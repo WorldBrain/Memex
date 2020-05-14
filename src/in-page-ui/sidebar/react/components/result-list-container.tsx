@@ -28,6 +28,7 @@ interface StateProps {
     needsWaypoint: boolean
     isTermsSearch: boolean
     isNewSearchLoading: boolean
+    isPaginating: boolean
     isListFilterActive: boolean
     areAnnotationsExpanded: boolean
     resultsByUrl: ResultsByUrl
@@ -235,8 +236,8 @@ export default class ResultListContainer extends Component<
      */
     private resultsStateToItems() {
         if (!this.props.resultsClusteredByDay) {
-            return Object.values(this.props.resultsByUrl).map((result) =>
-                this.attachDocWithPageResultItem(result, result.index),
+            return Object.values(this.props.resultsByUrl).map((result, i) =>
+                this.attachDocWithPageResultItem(result, i),
             )
         }
 
@@ -304,15 +305,15 @@ export default class ResultListContainer extends Component<
             resultItems.push(
                 <Waypoint
                     onEnter={this.props.handleScrollPagination}
-                    key="waypoint"
+                    key="pagination-waypoint"
                 />,
             )
         }
 
-        // // Add loading spinner to the list end, if loading
-        // if (this.props.isLoading) {
-        //     resultItems.push(<LoadingIndicator key="loading" />)
-        // }
+        // Add loading spinner to the list end, if loading
+        if (this.props.isPaginating) {
+            resultItems.push(<LoadingIndicator key="pagination-loader" />)
+        }
 
         return resultItems
     }

@@ -24,14 +24,18 @@ export interface PageAnnotationsProps {
     hoverAnnotationUrl: string
     annotationEventHandlers: AnnotationBoxEventProps
     showCongratsMessage: boolean
-    handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     tagsEventProps: TagsEventProps
+    handleScrollPagination: () => void
 }
 
 export default class PageAnnotations extends React.Component<
     PageAnnotationsProps
 > {
-    renderList() {
+    private handleWaypointEnter = (args: Waypoint.CallbackArgs) => {
+        this.props.handleScrollPagination()
+    }
+
+    private renderList() {
         const {
             annotationEventHandlers: annotationProps,
             tagsEventProps,
@@ -54,7 +58,7 @@ export default class PageAnnotations extends React.Component<
         if (this.props.needsWaypoint) {
             annots.push(
                 <Waypoint
-                    onEnter={this.props.handleScrollPagination}
+                    onEnter={this.handleWaypointEnter}
                     key="sidebar-waypoint"
                 />,
             )

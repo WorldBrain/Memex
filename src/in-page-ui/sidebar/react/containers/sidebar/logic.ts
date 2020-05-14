@@ -20,6 +20,7 @@ import {
     StandardSearchResponse,
     AnnotationsSearchResponse,
 } from 'src/search/background/types'
+import { mergeAnnotsByDay, areAnnotsByDayObjsDifferent } from 'src/search/util'
 import { Anchor } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
 import {
@@ -31,7 +32,8 @@ import {
 
 export interface SidebarContainerState {
     loadState: TaskState
-    searchLoadState: TaskState
+    primarySearchState: TaskState
+    secondarySearchState: TaskState
 
     state: 'visible' | 'hidden'
     // needsWaypoint: boolean
@@ -97,6 +99,7 @@ export interface SidebarContainerState {
     isInvalidSearch: boolean
     totalResultCount: number
     allAnnotationsExpanded: boolean
+    searchResultSkip: number
 
     isListFilterActive: boolean
     isSocialSearch: boolean
@@ -167,6 +170,7 @@ export type SidebarContainerEvents = UIEvent<{
     // Search
     enterSearchQuery: { searchQuery: string }
     changeSearchQuery: { searchQuery: string }
+    paginateSearch: null
     togglePageType: null
     switchSearch: { changes: SearchTypeChange }
     setAnnotationsExpanded: { value: boolean }
@@ -222,7 +226,8 @@ export class SidebarContainerLogic extends UILogic<
     getInitialState(): SidebarContainerState {
         return {
             loadState: 'pristine',
-            searchLoadState: 'pristine',
+            primarySearchState: 'pristine',
+            secondarySearchState: 'pristine',
 
             state: this.options.inPageUI.state.sidebar ? 'visible' : 'hidden',
             annotationModes: {
@@ -268,6 +273,7 @@ export class SidebarContainerLogic extends UILogic<
             resultsClusteredByDay: false,
             annotsByDay: {},
             isSocialSearch: false,
+            searchResultSkip: 0,
         }
     }
 
@@ -292,79 +298,218 @@ export class SidebarContainerLogic extends UILogic<
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial<SidebarContainerState>(this, async () => {
-            await this._doSearch(previousState)
+            await this._doSearch(previousState, { overwrite: true })
         })
     }
 
     private doSearch = debounce(this._doSearch, 300)
 
-    private async _doSearch(state: SidebarContainerState) {
-        const { search, currentTab } = this.options
+    private async _doSearch(
+        state: SidebarContainerState,
+        opts: { overwrite: boolean },
+    ) {
+        await executeUITask(
+            this,
+            opts.overwrite ? 'primarySearchState' : 'secondarySearchState',
+            async () => {
+                if (state.searchType === 'page') {
+                    return this.doPageSearch(state, opts)
+                } else if (state.searchType === 'notes') {
+                    return this.doAnnotationSearch(state, opts)
+                } else {
+                    throw new Error('Unknown search type')
+                }
+            },
+        )
+    }
+
+    private async doPageSearch(
+        state: SidebarContainerState,
+        opts: { overwrite: boolean },
+    ) {
         const query = state.searchValue.trim().length
             ? state.searchValue.trim()
             : undefined
-        const url = state.pageType === 'page' ? currentTab.url : undefined
 
-        await executeUITask(this, 'searchLoadState', async () => {
-            if (state.searchType === 'page') {
-                const results = (
-                    await search.searchPages({
-                        base64Img: true,
-                        query,
-                        contentTypes: {
-                            pages: true,
-                            notes: true,
-                            highlights: true,
-                        },
-                    })
-                ).docs
+        const results = (
+            await this.options.search.searchPages({
+                base64Img: true,
+                query,
+                contentTypes: {
+                    pages: true,
+                    notes: true,
+                    highlights: true,
+                },
+                limit: this.options.searchResultLimit,
+                skip: state.searchResultSkip,
+            })
+        ).docs
 
-                this.emitMutation({
-                    resultsByUrl: { $set: createResultsByUrlObj(results) },
-                    pageCount: { $set: results.length },
-                    noResults: { $set: !results.length },
-                })
-            } else if (state.searchType === 'notes') {
-                const result = await search.searchAnnotations({
-                    base64Img: true,
-                    query,
-                    url,
-                })
+        this.emitMutation({
+            pageCount: { $set: results.length },
+            noResults: { $set: results.length === 0 },
+            resultsByUrl: {
+                $apply: (prev) => {
+                    const resultsByUrl = createResultsByUrlObj(results)
 
-                let extraMutation: UIMutation<SidebarContainerState>
-                if (state.pageType === 'page') {
-                    extraMutation = this.calcPageAnnotationsMutation(
-                        result,
-                        !!query,
-                    )
-                } else {
-                    const { annotsByDay } = result as AnnotationsSearchResponse
-                    extraMutation = annotsByDay
-                        ? {
-                              annotsByDay: { $set: annotsByDay },
-                          }
-                        : {}
-                }
-
-                this.emitMutation({
-                    pageCount: { $set: result.docs.length },
-                    noResults: { $set: !result.docs.length },
-                    resultsByUrl: { $set: createResultsByUrlObj(result.docs) },
-                    ...extraMutation,
-                })
-            }
+                    return opts.overwrite
+                        ? resultsByUrl
+                        : { ...prev, ...resultsByUrl }
+                },
+            },
         })
     }
 
-    private calcPageAnnotationsMutation(
-        result: StandardSearchResponse | AnnotationsSearchResponse,
-        isTermsSearch: boolean,
+    private async doAnnotationSearch(
+        state: SidebarContainerState,
+        opts: { overwrite: boolean },
+    ) {
+        let mutation: UIMutation<SidebarContainerState> = {}
+
+        const query = state.searchValue.trim().length
+            ? state.searchValue.trim()
+            : undefined
+        const url =
+            state.pageType === 'page' ? this.options.currentTab.url : undefined
+
+        const results = await this.options.search.searchAnnotations({
+            base64Img: true,
+            query,
+            url,
+            limit: this.options.searchResultLimit,
+            skip: state.searchResultSkip,
+        })
+
+        if (state.pageType === 'page') {
+            mutation = this.calcPageAnnotationsSearchMutation(
+                results,
+                state.annotations,
+                {
+                    ...opts,
+                    isTermsSearch: !!query,
+                },
+            )
+        } else {
+            mutation = this.calcAllAnnotationsSearchMutation(
+                results,
+                state.annotsByDay,
+                { ...opts, isTermsSearch: !!query },
+            )
+        }
+
+        this.emitMutation({
+            ...mutation,
+            resultsByUrl: {
+                $apply: (prev) => {
+                    const resultsByUrl = createResultsByUrlObj(results.docs)
+
+                    return opts.overwrite
+                        ? resultsByUrl
+                        : { ...prev, ...resultsByUrl }
+                },
+            },
+        })
+    }
+
+    private calcAllAnnotationsSearchMutation(
+        results: StandardSearchResponse | AnnotationsSearchResponse,
+        existingAnnotsByDay: PageUrlsByDay,
+        opts: {
+            isTermsSearch: boolean
+            overwrite: boolean
+        },
+    ): UIMutation<SidebarContainerState> {
+        // Terms search doesn't return the same result shape :S
+        if (opts.isTermsSearch) {
+            return {
+                pageCount: { $set: results.docs.length },
+                noResults: { $set: !results.docs.length },
+            }
+        }
+
+        const { annotsByDay } = results as AnnotationsSearchResponse
+
+        // NOTE: search pagination does not seem to be working here, hence why
+        //  we're comparing the prev state with the current state to determine
+        //  whether we need to fetch more or not... :(
+        if (
+            opts.overwrite ||
+            areAnnotsByDayObjsDifferent(existingAnnotsByDay, annotsByDay)
+        ) {
+            return {
+                annotsByDay: {
+                    $apply: (prev) =>
+                        opts.overwrite
+                            ? annotsByDay
+                            : mergeAnnotsByDay(prev, annotsByDay),
+                },
+                pageCount: { $set: results.docs.length },
+                noResults: { $set: results.docs.length === 0 },
+            }
+        }
+
+        return {
+            noResults: { $set: true },
+        }
+    }
+
+    private calcPageAnnotationsSearchMutation(
+        results: StandardSearchResponse | AnnotationsSearchResponse,
+        existingAnnotations: Annotation[],
+        opts: {
+            isTermsSearch: boolean
+            overwrite: boolean
+        },
     ): UIMutation<SidebarContainerState> {
         const url = this.options.normalizeUrl(this.options.currentTab.url)
         const annotations: Annotation[] = []
 
-        if (isTermsSearch) {
-            for (const doc of result.docs) {
+        const uniqAnnotsByUrl = (
+            a: Annotation[],
+            b: Annotation[],
+        ): Annotation[] => {
+            const urls = new Set(a.map((annot) => annot.url))
+            return [...a, ...b.filter((annot) => !urls.has(annot.url))]
+        }
+
+        const diffAnnotsByUrl = (
+            a: Annotation[],
+            b: Annotation[],
+        ): Annotation[] => {
+            const urlsA = new Set(a.map((annot) => annot.url))
+            const urlsB = new Set(b.map((annot) => annot.url))
+
+            return [...a, ...b].filter(
+                (annot) => !(urlsA.has(annot.url) && urlsB.has(annot.url)),
+            )
+        }
+
+        // NOTE: the annots search end point doesn't properly implement the `skip` arg for pagination.
+        //  That, coupled with the usage of that cluster of annots indexed by page then by day, leads
+        //  to this big mess
+        const annotsMutation: UIMutation<SidebarContainerState> = {
+            pageCount: {
+                $apply: () =>
+                    opts.overwrite
+                        ? annotations.length
+                        : uniqAnnotsByUrl(existingAnnotations, annotations)
+                              .length,
+            },
+            noResults: {
+                $apply: () =>
+                    diffAnnotsByUrl(existingAnnotations, annotations).length ===
+                    0,
+            },
+            annotations: {
+                $apply: (prev) =>
+                    opts.overwrite
+                        ? annotations
+                        : uniqAnnotsByUrl(prev, annotations),
+            },
+        }
+
+        if (opts.isTermsSearch) {
+            for (const doc of results.docs) {
                 if (doc.url === url) {
                     annotations.push(
                         ...doc.annotations.map((annot) => ({
@@ -376,10 +521,10 @@ export class SidebarContainerLogic extends UILogic<
                 }
             }
 
-            return { annotations: { $set: annotations } }
+            return annotsMutation
         }
 
-        const { annotsByDay } = result as AnnotationsSearchResponse
+        const { annotsByDay } = results as AnnotationsSearchResponse
         const sortedKeys = Object.keys(annotsByDay).sort().reverse()
 
         for (const day of sortedKeys) {
@@ -393,8 +538,13 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         return {
-            annotations: { $set: annotations },
-            annotsByDay: { $set: annotsByDay },
+            ...annotsMutation,
+            annotsByDay: {
+                $apply: (prev) =>
+                    opts.overwrite
+                        ? annotsByDay
+                        : mergeAnnotsByDay(prev, annotsByDay),
+            },
         }
     }
 
@@ -1061,7 +1211,9 @@ export class SidebarContainerLogic extends UILogic<
         await this.doSearch(
             this.withMutation(previousState, {
                 searchValue: { $set: event.searchQuery },
+                searchResultSkip: { $set: 0 },
             }),
+            { overwrite: true },
         )
     }
 
@@ -1069,13 +1221,34 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const mutation = { searchValue: { $set: event.searchQuery } }
+        const mutation: UIMutation<SidebarContainerState> = {
+            searchValue: { $set: event.searchQuery },
+            searchResultSkip: { $set: 0 },
+        }
         this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
 
         if (nextState.searchValue.trim() !== previousState.searchValue.trim()) {
-            await this.doSearch(nextState)
+            await this.doSearch(nextState, { overwrite: true })
         }
+    }
+
+    paginateSearch: EventHandler<'paginateSearch'> = async ({
+        previousState,
+    }) => {
+        if (previousState.noResults) {
+            return
+        }
+
+        const mutation: UIMutation<SidebarContainerState> = {
+            searchResultSkip: {
+                $apply: (prev) => prev + this.options.searchResultLimit,
+            },
+        }
+        this.emitMutation(mutation)
+        const nextState = this.withMutation(previousState, mutation)
+
+        await this.doSearch(nextState, { overwrite: false })
     }
 
     togglePageType: EventHandler<'togglePageType'> = async (incoming) => {
@@ -1091,7 +1264,9 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
-        const mutation: UIMutation<SidebarContainerState> = {}
+        const mutation: UIMutation<SidebarContainerState> = {
+            searchResultSkip: { $set: 0 },
+        }
         if (event.changes.pageType) {
             mutation.pageType = { $set: event.changes.pageType }
         }
@@ -1104,7 +1279,9 @@ export class SidebarContainerLogic extends UILogic<
             }
         }
         this.emitMutation(mutation)
-        await this._doSearch(this.withMutation(previousState, mutation))
+        await this._doSearch(this.withMutation(previousState, mutation), {
+            overwrite: true,
+        })
     }
 
     setAnnotationsExpanded: EventHandler<'setAnnotationsExpanded'> = (

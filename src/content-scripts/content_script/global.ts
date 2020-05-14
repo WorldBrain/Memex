@@ -32,6 +32,7 @@ import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 import { SearchInterface } from 'src/search/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
+import * as constants from '../constants'
 
 // Set this up globally to prevent race conditions
 // TODO: Fix this with a proper restructuring of how pages are indexed
@@ -112,6 +113,7 @@ export async function main() {
                 search: runInBackground<SearchInterface>(),
                 customLists: runInBackground<RemoteCollectionsInterface>(),
                 normalizeUrl,
+                searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
             })
             components.sidebar!.resolve()
         },

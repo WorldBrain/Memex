@@ -1,0 +1,1 @@
+export const SIDEBAR_SEARCH_RESULT_LIMIT = 10

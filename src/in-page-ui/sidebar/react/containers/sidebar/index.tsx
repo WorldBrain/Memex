@@ -159,12 +159,14 @@ class SidebarContainer extends StatefulUIElement<
         return (
             <Sidebar
                 loadState={this.state.loadState}
-                searchLoadState={this.state.searchLoadState}
+                searchLoadState={this.state.primarySearchState}
                 env={this.props.env}
                 pageAnnotations={{
                     env: this.props.env,
                     highlighter: this.props.highlighter,
-                    needsWaypoint: false,
+                    needsWaypoint:
+                        this.state.primarySearchState !== 'running' &&
+                        !this.state.noResults,
                     annotations: this.state.annotations,
                     annotationModes: this.state.annotationModes.pageAnnotations,
                     activeAnnotationUrl: '',
@@ -174,7 +176,9 @@ class SidebarContainer extends StatefulUIElement<
                     annotationEventHandlers: createAnnotationEventHandlers(
                         'pageAnnotations',
                     ),
-                    handleScrollPagination: () => {},
+                    handleScrollPagination: () => {
+                        this.processEvent('paginateSearch', null)
+                    },
                     showCongratsMessage: this.state.showCongratsMessage,
                     tagsEventProps,
                 }}
@@ -257,8 +261,13 @@ class SidebarContainer extends StatefulUIElement<
                     // this.processEvent('closeComments', null),
                 }}
                 resultsContainer={{
-                    needsWaypoint: false,
-                    noResults: this.state.noResults,
+                    needsWaypoint:
+                        this.state.primarySearchState !== 'running' &&
+                        this.state.secondarySearchState !== 'running' &&
+                        !this.state.noResults,
+                    noResults:
+                        this.state.searchResultSkip === 0 &&
+                        this.state.noResults,
                     isBadTerm: this.state.isBadTerm,
                     areAnnotationsExpanded: this.state.allAnnotationsExpanded,
                     shouldShowCount: this.state.shouldShowCount,
@@ -268,8 +277,9 @@ class SidebarContainer extends StatefulUIElement<
                         e: React.SyntheticEvent,
                     ) => {},
 
+                    isPaginating: this.state.secondarySearchState !== 'success',
                     isNewSearchLoading:
-                        this.state.searchLoadState !== 'success',
+                        this.state.primarySearchState !== 'success',
                     isListFilterActive: this.state.isListFilterActive,
                     isTermsSearch: this.state.searchValue.length > 0,
                     resultsByUrl: this.state.resultsByUrl,
@@ -317,7 +327,9 @@ class SidebarContainer extends StatefulUIElement<
                     handleCrossRibbonClick: () => {
                         // console.log('handleCrossRibbonClick')
                     },
-                    handleScrollPagination: () => {},
+                    handleScrollPagination: () => {
+                        this.processEvent('paginateSearch', null)
+                    },
                     handleToggleBm: (result) => {
                         this.processEvent('togglePageBookmark', {
                             pageUrl: result.url,

@@ -65,6 +65,7 @@ const setupLogicHelper = async ({
         } as any,
         annotationsManager,
         env: 'inpage',
+        searchResultLimit: 10,
     })
 
     let initSearchTypeMutation

@@ -15,6 +15,7 @@ export interface SidebarContainerDependencies {
     currentTab: { id: number; url: string }
     normalizeUrl: URLNormalizer
     highlighter: HighlightInteractionInterface
+    searchResultLimit: number
 
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>
