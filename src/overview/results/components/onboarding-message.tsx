@@ -14,10 +14,16 @@ export default class OnboardingMessage extends React.PureComponent<Props> {
         return (
             <ResultsMessage onDismiss={this.handleDismiss}>
                 <OnboardingTooltip
-                    descriptionText="Import your existing bookmarks &amp; web history from Pocket, Diigo, Raindrop.io and many more."
+                    title="Import"
                     CTAText="Import"
                     onCTAClick={() => (window.location.hash = '#/import')}
-                />
+                    imgSrc="/img/onboarding-tutorials/import.svg"
+                >
+                    <p>
+                        Import your existing bookmarks &amp; web history from
+                        Pocket, Diigo, Raindrop.io and many more
+                    </p>
+                </OnboardingTooltip>
             </ResultsMessage>
         )
     }

@@ -66,7 +66,7 @@ export const TypographyButtonLabel = styled.span`
 export const TypographyActionText = styled.span`
     line-height: 1.4;
     text-align: center;
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     font-weight: 600;
 `
@@ -91,37 +91,38 @@ export const TypographyBodyBlock = styled(TypographyBody)`
     font-weight: 300;
     font-size: 16px;
     line-height: 1.4;
-    color: #544960;
+    color: ${colorText};
 `
 
 export const TypographyBodyBold = styled.div`
     display: block;
-    font-weight: bold;
+    font-weight: 600;
     margin: 10px 0;
     font-size: 16px;
-    color: #544960;
+    color: ${colorText};
     text-align: center;
 `
 
 export const TypographyBodyCenter = styled.div`
+    font-weight: 300;
     display: block;
     font-size: 16px;
     text-align: center;
-    color: #544960;
+    color: ${colorText};
 `
 export const HelpBlock = styled.div`
     display: block;
     font-size: ${fontSizeSmall};
     text-align: center;
     margin-top: 0px;
-    color: #544960;
+    color: ${colorText};
 `
 
 export const StageBlock = styled.div`
     display: block;
     font-weight: bold;
     font-size: 16px;
-    color: #544960;
+    color: ${colorText};
     text-align: center;
     margin-bottom: 30px;
     margin-top: 5px;
@@ -150,5 +151,5 @@ export const WhiteSpacer30 = styled.div`
 `
 
 export const HoverColor = styled.div`
-    background-color: #dadada
+    background-color: #dadada;
 `

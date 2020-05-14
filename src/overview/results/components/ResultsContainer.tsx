@@ -72,7 +72,10 @@ class ResultsContainer extends React.Component<Props, State> {
         if (showOnboarding === 'true' && this.props.noResults) {
             return (
                 <ResultsMessage>
-                    <NoResultBadTerm title="You don't have anything saved yet">
+                    <NoResultBadTerm title="Welcome to Memex!">
+                        It looks like you don't have anything saved yet. Visit
+                        some websites to fill your Memex or import bookmarks
+                        from other tools.
                         <OnboardingMessage />
                     </NoResultBadTerm>
                 </ResultsMessage>
@@ -142,7 +145,7 @@ class ResultsContainer extends React.Component<Props, State> {
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     showInbox: notifs.showInbox(state),
     noResults: selectors.noResults(state),
     isBadTerm: selectors.isBadTerm(state),
@@ -156,8 +159,10 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     showOnboardingMessage: selectors.showOnboardingMessage(state),
 })
 
-const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
-    toggleAreAnnotationsExpanded: e => {
+const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
+    dispatch,
+) => ({
+    toggleAreAnnotationsExpanded: (e) => {
         e.preventDefault()
         dispatch(actions.toggleAreAnnotationsExpanded())
     },
