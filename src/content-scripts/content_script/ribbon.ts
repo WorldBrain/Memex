@@ -1,10 +1,12 @@
 import { browser } from 'webextension-polyfill-ts'
+
+import { IGNORE_CLICK_OUTSIDE_CLASS } from '../constants'
 import { ContentScriptRegistry, RibbonScriptMain } from './types'
 import { setupRibbonUI, destroyRibbonUI } from 'src/in-page-ui/ribbon/react'
 import { createInPageUI } from 'src/in-page-ui/utils'
 import { setSidebarState, getSidebarState } from 'src/sidebar-overlay/utils'
 
-export const main: RibbonScriptMain = async options => {
+export const main: RibbonScriptMain = async (options) => {
     const cssFile = browser.extension.getURL(`/content_script_ribbon.css`)
 
     options.inPageUI.events.on('componentShouldSetUp', ({ component }) => {
@@ -20,7 +22,7 @@ export const main: RibbonScriptMain = async options => {
 
     let mount: ReturnType<typeof createInPageUI> | null = null
     const setUp = () => {
-        mount = createInPageUI('ribbon', cssFile)
+        mount = createInPageUI('ribbon', cssFile, [IGNORE_CLICK_OUTSIDE_CLASS])
         setupRibbonUI(mount.rootElement, {
             containerDependencies: {
                 ...options,

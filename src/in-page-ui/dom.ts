@@ -3,21 +3,27 @@ import { injectCSS } from 'src/util/content-injection'
 export function createInPageUIRoot({
     containerId,
     rootId,
-    classNames,
     cssFile,
+    rootClassNames,
+    containerClassNames,
 }: {
     containerId: string
     rootId: string
-    classNames?: string[]
     cssFile: string
+    rootClassNames?: string[]
+    containerClassNames?: string[]
 }) {
     const container = document.createElement('div')
     container.setAttribute('id', containerId)
 
+    if (containerClassNames != null) {
+        container.classList.add(...containerClassNames)
+    }
+
     const { rootElement, shadow } = createShadowRootIfSupported(
         container,
         rootId,
-        classNames,
+        rootClassNames,
         cssFile,
     )
     document.body.appendChild(container)
@@ -35,14 +41,14 @@ export function destroyRootElement(containerId: string) {
 export function createShadowRootIfSupported(
     container: HTMLElement,
     rootId: string,
-    classNames?: string[],
+    rootClassNames?: string[],
     cssFile?: string,
 ) {
     const rootElement = document.createElement('div')
     rootElement.setAttribute('id', rootId)
 
-    if (classNames !== undefined) {
-        rootElement.classList.add(...classNames)
+    if (rootClassNames != null) {
+        rootElement.classList.add(...rootClassNames)
     }
 
     let shadow: ShadowRoot | null = null

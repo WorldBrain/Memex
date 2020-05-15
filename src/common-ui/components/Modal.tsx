@@ -2,11 +2,11 @@ import React, { PureComponent, MouseEventHandler } from 'react'
 import styled from 'styled-components'
 import cx from 'classnames'
 
-import Overlay from './Overlay'
+import Overlay, { Props as OverlayProps } from './Overlay'
 
 const styles = require('./Modal.css')
 
-export interface Props {
+export interface Props extends Omit<OverlayProps, 'onClick'> {
     onClose?: MouseEventHandler
     large?: boolean
 }

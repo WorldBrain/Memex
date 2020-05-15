@@ -56,11 +56,11 @@ class SidebarContainer extends StatefulUIElement<
     }
 
     handleClickOutside = () => {
-        // if (this.state.state === 'visible') {
-        //     this.hideSidebar()
-        //     this.props.inPageUI.hideRibbon()
-        //     this.props.inPageUI.hideSidebar()
-        // }
+        if (this.state.state === 'visible') {
+            this.hideSidebar()
+            this.props.inPageUI.hideRibbon()
+            this.props.inPageUI.hideSidebar()
+        }
     }
 
     handleInPageUIStateChange: InPageUIEvents['stateChanged'] = ({

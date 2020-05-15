@@ -1,10 +1,11 @@
-import { ContentScriptRegistry, SidebarScriptMain } from './types'
 import { browser } from 'webextension-polyfill-ts'
+
+import { IGNORE_CLICK_OUTSIDE_CLASS } from '../constants'
+import { ContentScriptRegistry, SidebarScriptMain } from './types'
 import { createInPageUI } from 'src/in-page-ui/utils'
 import { setupSidebarUI, destroySidebarUI } from 'src/in-page-ui/sidebar/react'
-import { ResultsByUrl } from 'src/overview/types'
 
-export const main: SidebarScriptMain = async dependencies => {
+export const main: SidebarScriptMain = async (dependencies) => {
     const cssFile = browser.extension.getURL(`/content_script_sidebar.css`)
 
     dependencies.inPageUI.events.on('componentShouldSetUp', ({ component }) => {
@@ -23,7 +24,7 @@ export const main: SidebarScriptMain = async dependencies => {
 
     let mount: ReturnType<typeof createInPageUI> | null = null
     const setUp = () => {
-        mount = createInPageUI('sidebar', cssFile)
+        mount = createInPageUI('sidebar', cssFile, [IGNORE_CLICK_OUTSIDE_CLASS])
         setupSidebarUI(mount.rootElement, dependencies, {
             env: 'inpage',
         })

@@ -1,12 +1,15 @@
 import React, { Component, MouseEventHandler } from 'react'
 import ReactDOM from 'react-dom'
 import styled, { StyleSheetManager } from 'styled-components'
+import { IGNORE_CLICK_OUTSIDE_CLASS } from 'src/content-scripts/constants'
 
 export interface Props {
     rootEl?: string
     rootElId?: string
     className?: string
     innerClassName?: string
+    skipIgnoreClickOutside?: boolean
+    ignoreClickOutsideClassName?: string
     onClick?: MouseEventHandler
 }
 
@@ -15,6 +18,7 @@ class Overlay extends Component<Props> {
 
     static defaultProps = {
         rootEl: Overlay.DEF_ROOT_EL,
+        ignoreClickOutsideClassName: IGNORE_CLICK_OUTSIDE_CLASS,
     }
 
     private overlayRoot: HTMLElement
@@ -23,6 +27,10 @@ class Overlay extends Component<Props> {
         super(props)
 
         this.overlayRoot = document.createElement(props.rootEl)
+
+        if (!props.skipIgnoreClickOutside) {
+            this.overlayRoot.classList.add(props.ignoreClickOutsideClassName)
+        }
     }
 
     componentDidMount() {
