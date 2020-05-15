@@ -104,7 +104,6 @@ export async function main() {
         async registerSidebarScript(execute): Promise<void> {
             await execute({
                 inPageUI,
-                annotationsManager,
                 highlighter,
                 annotations,
                 currentTab,

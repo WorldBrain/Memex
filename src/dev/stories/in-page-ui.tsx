@@ -6,7 +6,7 @@ import AnnotationsManager from 'src/annotations/annotations-manager'
 import SidebarContainer from 'src/in-page-ui/sidebar/react/containers/sidebar'
 import { WithDependencies } from '../utils'
 import { InPageUI } from 'src/in-page-ui/shared-state'
-import { SidebarEnv, ResultsByUrl } from 'src/in-page-ui/sidebar/react/types'
+import { SidebarEnv } from 'src/in-page-ui/sidebar/react/types'
 import RibbonHolder from 'src/in-page-ui/ribbon/react/containers/ribbon-holder'
 
 const stories = storiesOf('In-page UI', module)
@@ -38,8 +38,8 @@ async function createDependencies() {
         rejectNoContent: true,
     })
 
-    const annotationManager = new AnnotationsManager()
-    annotationManager._getAllAnnotationsByUrlRPC =
+    const annotationsManager = new AnnotationsManager()
+    annotationsManager._getAllAnnotationsByUrlRPC =
         background.backgroundModules.directLinking.getAllAnnotationsByUrl
 
     const highlighter = {
@@ -65,10 +65,10 @@ async function createDependencies() {
         env: 'inpage' as SidebarEnv,
         currentTab,
         inPageUI,
-        annotationManager,
         highlighter,
+        annotationsManager,
+        searchResultLimit: 10,
         getRemoteFunction: () => async () => {},
-        annotationsManager: annotationManager,
         getSidebarEnabled: async () => true,
         setSidebarEnabled: async () => {},
         normalizeUrl: (url) => url,
@@ -99,7 +99,7 @@ async function createDependencies() {
 
     return {
         background,
-        annotationManager,
+        annotationsManager,
         highlighter,
         inPageUI,
         commonProps,

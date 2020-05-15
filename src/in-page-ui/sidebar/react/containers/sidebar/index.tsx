@@ -396,4 +396,6 @@ class SidebarContainer extends StatefulUIElement<
     }
 }
 
-export default onClickOutside(SidebarContainer)
+export default onClickOutside<typeof SidebarContainer, SidebarContainerProps>(
+    SidebarContainer,
+)

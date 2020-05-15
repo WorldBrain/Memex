@@ -11,7 +11,6 @@ import { BookmarksInterface } from 'src/bookmarks/background/types'
 
 export interface SidebarContainerDependencies {
     inPageUI: InPageUIInterface
-    annotationsManager: AnnotationsManagerInterface
     currentTab: { id: number; url: string }
     normalizeUrl: URLNormalizer
     highlighter: HighlightInteractionInterface

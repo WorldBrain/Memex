@@ -9,7 +9,6 @@ import {
 } from './types'
 import TypedEventEmitter from 'typed-emitter'
 import { Anchor } from 'src/highlighting/types'
-import { TooltipPosition } from '../tooltip/types'
 
 export class InPageUI implements InPageUIInterface {
     events = new EventEmitter() as TypedEventEmitter<InPageUIEvents>

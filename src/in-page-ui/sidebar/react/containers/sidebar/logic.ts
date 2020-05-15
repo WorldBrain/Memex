@@ -298,7 +298,9 @@ export class SidebarContainerLogic extends UILogic<
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial<SidebarContainerState>(this, async () => {
-            await this._doSearch(previousState, { overwrite: true })
+            if (this.options.env === 'inpage') {
+                await this._doSearch(previousState, { overwrite: true })
+            }
         })
     }
 

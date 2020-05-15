@@ -35,7 +35,6 @@ const setupLogicHelper = async ({
     const inPageUI = new InPageUI({
         loadComponent: async () => {},
     })
-    const annotationsManager = {} as any
     const sidebarLogic = new SidebarContainerLogic({
         currentTab,
         tags: backgroundModules.tags.remoteFunctions,
@@ -63,7 +62,6 @@ const setupLogicHelper = async ({
             removeAnnotationHighlights: () => undefined,
             removeTempHighlights: () => undefined,
         } as any,
-        annotationsManager,
         env: 'inpage',
         searchResultLimit: 10,
     })

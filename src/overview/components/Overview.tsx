@@ -1,10 +1,11 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
-import propTypes from 'prop-types'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import EventEmitter from 'events'
 
-import SidebarContainer, {
-    selectors as sidebarSelectors,
-} from 'src/sidebar-overlay/sidebar'
+import { runInBackground } from 'src/util/webextensionRPC'
+import SidebarContainer from 'src/in-page-ui/sidebar/react/containers/sidebar'
+import { selectors as sidebarSelectors } from 'src/sidebar-overlay/sidebar'
 import { OVERVIEW_URL } from 'src/constants'
 import Onboarding from '../onboarding'
 import { DeleteConfirmModal } from '../delete-confirm-modal'
@@ -19,21 +20,29 @@ import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
-import AnnotationsManager from 'src/annotations/annotations-manager'
-import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
+import { AnnotationInterface } from 'src/direct-linking/background/types'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { BookmarksInterface } from 'src/bookmarks/background/types'
+import { RemoteTagsInterface } from 'src/tags/background/types'
+import { SearchInterface } from 'src/search/background/types'
 
-class Overview extends PureComponent {
-    static propTypes = {
-        pageUrl: propTypes.string,
-        init: propTypes.func.isRequired,
-        setShowOnboardingMessage: propTypes.func.isRequired,
-    }
+export interface Props {
+    pageUrl: string
+    init: () => void
+    setShowOnboardingMessage: () => void
+}
 
+class Overview extends PureComponent<Props> {
     componentDidMount() {
         this.props.init()
     }
 
-    _annotationsManager = new AnnotationsManager()
+    get mockInPageUI() {
+        return {
+            state: {},
+            events: new EventEmitter(),
+        }
+    }
 
     handleOnboardingComplete = () => {
         window.location.href = OVERVIEW_URL
@@ -77,8 +86,18 @@ class Overview extends PureComponent {
 
                 <SidebarContainer
                     env="overview"
-                    annotationsManager={this._annotationsManager}
-                    goToAnnotation={goToAnnotation(this.props.pageUrl)}
+                    normalizeUrl={normalizeUrl}
+                    currentTab={{} as any}
+                    annotations={runInBackground<
+                        AnnotationInterface<'caller'>
+                    >()}
+                    tags={runInBackground<RemoteTagsInterface>()}
+                    bookmarks={runInBackground<BookmarksInterface>()}
+                    search={runInBackground<SearchInterface>()}
+                    customLists={runInBackground<RemoteCollectionsInterface>()}
+                    inPageUI={this.mockInPageUI as any}
+                    highlighter={{} as any}
+                    searchResultLimit={10}
                 />
                 <Tooltip />
                 <HelpBtn />
@@ -95,11 +114,11 @@ class Overview extends PureComponent {
     }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     pageUrl: sidebarSelectors.pageUrl(state),
 })
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
     init: () => {
         return dispatch(searchBarActs.init())
     },
