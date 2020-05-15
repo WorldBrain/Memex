@@ -198,6 +198,7 @@ export class RibbonContainerLogic extends UILogic<
                 ? {
                       tagging: { showTagsPicker: { $set: false } },
                       lists: { showListsPicker: { $set: false } },
+                      search: { showSearchBox: { $set: false } },
                   }
                 : {}
 
@@ -283,6 +284,7 @@ export class RibbonContainerLogic extends UILogic<
                 ? {
                       commentBox: { showCommentBox: { $set: false } },
                       lists: { showListsPicker: { $set: false } },
+                      search: { showSearchBox: { $set: false } },
                   }
                 : {}
 
@@ -354,6 +356,7 @@ export class RibbonContainerLogic extends UILogic<
                 ? {
                       commentBox: { showCommentBox: { $set: false } },
                       tagging: { showTagsPicker: { $set: false } },
+                      search: { showSearchBox: { $set: false } },
                   }
                 : {}
 
@@ -363,7 +366,16 @@ export class RibbonContainerLogic extends UILogic<
     // Search
     //
     setShowSearchBox: EventHandler<'setShowSearchBox'> = ({ event }) => {
-        return { search: { showSearchBox: { $set: event.value } } }
+        const extra: UIMutation<RibbonContainerState> =
+            event.value === true
+                ? {
+                      commentBox: { showCommentBox: { $set: false } },
+                      tagging: { showTagsPicker: { $set: false } },
+                      lists: { showListsPicker: { $set: false } },
+                  }
+                : {}
+
+        return { search: { showSearchBox: { $set: event.value } }, ...extra }
     }
 
     setSearchValue: EventHandler<'setSearchValue'> = ({ event }) => {

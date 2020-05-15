@@ -1,11 +1,10 @@
 import * as React from 'react'
-import { connect, MapStateToProps } from 'react-redux'
-import classNames from 'classnames'
-import noop from 'lodash/fp/noop'
+import onClickOutside from 'react-onclickoutside'
+import cx from 'classnames'
 
 import AnnotationHighlight from '../annotation-highlight'
 import CommentBoxForm, { CommentBoxFormProps } from './comment-box-form'
-import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
+import { Anchor } from 'src/highlighting/types'
 
 const styles = require('./comment-box.css')
 
@@ -31,9 +30,11 @@ interface OwnProps {
 
 export type CommentBoxProps = StateProps & CommentBoxDispatchProps & OwnProps
 
-export default class CommentBoxContainer extends React.Component<
-    CommentBoxProps
-> {
+class CommentBoxContainer extends React.Component<CommentBoxProps> {
+    handleClickOutside() {
+        this.props.closeComments()
+    }
+
     save = async (e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -53,7 +54,7 @@ export default class CommentBoxContainer extends React.Component<
 
         return (
             <div
-                className={classNames(styles.commentBoxContainer, {
+                className={cx(styles.commentBoxContainer, {
                     [styles.inPage]: env === 'inpage',
                 })}
             >
@@ -70,3 +71,5 @@ export default class CommentBoxContainer extends React.Component<
         )
     }
 }
+
+export default onClickOutside(CommentBoxContainer)

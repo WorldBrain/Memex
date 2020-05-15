@@ -1,4 +1,4 @@
-import React, { Component, ReactNode, KeyboardEventHandler } from 'react'
+import React, { Component, KeyboardEventHandler } from 'react'
 import cx from 'classnames'
 import qs from 'query-string'
 
@@ -14,7 +14,7 @@ import {
     KeyboardShortcuts,
     Shortcut,
 } from 'src/in-page-ui/keyboard-shortcuts/types'
-import TextInputControlled from 'src/common-ui/components/TextInputControlled'
+import SearchBox from './search-box'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { RibbonSubcomponentProps } from './types'
 import TagPicker from 'src/tags/ui/TagPicker'
@@ -96,6 +96,8 @@ export default class Ribbon extends Component<Props, State> {
         const queryParams = qs.stringify(queryFilters)
 
         this.openOverviewTabRPC(queryParams)
+        this.props.search.setShowSearchBox(false)
+        this.props.search.setSearchValue('')
     }
 
     private handleCommentIconBtnClick = () => {
@@ -129,6 +131,9 @@ export default class Ribbon extends Component<Props, State> {
             : source
     }
 
+    private hideTagPicker = () => this.props.tagging.setShowTagsPicker(false)
+    private hideListPicker = () => this.props.lists.setShowListsPicker(false)
+
     private renderTagsManager() {
         return (
             <TagPicker
@@ -140,9 +145,8 @@ export default class Ribbon extends Component<Props, State> {
                 loadDefaultSuggestions={
                     this.props.tagging.fetchInitialTagSuggestions
                 }
-                onEscapeKeyDown={() =>
-                    this.props.tagging.setShowTagsPicker(false)
-                }
+                onEscapeKeyDown={this.hideTagPicker}
+                onClickOutside={this.hideTagPicker}
             />
         )
     }
@@ -158,9 +162,8 @@ export default class Ribbon extends Component<Props, State> {
                 loadDefaultSuggestions={
                     this.props.lists.fetchInitialListSuggestions
                 }
-                onEscapeKeyDown={() =>
-                    this.props.lists.setShowListsPicker(false)
-                }
+                onEscapeKeyDown={this.hideListPicker}
+                onClickOutside={this.hideListPicker}
             />
         )
     }
@@ -262,40 +265,17 @@ export default class Ribbon extends Component<Props, State> {
                                             itemClass={styles.tooltipLeft}
                                             toolTipType="searchBar"
                                         >
-                                            <form>
-                                                <span
-                                                    className={styles.search}
-                                                />
-                                                <TextInputControlled
-                                                    autoFocus
-                                                    className={
-                                                        styles.searchInput
-                                                    }
-                                                    name="query"
-                                                    placeholder="Search your Memex"
-                                                    autoComplete="off"
-                                                    onChange={
-                                                        this.props.search
-                                                            .setSearchValue
-                                                    }
-                                                    specialHandlers={[
-                                                        {
-                                                            test: (e) =>
-                                                                e.key ===
-                                                                'Enter',
-                                                            handle: (e) =>
-                                                                this.handleSearchEnterPress(
-                                                                    e,
-                                                                ),
-                                                        },
-                                                    ]}
-                                                    defaultValue={
-                                                        this.props.search
-                                                            .searchValue
-                                                    }
-                                                    type="input"
-                                                />
-                                            </form>
+                                            <SearchBox
+                                                {...this.props.search}
+                                                onSearchEnterPress={
+                                                    this.handleSearchEnterPress
+                                                }
+                                                onOutsideClick={() =>
+                                                    this.props.search.setShowSearchBox(
+                                                        false,
+                                                    )
+                                                }
+                                            />
                                         </Tooltip>
                                     )}
                                 </ButtonTooltip>
