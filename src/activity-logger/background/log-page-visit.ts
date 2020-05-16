@@ -11,10 +11,12 @@ import analyzePage, {
 
 import { FavIconChecker } from './types'
 import { SearchIndex, PageDoc } from 'src/search'
+import PageStorage from 'src/page-indexing/background/storage'
 
 interface Props {
     tabManager: TabManager
     searchIndex: SearchIndex
+    pageStorage: PageStorage
     momentLib?: typeof moment
     favIconCheck?: FavIconChecker
     pageAnalyzer?: PageAnalyzer
@@ -29,11 +31,13 @@ export default class PageVisitLogger {
     private _createPage: SearchIndex['addPage']
     private _fetchPage: SearchIndex['getPage']
     private _createVisit: SearchIndex['addVisit']
+    private _pageStorage: PageStorage
     private _moment: typeof moment
 
     constructor({
         tabManager,
         searchIndex,
+        pageStorage,
         pageAnalyzer = analyzePage,
         momentLib = moment,
     }: Props) {
@@ -44,6 +48,7 @@ export default class PageVisitLogger {
         this._createPage = searchIndex.addPage
         this._createVisit = searchIndex.addVisit
         this._checkFavIcon = searchIndex.domainHasFavIcon
+        this._pageStorage = pageStorage
         this._moment = momentLib
     }
 
@@ -83,13 +88,12 @@ export default class PageVisitLogger {
         }
 
         try {
-            const existingPage = await this._fetchPage(tab.url)
-
-            if (existingPage != null) {
+            const latestVisit = await this._pageStorage.getLatestVisit(tab.url)
+            if (latestVisit) {
                 // Store just new visit if existing page has been indexed recently (`secsSinceLastIndex`)
                 //  also clear scheduled content indexing
                 if (
-                    this._moment(existingPage.latest).isAfter(
+                    this._moment(latestVisit.time).isAfter(
                         this._moment(internalTabState.visitTime).subtract(
                             secsSinceLastVisit,
                             'seconds',

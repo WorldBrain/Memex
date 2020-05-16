@@ -59,21 +59,49 @@ const Privacy = (props) => (
             </div>
         </div>
 
-        {Object.entries(ANALYTICS_EVENTS).map(([categoryName, actions]) => (
-            <div key={categoryName}>
-                {Object.entries(actions).map(([actionName, actionInfo]) => (
-                    <div
-                        key={`${categoryName}::${actionName}`}
-                        style={{ marginBottom: '10px' }}
-                    >
-                        <div>
-                            Event: {categoryName}::{actionName}
-                        </div>
-                        <div>Description: {actionInfo.description}</div>
-                    </div>
-                ))}
+        <div className={settingsStyle.section}>
+            <div className={settingsStyle.sectionTitle}>
+                Detailed list of all tracked events
             </div>
-        ))}
+            <p className={settingsStyle.infoText}>
+                These are all the events that Memex collects. None of them
+                contain personal data like the websites you visit, tags or
+                content of annotations, or data that allows us to identify who
+                those events came from.
+            </p>
+
+            <div>
+                <table className={localStyles.eventTable}>
+                    <tr className={localStyles.tableTitle}>
+                        <th>Event Name</th>
+                        <th>Description</th>
+                    </tr>
+                    {Object.entries(ANALYTICS_EVENTS).map(
+                        ([categoryName, actions]) =>
+                            Object.entries(actions).map(
+                                ([actionName, actionInfo]) => (
+                                    <tr className={localStyles.eventRow}>
+                                        <td
+                                            key={`${categoryName}::${actionName}`}
+                                            className={localStyles.eventName}
+                                        >
+                                            {categoryName}::{actionName}
+                                        </td>
+                                        <td
+                                            className={
+                                                localStyles.actionDescription
+                                            }
+                                            key={`${actionInfo.description}`}
+                                        >
+                                            {actionInfo.description}
+                                        </td>
+                                    </tr>
+                                ),
+                            ),
+                    )}
+                </table>
+            </div>
+        </div>
     </div>
 )
 

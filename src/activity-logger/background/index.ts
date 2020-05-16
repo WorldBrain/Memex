@@ -12,6 +12,7 @@ import { CONCURR_TAB_LOAD } from '../constants'
 import { SearchIndex } from 'src/search'
 import { bindMethod } from 'src/util/functions'
 import * as Raven from 'src/util/raven'
+import PageStorage from 'src/page-indexing/background/storage'
 
 export default class ActivityLoggerBackground {
     static SCROLL_UPDATE_FN = 'updateScrollState'
@@ -36,6 +37,7 @@ export default class ActivityLoggerBackground {
     constructor(options: {
         tabManager: TabManager
         searchIndex: SearchIndex
+        pageStorage: PageStorage
         browserAPIs: Pick<
             Browser,
             'tabs' | 'runtime' | 'webNavigation' | 'storage'
@@ -54,6 +56,7 @@ export default class ActivityLoggerBackground {
         }
 
         this.pageVisitLogger = new PageVisitLogger({
+            pageStorage: options.pageStorage,
             searchIndex: options.searchIndex,
             tabManager: this.tabManager,
         })

@@ -16,3 +16,24 @@
     max-height: 95vh;
     max-width: 95vw;
 }
+
+.close {
+    composes: closeIcon from 'src/common-ui/icons.css';
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-size: 12px;
+    width: 22px;
+    height: 22px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size: 13.5px;
+    min-height: 100%;
+    height: 100%;
+    align-items: center;
+    padding: 40px;
+}

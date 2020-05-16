@@ -82,10 +82,5 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
         }
     }
 
-    // CI doesn't need source-maps
-    if (opts.isCI) {
-        delete conf.devtool
-    }
-
     return conf
 }
