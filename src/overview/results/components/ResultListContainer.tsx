@@ -190,6 +190,9 @@ class ResultListContainer extends PureComponent<Props> {
                             collections.fetchInitialListSuggestions
                         }
                         initialSelectedEntries={async () => selectedLists}
+                        onEscapeKeyDown={
+                            this.props.handleListBtnClick(index) as any
+                        }
                     />
                 </div>
             </HoverBox>
@@ -214,6 +217,9 @@ class ResultListContainer extends PureComponent<Props> {
                         }
                         loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
                         initialSelectedEntries={async () => selectedTags}
+                        onEscapeKeyDown={
+                            this.props.handleTagBtnClick(index) as any
+                        }
                     />
                 </div>
             </HoverBox>
@@ -399,11 +405,15 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     props,
 ) => ({
     handleTagBtnClick: (index) => (event) => {
-        event.preventDefault()
+        if (event) {
+            event.preventDefault()
+        }
         dispatch(acts.toggleShowTagsPicker(index))
     },
     handleListBtnClick: (index) => (event) => {
-        event.preventDefault()
+        if (event) {
+            event.preventDefault()
+        }
         dispatch(acts.toggleShowListsPicker(index))
     },
     handleCommentBtnClick: ({ url, title }, index, isSocialPost) => (event) => {
