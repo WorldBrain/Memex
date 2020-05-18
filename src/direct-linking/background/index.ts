@@ -140,9 +140,18 @@ export default class DirectLinkingBackground {
             if (tabId === activeTab.id && changeInfo.status === 'complete') {
                 // Necessary to insert the ribbon/sidebar in case the user has turned
                 // it off.
+
+                // TODO: This wait is a hack to mitigate trying to use the remote function `showSidebar` before it's ready
+                // it should be registered in the tab setup, but is not available immediately on this tab onUpdate handler
+                // since it is fired on the page complete, not on our content script setup complete.
+                await new Promise((resolve) => setTimeout(resolve, 500))
+
                 await runInTab<InPageUIContentScriptRemoteInterface>(
                     tabId,
-                ).showRibbon()
+                ).showSidebar({
+                    annotationUrl: annotation.url,
+                    action: 'show_annotation',
+                })
                 await runInTab<InPageUIContentScriptRemoteInterface>(
                     tabId,
                 ).goToHighlight(annotation, highlightables)
