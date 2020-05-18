@@ -482,9 +482,31 @@ describe('SidebarContainerLogic', () => {
             ).toBe(false)
         })
 
-        it("should be able to toggle a page's annotations view", async () => {})
+        it("should be able to toggle a page's annotations view", async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({
+                device,
+            })
 
-        it("should be able to toggle open a page's annotations list", async () => {})
+            const testTitle = 'test'
+            const testUrl = 'test.com'
+
+            expect(sidebar.state.showAnnotsForPage).toBeUndefined()
+            await sidebar.processEvent('togglePageAnnotationsView', {
+                pageTitle: testTitle,
+                pageUrl: testUrl,
+            })
+            expect(sidebar.state.showAnnotsForPage).toEqual({
+                url: testUrl,
+                title: testTitle,
+            })
+            expect(sidebar.state.searchType).toEqual('notes')
+            expect(sidebar.state.pageType).toEqual('page')
+            await sidebar.processEvent('resetPageAnnotationsView', null)
+            expect(sidebar.state.showAnnotsForPage).toBeUndefined()
+            expect(sidebar.state.searchType).toEqual('page')
+        })
     })
 
     // TODO: Figure out why we're passing in all the comment data that's already available in state

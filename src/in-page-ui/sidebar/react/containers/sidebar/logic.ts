@@ -185,7 +185,7 @@ export type SidebarContainerEvents = UIEvent<{
     togglePageBookmark: { pageUrl: string }
     togglePageTagPicker: { pageUrl: string }
     togglePageListPicker: { pageUrl: string }
-    togglePageAnnotationsView: { pageUrl: string; pageTitle: string }
+    togglePageAnnotationsView: { pageUrl: string; pageTitle?: string }
     resetPageAnnotationsView: null
 }>
 export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
@@ -802,7 +802,10 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        if (previousState.showAnnotsForPage != null) {
+        if (
+            previousState.showAnnotsForPage != null &&
+            this.options.env !== 'overview'
+        ) {
             return
         }
 

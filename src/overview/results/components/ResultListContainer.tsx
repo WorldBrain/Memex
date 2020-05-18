@@ -14,7 +14,6 @@ import * as selectors from '../selectors'
 import * as acts from '../actions'
 import { actions as listActs } from 'src/custom-lists'
 import { acts as deleteConfActs } from '../../delete-confirm-modal'
-import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import { selectors as sidebarLeft } from '../../sidebar-left'
 import { actions as filterActs, selectors as filters } from 'src/search-filters'
 import { PageUrlsByDay } from 'src/search/background/types'
@@ -73,7 +72,9 @@ export interface DispatchProps {
     handleTrashBtnClick: (doc: Result, i: number) => MouseEventHandler
 }
 
-export interface OwnProps {}
+export interface OwnProps {
+    toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
+}
 
 export type Props = StateProps & DispatchProps & OwnProps
 
@@ -395,6 +396,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
+    props,
 ) => ({
     handleTagBtnClick: (index) => (event) => {
         event.preventDefault()
@@ -407,14 +409,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     handleCommentBtnClick: ({ url, title }, index, isSocialPost) => (event) => {
         event.preventDefault()
         dispatch(acts.setActiveSidebarIndex(index))
-        dispatch(
-            sidebarActs.openSidebar({
-                url,
-                title,
-                forceFetch: true,
-                isSocialPost,
-            }),
-        )
+        props.toggleAnnotationsSidebar({ pageUrl: url, pageTitle: title })
     },
     handleToggleBm: ({ url, fullUrl }, index) => (event) => {
         event.preventDefault()

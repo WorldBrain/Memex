@@ -36,7 +36,9 @@ export interface DispatchProps {
     toggleAreAnnotationsExpanded: (e: React.SyntheticEvent) => void
 }
 
-export interface OwnProps {}
+export interface OwnProps {
+    toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
+}
 
 export type Props = StateProps & DispatchProps & OwnProps
 
@@ -119,7 +121,7 @@ class ResultsContainer extends React.Component<Props, State> {
                         {this.props.totalResultCount} results
                     </ResultsMessage>
                 )}
-                <ResultList />
+                <ResultList {...this.props} />
             </React.Fragment>
         )
     }
@@ -142,7 +144,7 @@ class ResultsContainer extends React.Component<Props, State> {
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     showInbox: notifs.showInbox(state),
     noResults: selectors.noResults(state),
     isBadTerm: selectors.isBadTerm(state),
@@ -156,8 +158,10 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     showOnboardingMessage: selectors.showOnboardingMessage(state),
 })
 
-const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
-    toggleAreAnnotationsExpanded: e => {
+const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
+    dispatch,
+) => ({
+    toggleAreAnnotationsExpanded: (e) => {
         e.preventDefault()
         dispatch(actions.toggleAreAnnotationsExpanded())
     },

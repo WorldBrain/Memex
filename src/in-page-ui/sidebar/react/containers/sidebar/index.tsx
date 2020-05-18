@@ -15,15 +15,21 @@ import {
     InPageUISidebarAction,
 } from 'src/in-page-ui/shared-state/types'
 
-export interface SidebarContainerProps extends SidebarContainerOptions {}
+export interface SidebarContainerProps extends SidebarContainerOptions {
+    setRef?: (logic: SidebarContainer) => void
+}
 
-class SidebarContainer extends StatefulUIElement<
+export class SidebarContainer extends StatefulUIElement<
     SidebarContainerProps,
     SidebarContainerState,
     SidebarContainerEvents
 > {
     constructor(props) {
         super(props, new SidebarContainerLogic(props))
+
+        if (this.props.setRef) {
+            this.props.setRef(this)
+        }
     }
 
     componentDidMount() {
@@ -36,11 +42,6 @@ class SidebarContainer extends StatefulUIElement<
             'sidebarAction',
             this.handleExternalAction,
         )
-
-        // setTimeout(() => {
-        //     console.clear()
-        //     this.processEvent('setSearchType', { type: 'page' })
-        // }, 1000)
     }
 
     componentWillUnmount() {

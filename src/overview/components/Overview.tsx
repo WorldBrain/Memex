@@ -4,7 +4,9 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import EventEmitter from 'events'
 
 import { runInBackground } from 'src/util/webextensionRPC'
-import SidebarContainer from 'src/in-page-ui/sidebar/react/containers/sidebar'
+import SidebarContainer, {
+    SidebarContainer as AnnotationsSidebar,
+} from 'src/in-page-ui/sidebar/react/containers/sidebar'
 import { selectors as sidebarSelectors } from 'src/sidebar-overlay/sidebar'
 import { OVERVIEW_URL } from 'src/constants'
 import Onboarding from '../onboarding'
@@ -33,6 +35,8 @@ export interface Props {
 }
 
 class Overview extends PureComponent<Props> {
+    private annotationsSidebar: AnnotationsSidebar
+
     componentDidMount() {
         this.props.init()
     }
@@ -41,6 +45,33 @@ class Overview extends PureComponent<Props> {
         return {
             state: {},
             events: new EventEmitter(),
+            hideRibbon: () => undefined,
+            hideSidebar: () => undefined,
+        }
+    }
+
+    get mockHighlighter() {
+        return {
+            removeTempHighlights: () => undefined,
+        }
+    }
+
+    private setAnnotsSidebarRef = (sidebar) => {
+        this.annotationsSidebar = sidebar
+    }
+
+    private handleAnnotationSidebarToggle = async (args?: {
+        pageUrl: string
+        pageTitle?: string
+    }) => {
+        if (this.annotationsSidebar.state.state === 'visible') {
+            this.annotationsSidebar.hideSidebar()
+        } else if (this.annotationsSidebar.state.state === 'hidden') {
+            await this.annotationsSidebar.processEvent(
+                'togglePageAnnotationsView',
+                args,
+            )
+            this.annotationsSidebar.showSidebar()
         }
     }
 
@@ -67,7 +98,11 @@ class Overview extends PureComponent<Props> {
                 <CollectionsButton />
                 <Header />
                 <SidebarLeft />
-                <Results />
+                <Results
+                    toggleAnnotationsSidebar={
+                        this.handleAnnotationSidebarToggle
+                    }
+                />
                 <DeleteConfirmModal message="Delete page and related notes" />
                 <DragElement />
 
@@ -84,10 +119,12 @@ class Overview extends PureComponent<Props> {
                     </a>
                 </div> */}
 
+                {/* NOTE: most of these deps are unused in the overview's usage of the sidebar
+                    - perhaps we should make a separate simplified interface for overview usage? */}
                 <SidebarContainer
                     env="overview"
                     normalizeUrl={normalizeUrl}
-                    currentTab={{} as any}
+                    currentTab={{ url: 'http://worldbrain.io' } as any}
                     annotations={runInBackground<
                         AnnotationInterface<'caller'>
                     >()}
@@ -96,7 +133,8 @@ class Overview extends PureComponent<Props> {
                     search={runInBackground<SearchInterface>()}
                     customLists={runInBackground<RemoteCollectionsInterface>()}
                     inPageUI={this.mockInPageUI as any}
-                    highlighter={{} as any}
+                    setRef={this.setAnnotsSidebarRef}
+                    highlighter={this.mockHighlighter as any}
                     searchResultLimit={10}
                 />
                 <Tooltip />
