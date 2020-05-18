@@ -293,7 +293,7 @@ export default class ResultListContainer extends Component<
 
     private renderResultItems() {
         if (this.props.isNewSearchLoading) {
-            return <LoadingIndicator />
+            return <div className={styles.loadingBox}><LoadingIndicator /></div>
         }
 
         const resultItems = this.resultsStateToItems()
@@ -311,7 +311,7 @@ export default class ResultListContainer extends Component<
 
         // Add loading spinner to the list end, if loading
         if (this.props.isPaginating) {
-            resultItems.push(<LoadingIndicator key="pagination-loader" />)
+            resultItems.push(<div className={styles.loadingBox}><LoadingIndicator key="pagination-loader" /></div>)
         }
 
         return resultItems

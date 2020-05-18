@@ -141,7 +141,7 @@ export default class Sidebar extends React.Component<Props> {
             return this.renderResults()
         }
         if (this.props.searchLoadState === 'running') {
-            return <LoadingIndicator />
+            return <div className={styles.loadingBox}><LoadingIndicator /></div>
         }
 
         return (
