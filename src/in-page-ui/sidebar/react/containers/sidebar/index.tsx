@@ -57,7 +57,12 @@ export class SidebarContainer extends StatefulUIElement<
         )
     }
 
-    handleClickOutside = () => {
+    handleClickOutside = (e) => {
+        // Do not close the sidebar if clicked on a highlight in the page
+        if (e.target?.dataset?.annotation) {
+            return
+        }
+
         if (this.state.state === 'visible') {
             this.hideSidebar()
             this.props.inPageUI.hideRibbon()

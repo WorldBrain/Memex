@@ -564,7 +564,10 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     hide: EventHandler<'hide'> = () => {
-        return { state: { $set: 'hidden' } }
+        return {
+            state: { $set: 'hidden' },
+            activeAnnotationUrl: { $set: null },
+        }
     }
 
     addNewPageComment: EventHandler<'addNewPageComment'> = async () => {

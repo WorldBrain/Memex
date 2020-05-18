@@ -87,7 +87,7 @@ export default class DirectLinkingBackground {
             toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
             insertAnnotToList: this.insertAnnotToList.bind(this),
             removeAnnotFromList: this.removeAnnotFromList.bind(this),
-            goToAnnotationFromSidebar: this.goToAnnotationFromSidebar.bind(
+            goToAnnotationFromSidebar: this.goToAnnotationFromDashboardSidebar.bind(
                 this,
             ),
         }
@@ -113,7 +113,7 @@ export default class DirectLinkingBackground {
         await remoteFunction(functionName, { tabId: currentTab.id })(...args)
     }
 
-    async goToAnnotationFromSidebar(
+    async goToAnnotationFromDashboardSidebar(
         { tab }: TabArg,
         {
             url,
