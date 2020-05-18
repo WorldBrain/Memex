@@ -1,12 +1,11 @@
-import { InPageUIRibbonAction } from '../shared-state/types'
-import { Anchor } from 'src/highlighting/types'
+import {
+    InPageUIRibbonAction,
+    SidebarActionOptions,
+} from '../shared-state/types'
 import { Annotation } from 'src/annotations/types'
 
 export interface InPageUIContentScriptRemoteInterface {
-    showSidebar(options?: {
-        action?: InPageUIRibbonAction
-        anchor?: Anchor
-    }): Promise<void>
+    showSidebar(options?: SidebarActionOptions): Promise<void>
 
     // Ribbon
     showRibbon(options?: { action?: InPageUIRibbonAction }): Promise<void>

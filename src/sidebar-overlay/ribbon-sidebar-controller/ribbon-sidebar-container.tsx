@@ -171,7 +171,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
     private _setupRPC = () => {
         makeRemotelyCallable({
             openSidebar: this._openSidebar,
-            goToAnnotation: this._goToAnnotation,
+            goToAnnotationInPage: this._goToAnnotation,
         })
     }
 

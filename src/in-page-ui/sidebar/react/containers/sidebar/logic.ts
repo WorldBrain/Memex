@@ -45,9 +45,7 @@ export interface SidebarContainerState {
             [annotationUrl: string]: AnnotationMode
         }
     }
-    // activeAnnotationUrl: {
-    //     [context in AnnotationEventContext]: string
-    // }
+    activeAnnotationUrl: string | null
     hoverAnnotationUrl: {
         [context in AnnotationEventContext]: string
     }
@@ -138,7 +136,15 @@ export type SidebarContainerEvents = UIEvent<{
     showDeletePageModal: { pageUrl: string }
 
     // Annotation boxes
-    goToAnnotation: { context: AnnotationEventContext; annotationUrl: string }
+    goToAnnotationInPage: {
+        context: AnnotationEventContext
+        annotationUrl: string
+    }
+    goToAnnotationInSidebar: {
+        context: AnnotationEventContext
+        annotationUrl: string
+    }
+    setActiveAnnotationUrl: string
     editAnnotation: {
         context: AnnotationEventContext
         annotationUrl: string
@@ -253,7 +259,7 @@ export class SidebarContainerLogic extends UILogic<
             // needsWaypoint: false,
             // appendLoader: false,
             annotations: [],
-            // activeAnnotationUrl: { pageAnnotations: '', searchResults: ''},
+            activeAnnotationUrl: null,
             hoverAnnotationUrl: { pageAnnotations: '', searchResults: '' },
             showCommentBox: false,
             searchValue: '',
@@ -798,7 +804,10 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    goToAnnotation: EventHandler<'goToAnnotation'> = async ({
+    setActiveAnnotationUrl = async ({ event }) =>
+        this.emitMutation({ activeAnnotationUrl: { $set: event } })
+
+    goToAnnotationInPage: EventHandler<'goToAnnotationInPage'> = async ({
         event,
         previousState,
     }) => {

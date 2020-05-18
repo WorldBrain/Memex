@@ -33,7 +33,9 @@ export const goToAnnotation = (pageUrl: string) => async (
                 await runInTab<InPageUIContentScriptRemoteInterface>(
                     tabId,
                 ).showRibbon()
-                await remoteFunction('goToAnnotation', { tabId })(annotation)
+                await remoteFunction('goToAnnotationInPage', { tabId })(
+                    annotation,
+                )
                 browser.tabs.onUpdated.removeListener(listener)
             }
         }

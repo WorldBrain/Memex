@@ -1,10 +1,15 @@
 import TypedEventEmitter from 'typed-emitter'
 import { Anchor } from 'src/highlighting/types'
 
-export type InPageUISidebarAction = 'annotate' | 'comment'
+export type InPageUISidebarAction = 'annotate' | 'comment' | 'show_annotation'
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip'
 export type InPageUIState = { [Component in InPageUIComponent]: boolean }
+export interface SidebarActionOptions {
+    action: InPageUISidebarAction
+    anchor?: Anchor
+    annotationUrl?: string
+}
 export interface InPageUIEvents {
     stateChanged: (event: {
         newState: InPageUIState
@@ -12,10 +17,7 @@ export interface InPageUIEvents {
     }) => void
     ribbonAction: (event: { action: InPageUIRibbonAction }) => void
     ribbonUpdate: () => void
-    sidebarAction: (event: {
-        action: InPageUISidebarAction
-        anchor?: Anchor
-    }) => void
+    sidebarAction: (event: SidebarActionOptions) => void
     componentShouldSetUp: (event: { component: InPageUIComponent }) => void
     componentShouldDestroy: (event: { component: InPageUIComponent }) => void
 }
@@ -32,10 +34,7 @@ export interface InPageUIInterface {
     updateRibbon(): void
 
     // Sidebar
-    showSidebar(options?: {
-        action?: InPageUISidebarAction
-        anchor?: Anchor
-    }): void
+    showSidebar(options?: SidebarActionOptions): void
     hideSidebar(): void
     toggleSidebar(): void
 

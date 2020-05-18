@@ -129,10 +129,8 @@ export async function main() {
 
     const inPageUI = new InPageUI({ loadComponent })
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
-        showSidebar: async () => inPageUI.showSidebar(),
-        showRibbon: async (options?) => {
-            inPageUI.showRibbon(options)
-        },
+        showSidebar: inPageUI.showSidebar.bind(inPageUI),
+        showRibbon: async (options?) => inPageUI.showRibbon(options),
         insertRibbon: async () => inPageUI.loadComponent('ribbon'),
         removeRibbon: async () => inPageUI.removeRibbon(),
         insertOrRemoveRibbon: async () => inPageUI.toggleRibbon(),

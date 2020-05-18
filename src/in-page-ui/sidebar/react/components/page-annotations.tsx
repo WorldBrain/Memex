@@ -20,7 +20,7 @@ export interface PageAnnotationsProps {
     annotationModes: {
         [annotationUrl: string]: AnnotationMode
     }
-    activeAnnotationUrl: string
+    activeAnnotationUrl: string | null
     hoverAnnotationUrl: string
     annotationEventHandlers: AnnotationBoxEventProps
     showCongratsMessage: boolean
@@ -39,8 +39,19 @@ export default class PageAnnotations extends React.Component<
         const {
             annotationEventHandlers: annotationProps,
             tagsEventProps,
+            activeAnnotationUrl,
         } = this.props
-        const annots = this.props.annotations.map((annot, i) => (
+
+        let annotations = this.props.annotations
+        if (activeAnnotationUrl) {
+            annotations = annotations.reduce((list, annotation) => {
+                if (annotation.url === activeAnnotationUrl) {
+                    return [annotation, ...list]
+                }
+                return [...list, annotation]
+            }, [])
+        }
+        const annots = annotations.map((annot, i) => (
             <AnnotationBox
                 key={i}
                 env={this.props.env}

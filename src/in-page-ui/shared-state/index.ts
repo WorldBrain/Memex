@@ -6,6 +6,7 @@ import {
     InPageUIComponent,
     InPageUIRibbonAction,
     InPageUISidebarAction,
+    SidebarActionOptions,
 } from './types'
 import TypedEventEmitter from 'typed-emitter'
 import { Anchor } from 'src/highlighting/types'
@@ -25,9 +26,7 @@ export class InPageUI implements InPageUIInterface {
     _pendingEvents: {
         sidebarAction?: {
             emittedWhen: number
-            action: InPageUISidebarAction
-            anchor?: Anchor
-        }
+        } & SidebarActionOptions
         ribbonAction?: { emittedWhen: number; action: InPageUIRibbonAction }
     } = {}
 
@@ -62,16 +61,12 @@ export class InPageUI implements InPageUIInterface {
         delete this._pendingEvents[eventName]
     }
 
-    async showSidebar(options?: {
-        action?: InPageUISidebarAction
-        anchor?: Anchor
-    }) {
+    async showSidebar(options?: SidebarActionOptions) {
         const maybeEmitAction = () => {
             if (options?.action) {
                 this._emitAction({
                     type: 'sidebarAction',
-                    action: options.action,
-                    anchor: options.anchor,
+                    ...options,
                 })
             }
         }
@@ -89,11 +84,9 @@ export class InPageUI implements InPageUIInterface {
 
     _emitAction(
         params:
-            | {
+            | ({
                   type: 'sidebarAction'
-                  action: InPageUISidebarAction
-                  anchor?: Anchor
-              }
+              } & SidebarActionOptions)
             | { type: 'ribbonAction'; action: InPageUIRibbonAction },
     ) {
         const handled =

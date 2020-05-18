@@ -102,7 +102,11 @@ export const insertTooltip = async (params: {
                 annotationsManager: params.annotationsManager,
                 title: document.title,
                 url: window.location.href,
-                openSidebar: () => params.inPageUI.showSidebar(),
+                openSidebar: ({ activeUrl: annotationUrl }) =>
+                    params.inPageUI.showSidebar({
+                        annotationUrl,
+                        action: 'show_annotation',
+                    }),
             })
         },
         openSettings: () => openOptionsRPC('settings'),

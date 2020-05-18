@@ -13,6 +13,7 @@ import { Anchor } from 'src/highlighting/types'
 import {
     InPageUIEvents,
     InPageUISidebarAction,
+    SidebarActionOptions,
 } from 'src/in-page-ui/shared-state/types'
 
 export interface SidebarContainerProps extends SidebarContainerOptions {
@@ -84,10 +85,7 @@ export class SidebarContainer extends StatefulUIElement<
         this.processEvent('hide', null)
     }
 
-    handleExternalAction = (event: {
-        action: InPageUISidebarAction
-        anchor?: Anchor
-    }) => {
+    handleExternalAction = (event: SidebarActionOptions) => {
         if (event.action === 'annotate' || event.action === 'comment') {
             this.processEvent('addNewPageComment', null)
             if (event.anchor) {
@@ -95,6 +93,9 @@ export class SidebarContainer extends StatefulUIElement<
                     anchor: event.anchor,
                 })
             }
+        }
+        if (event.action === 'show_annotation') {
+            this.processEvent('setActiveAnnotationUrl', event.annotationUrl)
         }
         this.forceUpdate()
     }
@@ -112,7 +113,7 @@ export class SidebarContainer extends StatefulUIElement<
                         mode,
                     }),
                 handleGoToAnnotation: (annotationUrl) =>
-                    this.processEvent('goToAnnotation', {
+                    this.processEvent('goToAnnotationInPage', {
                         context,
                         annotationUrl,
                     }),
@@ -156,7 +157,6 @@ export class SidebarContainer extends StatefulUIElement<
             queryTagSuggestions: (query: string) =>
                 this.props.tags.searchForTagSuggestions({ query }),
         }
-
         return (
             <Sidebar
                 loadState={this.state.loadState}
@@ -171,7 +171,7 @@ export class SidebarContainer extends StatefulUIElement<
                         !this.state.noResults,
                     annotations: this.state.annotations,
                     annotationModes: this.state.annotationModes.pageAnnotations,
-                    activeAnnotationUrl: '',
+                    activeAnnotationUrl: this.state.activeAnnotationUrl,
                     hoverAnnotationUrl: this.state.hoverAnnotationUrl
                         .pageAnnotations,
                     appendLoader: false,
