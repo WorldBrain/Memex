@@ -102,6 +102,7 @@ export const insertTooltip = async (params: {
                 annotationsManager: params.annotationsManager,
                 title: document.title,
                 url: window.location.href,
+                openSidebar: () => params.inPageUI.showSidebar(),
             })
         },
         openSettings: () => openOptionsRPC('settings'),
@@ -317,6 +318,7 @@ async function createHighlightFromTooltip(params: {
     annotationsManager: AnnotationsManagerInterface
     url: string
     title: string
+    openSidebar: (args: { activeUrl?: string; openSidebar?: boolean }) => void
 }) {
     const anchor = await extractAnchor(document.getSelection())
     const body = anchor ? anchor.quote : ''
@@ -333,8 +335,11 @@ async function createHighlightFromTooltip(params: {
             tags,
         })
 
-        // TODO: Add annatation to open sidebar
-
-        renderHighlight(annotation as Highlight, undefined, undefined, () => {})
+        renderHighlight(
+            annotation as Highlight,
+            undefined,
+            undefined,
+            params.openSidebar,
+        )
     }
 }
