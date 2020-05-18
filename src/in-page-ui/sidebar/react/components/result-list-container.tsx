@@ -242,7 +242,6 @@ export default class ResultListContainer extends Component<
         }
 
         const els: JSX.Element[] = []
-
         const sortedKeys = Object.keys(this.props.annotsByDay).sort().reverse()
 
         let resultItemCount = 0

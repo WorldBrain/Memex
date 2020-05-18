@@ -190,10 +190,14 @@ export default class Sidebar extends React.Component<Props> {
     }
 
     renderPageInfo() {
+        if (!this.props.searchTypeSwitch.showAnnotationsForOtherPage) {
+            return
+        }
+
         return (
             <PageInfo
-                page={this.props.pageInfo.page}
-                isCurrentPage={this.props.pageType === 'page'}
+                pageUrl={this.props.pageInfo.page.url}
+                pageTitle={this.props.pageInfo.page.title}
                 resetPage={this.props.pageInfo.resetPage}
             />
         )

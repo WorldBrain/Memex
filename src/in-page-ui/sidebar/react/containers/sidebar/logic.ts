@@ -85,7 +85,7 @@ export interface SidebarContainerState {
     showCongratsMessage: boolean
     showClearFiltersBtn: boolean
     isSocialPost: boolean
-    page: Page
+    showAnnotsForPage?: Page
 
     // Filter sidebar props
     showFiltersSidebar: boolean
@@ -185,7 +185,8 @@ export type SidebarContainerEvents = UIEvent<{
     togglePageBookmark: { pageUrl: string }
     togglePageTagPicker: { pageUrl: string }
     togglePageListPicker: { pageUrl: string }
-    togglePageAnnotationsView: { pageUrl: string }
+    togglePageAnnotationsView: { pageUrl: string; pageTitle: string }
+    resetPageAnnotationsView: null
 }>
 export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
 
@@ -258,7 +259,7 @@ export class SidebarContainerLogic extends UILogic<
             searchValue: '',
             showCongratsMessage: false,
             showClearFiltersBtn: false,
-            page: {} as any,
+            showAnnotsForPage: undefined,
             showFiltersSidebar: false,
             showSocialSearch: false,
             pageCount: 0,
@@ -801,6 +802,10 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        if (previousState.showAnnotsForPage != null) {
+            return
+        }
+
         const { url } = this.options.currentTab
         const normalizedUrl = this.options.normalizeUrl(url)
         let annotation: Annotation
@@ -1185,21 +1190,30 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    // TODO: figure out which is the correct state to show annots for a given page
-    togglePageAnnotationsView: EventHandler<'togglePageAnnotationsView'> = ({
-        previousState,
-        event,
-    }) => {
-        // const currentlyShown = !!previousState.searchResults[resultIndex].
-        // const shouldBeShown = !currentlyShown
+    togglePageAnnotationsView: EventHandler<
+        'togglePageAnnotationsView'
+    > = async ({ event }) => {
+        const annotations = await this.options.annotations.getAllAnnotationsByUrl(
+            { url: event.pageUrl, limit: 100 },
+        )
 
-        return {
-            // searchResults: {
-            //     [resultIndex]: {
-            //         shouldDisplayTagPopup: { $set: shouldBeShown }
-            //     }
-            // }
-        }
+        this.emitMutation({
+            searchType: { $set: 'notes' },
+            pageType: { $set: 'page' },
+            annotations: { $set: annotations },
+            showAnnotsForPage: {
+                $set: { url: event.pageUrl, title: event.pageTitle },
+            },
+        })
+    }
+
+    resetPageAnnotationsView: EventHandler<
+        'resetPageAnnotationsView'
+    > = async ({ event }) => {
+        this.emitMutation({
+            searchType: { $set: 'page' },
+            showAnnotsForPage: { $set: undefined },
+        })
     }
 
     // annotationMouseEnter: EventHandler<'annotationMouseEnter'> = incoming => {
@@ -1268,7 +1282,9 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         const mutation: UIMutation<SidebarContainerState> = {
             searchResultSkip: { $set: 0 },
+            showAnnotsForPage: { $set: undefined },
         }
+
         if (event.changes.pageType) {
             mutation.pageType = { $set: event.changes.pageType }
         }

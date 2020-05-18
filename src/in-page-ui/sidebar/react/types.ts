@@ -1,8 +1,8 @@
 import { ResultWithIndex } from 'src/overview/types'
 
 export interface Page {
-    url: string | null
-    title: string | null
+    url?: string
+    title?: string
 }
 
 export type ClickHandler<T extends HTMLElement> = (

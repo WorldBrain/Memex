@@ -165,6 +165,7 @@ class SidebarContainer extends StatefulUIElement<
                     env: this.props.env,
                     highlighter: this.props.highlighter,
                     needsWaypoint:
+                        this.state.showAnnotsForPage == null &&
                         this.state.primarySearchState !== 'running' &&
                         !this.state.noResults,
                     annotations: this.state.annotations,
@@ -187,8 +188,9 @@ class SidebarContainer extends StatefulUIElement<
                 showCommentBox={this.state.showCommentBox}
                 searchValue={this.state.searchValue}
                 pageInfo={{
-                    page: this.state.page,
-                    resetPage: () => {},
+                    page: this.state.showAnnotsForPage,
+                    resetPage: () =>
+                        this.processEvent('resetPageAnnotationsView', null),
                 }}
                 pageType={this.state.pageType}
                 showFiltersSidebar={this.state.showFiltersSidebar}
@@ -322,6 +324,7 @@ class SidebarContainer extends StatefulUIElement<
                     handleCommentBtnClick: (result) => {
                         this.processEvent('togglePageAnnotationsView', {
                             pageUrl: result.url,
+                            pageTitle: result.title,
                         })
                     },
                     handleCrossRibbonClick: () => {
@@ -349,6 +352,8 @@ class SidebarContainer extends StatefulUIElement<
                         }),
                 }}
                 searchTypeSwitch={{
+                    showAnnotationsForOtherPage:
+                        this.state.showAnnotsForPage != null,
                     allAnnotationsExpanded: this.state.allAnnotationsExpanded,
                     resultsSearchType: this.state.searchType,
                     searchType: this.state.searchType,

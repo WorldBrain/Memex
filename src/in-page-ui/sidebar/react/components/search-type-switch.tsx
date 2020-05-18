@@ -12,6 +12,7 @@ const commentAdd = browser.extension.getURL('/img/comment_add.svg')
 const styles = require('./search-type-switch.css')
 
 export interface StateProps {
+    showAnnotationsForOtherPage: boolean
     allAnnotationsExpanded: boolean
     resultsSearchType: SearchType
     searchType: SearchType
@@ -157,52 +158,53 @@ export default class SearchTypeSwitch extends React.Component<
                         </div>
                     </div>
                     <div className={styles.notesBox}>
-                        {this.props.searchType === 'notes' && (
-                            <div className={styles.pageSwitch}>
-                                <div>
-                                    <button
-                                        className={cx(
-                                            styles.searchSwitchBtn,
-                                            styles.btn,
-                                        )}
-                                        onClick={(e) => {
-                                            e.preventDefault()
-                                            this.props.handlePageTypeToggle()
-                                        }}
-                                        disabled={!this.isCurrentPageSearch}
-                                    >
-                                        This page
-                                    </button>
-                                    <button
-                                        className={cx(
-                                            styles.searchSwitchBtn,
-                                            styles.btn,
-                                        )}
-                                        onClick={this.handleAllBtnClick}
-                                        disabled={this.isCurrentPageSearch}
-                                    >
-                                        All
-                                    </button>
-                                </div>
-                                <div>
-                                    {this.isCurrentPageSearch && (
+                        {!this.props.showAnnotationsForOtherPage &&
+                            this.props.searchType === 'notes' && (
+                                <div className={styles.pageSwitch}>
+                                    <div>
                                         <button
                                             className={cx(
-                                                styles.unfoldAllBtn,
+                                                styles.searchSwitchBtn,
                                                 styles.btn,
                                             )}
-                                            onClick={
-                                                this.props
-                                                    .handleAllAnnotationsFoldToggle
-                                            }
-                                            disabled={this.isPageSearch}
+                                            onClick={(e) => {
+                                                e.preventDefault()
+                                                this.props.handlePageTypeToggle()
+                                            }}
+                                            disabled={!this.isCurrentPageSearch}
                                         >
-                                            {this.unfoldBtnText}
+                                            This page
                                         </button>
-                                    )}
+                                        <button
+                                            className={cx(
+                                                styles.searchSwitchBtn,
+                                                styles.btn,
+                                            )}
+                                            onClick={this.handleAllBtnClick}
+                                            disabled={this.isCurrentPageSearch}
+                                        >
+                                            All
+                                        </button>
+                                    </div>
+                                    <div>
+                                        {this.isCurrentPageSearch && (
+                                            <button
+                                                className={cx(
+                                                    styles.unfoldAllBtn,
+                                                    styles.btn,
+                                                )}
+                                                onClick={
+                                                    this.props
+                                                        .handleAllAnnotationsFoldToggle
+                                                }
+                                                disabled={this.isPageSearch}
+                                            >
+                                                {this.unfoldBtnText}
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
                     </div>
                 </div>
             </React.Fragment>
