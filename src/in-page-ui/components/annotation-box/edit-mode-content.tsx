@@ -18,7 +18,7 @@ interface Props extends TagsEventProps {
     rows: number
     tags: string[]
     handleCancelOperation: () => void
-    handleEditAnnotation: (commentText: string, tagsInput: string[]) => void
+    handleSaveAnnotation: (commentText: string, tagsInput: string[]) => void
 }
 
 interface State {
@@ -34,8 +34,8 @@ class EditModeContent extends React.Component<Props, State> {
         tags: this.props.tags ?? [],
     }
 
-    private _handleEditAnnotation = () => {
-        this.props.handleEditAnnotation(
+    private _handleSaveAnnotation = () => {
+        this.props.handleSaveAnnotation(
             this.state.commentEditText,
             this.state.tags,
         )
@@ -56,7 +56,7 @@ class EditModeContent extends React.Component<Props, State> {
 
     private onEnterSaveHandler = {
         test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-        handle: (e) => this._handleCommentChange,
+        handle: (e) => this._handleSaveAnnotation(),
     }
 
     private _handleCommentChange = (comment: string) =>
@@ -123,7 +123,7 @@ class EditModeContent extends React.Component<Props, State> {
                 <AllModesFooter
                     mode="edit"
                     handleCancelEdit={this.props.handleCancelOperation}
-                    handleEditAnnotation={this._handleEditAnnotation}
+                    handleEditAnnotation={this._handleSaveAnnotation}
                 />
             </React.Fragment>
         )

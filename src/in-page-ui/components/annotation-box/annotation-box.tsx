@@ -266,7 +266,7 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
                         rows={2}
                         tags={this.props.tags}
                         comment={this.props.comment}
-                        handleEditAnnotation={this._handleEditAnnotation}
+                        handleSaveAnnotation={this._handleEditAnnotation}
                         handleCancelOperation={this._handleCancelOperation}
                         queryTagSuggestions={this.props.queryTagSuggestions}
                         fetchInitialTagSuggestions={
