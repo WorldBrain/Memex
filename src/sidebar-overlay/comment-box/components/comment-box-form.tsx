@@ -153,6 +153,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                     placeholder="Add a private note... (save with cmd/ctrl+enter)"
                     onChange={this.props.handleCommentTextChange}
                     specialHandlers={[this.onEnterSaveHandler]}
+                    autoFocus
                 />
 
                 {/* Save and Cancel buttons. */}

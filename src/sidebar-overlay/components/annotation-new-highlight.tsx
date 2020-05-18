@@ -13,7 +13,7 @@ interface State {
     truncateHighlight: boolean
 }
 
-class AnnotationHighlight extends React.Component<Props, State> {
+class AnnotationNewHighlight extends React.Component<Props, State> {
     state = {
         truncateHighlight: true,
     }
@@ -44,7 +44,7 @@ class AnnotationHighlight extends React.Component<Props, State> {
     }
 
     private _toggleHighlightTruncation = () => {
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
             truncateHighlight: !prevState.truncateHighlight,
         }))
     }
@@ -69,4 +69,4 @@ class AnnotationHighlight extends React.Component<Props, State> {
     }
 }
 
-export default AnnotationHighlight
+export default AnnotationNewHighlight

@@ -6,7 +6,7 @@ import noop from 'lodash/fp/noop'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
 import State from '../types'
-import { AnnotationHighlight } from '../../components'
+import { AnnotationNewHighlight } from '../../components'
 import CommentBoxForm from './comment-box-form'
 import { MapDispatchToProps } from '../../types'
 import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
@@ -87,7 +87,7 @@ class CommentBoxContainer extends React.PureComponent<Props> {
                     [styles.inPage]: env === 'inpage',
                 })}
             >
-                {!!anchor && <AnnotationHighlight anchor={anchor} />}
+                {!!anchor && <AnnotationNewHighlight anchor={anchor} />}
 
                 <CommentBoxForm
                     env={env}
