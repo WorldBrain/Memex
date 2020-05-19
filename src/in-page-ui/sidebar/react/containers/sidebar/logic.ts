@@ -658,6 +658,22 @@ export class SidebarContainerLogic extends UILogic<
                     url: annotationUrl,
                 })
             }
+
+            this.options.highlighter.removeTempHighlights()
+            await this.options.highlighter.renderHighlight(
+                dummyAnnotation,
+                undefined,
+                undefined,
+                () => {
+                    this.options.inPageUI.showSidebar(
+                        annotationUrl && {
+                            anchor: dummyAnnotation.selector,
+                            annotationUrl,
+                            action: 'show_annotation',
+                        },
+                    )
+                },
+            )
         } catch (err) {
             updateState({ annotations: previousState.annotations })
             throw err

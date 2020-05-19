@@ -263,7 +263,6 @@ export class SidebarContainer extends StatefulUIElement<
                             bookmarked,
                         }),
                     closeComments: () => {
-                        console
                         // .log('close comments')
                     },
                     // this.processEvent('closeComments', null),
