@@ -34,7 +34,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     State,
     Event
 > {
-    static TOTAL_STEPS = 7
+    static TOTAL_STEPS = 8
     static defaultProps: Partial<Props> = {
         storage: browser.storage.local,
     }
@@ -148,6 +148,10 @@ export default class OnboardingScreen extends StatefulUIElement<
     )
     private mobileImg = () => (
         <img src={'/img/mobileIllustration.svg'} className={styles.mobileImg} />
+    )
+
+    private backupImg = () => (
+        <img src={'/img/backup-providers.svg'} className={styles.backupImg} />
     )
 
     private dataImg = () => (
@@ -453,6 +457,29 @@ export default class OnboardingScreen extends StatefulUIElement<
                     </OnboardingStep>
                 )
             case 7:
+                return (
+                    <OnboardingStep
+                        goToStep={this.handleStepClick}
+                        titleText="Backup your data to your favorite providers"
+                        subtitleText="Browsers are unfortunately unreliable data stores. "
+                        subtitleText2="We are working on an external storage."
+                        renderButton={() => (
+                            <OnboardingAction
+                                onClick={this.handleNextStepClick}
+                                label={'Next'}
+                            />
+                        )}
+                        renderImage={this.backupImg}
+                        totalSteps={OnboardingScreen.TOTAL_STEPS}
+                        currentStep={this.state.currentStep - 1}
+                    >
+                        <SecondaryAction
+                            onClick={() => window.open(`${OPTIONS_URL}#/backup`)}
+                            label={'Start Backup'}
+                        />
+                    </OnboardingStep>
+                )
+            case 8:
                 return (
                     <OnboardingStep
                         privacyStep
