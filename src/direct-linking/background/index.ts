@@ -191,23 +191,6 @@ export default class DirectLinkingBackground {
 
         const { id: tabId } = currentTab
 
-        const actions: { [Action in InPageUIRibbonAction]: boolean } = {
-            tag: openToTags,
-            comment: openToComment,
-            bookmark: openToBookmark,
-            list: openToCollections,
-        }
-        const actionPair = Object.entries(actions).findIndex((pair) => {
-            return pair[1]
-        })
-        const action: InPageUIRibbonAction = actionPair[0]
-
-        // Make sure that the ribbon is inserted before trying to open the
-        // sidebar.
-        await runInTab<InPageUIContentScriptRemoteInterface>(tabId).showRibbon({
-            action,
-        })
-
         if (openSidebar) {
             await runInTab<InPageUIContentScriptRemoteInterface>(
                 tabId,
@@ -218,6 +201,22 @@ export default class DirectLinkingBackground {
                     action: 'show_annotation',
                 },
             )
+        } else {
+            const actions: { [Action in InPageUIRibbonAction]: boolean } = {
+                tag: openToTags,
+                comment: openToComment,
+                bookmark: openToBookmark,
+                list: openToCollections,
+            }
+            const actionPair = Object.entries(actions).findIndex((pair) => {
+                return pair[1]
+            })
+            const action: InPageUIRibbonAction = actionPair[0]
+            await runInTab<InPageUIContentScriptRemoteInterface>(
+                tabId,
+            ).showRibbon({
+                action,
+            })
         }
     }
 
