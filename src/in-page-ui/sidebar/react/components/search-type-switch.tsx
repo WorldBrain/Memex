@@ -154,7 +154,11 @@ export default class SearchTypeSwitch extends React.Component<
                             }}
                             className={styles.imgContainer}
                         >
-                            <img src={commentAdd} className={styles.img} />
+                            <img
+                                style={{ maxWidth: '25px', maxHeight: '25px' }}
+                                src={commentAdd}
+                                className={styles.img}
+                            />
                         </div>
                     </div>
                     <div className={styles.notesBox}>
