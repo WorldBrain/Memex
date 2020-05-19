@@ -174,8 +174,9 @@ export class InPageUI implements InPageUIInterface {
 
     async showTooltip() {
         await this._setState('tooltip', true)
-        this.loadComponent('sidebar')
         this.loadComponent('ribbon')
+        // Unfortunately loading the sidebar resets the document selection
+        // this.loadComponent('sidebar')
     }
 
     async hideTooltip() {
