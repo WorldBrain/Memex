@@ -23,6 +23,7 @@ export interface InPageUIEvents {
 }
 
 export interface InPageUIInterface {
+    areHighlightsShown: boolean
     events: TypedEventEmitter<InPageUIEvents>
     state: InPageUIState
 
@@ -46,5 +47,7 @@ export interface InPageUIInterface {
     toggleTooltip(): void
 
     // Highlights
-    toggleHighlights(): void
+    showHighlights(): Promise<void>
+    hideHighlights(): Promise<void>
+    toggleHighlights(): Promise<void>
 }

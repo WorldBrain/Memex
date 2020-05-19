@@ -1,18 +1,27 @@
 import EventEmitter from 'events'
+import TypedEventEmitter from 'typed-emitter'
+
 import {
     InPageUIInterface,
     InPageUIEvents,
     InPageUIState,
     InPageUIComponent,
     InPageUIRibbonAction,
-    InPageUISidebarAction,
     SidebarActionOptions,
 } from './types'
-import TypedEventEmitter from 'typed-emitter'
-import { Anchor } from 'src/highlighting/types'
+import { HighlightInteraction } from 'src/highlighting/ui/highlight-interactions'
+import { AnnotationInterface } from 'src/direct-linking/background/types'
+
+export interface InPageUIDependencies {
+    pageUrl: string
+    highlighter: HighlightInteraction
+    annotations: AnnotationInterface<'caller'>
+    loadComponent: (component: InPageUIComponent) => void
+}
 
 export class InPageUI implements InPageUIInterface {
     events = new EventEmitter() as TypedEventEmitter<InPageUIEvents>
+    areHighlightsShown = false
     state: InPageUIState = {
         ribbon: false,
         sidebar: false,
@@ -30,11 +39,7 @@ export class InPageUI implements InPageUIInterface {
         ribbonAction?: { emittedWhen: number; action: InPageUIRibbonAction }
     } = {}
 
-    constructor(
-        private options: {
-            loadComponent: (component: InPageUIComponent) => void
-        },
-    ) {
+    constructor(private options: InPageUIDependencies) {
         this.events.on('newListener' as any, this._handleNewListener)
     }
 
@@ -187,7 +192,34 @@ export class InPageUI implements InPageUIInterface {
         }
     }
 
-    toggleHighlights(): void {}
+    async hideHighlights() {
+        await this.options.highlighter.removeHighlights()
+        this.areHighlightsShown = false
+    }
+
+    async showHighlights() {
+        const { annotations, highlighter, pageUrl: url } = this.options
+
+        const pageAnnotations = await annotations.getAllAnnotationsByUrl({
+            url,
+        })
+        const highlightables = pageAnnotations.filter(
+            (annotation) => annotation.selector,
+        )
+        await highlighter.renderHighlights(
+            highlightables,
+            annotations.toggleSidebarOverlay,
+        )
+        this.areHighlightsShown = true
+    }
+
+    async toggleHighlights() {
+        if (this.areHighlightsShown) {
+            await this.hideHighlights()
+        } else {
+            await this.showHighlights()
+        }
+    }
 
     async _setState(component: InPageUIComponent, visible: boolean) {
         if (this.state[component] === visible) {

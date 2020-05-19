@@ -60,20 +60,6 @@ export async function main() {
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
 
-    const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
-    if (areHighlightsEnabled) {
-        const pageAnnotations = await annotations.getAllAnnotationsByUrl({
-            url: currentTab.url,
-        })
-        const highlightables = pageAnnotations.filter(
-            (annotation) => annotation.selector,
-        )
-        await highlighter.renderHighlights(
-            highlightables,
-            annotations.toggleSidebarOverlay,
-        )
-    }
-
     const contentScriptRegistry: ContentScriptRegistry = {
         async registerRibbonScript(execute): Promise<void> {
             await execute({
@@ -127,7 +113,18 @@ export async function main() {
     }
     window['contentScriptRegistry'] = contentScriptRegistry
 
-    const inPageUI = new InPageUI({ loadComponent })
+    const inPageUI = new InPageUI({
+        loadComponent,
+        annotations,
+        highlighter,
+        pageUrl: window.location.href,
+    })
+
+    const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
+    if (areHighlightsEnabled) {
+        await inPageUI.showHighlights()
+    }
+
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
         showRibbon: async (options?) => inPageUI.showRibbon(options),

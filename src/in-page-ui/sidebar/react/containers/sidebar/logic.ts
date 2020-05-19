@@ -828,7 +828,6 @@ export class SidebarContainerLogic extends UILogic<
         const { url } = this.options.currentTab
         const normalizedUrl = this.options.normalizeUrl(url)
         let annotation: Annotation
-        let pageAnnotations: Annotation[]
 
         const goToAnnotationInNewTab = (args: {
             url: string
@@ -853,13 +852,8 @@ export class SidebarContainerLogic extends UILogic<
                     annotation,
                 })
             }
-
-            pageAnnotations = await this.options.annotations.getAllAnnotationsByUrl(
-                { url },
-            )
         } else {
-            pageAnnotations = previousState.annotations
-            annotation = pageAnnotations.find(
+            annotation = previousState.annotations.find(
                 (annot) => annot.url === event.annotationUrl,
             )
         }
@@ -875,14 +869,7 @@ export class SidebarContainerLogic extends UILogic<
             })
         }
 
-        const highlightables = pageAnnotations.filter((annot) => annot.selector)
-
-        await this.options.highlighter.renderHighlights(
-            highlightables,
-            this.options.annotations.toggleSidebarOverlay,
-        )
-
-        await this.options.highlighter.highlightAndScroll(annotation)
+        await this.options.inPageUI.showHighlights()
     }
 
     editAnnotation: EventHandler<'editAnnotation'> = async ({

@@ -27,6 +27,26 @@ const setupLogicHelper = async ({
     initSearchType?: 'pageAnnots' | 'allAnnots' | 'pages'
 }) => {
     const { backgroundModules } = device
+
+    const annotations = {
+        // ...insertBackgroundFunctionTab(
+        //     backgroundModules.directLinking.remoteFunctions,
+        //     currentTab,
+        // ),
+        editAnnotation: () => undefined,
+        createAnnotation: () => undefined,
+        addAnnotationTag: () => undefined,
+        deleteAnnotation: () => undefined,
+        toggleAnnotBookmark: () => undefined,
+        updateAnnotationTags: () => undefined,
+        getAllAnnotationsByUrl: () => undefined,
+    } as any
+
+    const highlighter = {
+        removeAnnotationHighlights: () => undefined,
+        removeTempHighlights: () => undefined,
+    } as any
+
     const currentTab = {
         id: 654,
         url: currentTabUrl,
@@ -34,34 +54,23 @@ const setupLogicHelper = async ({
     }
     const inPageUI = new InPageUI({
         loadComponent: async () => {},
+        annotations,
+        highlighter,
+        pageUrl: currentTab.url,
     })
+
     const sidebarLogic = new SidebarContainerLogic({
         currentTab,
         tags: backgroundModules.tags.remoteFunctions,
         customLists: backgroundModules.customLists.remoteFunctions,
-        annotations: {
-            // ...insertBackgroundFunctionTab(
-            //     backgroundModules.directLinking.remoteFunctions,
-            //     currentTab,
-            // ),
-            editAnnotation: () => undefined,
-            createAnnotation: () => undefined,
-            addAnnotationTag: () => undefined,
-            deleteAnnotation: () => undefined,
-            toggleAnnotBookmark: () => undefined,
-            updateAnnotationTags: () => undefined,
-            getAllAnnotationsByUrl: () => undefined,
-        } as any,
+        annotations,
         normalizeUrl: (url) => url,
         search: {
             ...backgroundModules.search.remoteFunctions.search,
         },
         bookmarks: backgroundModules.search.remoteFunctions.bookmarks,
         inPageUI,
-        highlighter: {
-            removeAnnotationHighlights: () => undefined,
-            removeTempHighlights: () => undefined,
-        } as any,
+        highlighter,
         env: 'inpage',
         searchResultLimit: 10,
     })

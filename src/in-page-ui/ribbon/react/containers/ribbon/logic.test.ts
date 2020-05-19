@@ -35,13 +35,22 @@ describe('Ribbon logic', () => {
             url: 'https://www.foo.com',
             title: 'Foo.com: Home',
         }
-        const inPageUI = new InPageUI({
-            loadComponent: async () => {},
-        })
+        const annotations = insertBackgroundFunctionTab(
+            backgroundModules.directLinking.remoteFunctions,
+            currentTab,
+        )
         const highlighter = {
             renderHighlights: () => {},
             removeHighlights: () => {},
         } as any
+
+        const inPageUI = new InPageUI({
+            loadComponent: async () => {},
+            annotations,
+            highlighter,
+            pageUrl: currentTab.url,
+        })
+
         const annotationsManager = {} as any
 
         let globalTooltipState = false
@@ -60,10 +69,7 @@ describe('Ribbon logic', () => {
             tags: backgroundModules.tags.remoteFunctions,
             customLists: backgroundModules.customLists.remoteFunctions,
             activityLogger: backgroundModules.activityLogger.remoteFunctions,
-            annotations: insertBackgroundFunctionTab(
-                backgroundModules.directLinking.remoteFunctions,
-                currentTab,
-            ),
+            annotations,
             ...(options?.dependencies ?? {}),
             tooltip: {
                 getState: async () => globalTooltipState,

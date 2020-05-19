@@ -52,15 +52,28 @@ async function createDependencies() {
         highlightAndScroll: async () => {},
     } as any
 
-    const inPageUI = new InPageUI({
-        loadComponent: async () => {},
-    })
+    const annotations = mapValues(
+        background.backgroundModules.directLinking.remoteFunctions,
+        (f) => {
+            return (...args: any[]) => {
+                return f({ tab: currentTab }, ...args)
+            }
+        },
+    )
 
     const currentTab = {
         id: 654,
         url: 'https://www.foo.com',
         title: 'Foo.com: Home',
     }
+
+    const inPageUI = new InPageUI({
+        loadComponent: async () => {},
+        annotations,
+        highlighter,
+        pageUrl: currentTab.url,
+    })
+
     const commonProps = {
         env: 'inpage' as SidebarEnv,
         currentTab,
@@ -79,14 +92,7 @@ async function createDependencies() {
         customLists: background.backgroundModules.customLists.remoteFunctions,
         activityLogger:
             background.backgroundModules.activityLogger.remoteFunctions,
-        annotations: mapValues(
-            background.backgroundModules.directLinking.remoteFunctions,
-            (f) => {
-                return (...args: any[]) => {
-                    return f({ tab: currentTab }, ...args)
-                }
-            },
-        ),
+        annotations,
         tooltip: {
             getState: async () => true,
             setState: async () => undefined,
