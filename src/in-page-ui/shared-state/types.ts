@@ -47,7 +47,7 @@ export interface InPageUIInterface {
     toggleTooltip(): void
 
     // Highlights
-    showHighlights(): Promise<void>
+    showHighlights(): Promise<boolean>
     hideHighlights(): Promise<void>
     toggleHighlights(): Promise<void>
 }

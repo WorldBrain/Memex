@@ -120,11 +120,6 @@ export async function main() {
         pageUrl: currentTab.url,
     })
 
-    const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
-    if (areHighlightsEnabled) {
-        await inPageUI.showHighlights()
-    }
-
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
         showRibbon: inPageUI.showRibbon.bind(inPageUI),
@@ -168,6 +163,13 @@ export async function main() {
         await inPageUI.setupTooltip()
     }
 
+    const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
+    if (areHighlightsEnabled) {
+        if (await inPageUI.showHighlights()) {
+            await inPageUI.loadComponent('sidebar')
+            await inPageUI.loadComponent('ribbon')
+        }
+    }
     // if (window.location.hostname === 'worldbrain.io') {
     //     sniffWordpressWorldbrainUser()
     // }

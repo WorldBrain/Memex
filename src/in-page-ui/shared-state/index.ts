@@ -82,9 +82,9 @@ export class InPageUI implements InPageUIInterface {
         }
 
         this.loadComponent('sidebar')
-        this.showRibbon()
         this._setState('sidebar', true)
         maybeEmitAction()
+        this.showRibbon()
     }
 
     _emitAction(
@@ -174,6 +174,8 @@ export class InPageUI implements InPageUIInterface {
 
     async showTooltip() {
         await this._setState('tooltip', true)
+        this.loadComponent('sidebar')
+        this.loadComponent('ribbon')
     }
 
     async hideTooltip() {
@@ -203,14 +205,21 @@ export class InPageUI implements InPageUIInterface {
         const pageAnnotations = await annotations.getAllAnnotationsByUrl({
             url,
         })
+
         const highlightables = pageAnnotations.filter(
             (annotation) => annotation.selector,
         )
+
+        if ((highlightables?.length ?? 0) === 0) {
+            return false
+        }
+
         await highlighter.renderHighlights(
             highlightables,
             annotations.toggleSidebarOverlay,
         )
         this.areHighlightsShown = true
+        return this.areHighlightsShown
     }
 
     async toggleHighlights() {
