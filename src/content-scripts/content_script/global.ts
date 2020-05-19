@@ -117,7 +117,7 @@ export async function main() {
         loadComponent,
         annotations,
         highlighter,
-        pageUrl: window.location.href,
+        pageUrl: currentTab.url,
     })
 
     const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
@@ -148,7 +148,12 @@ export async function main() {
     setupScrollReporter()
     loadAnnotationWhenReady()
     setupRemoteDirectLinkFunction()
-    initKeyboardShortcuts(inPageUI)
+    initKeyboardShortcuts({
+        inPageUI,
+        annotationsManager,
+        pageUrl: currentTab.url,
+        pageTitle: document.title,
+    })
 
     const loadContentScript = createContentScriptLoader()
     if (shouldIncludeSearchInjection(window.location.hostname)) {

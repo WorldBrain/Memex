@@ -43,6 +43,7 @@ export default class RibbonContainer extends StatefulUIElement<
             this.processEvent('setShowCommentBox', { value: true })
         } else if (event.action === 'bookmark') {
             this.processEvent('toggleBookmark', null)
+            this.props.setRibbonShouldAutoHide(true)
         } else if (event.action === 'list') {
             this.processEvent('setShowListsPicker', { value: true })
         } else if (event.action === 'tag') {

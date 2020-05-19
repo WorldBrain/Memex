@@ -1,7 +1,7 @@
 import { browser } from 'webextension-polyfill-ts'
 
 import analytics from 'src/analytics'
-import { delayed, getPositionState, getTooltipState } from '../utils'
+import { delayed, getPositionState } from '../utils'
 import { createAndCopyDirectLink } from '../../../direct-linking/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
 import { remoteFunction } from '../../../util/webextensionRPC'
@@ -318,7 +318,7 @@ function isTargetInsideTooltip(event) {
     return $tooltipContainer.contains(event.target)
 }
 
-async function createHighlightFromTooltip(params: {
+export async function createHighlightFromTooltip(params: {
     annotationsManager: AnnotationsManagerInterface
     url: string
     title: string
