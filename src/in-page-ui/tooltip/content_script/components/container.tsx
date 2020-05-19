@@ -33,7 +33,7 @@ interface TooltipContainerState {
     showCreateLink: boolean
     showingCloseMessage?: boolean
     position: { x: number; y: number } | {}
-    tooltipState: 'copied' | 'running' | 'pristine' | 'runnning' | 'done'
+    tooltipState: 'copied' | 'running' | 'pristine' | 'done'
 }
 
 class TooltipContainer extends React.Component<
@@ -127,20 +127,22 @@ class TooltipContainer extends React.Component<
         // quick hack, to prevent the tooltip from popping again
         setTimeout(() => {
             this.setState({
-                tooltipState: 'runnning',
+                tooltipState: 'running',
             })
             this.props.inPageUI.hideTooltip()
         }, 400)
     }
+
     createHighlight = async (e) => {
-        this.setState({
-            tooltipState: 'running',
-        })
-        await this.props.createHighlight()
-        this.setState({
-            tooltipState: 'pristine',
-        })
-        this.props.inPageUI.hideTooltip()
+        this.setState({ tooltipState: 'running' })
+        try {
+            await this.props.createHighlight()
+        } catch (err) {
+            // Can happen if a user accidently removes the text selection before clicking the button
+        } finally {
+            this.setState({ tooltipState: 'pristine' })
+            this.props.inPageUI.hideTooltip()
+        }
     }
 
     openSettings = (event) => {
