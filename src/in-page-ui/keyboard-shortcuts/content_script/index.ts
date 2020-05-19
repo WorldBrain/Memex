@@ -1,7 +1,7 @@
 import Mousetrap from 'mousetrap'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { userSelectedText } from 'src/in-page-ui/tooltip/content_script/interactions'
-import { createAnnotationDraftInSidebar } from 'src/annotations'
+import { createHighlight } from 'src/highlighting/ui'
 import { conditionallyRemoveOnboardingSelectOption } from 'src/in-page-ui/tooltip/onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
 import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
@@ -50,7 +50,11 @@ function getShortcutHandlers(inPageUI: InPageUIInterface): HandleInterface {
         },
         createAnnotation: async () => {
             if (userSelectedText()) {
-                await createAnnotationDraftInSidebar()
+                const highlight = await createHighlight(undefined, true)
+                await inPageUI.showSidebar({
+                    action: 'comment',
+                    anchor: highlight.selector,
+                })
                 await conditionallyRemoveOnboardingSelectOption(
                     STAGES.annotation.annotationCreated,
                 )
