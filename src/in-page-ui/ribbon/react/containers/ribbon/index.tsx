@@ -8,7 +8,6 @@ import {
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Ribbon from '../../components/ribbon'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
-import { ListEntryArgs } from '../../components/types'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
@@ -93,10 +92,10 @@ export default class RibbonContainer extends StatefulUIElement<
                     saveComment: () => this.processEvent('saveComment', null),
                     cancelComment: () =>
                         this.processEvent('cancelComment', null),
-                    toggleCommentBookmark: () =>
-                        this.processEvent('toggleCommentBookmark', null),
-                    toggleTagPicker: () =>
-                        this.processEvent('toggleTagPicker', null),
+                    toggleCommentBoxBookmark: () =>
+                        this.processEvent('toggleCommentBoxBookmark', null),
+                    toggleCommentBoxTagPicker: () =>
+                        this.processEvent('toggleCommentBoxTagPicker', null),
                     setShowCommentBox: (value) =>
                         this.processEvent('setShowCommentBox', { value }),
                     updateCommentTags: (value) =>

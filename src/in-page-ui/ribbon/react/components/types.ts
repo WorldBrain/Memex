@@ -39,8 +39,8 @@ export interface RibbonCommentBoxProps extends CommonTaggingProps {
     handleCommentTextChange: (comment: string) => void
     saveComment: () => void
     cancelComment: () => void
-    toggleCommentBookmark: () => void
-    toggleTagPicker: () => void
+    toggleCommentBoxBookmark: () => void
+    toggleCommentBoxTagPicker: () => void
     setShowCommentBox: (value: boolean) => void
     updateCommentTags: PickerUpdateHandler
 }

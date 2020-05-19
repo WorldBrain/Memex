@@ -58,6 +58,7 @@ export type RibbonContainerEvents = UIEvent<
 
 export interface RibbonContainerOptions extends RibbonContainerDependencies {
     inPageUI: InPageUIInterface
+    setRibbonShouldAutoHide: (value: boolean) => void
 }
 
 type EventHandler<
@@ -73,6 +74,7 @@ export const INITIAL_RIBBON_COMMENT_BOX_STATE = {
     showTagsPicker: false,
     tags: [],
 }
+
 export class RibbonContainerLogic extends UILogic<
     RibbonContainerState,
     RibbonContainerEvents
@@ -193,6 +195,7 @@ export class RibbonContainerLogic extends UILogic<
     // Comment box
     //
     setShowCommentBox: EventHandler<'setShowCommentBox'> = ({ event }) => {
+        this.dependencies.setRibbonShouldAutoHide(!event.value)
         const extra: UIMutation<RibbonContainerState> =
             event.value === true
                 ? {
@@ -246,6 +249,8 @@ export class RibbonContainerLogic extends UILogic<
                 },
             },
         })
+        this.dependencies.setRibbonShouldAutoHide(true)
+
         await new Promise((resolve) =>
             setTimeout(resolve, this.commentSavedTimeout),
         )
@@ -259,7 +264,7 @@ export class RibbonContainerLogic extends UILogic<
         return { commentBox: { showCommentBox: { $set: false } } }
     }
 
-    toggleCommentBookmark: EventHandler<'toggleCommentBookmark'> = ({
+    toggleCommentBoxBookmark: EventHandler<'toggleCommentBoxBookmark'> = ({
         event,
         previousState,
     }) => {
@@ -268,7 +273,7 @@ export class RibbonContainerLogic extends UILogic<
         }
     }
 
-    toggleTagPicker: EventHandler<'toggleTagPicker'> = ({
+    toggleCommentBoxTagPicker: EventHandler<'toggleCommentBoxTagPicker'> = ({
         event,
         previousState,
     }) => {
@@ -279,6 +284,7 @@ export class RibbonContainerLogic extends UILogic<
     // Tagging
     //
     setShowTagsPicker: EventHandler<'setShowTagsPicker'> = ({ event }) => {
+        this.dependencies.setRibbonShouldAutoHide(!event.value)
         const extra: UIMutation<RibbonContainerState> =
             event.value === true
                 ? {
@@ -351,6 +357,7 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     setShowListsPicker: EventHandler<'setShowListsPicker'> = ({ event }) => {
+        this.dependencies.setRibbonShouldAutoHide(!event.value)
         const extra: UIMutation<RibbonContainerState> =
             event.value === true
                 ? {
@@ -366,6 +373,7 @@ export class RibbonContainerLogic extends UILogic<
     // Search
     //
     setShowSearchBox: EventHandler<'setShowSearchBox'> = ({ event }) => {
+        this.dependencies.setRibbonShouldAutoHide(!event.value)
         const extra: UIMutation<RibbonContainerState> =
             event.value === true
                 ? {

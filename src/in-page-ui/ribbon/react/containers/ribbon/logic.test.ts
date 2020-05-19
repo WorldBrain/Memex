@@ -3,7 +3,11 @@ import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
-import { RibbonContainerLogic, INITIAL_RIBBON_COMMENT_BOX_STATE } from './logic'
+import {
+    RibbonContainerLogic,
+    INITIAL_RIBBON_COMMENT_BOX_STATE,
+    RibbonContainerOptions,
+} from './logic'
 import { InPageUI } from 'src/in-page-ui/shared-state'
 import { RibbonContainerDependencies } from './types'
 import { Annotation } from 'src/annotations/types'
@@ -22,7 +26,7 @@ describe('Ribbon logic', () => {
     async function setupTest(
         device: UILogicTestDevice,
         options?: {
-            dependencies?: Partial<RibbonContainerDependencies>
+            dependencies?: Partial<RibbonContainerOptions>
         },
     ) {
         const { backgroundModules } = device
@@ -44,6 +48,7 @@ describe('Ribbon logic', () => {
         let globalHighlightsState = false
 
         const ribbonLogic = new RibbonContainerLogic({
+            setRibbonShouldAutoHide: () => undefined,
             getSidebarEnabled: async () => true,
             setSidebarEnabled: async () => {},
             inPageUI,
@@ -164,6 +169,41 @@ describe('Ribbon logic', () => {
         expect(ribbon.state.highlights.areHighlightsEnabled).toBe(false)
     })
 
+    it('should call passed-down callback when toggling popup open state', async ({
+        device,
+    }) => {
+        let arePopupsOpen = false
+        const toggleAutoHideRibbon = () => {
+            arePopupsOpen = !arePopupsOpen
+        }
+        const { ribbon } = await setupTest(device, {
+            dependencies: { setRibbonShouldAutoHide: toggleAutoHideRibbon },
+        })
+
+        await ribbon.init()
+
+        expect(arePopupsOpen).toBe(false)
+        await ribbon.processEvent('setShowCommentBox', { value: true })
+        expect(arePopupsOpen).toBe(true)
+        await ribbon.processEvent('setShowCommentBox', { value: false })
+
+        expect(arePopupsOpen).toBe(false)
+        await ribbon.processEvent('setShowListsPicker', { value: true })
+        expect(arePopupsOpen).toBe(true)
+        await ribbon.processEvent('setShowListsPicker', { value: false })
+
+        expect(arePopupsOpen).toBe(false)
+        await ribbon.processEvent('setShowTagsPicker', { value: true })
+        expect(arePopupsOpen).toBe(true)
+        await ribbon.processEvent('setShowTagsPicker', { value: false })
+
+        expect(arePopupsOpen).toBe(false)
+        await ribbon.processEvent('setShowSearchBox', { value: true })
+        expect(arePopupsOpen).toBe(true)
+        await ribbon.processEvent('setShowSearchBox', { value: false })
+        expect(arePopupsOpen).toBe(false)
+    })
+
     it('should save a comment that is bookmarked', async ({ device }) => {
         const { ribbon, ribbonLogic } = await setupTest(device)
 
@@ -187,7 +227,7 @@ describe('Ribbon logic', () => {
             commentText: 'comment',
         })
 
-        await ribbon.processEvent('toggleCommentBookmark', null)
+        await ribbon.processEvent('toggleCommentBoxBookmark', null)
         expect(ribbon.state.commentBox).toEqual({
             ...INITIAL_RIBBON_COMMENT_BOX_STATE,
             showCommentBox: true,

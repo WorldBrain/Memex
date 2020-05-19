@@ -331,9 +331,12 @@ export default class Ribbon extends Component<Props, State> {
                                                         env: 'inpage',
                                                         ...this.props
                                                             .commentBox,
+                                                        toggleTagPicker: this
+                                                            .props.commentBox
+                                                            .toggleCommentBoxTagPicker,
                                                         toggleBookmark: this
                                                             .props.commentBox
-                                                            .toggleCommentBookmark,
+                                                            .toggleCommentBoxBookmark,
                                                         updateTags: this.props
                                                             .commentBox
                                                             .updateCommentTags,

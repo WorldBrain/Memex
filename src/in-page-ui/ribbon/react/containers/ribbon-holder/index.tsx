@@ -21,6 +21,7 @@ export default class RibbonHolder extends StatefulUIElement<
     RibbonHolderEvents
 > {
     shouldHide = false
+    isAnyPopupOpen = false
     hideTimeout?: ReturnType<typeof setTimeout>
     ref: HTMLElement
 
@@ -44,6 +45,14 @@ export default class RibbonHolder extends StatefulUIElement<
             'stateChanged',
             this.handleInPageUIStateChange,
         )
+    }
+
+    private setAutoHide = (shouldAutoHide: boolean) => {
+        this.isAnyPopupOpen = !shouldAutoHide
+
+        if (shouldAutoHide) {
+            this.hideRibbonWithTimeout()
+        }
     }
 
     handleInPageUIStateChange: InPageUIEvents['stateChanged'] = ({
@@ -92,7 +101,7 @@ export default class RibbonHolder extends StatefulUIElement<
 
         this.hideTimeout = setTimeout(() => {
             delete this.hideTimeout
-            if (this.shouldHide) {
+            if (this.shouldHide && !this.isAnyPopupOpen) {
                 this.props.inPageUI.hideRibbon()
             }
         }, RIBBON_HIDE_TIMEOUT)
@@ -100,22 +109,6 @@ export default class RibbonHolder extends StatefulUIElement<
 
     hideRibbon = () => {
         this.processEvent('hide', null)
-    }
-
-    maybeRenderRibbon() {
-        // if (this.state.state !== 'visible') {
-        //     return null
-        // }
-        return (
-            <RibbonContainer
-                {...this.props.containerDependencies}
-                state={this.state.state}
-                inPageUI={this.props.inPageUI}
-                isSidebarOpen={this.state.isSidebarOpen}
-                openSidebar={() => this.props.inPageUI.showSidebar()}
-                closeSidebar={() => this.props.inPageUI.hideSidebar()}
-            />
-        )
     }
 
     render() {
@@ -126,7 +119,15 @@ export default class RibbonHolder extends StatefulUIElement<
                     [styles.withSidebar]: this.state.isSidebarOpen,
                 })}
             >
-                {this.maybeRenderRibbon()}
+                <RibbonContainer
+                    {...this.props.containerDependencies}
+                    state={this.state.state}
+                    inPageUI={this.props.inPageUI}
+                    isSidebarOpen={this.state.isSidebarOpen}
+                    openSidebar={() => this.props.inPageUI.showSidebar()}
+                    closeSidebar={() => this.props.inPageUI.hideSidebar()}
+                    setRibbonShouldAutoHide={this.setAutoHide}
+                />
             </div>
         )
     }
