@@ -94,7 +94,6 @@ class TagHolder extends React.Component<Props, State> {
 
                 {this._renderTags()}
                 {this._renderNumberOfRemainingTags()}
-                <span className={styles.plus}>+</span>
             </div>
         )
     }

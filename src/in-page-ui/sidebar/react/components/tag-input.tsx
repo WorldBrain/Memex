@@ -3,6 +3,7 @@ import * as React from 'react'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import TagHolder from './tag-holder'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 export interface Props {
     queryTagSuggestions: (query: string) => Promise<string[]>
@@ -22,27 +23,34 @@ const TagInput = ({
     deleteTag,
     ...props
 }: Props) => {
+    let tagPicker
+
     if (isTagInputActive) {
-        return (
-            <TagPicker
-                onUpdateEntrySelection={props.updateTags}
-                queryEntries={props.queryTagSuggestions}
-                loadDefaultSuggestions={props.fetchInitialTagSuggestions}
-                initialSelectedEntries={async () => tags}
-                onEscapeKeyDown={() => setTagInputActive(false)}
-            />
+        tagPicker = (
+            <HoverBox>
+                <TagPicker
+                    onUpdateEntrySelection={props.updateTags}
+                    queryEntries={props.queryTagSuggestions}
+                    loadDefaultSuggestions={props.fetchInitialTagSuggestions}
+                    initialSelectedEntries={async () => tags}
+                    onEscapeKeyDown={() => setTagInputActive(false)}
+                />
+            </HoverBox>
         )
     }
 
     return (
-        <TagHolder
-            tags={tags}
-            clickHandler={(e) => {
-                e.stopPropagation()
-                setTagInputActive(true)
-            }}
-            deleteTag={deleteTag}
-        />
+        <>
+            <TagHolder
+                tags={tags}
+                clickHandler={(e) => {
+                    e.stopPropagation()
+                    setTagInputActive(true)
+                }}
+                deleteTag={deleteTag}
+            />
+            {tagPicker}
+        </>
     )
 }
 
