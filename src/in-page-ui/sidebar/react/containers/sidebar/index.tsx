@@ -65,8 +65,6 @@ export class SidebarContainer extends StatefulUIElement<
 
         if (this.state.state === 'visible') {
             this.hideSidebar()
-            this.props.inPageUI.hideRibbon()
-            this.props.inPageUI.hideSidebar()
         }
     }
 
@@ -88,6 +86,8 @@ export class SidebarContainer extends StatefulUIElement<
 
     hideSidebar = () => {
         this.processEvent('hide', null)
+        this.props.inPageUI.hideRibbon()
+        this.props.inPageUI.hideSidebar()
     }
 
     handleExternalAction = (event: SidebarActionOptions) => {
@@ -201,7 +201,7 @@ export class SidebarContainer extends StatefulUIElement<
                 pageType={this.state.pageType}
                 showFiltersSidebar={this.state.showFiltersSidebar}
                 showSocialSearch={false}
-                closeSidebar={() => this.props.inPageUI.hideSidebar()}
+                closeSidebar={this.hideSidebar}
                 handleAddPageCommentBtnClick={() =>
                     this.processEvent('addNewPageComment', null)
                 }
