@@ -1,7 +1,8 @@
 import Storex from '@worldbrain/storex'
-import { Windows, Tabs } from 'webextension-polyfill-ts'
+import { Windows, Tabs, Storage } from 'webextension-polyfill-ts'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+
 import TagStorage from './storage'
-import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { SearchIndex } from 'src/search'
 import { pageIsStub, maybeIndexTabs } from 'src/page-indexing/utils'
 import PageStorage from 'src/page-indexing/background/storage'
@@ -10,13 +11,12 @@ import { bindMethod } from 'src/util/functions'
 import { initErrHandler } from 'src/search/storage'
 import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
 import SearchBackground from 'src/search/background'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { Analytics } from 'src/analytics/types'
-import { Storage } from 'webextension-polyfill-ts/src/generated/index'
 import { BrowserSettingsStore } from 'src/util/settings'
+import { updateSuggestionsCache } from '../utils'
 
-const limitSuggestionsReturnLength = 20
-const limitSuggestionsStorageLength = 40
+export const limitSuggestionsReturnLength = 20
+export const limitSuggestionsStorageLength = 40
 
 export default class TagsBackground {
     storage: TagStorage
@@ -96,18 +96,6 @@ export default class TagsBackground {
         return suggestions.slice(0, limit)
     }
 
-    async _updateTagSuggestionsCache({ added }) {
-        let suggestions = (await this.localStorage.get('suggestions')) ?? []
-        const tagIndex = suggestions.indexOf(added)
-        if (tagIndex !== -1) {
-            delete suggestions[tagIndex]
-            suggestions = suggestions.filter(Boolean)
-        }
-        suggestions.unshift(added)
-        suggestions = suggestions.slice(0, limitSuggestionsStorageLength)
-        await this.localStorage.set('suggestions', suggestions)
-    }
-
     async addTagsToOpenTabs(params: {
         name: string
         tabs?: TagTab[]
@@ -165,6 +153,22 @@ export default class TagsBackground {
         })
         await this._updateTagSuggestionsCache({ added: tag })
         return this.storage.addTag({ name: tag, url })
+    }
+
+    async _updateTagSuggestionsCache(args: {
+        added?: string
+        removed?: string
+    }) {
+        return updateSuggestionsCache({
+            ...args,
+            suggestionLimit: limitSuggestionsStorageLength,
+            getCache: async () => {
+                const suggestions = await this.localStorage.get('suggestions')
+                return suggestions ?? []
+            },
+            setCache: (suggestions: string[]) =>
+                this.localStorage.set('suggestions', suggestions),
+        })
     }
 
     async delTag({ tag, url }: { tag: string; url: string }) {

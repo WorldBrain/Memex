@@ -23,6 +23,10 @@ import { Annotation } from 'src/annotations/types'
 import { AnnotationInterface, CreateAnnotationParams } from './types'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
+import { BrowserSettingsStore } from 'src/util/settings'
+import { updateSuggestionsCache } from 'src/tags/utils'
+import { TagsSettings } from 'src/tags/background/types'
+import { limitSuggestionsStorageLength } from 'src/tags/background'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -36,6 +40,7 @@ export default class DirectLinkingBackground {
     private requests: AnnotationRequests
     private socialBg: SocialBG
     private _normalizeUrl: URLNormalizer
+    private localStorage: BrowserSettingsStore<TagsSettings>
 
     constructor(
         private options: {
@@ -91,6 +96,11 @@ export default class DirectLinkingBackground {
                 this,
             ),
         }
+
+        this.localStorage = new BrowserSettingsStore<TagsSettings>(
+            options.browserAPIs.storage.local,
+            { prefix: 'tags_' },
+        )
     }
 
     setupRemoteFunctions() {
@@ -377,7 +387,24 @@ export default class DirectLinkingBackground {
         return this.annotationStorage.getTagsByAnnotationUrl(url)
     }
 
+    async _updateTagSuggestionsCache(args: {
+        added?: string
+        removed?: string
+    }) {
+        return updateSuggestionsCache({
+            ...args,
+            suggestionLimit: limitSuggestionsStorageLength,
+            getCache: async () => {
+                const suggestions = await this.localStorage.get('suggestions')
+                return suggestions ?? []
+            },
+            setCache: (suggestions: string[]) =>
+                this.localStorage.set('suggestions', suggestions),
+        })
+    }
+
     async addTagForAnnotation(_, { tag, url }) {
+        await this._updateTagSuggestionsCache({ added: tag })
         return this.annotationStorage.modifyTags(true)(tag, url)
     }
 
