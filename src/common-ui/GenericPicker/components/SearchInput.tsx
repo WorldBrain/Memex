@@ -45,10 +45,7 @@ export class PickerSearchInput extends React.Component<Props, State> {
 
     render() {
         return (
-            <SearchBox
-                isFocused={this.state.isFocused}
-                id={'collectionSearchBox'}
-            >
+            <SearchBox isFocused={this.state.isFocused} id={'pickerSearchBox'}>
                 {this.props.before}
                 <SearchInput
                     placeholder={
