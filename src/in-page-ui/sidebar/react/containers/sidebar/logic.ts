@@ -559,8 +559,12 @@ export class SidebarContainerLogic extends UILogic<
 
     cleanup() {}
 
-    show: EventHandler<'show'> = () => {
-        return { state: { $set: 'visible' } }
+    show: EventHandler<'show'> = async () => {
+        this.emitMutation({ state: { $set: 'visible' } })
+
+        if (this.options.env === 'inpage') {
+            await this._doSearch(this.getInitialState(), { overwrite: true })
+        }
     }
 
     hide: EventHandler<'hide'> = () => {
