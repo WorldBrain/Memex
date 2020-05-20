@@ -7,6 +7,15 @@ import { setupSidebarUI, destroySidebarUI } from 'src/in-page-ui/sidebar/react'
 
 export const main: SidebarScriptMain = async (dependencies) => {
     const cssFile = browser.extension.getURL(`/content_script_sidebar.css`)
+    let mount: ReturnType<typeof createInPageUI> | null = null
+    const createMount = () => {
+        if (!mount) {
+            mount = createInPageUI('sidebar', cssFile, [
+                IGNORE_CLICK_OUTSIDE_CLASS,
+            ])
+        }
+    }
+    createMount()
 
     dependencies.inPageUI.events.on('componentShouldSetUp', ({ component }) => {
         if (component === 'sidebar') {
@@ -22,9 +31,8 @@ export const main: SidebarScriptMain = async (dependencies) => {
         },
     )
 
-    let mount: ReturnType<typeof createInPageUI> | null = null
     const setUp = () => {
-        mount = createInPageUI('sidebar', cssFile, [IGNORE_CLICK_OUTSIDE_CLASS])
+        createMount()
         setupSidebarUI(mount.rootElement, dependencies, {
             env: 'inpage',
         })
