@@ -1,4 +1,5 @@
 import { ResultWithIndex } from 'src/overview/types'
+import { SidebarContainerState } from './containers/sidebar/logic'
 
 export interface Page {
     url?: string
@@ -17,3 +18,7 @@ export interface ResultsByUrl {
 }
 
 export { ResultWithIndex }
+
+export type StateSelector<ReturnType> = (
+    state: SidebarContainerState,
+) => ReturnType
