@@ -8,6 +8,15 @@ import { setSidebarState, getSidebarState } from 'src/sidebar-overlay/utils'
 
 export const main: RibbonScriptMain = async (options) => {
     const cssFile = browser.extension.getURL(`/content_script_ribbon.css`)
+    let mount: ReturnType<typeof createInPageUI> | null = null
+    const createMount = () => {
+        if (!mount) {
+            mount = createInPageUI('ribbon', cssFile, [
+                IGNORE_CLICK_OUTSIDE_CLASS,
+            ])
+        }
+    }
+    createMount()
 
     options.inPageUI.events.on('componentShouldSetUp', ({ component }) => {
         if (component === 'ribbon') {
@@ -20,9 +29,8 @@ export const main: RibbonScriptMain = async (options) => {
         }
     })
 
-    let mount: ReturnType<typeof createInPageUI> | null = null
     const setUp = () => {
-        mount = createInPageUI('ribbon', cssFile, [IGNORE_CLICK_OUTSIDE_CLASS])
+        createMount()
         setupRibbonUI(mount.rootElement, {
             containerDependencies: {
                 ...options,
