@@ -127,7 +127,7 @@ class TooltipContainer extends React.Component<
         // quick hack, to prevent the tooltip from popping again
         setTimeout(() => {
             this.setState({
-                tooltipState: 'running',
+                tooltipState: 'pristine',
             })
             this.props.inPageUI.hideTooltip()
         }, 400)
