@@ -78,11 +78,10 @@ class ResultItemActions extends PureComponent<Props> {
                                 ? commentFull
                                 : commentEmpty
                         }
-                        className={
-                            this.props.annotsCount > 0
-                                ? styles.commentActive
-                                : styles.comment
-                        }
+                        className={cx(styles.commentBtn, {
+                            [styles.comment]: this.props.annotsCount === 0,
+                            [styles.commentActive]: this.props.annotsCount > 0,
+                        })}
                         onClick={this.props.onCommentBtnClick}
                         tooltipText="Add/View Notes"
                     />

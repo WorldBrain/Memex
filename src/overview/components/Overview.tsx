@@ -28,6 +28,8 @@ import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { SearchInterface } from 'src/search/background/types'
 
+const resultItemStyles = require('src/common-ui/components/result-item.css')
+
 export interface Props {
     pageUrl: string
     init: () => void
@@ -64,14 +66,34 @@ class Overview extends PureComponent<Props> {
         pageUrl: string
         pageTitle?: string
     }) => {
-        if (this.annotationsSidebar.state.state === 'visible') {
-            this.annotationsSidebar.hideSidebar()
-        } else if (this.annotationsSidebar.state.state === 'hidden') {
+        const isAlreadyOpenForOtherPage =
+            args.pageUrl !==
+            this.annotationsSidebar.state.showAnnotsForPage?.url
+
+        if (
+            this.annotationsSidebar.state.state === 'hidden' ||
+            isAlreadyOpenForOtherPage
+        ) {
             await this.annotationsSidebar.processEvent(
                 'togglePageAnnotationsView',
                 args,
             )
             this.annotationsSidebar.showSidebar()
+        } else if (this.annotationsSidebar.state.state === 'visible') {
+            this.annotationsSidebar.hideSidebar()
+        }
+    }
+
+    private handleClickOutsideSidebar: React.MouseEventHandler = (e) => {
+        const wasResultAnnotBtnClicked = (e.target as HTMLElement)?.classList?.contains(
+            resultItemStyles.commentBtn,
+        )
+
+        if (
+            !wasResultAnnotBtnClicked &&
+            this.annotationsSidebar.state.state === 'visible'
+        ) {
+            this.annotationsSidebar.hideSidebar()
         }
     }
 
@@ -135,6 +157,7 @@ class Overview extends PureComponent<Props> {
                     inPageUI={this.mockInPageUI as any}
                     setRef={this.setAnnotsSidebarRef}
                     highlighter={this.mockHighlighter as any}
+                    onClickOutside={this.handleClickOutsideSidebar}
                     searchResultLimit={10}
                 />
                 <Tooltip />

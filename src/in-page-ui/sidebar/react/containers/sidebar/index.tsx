@@ -17,6 +17,8 @@ import {
 } from 'src/in-page-ui/shared-state/types'
 
 export interface SidebarContainerProps extends SidebarContainerOptions {
+    /** If defined, overrides the default outside click behavior. */
+    onClickOutside?: React.MouseEventHandler
     setRef?: (logic: SidebarContainer) => void
 }
 
@@ -58,6 +60,10 @@ export class SidebarContainer extends StatefulUIElement<
     }
 
     handleClickOutside = (e) => {
+        if (this.props.onClickOutside) {
+            return this.props.onClickOutside(e)
+        }
+
         // Do not close the sidebar if clicked on a highlight in the page
         if (e.target?.dataset?.annotation) {
             return
