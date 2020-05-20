@@ -138,6 +138,15 @@ export class HighlightInteraction implements HighlightInteractionInterface {
             ;(highlightEl as HTMLElement).dataset.annotation = highlight.url
 
             const clickListener = async (e) => {
+                // Let anchors behave as normal
+                const parentNode = e.target?.parentNode
+                if (
+                    parentNode?.nodeName?.toLowerCase() === 'a' &&
+                    parentNode?.href.length
+                ) {
+                    return
+                }
+
                 e.preventDefault()
                 if (!e.target.dataset.annotation) {
                     return
