@@ -54,6 +54,12 @@
             "@worldbrain/storex-hub/lib/*": [
                 "external/@worldbrain/storex-hub/ts/*"
             ],
+            "@worldbrain/storex-hub-interfaces": [
+                "external/@worldbrain/storex-hub-interfaces/ts"
+            ],
+            "@worldbrain/storex-hub-interfaces/lib/*": [
+                "external/@worldbrain/storex-hub-interfaces/ts/*"
+            ],
             "@worldbrain/memex-storage": [
                 "external/@worldbrain/memex-storage/ts"
             ],
