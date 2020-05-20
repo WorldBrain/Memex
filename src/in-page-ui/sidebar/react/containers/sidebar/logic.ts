@@ -116,7 +116,6 @@ export type SidebarContainerEvents = UIEvent<{
         commentText: string
         tags: string[]
         bookmarked: boolean
-        skipPageIndexing?: boolean
     }
     cancelNewPageComment: null
     toggleNewPageCommentBookmark: null
@@ -607,7 +606,11 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        const pageUrl = this.options.currentTab.url
+        const pageUrl =
+            this.options.env === 'overview'
+                ? previousState.showAnnotsForPage?.url
+                : this.options.currentTab.url
+
         const dummyAnnotation = {
             pageUrl,
             comment,
@@ -637,11 +640,12 @@ export class SidebarContainerLogic extends UILogic<
                 {
                     url: pageUrl,
                     bookmarked: event.bookmarked,
+                    title: previousState.showAnnotsForPage?.title,
                     body: dummyAnnotation.body,
                     comment: dummyAnnotation.comment,
                     selector: dummyAnnotation.selector,
                 },
-                { skipPageIndexing: event.skipPageIndexing },
+                { skipPageIndexing: this.options.env === 'overview' },
             )
 
             this.emitMutation({

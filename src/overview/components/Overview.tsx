@@ -55,6 +55,7 @@ class Overview extends PureComponent<Props> {
     get mockHighlighter() {
         return {
             removeTempHighlights: () => undefined,
+            renderHighlight: () => undefined,
         }
     }
 

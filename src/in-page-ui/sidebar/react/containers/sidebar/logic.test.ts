@@ -577,7 +577,6 @@ describe('SidebarContainerLogic', () => {
                 tags: [],
                 bookmarked: false,
                 anchor: {} as any,
-                skipPageIndexing: true,
             })
             expect(sidebar.state.annotations.length).toBe(1)
             expect(sidebar.state.annotations).toEqual([
