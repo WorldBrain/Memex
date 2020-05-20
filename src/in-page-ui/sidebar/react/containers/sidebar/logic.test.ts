@@ -45,6 +45,7 @@ const setupLogicHelper = async ({
     const highlighter = {
         removeAnnotationHighlights: () => undefined,
         removeTempHighlights: () => undefined,
+        renderHighlight: () => undefined,
     } as any
 
     const currentTab = {
