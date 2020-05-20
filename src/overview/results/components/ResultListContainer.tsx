@@ -255,6 +255,9 @@ class ResultListContainer extends PureComponent<Props> {
                 isOverview
                 tags={doc.tags}
                 lists={doc.lists}
+                arePickersOpen={
+                    doc.shouldDisplayListPopup || doc.shouldDisplayTagPopup
+                }
                 setTagButtonRef={this.setTagButtonRef}
                 setListButtonRef={this.setListButtonRef}
                 tagHolder={this.renderTagHolder(doc, index)}
