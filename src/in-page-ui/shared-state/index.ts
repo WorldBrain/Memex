@@ -215,9 +215,11 @@ export class InPageUI implements InPageUIInterface {
             return false
         }
 
-        await highlighter.renderHighlights(
-            highlightables,
-            annotations.toggleSidebarOverlay,
+        await highlighter.renderHighlights(highlightables, ({ activeUrl }) =>
+            this.showSidebar({
+                annotationUrl: activeUrl,
+                action: 'show_annotation',
+            }),
         )
         this.areHighlightsShown = true
         return this.areHighlightsShown

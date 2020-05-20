@@ -663,6 +663,11 @@ export class SidebarContainerLogic extends UILogic<
                 })
             }
 
+            // No need to attempt to render annots that don't have a highlight
+            if (!dummyAnnotation.body?.length) {
+                return
+            }
+
             this.options.highlighter.removeTempHighlights()
             await this.options.highlighter.renderHighlight(
                 dummyAnnotation,
@@ -845,6 +850,10 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
+        this.emitMutation({
+            activeAnnotationUrl: { $set: event.annotationUrl },
+        })
+
         const { url } = this.options.currentTab
         const normalizedUrl = this.options.normalizeUrl(url)
         let annotation: Annotation
@@ -889,7 +898,8 @@ export class SidebarContainerLogic extends UILogic<
             })
         }
 
-        await this.options.inPageUI.showHighlights()
+        this.options.highlighter.removeHighlights(true)
+        this.options.highlighter.makeHighlightDark({ url: event.annotationUrl })
     }
 
     editAnnotation: EventHandler<'editAnnotation'> = async ({
