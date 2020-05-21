@@ -670,7 +670,7 @@ export class SidebarContainerLogic extends UILogic<
 
             this.options.highlighter.removeTempHighlights()
             await this.options.highlighter.renderHighlight(
-                dummyAnnotation,
+                { ...dummyAnnotation, url: annotationUrl },
                 undefined,
                 undefined,
                 () => {
