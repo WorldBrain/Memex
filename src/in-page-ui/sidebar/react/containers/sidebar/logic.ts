@@ -222,9 +222,7 @@ const INITIAL_COMMENT_BOX_STATE: SidebarContainerState['commentBox'] = {
 export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
     SidebarContainerEvents
->
-// implements UIEventHandlers<SidebarContainerState, SidebarContainerEvents>
-{
+> {
     constructor(private options: SidebarContainerOptions) {
         super()
     }

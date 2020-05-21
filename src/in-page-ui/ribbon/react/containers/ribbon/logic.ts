@@ -13,8 +13,8 @@ export type PropKeys<Base, ValueCondition> = keyof Pick<
 >
 type ValuesOf<Props> = Omit<Props, PropKeys<Props, Function>> // tslint:disable-line
 type HandlersOf<Props> = {
+    // tslint:disable-next-line
     [Key in PropKeys<Props, Function>]: Props[Key] extends (
-        // tslint:disable-line
         value: infer Arg,
     ) => void
         ? { value: Arg }

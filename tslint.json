@@ -61,13 +61,6 @@
         "no-unused-expression": false,
         "no-var-requires": false,
         "object-literal-sort-keys": false,
-        "one-line": [
-            true,
-            "check-catch",
-            "check-else",
-            "check-open-brace",
-            "check-whitespace"
-        ],
         "only-arrow-functions": false,
         "ordered-imports": false,
         "prefer-const": true,

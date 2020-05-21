@@ -29,9 +29,7 @@ type EventHandler<EventName extends keyof RibbonHolderEvents> = UIEventHandler<
 export class RibbonHolderLogic extends UILogic<
     RibbonHolderState,
     RibbonHolderEvents
->
-// implements UIEventHandlers<RibbonHolderState, RibbonHolderEvents>
-{
+> {
     constructor(private dependencies: RibbonHolderDependencies) {
         super()
     }

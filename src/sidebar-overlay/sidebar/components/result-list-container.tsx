@@ -223,9 +223,9 @@ class ResultListContainer extends PureComponent<Props, State> {
         )
     }
 
-    private renderTagHolder = ({ tags }, resultIndex) => (
+    private renderTagHolder = ({ tags: tagsToRender }, resultIndex) => (
         <TagHolder
-            tags={[...new Set([...tags])]}
+            tags={[...new Set([...tagsToRender])]}
             maxTagsLimit={constants.SHOWN_TAGS_LIMIT}
             setTagManagerRef={this.trackDropdownRef}
             handlePillClick={this.props.handlePillClick}
@@ -326,8 +326,11 @@ class ResultListContainer extends PureComponent<Props, State> {
 
     private renderResultItems() {
         if (this.props.isNewSearchLoading) {
-            return <div className={styles.loadingBox}><LoadingIndicator /></div>
-
+            return (
+                <div className={styles.loadingBox}>
+                    <LoadingIndicator />
+                </div>
+            )
         }
 
         const resultItems = this.resultsStateToItems()
@@ -345,7 +348,11 @@ class ResultListContainer extends PureComponent<Props, State> {
 
         // Add loading spinner to the list end, if loading
         if (this.props.isLoading) {
-            resultItems.push(<div className={styles.loadingBox}><LoadingIndicator key="loading" /></div>)
+            resultItems.push(
+                <div className={styles.loadingBox}>
+                    <LoadingIndicator key="loading" />
+                </div>,
+            )
         }
 
         return resultItems
