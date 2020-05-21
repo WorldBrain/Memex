@@ -898,8 +898,9 @@ export class SidebarContainerLogic extends UILogic<
             })
         }
 
-        this.options.highlighter.removeHighlights(true)
-        this.options.highlighter.makeHighlightDark({ url: event.annotationUrl })
+        this.options.highlighter.highlightAndScroll({
+            url: event.annotationUrl,
+        } as any)
     }
 
     editAnnotation: EventHandler<'editAnnotation'> = async ({

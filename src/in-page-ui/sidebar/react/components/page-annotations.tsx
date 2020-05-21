@@ -36,22 +36,7 @@ export default class PageAnnotations extends React.Component<
     }
 
     private renderList() {
-        const {
-            annotationEventHandlers: annotationProps,
-            tagsEventProps,
-            activeAnnotationUrl,
-        } = this.props
-
-        let annotations = this.props.annotations
-        if (activeAnnotationUrl) {
-            annotations = annotations.reduce((list, annotation) => {
-                if (annotation.url === activeAnnotationUrl) {
-                    return [annotation, ...list]
-                }
-                return [...list, annotation]
-            }, [])
-        }
-        const annots = annotations.map((annot, i) => (
+        const annots = this.props.annotations.map((annot, i) => (
             <AnnotationBox
                 key={i}
                 env={this.props.env}
@@ -59,8 +44,8 @@ export default class PageAnnotations extends React.Component<
                 mode={this.props.annotationModes[annot.url] || 'default'}
                 displayCrowdfunding={false}
                 {...annot}
-                {...annotationProps}
-                {...tagsEventProps}
+                {...this.props.annotationEventHandlers}
+                {...this.props.tagsEventProps}
                 isActive={this.props.activeAnnotationUrl === annot.url}
                 isHovered={this.props.hoverAnnotationUrl === annot.url}
             />
