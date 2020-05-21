@@ -7,7 +7,6 @@ import {
     SidebarContainerLogic,
     SidebarContainerEvents,
 } from './logic'
-import * as selectors from './selectors'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Sidebar from '../../components/sidebar'
 import { Anchor } from 'src/highlighting/types'
@@ -67,24 +66,6 @@ export class SidebarContainer extends StatefulUIElement<
         // Do not close the sidebar if clicked on a highlight in the page
         if (e.target?.dataset?.annotation) {
             return
-        }
-
-        const {
-            areTagsOpen,
-            areListsOpen,
-            ...details
-        } = selectors.areAnyPickersOpen(this.state)
-
-        if (areTagsOpen && details.isCommentBox) {
-            return this.processEvent('toggleNewPageCommentTagPicker', null)
-        } else if (areTagsOpen && details.pageUrl) {
-            return this.processEvent('togglePageTagPicker', {
-                pageUrl: details.pageUrl,
-            })
-        } else if (areListsOpen && details.pageUrl) {
-            return this.processEvent('togglePageListPicker', {
-                pageUrl: details.pageUrl,
-            })
         }
 
         if (this.state.state === 'visible') {
