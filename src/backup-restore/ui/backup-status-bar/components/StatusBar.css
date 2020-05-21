@@ -100,8 +100,5 @@
     mask-image: url('/img/removeIcon.svg');
     background-color: color12;
     mask-size: 16px;
-
-    &: hover {
-        cursor: pointer;
-    }
+    cursor: pointer;
 }
