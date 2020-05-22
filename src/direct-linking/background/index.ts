@@ -147,26 +147,30 @@ export default class DirectLinkingBackground {
         const highlightables = pageAnnotations.filter((annot) => annot.selector)
 
         const listener = async (tabId, changeInfo) => {
+            // Necessary to insert the ribbon/sidebar in case the user has turned  it off.
             if (tabId === activeTab.id && changeInfo.status === 'complete') {
-                // Necessary to insert the ribbon/sidebar in case the user has turned
-                // it off.
+                try {
+                    // TODO: This wait is a hack to mitigate trying to use the remote function `showSidebar` before it's ready
+                    // it should be registered in the tab setup, but is not available immediately on this tab onUpdate handler
+                    // since it is fired on the page complete, not on our content script setup complete.
+                    await new Promise((resolve) => setTimeout(resolve, 500))
 
-                // TODO: This wait is a hack to mitigate trying to use the remote function `showSidebar` before it's ready
-                // it should be registered in the tab setup, but is not available immediately on this tab onUpdate handler
-                // since it is fired on the page complete, not on our content script setup complete.
-                await new Promise((resolve) => setTimeout(resolve, 500))
-
-                await runInTab<InPageUIContentScriptRemoteInterface>(
-                    tabId,
-                ).showSidebar({
-                    annotationUrl: annotation.url,
-                    action: 'show_annotation',
-                })
-                await runInTab<InPageUIContentScriptRemoteInterface>(
-                    tabId,
-                ).goToHighlight(annotation, highlightables)
-
-                this.options.browserAPIs.tabs.onUpdated.removeListener(listener)
+                    await runInTab<InPageUIContentScriptRemoteInterface>(
+                        tabId,
+                    ).showSidebar({
+                        annotationUrl: annotation.url,
+                        action: 'show_annotation',
+                    })
+                    await runInTab<InPageUIContentScriptRemoteInterface>(
+                        tabId,
+                    ).goToHighlight(annotation, highlightables)
+                } catch (err) {
+                    throw err
+                } finally {
+                    this.options.browserAPIs.tabs.onUpdated.removeListener(
+                        listener,
+                    )
+                }
             }
         }
         this.options.browserAPIs.tabs.onUpdated.addListener(listener)
