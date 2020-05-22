@@ -1,4 +1,5 @@
 import * as React from 'react'
+import ReactDOM from 'react-dom'
 import onClickOutside from 'react-onclickoutside'
 
 import {
@@ -58,6 +59,29 @@ export class SidebarContainer extends StatefulUIElement<
         )
     }
 
+    private getDocument(): Document {
+        const containerNode = ReactDOM.findDOMNode(this)
+        return containerNode.getRootNode() as Document
+    }
+
+    private ensureAnnotationIsVisible(url: string) {
+        const annotationBoxNode = this.getDocument().getElementById(url)
+
+        if (!annotationBoxNode) {
+            return
+        }
+
+        annotationBoxNode.scrollIntoView({
+            block: 'center',
+            behavior: 'smooth',
+        })
+    }
+
+    private activateAnnotation(url: string) {
+        this.processEvent('setActiveAnnotationUrl', url)
+        this.ensureAnnotationIsVisible(url)
+    }
+
     handleClickOutside = (e) => {
         if (this.props.onClickOutside) {
             return this.props.onClickOutside(e)
@@ -105,7 +129,7 @@ export class SidebarContainer extends StatefulUIElement<
             }
         }
         if (event.action === 'show_annotation') {
-            this.processEvent('setActiveAnnotationUrl', event.annotationUrl)
+            this.activateAnnotation(event.annotationUrl)
         }
         this.forceUpdate()
     }
