@@ -15,13 +15,16 @@ class Modal extends PureComponent<Props> {
     static propTypes = {}
 
     render() {
+        const { onClose, large, ...props } = this.props
+
         return (
             <Overlay
                 innerClassName={cx({
-                    [styles.popup]: !this.props.large,
-                    [styles.popupLarge]: this.props.large,
+                    [styles.popup]: !large,
+                    [styles.popupLarge]: large,
                 })}
-                onClick={this.props.onClose}
+                onClick={onClose}
+                {...props}
             >
                 {this.props.onClose && (
                     <CloseButton

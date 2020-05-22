@@ -127,6 +127,7 @@ export default class Sidebar extends React.Component<Props> {
                         this.props.pageDeleteDialog.handleDeletePageModalClose
                     }
                     message="Delete page and related notes"
+                    requiresExplicitStyles
                 />
                 <DragElement />
             </React.Fragment>
@@ -141,7 +142,11 @@ export default class Sidebar extends React.Component<Props> {
             return this.renderResults()
         }
         if (this.props.searchLoadState === 'running') {
-            return <div className={styles.loadingBox}><LoadingIndicator /></div>
+            return (
+                <div className={styles.loadingBox}>
+                    <LoadingIndicator />
+                </div>
+            )
         }
 
         return (

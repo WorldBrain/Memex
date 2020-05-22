@@ -8,6 +8,7 @@ export interface Props {
     rootElId?: string
     className?: string
     innerClassName?: string
+    requiresExplicitStyles?: boolean
     skipIgnoreClickOutside?: boolean
     ignoreClickOutsideClassName?: string
     onClick?: MouseEventHandler
@@ -48,22 +49,29 @@ class Overlay extends Component<Props> {
 
     handleInnerClick = (event) => event.stopPropagation()
 
-    render() {
-        const { className, innerClassName, onClick, children } = this.props
+    renderMain() {
+        const { className, innerClassName, children } = this.props
 
-        return ReactDOM.createPortal(
-            <StyleSheetManager target={this.overlayRoot}>
-                <OuterDiv className={className} onClick={this.handleClick}>
-                    <div
-                        className={innerClassName}
-                        onClick={this.handleInnerClick}
-                    >
-                        {children}
-                    </div>
-                </OuterDiv>
-            </StyleSheetManager>,
-            this.overlayRoot,
+        return (
+            <OuterDiv className={className} onClick={this.handleClick}>
+                <div className={innerClassName} onClick={this.handleInnerClick}>
+                    {children}
+                </div>
+            </OuterDiv>
         )
+    }
+
+    render() {
+        if (this.props.requiresExplicitStyles) {
+            return ReactDOM.createPortal(
+                <StyleSheetManager target={this.overlayRoot}>
+                    {this.renderMain()}
+                </StyleSheetManager>,
+                this.overlayRoot,
+            )
+        }
+
+        return ReactDOM.createPortal(this.renderMain(), this.overlayRoot)
     }
 }
 

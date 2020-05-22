@@ -1,16 +1,15 @@
 import React, { PureComponent } from 'react'
 import cx from 'classnames'
 
-import Modal from './Modal'
+import Modal, { Props as ModalProps } from './Modal'
 import Spinner from './LoadingIndicator'
 
 const styles = require('./ConfirmModal.css')
 
-export interface Props {
+export interface Props extends ModalProps {
     isShown: boolean
     message: string
     isLoading?: boolean
-    onClose: () => void
 }
 
 class ConfirmModal extends PureComponent<Props> {
@@ -20,7 +19,7 @@ class ConfirmModal extends PureComponent<Props> {
         }
 
         return (
-            <Modal onClose={this.props.onClose}>
+            <Modal {...this.props}>
                 <div
                     className={cx(styles.textContainer, {
                         [styles.textContainerLoading]: this.props.isLoading,
