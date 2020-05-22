@@ -44,6 +44,7 @@ export interface Props extends Partial<SocialPage> {
     onCommentBtnClick: MouseEventHandler
     onToggleBookmarkClick: MouseEventHandler
     handleCrossRibbonClick: MouseEventHandler
+    goToAnnotation: (annotation: any) => void
     resetUrlDragged: () => void
     setUrlDragged: (url: string) => void
     setTagButtonRef: (el: HTMLElement) => void
@@ -102,6 +103,7 @@ class ResultItem extends PureComponent<Props> {
                 openAnnotationSidebar={this.props.onCommentBtnClick}
                 pageUrl={this.hrefToPage}
                 annotations={this.props.annotations}
+                goToAnnotation={this.props.goToAnnotation}
             />
         )
     }

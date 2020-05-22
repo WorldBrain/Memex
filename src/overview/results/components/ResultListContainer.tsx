@@ -4,7 +4,7 @@ import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
 import { selectors as opt } from 'src/options/settings'
-import { LoadingIndicator, ResultItem, Tooltip } from 'src/common-ui/components'
+import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
 import ResultList from './ResultList'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from '../constants'
@@ -73,6 +73,7 @@ export interface DispatchProps {
 }
 
 export interface OwnProps {
+    goToAnnotation: (annotation: any) => void
     toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
 }
 
@@ -285,6 +286,7 @@ class ResultListContainer extends PureComponent<Props> {
                     this.props.activeSidebarIndex === index
                 }
                 isSocial={isSocialPost}
+                goToAnnotation={this.props.goToAnnotation}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
             />

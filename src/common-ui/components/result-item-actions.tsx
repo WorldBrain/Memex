@@ -17,7 +17,7 @@ const commentEmpty = browser.extension.getURL('/img/comment_empty.svg')
 const commentFull = browser.extension.getURL('/img/comment_full.svg')
 const deleteItem = browser.extension.getURL('/img/trash.svg')
 
-class ResultItemActions extends PureComponent<Props> {
+class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
     get bookmarkClass() {
         return cx(styles.button, {
             [styles.bookmark]: this.props.hasBookmark,
