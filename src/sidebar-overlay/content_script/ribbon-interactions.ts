@@ -1,20 +1,13 @@
 import retargetEvents from 'react-shadow-dom-retarget-events'
 import { browser } from 'webextension-polyfill-ts'
 
-import {
-    makeRemotelyCallable,
-    makeRemotelyCallableType,
-} from 'src/util/webextensionRPC'
-import { setupRibbonAndSidebarUI, destroyRibbonAndSidebarUI } from '..'
+import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
+import { destroyRibbonAndSidebarUI } from '..'
 import { getSidebarState } from '../utils'
 import { getTooltipState } from 'src/in-page-ui/tooltip/utils'
 import { createRootElement, destroyRootElement } from './rendering'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
-import {
-    insertTooltip,
-    removeTooltip,
-} from 'src/in-page-ui/tooltip/content_script/interactions'
 import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
 
 let target = null /* Target container for the Ribbon. */
