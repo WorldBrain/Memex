@@ -1,0 +1,92 @@
+@value colors: 'src/common-ui/colors.css';
+@value color6 from colors;
+
+.annotationBoxDefaultFooter {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.buttonContainer {
+    display: flex;
+    flex-direction: row;
+    margin: 0 7px 3px;
+    z-index: 0;
+}
+
+.timestamp {
+    margin-right: auto;
+    margin-left: 12px;
+    font-size: 12px;
+    font-weight: 400;
+    color: #72727f;
+
+    & .lastEdit {
+        font-weight: 600;
+        color: #72727f;
+        margin: 0px;
+    }
+}
+
+.commonIcon {
+    border: none;
+    z-index: 2500;
+    min-width: 20px;
+    height: 16px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    outline: none;
+    background-position: center center;
+    border-radius: 3px;
+    background-size: contain;
+    max-width: 30px;
+    width: fill-available;
+    margin-left: 4px;
+    opacity: 0.3;
+}
+
+.editIcon {
+    background-image: url('/img/comment_edit.svg');
+
+    &:hover {
+        opacity: 0.6;
+    }
+}
+
+.trashIcon {
+    background-image: url('/img/trash.svg');
+
+    &:hover {
+        opacity: 0.6;
+    }
+}
+
+.goToPageIcon {
+    background-image: url('/img/open.svg');
+
+    &:hover {
+        opacity: 0.6;
+    }
+}
+
+.bookmark {
+    background-image: url('/img/star_full.svg');
+    opacity: 1;
+}
+
+.notBookmark {
+    background-image: url('/img/star_empty.svg');
+
+    &:hover {
+        opacity: 0.6;
+    }
+}
+
+.tag {
+    background-image: url('/img/tag_empty.svg');
+
+    &:hover {
+        opacity: 0.6;
+    }
+}

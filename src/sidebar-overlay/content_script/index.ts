@@ -3,7 +3,7 @@ import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import * as interactions from './ribbon-interactions'
 import { getSidebarState } from '../utils'
 import AnnotationsManager from 'src/annotations/annotations-manager'
-import { runOnScriptShutdown } from 'src/content-tooltip/utils'
+import { runOnScriptShutdown } from 'src/in-page-ui/tooltip/utils'
 
 const initRibbonAndSidebar = async ({
     annotationsManager,

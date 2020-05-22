@@ -1,6 +1,7 @@
-import React, { PureComponent } from 'react'
+import React, { MouseEventHandler } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
+import { runInBackground } from 'src/util/webextensionRPC'
 import NotificationContainer, {
     selectors as notifs,
 } from '../../../notifications'
@@ -15,6 +16,8 @@ import * as selectors from '../selectors'
 import { RootState } from 'src/options/types'
 import { features } from 'src/util/remote-functions-background'
 import MobileAppMessage from './mobile-app-message'
+import { AnnotationInterface } from 'src/direct-linking/background/types'
+import { Annotation } from 'src/annotations/types'
 
 const styles = require('./ResultList.css')
 
@@ -36,7 +39,9 @@ export interface DispatchProps {
     toggleAreAnnotationsExpanded: (e: React.SyntheticEvent) => void
 }
 
-export interface OwnProps {}
+export interface OwnProps {
+    toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
+}
 
 export type Props = StateProps & DispatchProps & OwnProps
 
@@ -49,9 +54,24 @@ class ResultsContainer extends React.Component<Props, State> {
         showSocialSearch: false,
     }
 
+    private annotations: AnnotationInterface<'caller'>
+
+    constructor(props) {
+        super(props)
+
+        this.annotations = runInBackground<AnnotationInterface<'caller'>>()
+    }
+
     async componentDidMount() {
         this.setState({
             showSocialSearch: await features.getFeature('SocialIntegration'),
+        })
+    }
+
+    private goToAnnotation = async (annotation: Annotation) => {
+        await this.annotations.goToAnnotationFromSidebar({
+            url: annotation.pageUrl,
+            annotation,
         })
     }
 
@@ -119,7 +139,10 @@ class ResultsContainer extends React.Component<Props, State> {
                         {this.props.totalResultCount} results
                     </ResultsMessage>
                 )}
-                <ResultList />
+                <ResultList
+                    {...this.props}
+                    goToAnnotation={this.goToAnnotation}
+                />
             </React.Fragment>
         )
     }
@@ -142,7 +165,7 @@ class ResultsContainer extends React.Component<Props, State> {
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     showInbox: notifs.showInbox(state),
     noResults: selectors.noResults(state),
     isBadTerm: selectors.isBadTerm(state),
@@ -156,8 +179,10 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     showOnboardingMessage: selectors.showOnboardingMessage(state),
 })
 
-const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
-    toggleAreAnnotationsExpanded: e => {
+const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
+    dispatch,
+) => ({
+    toggleAreAnnotationsExpanded: (e) => {
         e.preventDefault()
         dispatch(actions.toggleAreAnnotationsExpanded())
     },

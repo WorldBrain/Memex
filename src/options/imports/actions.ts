@@ -51,7 +51,7 @@ export const setBlobUrl = createAction('imports/setBlobUrl')
  * Responds to messages sent from background script over the runtime connection by dispatching
  * appropriate redux actions. Non-handled messages are ignored.
  */
-const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
+const getCmdMessageHandler = (dispatch) => ({ cmd, ...payload }) => {
     switch (cmd) {
         case CMDS.INIT:
             dispatch(initEstimateCounts(payload))
@@ -80,7 +80,7 @@ let port
 /**
  * Handles initing the imports runtime connection with the background script's batch import logic.
  */
-export const init = () => async dispatch => {
+export const init = () => async (dispatch) => {
     port = window['browser'].runtime.connect({
         name: IMPORT_CONN_NAME,
     })
@@ -94,11 +94,9 @@ export const init = () => async dispatch => {
  * @param {string} cmd The command to send over runtime connection's port.
  * @param {() => void} [cb] Opt. callback to run before any dispatch.
  */
-const makePortMessagingThunk = ({
-    actionCreator,
-    cmd,
-    cb = () => {},
-}) => payload => dispatch => {
+const makePortMessagingThunk = ({ actionCreator, cmd, cb = () => {} }) => (
+    payload,
+) => (dispatch) => {
     cb()
     dispatch(actionCreator(payload))
     port.postMessage({

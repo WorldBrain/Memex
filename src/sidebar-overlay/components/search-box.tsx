@@ -29,7 +29,7 @@ class SearchBox extends PureComponent<Props> {
                     onChange={this.props.onSearchChange}
                     specialHandlers={[
                         {
-                            test: e => e.key === 'Enter',
+                            test: (e) => e.key === 'Enter',
                             handle: this.props.onSearchEnter,
                         },
                     ]}

@@ -2,7 +2,7 @@ import { Runtime, WebNavigation, Tabs, Browser } from 'webextension-polyfill-ts'
 
 import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { mapChunks } from 'src/util/chunk'
-import initPauser from './pause-logging'
+import initPauser, { getState as getPauseState } from './pause-logging'
 import { updateVisitInteractionData } from './util'
 import { TabManager } from './tab-manager'
 import { TabChangeListener, ActivityLoggerInterface } from './types'
@@ -49,6 +49,7 @@ export default class ActivityLoggerBackground {
         this.webNavAPI = options.browserAPIs.webNavigation
         this.searchIndex = options.searchIndex
         this.remoteFunctions = {
+            isLoggingPaused: this.isLoggingPaused.bind(this),
             toggleLoggingPause: this.toggleLoggingPause,
             fetchTab: bindMethod(this.tabManager, 'getTabState'),
             fetchTabByUrl: bindMethod(this.tabManager, 'getTabStateByUrl'),
@@ -122,6 +123,12 @@ export default class ActivityLoggerBackground {
                 browserTab.url,
             ),
         })
+    }
+
+    private async isLoggingPaused(): Promise<boolean> {
+        const result = await getPauseState()
+
+        return result !== false
     }
 
     /**

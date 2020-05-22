@@ -4,7 +4,10 @@ import GenericPickerLogic, {
     GenericPickerState,
 } from 'src/common-ui/GenericPicker/logic'
 
-export type TagPickerDependencies = GenericPickerDependencies
+export interface TagPickerDependencies extends GenericPickerDependencies {
+    onClickOutside?: () => void
+}
+
 export type TagPickerEvent = GenericPickerEvent
 export type TagPickerState = GenericPickerState
 

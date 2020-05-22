@@ -6,7 +6,6 @@ import { MapDispatchToProps } from 'src/sidebar-overlay/types'
 import * as actions from 'src/sidebar-overlay/sidebar/actions'
 import AnnotationBox from 'src/sidebar-overlay/annotation-box'
 
-import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
 import { deleteAnnotation, editAnnotation } from 'src/annotations/actions'
 import { Annotation } from 'src/annotations/types'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
@@ -25,6 +24,7 @@ interface OwnProps {
     /** Opens the annotation sidebar with all of the annotations */
     openAnnotationSidebar: MouseEventHandler
     highlighter: HighlightInteractionInterface
+    goToAnnotation: (annotation: Annotation) => void
 }
 
 interface DispatchProps {
@@ -54,8 +54,6 @@ class AnnotationList extends Component<Props, State> {
         prevIsExpandedOverride: this.props.isExpandedOverride,
         annotations: this.props.annotations,
     }
-
-    private goToAnnotation = goToAnnotation(this.props.pageUrl)
 
     /**
      * We compare if the previous isExpandedOverride prop is different from
@@ -89,7 +87,7 @@ class AnnotationList extends Component<Props, State> {
         // Find the annotation in state and update it
         const { annotations } = this.state
 
-        const index = annotations.findIndex(annot => annot.url === url)
+        const index = annotations.findIndex((annot) => annot.url === url)
         const annotation: Annotation = annotations[index]
 
         if (
@@ -123,7 +121,7 @@ class AnnotationList extends Component<Props, State> {
         // Delete the annotation in the state too
         const { annotations } = this.state
         const index = this.state.annotations.findIndex(
-            annot => annot.url === url,
+            (annot) => annot.url === url,
         )
         const newAnnotations = [
             ...annotations.slice(0, index),
@@ -139,7 +137,7 @@ class AnnotationList extends Component<Props, State> {
 
         const { annotations } = this.state
 
-        const index = annotations.findIndex(annot => annot.url === url)
+        const index = annotations.findIndex((annot) => annot.url === url)
         const annotation: Annotation = annotations[index]
         const newAnnotations: Annotation[] = [
             ...annotations.slice(0, index),
@@ -157,11 +155,11 @@ class AnnotationList extends Component<Props, State> {
     ) => {
         e.preventDefault()
         e.stopPropagation()
-        this.goToAnnotation(annotation, this.props.env)
+        this.props.goToAnnotation(annotation)
     }
 
     private renderAnnotations() {
-        return this.state.annotations.map(annot => (
+        return this.state.annotations.map((annot) => (
             <AnnotationBox
                 key={annot.url}
                 className={cx({
@@ -213,16 +211,15 @@ class AnnotationList extends Component<Props, State> {
     }
 }
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+) => ({
     handleEditAnnotation: (url, comment, tags) =>
         dispatch(editAnnotation(url, comment, tags)),
-    handleDeleteAnnotation: url => {
+    handleDeleteAnnotation: (url) => {
         dispatch(deleteAnnotation(url))
     },
-    handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
+    handleBookmarkToggle: (url) => dispatch(actions.toggleBookmark(url)),
 })
 
 export default withSidebarContext(

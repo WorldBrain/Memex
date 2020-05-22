@@ -48,7 +48,7 @@ export default class TagStorage extends StorageModule {
     }
 
     async addTags({ name, urls }: { name: string; urls: Array<string> }) {
-        await Promise.all(urls.map(url => this.addTag({ name, url })))
+        await Promise.all(urls.map((url) => this.addTag({ name, url })))
     }
 
     async delTag({ name, url }: { name: string; url: string }) {
@@ -57,6 +57,6 @@ export default class TagStorage extends StorageModule {
     }
 
     async delTags({ name, urls }: { name: string; urls: Array<string> }) {
-        await Promise.all(urls.map(url => this.delTag({ name, url })))
+        await Promise.all(urls.map((url) => this.delTag({ name, url })))
     }
 }

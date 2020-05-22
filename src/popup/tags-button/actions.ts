@@ -20,7 +20,7 @@ export const deleteTag = createAction<string>('tags/deleteTag')
 export const addTagToPage = (
     tag: string,
     { fromRibbon = false } = {},
-) => async dispatch => {
+) => async (dispatch) => {
     const action = fromRibbon
         ? 'createForPageViaRibbon'
         : 'createForPageViaPopup'

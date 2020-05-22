@@ -13,7 +13,7 @@ import cx from 'classnames'
 
 const styles = require('./result-item.css')
 
-class SocialResultItem extends PureComponent<Props> {
+class SocialResultItem extends PureComponent<Omit<Props, 'goToAnnotation'>> {
     get hrefToUser() {
         return `http://twitter.com/${this.props.user.username}`
     }

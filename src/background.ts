@@ -91,14 +91,7 @@ export async function main() {
                 backgroundModules.auth.subscriptionService.getCurrentUserClaims,
         },
         notifications: { create: createNotification } as any,
-        bookmarks: {
-            addPageBookmark:
-                backgroundModules.search.remoteFunctions.bookmarks
-                    .addPageBookmark,
-            delPageBookmark:
-                backgroundModules.search.remoteFunctions.bookmarks
-                    .delPageBookmark,
-        },
+        bookmarks: backgroundModules.search.remoteFunctions.bookmarks,
         sync: backgroundModules.sync.remoteFunctions,
         features: new FeatureOptIns(),
         tags: backgroundModules.tags.remoteFunctions,

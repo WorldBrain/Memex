@@ -1,6 +1,6 @@
 import { browser } from 'webextension-polyfill-ts'
 
-import { injectCSS } from 'src/search-injection/dom'
+import { injectCSS } from 'src/util/content-injection'
 
 const CONTAINER_CLASS = 'memex-ribbon-sidebar-container'
 

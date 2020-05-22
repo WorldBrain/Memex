@@ -6,7 +6,13 @@ import SearchStorage from './storage'
 import QueryBuilder from '../query-builder'
 import { TabManager } from 'src/activity-logger/background'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { SearchInterface, BackgroundSearchParams } from './types'
+import {
+    SearchInterface,
+    StandardSearchResponse,
+    AnnotationsSearchResponse,
+    BackgroundSearchParams,
+    AnnotPage,
+} from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { SearchIndex } from '../types'
@@ -42,7 +48,7 @@ export default class SearchBackground {
         }
     }
 
-    static shapePageResult(results, limit: number, extra = {}) {
+    static shapePageResult(results: AnnotPage[], limit: number, extra = {}) {
         return {
             resultsExhausted: results.length < limit,
             totalCount: null, // TODO: try to get this implemented
@@ -86,6 +92,7 @@ export default class SearchBackground {
             bookmarks: {
                 addPageBookmark: this.searchIndex.addBookmark,
                 delPageBookmark: this.searchIndex.delBookmark,
+                pageHasBookmark: this.searchIndex.pageHasBookmark,
             },
             search: {
                 search: this.searchIndex.search,
@@ -155,7 +162,9 @@ export default class SearchBackground {
         }
     }
 
-    async searchAnnotations(params: BackgroundSearchParams) {
+    async searchAnnotations(
+        params: BackgroundSearchParams,
+    ): Promise<StandardSearchResponse | AnnotationsSearchResponse> {
         let searchParams
 
         try {
@@ -164,7 +173,7 @@ export default class SearchBackground {
             return SearchBackground.handleSearchError(e)
         }
 
-        const { docs, annotsByDay }: any = await this.storage.searchAnnots(
+        const { docs, annotsByDay } = await this.storage.searchAnnots(
             searchParams,
         )
 
@@ -180,7 +189,9 @@ export default class SearchBackground {
         return SearchBackground.shapePageResult(docs, searchParams.limit, extra)
     }
 
-    async searchPages(params: BackgroundSearchParams) {
+    async searchPages(
+        params: BackgroundSearchParams,
+    ): Promise<StandardSearchResponse> {
         let searchParams
 
         try {
@@ -194,7 +205,9 @@ export default class SearchBackground {
         return SearchBackground.shapePageResult(docs, searchParams.limit)
     }
 
-    async searchSocial(params: BackgroundSearchParams) {
+    async searchSocial(
+        params: BackgroundSearchParams,
+    ): Promise<StandardSearchResponse> {
         let searchParams
         try {
             searchParams = this.processSearchParams(params)

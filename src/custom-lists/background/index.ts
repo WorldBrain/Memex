@@ -2,7 +2,6 @@ import Storex from '@worldbrain/storex'
 import { Windows, Tabs, Storage } from 'webextension-polyfill-ts'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
@@ -19,6 +18,7 @@ import { maybeIndexTabs } from 'src/page-indexing/utils'
 import { bindMethod } from 'src/util/functions'
 import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
 import { BrowserSettingsStore } from 'src/util/settings'
+import { updateSuggestionsCache } from 'src/tags/utils'
 
 const limitSuggestionsReturnLength = 10
 const limitSuggestionsStorageLength = 20
@@ -88,10 +88,6 @@ export default class CustomListBackground {
             options.localBrowserStorage,
             { prefix: 'custom-lists_' },
         )
-    }
-
-    setupRemoteFunctions() {
-        makeRemotelyCallable<RemoteCollectionsInterface>(this.remoteFunctions)
     }
 
     generateListId() {
@@ -167,6 +163,22 @@ export default class CustomListBackground {
         const lists = await this.fetchListPagesByUrl({ url })
 
         return lists.map(({ name }) => name)
+    }
+
+    async _updateListSuggestionsCache(args: {
+        added?: string
+        removed?: string
+    }) {
+        return updateSuggestionsCache({
+            ...args,
+            suggestionLimit: limitSuggestionsStorageLength,
+            getCache: async () => {
+                const suggestions = await this.localStorage.get('suggestions')
+                return suggestions ?? []
+            },
+            setCache: (suggestions: string[]) =>
+                this.localStorage.set('suggestions', suggestions),
+        })
     }
 
     async createCustomList({ name }: { name: string }): Promise<number> {
@@ -277,31 +289,6 @@ export default class CustomListBackground {
         }
 
         return suggestions.slice(0, limit)
-    }
-
-    async _updateListSuggestionsCache(args: {
-        added?: string
-        removed?: string
-    }) {
-        let suggestions = (await this.localStorage.get('suggestions')) ?? []
-
-        if (args.added) {
-            const index = suggestions.indexOf(args.added)
-            if (index !== -1) {
-                delete suggestions[index]
-                suggestions = suggestions.filter(Boolean)
-            }
-            suggestions.unshift(args.added)
-        }
-
-        if (args.removed) {
-            const index = suggestions.indexOf(args.removed)
-            delete suggestions[index]
-            suggestions = suggestions.filter(Boolean)
-        }
-
-        suggestions = suggestions.slice(0, limitSuggestionsStorageLength)
-        await this.localStorage.set('suggestions', suggestions)
     }
 
     async __fetchListNameSuggestions({

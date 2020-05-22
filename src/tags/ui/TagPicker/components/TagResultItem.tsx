@@ -1,7 +1,7 @@
 import { fontSizeSmallest } from 'src/common-ui/components/design-library/typography'
 import styled from 'styled-components'
 
-const backgroundHoverSelected = props => {
+const backgroundHoverSelected = (props) => {
     if (props.selected || props.isFocused) {
         return props.theme.tag.selected
     } else if (!props.selected) {
@@ -15,12 +15,12 @@ const backgroundHoverSelected = props => {
 
 export const TagResultItem = styled.div`
     display: flex;
-    background: ${props =>
+    background: ${(props) =>
         props.selected ? props.theme.tag.selected : props.theme.tag.tag};
     border: 2px solid
-        ${props => (props.selected ? props.theme.tag.tag : 'transparent')};
+        ${(props) => (props.selected ? props.theme.tag.tag : 'transparent')};
     border-radius: 4px;
-    color: ${props => props.theme.tag.text};
+    color: ${(props) => props.theme.tag.text};
     padding: 0 8px;
     margin: 2px 4px 2px 0;
     font-weight: 400;

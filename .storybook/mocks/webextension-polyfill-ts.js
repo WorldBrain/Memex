@@ -12,8 +12,8 @@ export const browser = {
         },
     },
     extension: {
-        getURL(a) {
-            return Promise.resolve(undefined)
+        getURL(path) {
+            return path
         },
     },
     runtime: {

@@ -43,7 +43,7 @@ export default class PageStorage extends StorageModule {
                 },
             },
             deletePage: {
-                operation: 'deletePage',
+                operation: 'deleteObject',
                 collection: 'pages',
                 args: {
                     url: '$url:string',

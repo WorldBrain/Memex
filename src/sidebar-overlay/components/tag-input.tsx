@@ -28,11 +28,7 @@ const TagInput = ({
 }: Props) => {
     let tagPicker
     if (isTagInputActive) {
-        const handleTagsUpdate = async (
-            _: string[],
-            added: string,
-            deleted: string,
-        ) => {
+        const handleTagsUpdate = async ({ added, deleted }) => {
             if (added) {
                 return addTag(added)
             }
