@@ -339,11 +339,6 @@ export async function createHighlightFromTooltip(params: {
             tags,
         })
 
-        renderHighlight(
-            annotation as Highlight,
-            undefined,
-            undefined,
-            params.openSidebar,
-        )
+        renderHighlight(annotation as Highlight, params.openSidebar)
     }
 }

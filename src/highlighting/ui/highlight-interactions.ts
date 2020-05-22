@@ -17,26 +17,17 @@ export class HighlightInteraction implements HighlightInteractionInterface {
     renderHighlights = async (
         highlights: Highlight[],
         openSidebar: (args: { activeUrl?: string }) => void,
-        focusOnHighlight?: (url: string) => void,
-        hoverHighlightContainer?: (url: string) => void,
     ) => {
         await Promise.all(
             highlights.map(async (highlight) =>
-                this.renderHighlight(
-                    highlight,
-                    focusOnHighlight,
-                    hoverHighlightContainer,
-                    openSidebar,
-                ),
+                this.renderHighlight(highlight, openSidebar),
             ),
         )
     }
 
     renderHighlight = async (
         highlight: Highlight,
-        focusOnAnnotation,
-        hoverAnnotationContainer,
-        openSidebar,
+        openSidebar: (args: { activeUrl?: string }) => void,
         temporary = false,
     ) => {
         const baseClass =
@@ -64,12 +55,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
 
                 markRange({ range, cssClass: baseClass })
 
-                this.attachEventListenersToNewHighlights(
-                    highlight,
-                    focusOnAnnotation,
-                    hoverAnnotationContainer,
-                    openSidebar,
-                )
+                this.attachEventListenersToNewHighlights(highlight, openSidebar)
             })
         } catch (e) {
             Raven.captureException(e)
@@ -124,8 +110,6 @@ export class HighlightInteraction implements HighlightInteractionInterface {
      */
     attachEventListenersToNewHighlights = (
         highlight: Highlight,
-        focusOnAnnotation: (url: string) => void = (_) => undefined,
-        hoverAnnotationContainer: (url: string) => void = (_) => undefined,
         openSidebar: (args: {
             activeUrl?: string
             openSidebar?: boolean
@@ -154,7 +138,6 @@ export class HighlightInteraction implements HighlightInteractionInterface {
                 openSidebar({ activeUrl: highlight.url, openSidebar: true })
                 this.removeHighlights(true)
                 this.makeHighlightDark(highlight)
-                focusOnAnnotation(highlight.url)
             }
             highlightEl.addEventListener('click', clickListener, false)
 
@@ -164,7 +147,6 @@ export class HighlightInteraction implements HighlightInteractionInterface {
                 }
                 this.removeMediumHighlights()
                 this.makeHighlightMedium(highlight)
-                hoverAnnotationContainer(highlight.url)
             }
             highlightEl.addEventListener(
                 'mouseenter',
@@ -177,7 +159,6 @@ export class HighlightInteraction implements HighlightInteractionInterface {
                     return
                 }
                 this.removeMediumHighlights()
-                hoverAnnotationContainer(null)
             }
             highlightEl.addEventListener(
                 'mouseleave',

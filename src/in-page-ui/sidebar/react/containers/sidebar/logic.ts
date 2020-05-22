@@ -669,8 +669,6 @@ export class SidebarContainerLogic extends UILogic<
             this.options.highlighter.removeTempHighlights()
             await this.options.highlighter.renderHighlight(
                 { ...dummyAnnotation, url: annotationUrl },
-                undefined,
-                undefined,
                 () => {
                     this.options.inPageUI.showSidebar(
                         annotationUrl && {
