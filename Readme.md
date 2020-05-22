@@ -62,7 +62,7 @@ More about our choice you find [in this post](https://community.worldbrain.io/t/
 
 ## Changelog & Roadmap:
 
-See a list of our past updates and upcoming features [here](https://worldbrain.io/roadmap).
+See a list of our past updates and upcoming features [here](https://www.notion.so/Release-Notes-Roadmap-262a367f7a2a48ff8115d2c71f700c14).
 
 # Contributing
 
