@@ -1,4 +1,4 @@
-export { default as AnnotationHighlight } from './annotation-highlight'
+export { default as AnnotationNewHighlight } from './annotation-new-highlight'
 export { default as CloseButton } from './close-button'
 export { default as CongratsMessage } from './congrats-message'
 export { default as EmptyMessage } from './empty-message'

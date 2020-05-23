@@ -12,12 +12,14 @@ import { SIDEBAR_STORAGE_NAME } from 'src/sidebar-overlay/constants'
 import {
     TRACKING_STORAGE_NAME,
     TOOLTIP_STORAGE_NAME,
-    KEYBOARDSHORTCUTS_STORAGE_NAME,
-    KEYBOARDSHORTCUTS_DEFAULT_STATE,
-} from 'src/content-tooltip/constants'
+} from 'src/in-page-ui/tooltip/constants'
 import { OPTIONS_URL } from 'src/constants'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { OnboardingAction } from 'src/common-ui/components/design-library/actions/OnboardingAction'
+import {
+    KEYBOARDSHORTCUTS_STORAGE_NAME,
+    KEYBOARDSHORTCUTS_DEFAULT_STATE,
+} from 'src/in-page-ui/keyboard-shortcuts/constants'
 
 const styles = require('../../components/onboarding-box.css')
 const searchSettingsStyles = require('../../components/search-settings.css')
@@ -32,7 +34,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     State,
     Event
 > {
-    static TOTAL_STEPS = 7
+    static TOTAL_STEPS = 8
     static defaultProps: Partial<Props> = {
         storage: browser.storage.local,
     }
@@ -146,6 +148,10 @@ export default class OnboardingScreen extends StatefulUIElement<
     )
     private mobileImg = () => (
         <img src={'/img/mobileIllustration.svg'} className={styles.mobileImg} />
+    )
+
+    private backupImg = () => (
+        <img src={'/img/backup-providers.svg'} className={styles.backupImg} />
     )
 
     private dataImg = () => (
@@ -451,6 +457,29 @@ export default class OnboardingScreen extends StatefulUIElement<
                     </OnboardingStep>
                 )
             case 7:
+                return (
+                    <OnboardingStep
+                        goToStep={this.handleStepClick}
+                        titleText="Backup your data to your favorite providers"
+                        subtitleText="Browsers are unfortunately unreliable data stores. "
+                        subtitleText2="We are working on an external storage."
+                        renderButton={() => (
+                            <OnboardingAction
+                                onClick={this.handleNextStepClick}
+                                label={'Next'}
+                            />
+                        )}
+                        renderImage={this.backupImg}
+                        totalSteps={OnboardingScreen.TOTAL_STEPS}
+                        currentStep={this.state.currentStep - 1}
+                    >
+                        <SecondaryAction
+                            onClick={() => window.open(`${OPTIONS_URL}#/backup`)}
+                            label={'Start Backup'}
+                        />
+                    </OnboardingStep>
+                )
+            case 8:
                 return (
                     <OnboardingStep
                         privacyStep

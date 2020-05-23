@@ -6,7 +6,7 @@ import noop from 'lodash/fp/noop'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
 import State from '../types'
-import { AnnotationHighlight } from '../../components'
+import { AnnotationNewHighlight } from '../../components'
 import CommentBoxForm from './comment-box-form'
 import { MapDispatchToProps } from '../../types'
 import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
@@ -48,7 +48,7 @@ class CommentBoxContainer extends React.PureComponent<Props> {
         onSaveCb: noop,
     }
 
-    save = async e => {
+    save = async (e) => {
         e.preventDefault()
         e.stopPropagation()
 
@@ -87,7 +87,7 @@ class CommentBoxContainer extends React.PureComponent<Props> {
                     [styles.inPage]: env === 'inpage',
                 })}
             >
-                {!!anchor && <AnnotationHighlight anchor={anchor} />}
+                {!!anchor && <AnnotationNewHighlight anchor={anchor} />}
 
                 <CommentBoxForm
                     env={env}
@@ -104,11 +104,9 @@ class CommentBoxContainer extends React.PureComponent<Props> {
     }
 }
 
-const mapStateToProps: MapStateToProps<
-    StateProps,
-    OwnProps,
-    State
-> = state => ({
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, State> = (
+    state,
+) => ({
     anchor: selectors.anchor(state),
     commentText: selectors.commentText(state),
     tags: selectors.tags(state),
@@ -119,7 +117,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     dispatch,
     props,
 ) => ({
-    handleCommentTextChange: comment =>
+    handleCommentTextChange: (comment) =>
         dispatch(actions.setCommentText(comment)),
     saveComment: async (anchor, commentText, tags, bookmarked) => {
         if (props.closeComments) {

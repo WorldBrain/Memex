@@ -6,7 +6,7 @@ import { OutLink } from 'src/common-ui/containers'
 const localStyles = require('./Privacy.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
 
-const Privacy = props => (
+const Privacy = (props) => (
     <div className={localStyles.privacy}>
         <div className={settingsStyle.section}>
             <div className={settingsStyle.sectionTitle}>
@@ -64,37 +64,43 @@ const Privacy = props => (
                 Detailed list of all tracked events
             </div>
             <p className={settingsStyle.infoText}>
-                These are all the events that Memex collects. 
-                None of them contain personal data like the websites you visit, tags or content of annotations, or data that allows us to identify who those events came from. 
+                These are all the events that Memex collects. None of them
+                contain personal data like the websites you visit, tags or
+                content of annotations, or data that allows us to identify who
+                those events came from.
             </p>
-            
-                <div>
-                        <table className={localStyles.eventTable}>
-                          <tr className={localStyles.tableTitle}>
-                            <th>Event Name</th>
-                            <th>Description</th>
-                          </tr>
-                              {Object.entries(ANALYTICS_EVENTS).map(([categoryName, actions]) => (
-                                
-                                Object.entries(actions).map(([actionName, actionInfo]) => (
-                                    <tr
-                                        className={localStyles.eventRow}
-                                    >
-                                            <td 
-                                                key={`${categoryName}::${actionName}`}
-                                                className={localStyles.eventName}
-                                            >
-                                                {categoryName}::{actionName}
-                                            </td>
-                                            <td
-                                                className={localStyles.actionDescription}
-                                                key={`${actionInfo.description}`}
-                                            >{actionInfo.description}</td>
+
+            <div>
+                <table className={localStyles.eventTable}>
+                    <tr className={localStyles.tableTitle}>
+                        <th>Event Name</th>
+                        <th>Description</th>
+                    </tr>
+                    {Object.entries(ANALYTICS_EVENTS).map(
+                        ([categoryName, actions]) =>
+                            Object.entries(actions).map(
+                                ([actionName, actionInfo]) => (
+                                    <tr className={localStyles.eventRow}>
+                                        <td
+                                            key={`${categoryName}::${actionName}`}
+                                            className={localStyles.eventName}
+                                        >
+                                            {categoryName}::{actionName}
+                                        </td>
+                                        <td
+                                            className={
+                                                localStyles.actionDescription
+                                            }
+                                            key={`${actionInfo.description}`}
+                                        >
+                                            {actionInfo.description}
+                                        </td>
                                     </tr>
-                                ))
-                                ))}
-                        </table>
-                </div>
+                                ),
+                            ),
+                    )}
+                </table>
+            </div>
         </div>
     </div>
 )

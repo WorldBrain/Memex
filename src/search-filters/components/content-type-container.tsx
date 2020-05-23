@@ -93,7 +93,7 @@ class ContentTypeContainer extends PureComponent<Props, State> {
         return filterNodes
     }
 
-    private togglePopup: React.MouseEventHandler<HTMLButtonElement> = e => {
+    private togglePopup: React.MouseEventHandler = (e) => {
         if (this.props.env === 'inpage' && !this.props.showFilteredTypes) {
             this.props.resetFilterPopups()
         }
@@ -158,8 +158,8 @@ const mapDispatchToProps: MapDispatchToProps<
     DispatchProps,
     OwnProps,
     RootState
-> = dispatch => ({
-    setFilterTypes: value => dispatch(actions.setFilterTypes(value)),
+> = (dispatch) => ({
+    setFilterTypes: (value) => dispatch(actions.setFilterTypes(value)),
     clearFilterTypes: () => dispatch(actions.clearFilterTypes()),
     toggleWebsitesFilter: () => dispatch(actions.toggleWebsitesFilter()),
     toggleHighlightsFilter: () => dispatch(actions.toggleHighlightsFilter()),

@@ -1,5 +1,7 @@
 import React from 'react'
+import onClickOutside from 'react-onclickoutside'
 import styled, { ThemeProvider } from 'styled-components'
+
 import { StatefulUIElement } from 'src/util/ui-logic'
 import ListPickerLogic, {
     ListPickerDependencies,
@@ -21,7 +23,6 @@ import { fontSizeNormal } from 'src/common-ui/components/design-library/typograp
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { ListResultItem } from './components/ListResultItem'
 import { ActiveList } from './components/ActiveList'
-import { LoadingIndicator } from 'src/common-ui/components'
 
 class ListPicker extends StatefulUIElement<
     ListPickerDependencies,
@@ -30,6 +31,12 @@ class ListPicker extends StatefulUIElement<
 > {
     constructor(props: ListPickerDependencies) {
         super(props, new ListPickerLogic(props))
+    }
+
+    handleClickOutside = () => {
+        if (this.props.onClickOutside) {
+            this.props.onClickOutside()
+        }
     }
 
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
@@ -79,19 +86,20 @@ class ListPicker extends StatefulUIElement<
         />
     )
 
-    renderNewListAllTabsButton = () => (
-        <IconStyleWrapper show>
-            <ButtonTooltip
-                tooltipText="List all tabs in window"
-                position="left"
-            >
-                <ActOnAllTabsButton
-                    size={20}
-                    onClick={this.handleNewListAllPress}
-                />
-            </ButtonTooltip>
-        </IconStyleWrapper>
-    )
+    renderNewListAllTabsButton = () =>
+        this.props.actOnAllTabs && (
+            <IconStyleWrapper show>
+                <ButtonTooltip
+                    tooltipText="List all tabs in window"
+                    position="left"
+                >
+                    <ActOnAllTabsButton
+                        size={20}
+                        onClick={this.handleNewListAllPress}
+                    />
+                </ButtonTooltip>
+            </IconStyleWrapper>
+        )
 
     renderEmptyList() {
         if (this.state.newEntryName !== '') {
@@ -142,7 +150,7 @@ class ListPicker extends StatefulUIElement<
                         }
                         onPress={this.handleNewListPress}
                     >
-                        {this.renderNewListAllTabsButton}
+                        {this.renderNewListAllTabsButton()}
                     </AddNewEntry>
                 )}
                 <EntryResultsList
@@ -185,4 +193,4 @@ const EmptyListsView = styled.div`
     text-align: center;
 `
 
-export default ListPicker
+export default onClickOutside(ListPicker)

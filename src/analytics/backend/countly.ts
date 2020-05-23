@@ -28,7 +28,7 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
             return this.setupPromise
         }
 
-        this.setupPromise = new Promise<void>(resolve => {
+        this.setupPromise = new Promise<void>((resolve) => {
             this.resolveSetupPromise = resolve
         })
 

@@ -84,7 +84,7 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
         test: /\.(j|t)sx?$/,
         include: [
             path.resolve(context, './src'),
-            ...externalTsModules.map((mod) =>
+            ...Object.values(externalTsModules).map((mod) =>
                 path.resolve(context, `./external/${mod}`),
             ),
         ],

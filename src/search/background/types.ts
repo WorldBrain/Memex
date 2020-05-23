@@ -126,6 +126,17 @@ export interface SocialSearchParams extends AnnotSearchParams {
     hashtagsExc?: string[]
 }
 
+export interface StandardSearchResponse {
+    resultsExhausted: boolean
+    totalCount?: number
+    docs: AnnotPage[]
+}
+
+export interface AnnotationsSearchResponse extends StandardSearchResponse {
+    isAnnotsSearch: true
+    annotsByDay: PageUrlsByDay
+}
+
 // Todo: add proper types and refactor RPC usage in-line with 'refactoring.md'
 export interface SearchBackend {
     addPage: any
@@ -153,9 +164,13 @@ export interface SearchBackend {
 
 export interface SearchInterface {
     search: SearchIndex['search']
-    searchAnnotations: (params: AnnotSearchParams) => any
-    searchPages: (params: PageSearchParams) => any
-    searchSocial: (params: SocialSearchParams) => any
+    searchAnnotations: (
+        params: AnnotSearchParams,
+    ) => Promise<StandardSearchResponse | AnnotationsSearchResponse>
+    searchPages: (params: PageSearchParams) => Promise<StandardSearchResponse>
+    searchSocial: (
+        params: SocialSearchParams,
+    ) => Promise<StandardSearchResponse>
 
     suggest: SearchStorage['suggest']
     extendedSuggest: SearchStorage['suggestExtended']

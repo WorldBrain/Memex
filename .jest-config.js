@@ -2,10 +2,10 @@ const { jsWithTs: tsjPreset } = require('ts-jest/presets')
 const externalTsModules = require('./build/external').externalTsModules
 
 const externalTsModuleMappings = {}
-for (const externalTsModule of externalTsModules) {
+for (const [alias, relPath] of Object.entries(externalTsModules)) {
     Object.assign(externalTsModuleMappings, {
-        [`^${externalTsModule}$`]: `<rootDir>/external/${externalTsModule}/ts`,
-        [`^${externalTsModule}/lib/(.*)`]: `<rootDir>/external/${externalTsModule}/ts/$1`,
+        [`^${alias}$`]: `<rootDir>/external/${relPath}/ts`,
+        [`^${alias}/lib/(.*)`]: `<rootDir>/external/${relPath}/ts/$1`,
     })
 }
 

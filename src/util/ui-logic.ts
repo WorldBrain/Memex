@@ -1,5 +1,6 @@
 import fromPairs from 'lodash/fromPairs'
 import { UILogic } from 'ui-logic-core'
+import { TaskState as UITaskState } from 'ui-logic-core/lib/types'
 import { UIElement } from 'ui-logic-react'
 
 export type EventProcessor<Dependencies> = (
@@ -163,5 +164,36 @@ export abstract class NavigationScreen<
 > extends StatefulUIElement<Props, State, Event> {
     constructor(props: Props, options: { logic: UILogic<State, Event> }) {
         super(props, options.logic)
+    }
+}
+
+export async function loadInitial<State extends { loadState: UITaskState }>(
+    logic: UILogic<State, any>,
+    loader: () => Promise<any>,
+): Promise<boolean> {
+    return (await executeUITask(logic, 'loadState', loader))[0]
+}
+
+export async function executeUITask<
+    State,
+    Key extends keyof State,
+    ReturnValue
+>(
+    logic: UILogic<State, any>,
+    key: Key,
+    loader: () => Promise<ReturnValue>,
+): Promise<[false] | [true, ReturnValue]> {
+    const emit = (state: UITaskState) =>
+        logic.emitMutation({ [key]: { $set: state } } as any)
+    emit('running')
+
+    try {
+        const returned = await loader()
+        emit('success')
+        return [true, returned]
+    } catch (e) {
+        emit('error')
+        console.error(e)
+        return [false]
     }
 }

@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color4, color12 from colors;
+@value color4, color12, grey9 from colors;
 
 .TopContainer {
     height: 100%;
@@ -86,10 +86,19 @@
     composes: checkMark from '../../../../common-ui/icons.css';
 }
 
+.syncIcon {
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/sync.svg');
+    background-color: grey9;
+    mask-size: 16px;
+}
+
 .failIcon {
     mask-position: center;
     mask-repeat: no-repeat;
     mask-image: url('/img/removeIcon.svg');
     background-color: color12;
     mask-size: 16px;
+    cursor: pointer;
 }

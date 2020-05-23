@@ -243,7 +243,7 @@ describe('Custom List Integrations', () => {
 })
 
 describe('Collection Cache', () => {
-    async function setupTest() {
+    async function setupCacheTest() {
         const setup = await setupBackgroundIntegrationTest()
         const listsModule = setup.backgroundModules.customLists
         return { listsModule }
@@ -251,7 +251,7 @@ describe('Collection Cache', () => {
 
     describe('modifies cache', () => {
         test('add lists', async () => {
-            const { listsModule } = await setupTest()
+            const { listsModule } = await setupCacheTest()
 
             expect(await listsModule.fetchInitialListSuggestions()).toEqual([])
             await listsModule.createCustomList(DATA.LIST_1)
@@ -281,7 +281,7 @@ describe('Collection Cache', () => {
         })
 
         test("adding new page entry for non-existent list doesn't add dupe cache entries", async () => {
-            const { listsModule } = await setupTest()
+            const { listsModule } = await setupCacheTest()
 
             expect(await listsModule.fetchInitialListSuggestions()).toEqual([])
             await listsModule.updateListForPage({

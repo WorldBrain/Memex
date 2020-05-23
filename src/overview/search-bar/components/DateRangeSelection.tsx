@@ -54,7 +54,7 @@ class DateRangeSelection extends Component<Props> {
     /**
      * Overrides react-date-picker's clear input handler to also clear our local input value states.
      */
-    handleClearClick = ({ isStartDate }) => event => {
+    handleClearClick = ({ isStartDate }) => (event) => {
         event.preventDefault()
         const stateKey = isStartDate ? 'startDateText' : 'endDateText'
         const refKey = isStartDate ? 'startDatePicker' : 'endDatePicker'
@@ -64,14 +64,14 @@ class DateRangeSelection extends Component<Props> {
 
         // Update both states
         this[refKey].props.onChange(null, event)
-        this.setState(state => ({ ...state, [stateKey]: '' }))
+        this.setState((state) => ({ ...state, [stateKey]: '' }))
         updateDateText('')
     }
 
     /**
      * Overrides react-date-picker's input keydown handler to search on Enter key press.
      */
-    handleKeydown = ({ isStartDate }) => event => {
+    handleKeydown = ({ isStartDate }) => (event) => {
         if (
             this.props.env === 'inpage' &&
             !(event.ctrlKey || event.metaKey) &&
@@ -84,7 +84,7 @@ class DateRangeSelection extends Component<Props> {
                 ? this.props.onStartDateTextChange
                 : this.props.onEndDateTextChange
 
-            this.setState(state => ({
+            this.setState((state) => ({
                 ...state,
                 [stateKey]: state[stateKey] + event.key,
             }))
@@ -137,7 +137,7 @@ class DateRangeSelection extends Component<Props> {
         }
 
         // Reset input value state as NLP value invalid
-        this.setState(state => ({ ...state, [stateKey]: '' }))
+        this.setState((state) => ({ ...state, [stateKey]: '' }))
         return null
     }
 
@@ -183,7 +183,7 @@ class DateRangeSelection extends Component<Props> {
     /**
      * Runs against raw text input to update value state in realtime
      */
-    handleRawInputChange = ({ isStartDate }) => event => {
+    handleRawInputChange = ({ isStartDate }) => (event) => {
         const stateKey = isStartDate ? 'startDateText' : 'endDateText'
         const updateDateText = isStartDate
             ? this.props.onStartDateTextChange
@@ -191,13 +191,13 @@ class DateRangeSelection extends Component<Props> {
 
         const input = event.target
         updateDateText(input.value)
-        this.setState(state => ({ ...state, [stateKey]: input.value }))
+        this.setState((state) => ({ ...state, [stateKey]: input.value }))
     }
 
     /**
      * Runs against date selected in the date dropdown component.
      */
-    handleDateChange = ({ isStartDate }) => date => {
+    handleDateChange = ({ isStartDate }) => (date) => {
         let action
 
         // tslint:disable-next-line
@@ -232,7 +232,7 @@ class DateRangeSelection extends Component<Props> {
 
         updateDateText(date ? date.format(FORMAT) : '')
 
-        this.setState(state => ({
+        this.setState((state) => ({
             ...state,
             [stateKey]: date ? date.format(FORMAT) : null,
         }))
@@ -288,7 +288,7 @@ class DateRangeSelection extends Component<Props> {
                     </div>
                     <div className={styles.datePickerDiv}>
                         <DatePicker
-                            ref={dp => {
+                            ref={(dp) => {
                                 this.startDatePicker = dp
                             }}
                             className={styles.datePicker}
@@ -328,7 +328,7 @@ class DateRangeSelection extends Component<Props> {
                     </div>
                     <div className={styles.datePickerDiv}>
                         <DatePicker
-                            ref={dp => {
+                            ref={(dp) => {
                                 this.endDatePicker = dp
                             }}
                             className={styles.datePicker}

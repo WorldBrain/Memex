@@ -75,7 +75,7 @@ export async function insertIntegrationTestData(
                 comment: 'test comment',
                 createdWhen: new Date('2019-10-11'),
                 body: 'test body',
-                selector: 'test selector',
+                selector: 'test selector' as any,
                 bookmarked: false,
                 isSocialPost: false,
             },

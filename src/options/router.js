@@ -12,12 +12,12 @@ class MemexRouter extends React.Component {
     constructor(props) {
         super(props)
 
-        this.overviewRoutes = props.routes.filter(route => route.useOwnLayout)
-        this.optionsRoutes = props.routes.filter(route => !route.useOwnLayout)
+        this.overviewRoutes = props.routes.filter((route) => route.useOwnLayout)
+        this.optionsRoutes = props.routes.filter((route) => !route.useOwnLayout)
     }
 
     renderRoutes(routes = []) {
-        return routes.map(route => (
+        return routes.map((route) => (
             <Route
                 key={route.pathname}
                 path={route.pathname}

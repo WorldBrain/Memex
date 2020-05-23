@@ -4,7 +4,10 @@ import GenericPickerLogic, {
     GenericPickerState,
 } from 'src/common-ui/GenericPicker/logic'
 
-export type ListPickerDependencies = GenericPickerDependencies
+export interface ListPickerDependencies extends GenericPickerDependencies {
+    onClickOutside?: () => void
+}
+
 export type ListPickerEvent = GenericPickerEvent
 export type ListPickerState = GenericPickerState
 

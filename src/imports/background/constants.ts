@@ -13,4 +13,4 @@ export const WARN_NOTIF: Partial<NotifOpts> = {
 }
 
 export const WARN_INFO_URL =
-    'https://worldbrain.helprace.com/i49-prevent-your-imports-from-stopping-midway'
+    'https://www.notion.so/worldbrain/Imports-fail-and-freeze-3b8a2a55b7da48288ff1e29f6d43b8db'

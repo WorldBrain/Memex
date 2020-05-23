@@ -83,7 +83,7 @@ const PricingHead = styled.div`
     font-weight: 700;
 `
 
-const WhiteSpacer30 = styled.div `
+const WhiteSpacer30 = styled.div`
     height: 30px;
 `
 
@@ -105,7 +105,7 @@ const PricingPrice = styled.div`
 
 const PricingButton = styled.div`
     flex-direction: column;
-    background: ${props =>
+    background: ${(props) =>
         props.background ? props.background : 'rgb(64, 182, 154)'};
     color: white;
     cursor: pointer;
@@ -236,34 +236,33 @@ const PricingButtonWrapper = styled.div`
     }
 `
 
-const PricingBox = styled.div `
+const PricingBox = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
     height: 130px;
     flex-direction: column;
-`; 
+`
 
-const PlanBox = styled.div `
+const PlanBox = styled.div`
     display: flex;
     justify-content: center;
     margin-top: -30px;
     margin-bottom: 30px;
-`; 
+`
 
-const PlanTitle = styled.div `
+const PlanTitle = styled.div`
     font-size: 20px;
     font-weight: 400;
     color: ${colorDarkText};
-`;
+`
 
-const PlanName = styled.div `
+const PlanName = styled.div`
     font-size: 20px;
     font-weight: 800;
     color: ${colorDarkText};
     margin-left: 10px;
-`; 
-
+`
 
 export {
     PricingPlanTitle,
@@ -271,7 +270,7 @@ export {
     PlanTitle,
     PlanName,
     PlanBox,
-    LoginTitle, 
+    LoginTitle,
     LoginButton,
     PricingHead,
     PricingPrice,

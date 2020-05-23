@@ -6,7 +6,7 @@ import { Props } from './result-item'
 
 const styles = require('./result-item.css')
 
-class PageResultItem extends PureComponent<Props> {
+class PageResultItem extends PureComponent<Omit<Props, 'goToAnnotation'>> {
     static defaultProps = {
         nullImg: '/img/null-icon.png',
     }
