@@ -344,6 +344,12 @@ export class RibbonContainerLogic extends UILogic<
     updateCommentTags = this._updateTags('commentBox')
     updateTags = this._updateTags('tagging')
 
+    tagAllTabs: EventHandler<'tagAllTabs'> = ({ event }) => {
+        return this.dependencies.tags.addTagsToOpenTabs({
+            name: event.value,
+        })
+    }
+
     //
     // Lists
     //
@@ -353,6 +359,12 @@ export class RibbonContainerLogic extends UILogic<
             deleted: event.value.deleted,
             url: this.dependencies.currentTab.url,
             tabId: this.dependencies.currentTab.id,
+        })
+    }
+
+    listAllTabs: EventHandler<'listAllTabs'> = ({ event }) => {
+        return this.dependencies.customLists.addOpenTabsToList({
+            name: event.value,
         })
     }
 

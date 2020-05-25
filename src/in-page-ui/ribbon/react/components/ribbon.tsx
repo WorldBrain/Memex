@@ -139,6 +139,7 @@ export default class Ribbon extends Component<Props, State> {
             <TagPicker
                 onUpdateEntrySelection={this.props.tagging.updateTags}
                 queryEntries={this.props.tagging.queryTagSuggestions}
+                actOnAllTabs={this.props.tagging.tagAllTabs}
                 initialSelectedEntries={
                     this.props.tagging.fetchInitialTagSelections
                 }
@@ -156,6 +157,7 @@ export default class Ribbon extends Component<Props, State> {
             <CollectionPicker
                 onUpdateEntrySelection={this.props.lists.updateLists}
                 queryEntries={this.props.lists.queryListSuggestions}
+                actOnAllTabs={this.props.lists.listAllTabs}
                 initialSelectedEntries={
                     this.props.lists.fetchInitialListSelections
                 }
