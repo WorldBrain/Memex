@@ -15,8 +15,15 @@ import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { AnnotationBoxEventProps } from 'src/in-page-ui/components/annotation-box/annotation-box'
 import { AnnotationMode, SidebarEnv } from '../types'
 import { TagsEventProps } from 'src/in-page-ui/components/annotation-box/edit-mode-content'
+import AllModesFooter from 'src/in-page-ui/components/annotation-box/all-modes-footer'
 
 const styles = require('./result-item.css')
+
+export interface PageDeleteProps {
+    pageUrlToDelete?: string
+    handleDeletePage: () => Promise<void>
+    handleDeletePageModalClose: () => void
+}
 
 export interface Props extends Partial<SocialPage> {
     url: string
@@ -47,6 +54,7 @@ export interface Props extends Partial<SocialPage> {
     annotationModes: {
         [annotationUrl: string]: AnnotationMode
     }
+    pageDeleteProps: PageDeleteProps
     tagsEventProps: TagsEventProps
     onTagBtnClick: MouseEventHandler
     onListBtnClick: MouseEventHandler
@@ -73,6 +81,15 @@ class ResultItem extends Component<Props> {
         }
     }
 
+    get shouldShowDeleteConfirm(): boolean {
+        const { pageDeleteProps } = this.props
+
+        return (
+            pageDeleteProps.pageUrlToDelete != null &&
+            pageDeleteProps.pageUrlToDelete === this.props.url
+        )
+    }
+
     dragStart: DragEventHandler = (e) => {
         const { url, setUrlDragged, isSocial } = this.props
 
@@ -92,6 +109,24 @@ class ResultItem extends Component<Props> {
         e.dataTransfer.setData('text/plain', data)
 
         e.dataTransfer.setDragImage(crt, 10, 10)
+    }
+
+    private renderDeleteConfirm() {
+        const { pageDeleteProps } = this.props
+
+        if (!this.shouldShowDeleteConfirm) {
+            return null
+        }
+
+        return (
+            <AllModesFooter
+                mode="delete"
+                handleDeleteAnnotation={pageDeleteProps.handleDeletePage}
+                handleCancelDeletion={
+                    pageDeleteProps.handleDeletePageModalClose
+                }
+            />
+        )
     }
 
     private renderAnnotsList() {
@@ -128,6 +163,8 @@ class ResultItem extends Component<Props> {
                 {this.props.listManager}
                 <div
                     className={cx(styles.rootContainer, {
+                        [styles.rootContainerBottomBorder]: !this
+                            .shouldShowDeleteConfirm,
                         [styles.tweetRootContainer]: this.props.isSocial,
                         [styles.rootContainerOverview]: this.props.isOverview,
                         [styles.isSidebarOpen]: this.props
@@ -151,6 +188,7 @@ class ResultItem extends Component<Props> {
                         )}
                     </a>
                 </div>
+                {this.renderDeleteConfirm()}
                 {this.renderAnnotsList()}
             </li>
         )

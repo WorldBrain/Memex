@@ -234,14 +234,6 @@ export class SidebarContainer extends StatefulUIElement<
                 handleAddPageCommentBtnClick={() =>
                     this.processEvent('addNewPageComment', null)
                 }
-                pageDeleteDialog={{
-                    isDeletePageModalShown:
-                        this.state.deletePageModal.pageUrlToDelete != null,
-                    handleDeletePage: () =>
-                        this.processEvent('deletePage', null),
-                    handleDeletePageModalClose: () =>
-                        this.processEvent('closeDeletePageModal', null),
-                }}
                 onQueryEnter={(searchQuery) =>
                     this.processEvent('enterSearchQuery', { searchQuery })
                 }
@@ -329,6 +321,14 @@ export class SidebarContainer extends StatefulUIElement<
                     annotationEventHandlers: createAnnotationEventHandlers(
                         'searchResults',
                     ),
+                    pageDeleteProps: {
+                        pageUrlToDelete: this.state.deletePageConfirm
+                            .pageUrlToDelete,
+                        handleDeletePage: () =>
+                            this.processEvent('deletePage', null),
+                        handleDeletePageModalClose: () =>
+                            this.processEvent('closeDeletePageModal', null),
+                    },
                     resetUrlDragged: () => {},
                     resetActiveTagIndex: () => {},
                     setUrlDragged: (url: string) => {},
@@ -373,7 +373,7 @@ export class SidebarContainer extends StatefulUIElement<
                         })
                     },
                     handleTrashBtnClick: (result) => {
-                        this.processEvent('showDeletePageModal', {
+                        this.processEvent('showPageDeleteConfirm', {
                             pageUrl: result.url,
                         })
                     },

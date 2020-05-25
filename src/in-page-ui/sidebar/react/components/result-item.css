@@ -37,7 +37,6 @@
     height: fit-content;
     min-height: var(--height);
     width: 100%;
-    border-bottom: 0.75px solid #e1e1e1;
 
     &:hover {
         cursor: pointer;
@@ -61,6 +60,10 @@
         display: none;
         padding: 0;
     }
+}
+
+.rootContainerBottomBorder {
+    border-bottom: 0.75px solid #eed4d4;
 }
 
 .rootContainerOverview {

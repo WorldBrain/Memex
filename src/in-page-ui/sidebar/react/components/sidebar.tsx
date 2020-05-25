@@ -10,7 +10,6 @@ import { Page, SidebarEnv } from '../types'
 import FiltersSidebar, { FiltersSidebarProps } from './filters-sidebar'
 import ResultsContainer, { ResultsContainerProps } from './results-container'
 import DragElement from 'src/overview/components/DragElement'
-import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import SearchTypeSwitch, { SearchTypeSwitchProps } from './search-type-switch'
 import PageInfo from './page-info'
 import cx from 'classnames'
@@ -45,12 +44,6 @@ interface OwnProps {
     closeSidebar: () => void
 
     handleAddPageCommentBtnClick: () => void
-
-    pageDeleteDialog: {
-        isDeletePageModalShown: boolean
-        handleDeletePage: () => Promise<void>
-        handleDeletePageModalClose: () => void
-    }
 
     highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
     onQueryEnter: (searchValue: string) => void
@@ -120,15 +113,6 @@ export default class Sidebar extends React.Component<Props> {
         return (
             <React.Fragment>
                 <ResultsContainer {...this.props.resultsContainer} />
-                <DeleteConfirmModal
-                    deleteDocs={this.props.pageDeleteDialog.handleDeletePage}
-                    isShown={this.props.pageDeleteDialog.isDeletePageModalShown}
-                    onClose={
-                        this.props.pageDeleteDialog.handleDeletePageModalClose
-                    }
-                    message="Delete page and related notes"
-                    requiresExplicitStyles
-                />
                 <DragElement />
             </React.Fragment>
         )

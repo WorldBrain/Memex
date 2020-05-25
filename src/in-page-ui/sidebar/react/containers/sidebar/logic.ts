@@ -62,7 +62,7 @@ export interface SidebarContainerState {
         }
     }
 
-    deletePageModal: {
+    deletePageConfirm: {
         pageUrlToDelete?: string
         // isDeletePageModalShown: boolean
     }
@@ -132,7 +132,7 @@ export type SidebarContainerEvents = UIEvent<{
     // Delete page(s) modal
     deletePage: null
     closeDeletePageModal: null
-    showDeletePageModal: { pageUrl: string }
+    showPageDeleteConfirm: { pageUrl: string }
 
     // Annotation boxes
     goToAnnotationInPage: {
@@ -240,7 +240,7 @@ export class SidebarContainerLogic extends UILogic<
             },
 
             commentBox: { ...INITIAL_COMMENT_BOX_STATE },
-            deletePageModal: {
+            deletePageConfirm: {
                 pageUrlToDelete: undefined,
                 // isDeletePageModalShown: false,
             },
@@ -1119,22 +1119,27 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    showDeletePageModal: EventHandler<'showDeletePageModal'> = ({ event }) => {
+    showPageDeleteConfirm: EventHandler<'showPageDeleteConfirm'> = ({
+        event,
+    }) => {
         return {
-            deletePageModal: {
-                pageUrlToDelete: { $set: event.pageUrl },
+            deletePageConfirm: {
+                pageUrlToDelete: {
+                    $apply: (prev) =>
+                        prev === event.pageUrl ? undefined : event.pageUrl,
+                },
             },
         }
     }
 
     deletePage: EventHandler<'deletePage'> = async ({ previousState }) => {
-        const { pageUrlToDelete } = previousState.deletePageModal
+        const { pageUrlToDelete } = previousState.deletePageConfirm
 
         this.emitMutation({
             resultsByUrl: {
                 $unset: [pageUrlToDelete],
             },
-            deletePageModal: {
+            deletePageConfirm: {
                 $unset: ['pageUrlToDelete'],
             },
         })
@@ -1152,7 +1157,7 @@ export class SidebarContainerLogic extends UILogic<
 
     closeDeletePageModal: EventHandler<'closeDeletePageModal'> = () => {
         return {
-            deletePageModal: {
+            deletePageConfirm: {
                 pageUrlToDelete: { $set: undefined },
             },
         }
