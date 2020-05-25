@@ -45,7 +45,7 @@ type Props = StateProps & DispatchProps & OwnProps
 interface State {}
 
 class DatesFilter extends PureComponent<Props, State> {
-    private togglePopup: React.MouseEventHandler<HTMLButtonElement> = e => {
+    private togglePopup: React.MouseEventHandler = (e) => {
         if (this.props.env === 'inpage' && !this.props.datesFilterDropdown) {
             this.props.resetFilterPopups()
         }
@@ -119,13 +119,13 @@ const mapDispatchToProps: MapDispatchToProps<
     DispatchProps,
     OwnProps,
     RootState
-> = dispatch => ({
-    onStartDateChange: date => dispatch(searchBarActs.setStartDate(date)),
-    onEndDateChange: date => dispatch(searchBarActs.setEndDate(date)),
-    onStartDateTextChange: date =>
+> = (dispatch) => ({
+    onStartDateChange: (date) => dispatch(searchBarActs.setStartDate(date)),
+    onEndDateChange: (date) => dispatch(searchBarActs.setEndDate(date)),
+    onStartDateTextChange: (date) =>
         dispatch(searchBarActs.setStartDateText(date)),
-    onEndDateTextChange: date => dispatch(searchBarActs.setEndDateText(date)),
-    setDatesFilter: value => dispatch(actions.setDatesFilter(value)),
+    onEndDateTextChange: (date) => dispatch(searchBarActs.setEndDateText(date)),
+    setDatesFilter: (value) => dispatch(actions.setDatesFilter(value)),
     changeTooltip: () => {
         // Change tooltip notification to more filters once the user selects date
         dispatch(tooltipActs.setTooltip('more-filters'))
@@ -133,7 +133,4 @@ const mapDispatchToProps: MapDispatchToProps<
     resetFilterPopups: () => dispatch(actions.resetFilterPopups()),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(DatesFilter)
+export default connect(mapStateToProps, mapDispatchToProps)(DatesFilter)

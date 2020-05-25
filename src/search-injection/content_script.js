@@ -23,7 +23,7 @@ export async function initSearchInjection() {
             const searchRes = await requestSearch({ query, limit: 5 })
 
             if (searchRes.docs.length || searchRes.requiresMigration) {
-                handleRender(searchRes, matched)
+                await handleRender(searchRes, matched)
             }
         } catch (err) {
             // Let it fail

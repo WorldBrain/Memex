@@ -1,4 +1,4 @@
-import { browser, Browser } from 'webextension-polyfill-ts'
+import { Browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
 import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import NotificationBackground from 'src/notifications/background'
@@ -47,6 +47,8 @@ import { combineSearchIndex } from 'src/search/search-index'
 import { StorexHubBackground } from 'src/storex-hub/background'
 import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { bindMethod } from 'src/util/functions'
+import { ContentScriptsBackground } from 'src/content-scripts/background'
+import { InPageUIBackground } from 'src/in-page-ui/background'
 import { AnalyticsBackground } from 'src/analytics/background'
 import { Analytics } from 'src/analytics/types'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
@@ -70,6 +72,8 @@ export interface BackgroundModules {
     backupModule: backup.BackupBackgroundModule
     sync: SyncBackground
     bgScript: BackgroundScript
+    contentScripts: ContentScriptsBackground
+    inPageUI: InPageUIBackground
     features: FeatureOptIns
     pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
@@ -128,8 +132,8 @@ export function createBackgroundModules(options: {
         storageManager,
         pageStorage: pages.storage,
         searchIndex,
-        queryTabs: bindMethod(browser.tabs, 'query'),
-        windows: browser.windows,
+        queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
+        windows: options.browserAPIs.windows,
         searchBackgroundModule: search,
         analytics,
         localBrowserStorage: options.browserAPIs.storage.local,
@@ -206,8 +210,8 @@ export function createBackgroundModules(options: {
         eventLog: new EventLogBackground({ storageManager }),
         customLists: new CustomListBackground({
             storageManager,
-            queryTabs: bindMethod(browser.tabs, 'query'),
-            windows: browser.windows,
+            queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
+            windows: options.browserAPIs.windows,
             searchIndex: search.searchIndex,
             pageStorage: pages.storage,
             localBrowserStorage: options.browserAPIs.storage.local,
@@ -256,6 +260,14 @@ export function createBackgroundModules(options: {
         pages,
         bgScript,
         pageFetchBacklog,
+        contentScripts: new ContentScriptsBackground({
+            getTab: bindMethod(options.browserAPIs.tabs, 'get'),
+            injectScriptInTab: (tabId, injection) =>
+                options.browserAPIs.tabs.executeScript(tabId, injection),
+        }),
+        inPageUI: new InPageUIBackground({
+            queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
+        }),
     }
 }
 
@@ -284,12 +296,12 @@ export async function setupBackgroundModules(
     backgroundModules.activityLogger.setupRemoteFunctions()
     backgroundModules.search.setupRemoteFunctions()
     backgroundModules.eventLog.setupRemoteFunctions()
-    backgroundModules.customLists.setupRemoteFunctions()
-    backgroundModules.tags.setupRemoteFunctions()
     backgroundModules.backupModule.setBackendFromStorage()
     backgroundModules.backupModule.setupRemoteFunctions()
     backgroundModules.backupModule.startRecordingChangesIfNeeded()
     backgroundModules.bgScript.setupRemoteFunctions()
+    backgroundModules.contentScripts.setupRemoteFunctions()
+    backgroundModules.inPageUI.setupRemoteFunctions()
     backgroundModules.bgScript.setupWebExtAPIHandlers()
     backgroundModules.bgScript.setupAlarms(alarms)
     backgroundModules.pageFetchBacklog.setupBacklogProcessing()

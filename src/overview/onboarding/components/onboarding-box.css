@@ -222,6 +222,11 @@
     composes: onboardingGif;
 }
 
+.backupImg {
+    width: 40%;
+    margin-bottom: 100px;
+}
+
 .floatingImage {
     animation-name: float, scale-in-center;
     animation-duration: 6s, 1s;

@@ -11,10 +11,7 @@ interface Props {
     loadingYearly: boolean
 }
 
-
-
 export class SubscriptionInnerOptions extends React.Component<Props> {
-
     render() {
         return (
             <div style={styles.subscriptionOptionsContainer}>

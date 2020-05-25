@@ -397,6 +397,10 @@
     }
 }
 
+.commentBtn {
+    /* only used to ID if button is clicked - multiple buttons so cannot use a real `id` att */
+}
+
 .comment {
     &:hover {
         opacity: 0.6;

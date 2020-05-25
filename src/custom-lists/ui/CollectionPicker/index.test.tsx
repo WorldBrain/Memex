@@ -47,7 +47,7 @@ const renderList = (opts: Partial<ListPickerDependencies> = {}) => {
 const findElements = (container) => ({
     container,
     input: container.querySelector('input'),
-    listSearchBox: container.querySelector('#listSearchBox'),
+    listSearchBox: container.querySelector('#pickerSearchBox'),
     listResults: container.querySelector('#listResults'),
 })
 

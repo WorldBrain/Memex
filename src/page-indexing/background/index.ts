@@ -85,14 +85,14 @@ export class PageIndexingBackground {
             .findObjects<PipelineRes>(query)
 
         return Promise.all(
-            pages.map(page =>
+            pages.map((page) =>
                 new Page(this.options.storageManager, page).delete(),
             ),
         ).catch(initErrHandler())
     }
 
     async delPages(urls: string[]): Promise<{ info: any }[]> {
-        const normalizedUrls: string[] = urls.map(url => normalizeUrl(url))
+        const normalizedUrls: string[] = urls.map((url) => normalizeUrl(url))
 
         return this._deletePages({ url: { $in: normalizedUrls } })
     }
@@ -226,17 +226,18 @@ export class PageIndexingBackground {
      * TODO: Better name?
      */
     async createPageViaBmTagActs(props: PageCreationProps) {
-        const {
-            [IDXING_PREF_KEYS.BOOKMARKS]: fullyIndex,
-        } = await browser.storage.local.get(IDXING_PREF_KEYS.BOOKMARKS)
+        if (props.stubOnly == null) {
+            const {
+                [IDXING_PREF_KEYS.BOOKMARKS]: fullyIndex,
+            } = await browser.storage.local.get(IDXING_PREF_KEYS.BOOKMARKS)
 
-        if (props.tabId) {
-            return this.createPageFromTab({
-                stubOnly: !fullyIndex,
-                ...props,
-            })
+            props.stubOnly = !fullyIndex
         }
 
-        return this.createPageFromUrl({ stubOnly: !fullyIndex, ...props })
+        if (props.tabId) {
+            return this.createPageFromTab(props)
+        }
+
+        return this.createPageFromUrl(props)
     }
 }

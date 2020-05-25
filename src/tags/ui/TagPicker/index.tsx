@@ -1,5 +1,7 @@
 import React from 'react'
+import onClickOutside from 'react-onclickoutside'
 import styled, { ThemeProvider } from 'styled-components'
+
 import { StatefulUIElement } from 'src/util/ui-logic'
 import TagPickerLogic, {
     TagPickerDependencies,
@@ -31,6 +33,12 @@ class TagPicker extends StatefulUIElement<
         super(props, new TagPickerLogic(props))
     }
 
+    handleClickOutside = () => {
+        if (this.props.onClickOutside) {
+            this.props.onClickOutside()
+        }
+    }
+
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
         this.processEvent('setSearchInputRef', { ref })
     handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
@@ -48,7 +56,10 @@ class TagPicker extends StatefulUIElement<
     handleResultTagAllPress = (tag: DisplayEntry) =>
         this.processEvent('resultEntryAllPress', { entry: tag })
 
-    handleNewTagAllPress = () => this.processEvent('newEntryAllPress', {})
+    handleNewTagAllPress = () =>
+        this.processEvent('newEntryAllPress', {
+            entry: this.state.newEntryName,
+        })
 
     handleResultTagFocus = (tag: DisplayEntry, index?: number) =>
         this.processEvent('resultEntryFocus', { entry: tag, index })
@@ -78,16 +89,20 @@ class TagPicker extends StatefulUIElement<
         />
     )
 
-    renderNewTagAllTabsButton = () => (
-        <IconStyleWrapper show>
-            <ButtonTooltip tooltipText="Tag all tabs in window" position="left">
-                <ActOnAllTabsButton
-                    size={20}
-                    onClick={this.handleNewTagAllPress}
-                />
-            </ButtonTooltip>
-        </IconStyleWrapper>
-    )
+    renderNewTagAllTabsButton = () =>
+        this.props.actOnAllTabs && (
+            <IconStyleWrapper show>
+                <ButtonTooltip
+                    tooltipText="Tag all tabs in window"
+                    position="left"
+                >
+                    <ActOnAllTabsButton
+                        size={20}
+                        onClick={this.handleNewTagAllPress}
+                    />
+                </ButtonTooltip>
+            </IconStyleWrapper>
+        )
 
     renderEmptyList() {
         if (this.state.newEntryName !== '') {
@@ -138,7 +153,7 @@ class TagPicker extends StatefulUIElement<
                         }
                         onPress={this.handleNewTagPress}
                     >
-                        {this.renderNewTagAllTabsButton}
+                        {this.renderNewTagAllTabsButton()}
                     </AddNewEntry>
                 )}
                 <EntryResultsList
@@ -181,4 +196,4 @@ const EmptyTagsView = styled.div`
     text-align: center;
 `
 
-export default TagPicker
+export default onClickOutside(TagPicker)

@@ -9,7 +9,7 @@ export async function storeTrackingOption(isOptIn, skipEventTrack = false) {
             [SHOULD_TRACK]: isOptIn,
         })
 
-    const trackEvent = force => {
+    const trackEvent = (force) => {
         if (skipEventTrack) {
             return Promise.resolve()
         }

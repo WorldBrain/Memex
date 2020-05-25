@@ -1,6 +1,6 @@
 import { UILogic, UIEvent } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
-import { KeyEvent, DisplayEntry } from './types'
+import { KeyEvent, DisplayEntry, PickerUpdateHandler } from './types'
 
 export const INITIAL_STATE: GenericPickerState = {
     query: '',
@@ -21,15 +21,12 @@ export interface GenericPickerState {
 }
 
 export interface GenericPickerDependencies {
-    onUpdateEntrySelection: (
-        entries: string[],
-        added: string,
-        deleted: string,
-    ) => Promise<void>
+    onUpdateEntrySelection: PickerUpdateHandler
     queryEntries: (query: string) => Promise<string[]>
     actOnAllTabs?: (query: string) => Promise<void>
+    onEscapeKeyDown?: () => void | Promise<void>
     loadDefaultSuggestions: () => string[] | Promise<string[]>
-    initialSelectedEntries?: () => Promise<string[]>
+    initialSelectedEntries?: () => string[] | Promise<string[]>
     children?: any
 }
 
@@ -41,7 +38,7 @@ export type GenericPickerEvent = UIEvent<{
     searchInputChanged: { query: string }
     selectedEntryPress: { entry: string }
     resultEntryAllPress: { entry: DisplayEntry }
-    newEntryAllPress: {}
+    newEntryAllPress: { entry: string }
     resultEntryPress: { entry: DisplayEntry }
     resultEntryFocus: { entry: DisplayEntry; index: number }
     newEntryPress: { entry: string }
@@ -60,7 +57,7 @@ export default abstract class GenericPickerLogic extends UILogic<
 > {
     private searchInputRef?: HTMLInputElement
 
-    constructor(private dependencies: GenericPickerDependencies) {
+    constructor(protected dependencies: GenericPickerDependencies) {
         super()
     }
 
@@ -92,7 +89,10 @@ export default abstract class GenericPickerLogic extends UILogic<
     init = async () => {
         this.emitMutation({ loadingSuggestions: { $set: true } })
 
-        const initialSelectedEntries = await this.dependencies.initialSelectedEntries()
+        const initialSelectedEntries = this.dependencies.initialSelectedEntries
+            ? await this.dependencies.initialSelectedEntries()
+            : []
+
         const defaultSuggestions =
             typeof this.dependencies.loadDefaultSuggestions === 'string'
                 ? this.dependencies.loadDefaultSuggestions
@@ -161,6 +161,10 @@ export default abstract class GenericPickerLogic extends UILogic<
                 )
             }
         }
+
+        if (key === 'Escape' && this.dependencies.onEscapeKeyDown) {
+            return this.dependencies.onEscapeKeyDown()
+        }
     }
 
     searchInputChanged = async ({
@@ -169,7 +173,6 @@ export default abstract class GenericPickerLogic extends UILogic<
     }: GenericPickerUIEvent<'searchInputChanged'>) => {
         this.emitMutation({
             query: { $set: query },
-            // Opportunistically set the new entry name before searching
             newEntryName: { $set: query },
         })
 
@@ -354,14 +357,12 @@ export default abstract class GenericPickerLogic extends UILogic<
     }
 
     newEntryAllPress = async ({
-        event: {},
+        event: { entry },
         previousState,
     }: GenericPickerUIEvent<'newEntryAllPress'>) => {
-        const entry = this._validateEntry(previousState.query)
+        const name = this._validateEntry(entry)
         await this.newEntryPress({ event: { entry: name }, previousState })
-        this._processingUpstreamOperation = this.dependencies.actOnAllTabs(
-            entry,
-        )
+        this._processingUpstreamOperation = this.dependencies.actOnAllTabs(name)
     }
 
     resultEntryFocus = ({
@@ -429,11 +430,11 @@ export default abstract class GenericPickerLogic extends UILogic<
         }
 
         try {
-            await this.dependencies.onUpdateEntrySelection(
-                selectedEntries,
+            await this.dependencies.onUpdateEntrySelection({
+                selected: selectedEntries,
                 added,
                 deleted,
-            )
+            })
         } catch (e) {
             this._undoAfterError({
                 displayEntries,

@@ -23,6 +23,7 @@ import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { tags, collections } from 'src/util/remote-functions-background'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 const styles = require('./result-list.css')
 
@@ -133,11 +134,10 @@ class ResultListContainer extends PureComponent<Props, State> {
         }
     }
 
-    handleTagUpdate = (index: number) => async (
-        _: string[],
-        added: string,
-        deleted: string,
-    ) => {
+    handleTagUpdate: (i: number) => PickerUpdateHandler = (index) => async ({
+        added,
+        deleted,
+    }) => {
         const url = this.props.searchResults[index].url
         const backendResult = tags.updateTagForPage({
             added,
@@ -154,11 +154,10 @@ class ResultListContainer extends PureComponent<Props, State> {
         return backendResult
     }
 
-    handleListUpdate = (index: number) => async (
-        _: string[],
-        added: string,
-        deleted: string,
-    ) => {
+    handleListUpdate: (i: number) => PickerUpdateHandler = (index) => async ({
+        added,
+        deleted,
+    }) => {
         const url = this.props.searchResults[index].url
         const backendResult = collections.updateListForPage({
             added,
@@ -224,9 +223,9 @@ class ResultListContainer extends PureComponent<Props, State> {
         )
     }
 
-    private renderTagHolder = ({ tags }, resultIndex) => (
+    private renderTagHolder = ({ tags: tagsToRender }, resultIndex) => (
         <TagHolder
-            tags={[...new Set([...tags])]}
+            tags={[...new Set([...tagsToRender])]}
             maxTagsLimit={constants.SHOWN_TAGS_LIMIT}
             setTagManagerRef={this.trackDropdownRef}
             handlePillClick={this.props.handlePillClick}
@@ -327,7 +326,11 @@ class ResultListContainer extends PureComponent<Props, State> {
 
     private renderResultItems() {
         if (this.props.isNewSearchLoading) {
-            return <LoadingIndicator />
+            return (
+                <div className={styles.loadingBox}>
+                    <LoadingIndicator />
+                </div>
+            )
         }
 
         const resultItems = this.resultsStateToItems()
@@ -345,7 +348,11 @@ class ResultListContainer extends PureComponent<Props, State> {
 
         // Add loading spinner to the list end, if loading
         if (this.props.isLoading) {
-            resultItems.push(<LoadingIndicator key="loading" />)
+            resultItems.push(
+                <div className={styles.loadingBox}>
+                    <LoadingIndicator key="loading" />
+                </div>,
+            )
         }
 
         return resultItems

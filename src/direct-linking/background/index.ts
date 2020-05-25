@@ -17,22 +17,30 @@ import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import SocialBG from 'src/social-integration/background'
 import { buildPostUrlId } from 'src/social-integration/util'
-import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
 import { SearchIndex } from 'src/search'
 import PageStorage from 'src/page-indexing/background/storage'
 import { Annotation } from 'src/annotations/types'
+import { AnnotationInterface, CreateAnnotationParams } from './types'
+import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
+import { BrowserSettingsStore } from 'src/util/settings'
+import { updateSuggestionsCache } from 'src/tags/utils'
+import { TagsSettings } from 'src/tags/background/types'
+import { limitSuggestionsStorageLength } from 'src/tags/background'
 
 interface TabArg {
     tab: Tabs.Tab
 }
 
 export default class DirectLinkingBackground {
+    remoteFunctions: AnnotationInterface<'provider'>
     private backend: DirectLinkingBackend
     annotationStorage: AnnotationStorage
     private sendAnnotation: AnnotationSender
     private requests: AnnotationRequests
     private socialBg: SocialBG
     private _normalizeUrl: URLNormalizer
+    private localStorage: BrowserSettingsStore<TagsSettings>
 
     constructor(
         private options: {
@@ -67,33 +75,36 @@ export default class DirectLinkingBackground {
             this.backend,
             this.sendAnnotation,
         )
+
+        this.remoteFunctions = {
+            createDirectLink: this.createDirectLink.bind(this),
+            getAllAnnotationsByUrl: this.getAllAnnotationsByUrl.bind(this),
+            createAnnotation: this.createAnnotation.bind(this),
+            editAnnotation: this.editAnnotation.bind(this),
+            editAnnotationTags: this.editAnnotationTags.bind(this),
+            updateAnnotationTags: this.updateAnnotationTags.bind(this),
+            deleteAnnotation: this.deleteAnnotation.bind(this),
+            getAnnotationTags: this.getTagsByAnnotationUrl.bind(this),
+            addAnnotationTag: this.addTagForAnnotation.bind(this),
+            delAnnotationTag: this.delTagForAnnotation.bind(this),
+            followAnnotationRequest: this.followAnnotationRequest.bind(this),
+            toggleSidebarOverlay: this.toggleSidebarOverlay.bind(this),
+            toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
+            insertAnnotToList: this.insertAnnotToList.bind(this),
+            removeAnnotFromList: this.removeAnnotFromList.bind(this),
+            goToAnnotationFromSidebar: this.goToAnnotationFromDashboardSidebar.bind(
+                this,
+            ),
+        }
+
+        this.localStorage = new BrowserSettingsStore<TagsSettings>(
+            options.browserAPIs.storage.local,
+            { prefix: 'tags_' },
+        )
     }
 
     setupRemoteFunctions() {
-        makeRemotelyCallable(
-            {
-                createDirectLink: this.createDirectLink.bind(this),
-                getAllAnnotationsByUrl: this.getAllAnnotationsByUrl.bind(this),
-                createAnnotation: this.createAnnotation.bind(this),
-                editAnnotation: this.editAnnotation.bind(this),
-                editAnnotationTags: this.editAnnotationTags.bind(this),
-                deleteAnnotation: this.deleteAnnotation.bind(this),
-                getAnnotationTags: this.getTagsByAnnotationUrl.bind(this),
-                addAnnotationTag: this.addTagForAnnotation.bind(this),
-                delAnnotationTag: this.delTagForAnnotation.bind(this),
-                followAnnotationRequest: this.followAnnotationRequest.bind(
-                    this,
-                ),
-                toggleSidebarOverlay: this.toggleSidebarOverlay.bind(this),
-                toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
-                insertAnnotToList: this.insertAnnotToList.bind(this),
-                removeAnnotFromList: this.removeAnnotFromList.bind(this),
-                goToAnnotationFromSidebar: this.goToAnnotationFromSidebar.bind(
-                    this,
-                ),
-            },
-            { insertExtraArg: true },
-        )
+        makeRemotelyCallable(this.remoteFunctions, { insertExtraArg: true })
     }
 
     setupRequestInterceptor() {
@@ -112,7 +123,7 @@ export default class DirectLinkingBackground {
         await remoteFunction(functionName, { tabId: currentTab.id })(...args)
     }
 
-    async goToAnnotationFromSidebar(
+    async goToAnnotationFromDashboardSidebar(
         { tab }: TabArg,
         {
             url,
@@ -122,20 +133,44 @@ export default class DirectLinkingBackground {
             annotation: Annotation
         },
     ) {
+        url = url.startsWith('http') ? url : `https://${url}`
+
         const activeTab = await this.options.browserAPIs.tabs.create({
             active: true,
             url,
         })
 
+        const pageAnnotations = await this.getAllAnnotationsByUrl(
+            { tab },
+            { url },
+        )
+        const highlightables = pageAnnotations.filter((annot) => annot.selector)
+
         const listener = async (tabId, changeInfo) => {
+            // Necessary to insert the ribbon/sidebar in case the user has turned  it off.
             if (tabId === activeTab.id && changeInfo.status === 'complete') {
-                // Necessary to insert the ribbon/sidebar in case the user has turned
-                // it off.
-                await runInTab<RibbonInteractionsInterface>(
-                    tabId,
-                ).insertRibbon({ forceExpandRibbon: true })
-                await remoteFunction('goToAnnotation', { tabId })(annotation)
-                this.options.browserAPIs.tabs.onUpdated.removeListener(listener)
+                try {
+                    // TODO: This wait is a hack to mitigate trying to use the remote function `showSidebar` before it's ready
+                    // it should be registered in the tab setup, but is not available immediately on this tab onUpdate handler
+                    // since it is fired on the page complete, not on our content script setup complete.
+                    await new Promise((resolve) => setTimeout(resolve, 500))
+
+                    await runInTab<InPageUIContentScriptRemoteInterface>(
+                        tabId,
+                    ).showSidebar({
+                        annotationUrl: annotation.url,
+                        action: 'show_annotation',
+                    })
+                    await runInTab<InPageUIContentScriptRemoteInterface>(
+                        tabId,
+                    ).goToHighlight(annotation, highlightables)
+                } catch (err) {
+                    throw err
+                } finally {
+                    this.options.browserAPIs.tabs.onUpdated.removeListener(
+                        listener,
+                    )
+                }
             }
         }
         this.options.browserAPIs.tabs.onUpdated.addListener(listener)
@@ -170,28 +205,31 @@ export default class DirectLinkingBackground {
 
         const { id: tabId } = currentTab
 
-        const forceExpandRibbon =
-            openToTags ||
-            openToComment ||
-            openToCollections ||
-            openToBookmark ||
-            openSidebar
-
-        // Make sure that the ribbon is inserted before trying to open the
-        // sidebar.
-        await runInTab<RibbonInteractionsInterface>(tabId).insertRibbon({
-            override,
-            forceExpandRibbon,
-            openToCollections,
-            openToBookmark,
-            openToComment,
-            openToTags,
-        })
-
-        if (!forceExpandRibbon || openSidebar) {
-            await remoteFunction('openSidebar', { tabId })({
-                anchor,
-                activeUrl,
+        if (openSidebar) {
+            await runInTab<InPageUIContentScriptRemoteInterface>(
+                tabId,
+            ).showSidebar(
+                activeUrl && {
+                    anchor,
+                    annotationUrl: activeUrl,
+                    action: 'show_annotation',
+                },
+            )
+        } else {
+            const actions: { [Action in InPageUIRibbonAction]: boolean } = {
+                tag: openToTags,
+                comment: openToComment,
+                bookmark: openToBookmark,
+                list: openToCollections,
+            }
+            const actionPair = Object.entries(actions).findIndex((pair) => {
+                return pair[1]
+            })
+            const action: InPageUIRibbonAction = actionPair[0]
+            await runInTab<InPageUIContentScriptRemoteInterface>(
+                tabId,
+            ).showRibbon({
+                action,
             })
         }
     }
@@ -200,7 +238,7 @@ export default class DirectLinkingBackground {
         this.requests.followAnnotationRequest(tab.id)
     }
 
-    async createDirectLink({ tab }: TabArg, request) {
+    createDirectLink = async ({ tab }: TabArg, request) => {
         const pageTitle = tab.title
         const result = await this.backend.createDirectLink(request)
         await this.annotationStorage.createAnnotation({
@@ -218,11 +256,19 @@ export default class DirectLinkingBackground {
         return result
     }
 
-    async getAllAnnotationsByUrl(
+    getAllAnnotationsByUrl = async (
         { tab }: TabArg,
         { url, limit = 1000, skip = 0, ...params }: AnnotSearchParams,
         isSocialPost?: boolean,
-    ) {
+    ): Promise<
+        Array<
+            Annotation & {
+                hasBookmark: boolean
+                createdWhen: number
+                lastEdited?: number
+            }
+        >
+    > => {
         url = url == null && tab != null ? tab.url : url
         url = isSocialPost
             ? await this.lookupSocialId(url)
@@ -237,56 +283,58 @@ export default class DirectLinkingBackground {
             },
         )
 
-        const annotResults = await Promise.all(
+        const annotResults = (await Promise.all(
             annotations.map(
-                async ({ createdWhen, lastEdited, ...annotation }) => ({
-                    ...annotation,
-                    hasBookmark: await this.annotationStorage.annotHasBookmark({
-                        url: annotation.url,
-                    }),
-                    createdWhen: createdWhen.getTime(),
-                    lastEdited:
-                        lastEdited && lastEdited instanceof Date
-                            ? lastEdited.getTime()
-                            : undefined,
-                }),
+                async ({ createdWhen, lastEdited, ...annotation }) => {
+                    const tags = await this.annotationStorage.getTagsByAnnotationUrl(
+                        annotation.url,
+                    )
+
+                    return {
+                        ...annotation,
+                        hasBookmark: await this.annotationStorage.annotHasBookmark(
+                            {
+                                url: annotation.url,
+                            },
+                        ),
+                        createdWhen: createdWhen.getTime(),
+                        tags: tags.map((t) => t.name),
+                        lastEdited:
+                            lastEdited && lastEdited instanceof Date
+                                ? lastEdited.getTime()
+                                : undefined,
+                    }
+                },
             ),
-        )
+        )) as any
 
         return annotResults
     }
 
     async createAnnotation(
         { tab }: TabArg,
-        {
-            url,
-            title,
-            comment,
-            body,
-            selector,
-            bookmarked,
-            isSocialPost,
-            createdWhen = new Date(),
-        },
+        toCreate: CreateAnnotationParams,
         { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
-        let pageUrl = this._normalizeUrl(url == null ? tab.url : url)
+        let pageUrl = this._normalizeUrl(
+            toCreate.url == null ? tab.url : toCreate.url,
+        )
 
-        if (isSocialPost) {
+        if (toCreate.isSocialPost) {
             pageUrl = await this.lookupSocialId(pageUrl)
         }
 
-        const pageTitle = title == null ? tab.title : title
+        const pageTitle = toCreate.title == null ? tab.title : toCreate.title
         const uniqueUrl = `${pageUrl}/#${Date.now()}`
 
         await this.annotationStorage.createAnnotation({
             pageUrl,
             url: uniqueUrl,
             pageTitle,
-            comment,
-            body,
-            selector,
-            createdWhen,
+            comment: toCreate.comment,
+            body: toCreate.body,
+            selector: toCreate.selector,
+            createdWhen: toCreate.createdWhen,
         })
 
         // Attempt to (re-)index, if user preference set, but don't wait for it
@@ -294,7 +342,7 @@ export default class DirectLinkingBackground {
             this.annotationStorage.indexPageFromTab(tab)
         }
 
-        if (bookmarked) {
+        if (toCreate.bookmarked) {
             await this.toggleAnnotBookmark({ tab }, { url: uniqueUrl })
         }
 
@@ -342,7 +390,24 @@ export default class DirectLinkingBackground {
         return this.annotationStorage.getTagsByAnnotationUrl(url)
     }
 
+    async _updateTagSuggestionsCache(args: {
+        added?: string
+        removed?: string
+    }) {
+        return updateSuggestionsCache({
+            ...args,
+            suggestionLimit: limitSuggestionsStorageLength,
+            getCache: async () => {
+                const suggestions = await this.localStorage.get('suggestions')
+                return suggestions ?? []
+            },
+            setCache: (suggestions: string[]) =>
+                this.localStorage.set('suggestions', suggestions),
+        })
+    }
+
     async addTagForAnnotation(_, { tag, url }) {
+        await this._updateTagSuggestionsCache({ added: tag })
         return this.annotationStorage.modifyTags(true)(tag, url)
     }
 
@@ -356,6 +421,38 @@ export default class DirectLinkingBackground {
             tagsToBeDeleted,
             url,
         )
+    }
+
+    async updateAnnotationTags(
+        _,
+        { tags, url }: { tags: string[]; url: string },
+    ) {
+        const existingTags = await this.annotationStorage.getTagsByAnnotationUrl(
+            url,
+        )
+
+        const existingTagsSet = new Set(existingTags.map((tag) => tag.name))
+        const incomingTagsSet = new Set(tags)
+        const tagsToBeDeleted: string[] = []
+        const tagsToBeAdded: string[] = []
+
+        for (const incomingTag of incomingTagsSet) {
+            if (!existingTagsSet.has(incomingTag)) {
+                tagsToBeAdded.push(incomingTag)
+            }
+        }
+
+        for (const existingTag of existingTagsSet) {
+            if (!incomingTagsSet.has(existingTag)) {
+                tagsToBeDeleted.push(existingTag)
+            }
+        }
+
+        return this.editAnnotationTags(_, {
+            url,
+            tagsToBeAdded,
+            tagsToBeDeleted,
+        })
     }
 
     private async lookupSocialId(id: string): Promise<string> {

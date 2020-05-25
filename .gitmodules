@@ -43,3 +43,6 @@
 [submodule "external/@worldbrain/storex-hub-interfaces"]
 	path = external/@worldbrain/storex-hub-interfaces
 	url = https://github.com/WorldBrain/storex-hub-interfaces
+[submodule "external/ui-logic"]
+	path = external/ui-logic
+	url = https://github.com/ShishKabab/ui-logic.git

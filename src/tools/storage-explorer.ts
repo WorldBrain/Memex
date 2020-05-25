@@ -71,8 +71,8 @@ async function main() {
 
     const display = console['log'].bind(console) // Circumvent linter
     if (args.command === 'list-operations') {
-        const report = mapValues(storageModules, storageModule =>
-            mapValues(storageModule.operations, operation => {
+        const report = mapValues(storageModules, (storageModule) =>
+            mapValues(storageModule.operations, (operation) => {
                 operation = { ...operation }
                 if (operation.operation === 'createObject') {
                     delete operation.args

@@ -87,6 +87,14 @@
             ],
             "user-logic": ["external/user-logic/ts"],
             "user-logic/lib/*": ["external/user-logic/ts/*"],
+            "ui-logic-core": ["external/ui-logic/packages/ui-logic-core/ts"],
+            "ui-logic-core/lib/*": [
+                "external/ui-logic/packages/ui-logic-core/ts/*"
+            ],
+            "ui-logic-react": ["external/ui-logic/packages/ui-logic-react/ts"],
+            "ui-logic-react/lib/*": [
+                "external/ui-logic/packages/ui-logic-react/ts/*"
+            ],
             "simple-signalling": ["external/simple-signalling/ts"],
             "simple-signalling/lib/*": ["external/simple-signalling/ts/*"],
             "src/*": ["src/*"]

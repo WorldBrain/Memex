@@ -57,7 +57,7 @@ export const fetchAnnotationsForPageUrl: (
 }
 export const fetchMoreAnnotationsForPageUrl: (
     isSocialPost?: boolean,
-) => Thunk = isSocialPost => async (dispatch, getState) => {
+) => Thunk = (isSocialPost) => async (dispatch, getState) => {
     dispatch(setIsLoading(true))
 
     const state = getState()
@@ -123,12 +123,7 @@ export const createAnnotation: (
         dispatch(appendAnnotations([annotation]))
 
         if (!options?.skipRender) {
-            renderHighlight(
-                annotation as Highlight,
-                undefined,
-                undefined,
-                toggleSidebarOverlay,
-            )
+            renderHighlight(annotation as Highlight, toggleSidebarOverlay)
         }
 
         dispatch(checkAndSetCongratsMessage())
@@ -153,7 +148,7 @@ export const editAnnotation: (
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
     const annotations = selectors.annotations(state)
-    const index = annotations.findIndex(annot => annot.url === url)
+    const index = annotations.findIndex((annot) => annot.url === url)
 
     let annotation
     let body
@@ -188,7 +183,7 @@ export const editAnnotation: (
         dispatch(setAnnotations(newAnnotations))
     }
 }
-export const deleteAnnotation: (url: string) => Thunk = url => async (
+export const deleteAnnotation: (url: string) => Thunk = (url) => async (
     dispatch,
     getState,
 ) => {
@@ -198,7 +193,7 @@ export const deleteAnnotation: (url: string) => Thunk = url => async (
 
     if (annotationsManager) {
         await annotationsManager.deleteAnnotation(url)
-        const newAnnotations = annotations.filter(annot => annot.url !== url)
+        const newAnnotations = annotations.filter((annot) => annot.url !== url)
         dispatch(setAnnotations(newAnnotations))
     }
 }
@@ -243,9 +238,7 @@ export const searchAnnotations: () => Thunk = () => async (
         if (!searchParams.query) {
             const { annotsByDay } = annotSearchResult
 
-            const sortedKeys = Object.keys(annotsByDay)
-                .sort()
-                .reverse()
+            const sortedKeys = Object.keys(annotsByDay).sort().reverse()
 
             for (const day of sortedKeys) {
                 const cluster = annotsByDay[day]

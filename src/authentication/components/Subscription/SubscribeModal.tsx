@@ -11,11 +11,7 @@ type Props = {
 class SubscribeModal extends React.PureComponent<Props & AuthContextInterface> {
     render() {
         return (
-            <Modal
-                onClose={this.props.onClose}
-                onClick={this.props.onClose}
-                large
-            >
+            <Modal onClose={this.props.onClose} large>
                 <div style={styles.container}>
                     <Subscribe onClose={this.props.onClose} />
                 </div>

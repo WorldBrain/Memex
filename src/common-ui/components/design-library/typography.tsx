@@ -150,5 +150,5 @@ export const WhiteSpacer30 = styled.div`
 `
 
 export const HoverColor = styled.div`
-    background-color: #dadada
+    background-color: #dadada;
 `

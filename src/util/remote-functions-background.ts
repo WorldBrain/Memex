@@ -8,7 +8,9 @@ import { FeaturesInterface } from 'src/feature-opt-in/background/feature-opt-ins
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 
-export interface RemoteFunctionImplementations {
+export interface RemoteFunctionImplementations<
+    Role extends 'provider' | 'caller'
+> {
     notifications: NotificationCreator
     bookmarks: BookmarksInterface
     auth: AuthRemoteFunctionsInterface
@@ -21,7 +23,7 @@ export interface RemoteFunctionImplementations {
 
 // See `src/background.ts` for the concrete remote function bindings
 // (in setupRemoteFunctionsImplementations and elsewhere)
-export const remoteFunctions: RemoteFunctionImplementations = {
+export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
     notifications: runInBackground<NotificationCreator>(),
     bookmarks: runInBackground<BookmarksInterface>(),
     auth: runInBackground<AuthRemoteFunctionsInterface>(),

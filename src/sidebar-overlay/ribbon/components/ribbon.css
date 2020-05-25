@@ -18,7 +18,7 @@
     justify-content: center;
     align-self: center;
     right: 0;
-    width: 34px;
+    width: 35px;
     top: 25%;
     height: 50%;
     z-index: 2147483645;
@@ -39,7 +39,7 @@
 
 .ribbonExpanded {
     display: flex;
-    width: 34px;
+    width: 35px;
     transition: all 0.1s ease-in-out;
 }
 
@@ -50,7 +50,7 @@
     box-shadow: none;
     background: white;
     height: 105vh;
-    width: 34px;
+    width: 35px;
     top: 0px;
 
     & .removeSidebar {

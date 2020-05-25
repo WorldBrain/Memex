@@ -43,7 +43,7 @@ type Props = StateProps & DispatchProps & OwnProps
 interface State {}
 
 class UsersFilter extends PureComponent<Props, State> {
-    private togglePopup: React.MouseEventHandler<HTMLButtonElement> = e => {
+    private togglePopup: React.MouseEventHandler = (e) => {
         if (this.props.env === 'inpage' && !this.props.userFilterDropdown) {
             this.props.resetFilterPopups()
         }
@@ -110,23 +110,20 @@ const mapDispatchToProps: MapDispatchToProps<
     DispatchProps,
     OwnProps,
     RootState
-> = dispatch => ({
-    addIncUserFilter: user => {
+> = (dispatch) => ({
+    addIncUserFilter: (user) => {
         dispatch(actions.addIncUserFilter(user))
         // dispatch(actions.fetchSuggestedUsers())
     },
-    delIncUserFilter: user => dispatch(actions.delIncUserFilter(user)),
-    addExcUserFilter: user => dispatch(actions.addExcUserFilter(user)),
-    delExcUserFilter: user => dispatch(actions.delExcUserFilter(user)),
+    delIncUserFilter: (user) => dispatch(actions.delIncUserFilter(user)),
+    addExcUserFilter: (user) => dispatch(actions.addExcUserFilter(user)),
+    delExcUserFilter: (user) => dispatch(actions.delExcUserFilter(user)),
     clearUserFilters: () => {
         dispatch(actions.setIncUserFilters([]))
         dispatch(actions.setExcUserFilters([]))
     },
-    setUserFilter: value => dispatch(actions.setUserFilter(value)),
+    setUserFilter: (value) => dispatch(actions.setUserFilter(value)),
     resetFilterPopups: () => dispatch(actions.resetFilterPopups()),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(UsersFilter)
+export default connect(mapStateToProps, mapDispatchToProps)(UsersFilter)

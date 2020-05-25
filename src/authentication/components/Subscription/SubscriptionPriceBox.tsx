@@ -10,7 +10,6 @@ import PricingTable, {
 } from 'src/authentication/components/Subscription/pricing.style'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 
-
 interface Props {
     onClick?: (...params: any) => any
     title: string
@@ -19,15 +18,14 @@ interface Props {
 }
 
 export class SubscriptionPriceBox extends React.PureComponent<Props> {
-
     public render() {
         return (
             <PricingTable onClick={this.props.onClick}>
                 {this.props.loading ? (
-                        <PricingBox>
-                            <LoadingIndicator />
-                        </PricingBox>
-                    ):(
+                    <PricingBox>
+                        <LoadingIndicator />
+                    </PricingBox>
+                ) : (
                     <PricingBox>
                         <PricingHead>
                             <PricingHeadTitle>
@@ -36,7 +34,9 @@ export class SubscriptionPriceBox extends React.PureComponent<Props> {
                             </PricingHeadTitle>
                         </PricingHead>
                         <PricingPrice>
-                            <span>{this.props.price ? this.props.price : ' '}</span>
+                            <span>
+                                {this.props.price ? this.props.price : ' '}
+                            </span>
                         </PricingPrice>
                     </PricingBox>
                 )}
