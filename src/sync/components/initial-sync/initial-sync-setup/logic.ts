@@ -35,6 +35,11 @@ export default class InitialSyncSetupLogic extends UILogic<
     InitialSyncSetupEvent
 > {
     eventEmitter: TypedEventEmitter<InitialSyncEvents> = null
+    private _started: number
+
+    private get runningTime() {
+        return this._started ? now() - this._started : 0
+    }
 
     constructor(private dependencies: InitialSyncSetupDependencies) {
         super()
@@ -72,7 +77,6 @@ export default class InitialSyncSetupLogic extends UILogic<
 
     updateError = (event: Parameters<FastSyncEvents['error']>[0]) => {
         // console.log('UI Logic received event [roleSwitch]:', event)
-
         this.emitMutation({
             status: { $set: 'sync' },
             error: { $set: event.error },
@@ -92,11 +96,13 @@ export default class InitialSyncSetupLogic extends UILogic<
             this.eventEmitter.removeAllListeners('roleSwitch')
             this.eventEmitter.removeAllListeners('error')
             this.eventEmitter.removeAllListeners('finished')
+            this.eventEmitter.removeAllListeners('channelTimeout')
         }
     }
 
     start = async () => {
         this.eventEmitter = this.dependencies.getSyncEventEmitter()
+        this._started = now()
         this.registerListeners()
 
         this.emitMutation({
@@ -107,6 +113,8 @@ export default class InitialSyncSetupLogic extends UILogic<
                 $set: await this.dependencies.getInitialSyncMessage(),
             },
         })
+
+        analytics.trackEvent({category: 'Sync',action: 'startInitSync'})
 
         try {
             await this.dependencies.waitForInitialSyncConnected()
@@ -122,6 +130,8 @@ export default class InitialSyncSetupLogic extends UILogic<
             this.emitMutation({
                 status: { $set: 'done' },
             })
+            analytics.trackEvent({category: 'Sync',action: 'finishInitSync', duration: this.runningTime })
+
         } catch (e) {
             this.error(e)
         }

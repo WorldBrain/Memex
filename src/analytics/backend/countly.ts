@@ -54,19 +54,20 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
 
     private enqueueEvent({
         name,
-        value = null,
+        segmentation = null,
+        duration = null,
         count = 1,
     }: {
         name: string
-        value?: any
+        segmentation?: {}
+        duration?: number
         count?: number
     }) {
         return this.enqueue('add_event', {
             key: name,
             count,
-            segmentation: {
-                ...(value ? { value } : {}),
-            },
+            ...(segmentation ? { segmentation } : {}),
+            ...(duration ? { dur: duration } : {}),
         })
     }
 
@@ -78,7 +79,8 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
 
         this.enqueueEvent({
             name: `${event.category}::${event.action}`,
-            value: event.value,
+            segmentation: event.segmentation,
+            duration: event.duration,
         })
     }
 }
