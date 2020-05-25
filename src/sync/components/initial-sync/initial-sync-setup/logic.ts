@@ -3,6 +3,9 @@ import TypedEventEmitter from 'typed-emitter'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 import { FastSyncEvents } from '@worldbrain/storex-sync/lib/fast-sync'
 import * as Raven from 'src/util/raven'
+import analytics from 'src/analytics'
+import { now } from 'moment'
+import { InitialSyncError } from 'src/sync/components/types'
 
 type SyncSetupState = 'introduction' | 'pair' | 'sync' | 'done'
 
@@ -18,6 +21,7 @@ export type InitialSyncSetupEvent = UIEvent<{
     start: {}
     backToIntroduction: {}
     cancel: {}
+    retry: {}
 }>
 
 export interface InitialSyncSetupDependencies {
@@ -87,6 +91,9 @@ export default class InitialSyncSetupLogic extends UILogic<
         this.eventEmitter.on('progress', this.updateProgress)
         this.eventEmitter.on('roleSwitch', this.updateRole)
         this.eventEmitter.on('error', this.updateError)
+        this.eventEmitter.on('channelTimeout', () =>
+            this.updateError({ error: 'Timed out' }),
+        )
         this.eventEmitter.on('finished', this.done)
     }
 
@@ -114,7 +121,7 @@ export default class InitialSyncSetupLogic extends UILogic<
             },
         })
 
-        analytics.trackEvent({category: 'Sync',action: 'startInitSync'})
+        analytics.trackEvent({ category: 'Sync', action: 'startInitSync' })
 
         try {
             await this.dependencies.waitForInitialSyncConnected()
@@ -130,8 +137,11 @@ export default class InitialSyncSetupLogic extends UILogic<
             this.emitMutation({
                 status: { $set: 'done' },
             })
-            analytics.trackEvent({category: 'Sync',action: 'finishInitSync', duration: this.runningTime })
-
+            analytics.trackEvent({
+                category: 'Sync',
+                action: 'finishInitSync',
+                duration: this.runningTime,
+            })
         } catch (e) {
             this.error(e)
         }
@@ -141,9 +151,14 @@ export default class InitialSyncSetupLogic extends UILogic<
         return this.dependencies.abortInitialSync()
     }
 
+    retry = () => {
+        return this.backToIntroduction()
+    }
+
     backToIntroduction = () => {
         this.emitMutation({
             status: { $set: 'introduction' },
+            stage: { $set: '1/2' },
         })
     }
 
@@ -154,9 +169,14 @@ export default class InitialSyncSetupLogic extends UILogic<
     }
 
     error(e) {
-        Raven.captureException(e)
+        Raven.captureException(new InitialSyncError(e))
         this.emitMutation({
             error: { $set: `${e}` },
+        })
+        analytics.trackEvent({
+            category: 'Sync',
+            action: 'failInitSync',
+            duration: this.runningTime,
         })
     }
 }

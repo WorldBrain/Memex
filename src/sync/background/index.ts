@@ -175,5 +175,11 @@ export default class SyncBackground extends SyncService {
         this.initialSync.events.on('finished', (args) => {
             return remoteEmitter.emit('finished', args)
         })
+        this.initialSync.events.on('channelTimeout', () => {
+            return remoteEmitter.emit('channelTimeout', {})
+        })
+        this.initialSync.events.on('packageStalled', () => {
+            return remoteEmitter.emit('packageStalled', {})
+        })
     }
 }
