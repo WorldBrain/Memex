@@ -52,6 +52,7 @@ import { InPageUIBackground } from 'src/in-page-ui/background'
 import { AnalyticsBackground } from 'src/analytics/background'
 import { Analytics } from 'src/analytics/types'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
+import { PipelineRes } from 'src/search'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -172,13 +173,14 @@ export function createBackgroundModules(options: {
         xhr: new XMLHttpRequest(),
     })
 
+    const storePageContent = async (content: PipelineRes): Promise<void> => {
+        await pages.storage.createOrUpdatePage(content)
+    }
     const pageFetchBacklog = new PageFetchBacklogBackground({
         storageManager,
         connectivityChecker,
         fetchPageData: options.fetchPageDataProcessor,
-        storePageContent: async (content) => {
-            await pages.storage.createOrUpdatePage(content)
-        },
+        storePageContent,
     })
 
     const postReceiveProcessor = options.includePostSyncProcessor
@@ -238,6 +240,21 @@ export function createBackgroundModules(options: {
         }),
         storexHub: new StorexHubBackground({
             storageManager,
+            localBrowserStorage: options.browserAPIs.storage.local,
+            fetchPageData: options.fetchPageDataProcessor,
+            storePageContent,
+            addVisit: (visit) => pages.addVisit(visit.url, visit.time),
+            addBookmark: async (bookmark) => {
+                if (!(await bookmarks.storage.pageHasBookmark(bookmark.url))) {
+                    await bookmarks.addBookmark(bookmark)
+                }
+            },
+            addTags: (params) =>
+                Promise.all(
+                    params.tags.map((tag) =>
+                        tags.addTagToPage({ url: params.url, tag }),
+                    ),
+                ),
         }),
         features: new FeatureOptIns(),
         pages,
