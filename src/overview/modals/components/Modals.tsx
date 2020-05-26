@@ -14,7 +14,7 @@ const modalsMap = {
         <SubscribeModal onClose={onClose} {...modalOptions} />
     ),
     ReaderView: ({ modalOptions, onClose }) => (
-        <ViewerModal onClose={onClose} {...modalOptions} />
+        <ViewerModal handleClick={onClose} {...modalOptions} />
     ),
 }
 

@@ -44,16 +44,13 @@ class Overlay extends Component<Props> {
         }
     }
 
-    handleClick = (event) =>
-        this.props.onClick ? this.props.onClick(event) : null
-
     handleInnerClick = (event) => event.stopPropagation()
 
     renderMain() {
         const { className, innerClassName, children } = this.props
 
         return (
-            <OuterDiv className={className} onClick={this.handleClick}>
+            <OuterDiv className={className} onClick={this.props.onClick}>
                 <div className={innerClassName} onClick={this.handleInnerClick}>
                     {children}
                 </div>
@@ -87,7 +84,7 @@ export const OuterDiv = styled.div`
     right: 0;
     z-index: 2147483646;
     background: rgba(0, 0, 0, 0.3);
-    cursor: ${(props) => (props.onClick == null ? 'default' : 'pointer')};
+    cursor: ${(props) => (props.onClick ? 'default' : 'pointer')};
     justify-content: center;
     align-items: center;
 `
