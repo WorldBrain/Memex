@@ -72,7 +72,7 @@ const fetchPageData: FetchPageData = ({
          * @return {Promise<any>} Resolves to an object containing `content` and `favIconURI` data
          *  fetched from the DOM pointed at by the `url` of `fetchPageData` call.
          */
-        run = async function() {
+        run = async function () {
             const doc = await req.run()
 
             if (!doc) {
@@ -131,49 +131,44 @@ function fetchDOMFromUrl(
 
     return {
         cancel: () => controller.abort(),
-        run: () =>
-            new Promise((resolve, reject) => {
-                fetchTimeout(url, timeout, { signal: controller.signal })
-                    .then(response => {
-                        switch (response.status) {
-                            case 200:
-                                return response.text()
-                            case 429:
-                                throw new FetchPageDataError(
-                                    'Too many requests',
-                                    'temporary',
-                                )
-                            case 500:
-                            case 503:
-                            case 504:
-                                throw new FetchPageDataError(
-                                    'Server currently unavailable',
-                                    'temporary',
-                                )
-                            default:
-                                throw new FetchPageDataError(
-                                    'Data fetch failed',
-                                    'permanent',
-                                )
-                        }
-                    })
-                    .then(text =>
-                        resolve(
-                            new DOMParser().parseFromString(text, 'text/html'),
-                        ),
+        run: async () => {
+            try {
+                const response = await fetchTimeout(url, timeout, {
+                    signal: controller.signal,
+                })
+
+                if (response.status !== 200) {
+                    switchOnResponseErrorStatus(response.status)
+                }
+                const text = await response.text()
+
+                return new DOMParser().parseFromString(text, 'text/html')
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new FetchPageDataError(
+                        'Data fetch timeout',
+                        'temporary',
                     )
-                    .catch(error => {
-                        if (error.name === 'AbortError') {
-                            reject(
-                                new FetchPageDataError(
-                                    'Data fetch timeout',
-                                    'temporary',
-                                ),
-                            )
-                        } else {
-                            reject(error)
-                        }
-                    })
-            }),
+                } else {
+                    throw error
+                }
+            }
+        },
+    }
+}
+
+function switchOnResponseErrorStatus(status: number) {
+    switch (status) {
+        case 429:
+            throw new FetchPageDataError('Too many requests', 'temporary')
+        case 500:
+        case 503:
+        case 504:
+            throw new FetchPageDataError(
+                'Server currently unavailable',
+                'temporary',
+            )
+        default:
+            throw new FetchPageDataError('Data fetch failed', 'permanent')
     }
 }

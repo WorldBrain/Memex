@@ -29,7 +29,7 @@ describe('Search index integration', () => {
             tags: backgroundModules.tags,
             search: (params = {}) =>
                 searchIndex.search({
-                    mapResultsFunc: db => res => {
+                    mapResultsFunc: (db) => (res) => {
                         return res.map(([id, score]) => [id, score])
                     },
                     ...params,
@@ -57,15 +57,15 @@ describe('Search index integration', () => {
         })
 
         // // Add some test tags
-        await tags.addTag({ url: DATA.PAGE_3.url, tag: 'good' })
-        await tags.addTag({ url: DATA.PAGE_3.url, tag: 'quality' })
-        await tags.addTag({ url: DATA.PAGE_2.url, tag: 'quality' })
+        await tags.addTagToExistingUrl({ url: DATA.PAGE_3.url, tag: 'good' })
+        await tags.addTagToExistingUrl({ url: DATA.PAGE_3.url, tag: 'quality' })
+        await tags.addTagToExistingUrl({ url: DATA.PAGE_2.url, tag: 'quality' })
     }
 
     describe('read ops', () => {
         test('fetch page by URL', async () => {
             const { searchIndex } = await setupTest()
-            const runChecks = async currPage => {
+            const runChecks = async (currPage) => {
                 expect(currPage).toBeDefined()
                 expect(currPage).not.toBeNull()
                 expect(currPage.hasBookmark).toBe(false)
@@ -160,7 +160,7 @@ describe('Search index integration', () => {
 
         test('time-filtered + terms search', async () => {
             const { search } = await setupTest()
-            const runChecks = docs => {
+            const runChecks = (docs) => {
                 expect(docs.length).toBe(2)
                 expect(docs[0]).toEqual([DATA.PAGE_ID_2, DATA.VISIT_2])
                 expect(docs[1]).toEqual([DATA.PAGE_ID_1, DATA.VISIT_1])
@@ -351,7 +351,7 @@ describe('Search index integration', () => {
 
         const testTags = (singleQuery, multiQuery) => async () => {
             const { search } = await setupTest()
-            const runChecks = docs => {
+            const runChecks = (docs) => {
                 expect(docs.length).toBe(2)
                 expect(docs[0]).toEqual([DATA.PAGE_ID_3, DATA.VISIT_3])
                 expect(docs[1]).toEqual([DATA.PAGE_ID_2, DATA.VISIT_2])
@@ -604,7 +604,10 @@ describe('Search index integration', () => {
             )
 
             // This page doesn't have any tags; 'quality' tag has 2 other pages
-            await tags.addTag({ url: DATA.PAGE_1.url, tag: 'quality' })
+            await tags.addTagToExistingUrl({
+                url: DATA.PAGE_1.url,
+                tag: 'quality',
+            })
 
             const { docs: after } = await search({ tags: ['quality'] })
             expect(after.length).toBe(3)

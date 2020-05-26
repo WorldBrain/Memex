@@ -1,4 +1,5 @@
 import * as React from 'react'
+import cx from 'classnames'
 
 import { maxPossibleTags } from '../utils'
 import { ClickHandler } from '../types'
@@ -94,7 +95,6 @@ class TagHolder extends React.Component<Props, State> {
 
                 {this._renderTags()}
                 {this._renderNumberOfRemainingTags()}
-                <span className={styles.plus}>+</span>
             </div>
         )
     }

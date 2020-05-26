@@ -8,7 +8,8 @@ import {
     setTooltipState,
     getHighlightsState,
     setHighlightsState,
-} from 'src/content-tooltip/utils'
+} from 'src/in-page-ui/tooltip/utils'
+import analytics from 'src/analytics'
 
 export const setIsPageFullScreen = createAction<boolean>('setIsPageFullScreen')
 
@@ -35,13 +36,20 @@ export const toggleFullScreen: () => Thunk = () => (dispatch, getState) => {
 /**
  * Hydrates the initial state of the ribbon.
  */
-export const initState: () => Thunk = () => async dispatch => {
+export const initState: () => Thunk = () => async (dispatch) => {
     dispatch(setHighlightsEnabled(await getHighlightsState()))
     dispatch(setTooltipEnabled(await getTooltipState()))
 }
 
 export const toggleRibbon: () => Thunk = () => async (dispatch, getState) => {
     const isRibbonEnabled = selectors.isRibbonEnabled(getState())
+
+    if (isRibbonEnabled) {
+        analytics.trackEvent({
+            category: 'Sidebar',
+            action: 'disablePermanently',
+        })
+    }
 
     dispatch(setRibbonEnabled(!isRibbonEnabled))
 
@@ -53,6 +61,13 @@ export const toggleRibbon: () => Thunk = () => async (dispatch, getState) => {
 
 export const toggleTooltip: () => Thunk = () => async (dispatch, getState) => {
     const isTooltipEnabled = selectors.isTooltipEnabled(getState())
+
+    if (isTooltipEnabled) {
+        analytics.trackEvent({
+            category: 'InPageTooltip',
+            action: 'disableTooltipViaRibbon',
+        })
+    }
 
     dispatch(setTooltipEnabled(!isTooltipEnabled))
     await setTooltipState(!isTooltipEnabled)

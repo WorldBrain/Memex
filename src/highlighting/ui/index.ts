@@ -20,13 +20,7 @@ export async function createHighlight(selection?: any, temporary = false) {
         selector: anchor,
     } as Partial<Annotation>
 
-    renderHighlight(
-        highlight as Highlight,
-        undefined,
-        undefined,
-        toggleSidebarOverlay,
-        temporary,
-    )
+    renderHighlight(highlight as Highlight, toggleSidebarOverlay, temporary)
 
     return highlight
 }

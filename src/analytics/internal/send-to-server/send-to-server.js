@@ -1,5 +1,5 @@
 import { idleManager } from 'src/util/idle'
-import { shouldTrack, fetchUserId } from '../../utils'
+import { shouldTrack, generateUserId } from '../../utils'
 
 class SendToServer {
     static DEF_TRACKING = true
@@ -41,7 +41,7 @@ class SendToServer {
         return JSON.stringify(data)
     }
 
-    _poolReq = params => this._pool.add(params)
+    _poolReq = (params) => this._pool.add(params)
 
     /**
      * Send a request to the Redash HTTP Tracking API. Takes care of calculating all default
@@ -50,12 +50,12 @@ class SendToServer {
      * @param {any} params
      * @return {Promise<Response>}
      */
-    _sendReq = async event => {
+    _sendReq = async (event) => {
         if (!(await shouldTrack(SendToServer.DEF_TRACKING))) {
             return
         }
 
-        const userId = await fetchUserId()
+        const userId = await generateUserId({})
 
         if (!userId) {
             return
@@ -83,7 +83,7 @@ class SendToServer {
             return
         }
 
-        const userId = await fetchUserId()
+        const userId = await generateUserId({})
 
         if (!userId) {
             return

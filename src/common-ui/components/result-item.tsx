@@ -23,8 +23,10 @@ export interface Props extends Partial<SocialPage> {
     displayTime?: string
     isDeleting: boolean
     tags: string[]
+    lists: string[]
     hasBookmark?: boolean
     isSidebarOpen?: boolean
+    arePickersOpen?: boolean
     isListFilterActive: boolean
     areScreenshotsEnabled?: boolean
     areAnnotationsExpanded?: boolean
@@ -35,14 +37,18 @@ export interface Props extends Partial<SocialPage> {
     annotsCount?: number
     tagHolder: ReactNode
     tagManager: ReactNode
+    listManager: ReactNode
     onTagBtnClick: MouseEventHandler
+    onListBtnClick: MouseEventHandler
     onTrashBtnClick: MouseEventHandler
     onCommentBtnClick: MouseEventHandler
     onToggleBookmarkClick: MouseEventHandler
     handleCrossRibbonClick: MouseEventHandler
+    goToAnnotation: (annotation: any) => void
     resetUrlDragged: () => void
     setUrlDragged: (url: string) => void
     setTagButtonRef: (el: HTMLElement) => void
+    setListButtonRef: (el: HTMLElement) => void
 }
 
 class ResultItem extends PureComponent<Props> {
@@ -58,7 +64,7 @@ class ResultItem extends PureComponent<Props> {
         }
     }
 
-    dragStart: DragEventHandler = e => {
+    dragStart: DragEventHandler = (e) => {
         const { url, setUrlDragged, isSocial } = this.props
 
         setUrlDragged(url)
@@ -79,6 +85,12 @@ class ResultItem extends PureComponent<Props> {
         e.dataTransfer.setDragImage(crt, 10, 10)
     }
 
+    private handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        if (this.props.arePickersOpen) {
+            e.preventDefault()
+        }
+    }
+
     private renderAnnotsList() {
         if (!(this.props.annotations && this.props.annotations.length)) {
             return null
@@ -91,6 +103,7 @@ class ResultItem extends PureComponent<Props> {
                 openAnnotationSidebar={this.props.onCommentBtnClick}
                 pageUrl={this.hrefToPage}
                 annotations={this.props.annotations}
+                goToAnnotation={this.props.goToAnnotation}
             />
         )
     }
@@ -106,6 +119,7 @@ class ResultItem extends PureComponent<Props> {
                     <LoadingIndicator className={styles.deletingSpinner} />
                 )}
                 {this.props.tagManager}
+                {this.props.listManager}
                 <div
                     className={cx(styles.rootContainer, {
                         [styles.tweetRootContainer]: this.props.isSocial,
@@ -115,6 +129,7 @@ class ResultItem extends PureComponent<Props> {
                     })}
                 >
                     <a
+                        onClick={this.handleClick}
                         onDragStart={this.dragStart}
                         onDragEnd={this.props.resetUrlDragged}
                         className={cx(styles.root, {

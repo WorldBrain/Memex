@@ -90,6 +90,7 @@ const expectedPage1Result = {
     hasBookmark: false,
     screenshot: undefined,
     tags: [],
+    lists: [],
     title: undefined,
     url: DATA.PAGE_1.url,
     fullUrl: DATA.PAGE_1.fullUrl,
@@ -102,6 +103,7 @@ const expectedPage2Result = {
     hasBookmark: false,
     screenshot: undefined,
     tags: [],
+    lists: [],
     title: undefined,
     url: DATA.PAGE_2.url,
     fullUrl: DATA.PAGE_2.fullUrl,
@@ -385,7 +387,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                             await bookmarks(setup).addBookmark({
                                 url: DATA.PAGE_1.url,
                             })
-                            await tags(setup).addTag({
+                            await tags(setup).addTagToExistingUrl({
                                 url: DATA.PAGE_1.fullUrl,
                                 tag: DATA.TAG_1,
                             })

@@ -4,6 +4,7 @@ import {
     colorText,
 } from 'src/common-ui/components/design-library/colors'
 
+export const fontSizeSmallest = 12
 export const fontSizeSmall = 13
 export const fontSizeNormal = 14
 export const fontSizeBig = 17
@@ -35,13 +36,11 @@ export const TypographyLink = styled.span`
 `
 
 export const TypographyHeadingPage = styled.span`
-    font-size: ${fontSizeBigger}px;
+    font-size: ${fontSizeTitle}px;
     font-weight: 600;
     font-family: Poppins;
     font-style: normal;
-    font-weight: 600;
-    font-size: 16px;
-    line-height: 19px;
+    line-height: 1.4;
     text-align: left;
     color: #544960;
 `
@@ -60,12 +59,12 @@ export const TypographyButtonLabel = styled.span`
     font-style: normal;
     font-weight: 600;
     font-size: ${fontSizeSmall}px;
-    line-height: 16px;
+    line-height: 1.4;
     text-align: center;
     color: #fafafb;
 `
 export const TypographyActionText = styled.span`
-    line-height: 16px;
+    line-height: 1.4;
     text-align: center;
     font-family: Poppins;
     font-style: normal;
@@ -76,7 +75,7 @@ export const TypographyBody = styled.span`
     font-style: normal;
     font-weight: 300;
     font-size: 16px;
-    line-height: 19px;
+    line-height: 1.4;
     margin-top: 20px;
     text-align: left;
     color: ${colorText};
@@ -91,7 +90,7 @@ export const TypographyBodyBlock = styled(TypographyBody)`
     font-style: normal;
     font-weight: 300;
     font-size: 16px;
-    line-height: 19px;
+    line-height: 1.4;
     color: #544960;
 `
 
@@ -112,7 +111,7 @@ export const TypographyBodyCenter = styled.div`
 `
 export const HelpBlock = styled.div`
     display: block;
-    font-size: 13px;
+    font-size: ${fontSizeSmall};
     text-align: center;
     margin-top: 0px;
     color: #544960;
@@ -148,4 +147,8 @@ export const WhiteSpacer20 = styled.div`
 
 export const WhiteSpacer30 = styled.div`
     margin-top: 30px;
+`
+
+export const HoverColor = styled.div`
+    background-color: #dadada;
 `

@@ -12,7 +12,7 @@ export const menuItems: MenuOptions = [
         link: '#/overview?install=true',
     },
     '-',
-     {
+    {
         text: 'OpenCollective',
         link: 'https://opencollective.com/worldbrain',
     },
@@ -32,7 +32,7 @@ export const menuItems: MenuOptions = [
     },
     '-',
     {
-        text: "Changelog & Roadmap",
+        text: 'Changelog & Roadmap',
         link: 'https://www.notion.so/262a367f7a2a48ff8115d2c71f700c14',
     },
     '-',

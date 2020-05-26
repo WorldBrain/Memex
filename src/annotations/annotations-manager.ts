@@ -4,29 +4,40 @@ import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import analytics from 'src/analytics'
 import { BackgroundSearchParams } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
-import { Annotation } from 'src/annotations/types'
+import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
 
-export default class AnnotationsManager {
-    private readonly _processEventRPC = remoteFunction('processEvent')
-    private readonly _createAnnotationRPC = remoteFunction('createAnnotation')
-    private readonly _addAnnotationTagRPC = remoteFunction('addAnnotationTag')
-    private readonly _getAllAnnotationsByUrlRPC = remoteFunction(
-        'getAllAnnotationsByUrl',
-    )
-    private readonly _getTagsByAnnotationUrlRPC = remoteFunction(
-        'getAnnotationTags',
-    )
-    private readonly _editAnnotationRPC = remoteFunction('editAnnotation')
-    private readonly _editAnnotationTagsRPC = remoteFunction(
-        'editAnnotationTags',
-    )
-    private readonly _deleteAnnotationRPC = remoteFunction('deleteAnnotation')
+export default class AnnotationsManager implements AnnotationsManagerInterface {
+    private _isSetUp = false
+    _processEventRPC: (...args: any[]) => Promise<any>
+    _createAnnotationRPC: (...args: any[]) => Promise<any>
+    _addAnnotationTagRPC: (...args: any[]) => Promise<any>
+    _getAllAnnotationsByUrlRPC: (...args: any[]) => Promise<any>
+    _getTagsByAnnotationUrlRPC: (...args: any[]) => Promise<any>
+    _editAnnotationRPC: (...args: any[]) => Promise<any>
+    _editAnnotationTagsRPC: (...args: any[]) => Promise<any>
+    _deleteAnnotationRPC: (...args: any[]) => Promise<any>
+    _bookmarkAnnotationRPC: (...args: any[]) => Promise<any>
+    _searchAnnotationsRPC: (...args: any[]) => Promise<any>
 
-    private readonly bookmarkAnnotationRPC = remoteFunction(
-        'toggleAnnotBookmark',
-    )
+    _setupRPC() {
+        if (this._isSetUp) {
+            return
+        }
+        this._isSetUp = true
 
-    private readonly searchAnnotationsRPC = remoteFunction('searchAnnotations')
+        this._processEventRPC = remoteFunction('processEvent')
+        this._createAnnotationRPC = remoteFunction('createAnnotation')
+        this._addAnnotationTagRPC = remoteFunction('addAnnotationTag')
+        this._getAllAnnotationsByUrlRPC = remoteFunction(
+            'getAllAnnotationsByUrl',
+        )
+        this._getTagsByAnnotationUrlRPC = remoteFunction('getAnnotationTags')
+        this._editAnnotationRPC = remoteFunction('editAnnotation')
+        this._editAnnotationTagsRPC = remoteFunction('editAnnotationTags')
+        this._deleteAnnotationRPC = remoteFunction('deleteAnnotation')
+        this._bookmarkAnnotationRPC = remoteFunction('toggleAnnotBookmark')
+        this._searchAnnotationsRPC = remoteFunction('searchAnnotations')
+    }
 
     public createAnnotation = async ({
         url,
@@ -47,6 +58,7 @@ export default class AnnotationsManager {
         bookmarked?: boolean
         isSocialPost?: boolean
     }) => {
+        this._setupRPC()
         this._processEventRPC({ type: EVENT_NAMES.CREATE_ANNOTATION })
 
         if (tags && tags.length) {
@@ -74,7 +86,7 @@ export default class AnnotationsManager {
         const uniqueUrl = await this._createAnnotationRPC(annotation)
 
         // Write tags to database.
-        tags.forEach(async tag => {
+        tags.forEach(async (tag) => {
             await this._addAnnotationTagRPC({ tag, url: uniqueUrl })
         })
 
@@ -93,31 +105,14 @@ export default class AnnotationsManager {
         // limit = 10,
         // skip = 0,
         isSocialPost?: boolean,
-    ) => {
-        const annotationsWithoutTags: Omit<
-            Annotation,
-            'tags'
-        >[] = await this._getAllAnnotationsByUrlRPC(
+    ): Promise<Annotation[]> => {
+        return this._getAllAnnotationsByUrlRPC(
             {
                 url,
                 // limit,
                 // skip,
             },
             isSocialPost,
-        )
-
-        return Promise.all(
-            annotationsWithoutTags.map(async annotation => {
-                const annotationTags: {
-                    name: string
-                    url: string
-                }[] = await this._getTagsByAnnotationUrlRPC(annotation.url)
-                const tags = annotationTags.map(tag => tag.name)
-                return {
-                    ...annotation,
-                    tags,
-                }
-            }),
         )
     }
 
@@ -132,6 +127,8 @@ export default class AnnotationsManager {
         tags: string[]
         isSocialPost?: boolean
     }) => {
+        this._setupRPC()
+
         // Get the previously tags for the annotation.
         const prevTags = await this._getTagsByAnnotationUrlRPC(url)
 
@@ -153,23 +150,27 @@ export default class AnnotationsManager {
 
         if (tagsToBeAdded) {
             analytics.trackEvent({
-                category: 'Tag',
-                action: 'addToExistingAnnotation',
+                category: 'Tags',
+                action: 'createForAnnotation',
             })
         }
     }
 
     public deleteAnnotation = async (url: string, isSocialPost?: boolean) => {
+        this._setupRPC()
+
         await this._processEventRPC({ type: EVENT_NAMES.DELETE_ANNOTATION })
         await this._deleteAnnotationRPC(url, isSocialPost)
     }
 
     public toggleBookmark = async (url: string) => {
-        return this.bookmarkAnnotationRPC({ url })
+        this._setupRPC()
+        return this._bookmarkAnnotationRPC({ url })
     }
 
     public searchAnnotations = async (searchParams: BackgroundSearchParams) => {
-        const annotations = await this.searchAnnotationsRPC(searchParams)
+        this._setupRPC()
+        const annotations = await this._searchAnnotationsRPC(searchParams)
         return annotations
     }
 
@@ -180,6 +181,7 @@ export default class AnnotationsManager {
         oldTags,
         newTags,
     ) => {
+        this._setupRPC()
         const oldSet = new Set(oldTags)
         const tagsToBeAdded = newTags.reduce((accumulator, currentTag) => {
             if (!oldSet.has(currentTag)) {

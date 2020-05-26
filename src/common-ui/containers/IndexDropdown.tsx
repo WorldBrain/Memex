@@ -2,17 +2,17 @@ import React, { Component } from 'react'
 import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import {
     IndexDropdown,
     IndexDropdownNewRow,
     IndexDropdownRow,
 } from '../components'
-import { ClickHandler } from '../../popup/types'
+import { ClickHandler } from 'src/popup/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { notifications } from 'src/util/remote-functions-background'
+import { notifications, tags } from 'src/util/remote-functions-background'
 import * as Raven from 'src/util/raven'
 
 export interface Props {
@@ -82,7 +82,6 @@ class IndexDropdownContainer extends Component<Props, State> {
 
     private err: { timestamp: number; err: Error }
     private suggestRPC
-    private addTagRPC
     private delTagRPC
     private addTagsToOpenTabsRPC
     private delTagsFromOpenTabsRPC
@@ -95,7 +94,6 @@ class IndexDropdownContainer extends Component<Props, State> {
         super(props)
 
         this.suggestRPC = remoteFunction('suggest')
-        this.addTagRPC = remoteFunction(this.addTagRPCName)
         this.delTagRPC = remoteFunction(this.delTagRPCName)
         this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabs')
         this.delTagsFromOpenTabsRPC = remoteFunction('delTagsFromOpenTabs')
@@ -126,7 +124,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     componentWillUnmount() {
         if (this.err && Date.now() - this.err.timestamp <= 1000) {
             handleDBQuotaErrors(
-                err =>
+                (err) =>
                     notifications.create({
                         requireInteraction: false,
                         title: 'Memex error: tag adding',
@@ -161,20 +159,23 @@ class IndexDropdownContainer extends Component<Props, State> {
         }
     }
 
-    private get addTagRPCName(): string {
-        if (this.props.isSocialPost) {
-            return 'addTagForTweet'
-        }
-
-        if (this.props.isForAnnotation) {
-            return 'addAnnotationTag'
-        }
-
+    private get addTagRPC() {
         if (this.props.fromOverview) {
-            return 'addTag'
+            return tags.addTagToExistingUrl
         }
 
-        return 'addPageTag'
+        let rpcName
+        if (this.props.isSocialPost) {
+            rpcName = 'addTagForTweet'
+        } else if (this.props.isForAnnotation) {
+            rpcName = 'addAnnotationTag'
+        } else if (this.props.fromOverview) {
+            rpcName = 'addTag'
+        } else {
+            rpcName = 'addPageTag'
+        }
+
+        return remoteFunction(rpcName)
     }
 
     private get delTagRPCName(): string {
@@ -253,7 +254,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     private pageHasTag = (value: any, inc: boolean) => {
         const filters = inc ? this.state.filters : this.state.excFilters
         return this.props.source === 'user'
-            ? filters.find(user => user.id === value.id) !== undefined
+            ? filters.find((user) => user.id === value.id) !== undefined
             : filters.includes(value)
     }
     private setInputRef = (el: HTMLInputElement) => (this.inputEl = el)
@@ -262,10 +263,7 @@ class IndexDropdownContainer extends Component<Props, State> {
      * Selector for derived search value/new tag input state
      */
     private getSearchVal() {
-        return this.state.searchVal
-            .trim()
-            .replace(/\s\s+/g, ' ')
-            .toLowerCase()
+        return this.state.searchVal.trim().replace(/\s\s+/g, ' ').toLowerCase()
     }
 
     private canCreateTag = () => {
@@ -305,7 +303,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         if (this.allowIndexUpdate) {
             try {
                 if (this.props.allTabs) {
-                    this.setState(state => ({
+                    this.setState((state) => ({
                         multiEdit: state.multiEdit.add(newTag),
                     }))
                     await this.addTagsToOpenTabsRPC({ name: newTag })
@@ -399,7 +397,7 @@ class IndexDropdownContainer extends Component<Props, State> {
      * Used for clicks on displayed tags. Will either add or remove tags to the page
      * depending on their current status as assoc. tags or not.
      */
-    private handleTagSelection = (index: number) => async event => {
+    private handleTagSelection = (index: number) => async (event) => {
         await this.props.onTagClickCb()
 
         const tag =
@@ -441,7 +439,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         }
     }
 
-    private handleExcTagSelection = (index: number) => event => {
+    private handleExcTagSelection = (index: number) => (event) => {
         const tag =
             this.state.searchVal.length > 0
                 ? this.state.displayFilters[index]
@@ -463,8 +461,8 @@ class IndexDropdownContainer extends Component<Props, State> {
             this.props.onExcFilterDel(tag)
             excFilters =
                 this.props.source === 'user'
-                    ? excFilters.filter(user => user.id !== tag.id)
-                    : excFilters.filter(a => a !== tag)
+                    ? excFilters.filter((user) => user.id !== tag.id)
+                    : excFilters.filter((a) => a !== tag)
         }
 
         this.setState({
@@ -508,18 +506,18 @@ class IndexDropdownContainer extends Component<Props, State> {
         // Calculate the next focused index depending on current focus and direction
         let focusedReducer
         if (event.key === 'ArrowUp') {
-            focusedReducer = focused =>
+            focusedReducer = (focused) =>
                 focused < 1
                     ? this.state.displayFilters.length - offset
                     : focused - 1
         } else {
-            focusedReducer = focused =>
+            focusedReducer = (focused) =>
                 focused === this.state.displayFilters.length - offset
                     ? 0
                     : focused + 1
         }
 
-        this.setState(state => ({
+        this.setState((state) => ({
             ...state,
             focused: focusedReducer(state.focused),
         }))
@@ -540,13 +538,13 @@ class IndexDropdownContainer extends Component<Props, State> {
         }
 
         this.setState(
-            state => ({ ...state, searchVal, displayFilters, clearFieldBtn }),
+            (state) => ({ ...state, searchVal, displayFilters, clearFieldBtn }),
             this.fetchTagSuggestions, // Debounced suggestion fetch
         )
     }
 
     clearSearchField = () => {
-        this.setState(state => ({
+        this.setState((state) => ({
             ...state,
             searchVal: '',
             clearFieldBtn: false,
@@ -580,7 +578,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         } catch (err) {
             this.handleError(err)
         } finally {
-            this.setState(state => ({
+            this.setState((state) => ({
                 ...state,
                 displayFilters: suggestions,
                 focused: -1,
@@ -642,11 +640,12 @@ class IndexDropdownContainer extends Component<Props, State> {
                 onTagSearchChange={this.handleSearchChange}
                 onTagSearchSpecialKeyHandlers={[
                     {
-                        test: e => e.key === 'Enter',
+                        test: (e) => e.key === 'Enter',
                         handle: this.handleSearchEnterPress,
                     },
                     {
-                        test: e => e.key === 'ArrowUp' || e.key === 'ArrowDown',
+                        test: (e) =>
+                            e.key === 'ArrowUp' || e.key === 'ArrowDown',
                         handle: this.handleSearchArrowPress,
                     },
                 ]}

@@ -58,7 +58,7 @@ export async function insertIntegrationTestData(
         })
     }
     if (includeCollection('tags')) {
-        await backgroundModules.tags.addTag({
+        await backgroundModules.tags.addTagToExistingUrl({
             tag: 'my-tag',
             url: pages[0].url,
         })
@@ -75,7 +75,7 @@ export async function insertIntegrationTestData(
                 comment: 'test comment',
                 createdWhen: new Date('2019-10-11'),
                 body: 'test body',
-                selector: 'test selector',
+                selector: 'test selector' as any,
                 bookmarked: false,
                 isSocialPost: false,
             },

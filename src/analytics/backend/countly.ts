@@ -1,70 +1,86 @@
-// tslint:disable:no-console
-import { fetchUserId } from '../utils'
 import { AnalyticsBackend } from './types'
-import { AnalyticsEvent, AnalyticsTrackEventOptions } from '../types'
+import {
+    AnalyticsEvent,
+    AnalyticsEvents,
+    AnalyticsTrackEventOptions,
+} from '../types'
+
+export type CountlyEvent = any
+export type CountlyQueue = Array<CountlyQueueEntry>
+export type CountlyQueueEntry = [string, CountlyEvent] | [string]
+
+export interface Props {
+    fetchUserId: () => Promise<string>
+    countlyConnector: any
+    appKey: string
+    url: string
+}
 
 export default class CountlyAnalyticsBackend implements AnalyticsBackend {
     static DEF_TRACKING = true
+    private setupPromise: Promise<void>
+    private resolveSetupPromise: () => void
 
-    private countlyConnector
+    constructor(private props: Props) {}
 
-    /**
-     * @param {Object} args
-     * @param {string} args.countlyConnector Connector to the Countly.
-     * @param {string} args.url url of the counly server.
-     * @param {string} args.appKey app key of the counly server.
-     */
-    constructor({
-        countlyConnector,
-        ...args
-    }: {
-        countlyConnector: null
-        url: string
-        appKey: string
-    }) {
-        // this.countlyConnector = countlyConnector
-        // this.initCountly(args)
+    private async init() {
+        if (this.setupPromise) {
+            return this.setupPromise
+        }
+
+        this.setupPromise = new Promise<void>((resolve) => {
+            this.resolveSetupPromise = resolve
+        })
+
+        const userId = await this.props.fetchUserId()
+
+        this.props.countlyConnector.init({
+            device_id: userId,
+            app_key: this.props.appKey,
+            url: this.props.url,
+        })
+        this.enqueue('track_sessions')
+        return this.resolveSetupPromise()
     }
 
-    // private initCountly({ url, appKey }) {
-    //     this.countlyConnector.app_key = appKey
-    //     this.countlyConnector.url = url
-    //     this.countlyConnector.init()
-    // }
+    private get countlyQueue(): CountlyQueue {
+        return this.props.countlyConnector.q
+    }
 
-    // private get countlyQueue() {
-    //     return this.countlyConnector.q
-    // }
+    private enqueue<T = any>(key: string, payload?: T) {
+        const entry: CountlyQueueEntry = payload ? [key, payload] : [key]
+        this.countlyQueue.push(entry)
+    }
 
-    // private enqueueEvent({ key, userId, value = null }) {
-    // const event = [
-    //     'add_event',
-    //     {
-    //         key,
-    //         count: 1,
-    //         segmentation: {
-    //             userId,
-    //             ...(value ? { value } : {}),
-    //         },
-    //     },
-    // ]
-    // this.countlyQueue.push(event)
-    // }
+    private enqueueEvent({
+        name,
+        segmentation = null,
+        duration = null,
+        count = 1,
+    }: {
+        name: string
+        segmentation?: {}
+        duration?: number
+        count?: number
+    }) {
+        return this.enqueue('add_event', {
+            key: name,
+            count,
+            ...(segmentation ? { segmentation } : {}),
+            ...(duration ? { dur: duration } : {}),
+        })
+    }
 
-    async trackEvent(
-        event: AnalyticsEvent,
+    async trackEvent<Category extends keyof AnalyticsEvents>(
+        event: AnalyticsEvent<Category>,
         options?: AnalyticsTrackEventOptions,
     ) {
-        // const userId = await fetchUserId()
-        // if (!userId) {
-        //     return
-        // }
-        // const isEvent = (wanted: { category: string; action: string }) =>
-        //     event.category === wanted.category && event.action === wanted.action
-        // this.enqueueEvent({
-        //     userId,
-        //     key: `${event.category}::${event.action}`,
-        //     value: event.value,
-        // })
+        await this.init()
+
+        this.enqueueEvent({
+            name: `${event.category}::${event.action}`,
+            segmentation: event.segmentation,
+            duration: event.duration,
+        })
     }
 }

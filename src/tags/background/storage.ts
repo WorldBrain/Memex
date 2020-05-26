@@ -47,22 +47,16 @@ export default class TagStorage extends StorageModule {
         return this.operation('createTag', { name, url })
     }
 
+    async addTags({ name, urls }: { name: string; urls: Array<string> }) {
+        await Promise.all(urls.map((url) => this.addTag({ name, url })))
+    }
+
     async delTag({ name, url }: { name: string; url: string }) {
         url = normalizeUrl(url, {})
         return this.operation('deleteTag', { name, url })
     }
 
-    async addTagToPages({ name, urls }: { name: string; urls: Array<string> }) {
-        await Promise.all(urls.map(url => this.addTag({ name, url })))
-    }
-
-    async delTagsFromPages({
-        name,
-        urls,
-    }: {
-        name: string
-        urls: Array<string>
-    }) {
-        await Promise.all(urls.map(url => this.delTag({ name, url })))
+    async delTags({ name, urls }: { name: string; urls: Array<string> }) {
+        await Promise.all(urls.map((url) => this.delTag({ name, url })))
     }
 }

@@ -25,11 +25,13 @@ export const SyncDeviceScreen = ({
     stage,
     progressPct,
     handleCancel,
+    handleRetry,
 }: {
     error?: string
     stage: string
     progressPct?: number
     handleCancel?: () => void
+    handleRetry?: () => void
 }) => {
     return (
         <ModalBox
@@ -70,16 +72,26 @@ export const SyncDeviceScreen = ({
                                 <Warning>⚠️ Something went wrong</Warning>
                                 <PrimaryAction
                                     label={'Retry Syncing'}
-                                    onClick={handleCancel}
+                                    onClick={handleRetry}
                                 />
                                 <WhiteSpacer30 />
                             </div>
                         )}
                     </div>
                     <HelpBlock>
-                        <span>{'Problem with syncing?'}</span>
-                        <ExternalLink label={'Send a bug report'} href={''} />
-                        <ExternalLink label={'Help & FAQ'} href={''} />
+                        <span>{'Problem with syncing? '}</span>
+                        <ExternalLink
+                            label={'Send a bug report'}
+                            href={
+                                'https://community.worldbrain.io/c/bug-reports'
+                            }
+                        />
+                        <ExternalLink
+                            label={'Help & FAQ'}
+                            href={
+                                'https://www.notion.so/worldbrain/Troubleshooting-the-Device-Sync-d1ccb11785774c389c621b44f65bb543'
+                            }
+                        />
                     </HelpBlock>
                 </CenterText>
             </ProgressBox>

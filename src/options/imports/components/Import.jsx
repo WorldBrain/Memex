@@ -52,11 +52,14 @@ const Import = ({
                             <a
                                 className={localStyles.link}
                                 target="_blank"
-                                href="http://memex.link/2Jw-R3BQh/worldbrain.helprace.com/i49-prevent-your-imports-from-stopping-midway"
+                                href="https://www.notion.so/worldbrain/Imports-fail-and-freeze-3b8a2a55b7da48288ff1e29f6d43b8db"
                             >
-                                <b>worldbrain.io/import_bug</b>
+                                <b>wrldbra.in/import_bug</b>
                             </a>{' '}
                             to fix it.
+                            <br />
+                            It can also happen that virtually all URLs fail.
+                            Restart your extension and start over.
                         </Warning>
                     </div>
                 </div>

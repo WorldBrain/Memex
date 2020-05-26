@@ -2,8 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Router, Route, IndexRedirect } from 'react-router'
 import history from './history'
-
-import { withPageTracking } from 'src/common-ui/hocs'
 import Layout from './layout'
 
 class MemexRouter extends React.Component {
@@ -14,12 +12,12 @@ class MemexRouter extends React.Component {
     constructor(props) {
         super(props)
 
-        this.overviewRoutes = props.routes.filter(route => route.useOwnLayout)
-        this.optionsRoutes = props.routes.filter(route => !route.useOwnLayout)
+        this.overviewRoutes = props.routes.filter((route) => route.useOwnLayout)
+        this.optionsRoutes = props.routes.filter((route) => !route.useOwnLayout)
     }
 
     renderRoutes(routes = []) {
-        return routes.map(route => (
+        return routes.map((route) => (
             <Route
                 key={route.pathname}
                 path={route.pathname}
@@ -32,7 +30,7 @@ class MemexRouter extends React.Component {
         return (
             <Router history={history}>
                 <Route path="/">
-                    <Route component={withPageTracking(Layout)}>
+                    <Route component={Layout}>
                         <IndexRedirect to="/blacklist" />
                         {this.renderRoutes(this.optionsRoutes)}
                     </Route>

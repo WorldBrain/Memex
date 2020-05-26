@@ -5,7 +5,7 @@ import { PAUSE_STORAGE_KEY } from '..'
 export const pauseIconPath = '/img/worldbrain-logo-narrow-pause.png'
 export const unpauseIconPath = '/img/worldbrain-logo-narrow-bw.png'
 
-const getState = async () => {
+export const getState = async () => {
     const state = (await browser.storage.local.get(PAUSE_STORAGE_KEY))[
         PAUSE_STORAGE_KEY
     ]
@@ -21,8 +21,8 @@ const getState = async () => {
     }
 }
 
-const setState = async state => {
-    const transformState = val => {
+const setState = async (state) => {
+    const transformState = (val) => {
         switch (val) {
             case Infinity: {
                 browser.browserAction.setIcon({ path: pauseIconPath })
@@ -79,11 +79,11 @@ export default function initPauser() {
     let timeoutId
     // Set default unpaused state in local storage flag, unless Infinity is set
     getState()
-        .then(initState => initState != Infinity && setState(false))
-        .catch(f => f) // noop
+        .then((initState) => initState != Infinity && setState(false))
+        .catch((f) => f) // noop
 
     // Either clears or sets the pause timeout depending on its running state as denoted by local storage flag
-    return async timeoutMins => {
+    return async (timeoutMins) => {
         timeoutMins = timeoutMins || Infinity
 
         const isPaused = await getState()

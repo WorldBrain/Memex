@@ -7,7 +7,7 @@ const styles = require('./search-box.css')
 
 export interface Props {
     searchValue: string
-    onSearchEnter?: (e: SyntheticEvent<HTMLInputElement>) => void
+    onSearchEnter?: (e) => void
     onSearchChange?: (searchQuery: string) => void
     onClearBtn?: ClickHandler<HTMLElement>
     placeholder: string
@@ -29,7 +29,7 @@ class SearchBox extends PureComponent<Props> {
                     onChange={this.props.onSearchChange}
                     specialHandlers={[
                         {
-                            test: e => e.key === 'Enter',
+                            test: (e) => e.key === 'Enter',
                             handle: this.props.onSearchEnter,
                         },
                     ]}

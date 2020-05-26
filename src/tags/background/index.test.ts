@@ -32,7 +32,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                             })
                         },
                         execute: async ({ setup }) => {
-                            await tags(setup).remoteFunctions.addTag({
+                            await tags(
+                                setup,
+                            ).remoteFunctions.addTagToExistingUrl({
                                 tag: DATA.TAG_1,
                                 url: DATA.PAGE_1.fullUrl,
                             })
@@ -63,6 +65,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                                         hasBookmark: false,
                                         screenshot: undefined,
                                         tags: [DATA.TAG_1],
+                                        lists: [],
                                         title: undefined,
                                         url: DATA.PAGE_1.url,
                                         fullUrl: DATA.PAGE_1.fullUrl,
@@ -86,7 +89,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                     createPageStep,
                     {
                         execute: async ({ setup }) => {
-                            await tags(setup).remoteFunctions.addTag({
+                            await tags(
+                                setup,
+                            ).remoteFunctions.addTagToExistingUrl({
                                 tag: DATA.TAG_1,
                                 url: DATA.PAGE_1.fullUrl,
                             })
@@ -119,6 +124,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                                         hasBookmark: false,
                                         screenshot: undefined,
                                         tags: [DATA.TAG_1],
+                                        lists: [],
                                         title: undefined,
                                         url: DATA.PAGE_1.url,
                                         fullUrl: DATA.PAGE_1.fullUrl,

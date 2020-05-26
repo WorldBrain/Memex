@@ -9,13 +9,15 @@ import ResultItemActionBtn from './result-item-action-btn'
 const styles = require('./result-item.css')
 const tagEmpty = browser.extension.getURL('/img/tag_empty.svg')
 const tagFull = browser.extension.getURL('/img/tag_full.svg')
+const listAdd = browser.extension.getURL('/img/collections_add.svg')
+const listFull = browser.extension.getURL('/img/collections_full.svg')
 const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
 const heartFull = browser.extension.getURL('/img/star_full.svg')
 const commentEmpty = browser.extension.getURL('/img/comment_empty.svg')
 const commentFull = browser.extension.getURL('/img/comment_full.svg')
 const deleteItem = browser.extension.getURL('/img/trash.svg')
 
-class ResultItemActions extends PureComponent<Props> {
+class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
     get bookmarkClass() {
         return cx(styles.button, {
             [styles.bookmark]: this.props.hasBookmark,
@@ -32,7 +34,7 @@ class ResultItemActions extends PureComponent<Props> {
             >
                 <div
                     className={styles.buttonsContainer}
-                    onClick={e => {
+                    onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
                     }}
@@ -56,17 +58,30 @@ class ResultItemActions extends PureComponent<Props> {
                         refHandler={this.props.setTagButtonRef}
                     />
                     <ResultItemActionBtn
+                        permanent={this.props.lists.length > 0}
+                        imgSrc={
+                            this.props.lists.length > 0 ? listFull : listAdd
+                        }
+                        className={
+                            this.props.lists.length > 0
+                                ? styles.commentActive
+                                : styles.tag
+                        }
+                        onClick={this.props.onListBtnClick}
+                        tooltipText="Edit Collections"
+                        refHandler={this.props.setListButtonRef}
+                    />
+                    <ResultItemActionBtn
                         permanent={this.props.annotsCount > 0}
                         imgSrc={
                             this.props.annotsCount > 0
                                 ? commentFull
                                 : commentEmpty
                         }
-                        className={
-                            this.props.annotsCount > 0
-                                ? styles.commentActive
-                                : styles.comment
-                        }
+                        className={cx(styles.commentBtn, {
+                            [styles.comment]: this.props.annotsCount === 0,
+                            [styles.commentActive]: this.props.annotsCount > 0,
+                        })}
                         onClick={this.props.onCommentBtnClick}
                         tooltipText="Add/View Notes"
                     />

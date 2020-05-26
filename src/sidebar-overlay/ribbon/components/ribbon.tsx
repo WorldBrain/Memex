@@ -10,12 +10,17 @@ import {
     shortcuts,
     ShortcutElData,
 } from 'src/options/settings/keyboard-shortcuts'
-import * as utils from 'src/content-tooltip/utils'
-import { KeyboardShortcuts, Shortcut } from 'src/content-tooltip/types'
+import * as utils from 'src/in-page-ui/tooltip/utils'
+import * as getKeyboardShortcutsState from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import {
+    KeyboardShortcuts,
+    Shortcut,
+} from 'src/in-page-ui/keyboard-shortcuts/types'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { highlightAnnotations } from 'src/annotations'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
+import analytics from 'src/analytics'
 const styles = require('./ribbon.css')
 
 export interface Props {
@@ -67,16 +72,13 @@ class Ribbon extends Component<Props, State> {
     private openOverviewTabRPC
     private openOptionsTabRPC
     private ribbonRef: HTMLElement
-    private inputQueryEl: HTMLInputElement
-
-    private setInputRef = (el: HTMLInputElement) => (this.inputQueryEl = el)
 
     state: State = { shortcutsReady: false }
 
     constructor(props: Props) {
         super(props)
         this.shortcutsData = new Map(
-            props.shortcutsData.map(s => [s.name, s]) as [
+            props.shortcutsData.map((s) => [s.name, s]) as [
                 string,
                 ShortcutElData,
             ][],
@@ -92,7 +94,7 @@ class Ribbon extends Component<Props, State> {
             highlightAnnotations()
         }
 
-        this.keyboardShortcuts = await utils.getKeyboardShortcutsState()
+        this.keyboardShortcuts = await getKeyboardShortcutsState.getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
 
         if (this.props.hideOnMouseLeave) {
@@ -116,9 +118,9 @@ class Ribbon extends Component<Props, State> {
         }
     }
 
-    private handleSearchEnterPress: KeyboardEventHandler<
-        HTMLInputElement
-    > = event => {
+    private handleSearchEnterPress: KeyboardEventHandler<HTMLInputElement> = (
+        event,
+    ) => {
         const queryFilters = extractQueryFilters(this.props.searchValue)
         const queryParams = qs.stringify(queryFilters)
 
@@ -171,7 +173,7 @@ class Ribbon extends Component<Props, State> {
 
         return (
             <div
-                ref={ref => (this.ribbonRef = ref)}
+                ref={(ref) => (this.ribbonRef = ref)}
                 className={cx(styles.ribbon, {
                     [styles.ribbonExpanded]: this.props.isExpanded,
                     [styles.ribbonSidebarOpen]: this.props.isSidebarOpen,
@@ -196,9 +198,13 @@ class Ribbon extends Component<Props, State> {
                                             styles.button,
                                             styles.cancel,
                                         )}
-                                        onClick={() =>
+                                        onClick={() => {
+                                            analytics.trackEvent({
+                                                category: 'Sidebar',
+                                                action: 'disableTemporarily',
+                                            })
                                             this.props.handleRemoveRibbon()
-                                        }
+                                        }}
                                     />
                                 </ButtonTooltip>
                                 <ButtonTooltip
@@ -243,12 +249,15 @@ class Ribbon extends Component<Props, State> {
                                         className={cx(
                                             styles.button,
                                             styles.search,
+                                            {
+                                                [styles.active]: this.props
+                                                    .showSearchBox,
+                                            },
                                         )}
                                         onClick={() => {
                                             this.props.setShowSearchBox(
                                                 !this.props.showSearchBox,
                                             )
-                                            this.inputQueryEl.focus()
                                         }}
                                     />
                                     {this.props.showSearchBox && (
@@ -263,7 +272,6 @@ class Ribbon extends Component<Props, State> {
                                                 />
                                                 <TextInputControlled
                                                     autoFocus={false}
-                                                    setRef={this.setInputRef}
                                                     className={
                                                         styles.searchInput
                                                     }
@@ -276,10 +284,10 @@ class Ribbon extends Component<Props, State> {
                                                     }
                                                     specialHandlers={[
                                                         {
-                                                            test: e =>
+                                                            test: (e) =>
                                                                 e.key ===
                                                                 'Enter',
-                                                            handle: e =>
+                                                            handle: (e) =>
                                                                 this.handleSearchEnterPress(
                                                                     e,
                                                                 ),
@@ -315,31 +323,39 @@ class Ribbon extends Component<Props, State> {
                                         }
                                     />
                                 </ButtonTooltip>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'addComment',
-                                    )}
-                                    position="left"
-                                >
-                                    <div
-                                        className={cx(
-                                            styles.button,
-                                            styles.comments,
+                                <div>
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'addComment',
                                         )}
-                                        onClick={this.handleCommentIconBtnClick}
-                                    />
-                                    {this.props.showCommentBox && (
-                                        <Tooltip position="left">
-                                            <CommentBoxContainer
-                                                env="inpage"
-                                                closeComments={() =>
-                                                    this.props.setShowCommentBox(
-                                                        false,
-                                                    )
-                                                }
-                                            />
-                                        </Tooltip>
-                                    )}
+                                        position="left"
+                                    >
+                                        <div
+                                            className={cx(
+                                                styles.button,
+                                                styles.comments,
+                                                {
+                                                    [styles.active]: this.props
+                                                        .showCommentBox,
+                                                },
+                                            )}
+                                            onClick={
+                                                this.handleCommentIconBtnClick
+                                            }
+                                        />
+                                        {this.props.showCommentBox && (
+                                            <Tooltip position="left">
+                                                <CommentBoxContainer
+                                                    env="inpage"
+                                                    closeComments={() =>
+                                                        this.props.setShowCommentBox(
+                                                            false,
+                                                        )
+                                                    }
+                                                />
+                                            </Tooltip>
+                                        )}
+                                    </ButtonTooltip>
                                     {this.props.isCommentSaved && (
                                         <Tooltip
                                             position="left"
@@ -352,47 +368,60 @@ class Ribbon extends Component<Props, State> {
                                             </div>
                                         </Tooltip>
                                     )}
-                                </ButtonTooltip>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText('addTag')}
-                                    position="left"
-                                >
-                                    <div
-                                        className={cx(
-                                            styles.button,
-                                            styles.tag,
+                                </div>
+                                <div>
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'addTag',
                                         )}
-                                        onClick={() =>
-                                            this.props.setShowTagsPicker(
-                                                !this.props.showTagsPicker,
-                                            )
-                                        }
-                                    />
+                                        position="left"
+                                    >
+                                        <div
+                                            className={cx(
+                                                styles.button,
+                                                styles.tag,
+                                                {
+                                                    [styles.active]: this.props
+                                                        .showTagsPicker,
+                                                },
+                                            )}
+                                            onClick={() =>
+                                                this.props.setShowTagsPicker(
+                                                    !this.props.showTagsPicker,
+                                                )
+                                            }
+                                        />
+                                    </ButtonTooltip>
                                     {this.props.showTagsPicker && (
                                         <Tooltip position="left">
                                             {this.props.tagManager}
                                         </Tooltip>
                                     )}
-                                </ButtonTooltip>
-
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'addToCollection',
-                                    )}
-                                    position="left"
-                                >
-                                    <div
-                                        className={cx(
-                                            styles.button,
-                                            styles.collection,
+                                </div>
+                                <div>
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'addToCollection',
                                         )}
-                                        onClick={() =>
-                                            this.props.setShowCollectionsPicker(
-                                                !this.props
-                                                    .showCollectionsPicker,
-                                            )
-                                        }
-                                    />
+                                        position="left"
+                                    >
+                                        <div
+                                            className={cx(
+                                                styles.button,
+                                                styles.collection,
+                                                {
+                                                    [styles.active]: this.props
+                                                        .showCollectionsPicker,
+                                                },
+                                            )}
+                                            onClick={() =>
+                                                this.props.setShowCollectionsPicker(
+                                                    !this.props
+                                                        .showCollectionsPicker,
+                                                )
+                                            }
+                                        />
+                                    </ButtonTooltip>
                                     {this.props.showCollectionsPicker && (
                                         <Tooltip
                                             position="left"
@@ -401,7 +430,7 @@ class Ribbon extends Component<Props, State> {
                                             {this.props.collectionsManager}
                                         </Tooltip>
                                     )}
-                                </ButtonTooltip>
+                                </div>
                             </div>
                             <div className={styles.horizontalLine} />
                             <div className={styles.settingsActions}>
