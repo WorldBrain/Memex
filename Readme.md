@@ -25,7 +25,7 @@ Search with every word of all websites & PDFs you visited & filter by time, doma
 
 ## Highlights, Notes & Annotations:
 
-Add notes to websites and pieces of text in them
+Add notes to websites as a whole and to individual components (e.g. text, images)
 ![](https://user-images.githubusercontent.com/7870039/75158717-a3f32100-570e-11ea-901d-8241b0710d60.gif)
 
 ## Tags, Lists, Bookmarks
@@ -33,32 +33,32 @@ Add notes to websites and pieces of text in them
 Add bookmarks, tags or sort websites into lists on the fly.
 ![](https://user-images.githubusercontent.com/7870039/75158720-a786a800-570e-11ea-9891-0ef26f7066f3.gif)
 
-## All Data stored locally
+## All Data Stored Locally
 
 All personal data is stored and processed on your own computer and will **never** leave your computer without you either sharing, syncing or backing it up to an external cloud.
-For more info please see our [privacy policy](https://worldbrain.io/privacy)
+For more details please see our [privacy policy](https://worldbrain.io/privacy)
 
-## Mobile apps for iOS & Android + Encrypted Sync
+## Mobile Apps for iOS & Android + Encrypted Sync
 
 With [Memex Go](https://getmemex.com) you can save & organise content on the go.
 Sync is end2end encrypted with [TweetNaCl](https://github.com/dchest/tweetnacl-js)
 
 <img width="1025" alt="mobileSync" src="https://user-images.githubusercontent.com/7870039/75159422-07ca1980-5710-11ea-845e-25f5157bcfd0.png">
 
-## No VC money, no Exit: Your data & attention stays yours
+## No VC Money, No Exit: Your Data & Attention Stays Yours
 
-Memex is funded without VC money or selling shares. Instead we are funded with a model called "Steward Ownership". This model ensures that the company can never be sold and our investors are rewarded with a capped profit share. This way we will never get the incentives to optimise our company for maximising growth & shareholder profits to the expense of your privacy, provider freedom or attention.
-More about our choice you find [in this post](https://community.worldbrain.io/t/why-worldbrain-io-does-not-take-venture-capital/75).
+Memex is funded without VC money or selling shares. Instead we are funded with a model called "Steward Ownership". This model ensures that the company can never be sold and our investors are rewarded with a capped profit share. This way we will never get be tempted by incentivizes to optimise our company for maximising growth and shareholder profits at the expense of your privacy, attention, or freed to choose a provider.
+You can find more about our choice [in this post](https://community.worldbrain.io/t/why-worldbrain-io-does-not-take-venture-capital/75).
 
 ## Other:
 
-⛅Backup and restore your data to any of your favorite cloud providers & Google Drive
+⛅ Backup and restore your data to any of your favorite cloud providers including Google Drive
 
-📲Import bookmarks and history from other services
+📲 Import bookmarks and history from other services
 
 ⌨ Keyboard Shortcuts for everything
 
-🗂Tab manager: add all open tabs to a collection or tag
+🗂 Tab manager: add all open tabs to a collection or tag
 
 ## Changelog & Roadmap:
 
