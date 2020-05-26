@@ -38,7 +38,7 @@ export type GenericPickerEvent = UIEvent<{
     searchInputChanged: { query: string }
     selectedEntryPress: { entry: string }
     resultEntryAllPress: { entry: DisplayEntry }
-    newEntryAllPress: {}
+    newEntryAllPress: { entry: string }
     resultEntryPress: { entry: DisplayEntry }
     resultEntryFocus: { entry: DisplayEntry; index: number }
     newEntryPress: { entry: string }
@@ -357,14 +357,12 @@ export default abstract class GenericPickerLogic extends UILogic<
     }
 
     newEntryAllPress = async ({
-        event: {},
+        event: { entry },
         previousState,
     }: GenericPickerUIEvent<'newEntryAllPress'>) => {
-        const entry = this._validateEntry(previousState.query)
+        const name = this._validateEntry(entry)
         await this.newEntryPress({ event: { entry: name }, previousState })
-        this._processingUpstreamOperation = this.dependencies.actOnAllTabs(
-            entry,
-        )
+        this._processingUpstreamOperation = this.dependencies.actOnAllTabs(name)
     }
 
     resultEntryFocus = ({

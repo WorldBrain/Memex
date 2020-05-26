@@ -56,7 +56,10 @@ class ListPicker extends StatefulUIElement<
     handleResultListAllPress = (list: DisplayEntry) =>
         this.processEvent('resultEntryAllPress', { entry: list })
 
-    handleNewListAllPress = () => this.processEvent('newEntryAllPress', {})
+    handleNewListAllPress = () =>
+        this.processEvent('newEntryAllPress', {
+            entry: this.state.newEntryName,
+        })
 
     handleResultListFocus = (list: DisplayEntry, index?: number) =>
         this.processEvent('resultEntryFocus', { entry: list, index })

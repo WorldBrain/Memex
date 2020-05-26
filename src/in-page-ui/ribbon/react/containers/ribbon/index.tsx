@@ -115,6 +115,8 @@ export default class RibbonContainer extends StatefulUIElement<
                     ...this.state.tagging,
                     setShowTagsPicker: (value) =>
                         this.processEvent('setShowTagsPicker', { value }),
+                    tagAllTabs: (value) =>
+                        this.processEvent('tagAllTabs', { value }),
                     updateTags: (value) =>
                         this.processEvent('updateTags', { value }),
                     fetchInitialTagSuggestions: () =>
@@ -128,6 +130,8 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 lists={{
                     ...this.state.lists,
+                    listAllTabs: (value) =>
+                        this.processEvent('listAllTabs', { value }),
                     updateLists: (value) =>
                         this.processEvent('updateLists', { value }),
                     setShowListsPicker: (value: false) =>

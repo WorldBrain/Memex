@@ -42,14 +42,19 @@ export default Modal
 
 export const CloseButton = styled.button`
     position: absolute;
-    top: 5px;
-    right: 5px;
-    background-size: 12px;
-    width: 100px;
+    top: 10px;
+    right: 10px;
+    background-size: 14px;
+    width: 22px;
     height: 22px;
     border: none;
     transition: all 200ms;
     cursor: pointer;
+    background-color: transparent;
+    background-image: url('/img/close.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 3px;
 `
 
 export const Content = styled.div`

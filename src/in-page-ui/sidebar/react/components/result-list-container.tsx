@@ -4,7 +4,7 @@ import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
 
 import { LoadingIndicator } from 'src/common-ui/components'
-import ResultItem from './result-item'
+import ResultItem, { PageDeleteProps } from './result-item'
 import ResultList from './result-list'
 import { TagHolder } from 'src/common-ui/components/'
 import {
@@ -66,6 +66,7 @@ interface OwnProps {
         'removeTempHighlights' | 'removeAnnotationHighlights'
     >
     annotationEventHandlers: AnnotationBoxEventProps
+    pageDeleteProps: PageDeleteProps
     shownTagsLimit?: number
 }
 
@@ -224,6 +225,7 @@ export default class ResultListContainer extends Component<
                         .fetchInitialTagSuggestions,
                     queryTagSuggestions: this.props.queryTagSuggestions,
                 }}
+                pageDeleteProps={this.props.pageDeleteProps}
             />
         )
     }
@@ -293,7 +295,11 @@ export default class ResultListContainer extends Component<
 
     private renderResultItems() {
         if (this.props.isNewSearchLoading) {
-            return <div className={styles.loadingBox}><LoadingIndicator /></div>
+            return (
+                <div className={styles.loadingBox}>
+                    <LoadingIndicator />
+                </div>
+            )
         }
 
         const resultItems = this.resultsStateToItems()
@@ -311,7 +317,11 @@ export default class ResultListContainer extends Component<
 
         // Add loading spinner to the list end, if loading
         if (this.props.isPaginating) {
-            resultItems.push(<div className={styles.loadingBox}><LoadingIndicator key="pagination-loader" /></div>)
+            resultItems.push(
+                <div className={styles.loadingBox}>
+                    <LoadingIndicator key="pagination-loader" />
+                </div>,
+            )
         }
 
         return resultItems

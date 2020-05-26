@@ -354,7 +354,9 @@ describe('SidebarContainerLogic', () => {
     })
 
     describe('page search results', () => {
-        it('should be able to delete a page via modal', async ({ device }) => {
+        it('should be able to delete a page via confirm', async ({
+            device,
+        }) => {
             const { sidebar } = await setupLogicHelper({
                 device,
             })
@@ -373,18 +375,18 @@ describe('SidebarContainerLogic', () => {
             expect(Object.keys(sidebar.state.resultsByUrl).length).toBe(1)
 
             expect(
-                sidebar.state.deletePageModal.pageUrlToDelete,
+                sidebar.state.deletePageConfirm.pageUrlToDelete,
             ).toBeUndefined()
-            await sidebar.processEvent('showDeletePageModal', {
+            await sidebar.processEvent('showPageDeleteConfirm', {
                 pageUrl: DATA.PAGE_URL_1,
             })
-            expect(sidebar.state.deletePageModal.pageUrlToDelete).toEqual(
+            expect(sidebar.state.deletePageConfirm.pageUrlToDelete).toEqual(
                 DATA.PAGE_URL_1,
             )
 
             await sidebar.processEvent('deletePage', null)
             expect(
-                sidebar.state.deletePageModal.pageUrlToDelete,
+                sidebar.state.deletePageConfirm.pageUrlToDelete,
             ).toBeUndefined()
             expect(Object.keys(sidebar.state.resultsByUrl).length).toBe(0)
         })

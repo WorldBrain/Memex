@@ -226,17 +226,18 @@ export class PageIndexingBackground {
      * TODO: Better name?
      */
     async createPageViaBmTagActs(props: PageCreationProps) {
-        const {
-            [IDXING_PREF_KEYS.BOOKMARKS]: fullyIndex,
-        } = await browser.storage.local.get(IDXING_PREF_KEYS.BOOKMARKS)
+        if (props.stubOnly == null) {
+            const {
+                [IDXING_PREF_KEYS.BOOKMARKS]: fullyIndex,
+            } = await browser.storage.local.get(IDXING_PREF_KEYS.BOOKMARKS)
 
-        if (props.tabId) {
-            return this.createPageFromTab({
-                stubOnly: !fullyIndex,
-                ...props,
-            })
+            props.stubOnly = !fullyIndex
         }
 
-        return this.createPageFromUrl({ stubOnly: !fullyIndex, ...props })
+        if (props.tabId) {
+            return this.createPageFromTab(props)
+        }
+
+        return this.createPageFromUrl(props)
     }
 }

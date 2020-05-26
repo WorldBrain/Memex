@@ -56,7 +56,10 @@ class TagPicker extends StatefulUIElement<
     handleResultTagAllPress = (tag: DisplayEntry) =>
         this.processEvent('resultEntryAllPress', { entry: tag })
 
-    handleNewTagAllPress = () => this.processEvent('newEntryAllPress', {})
+    handleNewTagAllPress = () =>
+        this.processEvent('newEntryAllPress', {
+            entry: this.state.newEntryName,
+        })
 
     handleResultTagFocus = (tag: DisplayEntry, index?: number) =>
         this.processEvent('resultEntryFocus', { entry: tag, index })

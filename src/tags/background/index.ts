@@ -14,6 +14,7 @@ import SearchBackground from 'src/search/background'
 import { Analytics } from 'src/analytics/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from '../utils'
+import { STORAGE_KEYS as IDXING_PREF_KEYS } from 'src/options/settings/constants'
 
 export const limitSuggestionsReturnLength = 20
 export const limitSuggestionsStorageLength = 40
@@ -190,11 +191,18 @@ export default class TagsBackground {
         const fullUrl = url
         const normalizedUrl = normalizeUrl(url, {})
 
-        if (page == null || pageIsStub(page)) {
+        const {
+            [IDXING_PREF_KEYS.BOOKMARKS]: shouldFullyIndex,
+        } = await this.options.localBrowserStorage.get(
+            IDXING_PREF_KEYS.BOOKMARKS,
+        )
+
+        if (page == null || (shouldFullyIndex && pageIsStub(page))) {
             page = await this.searchIndex.createPageViaBmTagActs({
                 fullUrl,
                 url: normalizedUrl,
                 tabId,
+                stubOnly: !shouldFullyIndex,
             })
             if (page == null) {
                 throw new Error(
