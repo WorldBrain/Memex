@@ -47,7 +47,7 @@ Sync is end2end encrypted with [TweetNaCl](https://github.com/dchest/tweetnacl-j
 
 ## No VC Money, No Exit: Your Data & Attention Stays Yours
 
-Memex is funded without VC money or selling shares. Instead we are funded with a model called "Steward Ownership". This model ensures that the company can never be sold and our investors are rewarded with a capped profit share. This way we will never get be tempted by incentivizes to optimise our company for maximising growth and shareholder profits at the expense of your privacy, attention, or freed to choose a provider.
+Memex is funded without VC money or selling shares. Instead we are funded with a model called "Steward Ownership". This model ensures that the company can never be sold and our investors are rewarded with a capped profit share. This way we will never be tempted by incentivizes to optimise our company for maximising growth and shareholder profits at the expense of your privacy, attention, or freed to choose a provider.
 You can find more about our choice [in this post](https://community.worldbrain.io/t/why-worldbrain-io-does-not-take-venture-capital/75).
 
 ## Other:
