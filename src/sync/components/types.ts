@@ -4,5 +4,3 @@ export interface SyncDevice {
     devicePlatform: string
     createdWhen: Date
 }
-
-export class InitialSyncError extends Error {}

@@ -170,12 +170,14 @@ export default class SyncBackground extends SyncService {
             return remoteEmitter.emit('roleSwitch', args)
         })
         this.initialSync.events.on('error', (args) => {
+            Raven.captureException(`InitialSyncError - ${args.error}`)
             return remoteEmitter.emit('error', args)
         })
         this.initialSync.events.on('finished', (args) => {
             return remoteEmitter.emit('finished', args)
         })
         this.initialSync.events.on('channelTimeout', () => {
+            Raven.captureException(`InitialSyncError - channelTimeout`)
             return remoteEmitter.emit('channelTimeout', {})
         })
         this.initialSync.events.on('packageStalled', () => {

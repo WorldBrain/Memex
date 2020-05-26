@@ -5,7 +5,6 @@ import { FastSyncEvents } from '@worldbrain/storex-sync/lib/fast-sync'
 import * as Raven from 'src/util/raven'
 import analytics from 'src/analytics'
 import { now } from 'moment'
-import { InitialSyncError } from 'src/sync/components/types'
 
 type SyncSetupState = 'introduction' | 'pair' | 'sync' | 'done'
 
@@ -92,7 +91,7 @@ export default class InitialSyncSetupLogic extends UILogic<
         this.eventEmitter.on('roleSwitch', this.updateRole)
         this.eventEmitter.on('error', this.updateError)
         this.eventEmitter.on('channelTimeout', () =>
-            this.updateError({ error: 'Timed out' }),
+            this.error(new Error(`Timed out`)),
         )
         this.eventEmitter.on('finished', this.done)
     }
@@ -152,7 +151,8 @@ export default class InitialSyncSetupLogic extends UILogic<
     }
 
     retry = () => {
-        return this.backToIntroduction()
+        // N.B. For retries, existing devices need to be deleted
+        return this.dependencies.onClose()
     }
 
     backToIntroduction = () => {
@@ -169,14 +169,13 @@ export default class InitialSyncSetupLogic extends UILogic<
     }
 
     error(e) {
-        Raven.captureException(new InitialSyncError(e))
-        this.emitMutation({
-            error: { $set: `${e}` },
-        })
         analytics.trackEvent({
             category: 'Sync',
             action: 'failInitSync',
             duration: this.runningTime,
+        })
+        this.emitMutation({
+            error: { $set: `${e}` },
         })
     }
 }
