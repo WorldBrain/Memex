@@ -46,6 +46,22 @@ export class RemoteError extends Error {
     }
 }
 
+export type RemoteFunctionRole = 'provider' | 'caller'
+export type RemoteFunction<
+    Role extends RemoteFunctionRole,
+    Params,
+    Returns = void
+> = Role extends 'provider'
+    ? (info: { tab: { id: number } }, params: Params) => Promise<Returns>
+    : (params: Params) => Promise<Returns>
+export type RemotePositionalFunction<
+    Role extends RemoteFunctionRole,
+    Params extends Array<any>,
+    Returns = void
+> = Role extends 'provider'
+    ? (info: { tab: { id: number } }, ...params: Params) => Promise<Returns>
+    : (...params: Params) => Promise<Returns>
+
 // === Initiating side ===
 
 // The extra options available when calling a remote function
@@ -154,7 +170,11 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
 
 // === Executing side ===
 
-const remotelyCallableFunctions = {}
+const remotelyCallableFunctions =
+    typeof window !== 'undefined' ? window['remoteFunctions'] || {} : {}
+if (typeof window !== 'undefined') {
+    window['remoteFunctions'] = remotelyCallableFunctions
+}
 
 async function incomingRPCListener(message, sender) {
     if (!message || message[RPC_CALL] !== RPC_CALL) {
@@ -206,7 +226,7 @@ async function incomingRPCListener(message, sender) {
 let enabled = false
 
 export function setupRemoteFunctionsImplementations<T>(
-    implementations: RemoteFunctionImplementations,
+    implementations: RemoteFunctionImplementations<'provider'>,
 ): void {
     for (const [group, functions] of Object.entries(implementations)) {
         makeRemotelyCallableType<typeof functions>(functions)

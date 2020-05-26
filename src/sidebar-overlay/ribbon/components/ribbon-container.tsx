@@ -19,6 +19,7 @@ import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar/'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { tags, collections } from 'src/util/remote-functions-background'
+import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 interface StateProps {
     isExpanded: boolean
@@ -81,7 +82,7 @@ class RibbonContainer extends Component<Props> {
         this.props.handleTooltipToggle()
     }
 
-    handleTagsUpdate = async (_: string[], added: string, deleted: string) => {
+    handleTagsUpdate: PickerUpdateHandler = async ({ added, deleted }) => {
         const backedResult = tags.updateTagForPage({
             added,
             deleted,
@@ -96,13 +97,14 @@ class RibbonContainer extends Component<Props> {
         }
         return backedResult
     }
+
     handleTagAllTabs = (tagName: string) =>
         tags.addTagsToOpenTabs({ name: tagName })
     handleTagQuery = (query: string) => tags.searchForTagSuggestions({ query })
     fetchTagsForPage = async () =>
         tags.fetchPageTags({ url: this.props.getUrl() })
 
-    handleListsUpdate = async (_: string[], added: string, deleted: string) => {
+    handleListsUpdate: PickerUpdateHandler = async ({ added, deleted }) => {
         const backedResult = collections.updateListForPage({
             added,
             deleted,

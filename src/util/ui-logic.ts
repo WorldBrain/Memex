@@ -1,5 +1,6 @@
 import fromPairs from 'lodash/fromPairs'
 import { UILogic } from 'ui-logic-core'
+import { TaskState as UITaskState } from 'ui-logic-core/lib/types'
 import { UIElement } from 'ui-logic-react'
 
 export type EventProcessor<Dependencies> = (
@@ -77,7 +78,7 @@ export function reactEventHandler<Dependencies extends object = null>(
         dependencies = null,
     }: { actions?: ActionMap; dependencies?: Dependencies } = {},
 ) {
-    return event => {
+    return (event) => {
         handleEvent({
             eventProcessor,
             state: component.state,
@@ -113,7 +114,7 @@ export function _doDispatch(
 
 export function fakeState(initial) {
     const state = { ...initial }
-    const setState = updates => {
+    const setState = (updates) => {
         Object.assign(state, updates)
     }
     return { state, setState }
@@ -122,7 +123,7 @@ export function fakeState(initial) {
 export function fakeEventProps(eventNames) {
     const events = { log: [] }
     const props = fromPairs(
-        eventNames.map(eventName => [
+        eventNames.map((eventName) => [
             eventName,
             (...args) => events.log.push({ event: eventName, args }),
         ]),
@@ -163,5 +164,36 @@ export abstract class NavigationScreen<
 > extends StatefulUIElement<Props, State, Event> {
     constructor(props: Props, options: { logic: UILogic<State, Event> }) {
         super(props, options.logic)
+    }
+}
+
+export async function loadInitial<State extends { loadState: UITaskState }>(
+    logic: UILogic<State, any>,
+    loader: () => Promise<any>,
+): Promise<boolean> {
+    return (await executeUITask(logic, 'loadState', loader))[0]
+}
+
+export async function executeUITask<
+    State,
+    Key extends keyof State,
+    ReturnValue
+>(
+    logic: UILogic<State, any>,
+    key: Key,
+    loader: () => Promise<ReturnValue>,
+): Promise<[false] | [true, ReturnValue]> {
+    const emit = (state: UITaskState) =>
+        logic.emitMutation({ [key]: { $set: state } } as any)
+    emit('running')
+
+    try {
+        const returned = await loader()
+        emit('success')
+        return [true, returned]
+    } catch (e) {
+        emit('error')
+        console.error(e)
+        return [false]
     }
 }

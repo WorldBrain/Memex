@@ -29,7 +29,7 @@ describe('Search index integration', () => {
             tags: backgroundModules.tags,
             search: (params = {}) =>
                 searchIndex.search({
-                    mapResultsFunc: db => res => {
+                    mapResultsFunc: (db) => (res) => {
                         return res.map(([id, score]) => [id, score])
                     },
                     ...params,
@@ -65,7 +65,7 @@ describe('Search index integration', () => {
     describe('read ops', () => {
         test('fetch page by URL', async () => {
             const { searchIndex } = await setupTest()
-            const runChecks = async currPage => {
+            const runChecks = async (currPage) => {
                 expect(currPage).toBeDefined()
                 expect(currPage).not.toBeNull()
                 expect(currPage.hasBookmark).toBe(false)
@@ -160,7 +160,7 @@ describe('Search index integration', () => {
 
         test('time-filtered + terms search', async () => {
             const { search } = await setupTest()
-            const runChecks = docs => {
+            const runChecks = (docs) => {
                 expect(docs.length).toBe(2)
                 expect(docs[0]).toEqual([DATA.PAGE_ID_2, DATA.VISIT_2])
                 expect(docs[1]).toEqual([DATA.PAGE_ID_1, DATA.VISIT_1])
@@ -351,7 +351,7 @@ describe('Search index integration', () => {
 
         const testTags = (singleQuery, multiQuery) => async () => {
             const { search } = await setupTest()
-            const runChecks = docs => {
+            const runChecks = (docs) => {
                 expect(docs.length).toBe(2)
                 expect(docs[0]).toEqual([DATA.PAGE_ID_3, DATA.VISIT_3])
                 expect(docs[1]).toEqual([DATA.PAGE_ID_2, DATA.VISIT_2])

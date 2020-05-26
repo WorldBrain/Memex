@@ -4,6 +4,7 @@ import {
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
 import 'jest-extended'
+import { PickerUpdateHandler } from './types'
 
 // see https://github.com/WorldBrain/Memex-Mobile/blob/develop/app/src/features/overview/ui/screens/dashboard/logic.test.ts
 // see https://github.com/WorldBrain/Memex-Mobile/blob/7b74b83d3f3ebec793317c84222939d3fcba67b7/app/src/ui/index.tests.ts#L3
@@ -67,22 +68,17 @@ const setupLogicHelper = async ({
     url,
 }: {
     device: UILogicTestDevice
-    onUpdateEntrySelection?: (
-        _: string[],
-        added: string,
-        deleted: string,
-    ) => Promise<void>
+    onUpdateEntrySelection?: PickerUpdateHandler
     queryEntries?: (query: string) => Promise<string[]>
     queryEntryResults?: string[]
     initialSuggestions?: string[]
     initialSelectedEntries?: string[]
     url?: string
 }) => {
-    const backendEntryUpdate = async (
-        _: string[],
-        added: string,
-        deleted: string,
-    ) =>
+    const backendEntryUpdate: PickerUpdateHandler = async ({
+        added,
+        deleted,
+    }) =>
         device.backgroundModules.customLists.updateListForPage({
             added,
             deleted,
@@ -378,6 +374,50 @@ describe('GenericPickerLogic', () => {
 
         expect(entriesBefore).toEqual([])
         expect(entriesAfter).toEqual(['sugg1'])
+    })
+
+    it('should correctly add entry to all tabs', async ({ device }) => {
+        const initialSuggestions = ['sugg1', 'sugg2']
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+            device,
+            initialSuggestions,
+        })
+
+        const { customLists } = device.backgroundModules
+
+        expect(await customLists.fetchPageLists({ url: TESTURL })).toEqual([])
+        expect(testLogic.state.selectedEntries).toEqual([])
+
+        await testLogic.processEvent('resultEntryAllPress', {
+            entry: { name: 'sugg1', focused: false, selected: false },
+        })
+        await entryPickerLogic.processingUpstreamOperation
+
+        expect(await customLists.fetchPageLists({ url: TESTURL })).toEqual([
+            'sugg1',
+        ])
+        expect(testLogic.state.selectedEntries).toEqual(['sugg1'])
+    })
+
+    it('should correctly add a new ntry to all tabs', async ({ device }) => {
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+            device,
+        })
+
+        const { customLists } = device.backgroundModules
+
+        expect(await customLists.fetchPageLists({ url: TESTURL })).toEqual([])
+        expect(testLogic.state.selectedEntries).toEqual([])
+
+        await testLogic.processEvent('newEntryAllPress', {
+            entry: 'sugg1',
+        })
+        await entryPickerLogic.processingUpstreamOperation
+
+        expect(await customLists.fetchPageLists({ url: TESTURL })).toEqual([
+            'sugg1',
+        ])
+        expect(testLogic.state.selectedEntries).toEqual(['sugg1'])
     })
 
     it('should be in the right state after an error adding a entry', async ({

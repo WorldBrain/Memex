@@ -11,7 +11,10 @@ export interface AnalyticsEvent<
     action: AnalyticsEvents[Category] // ('Add Entry', etc.).
     category: Category // ('Search', 'Blacklist', etc.).
     name?: string // (user input - other custom info)
-    value?: any
+    segmentation?: {}
+    duration?: number
+    // @depreciated no longer works in Countly
+    value?: {}
 }
 
 export interface AnalyticsTrackEventOptions {

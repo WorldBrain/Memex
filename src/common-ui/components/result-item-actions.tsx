@@ -18,7 +18,7 @@ const commentFull = browser.extension.getURL('/img/comment_full.svg')
 const deleteItem = browser.extension.getURL('/img/trash.svg')
 const readerIcon = browser.extension.getURL('/img/eye.svg')
 
-class ResultItemActions extends PureComponent<Props> {
+class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
     get bookmarkClass() {
         return cx(styles.button, {
             [styles.bookmark]: this.props.hasBookmark,
@@ -85,11 +85,10 @@ class ResultItemActions extends PureComponent<Props> {
                                 ? commentFull
                                 : commentEmpty
                         }
-                        className={
-                            this.props.annotsCount > 0
-                                ? styles.commentActive
-                                : styles.comment
-                        }
+                        className={cx(styles.commentBtn, {
+                            [styles.comment]: this.props.annotsCount === 0,
+                            [styles.commentActive]: this.props.annotsCount > 0,
+                        })}
                         onClick={this.props.onCommentBtnClick}
                         tooltipText="Add/View Notes"
                     />

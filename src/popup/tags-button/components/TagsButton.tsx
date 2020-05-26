@@ -38,17 +38,17 @@ class TagsButton extends PureComponent<Props> {
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     isDisabled: !popup.isLoggable(state),
 })
 
 const mapDispatch = (dispatch): DispatchProps => ({
-    toggleTagPopup: event => {
+    toggleTagPopup: (event) => {
         event.preventDefault()
         dispatch(acts.setAllTabs(false))
         dispatch(acts.toggleShowTagsPicker())
     },
-    toggleAllTabsPopup: event => {
+    toggleAllTabsPopup: (event) => {
         event.preventDefault()
         dispatch(acts.setAllTabs(true))
         dispatch(acts.toggleShowTagsPicker())

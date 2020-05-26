@@ -25,22 +25,16 @@ export interface HighlightInteractionInterface {
     renderHighlights: (
         highlights: Highlight[],
         openSidebar: (args: { activeUrl?: string }) => void,
-        focusOnHighlight?: (url: string) => void,
-        hoverHighlightContainer?: (url: string) => void,
     ) => Promise<void>
     renderHighlight: (
         highlight: Highlight,
-        focusOnAnnotation,
-        hoverAnnotationContainer,
-        openSidebar,
+        openSidebar: (args: { activeUrl?: string }) => void,
         temporary?: boolean,
     ) => Promise<boolean>
     scrollToHighlight: ({ url }: Highlight) => number
     highlightAndScroll: (annotation: Annotation) => number
     attachEventListenersToNewHighlights: (
         highlight: Highlight,
-        focusOnAnnotation: (url: string) => void,
-        hoverAnnotationContainer: (url: string) => void,
         openSidebar: (args: { activeUrl?: string }) => void,
     ) => void
     removeMediumHighlights: () => void

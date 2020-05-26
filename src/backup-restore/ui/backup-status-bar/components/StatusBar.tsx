@@ -5,6 +5,7 @@ import { BackupUIState } from 'src/backup-restore/ui/backup-status-bar/BackupSta
 import StatusOverlay from 'src/backup-restore/ui/backup-status-bar/components/StatusOverlay'
 import { BackupTimes } from 'src/backup-restore/types'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { sync, auth, subscription } from 'src/util/remote-functions-background'
 
 const styles = require('./StatusBar.css')
 
@@ -20,7 +21,11 @@ interface Props {
     paymentUrl: string
 }
 
-const StatusBar = (props: Props) => {
+interface State {
+    syncError: any
+}
+
+const StatusBar = (props: Props, state: State) => {
     const backupProps = {
         isAutomaticBackupAllowed: props.isAutomaticBackupAllowed,
         isAutomaticBackupEnabled: props.isAutomaticBackupEnabled,
@@ -31,7 +36,6 @@ const StatusBar = (props: Props) => {
         lastBackup: props.backupTimes.lastBackup as BackupTimes['lastBackup'],
         nextBackup: props.backupTimes.nextBackup as BackupTimes['nextBackup'],
     }
-
     return (
         <div className={styles.TopContainer}>
             <div
@@ -42,17 +46,19 @@ const StatusBar = (props: Props) => {
                 <div className={styles.headerBox}>
                     <div className={styles.header}>Sync Status</div>
                     <div className={styles.IconBox}>
-                        {props.backupUIState.state === 'success' ? (
+                        {(props.backupUIState.state === 'fail' &&
+                            props.isAutomaticBackupEnabled) ||
+                        state.syncError ? (
                             <span
                                 className={classNames(
-                                    styles.successIcon,
+                                    styles.failIcon,
                                     styles.icon,
                                 )}
                             />
                         ) : (
                             <span
                                 className={classNames(
-                                    styles.failIcon,
+                                    styles.syncIcon,
                                     styles.icon,
                                 )}
                             />
@@ -60,7 +66,7 @@ const StatusBar = (props: Props) => {
                     </div>
                 </div>
                 <div className={styles.backupOverlay}>
-                    {props.hover && props.backupTimes && (
+                    {props.hover && (
                         <div>
                             {props.backupUIState.state === 'success' && (
                                 <StatusOverlay

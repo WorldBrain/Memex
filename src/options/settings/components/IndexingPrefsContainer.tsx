@@ -67,12 +67,12 @@ const mapStateToProps = (state): Partial<IndexingPrefsProps> => ({
 const mapDispatchToProps = (
     dispatch,
 ): Partial<IndexingPrefsProps> & Partial<Props> => ({
-    initBookmarks: val => dispatch(acts.initBookmarks(val)),
-    initLinks: val => dispatch(acts.initLinks(val)),
-    initStubs: val => dispatch(acts.initStubs(val)),
-    initScreenshots: val => dispatch(acts.initScreenshots(val)),
-    initVisits: val => dispatch(acts.initVisits(val)),
-    initVisitDelay: val => dispatch(acts.initVisitDelay(val)),
+    initBookmarks: (val) => dispatch(acts.initBookmarks(val)),
+    initLinks: (val) => dispatch(acts.initLinks(val)),
+    initStubs: (val) => dispatch(acts.initStubs(val)),
+    initScreenshots: (val) => dispatch(acts.initScreenshots(val)),
+    initVisits: (val) => dispatch(acts.initVisits(val)),
+    initVisitDelay: (val) => dispatch(acts.initVisitDelay(val)),
     toggleBookmarks: () => {
         trackIndexingSettingChange()
 
@@ -125,7 +125,7 @@ const mapDispatchToProps = (
             })
         })
     },
-    handleVisitDelayChange: ev => {
+    handleVisitDelayChange: (ev) => {
         trackIndexingSettingChange()
 
         const el = ev.target as HTMLInputElement

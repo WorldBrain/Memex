@@ -1,0 +1,17 @@
+.showMoreBtn {
+    composes: nakedButton from 'src/common-ui/elements.css';
+    display: inline-flex;
+    border: none;
+    outline: none;
+    vertical-align: text-top;
+    font-weight: bold;
+    font-size: 11px;
+    cursor: pointer;
+    margin-top: -2px;
+    border-radius: 0px;
+    background-color: transparent;
+
+    &:hover {
+        border-radius: 3px;
+    }
+}

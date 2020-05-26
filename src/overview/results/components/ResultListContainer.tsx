@@ -4,7 +4,7 @@ import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
 import { selectors as opt } from 'src/options/settings'
-import { LoadingIndicator, ResultItem, Tooltip } from 'src/common-ui/components'
+import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
 import ResultList from './ResultList'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from '../constants'
@@ -14,7 +14,6 @@ import * as selectors from '../selectors'
 import * as acts from '../actions'
 import { actions as listActs } from 'src/custom-lists'
 import { acts as deleteConfActs } from '../../delete-confirm-modal'
-import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import { selectors as sidebarLeft } from '../../sidebar-left'
 import { actions as filterActs, selectors as filters } from 'src/search-filters'
 import { PageUrlsByDay } from 'src/search/background/types'
@@ -75,7 +74,10 @@ export interface DispatchProps {
     handleReaderViewClick: (fullUrl: string) => void
 }
 
-export interface OwnProps {}
+export interface OwnProps {
+    goToAnnotation: (annotation: any) => void
+    toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
+}
 
 export type Props = StateProps & DispatchProps & OwnProps
 
@@ -138,12 +140,8 @@ class ResultListContainer extends PureComponent<Props> {
         }
     }
 
-    handleTagUpdate = (index: number) => async (
-        _: string[],
-        added: string,
-        deleted: string,
-    ) => {
-        const url = this.props.searchResults[index].url
+    handleTagUpdate = (index: number) => async ({ added, deleted }) => {
+        const url = this.props.searchResults[index].fullUrl
         const backendResult = tags.updateTagForPage({
             added,
             deleted,
@@ -159,11 +157,7 @@ class ResultListContainer extends PureComponent<Props> {
         return backendResult
     }
 
-    handleListUpdate = (index: number) => async (
-        _: string[],
-        added: string,
-        deleted: string,
-    ) => {
+    handleListUpdate = (index: number) => async ({ added, deleted }) => {
         const url = this.props.searchResults[index].url
         const backendResult = collections.updateListForPage({
             added,
@@ -199,6 +193,9 @@ class ResultListContainer extends PureComponent<Props> {
                             collections.fetchInitialListSuggestions
                         }
                         initialSelectedEntries={async () => selectedLists}
+                        onEscapeKeyDown={
+                            this.props.handleListBtnClick(index) as any
+                        }
                     />
                 </div>
             </HoverBox>
@@ -223,6 +220,9 @@ class ResultListContainer extends PureComponent<Props> {
                         }
                         loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
                         initialSelectedEntries={async () => selectedTags}
+                        onEscapeKeyDown={
+                            this.props.handleTagBtnClick(index) as any
+                        }
                     />
                 </div>
             </HoverBox>
@@ -265,6 +265,9 @@ class ResultListContainer extends PureComponent<Props> {
                 isOverview
                 tags={doc.tags}
                 lists={doc.lists}
+                arePickersOpen={
+                    doc.shouldDisplayListPopup || doc.shouldDisplayTagPopup
+                }
                 setTagButtonRef={this.setTagButtonRef}
                 setListButtonRef={this.setListButtonRef}
                 tagHolder={this.renderTagHolder(doc, index)}
@@ -293,6 +296,7 @@ class ResultListContainer extends PureComponent<Props> {
                     this.props.activeSidebarIndex === index
                 }
                 isSocial={isSocialPost}
+                goToAnnotation={this.props.goToAnnotation}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
             />
@@ -413,28 +417,26 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
+    props,
 ) => ({
     handleReaderViewClick: (fullUrl) =>
         dispatch(show({ modalId: 'ReaderView', options: { fullUrl } })),
     handleTagBtnClick: (index) => (event) => {
-        event.preventDefault()
+        if (event) {
+            event.preventDefault()
+        }
         dispatch(acts.toggleShowTagsPicker(index))
     },
     handleListBtnClick: (index) => (event) => {
-        event.preventDefault()
+        if (event) {
+            event.preventDefault()
+        }
         dispatch(acts.toggleShowListsPicker(index))
     },
     handleCommentBtnClick: ({ url, title }, index, isSocialPost) => (event) => {
         event.preventDefault()
         dispatch(acts.setActiveSidebarIndex(index))
-        dispatch(
-            sidebarActs.openSidebar({
-                url,
-                title,
-                forceFetch: true,
-                isSocialPost,
-            }),
-        )
+        props.toggleAnnotationsSidebar({ pageUrl: url, pageTitle: title })
     },
     handleToggleBm: ({ url, fullUrl }, index) => (event) => {
         event.preventDefault()

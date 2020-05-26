@@ -24,7 +24,7 @@ import { remoteEventEmitter } from 'src/util/webextensionRPC'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 import { bindMethod } from 'src/util/functions'
 import { Analytics } from 'src/analytics/types'
-
+import { captureException } from 'src/util/raven'
 export default class SyncBackground extends SyncService {
     private analytics: Analytics
     initialSync: MemexInitialSync
@@ -150,7 +150,7 @@ export default class SyncBackground extends SyncService {
 
             await Promise.race([
                 authChangePromise,
-                new Promise(resolve => setTimeout(resolve, 2000)),
+                new Promise((resolve) => setTimeout(resolve, 2000)),
             ])
             await maybeSync()
         })()
@@ -163,17 +163,25 @@ export default class SyncBackground extends SyncService {
     registerRemoteEmitter() {
         const remoteEmitter = remoteEventEmitter<InitialSyncEvents>('sync')
 
-        this.initialSync.events.on('progress', args => {
+        this.initialSync.events.on('progress', (args) => {
             return remoteEmitter.emit('progress', args)
         })
-        this.initialSync.events.on('roleSwitch', args => {
+        this.initialSync.events.on('roleSwitch', (args) => {
             return remoteEmitter.emit('roleSwitch', args)
         })
-        this.initialSync.events.on('error', args => {
+        this.initialSync.events.on('error', (args) => {
+            captureException(`InitialSyncError - ${args.error}`)
             return remoteEmitter.emit('error', args)
         })
-        this.initialSync.events.on('finished', args => {
+        this.initialSync.events.on('finished', (args) => {
             return remoteEmitter.emit('finished', args)
+        })
+        this.initialSync.events.on('channelTimeout', () => {
+            captureException(`InitialSyncError - channelTimeout`)
+            return remoteEmitter.emit('channelTimeout', {})
+        })
+        this.initialSync.events.on('packageStalled', () => {
+            return remoteEmitter.emit('packageStalled', {})
         })
     }
 }

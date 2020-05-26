@@ -32,7 +32,7 @@ const wantedTransitionTypes = new Set([
  * @param {history.VisitItem} item VisitItem object received from the WebExt History API.
  * @returns {boolean}
  */
-const filterVisitItemByTransType = item =>
+const filterVisitItemByTransType = (item) =>
     wantedTransitionTypes.has(item.transition)
 
 /**
@@ -55,7 +55,7 @@ async function checkVisitItemTransitionTypes({ url }) {
 const getVisitTimes = ({ url }) =>
     browser.history
         .getVisits({ url })
-        .then(visits => visits.map(visit => Math.trunc(visit.visitTime)))
+        .then((visits) => visits.map((visit) => Math.trunc(visit.visitTime)))
 
 async function getBookmarkTime({ browserId }) {
     // Web Ext. API should return array of BookmarkItems; grab first one
@@ -137,13 +137,13 @@ export default class ImportItemProcessor {
                 },
             )
             await Promise.all([
-                ...listIds.map(async listId => {
+                ...listIds.map(async (listId) => {
                     await this.options.customListsModule.insertPageToList({
                         id: listId,
                         url,
                     })
                 }),
-                ...tags.map(async tag => {
+                ...tags.map(async (tag) => {
                     await this.options.tagsModule.addTagToExistingUrl({
                         url,
                         tag,

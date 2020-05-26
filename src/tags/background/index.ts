@@ -1,7 +1,8 @@
 import Storex from '@worldbrain/storex'
-import { Windows, Tabs } from 'webextension-polyfill-ts'
+import { Windows, Tabs, Storage } from 'webextension-polyfill-ts'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+
 import TagStorage from './storage'
-import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { SearchIndex } from 'src/search'
 import { pageIsStub, maybeIndexTabs } from 'src/page-indexing/utils'
 import PageStorage from 'src/page-indexing/background/storage'
@@ -10,13 +11,13 @@ import { bindMethod } from 'src/util/functions'
 import { initErrHandler } from 'src/search/storage'
 import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
 import SearchBackground from 'src/search/background'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { Analytics } from 'src/analytics/types'
-import { Storage } from 'webextension-polyfill-ts/src/generated/index'
 import { BrowserSettingsStore } from 'src/util/settings'
+import { updateSuggestionsCache } from '../utils'
+import { STORAGE_KEYS as IDXING_PREF_KEYS } from 'src/options/settings/constants'
 
-const limitSuggestionsReturnLength = 20
-const limitSuggestionsStorageLength = 40
+export const limitSuggestionsReturnLength = 20
+export const limitSuggestionsStorageLength = 40
 
 export default class TagsBackground {
     storage: TagStorage
@@ -69,10 +70,6 @@ export default class TagsBackground {
         )
     }
 
-    setupRemoteFunctions() {
-        makeRemotelyCallableType<RemoteTagsInterface>(this.remoteFunctions)
-    }
-
     async searchForTagSuggestions(args: { query: string; limit?: number }) {
         return this.options.searchBackgroundModule.storage.suggest({
             type: 'tag',
@@ -98,18 +95,6 @@ export default class TagsBackground {
         }
 
         return suggestions.slice(0, limit)
-    }
-
-    async _updateTagSuggestionsCache({ added }) {
-        let suggestions = (await this.localStorage.get('suggestions')) ?? []
-        const tagIndex = suggestions.indexOf(added)
-        if (tagIndex !== -1) {
-            delete suggestions[tagIndex]
-            suggestions = suggestions.filter(Boolean)
-        }
-        suggestions.unshift(added)
-        suggestions = suggestions.slice(0, limitSuggestionsStorageLength)
-        await this.localStorage.set('suggestions', suggestions)
     }
 
     async addTagsToOpenTabs(params: {
@@ -171,6 +156,22 @@ export default class TagsBackground {
         return this.storage.addTag({ name: tag, url })
     }
 
+    async _updateTagSuggestionsCache(args: {
+        added?: string
+        removed?: string
+    }) {
+        return updateSuggestionsCache({
+            ...args,
+            suggestionLimit: limitSuggestionsStorageLength,
+            getCache: async () => {
+                const suggestions = await this.localStorage.get('suggestions')
+                return suggestions ?? []
+            },
+            setCache: (suggestions: string[]) =>
+                this.localStorage.set('suggestions', suggestions),
+        })
+    }
+
     async delTag({ tag, url }: { tag: string; url: string }) {
         return this.storage.delTag({ name: tag, url })
     }
@@ -190,11 +191,18 @@ export default class TagsBackground {
         const fullUrl = url
         const normalizedUrl = normalizeUrl(url, {})
 
-        if (page == null || pageIsStub(page)) {
+        const {
+            [IDXING_PREF_KEYS.BOOKMARKS]: shouldFullyIndex,
+        } = await this.options.localBrowserStorage.get(
+            IDXING_PREF_KEYS.BOOKMARKS,
+        )
+
+        if (page == null || (shouldFullyIndex && pageIsStub(page))) {
             page = await this.searchIndex.createPageViaBmTagActs({
                 fullUrl,
                 url: normalizedUrl,
                 tabId,
+                stubOnly: !shouldFullyIndex,
             })
             if (page == null) {
                 throw new Error(

@@ -12,7 +12,7 @@ let sentryEnabled = false
 // Init the enabled state based on stored flag
 browser.storage.local
     .get(SHOULD_TRACK)
-    .then(storage => (sentryEnabled = !!storage[SHOULD_TRACK]))
+    .then((storage) => (sentryEnabled = !!storage[SHOULD_TRACK]))
 
 /**
  * Inits Sentry's JS client Raven. Optionally supports adding redux middleware,
@@ -20,7 +20,7 @@ browser.storage.local
  */
 export default function initSentry({
     reduxMiddlewares,
-    stateTransformer = f => f,
+    stateTransformer = (f) => f,
     storageChangesManager = new StorageChangesManager({
         storage: browser.storage,
     }),
@@ -53,6 +53,7 @@ export default function initSentry({
 }
 
 export const context = (cb: () => Promise<void> | void) => raven.context(cb)
-export const captureException = (error: Error) => raven.captureException(error)
+export const captureException = (error: Error | ErrorEvent | string) =>
+    raven.captureException(error)
 export const captureBreadcrumb = (details: any) =>
     raven.captureBreadcrumb(details)

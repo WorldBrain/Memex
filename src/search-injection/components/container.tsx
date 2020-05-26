@@ -14,7 +14,7 @@ import * as actionTypes from '../../notifications/action-types'
 import { actionRegistry } from '../../notifications/registry'
 import ActionButton from '../../notifications/components/ActionButton'
 import OptIn from '../../notifications/components/OptIn'
-import { ToggleSwitch } from '../../common-ui/components'
+import ToggleSwitch from '../../common-ui/components/ToggleSwitch'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 class Container extends React.Component<any, any> {
@@ -126,7 +126,7 @@ class Container extends React.Component<any, any> {
     }
 
     toggleDropdown() {
-        this.setState(state => ({
+        this.setState((state) => ({
             ...state,
             dropdown: !state.dropdown,
         }))
@@ -253,7 +253,7 @@ class Container extends React.Component<any, any> {
                 <OptIn fromSearch label={buttons[0].label}>
                     <ToggleSwitch
                         defaultValue
-                        onChange={val =>
+                        onChange={(val) =>
                             this.handleToggleStorageOption(action, val)
                         }
                         fromSearch

@@ -80,7 +80,7 @@ See a list of our past updates and upcoming features [here](https://worldbrain.i
 
 ⭐️Nested Collections
 
-Drop by in our [team chat](http://join-worldbrain.herokuapp.com/) if you're interested in contributing to those features.
+Drop by in our [team chat](https://join.slack.com/t/worldbrain/shared_invite/enQtOTcwMjQxNTgyNTE4LTRhYTAzN2QwNmM3ZjQwMGE5MzllZDM3N2E5OTFjY2FmY2JmOTY3ZWJhNGEyNWRiMzU5NTZjMzU0MWJhOTA2ZDA) if you're interested in contributing to those features.
 **_Experience in React or React Native & Test Driven Development required_**
 
 ## Bugs & Feature Requests

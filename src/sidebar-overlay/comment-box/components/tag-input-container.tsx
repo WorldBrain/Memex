@@ -29,7 +29,7 @@ type Props = StateProps & DispatchProps & OwnProps
 
 // N.B. this is used for creating new annotations
 class TagAnnotationContainer extends React.Component<Props> {
-    handleTagsUpdate = async (_: string[], added: string, deleted: string) => {
+    handleTagsUpdate = async ({ added, deleted }) => {
         if (added) {
             this.props.onAnnotationTagAdd(added)
         }

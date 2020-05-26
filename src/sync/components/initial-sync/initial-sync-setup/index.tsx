@@ -45,6 +45,7 @@ export default class InitialSyncSetup extends StatefulUIElement<
                         progressPct={this.state.progressPct}
                         stage={this.state.stage}
                         handleCancel={() => this.processEvent('cancel', {})}
+                        handleRetry={() => this.processEvent('retry', {})}
                     />
                 )
             case 'done':
