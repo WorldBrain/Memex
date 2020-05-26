@@ -51,34 +51,51 @@ export default class Viewer extends React.Component<Props, State> {
 
     getHostName() {
         const url = this.props.fullUrl
-        const match = url.match(/:\/\/(www[0-9]?\.)?(.[^/:]+)/i);
-        if (match != null && match.length > 2 && typeof match[2] === 'string' && match[2].length > 0) {
-        return match[2];
-        }
-        else {
-            return null;
+        const match = url.match(/:\/\/(www[0-9]?\.)?(.[^/:]+)/i)
+        if (
+            match != null &&
+            match.length > 2 &&
+            typeof match[2] === 'string' &&
+            match[2].length > 0
+        ) {
+            return match[2]
+        } else {
+            return null
         }
     }
 
-
     renderArticle = (article) => {
-
         const readingTime = Math.floor(article.length / 5 / 268)
 
         const hostName = this.getHostName()
 
-        const HTML = '<html>'
-                        +'<h1>'+ article.title +'</h1>'
-                        +'<span id="readingTime">'+ readingTime + ' min' +'</span>'
-                        +'<span id="separator"> - </span>'
-                        +'<span id="domain">'+ hostName +'</span>'
-                        +'<span id="separator"> - </span>'
-                        +'<span id="visitUrl">'+ '<a target="_blank" href="'+this.props.fullUrl+'">Visit Original</a>'+'</span>' 
-                        +'<div id="hLine"></div>'
-                        +'<body>'+ article.content + '</body>'+
-                    '</html>'
+        const HTML =
+            '<div>' +
+            '<h1>' +
+            article.title +
+            '</h1>' +
+            '<span id="readingTime">' +
+            readingTime +
+            ' min' +
+            '</span>' +
+            '<span id="separator"> - </span>' +
+            '<span id="domain">' +
+            hostName +
+            '</span>' +
+            '<span id="separator"> - </span>' +
+            '<span id="visitUrl">' +
+            '<a target="_blank" href="' +
+            this.props.fullUrl +
+            '">Visit Original</a>' +
+            '</span>' +
+            '<div id="hLine"></div>' +
+            '<div>' +
+            article.content +
+            '</div>' +
+            '</div>'
 
         this.setState({ readerHtml: { __html: HTML } })
+        // this._readerContainerRef.current.innerHTML = HTML
     }
 
     render() {
@@ -88,7 +105,7 @@ export default class Viewer extends React.Component<Props, State> {
 
         return (
             <ViewerContainer
-                ref={(ref) => this._readerContainerRef}
+                ref={(ref) => (this._readerContainerRef = ref)}
                 dangerouslySetInnerHTML={this.state.readerHtml}
             />
         )
@@ -125,9 +142,9 @@ const ViewerContainer = styled.div`
         border-radius: 8px;
         padding: 10px 35px;
 
-        & span, 
-            p, 
-            div, 
+        & span,
+            p,
+            div,
             a {
             font-style: italic;
             font-weight: 400;

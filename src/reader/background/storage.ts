@@ -8,6 +8,8 @@ import { ReadableData } from 'src/reader/types'
 import { now } from 'moment'
 import Readability from 'readability/Readability'
 import { fetchDOMFromUrl } from 'src/page-analysis/background/fetch-page-data'
+import DOMPurify from 'dompurify'
+
 export default class ReaderStorage extends StorageModule {
     constructor(private options: StorageModuleConstructorArgs) {
         super(options)
@@ -91,7 +93,8 @@ export default class ReaderStorage extends StorageModule {
             }k`,
         )
         console.time('Reader::Parser::ParseTime')
-        const article = new Readability(document).parse()
+        const article = DOMPurify.sanitize(new Readability(document).parse())
+
         console.timeEnd('Reader::Parser::ParseTime')
         console.log(
             `Reader::Parser Readable Doc Size - ${

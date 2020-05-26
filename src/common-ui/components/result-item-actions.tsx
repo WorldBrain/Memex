@@ -27,6 +27,9 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
     }
 
     render() {
+        const listLength = this.props.lists?.length ?? 0
+        const tagsLength = this.props.tags?.length ?? 0
+
         return (
             <div
                 className={cx(styles.detailsContainer, {
@@ -53,26 +56,20 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                         className={styles.trash}
                     />
                     <ResultItemActionBtn
-                        permanent={this.props.tags.length > 0}
-                        imgSrc={this.props.tags.length > 0 ? tagFull : tagEmpty}
+                        permanent={listLength > 0}
+                        imgSrc={tagsLength > 0 ? tagFull : tagEmpty}
                         className={
-                            this.props.tags.length > 0
-                                ? styles.commentActive
-                                : styles.tag
+                            tagsLength > 0 ? styles.commentActive : styles.tag
                         }
                         onClick={this.props.onTagBtnClick}
                         tooltipText="Edit Tags"
                         refHandler={this.props.setTagButtonRef}
                     />
                     <ResultItemActionBtn
-                        permanent={this.props.lists.length > 0}
-                        imgSrc={
-                            this.props.lists.length > 0 ? listFull : listAdd
-                        }
+                        permanent={listLength > 0}
+                        imgSrc={listLength > 0 ? listFull : listAdd}
                         className={
-                            this.props.lists.length > 0
-                                ? styles.commentActive
-                                : styles.tag
+                            listLength > 0 ? styles.commentActive : styles.tag
                         }
                         onClick={this.props.onListBtnClick}
                         tooltipText="Edit Collections"
