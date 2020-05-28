@@ -25,6 +25,7 @@ import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { tags, collections } from 'src/util/remote-functions-background'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import CopyPaster from 'src/overview/copy-paster'
 
 const styles = require('./ResultList.css')
 
@@ -44,6 +45,7 @@ export interface StateProps {
     annotsByDay: PageUrlsByDay
     isFilterBarActive: boolean
     isSocialPost: boolean
+    copyPasterEditingId: string | null
 }
 
 export interface DispatchProps {
@@ -71,6 +73,8 @@ export interface DispatchProps {
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
     handleTrashBtnClick: (doc: Result, i: number) => MouseEventHandler
+    setCopyPasterEditingId: (id: string) => void
+    resetCopyPasterEditingId: () => void
 }
 
 export interface OwnProps {
@@ -242,10 +246,58 @@ class ResultListContainer extends PureComponent<Props> {
             return null
         }
 
+        const { copyPasterEditingId } = this.props
+
+        const MOCK_TEMPLATES = [
+            {
+                id: 'uuid0001',
+                title: 'Markdown',
+                code: `[{{{title}}}]({{url}})`,
+                favourite: false,
+            },
+            {
+                id: 'uuid0002',
+                title: 'HTML Link',
+                code: `<a href="{{url}}">\n  {{{title}}}\n</a>`,
+                favourite: true,
+            },
+        ]
+
         return (
             <HoverBox>
                 <div ref={(ref) => this.setCopyPasterDivRef(ref)}>
-                    TODO: copy paster
+                    <CopyPaster
+                        copyPasterEditingId={copyPasterEditingId}
+                        templates={MOCK_TEMPLATES}
+                        onClickEdit={(id) =>
+                            this.props.setCopyPasterEditingId(id)
+                        }
+                        onClickCancel={this.props.resetCopyPasterEditingId}
+                        onClickNew={() => {
+                            // TODO
+                        }}
+                        onClickSave={(id) => {
+                            // TODO
+                        }}
+                        onClickDelete={(id) => {
+                            // TODO
+                        }}
+                        onClickHowto={() => {
+                            // TODO
+                        }}
+                        onTitleChange={(id, title) => {
+                            // TODO
+                        }}
+                        onCodeChange={(id, code) => {
+                            // TODO
+                        }}
+                        onSetFavourite={(id, favourite) => {
+                            // TODO
+                        }}
+                        onClickOutside={() => {
+                            // TODO
+                        }}
+                    />
                 </div>
             </HoverBox>
         )
@@ -434,6 +486,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
     isFilterBarActive: filters.showFilterBar(state),
     isSocialPost: selectors.isSocialPost(state),
+    copyPasterEditingId: selectors.copyPasterEditingId(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
@@ -494,6 +547,8 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
         dispatch(listActs.delPageFromList(url, isSocialPost))
         dispatch(acts.hideResultItem(url))
     },
+    setCopyPasterEditingId: (id) => dispatch(acts.setCopyPasterEditingId(id)),
+    resetCopyPasterEditingId: () => dispatch(acts.resetCopyPasterEditingId()),
 })
 
 export default connect(mapState, mapDispatch)(ResultListContainer)

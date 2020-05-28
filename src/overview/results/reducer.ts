@@ -26,6 +26,8 @@ export interface State {
     activeSidebarIndex: number
     /** Holds the index of the result which has the copy paster popup open (-1 by default) */
     activeCopyPasterIndex: number
+    /** Holds the id of currently edited template, or null if not editing (null by default) */
+    copyPasterEditingId: string | null
     /** Holds the current page of results that the user has scrolled to (0-based). */
     currentPage: number
     /** Holds the total count of matching results to the current search (includes not-shown results). */
@@ -52,6 +54,7 @@ export const defaultState: State = {
     activeListIndex: -1,
     activeSidebarIndex: -1,
     activeCopyPasterIndex: -1,
+    copyPasterEditingId: null,
     currentPage: 0,
     totalCount: null,
     searchCount: 0,
@@ -253,6 +256,16 @@ reducer.on(acts.resetActiveCopyPasterIndex, (state) => ({
 reducer.on(acts.setActiveCopyPasterIndex, (state, payload) => ({
     ...state,
     activeCopyPasterIndex: payload,
+}))
+
+reducer.on(acts.resetCopyPasterEditingId, (state) => ({
+    ...state,
+    copyPasterEditingId: defaultState.copyPasterEditingId,
+}))
+
+reducer.on(acts.setCopyPasterEditingId, (state, payload) => ({
+    ...state,
+    copyPasterEditingId: payload,
 }))
 
 reducer.on(acts.resetActiveSidebarIndex, (state) => ({
