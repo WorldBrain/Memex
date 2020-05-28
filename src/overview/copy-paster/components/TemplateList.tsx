@@ -60,7 +60,7 @@ class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
         return templates.map((template) => (
             <TemplateRow
                 key={template.id}
-                {...template}
+                template={template}
                 onClickSetFavourite={(favourite) =>
                     this.props.onClickSetFavourite(template.id, favourite)
                 }

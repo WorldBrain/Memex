@@ -29,7 +29,7 @@ const TEMPLATE_MOCKS = [
 
 stories.add('Template Row', () => (
     <TemplateRow
-        {...TEMPLATE_MOCKS[0]}
+        template={TEMPLATE_MOCKS[0]}
         onClickSetFavourite={(favourite) => console.log('favourite', favourite)}
         onClickEdit={() => console.log('edit')}
     />
