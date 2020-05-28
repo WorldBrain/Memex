@@ -49,6 +49,7 @@ export interface Props extends Partial<SocialPage> {
     tagHolder: ReactNode
     tagManager: ReactNode
     listManager: ReactNode
+    copyPasterManager: ReactNode
     highlighter: HighlightInteractionInterface
     annotationEventProps: AnnotationBoxEventProps
     annotationModes: {
@@ -61,11 +62,13 @@ export interface Props extends Partial<SocialPage> {
     onTrashBtnClick: MouseEventHandler
     onCommentBtnClick: MouseEventHandler
     onToggleBookmarkClick: MouseEventHandler
+    onCopyPasterBtnClick: MouseEventHandler
     handleCrossRibbonClick: MouseEventHandler
     resetUrlDragged: () => void
     setUrlDragged: (url: string) => void
     setTagButtonRef: (el: HTMLElement) => void
     setListButtonRef: (el: HTMLElement) => void
+    setCopyPasterButtonRef: (el: HTMLElement) => void
 }
 
 class ResultItem extends Component<Props> {
@@ -161,6 +164,7 @@ class ResultItem extends Component<Props> {
                 )}
                 {this.props.tagManager}
                 {this.props.listManager}
+                {this.props.copyPasterManager}
                 <div
                     className={cx(styles.rootContainer, {
                         [styles.rootContainerBottomBorder]: !this
