@@ -78,6 +78,12 @@ export const resetActiveCopyPasterIndex = createAction(
 export const setActiveCopyPasterIndex = createAction<number>(
     'results/setActiveCopyPasterIndex',
 )
+export const resetCopyPasterEditingId = createAction(
+    'results/resetCopyPasterEditingId',
+)
+export const setCopyPasterEditingId = createAction<string>(
+    'results/setCopyPasterEditingId',
+)
 export const nextPage = createAction('results/nextPage')
 export const resetPage = createAction('results/resetPage')
 export const setSearchType = createAction<'page' | 'notes' | 'social'>(

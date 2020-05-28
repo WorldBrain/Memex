@@ -18,6 +18,8 @@ const ReduxDevTools =
 
 const store = configureStore({ ReduxDevTools })
 
+window.store = store
+
 ReactDOM.render(
     <Provider store={store}>
         <ErrorBoundary component={RuntimeError}>
