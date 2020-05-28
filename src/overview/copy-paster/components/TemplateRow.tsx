@@ -33,14 +33,16 @@ const ActionsContainer = styled.div`
     margin-right: 8px;
 `
 
-interface TemplateRowProps extends Template {
+interface TemplateRowProps {
+    template: Template
+
     onClickSetFavourite: (favourite: boolean) => void
     onClickEdit: () => void
 }
 
 export default class TemplateRow extends PureComponent<TemplateRowProps> {
     render() {
-        const { title, favourite } = this.props
+        const { title, favourite } = this.props.template
 
         return (
             <Row>
