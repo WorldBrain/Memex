@@ -72,6 +72,12 @@ export const resetActiveSidebarIndex = createAction(
 export const setActiveSidebarIndex = createAction<number>(
     'results/setActiveSidebarIndex',
 )
+export const resetActiveCopyPasterIndex = createAction(
+    'results/resetActiveCopyPasterIndex',
+)
+export const setActiveCopyPasterIndex = createAction<number>(
+    'results/setActiveCopyPasterIndex',
+)
 export const nextPage = createAction('results/nextPage')
 export const resetPage = createAction('results/resetPage')
 export const setSearchType = createAction<'page' | 'notes' | 'social'>(
@@ -173,6 +179,8 @@ export const toggleShowTagsPicker: (i: number) => Thunk = (index) => (
         dispatch(resetActiveTagIndex())
     } else {
         dispatch(resetActiveListIndex())
+        dispatch(resetActiveCopyPasterIndex())
+
         dispatch(setActiveTagIndex(index))
     }
 }
@@ -187,7 +195,25 @@ export const toggleShowListsPicker: (i: number) => Thunk = (index) => (
         dispatch(resetActiveListIndex())
     } else {
         dispatch(resetActiveTagIndex())
+        dispatch(resetActiveCopyPasterIndex())
+
         dispatch(setActiveListIndex(index))
+    }
+}
+
+export const toggleShowCopyPaster: (i: number) => Thunk = (index) => (
+    dispatch,
+    getState,
+) => {
+    const activeCopyPasterIndex = selectors.activeCopyPasterIndex(getState())
+
+    if (activeCopyPasterIndex === index) {
+        dispatch(resetActiveCopyPasterIndex())
+    } else {
+        dispatch(resetActiveTagIndex())
+        dispatch(resetActiveListIndex())
+
+        dispatch(setActiveCopyPasterIndex(index))
     }
 }
 
