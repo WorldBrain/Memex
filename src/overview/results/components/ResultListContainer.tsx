@@ -292,7 +292,7 @@ class ResultListContainer extends PureComponent<Props> {
                 setUrlDragged={this.props.setUrlDragged}
                 tagManager={this.renderTagsManager(doc, index)}
                 listManager={this.renderListsManager(doc, index)}
-                copyPasterManger={this.renderCopyPasterManager(doc, index)}
+                copyPasterManager={this.renderCopyPasterManager(doc, index)}
                 resetUrlDragged={this.props.resetUrlDragged}
                 onTagBtnClick={this.props.handleTagBtnClick(index)}
                 onListBtnClick={this.props.handleListBtnClick(index)}

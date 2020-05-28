@@ -123,7 +123,7 @@ class ResultItem extends PureComponent<Props> {
                 )}
                 {this.props.tagManager}
                 {this.props.listManager}
-                {this.props.copyPasterManger}
+                {this.props.copyPasterManager}
                 <div
                     className={cx(styles.rootContainer, {
                         [styles.tweetRootContainer]: this.props.isSocial,
