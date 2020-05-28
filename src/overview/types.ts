@@ -16,6 +16,7 @@ export interface Result extends SocialPage {
     tagPillsData: string[]
     shouldDisplayTagPopup: boolean
     shouldDisplayListPopup: boolean
+    shouldDisplayCopyPasterPopup: boolean
     displayTime: number
     screenshot: string
     favIcon: string

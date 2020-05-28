@@ -397,6 +397,12 @@
     }
 }
 
+.copy {
+    &:hover {
+        opacity: 0.6;
+    }
+}
+
 .commentBtn {
     /* only used to ID if button is clicked - multiple buttons so cannot use a real `id` att */
 }

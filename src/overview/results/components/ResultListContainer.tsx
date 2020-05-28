@@ -67,6 +67,7 @@ export interface DispatchProps {
         doc: Result,
         isSocialPost: boolean,
     ) => MouseEventHandler
+    handleCopyPasterBtnClick: (i: number) => MouseEventHandler
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
     handleTrashBtnClick: (doc: Result, i: number) => MouseEventHandler
@@ -83,17 +84,23 @@ class ResultListContainer extends PureComponent<Props> {
     private dropdownRefs: HTMLSpanElement[] = []
     private tagBtnRefs: HTMLButtonElement[] = []
     private listBtnRefs: HTMLButtonElement[] = []
+    private copyPasterBtnRefs: HTMLButtonElement[] = []
     private tagDivRef: HTMLDivElement
     private listDivRef: HTMLDivElement
+    private copyPasterDivRef: HTMLDivElement
 
     private trackDropdownRef = (el: HTMLSpanElement) =>
         this.dropdownRefs.push(el)
     private setTagDivRef = (el: HTMLDivElement) => (this.tagDivRef = el)
     private setListDivRef = (el: HTMLDivElement) => (this.listDivRef = el)
+    private setCopyPasterDivRef = (el: HTMLDivElement) =>
+        (this.copyPasterDivRef = el)
     private setTagButtonRef = (el: HTMLButtonElement) =>
         this.tagBtnRefs.push(el)
     private setListButtonRef = (el: HTMLButtonElement) =>
         this.listBtnRefs.push(el)
+    private setCopyPasterButtonRef = (el: HTMLButtonElement) =>
+        this.copyPasterBtnRefs.push(el)
 
     state = {
         tagSuggestions: [],
@@ -227,6 +234,23 @@ class ResultListContainer extends PureComponent<Props> {
         )
     }
 
+    private renderCopyPasterManager(
+        { shouldDisplayCopyPasterPopup }: Result,
+        index,
+    ) {
+        if (!shouldDisplayCopyPasterPopup) {
+            return null
+        }
+
+        return (
+            <HoverBox>
+                <div ref={(ref) => this.setCopyPasterDivRef(ref)}>
+                    TODO: copy paster
+                </div>
+            </HoverBox>
+        )
+    }
+
     private renderTagHolder = ({ tags: currentTags }, resultIndex) => (
         <TagHolder
             tags={[...new Set([...currentTags])]}
@@ -257,14 +281,18 @@ class ResultListContainer extends PureComponent<Props> {
                 tags={doc.tags}
                 lists={doc.lists}
                 arePickersOpen={
-                    doc.shouldDisplayListPopup || doc.shouldDisplayTagPopup
+                    doc.shouldDisplayListPopup ||
+                    doc.shouldDisplayTagPopup ||
+                    doc.shouldDisplayCopyPasterPopup
                 }
                 setTagButtonRef={this.setTagButtonRef}
                 setListButtonRef={this.setListButtonRef}
+                setCopyPasterButtonRef={this.setCopyPasterButtonRef}
                 tagHolder={this.renderTagHolder(doc, index)}
                 setUrlDragged={this.props.setUrlDragged}
                 tagManager={this.renderTagsManager(doc, index)}
                 listManager={this.renderListsManager(doc, index)}
+                copyPasterManger={this.renderCopyPasterManager(doc, index)}
                 resetUrlDragged={this.props.resetUrlDragged}
                 onTagBtnClick={this.props.handleTagBtnClick(index)}
                 onListBtnClick={this.props.handleListBtnClick(index)}
@@ -275,6 +303,9 @@ class ResultListContainer extends PureComponent<Props> {
                     doc,
                     index,
                     isSocialPost,
+                )}
+                onCopyPasterBtnClick={this.props.handleCopyPasterBtnClick(
+                    index,
                 )}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(
                     doc,
@@ -425,6 +456,13 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
         event.preventDefault()
         dispatch(acts.setActiveSidebarIndex(index))
         props.toggleAnnotationsSidebar({ pageUrl: url, pageTitle: title })
+    },
+    handleCopyPasterBtnClick: (index) => (event) => {
+        if (event) {
+            event.preventDefault()
+        }
+
+        dispatch(acts.toggleShowCopyPaster(index))
     },
     handleToggleBm: ({ url, fullUrl }, index) => (event) => {
         event.preventDefault()
