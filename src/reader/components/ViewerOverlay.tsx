@@ -17,12 +17,15 @@ export default class ViewerOverlay extends React.PureComponent<Props> {
         this.el = document.createElement('div')
     }
 
-    componentDidMount() {
+    componentDidMount = () => {
         modalRoot.appendChild(this.el)
     }
 
-    componentWillUnmount() {
+    componentWillUnmount = () => {
         modalRoot.removeChild(this.el)
+    }
+    handleClose = () => {
+        this.props.handleClose()
     }
 
     render() {
@@ -32,7 +35,7 @@ export default class ViewerOverlay extends React.PureComponent<Props> {
     renderContent() {
         return (
             <Wrapper>
-                <CloseButton onClick={this.props.handleClose} />
+                <CloseButton onClick={this.handleClose} />
 
                 <Inner>
                     <div>{this.props.children}</div>

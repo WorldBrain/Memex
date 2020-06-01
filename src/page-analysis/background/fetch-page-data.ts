@@ -12,6 +12,7 @@ import { FetchPageDataError } from './fetch-page-data-error'
 export type FetchPageData = (args: {
     url: string
     timeout?: number
+    domParser?: (html: string) => Document
     opts?: FetchPageDataOpts
 }) => FetchPageDataReturnValue
 export type RunXHR = () => Promise<PageDataResult>
@@ -41,6 +42,7 @@ export const defaultOpts: FetchPageDataOpts = {
 const fetchPageData: FetchPageData = ({
     url,
     timeout = 10000,
+    domParser,
     opts = defaultOpts,
 }) => {
     let normalizedUrl
@@ -65,14 +67,14 @@ const fetchPageData: FetchPageData = ({
         })
         cancel = () => undefined
     } else {
-        const req = fetchDOMFromUrl(url, timeout)
+        const req = fetchDOMFromUrl(url, timeout, domParser)
         cancel = req.cancel
 
         /**
          * @return {Promise<any>} Resolves to an object containing `content` and `favIconURI` data
          *  fetched from the DOM pointed at by the `url` of `fetchPageData` call.
          */
-        run = async function() {
+        run = async function () {
             const doc = await req.run()
 
             if (!doc) {
@@ -126,6 +128,7 @@ const fetchTimeout = (
 export function fetchDOMFromUrl(
     url: string,
     timeout: number,
+    domParser?: (html: string) => Document,
 ): { run: () => Promise<Document>; cancel: CancelXHR } {
     const controller = new AbortController()
 
@@ -142,7 +145,12 @@ export function fetchDOMFromUrl(
                 }
                 const text = await response.text()
 
-                return new DOMParser().parseFromString(text, 'text/html')
+                const doc = domParser
+                    ? domParser(text)
+                    : new DOMParser().parseFromString(text, 'text/html')
+
+                console.log('docHtml', doc.body.outerHTML)
+                return doc
             } catch (error) {
                 if (error.name === 'AbortError') {
                     throw new FetchPageDataError(

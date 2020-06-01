@@ -5,9 +5,12 @@ import { renderHighlights } from 'src/highlighting/ui/highlight-interactions'
 import styled from 'styled-components'
 import { colorText } from 'src/common-ui/components/design-library/colors'
 import { readable } from 'src/util/remote-functions-background'
+import { insertTooltip } from 'src/in-page-ui/tooltip/content_script/interactions'
 
 interface Props {
     fullUrl: string
+    init?: ({ url, title }) => void
+    openSidebar?: (args: { activeUrl?: string }) => void
 }
 
 interface State {
@@ -29,10 +32,13 @@ export default class Viewer extends React.Component<Props, State> {
         this.setState({ loading: false })
 
         // load annotations
-        await this.loadAndRenderAnnotations(this.props.fullUrl)
+        await this.loadAndRenderAnnotations(
+            this.props.fullUrl,
+            this.props.openSidebar,
+        )
     }
 
-    loadAndRenderAnnotations = async (fullUrl) => {
+    loadAndRenderAnnotations = async (fullUrl, onAnnotationClick) => {
         const annots = await remoteFunction('getAllAnnotationsByUrl')({
             url: fullUrl,
         })
@@ -41,22 +47,11 @@ export default class Viewer extends React.Component<Props, State> {
         const highlightables = annots.filter(
             (annotation) => annotation.selector,
         )
-        await renderHighlights(highlightables, () => null)
+        await renderHighlights(highlightables, onAnnotationClick)
     }
 
     getHostName() {
-        const url = this.props.fullUrl
-        const match = url.match(/:\/\/(www[0-9]?\.)?(.[^/:]+)/i)
-        if (
-            match != null &&
-            match.length > 2 &&
-            typeof match[2] === 'string' &&
-            match[2].length > 0
-        ) {
-            return match[2]
-        } else {
-            return null
-        }
+        return new URL(this.props.fullUrl).hostname
     }
 
     renderArticle = (article) => {
@@ -85,9 +80,12 @@ export default class Viewer extends React.Component<Props, State> {
             '</span>' +
             '<div id="hLine"></div>' +
             '<div>' +
-            ((article.content?.length ?? 0) === 0)
-                ? article.textContent
-                : article.content + '</div>' + '</div>'
+            // ((article.content?.length ?? 0) === 0)
+            //     ? article.textContent
+            //     : article.content + '</div>' + '</div>'
+            article.content +
+            '</div>' +
+            '</div>'
 
         this.setState({ readerHtml: { __html: HTML } })
         // this._readerContainerRef.current.innerHTML = HTML
@@ -99,7 +97,7 @@ export default class Viewer extends React.Component<Props, State> {
         }
 
         return (
-            <ViewerContainer
+            <Content
                 ref={(ref) => (this._readerContainerRef = ref)}
                 dangerouslySetInnerHTML={this.state.readerHtml}
             />
@@ -107,7 +105,7 @@ export default class Viewer extends React.Component<Props, State> {
     }
 }
 
-const ViewerContainer = styled.div`
+const Content = styled.div`
     color: #3a2f45;
 
     & img {

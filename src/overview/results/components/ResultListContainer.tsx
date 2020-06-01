@@ -71,12 +71,12 @@ export interface DispatchProps {
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
     handleTrashBtnClick: (doc: Result, i: number) => MouseEventHandler
-    handleReaderViewClick: (fullUrl: string) => void
 }
 
 export interface OwnProps {
     goToAnnotation: (annotation: any) => void
     toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
+    handleReaderViewClick: (fullUrl: string) => void
 }
 
 export type Props = StateProps & DispatchProps & OwnProps
@@ -419,8 +419,6 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
     props,
 ) => ({
-    handleReaderViewClick: (fullUrl) =>
-        dispatch(show({ modalId: 'ReaderView', options: { fullUrl } })),
     handleTagBtnClick: (index) => (event) => {
         if (event) {
             event.preventDefault()

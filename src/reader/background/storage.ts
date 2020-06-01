@@ -83,6 +83,7 @@ export default class ReaderStorage extends StorageModule {
         let document = doc
         if (!document) {
             console.log(`Reader::Parser Document fetching from URL ${fullUrl}`)
+
             document = await fetchDOMFromUrl(fullUrl, 5000).run()
         } else {
             console.log(`Reader::Parser Document given`)
@@ -96,9 +97,7 @@ export default class ReaderStorage extends StorageModule {
         console.time('Reader::Parser::ParseTime')
 
         const article = new Readability(document).parse()
-        console.dir({ article })
         article.content = DOMPurify.sanitize(article.contnet)
-        console.dir({ article })
         console.timeEnd('Reader::Parser::ParseTime')
         console.log(
             `Reader::Parser Readable Doc Size - ${

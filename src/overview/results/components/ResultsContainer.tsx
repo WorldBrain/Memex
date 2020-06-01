@@ -41,6 +41,7 @@ export interface DispatchProps {
 
 export interface OwnProps {
     toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
+    handleReaderViewClick: (url: string) => void
 }
 
 export type Props = StateProps & DispatchProps & OwnProps
@@ -141,6 +142,7 @@ class ResultsContainer extends React.Component<Props, State> {
                 )}
                 <ResultList
                     {...this.props}
+                    handleReaderViewClick={this.props.handleReaderViewClick}
                     goToAnnotation={this.goToAnnotation}
                 />
             </React.Fragment>

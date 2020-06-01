@@ -12,7 +12,7 @@ import { createHighlight, extractAnchor } from 'src/highlighting/ui'
 import { AnnotationsManagerInterface } from 'src/annotations/types'
 import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
 import { Highlight } from 'src/highlighting/types'
-import { TooltipPosition } from '../types'
+import { TooltipInPageUIInterface, TooltipPosition } from '../types'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
@@ -64,7 +64,7 @@ let manualOverride = false
  */
 export const insertTooltip = async (params: {
     toolbarNotifications: any
-    inPageUI: InPageUIInterface
+    inPageUI: TooltipInPageUIInterface
     annotationsManager: AnnotationsManagerInterface
 }) => {
     // If target is set, Tooltip has already been injected.
@@ -175,34 +175,9 @@ export const removeTooltip = (options?: { override?: boolean }) => {
 //     }
 // }
 
-/**
- * Sets up RPC functions to insert and remove Tooltip from Popup.
- */
-export const setupRPC = (params: {
-    toolbarNotifications: any
-    inPageUI: InPageUIInterface
-    annotationsManager: AnnotationsManagerInterface
-}) => {
-    // makeRemotelyCallableType<TooltipInteractionInterface>({
-    //     showContentTooltip: async () => {
-    //     },
-    //     insertTooltip: async ({ override } = {}) => {
-    //         manualOverride = !!override
-    //         await insertTooltip(params)
-    //     },
-    //     removeTooltip: async ({ override } = {}) => {
-    //         manualOverride = !!override
-    //         await removeTooltip()
-    //     },
-    //     insertOrRemoveTooltip: async () => {
-    //         await insertOrRemoveTooltip(params)
-    //     },
-    // })
-}
-
 export const showContentTooltip = async (params: {
     toolbarNotifications: any
-    inPageUI: InPageUIInterface
+    inPageUI: TooltipInPageUIInterface
     annotationsManager: AnnotationsManagerInterface
     position?: TooltipPosition
 }) => {

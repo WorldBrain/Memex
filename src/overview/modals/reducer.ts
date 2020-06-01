@@ -2,7 +2,7 @@ import { createReducer } from 'redux-act'
 
 import * as acts from './actions'
 
-export type ModalIds = 'Subscription' | 'ReaderView' | null
+export type ModalIds = 'Subscription' | null
 
 export interface State {
     modalId?: ModalIds

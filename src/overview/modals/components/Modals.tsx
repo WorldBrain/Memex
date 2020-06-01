@@ -13,9 +13,6 @@ const modalsMap = {
     Subscription: ({ modalOptions, onClose }) => (
         <SubscribeModal onClose={onClose} {...modalOptions} />
     ),
-    ReaderView: ({ modalOptions, onClose }) => (
-        <ViewerModal handleClick={onClose} {...modalOptions} />
-    ),
 }
 
 class Modals extends PureComponent<Props> {

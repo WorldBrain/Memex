@@ -1,12 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import TooltipContainer from './container'
-import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import { TooltipInPageUIInterface } from 'src/in-page-ui/tooltip/types'
 
 export function setupUIContainer(
     target,
     params: {
-        inPageUI: InPageUIInterface
+        inPageUI: TooltipInPageUIInterface
         createAndCopyDirectLink: any
         openSettings: any
         destroyTooltip: any
