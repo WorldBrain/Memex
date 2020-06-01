@@ -22,8 +22,4 @@ export class ReaderBackground {
             parseAndSaveReadable: this.storage.parseAndSaveReadable,
         }
     }
-
-    setupRemoteFunctions() {
-        makeRemotelyCallableType<RemoteReaderInterface>(this.remoteFunctions)
-    }
 }

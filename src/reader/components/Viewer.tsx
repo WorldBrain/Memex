@@ -90,9 +90,9 @@ export default class Viewer extends React.Component<Props, State> {
             '</span>' +
             '<div id="hLine"></div>' +
             '<div>' +
-            article.content +
-            '</div>' +
-            '</div>'
+            ((article.content?.length ?? 0) === 0)
+                ? article.textContent
+                : article.content + '</div>' + '</div>'
 
         this.setState({ readerHtml: { __html: HTML } })
         // this._readerContainerRef.current.innerHTML = HTML

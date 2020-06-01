@@ -1,5 +1,6 @@
 export interface ReadableData {
     content: string
+    textContent: string
     title: string
     url: string
     length: string

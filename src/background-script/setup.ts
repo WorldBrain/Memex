@@ -313,7 +313,6 @@ export async function setupBackgroundModules(
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()
-    backgroundModules.readable.setupRemoteFunctions()
 
     await backgroundModules.sync.setup()
     await backgroundModules.analytics.setup()

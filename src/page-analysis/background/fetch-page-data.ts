@@ -72,7 +72,7 @@ const fetchPageData: FetchPageData = ({
          * @return {Promise<any>} Resolves to an object containing `content` and `favIconURI` data
          *  fetched from the DOM pointed at by the `url` of `fetchPageData` call.
          */
-        run = async function () {
+        run = async function() {
             const doc = await req.run()
 
             if (!doc) {

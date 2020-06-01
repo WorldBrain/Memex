@@ -25,6 +25,7 @@ export default class ReaderStorage extends StorageModule {
                     title: { type: 'string' },
                     length: { type: 'string' },
                     content: { type: 'text', optional: true },
+                    textContent: { type: 'text', optional: true },
                     strategy: { type: 'string' },
                 },
                 indices: [
@@ -89,12 +90,15 @@ export default class ReaderStorage extends StorageModule {
 
         console.log(
             `Reader::Parser Original Doc Size - ${
-                document.body.outerHTML.length / 1000
+                document.body.outerHTML.length / 1024
             }k`,
         )
         console.time('Reader::Parser::ParseTime')
-        const article = DOMPurify.sanitize(new Readability(document).parse())
 
+        const article = new Readability(document).parse()
+        console.dir({ article })
+        article.content = DOMPurify.sanitize(article.contnet)
+        console.dir({ article })
         console.timeEnd('Reader::Parser::ParseTime')
         console.log(
             `Reader::Parser Readable Doc Size - ${
@@ -105,6 +109,7 @@ export default class ReaderStorage extends StorageModule {
         const readableData = {
             title: article.title,
             content: article.content,
+            textContent: article.textContent,
             url: normalizedUrl,
             length: article.length,
             fullUrl,
@@ -112,10 +117,7 @@ export default class ReaderStorage extends StorageModule {
             created: now(),
         }
 
-        await this.operation('createReadable', {
-            ...readableData,
-            url: normalizedUrl,
-        })
+        await this.operation('createReadable', readableData)
 
         return readableData as ReadableData
     }
