@@ -84,7 +84,7 @@ function isAlpha(str) {
 
 export const convertKeyboardEventToKeyString = (
     e,
-    getKeyVal = event => event.key,
+    getKeyVal = (event) => event.key,
 ) => {
     if (!isAlpha(e.key)) {
         return ''

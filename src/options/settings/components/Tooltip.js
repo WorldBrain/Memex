@@ -27,7 +27,7 @@ class Tooltip extends React.Component {
         this.setState({ tooltip })
     }
 
-    togglePosition = async e => {
+    togglePosition = async (e) => {
         const position = e.target.value
         await utils.setPositionState(position)
         this.setState({ position })

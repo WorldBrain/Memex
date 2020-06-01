@@ -46,7 +46,7 @@ export const conditionallyShowHighlightNotification = async ({
  * "browse around a bit" in Power Search welcome notification.
  */
 
-const handler = toolbarNotifications => async () => {
+const handler = (toolbarNotifications) => async () => {
     toolbarNotifications._destroyRootElement()
     toolbarNotifications.showToolbarNotification('go-to-dashboard')
 
@@ -109,7 +109,7 @@ export const conditionallyShowOnboardingNotifications = async ({
  * is created.
  * @param nextStage Next stage to set for annotations flow
  */
-export const conditionallyRemoveOnboardingSelectOption = async nextStage => {
+export const conditionallyRemoveOnboardingSelectOption = async (nextStage) => {
     const annotationStage = await utils.fetchOnboardingStage(FLOWS.annotation)
     if (annotationStage === STAGES.annotation.notifiedSelectOption) {
         await utils.setOnboardingStage(FLOWS.annotation, nextStage)

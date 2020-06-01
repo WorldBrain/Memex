@@ -44,11 +44,11 @@ const CommentTags = ({
                     [styles.noComment]: !comment,
                 })}
             >
-                {tags.map(tag => (
+                {tags.map((tag) => (
                     <span
                         key={tag}
                         className={styles.tagPill}
-                        onClick={e => {
+                        onClick={(e) => {
                             e.preventDefault()
                             e.stopPropagation()
                             handleTagClick(tag)

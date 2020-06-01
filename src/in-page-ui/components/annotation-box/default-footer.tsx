@@ -34,7 +34,7 @@ const DefaultFooter = ({
             <button
                 className={cx(styles.commonIcon, styles.trashIcon)}
                 title="Delete note"
-                onClick={e => {
+                onClick={(e) => {
                     e.stopPropagation()
                     trashIconClickHandler()
                 }}
@@ -49,7 +49,7 @@ const DefaultFooter = ({
             <button
                 className={cx(styles.commonIcon, styles.editIcon)}
                 title="Edit note"
-                onClick={e => {
+                onClick={(e) => {
                     e.stopPropagation()
                     editIconClickHandler()
                 }}
@@ -68,7 +68,7 @@ const DefaultFooter = ({
                     [styles.notBookmark]: !hasBookmark,
                 })}
                 title="Toggle star"
-                onClick={e => {
+                onClick={(e) => {
                     e.stopPropagation()
                     handleBookmarkToggle()
                 }}

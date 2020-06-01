@@ -46,22 +46,23 @@ const StatusBar = (props: Props, state: State) => {
                 <div className={styles.headerBox}>
                     <div className={styles.header}>Sync Status</div>
                     <div className={styles.IconBox}>
-                        {(props.backupUIState.state === 'fail' && props.isAutomaticBackupEnabled) || state.syncError ? (
-                                <span
-                                    className={classNames(
-                                        styles.failIcon,
-                                        styles.icon,
-                                    )}
-                                />
-                            ):(
-                                <span
-                                    className={classNames(
-                                        styles.syncIcon,
-                                        styles.icon,
-                                    )}
-                                />
-                            )
-                        }
+                        {(props.backupUIState.state === 'fail' &&
+                            props.isAutomaticBackupEnabled) ||
+                        state.syncError ? (
+                            <span
+                                className={classNames(
+                                    styles.failIcon,
+                                    styles.icon,
+                                )}
+                            />
+                        ) : (
+                            <span
+                                className={classNames(
+                                    styles.syncIcon,
+                                    styles.icon,
+                                )}
+                            />
+                        )}
                     </div>
                 </div>
                 <div className={styles.backupOverlay}>

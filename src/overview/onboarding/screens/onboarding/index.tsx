@@ -474,7 +474,9 @@ export default class OnboardingScreen extends StatefulUIElement<
                         currentStep={this.state.currentStep - 1}
                     >
                         <SecondaryAction
-                            onClick={() => window.open(`${OPTIONS_URL}#/backup`)}
+                            onClick={() =>
+                                window.open(`${OPTIONS_URL}#/backup`)
+                            }
                             label={'Start Backup'}
                         />
                     </OnboardingStep>

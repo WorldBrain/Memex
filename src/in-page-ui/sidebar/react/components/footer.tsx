@@ -33,7 +33,7 @@ const Footer = ({
             <ButtonTooltip tooltipText={'ctr/cmd + Enter'} position="top">
                 <button
                     className={actionBtnClassName}
-                    onClick={e => {
+                    onClick={(e) => {
                         e.stopPropagation()
                         actionBtnClickHandler()
                     }}
@@ -43,7 +43,7 @@ const Footer = ({
             </ButtonTooltip>
             <button
                 className={cancelBtnClassName}
-                onClick={e => {
+                onClick={(e) => {
                     e.stopPropagation()
                     cancelBtnClickHandler()
                 }}

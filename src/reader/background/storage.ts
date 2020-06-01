@@ -90,7 +90,7 @@ export default class ReaderStorage extends StorageModule {
 
         console.log(
             `Reader::Parser Original Doc Size - ${
-                document.body.outerHTML.length / 1024
+                document.body.outerHTML.length / 1000
             }k`,
         )
         console.time('Reader::Parser::ParseTime')

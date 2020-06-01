@@ -1,15 +1,10 @@
 import React from 'react'
 import { LoadingIndicator } from 'src/common-ui/components'
-import { fetchDOMFromUrl } from 'src/page-analysis/background/fetch-page-data'
-import Readability from 'readability/Readability'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { renderHighlights } from 'src/highlighting/ui/highlight-interactions'
 import styled from 'styled-components'
 import { colorText } from 'src/common-ui/components/design-library/colors'
 import { readable } from 'src/util/remote-functions-background'
-import { now } from 'moment'
-import { message } from 'openpgp'
-import read = message.read
 
 interface Props {
     fullUrl: string
