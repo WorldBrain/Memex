@@ -149,7 +149,6 @@ export function fetchDOMFromUrl(
                     ? domParser(text)
                     : new DOMParser().parseFromString(text, 'text/html')
 
-                console.log('docHtml', doc.body.outerHTML)
                 return doc
             } catch (error) {
                 if (error.name === 'AbortError') {

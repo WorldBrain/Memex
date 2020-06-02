@@ -19,11 +19,16 @@ export default class ViewerOverlay extends React.PureComponent<Props> {
 
     componentDidMount = () => {
         modalRoot.appendChild(this.el)
+        document.addEventListener('keypress', this.keyListener)
     }
 
     componentWillUnmount = () => {
         modalRoot.removeChild(this.el)
+        document.removeEventListener('keypress', this.keyListener)
     }
+
+    keyListener = (event) => event.key === 'Escape' && this.handleClose()
+
     handleClose = () => {
         this.props.handleClose()
     }
@@ -52,7 +57,7 @@ const Wrapper = styled.div`
     background-color: rgba(0, 0, 0, 0.2);
     height: 100vh;
     width: 100vw;
-    z-index: 9999;
+    z-index: 998;
     padding-left: 1rem;
     padding-right: 1rem;
 `
@@ -68,8 +73,8 @@ const Inner = styled.div`
 
 const CloseButton = styled.button`
     position: absolute;
-    top: 1rem;
-    right: 3rem;
+    top: 5rem;
+    right: 5rem;
     background-size: 14px;
     width: 22px;
     height: 22px;
@@ -81,5 +86,5 @@ const CloseButton = styled.button`
     background-repeat: no-repeat;
     background-position: center;
     border-radius: 3px;
-    z-index: 9999;
+    z-index: 999;
 `

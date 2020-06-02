@@ -1,16 +1,12 @@
 import React from 'react'
 import { LoadingIndicator } from 'src/common-ui/components'
-import { remoteFunction } from 'src/util/webextensionRPC'
-import { renderHighlights } from 'src/highlighting/ui/highlight-interactions'
 import styled from 'styled-components'
 import { colorText } from 'src/common-ui/components/design-library/colors'
 import { readable } from 'src/util/remote-functions-background'
-import { insertTooltip } from 'src/in-page-ui/tooltip/content_script/interactions'
 
 interface Props {
     fullUrl: string
-    init?: ({ url, title }) => void
-    openSidebar?: (args: { activeUrl?: string }) => void
+    onInit?: ({ url }) => void
 }
 
 interface State {
@@ -31,23 +27,7 @@ export default class Viewer extends React.Component<Props, State> {
         await this.renderArticle(article)
         this.setState({ loading: false })
 
-        // load annotations
-        await this.loadAndRenderAnnotations(
-            this.props.fullUrl,
-            this.props.openSidebar,
-        )
-    }
-
-    loadAndRenderAnnotations = async (fullUrl, onAnnotationClick) => {
-        const annots = await remoteFunction('getAllAnnotationsByUrl')({
-            url: fullUrl,
-        })
-        // console.log(`Found ${annots?.length} annots for url`)
-        // console.dir(annots)
-        const highlightables = annots.filter(
-            (annotation) => annotation.selector,
-        )
-        await renderHighlights(highlightables, onAnnotationClick)
+        this.props?.onInit({ url })
     }
 
     getHostName() {
