@@ -26,6 +26,7 @@ import TagPicker from 'src/tags/ui/TagPicker'
 import { tags, collections } from 'src/util/remote-functions-background'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import CopyPaster from 'src/overview/copy-paster'
+import { renderTemplate } from 'src/overview/copy-paster/utils'
 
 const styles = require('./ResultList.css')
 
@@ -239,7 +240,7 @@ class ResultListContainer extends PureComponent<Props> {
     }
 
     private renderCopyPasterManager(
-        { shouldDisplayCopyPasterPopup }: Result,
+        { shouldDisplayCopyPasterPopup, fullUrl, title, tags }: Result,
         index,
     ) {
         if (!shouldDisplayCopyPasterPopup) {
@@ -252,16 +253,22 @@ class ResultListContainer extends PureComponent<Props> {
             {
                 id: 'uuid0001',
                 title: 'Markdown',
-                code: `[{{{title}}}]({{url}})`,
+                code: `[{{{title}}}]({{{url}}})`,
                 favourite: false,
             },
             {
                 id: 'uuid0002',
                 title: 'HTML Link',
-                code: `<a href="{{url}}">\n  {{{title}}}\n</a>`,
+                code: `<a href="{{{url}}}">\n  {{{title}}}\n</a>`,
                 favourite: true,
             },
         ]
+
+        const doc = {
+            url: fullUrl,
+            title,
+            tags,
+        }
 
         return (
             <HoverBox>
@@ -269,6 +276,23 @@ class ResultListContainer extends PureComponent<Props> {
                     <CopyPaster
                         copyPasterEditingId={copyPasterEditingId}
                         templates={MOCK_TEMPLATES}
+                        onClick={(id) => {
+                            const template = MOCK_TEMPLATES.find(
+                                (t) => t.id === id,
+                            )
+
+                            if (!template) {
+                                return
+                            }
+
+                            const rendered = renderTemplate(template, doc)
+
+                            navigator.clipboard
+                                .writeText(rendered)
+                                .catch((e) => {
+                                    console.error(e)
+                                })
+                        }}
                         onClickEdit={(id) =>
                             this.props.setCopyPasterEditingId(id)
                         }

@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
-import { Template } from './components/types'
+import { Template } from './types'
 import TemplateEditor from './components/TemplateEditor'
 import TemplateList from './components/TemplateList'
 
@@ -15,6 +15,7 @@ interface CopyPasterProps {
 
     onClickNew: () => void
     onClickEdit: (id: string) => void
+    onClick: (id: string) => void
     onClickCancel: () => void
     onClickSave: (id: string) => void
     onClickDelete: (id: string) => void
@@ -66,6 +67,7 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
                         onClickSetFavourite={this.props.onSetFavourite}
                         onClickEdit={(id) => this.props.onClickEdit(id)}
                         onClickNew={this.props.onClickNew}
+                        onClick={this.props.onClick}
                     />
                 )}
             </CopyPasterWrapper>

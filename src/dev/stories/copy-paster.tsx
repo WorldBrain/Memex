@@ -30,6 +30,7 @@ const TEMPLATE_MOCKS = [
 stories.add('Template Row', () => (
     <TemplateRow
         template={TEMPLATE_MOCKS[0]}
+        onClick={() => console.log('click')}
         onClickSetFavourite={(favourite) => console.log('favourite', favourite)}
         onClickEdit={() => console.log('edit')}
     />
@@ -38,6 +39,9 @@ stories.add('Template Row', () => (
 const TEMPLATE_LIST_ACTIONS = {
     onClickNew: () => {
         console.log('new')
+    },
+    onClick: (id) => {
+        console.log('click', id)
     },
     onClickSetFavourite: (id, favourite) => {
         console.log('favourite', id, favourite)
@@ -72,10 +76,10 @@ const TEMPLATE_EDITOR_ACTIONS = {
     onClickHowto: () => {
         console.log('howto')
     },
-    onTitleChange: (s: string) => {
+    onTitleChange: (s) => {
         console.log('title:', s)
     },
-    onCodeChange: (s: string) => {
+    onCodeChange: (s) => {
         console.log('code:', s)
     },
 }
