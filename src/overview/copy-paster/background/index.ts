@@ -1,15 +1,12 @@
 import Storex from '@worldbrain/storex'
-
-import CopyPasterStorage from './storage'
-import { RemoteCollectionsInterface } from './types'
-
 import { bindMethod } from 'src/util/functions'
-
 import { BrowserSettingsStore } from 'src/util/settings'
+import CopyPasterStorage from './storage'
+import { RemoteCopyPasterInterface } from './types'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage
-    remoteFunctions: RemoteCollectionsInterface
+    remoteFunctions: RemoteCopyPasterInterface
 
     constructor(
         private options: {
@@ -23,6 +20,10 @@ export default class CopyPasterBackground {
 
         this.remoteFunctions = {
             createTemplate: bindMethod(this, 'createTemplate'),
+            findTemplate: bindMethod(this, 'findTemplate'),
+            updateTemplate: bindMethod(this, 'updateTemplate'),
+            deleteTemplate: bindMethod(this, 'deleteTemplate'),
+            findAllTemplates: bindMethod(this, 'findAllTemplates'),
         }
     }
 
