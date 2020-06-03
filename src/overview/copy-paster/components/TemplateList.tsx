@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import { LoadingIndicator } from 'src/common-ui/components'
 import styled from 'styled-components'
-import { Template } from './types'
+import { Template } from '../types'
 import TemplateRow from './TemplateRow'
 
 const Header = styled.div`
@@ -47,6 +47,7 @@ interface InternalTemplateListProps {
 
     onClickSetFavourite: (id: string, favourite: boolean) => void
     onClickEdit: (id: string) => void
+    onClick: (id: string) => void
 }
 
 class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
@@ -61,6 +62,7 @@ class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
             <TemplateRow
                 key={template.id}
                 template={template}
+                onClick={() => this.props.onClick(template.id)}
                 onClickSetFavourite={(favourite) =>
                     this.props.onClickSetFavourite(template.id, favourite)
                 }
@@ -76,6 +78,7 @@ interface TemplateListProps {
 
     onClickSetFavourite: (id: string, favourite: boolean) => void
     onClickEdit: (id: string) => void
+    onClick: (id: string) => void
     onClickNew: () => void
 }
 
@@ -100,6 +103,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
 
                 <InternalTemplateList
                     templates={this.props.templates}
+                    onClick={this.props.onClick}
                     onClickSetFavourite={this.props.onClickSetFavourite}
                     onClickEdit={this.props.onClickEdit}
                 />

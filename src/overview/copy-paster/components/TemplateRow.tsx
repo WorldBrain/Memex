@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Template } from './types'
+import { Template } from '../types'
 import styled from 'styled-components'
 import ResultItemActionBtn from 'src/common-ui/components/result-item-action-btn'
 import { browser } from 'webextension-polyfill-ts'
@@ -15,7 +15,12 @@ const Row = styled.div`
     align-items: center;
 `
 
-const Title = styled.h2`
+const Title = styled.button`
+    display: block;
+    width: 100%;
+    cursor: pointer;
+    text-align: left;
+
     font-family: Poppins;
     font-style: normal;
     font-weight: normal;
@@ -23,6 +28,10 @@ const Title = styled.h2`
     color: #3a2f45;
 
     margin: 4px 0;
+
+    outline: none;
+    border: none;
+    background: transparent;
 `
 
 const ActionsContainer = styled.div`
@@ -36,6 +45,7 @@ const ActionsContainer = styled.div`
 interface TemplateRowProps {
     template: Template
 
+    onClick: () => void
     onClickSetFavourite: (favourite: boolean) => void
     onClickEdit: () => void
 }
@@ -46,7 +56,7 @@ export default class TemplateRow extends PureComponent<TemplateRowProps> {
 
         return (
             <Row>
-                <Title>{title}</Title>
+                <Title onClick={this.props.onClick}>{title}</Title>
                 <ActionsContainer>
                     <ResultItemActionBtn
                         imgSrc={favourite ? starImg : emptyStarImg}
@@ -58,11 +68,13 @@ export default class TemplateRow extends PureComponent<TemplateRowProps> {
                                 ? 'Remove from favourites'
                                 : 'Add to favourites'
                         }
+                        tooltipPosition="left"
                     />
                     <ResultItemActionBtn
                         imgSrc={editImg}
                         onClick={this.props.onClickEdit}
                         tooltipText="Edit"
+                        tooltipPosition="left"
                     />
                 </ActionsContainer>
             </Row>

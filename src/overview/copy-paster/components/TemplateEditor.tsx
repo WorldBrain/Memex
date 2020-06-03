@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Template } from './types'
+import { Template } from '../types'
 import styled, { css } from 'styled-components'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { LesserLink } from 'src/common-ui/components/design-library/actions/LesserLink'
