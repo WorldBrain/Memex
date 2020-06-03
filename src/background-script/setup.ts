@@ -191,6 +191,15 @@ export function createBackgroundModules(options: {
           }).processor
         : undefined
 
+    const customLists = new CustomListBackground({
+        storageManager,
+        queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
+        windows: options.browserAPIs.windows,
+        searchIndex: search.searchIndex,
+        pageStorage: pages.storage,
+        localBrowserStorage: options.browserAPIs.storage.local,
+    })
+
     return {
         auth,
         social,
@@ -208,14 +217,7 @@ export function createBackgroundModules(options: {
         }),
         search,
         eventLog: new EventLogBackground({ storageManager }),
-        customLists: new CustomListBackground({
-            storageManager,
-            queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
-            windows: options.browserAPIs.windows,
-            searchIndex: search.searchIndex,
-            pageStorage: pages.storage,
-            localBrowserStorage: options.browserAPIs.storage.local,
-        }),
+        customLists,
         tags,
         bookmarks,
         backupModule: new backup.BackupBackgroundModule({
@@ -243,18 +245,51 @@ export function createBackgroundModules(options: {
             localBrowserStorage: options.browserAPIs.storage.local,
             fetchPageData: options.fetchPageDataProcessor,
             storePageContent,
-            addVisit: (visit) => pages.addVisit(visit.url, visit.time),
+            addVisit: (visit) =>
+                pages.addVisit(visit.normalizedUrl, visit.time),
             addBookmark: async (bookmark) => {
-                if (!(await bookmarks.storage.pageHasBookmark(bookmark.url))) {
-                    await bookmarks.addBookmark(bookmark)
+                if (
+                    !(await bookmarks.storage.pageHasBookmark(
+                        bookmark.normalizedUrl,
+                    ))
+                ) {
+                    await bookmarks.addBookmark({
+                        url: bookmark.normalizedUrl,
+                        time: bookmark.time,
+                    })
                 }
             },
-            addTags: (params) =>
-                Promise.all(
-                    params.tags.map((tag) =>
-                        tags.addTagToPage({ url: params.url, tag }),
-                    ),
-                ),
+            addTags: async (params) => {
+                const existingTags = await tags.storage.fetchPageTags({
+                    url: params.normalizedUrl,
+                })
+                await Promise.all(
+                    params.tags.map(async (tag) => {
+                        if (!existingTags.includes(tag)) {
+                            await tags.addTagToPage({
+                                url: params.normalizedUrl,
+                                tag,
+                            })
+                        }
+                    }),
+                )
+            },
+            addToLists: async (params) => {
+                const existingEntries = await customLists.storage.fetchListIdsByUrl(
+                    params.normalizedUrl,
+                )
+                await Promise.all(
+                    params.lists.map(async (listId) => {
+                        if (!existingEntries.includes(listId)) {
+                            await customLists.storage.insertPageToList({
+                                listId,
+                                pageUrl: params.normalizedUrl,
+                                fullUrl: params.fullUrl,
+                            })
+                        }
+                    }),
+                )
+            },
         }),
         features: new FeatureOptIns(),
         pages,
