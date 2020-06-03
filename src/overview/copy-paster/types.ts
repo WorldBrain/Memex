@@ -1,5 +1,5 @@
 export interface Template {
-    id: string
+    id: number
     title: string
     code: string
     favourite: boolean
