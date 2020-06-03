@@ -53,6 +53,7 @@ import { AnalyticsBackground } from 'src/analytics/background'
 import { Analytics } from 'src/analytics/types'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
 import { PipelineRes } from 'src/search'
+import CopyPasterBackground from 'src/overview/copy-paster/background'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -77,6 +78,7 @@ export interface BackgroundModules {
     features: FeatureOptIns
     pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
+    copyPaster: CopyPasterBackground
 }
 
 export function createBackgroundModules(options: {
@@ -268,6 +270,9 @@ export function createBackgroundModules(options: {
         inPageUI: new InPageUIBackground({
             queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
         }),
+        copyPaster: new CopyPasterBackground({
+            storageManager,
+        }),
     }
 }
 
@@ -332,6 +337,7 @@ export function getBackgroundStorageModules(
         clientSyncLog: backgroundModules.sync.clientSyncLog,
         syncInfo: backgroundModules.sync.syncInfoStorage,
         pages: backgroundModules.pages.storage,
+        copyPaster: backgroundModules.copyPaster.storage,
     }
 }
 
