@@ -496,7 +496,7 @@ describe('Storage initialization', () => {
                         socialUsers: '++id, name, serviceId, username',
                         syncDeviceInfo: 'deviceId',
                         tags: '[name+url], name, url',
-                        templates: '++id, code, isFavourite, title',
+                        templates: 'id, code, isFavourite, title',
                         visits: '[time+url], url',
                     },
                     dexieSchemaVersion: 20,

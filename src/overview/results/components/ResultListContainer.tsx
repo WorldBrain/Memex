@@ -120,9 +120,7 @@ class ResultListContainer extends PureComponent<Props> {
 
     async componentDidMount() {
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
-        this.setState({
-            tagSuggestions: tagSuggestions.reverse(),
-        })
+        this.setState({ tagSuggestions: tagSuggestions.reverse() })
 
         document.addEventListener('click', this.handleOutsideClick, false)
 
@@ -134,7 +132,7 @@ class ResultListContainer extends PureComponent<Props> {
         this.copyPasterBackground = runInBackground<RemoteCopyPasterInterface>()
         const copyPasterTemplates = await this.copyPasterBackground.findAllTemplates()
 
-        this.setState({ copyPasterTemplates })
+        this.setState({ copyPasterTemplates: copyPasterTemplates.reverse() })
     }
 
     componentWillUnmount() {
@@ -351,19 +349,15 @@ class ResultListContainer extends PureComponent<Props> {
                         }}
                         onClickSave={async (id) => {
                             if (id === -1) {
-                                const {
-                                    title,
-                                    code,
-                                    isFavourite,
-                                } = this.state.tmpCopyPasterTemplate
-
-                                await this.copyPasterBackground.createTemplate({
-                                    title,
-                                    code,
-                                    isFavourite,
-                                })
+                                await this.copyPasterBackground.createTemplate(
+                                    this.state.tmpCopyPasterTemplate,
+                                )
 
                                 this.updateTemplates()
+
+                                this.setState({
+                                    tmpCopyPasterTemplate: undefined,
+                                })
 
                                 return
                             }

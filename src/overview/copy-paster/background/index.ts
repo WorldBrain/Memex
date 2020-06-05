@@ -4,6 +4,7 @@ import { BrowserSettingsStore } from 'src/util/settings'
 import CopyPasterStorage from './storage'
 import { RemoteCopyPasterInterface } from './types'
 import { Template } from '../types'
+import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage
@@ -26,6 +27,8 @@ export default class CopyPasterBackground {
             deleteTemplate: bindMethod(this, 'deleteTemplate'),
             findAllTemplates: bindMethod(this, 'findAllTemplates'),
         }
+
+        makeRemotelyCallable(this.remoteFunctions)
     }
 
     async createTemplate(params: Omit<Template, 'id'>) {

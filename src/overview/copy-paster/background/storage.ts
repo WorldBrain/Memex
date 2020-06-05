@@ -20,7 +20,7 @@ export default class CopyPasterStorage extends StorageModule {
                     isFavourite: { type: 'boolean' },
                 },
                 indices: [
-                    { field: 'id', pk: true, autoInc: true },
+                    { field: 'id', pk: true },
                     { field: 'title' },
                     { field: 'code' },
                     { field: 'isFavourite' },
@@ -63,8 +63,13 @@ export default class CopyPasterStorage extends StorageModule {
         },
     })
 
+    private getId(): number {
+        return Date.now()
+    }
+
     async createTemplate({ title, code, isFavourite }: Omit<Template, 'id'>) {
         const { object } = await this.operation('createTemplate', {
+            id: this.getId(),
             title,
             code,
             isFavourite,
