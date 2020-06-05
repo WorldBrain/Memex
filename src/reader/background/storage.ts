@@ -97,7 +97,7 @@ export default class ReaderStorage extends StorageModule {
         console.time('Reader::Parser::ParseTime')
 
         const article = new Readability(document).parse()
-        article.content = DOMPurify.sanitize(article.contnet)
+        article.content = DOMPurify.sanitize(article.content)
         console.timeEnd('Reader::Parser::ParseTime')
         console.log(
             `Reader::Parser Readable Doc Size - ${
