@@ -11,19 +11,7 @@ async function setupTest() {
 }
 
 describe('Tempaltes', () => {
-    test('should be able to create a template', async () => {
-        const { copyPaster } = await setupTest()
-
-        const result = await copyPaster.createTemplate({
-            title: 'template test',
-            code: '',
-            isFavourite: false,
-        })
-
-        expect(result).toBe(1)
-    })
-
-    test('should be able to find a template', async () => {
+    test('should be able to create and find a template', async () => {
         const { copyPaster } = await setupTest()
 
         const newTemplate = {
@@ -32,33 +20,33 @@ describe('Tempaltes', () => {
             isFavourite: false,
         }
 
-        await copyPaster.createTemplate(newTemplate)
+        const id = await copyPaster.createTemplate(newTemplate)
 
-        const result = await copyPaster.findTemplate({ id: 1 })
+        const result = await copyPaster.findTemplate({ id })
 
-        expect(result).toEqual({ ...newTemplate, id: 1 })
+        expect(result).toEqual({ ...newTemplate, id })
     })
 
     test('should be able to update a template', async () => {
         const { copyPaster } = await setupTest()
 
-        await copyPaster.createTemplate({
+        const id = await copyPaster.createTemplate({
             title: 'template test',
             code: '',
             isFavourite: false,
         })
 
         await copyPaster.updateTemplate({
-            id: 1,
+            id,
             title: 'test 2',
             code: '',
             isFavourite: false,
         })
 
-        const result = await copyPaster.findTemplate({ id: 1 })
+        const result = await copyPaster.findTemplate({ id })
 
         expect(result).toEqual({
-            id: 1,
+            id,
             title: 'test 2',
             code: '',
             isFavourite: false,
@@ -69,7 +57,7 @@ describe('Tempaltes', () => {
         const { copyPaster } = await setupTest()
         let result
 
-        await copyPaster.createTemplate({
+        const id = await copyPaster.createTemplate({
             title: 'template test',
             code: '',
             isFavourite: false,
@@ -79,7 +67,7 @@ describe('Tempaltes', () => {
         expect(result.length).toBe(1)
 
         await copyPaster.deleteTemplate({
-            id: 1,
+            id,
         })
 
         result = await copyPaster.findAllTemplates()
