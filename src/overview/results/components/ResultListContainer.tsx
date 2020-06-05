@@ -27,6 +27,9 @@ import { tags, collections } from 'src/util/remote-functions-background'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import CopyPaster from 'src/overview/copy-paster'
 import { renderTemplate } from 'src/overview/copy-paster/utils'
+import { runInBackground } from 'src/util/webextensionRPC'
+import { RemoteCopyPasterInterface } from 'src/overview/copy-paster/background/types'
+import TemplateEditor from 'src/overview/copy-paster/components/TemplateEditor'
 
 const styles = require('./ResultList.css')
 
@@ -107,15 +110,31 @@ class ResultListContainer extends PureComponent<Props> {
     private setCopyPasterButtonRef = (el: HTMLButtonElement) =>
         this.copyPasterBtnRefs.push(el)
 
+    private copyPasterBackground: RemoteCopyPasterInterface
+
     state = {
         tagSuggestions: [],
+        copyPasterTemplates: [],
+        tmpCopyPasterTemplate: undefined,
     }
 
     async componentDidMount() {
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
-        this.setState({ tagSuggestions: tagSuggestions.reverse() })
+        this.setState({
+            tagSuggestions: tagSuggestions.reverse(),
+        })
 
         document.addEventListener('click', this.handleOutsideClick, false)
+
+        this.copyPasterBackground = runInBackground<RemoteCopyPasterInterface>()
+        this.updateTemplates()
+    }
+
+    private async updateTemplates() {
+        this.copyPasterBackground = runInBackground<RemoteCopyPasterInterface>()
+        const copyPasterTemplates = await this.copyPasterBackground.findAllTemplates()
+
+        this.setState({ copyPasterTemplates })
     }
 
     componentWillUnmount() {
@@ -240,7 +259,12 @@ class ResultListContainer extends PureComponent<Props> {
     }
 
     private renderCopyPasterManager(
-        { shouldDisplayCopyPasterPopup, fullUrl, title, tags }: Result,
+        {
+            shouldDisplayCopyPasterPopup,
+            fullUrl,
+            title,
+            tags: resultTags,
+        }: Result,
         index,
     ) {
         if (!shouldDisplayCopyPasterPopup) {
@@ -249,35 +273,44 @@ class ResultListContainer extends PureComponent<Props> {
 
         const { copyPasterEditingId } = this.props
 
-        const MOCK_TEMPLATES = [
-            {
-                id: 1,
-                title: 'Markdown',
-                code: `[{{{title}}}]({{{url}}})`,
-                isFavourite: false,
-            },
-            {
-                id: 2,
-                title: 'HTML Link',
-                code: `<a href="{{{url}}}">\n  {{{title}}}\n</a>`,
-                isFavourite: true,
-            },
-        ]
+        // const MOCK_TEMPLATES = [
+        //     {
+        //         id: 1,
+        //         title: 'Markdown',
+        //         code: `[{{{title}}}]({{{url}}})`,
+        //         isFavourite: false,
+        //     },
+        //     {
+        //         id: 2,
+        //         title: 'HTML Link',
+        //         code: `<a href="{{{url}}}">\n  {{{title}}}\n</a>`,
+        //         isFavourite: true,
+        //     },
+        // ]
 
         const doc = {
             url: fullUrl,
             title,
-            tags,
+            tags: resultTags,
+        }
+
+        const isCreatingNewTemplate = !!this.state.tmpCopyPasterTemplate
+        let templates = this.state.copyPasterTemplates
+
+        if (isCreatingNewTemplate) {
+            templates = templates.concat([this.state.tmpCopyPasterTemplate])
         }
 
         return (
             <HoverBox>
                 <div ref={(ref) => this.setCopyPasterDivRef(ref)}>
                     <CopyPaster
-                        copyPasterEditingId={copyPasterEditingId}
-                        templates={MOCK_TEMPLATES}
+                        copyPasterEditingId={
+                            isCreatingNewTemplate ? -1 : copyPasterEditingId
+                        }
+                        templates={templates}
                         onClick={(id) => {
-                            const template = MOCK_TEMPLATES.find(
+                            const template = this.state.copyPasterTemplates.find(
                                 (t) => t.id === id,
                             )
 
@@ -296,26 +329,91 @@ class ResultListContainer extends PureComponent<Props> {
                         onClickEdit={(id) =>
                             this.props.setCopyPasterEditingId(id)
                         }
-                        onClickCancel={this.props.resetCopyPasterEditingId}
-                        onClickNew={() => {
-                            // TODO
+                        onClickCancel={() => {
+                            if (isCreatingNewTemplate) {
+                                this.setState({
+                                    tmpCopyPasterTemplate: undefined,
+                                })
+                                return
+                            }
+
+                            this.props.resetCopyPasterEditingId()
                         }}
-                        onClickSave={(id) => {
+                        onClickNew={() => {
+                            this.setState({
+                                tmpCopyPasterTemplate: {
+                                    id: -1,
+                                    title: '',
+                                    code: '',
+                                    isFavourite: false,
+                                },
+                            })
+                        }}
+                        onClickSave={async (id) => {
+                            if (id === -1) {
+                                const {
+                                    title,
+                                    code,
+                                    isFavourite,
+                                } = this.state.tmpCopyPasterTemplate
+
+                                await this.copyPasterBackground.createTemplate({
+                                    title,
+                                    code,
+                                    isFavourite,
+                                })
+
+                                this.updateTemplates()
+
+                                return
+                            }
+
                             // TODO
                         }}
                         onClickDelete={(id) => {
+                            if (id === -1) {
+                                this.setState({
+                                    tmpCopyPasterTemplate: undefined,
+                                })
+                                return
+                            }
+
                             // TODO
                         }}
                         onClickHowto={() => {
                             // TODO
                         }}
                         onTitleChange={(id, title) => {
+                            if (id === -1) {
+                                this.setState({
+                                    tmpCopyPasterTemplate: {
+                                        ...this.state.tmpCopyPasterTemplate,
+                                        title,
+                                    },
+                                })
+                                return
+                            }
+
                             // TODO
                         }}
                         onCodeChange={(id, code) => {
+                            if (id === -1) {
+                                this.setState({
+                                    tmpCopyPasterTemplate: {
+                                        ...this.state.tmpCopyPasterTemplate,
+                                        code,
+                                    },
+                                })
+                                return
+                            }
+
                             // TODO
                         }}
                         onSetIsFavourite={(id, isFavourite) => {
+                            if (id === -1) {
+                                return
+                            }
+
                             // TODO
                         }}
                         onClickOutside={() => {

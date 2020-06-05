@@ -4,6 +4,7 @@ import { UILogic } from 'ui-logic-core'
 import { PageUrlsByDay } from 'src/search/background/types'
 import { SocialPage } from 'src/social-integration/types'
 import { Annotation } from 'src/annotations/types'
+import { Template } from './copy-paster/types'
 
 export interface Result extends SocialPage {
     url: string
