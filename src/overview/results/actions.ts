@@ -81,7 +81,7 @@ export const setActiveCopyPasterIndex = createAction<number>(
 export const resetCopyPasterEditingId = createAction(
     'results/resetCopyPasterEditingId',
 )
-export const setCopyPasterEditingId = createAction<string>(
+export const setCopyPasterEditingId = createAction<number>(
     'results/setCopyPasterEditingId',
 )
 export const nextPage = createAction('results/nextPage')

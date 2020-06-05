@@ -46,7 +46,7 @@ export interface StateProps {
     annotsByDay: PageUrlsByDay
     isFilterBarActive: boolean
     isSocialPost: boolean
-    copyPasterEditingId: string | null
+    copyPasterEditingId: number | null
 }
 
 export interface DispatchProps {
@@ -74,7 +74,7 @@ export interface DispatchProps {
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
     handleTrashBtnClick: (doc: Result, i: number) => MouseEventHandler
-    setCopyPasterEditingId: (id: string) => void
+    setCopyPasterEditingId: (id: number) => void
     resetCopyPasterEditingId: () => void
 }
 
@@ -251,13 +251,13 @@ class ResultListContainer extends PureComponent<Props> {
 
         const MOCK_TEMPLATES = [
             {
-                id: 'uuid0001',
+                id: 1,
                 title: 'Markdown',
                 code: `[{{{title}}}]({{{url}}})`,
                 isFavourite: false,
             },
             {
-                id: 'uuid0002',
+                id: 2,
                 title: 'HTML Link',
                 code: `<a href="{{{url}}}">\n  {{{title}}}\n</a>`,
                 isFavourite: true,

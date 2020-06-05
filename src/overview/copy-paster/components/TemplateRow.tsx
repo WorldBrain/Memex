@@ -59,12 +59,12 @@ export default class TemplateRow extends PureComponent<TemplateRowProps> {
                 <Title onClick={this.props.onClick}>{title}</Title>
                 <ActionsContainer>
                     <ResultItemActionBtn
-                        imgSrc={favourite ? starImg : emptyStarImg}
+                        imgSrc={isFavourite ? starImg : emptyStarImg}
                         onClick={() =>
-                            this.props.onClickSetFavourite(!isFavourite)
+                            this.props.onClickSetIsFavourite(!isFavourite)
                         }
                         tooltipText={
-                            favourite
+                            isFavourite
                                 ? 'Remove from favourites'
                                 : 'Add to favourites'
                         }

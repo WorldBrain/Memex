@@ -8,19 +8,19 @@ const stories = storiesOf('Copy Paster', module)
 
 const TEMPLATE_MOCKS = [
     {
-        id: 'markdown',
+        id: 1,
         title: 'Markdown',
         code: 'nocode()',
         isFavourite: false,
     },
     {
-        id: 'roam',
+        id: 2,
         title: 'For Roam',
         code: 'nocode()',
         isFavourite: true,
     },
     {
-        id: 'html',
+        id: 3,
         title: 'HTML Link',
         code: 'nocode()',
         isFavourite: false,

@@ -27,7 +27,7 @@ export interface State {
     /** Holds the index of the result which has the copy paster popup open (-1 by default) */
     activeCopyPasterIndex: number
     /** Holds the id of currently edited template, or null if not editing (null by default) */
-    copyPasterEditingId: string | null
+    copyPasterEditingId: number | null
     /** Holds the current page of results that the user has scrolled to (0-based). */
     currentPage: number
     /** Holds the total count of matching results to the current search (includes not-shown results). */
