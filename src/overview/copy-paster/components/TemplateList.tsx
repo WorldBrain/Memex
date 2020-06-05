@@ -45,9 +45,9 @@ const Center = styled.div`
 interface InternalTemplateListProps {
     templates: Template[]
 
-    onClickSetIsFavourite: (id: string, isFavourite: boolean) => void
-    onClickEdit: (id: string) => void
-    onClick: (id: string) => void
+    onClickSetIsFavourite: (id: number, isFavourite: boolean) => void
+    onClickEdit: (id: number) => void
+    onClick: (id: number) => void
 }
 
 class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
@@ -76,9 +76,9 @@ interface TemplateListProps {
     isLoading?: boolean
     templates: Template[]
 
-    onClickSetIsFavourite: (id: string, isFavourite: boolean) => void
-    onClickEdit: (id: string) => void
-    onClick: (id: string) => void
+    onClickSetIsFavourite: (id: number, isFavourite: boolean) => void
+    onClickEdit: (id: number) => void
+    onClick: (id: number) => void
     onClickNew: () => void
 }
 

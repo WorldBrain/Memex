@@ -11,19 +11,19 @@ const CopyPasterWrapper = styled.div`
 
 interface CopyPasterProps {
     templates: Template[]
-    copyPasterEditingId: string | null
+    copyPasterEditingId: number | null
 
     onClickNew: () => void
-    onClickEdit: (id: string) => void
-    onClick: (id: string) => void
+    onClickEdit: (id: number) => void
+    onClick: (id: number) => void
     onClickCancel: () => void
-    onClickSave: (id: string) => void
-    onClickDelete: (id: string) => void
+    onClickSave: (id: number) => void
+    onClickDelete: (id: number) => void
     onClickHowto: () => void
 
-    onTitleChange: (id: string, title: string) => void
-    onCodeChange: (id: string, code: string) => void
-    onSetIsFavourite: (id: string, isFavourite: boolean) => void
+    onTitleChange: (id: number, title: string) => void
+    onCodeChange: (id: number, code: string) => void
+    onSetIsFavourite: (id: number, isFavourite: boolean) => void
 
     onClickOutside?: () => void
 }
