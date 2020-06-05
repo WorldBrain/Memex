@@ -46,13 +46,13 @@ interface TemplateRowProps {
     template: Template
 
     onClick: () => void
-    onClickSetFavourite: (favourite: boolean) => void
+    onClickSetIsFavourite: (isFavourite: boolean) => void
     onClickEdit: () => void
 }
 
 export default class TemplateRow extends PureComponent<TemplateRowProps> {
     render() {
-        const { title, favourite } = this.props.template
+        const { title, isFavourite } = this.props.template
 
         return (
             <Row>
@@ -61,7 +61,7 @@ export default class TemplateRow extends PureComponent<TemplateRowProps> {
                     <ResultItemActionBtn
                         imgSrc={favourite ? starImg : emptyStarImg}
                         onClick={() =>
-                            this.props.onClickSetFavourite(!favourite)
+                            this.props.onClickSetFavourite(!isFavourite)
                         }
                         tooltipText={
                             favourite

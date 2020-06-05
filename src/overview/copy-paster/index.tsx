@@ -23,7 +23,7 @@ interface CopyPasterProps {
 
     onTitleChange: (id: string, title: string) => void
     onCodeChange: (id: string, code: string) => void
-    onSetFavourite: (id: string, favourite: boolean) => void
+    onSetIsFavourite: (id: string, isFavourite: boolean) => void
 
     onClickOutside?: () => void
 }
@@ -64,7 +64,7 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
                     <TemplateList
                         isLoading={false}
                         templates={templates}
-                        onClickSetFavourite={this.props.onSetFavourite}
+                        onClickSetIsFavourite={this.props.onSetIsFavourite}
                         onClickEdit={(id) => this.props.onClickEdit(id)}
                         onClickNew={this.props.onClickNew}
                         onClick={this.props.onClick}

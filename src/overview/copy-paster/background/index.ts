@@ -3,6 +3,7 @@ import { bindMethod } from 'src/util/functions'
 import { BrowserSettingsStore } from 'src/util/settings'
 import CopyPasterStorage from './storage'
 import { RemoteCopyPasterInterface } from './types'
+import { Template } from '../types'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage
@@ -27,33 +28,20 @@ export default class CopyPasterBackground {
         }
     }
 
-    async createTemplate({ title, code, isFavourite = false }) {
-        return this.storage.createTemplate({
-            title,
-            code,
-            isFavourite,
-        })
+    async createTemplate(params: Omit<Template, 'id'>) {
+        return this.storage.createTemplate(params)
     }
 
-    async findTemplate({ id }) {
-        return this.storage.findTemplate({
-            id,
-        })
+    async findTemplate(params: { id: number }) {
+        return this.storage.findTemplate(params)
     }
 
-    async updateTemplate({ id, title, code, isFavourite = false }) {
-        return this.storage.updateTemplate({
-            id,
-            title,
-            code,
-            isFavourite,
-        })
+    async updateTemplate(params: Template) {
+        return this.storage.updateTemplate(params)
     }
 
-    async deleteTemplate({ id }) {
-        return this.storage.deleteTemplate({
-            id,
-        })
+    async deleteTemplate(params: { id: number }) {
+        return this.storage.deleteTemplate(params)
     }
 
     async findAllTemplates() {

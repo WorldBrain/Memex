@@ -254,13 +254,13 @@ class ResultListContainer extends PureComponent<Props> {
                 id: 'uuid0001',
                 title: 'Markdown',
                 code: `[{{{title}}}]({{{url}}})`,
-                favourite: false,
+                isFavourite: false,
             },
             {
                 id: 'uuid0002',
                 title: 'HTML Link',
                 code: `<a href="{{{url}}}">\n  {{{title}}}\n</a>`,
-                favourite: true,
+                isFavourite: true,
             },
         ]
 
@@ -315,7 +315,7 @@ class ResultListContainer extends PureComponent<Props> {
                         onCodeChange={(id, code) => {
                             // TODO
                         }}
-                        onSetFavourite={(id, favourite) => {
+                        onSetIsFavourite={(id, isFavourite) => {
                             // TODO
                         }}
                         onClickOutside={() => {
