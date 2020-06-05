@@ -2,7 +2,7 @@ export interface Template {
     id: number
     title: string
     code: string
-    favourite: boolean
+    isFavourite: boolean
 }
 
 export interface TemplateDoc {

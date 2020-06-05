@@ -2,6 +2,7 @@ import {
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
+import { Template } from '../types'
 
 const COLLECTION_NAMES = {
     templates: 'templates',
@@ -62,15 +63,7 @@ export default class CopyPasterStorage extends StorageModule {
         },
     })
 
-    async createTemplate({
-        title,
-        code,
-        isFavourite = false,
-    }: {
-        title: string
-        code: string
-        isFavourite?: boolean
-    }) {
+    async createTemplate({ title, code, isFavourite }: Omit<Template, 'id'>) {
         const { object } = await this.operation('createTemplate', {
             title,
             code,
@@ -84,17 +77,7 @@ export default class CopyPasterStorage extends StorageModule {
         return this.operation('findTemplate', { id })
     }
 
-    async updateTemplate({
-        id,
-        title,
-        code,
-        isFavourite = false,
-    }: {
-        id: number
-        title: string
-        code: string
-        isFavourite?: boolean
-    }) {
+    async updateTemplate({ id, title, code, isFavourite }: Template) {
         return this.operation('updateTemplate', {
             id,
             title,
