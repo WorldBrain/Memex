@@ -76,6 +76,7 @@ export interface DispatchProps {
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
     handleTrashBtnClick: (doc: Result, i: number) => MouseEventHandler
+    resetActiveCopyPasterIndex: () => void
     getCopyPasterTemplates: () => void
     deleteCopyPasterTemplate: (id: number) => void
     saveNewCopyPasterTemplate: (template: Omit<Template, 'id'>) => void
@@ -362,10 +363,7 @@ class ResultListContainer extends PureComponent<Props> {
                                 isFavourite,
                             })
                         }}
-                        onClickOutside={() => {
-                            console.log('OUTSIDE?')
-                            // TODO
-                        }}
+                        onClickOutside={this.props.resetActiveCopyPasterIndex}
                     />
                 </div>
             </HoverBox>
@@ -616,6 +614,8 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
         dispatch(listActs.delPageFromList(url, isSocialPost))
         dispatch(acts.hideResultItem(url))
     },
+    resetActiveCopyPasterIndex: () =>
+        dispatch(acts.resetActiveCopyPasterIndex()),
     getCopyPasterTemplates: () => dispatch(acts.getCopyPasterTemplates()),
     deleteCopyPasterTemplate: (id) =>
         dispatch(acts.deleteCopyPasterTemplate(id)),
