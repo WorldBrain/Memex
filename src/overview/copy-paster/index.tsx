@@ -11,18 +11,18 @@ const CopyPasterWrapper = styled.div`
 
 interface CopyPasterProps {
     templates: Template[]
-    copyPasterEditingId: number | null
+    copyPasterEditingTemplate?: Template
 
     onClickNew: () => void
     onClickEdit: (id: number) => void
     onClick: (id: number) => void
     onClickCancel: () => void
-    onClickSave: (id: number) => void
-    onClickDelete: (id: number) => void
+    onClickSave: () => void
+    onClickDelete: () => void
     onClickHowto: () => void
 
-    onTitleChange: (id: number, title: string) => void
-    onCodeChange: (id: number, code: string) => void
+    onTitleChange: (title: string) => void
+    onCodeChange: (code: string) => void
     onSetIsFavourite: (id: number, isFavourite: boolean) => void
 
     onClickOutside?: () => void
@@ -36,29 +36,19 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
     }
 
     render() {
-        const { copyPasterEditingId, templates } = this.props
+        const { copyPasterEditingTemplate, templates } = this.props
 
         return (
             <CopyPasterWrapper>
-                {copyPasterEditingId ? (
+                {copyPasterEditingTemplate ? (
                     <TemplateEditor
-                        template={templates.find(
-                            (t) => t.id === copyPasterEditingId,
-                        )}
-                        onClickSave={() =>
-                            this.props.onClickSave(copyPasterEditingId)
-                        }
+                        template={copyPasterEditingTemplate}
+                        onClickSave={() => this.props.onClickSave()}
                         onClickCancel={this.props.onClickCancel}
-                        onClickDelete={() =>
-                            this.props.onClickDelete(copyPasterEditingId)
-                        }
+                        onClickDelete={() => this.props.onClickDelete()}
                         onClickHowto={this.props.onClickHowto}
-                        onTitleChange={(s) =>
-                            this.props.onTitleChange(copyPasterEditingId, s)
-                        }
-                        onCodeChange={(s) =>
-                            this.props.onCodeChange(copyPasterEditingId, s)
-                        }
+                        onTitleChange={(s) => this.props.onTitleChange(s)}
+                        onCodeChange={(s) => this.props.onCodeChange(s)}
                     />
                 ) : (
                     <TemplateList

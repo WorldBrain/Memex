@@ -10,7 +10,12 @@ import { selectors as searchBar, acts as searchBarActs } from '../search-bar'
 import { selectors as filters } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { bookmarks, notifications } from 'src/util/remote-functions-background'
+import {
+    bookmarks,
+    notifications,
+    copyPaster,
+} from 'src/util/remote-functions-background'
+import { Template } from '../copy-paster/types'
 
 const processEventRPC = remoteFunction('processEvent')
 const createSocialBookmarkRPC = remoteFunction('addSocialBookmark')
@@ -78,11 +83,8 @@ export const resetActiveCopyPasterIndex = createAction(
 export const setActiveCopyPasterIndex = createAction<number>(
     'results/setActiveCopyPasterIndex',
 )
-export const resetCopyPasterEditingId = createAction(
-    'results/resetCopyPasterEditingId',
-)
-export const setCopyPasterEditingId = createAction<number>(
-    'results/setCopyPasterEditingId',
+export const setCopyPasterTemplates = createAction<Template[]>(
+    'results/setCopyPasterTemplates',
 )
 export const nextPage = createAction('results/nextPage')
 export const resetPage = createAction('results/resetPage')
@@ -221,6 +223,34 @@ export const toggleShowCopyPaster: (i: number) => Thunk = (index) => (
 
         dispatch(setActiveCopyPasterIndex(index))
     }
+}
+
+export const getCopyPasterTemplates: () => Thunk = () => async (dispatch) => {
+    const templates = await copyPaster.findAllTemplates()
+
+    dispatch(setCopyPasterTemplates(templates))
+}
+
+export const deleteCopyPasterTemplate: (id: number) => Thunk = (id) => async (
+    dispatch,
+) => {
+    await copyPaster.deleteTemplate({ id })
+
+    dispatch(getCopyPasterTemplates())
+}
+
+export const saveNewCopyPasterTemplate: (
+    template: Omit<Template, 'id'>,
+) => Thunk = (template) => async (dispatch) => {
+    await copyPaster.createTemplate(template)
+    dispatch(getCopyPasterTemplates())
+}
+
+export const updateCopyPasterTemplate: (template: Template) => Thunk = (
+    template,
+) => async (dispatch) => {
+    await copyPaster.updateTemplate(template)
+    dispatch(getCopyPasterTemplates())
 }
 
 /**
