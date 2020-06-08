@@ -15,6 +15,11 @@ const Row = styled.div`
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    padding: 0px 10px 0 15px;
+
+    &:hover {
+        background-color: #efefef
+    }
 `
 
 const Title = styled.div`
@@ -26,7 +31,7 @@ const Title = styled.div`
     font-family: Poppins;
     font-style: normal;
     font-weight: normal;
-    font-size: 16px;
+    font-size: 14px;
     color: #3a2f45;
 
     margin: 4px 0;
@@ -44,7 +49,7 @@ const ActionsContainer = styled.div`
     margin-right: 8px;
 `
 
-const COPY_TIMEOUT = 1000
+const COPY_TIMEOUT = 2000
 
 interface TemplateRowProps {
     template: Template
@@ -76,6 +81,7 @@ export default class TemplateRow extends Component<TemplateRowProps> {
 
         this.copyTimeout = setTimeout(() => {
             this.setState({ hasCopied: false })
+            
         }, COPY_TIMEOUT)
     }
 
@@ -90,18 +96,26 @@ export default class TemplateRow extends Component<TemplateRowProps> {
         const { hasCopied } = this.state
 
         return (
-            <Row>
-                <Title>{title}</Title>
+            <Row
+                onClick={() => {
+                    this.onClickCopy()
+                }}
+            >
+                {hasCopied ? (
+                    <Title>Copied to clipboard</Title>
+                    ):(
+                    <Title>{title}</Title>
+                )}
                 <ActionsContainer>
                     <ResultItemActionBtn
                         imgSrc={copyImg}
                         onClick={() => {
                             this.onClickCopy()
                         }}
-                        tooltipText={hasCopied ? 'Copied!' : 'Copy'}
+                        tooltipText={hasCopied ? null : 'Copy'}
                         tooltipPosition="left"
                     />
-                    <ResultItemActionBtn
+                    {/*<ResultItemActionBtn
                         imgSrc={isFavourite ? starImg : emptyStarImg}
                         onClick={() =>
                             this.props.onClickSetIsFavourite(!isFavourite)
@@ -113,6 +127,7 @@ export default class TemplateRow extends Component<TemplateRowProps> {
                         }
                         tooltipPosition="left"
                     />
+                    */}
                     <ResultItemActionBtn
                         imgSrc={editImg}
                         onClick={this.props.onClickEdit}

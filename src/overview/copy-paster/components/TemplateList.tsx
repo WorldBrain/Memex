@@ -3,18 +3,20 @@ import { LoadingIndicator } from 'src/common-ui/components'
 import styled from 'styled-components'
 import { Template } from '../types'
 import TemplateRow from './TemplateRow'
+import { LesserLink } from 'src/common-ui/components/design-library/actions/LesserLink'
 
 const Header = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    padding: 10px 15px 10px 15px;
 `
 
-const HeaderText = styled.h2`
+const HeaderText = styled.div`
     font-family: Poppins;
     font-style: normal;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 14px;
     color: #3a2f45;
 `
 
@@ -22,9 +24,10 @@ const CreateNewButton = styled.button`
     font-family: Poppins;
     font-style: normal;
     font-weight: normal;
-    font-size: 16px;
+    font-size: 14px;
     color: #3a2f45;
     cursor: pointer;
+    padding: 0px;
 
     outline: none;
     border: none;
@@ -35,6 +38,22 @@ const NoResults = styled.p`
     text-align: center
     font-family: Poppins;
     font-style: normal;
+    font-size: 12px;
+    padding: 0 15px;
+    color: #3a2f45;
+`
+
+const NoResultsBox = styled.p`
+    text-align: center
+    font-family: Poppins;
+    font-style: normal;
+    font-size: 12px;
+    padding: 0 15px;
+    color: #3a2f45;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 `
 
 const Center = styled.div`
@@ -48,6 +67,7 @@ interface InternalTemplateListProps {
     onClickSetIsFavourite: (id: number, isFavourite: boolean) => void
     onClickEdit: (id: number) => void
     onClick: (id: number) => void
+    onClickHowto: () => void
 }
 
 class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
@@ -55,7 +75,13 @@ class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
         const { templates } = this.props
 
         if (templates.length === 0) {
-            return <NoResults>no templates yet, create one!</NoResults>
+            return <NoResultsBox>
+                        <NoResults>Create custom templates to copy/paste content into your workflow</NoResults>
+                        <LesserLink
+                            label={'Learn More >'}
+                            onClick={this.props.onClickHowto}
+                        />
+                    </NoResultsBox>
         }
 
         return templates.map((template) => (
@@ -80,6 +106,7 @@ interface TemplateListProps {
     onClickEdit: (id: number) => void
     onClick: (id: number) => void
     onClickNew: () => void
+    onClickHowto: () => void
 }
 
 export default class TemplateList extends PureComponent<TemplateListProps> {
@@ -95,9 +122,9 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
         return (
             <div>
                 <Header>
-                    <HeaderText>Templates</HeaderText>
+                    <HeaderText>Copy/Paste Templates</HeaderText>
                     <CreateNewButton onClick={this.props.onClickNew}>
-                        + Create New
+                        + New
                     </CreateNewButton>
                 </Header>
 
@@ -106,6 +133,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                     onClick={this.props.onClick}
                     onClickSetIsFavourite={this.props.onClickSetIsFavourite}
                     onClickEdit={this.props.onClickEdit}
+                    onClickHowto={this.props.onClickHowto}
                 />
             </div>
         )
