@@ -7,6 +7,7 @@ import { PublicSyncInterface } from 'src/sync/background/types'
 import { FeaturesInterface } from 'src/feature-opt-in/background/feature-opt-ins'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { RemoteCopyPasterInterface } from 'src/overview/copy-paster/background/types'
 
 export interface RemoteFunctionImplementations<
     Role extends 'provider' | 'caller'
@@ -19,6 +20,7 @@ export interface RemoteFunctionImplementations<
     features: FeaturesInterface
     tags: RemoteTagsInterface
     collections: RemoteCollectionsInterface
+    copyPaster: RemoteCopyPasterInterface
 }
 
 // See `src/background.ts` for the concrete remote function bindings
@@ -32,6 +34,7 @@ export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
     features: runInBackground<FeaturesInterface>(),
     tags: runInBackground<RemoteTagsInterface>(),
     collections: runInBackground<RemoteCollectionsInterface>(),
+    copyPaster: runInBackground<RemoteCopyPasterInterface>(),
 }
 
 export const notifications = remoteFunctions.notifications
@@ -42,3 +45,4 @@ export const sync = remoteFunctions.sync
 export const features = remoteFunctions.features
 export const tags = remoteFunctions.tags
 export const collections = remoteFunctions.collections
+export const copyPaster = remoteFunctions.copyPaster

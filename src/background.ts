@@ -96,6 +96,7 @@ export async function main() {
         features: new FeatureOptIns(),
         tags: backgroundModules.tags.remoteFunctions,
         collections: backgroundModules.customLists.remoteFunctions,
+        copyPaster: backgroundModules.copyPaster.remoteFunctions,
     })
 
     // Attach interesting features onto global window scope for interested users

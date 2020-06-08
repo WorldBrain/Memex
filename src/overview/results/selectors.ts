@@ -72,9 +72,9 @@ export const activeCopyPasterIndex = createSelector(
     resultsState,
     (state) => state.activeCopyPasterIndex,
 )
-export const copyPasterEditingId = createSelector(
+export const copyPasterTemplates = createSelector(
     resultsState,
-    (state) => state.copyPasterEditingId,
+    (state) => state.copyPasterTemplates,
 )
 
 export const currentPage = createSelector(
