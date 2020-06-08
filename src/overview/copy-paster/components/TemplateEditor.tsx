@@ -48,6 +48,12 @@ const Button = styled.button`
         css`
             color: #f29d9d;
         `}
+
+    ${(props) =>
+        props.disabled &&
+        css`
+            color: #a2a2a2;
+        `}
 `
 
 interface TemplateEditorProps {
@@ -67,6 +73,8 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
         const { template } = this.props
         const isNewTemplate = template === undefined
 
+        const isSaveDisabled = template.title.length === 0
+
         return (
             <div>
                 <FlexContainer>
@@ -78,7 +86,12 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                         <Button danger onClick={this.props.onClickCancel}>
                             Cancel
                         </Button>
-                        <Button onClick={this.props.onClickSave}>Save</Button>
+                        <Button
+                            disabled={isSaveDisabled}
+                            onClick={this.props.onClickSave}
+                        >
+                            Save
+                        </Button>
                     </ButtonContainer>
                 </FlexContainer>
 
