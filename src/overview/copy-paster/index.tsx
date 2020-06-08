@@ -6,7 +6,7 @@ import TemplateEditor from './components/TemplateEditor'
 import TemplateList from './components/TemplateList'
 
 const CopyPasterWrapper = styled.div`
-    padding: 0 8px 8px;
+    padding: 0 0 5px 0;
 `
 
 interface CopyPasterProps {
@@ -56,6 +56,7 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
                         templates={templates}
                         onClickSetIsFavourite={this.props.onSetIsFavourite}
                         onClickEdit={(id) => this.props.onClickEdit(id)}
+                        onClickHowto={this.props.onClickHowto}
                         onClickNew={this.props.onClickNew}
                         onClick={this.props.onClick}
                     />

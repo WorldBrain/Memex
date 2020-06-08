@@ -10,13 +10,18 @@ const FlexContainer = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    padding: 10px 15px 5px 15px;
 `
 
-const HeaderText = styled.h2`
+const TextInputBox = styled.div`
+    padding: 0px 10px;
+`
+
+const HeaderText = styled.div`
     font-family: Poppins;
     font-style: normal;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 14px;
     color: #3a2f45;
 `
 
@@ -29,9 +34,10 @@ const Button = styled.button`
     font-family: Poppins;
     font-style: normal;
     font-weight: normal;
-    font-size: 16px;
+    font-size: 14px;
     color: #3a2f45;
     cursor: pointer;
+    padding: 0 0 0 5px;
 
     outline: none;
     border: none;
@@ -95,8 +101,9 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                     </ButtonContainer>
                 </FlexContainer>
 
-                <div>
+                <TextInputBox>
                     <TextInputControlled
+                        autoFocus
                         placeholder="Title"
                         type="input"
                         defaultValue={template ? template.title : ''}
@@ -110,7 +117,7 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                         onChange={this.props.onCodeChange}
                         rows={5}
                     />
-                </div>
+                </TextInputBox>
 
                 <FlexContainer>
                     <LesserLink

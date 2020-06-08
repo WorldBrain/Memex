@@ -51,6 +51,9 @@ const TEMPLATE_LIST_ACTIONS = {
     onClickEdit: (id) => {
         console.log('edit', id)
     },
+    onClickHowto: () => {
+        console.log('howto')
+    },
 }
 
 stories.add('Template List - Loading', () => (
