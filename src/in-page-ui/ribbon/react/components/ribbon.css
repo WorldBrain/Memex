@@ -24,7 +24,7 @@
     border-right: none; */
     transform: translate(0, -20px);
     transition: all 0.1s ease-in-out;
-    width: 34px;
+    width: 5px;
     height: 105vh;
     margin-right: -2px;
 
@@ -32,6 +32,10 @@
     line-height: normal;
     text-align: start;
     align-items: center;
+}
+
+.ribbonHolderBackground {
+    background-color: #b7b6f8;
 }
 
 .ribbonExpanded {
@@ -50,6 +54,11 @@
 
 .removeSidebar {
     display: flex;
+}
+
+.innerRibbon {
+    position: relative;
+    right: 15px;
 }
 
 .innerRibbonExpanded {

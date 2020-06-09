@@ -4,17 +4,14 @@ import { Styles } from 'react-burger-menu'
 const baseStyles = {
     bmMenuWrap: {
         top: '0px',
-        right: '-60px',
+        right: '-30px',
         zIndex: '2147483644',
         transition: 'all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1)',
+        width: '480px',
     },
     bmMenu: {
-        position: 'fixed',
-        right: '30px',
-        top: '0px',
         zIndex: '2147483646',
         overflowY: 'hidden',
-        width: '450px',
         opacity: '1',
         height: '100%',
         background: '#fff',
@@ -45,10 +42,11 @@ const baseStyles = {
 
 const menuStyles = (env, isOpen): Partial<Styles> => {
     if (env === 'overview') {
-        ;((baseStyles.bmMenu.top as unknown) as string) = '55px'
-        ;((baseStyles.bmMenuWrap.top as unknown) as string) = '0px'
-        ;((baseStyles.bmMenu.right as unknown) as string) = '0px'
-        ;((baseStyles.bmMenuWrap.zIndex as unknown) as string) = '999'
+        ;(baseStyles.bmMenu as any).position = 'relative'
+        ;(baseStyles.bmMenu as any).top = '55px'
+        ;(baseStyles.bmMenu as any).right = '30px'
+        ;(baseStyles.bmMenuWrap.top as string) = '0px'
+        ;(baseStyles.bmMenuWrap.zIndex as string) = '999'
     }
 
     if (isOpen) {
