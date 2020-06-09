@@ -591,6 +591,7 @@ function extensionSyncTests(suiteOptions: {
         const storageContents = await getStorageContents(
             devices[0].storageManager,
         )
+        await removeTermFieldsFromStorageContents(storageContents)
         delete storageContents['clientSyncLogEntry']
 
         const getTargetStorageContents = async () => {
@@ -608,7 +609,9 @@ function extensionSyncTests(suiteOptions: {
             source: devices[0].backgroundModules.sync,
             target: devices[1].backgroundModules.sync,
         })
-        expect(await getTargetStorageContents()).toEqual({
+        const targetStorageContentsBefore = await getTargetStorageContents()
+        await removeTermFieldsFromStorageContents(targetStorageContentsBefore)
+        expect(targetStorageContentsBefore).toEqual({
             ...storageContents,
             syncDeviceInfo: expectedDeviceInfo,
         })
@@ -617,7 +620,9 @@ function extensionSyncTests(suiteOptions: {
             source: devices[0].backgroundModules.sync,
             target: devices[1].backgroundModules.sync,
         })
-        expect(await getTargetStorageContents()).toEqual({
+        const targetStorageContentsAfter = await getTargetStorageContents()
+        await removeTermFieldsFromStorageContents(targetStorageContentsAfter)
+        expect(targetStorageContentsAfter).toEqual({
             ...storageContents,
             syncDeviceInfo: expectedDeviceInfo,
         })
@@ -922,18 +927,6 @@ function mobileSyncTests(suiteOptions: {
         }
     }
 
-    function removeTermFieldsFromStorageContents(
-        storageContents: StorageContents,
-    ) {
-        for (const [collectionName, objects] of Object.entries(
-            storageContents,
-        )) {
-            for (const object of objects) {
-                removeTermFieldsFromObject(object, { collectionName })
-            }
-        }
-    }
-
     async function getExtensionStorageContents(storageManager: StorageManager) {
         const extensionStorageContents = await getStorageContents(
             storageManager,
@@ -948,6 +941,7 @@ function mobileSyncTests(suiteOptions: {
     async function getMobileStorageContents(storageManager: StorageManager) {
         const mobileStorageContents = await getStorageContents(storageManager)
         await removeUnsyncedCollectionFromStorageContents(mobileStorageContents)
+        await removeTermFieldsFromStorageContents(mobileStorageContents)
         return mobileStorageContents
     }
 
@@ -1331,4 +1325,15 @@ function expectIncrementalSyncScheduled(
     expect(recurringTask.aproximateNextRun).toBeTruthy()
     const difference = recurringTask.aproximateNextRun - options.when
     expect(difference).toBeLessThan(options.margin)
+}
+
+function removeTermFieldsFromStorageContents(storageContents: StorageContents) {
+    for (const [collectionName, objects] of Object.entries(storageContents)) {
+        for (const object of objects) {
+            if (collectionName === 'pages') {
+                delete object.text
+            }
+            removeTermFieldsFromObject(object, { collectionName })
+        }
+    }
 }
