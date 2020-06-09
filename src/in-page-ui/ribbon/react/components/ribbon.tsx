@@ -29,6 +29,8 @@ export interface Props extends RibbonSubcomponentProps {
     isExpanded: boolean
     isRibbonEnabled: boolean
     shortcutsData?: ShortcutElData[]
+    showExtraButtons: boolean
+    toggleShowExtraButtons: () => void
     handleRibbonToggle: () => void
     handleRemoveRibbon: () => void
     getUrl: () => string
@@ -150,6 +152,14 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
+    private renderExtraButtons() {
+        if (!this.props.showExtraButtons) {
+            return
+        }
+
+        return <div className={styles.extraButtonsPanel}></div>
+    }
+
     render() {
         if (!this.state.shortcutsReady) {
             return false
@@ -211,7 +221,7 @@ export default class Ribbon extends Component<Props, State> {
                                         }
                                     />
                                 </ButtonTooltip>
-                                <ButtonTooltip
+                                {/* <ButtonTooltip
                                     tooltipText="Open Memex Dashboard"
                                     position="left"
                                 >
@@ -224,7 +234,7 @@ export default class Ribbon extends Component<Props, State> {
                                             styles.logo,
                                         )}
                                     />
-                                </ButtonTooltip>
+                                </ButtonTooltip> */}
                                 <ButtonTooltip
                                     tooltipText={'Search Memex via Dashboard'}
                                     position="left"
@@ -390,8 +400,18 @@ export default class Ribbon extends Component<Props, State> {
                                         </Tooltip>
                                     )}
                                 </ButtonTooltip>
+                                <div
+                                    className={cx(
+                                        styles.button,
+                                        styles.showMore,
+                                    )}
+                                    onMouseOver={() =>
+                                        this.props.toggleShowExtraButtons()
+                                    }
+                                />
+                                {this.renderExtraButtons()}
                             </div>
-                            <div className={styles.horizontalLine} />
+                            {/* <div className={styles.horizontalLine} />
                             <div className={styles.settingsActions}>
                                 <ButtonTooltip
                                     tooltipText="Disable this Toolbar (You can still use keyboard shortcuts)"
@@ -491,8 +511,8 @@ export default class Ribbon extends Component<Props, State> {
                                             this.openOptionsTabRPC('settings')
                                         }
                                     />
-                                </ButtonTooltip>
-                            </div>
+                                </ButtonTooltip> */}
+                            {/* </div> */}
                         </React.Fragment>
                     )}
                 </div>

@@ -170,6 +170,10 @@
     background-image: url('/img/collections_add.svg');
 }
 
+.showMore {
+    background-image: url('/img/collections_add.svg');
+}
+
 .comments {
     background-image: url('/img/comment_add.svg');
 }
@@ -292,4 +296,10 @@
 .cancel {
     background-image: url('/img/close.svg');
     background-size: 14px;
+}
+
+.extraButtonsPanel {
+    position: relative;
+    border: solid 1px #d8d8d8;
+    border-radius: 5px;
 }

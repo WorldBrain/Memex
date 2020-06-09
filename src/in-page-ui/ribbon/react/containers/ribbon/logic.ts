@@ -27,6 +27,7 @@ type SubcomponentHandlers<
 export interface RibbonContainerState {
     loadState: TaskState
     isRibbonEnabled: boolean | null
+    areExtraButtonsShown: boolean
 
     highlights: ValuesOf<componentTypes.RibbonHighlightsProps>
     tooltip: ValuesOf<componentTypes.RibbonTooltipProps>
@@ -45,6 +46,7 @@ export type RibbonContainerEvents = UIEvent<
         hide: null
         toggleRibbon: null
         highlightAnnotations: null
+        toggleShowExtraButtons: null
     } & SubcomponentHandlers<'highlights'> &
         SubcomponentHandlers<'tooltip'> &
         // SubcomponentHandlers<'sidebar'> &
@@ -89,6 +91,7 @@ export class RibbonContainerLogic extends UILogic<
     getInitialState(): RibbonContainerState {
         return {
             loadState: 'pristine',
+            areExtraButtonsShown: false,
             isRibbonEnabled: null,
             highlights: {
                 areHighlightsEnabled: false,
@@ -150,6 +153,10 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     cleanup() {}
+
+    toggleShowExtraButtons: EventHandler<'toggleShowExtraButtons'> = () => {
+        this.emitMutation({ areExtraButtonsShown: { $apply: (prev) => !prev } })
+    }
 
     toggleRibbon: EventHandler<'toggleRibbon'> = async ({ previousState }) => {
         const shouldBeEnabled = !previousState.isRibbonEnabled
