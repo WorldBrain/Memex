@@ -134,13 +134,13 @@ class Subscribe extends React.Component<Props, State> {
                 ⭐️ Upgrade to Memex Pro
             </PricingPlanTitle>
 
-            <PricingPlanItem className={''}>
-                📲 Encrypted Sync with your iOS or Android phone
-            </PricingPlanItem>
+            {/*<PricingPlanItem className={''}>*/}
+            {/*    📲 Encrypted Sync with your iOS or Android phone*/}
+            {/*</PricingPlanItem>*/}
 
-            <PricingPlanItem className={''}>
-                💾 Automatic Backups
-            </PricingPlanItem>
+            {/*<PricingPlanItem className={''}>*/}
+            {/*    💾 Automatic Backups*/}
+            {/*</PricingPlanItem>*/}
 
             <WhiteSpacer30 />
             <SubscriptionOptionsChargebee

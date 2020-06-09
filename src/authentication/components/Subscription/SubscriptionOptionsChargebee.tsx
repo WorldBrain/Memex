@@ -1,5 +1,8 @@
 import * as React from 'react'
-import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
+import {
+    SubscriptionCheckoutOptions,
+    UserPlan,
+} from '@worldbrain/memex-common/lib/subscriptions/types'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { auth, subscription } from 'src/util/remote-functions-background'
 import {
@@ -64,14 +67,20 @@ class SubscriptionOptionsChargebee extends React.Component<
             loadingPortal: true,
         })
         const portalLink = await subscription.getManageLink()
-        window.open(portalLink['access_url'])
+
+        if (portalLink?.access_url) {
+            window.open(portalLink?.access_url)
+            this.props.onSubscriptionOpened?.()
+        }
+
         this.setState({
             loadingPortal: false,
         })
-        this.props.onSubscriptionOpened?.()
     }
 
-    openCheckoutBackupYearly = async () => {
+    openCheckoutBackupYearly = async (
+        options?: SubscriptionCheckoutOptions,
+    ) => {
         this.props.onSubscriptionClicked?.()
         if (!this.props.currentUser) {
             return
@@ -83,12 +92,17 @@ class SubscriptionOptionsChargebee extends React.Component<
 
         const checkoutExternalUrl = await subscription.getCheckoutLink({
             planId: 'pro-yearly',
+            ...options,
         })
-        window.open(checkoutExternalUrl.url)
-        this.props.onSubscriptionOpened?.()
+        if (checkoutExternalUrl?.url) {
+            window.open(checkoutExternalUrl.url)
+            this.props.onSubscriptionOpened?.()
+        }
     }
 
-    openCheckoutBackupMonthly = async () => {
+    openCheckoutBackupMonthly = async (
+        options?: SubscriptionCheckoutOptions,
+    ) => {
         this.props.onSubscriptionClicked?.()
         if (!this.props.currentUser) {
             return
@@ -99,22 +113,25 @@ class SubscriptionOptionsChargebee extends React.Component<
         this.props.onSubscriptionClicked?.()
         const checkoutExternalUrl = await subscription.getCheckoutLink({
             planId: 'pro-monthly',
+            ...options,
         })
 
-        window.open(checkoutExternalUrl.url)
-        this.props.onSubscriptionOpened?.()
+        if (checkoutExternalUrl?.url) {
+            window.open(checkoutExternalUrl.url)
+            this.props.onSubscriptionOpened?.()
+        }
     }
 
-    openCheckoutMonthly = async () => {
-        await this.openCheckoutBackupMonthly().then(() => {
+    openCheckoutMonthly = async (options?: SubscriptionCheckoutOptions) => {
+        await this.openCheckoutBackupMonthly(options).then(() => {
             this.setState({
                 loadingMonthly: false,
             })
         })
     }
 
-    openCheckoutYearly = async () => {
-        await this.openCheckoutBackupYearly().then(() => {
+    openCheckoutYearly = async (options?: SubscriptionCheckoutOptions) => {
+        await this.openCheckoutBackupYearly(options).then(() => {
             this.setState({
                 loadingYearly: false,
             })

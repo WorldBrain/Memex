@@ -1,14 +1,21 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import {
     colorPrimary,
     colorSecondary,
     colorDarkText,
 } from 'src/common-ui/components/design-library/colors'
+import {
+    fontSizeTitle,
+    TypographyBody,
+    TypographyBodyBold,
+    TypographyHeadingSmall,
+    TypographyInputTitle,
+} from 'src/common-ui/components/design-library/typography'
 
 const PricingTable = styled.div`
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
-    font-family: 
+    font-family: 'Poppins', sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -264,7 +271,84 @@ const PlanName = styled.div`
     margin-left: 10px;
 `
 
+const PricingGrid = styled.div`
+    display: grid;
+    grid-template-columns: 300px 100px 100px 100px;
+    //grid-gap: 10px;
+    background-color: #fff;
+`
+
+const gridPadding = css`
+    padding: 2px;
+`
+
+const PricingGridPlanSpacer = styled.div`
+    ${gridPadding}
+    grid-column: 1;
+`
+
+const PricingGridPlanTitle = styled(TypographyInputTitle)``
+
+const PricingGridFeatureTitle = styled(TypographyBodyBold)`
+    ${gridPadding}
+`
+
+const PricingGridFeatureDescription = styled(TypographyBody)`
+    grid-column: 1;
+    ${gridPadding}
+`
+
+// const PricingGridCheck = styled.div`
+//     padding:5px;
+//     height: 20px;
+//     width: 20px;
+//     background-image: url('/img/check.svg');
+//     fill: #2f2f2f;
+//     color: #2f2f2f;
+// `
+
+const PricingGridButton = styled(PricingButton)``
+const Line = styled.hr`
+    grid-column: span 5 / 5;
+    width: 100%;
+    color: #e0e0e0;
+`
+
+const ColExplorer = styled.div`
+    grid-column: 2;
+`
+
+const ColThinker = styled.div`
+    grid-column: 3;
+`
+
+const ColPioneer = styled.div`
+    grid-column: 4;
+`
+
+const PriceText = styled(TypographyInputTitle)`
+    display: inline-block;
+`
+
+const PriceInputBox = styled.input`
+    display: inline-block;
+    font-family: 'Poppins', sans-serif;
+    font-size: ${fontSizeTitle}px;
+    box-sizing: border-box;
+`
 export {
+    PriceInputBox,
+    PriceText,
+    ColExplorer,
+    ColThinker,
+    ColPioneer,
+    Line,
+    PricingGrid,
+    PricingGridPlanTitle,
+    PricingGridFeatureTitle,
+    PricingGridFeatureDescription,
+    PricingGridPlanSpacer,
+    PricingGridButton,
     PricingPlanTitle,
     PricingPlanItem,
     PlanTitle,
