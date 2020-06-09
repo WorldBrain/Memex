@@ -24,6 +24,7 @@ const styles = require('./ribbon.css')
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
+    setRef?: (el: HTMLElement) => void
     tabId: number
     isExpanded: boolean
     isRibbonEnabled: boolean
@@ -46,7 +47,6 @@ export default class Ribbon extends Component<Props, State> {
     private shortcutsData: Map<string, ShortcutElData>
     private openOverviewTabRPC
     private openOptionsTabRPC
-    private ribbonRef: HTMLElement
 
     state: State = { shortcutsReady: false }
 
@@ -67,26 +67,6 @@ export default class Ribbon extends Component<Props, State> {
     async componentDidMount() {
         this.keyboardShortcuts = await getKeyboardShortcutsState.getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
-
-        if (this.props.hideOnMouseLeave) {
-            this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
-        }
-    }
-
-    componentWillUnmount() {
-        if (this.ribbonRef && this.props.hideOnMouseLeave) {
-            this.ribbonRef.removeEventListener(
-                'mouseleave',
-                this.handleMouseLeave,
-            )
-        }
-    }
-
-    private handleMouseLeave = () => {
-        if (!this.props.sidebar.isSidebarOpen) {
-            const value = this.props.commentBox.commentText.length > 0
-            this.props.commentBox.setShowCommentBox(value)
-        }
     }
 
     private handleSearchEnterPress: KeyboardEventHandler<HTMLInputElement> = (
@@ -177,7 +157,6 @@ export default class Ribbon extends Component<Props, State> {
 
         return (
             <div
-                ref={(ref) => (this.ribbonRef = ref)}
                 className={cx(styles.ribbon, {
                     [styles.ribbonExpanded]: this.props.isExpanded,
                     [styles.ribbonSidebarOpen]: this.props.sidebar
@@ -185,6 +164,7 @@ export default class Ribbon extends Component<Props, State> {
                 })}
             >
                 <div
+                    ref={this.props.setRef}
                     className={cx(styles.innerRibbon, {
                         [styles.innerRibbonExpanded]: this.props.isExpanded,
                         [styles.innerRibbonSidebarOpen]: this.props.sidebar
