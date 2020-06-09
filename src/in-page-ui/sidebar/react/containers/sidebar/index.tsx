@@ -115,7 +115,6 @@ export class SidebarContainer extends StatefulUIElement<
 
     hideSidebar = () => {
         this.processEvent('hide', null)
-        this.props.inPageUI.hideRibbon()
         this.props.inPageUI.hideSidebar()
     }
 
