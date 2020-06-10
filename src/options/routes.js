@@ -6,9 +6,9 @@ import Statistics from './statistics'
 import Settings from './settings'
 import Overview from '../overview'
 import UserScreen from '../authentication/components/UserScreen'
-import { FeaturesOptInScreen } from '../feature-opt-in/ui/components/FeaturesOptInScreen'
 import React from 'react'
 import SyncDevicesPaneContainer from '../sync/components/device-list/SyncDevicesPane'
+import BetaFeaturesScreen from 'src/features/ui/components/BetaFeaturesScreen'
 
 export default [
     {
@@ -49,6 +49,12 @@ export default [
         icon: 'sync',
     },
     {
+        name: 'Beta Features',
+        pathname: '/features',
+        icon: 'settings',
+        component: BetaFeaturesScreen,
+    },
+    {
         name: 'Blocklist',
         pathname: '/blocklist',
         component: SettingsContainer,
@@ -75,7 +81,7 @@ export default [
     {
         name: 'Tutorial',
         pathname:
-            'https://www.notion.so/worldbrain/Tutorials-fa44dcbf41654ceb910c5952b6097f8d',
+            'https://worldbrain.io/tutorials',
         isExternal: true,
         icon: 'info',
     },
@@ -93,13 +99,6 @@ export default [
         component: (props) => (
             <UserScreen {...props} initiallyShowSubscriptionModal refreshUser />
         ),
-        hideFromSidebar: true,
-    },
-    {
-        name: 'Opt In Features',
-        pathname: '/features',
-        icon: 'settings',
-        component: FeaturesOptInScreen,
         hideFromSidebar: true,
     },
 ]

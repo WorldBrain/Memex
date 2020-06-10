@@ -38,7 +38,7 @@ import {
     createAuthDependencies,
     DevAuthState,
 } from 'src/authentication/background/setup'
-import { FeatureOptIns } from 'src/feature-opt-in/background/feature-opt-ins'
+import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
 import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
 import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'

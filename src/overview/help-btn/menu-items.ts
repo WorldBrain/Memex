@@ -4,7 +4,7 @@ export const menuItems: MenuOptions = [
     {
         text: 'Tutorials and FAQs',
         link:
-            'https://www.notion.so/worldbrain/fa44dcbf41654ceb910c5952b6097f8d',
+            'https://worldbrain.io/tutorials',
     },
     '-',
     {
@@ -33,7 +33,7 @@ export const menuItems: MenuOptions = [
     '-',
     {
         text: 'Changelog & Roadmap',
-        link: 'https://www.notion.so/262a367f7a2a48ff8115d2c71f700c14',
+        link: 'https://worldbrain.io/changelog',
     },
     '-',
     {

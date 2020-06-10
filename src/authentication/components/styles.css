@@ -43,6 +43,10 @@
     padding-left: 0;
 }
 
+.PriceBox {
+    width: 100%;
+}
+
 .buttonBox {
     display: flex;
     flex-direction: row;

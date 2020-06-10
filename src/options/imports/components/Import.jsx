@@ -52,9 +52,9 @@ const Import = ({
                             <a
                                 className={localStyles.link}
                                 target="_blank"
-                                href="https://www.notion.so/worldbrain/Imports-fail-and-freeze-3b8a2a55b7da48288ff1e29f6d43b8db"
+                                href="https://worldbrain.io/import_bug"
                             >
-                                <b>wrldbra.in/import_bug</b>
+                                <b>worldbrain.io/import_bug</b>
                             </a>{' '}
                             to fix it.
                             <br />

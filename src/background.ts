@@ -26,12 +26,13 @@ import { createFirebaseSignalTransport } from './sync/background/signalling'
 import { DevAuthState } from 'src/authentication/background/setup'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { FeatureOptIns } from 'src/feature-opt-in/background/feature-opt-ins'
+import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
 import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import pipeline from 'src/search/pipeline'
 import { setStorageMiddleware } from './storage/middleware'
 import { getFirebase } from './util/firebase-app-initialized'
+import { FeaturesBeta } from './features/background/feature-beta'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -94,6 +95,7 @@ export async function main() {
         bookmarks: backgroundModules.search.remoteFunctions.bookmarks,
         sync: backgroundModules.sync.remoteFunctions,
         features: new FeatureOptIns(),
+        featuresBeta: new FeaturesBeta(),
         tags: backgroundModules.tags.remoteFunctions,
         collections: backgroundModules.customLists.remoteFunctions,
     })

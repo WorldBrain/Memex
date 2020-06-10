@@ -1,14 +1,33 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import {
     colorPrimary,
     colorSecondary,
     colorDarkText,
 } from 'src/common-ui/components/design-library/colors'
+import {
+    fontSizeTitle,
+    TypographyBody,
+    TypographyBodyBold,
+    TypographyHeadingSmall,
+    TypographyInputTitle,
+    TypographyTextNormal,
+    TypographySubHeading,
+    TypographyHeadingPage,
+    TypographyBigTitle,
+} from 'src/common-ui/components/design-library/typography'
+
+
+const SubscriptionOptionsContainer = styled.div`
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+`
+
 
 const PricingTable = styled.div`
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
-    font-family: 
+    font-family: 'Poppins', sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -44,13 +63,14 @@ const DeviceSelection = styled.div`
     margin-bottom: 20px;
 `
 
-const PricingPlanTitle = styled.h1`
+const PricingPlanTitle = styled(TypographyBigTitle)`
     box-sizing: border-box;
     font-weight: 700;
-    font-size: 30px;
     color: #3a2f45;
-    margin: 0 0 30px;
+    margin: 0 0 20px;
     text-align: center;
+    display: flex;
+    justify-content: center;
 `
 
 const PricingPlanItem = styled.div`
@@ -144,6 +164,36 @@ const PricingList = styled.div`
     margin-bottom: 40px;
 `
 
+const TimeButtonBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`
+
+const TimeButtonRight = styled(TypographyTextNormal)`
+    border-color: #E0E0E0;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px; 
+    border-width: 1px;
+    border-style: solid;
+    padding: 5px 15px;
+    cursor: pointer;
+    border-left: 0.5px;
+    background-color: ${(props)=>props.active ? '#E0E0E0':'white'}
+`
+
+const TimeButtonLeft = styled(TypographyTextNormal)`
+    border-color: #E0E0E0;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-width: 1px;
+    border-style: solid;
+    padding: 5px 15px;
+    border-right: 0.5px;
+    cursor: pointer;
+    background-color: ${(props)=>props.active ? '#E0E0E0':'white'}
+`
+
 const ListItem = styled.div`
     margin-bottom: 19px;
     justify-content: center;
@@ -160,7 +210,6 @@ const ListItem = styled.div`
 
 const SwitchWrapper = styled.div`
   text-align: center;
-  margin-top: 20px;
   .reusecore__switch {
     .reusecore__field-label {
       font-size: 16px;
@@ -264,7 +313,123 @@ const PlanName = styled.div`
     margin-left: 10px;
 `
 
+const PricingGrid = styled.div`
+    display: grid;
+    grid-template-columns: 46% 18% 18% 18%;
+    //grid-gap: 10px;
+    background-color: #fff;
+    margin-top: 20px;
+    width: 100%;
+
+    @media (max-width: 767px) {
+        grid-template-columns: 40% 20% 20% 20%;
+    }
+`
+
+const gridPadding = css`
+    padding: 2px;
+`
+
+const PricingGridPlanSpacer = styled.div`
+    ${gridPadding}
+    color: #E0E0E0
+    grid-column: 1;
+`
+
+const PricingGridPlanTitle = styled(TypographyHeadingPage)`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const PricingGridFeatureTitle = styled(TypographyBodyBold)`
+    ${gridPadding}
+`
+
+const PricingGridFeatureDescription = styled(TypographyTextNormal)`
+    grid-column: 1;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+
+    @media (max-width: 767px) {
+        padding: 0px;
+    }
+`
+
+// const PricingGridCheck = styled.div`
+//     padding:5px;
+//     height: 20px;
+//     width: 20px;
+//     background-image: url('/img/check.svg');
+//     fill: #2f2f2f;
+//     color: #2f2f2f;
+// `
+
+const PricingGridButton = styled(PricingButton)``
+const Line = styled.hr`
+    grid-column: span 5 / 5;
+    width: 100%;
+    border-top: 1px #e0e0e0;
+`
+
+const ColExplorer = styled.div`
+    grid-column: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const ColThinker = styled.div`
+    grid-column: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+`
+
+const ColPioneer = styled.div`
+    grid-column: 4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+`
+const PriceBox = styled(TypographySubHeading)`
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+`
+
+const PriceText = styled(TypographySubHeading)`
+    display: inline-block;
+    text-align: center;
+`
+
+const PriceInputBox = styled.select`
+    display: inline-block;
+    font-family: 'Poppins', sans-serif;
+    font-size: ${TypographyTextNormal}px;
+    box-sizing: border-box;
+    margin: 0 2px 0 5px;
+`
 export {
+    SubscriptionOptionsContainer,
+    PriceInputBox,
+    PriceText,
+    PriceBox,
+    ColExplorer,
+    ColThinker,
+    ColPioneer,
+    Line,
+    PricingGrid,
+    PricingGridPlanTitle,
+    PricingGridFeatureTitle,
+    PricingGridFeatureDescription,
+    PricingGridPlanSpacer,
+    PricingGridButton,
     PricingPlanTitle,
     PricingPlanItem,
     PlanTitle,
@@ -283,5 +448,8 @@ export {
     PricingButtonWrapper,
     DeviceSelection,
     PricingBox,
+    TimeButtonLeft,
+    TimeButtonRight,
+    TimeButtonBox,
 }
 export default PricingTable

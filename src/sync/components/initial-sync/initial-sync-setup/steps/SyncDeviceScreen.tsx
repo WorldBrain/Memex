@@ -89,7 +89,7 @@ export const SyncDeviceScreen = ({
                         <ExternalLink
                             label={'Help & FAQ'}
                             href={
-                                'https://www.notion.so/worldbrain/Troubleshooting-the-Device-Sync-d1ccb11785774c389c621b44f65bb543'
+                                'https://worldbrain.io/help'
                             }
                         />
                     </HelpBlock>

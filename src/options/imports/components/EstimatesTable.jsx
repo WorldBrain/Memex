@@ -224,7 +224,7 @@ const EstimatesTable = ({
                                 position="right"
                             >
                                 <a
-                                    href="https://www.notion.so/worldbrain/7a12d7a019094785a14ff109e99a531d"
+                                    href="https://worldbrain.io/tutorials/importing"
                                     taget="_blank"
                                 >
                                     <span

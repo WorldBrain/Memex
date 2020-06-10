@@ -27,7 +27,7 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                                 <a
                                     className={Styles.link}
                                     target="_blank"
-                                    href="https://www.notion.so/worldbrain/7dacad9e95b44c5db681033fc264fb59"
+                                    href="https://worldbrain.io/tutorials/backups"
                                 >
                                     Learn More ▸
                                 </a>
@@ -83,7 +83,7 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                                 <a
                                     className={Styles.link}
                                     target="_blank"
-                                    href="https://www.notion.so/worldbrain/7dacad9e95b44c5db681033fc264fb59"
+                                    href="https://worldbrain.io/tutorials/backups"
                                 >
                                     Learn More ▸
                                 </a>

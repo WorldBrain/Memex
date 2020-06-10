@@ -14,7 +14,7 @@ export class FeaturesOptInScreen extends React.Component<any, any> {
         this.setState({ featureOptions })
     }
 
-    toggleFeature = feature => {
+    toggleFeature = (feature) => {
         return () => {
             features.toggleFeature(feature)
             this.refreshFeatures()
@@ -24,7 +24,7 @@ export class FeaturesOptInScreen extends React.Component<any, any> {
     render() {
         return (
             <div>
-                {Object.keys(this.state.featureOptions).map(feature => (
+                {Object.keys(this.state.featureOptions).map((feature) => (
                     <div key={`key-opt-in-${feature}`}>
                         <span>{feature}</span>
                         <ToggleSwitch
