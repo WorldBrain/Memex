@@ -24,7 +24,7 @@
     border-right: none; */
     transform: translate(0, -20px);
     transition: all 0.1s ease-in-out;
-    width: 35px;
+    width: 5px;
     height: 40vh;
 
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
@@ -44,10 +44,11 @@
     display: flex;
     justify-content: flex-end;
     height: 105vh;
+    width: 40px;
 
     & .removeSidebar {
         visibility: hidden;
-        display: flex;
+        display: none;
     }
 }
 
@@ -58,7 +59,7 @@
 .innerRibbon {
     position: absolute;
     right: 10px;
-    bottom: 15px;
+    top: 35px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -75,7 +76,14 @@
 
 .innerRibbonSidebarOpen {
     box-shadow: none;
-    right: 10px;
+    right: 0px;
+    height: 100%;
+    top: 0px;
+    justify-content: flex-start;
+    padding-right: 16px;
+    padding-top: 40px;
+    width: 20px;
+    align-items: flex-end;
 }
 
 /* SECTIONS */
@@ -229,6 +237,10 @@
     }
 }
 
+.saveIcon {
+    background-image: url('/img/saveIcon.svg');
+}
+
 /* Interaction Modals */
 
 .collectionDiv {
@@ -278,15 +290,6 @@
     display: flex;
     justify-content: flex-start;
     align-items: center;
-}
-
-.saveIcon {
-    background-image: url('/img/saveIcon.svg');
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 28px;
-    height: 28px;
-    background-size: 30px;
 }
 
 .toggler,

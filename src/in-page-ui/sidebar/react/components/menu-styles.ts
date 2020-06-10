@@ -25,7 +25,7 @@ const baseStyles = {
         display: 'none',
     },
     bmItem: {
-        display: 'block',
+        display: 'none',
         overflowY: 'scroll',
         flex: '1',
         overflowX: 'hidden',
@@ -52,9 +52,11 @@ const menuStyles = (env, isOpen): Partial<Styles> => {
     if (isOpen) {
         ;((baseStyles.bmMenu.opacity as unknown) as string) = '1'
         ;((baseStyles.bmMenu.background as unknown) as string) = '#fff'
+        ;((baseStyles.bmItem.display as unknown) as string) = 'block'
     } else {
         ;((baseStyles.bmMenu.opacity as unknown) as string) = '0'
         ;((baseStyles.bmMenu.background as unknown) as string) = 'transparent'
+        ;((baseStyles.bmItem.display as unknown) as string) = 'none'
     }
 
     return baseStyles

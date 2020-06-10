@@ -426,7 +426,9 @@ export default class Ribbon extends Component<Props, State> {
                                     <div
                                         className={cx(
                                             styles.button,
-                                            styles.comments,
+                                            styles.comments, {
+                                                [styles.saveIcon]: this.props.commentBox.isCommentSaved
+                                            }
                                         )}
                                         onClick={this.handleCommentIconBtnClick}
                                     />
@@ -460,18 +462,6 @@ export default class Ribbon extends Component<Props, State> {
                                                     }}
                                                 />
                                             }
-                                        </Tooltip>
-                                    )}
-                                    {this.props.commentBox.isCommentSaved && (
-                                        <Tooltip
-                                            position="left"
-                                            itemClass={styles.commentSaved}
-                                        >
-                                            <div className={styles.saveBox}>
-                                                <span
-                                                    className={styles.saveIcon}
-                                                />
-                                            </div>
                                         </Tooltip>
                                     )}
                                 </ButtonTooltip>

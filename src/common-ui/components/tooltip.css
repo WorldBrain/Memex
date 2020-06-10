@@ -65,7 +65,7 @@
 .tooltipleft {
     &.tooltipBubble {
         right: 33px;
-        bottom: -16px;
+        top: -16px;
         overflow: visible;
     }
 }
@@ -74,7 +74,7 @@
     content: '';
     position: absolute;
     left: 100%;
-    bottom: 10px;
+    top: 10px;
     border-width: 6px;
     border-style: solid;
     border-color: transparent transparent transparent #fff;
