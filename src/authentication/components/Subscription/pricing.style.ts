@@ -330,7 +330,7 @@ const PriceText = styled(TypographyInputTitle)`
     display: inline-block;
 `
 
-const PriceInputBox = styled.input`
+const PriceInputBox = styled.select`
     display: inline-block;
     font-family: 'Poppins', sans-serif;
     font-size: ${fontSizeTitle}px;

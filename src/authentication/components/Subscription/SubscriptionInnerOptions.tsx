@@ -17,7 +17,6 @@ import {
 } from 'src/authentication/components/Subscription/pricing.style'
 import { TypographyBodyBold } from 'src/common-ui/components/design-library/typography'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 interface Props {
     openCheckoutBackupMonthly?: (
@@ -31,20 +30,27 @@ interface Props {
     loadingMonthly: boolean
     loadingYearly: boolean
 }
-
+type Term = 'monthly' | 'annual'
 interface State {
     pioneerDonationAmount: number
+    term: Term
 }
 
 export class SubscriptionInnerOptions extends React.Component<Props, State> {
     state = {
         pioneerDonationAmount: 5,
+        term: 'monthly' as Term,
     }
 
-    openCheckoutpioneer = () => {
-        this.props.openCheckoutBackupMonthly({
+    openCheckoutPioneer = () => {
+        const options = {
             pioneerDonationAmount: this.state.pioneerDonationAmount,
-        })
+        }
+        if (this.state.term === 'monthly') {
+            this.props.openCheckoutBackupMonthly(options)
+        } else {
+            this.props.openCheckoutBackupYearly(options)
+        }
     }
 
     openCheckout = () => {
@@ -61,9 +67,21 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
         })
     }
 
+    toggleMonthly = (e) => {
+        this.setState({ term: 'monthly', pioneerDonationAmount: 5 })
+    }
+
+    toggleAnnual = (e) => {
+        this.setState({ term: 'annual', pioneerDonationAmount: 50 })
+    }
+
     render() {
         return (
             <div style={styles.subscriptionOptionsContainer}>
+                <div>
+                    <button onClick={this.toggleMonthly}>Monthly</button>
+                    <button onClick={this.toggleAnnual}>Annual</button>
+                </div>
                 <PricingGrid>
                     <PricingGridPlanSpacer />
                     <PricingGridPlanTitle> Explorer </PricingGridPlanTitle>
@@ -142,41 +160,49 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     </ColExplorer>
 
                     <ColThinker>
-                        <PriceText>2€</PriceText>
+                        <PriceText>
+                            {this.state.term === 'monthly' ? '3' : '30'}€
+                        </PriceText>
                         <PrimaryButton onClick={this.openCheckout}>
                             Upgrade
                         </PrimaryButton>
                     </ColThinker>
 
                     <ColPioneer>
-                        <PriceText>2 + </PriceText>
-                        <PriceInputBox
-                            value={this.state.pioneerDonationAmount}
-                            onChange={this.pioneerDonationChanged}
-                            size={1}
-                        />
+                        <PriceText>
+                            {this.state.term === 'monthly' ? '3' : '30'} +{' '}
+                        </PriceText>
+
+                        {this.state.term === 'monthly' ? (
+                            <PriceInputBox
+                                onChange={this.pioneerDonationChanged}
+                                size={1}
+                            >
+                                <option value={5}>5</option>
+                                <option value={8}>8</option>
+                                <option value={10}>10</option>
+                                <option value={15}>15</option>
+                                <option value={50}>50</option>
+                            </PriceInputBox>
+                        ) : (
+                            <PriceInputBox
+                                onChange={this.pioneerDonationChanged}
+                                size={1}
+                            >
+                                <option value={50}>50</option>
+                                <option value={80}>80</option>
+                                <option value={100}>100</option>
+                                <option value={150}>150</option>
+                                <option value={500}>500</option>
+                            </PriceInputBox>
+                        )}
                         <PriceText>€</PriceText>
 
-                        <PrimaryButton onClick={this.openCheckoutpioneer}>
+                        <PrimaryButton onClick={this.openCheckoutPioneer}>
                             Upgrade
                         </PrimaryButton>
                     </ColPioneer>
                 </PricingGrid>
-
-                {/*<SubscriptionPriceBox*/}
-                {/*    key={'SubscriptionBoxBackupsMonthly'}*/}
-                {/*    onClick={this.props.openCheckoutBackupMonthly}*/}
-                {/*    title={'Monthly'}*/}
-                {/*    price={'€2'}*/}
-                {/*    loading={this.props.loadingMonthly}*/}
-                {/*/>*/}
-                {/*<SubscriptionPriceBox*/}
-                {/*    key={'SubscriptionBoxBackupsYearly'}*/}
-                {/*    onClick={this.props.openCheckoutBackupYearly}*/}
-                {/*    price={'€20'}*/}
-                {/*    title={'Yearly'}*/}
-                {/*    loading={this.props.loadingYearly}*/}
-                {/*/>*/}
             </div>
         )
     }
