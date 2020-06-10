@@ -1,9 +1,7 @@
-import { AnnotationsManagerInterface } from 'src/annotations/types'
-import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { RibbonContainerDependencies } from 'src/in-page-ui/ribbon/react/containers/ribbon/types'
 import { SidebarContainerDependencies } from 'src/in-page-ui/sidebar/react/containers/sidebar/types'
-import { ToolbarNotificationsInterface } from 'src/toolbar-notification/content_script/types'
+import { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
 
 export interface ContentScriptRegistry {
     registerRibbonScript(main: RibbonScriptMain): Promise<void>
@@ -27,8 +25,6 @@ export type RibbonScriptMain = (
 
 export type HighlightingScriptMain = () => Promise<void>
 
-export type TooltipScriptMain = (dependencies: {
-    inPageUI: InPageUIInterface
-    toolbarNotifications: ToolbarNotificationsInterface
-    annotationsManager: AnnotationsManagerInterface
-}) => Promise<void>
+export type TooltipScriptMain = (
+    dependencies: TooltipDependencies,
+) => Promise<void>

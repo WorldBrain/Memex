@@ -1,9 +1,6 @@
 import Mousetrap from 'mousetrap'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
-import {
-    userSelectedText,
-    createHighlightFromTooltip,
-} from 'src/in-page-ui/tooltip/content_script/interactions'
+import { userSelectedText } from 'src/in-page-ui/tooltip/content_script/interactions'
 import { createHighlight } from 'src/highlighting/ui'
 import { conditionallyRemoveOnboardingSelectOption } from 'src/in-page-ui/tooltip/onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
@@ -11,6 +8,7 @@ import { createAndCopyDirectLink } from 'src/direct-linking/content_script/inter
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { KeyboardShortcuts } from '../types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
+import { HighlightInteractionInterface } from 'src/highlighting/types'
 
 type HandleInterface = {
     [key in keyof KeyboardShortcuts]: () => void
@@ -19,6 +17,7 @@ type HandleInterface = {
 export interface KeyboardShortcutsDependencies {
     inPageUI: InPageUIInterface
     annotationsManager: AnnotationsManager
+    highlighter: HighlightInteractionInterface
     pageUrl: string
     pageTitle: string
 }
@@ -53,6 +52,7 @@ function getShortcutHandlers({
     annotationsManager,
     pageTitle: title,
     pageUrl: url,
+    highlighter,
 }: KeyboardShortcutsDependencies): HandleInterface {
     return {
         addComment: () => inPageUI.showRibbon({ action: 'comment' }),
@@ -64,16 +64,7 @@ function getShortcutHandlers({
         },
         toggleHighlights: () => inPageUI.toggleHighlights(),
         createHighlight: () =>
-            createHighlightFromTooltip({
-                annotationsManager,
-                title,
-                url,
-                openSidebar: ({ activeUrl: annotationUrl }) =>
-                    inPageUI.showSidebar({
-                        action: 'show_annotation',
-                        annotationUrl,
-                    }),
-            }),
+            highlighter.createHighlight({ annotationsManager, inPageUI }),
         createAnnotation: async () => {
             if (userSelectedText()) {
                 const highlight = await createHighlight(undefined, true)

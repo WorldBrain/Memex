@@ -1,3 +1,4 @@
+import analytics from 'src/analytics'
 import { getOffsetTop } from 'src/sidebar-overlay/utils'
 import {
     Highlight,
@@ -6,11 +7,63 @@ import {
 import { retryUntil } from 'src/util/retry-until'
 import { descriptorToRange, markRange } from './anchoring/index'
 import * as Raven from 'src/util/raven'
-import { Annotation } from 'src/annotations/types'
+import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
+import { createHighlight, extractAnchor } from 'src/highlighting/ui'
+import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
 
 const styles = require('src/highlighting/ui/styles.css')
 
 export class HighlightInteraction implements HighlightInteractionInterface {
+    createHighlight = async (params: {
+        annotationsManager: AnnotationsManagerInterface
+        inPageUI: InPageUIInterface
+    }) => {
+        analytics.trackEvent({
+            category: 'InPageTooltip',
+            action: 'highlightText',
+        })
+
+        const anchor = await extractAnchor(document.getSelection())
+        const body = anchor ? anchor.quote : ''
+        const comment = ''
+        const tags = []
+
+        const annotation = await params.annotationsManager.createAnnotation({
+            url: window.location.href,
+            title: document.title,
+            body,
+            comment,
+            anchor,
+            tags,
+        })
+
+        renderHighlight(
+            annotation as Highlight,
+            ({ activeUrl: annotationUrl }) =>
+                params.inPageUI.showSidebar({
+                    annotationUrl,
+                    action: 'show_annotation',
+                }),
+        )
+    }
+
+    createAnnotation = async (params: {
+        selection?: Selection
+        inPageUI: InPageUIInterface
+    }) => {
+        analytics.trackEvent({
+            category: 'InPageTooltip',
+            action: 'annotateText',
+        })
+
+        const highlight = await createHighlight(params.selection, true)
+
+        params.inPageUI.showSidebar({
+            action: 'comment',
+            anchor: highlight.selector,
+        })
+    }
+
     /**
      * Given an array of highlight objects, highlights all of them.
      */

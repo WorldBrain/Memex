@@ -25,4 +25,6 @@ export interface InPageUIContentScriptRemoteInterface {
         annotation: Annotation,
         pageAnnotations: Annotation[],
     ): Promise<void>
+    createHighlight(): Promise<void>
+    createAnnotation(): Promise<void>
 }

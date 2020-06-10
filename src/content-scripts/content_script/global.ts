@@ -105,8 +105,9 @@ export async function main() {
         async registerTooltipScript(execute): Promise<void> {
             await execute({
                 inPageUI,
-                toolbarNotifications,
+                highlighter,
                 annotationsManager,
+                toolbarNotifications,
             })
             components.tooltip!.resolve()
         },
@@ -138,6 +139,9 @@ export async function main() {
             )
             await highlighter.highlightAndScroll(annotation)
         },
+        createHighlight: () =>
+            highlighter.createHighlight({ annotationsManager, inPageUI }),
+        createAnnotation: () => highlighter.createAnnotation({ inPageUI }),
     })
 
     setupScrollReporter()
@@ -145,6 +149,7 @@ export async function main() {
     setupRemoteDirectLinkFunction()
     initKeyboardShortcuts({
         inPageUI,
+        highlighter,
         annotationsManager,
         pageUrl: currentTab.url,
         pageTitle: document.title,
