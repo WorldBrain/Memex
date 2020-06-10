@@ -31,6 +31,7 @@ import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 import { SearchInterface } from 'src/search/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
+import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
 import * as constants from '../constants'
 
@@ -59,6 +60,12 @@ export async function main() {
     const highlighter = new HighlightInteraction()
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
+
+    const annotationFunctions: AnnotationFunctions = {
+        createHighlight: () =>
+            highlighter.createHighlight({ annotationsManager, inPageUI }),
+        createAnnotation: () => highlighter.createAnnotation({ inPageUI }),
+    }
 
     const contentScriptRegistry: ContentScriptRegistry = {
         async registerRibbonScript(execute): Promise<void> {
@@ -105,9 +112,8 @@ export async function main() {
         async registerTooltipScript(execute): Promise<void> {
             await execute({
                 inPageUI,
-                highlighter,
-                annotationsManager,
                 toolbarNotifications,
+                ...annotationFunctions,
             })
             components.tooltip!.resolve()
         },
@@ -139,9 +145,7 @@ export async function main() {
             )
             await highlighter.highlightAndScroll(annotation)
         },
-        createHighlight: () =>
-            highlighter.createHighlight({ annotationsManager, inPageUI }),
-        createAnnotation: () => highlighter.createAnnotation({ inPageUI }),
+        ...annotationFunctions,
     })
 
     setupScrollReporter()
@@ -149,10 +153,7 @@ export async function main() {
     setupRemoteDirectLinkFunction()
     initKeyboardShortcuts({
         inPageUI,
-        highlighter,
-        annotationsManager,
-        pageUrl: currentTab.url,
-        pageTitle: document.title,
+        ...annotationFunctions,
     })
 
     const loadContentScript = createContentScriptLoader()

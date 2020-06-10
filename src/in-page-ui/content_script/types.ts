@@ -2,9 +2,11 @@ import {
     InPageUIRibbonAction,
     SidebarActionOptions,
 } from '../shared-state/types'
+import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
 import { Annotation } from 'src/annotations/types'
 
-export interface InPageUIContentScriptRemoteInterface {
+export interface InPageUIContentScriptRemoteInterface
+    extends AnnotationFunctions {
     showSidebar(options?: SidebarActionOptions): Promise<void>
 
     // Ribbon
@@ -25,6 +27,4 @@ export interface InPageUIContentScriptRemoteInterface {
         annotation: Annotation,
         pageAnnotations: Annotation[],
     ): Promise<void>
-    createHighlight(): Promise<void>
-    createAnnotation(): Promise<void>
 }

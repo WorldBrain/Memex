@@ -8,7 +8,6 @@ import { remoteFunction } from '../../../util/webextensionRPC'
 import { injectCSS } from '../../../util/content-injection'
 import { conditionallyShowHighlightNotification } from '../onboarding-interactions'
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
-import { AnnotationsManagerInterface } from 'src/annotations/types'
 import { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
 import { TooltipPosition } from '../types'
 
@@ -76,8 +75,8 @@ export const insertTooltip = async (params: TooltipDependencies) => {
     showTooltip = await setupUIContainer(target, {
         inPageUI: params.inPageUI,
         createAndCopyDirectLink,
-        createAnnotation: params.highlighter.createAnnotation,
-        createHighlight: params.highlighter.createHighlight,
+        createAnnotation: params.createAnnotation,
+        createHighlight: params.createHighlight,
         openSettings: () => openOptionsRPC('settings'),
         destroyTooltip: async () => {
             analytics.trackEvent({
@@ -148,27 +147,26 @@ export const removeTooltip = (options?: { override?: boolean }) => {
 /**
  * Sets up RPC functions to insert and remove Tooltip from Popup.
  */
-export const setupRPC = (params: {
-    toolbarNotifications: any
-    inPageUI: InPageUIInterface
-    annotationsManager: AnnotationsManagerInterface
-}) => {
-    // makeRemotelyCallableType<TooltipInteractionInterface>({
-    //     showContentTooltip: async () => {
-    //     },
-    //     insertTooltip: async ({ override } = {}) => {
-    //         manualOverride = !!override
-    //         await insertTooltip(params)
-    //     },
-    //     removeTooltip: async ({ override } = {}) => {
-    //         manualOverride = !!override
-    //         await removeTooltip()
-    //     },
-    //     insertOrRemoveTooltip: async () => {
-    //         await insertOrRemoveTooltip(params)
-    //     },
-    // })
-}
+// export const setupRPC = (params: {
+//     toolbarNotifications: any
+//     inPageUI: InPageUIInterface
+// }) => {
+// makeRemotelyCallableType<TooltipInteractionInterface>({
+//     showContentTooltip: async () => {
+//     },
+//     insertTooltip: async ({ override } = {}) => {
+//         manualOverride = !!override
+//         await insertTooltip(params)
+//     },
+//     removeTooltip: async ({ override } = {}) => {
+//         manualOverride = !!override
+//         await removeTooltip()
+//     },
+//     insertOrRemoveTooltip: async () => {
+//         await insertOrRemoveTooltip(params)
+//     },
+// })
+// }
 
 export const showContentTooltip = async (params: TooltipDependencies) => {
     if (!showTooltip) {
