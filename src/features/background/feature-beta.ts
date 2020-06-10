@@ -1,46 +1,67 @@
-export type UserBetaFeature = 'Reader View' | 'Copy Paster'
+export type UserBetaFeatureId = 'reader' | 'copy-paster'
 
-const allFeatures: UserBetaFeature[] = ['Reader View', 'Copy Paster']
-const featureDefaults = {
-    'Reader View': false,
-    'Copy Paster': false,
+export interface UserBetaFeature {
+    id: UserBetaFeatureId
+    name: string
+    description: string
+    link: string
+    enabled: boolean // (by default)
 }
+const allFeatures: UserBetaFeature[] = [
+    {
+        id: 'reader',
+        name: 'Reader View',
+        description: '...',
+        link: '...',
+        enabled: false,
+    },
+    {
+        id: 'copy-paster',
+        name: 'Copy Paster',
+        description: '...',
+        link: '...',
+        enabled: false,
+    },
+]
 
 export type UserBetaFeatureMap = {
-    [key in UserBetaFeature]: boolean
+    [key in UserBetaFeatureId]: boolean
 }
 export interface FeaturesBetaInterface {
-    getFeatures(): Promise<UserBetaFeatureMap>
-    toggleFeature(feature: UserBetaFeature): void
-    getFeature(feature: UserBetaFeature): Promise<boolean>
+    getFeatures(): Promise<UserBetaFeature[]>
+    toggleFeature(feature: UserBetaFeatureId): void
+    getFeatureState(feature: UserBetaFeatureId): Promise<boolean>
 }
 
 export class FeaturesBeta implements FeaturesBetaInterface {
     private keyPrefix = 'BetaFeature_'
 
-    public getFeatures = async (): Promise<UserBetaFeatureMap> => {
-        const allFeatureOptions = {} as UserBetaFeatureMap
+    public getFeatures = async (): Promise<UserBetaFeature[]> => {
+        const allFeatureOptions = allFeatures
         for (const feature of allFeatures) {
-            allFeatureOptions[feature] = await this.getFeature(feature)
+            feature.enabled = await this.getFeatureState(feature.id)
         }
         return allFeatureOptions
     }
 
-    public getFeature = async (feature: UserBetaFeature): Promise<boolean> => {
-        const val = localStorage.getItem(`${this.keyPrefix}${feature}`)
+    public getFeatureState = async (
+        featureId: UserBetaFeatureId,
+    ): Promise<boolean> => {
+        const val = localStorage.getItem(`${this.keyPrefix}${featureId}`)
         if (val !== null) {
             // If the user has saved a value, use that
             return JSON.parse(val)
         } else {
             // Otherwise use a static default
-            return featureDefaults[feature]
+            return allFeatures.find((feature) => feature.id === featureId)
+                .enabled
         }
     }
 
-    public toggleFeature = async (feature: UserBetaFeature) => {
-        const val = await this.getFeature(feature)
+    public toggleFeature = async (featureId: UserBetaFeatureId) => {
+        const val = await this.getFeatureState(featureId)
         localStorage.setItem(
-            `${this.keyPrefix}${feature}`,
+            `${this.keyPrefix}${featureId}`,
             JSON.stringify(!val),
         )
     }
