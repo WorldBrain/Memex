@@ -106,9 +106,11 @@ export class RibbonContainerLogic extends UILogic<
             tagging: {
                 tags: [],
                 showTagsPicker: false,
+                pageHasTags: false,
             },
             lists: {
                 showListsPicker: false,
+                pageBelongsToList: false,
             },
             search: {
                 showSearchBox: false,
@@ -122,6 +124,13 @@ export class RibbonContainerLogic extends UILogic<
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial<RibbonContainerState>(this, async () => {
+            const { url } = this.dependencies.currentTab
+
+            const tags = await this.dependencies.tags.fetchPageTags({ url })
+            const lists = await this.dependencies.customLists.fetchPageLists({
+                url,
+            })
+
             this.emitMutation({
                 pausing: {
                     isPaused: {
@@ -146,6 +155,16 @@ export class RibbonContainerLogic extends UILogic<
                 highlights: {
                     areHighlightsEnabled: {
                         $set: await this.dependencies.highlights.getState(),
+                    },
+                },
+                tagging: {
+                    pageHasTags: {
+                        $set: tags.length > 0,
+                    },
+                },
+                lists: {
+                    pageBelongsToList: {
+                        $set: lists.length > 0,
                     },
                 },
             })

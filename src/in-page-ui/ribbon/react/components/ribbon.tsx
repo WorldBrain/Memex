@@ -41,8 +41,6 @@ export interface Props extends RibbonSubcomponentProps {
 
 interface State {
     shortcutsReady: boolean
-    tags: boolean
-    lists: boolean
 }
 
 export default class Ribbon extends Component<Props, State> {
@@ -53,7 +51,7 @@ export default class Ribbon extends Component<Props, State> {
     private openOverviewTabRPC
     private openOptionsTabRPC
 
-    state: State = { shortcutsReady: false, tags: false, lists: false }
+    state: State = { shortcutsReady: false }
 
     constructor(props: Props) {
         super(props)
@@ -72,18 +70,6 @@ export default class Ribbon extends Component<Props, State> {
     async componentDidMount() {
         this.keyboardShortcuts = await getKeyboardShortcutsState.getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
-
-        if (this.props.tagging.fetchInitialTagSelections) {
-            this.setState(() => ({ tags: true }))
-        }
-
-        if (this.props.lists.fetchInitialListSelections) {
-            this.setState(() => ({ lists: true }))
-        }
-
-        if (this.props.lists.fetchInitialListSelections) {
-            this.setState(() => ({ lists: true }))
-        }
     }
 
     private handleSearchEnterPress: KeyboardEventHandler<HTMLInputElement> = (
@@ -495,8 +481,10 @@ export default class Ribbon extends Component<Props, State> {
                                 >
                                     <div
                                         className={cx(styles.button, {
-                                            [styles.tagFull]: this.state.tags,
-                                            [styles.tag]: !this.state.tags,
+                                            [styles.tagFull]: this.props.tagging
+                                                .pageHasTags,
+                                            [styles.tag]: !this.props.tagging
+                                                .pageHasTags,
                                         })}
                                         onClick={() =>
                                             this.props.tagging.setShowTagsPicker(
@@ -520,10 +508,10 @@ export default class Ribbon extends Component<Props, State> {
                                 >
                                     <div
                                         className={cx(styles.button, {
-                                            [styles.collectionsFull]: this.state
-                                                .lists,
-                                            [styles.collections]: !this.state
-                                                .lists,
+                                            [styles.collectionsFull]: this.props
+                                                .lists.pageBelongsToList,
+                                            [styles.collections]: !this.props
+                                                .lists.pageBelongsToList,
                                         })}
                                         onClick={() =>
                                             this.props.lists.setShowListsPicker(
