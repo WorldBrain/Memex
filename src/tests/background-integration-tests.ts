@@ -88,6 +88,9 @@ export async function setupBackgroundIntegrationTest(options?: {
                 query: () => {},
                 get: () => {},
             },
+            contextMenus: {
+                create: () => {},
+            },
         } as any,
         tabManager: options?.tabManager,
         signalTransportFactory: options?.signalTransportFactory,

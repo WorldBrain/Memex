@@ -302,6 +302,10 @@ export function createBackgroundModules(options: {
         }),
         inPageUI: new InPageUIBackground({
             queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
+            createContextMenuEntry: bindMethod(
+                options.browserAPIs.contextMenus,
+                'create',
+            ),
         }),
     }
 }
