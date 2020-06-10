@@ -81,7 +81,7 @@ export default [
     {
         name: 'Tutorial',
         pathname:
-            'https://www.notion.so/worldbrain/Tutorials-fa44dcbf41654ceb910c5952b6097f8d',
+            'https://worldbrain.io/tutorials',
         isExternal: true,
         icon: 'info',
     },

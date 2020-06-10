@@ -3,6 +3,7 @@ import {
     SubscriptionCheckoutOptions,
     UserPlan,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import {
     SubscriptionOptionsContainer,
     PricingGrid,
@@ -59,8 +60,11 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
     }
 
     openCheckout = () => {
-        // todo show loading state
-        this.props.openCheckoutBackupMonthly()
+        if (this.state.term === 'monthly') {
+            this.props.openCheckoutBackupMonthly()   
+        } else {
+            this.props.openCheckoutBackupYearly()
+        }
     }
 
     pioneerDonationChanged = (e) => {
@@ -81,6 +85,9 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
     }
 
     render() {
+
+        console.log(this.props.loadingYearly)
+
         return (
             <SubscriptionOptionsContainer>
                 <TimeButtonBox>
@@ -206,16 +213,27 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     </ColPioneer>
 
                     <ColThinker>
-                        <PrimaryButton onClick={this.openCheckout}>
-                            Upgrade
-                        </PrimaryButton>
-                    
+                        {(this.props.loadingMonthly || this.props.loadingYearly) ? (
+                                <PrimaryButton onClick={this.openCheckout}>
+                                    <LoadingIndicator/>
+                                </PrimaryButton>
+                            ):(
+                                <PrimaryButton onClick={this.openCheckout}>
+                                    Upgrade
+                                </PrimaryButton>
+                            )}
                     </ColThinker>
 
                     <ColPioneer>
-                        <PrimaryButton onClick={this.openCheckoutPioneer}>
-                            Upgrade
-                        </PrimaryButton>
+                        {(this.props.loadingMonthly || this.props.loadingYearly) ? (
+                                <PrimaryButton onClick={this.openCheckoutPioneer}>
+                                    <LoadingIndicator/>
+                                </PrimaryButton>
+                            ):(
+                                <PrimaryButton onClick={this.openCheckoutPioneer}>
+                                    Upgrade
+                                </PrimaryButton>
+                            )}
                     </ColPioneer>
                 </PricingGrid>
             </SubscriptionOptionsContainer>
