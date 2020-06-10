@@ -10,6 +10,10 @@ import {
     TypographyBodyBold,
     TypographyHeadingSmall,
     TypographyInputTitle,
+    TypographyTextNormal,
+    TypographySubHeading,
+    TypographyHeadingPage,
+    TypographyBigTitle,
 } from 'src/common-ui/components/design-library/typography'
 
 const PricingTable = styled.div`
@@ -51,13 +55,14 @@ const DeviceSelection = styled.div`
     margin-bottom: 20px;
 `
 
-const PricingPlanTitle = styled.h1`
+const PricingPlanTitle = styled(TypographyBigTitle)`
     box-sizing: border-box;
     font-weight: 700;
-    font-size: 30px;
     color: #3a2f45;
-    margin: 0 0 30px;
+    margin: 0 0 20px;
     text-align: center;
+    display: flex;
+    justify-content: center;
 `
 
 const PricingPlanItem = styled.div`
@@ -151,6 +156,36 @@ const PricingList = styled.div`
     margin-bottom: 40px;
 `
 
+const TimeButtonBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`
+
+const TimeButtonRight = styled(TypographyTextNormal)`
+    border-color: #E0E0E0;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px; 
+    border-width: 1px;
+    border-style: solid;
+    padding: 5px 15px;
+    cursor: pointer;
+    border-left: 0.5px;
+    background-color: ${(props)=>props.active ? '#E0E0E0':'white'}
+`
+
+const TimeButtonLeft = styled(TypographyTextNormal)`
+    border-color: #E0E0E0;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-width: 1px;
+    border-style: solid;
+    padding: 5px 15px;
+    border-right: 0.5px;
+    cursor: pointer;
+    background-color: ${(props)=>props.active ? '#E0E0E0':'white'}
+`
+
 const ListItem = styled.div`
     margin-bottom: 19px;
     justify-content: center;
@@ -167,7 +202,6 @@ const ListItem = styled.div`
 
 const SwitchWrapper = styled.div`
   text-align: center;
-  margin-top: 20px;
   .reusecore__switch {
     .reusecore__field-label {
       font-size: 16px;
@@ -273,9 +307,15 @@ const PlanName = styled.div`
 
 const PricingGrid = styled.div`
     display: grid;
-    grid-template-columns: 300px 100px 100px 100px;
+    grid-template-columns: 46% 18% 18% 18%;
     //grid-gap: 10px;
     background-color: #fff;
+    margin-top: 20px;
+    width: 100%;
+
+    @media (max-width: 767px) {
+        grid-template-columns: 40% 20% 20% 20%;
+    }
 `
 
 const gridPadding = css`
@@ -284,18 +324,29 @@ const gridPadding = css`
 
 const PricingGridPlanSpacer = styled.div`
     ${gridPadding}
+    color: #E0E0E0
     grid-column: 1;
 `
 
-const PricingGridPlanTitle = styled(TypographyInputTitle)``
+const PricingGridPlanTitle = styled(TypographyHeadingPage)`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
 
 const PricingGridFeatureTitle = styled(TypographyBodyBold)`
     ${gridPadding}
 `
 
-const PricingGridFeatureDescription = styled(TypographyBody)`
+const PricingGridFeatureDescription = styled(TypographyTextNormal)`
     grid-column: 1;
-    ${gridPadding}
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+
+    @media (max-width: 767px) {
+        padding: 0px;
+    }
 `
 
 // const PricingGridCheck = styled.div`
@@ -311,34 +362,55 @@ const PricingGridButton = styled(PricingButton)``
 const Line = styled.hr`
     grid-column: span 5 / 5;
     width: 100%;
-    color: #e0e0e0;
+    border-top: 1px #e0e0e0;
 `
 
 const ColExplorer = styled.div`
     grid-column: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `
 
 const ColThinker = styled.div`
     grid-column: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 `
 
 const ColPioneer = styled.div`
     grid-column: 4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+`
+const PriceBox = styled(TypographySubHeading)`
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
 `
 
-const PriceText = styled(TypographyInputTitle)`
+const PriceText = styled(TypographySubHeading)`
     display: inline-block;
+    text-align: center;
 `
 
 const PriceInputBox = styled.select`
     display: inline-block;
     font-family: 'Poppins', sans-serif;
-    font-size: ${fontSizeTitle}px;
+    font-size: ${TypographyTextNormal}px;
     box-sizing: border-box;
+    margin: 0 2px 0 5px;
 `
 export {
     PriceInputBox,
     PriceText,
+    PriceBox,
     ColExplorer,
     ColThinker,
     ColPioneer,
@@ -367,5 +439,8 @@ export {
     PricingButtonWrapper,
     DeviceSelection,
     PricingBox,
+    TimeButtonLeft,
+    TimeButtonRight,
+    TimeButtonBox,
 }
 export default PricingTable

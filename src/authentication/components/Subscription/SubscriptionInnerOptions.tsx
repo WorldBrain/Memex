@@ -14,6 +14,10 @@ import {
     ColExplorer,
     PriceInputBox,
     PriceText,
+    PriceBox,
+    TimeButtonRight,
+    TimeButtonLeft,
+    TimeButtonBox,
 } from 'src/authentication/components/Subscription/pricing.style'
 import { TypographyBodyBold } from 'src/common-ui/components/design-library/typography'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
@@ -78,10 +82,10 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
     render() {
         return (
             <div style={styles.subscriptionOptionsContainer}>
-                <div>
-                    <button onClick={this.toggleMonthly}>Monthly</button>
-                    <button onClick={this.toggleAnnual}>Annual</button>
-                </div>
+                <TimeButtonBox>
+                    <TimeButtonLeft  active={this.state.term === 'monthly'} onClick={this.toggleMonthly}>Monthly</TimeButtonLeft>
+                    <TimeButtonRight active={this.state.term === 'annual'} onClick={this.toggleAnnual}>Yearly</TimeButtonRight>
+                </TimeButtonBox>
                 <PricingGrid>
                     <PricingGridPlanSpacer />
                     <PricingGridPlanTitle> Explorer </PricingGridPlanTitle>
@@ -160,44 +164,54 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     </ColExplorer>
 
                     <ColThinker>
-                        <PriceText>
-                            {this.state.term === 'monthly' ? '3' : '30'}€
-                        </PriceText>
-                        <PrimaryButton onClick={this.openCheckout}>
-                            Upgrade
-                        </PrimaryButton>
+                        <PriceBox>
+                            <PriceText>
+                                {this.state.term === 'monthly' ? '3' : '30'}€
+                            </PriceText>
+                        </PriceBox>
                     </ColThinker>
 
                     <ColPioneer>
-                        <PriceText>
-                            {this.state.term === 'monthly' ? '3' : '30'} +{' '}
-                        </PriceText>
+                        <PriceBox>
+                            <PriceText>
+                                {this.state.term === 'monthly' ? '3' : '30'} +{' '}
+                            </PriceText>
 
-                        {this.state.term === 'monthly' ? (
-                            <PriceInputBox
-                                onChange={this.pioneerDonationChanged}
-                                size={1}
-                            >
-                                <option value={5}>5</option>
-                                <option value={8}>8</option>
-                                <option value={10}>10</option>
-                                <option value={15}>15</option>
-                                <option value={50}>50</option>
-                            </PriceInputBox>
-                        ) : (
-                            <PriceInputBox
-                                onChange={this.pioneerDonationChanged}
-                                size={1}
-                            >
-                                <option value={50}>50</option>
-                                <option value={80}>80</option>
-                                <option value={100}>100</option>
-                                <option value={150}>150</option>
-                                <option value={500}>500</option>
-                            </PriceInputBox>
-                        )}
-                        <PriceText>€</PriceText>
+                            {this.state.term === 'monthly' ? (
+                                <PriceInputBox
+                                    onChange={this.pioneerDonationChanged}
+                                    size={1}
+                                >
+                                    <option value={5}>5</option>
+                                    <option value={8}>8</option>
+                                    <option value={10}>10</option>
+                                    <option value={15}>15</option>
+                                    <option value={50}>50</option>
+                                </PriceInputBox>
+                            ) : (
+                                <PriceInputBox
+                                    onChange={this.pioneerDonationChanged}
+                                    size={1}
+                                >
+                                    <option value={50}>50</option>
+                                    <option value={80}>80</option>
+                                    <option value={100}>100</option>
+                                    <option value={150}>150</option>
+                                    <option value={500}>500</option>
+                                </PriceInputBox>
+                            )}
+                            <PriceText>€</PriceText>
+                        </PriceBox>
+                    </ColPioneer>
 
+                    <ColThinker>
+                        <PrimaryButton onClick={this.openCheckout}>
+                            Upgrade
+                        </PrimaryButton>
+                    
+                    </ColThinker>
+
+                    <ColPioneer>
                         <PrimaryButton onClick={this.openCheckoutPioneer}>
                             Upgrade
                         </PrimaryButton>
@@ -212,7 +226,7 @@ const PricingGridCheck = () => <TypographyBodyBold>✓</TypographyBodyBold>
 const styles = {
     subscriptionOptionsContainer: {
         display: 'flex',
-        justifyContent: 'center',
-        marginTop: '10px',
+        flexDirection: 'column',
+        alignItems: 'center',
     },
 }

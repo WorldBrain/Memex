@@ -9,7 +9,7 @@ export const colorDisabled = `lightgrey;`
 export const colorMidPurple = `#5671CF`
 export const colorBlue = `#83c9f4`
 export const colorDarkText = `#3A2F45`
-export const colorText = `#544960`
+export const colorText = `#3a2f45`
 export const colorError = `#F45F5F`
 
 // Shades of grey listed in Notion (design / colours). Scale to be from 1-10 from light to dark

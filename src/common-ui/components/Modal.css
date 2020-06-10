@@ -11,7 +11,7 @@
 .popupLarge {
     composes: popup;
     overflow-y: scroll;
-    width: 800px;
+    width: 840px;
     height: fit-content;
     max-height: 95vh;
     max-width: 95vw;

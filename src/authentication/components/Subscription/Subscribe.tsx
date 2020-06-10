@@ -129,9 +129,9 @@ class Subscribe extends React.Component<Props, State> {
     )
 
     renderPlans = () => (
-        <div>
+        <div className={styles.PriceBox}>
             <PricingPlanTitle className={''}>
-                ⭐️ Upgrade to Memex Pro
+                ⭐️ Upgrade your Memex
             </PricingPlanTitle>
 
             {/*<PricingPlanItem className={''}>*/}
@@ -142,7 +142,6 @@ class Subscribe extends React.Component<Props, State> {
             {/*    💾 Automatic Backups*/}
             {/*</PricingPlanItem>*/}
 
-            <WhiteSpacer30 />
             <SubscriptionOptionsChargebee
                 user={this.props.currentUser}
                 plans={this.props.currentUser?.authorizedPlans}
@@ -151,7 +150,7 @@ class Subscribe extends React.Component<Props, State> {
                 onSubscriptionOpened={this.handleSubscriptionOpened}
             />
 
-            {!this.props.currentUser && (
+            {/*{!this.props.currentUser && (
                 <div>
                     <LoginTitle className={''}>
                         Already have a subscription?
@@ -160,7 +159,7 @@ class Subscribe extends React.Component<Props, State> {
                         Login
                     </LoginButton>
                 </div>
-            )}
+            )}*/}
         </div>
     )
 
