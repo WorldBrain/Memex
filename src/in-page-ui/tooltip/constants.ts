@@ -1,5 +1,5 @@
-export const TOOLTIP_DEFAULT_OPTION = true
-export const POSITION_DEFAULT_OPTION = 'mouse'
+export const TOOLTIP_DEFAULT_OPTION = false
+export const POSITION_DEFAULT_OPTION = 'text'
 export const HIGHLIGHTS_DEFAULT_OPTION = true
 export const HIGHLIGHTS_STORAGE_NAME = 'memex_link_highlights'
 export const TOOLTIP_STORAGE_NAME = 'memex_link_tooltip'

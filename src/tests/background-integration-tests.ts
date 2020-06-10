@@ -88,6 +88,9 @@ export async function setupBackgroundIntegrationTest(options?: {
                 query: () => {},
                 get: () => {},
             },
+            contextMenus: {
+                create: () => {},
+            },
         } as any,
         tabManager: options?.tabManager,
         signalTransportFactory: options?.signalTransportFactory,
@@ -172,7 +175,7 @@ export async function runBackgroundIntegrationTest(
     const setup = await setupBackgroundIntegrationTest({
         customMiddleware: [],
     })
-    const testOptions = await test.instantiate()
+    const testOptions = await test.instantiate({ isSyncTest: false })
 
     let changeDetectorUsed = false
 

@@ -98,7 +98,10 @@ class TextInputControlled extends React.Component<
         prevState: Readonly<ControlledTextInputState>,
         snapshot?: any,
     ): void {
-        if (this.props.defaultValue !== this.state.text) {
+        if (
+            this.props.defaultValue !== prevProps.defaultValue &&
+            this.props.defaultValue !== this.state.text
+        ) {
             this.updateTextElement({
                 text: this.props.defaultValue,
                 selection: {

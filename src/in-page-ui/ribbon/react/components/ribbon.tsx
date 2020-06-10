@@ -15,6 +15,7 @@ import {
     Shortcut,
 } from 'src/in-page-ui/keyboard-shortcuts/types'
 import SearchBox from './search-box'
+import ExtraButtonsPanel from './extra-buttons-panel'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { RibbonSubcomponentProps } from './types'
 import TagPicker from 'src/tags/ui/TagPicker'
@@ -24,10 +25,13 @@ const styles = require('./ribbon.css')
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
+    setRef?: (el: HTMLElement) => void
     tabId: number
     isExpanded: boolean
     isRibbonEnabled: boolean
     shortcutsData?: ShortcutElData[]
+    showExtraButtons: boolean
+    toggleShowExtraButtons: () => void
     handleRibbonToggle: () => void
     handleRemoveRibbon: () => void
     getUrl: () => string
@@ -46,7 +50,6 @@ export default class Ribbon extends Component<Props, State> {
     private shortcutsData: Map<string, ShortcutElData>
     private openOverviewTabRPC
     private openOptionsTabRPC
-    private ribbonRef: HTMLElement
 
     state: State = { shortcutsReady: false }
 
@@ -67,26 +70,6 @@ export default class Ribbon extends Component<Props, State> {
     async componentDidMount() {
         this.keyboardShortcuts = await getKeyboardShortcutsState.getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
-
-        if (this.props.hideOnMouseLeave) {
-            this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
-        }
-    }
-
-    componentWillUnmount() {
-        if (this.ribbonRef && this.props.hideOnMouseLeave) {
-            this.ribbonRef.removeEventListener(
-                'mouseleave',
-                this.handleMouseLeave,
-            )
-        }
-    }
-
-    private handleMouseLeave = () => {
-        if (!this.props.sidebar.isSidebarOpen) {
-            const value = this.props.commentBox.commentText.length > 0
-            this.props.commentBox.setShowCommentBox(value)
-        }
     }
 
     private handleSearchEnterPress: KeyboardEventHandler<HTMLInputElement> = (
@@ -170,6 +153,138 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
+    private renderExtraButtons() {
+        if (!this.props.showExtraButtons) {
+            return
+        }
+
+        return (
+            <ExtraButtonsPanel
+                closePanel={() => this.props.toggleShowExtraButtons()}
+            >
+                <div
+                    onClick={() => {
+                        this.props.handleRibbonToggle()
+                        this.props.sidebar.closeSidebar()
+                    }}
+                    className={styles.extraButtonRow}
+                >
+                    <div
+                        className={cx(
+                            styles.button,
+                            styles.ribbonIcon,
+                            styles.extraButtons,
+                            {
+                                [styles.ribbonOn]: this.props.isRibbonEnabled,
+                                [styles.ribbonOff]: !this.props.isRibbonEnabled,
+                            },
+                        )}
+                    />
+                    {this.props.isRibbonEnabled ? (
+                        <div className={styles.extraButtonsText}>
+                            Disable Sidebar
+                        </div>
+                    ) : (
+                        <div className={styles.extraButtonsText}>
+                            Enable Sidebar
+                        </div>
+                    )}
+                </div>
+
+                <div
+                    onClick={this.props.highlights.handleHighlightsToggle}
+                    className={styles.extraButtonRow}
+                >
+                    <div
+                        className={cx(
+                            styles.button,
+                            styles.ribbonIcon,
+                            styles.extraButtons,
+                            {
+                                [styles.highlightsOn]: this.props.highlights
+                                    .areHighlightsEnabled,
+                                [styles.highlightsOff]: !this.props.highlights
+                                    .areHighlightsEnabled,
+                            },
+                        )}
+                    />
+                    {this.props.highlights.areHighlightsEnabled ? (
+                        <div className={styles.extraButtonsText}>
+                            Hide Highlights
+                        </div>
+                    ) : (
+                        <div className={styles.extraButtonsText}>
+                            Show Highlights
+                        </div>
+                    )}
+                </div>
+
+                <div
+                    onClick={this.props.tooltip.handleTooltipToggle}
+                    className={styles.extraButtonRow}
+                >
+                    <div
+                        className={cx(
+                            styles.extraButtons,
+                            styles.button,
+                            styles.ribbonIcon,
+                            {
+                                [styles.tooltipOn]: this.props.tooltip
+                                    .isTooltipEnabled,
+                                [styles.tooltipOff]: !this.props.tooltip
+                                    .isTooltipEnabled,
+                            },
+                        )}
+                    />
+                    {this.props.tooltip.isTooltipEnabled ? (
+                        <div className={styles.extraButtonsText}>
+                            Hide Highlighter
+                        </div>
+                    ) : (
+                        <div className={styles.extraButtonsText}>
+                            Show Highlighter
+                        </div>
+                    )}
+                </div>
+
+                <div
+                    onClick={() => this.props.pausing.handlePauseToggle()}
+                    className={styles.extraButtonRow}
+                >
+                    <div
+                        className={cx(styles.button, styles.extraButtons, {
+                            [styles.playIcon]: this.props.pausing.isPaused,
+                            [styles.pauseIcon]: !this.props.pausing.isPaused,
+                        })}
+                    />
+                    {this.props.pausing.isPaused ? (
+                        <div className={styles.extraButtonsText}>
+                            Continue indexing
+                        </div>
+                    ) : (
+                        <div className={styles.extraButtonsText}>
+                            Pause Indexing
+                        </div>
+                    )}
+                </div>
+
+                <div
+                    onClick={() => this.openOptionsTabRPC('settings')}
+                    className={styles.extraButtonRow}
+                >
+                    <div
+                        className={cx(
+                            styles.button,
+                            styles.settings,
+                            styles.extraButtons,
+                        )}
+                    />
+                    <div className={styles.extraButtonsText}>Open Settings</div>
+                </div>
+            </ExtraButtonsPanel>
+        )
+    }
+
     render() {
         if (!this.state.shortcutsReady) {
             return false
@@ -177,7 +292,6 @@ export default class Ribbon extends Component<Props, State> {
 
         return (
             <div
-                ref={(ref) => (this.ribbonRef = ref)}
                 className={cx(styles.ribbon, {
                     [styles.ribbonExpanded]: this.props.isExpanded,
                     [styles.ribbonSidebarOpen]: this.props.sidebar
@@ -185,6 +299,7 @@ export default class Ribbon extends Component<Props, State> {
                 })}
             >
                 <div
+                    ref={this.props.setRef}
                     className={cx(styles.innerRibbon, {
                         [styles.innerRibbonExpanded]: this.props.isExpanded,
                         [styles.innerRibbonSidebarOpen]: this.props.sidebar
@@ -241,11 +356,11 @@ export default class Ribbon extends Component<Props, State> {
                                         }
                                         className={cx(
                                             styles.button,
-                                            styles.logo,
+                                            styles.search,
                                         )}
                                     />
                                 </ButtonTooltip>
-                                <ButtonTooltip
+                                {/*<ButtonTooltip
                                     tooltipText={'Search Memex via Dashboard'}
                                     position="left"
                                 >
@@ -280,7 +395,7 @@ export default class Ribbon extends Component<Props, State> {
                                             />
                                         </Tooltip>
                                     )}
-                                </ButtonTooltip>
+                                </ButtonTooltip>*/}
                             </div>
                             <div className={styles.horizontalLine} />
                             <div className={styles.pageActions}>
@@ -311,7 +426,9 @@ export default class Ribbon extends Component<Props, State> {
                                     <div
                                         className={cx(
                                             styles.button,
-                                            styles.comments,
+                                            styles.comments, {
+                                                [styles.saveIcon]: this.props.commentBox.isCommentSaved
+                                            }
                                         )}
                                         onClick={this.handleCommentIconBtnClick}
                                     />
@@ -347,28 +464,18 @@ export default class Ribbon extends Component<Props, State> {
                                             }
                                         </Tooltip>
                                     )}
-                                    {this.props.commentBox.isCommentSaved && (
-                                        <Tooltip
-                                            position="left"
-                                            itemClass={styles.commentSaved}
-                                        >
-                                            <div className={styles.saveBox}>
-                                                <span
-                                                    className={styles.saveIcon}
-                                                />
-                                            </div>
-                                        </Tooltip>
-                                    )}
                                 </ButtonTooltip>
                                 <ButtonTooltip
                                     tooltipText={this.getTooltipText('addTag')}
                                     position="left"
                                 >
                                     <div
-                                        className={cx(
-                                            styles.button,
-                                            styles.tag,
-                                        )}
+                                        className={cx(styles.button, {
+                                            [styles.tagFull]: this.props.tagging
+                                                .pageHasTags,
+                                            [styles.tag]: !this.props.tagging
+                                                .pageHasTags,
+                                        })}
                                         onClick={() =>
                                             this.props.tagging.setShowTagsPicker(
                                                 !this.props.tagging
@@ -390,10 +497,12 @@ export default class Ribbon extends Component<Props, State> {
                                     position="left"
                                 >
                                     <div
-                                        className={cx(
-                                            styles.button,
-                                            styles.collection,
-                                        )}
+                                        className={cx(styles.button, {
+                                            [styles.collectionsFull]: this.props
+                                                .lists.pageBelongsToList,
+                                            [styles.collections]: !this.props
+                                                .lists.pageBelongsToList,
+                                        })}
                                         onClick={() =>
                                             this.props.lists.setShowListsPicker(
                                                 !this.props.lists
@@ -402,16 +511,34 @@ export default class Ribbon extends Component<Props, State> {
                                         }
                                     />
                                     {this.props.lists.showListsPicker && (
-                                        <Tooltip
-                                            position="left"
-                                            itemClass={styles.collectionDiv}
-                                        >
+                                        <Tooltip position="left">
                                             {this.renderCollectionsManager()}
                                         </Tooltip>
                                     )}
                                 </ButtonTooltip>
+                                <ButtonTooltip
+                                    tooltipText="More Settings"
+                                    position="left"
+                                >
+                                    <div
+                                        className={cx(styles.button, {
+                                            [styles.playIcon]: this.props
+                                                .pausing.isPaused,
+                                            [styles.showMore]: !this.props
+                                                .pausing.isPaused,
+                                        })}
+                                        onClick={() =>
+                                            this.props.toggleShowExtraButtons()
+                                        }
+                                    />
+                                    {this.props.showExtraButtons && (
+                                        <Tooltip position="leftSmallWidth">
+                                            {this.renderExtraButtons()}
+                                        </Tooltip>
+                                    )}
+                                </ButtonTooltip>
                             </div>
-                            <div className={styles.horizontalLine} />
+                            {/*
                             <div className={styles.settingsActions}>
                                 <ButtonTooltip
                                     tooltipText="Disable this Toolbar (You can still use keyboard shortcuts)"
@@ -511,8 +638,8 @@ export default class Ribbon extends Component<Props, State> {
                                             this.openOptionsTabRPC('settings')
                                         }
                                     />
-                                </ButtonTooltip>
-                            </div>
+                                </ButtonTooltip> */}
+                            {/* </div> */}
                         </React.Fragment>
                     )}
                 </div>
