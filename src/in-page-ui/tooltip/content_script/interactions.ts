@@ -8,10 +8,7 @@ import { remoteFunction } from '../../../util/webextensionRPC'
 import { injectCSS } from '../../../util/content-injection'
 import { conditionallyShowHighlightNotification } from '../onboarding-interactions'
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
-import { createHighlight, extractAnchor } from 'src/highlighting/ui'
-import { AnnotationsManagerInterface } from 'src/annotations/types'
-import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
-import { Highlight } from 'src/highlighting/types'
+import { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
 import { TooltipPosition } from '../types'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
@@ -62,11 +59,7 @@ let manualOverride = false
  * Mounts Tooltip React component.
  * Sets up Container <---> webpage Remote functions.
  */
-export const insertTooltip = async (params: {
-    toolbarNotifications: any
-    inPageUI: InPageUIInterface
-    annotationsManager: AnnotationsManagerInterface
-}) => {
+export const insertTooltip = async (params: TooltipDependencies) => {
     // If target is set, Tooltip has already been injected.
     if (target) {
         return
@@ -82,33 +75,8 @@ export const insertTooltip = async (params: {
     showTooltip = await setupUIContainer(target, {
         inPageUI: params.inPageUI,
         createAndCopyDirectLink,
-        createAnnotation: async (selection?) => {
-            analytics.trackEvent({
-                category: 'InPageTooltip',
-                action: 'annotateText',
-            })
-            const highlight = await createHighlight(selection, true)
-            params.inPageUI.showSidebar({
-                action: 'comment',
-                anchor: highlight.selector,
-            })
-        },
-        createHighlight: async () => {
-            analytics.trackEvent({
-                category: 'InPageTooltip',
-                action: 'highlightText',
-            })
-            await createHighlightFromTooltip({
-                annotationsManager: params.annotationsManager,
-                title: document.title,
-                url: window.location.href,
-                openSidebar: ({ activeUrl: annotationUrl }) =>
-                    params.inPageUI.showSidebar({
-                        annotationUrl,
-                        action: 'show_annotation',
-                    }),
-            })
-        },
+        createAnnotation: params.createAnnotation,
+        createHighlight: params.createHighlight,
         openSettings: () => openOptionsRPC('settings'),
         destroyTooltip: async () => {
             analytics.trackEvent({
@@ -122,6 +90,7 @@ export const insertTooltip = async (params: {
             if (!closeMessageShown) {
                 params.toolbarNotifications.showToolbarNotification(
                     'tooltip-first-close',
+                    {},
                 )
                 _setCloseMessageShown()
             }
@@ -178,37 +147,32 @@ export const removeTooltip = (options?: { override?: boolean }) => {
 /**
  * Sets up RPC functions to insert and remove Tooltip from Popup.
  */
-export const setupRPC = (params: {
-    toolbarNotifications: any
-    inPageUI: InPageUIInterface
-    annotationsManager: AnnotationsManagerInterface
-}) => {
-    // makeRemotelyCallableType<TooltipInteractionInterface>({
-    //     showContentTooltip: async () => {
-    //     },
-    //     insertTooltip: async ({ override } = {}) => {
-    //         manualOverride = !!override
-    //         await insertTooltip(params)
-    //     },
-    //     removeTooltip: async ({ override } = {}) => {
-    //         manualOverride = !!override
-    //         await removeTooltip()
-    //     },
-    //     insertOrRemoveTooltip: async () => {
-    //         await insertOrRemoveTooltip(params)
-    //     },
-    // })
-}
+// export const setupRPC = (params: {
+//     toolbarNotifications: any
+//     inPageUI: InPageUIInterface
+// }) => {
+// makeRemotelyCallableType<TooltipInteractionInterface>({
+//     showContentTooltip: async () => {
+//     },
+//     insertTooltip: async ({ override } = {}) => {
+//         manualOverride = !!override
+//         await insertTooltip(params)
+//     },
+//     removeTooltip: async ({ override } = {}) => {
+//         manualOverride = !!override
+//         await removeTooltip()
+//     },
+//     insertOrRemoveTooltip: async () => {
+//         await insertOrRemoveTooltip(params)
+//     },
+// })
+// }
 
-export const showContentTooltip = async (params: {
-    toolbarNotifications: any
-    inPageUI: InPageUIInterface
-    annotationsManager: AnnotationsManagerInterface
-    position?: TooltipPosition
-}) => {
+export const showContentTooltip = async (params: TooltipDependencies) => {
     if (!showTooltip) {
         await insertTooltip(params)
     }
+
     if (userSelectedText()) {
         const position = calculateTooltipPostion()
         showTooltip(position)
@@ -316,29 +280,4 @@ function isTargetInsideTooltip(event) {
         return true
     }
     return $tooltipContainer.contains(event.target)
-}
-
-export async function createHighlightFromTooltip(params: {
-    annotationsManager: AnnotationsManagerInterface
-    url: string
-    title: string
-    openSidebar: (args: { activeUrl?: string; openSidebar?: boolean }) => void
-}) {
-    const anchor = await extractAnchor(document.getSelection())
-    const body = anchor ? anchor.quote : ''
-    const comment = ''
-    const tags = []
-
-    if (params.annotationsManager) {
-        const annotation = await params.annotationsManager.createAnnotation({
-            url: params.url,
-            title: params.title,
-            body,
-            comment,
-            anchor,
-            tags,
-        })
-
-        renderHighlight(annotation as Highlight, params.openSidebar)
-    }
 }

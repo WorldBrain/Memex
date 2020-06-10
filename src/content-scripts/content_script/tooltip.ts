@@ -1,8 +1,6 @@
 import { ContentScriptRegistry, TooltipScriptMain } from './types'
 
-import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { bodyLoader } from 'src/util/loader'
-import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import { runOnScriptShutdown } from 'src/in-page-ui/tooltip/utils'
 import {
     removeTooltip,

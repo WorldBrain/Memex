@@ -3,13 +3,14 @@ import React from 'react'
 // import Checkbox from './Checkbox'
 import { Checkbox } from 'src/common-ui/components'
 import * as utils from 'src/in-page-ui/tooltip/utils'
+import * as tooltipConstants from 'src/in-page-ui/tooltip/constants'
 
 import styles from './settings.css'
 
 class Tooltip extends React.Component {
     state = {
-        tooltip: true,
-        position: 'mouse',
+        tooltip: tooltipConstants.TOOLTIP_DEFAULT_OPTION,
+        position: tooltipConstants.POSITION_DEFAULT_OPTION,
     }
 
     async componentDidMount() {
@@ -27,7 +28,7 @@ class Tooltip extends React.Component {
         this.setState({ tooltip })
     }
 
-    togglePosition = async e => {
+    togglePosition = async (e) => {
         const position = e.target.value
         await utils.setPositionState(position)
         this.setState({ position })
