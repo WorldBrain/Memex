@@ -1,7 +1,7 @@
 import { featuresBeta } from 'src/util/remote-functions-background'
 import ToggleSwitch from 'src/common-ui/components/ToggleSwitch'
 import React from 'react'
-import { TypographyHeadingBig, TypographySubHeading } from 'src/common-ui/components/design-library/typography'
+import { TypographyHeadingBig, TypographySubHeading, TypographyText } from 'src/common-ui/components/design-library/typography'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { AuthContextInterface } from 'src/authentication/background/types'
 import { connect } from 'react-redux'
@@ -55,6 +55,7 @@ class BetaFeaturesScreen extends React.Component<AuthContextInterface & Props, a
                                     <section className={settingsStyle.section}>
                                         <div className={settingsStyle.featureBlock} key={`key-beta-${feature}`}>
                                             <TypographySubHeading>{feature}</TypographySubHeading>
+                                            <TypographyText>{feature}</TypographyText>
                                             {this.props.currentUser?.authorizedFeatures?.includes(
                                                 'beta',
                                             ) ? (
