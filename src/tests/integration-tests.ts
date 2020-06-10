@@ -21,7 +21,9 @@ export interface IntegrationTestSuite<StepContext> {
 export interface IntegrationTest<StepContext> {
     description: string
     mark?: boolean
-    instantiate: () => IntegrationTestInstance<StepContext>
+    instantiate: (options: {
+        isSyncTest?: boolean
+    }) => IntegrationTestInstance<StepContext>
 }
 export interface IntegrationTestInstance<StepContext> {
     steps: Array<IntegrationTestStep<StepContext>>
@@ -52,7 +54,6 @@ export interface BackgroundIntegrationTestSetup {
 }
 export interface BackgroundIntegrationTestContext {
     setup: BackgroundIntegrationTestSetup
-    isSyncTest?: boolean
 }
 export type BackgroundIntegrationTest = IntegrationTest<
     BackgroundIntegrationTestContext
@@ -82,18 +83,26 @@ export interface BackgroundIntegrationTestOptions {
 export function backgroundIntegrationTest(
     description: string,
     options: BackgroundIntegrationTestOptions,
-    test: () => IntegrationTestInstance<BackgroundIntegrationTestContext>,
+    test: (options: {
+        isSyncTest?: boolean
+    }) => IntegrationTestInstance<BackgroundIntegrationTestContext>,
 ): BackgroundIntegrationTest
 export function backgroundIntegrationTest(
     description: string,
-    test: () => IntegrationTestInstance<BackgroundIntegrationTestContext>,
+    test: (options: {
+        isSyncTest?: boolean
+    }) => IntegrationTestInstance<BackgroundIntegrationTestContext>,
 ): BackgroundIntegrationTest
 export function backgroundIntegrationTest(
     description: string,
     paramA:
         | BackgroundIntegrationTestOptions
-        | (() => IntegrationTestInstance<BackgroundIntegrationTestContext>),
-    paramB?: () => IntegrationTestInstance<BackgroundIntegrationTestContext>,
+        | ((options: {
+              isSyncTest?: boolean
+          }) => IntegrationTestInstance<BackgroundIntegrationTestContext>),
+    paramB?: (options: {
+        isSyncTest?: boolean
+    }) => IntegrationTestInstance<BackgroundIntegrationTestContext>,
 ): BackgroundIntegrationTest {
     const test = typeof paramA === 'function' ? paramA : paramB
     const options = typeof paramA === 'object' ? paramA : {}
