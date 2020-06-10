@@ -48,7 +48,7 @@
 }
 
 .nav li {
-    margin: 10px 0;
+    margin: 5px 0;
 }
 
 .navIcon {
@@ -68,10 +68,10 @@
 }
 
 .navLink {
-    composes: menuItem from '../../../common-ui/colors.css';
+    color: #3a2f45;
     display: flex;
     text-decoration: none;
-    font-size: 15px;
+    font-size: 14px;
     padding: 10px 5px 10px 25px;
     letter-spacing: 0.5px;
     align-items: center;
@@ -82,19 +82,39 @@
         background-color: #e4e4e4; /* MAN */
         border-right: none;
     }
+
+    @media (max-width: 700px) {
+        font-size: 12px;
+        padding: 5px 5px 5px 10px;
+    }
 }
 
 .navlink > span {
     padding-left: 15px;
+
+    @media (max-width: 700px) {
+        font-size: 12px;
+        padding: 5px 5px 5px 10px;
+    }
 }
 
 .navLink li:first-of-type {
     margin-bottom: 50px;
+
+    @media (max-width: 700px) {
+        font-size: 12px;
+        padding: 5px 5px 5px 10px;
+    }
 }
 
 .nav li:first-of-type a {
     font-size: 15px;
     font-weight: 600;
+
+    @media (max-width: 700px) {
+        font-size: 12px;
+        padding: 5px 5px 5px 10px;
+    }
 }
 
 .importSubItems {
@@ -112,3 +132,4 @@
 .done {
     text-decoration: line-through;
 }
+
