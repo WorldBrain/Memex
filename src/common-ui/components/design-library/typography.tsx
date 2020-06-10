@@ -4,13 +4,13 @@ import {
     colorText,
 } from 'src/common-ui/components/design-library/colors'
 
-export const fontSizeSmallest = 12
-export const fontSizeSmall = 13
+export const fontSizeSmallest = 10
+export const fontSizeSmall = 12
 export const fontSizeNormal = 14
-export const fontSizeBig = 17
-export const fontSizeBigger = 16
+export const fontSizeBig = 16
+export const fontSizeBigger = 18
 export const fontSizeTitle = 20
-export const fontSizeBiggerTitle = 25
+export const fontSizeBiggerTitle = 22
 
 
 export const TypographyBigTitle = styled.span`
@@ -20,11 +20,13 @@ export const TypographyBigTitle = styled.span`
         font-size: ${fontSizeBigger}px;
     }
 `
-
-export const TypographyHeadingSmall = styled.span`
-    font-size: ${fontSizeNormal}px;
+export const TypographyHeadingBigger = styled.span`
+    font-size: ${fontSizeBigger}px;
     text-decoration: none;
+    color: ${colorText};
     margin-right: 5px;
+    font-weight: bold;
+    width: 100%;
 `
 
 export const TypographyHeadingBig = styled.span`
@@ -37,13 +39,27 @@ export const TypographyHeadingBig = styled.span`
     width: 100%;
 `
 
-export const TypographyLink = styled.span`
+export const TypographyHeadingNormal = styled.span`
     font-size: ${fontSizeNormal}px;
+    text-decoration: none;
+    margin-right: 5px;
+    font-weight: bold;
+    color: ${colorText};
+`
+
+export const TypographyHeadingSmall = styled.span`
+    font-size: ${fontSizeSmall}px;
+    text-decoration: none;
+    margin-right: 5px;
+    font-weight: bold;
+    color: ${colorText};
+`
+
+export const TypographyLink = styled.span`
     text-decoration: none;
     margin: 5px;
     color: ${colorPrimary};
     cursor: pointer;
-    padding: 5px;
 `
 
 export const TypographyHeadingPage = styled.span`
@@ -90,7 +106,7 @@ export const TypographyTextNormal = styled.span`
 
 export const TypographyText = styled.span`
     font-size: ${fontSizeSmall}px;
-    font-weight: 600;
+    font-weight: 400;
     font-family: Poppins;
     font-style: normal;
     line-height: 1.4;

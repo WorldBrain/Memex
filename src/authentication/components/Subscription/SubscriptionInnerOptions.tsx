@@ -4,6 +4,7 @@ import {
     UserPlan,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
 import {
+    SubscriptionOptionsContainer,
     PricingGrid,
     PricingGridPlanSpacer,
     PricingGridPlanTitle,
@@ -81,7 +82,7 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
 
     render() {
         return (
-            <div style={styles.subscriptionOptionsContainer}>
+            <SubscriptionOptionsContainer>
                 <TimeButtonBox>
                     <TimeButtonLeft  active={this.state.term === 'monthly'} onClick={this.toggleMonthly}>Monthly</TimeButtonLeft>
                     <TimeButtonRight active={this.state.term === 'annual'} onClick={this.toggleAnnual}>Yearly</TimeButtonRight>
@@ -217,16 +218,8 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                         </PrimaryButton>
                     </ColPioneer>
                 </PricingGrid>
-            </div>
+            </SubscriptionOptionsContainer>
         )
     }
 }
 const PricingGridCheck = () => <TypographyBodyBold>✓</TypographyBodyBold>
-
-const styles = {
-    subscriptionOptionsContainer: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-}

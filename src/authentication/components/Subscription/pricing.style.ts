@@ -16,6 +16,14 @@ import {
     TypographyBigTitle,
 } from 'src/common-ui/components/design-library/typography'
 
+
+const SubscriptionOptionsContainer = styled.div`
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+`
+
+
 const PricingTable = styled.div`
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
@@ -408,6 +416,7 @@ const PriceInputBox = styled.select`
     margin: 0 2px 0 5px;
 `
 export {
+    SubscriptionOptionsContainer,
     PriceInputBox,
     PriceText,
     PriceBox,

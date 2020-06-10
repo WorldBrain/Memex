@@ -6,21 +6,24 @@ export interface UserBetaFeature {
     description: string
     link: string
     enabled: boolean // (by default)
+    available: boolean
 }
 const allFeatures: UserBetaFeature[] = [
     {
         id: 'reader',
-        name: 'Reader View',
-        description: '...',
-        link: '...',
+        name: 'Offline-first Reader & Mobile Annotations',
+        description: 'Have local & clean-view copies of websites you read. Create annotations on your mobile phone',
+        link: 'https://worldbrain.io/projects/reader',
         enabled: false,
+        available: false,
     },
     {
         id: 'copy-paster',
-        name: 'Copy Paster',
-        description: '...',
-        link: '...',
+        name: 'Copy/Paste templates',
+        description: 'Create custom templates to copy pages and annotations into your own workflow',
+        link: 'https://worldbrain.io/projects/copy-paster',
         enabled: false,
+        available: false,
     },
 ]
 
