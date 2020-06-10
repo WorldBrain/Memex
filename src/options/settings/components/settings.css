@@ -73,6 +73,12 @@
     text-align: center;
 }
 
+.featureBlock {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+} 
+
 .header {
     composes: sectionTitle from 'src/options/base.css';
 }

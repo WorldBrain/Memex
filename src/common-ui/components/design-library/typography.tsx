@@ -20,6 +20,7 @@ export const TypographyHeadingSmall = styled.span`
 export const TypographyHeadingBig = styled.span`
     font-size: ${fontSizeBig}px;
     text-decoration: none;
+    color: ${colorText};
     margin-right: 5px;
     font-weight: bold;
     text-align: center;
@@ -42,7 +43,27 @@ export const TypographyHeadingPage = styled.span`
     font-style: normal;
     line-height: 1.4;
     text-align: left;
-    color: #544960;
+    color: ${colorText};
+`
+
+export const TypographySubHeading = styled.span`
+    font-size: ${fontSizeNormal}px;
+    font-weight: 600;
+    font-family: Poppins;
+    font-style: normal;
+    line-height: 1.4;
+    text-align: left;
+    color: ${colorText};
+`
+
+export const TypographyText = styled.span`
+    font-size: ${fontSizeSmall}px;
+    font-weight: 600;
+    font-family: Poppins;
+    font-style: normal;
+    line-height: 1.4;
+    text-align: left;
+    color: ${colorText};
 `
 
 export const TypographyInputTitle = styled.h2`
