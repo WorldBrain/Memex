@@ -154,8 +154,20 @@ export class RibbonContainerLogic extends UILogic<
 
     cleanup() {}
 
-    toggleShowExtraButtons: EventHandler<'toggleShowExtraButtons'> = () => {
-        this.emitMutation({ areExtraButtonsShown: { $apply: (prev) => !prev } })
+    toggleShowExtraButtons: EventHandler<'toggleShowExtraButtons'> = ({
+        previousState,
+    }) => {
+        const mutation: UIMutation<RibbonContainerState> = {
+            areExtraButtonsShown: { $set: !previousState.areExtraButtonsShown },
+        }
+
+        if (!previousState.areExtraButtonsShown) {
+            mutation.commentBox = { showCommentBox: { $set: false } }
+            mutation.tagging = { showTagsPicker: { $set: false } }
+            mutation.lists = { showListsPicker: { $set: false } }
+        }
+
+        this.emitMutation(mutation)
     }
 
     toggleRibbon: EventHandler<'toggleRibbon'> = async ({ previousState }) => {
@@ -209,6 +221,7 @@ export class RibbonContainerLogic extends UILogic<
                       tagging: { showTagsPicker: { $set: false } },
                       lists: { showListsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
+                      areExtraButtonsShown: { $set: false },
                   }
                 : {}
 
@@ -298,6 +311,7 @@ export class RibbonContainerLogic extends UILogic<
                       commentBox: { showCommentBox: { $set: false } },
                       lists: { showListsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
+                      areExtraButtonsShown: { $set: false },
                   }
                 : {}
 
@@ -383,6 +397,7 @@ export class RibbonContainerLogic extends UILogic<
                       commentBox: { showCommentBox: { $set: false } },
                       tagging: { showTagsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
+                      areExtraButtonsShown: { $set: false },
                   }
                 : {}
 
@@ -399,6 +414,7 @@ export class RibbonContainerLogic extends UILogic<
                       commentBox: { showCommentBox: { $set: false } },
                       tagging: { showTagsPicker: { $set: false } },
                       lists: { showListsPicker: { $set: false } },
+                      areExtraButtonsShown: { $set: false },
                   }
                 : {}
 
