@@ -92,9 +92,9 @@ class BetaFeaturesScreen extends React.Component<
                     <div
                         className={settingsStyle.titleSpace}
                     >
-                    <TypographyHeadingBig>
+                    {/*<TypographyHeadingBig>
                             Available Beta Features
-                    </TypographyHeadingBig>
+                    </TypographyHeadingBig>*/}
                     </div>
                     {Object.values(this.state.featureOptions)?.map((feature) => (
                         <div>
