@@ -20,7 +20,7 @@ export const TERM_CLEAN_PATTERN = /^-?(site:)?-?(?=\w+)/
 /**
  * Pattern to match hashtag prefix syntax for tags.
  */
-export const HASH_TAG_PATTERN = /^-?#\w+(\-\w+)*$/
+export const HASH_TAG_PATTERN = /^-?#\w+([-\.]\w+)*$/
 
 export const DATE_PICKER_DATE_FORMAT = 'DD-MM-YYYY'
 
