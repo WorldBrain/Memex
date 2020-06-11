@@ -49,20 +49,20 @@ class ListContainer extends Component {
         this.props.getListFromDB()
     }
 
-    setInputRef = el => (this.inputEl = el)
+    setInputRef = (el) => (this.inputEl = el)
 
-    handleSearchChange = field => event => {
+    handleSearchChange = (field) => (event) => {
         const { value } = event.target
 
-        this.setState(state => ({
+        this.setState((state) => ({
             ...state,
             [field]: value,
         }))
     }
 
-    getSearchVal = value => value.trim().replace(/\s\s+/g, ' ')
+    getSearchVal = (value) => value.trim().replace(/\s\s+/g, ' ')
 
-    handleCreateListSubmit = event => {
+    handleCreateListSubmit = (event) => {
         event.preventDefault()
         const { value } = event.target.elements['listName']
         // value = list name
@@ -73,18 +73,20 @@ class ListContainer extends Component {
     }
 
     vacateInputField = () => {
-        this.setState(state => ({
+        this.setState((state) => ({
             ...state,
             listName: null,
         }))
     }
 
-    handleUpdateList = ({ id }, index) => event => {
+    handleUpdateList = ({ id, name: oldName }, index) => (event) => {
         event.preventDefault()
         const { value } = event.target.elements['listName']
-        // value = list name
-        this.props.updateList(index, this.getSearchVal(value), id)
-        this.setState(state => ({
+        const newName = this.getSearchVal(value)
+
+        this.props.updateList([oldName, newName], id)
+
+        this.setState((state) => ({
             ...state,
             updatedListName: null,
         }))
@@ -189,7 +191,7 @@ class ListContainer extends Component {
     }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     lists: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
     showCreateList: selectors.showCreateListForm(state),
@@ -211,11 +213,11 @@ const mapDispatchToProps = (dispatch, getState) => ({
         },
         dispatch,
     ),
-    handleEditBtnClick: index => event => {
+    handleEditBtnClick: (index) => (event) => {
         event.preventDefault()
         dispatch(actions.showEditBox(index))
     },
-    handleCrossBtnClick: ({ id }, index) => event => {
+    handleCrossBtnClick: ({ id }, index) => (event) => {
         event.preventDefault()
         dispatch(actions.showListDeleteModal(id, index))
     },
@@ -233,7 +235,7 @@ const mapDispatchToProps = (dispatch, getState) => ({
             dispatch(actions.addUrltoList(url, isSocialPost, index, id))
         }
     },
-    handleDeleteList: e => {
+    handleDeleteList: (e) => {
         e.preventDefault()
         dispatch(actions.deletePageList())
         dispatch(filterActs.delListFilter())

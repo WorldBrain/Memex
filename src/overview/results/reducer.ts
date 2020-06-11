@@ -302,4 +302,23 @@ reducer.on(acts.setSearchType, (state, searchType) => ({
     searchType,
 }))
 
+// Go over every result, and update their lists if they have `oldName`
+reducer.on(acts.updateListName, (state, [oldName, newName]) => ({
+    ...state,
+    results: state.results.map((res) => {
+        const index = res.lists.indexOf(oldName)
+
+        return index === -1
+            ? res
+            : {
+                  ...res,
+                  lists: [
+                      ...res.lists.slice(0, index),
+                      newName,
+                      ...res.lists.slice(index + 1),
+                  ],
+              }
+    }),
+}))
+
 export default reducer
