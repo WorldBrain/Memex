@@ -5,6 +5,7 @@
     padding: 8px 16px;
     font-size: 14px;
     color: #3a2f45;
+    text-align: center;
 
     @media (max-width: 767px) {
 		font-size: 12px;
