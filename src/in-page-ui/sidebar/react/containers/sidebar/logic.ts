@@ -29,6 +29,7 @@ import {
     SearchType,
     SearchTypeChange,
 } from './types'
+import { featuresBeta } from 'src/util/remote-functions-background'
 
 export interface SidebarContainerState {
     loadState: TaskState
@@ -84,6 +85,7 @@ export interface SidebarContainerState {
     showClearFiltersBtn: boolean
     isSocialPost: boolean
     showAnnotsForPage?: Page
+    isBetaEnabled: boolean
 
     // Filter sidebar props
     showFiltersSidebar: boolean
@@ -278,6 +280,8 @@ export class SidebarContainerLogic extends UILogic<
             annotsByDay: {},
             isSocialSearch: false,
             searchResultSkip: 0,
+
+            isBetaEnabled: false,
         }
     }
 
@@ -305,7 +309,16 @@ export class SidebarContainerLogic extends UILogic<
             if (this.options.env === 'inpage') {
                 await this._doSearch(previousState, { overwrite: true })
             }
+            // await this.loadBeta()
         })
+    }
+
+    private async loadBeta() {
+        // Check if user is allowed for beta too
+        const copyPasterEnabled = await featuresBeta.getFeatureState(
+            'copy-paster',
+        )
+        this.emitMutation({ isBetaEnabled: { $set: copyPasterEnabled } })
     }
 
     private doSearch = debounce(this._doSearch, 300)

@@ -12,7 +12,8 @@ const allFeatures: UserBetaFeature[] = [
     {
         id: 'reader',
         name: 'Offline-first Reader & Mobile Annotations',
-        description: 'Have local & clean-view copies of websites you read. Create annotations on your mobile phone',
+        description:
+            'Have local & clean-view copies of websites you read. Create annotations on your mobile phone',
         link: 'https://worldbrain.io/projects/reader',
         enabled: false,
         available: false,
@@ -20,10 +21,11 @@ const allFeatures: UserBetaFeature[] = [
     {
         id: 'copy-paster',
         name: 'Copy/Paste templates',
-        description: 'Create custom templates to copy pages and annotations into your own workflow',
+        description:
+            'Create custom templates to copy pages and annotations into your own workflow',
         link: 'https://worldbrain.io/projects/copy-paster',
         enabled: false,
-        available: false,
+        available: true,
     },
 ]
 
@@ -32,7 +34,7 @@ export type UserBetaFeatureMap = {
 }
 export interface FeaturesBetaInterface {
     getFeatures(): Promise<UserBetaFeature[]>
-    toggleFeature(feature: UserBetaFeatureId): void
+    toggleFeature(feature: UserBetaFeatureId): Promise<void>
     getFeatureState(feature: UserBetaFeatureId): Promise<boolean>
 }
 

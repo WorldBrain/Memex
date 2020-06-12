@@ -32,6 +32,7 @@ describe('Backup feature', () => {
             socialBookmarks: { backup: true, watch: true },
             socialPostListEntries: { backup: true, watch: true },
             tags: { backup: true, watch: true },
+            templates: { backup: true, watch: true },
 
             pageFetchBacklog: { backup: false, watch: false },
             backupChanges: { backup: false, watch: false },

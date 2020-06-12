@@ -12,8 +12,8 @@ const StyledLesserLink = styled.div`
 `
 const StyledLesserLinkText = styled(TypographyActionText)`
     font-size: ${fontSizeNormal}px;
-    text-decoration-line: underline;
-    font-weight: normal;
+    text-decoration-line: none;
+    font-weight: bold;
     color: ${colorText};
 `
 export const LesserLink = ({

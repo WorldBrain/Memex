@@ -100,6 +100,7 @@ export async function main() {
         featuresBeta: new FeaturesBeta(),
         tags: backgroundModules.tags.remoteFunctions,
         collections: backgroundModules.customLists.remoteFunctions,
+        copyPaster: backgroundModules.copyPaster.remoteFunctions,
     })
 
     // Attach interesting features onto global window scope for interested users
