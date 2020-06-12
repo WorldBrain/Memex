@@ -333,7 +333,7 @@ class ResultListContainer extends PureComponent<Props> {
                             this.setState({ tmpCopyPasterTemplate: undefined })
                         }}
                         onClickHowto={() => {
-                            window.open('https://worldbrain.io/copy-templates')
+                            window.open('https://worldbrain.io/tutorials/copy-templates')
                         }}
                         onTitleChange={(title) => {
                             this.setState({
