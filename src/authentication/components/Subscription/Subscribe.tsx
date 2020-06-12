@@ -113,11 +113,10 @@ class Subscribe extends React.Component<Props, State> {
     )
 
     renderSubscribed = () => (
-        <div>
+        <div className={styles.PriceBox}>
             <PricingPlanTitle className={''}>
-                💫 You're subscribed!
+                💫 You're already subscribed!
             </PricingPlanTitle>
-            <WhiteSpacer30 />
             <SubscriptionOptionsChargebee
                 user={this.props.currentUser}
                 plans={this.props.currentUser?.authorizedPlans}

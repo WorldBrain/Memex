@@ -64,7 +64,7 @@ export const TypographyLink = styled.span`
 `
 
 export const TypographyHeadingPage = styled.span`
-    font-size: ${fontSizeBigger}px;
+    font-size: ${fontSizeBig}px;
     font-weight: 600;
     font-family: Poppins;
     font-style: normal;

@@ -340,6 +340,7 @@ const PricingGridPlanTitle = styled(TypographyHeadingPage)`
     display: flex;
     justify-content: center;
     align-items: center;
+    color: ${(props)=>props.active ? '#5cd9a6':'#3a2f45'};
 `
 
 const PricingGridFeatureTitle = styled(TypographyBodyBold)`
@@ -357,14 +358,17 @@ const PricingGridFeatureDescription = styled(TypographyTextNormal)`
     }
 `
 
-// const PricingGridCheck = styled.div`
-//     padding:5px;
-//     height: 20px;
-//     width: 20px;
-//     background-image: url('/img/check.svg');
-//     fill: #2f2f2f;
-//     color: #2f2f2f;
-// `
+const PricingGridCheck = styled.div`
+    padding: 25px 5px;
+    height: 20px;
+    width: 20px;
+    mask-size: 15px;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-image: url('/img/check.svg');
+    background-color: ${(props)=>props.active ? '#5cd9a6':'#3a2f45'};
+    color: #2f2f2f;
+`
 
 const PricingGridButton = styled(PricingButton)``
 const Line = styled.hr`
@@ -386,6 +390,7 @@ const ColThinker = styled.div`
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    background-color: ${(props)=>props.active ? '#E0E0E0':'white'}
 `
 
 const ColPioneer = styled.div`
@@ -425,6 +430,7 @@ export {
     ColPioneer,
     Line,
     PricingGrid,
+    PricingGridCheck,
     PricingGridPlanTitle,
     PricingGridFeatureTitle,
     PricingGridFeatureDescription,
