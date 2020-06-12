@@ -82,8 +82,8 @@ class BetaFeaturesScreen extends React.Component<
                             ) ? (
                                 <div>
                                     <TypographyTextNormal>
-                                        Thanks so much for your support. If you
-                                        run into issues with Beta features,{' '}
+                                        Thanks so much for your support. Without you this would not be possible! <br/>
+                                        If you run into issues with Beta features,{' '}
                                         <a href="https://community.worldbrain.io">
                                             let us know
                                         </a>
