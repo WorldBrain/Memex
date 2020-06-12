@@ -92,6 +92,20 @@ export const TypographySubHeading = styled.span`
 `
 
 export const TypographyTextNormal = styled.span`
+    font-size: ${fontSizeNormal}px;
+    font-weight: 400;
+    font-family: Poppins;
+    font-style: normal;
+    line-height: 1.4;
+    text-align: left;
+    color: ${colorText};
+
+    @media (max-width: 767px) {
+        font-size: ${fontSizeSmall}px;
+    }
+`
+
+export const TypographyTextSmall = styled.span`
     font-size: ${fontSizeSmall}px;
     font-weight: 400;
     font-family: Poppins;
@@ -103,16 +117,6 @@ export const TypographyTextNormal = styled.span`
     @media (max-width: 767px) {
         font-size: ${fontSizeSmallest}px;
     }
-`
-
-export const TypographyText = styled.span`
-    font-size: ${fontSizeSmall}px;
-    font-weight: 400;
-    font-family: Poppins;
-    font-style: normal;
-    line-height: 1.4;
-    text-align: left;
-    color: ${colorText};
 `
 
 export const TypographyInputTitle = styled.h2`

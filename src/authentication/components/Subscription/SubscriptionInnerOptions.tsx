@@ -55,14 +55,14 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
         plan: null,
     }
 
-    componentDidMount() {
-        if (this.props.currentUser?.authorizedPlans?.includes('pro-yearly')) {
+    async componentDidMount() {
+        if (await this.props.currentUser?.authorizedPlans?.includes('pro-yearly')) {
             this.setState({ term: 'annual', pioneerDonationAmount: 50 })
         }
 
-        if (this.props.currentUser?.authorizedFeatures?.includes('beta')) {
+        if (await this.props.currentUser?.authorizedFeatures?.includes('beta')) {
             this.setState({ plan: 'beta'})
-        } else if (this.props.currentUser?.authorizedPlans?.includes('pro-monthly') || this.props.currentUser?.authorizedPlans?.includes('pro-yearly')) {
+        } else if (await this.props.currentUser?.authorizedPlans?.includes('pro-monthly') || await this.props.currentUser?.authorizedPlans?.includes('pro-yearly')) {
             this.setState({ plan: 'pro'})
         } 
 
@@ -127,7 +127,6 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                         (<PricingGridPlanTitle active={this.state.plan === 'beta'}> Pioneer </PricingGridPlanTitle>) :
                         (<PricingGridPlanTitle> Pioneer </PricingGridPlanTitle>)
                     }
-                    <Line />
 
                     <PricingGridFeatureDescription>
                         Search, Organise and Annotate
@@ -187,13 +186,12 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     <Line />
 
                     <PricingGridFeatureDescription>
-                        Support the development of an ethical business
+                        Support the development of an ethical business. <a href="https://worldbrain.io/vision">Learn more</a>
                     </PricingGridFeatureDescription>
                     <ColPioneer>
                         {' '}
                         <PricingGridCheck active={this.state.plan === 'beta'}/>{' '}
                     </ColPioneer>
-                    <Line />
 
                     <ColExplorer>
                         <PriceText> Free</PriceText>

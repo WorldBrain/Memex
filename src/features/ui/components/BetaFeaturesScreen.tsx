@@ -4,11 +4,11 @@ import React from 'react'
 import {
     TypographyHeadingBig,
     TypographySubHeading,
-    TypographyText,
     TypographyHeadingSmall,
     TypographyHeadingNormal,
     TypographyHeadingBigger,
     TypographyLink,
+    TypographyTextNormal,
 } from 'src/common-ui/components/design-library/typography'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { AuthContextInterface } from 'src/authentication/background/types'
@@ -80,17 +80,17 @@ class BetaFeaturesScreen extends React.Component<
                                 'beta',
                             ) ? (
                                 <div>
-                                    <TypographyText>
+                                    <TypographyTextNormal>
                                         Thanks so much for your support. If you
                                         run into issues with Beta features,{' '}
                                         <a href="https://community.worldbrain.io">
                                             let us know
                                         </a>
-                                    </TypographyText>
+                                    </TypographyTextNormal>
                                 </div>
                             ) : (
                                 <div>
-                                    <TypographyText>
+                                    <TypographyTextNormal>
                                         To access beta features, please
                                         <TypographyLink
                                             onClick={
@@ -99,7 +99,7 @@ class BetaFeaturesScreen extends React.Component<
                                         >
                                             support us with the pioneer upgrade.
                                         </TypographyLink>
-                                    </TypographyText>
+                                    </TypographyTextNormal>
                                 </div>
                             )}
                         </div>

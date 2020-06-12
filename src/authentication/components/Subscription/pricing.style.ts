@@ -341,6 +341,7 @@ const PricingGridPlanTitle = styled(TypographyHeadingPage)`
     justify-content: center;
     align-items: center;
     color: ${(props)=>props.active ? '#5cd9a6':'#3a2f45'};
+    padding-bottom: 15px;
 `
 
 const PricingGridFeatureTitle = styled(TypographyBodyBold)`
@@ -371,10 +372,10 @@ const PricingGridCheck = styled.div`
 `
 
 const PricingGridButton = styled(PricingButton)``
-const Line = styled.hr`
+const Line = styled.div`
     grid-column: span 5 / 5;
     width: 100%;
-    border-top: 1px #e0e0e0;
+    border-top: 1px solid #e0e0e0;
 `
 
 const ColExplorer = styled.div`
