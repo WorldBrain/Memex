@@ -1,7 +1,8 @@
 import { UILogic, UIEvent } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
+import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
+
 import { KeyEvent, DisplayEntry, PickerUpdateHandler } from './types'
-import { VALID_TAG_PATTERN } from 'src/overview/search-bar/constants'
 
 export const INITIAL_STATE: GenericPickerState = {
     query: '',

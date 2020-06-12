@@ -1,4 +1,7 @@
-import { VALID_TAG_PATTERN, HASH_TAG_PATTERN } from './constants'
+import {
+    VALID_TAG_PATTERN,
+    HASH_TAG_PATTERN,
+} from '@worldbrain/memex-common/lib/storage/constants'
 
 describe('Overview search bar tests', () => {
     it('hashtag regexp should match desired patterns', () => {

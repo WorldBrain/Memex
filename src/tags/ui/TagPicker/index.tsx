@@ -23,7 +23,7 @@ import { fontSizeNormal } from 'src/common-ui/components/design-library/typograp
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { TagResultItem } from './components/TagResultItem'
 import { ActiveTag } from './components/ActiveTag'
-import { VALID_TAG_PATTERN } from 'src/overview/search-bar/constants'
+import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 
 class TagPicker extends StatefulUIElement<
     TagPickerDependencies,
