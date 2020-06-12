@@ -69,6 +69,7 @@ export async function main() {
         },
     })
     registerBackgroundModuleCollections(storageManager, backgroundModules)
+
     await storageManager.finishInitialization()
     await navigator?.storage?.persist?.()
 
