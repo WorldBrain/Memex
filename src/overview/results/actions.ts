@@ -80,6 +80,10 @@ export const setSearchType = createAction<'page' | 'notes' | 'social'>(
 export const initSearchCount = createAction('overview/initSearchCount')
 export const incSearchCount = createAction('overview/incSearchCount')
 
+export const updateListName = createAction<[string, string]>(
+    'overview/updateListName',
+)
+
 export const toggleBookmark: (args: {
     url: string
     fullUrl: string

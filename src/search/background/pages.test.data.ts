@@ -2,7 +2,7 @@ export const VISIT_1 = 1569987700000
 export const VISIT_2 = 1569987800000
 export const VISIT_3 = 1569989800000
 
-export const TAG_1 = 'test 1'
+export const TAG_1 = 'test-1'
 
 export const PAGE_1 = {
     url: 'lorem.com',

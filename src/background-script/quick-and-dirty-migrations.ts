@@ -1,10 +1,12 @@
 import Dexie from 'dexie'
+import { Storage } from 'webextension-polyfill-ts'
 import { URLNormalizer } from '@worldbrain/memex-url-utils'
 import { MOBILE_LIST_NAME } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/constants'
 
 export interface MigrationProps {
     db: Dexie
     normalizeUrl: URLNormalizer
+    localStorage: Storage.LocalStorageArea
 }
 
 export interface Migrations {
@@ -12,6 +14,15 @@ export interface Migrations {
 }
 
 export const migrations: Migrations = {
+    'reseed-collections-suggestion-cache': async ({ localStorage, db }) => {
+        const cacheStorageKey = 'custom-lists_suggestions'
+        await localStorage.remove(cacheStorageKey)
+
+        const listEntries = await db.table('customLists').limit(10).toArray()
+        const newCache: string[] = listEntries.map((entry) => entry.name)
+
+        await localStorage.set({ [cacheStorageKey]: newCache })
+    },
     /**
      * If pageUrl is undefined, then re-derive it from url field.
      */
@@ -19,8 +30,8 @@ export const migrations: Migrations = {
         await db
             .table('annotations')
             .toCollection()
-            .filter(annot => annot.pageUrl === undefined)
-            .modify(annot => {
+            .filter((annot) => annot.pageUrl === undefined)
+            .modify((annot) => {
                 annot.pageUrl = normalizeUrl(annot.url)
             })
     },
@@ -32,12 +43,12 @@ export const migrations: Migrations = {
             .table('annotations')
             .toCollection()
             .filter(
-                annot =>
+                (annot) =>
                     annot.lastEdited == null ||
                     (Object.keys(annot.lastEdited).length === 0 &&
                         annot.lastEdited.constructor === Object),
             )
-            .modify(annot => {
+            .modify((annot) => {
                 annot.lastEdited = annot.createdWhen
             })
     },
@@ -91,25 +102,9 @@ export const migrations: Migrations = {
      * associate meta data with pages) was empty.
      */
     'remove-empty-url': async ({ db }) => {
-        await db
-            .table('tags')
-            .where('url')
-            .equals('')
-            .delete()
-        await db
-            .table('visits')
-            .where('url')
-            .equals('')
-            .delete()
-        await db
-            .table('annotations')
-            .where('pageUrl')
-            .equals('')
-            .delete()
-        await db
-            .table('pageListEntries')
-            .where('pageUrl')
-            .equals('')
-            .delete()
+        await db.table('tags').where('url').equals('').delete()
+        await db.table('visits').where('url').equals('').delete()
+        await db.table('annotations').where('pageUrl').equals('').delete()
+        await db.table('pageListEntries').where('pageUrl').equals('').delete()
     },
 }

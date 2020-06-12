@@ -120,6 +120,7 @@ class BackgroundScript {
 
             await migration({
                 db: this.storageManager.backend['dexieInstance'],
+                localStorage: this.storageAPI.local,
                 normalizeUrl: this.urlNormalizer,
             })
             await this.storageAPI.local.set({ [storageKey]: true })

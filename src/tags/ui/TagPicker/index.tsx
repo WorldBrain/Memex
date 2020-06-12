@@ -23,6 +23,7 @@ import { fontSizeNormal } from 'src/common-ui/components/design-library/typograp
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { TagResultItem } from './components/TagResultItem'
 import { ActiveTag } from './components/ActiveTag'
+import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 
 class TagPicker extends StatefulUIElement<
     TagPickerDependencies,
@@ -31,6 +32,11 @@ class TagPicker extends StatefulUIElement<
 > {
     constructor(props: TagPickerDependencies) {
         super(props, new TagPickerLogic(props))
+    }
+
+    get shouldShowAddNew(): boolean {
+        const { newEntryName } = this.state
+        return newEntryName !== '' && VALID_TAG_PATTERN.test(newEntryName)
     }
 
     handleClickOutside = () => {
@@ -122,9 +128,11 @@ class TagPicker extends StatefulUIElement<
 
     renderMainContent() {
         if (this.state.loadingSuggestions) {
-            return <LoadingBox>
-                        <LoadingIndicator/>
-                    </LoadingBox>
+            return (
+                <LoadingBox>
+                    <LoadingIndicator />
+                </LoadingBox>
+            )
         }
 
         return (
@@ -146,7 +154,7 @@ class TagPicker extends StatefulUIElement<
                         />
                     }
                 />
-                {this.state.newEntryName !== '' && (
+                {this.shouldShowAddNew && (
                     <AddNewEntry
                         resultItem={
                             <TagResultItem>
@@ -183,7 +191,7 @@ class TagPicker extends StatefulUIElement<
     }
 }
 
-const LoadingBox = styled.div `
+const LoadingBox = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;

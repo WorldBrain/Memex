@@ -57,6 +57,7 @@ export const TypographyHeadingSmall = styled.span`
 
 export const TypographyLink = styled.span`
     text-decoration: none;
+    font-size: 1em;
     margin: 5px;
     color: ${colorPrimary};
     cursor: pointer;
@@ -138,6 +139,7 @@ export const TypographyActionText = styled.span`
     font-family: Poppins;
     font-style: normal;
     font-weight: 600;
+    font-size: 1em;
 `
 
 export const TypographyBody = styled.span`
