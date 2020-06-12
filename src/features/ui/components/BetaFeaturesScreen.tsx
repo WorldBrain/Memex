@@ -8,6 +8,7 @@ import {
     TypographyHeadingNormal,
     TypographyHeadingBigger,
     TypographyLink,
+    TypographyTextSmall,
     TypographyTextNormal,
 } from 'src/common-ui/components/design-library/typography'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
@@ -137,9 +138,9 @@ class BetaFeaturesScreen extends React.Component<
                                                 <TypographyHeadingNormal>
                                                     {feature.name}
                                                 </TypographyHeadingNormal>
-                                                <TypographyText>
+                                                <TypographyTextSmall>
                                                     {feature.description}
-                                                </TypographyText>
+                                                </TypographyTextSmall>
                                             </div>
                                             <div
                                                 className={
@@ -211,9 +212,9 @@ class BetaFeaturesScreen extends React.Component<
                                                     <TypographyHeadingNormal>
                                                         {feature.name}
                                                     </TypographyHeadingNormal>
-                                                    <TypographyText>
+                                                    <TypographyTextSmall>
                                                         {feature.description}
-                                                    </TypographyText>
+                                                    </TypographyTextSmall>
                                                 </div>
                                                 <div
                                                     className={
