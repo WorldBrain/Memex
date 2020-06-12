@@ -41,16 +41,17 @@ export const SyncDeviceScreen = ({
         >
             <ProgressBox>
                 <CenterText>
-                    <TypographyBodyBold>
-                        {'Initial sync is in progress... this may take a while'}
-                    </TypographyBodyBold>
-                    <TypographyBodyCenter>
-                        {'Make sure both devices stay connected'}
-                    </TypographyBodyCenter>
-
                     <div className={styles.progressBar}>
                         {!error ? (
                             <div className={styles.progressBox}>
+
+                             <TypographyBodyBold>
+                                    {'Initial sync is in progress... this may take a while'}
+                                </TypographyBodyBold>
+                                <TypographyBodyCenter>
+                                    {'Make sure both devices stay connected'}
+                             </TypographyBodyCenter>
+
                                 <WhiteSpacer20 />
                                 <CancelAction
                                     label={'Cancel'}
@@ -70,11 +71,6 @@ export const SyncDeviceScreen = ({
                         ) : (
                             <div className={styles.progressBox}>
                                 <Warning>⚠️ Something went wrong</Warning>
-                                <PrimaryAction
-                                    label={'Retry Syncing'}
-                                    onClick={handleRetry}
-                                />
-                                <WhiteSpacer30 />
                             </div>
                         )}
                     </div>
