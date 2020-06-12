@@ -43,6 +43,8 @@ export interface State {
     annotsByDay: PageUrlsByDay
     /** Denotes the type of search performed */
     searchType: 'notes' | 'page' | 'social'
+    /** Is the user granted access to beta features */
+    isBetaEnabled: boolean
 }
 
 export const defaultState: State = {
@@ -64,6 +66,7 @@ export const defaultState: State = {
     isAnnotsSearch: false,
     annotsByDay: null,
     searchType: 'page',
+    isBetaEnabled: false,
 }
 
 const handleSearchResult = (overwrite: boolean) => (
@@ -110,6 +113,11 @@ const reducer = createReducer<State>({}, defaultState)
 reducer.on(acts.setShowOnboardingMessage, (state, showOnboardingMessage) => ({
     ...state,
     showOnboardingMessage,
+}))
+
+reducer.on(acts.setBetaFeatures, (state, isBetaEnabled) => ({
+    ...state,
+    isBetaEnabled,
 }))
 
 reducer.on(acts.addList, (state, { list, index }) => {
@@ -307,6 +315,7 @@ reducer.on(acts.setLoading, (state, payload) => ({
     ...state,
     isLoading: payload,
 }))
+
 reducer.on(acts.appendSearchResult, handleSearchResult(false))
 reducer.on(acts.resetSearchResult, (state) => ({
     ...state,

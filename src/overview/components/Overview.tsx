@@ -27,6 +27,7 @@ import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { SearchInterface } from 'src/search/background/types'
+import { featuresBeta } from 'src/util/remote-functions-background'
 
 const resultItemStyles = require('src/common-ui/components/result-item.css')
 
@@ -182,6 +183,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
     init: () => {
+        featuresBeta.getFeatureState('copy-paster')
         return dispatch(searchBarActs.init())
     },
     setShowOnboardingMessage: () =>

@@ -52,6 +52,7 @@ export interface Props extends Partial<SocialPage> {
     setTagButtonRef: (el: HTMLElement) => void
     setListButtonRef: (el: HTMLElement) => void
     setCopyPasterButtonRef: (el: HTMLElement) => void
+    isBetaEnabled: boolean
 }
 
 class ResultItem extends PureComponent<Props> {

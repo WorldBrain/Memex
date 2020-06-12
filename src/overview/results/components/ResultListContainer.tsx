@@ -49,6 +49,7 @@ export interface StateProps {
     isFilterBarActive: boolean
     isSocialPost: boolean
     copyPasterTemplates: Template[]
+    isBetaEnabled: boolean
 }
 
 export interface DispatchProps {
@@ -439,6 +440,7 @@ class ResultListContainer extends PureComponent<Props> {
                 goToAnnotation={this.props.goToAnnotation}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
+                isBetaEnabled={this.props.isBetaEnabled}
             />
         )
     }
@@ -554,6 +556,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     isFilterBarActive: filters.showFilterBar(state),
     isSocialPost: selectors.isSocialPost(state),
     copyPasterTemplates: selectors.copyPasterTemplates(state),
+    isBetaEnabled: selectors.isBetaEnabled(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (

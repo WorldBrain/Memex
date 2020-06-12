@@ -77,6 +77,11 @@ export const copyPasterTemplates = createSelector(
     (state) => state.copyPasterTemplates,
 )
 
+export const isBetaEnabled = createSelector(
+    resultsState,
+    (state) => state.isBetaEnabled,
+)
+
 export const currentPage = createSelector(
     resultsState,
     (state) => state.currentPage,
@@ -156,7 +161,16 @@ export const results = createSelector(
     activeTagIndex,
     activeListIndex,
     activeCopyPasterIndex,
-    (docs, modalShown, deleting, tagIndex, listIndex, copyPasterIndex) => {
+    isBetaEnabled,
+    (
+        docs,
+        modalShown,
+        deleting,
+        tagIndex,
+        listIndex,
+        copyPasterIndex,
+        isBetaEnabled,
+    ) => {
         const docsMapFn = editPageResults({
             modalShown,
             deleting,

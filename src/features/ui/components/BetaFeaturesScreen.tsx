@@ -17,21 +17,30 @@ import { show } from 'src/overview/modals/actions'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
-import { UserBetaFeature } from 'src/features/background/feature-beta'
+import {
+    UserBetaFeature,
+    UserBetaFeatureId,
+} from 'src/features/background/feature-beta'
+import { acts as resultsActs } from 'src/overview/results'
 
 interface Props {
     showSubscriptionModal: () => void
+    toggleBetaFeatures: (val: boolean) => void
 }
 
 interface State {
     featureOptions: UserBetaFeature[]
+    featureEnabled: { [key in UserBetaFeatureId]: boolean }
 }
 
 class BetaFeaturesScreen extends React.Component<
     AuthContextInterface & Props,
     State
 > {
-    state = { featureOptions: {} as UserBetaFeature[] }
+    state = {
+        featureOptions: {},
+        featureEnabled: {},
+    } as State
 
     componentDidMount = async () => {
         await this.refreshFeatures()
@@ -39,14 +48,21 @@ class BetaFeaturesScreen extends React.Component<
 
     refreshFeatures = async () => {
         const featureOptions = await featuresBeta.getFeatures()
-        this.setState({ featureOptions })
+        const featureEnabled = {
+            'copy-paster': false,
+            reader: false,
+        }
+        Object.values(featureOptions).forEach(
+            (f) => (featureEnabled[f.id] = f.enabled),
+        )
+        this.setState({ featureOptions, featureEnabled })
+        this.props.currentUser?.authorizedFeatures?.includes('beta') &&
+            this.props.toggleBetaFeatures(featureEnabled['copy-paster'])
     }
 
-    toggleFeature = (feature) => {
-        return () => {
-            featuresBeta.toggleFeature(feature)
-            this.refreshFeatures()
-        }
+    toggleFeature = (feature) => async () => {
+        await featuresBeta.toggleFeature(feature)
+        await this.refreshFeatures()
     }
 
     render() {
@@ -55,108 +71,142 @@ class BetaFeaturesScreen extends React.Component<
                 <section className={settingsStyle.section}>
                     <div className={settingsStyle.titleBox}>
                         <div className={settingsStyle.titleArea}>
-                            <TypographyHeadingBigger>Beta Features</TypographyHeadingBigger>
+                            <TypographyHeadingBigger>
+                                Beta Features
+                            </TypographyHeadingBigger>
 
                             {this.props.currentUser?.authorizedFeatures?.includes(
                                 'beta',
                             ) ? (
                                 <div>
-                                <TypographyText>
-                                    Thanks so much for your support. If you run into
-                                    issues with Beta features,{' '}
-                                    <a href="https://community.worldbrain.io">
-                                        let us know
-                                    </a>
-                                </TypographyText>
+                                    <TypographyText>
+                                        Thanks so much for your support. If you
+                                        run into issues with Beta features,{' '}
+                                        <a href="https://community.worldbrain.io">
+                                            let us know
+                                        </a>
+                                    </TypographyText>
                                 </div>
                             ) : (
                                 <div>
                                     <TypographyText>
-                                        To access beta features, please 
-                                            <TypographyLink
-                                                onClick={this.props.showSubscriptionModal}
-                                            >
-                                                support us with the
-                                                pioneer upgrade.
-                                            </TypographyLink>
+                                        To access beta features, please
+                                        <TypographyLink
+                                            onClick={
+                                                this.props.showSubscriptionModal
+                                            }
+                                        >
+                                            support us with the pioneer upgrade.
+                                        </TypographyLink>
                                     </TypographyText>
-                               </div>
+                                </div>
                             )}
                         </div>
                         <PrimaryButton
-                            onClick={()=>window.open('https://worldbrain.io/feedback/betafeatures')}
+                            onClick={() =>
+                                window.open(
+                                    'https://worldbrain.io/feedback/betafeatures',
+                                )
+                            }
                         >
                             Send Feedback
                         </PrimaryButton>
                     </div>
-                    <div
-                        className={settingsStyle.titleSpace}
-                    >
-                    {/*<TypographyHeadingBig>
+                    <div className={settingsStyle.titleSpace}>
+                        {/*<TypographyHeadingBig>
                             Available Beta Features
                     </TypographyHeadingBig>*/}
                     </div>
-                    {Object.values(this.state.featureOptions)?.map((feature) => (
-                        <div>
-                            {feature.available === true && (
-                                <section className={settingsStyle.listItem}>
-                                    <div
-                                        className={settingsStyle.featureBlock}
-                                        key={`key-beta-${feature.id}`}
-                                    >
-                                        <div className={settingsStyle.featureContent}>
-                                            <TypographyHeadingNormal>
-                                                {feature.name}
-                                            </TypographyHeadingNormal>
-                                            <TypographyText>
-                                                {feature.description}
-                                            </TypographyText>
-                                        </div>
+                    {Object.values(this.state.featureOptions)?.map(
+                        (feature) => (
+                            <div>
+                                {feature.available === true && (
+                                    <section className={settingsStyle.listItem}>
                                         <div
-                                            className={settingsStyle.buttonArea}
+                                            className={
+                                                settingsStyle.featureBlock
+                                            }
+                                            key={`key-beta-${feature.id}`}
                                         >
                                             <div
-                                                className={settingsStyle.readMoreButton}
-                                                onClick={()=>{window.open(feature.link)}}
+                                                className={
+                                                    settingsStyle.featureContent
+                                                }
                                             >
-                                                Read More
+                                                <TypographyHeadingNormal>
+                                                    {feature.name}
+                                                </TypographyHeadingNormal>
+                                                <TypographyText>
+                                                    {feature.description}
+                                                </TypographyText>
                                             </div>
-                                            {this.props.currentUser?.authorizedFeatures?.includes(
-                                                'beta',
-                                            ) ? (
-                                                <ToggleSwitch
-                                                    isChecked={
-                                                        this.state.featureOptions[feature.id]
-                                                    }
-                                                    onChange={this.toggleFeature(feature.id)}
-                                                />
-                                            ) : (
-                                                <ToggleSwitch
-                                                    isChecked={
-                                                        false
-                                                    }
-                                                    onChange={this.props.showSubscriptionModal}
-                                                />
-                                            )}
-                                        </div>
-                                    </div>
-                                </section>)
-                        }
-                        </div>
-                    ))}
-                    <TypographyHeadingBig>
-                        In Development
-                    </TypographyHeadingBig>
-                    {Object.values(this.state.featureOptions)?.map((feature) => (
-                            <div>
-                                {!feature.available && (
-                                    <div>
-                                        <section className={settingsStyle.listItem}>
                                             <div
-                                                className={settingsStyle.featureBlock}
+                                                className={
+                                                    settingsStyle.buttonArea
+                                                }
+                                            >
+                                                <div
+                                                    className={
+                                                        settingsStyle.readMoreButton
+                                                    }
+                                                    onClick={() => {
+                                                        window.open(
+                                                            feature.link,
+                                                        )
+                                                    }}
+                                                >
+                                                    Read More
+                                                </div>
+                                                {this.props.currentUser?.authorizedFeatures?.includes(
+                                                    'beta',
+                                                ) ? (
+                                                    <ToggleSwitch
+                                                        isChecked={
+                                                            this.state
+                                                                .featureEnabled[
+                                                                feature.id
+                                                            ]
+                                                        }
+                                                        onChange={this.toggleFeature(
+                                                            feature.id,
+                                                        )}
+                                                    />
+                                                ) : (
+                                                    <ToggleSwitch
+                                                        isChecked={false}
+                                                        onChange={
+                                                            this.props
+                                                                .showSubscriptionModal
+                                                        }
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                    </section>
+                                )}
+                            </div>
+                        ),
+                    )}
+                    <TypographyHeadingBig>In Development</TypographyHeadingBig>
+                    {Object.values(this.state.featureOptions)?.map(
+                        (feature) => (
+                            <div>
+                                {!feature.available && (
+                                    <div>
+                                        <section
+                                            className={settingsStyle.listItem}
+                                        >
+                                            <div
+                                                className={
+                                                    settingsStyle.featureBlock
+                                                }
                                                 key={`key-beta-${feature.id}`}
                                             >
-                                                <div className={settingsStyle.featureContent}>
+                                                <div
+                                                    className={
+                                                        settingsStyle.featureContent
+                                                    }
+                                                >
                                                     <TypographyHeadingNormal>
                                                         {feature.name}
                                                     </TypographyHeadingNormal>
@@ -165,11 +215,19 @@ class BetaFeaturesScreen extends React.Component<
                                                     </TypographyText>
                                                 </div>
                                                 <div
-                                                    className={settingsStyle.buttonArea}
+                                                    className={
+                                                        settingsStyle.buttonArea
+                                                    }
                                                 >
                                                     <div
-                                                        className={settingsStyle.readMoreButton}
-                                                        onClick={()=>{window.open(feature.link)}}
+                                                        className={
+                                                            settingsStyle.readMoreButton
+                                                        }
+                                                        onClick={() => {
+                                                            window.open(
+                                                                feature.link,
+                                                            )
+                                                        }}
                                                     >
                                                         Read More
                                                     </div>
@@ -177,16 +235,16 @@ class BetaFeaturesScreen extends React.Component<
                                             </div>
                                         </section>
                                     </div>
-                                )
-                                }
+                                )}
                             </div>
-                        )
+                        ),
                     )}
-                </section>    
+                </section>
             </div>
         )
     }
 }
 export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
+    toggleBetaFeatures: (val) => dispatch(resultsActs.setBetaFeatures(val)),
 }))(withCurrentUser(BetaFeaturesScreen))

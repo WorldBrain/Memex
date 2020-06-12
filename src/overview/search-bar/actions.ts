@@ -15,6 +15,7 @@ import {
 import { actions as notifActs } from '../../notifications'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import * as Raven from 'src/util/raven'
+import { auth, featuresBeta } from 'src/util/remote-functions-background'
 
 const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
@@ -173,4 +174,14 @@ export const search: (args?: any) => Thunk = (
 export const init = () => (dispatch) => {
     dispatch(notifActs.updateUnreadNotif())
     dispatch(search({ overwrite: true, fromOverview: false }))
+
+    const getFeatures = async () => {
+        if (
+            (await auth.isAuthorizedForFeature('beta')) &&
+            (await featuresBeta.getFeatureState('copy-paster'))
+        ) {
+            dispatch(resultsActs.setBetaFeatures(true))
+        }
+    }
+    getFeatures()
 }

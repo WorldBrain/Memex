@@ -40,13 +40,16 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                         e.stopPropagation()
                     }}
                 >
-                    <ResultItemActionBtn
-                        imgSrc={copy}
-                        onClick={this.props.onCopyPasterBtnClick}
-                        tooltipText="Copy"
-                        className={styles.copy}
-                        refHandler={this.props.setCopyPasterButtonRef}
-                    />
+                    {this.props.isBetaEnabled && (
+                        <ResultItemActionBtn
+                            imgSrc={copy}
+                            onClick={this.props.onCopyPasterBtnClick}
+                            tooltipText="Copy"
+                            className={styles.copy}
+                            refHandler={this.props.setCopyPasterButtonRef}
+                        />
+                    )}
+
                     <ResultItemActionBtn
                         imgSrc={deleteItem}
                         onClick={this.props.onTrashBtnClick}
