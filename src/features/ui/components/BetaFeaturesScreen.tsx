@@ -49,8 +49,9 @@ class BetaFeaturesScreen extends React.Component<
     refreshFeatures = async () => {
         const featureOptions = await featuresBeta.getFeatures()
         const featureEnabled = {
-            'copy-paster': false,
+            'copy-paster': true,
             reader: false,
+            'pdf-annotations': false,
         }
         Object.values(featureOptions).forEach(
             (f) => (featureEnabled[f.id] = f.enabled),
@@ -113,9 +114,9 @@ class BetaFeaturesScreen extends React.Component<
                         </PrimaryButton>
                     </div>
                     <div className={settingsStyle.titleSpace}>
-                        {/*<TypographyHeadingBig>
+                    <TypographyHeadingBig>
                             Available Beta Features
-                    </TypographyHeadingBig>*/}
+                    </TypographyHeadingBig>
                     </div>
                     {Object.values(this.state.featureOptions)?.map(
                         (feature) => (

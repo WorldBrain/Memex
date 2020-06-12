@@ -77,7 +77,10 @@ class TextInputControlled extends React.Component<
     // -- Methods primarily to do with keeping the selection state in sync --
     componentDidMount() {
         this.registerEventListeners()
-        this.textElement.focus()
+
+        setTimeout(() => {
+            this.textElement.focus()
+        }, 100)
 
         this.updateTextElement({
             text: this.props.defaultValue,

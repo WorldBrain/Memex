@@ -1,4 +1,4 @@
-export type UserBetaFeatureId = 'reader' | 'copy-paster'
+export type UserBetaFeatureId = 'reader' | 'copy-paster' | 'pdf-annotations'
 
 export interface UserBetaFeature {
     id: UserBetaFeatureId
@@ -26,6 +26,15 @@ const allFeatures: UserBetaFeature[] = [
         link: 'https://worldbrain.io/projects/copy-paster',
         enabled: false,
         available: true,
+    },
+    {
+        id: 'pdf-annotations',
+        name: 'PDF Annotations',
+        description:
+            'Annotate PDFs via the Memex extension (no phone support yet)',
+        link: 'https://worldbrain.io/projects/pdfannotations',
+        enabled: false,
+        available: false,
     },
 ]
 
