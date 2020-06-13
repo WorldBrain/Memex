@@ -25,13 +25,13 @@ export const InitialComponent = ({
         </div>
 
         <div className={styles.button} onClick={createAnnotation}>
-            <ButtonTooltip tooltipText="Annotate (A)" position="bottom">
+            <ButtonTooltip tooltipText="Annotate" position="bottom">
                 <img src={annotations} className={styles.buttonImg} />
             </ButtonTooltip>
         </div>
         {createLink && (
             <ButtonTooltip
-                tooltipText="Create Link to Highlight (L)"
+                tooltipText="Create Link to Highlight"
                 position="bottom"
             >
                 <div className={styles.button} onClick={createLink}>
@@ -48,7 +48,7 @@ export const InitialComponent = ({
             })}
         >
             <ButtonTooltip
-                tooltipText="Close. Disable in Toolbar (R)"
+                tooltipText="Close. Disable in Toolbar"
                 position="bottom"
             >
                 <img src={close} className={styles.buttonImg} />
