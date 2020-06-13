@@ -16,13 +16,13 @@ import EntryRow, {
     IconStyleWrapper,
     ActOnAllTabsButton,
 } from 'src/common-ui/GenericPicker/components/EntryRow'
-import { EntrySelectedList } from 'src/common-ui/GenericPicker/components/EntrySelectedList'
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { TagResultItem } from './components/TagResultItem'
 import { ActiveTag } from './components/ActiveTag'
+import { EntrySelectedTag } from './components/EntrySelectedTag'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 
 class TagPicker extends StatefulUIElement<
@@ -146,8 +146,7 @@ class TagPicker extends StatefulUIElement<
                     value={this.state.query}
                     loading={this.state.loadingQueryResults}
                     before={
-                        <EntrySelectedList
-                            ActiveEntry={ActiveTag}
+                        <EntrySelectedTag
                             dataAttributeName="tag-name"
                             entriesSelected={this.state.selectedEntries}
                             onPress={this.handleSelectedTagPress}
