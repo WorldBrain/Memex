@@ -11,7 +11,7 @@ import {
     PlanBox,
 } from 'src/authentication/components/Subscription/pricing.style'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
-import { SubscriptionInnerOptions } from 'src/authentication/components/Subscription/SubscriptionInnerOptions'
+import SubscriptionInnerOptions from 'src/authentication/components/Subscription/SubscriptionInnerOptions'
 import {
     CenterText,
     WhiteSpacer10,
@@ -90,6 +90,7 @@ class SubscriptionOptionsChargebee extends React.Component<
             loadingYearly: true,
         })
 
+        this.props.onSubscriptionClicked?.()
         const checkoutExternalUrl = await subscription.getCheckoutLink({
             planId: 'pro-yearly',
             ...options,
@@ -170,46 +171,26 @@ class SubscriptionOptionsChargebee extends React.Component<
     }
 
     render() {
+
+        console.log(this.props.plans)
+
         return (
             <div className={''}>
                 <div>
-                    {(this.props.plans?.length ?? 0) > 0 ? (
-                        <PlanBox>
-                            <PlanTitle>Your plan: </PlanTitle>
-                            <PlanName>{this.props.plans}</PlanName>
-                        </PlanBox>
-                    ) : (
-                        <>
-                            <SubscriptionInnerOptions
-                                openCheckoutBackupMonthly={
-                                    this.openCheckoutMonthly
-                                }
-                                openCheckoutBackupYearly={
-                                    this.openCheckoutYearly
-                                }
-                                openPortal={this.openPortal}
-                                plans={this.props.plans}
-                                loadingMonthly={this.state.loadingMonthly}
-                                loadingYearly={this.state.loadingYearly}
-                            />
-                            <WhiteSpacer10 />
-                        </>
-                    )}
-                    <CenterText>
-                        {this.state.subscribed && (
-                            <div>
-                                {this.state.loadingPortal ? (
-                                    <PrimaryButton onClick={() => null}>
-                                        <LoadingIndicator />
-                                    </PrimaryButton>
-                                ) : (
-                                    <PrimaryButton onClick={this.openPortal}>
-                                        {'Edit Subscriptions'}
-                                    </PrimaryButton>
-                                )}
-                            </div>
-                        )}
-                    </CenterText>
+                        <SubscriptionInnerOptions
+                            openCheckoutBackupMonthly={
+                                this.openCheckoutMonthly
+                            }
+                            openCheckoutBackupYearly={
+                                this.openCheckoutYearly
+                            }
+                            openPortal={this.openPortal}
+                            plans={this.props.plans}
+                            loadingMonthly={this.state.loadingMonthly}
+                            loadingYearly={this.state.loadingYearly}
+                            loadingPortal={this.state.loadingPortal}
+                        />
+                        <WhiteSpacer10 />
                 </div>
             </div>
         )

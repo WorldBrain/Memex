@@ -7,6 +7,7 @@ import {
     COLLECTION_NAMES,
 } from '@worldbrain/memex-storage/lib/tags/constants'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 
 export default class TagStorage extends StorageModule {
     static TAGS_COLL = COLLECTION_NAMES.tag
@@ -43,6 +44,10 @@ export default class TagStorage extends StorageModule {
     }
 
     async addTag({ name, url }: { name: string; url: string }) {
+        if (!VALID_TAG_PATTERN.test(name)) {
+            throw new Error(`Attempted to create a badly shaped tag: ${name}`)
+        }
+
         url = normalizeUrl(url, {})
         return this.operation('createTag', { name, url })
     }

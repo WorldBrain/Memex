@@ -300,7 +300,8 @@ function extensionSyncTests(suiteOptions: {
 
         await customLists(devices[1]).updateList({
             id: listId,
-            name: 'Updated List Title',
+            newName: 'Updated List Title',
+            oldName: 'My list',
         })
 
         await syncModule(devices[1]).remoteFunctions.forceIncrementalSync()
@@ -324,7 +325,8 @@ function extensionSyncTests(suiteOptions: {
 
         await customLists(devices[0]).updateList({
             id: listId,
-            name: 'Another Updated List Title',
+            newName: 'Another Updated List Title',
+            oldName: 'Updated List Title',
         })
 
         await syncModule(devices[0]).remoteFunctions.forceIncrementalSync()

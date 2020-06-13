@@ -16,7 +16,7 @@ export const fontSizeBiggerTitle = 22
 export const TypographyBigTitle = styled.span`
     font-size: ${fontSizeTitle}px;
 
-    @media (max-width: 767px) {
+    @media (max-width: 1300px) {
         font-size: ${fontSizeBigger}px;
     }
 `
@@ -57,13 +57,14 @@ export const TypographyHeadingSmall = styled.span`
 
 export const TypographyLink = styled.span`
     text-decoration: none;
+    font-size: 1em;
     margin: 5px;
     color: ${colorPrimary};
     cursor: pointer;
 `
 
 export const TypographyHeadingPage = styled.span`
-    font-size: ${fontSizeBigger}px;
+    font-size: ${fontSizeBig}px;
     font-weight: 600;
     font-family: Poppins;
     font-style: normal;
@@ -71,7 +72,7 @@ export const TypographyHeadingPage = styled.span`
     text-align: left;
     color: ${colorText};
 
-    @media (max-width: 767px) {
+    @media (max-width: 1300px) {
         font-size: ${fontSizeNormal}px;
     }
 `
@@ -85,13 +86,13 @@ export const TypographySubHeading = styled.span`
     text-align: left;
     color: ${colorText};
 
-    @media (max-width: 767px) {
+    @media (max-width: 1300px) {
         font-size: ${fontSizeSmall}px;
     }
 `
 
 export const TypographyTextNormal = styled.span`
-    font-size: ${fontSizeSmall}px;
+    font-size: ${fontSizeNormal}px;
     font-weight: 400;
     font-family: Poppins;
     font-style: normal;
@@ -99,12 +100,12 @@ export const TypographyTextNormal = styled.span`
     text-align: left;
     color: ${colorText};
 
-    @media (max-width: 767px) {
-        font-size: ${fontSizeSmallest}px;
+    @media (max-width: 1300px) {
+        font-size: ${fontSizeSmall}px;
     }
 `
 
-export const TypographyText = styled.span`
+export const TypographyTextSmall = styled.span`
     font-size: ${fontSizeSmall}px;
     font-weight: 400;
     font-family: Poppins;
@@ -112,6 +113,10 @@ export const TypographyText = styled.span`
     line-height: 1.4;
     text-align: left;
     color: ${colorText};
+
+    @media (max-width: 1300px) {
+        font-size: ${fontSizeSmallest}px;
+    }
 `
 
 export const TypographyInputTitle = styled.h2`
@@ -138,6 +143,7 @@ export const TypographyActionText = styled.span`
     font-family: Poppins;
     font-style: normal;
     font-weight: 600;
+    font-size: 1em;
 `
 
 export const TypographyBody = styled.span`

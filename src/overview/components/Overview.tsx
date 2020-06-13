@@ -27,7 +27,11 @@ import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { SearchInterface } from 'src/search/background/types'
+import { auth, featuresBeta } from 'src/util/remote-functions-background'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 
+const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
 
 export interface Props {
@@ -115,6 +119,7 @@ class Overview extends PureComponent<Props> {
     }
 
     renderOverview() {
+        console.log(auth.isAuthorizedForFeature('beta'))
         return (
             <div>
                 <Head />
@@ -128,6 +133,7 @@ class Overview extends PureComponent<Props> {
                 />
                 <DeleteConfirmModal message="Delete page and related notes" />
                 <DragElement />
+               
 
                 {/* <div className={styles.productHuntContainer}>
                     <a
@@ -162,7 +168,21 @@ class Overview extends PureComponent<Props> {
                     searchResultLimit={10}
                 />
                 <Tooltip />
-                <HelpBtn />
+                <div className={styles.rightCorner} >
+                    {auth.isAuthorizedForFeature('beta') && (
+                            <div 
+                                 onClick={()=>{window.open('#/features')}}
+                                 className={styles.pioneerBadge}>
+                                 <ButtonTooltip
+                                    tooltipText="Thank you for supporting this journey 🙏"
+                                    position="top"
+                                >
+                                👨🏾‍🚀Pioneer Edition
+                                </ButtonTooltip>
+                            </div>
+                    )}
+                    <HelpBtn />
+                </div>
             </div>
         )
     }
@@ -182,6 +202,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
     init: () => {
+        featuresBeta.getFeatureState('copy-paster')
         return dispatch(searchBarActs.init())
     },
     setShowOnboardingMessage: () =>

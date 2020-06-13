@@ -1,11 +1,11 @@
 import React, { ChangeEvent } from 'react'
 import styled from 'styled-components'
 import { X as XIcon } from '@styled-icons/feather'
+import { ActiveList } from 'src/custom-lists/ui/CollectionPicker/components/ActiveList'
 
 interface Props {
     dataAttributeName: string
     entriesSelected: string[]
-    ActiveEntry: typeof React.Component
     onPress: (entry: string) => void
 }
 
@@ -18,10 +18,6 @@ export class EntrySelectedList extends React.PureComponent<Props> {
         this.props.onPress(event.target.getAttribute(this.dataAttribute))
 
     render() {
-        const StyledActiveEntry = createStyledActiveEntry(
-            this.props.ActiveEntry,
-        )
-
         return (
             <React.Fragment>
                 {this.props.entriesSelected?.map((entry) => (
@@ -39,9 +35,7 @@ export class EntrySelectedList extends React.PureComponent<Props> {
     }
 }
 
-const createStyledActiveEntry = (ActiveEntry: typeof React.Component) => styled(
-    ActiveEntry,
-)`
+const StyledActiveEntry = styled(ActiveList)`
     display: inline-flex;
     cursor: pointer;
 `

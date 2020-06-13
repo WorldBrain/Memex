@@ -9,7 +9,7 @@ export const getDefaultState = () =>
         isTooltipEnabled: TOOLTIP_DEFAULT_OPTION,
         isSidebarEnabled: true,
         isTrackingEnabled: true,
-        areShortcutsEnabled: true,
+        areShortcutsEnabled: false,
         areStubsEnabled: true,
         areVisitsEnabled: true,
         areBookmarksEnabled: true,

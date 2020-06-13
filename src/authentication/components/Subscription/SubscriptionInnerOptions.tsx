@@ -7,6 +7,7 @@ import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import {
     SubscriptionOptionsContainer,
     PricingGrid,
+    PricingGridCheck,
     PricingGridPlanSpacer,
     PricingGridPlanTitle,
     PricingGridFeatureDescription,
@@ -20,11 +21,15 @@ import {
     TimeButtonRight,
     TimeButtonLeft,
     TimeButtonBox,
+    LinkSpan,
 } from 'src/authentication/components/Subscription/pricing.style'
 import { TypographyBodyBold } from 'src/common-ui/components/design-library/typography'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { AuthContextInterface } from 'src/authentication/background/types'
 
-interface Props {
+
+interface Props extends AuthContextInterface {
     openCheckoutBackupMonthly?: (
         options?: Omit<SubscriptionCheckoutOptions, 'planId'>,
     ) => void
@@ -35,17 +40,33 @@ interface Props {
     plans?: UserPlan[]
     loadingMonthly: boolean
     loadingYearly: boolean
-}
+    loadingPortal: boolean
+} 
 type Term = 'monthly' | 'annual'
 interface State {
     pioneerDonationAmount: number
     term: Term
+    plan: string
 }
 
 export class SubscriptionInnerOptions extends React.Component<Props, State> {
     state = {
         pioneerDonationAmount: 5,
         term: 'monthly' as Term,
+        plan: null,
+    }
+
+    async componentDidMount() {
+        if (await this.props.currentUser?.authorizedPlans?.includes('pro-yearly')) {
+            this.setState({ term: 'annual', pioneerDonationAmount: 50 })
+        }
+
+        if (await this.props.currentUser?.authorizedFeatures?.includes('beta')) {
+            this.setState({ plan: 'beta'})
+        } else if (await this.props.currentUser?.authorizedPlans?.includes('pro-monthly') || await this.props.currentUser?.authorizedPlans?.includes('pro-yearly')) {
+            this.setState({ plan: 'pro'})
+        } 
+
     }
 
     openCheckoutPioneer = () => {
@@ -86,7 +107,8 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
 
     render() {
 
-        console.log(this.props.loadingYearly)
+       console.log(this.state.plan === 'pro')
+       console.log(this.state.plan === 'beta')
 
         return (
             <SubscriptionOptionsContainer>
@@ -97,9 +119,15 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                 <PricingGrid>
                     <PricingGridPlanSpacer />
                     <PricingGridPlanTitle> Explorer </PricingGridPlanTitle>
-                    <PricingGridPlanTitle> Thinker </PricingGridPlanTitle>
-                    <PricingGridPlanTitle> Pioneer </PricingGridPlanTitle>
-                    <Line />
+
+                    {(this.props.currentUser?.authorizedPlans?.includes('pro-monthly')) || (this.props.currentUser?.authorizedPlans?.includes('pro-yearly')) ? 
+                        (<PricingGridPlanTitle active={this.state.plan === 'pro'}> Thinker </PricingGridPlanTitle>) : 
+                        (<PricingGridPlanTitle > Thinker </PricingGridPlanTitle>)
+                    }
+                    {this.props.currentUser?.authorizedFeatures?.includes('beta') ? 
+                        (<PricingGridPlanTitle active={this.state.plan === 'beta'}> Pioneer </PricingGridPlanTitle>) :
+                        (<PricingGridPlanTitle> Pioneer </PricingGridPlanTitle>)
+                    }
 
                     <PricingGridFeatureDescription>
                         Search, Organise and Annotate
@@ -110,11 +138,11 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     </ColExplorer>
                     <ColThinker>
                         {' '}
-                        <PricingGridCheck />{' '}
+                        <PricingGridCheck active={this.state.plan === 'pro'} />{' '}
                     </ColThinker>
                     <ColPioneer>
                         {' '}
-                        <PricingGridCheck />{' '}
+                        <PricingGridCheck active={this.state.plan === 'beta'}/>{' '}
                     </ColPioneer>
                     <Line />
 
@@ -127,11 +155,11 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     </ColExplorer>
                     <ColThinker>
                         {' '}
-                        <PricingGridCheck />{' '}
+                        <PricingGridCheck active={this.state.plan === 'pro'} />{' '}
                     </ColThinker>
                     <ColPioneer>
                         {' '}
-                        <PricingGridCheck />{' '}
+                        <PricingGridCheck active={this.state.plan === 'beta'}/>{' '}
                     </ColPioneer>
                     <Line />
 
@@ -140,11 +168,24 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     </PricingGridFeatureDescription>
                     <ColThinker>
                         {' '}
-                        <PricingGridCheck />{' '}
+                        <PricingGridCheck active={this.state.plan === 'pro'} />{' '}
                     </ColThinker>
                     <ColPioneer>
                         {' '}
-                        <PricingGridCheck />{' '}
+                        <PricingGridCheck active={this.state.plan === 'beta'}/>{' '}
+                    </ColPioneer>
+                    <Line />
+
+                    <PricingGridFeatureDescription>
+                        Automatic backup to your favorite cloud
+                    </PricingGridFeatureDescription>
+                    <ColThinker>
+                        {' '}
+                        <PricingGridCheck active={this.state.plan === 'pro'} />{' '}
+                    </ColThinker>
+                    <ColPioneer>
+                        {' '}
+                        <PricingGridCheck active={this.state.plan === 'beta'}/>{' '}
                     </ColPioneer>
                     <Line />
 
@@ -154,18 +195,19 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
 
                     <ColPioneer>
                         {' '}
-                        <PricingGridCheck />{' '}
+                        <PricingGridCheck active={this.state.plan === 'beta'}/>{' '}
                     </ColPioneer>
                     <Line />
 
-                    <PricingGridFeatureDescription>
-                        Support the development of an ethical business
+                    <PricingGridFeatureDescription
+                        onClick={()=>(window.open("https://worldbrain.io/vision"))}
+                    >
+                        Support the development of an ethical business. <LinkSpan>Learn more</LinkSpan>
                     </PricingGridFeatureDescription>
                     <ColPioneer>
                         {' '}
-                        <PricingGridCheck />{' '}
+                        <PricingGridCheck active={this.state.plan === 'beta'}/>{' '}
                     </ColPioneer>
-                    <Line />
 
                     <ColExplorer>
                         <PriceText> Free</PriceText>
@@ -213,31 +255,64 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     </ColPioneer>
 
                     <ColThinker>
-                        {(this.props.loadingMonthly || this.props.loadingYearly) ? (
-                                <PrimaryButton onClick={this.openCheckout}>
+                        {(this.props.loadingMonthly || this.props.loadingYearly || this.props.loadingPortal) ? (
+                                <PrimaryButton onClick={null}>
                                     <LoadingIndicator/>
                                 </PrimaryButton>
                             ):(
-                                <PrimaryButton onClick={this.openCheckout}>
-                                    Upgrade
-                                </PrimaryButton>
-                            )}
+                            <div>
+                                {this.state.plan !== 'pro' ? (
+                                    <PrimaryButton onClick={this.openCheckout}>
+                                        Upgrade
+                                    </PrimaryButton>
+                                    ):(
+                                        <div>
+                                            {this.state.term === 'annual' &&  this.props.currentUser?.authorizedPlans?.includes('pro-monthly') ? (
+                                                    <PrimaryButton onClick={this.openCheckout}>
+                                                        Upgrade
+                                                    </PrimaryButton>
+                                                ):(
+                                                    <PrimaryButton onClick={this.props.openPortal}>
+                                                        Edit
+                                                    </PrimaryButton>
+                                            )}
+                                        </div>
+                                    )}
+                            </div>
+                        )}
                     </ColThinker>
-
                     <ColPioneer>
-                        {(this.props.loadingMonthly || this.props.loadingYearly) ? (
-                                <PrimaryButton onClick={this.openCheckoutPioneer}>
+                        {(this.props.loadingMonthly || this.props.loadingYearly || this.props.loadingPortal) ? (
+                                <PrimaryButton onClick={null}>
                                     <LoadingIndicator/>
                                 </PrimaryButton>
                             ):(
-                                <PrimaryButton onClick={this.openCheckoutPioneer}>
-                                    Upgrade
-                                </PrimaryButton>
-                            )}
+                             <div>
+                                {this.state.plan !== 'beta' ? (
+                                    <PrimaryButton onClick={this.openCheckoutPioneer}>
+                                        Upgrade
+                                    </PrimaryButton>
+                                    ):(
+                                        <div>
+                                            {this.state.term === 'annual' && this.props.currentUser?.authorizedPlans?.includes('pro-monthly') ? (
+                                                    <PrimaryButton onClick={this.openCheckoutPioneer}>
+                                                        Upgrade
+                                                    </PrimaryButton>
+                                                ):(
+                                                    <PrimaryButton onClick={this.props.openPortal}>
+                                                        Edit
+                                                    </PrimaryButton>
+                                            )}
+                                        </div>
+                                    )}
+                            </div>
+                        )}
                     </ColPioneer>
                 </PricingGrid>
             </SubscriptionOptionsContainer>
         )
     }
 }
-const PricingGridCheck = () => <TypographyBodyBold>✓</TypographyBodyBold>
+
+export default withCurrentUser(SubscriptionInnerOptions)
+

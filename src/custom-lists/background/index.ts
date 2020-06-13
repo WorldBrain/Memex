@@ -168,6 +168,7 @@ export default class CustomListBackground {
     async _updateListSuggestionsCache(args: {
         added?: string
         removed?: string
+        updated?: [string, string]
     }) {
         return updateSuggestionsCache({
             ...args,
@@ -196,10 +197,20 @@ export default class CustomListBackground {
         return inserted
     }
 
-    async updateList({ id, name }: { id: number; name: string }) {
+    async updateList({
+        id,
+        oldName,
+        newName,
+    }: {
+        id: number
+        oldName: string
+        newName: string
+    }) {
+        await this._updateListSuggestionsCache({ updated: [oldName, newName] })
+
         return this.storage.updateListName({
             id,
-            name,
+            name: newName,
         })
     }
 

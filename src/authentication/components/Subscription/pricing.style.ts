@@ -14,6 +14,7 @@ import {
     TypographySubHeading,
     TypographyHeadingPage,
     TypographyBigTitle,
+    TypographyTextSmall,
 } from 'src/common-ui/components/design-library/typography'
 
 
@@ -41,7 +42,7 @@ const PricingTable = styled.div`
         cursor: pointer;
     }
 
-    @media (max-width: 767px) {
+    @media (max-width: 1300px) {
         padding: 10px 13px;
         width: 100%;
         min-height: 0;
@@ -315,13 +316,13 @@ const PlanName = styled.div`
 
 const PricingGrid = styled.div`
     display: grid;
-    grid-template-columns: 46% 18% 18% 18%;
+    grid-template-columns: 50% 16% 16% 16%;
     //grid-gap: 10px;
     background-color: #fff;
     margin-top: 20px;
     width: 100%;
 
-    @media (max-width: 767px) {
+    @media (max-width: 1300px) {
         grid-template-columns: 40% 20% 20% 20%;
     }
 `
@@ -340,6 +341,7 @@ const PricingGridPlanTitle = styled(TypographyHeadingPage)`
     display: flex;
     justify-content: center;
     align-items: center;
+    color: ${(props)=>props.active ? '#5cd9a6':'#3a2f45'};
 `
 
 const PricingGridFeatureTitle = styled(TypographyBodyBold)`
@@ -349,28 +351,44 @@ const PricingGridFeatureTitle = styled(TypographyBodyBold)`
 const PricingGridFeatureDescription = styled(TypographyTextNormal)`
     grid-column: 1;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     padding-left: 20px;
+    flex-direction: column;
+    justify-content: center;
 
-    @media (max-width: 767px) {
+    @media (max-width: 1300px) {
         padding: 0px;
     }
 `
 
-// const PricingGridCheck = styled.div`
-//     padding:5px;
-//     height: 20px;
-//     width: 20px;
-//     background-image: url('/img/check.svg');
-//     fill: #2f2f2f;
-//     color: #2f2f2f;
-// `
+const PricingGridCheck = styled.div`
+    padding: 25px 5px;
+    height: 20px;
+    width: 20px;
+    mask-size: 15px;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-image: url('/img/check.svg');
+    background-color: ${(props)=>props.active ? '#5cd9a6':'#3a2f45'};
+    color: #2f2f2f;
+
+    @media (max-width: 700px) {
+        padding: 10px 5px;
+        mask-size: 12px;
+    }
+
+`
 
 const PricingGridButton = styled(PricingButton)``
-const Line = styled.hr`
+const Line = styled.div`
     grid-column: span 5 / 5;
     width: 100%;
-    border-top: 1px #e0e0e0;
+    border-top: 1px solid #e0e0e0;
+`
+
+const LinkSpan = styled.a`
+    font-weight: 600;
+    cursor: pointer;
 `
 
 const ColExplorer = styled.div`
@@ -386,6 +404,7 @@ const ColThinker = styled.div`
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    background-color: ${(props)=>props.active ? '#E0E0E0':'white'}
 `
 
 const ColPioneer = styled.div`
@@ -425,6 +444,7 @@ export {
     ColPioneer,
     Line,
     PricingGrid,
+    PricingGridCheck,
     PricingGridPlanTitle,
     PricingGridFeatureTitle,
     PricingGridFeatureDescription,
@@ -451,5 +471,6 @@ export {
     TimeButtonLeft,
     TimeButtonRight,
     TimeButtonBox,
+    LinkSpan,
 }
 export default PricingTable

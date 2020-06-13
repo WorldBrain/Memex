@@ -44,8 +44,9 @@ const menuStyles = (env, isOpen): Partial<Styles> => {
     if (env === 'overview') {
         ;(baseStyles.bmMenu as any).position = 'relative'
         ;(baseStyles.bmMenu as any).top = '55px'
-        ;(baseStyles.bmMenu as any).right = '30px'
+        ;(baseStyles.bmMenu as any).right = '0px'
         ;(baseStyles.bmMenuWrap.top as string) = '0px'
+        ;(baseStyles.bmMenuWrap.right as string) = '0px'
         ;(baseStyles.bmMenuWrap.zIndex as string) = '999'
     }
 

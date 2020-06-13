@@ -130,7 +130,7 @@ export default class StatusOverlay extends PureComponent<Props> {
                         </div>
                         <WhiteSpacer20 />
                         <div className={styles.backupSection}>
-                            <div className={settingsStyle.buttonArea}>
+                            <div className={settingsStyle.buttonAreaSyncOverlay}>
                                 <div className={settingsStyle.sectionTitle}>
                                     {header && <span>{header}</span>}
                                 </div>

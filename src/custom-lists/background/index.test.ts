@@ -232,7 +232,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) =>
                                 customLists(setup).updateList({
                                     id: listId,
-                                    name: TEST_LIST_2,
+                                    oldName: TEST_LIST_1,
+                                    newName: TEST_LIST_2,
                                 }),
                             expectedStorageChanges: {
                                 customLists: (): StorageCollectionDiff => ({

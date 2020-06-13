@@ -1,4 +1,4 @@
-export type UserBetaFeatureId = 'reader' | 'copy-paster'
+export type UserBetaFeatureId = 'reader' | 'copy-paster' | 'pdf-annotations'
 
 export interface UserBetaFeature {
     id: UserBetaFeatureId
@@ -12,7 +12,8 @@ const allFeatures: UserBetaFeature[] = [
     {
         id: 'reader',
         name: 'Offline-first Reader & Mobile Annotations',
-        description: 'Have local & clean-view copies of websites you read. Create annotations on your mobile phone',
+        description:
+            'Have local & clean-view copies of websites you read. Create annotations on your mobile phone',
         link: 'https://worldbrain.io/projects/reader',
         enabled: false,
         available: false,
@@ -20,8 +21,18 @@ const allFeatures: UserBetaFeature[] = [
     {
         id: 'copy-paster',
         name: 'Copy/Paste templates',
-        description: 'Create custom templates to copy pages and annotations into your own workflow',
+        description:
+            'Create custom templates to copy pages and annotations into your own workflow',
         link: 'https://worldbrain.io/projects/copy-paster',
+        enabled: false,
+        available: true,
+    },
+    {
+        id: 'pdf-annotations',
+        name: 'PDF Annotations',
+        description:
+            'Annotate PDFs via the Memex extension (no phone support yet)',
+        link: 'https://worldbrain.io/projects/pdfannotations',
         enabled: false,
         available: false,
     },
@@ -32,7 +43,7 @@ export type UserBetaFeatureMap = {
 }
 export interface FeaturesBetaInterface {
     getFeatures(): Promise<UserBetaFeature[]>
-    toggleFeature(feature: UserBetaFeatureId): void
+    toggleFeature(feature: UserBetaFeatureId): Promise<void>
     getFeatureState(feature: UserBetaFeatureId): Promise<boolean>
 }
 

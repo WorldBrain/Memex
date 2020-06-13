@@ -38,6 +38,7 @@ interface StateProps {
     annotationModes: {
         [annotationUrl: string]: AnnotationMode
     }
+    isBetaEnabled: boolean
 }
 
 interface DispatchProps {
@@ -226,6 +227,7 @@ export default class ResultListContainer extends Component<
                     queryTagSuggestions: this.props.queryTagSuggestions,
                 }}
                 pageDeleteProps={this.props.pageDeleteProps}
+                isBetaEnabled={this.props.isBetaEnabled}
             />
         )
     }

@@ -24,7 +24,7 @@
     border-right: none; */
     transform: translate(0, -20px);
     transition: all 0.1s ease-in-out;
-    width: 5px;
+    width: 8px;
     height: 40vh;
 
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
@@ -59,12 +59,12 @@
 .innerRibbon {
     position: absolute;
     right: 10px;
-    top: 35px;
+    top: 50px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 5px 0;
-    display: flex;
+    display: none;
     width: 30px;
 }
 
@@ -72,6 +72,7 @@
     border-radius: 20px;
     box-shadow: -1px 1px 7px 2px #13131321;
     background: white;
+    display: flex;
 }
 
 .innerRibbonSidebarOpen {
@@ -81,9 +82,10 @@
     top: 0px;
     justify-content: flex-start;
     padding-right: 16px;
-    padding-top: 40px;
+    padding-top: 55px;
     width: 20px;
     align-items: flex-end;
+    display: flex;
 }
 
 /* SECTIONS */
@@ -294,14 +296,17 @@
 
 .toggler,
 .cancel {
-    background-repeat: no-repeat;
+    mask-repeat: no-repeat;
     display: inline-block;
     cursor: pointer;
 }
 
 .cancel {
-    background-image: url('/img/close.svg');
-    background-size: 14px;
+    composes: removeIcon from 'src/common-ui/icons.css';
+    mask-size: 14px;
+    background-color: #3a2f45;
+    display: flex;
+    justify-content: center;
 }
 
 .extraButtonsPanel {
