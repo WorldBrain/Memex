@@ -80,7 +80,7 @@ class TextInputControlled extends React.Component<
 
         setTimeout(() => {
             this.textElement.focus()
-        }, 100)
+        }, 200)
 
         this.updateTextElement({
             text: this.props.defaultValue,

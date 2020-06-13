@@ -16,7 +16,7 @@ export const fontSizeBiggerTitle = 22
 export const TypographyBigTitle = styled.span`
     font-size: ${fontSizeTitle}px;
 
-    @media (max-width: 767px) {
+    @media (max-width: 1300px) {
         font-size: ${fontSizeBigger}px;
     }
 `
@@ -72,7 +72,7 @@ export const TypographyHeadingPage = styled.span`
     text-align: left;
     color: ${colorText};
 
-    @media (max-width: 767px) {
+    @media (max-width: 1300px) {
         font-size: ${fontSizeNormal}px;
     }
 `
@@ -86,7 +86,7 @@ export const TypographySubHeading = styled.span`
     text-align: left;
     color: ${colorText};
 
-    @media (max-width: 767px) {
+    @media (max-width: 1300px) {
         font-size: ${fontSizeSmall}px;
     }
 `
@@ -100,7 +100,7 @@ export const TypographyTextNormal = styled.span`
     text-align: left;
     color: ${colorText};
 
-    @media (max-width: 767px) {
+    @media (max-width: 1300px) {
         font-size: ${fontSizeSmall}px;
     }
 `
@@ -114,7 +114,7 @@ export const TypographyTextSmall = styled.span`
     text-align: left;
     color: ${colorText};
 
-    @media (max-width: 767px) {
+    @media (max-width: 1300px) {
         font-size: ${fontSizeSmallest}px;
     }
 `

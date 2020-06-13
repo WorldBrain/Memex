@@ -21,6 +21,7 @@ import {
     TimeButtonRight,
     TimeButtonLeft,
     TimeButtonBox,
+    LinkSpan,
 } from 'src/authentication/components/Subscription/pricing.style'
 import { TypographyBodyBold } from 'src/common-ui/components/design-library/typography'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
@@ -176,6 +177,19 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     <Line />
 
                     <PricingGridFeatureDescription>
+                        Automatic backup to your favorite cloud
+                    </PricingGridFeatureDescription>
+                    <ColThinker>
+                        {' '}
+                        <PricingGridCheck active={this.state.plan === 'pro'} />{' '}
+                    </ColThinker>
+                    <ColPioneer>
+                        {' '}
+                        <PricingGridCheck active={this.state.plan === 'beta'}/>{' '}
+                    </ColPioneer>
+                    <Line />
+
+                    <PricingGridFeatureDescription>
                         Early access to beta features
                     </PricingGridFeatureDescription>
 
@@ -185,8 +199,10 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     </ColPioneer>
                     <Line />
 
-                    <PricingGridFeatureDescription>
-                        Support the development of an ethical business. <a href="https://worldbrain.io/vision">Learn more</a>
+                    <PricingGridFeatureDescription
+                        onClick={()=>(window.open("https://worldbrain.io/vision"))}
+                    >
+                        Support the development of an ethical business. <LinkSpan>Learn more</LinkSpan>
                     </PricingGridFeatureDescription>
                     <ColPioneer>
                         {' '}

@@ -84,9 +84,9 @@ class BetaFeaturesScreen extends React.Component<
                                     <TypographyTextNormal>
                                         Thanks so much for your support. Without you this would not be possible! <br/>
                                         If you run into issues with Beta features,{' '}
-                                        <a href="https://community.worldbrain.io">
+                                        <a href="http://worldbrain.io/feedback/betafeatures">
                                             let us know
-                                        </a>
+                                        </a>.
                                     </TypographyTextNormal>
                                 </div>
                             ) : (
