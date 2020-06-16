@@ -11,27 +11,33 @@ import {
     DOWNLOAD_STATUS as DL_STAT,
 } from './constants'
 
-export const imports = state => state.imports
+export const imports = (state) => state.imports
 
-export const importStatus = createSelector(imports, state => state.importStatus)
-export const downloadData = createSelector(imports, state => state.downloadData)
+export const importStatus = createSelector(
+    imports,
+    (state) => state.importStatus,
+)
+export const downloadData = createSelector(
+    imports,
+    (state) => state.downloadData,
+)
 export const downloadDataFilter = createSelector(
     imports,
-    state => state.downloadDataFilter,
+    (state) => state.downloadDataFilter,
 )
-export const fail = createSelector(imports, state => state.fail)
-export const success = createSelector(imports, state => state.success)
-export const totals = createSelector(imports, state => state.totals)
-const completed = createSelector(imports, state => state.completed)
-export const allowTypes = createSelector(imports, state => state.allowTypes)
-export const loadingMsg = createSelector(imports, state => state.loadingMsg)
+export const fail = createSelector(imports, (state) => state.fail)
+export const success = createSelector(imports, (state) => state.success)
+export const totals = createSelector(imports, (state) => state.totals)
+const completed = createSelector(imports, (state) => state.completed)
+export const allowTypes = createSelector(imports, (state) => state.allowTypes)
+export const loadingMsg = createSelector(imports, (state) => state.loadingMsg)
 
-export const blobUrl = createSelector(imports, state => state.blobUrl)
+export const blobUrl = createSelector(imports, (state) => state.blobUrl)
 
 /**
  * Currently only used for analytics; derive the import type from `allowTypes` state
  */
-export const allowTypesString = createSelector(allowTypes, state => {
+export const allowTypesString = createSelector(allowTypes, (state) => {
     const val = []
 
     for (const type in state) {
@@ -43,27 +49,25 @@ export const allowTypesString = createSelector(allowTypes, state => {
     return val.join('+')
 })
 
-// TODO: Mocked out for now due to UI performance issues with show details views
-export const showDownloadDetails = () => false
-// export const showDownloadDetails = createSelector(
-//     imports,
-//     state => state.showDownloadDetails,
-// )
+export const showDownloadDetails = createSelector(
+    imports,
+    (state) => state.showDownloadDetails,
+)
 
 // Adv settings mode
-export const concurrency = createSelector(imports, state => state.concurrency)
+export const concurrency = createSelector(imports, (state) => state.concurrency)
 export const processErrors = createSelector(
     imports,
-    state => state.processErrors,
+    (state) => state.processErrors,
 )
 export const bookmarkImports = createSelector(
     imports,
-    state => state.bookmarkImports,
+    (state) => state.bookmarkImports,
 )
-export const indexTitle = createSelector(imports, state => state.indexTitle)
+export const indexTitle = createSelector(imports, (state) => state.indexTitle)
 
-const getImportStatusFlag = status =>
-    createSelector(importStatus, importStatus => importStatus === status)
+const getImportStatusFlag = (status) =>
+    createSelector(importStatus, (importStatus) => importStatus === status)
 
 // Main import state selectors
 export const isLoading = getImportStatusFlag(STATUS.LOADING)
@@ -128,9 +132,9 @@ export const progress = createSelector(
     totals,
     allowTypes,
     (...args) => ({
-        [TYPE.HISTORY]: getProgress(...args.map(arg => arg[TYPE.HISTORY])),
-        [TYPE.BOOKMARK]: getProgress(...args.map(arg => arg[TYPE.BOOKMARK])),
-        [TYPE.OTHERS]: getProgress(...args.map(arg => arg[TYPE.OTHERS])),
+        [TYPE.HISTORY]: getProgress(...args.map((arg) => arg[TYPE.HISTORY])),
+        [TYPE.BOOKMARK]: getProgress(...args.map((arg) => arg[TYPE.BOOKMARK])),
+        [TYPE.OTHERS]: getProgress(...args.map((arg) => arg[TYPE.OTHERS])),
     }),
 )
 
@@ -170,12 +174,12 @@ export const progressPercent = createSelector(
 )
 
 // Util formatting functions for download time estimates
-const getHours = time => Math.floor(time / 3600).toFixed(0)
-const getMins = time =>
+const getHours = (time) => Math.floor(time / 3600).toFixed(0)
+const getMins = (time) =>
     Math.floor((time - getHours(time) * 3600) / 60).toFixed(0)
-const getPaddedMins = time =>
+const getPaddedMins = (time) =>
     getMins(time) < 10 ? `0${getMins(time)}` : getMins(time)
-const getTimeEstStr = time => {
+const getTimeEstStr = (time) => {
     const timeEstimate = `${getHours(time)}:${getPaddedMins(time)}`
     return timeEstimate === '0:00'
         ? timeEstimate
@@ -216,7 +220,7 @@ export const isStartBtnDisabled = createSelector(
 
         // Map-reduce the remaining (allowed) estimates to disable button when remaining is 0
         const noImportsRemaining = Object.keys(pickByAllowedTypes(allowTypes))
-            .map(importType => estimates[importType].remaining === 0)
+            .map((importType) => estimates[importType].remaining === 0)
             .reduce((prev, curr) => prev && curr, true)
 
         const allCheckboxesDisabled =

@@ -1,15 +1,15 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import classNames from 'classnames'
+// import classNames from 'classnames'
 
 import localStyles from './DownloadDetails.css'
-import styles from '../../options.css'
+// import styles from '../../options.css'
 
-const filterClass = classNames(localStyles.filterOption, styles.buttonNaked)
+// const filterClass = classNames(localStyles.filterOption, styles.buttonNaked)
 
 const DownloadDetails = ({ children, filterHandlers, filter }) => (
     <div className={localStyles.detailsContainer}>
-        <div className={localStyles.filters}>
+        {/* <div className={localStyles.filters}>
             <button className={filterClass} onClick={filterHandlers.all}>
                 All
             </button>
@@ -26,7 +26,7 @@ const DownloadDetails = ({ children, filterHandlers, filter }) => (
                 </a>
                 )
             </button>
-        </div>
+        </div> */}
         <table className={localStyles.detailsTable}>
             <thead className={localStyles.detailsTableHead}>
                 <tr>

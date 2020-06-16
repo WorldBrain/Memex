@@ -10,7 +10,9 @@ const ShowDownloadDetails = ({ changeShowDetails, showDownloadDetails }) => (
                 className={localStyles.showDetailsLink}
                 onClick={changeShowDetails}
             >
-                {showDownloadDetails ? 'Hide Details' : 'Show Details'}
+                {showDownloadDetails
+                    ? 'Hide Error Details'
+                    : 'Show Error Details'}
             </a>
         </div>
     </div>
