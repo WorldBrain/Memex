@@ -144,10 +144,12 @@ export default class ImportItemProcessor {
                     })
                 }),
                 ...tags.map(async (tag) => {
-                    await this.options.tagsModule.addTagToExistingUrl({
-                        url,
-                        tag,
-                    })
+                    await this.options.tagsModule
+                        .addTagToExistingUrl({
+                            url,
+                            tag,
+                        })
+                        .catch((e) => {}) // Lots of outside tags may violate our tag validity pattern; catch them and try others
                 }),
             ])
         } catch (e) {

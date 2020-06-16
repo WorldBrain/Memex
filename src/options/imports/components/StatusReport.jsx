@@ -1,6 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import {
+    TypographyHeadingSmall,
+} from 'src/common-ui/components/design-library/typography'
+
 import localStyles from './Import.css'
 
 const StatusReport = ({
@@ -25,14 +29,13 @@ const StatusReport = ({
             </p>
             <p>{`Total (${successCount + failCount})`}</p>
             {children && (
-                <p>
+                <TypographyHeadingSmall className={localStyles.showDetails}>
                     <a
-                        className={localStyles.showDetails}
                         onClick={changeShowDetails}
                     >
                         {children}
                     </a>
-                </p>
+                </TypographyHeadingSmall>
             )}
         </div>
     </div>

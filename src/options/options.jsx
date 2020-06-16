@@ -11,10 +11,10 @@ import { ModalsContainer } from '../overview/modals/components/ModalsContainer'
 import { AuthContextProvider } from 'src/authentication/components/AuthContextProvider'
 
 // Include development tools if we are not building for production
-const ReduxDevTools =
-    process.env.NODE_ENV !== 'production'
-        ? require('src/dev/redux-devtools-component').default
-        : undefined
+const ReduxDevTools = undefined
+// process.env.NODE_ENV !== 'production'
+//     ? require('src/dev/redux-devtools-component').default
+//     : undefined
 
 const store = configureStore({ ReduxDevTools })
 
