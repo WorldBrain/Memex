@@ -71,7 +71,13 @@ export default async function ({
                 environmentHash: {
                     root: process.cwd(),
                     directories: [],
-                    files: ['package-lock.json', 'yarn.lock', '.env'],
+                    files: [
+                        'yarn.lock',
+                        'package-lock.json',
+                        'private/.env.example',
+                        'private/.env.production',
+                        'private/.env.development',
+                    ],
                 },
             }),
         )
