@@ -235,7 +235,9 @@ export class SidebarContainerLogic extends UILogic<
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',
 
-            state: this.options.inPageUI.state.sidebar ? 'visible' : 'hidden',
+            state: this.options.inPageUI.componentsShown.sidebar
+                ? 'visible'
+                : 'hidden',
             annotationModes: {
                 pageAnnotations: {},
                 searchResults: {},

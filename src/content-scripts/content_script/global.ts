@@ -35,11 +35,17 @@ import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
 import * as constants from '../constants'
 
-// Set this up globally to prevent race conditions
-// TODO: Fix this with a proper restructuring of how pages are indexed
+// TODO:(page-indexing)[high] Fix this with a proper restructuring of how pages are indexed
 setupPageContentRPC()
 
+// Content Scripts are separate bundles of javascript code that can be loaded
+// on demand by the browser, as needed. This main function manages the initialisation
+// and dependencies of content scripts.
+
 export async function main() {
+    // 1. Create a local object with promises to track each content script
+    // initialisation and provide a function which can initialise a content script
+    // or ignore if already loaded.
     const components: {
         ribbon?: Resolvable<void>
         sidebar?: Resolvable<void>
@@ -53,6 +59,7 @@ export async function main() {
         return components[component]!
     }
 
+    // 2. Initialise dependencies required by content scripts
     const currentTab = await getCurrentTab()
     const annotations = runInBackground<AnnotationInterface<'caller'>>()
     const remoteFunctionRegistry = new RemoteFunctionRegistry()
@@ -67,6 +74,9 @@ export async function main() {
         createAnnotation: () => highlighter.createAnnotation({ inPageUI }),
     }
 
+    // 3. Create a contentScriptRegistry object with functions for each content script
+    // component, that when run, initialise the respective component with it's
+    // dependencies
     const contentScriptRegistry: ContentScriptRegistry = {
         async registerRibbonScript(execute): Promise<void> {
             await execute({
@@ -120,6 +130,8 @@ export async function main() {
     }
     window['contentScriptRegistry'] = contentScriptRegistry
 
+    // 4. Creates an instance of the InPageUI manager class to encapsulate
+    // business logic of initialising and hide/showing components.
     const inPageUI = new InPageUI({
         loadComponent,
         annotations,
@@ -127,6 +139,9 @@ export async function main() {
         pageUrl: currentTab.url,
     })
 
+    // 5. Registers remote functions that can be used to interact with components
+    // in this tab.
+    // TODO:(remote-functions) Move these to the inPageUI class too
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
         showRibbon: inPageUI.showRibbon.bind(inPageUI),
@@ -148,6 +163,7 @@ export async function main() {
         ...annotationFunctions,
     })
 
+    // 6. Setup other interactions with this page (things that always run)
     setupScrollReporter()
     loadAnnotationWhenReady()
     setupRemoteDirectLinkFunction()
@@ -155,16 +171,13 @@ export async function main() {
         inPageUI,
         ...annotationFunctions,
     })
-
     const loadContentScript = createContentScriptLoader()
     if (shouldIncludeSearchInjection(window.location.hostname)) {
         loadContentScript('search_injection')
     }
 
-    if (await getSidebarState()) {
-        setupOnDemandInPageUi(() => inPageUI.loadComponent('ribbon'))
-    }
-
+    // 7. Load components and associated content scripts if they are set to autoload
+    // on each page.
     if (await tooltipUtils.getTooltipState()) {
         await inPageUI.setupTooltip()
     }
@@ -176,9 +189,6 @@ export async function main() {
             await inPageUI.loadComponent('ribbon')
         }
     }
-    // if (window.location.hostname === 'worldbrain.io') {
-    //     sniffWordpressWorldbrainUser()
-    // }
 
     // global['worldbrainMemex'] = {
     //     inPageUI,
@@ -200,7 +210,7 @@ export function createContentScriptLoader() {
     return loader
 }
 
-export function setupOnDemandInPageUi(loadRibbon: () => void) {
+export function loadRibbonOnMouseOver(loadRibbon: () => void) {
     const listener = (event: MouseEvent) => {
         if (event.clientX > window.innerWidth - 200) {
             loadRibbon()

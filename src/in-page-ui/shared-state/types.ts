@@ -4,7 +4,9 @@ import { Anchor } from 'src/highlighting/types'
 export type InPageUISidebarAction = 'annotate' | 'comment' | 'show_annotation'
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip'
-export type InPageUIState = { [Component in InPageUIComponent]: boolean }
+export type InPageUIComponentShowState = {
+    [Component in InPageUIComponent]: boolean
+}
 export interface SidebarActionOptions {
     action: InPageUISidebarAction
     anchor?: Anchor
@@ -12,8 +14,8 @@ export interface SidebarActionOptions {
 }
 export interface InPageUIEvents {
     stateChanged: (event: {
-        newState: InPageUIState
-        changes: Partial<InPageUIState>
+        newState: InPageUIComponentShowState
+        changes: Partial<InPageUIComponentShowState>
     }) => void
     ribbonAction: (event: { action: InPageUIRibbonAction }) => void
     ribbonUpdate: () => void
@@ -25,7 +27,7 @@ export interface InPageUIEvents {
 export interface InPageUIInterface {
     areHighlightsShown: boolean
     events: TypedEventEmitter<InPageUIEvents>
-    state: InPageUIState
+    componentsShown: InPageUIComponentShowState
 
     // Ribbon
     showRibbon(options?: { action?: InPageUIRibbonAction }): void
