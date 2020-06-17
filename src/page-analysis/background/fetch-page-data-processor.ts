@@ -2,6 +2,7 @@ import { PagePipeline } from 'src/search/pipeline'
 import { FetchPageData } from './fetch-page-data'
 import { FetchPageDataError } from './fetch-page-data-error'
 import { PageDataResult, PageContent, FetchPageProcessor } from './types'
+import PdfViewerBackground from 'src/pdf-viewer/background'
 
 export class FetchPageDataProcessor implements FetchPageProcessor {
     constructor(
@@ -13,6 +14,7 @@ export class FetchPageDataProcessor implements FetchPageProcessor {
     ) {}
 
     async process(url: string): Promise<PageContent> {
+        const pdfViewer = new PdfViewerBackground({})
         const fetch = this.props.fetchPageData({
             url,
             domParser: this.props.domParser,
@@ -37,8 +39,10 @@ export class FetchPageDataProcessor implements FetchPageProcessor {
             fetchResult = { content: { title: url } }
         }
 
+        const pdfFingerprint = await pdfViewer.getPdfFingerprintForUrl(url)
+
         const pageData = await this.props.pagePipeline({
-            pageDoc: { ...fetchResult, url },
+            pageDoc: { ...fetchResult, url, pdfFingerprint },
             rejectNoContent: false,
         })
 

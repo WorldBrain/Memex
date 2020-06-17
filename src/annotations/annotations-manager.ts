@@ -41,6 +41,7 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
 
     public createAnnotation = async ({
         url,
+        pdfFingerprint,
         title,
         body,
         comment,
@@ -50,6 +51,7 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         isSocialPost,
     }: {
         url: string
+        pdfFingerprint: string | null
         title: string
         body: string
         comment: string
@@ -75,6 +77,7 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
 
         const annotation = {
             url,
+            pdfFingerprint,
             title,
             body,
             comment,

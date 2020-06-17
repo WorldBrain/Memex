@@ -33,8 +33,8 @@ const StatusBar = (props: Props, state: State) => {
         message: props.backupUIState.message,
         header: props.backupUIState.header,
         UIstate: props.backupUIState.state,
-        lastBackup: props.backupTimes.lastBackup as BackupTimes['lastBackup'],
-        nextBackup: props.backupTimes.nextBackup as BackupTimes['nextBackup'],
+        // lastBackup: props.backupTimes.lastBackup as BackupTimes['lastBackup'],
+        // nextBackup: props.backupTimes.nextBackup as BackupTimes['nextBackup'],
     }
     return (
         <div className={styles.TopContainer}>

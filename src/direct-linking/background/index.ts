@@ -1,6 +1,8 @@
 import Storex from '@worldbrain/storex'
 import { Tabs, Browser } from 'webextension-polyfill-ts'
 import { normalizeUrl, URLNormalizer } from '@worldbrain/memex-url-utils'
+import PDFBackground from 'src/pdf-viewer/background'
+import { isUrlToPdf } from 'src/pdf-viewer/util'
 
 import {
     makeRemotelyCallable,
@@ -41,6 +43,7 @@ export default class DirectLinkingBackground {
     private socialBg: SocialBG
     private _normalizeUrl: URLNormalizer
     private localStorage: BrowserSettingsStore<TagsSettings>
+    private pdfViewer: PDFBackground
 
     constructor(
         private options: {
@@ -50,10 +53,12 @@ export default class DirectLinkingBackground {
             socialBg: SocialBG
             searchIndex: SearchIndex
             normalizeUrl?: URLNormalizer
+            pdfViewer: PDFBackground
         },
     ) {
         this.socialBg = options.socialBg
         this.backend = new DirectLinkingBackend()
+        this.pdfViewer = options.pdfViewer
 
         this.annotationStorage = new AnnotationStorage({
             storageManager: options.storageManager,
@@ -238,12 +243,17 @@ export default class DirectLinkingBackground {
         this.requests.followAnnotationRequest(tab.id)
     }
 
-    createDirectLink = async ({ tab }: TabArg, request) => {
+    async createDirectLink({ tab }: TabArg, request) {
         const pageTitle = tab.title
+        const pageUrl = this._normalizeUrl(tab.url)
+        const pdfFingerprint = isUrlToPdf(pageUrl)
+            ? await this.pdfViewer.getPdfFingerprintForUrl(pageUrl)
+            : null
         const result = await this.backend.createDirectLink(request)
         await this.annotationStorage.createAnnotation({
             pageTitle,
-            pageUrl: this._normalizeUrl(tab.url),
+            pdfFingerprint,
+            pageUrl,
             body: request.anchor.quote,
             url: result.url,
             selector: request.anchor,
@@ -256,7 +266,7 @@ export default class DirectLinkingBackground {
         return result
     }
 
-    getAllAnnotationsByUrl = async (
+    async getAllAnnotationsByUrl(
         { tab }: TabArg,
         { url, limit = 1000, skip = 0, ...params }: AnnotSearchParams,
         isSocialPost?: boolean,
@@ -268,7 +278,7 @@ export default class DirectLinkingBackground {
                 lastEdited?: number
             }
         >
-    > => {
+    > {
         url = url == null && tab != null ? tab.url : url
         url = isSocialPost
             ? await this.lookupSocialId(url)
@@ -327,9 +337,14 @@ export default class DirectLinkingBackground {
         const pageTitle = toCreate.title == null ? tab.title : toCreate.title
         const uniqueUrl = `${pageUrl}/#${Date.now()}`
 
+        const pdfFingerprint = isUrlToPdf(pageUrl)
+            ? await this.pdfViewer.getPdfFingerprintForUrl(pageUrl)
+            : null
+
         await this.annotationStorage.createAnnotation({
             pageUrl,
             url: uniqueUrl,
+            pdfFingerprint,
             pageTitle,
             comment: toCreate.comment,
             body: toCreate.body,

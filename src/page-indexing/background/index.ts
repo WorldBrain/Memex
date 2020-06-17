@@ -16,6 +16,7 @@ import { DexieUtilsPlugin } from 'src/search/plugins'
 import analysePage from 'src/page-analysis/background'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from 'src/options/settings/constants'
+import { remoteFunction } from 'src/util/webextensionRPC'
 
 export class PageIndexingBackground {
     storage: PageStorage
@@ -170,8 +171,12 @@ export class PageIndexingBackground {
             analysisRes.content.fullText = await analysisRes.getFullText()
         }
 
+        const pdfFingerprint = await remoteFunction('getPdfFingerprint')(
+            props.url,
+        )
+
         const pageData = await pipeline({
-            pageDoc: { ...analysisRes, url: props.url },
+            pageDoc: { ...analysisRes, url: props.url, pdfFingerprint },
             rejectNoContent: !props.stubOnly,
         })
 
@@ -208,8 +213,11 @@ export class PageIndexingBackground {
     }
 
     async createTestPage(props: PageCreationProps) {
+        const pdfFingerprint = await remoteFunction('getPdfFingerprint')(
+            props.url,
+        )
         const pageData = await pipeline({
-            pageDoc: { url: props.url, content: {} },
+            pageDoc: { url: props.url, content: {}, pdfFingerprint },
             rejectNoContent: false,
         })
 

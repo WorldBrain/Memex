@@ -31,6 +31,7 @@ import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 import { SearchInterface } from 'src/search/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
+import { isPdfViewer } from 'src/pdf-viewer/util'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
 import * as constants from '../constants'
 
@@ -215,5 +216,9 @@ const getCurrentTab = (() => {
         return currentTab
     }
 })()
+
+if (isPdfViewer()) {
+    remoteFunction('toggleSidebarOverlay')({ showHighlights: true })
+}
 
 main()

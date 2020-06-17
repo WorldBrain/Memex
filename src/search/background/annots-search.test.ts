@@ -10,6 +10,8 @@ import AnnotsBg from 'src/direct-linking/background'
 import { Annotation } from 'src/direct-linking/types'
 import { AnnotSearchParams } from './types'
 
+const mockPdfBg = { getPdfFingerprintForUrl: (url) => url }
+
 const countAnnots = (res: Map<number, Map<string, Annotation[]>>) => {
     let count = 0
     for (const [, pageMap] of res) {
@@ -95,6 +97,7 @@ describe.skip('annots search plugin', () => {
             browserAPIs: {} as any,
             pageStorage: {} as any,
             searchIndex: {} as any,
+            pdfViewer: mockPdfBg as any,
         })
         customListsBg = new CustomListBg({
             storageManager,

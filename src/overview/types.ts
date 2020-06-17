@@ -9,6 +9,7 @@ export interface Result extends SocialPage {
     url: string
     fullUrl: string
     title: string
+    pdfFingerprint: string | null
     tags: string[]
     lists: string[]
     hasBookmark: boolean

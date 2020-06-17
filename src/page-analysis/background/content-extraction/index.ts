@@ -8,7 +8,7 @@ export default function extractPageMetadataFromRawContent(
     rawContent: RawPageContent,
 ): Promise<PageContent> {
     if (rawContent.type === 'pdf') {
-        return extractPdfContent(rawContent)
+        return extractPdfContent(rawContent.url)
     } else {
         return extractHtmlContent(rawContent)
     }

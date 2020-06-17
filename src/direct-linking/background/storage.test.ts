@@ -11,6 +11,8 @@ import CustomListBackground from 'src/custom-lists/background'
 import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
+const mockPdfBg = { getPdfFingerprintForUrl: (url) => url }
+
 describe('Annotations storage', () => {
     let annotationStorage: AnnotationStorage
     let storageManager: Storex
@@ -28,6 +30,7 @@ describe('Annotations storage', () => {
             // Pages also need to be seeded to match domains filters against
             await storageManager.collection('pages').createObject({
                 url: annot.pageUrl,
+                pdfFingerprint: null,
                 fullUrl: annot.url,
                 hostname: normalizeUrl(annot.pageUrl),
                 domain: normalizeUrl(annot.pageUrl),
@@ -95,13 +98,13 @@ describe('Annotations storage', () => {
         })
 
         describe('Update operations: ', () => {
-            const checkIsDefined = async annotation => {
+            const checkIsDefined = async (annotation) => {
                 expect(annotation).toBeDefined()
                 expect(annotation).not.toBeNull()
             }
 
             test('update comment', async () => {
-                const stripTerms = comment =>
+                const stripTerms = (comment) =>
                     omitBy(comment, (value, key) => endsWith(key, '_terms'))
 
                 const oldComment = await annotationStorage.getAnnotationByPk(

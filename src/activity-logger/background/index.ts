@@ -13,6 +13,7 @@ import { SearchIndex } from 'src/search'
 import { bindMethod } from 'src/util/functions'
 import * as Raven from 'src/util/raven'
 import PageStorage from 'src/page-indexing/background/storage'
+import PDFBackground from 'src/pdf-viewer/background'
 
 export default class ActivityLoggerBackground {
     static SCROLL_UPDATE_FN = 'updateScrollState'
@@ -42,6 +43,7 @@ export default class ActivityLoggerBackground {
             Browser,
             'tabs' | 'runtime' | 'webNavigation' | 'storage'
         >
+        pdfViewer: PDFBackground
     }) {
         this.tabManager = options.tabManager
         this.tabsAPI = options.browserAPIs.tabs
@@ -59,6 +61,7 @@ export default class ActivityLoggerBackground {
             pageStorage: options.pageStorage,
             searchIndex: options.searchIndex,
             tabManager: this.tabManager,
+            pdfBackground: options.pdfViewer,
         })
         this.tabChangeListener = new TabChangeListeners({
             tabManager: this.tabManager,

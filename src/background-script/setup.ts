@@ -53,7 +53,11 @@ import { AnalyticsBackground } from 'src/analytics/background'
 import { Analytics } from 'src/analytics/types'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
 import { PipelineRes } from 'src/search'
+<<<<<<< HEAD
 import { ReaderBackground } from 'src/reader/background'
+=======
+import PdfViewerBackground from 'src/pdf-viewer/background'
+>>>>>>> 1a7c224... Initial reconstruction of pdf-annotation
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -78,7 +82,11 @@ export interface BackgroundModules {
     features: FeatureOptIns
     pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
+<<<<<<< HEAD
     readable: ReaderBackground
+=======
+    pdfViewer: PdfViewerBackground
+>>>>>>> 1a7c224... Initial reconstruction of pdf-annotation
 }
 
 export function createBackgroundModules(options: {
@@ -90,6 +98,7 @@ export function createBackgroundModules(options: {
     fetchPageDataProcessor: FetchPageProcessor
     tabManager?: TabManager
     auth?: AuthBackground
+    pdfBackground?: PdfViewerBackground
     analyticsManager: Analytics
     authOptions?: { devAuthState: DevAuthState }
     includePostSyncProcessor?: boolean
@@ -115,11 +124,15 @@ export function createBackgroundModules(options: {
         bookmarksStorage: bookmarks.storage,
         tabManager,
     })
+
+    const pdfViewer = new PdfViewerBackground({})
+
     const activityLogger = new ActivityLoggerBackground({
         searchIndex,
         browserAPIs: options.browserAPIs,
         tabManager,
         pageStorage: pages.storage,
+        pdfViewer,
     })
 
     const search = new SearchBackground({
@@ -198,6 +211,7 @@ export function createBackgroundModules(options: {
     return {
         auth,
         social,
+        pdfViewer,
         analytics,
         jobScheduler,
         notifications,
@@ -210,6 +224,7 @@ export function createBackgroundModules(options: {
             socialBg: social,
             searchIndex: search.searchIndex,
             pageStorage: pages.storage,
+            pdfViewer,
         }),
         search,
         eventLog: new EventLogBackground({ storageManager }),

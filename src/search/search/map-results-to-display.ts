@@ -4,6 +4,7 @@ import { SearchParams, SearchResult, DBGet } from '../types'
 export interface SearchDisplayResult {
     url: string
     title: string
+    pdfFingerprint: string | null
     hasBookmark: boolean
     displayTime: number
     screenshot: string
@@ -17,7 +18,7 @@ const mapPageToDisplay = (
     { endDate }: SearchParams,
     getDb: DBGet,
 ) =>
-    async function([url]: SearchResult): Promise<SearchDisplayResult> {
+    async function ([url]: SearchResult): Promise<SearchDisplayResult> {
         const db = await getDb()
         const page = new Page(db, pagesMap.get(url))
         const favIcon = favIconsMap.get(page.hostname)
@@ -25,6 +26,7 @@ const mapPageToDisplay = (
 
         return {
             url: page.fullUrl,
+            pdfFingerprint: page.pdfFingerprint,
             title: page.fullTitle,
             hasBookmark: page.hasBookmark,
             displayTime: page.getLatest(endDate),
@@ -53,7 +55,7 @@ export const mapResultsToDisplay = (getDb: DBGet) => async (
         url: { $in: resultUrls },
     })
 
-    pages.forEach(page => {
+    pages.forEach((page) => {
         hostnamesSet.add(page.hostname)
         pagesMap.set(page.url, page)
     })
@@ -62,7 +64,7 @@ export const mapResultsToDisplay = (getDb: DBGet) => async (
     const favIcons = await db.collection('favIcons').findObjects<FavIcon>({
         hostname: { $in: [...hostnamesSet] },
     })
-    favIcons.forEach(favIcon => favIconsMap.set(favIcon.hostname, favIcon))
+    favIcons.forEach((favIcon) => favIconsMap.set(favIcon.hostname, favIcon))
 
     // Grab all the Pages needed for results (mapping over input `results` to maintain order)
     return Promise.all(

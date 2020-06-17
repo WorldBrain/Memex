@@ -3,6 +3,7 @@ import { Anchor } from 'src/highlighting/types'
 export interface Annotation {
     pageTitle: string
     pageUrl: string
+    pdfFingerprint?: string | null
     body?: string
     selector?: Anchor
     createdWhen?: Date

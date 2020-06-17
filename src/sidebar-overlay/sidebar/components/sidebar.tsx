@@ -18,6 +18,7 @@ import cx from 'classnames'
 import { Annotation } from 'src/annotations/types'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { features } from 'src/util/remote-functions-background'
+import { remoteFunction } from 'src/util/webextensionRPC'
 
 const styles = require('./sidebar.css')
 
@@ -26,6 +27,7 @@ interface Props {
     isOpen: boolean
     isLoading: boolean
     needsWaypoint?: boolean
+    renderAnnotPdfBtn: boolean
     appendLoader: boolean
     annotations: Annotation[]
     activeAnnotationUrl: string
@@ -99,7 +101,7 @@ class Sidebar extends React.Component<Props, State> {
     }
 
     private toggleShowFilters = () => {
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
             showFiltersSidebar: !prevState.showFiltersSidebar,
         }))
     }
@@ -114,7 +116,7 @@ class Sidebar extends React.Component<Props, State> {
     ) => {
         e.preventDefault()
         e.stopPropagation()
-        this.setState(state => ({
+        this.setState((state) => ({
             showFiltersSidebar: false,
             searchValue: '',
         }))
@@ -125,7 +127,7 @@ class Sidebar extends React.Component<Props, State> {
         return this.props.pageType === 'page'
     }
 
-    handleDeleteAnnotation = url => {
+    handleDeleteAnnotation = (url) => {
         this.props.handleDeleteAnnotation(url)
     }
 
@@ -171,6 +173,24 @@ class Sidebar extends React.Component<Props, State> {
                 <DeleteConfirmModal message="Delete page and related notes" />
                 <DragElement />
             </React.Fragment>
+        )
+    }
+
+    private renderAnnotatePdfBtn() {
+        if (!this.props.renderAnnotPdfBtn) {
+            return null
+        }
+
+        return (
+            <button
+                className={cx(styles.annotatePDFButton)}
+                onClick={(e) => {
+                    e.preventDefault()
+                    remoteFunction('openPdfViewer')(this.props.page.url)
+                }}
+            >
+                Annotate PDF
+            </button>
         )
     }
 
@@ -247,6 +267,7 @@ class Sidebar extends React.Component<Props, State> {
                                 </div>
                             )}
                         </div>
+                        <div>{this.renderAnnotatePdfBtn()}</div>
                         <div
                             className={cx(styles.resultsContainer, {
                                 [styles.resultsContainerPage]:

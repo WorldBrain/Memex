@@ -1,4 +1,5 @@
 import { PipelineRes } from 'src/search'
+import PdfBackgroundViewer from 'src/pdf-viewer/background'
 
 export type PageContent = PipelineRes
 

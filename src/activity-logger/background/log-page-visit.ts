@@ -1,6 +1,7 @@
 import update from 'immutability-helper'
 import { Tabs } from 'webextension-polyfill-ts'
 import moment from 'moment'
+import PDFBackground from 'src/pdf-viewer/background'
 
 import { TabManager } from './tab-manager'
 // @ts-ignore
@@ -12,6 +13,7 @@ import analyzePage, {
 import { FavIconChecker } from './types'
 import { SearchIndex, PageDoc } from 'src/search'
 import PageStorage from 'src/page-indexing/background/storage'
+// import { remoteFunction } from 'src/util/webextensionRPC'
 
 interface Props {
     tabManager: TabManager
@@ -20,6 +22,7 @@ interface Props {
     momentLib?: typeof moment
     favIconCheck?: FavIconChecker
     pageAnalyzer?: PageAnalyzer
+    pdfBackground: PDFBackground
 }
 type PageLoggingPreparation = PageAnalysis
 
@@ -33,11 +36,13 @@ export default class PageVisitLogger {
     private _createVisit: SearchIndex['addVisit']
     private _pageStorage: PageStorage
     private _moment: typeof moment
+    private pdfBackground: PDFBackground
 
     constructor({
         tabManager,
         searchIndex,
         pageStorage,
+        pdfBackground,
         pageAnalyzer = analyzePage,
         momentLib = moment,
     }: Props) {
@@ -50,6 +55,7 @@ export default class PageVisitLogger {
         this._checkFavIcon = searchIndex.domainHasFavIcon
         this._pageStorage = pageStorage
         this._moment = momentLib
+        this.pdfBackground = pdfBackground
     }
 
     async preparePageLogging(params: {
@@ -110,8 +116,13 @@ export default class PageVisitLogger {
             }
 
             // Don't index full-text in this stage
+            const pdfFingerprint = await this.pdfBackground.getPdfFingerprintForUrl(
+                tab.url,
+            )
+
             const pageDoc: PageDoc = {
                 url: tab.url,
+                pdfFingerprint,
                 ...update(pageAnalysis, {
                     content: { $unset: ['fullText'] },
                     $unset: ['getFullText'],
@@ -134,8 +145,12 @@ export default class PageVisitLogger {
         pageAnalysis: PageLoggingPreparation,
         textOnly = true,
     ) {
+        const pdfFingerprint = await this.pdfBackground.getPdfFingerprintForUrl(
+            tab.url,
+        )
         const pageDoc: PageDoc = {
             url: tab.url,
+            pdfFingerprint,
             ...update(pageAnalysis, {
                 content: {
                     fullText: {

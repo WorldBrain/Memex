@@ -24,6 +24,7 @@ export interface PageConstructorOptions {
     titleTerms: string[]
     domain: string
     hostname: string
+    pdfFingerprint: string | null
 
     // Display data
     text: string
@@ -45,6 +46,7 @@ export default class Page extends AbstractModel
     implements PageConstructorOptions {
     public url: string
     public text: string
+    public pdfFingerprint: string | null
     public fullUrl: string
     public fullTitle: string
     public terms: string[]
@@ -62,6 +64,7 @@ export default class Page extends AbstractModel
     constructor(db: Storex, props: PageConstructorOptions) {
         super(db)
         this.url = props.url
+        this.pdfFingerprint = props.pdfFingerprint
         this.fullUrl = props.fullUrl
         this.fullTitle = props.fullTitle
         this.text = props.text
@@ -139,7 +142,7 @@ export default class Page extends AbstractModel
     }
 
     get tags() {
-        return this[tagsProp].map(tag => tag.name)
+        return this[tagsProp].map((tag) => tag.name)
     }
 
     get visits(): Visit[] {
@@ -194,7 +197,7 @@ export default class Page extends AbstractModel
 
     addTag(name: string) {
         const index = (this[tagsProp] as Tag[]).findIndex(
-            tag => tag.name === name,
+            (tag) => tag.name === name,
         )
 
         if (index === -1) {
@@ -204,7 +207,7 @@ export default class Page extends AbstractModel
 
     delTag(name: string) {
         const index = (this[tagsProp] as Tag[]).findIndex(
-            tag => tag.name === name,
+            (tag) => tag.name === name,
         )
 
         if (index !== -1) {
@@ -268,8 +271,8 @@ export default class Page extends AbstractModel
             .collection('bookmarks')
             .findOneObject<Bookmark>({ url: this.url })
 
-        this[visitsProp] = visits.map(v => new Visit(this.db, v))
-        this[tagsProp] = tags.map(t => new Tag(this.db, t))
+        this[visitsProp] = visits.map((v) => new Visit(this.db, v))
+        this[tagsProp] = tags.map((t) => new Tag(this.db, t))
         this[bookmarkProp] = bookmark
             ? new Bookmark(this.db, bookmark)
             : undefined
@@ -325,7 +328,7 @@ export default class Page extends AbstractModel
             .findObjects<Visit>({ url: this.url })
 
         const existingVisitsTimeMap = new Map<number, Visit>()
-        existingVisits.forEach(v => existingVisitsTimeMap.set(v.time, v))
+        existingVisits.forEach((v) => existingVisitsTimeMap.set(v.time, v))
 
         return Promise.all<[number, string]>(
             this[visitsProp].map((v: Visit) => {
@@ -344,7 +347,7 @@ export default class Page extends AbstractModel
             .findObjects<Tag>({ url: this.url })
 
         const existingTagsNameMap = new Map<string, Tag>()
-        existingTags.forEach(t => existingTagsNameMap.set(t.name, t))
+        existingTags.forEach((t) => existingTagsNameMap.set(t.name, t))
 
         return Promise.all<[string, string]>(
             this[tagsProp].map((t: Tag) => {

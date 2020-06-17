@@ -61,7 +61,7 @@ export const setIsSocialPost = createAction<boolean>('sidebar/setIsSocialPost')
 /**
  * Hydrates the initial state of the sidebar.
  */
-export const initState: () => Thunk = () => dispatch => {
+export const initState: () => Thunk = () => (dispatch) => {
     dispatch(resetResultsPage())
 }
 
@@ -95,7 +95,7 @@ export const openSidebar: (
     await processEventRPC({ type: EVENT_NAMES.OPEN_SIDEBAR_PAGE })
 }
 
-export const closeSidebar: () => Thunk = () => async dispatch => {
+export const closeSidebar: () => Thunk = () => async (dispatch) => {
     dispatch(setSidebarOpen(false))
     await processEventRPC({ type: EVENT_NAMES.CLOSE_SIDEBAR_PAGE })
 }
@@ -125,14 +125,14 @@ export const checkAndSetCongratsMessage: () => Thunk = () => async (
     }
 }
 
-export const toggleBookmark: (url: string) => Thunk = url => async (
+export const toggleBookmark: (url: string) => Thunk = (url) => async (
     dispatch,
     getState,
 ) => {
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
     const annotations = selectors.annotations(state)
-    const index = annotations.findIndex(annot => annot.url === url)
+    const index = annotations.findIndex((annot) => annot.url === url)
     dispatch(toggleBookmarkState(index))
 
     try {
@@ -140,7 +140,7 @@ export const toggleBookmark: (url: string) => Thunk = url => async (
     } catch (err) {
         dispatch(toggleBookmarkState(index))
         handleDBQuotaErrors(
-            error =>
+            (error) =>
                 notifications.create({
                     requireInteraction: false,
                     title: 'Memex error: starring page',
@@ -152,7 +152,7 @@ export const toggleBookmark: (url: string) => Thunk = url => async (
 }
 
 // Only toggles UI state; no DB side-effects
-export const toggleBookmarkState: (i: number) => Thunk = i => (
+export const toggleBookmarkState: (i: number) => Thunk = (i) => (
     dispatch,
     getState,
 ) => {

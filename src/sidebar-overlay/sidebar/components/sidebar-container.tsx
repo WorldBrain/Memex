@@ -34,6 +34,7 @@ interface StateProps {
     isLoading: boolean
     needsWaypoint: boolean
     appendLoader: boolean
+    renderAnnotPdfBtn: boolean
     annotations: Annotation[]
     activeAnnotationUrl: string
     hoverAnnotationUrl: string
@@ -159,11 +160,9 @@ class SidebarContainer extends React.Component<Props> {
     }
 }
 
-const mapStateToProps: MapStateToProps<
-    StateProps,
-    OwnProps,
-    RootState
-> = state => ({
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+    state,
+) => ({
     isOpen: selectors.isOpen(state),
     isLoading: selectors.isLoading(state),
     // Disable pagination for now
@@ -181,6 +180,7 @@ const mapStateToProps: MapStateToProps<
     showClearFiltersBtn: searchBar.showClearFiltersBtn(state),
     page: selectors.page(state),
     isSocialPost: selectors.isSocialPost(state),
+    renderAnnotPdfBtn: selectors.renderAnnotPdfBtn(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
@@ -189,7 +189,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
 ) => {
     return {
         onInit: () => dispatch(actions.initState()),
-        setAnnotationsManager: annotationsManager =>
+        setAnnotationsManager: (annotationsManager) =>
             dispatch(actions.setAnnotationsManager(annotationsManager)),
         closeSidebar: () => {
             // This state is not used in the content script version of sidebar
@@ -205,22 +205,22 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
         },
         handleAddCommentBtnClick: () =>
             dispatch(commentBoxActions.setShowCommentBox(true)),
-        setHoverAnnotationUrl: url =>
+        setHoverAnnotationUrl: (url) =>
             dispatch(actions.setHoverAnnotationUrl(url)),
         handleEditAnnotation: (url, comment, tags) =>
             dispatch(editAnnotation(url, comment, tags)),
-        handleDeleteAnnotation: url => {
+        handleDeleteAnnotation: (url) => {
             props.highlighter.removeAnnotationHighlights(url)
             dispatch(deleteAnnotation(url))
         },
         handleScrollPagination: (isSocialSearch?: boolean) =>
             dispatch(fetchMoreAnnotationsForPageUrl(isSocialSearch)),
-        handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
-        onQueryChange: searchValue =>
+        handleBookmarkToggle: (url) => dispatch(actions.toggleBookmark(url)),
+        onQueryChange: (searchValue) =>
             dispatch(searchBarActs.setQueryTagsDomains(searchValue, false)),
-        onQueryKeyDown: searchValue =>
+        onQueryKeyDown: (searchValue) =>
             dispatch(searchBarActs.setQueryTagsDomains(searchValue, true)),
-        handlePageTypeClick: e => {
+        handlePageTypeClick: (e) => {
             e.preventDefault()
             dispatch(actions.togglePageType())
         },
@@ -228,7 +228,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
             dispatch(filterActs.resetFilters())
             dispatch(searchBarActs.clearFilters())
         },
-        resetPage: e => {
+        resetPage: (e) => {
             e.preventDefault()
             dispatch(actions.setPageType('all'))
             dispatch(

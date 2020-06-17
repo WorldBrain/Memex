@@ -59,10 +59,10 @@
     margin: 0 10px 40px;
     position: relative;
     width: 93%;
+}
 
-    &:hover {
-        background: white;
-    }
+.commentBoxContainer:hover {
+    background: white;
 }
 
 .navBar {
@@ -89,14 +89,14 @@
     background: none;
     border: none;
     cursor: pointer;
+}
 
-    &:disabled {
-        cursor: auto;
-    }
+.navBtn:disabled {
+    cursor: auto;
+}
 
-    &:focus {
-        outline: none;
-    }
+.navBtn:focus {
+    outline: none;
 }
 
 .bookmark {
@@ -107,4 +107,23 @@
 
 .allResultsDiv {
     margin-top: 50px;
+}
+
+.annotatePDFButton {
+    position: relative;
+    top: 2em;
+    width: 80%;
+    height: 2em;
+    background: #3eb995;
+    color: #fff;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    padding: 5px 6px;
+    font-size: 14px;
+    font-weight: 100;
+    margin: 0 auto;
+    margin-top: 10px;
+    display: block;
 }

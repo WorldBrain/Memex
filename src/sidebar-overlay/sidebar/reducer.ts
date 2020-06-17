@@ -19,8 +19,8 @@ export const defaultState: State = {
     isOpen: false,
     isLoading: false,
     page: {
-        url: null,
-        title: null,
+        url: location.href,
+        title: document.title,
     },
     annotations: [],
     activeAnnotationUrl: null,
@@ -43,7 +43,12 @@ const setSidebarOpen = (state: boolean, isOpen: boolean) => isOpen
 
 const setIsLoading = (state: boolean, isLoading: boolean) => isLoading
 
-const setPage = (state: Page, page: Page) => page
+const setPage = (state: Page, next: Page) => {
+    return {
+        title: next.title || state.title,
+        url: next.url || state.url,
+    }
+}
 
 const setAnnotations = (state: Annotation[], annotations: Annotation[]) =>
     annotations
@@ -57,57 +62,57 @@ const setHoverAnnotationUrl = (state: string, hoverAnnotationUrl: string) =>
 const setShowCongratsMessage = (state: boolean, showCongratsMessage: boolean) =>
     showCongratsMessage
 
-const annotationsManagerReducer = createReducer<AnnotationsManager>(on => {
+const annotationsManagerReducer = createReducer<AnnotationsManager>((on) => {
     on(actions.setAnnotationsManager, setAnnotationsManager)
 }, defaultState.annotationsManager)
 
-const isOpenReducer = createReducer<boolean>(on => {
+const isOpenReducer = createReducer<boolean>((on) => {
     on(actions.setSidebarOpen, setSidebarOpen)
 }, defaultState.isOpen)
 
-const isLoadingReducer = createReducer<boolean>(on => {
+const isLoadingReducer = createReducer<boolean>((on) => {
     on(actions.setIsLoading, setIsLoading)
 }, defaultState.isLoading)
 
-const pageReducer = createReducer<Page>(on => {
+const pageReducer = createReducer<Page>((on) => {
     on(actions.setPage, setPage)
 }, defaultState.page)
 
-const annotationsReducer = createReducer<Annotation[]>(on => {
+const annotationsReducer = createReducer<Annotation[]>((on) => {
     on(setAnnotationsAction, setAnnotations)
     on(appendAnnotationsAction, (state, payload) => [...payload, ...state])
 }, defaultState.annotations)
 
-const activeAnnotationUrlReducer = createReducer<string>(on => {
+const activeAnnotationUrlReducer = createReducer<string>((on) => {
     on(actions.setActiveAnnotationUrl, setActiveAnnotationUrl)
 }, defaultState.activeAnnotationUrl)
 
-const hoverAnnotationUrlReducer = createReducer<string>(on => {
+const hoverAnnotationUrlReducer = createReducer<string>((on) => {
     on(actions.setHoverAnnotationUrl, setHoverAnnotationUrl)
 }, defaultState.hoverAnnotationUrl)
 
-const showCongratsMessageReducer = createReducer<boolean>(on => {
+const showCongratsMessageReducer = createReducer<boolean>((on) => {
     on(actions.setShowCongratsMessage, setShowCongratsMessage)
 }, defaultState.showCongratsMessage)
 
-const currentResultPage = createReducer(on => {
-    on(actions.resetResultsPage, page => defaultState.currentResultPage)
-    on(actions.nextResultsPage, page => page + 1)
+const currentResultPage = createReducer((on) => {
+    on(actions.resetResultsPage, (page) => defaultState.currentResultPage)
+    on(actions.nextResultsPage, (page) => page + 1)
 }, defaultState.currentResultPage)
 
-const resultsExhausted = createReducer(on => {
+const resultsExhausted = createReducer((on) => {
     on(actions.setResultsExhausted, (state, payload) => payload)
 }, defaultState.resultsExhausted)
 
-const pageTypeReducer = createReducer(on => {
+const pageTypeReducer = createReducer((on) => {
     on(actions.setPageType, (state, payload) => payload)
 }, defaultState.pageType)
 
-const searchTypeReducer = createReducer(on => {
+const searchTypeReducer = createReducer((on) => {
     on(actions.setSearchType, (state, payload) => payload)
 }, defaultState.searchType)
 
-const isSocialPostReducer = createReducer(on => {
+const isSocialPostReducer = createReducer((on) => {
     on(actions.setIsSocialPost, (state, payload) => payload)
 }, defaultState.isSocialPost)
 

@@ -33,6 +33,8 @@ export const copyPatterns = [
         to: 'lib/',
     },
     { from: 'node_modules/pdfjs-dist/build/pdf.worker.min.js', to: 'lib/' },
+    { from: 'node_modules/pdfjs-dist/build/pdf.min.js', to: 'lib/' },
+    { from: 'node_modules/pdfjs-dist/web/pdf_viewer.css', to: 'lib/' },
     {
         from: 'fonts/*/*',
         to: 'fonts/[name].[ext]',
@@ -50,5 +52,9 @@ export const copyPatterns = [
             'node_modules/material-design-icons/iconfont/*.{eot,ttf,woff,woff2,css}',
         to: 'fonts/material-icons/[name].[ext]',
         toType: 'template',
+    },
+    {
+        from: 'src/pdf-viewer/app/index.{html,js,css}',
+        to: './pdf-viewer.[ext]',
     },
 ]
