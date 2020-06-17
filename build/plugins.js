@@ -26,7 +26,7 @@ const initTsPlugin = (tslint) =>
         tslint,
     })
 
-export default function ({
+export default async function ({
     webExtReloadPort = 9090,
     mode = 'development',
     template,
@@ -38,10 +38,11 @@ export default function ({
     extPackageName = 'extension.zip',
     sourcePackageName = 'source-code.zip',
 }) {
-    const envs = initEnv({ mode })
+    const { defaultEnv, envPath } = await initEnv({ mode })
+
     const plugins = [
-        new EnvironmentPlugin(envs),
-        new Dotenv(),
+        new EnvironmentPlugin(defaultEnv),
+        new Dotenv({ path: envPath }),
         new CopyPlugin(staticFiles.copyPatterns),
         new HtmlPlugin({
             title: 'Popup',

@@ -1,7 +1,7 @@
 import initConfig from './build'
 
-export default (env = {}) => {
-    const conf = initConfig({
+export default async (env = {}) => {
+    const conf = await initConfig({
         context: __dirname,
         mode: env.prod ? 'production' : 'development',
         notifsEnabled: !!env.notifs,

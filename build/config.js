@@ -26,7 +26,11 @@ export const output = {
     filename: '[name].js',
 }
 
-export default ({ context = __dirname, mode = 'development', ...opts }) => {
+export default async ({
+    context = __dirname,
+    mode = 'development',
+    ...opts
+}) => {
     const aliases = {
         src: path.resolve(context, './src'),
     }
@@ -48,7 +52,7 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
             mode === 'development'
                 ? 'inline-cheap-module-source-map'
                 : 'hidden-source-map',
-        plugins: initPlugins({
+        plugins: await initPlugins({
             ...opts,
             mode,
             template: htmlTemplate,
