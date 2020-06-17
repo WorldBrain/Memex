@@ -1,0 +1,198 @@
+@startuml
+
+skinparam interface {
+  backgroundColor RosyBrown
+  borderColor orange
+  defaultFontName Mono
+}
+skinparam package {
+  FontName Roboto
+  FontSize 10
+}
+
+skinparam component {
+  FontSize 13
+  BorderColor black
+  BackgroundColor #5CD9A6
+  ArrowFontName Impact
+  ArrowColor #FF6655
+  ArrowFontColor #777777
+}
+
+
+
+package "In-Page Content Script (the part of the extension that runs in browser tabs)" {
+
+component global [
+<u>src/content-scripts/content_script/<b>global.ts
+
+<b>o) <color:red>setupPageContentRPC
+Provides a remote function hook into this tab
+that can be called to `extractRawPageContent`.
+
+<b>o) components : { ribbon: .., sidebar: ..., tooltip: ... }</b>
+Creates a local object with promises to track each content script
+ initialisation and provide a function which can initialise a content script
+or ignore if already loaded.
+
+<b>o) currentTab, annotations, annotationsManager, highlighter, toolbarNotifications
+Initialise dependencies required by content scripts
+
+<b>o) contentScriptRegistry = { registerRibbonScript: ..., registerSidebarScript:... </b>
+Create a contentScriptRegistry object with functions for each content script
+component, that when run, initialise the respective component with it's
+dependencies
+
+<b>o) new <i>InPageUI</i> </b>
+Creates an instance of the InPageUI manager class to encapsulate
+business logic of initialising and hide/showing components.
+
+<b>o) makeRemotelyCallableType<InPageUIContentScriptRemoteInterface> </b>
+Registers remote functions that can be used to interact with components
+in this tab.
+<color:red> many of these are show/hide functions that just call public methods on the InPageUI class
+
+<b>o) Setup other interactions with this page (things that always run)
+<color:red> setupScrollReporter
+<color:red> loadAnnotationWhenReady,
+<color:red>setupRemoteDirectLinkFunction
+<color:red> initKeyboardShortcuts
+<color:red> loadContentScript('search_injection')
+
+
+<b>o) Load components and associated content scripts </b>
+if they are set to autoload on each page.
+inPageUI.setupTooltip(),
+inPageUI.loadComponent('sidebar'),
+etc
+]
+
+class InPageUI {
+
+Class to hold state of what component is shown and loaded
+, and methods to affect them.
+
+- events
+> 'comment' | 'tag' | 'list' | 'bookmark',
+> 'annotate' | 'comment' | 'show_annotation'
+
+- hide {tooltip, ribbon, sidebar}
+- show {tooltip, ribbon, sidebar}
+- setup {tooltip, ribbon, sidebar}
+- remove {tooltip, ribbon, sidebar}
+}
+
+global -> InPageUI #green
+
+InPageUI .. CS #white
+note left of CS: Can we clearly name and organise \n this part into something like \n 'script loading' as n1
+package "src/content-scripts/content_script/" as CS {
+
+    component RibbonMain [
+         <i><u>ribbon.ts
+
+        Create mount, load css file, etc.
+
+        setup
+         > setupRibbonUI
+
+        destroy
+    ]
+
+    component SidebarMain [
+         <i><u>sidebar.ts
+
+        Create mount, load css file, etc.
+
+        setup()
+        > setupSidebarUI
+        destroy
+    ]
+
+    component TooltipMain [
+         <i><u>tooltip.ts
+
+        Create mount, load css file, etc.
+
+        setup
+        destroy
+    ]
+
+    InPageUI --> RibbonMain #blue
+    InPageUI --> SidebarMain #blue
+    InPageUI --> TooltipMain #blue
+
+}
+
+CS .. RMS #white
+
+note left of RMS: Can we clearly name and organise \n this part into something like \n 'component mounting'
+package "src/in-page-ui/" as RMS {
+
+    component RibbonIndex [
+        <i><u>ribbon/react/index.tsx
+
+          setupRibbonUI
+          > mounts the React component
+          > <b>RibbonContainer
+
+    ]
+    component SidebarIndex [
+        <i><u>sidebar/react/index.tsx
+
+        setupSidebarUI
+           > mounts the React component
+           > <b>SidebarContainer
+    ]
+
+    component TooltipIndex [
+      <i><u><color:red>tooltip/content_script/interactions.ts
+
+    ]
+     note right of TooltipIndex: Can we remove the tooltip now \n to simplify the product and complexity \n if we use right click context menu?
+
+
+ TooltipMain --> TooltipIndex #green
+ SidebarMain --> SidebarIndex #green
+ RibbonMain --> RibbonIndex #green
+
+}
+
+RMS .. "React Components" #white
+
+note left of "React Components": "what about annotations?"
+package "React Components" {
+
+SidebarIndex --> SidebarContainer #green
+RibbonIndex --> RibbonContainer #green
+TooltipIndex --> TooltipContainer #green
+
+class SidebarContainer {
++ InPageUIEvents
+- show
+- hide
+}
+class RibbonContainer {
++ InPageUIEvents
+- show
+- hide
+}
+class TooltipContainer? {
++ InPageUIEvents
+- show
+- hide
+}
+
+InPageUI --> RibbonContainer #blue
+InPageUI --> SidebarContainer #blue
+InPageUI --> TooltipContainer #blue
+TooltipContainer --> InPageUI #blue
+SidebarContainer --> InPageUI #blue
+TooltipContainer --> InPageUI #blue
+
+
+
+}
+
+
+@enduml
