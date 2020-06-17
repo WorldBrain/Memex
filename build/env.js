@@ -1,16 +1,14 @@
 import process from 'process'
 import dotenv from 'dotenv'
 import path from 'path'
-import fs from 'fs'
+
+import { doesFileExist } from './util'
 
 export const envPaths = {
     development: path.resolve(__dirname, '../private/.env.development'),
     production: path.resolve(__dirname, '../private/.env.production'),
     fallback: path.resolve(__dirname, '../private/.env.example'),
 }
-
-export const doesFileExist = (path) =>
-    new Promise((resolve) => fs.access(path, (err) => resolve(err == null)))
 
 export async function determineEnvPath({ mode }) {
     if (mode === 'development') {

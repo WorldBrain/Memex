@@ -1,3 +1,5 @@
+import fs from 'fs'
+
 export function staticFilesToPatterns(filesDict = {}) {
     const patterns = []
 
@@ -7,3 +9,6 @@ export function staticFilesToPatterns(filesDict = {}) {
 
     return patterns
 }
+
+export const doesFileExist = (path) =>
+    new Promise((resolve) => fs.access(path, (err) => resolve(err == null)))

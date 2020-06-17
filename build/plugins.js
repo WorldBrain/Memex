@@ -81,6 +81,7 @@ export default async function ({
                 release: process.env.npm_package_version,
                 include: output.path,
                 dryRun: !runSentry,
+                debug: true,
             }),
         )
     }
