@@ -26,7 +26,7 @@ const initTsPlugin = (tslint) =>
         tslint,
     })
 
-export default async function ({
+export default function ({
     webExtReloadPort = 9090,
     mode = 'development',
     template,
@@ -38,7 +38,7 @@ export default async function ({
     extPackageName = 'extension.zip',
     sourcePackageName = 'source-code.zip',
 }) {
-    const { defaultEnv, envPath } = await initEnv({ mode })
+    const { defaultEnv, envPath } = initEnv({ mode })
 
     const plugins = [
         new EnvironmentPlugin(defaultEnv),

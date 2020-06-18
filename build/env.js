@@ -10,14 +10,14 @@ export const envPaths = {
     fallback: path.resolve(__dirname, '../private/.env.example'),
 }
 
-export async function determineEnvPath({ mode }) {
+export function determineEnvPath({ mode }) {
     if (mode === 'development') {
-        return (await doesFileExist(envPaths.development))
+        return doesFileExist(envPaths.development)
             ? envPaths.development
             : envPaths.fallback
     }
 
-    if (await doesFileExist(envPaths.production)) {
+    if (doesFileExist(envPaths.production)) {
         return envPaths.production
     }
 
@@ -27,8 +27,8 @@ export async function determineEnvPath({ mode }) {
     process.exit(1)
 }
 
-export default async ({ mode }) => {
-    const envPath = await determineEnvPath({ mode })
+export default ({ mode }) => {
+    const envPath = determineEnvPath({ mode })
     console.log('USING ENV FILE:', envPath)
     dotenv.config({ path: envPath })
 
