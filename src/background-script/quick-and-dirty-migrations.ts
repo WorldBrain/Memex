@@ -14,16 +14,20 @@ export interface Migrations {
 }
 
 export const migrations: Migrations = {
+    /*
+     * There was a bug in the ext where collection renames weren't also updating
+     * the cache, resulting in out-of-sync cache to DB. Therefore seed the
+     * collections suggestion cache with entries from the DB.
+     */
     'reseed-collections-suggestion-cache': async ({ localStorage, db }) => {
         const cacheStorageKey = 'custom-lists_suggestions'
-        await localStorage.remove(cacheStorageKey)
 
         const listEntries = await db.table('customLists').limit(10).toArray()
         const newCache: string[] = listEntries.map((entry) => entry.name)
 
         await localStorage.set({ [cacheStorageKey]: newCache })
     },
-    /**
+    /*
      * If pageUrl is undefined, then re-derive it from url field.
      */
     'annots-undefined-pageUrl-field': async ({ db, normalizeUrl }) => {
@@ -35,7 +39,7 @@ export const migrations: Migrations = {
                 annot.pageUrl = normalizeUrl(annot.url)
             })
     },
-    /**
+    /*
      * If lastEdited is undefined, then set it to createdWhen value.
      */
     'annots-created-when-to-last-edited': async ({ db }) => {
