@@ -15,6 +15,7 @@ input {
 
 .subname {
     composes: infoText from 'src/options/settings/components/settings.css';
+    padding-right: 15px;
 }
 
 .selectionContainer {

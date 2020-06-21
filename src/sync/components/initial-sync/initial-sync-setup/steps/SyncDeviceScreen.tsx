@@ -53,10 +53,6 @@ export const SyncDeviceScreen = ({
                              </TypographyBodyCenter>
 
                                 <WhiteSpacer20 />
-                                <CancelAction
-                                    label={'Cancel'}
-                                    onClick={() => false}
-                                />
                                 {progressPct === undefined ? (
                                     <LoadingIndicator />
                                 ) : (
