@@ -246,13 +246,13 @@ export default class DirectLinkingBackground {
     async createDirectLink({ tab }: TabArg, request) {
         const pageTitle = tab.title
         const pageUrl = this._normalizeUrl(tab.url)
-        const pdfFingerprint = isUrlToPdf(pageUrl)
-            ? await this.pdfViewer.getPdfFingerprintForUrl(pageUrl)
-            : null
+        // const pdfFingerprint = isUrlToPdf(pageUrl)
+        //     ? await this.pdfViewer.getPdfFingerprintForUrl(pageUrl)
+        //     : null
         const result = await this.backend.createDirectLink(request)
         await this.annotationStorage.createAnnotation({
             pageTitle,
-            pdfFingerprint,
+            // pdfFingerprint,
             pageUrl,
             body: request.anchor.quote,
             url: result.url,
@@ -337,14 +337,14 @@ export default class DirectLinkingBackground {
         const pageTitle = toCreate.title == null ? tab.title : toCreate.title
         const uniqueUrl = `${pageUrl}/#${Date.now()}`
 
-        const pdfFingerprint = isUrlToPdf(pageUrl)
-            ? await this.pdfViewer.getPdfFingerprintForUrl(pageUrl)
-            : null
+        // const pdfFingerprint = isUrlToPdf(pageUrl)
+        //     ? await this.pdfViewer.getPdfFingerprintForUrl(pageUrl)
+        //     : null
 
         await this.annotationStorage.createAnnotation({
             pageUrl,
             url: uniqueUrl,
-            pdfFingerprint,
+            // pdfFingerprint,
             pageTitle,
             comment: toCreate.comment,
             body: toCreate.body,

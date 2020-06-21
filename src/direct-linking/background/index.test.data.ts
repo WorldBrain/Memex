@@ -5,6 +5,7 @@ export const TAG_2 = 'test2'
 
 export const PAGE_1 = {
     url: 'lorem.com',
+    pdfFingerprint: null,
     fullUrl: 'https://www.lorem.com',
     domain: 'lorem.com',
     hostname: 'lorem.com',
@@ -12,6 +13,7 @@ export const PAGE_1 = {
 
 export const PAGE_2 = {
     url: 'test.com',
+    pdfFingerprint: null,
     fullUrl: 'https://www.test.com',
     domain: 'test.com',
     hostname: 'test.com',

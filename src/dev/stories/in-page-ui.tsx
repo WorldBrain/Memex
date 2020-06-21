@@ -30,6 +30,7 @@ async function createDependencies() {
         visits: [Date.now() - 1000 * 60 * 5],
         pageDoc: {
             url: 'http://foo.com',
+            pdfFingerprint: null,
             content: {
                 title: 'Foo title',
                 fullText: 'Foo page text',

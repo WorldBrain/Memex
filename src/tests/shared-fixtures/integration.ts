@@ -23,12 +23,13 @@ export async function insertIntegrationTestData(
     const { backgroundModules } = device
     const includeCollection = (collection: IntegrationTestDataCollection) =>
         !options?.collections || options.collections[collection]
-    const pages = [{ url: 'http://www.bla.com/' }]
+    const pages = [{ url: 'http://www.bla.com/', pdfFingerprint: null }]
 
     if (includeCollection('pages')) {
         await backgroundModules.search.searchIndex.addPage({
             pageDoc: {
                 url: pages[0].url,
+                pdfFingerprint: pages[0].pdfFingerprint,
                 content: {
                     fullText: 'home page content',
                     title: 'bla.com title',

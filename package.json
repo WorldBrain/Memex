@@ -42,6 +42,7 @@
         "@josephg/resolvable": "^1.0.0",
         "@styled-icons/feather": "^10.0.0",
         "@styled-icons/styled-icon": "^10.0.0",
+        "@types/pdfjs-dist": "^2.1.4",
         "@types/socket.io-client": "^1.4.32",
         "blob-util": "^1.2.1",
         "chargebee": ">=2 <3",

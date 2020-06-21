@@ -48,6 +48,7 @@ interface StateProps {
     blacklistConfirm: boolean
     showTagsPicker: boolean
     renderAnnotPdfBtn: boolean
+    pdfFingerprint: string
     showCollectionsPicker: boolean
     tabId: number
     url: string
@@ -74,6 +75,7 @@ class PopupContainer extends PureComponent<Props> {
             action: 'openPopup',
         })
         this.props.initState()
+        console.log('pdffingerprint', this.props.pdfFingerprint)
     }
 
     processEvent = remoteFunction('processEvent')
@@ -202,7 +204,10 @@ class PopupContainer extends PureComponent<Props> {
                 <hr />
                 {this.props.renderAnnotPdfBtn && (
                     <div className={styles.item}>
-                        <AnnotatePDFButton pdfURL={this.props.url} />
+                        <AnnotatePDFButton
+                            pdfURL={this.props.url}
+                            pdfFingerprint={this.props.pdfFingerprint}
+                        />
                     </div>
                 )}
                 <div className={styles.item}>
@@ -263,6 +268,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     tabId: selectors.tabId(state),
     url: selectors.url(state),
     renderAnnotPdfBtn: selectors.renderAnnotPdfBtn(state),
+    pdfFingerprint: selectors.pdfFingerprint(state),
     searchValue: selectors.searchValue(state),
     blacklistConfirm: blacklist.showDeleteConfirm(state),
     showCollectionsPicker: collectionsSelectors.showCollectionsPicker(state),

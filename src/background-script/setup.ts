@@ -53,11 +53,8 @@ import { AnalyticsBackground } from 'src/analytics/background'
 import { Analytics } from 'src/analytics/types'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
 import { PipelineRes } from 'src/search'
-<<<<<<< HEAD
 import { ReaderBackground } from 'src/reader/background'
-=======
 import PdfViewerBackground from 'src/pdf-viewer/background'
->>>>>>> 1a7c224... Initial reconstruction of pdf-annotation
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -82,11 +79,8 @@ export interface BackgroundModules {
     features: FeatureOptIns
     pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
-<<<<<<< HEAD
     readable: ReaderBackground
-=======
     pdfViewer: PdfViewerBackground
->>>>>>> 1a7c224... Initial reconstruction of pdf-annotation
 }
 
 export function createBackgroundModules(options: {

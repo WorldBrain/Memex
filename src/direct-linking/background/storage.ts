@@ -64,7 +64,6 @@ export default class AnnotationStorage extends StorageModule {
                 fields: {
                     pageTitle: { type: 'text' },
                     pageUrl: { type: 'url' },
-                    pdfFingerprint: { type: 'string' },
                     body: { type: 'text' },
                     comment: { type: 'text' },
                     selector: { type: 'json' },
@@ -76,7 +75,6 @@ export default class AnnotationStorage extends StorageModule {
                     { field: 'url', pk: true },
                     { field: 'pageTitle' },
                     { field: 'pageUrl' },
-                    { field: 'pdfFingerprint' },
                     { field: 'body' },
                     { field: 'createdWhen' },
                     { field: 'comment' },
@@ -271,16 +269,16 @@ export default class AnnotationStorage extends StorageModule {
         return results
     }
 
-    async getAnnotationsByFingerprint(pdfFingerprint: string) {
-        return this.operation('findAnnotationByPdfFingerprint', {
-            pdfFingerprint,
-        })
-    }
+    // async getAnnotationsByFingerprint(pdfFingerprint: string) {
+    //     return this.operation('findAnnotationByPdfFingerprint', {
+    //         pdfFingerprint,
+    //     })
+    // }
 
     async createAnnotation({
         pageTitle,
         pageUrl,
-        pdfFingerprint,
+        // pdfFingerprint,
         body,
         url,
         comment,
@@ -296,7 +294,7 @@ export default class AnnotationStorage extends StorageModule {
         return this.operation('createAnnotation', {
             pageTitle,
             pageUrl,
-            pdfFingerprint,
+            // pdfFingerprint,
             comment,
             body,
             selector,

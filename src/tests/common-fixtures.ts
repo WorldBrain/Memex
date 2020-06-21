@@ -14,6 +14,7 @@ export const createPageStep: IntegrationTestStep<BackgroundIntegrationTestContex
         await searchModule(setup).searchIndex.addPage({
             pageDoc: {
                 url: DATA.PAGE_1.fullUrl,
+                pdfFingerprint: DATA.PAGE_1.pdfFingerprint,
                 content: {},
             },
             visits: [DATA.VISIT_1],

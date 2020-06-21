@@ -31,6 +31,7 @@ import {
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import SyncBackground from '.'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
+import { mock } from 'sinon'
 
 const registerTest = it
 
@@ -244,6 +245,7 @@ function extensionSyncTests(suiteOptions: {
         await searchModule(devices[0]).searchIndex.addPage({
             pageDoc: {
                 url: 'http://www.bla.com/',
+                pdfFingerprint: null,
                 content: {
                     fullText: 'home page content',
                     title: 'bla.com title',
@@ -511,6 +513,7 @@ function extensionSyncTests(suiteOptions: {
 
         const mockPage = {
             url: 'test.com',
+            pdfFingerprint: null,
             domain: 'test.com',
             hostname: 'test.com',
             fullUrl: 'http://test.com',
@@ -548,6 +551,7 @@ function extensionSyncTests(suiteOptions: {
             rejectNoContent: false,
             pageDoc: {
                 url: mockPage.fullUrl,
+                pdfFingerprint: mockPage.pdfFingerprint,
                 content: {},
             },
         })
@@ -657,6 +661,7 @@ function extensionSyncTests(suiteOptions: {
                 await searchModule(devices[0]).searchIndex.addPage({
                     pageDoc: {
                         url: 'http://www.bla.com/',
+                        pdfFingerprint: null,
                         content: {
                             fullText: 'home page content',
                             title: 'bla.com title',
@@ -667,6 +672,7 @@ function extensionSyncTests(suiteOptions: {
                 await searchModule(devices[0]).searchIndex.addPage({
                     pageDoc: {
                         url: 'http://www.bla2.com/',
+                        pdfFingerprint: null,
                         content: {
                             fullText: 'home page content',
                             title: 'bla2.com title',

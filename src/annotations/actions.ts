@@ -17,6 +17,7 @@ import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 import { extractAnchor } from 'src/highlighting/ui'
 import { highlightAnnotations } from 'src/annotations/index'
+// import { fetchPdfFingerprint } from 'src/pdf-viewer/util'
 
 export const setAnnotations = createAction<Annotation[]>('setAnnotations')
 export const appendAnnotations = createAction<Annotation[]>(
@@ -102,6 +103,7 @@ export const createAnnotation: (
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
     const { url, title } = selectors.page(state)
+    // const pdfFingerprint = await fetchPdfFingerprint(url)
 
     anchor = anchor || (await extractAnchor(document.getSelection()))
     body = body || anchor ? anchor.quote : ''
@@ -111,6 +113,7 @@ export const createAnnotation: (
     if (annotationsManager) {
         const annotation = await annotationsManager.createAnnotation({
             url,
+            // pdfFingerprint,
             title,
             body,
             comment,

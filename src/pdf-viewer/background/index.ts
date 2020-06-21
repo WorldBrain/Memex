@@ -17,7 +17,7 @@ export interface Props {
     storageAPI?: Storage.Static
     extAPI?: Extension.Static
     tabsAPI?: Tabs.Static
-    pdfJs?: PDFJS
+    pdfJs?: typeof PDFJS
     pdfJsWorkerPath?: string
     normalizer?: typeof normalizeUrl
 }
@@ -26,7 +26,7 @@ export default class PDFViewerBackground {
     private storageAPI: Storage.Static
     private extAPI: Extension.Static
     private tabsAPI: Tabs.Static
-    private pdfJs: PDFJS
+    private pdfJs: typeof PDFJS
     private pdfJsWorkerPath: string
     private urlNormalizer: typeof normalizeUrl
     remoteFunctions: PdfRemoteFunctionsInterface

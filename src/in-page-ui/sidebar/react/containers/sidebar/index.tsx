@@ -37,6 +37,7 @@ export class SidebarContainer extends StatefulUIElement<
 
     componentDidMount() {
         super.componentDidMount()
+        console.log('I have mounted')
         this.props.inPageUI.events.on(
             'stateChanged',
             this.handleInPageUIStateChange,

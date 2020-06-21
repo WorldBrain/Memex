@@ -87,7 +87,7 @@ export default class RunningProcess extends React.Component<Props> {
         await remoteFunction(this.props.functionNames.start)()
     }
 
-    messageListener = message => {
+    messageListener = (message) => {
         if (message.type === this.props.eventMessageName) {
             this.handleProcessEvent(message.event)
         }
@@ -164,8 +164,8 @@ export default class RunningProcess extends React.Component<Props> {
                 <div className={overviewStyles.showWarning}>
                     <span className={overviewStyles.WarningIcon} />
                     <span className={overviewStyles.showWarningText}>
-                        With a lot of data (> 25.000 pages) it is recommended
-                        running this over night.
+                        With a lot of data ({'>'} 25.000 pages) it is
+                        recommended running this over night.
                     </span>
                 </div>
                 <WhiteSpacer30 />
@@ -299,7 +299,7 @@ export default class RunningProcess extends React.Component<Props> {
                     {status === 'fail' && this.renderFail()}
                     <FailedOverlay
                         disabled={!overlay}
-                        onClick={async action => {
+                        onClick={async (action) => {
                             if (action === 'continue') {
                                 await this.startRestore()
                             }

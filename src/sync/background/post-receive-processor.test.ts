@@ -41,6 +41,7 @@ function setupTest({
 }) {
     const mockPagePipeline = async ({ pageDoc }) => ({
         url: pageDoc.url,
+        pdfFingerprint: null,
         fullUrl: pageDoc.url,
         fullTitle: pageDoc.content.title,
         domain: pageDoc.url,

@@ -24,6 +24,7 @@ const createPagesStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
         await searchModule(setup).searchIndex.addPage({
             pageDoc: {
                 url: DATA.PAGE_1.fullUrl,
+                pdfFingerprint: null,
                 content: { fullText: 'just some dummy test text' },
             },
             visits: [DATA.VISIT_1],
@@ -32,6 +33,7 @@ const createPagesStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
         await searchModule(setup).searchIndex.addPage({
             pageDoc: {
                 url: DATA.PAGE_2.fullUrl,
+                pdfFingerprint: null,
                 content: {},
             },
             visits: [DATA.VISIT_2],
@@ -317,6 +319,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                             await searchModule(setup).searchIndex.addPageTerms({
                                 pageDoc: {
                                     url: DATA.PAGE_1.fullUrl,
+                                    pdfFingerprint: null,
                                     content: {
                                         fullText: 'some new updated text',
                                     },

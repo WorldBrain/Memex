@@ -40,10 +40,11 @@ describe('src/search/bookmarks tests', () => {
     it('bookmark add should attempt to create a page via XHR if missing and no tab ID provided', async () => {
         const { addBookmark, fetchPageData, pages } = await setup()
         const testUrl = 'test.com'
+        const pdfFingerprint = null
         const testFullUrl = 'http://test.com'
 
         await pages.addPage({
-            pageDoc: { url: testUrl, content: {} },
+            pageDoc: { url: testUrl, pdfFingerprint, content: {} },
             rejectNoContent: false,
         })
 

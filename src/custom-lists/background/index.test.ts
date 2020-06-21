@@ -154,6 +154,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await searchModule(setup).searchIndex.addPage({
                                     pageDoc: {
                                         url: 'http://www.bla.com/',
+                                        pdfFingerprint: null,
                                         content: {
                                             fullText: 'home page content',
                                             title: 'bla.com title',
@@ -164,6 +165,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await searchModule(setup).searchIndex.addPage({
                                     pageDoc: {
                                         url: 'http://www.bla.com/foo',
+                                        pdfFingerprint: null,
                                         content: {
                                             fullText: 'foo page content',
                                             title: 'bla.com foo title',
@@ -331,6 +333,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await searchModule(setup).searchIndex.addPage({
                                     pageDoc: {
                                         url: 'http://www.bla.com/',
+                                        pdfFingerprint: null,
                                         content: {
                                             fullText: 'home page content',
                                             title: 'bla.com title',

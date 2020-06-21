@@ -2,6 +2,7 @@ import { PageConstructorOptions } from './page'
 
 export const testPageA: PageConstructorOptions = {
     url: 'test.com/test',
+    pdfFingerprint: null,
     fullUrl: 'http://www.test.com/test',
     urlTerms: ['test'],
     domain: 'test.com',
