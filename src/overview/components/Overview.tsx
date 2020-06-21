@@ -51,22 +51,17 @@ class Overview extends PureComponent<Props> {
         showPioneer: false
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         this.props.init() 
         this.showPioneer()
     }
 
-    async getBetaState() {
-         let result = await auth.isAuthorizedForFeature('beta')
-         return result
-    }
-
     async showPioneer() {
-         setTimeout(()=>{this.getBetaState().then((result)=>{
-                this.setState({
-                    showPioneer: result,
-                })
-            }), 300})
+        if(await auth.isAuthorizedForFeature('beta')){
+            this.setState({
+                showPioneer: true,
+            })
+        }
     }
 
     get mockInPageUI() {
