@@ -16,7 +16,7 @@ export default merge(
             //   https://github.com/aeksco/react-typescript-web-extension-starter/blob/f62486ec8518eb5cf78687a2e658505fd528dc8a/.storybook/webpack.config.js
             new NormalModuleReplacementPlugin(
                 /webextension-polyfill-ts/,
-                resource => {
+                (resource) => {
                     const absMockPath = path.resolve(
                         __dirname,
                         'mocks/webextension-polyfill-ts.js',

@@ -1,18 +1,22 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import {
+    TypographyHeadingSmall,
+} from 'src/common-ui/components/design-library/typography'
 
 import localStyles from './DownloadDetails.css'
 
 const ShowDownloadDetails = ({ changeShowDetails, showDownloadDetails }) => (
     <div className={localStyles.detailsContainer}>
-        <div className={localStyles.showDetails}>
+        <TypographyHeadingSmall className={localStyles.showDetails}>
             <a
-                className={localStyles.showDetailsLink}
                 onClick={changeShowDetails}
             >
-                {showDownloadDetails ? 'Hide Details' : 'Show Details'}
+                {showDownloadDetails
+                    ? 'Hide Error Details'
+                    : 'Show Error Details'}
             </a>
-        </div>
+        </TypographyHeadingSmall>
     </div>
 )
 

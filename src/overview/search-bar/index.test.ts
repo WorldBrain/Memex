@@ -15,9 +15,9 @@ describe('Overview search bar tests', () => {
             { pattern: '#tag_tag', shouldPass: true },
             { pattern: '#tag_tag.tag-tag', shouldPass: true },
             { pattern: '#tag', shouldPass: true },
+            //{ pattern: '#tag tag', shouldPass: true },
             { pattern: '#tag-', shouldPass: false },
             { pattern: '#tag.', shouldPass: false },
-            { pattern: 'tag tag', shouldPass: false },
             { pattern: 'tag', shouldPass: false },
             { pattern: '#', shouldPass: false },
         ]
@@ -40,10 +40,10 @@ describe('Overview search bar tests', () => {
             { pattern: 'tag.tag', shouldPass: true },
             { pattern: 'tag_tag', shouldPass: true },
             { pattern: 'tag_tag.tag-tag', shouldPass: true },
+            //{ pattern: 'tag tag', shouldPass: true },
             { pattern: 'tag', shouldPass: true },
             { pattern: 'tag-', shouldPass: false },
             { pattern: 'tag.', shouldPass: false },
-            { pattern: 'tag tag', shouldPass: false },
         ]
 
         for (const { pattern, shouldPass } of testCases) {

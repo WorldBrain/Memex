@@ -40,11 +40,28 @@ export interface Props {
     setShowOnboardingMessage: () => void
 }
 
+interface State {
+    showPioneer: boolean
+}
+
 class Overview extends PureComponent<Props> {
     private annotationsSidebar: AnnotationsSidebar
 
+    state = {
+        showPioneer: false
+    }
+
     componentDidMount() {
-        this.props.init()
+        this.props.init() 
+        this.showPioneer()
+    }
+
+    async showPioneer() {
+        if(await auth.isAuthorizedForFeature('beta')){
+            this.setState({
+                showPioneer: true,
+            })
+        }
     }
 
     get mockInPageUI() {
@@ -119,7 +136,8 @@ class Overview extends PureComponent<Props> {
     }
 
     renderOverview() {
-        console.log(auth.isAuthorizedForFeature('beta'))
+
+        console.log(this.state.showPioneer)
         return (
             <div>
                 <Head />
@@ -169,7 +187,7 @@ class Overview extends PureComponent<Props> {
                 />
                 <Tooltip />
                 <div className={styles.rightCorner} >
-                    {auth.isAuthorizedForFeature('beta') && (
+                    {this.state.showPioneer && (
                             <div 
                                  onClick={()=>{window.open('#/features')}}
                                  className={styles.pioneerBadge}>

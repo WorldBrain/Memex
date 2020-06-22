@@ -26,26 +26,22 @@
 }
 
 .button {
-    composes: nakedSquareButton from 'src/common-ui/elements.css';
     width: 24px;
     height: 24px;
     display: inline;
     border: none;
-    background-repeat: no-repeat;
     cursor: pointer;
     outline: none;
-    background-color: transparent;
 }
 
 .tick {
     composes: checkMark from 'src/common-ui/icons.css';
-    background-size: 75%;
 }
 
 .deleteButton {
     composes: removeIcon from 'src/common-ui/icons.css';
-    background-size: 50%;
     margin-left: 5px;
+    mask-size: 50%;
 }
 
 .buttonBox {

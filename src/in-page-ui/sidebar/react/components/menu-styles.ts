@@ -4,7 +4,7 @@ import { Styles } from 'react-burger-menu'
 const baseStyles = {
     bmMenuWrap: {
         top: '0px',
-        right: '35px',
+        right: '0px',
         zIndex: '2147483644',
         transition: 'all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1)',
         width: '450px',
@@ -50,10 +50,13 @@ const menuStyles = (env, isOpen): Partial<Styles> => {
         ;(baseStyles.bmMenuWrap.zIndex as string) = '999'
     }
 
+    if (env === 'inpage'&& isOpen) {
+        ;((baseStyles.bmMenuWrap.right as unknown) as string) = '35px'
+    }   
     if (isOpen) {
         ;((baseStyles.bmMenu.opacity as unknown) as string) = '1'
         ;((baseStyles.bmMenu.background as unknown) as string) = '#fff'
-        ;((baseStyles.bmItem.display as unknown) as string) = 'block'
+        ;((baseStyles.bmItem.display as unknown) as string) = 'block'  
     } else {
         ;((baseStyles.bmMenu.opacity as unknown) as string) = '0'
         ;((baseStyles.bmMenu.background as unknown) as string) = 'transparent'
