@@ -7,13 +7,10 @@ import { PublicSyncInterface } from 'src/sync/background/types'
 import { FeaturesInterface } from 'src/features/background/feature-opt-ins'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-<<<<<<< HEAD
 import { RemoteReaderInterface } from 'src/reader/types'
 import { PdfRemoteFunctionsInterface } from 'src/pdf-viewer/background/types'
-=======
 import { RemoteCopyPasterInterface } from 'src/overview/copy-paster/background/types'
 import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
->>>>>>> develop
 
 export interface RemoteFunctionImplementations<
     Role extends 'provider' | 'caller'
@@ -27,12 +24,9 @@ export interface RemoteFunctionImplementations<
     featuresBeta: FeaturesBetaInterface
     tags: RemoteTagsInterface
     collections: RemoteCollectionsInterface
-<<<<<<< HEAD
     readable: RemoteReaderInterface
     pdfViewer: PdfRemoteFunctionsInterface
-=======
     copyPaster: RemoteCopyPasterInterface
->>>>>>> develop
 }
 
 // See `src/background.ts` for the concrete remote function bindings
@@ -47,12 +41,9 @@ export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
     featuresBeta: runInBackground<FeaturesBetaInterface>(),
     tags: runInBackground<RemoteTagsInterface>(),
     collections: runInBackground<RemoteCollectionsInterface>(),
-<<<<<<< HEAD
     readable: runInBackground<RemoteReaderInterface>(),
     pdfViewer: runInBackground<PdfRemoteFunctionsInterface>(),
-=======
     copyPaster: runInBackground<RemoteCopyPasterInterface>(),
->>>>>>> develop
 }
 
 export const notifications = remoteFunctions.notifications
@@ -64,9 +55,6 @@ export const features = remoteFunctions.features
 export const featuresBeta = remoteFunctions.featuresBeta
 export const tags = remoteFunctions.tags
 export const collections = remoteFunctions.collections
-<<<<<<< HEAD
 export const readable = remoteFunctions.readable
 export const pdfViewer = remoteFunctions.pdfViewer
-=======
 export const copyPaster = remoteFunctions.copyPaster
->>>>>>> develop

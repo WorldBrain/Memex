@@ -64,15 +64,7 @@ let manualOverride = false
  * Mounts Tooltip React component.
  * Sets up Container <---> webpage Remote functions.
  */
-<<<<<<< HEAD
-export const insertTooltip = async (params: {
-    toolbarNotifications: any
-    inPageUI: TooltipInPageUIInterface
-    annotationsManager: AnnotationsManagerInterface
-}) => {
-=======
 export const insertTooltip = async (params: TooltipDependencies) => {
->>>>>>> develop
     // If target is set, Tooltip has already been injected.
     if (target) {
         return
@@ -157,14 +149,6 @@ export const removeTooltip = (options?: { override?: boolean }) => {
 //     }
 // }
 
-<<<<<<< HEAD
-export const showContentTooltip = async (params: {
-    toolbarNotifications: any
-    inPageUI: TooltipInPageUIInterface
-    annotationsManager: AnnotationsManagerInterface
-    position?: TooltipPosition
-}) => {
-=======
 /**
  * Sets up RPC functions to insert and remove Tooltip from Popup.
  */
@@ -190,7 +174,6 @@ export const showContentTooltip = async (params: {
 // }
 
 export const showContentTooltip = async (params: TooltipDependencies) => {
->>>>>>> develop
     if (!showTooltip) {
         await insertTooltip(params)
     }

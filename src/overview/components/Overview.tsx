@@ -15,8 +15,6 @@ import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
-<<<<<<< HEAD
-=======
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
@@ -28,7 +26,6 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
->>>>>>> develop
 
 export interface Props {
     pageUrl: string
@@ -42,21 +39,19 @@ interface State {
 }
 
 class Overview extends PureComponent<Props> {
-<<<<<<< HEAD
-=======
     private annotationsSidebar: AnnotationsSidebar
 
     state = {
-        showPioneer: false
+        showPioneer: false,
     }
 
     componentDidMount() {
-        this.props.init() 
+        this.props.init()
         this.showPioneer()
     }
 
-    async showPioneer() {
-        if(await auth.isAuthorizedForFeature('beta')){
+    async showPioneer() {
+        if (await auth.isAuthorizedForFeature('beta')) {
             this.setState({
                 showPioneer: true,
             })
@@ -118,7 +113,6 @@ class Overview extends PureComponent<Props> {
         }
     }
 
->>>>>>> develop
     handleOnboardingComplete = () => {
         window.location.href = OVERVIEW_URL
         this.props.setShowOnboardingMessage()
@@ -136,7 +130,6 @@ class Overview extends PureComponent<Props> {
     }
 
     renderOverview() {
-
         console.log(this.state.showPioneer)
         return (
             <div>
@@ -152,7 +145,6 @@ class Overview extends PureComponent<Props> {
                 />
                 <DeleteConfirmModal message="Delete page and related notes" />
                 <DragElement />
-               
 
                 {/* <div className={styles.productHuntContainer}>
                     <a
@@ -168,18 +160,21 @@ class Overview extends PureComponent<Props> {
                 </div> */}
 
                 <Tooltip />
-                <div className={styles.rightCorner} >
-                    {this.state.showPioneer && (
-                            <div 
-                                 onClick={()=>{window.open('#/features')}}
-                                 className={styles.pioneerBadge}>
-                                 <ButtonTooltip
-                                    tooltipText="Thank you for supporting this journey 🙏"
-                                    position="top"
-                                >
+                <div className={styles.rightCorner}>
+                    {this.state.showPioneer && (
+                        <div
+                            onClick={() => {
+                                window.open('#/features')
+                            }}
+                            className={styles.pioneerBadge}
+                        >
+                            <ButtonTooltip
+                                tooltipText="Thank you for supporting this journey 🙏"
+                                position="top"
+                            >
                                 👨🏾‍🚀Pioneer Edition
-                                </ButtonTooltip>
-                            </div>
+                            </ButtonTooltip>
+                        </div>
                     )}
                     <HelpBtn />
                 </div>

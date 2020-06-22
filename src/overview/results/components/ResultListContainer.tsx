@@ -25,14 +25,11 @@ import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { tags, collections } from 'src/util/remote-functions-background'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-<<<<<<< HEAD
 import { show } from 'src/overview/modals/actions'
-=======
 import CopyPaster from 'src/overview/copy-paster'
 import { renderTemplate } from 'src/overview/copy-paster/utils'
 import { Template } from 'src/overview/copy-paster/types'
 import omit from 'lodash/omit'
->>>>>>> develop
 
 const styles = require('./ResultList.css')
 
@@ -338,7 +335,9 @@ class ResultListContainer extends PureComponent<Props> {
                             this.setState({ tmpCopyPasterTemplate: undefined })
                         }}
                         onClickHowto={() => {
-                            window.open('https://worldbrain.io/tutorials/copy-templates')
+                            window.open(
+                                'https://worldbrain.io/tutorials/copy-templates',
+                            )
                         }}
                         onTitleChange={(title) => {
                             this.setState({
