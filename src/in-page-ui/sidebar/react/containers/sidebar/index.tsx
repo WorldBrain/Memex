@@ -60,6 +60,7 @@ export class SidebarContainer extends StatefulUIElement<
         )
     }
 
+    // todo refactor document usage
     private getDocument(): Document {
         const containerNode = ReactDOM.findDOMNode(this)
         return containerNode.getRootNode() as Document

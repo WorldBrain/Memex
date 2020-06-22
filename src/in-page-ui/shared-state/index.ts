@@ -4,7 +4,7 @@ import TypedEventEmitter from 'typed-emitter'
 import {
     InPageUIInterface,
     InPageUIEvents,
-    InPageUIState,
+    InPageUIComponentShowState,
     InPageUIComponent,
     InPageUIRibbonAction,
     SidebarActionOptions,
@@ -22,12 +22,12 @@ export interface InPageUIDependencies {
 export class InPageUI implements InPageUIInterface {
     events = new EventEmitter() as TypedEventEmitter<InPageUIEvents>
     areHighlightsShown = false
-    state: InPageUIState = {
+    componentsShown: InPageUIComponentShowState = {
         ribbon: false,
         sidebar: false,
         tooltip: false,
     }
-    componentsSetUp: InPageUIState = {
+    componentsSetUp: InPageUIComponentShowState = {
         ribbon: false,
         sidebar: false,
         tooltip: false,
@@ -76,7 +76,7 @@ export class InPageUI implements InPageUIInterface {
             }
         }
 
-        if (this.state.sidebar) {
+        if (this.componentsShown.sidebar) {
             maybeEmitAction()
             return
         }
@@ -112,7 +112,7 @@ export class InPageUI implements InPageUIInterface {
     }
 
     toggleSidebar(): void {
-        if (this.state.sidebar) {
+        if (this.componentsShown.sidebar) {
             this.hideSidebar()
         } else {
             this.showSidebar()
@@ -134,7 +134,7 @@ export class InPageUI implements InPageUIInterface {
             }
         }
 
-        if (this.state.ribbon) {
+        if (this.componentsShown.ribbon) {
             maybeEmitAction()
             return
         }
@@ -157,7 +157,7 @@ export class InPageUI implements InPageUIInterface {
     }
 
     async toggleRibbon() {
-        if (this.state.ribbon) {
+        if (this.componentsShown.ribbon) {
             await this.hideRibbon()
         } else {
             await this.showRibbon()
@@ -231,7 +231,7 @@ export class InPageUI implements InPageUIInterface {
     }
 
     async _setState(component: InPageUIComponent, visible: boolean) {
-        if (this.state[component] === visible) {
+        if (this.componentsShown[component] === visible) {
             return
         }
 
@@ -239,15 +239,15 @@ export class InPageUI implements InPageUIInterface {
             await this.loadComponent(component)
         }
 
-        this.state[component] = visible
+        this.componentsShown[component] = visible
         this.events.emit('stateChanged', {
-            newState: this.state,
-            changes: { [component]: this.state[component] },
+            newState: this.componentsShown,
+            changes: { [component]: this.componentsShown[component] },
         })
     }
 
     _removeComponent(component: InPageUIComponent) {
-        this.state[component] = false
+        this.componentsShown[component] = false
         this.componentsSetUp[component] = false
         this.events.emit('componentShouldDestroy', { component })
     }
