@@ -46,9 +46,10 @@ const fetchPageData: FetchPageData = ({
     let normalizedUrl
 
     try {
-        normalizedUrl = normalizeUrl(url, {
+        normalizedUrl = 
+JSON.stringify(normalizeUrl(url, {
             removeQueryParameters: [/.*/i],
-        })
+        }))
     } catch (err) {
         normalizedUrl = url
     }
