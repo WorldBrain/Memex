@@ -9,6 +9,7 @@ import { FeaturesOptInScreen } from '../feature-opt-in/ui/components/FeaturesOpt
 import React from 'react'
 import SyncDevicesPaneContainer from '../sync/components/device-list/SyncDevicesPane'
 import DashboardResultsContainer from 'src/overview/components/DashboardResultsContainer'
+import PdfViewerContainer from 'src/pdf-viewer/PdfViewerContainer'
 
 export default [
     {
@@ -22,6 +23,14 @@ export default [
         pathname: '/overview',
         component: DashboardResultsContainer,
         icon: 'search',
+        useOwnLayout: true,
+    },
+    {
+        name: 'Pdf Viewer',
+        pathname: '/pdf-viewer/:pdfId',
+        component: PdfViewerContainer,
+        // icon: 'search',
+        hideFromSidebar: true,
         useOwnLayout: true,
     },
     {

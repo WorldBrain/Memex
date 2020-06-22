@@ -27,6 +27,8 @@ import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from 'src/tags/utils'
 import { TagsSettings } from 'src/tags/background/types'
 import { limitSuggestionsStorageLength } from 'src/tags/background'
+import PDFBackground from 'src/pdf-viewer/background'
+import { isUrlToPdf } from 'src/pdf-viewer/util'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -41,6 +43,7 @@ export default class DirectLinkingBackground {
     private socialBg: SocialBG
     private _normalizeUrl: URLNormalizer
     private localStorage: BrowserSettingsStore<TagsSettings>
+    private pdfViewer: PDFBackground
 
     constructor(
         private options: {
@@ -50,10 +53,12 @@ export default class DirectLinkingBackground {
             socialBg: SocialBG
             searchIndex: SearchIndex
             normalizeUrl?: URLNormalizer
+            pdfViewer: PDFBackground
         },
     ) {
         this.socialBg = options.socialBg
         this.backend = new DirectLinkingBackend()
+        this.pdfViewer = options.pdfViewer
 
         this.annotationStorage = new AnnotationStorage({
             storageManager: options.storageManager,

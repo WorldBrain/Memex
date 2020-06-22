@@ -14,6 +14,7 @@ import { TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
 import { NotifButton } from './notif-button'
 import { HistoryPauser } from './pause-button'
+import { AnnotatePDFButton } from './annotatePDF-button'
 import {
     selectors as tagsSelectors,
     acts as tagActs,
@@ -46,6 +47,8 @@ export interface OwnProps {}
 interface StateProps {
     blacklistConfirm: boolean
     showTagsPicker: boolean
+    renderAnnotPdfBtn: boolean
+    pdfFingerprint: string
     showCollectionsPicker: boolean
     tabId: number
     url: string
@@ -198,6 +201,14 @@ class PopupContainer extends PureComponent<Props> {
                     </LinkButton>
                 </div>
                 <hr />
+                {this.props.renderAnnotPdfBtn && (
+                    <div className={styles.item}>
+                        <AnnotatePDFButton
+                            pdfURL={this.props.url}
+                            pdfFingerprint={this.props.pdfFingerprint}
+                        />
+                    </div>
+                )}
                 <div className={styles.item}>
                     <BookmarkButton closePopup={this.closePopup} />
                 </div>
@@ -255,6 +266,8 @@ class PopupContainer extends PureComponent<Props> {
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     tabId: selectors.tabId(state),
     url: selectors.url(state),
+    renderAnnotPdfBtn: selectors.renderAnnotPdfBtn(state),
+    pdfFingerprint: selectors.pdfFingerprint(state),
     searchValue: selectors.searchValue(state),
     blacklistConfirm: blacklist.showDeleteConfirm(state),
     showCollectionsPicker: collectionsSelectors.showCollectionsPicker(state),

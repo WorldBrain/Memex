@@ -8,12 +8,15 @@ import extractPageMetadataFromRawContent, {
 } from './content-extraction'
 import { PageDataResult } from './types'
 import { FetchPageDataError } from './fetch-page-data-error'
+import PdfViewerBackground from 'src/pdf-viewer/background'
+import { isUrlToPdf } from 'src/pdf-viewer/util'
 
 export type FetchPageData = (args: {
     url: string
     timeout?: number
     domParser?: (html: string) => Document
     opts?: FetchPageDataOpts
+    pdfViewerBackground?: PdfViewerBackground
 }) => FetchPageDataReturnValue
 export type RunXHR = () => Promise<PageDataResult>
 export type CancelXHR = () => void
@@ -62,7 +65,7 @@ const fetchPageData: FetchPageData = ({
     if (normalizedUrl.endsWith('.pdf')) {
         run = async () => ({
             content: opts.includePageContent
-                ? await extractPdfContent({ url })
+                ? await extractPdfContent(url)
                 : undefined,
         })
         cancel = () => undefined

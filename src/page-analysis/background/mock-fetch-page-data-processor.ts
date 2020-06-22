@@ -3,6 +3,7 @@ import { PageContent, FetchPageProcessor } from './types'
 export class MockFetchPageDataProcessor implements FetchPageProcessor {
     static DEF_PAGE: PageContent = {
         url: 'test.com',
+        pdfFingerprint: null,
         domain: 'test.com',
         hostname: 'test.com',
         fullTitle: 'Test',

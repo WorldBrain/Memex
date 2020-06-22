@@ -90,6 +90,7 @@ export async function main() {
             getCurrentUserClaims:
                 backgroundModules.auth.subscriptionService.getCurrentUserClaims,
         },
+        pdfViewer: backgroundModules.pdfViewer.remoteFunctions,
         notifications: { create: createNotification } as any,
         bookmarks: backgroundModules.search.remoteFunctions.bookmarks,
         sync: backgroundModules.sync.remoteFunctions,
@@ -105,6 +106,7 @@ export async function main() {
     window['bgModules'] = backgroundModules
     window['analytics'] = analytics
     window['tabMan'] = backgroundModules.activityLogger.tabManager
+    window['pdfViewer'] = backgroundModules.pdfViewer
 
     window['selfTests'] = await createSelfTests({
         storage: {

@@ -1053,6 +1053,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await searchModule(setup).searchIndex.addPage({
                                     pageDoc: {
                                         url: DATA.PAGE_1.fullUrl,
+                                        pdfFingerprint:
+                                            DATA.PAGE_1.pdfFingerprint,
                                         content: {},
                                     },
                                     visits: [DATA.VISIT_1],
@@ -1061,6 +1063,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await searchModule(setup).searchIndex.addPage({
                                     pageDoc: {
                                         url: DATA.PAGE_2.fullUrl,
+                                        pdfFingerprint:
+                                            DATA.PAGE_2.pdfFingerprint,
                                         content: {},
                                     },
                                     visits: [DATA.VISIT_1],

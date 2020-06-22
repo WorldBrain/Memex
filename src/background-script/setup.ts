@@ -54,6 +54,7 @@ import { Analytics } from 'src/analytics/types'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
 import { PipelineRes } from 'src/search'
 import { ReaderBackground } from 'src/reader/background'
+import PdfViewerBackground from 'src/pdf-viewer/background'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -79,6 +80,7 @@ export interface BackgroundModules {
     pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
     readable: ReaderBackground
+    pdfViewer: PdfViewerBackground
 }
 
 export function createBackgroundModules(options: {
@@ -89,6 +91,7 @@ export function createBackgroundModules(options: {
     localStorageChangesManager: StorageChangesManager
     fetchPageDataProcessor: FetchPageProcessor
     tabManager?: TabManager
+    pdfBackground?: PdfViewerBackground
     auth?: AuthBackground
     analyticsManager: Analytics
     authOptions?: { devAuthState: DevAuthState }
@@ -115,11 +118,14 @@ export function createBackgroundModules(options: {
         bookmarksStorage: bookmarks.storage,
         tabManager,
     })
+    const pdfViewer = new PdfViewerBackground({})
+
     const activityLogger = new ActivityLoggerBackground({
         searchIndex,
         browserAPIs: options.browserAPIs,
         tabManager,
         pageStorage: pages.storage,
+        pdfViewer,
     })
 
     const search = new SearchBackground({
@@ -198,6 +204,7 @@ export function createBackgroundModules(options: {
     return {
         auth,
         social,
+        pdfViewer,
         analytics,
         jobScheduler,
         notifications,
@@ -210,6 +217,7 @@ export function createBackgroundModules(options: {
             socialBg: social,
             searchIndex: search.searchIndex,
             pageStorage: pages.storage,
+            pdfViewer,
         }),
         search,
         eventLog: new EventLogBackground({ storageManager }),

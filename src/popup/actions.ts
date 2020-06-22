@@ -6,6 +6,7 @@ import { acts as bookmarkActs } from './bookmark-button'
 import { acts as tagActs } from './tags-button'
 import { acts as collectionActs } from './collections-button'
 import { acts as blacklistActs } from './blacklist-button'
+import { isUrlToPdf, fetchPdfFingerprint } from 'src/pdf-viewer/util'
 
 const fetchPageTagsRPC = remoteFunction('fetchPageTags')
 const fetchListsRPC = remoteFunction('fetchListPagesByUrl')
@@ -17,6 +18,7 @@ const fetchTabByUrlRPC = remoteFunction('fetchTabByUrl')
 
 export const setTabId = createAction<number>('popup/setTabId')
 export const setUrl = createAction<string>('popup/setUrl')
+export const setFingerprint = createAction<string>('popup/setPdfFingerprint')
 export const setSearchVal = createAction<string>('popup/setSearchVal')
 
 const getCurrentTab = async () => {
@@ -42,6 +44,10 @@ const setTabAndUrl: (id: number, url: string) => Thunk = (id, url) => async (
     await dispatch(setUrl(url))
 }
 
+const setPdfFingerprint: (url: string) => Thunk = (url) => async (dispatch) => {
+    await dispatch(setFingerprint(url))
+}
+
 const setTabIsBookmarked: (tabId: number) => Thunk = (tabId) => async (
     dispatch,
 ) => {
@@ -52,6 +58,9 @@ const setTabIsBookmarked: (tabId: number) => Thunk = (tabId) => async (
 // N.B. This is also setup for all injections of the content script. Mainly so that keyboard shortcuts (bookmark) has the data when needed.
 export const initBasicStore: () => Thunk = () => async (dispatch) => {
     const currentTab = await getCurrentTab()
+    const pdfFingerprint = isUrlToPdf
+        ? await fetchPdfFingerprint(currentTab.url)
+        : null
 
     // If we can't get the tab data, then can't init action button states
     if (!currentTab || !currentTab.url) {
@@ -59,11 +68,15 @@ export const initBasicStore: () => Thunk = () => async (dispatch) => {
         return false
     }
     await dispatch(setTabAndUrl(currentTab.id, currentTab.url))
+    await dispatch(setPdfFingerprint(pdfFingerprint))
     await dispatch(setTabIsBookmarked(currentTab.id))
 }
 
 export const initState: () => Thunk = () => async (dispatch) => {
     const currentTab = await getCurrentTab()
+    const pdfFingerprint = isUrlToPdf
+        ? await fetchPdfFingerprint(currentTab.url)
+        : null
 
     // If we can't get the tab data, then can't init action button states
     if (!currentTab || !currentTab.url) {
@@ -72,6 +85,7 @@ export const initState: () => Thunk = () => async (dispatch) => {
     }
 
     await dispatch(setTabAndUrl(currentTab.id, currentTab.url))
+    await dispatch(setPdfFingerprint(pdfFingerprint))
 
     const isBlacklisted = await isURLBlacklistedRPC(currentTab.url)
     dispatch(blacklistActs.setIsBlacklisted(isBlacklisted))
