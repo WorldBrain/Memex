@@ -1,6 +1,5 @@
 import { PDF_VIEWER_ROOT_URL } from './constants'
 import PDFJS from 'pdfjs-dist'
-import { Metadata, PDFData } from './background/types'
 
 export function isUrlToPdf(url: string) {
     return url.endsWith('.pdf')

@@ -12,13 +12,13 @@ import PDFJS from 'pdfjs-dist'
 import SidebarContainer, {
     SidebarContainer as SidebarContainerUI,
 } from 'src/in-page-ui/sidebar/react/containers/sidebar'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+// import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
-import { AnnotationInterface } from 'src/direct-linking/background/types'
-import { RemoteTagsInterface } from 'src/tags/background/types'
-import { BookmarksInterface } from 'src/bookmarks/background/types'
-import { SearchInterface } from 'src/search/background/types'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+// import { AnnotationInterface } from 'src/direct-linking/background/types'
+// import { RemoteTagsInterface } from 'src/tags/background/types'
+// import { BookmarksInterface } from 'src/bookmarks/background/types'
+// import { SearchInterface } from 'src/search/background/types'
+// import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 
 import { renderHighlights } from 'src/highlighting/ui/highlight-interactions'
 import { insertTooltip } from 'src/in-page-ui/tooltip/content_script/interactions'
@@ -192,23 +192,6 @@ export default class PdfViewerResultsContainer extends StatefulUIElement<
                 <div className={styles.container}>
                     <div id="pdf-viewer-container" className="pdf-viewer" />
                 </div>
-                <SidebarContainer
-                    env="overview"
-                    normalizeUrl={normalizeUrl}
-                    currentTab={{ url: 'http://worldbrain.io' } as any}
-                    annotations={runInBackground<
-                        AnnotationInterface<'caller'>
-                    >()}
-                    tags={runInBackground<RemoteTagsInterface>()}
-                    bookmarks={runInBackground<BookmarksInterface>()}
-                    search={runInBackground<SearchInterface>()}
-                    customLists={runInBackground<RemoteCollectionsInterface>()}
-                    inPageUI={this.state.pdfUI}
-                    setRef={this.setRefSidebarContainer}
-                    highlighter={this.state.highlighter as any}
-                    onClickOutside={this.handleClickOutsideSidebar}
-                    searchResultLimit={10}
-                />
             </>
         )
     }

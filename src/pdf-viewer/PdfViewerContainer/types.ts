@@ -1,6 +1,10 @@
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
 
-export interface PdfViewerDependencies {}
+export interface PdfViewerDependencies {
+    params: {
+        pdfId: string
+    }
+}
 
 export interface PdfViewerResultsState {
     viewerShow: boolean
