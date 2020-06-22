@@ -30,7 +30,7 @@ const CreateListForm = props => (
                         className={cx(styles.tick, styles.button)}
                     />
                 </ButtonTooltip>
-                <ButtonTooltip tooltipText="Cancel" position="right">
+                <ButtonTooltip tooltipText="Cancel" position="bottom">
                     <button
                         onClick={props.closeCreateListForm}
                         className={cx(styles.deleteButton, styles.button)}

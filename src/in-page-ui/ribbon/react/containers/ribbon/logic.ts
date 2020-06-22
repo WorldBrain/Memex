@@ -27,6 +27,7 @@ type SubcomponentHandlers<
 export interface RibbonContainerState {
     loadState: TaskState
     isRibbonEnabled: boolean | null
+    areExtraButtonsShown: boolean
 
     highlights: ValuesOf<componentTypes.RibbonHighlightsProps>
     tooltip: ValuesOf<componentTypes.RibbonTooltipProps>
@@ -45,6 +46,7 @@ export type RibbonContainerEvents = UIEvent<
         hide: null
         toggleRibbon: null
         highlightAnnotations: null
+        toggleShowExtraButtons: null
     } & SubcomponentHandlers<'highlights'> &
         SubcomponentHandlers<'tooltip'> &
         // SubcomponentHandlers<'sidebar'> &
@@ -89,6 +91,7 @@ export class RibbonContainerLogic extends UILogic<
     getInitialState(): RibbonContainerState {
         return {
             loadState: 'pristine',
+            areExtraButtonsShown: false,
             isRibbonEnabled: null,
             highlights: {
                 areHighlightsEnabled: false,
@@ -103,9 +106,11 @@ export class RibbonContainerLogic extends UILogic<
             tagging: {
                 tags: [],
                 showTagsPicker: false,
+                pageHasTags: false,
             },
             lists: {
                 showListsPicker: false,
+                pageBelongsToList: false,
             },
             search: {
                 showSearchBox: false,
@@ -119,6 +124,13 @@ export class RibbonContainerLogic extends UILogic<
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial<RibbonContainerState>(this, async () => {
+            const { url } = this.dependencies.currentTab
+
+            const tags = await this.dependencies.tags.fetchPageTags({ url })
+            const lists = await this.dependencies.customLists.fetchPageLists({
+                url,
+            })
+
             this.emitMutation({
                 pausing: {
                     isPaused: {
@@ -145,11 +157,37 @@ export class RibbonContainerLogic extends UILogic<
                         $set: await this.dependencies.highlights.getState(),
                     },
                 },
+                tagging: {
+                    pageHasTags: {
+                        $set: tags.length > 0,
+                    },
+                },
+                lists: {
+                    pageBelongsToList: {
+                        $set: lists.length > 0,
+                    },
+                },
             })
         })
     }
 
     cleanup() {}
+
+    toggleShowExtraButtons: EventHandler<'toggleShowExtraButtons'> = ({
+        previousState,
+    }) => {
+        const mutation: UIMutation<RibbonContainerState> = {
+            areExtraButtonsShown: { $set: !previousState.areExtraButtonsShown },
+        }
+
+        if (!previousState.areExtraButtonsShown) {
+            mutation.commentBox = { showCommentBox: { $set: false } }
+            mutation.tagging = { showTagsPicker: { $set: false } }
+            mutation.lists = { showListsPicker: { $set: false } }
+        }
+
+        this.emitMutation(mutation)
+    }
 
     toggleRibbon: EventHandler<'toggleRibbon'> = async ({ previousState }) => {
         const shouldBeEnabled = !previousState.isRibbonEnabled
@@ -202,6 +240,7 @@ export class RibbonContainerLogic extends UILogic<
                       tagging: { showTagsPicker: { $set: false } },
                       lists: { showListsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
+                      areExtraButtonsShown: { $set: false },
                   }
                 : {}
 
@@ -291,6 +330,7 @@ export class RibbonContainerLogic extends UILogic<
                       commentBox: { showCommentBox: { $set: false } },
                       lists: { showListsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
+                      areExtraButtonsShown: { $set: false },
                   }
                 : {}
 
@@ -376,6 +416,7 @@ export class RibbonContainerLogic extends UILogic<
                       commentBox: { showCommentBox: { $set: false } },
                       tagging: { showTagsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
+                      areExtraButtonsShown: { $set: false },
                   }
                 : {}
 
@@ -392,6 +433,7 @@ export class RibbonContainerLogic extends UILogic<
                       commentBox: { showCommentBox: { $set: false } },
                       tagging: { showTagsPicker: { $set: false } },
                       lists: { showListsPicker: { $set: false } },
+                      areExtraButtonsShown: { $set: false },
                   }
                 : {}
 

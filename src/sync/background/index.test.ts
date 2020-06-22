@@ -300,7 +300,8 @@ function extensionSyncTests(suiteOptions: {
 
         await customLists(devices[1]).updateList({
             id: listId,
-            name: 'Updated List Title',
+            newName: 'Updated List Title',
+            oldName: 'My list',
         })
 
         await syncModule(devices[1]).remoteFunctions.forceIncrementalSync()
@@ -324,7 +325,8 @@ function extensionSyncTests(suiteOptions: {
 
         await customLists(devices[0]).updateList({
             id: listId,
-            name: 'Another Updated List Title',
+            newName: 'Another Updated List Title',
+            oldName: 'Updated List Title',
         })
 
         await syncModule(devices[0]).remoteFunctions.forceIncrementalSync()
@@ -591,6 +593,7 @@ function extensionSyncTests(suiteOptions: {
         const storageContents = await getStorageContents(
             devices[0].storageManager,
         )
+        await removeTermFieldsFromStorageContents(storageContents)
         delete storageContents['clientSyncLogEntry']
 
         const getTargetStorageContents = async () => {
@@ -608,7 +611,9 @@ function extensionSyncTests(suiteOptions: {
             source: devices[0].backgroundModules.sync,
             target: devices[1].backgroundModules.sync,
         })
-        expect(await getTargetStorageContents()).toEqual({
+        const targetStorageContentsBefore = await getTargetStorageContents()
+        await removeTermFieldsFromStorageContents(targetStorageContentsBefore)
+        expect(targetStorageContentsBefore).toEqual({
             ...storageContents,
             syncDeviceInfo: expectedDeviceInfo,
         })
@@ -617,7 +622,9 @@ function extensionSyncTests(suiteOptions: {
             source: devices[0].backgroundModules.sync,
             target: devices[1].backgroundModules.sync,
         })
-        expect(await getTargetStorageContents()).toEqual({
+        const targetStorageContentsAfter = await getTargetStorageContents()
+        await removeTermFieldsFromStorageContents(targetStorageContentsAfter)
+        expect(targetStorageContentsAfter).toEqual({
             ...storageContents,
             syncDeviceInfo: expectedDeviceInfo,
         })
@@ -632,10 +639,10 @@ function extensionSyncTests(suiteOptions: {
             }) => Promise<void>
             checkData: (params: {
                 device: BackgroundIntegrationTestSetup
-                expectData: (
-                    collections: string[],
-                    expacted: object,
-                ) => Promise<void>
+                expectData: (params: {
+                    collections: string[]
+                    expected: object
+                }) => Promise<void>
             }) => Promise<void>
         }) {
             const {
@@ -686,7 +693,7 @@ function extensionSyncTests(suiteOptions: {
 
             await params.checkData({
                 device: devices[1],
-                expectData: async (collections, expected) => {
+                expectData: async ({ collections, expected }) => {
                     const contents = await getStorageContents(
                         devices[1].storageManager,
                         { include: new Set(collections) },
@@ -696,7 +703,7 @@ function extensionSyncTests(suiteOptions: {
             })
         }
 
-        it('should not include pages in filtered initial Sync unless included in a custom list', async (setup: TestSetup) => {
+        it('should consider pages included in custom lists as active data', async (setup: TestSetup) => {
             const { customLists } = await setup()
 
             await runPassiveDataTest({
@@ -712,9 +719,13 @@ function extensionSyncTests(suiteOptions: {
                     })
                 },
                 checkData: async ({ expectData }) => {
-                    await expectData(
-                        ['pages', 'customLists', 'pageListEntries'],
-                        {
+                    await expectData({
+                        collections: [
+                            'pages',
+                            'customLists',
+                            'pageListEntries',
+                        ],
+                        expected: {
                             pages: [
                                 expect.objectContaining({
                                     fullUrl: 'http://www.bla.com/',
@@ -731,7 +742,108 @@ function extensionSyncTests(suiteOptions: {
                                 }),
                             ],
                         },
+                    })
+                },
+            })
+        })
+
+        it('should consider tagged pages as active data', async (setup: TestSetup) => {
+            const { customLists } = await setup()
+
+            await runPassiveDataTest({
+                setup,
+                insertDefaultPages: true,
+                insertData: async ({ device }) => {
+                    await device.backgroundModules.tags.addTagToPage({
+                        url: 'bla.com',
+                        tag: 'bla',
+                    })
+                },
+                checkData: async ({ expectData }) => {
+                    await expectData({
+                        collections: ['pages', 'tags'],
+                        expected: {
+                            pages: [
+                                expect.objectContaining({
+                                    fullUrl: 'http://www.bla.com/',
+                                }),
+                            ],
+                            tags: [
+                                expect.objectContaining({
+                                    url: 'bla.com',
+                                    name: 'bla',
+                                }),
+                            ],
+                        },
+                    })
+                },
+            })
+        })
+
+        it('should consider bookmarked pages as active data', async (setup: TestSetup) => {
+            const { customLists } = await setup()
+
+            await runPassiveDataTest({
+                setup,
+                insertDefaultPages: true,
+                insertData: async ({ device }) => {
+                    await device.backgroundModules.bookmarks.addBookmark({
+                        url: 'bla.com',
+                    })
+                },
+                checkData: async ({ expectData }) => {
+                    await expectData({
+                        collections: ['pages', 'bookmarks'],
+                        expected: {
+                            pages: [
+                                expect.objectContaining({
+                                    fullUrl: 'http://www.bla.com/',
+                                }),
+                            ],
+                            bookmarks: [
+                                expect.objectContaining({
+                                    url: 'bla.com',
+                                }),
+                            ],
+                        },
+                    })
+                },
+            })
+        })
+
+        it('should consider annotated pages as active data', async (setup: TestSetup) => {
+            const { customLists } = await setup()
+
+            await runPassiveDataTest({
+                setup,
+                insertDefaultPages: true,
+                insertData: async ({ device }) => {
+                    await device.backgroundModules.directLinking.annotationStorage.createAnnotation(
+                        {
+                            url: 'bla.com#12345',
+                            pageUrl: 'bla.com',
+                            pageTitle: 'bla title',
+                            comment: 'rgreggre',
+                        },
                     )
+                },
+                checkData: async ({ expectData }) => {
+                    await expectData({
+                        collections: ['pages', 'annotations'],
+                        expected: {
+                            pages: [
+                                expect.objectContaining({
+                                    fullUrl: 'http://www.bla.com/',
+                                }),
+                            ],
+                            annotations: [
+                                expect.objectContaining({
+                                    url: 'bla.com#12345',
+                                    pageUrl: 'bla.com',
+                                }),
+                            ],
+                        },
+                    })
                 },
             })
         })
@@ -817,18 +929,6 @@ function mobileSyncTests(suiteOptions: {
         }
     }
 
-    function removeTermFieldsFromStorageContents(
-        storageContents: StorageContents,
-    ) {
-        for (const [collectionName, objects] of Object.entries(
-            storageContents,
-        )) {
-            for (const object of objects) {
-                removeTermFieldsFromObject(object, { collectionName })
-            }
-        }
-    }
-
     async function getExtensionStorageContents(storageManager: StorageManager) {
         const extensionStorageContents = await getStorageContents(
             storageManager,
@@ -843,6 +943,7 @@ function mobileSyncTests(suiteOptions: {
     async function getMobileStorageContents(storageManager: StorageManager) {
         const mobileStorageContents = await getStorageContents(storageManager)
         await removeUnsyncedCollectionFromStorageContents(mobileStorageContents)
+        await removeTermFieldsFromStorageContents(mobileStorageContents)
         return mobileStorageContents
     }
 
@@ -1226,4 +1327,15 @@ function expectIncrementalSyncScheduled(
     expect(recurringTask.aproximateNextRun).toBeTruthy()
     const difference = recurringTask.aproximateNextRun - options.when
     expect(difference).toBeLessThan(options.margin)
+}
+
+function removeTermFieldsFromStorageContents(storageContents: StorageContents) {
+    for (const [collectionName, objects] of Object.entries(storageContents)) {
+        for (const object of objects) {
+            if (collectionName === 'pages') {
+                delete object.text
+            }
+            removeTermFieldsFromObject(object, { collectionName })
+        }
+    }
 }

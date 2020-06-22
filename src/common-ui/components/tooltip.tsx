@@ -24,12 +24,13 @@ class Tooltip extends React.PureComponent<Props> {
                         this.props.itemClass,
                         {
                             [styles.tooltipleft]:
-                                this.props.position === 'left',
+                                this.props.position === 'left' || this.props.position === 'leftSmallWidth',
                             [styles.tooltipright]:
                                 this.props.position === 'right',
                             [styles.tooltipbottom]:
                                 this.props.position === 'bottom',
-                            [styles.tooltiptop]: this.props.position === 'top',
+                            [styles.tooltiptop]: 
+                                this.props.position === 'top',
                             [styles.tooltipDate]:
                                 this.props.position === 'tooltipDate',
                             [styles.tooltipBottomLeft]:
@@ -43,6 +44,8 @@ class Tooltip extends React.PureComponent<Props> {
                         className={classNames(styles.tooltipContent, {
                             [styles.tooltipContentDate]:
                                 this.props.position === 'tooltipDate',
+                            [styles.leftSmallWidth]:
+                                this.props.position === 'leftSmallWidth',
                         })}
                     >
                         {this.props.children}

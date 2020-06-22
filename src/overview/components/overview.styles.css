@@ -1,0 +1,13 @@
+.pioneerBadge {
+	font-size: 14px;
+    cursor: pointer;
+    width: 150px;
+    height: 40px;
+    position: fixed;
+    border: none;
+    bottom: 0.9em;
+    right: 4.2em;
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+}

@@ -29,7 +29,7 @@ export const Success = ({ onClose }: { onClose: () => void }) => {
                     <ExternalLink
                         label={'Roadmap'}
                         href={
-                            'https://www.notion.so/262a367f7a2a48ff8115d2c71f700c14'
+                            'https://worldbrain.io/roadmap'
                         }
                     />{' '}
                     to learn about the full set of upcoming sync and mobile

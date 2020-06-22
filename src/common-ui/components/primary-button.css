@@ -2,8 +2,15 @@
     composes: CTA from 'src/common-ui/colors.css';
     display: inline-block;
     cursor: pointer;
-    padding: 10px 20px;
+    padding: 8px 16px;
     font-size: 14px;
+    color: #3a2f45;
+    text-align: center;
+
+    @media (max-width: 767px) {
+		font-size: 12px;
+		padding: 5px 10px;
+    }
 }
 
 .disabled {

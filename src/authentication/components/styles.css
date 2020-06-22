@@ -43,6 +43,10 @@
     padding-left: 0;
 }
 
+.PriceBox {
+    width: 100%;
+}
+
 .buttonBox {
     display: flex;
     flex-direction: row;
@@ -63,6 +67,7 @@
     text-align: center;
     justify-content: center;
     display: flex;
+    align-items: center;
 }
 
 .section {

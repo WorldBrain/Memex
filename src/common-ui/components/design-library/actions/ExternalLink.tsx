@@ -9,9 +9,10 @@ import {
 const StyledExternalLink = styled.a`
     cursor: pointer;
     display: inline-block;
+    font-size: 1em;
 `
 const StyledExternalLinkText = styled(TypographyActionText)`
-    font-size: ${fontSizeTitle}px;
+    font-size: 1em;
     text-decoration-line: underline;
     font-weight: normal;
     color: ${colorText};

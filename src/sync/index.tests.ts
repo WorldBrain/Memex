@@ -37,7 +37,7 @@ function maybeMark(s: string, mark: false | null | undefined | string): string {
 }
 
 function registerSyncBackAndForthTests(test: BackgroundIntegrationTest) {
-    const testOptions = test.instantiate()
+    const testOptions = test.instantiate({ isSyncTest: true })
     const syncPatterns = generateSyncPatterns([0, 1], testOptions.steps.length)
     for (const pattern of syncPatterns) {
         const description = `should work when synced in pattern ${getReadablePattern(
@@ -117,7 +117,7 @@ function registerConflictGenerationTests(test: BackgroundIntegrationTest) {
     const description =
         'should work when device A syncs an action, device B does the same action, then syncs'
     it(maybeMark(description, test.mark && '!!!'), async () => {
-        const testInstance = test.instantiate()
+        const testInstance = test.instantiate({ isSyncTest: true })
         const sequence = generateConfictingActionsTestSequence({ testInstance })
         await runSyncBackgroundTest({
             sequence,
@@ -201,7 +201,7 @@ async function runSyncBackgroundTest(options: {
         deviceCount: options.deviceCount,
     })
 
-    const testInstance = await options.test.instantiate()
+    const testInstance = await options.test.instantiate({ isSyncTest: true })
     for (const sequenceStep of options.sequence) {
         const integrationTestStep =
             testInstance.steps[sequenceStep.integrationStepIndex]
@@ -237,7 +237,7 @@ async function runSyncBackgroundTest(options: {
                 const executedOperations = setup.storageOperationLogger.popOperations()
                 expect(
                     executedOperations.filter(
-                        entry => entry.operation[1] !== 'clientSyncLogEntry',
+                        (entry) => entry.operation[1] !== 'clientSyncLogEntry',
                     ),
                 ).toEqual(integrationTestStep.expectedStorageOperations())
             }
@@ -299,7 +299,7 @@ async function setupSyncBackgroundTest(options: {
         const setup = setups[deviceIndex]
         await setup.backgroundModules.sync.continuousSync.doIncrementalSync({
             debug: syncOptions.debug,
-            prettifier: object =>
+            prettifier: (object) =>
                 require('util').inspect(object, {
                     depth: null,
                     color: true,

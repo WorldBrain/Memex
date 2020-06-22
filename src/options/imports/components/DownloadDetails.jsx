@@ -1,15 +1,15 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import classNames from 'classnames'
+// import classNames from 'classnames'
 
 import localStyles from './DownloadDetails.css'
-import styles from '../../options.css'
+// import styles from '../../options.css'
 
-const filterClass = classNames(localStyles.filterOption, styles.buttonNaked)
+// const filterClass = classNames(localStyles.filterOption, styles.buttonNaked)
 
 const DownloadDetails = ({ children, filterHandlers, filter }) => (
     <div className={localStyles.detailsContainer}>
-        <div className={localStyles.filters}>
+        {/* <div className={localStyles.filters}>
             <button className={filterClass} onClick={filterHandlers.all}>
                 All
             </button>
@@ -20,13 +20,13 @@ const DownloadDetails = ({ children, filterHandlers, filter }) => (
                 Failed (
                 <a
                     target="_blank"
-                    href="https://www.notion.so/worldbrain/Imports-fail-and-freeze-3b8a2a55b7da48288ff1e29f6d43b8db"
+                    href="https://worldbrain.io/import_bug"
                 >
                     ?
                 </a>
                 )
             </button>
-        </div>
+        </div> */}
         <table className={localStyles.detailsTable}>
             <thead className={localStyles.detailsTableHead}>
                 <tr>

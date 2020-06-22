@@ -4,8 +4,13 @@ import OnboardingTooltip from 'src/overview/onboarding/components/onboarding-too
 import QRCanvas from 'src/common-ui/components/qr-canvas'
 import React from 'react'
 import ResultsMessageDismissible from 'src/overview/results/components/results-message-dismissible'
+import TextInputControlled from 'src/common-ui/components/TextInputControlled'
+import { action } from '@storybook/addon-actions'
 
 storiesOf('Other', module)
+    .add('Controlled input', () => (
+        <TextInputControlled onChange={action('onChange')} value={'test'} />
+    ))
     .add('No steps seen/completed', () => (
         <ProgressStepContainer totalSteps={4} onStepClick={() => undefined} />
     ))

@@ -77,7 +77,10 @@ class TextInputControlled extends React.Component<
     // -- Methods primarily to do with keeping the selection state in sync --
     componentDidMount() {
         this.registerEventListeners()
-        this.textElement.focus()
+
+        setTimeout(() => {
+            this.textElement.focus()
+        }, 200)
 
         this.updateTextElement({
             text: this.props.defaultValue,
@@ -98,7 +101,10 @@ class TextInputControlled extends React.Component<
         prevState: Readonly<ControlledTextInputState>,
         snapshot?: any,
     ): void {
-        if (this.props.defaultValue !== this.state.text) {
+        if (
+            this.props.defaultValue !== prevProps.defaultValue &&
+            this.props.defaultValue !== this.state.text
+        ) {
             this.updateTextElement({
                 text: this.props.defaultValue,
                 selection: {

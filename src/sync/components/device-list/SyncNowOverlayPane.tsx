@@ -143,7 +143,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                     </div>
                 )}
                 {this.state.devices.length === 0 && syncFeatureAllowed && (
-                    <div className={settingsStyle.buttonArea}>
+                    <div className={settingsStyle.buttonAreaSyncOverlay}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
                                 Sync Status
@@ -161,7 +161,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                 )}
 
                 {this.props.currentUser === null && (
-                    <div className={settingsStyle.buttonArea}>
+                    <div className={settingsStyle.buttonAreaSyncOverlay}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
                                 Sync Status
@@ -178,7 +178,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                     </div>
                 )}
                 {!syncFeatureAllowed && this.props.currentUser && (
-                    <div className={settingsStyle.buttonArea}>
+                    <div className={settingsStyle.buttonAreaSyncOverlay}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
                                 Sync Status
@@ -198,7 +198,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                 {syncFeatureAllowed &&
                     this.state.devices.length > 0 &&
                     !this.state.isSyncing && (
-                        <div className={settingsStyle.buttonArea}>
+                        <div className={settingsStyle.buttonAreaSyncOverlay}>
                             <div>
                                 <div className={settingsStyle.sectionTitle}>
                                     Sync Enabled
@@ -216,7 +216,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                     )}
 
                 {this.state.isSyncing && (
-                    <div className={settingsStyle.buttonArea}>
+                    <div className={settingsStyle.buttonAreaSyncOverlay}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
                                 Sync Status
@@ -233,7 +233,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                     </div>
                 )}
                 {this.state.syncError && (
-                    <div className={settingsStyle.buttonArea}>
+                    <div className={settingsStyle.buttonAreaSyncOverlay}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
                                 Sync Failed

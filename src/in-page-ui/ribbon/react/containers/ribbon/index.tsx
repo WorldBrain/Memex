@@ -14,6 +14,7 @@ export interface RibbonContainerProps extends RibbonContainerOptions {
     isSidebarOpen: boolean
     openSidebar: () => void
     closeSidebar: () => void
+    setRef?: (el: HTMLElement) => void
 }
 
 export default class RibbonContainer extends StatefulUIElement<
@@ -54,6 +55,11 @@ export default class RibbonContainer extends StatefulUIElement<
     render() {
         return (
             <Ribbon
+                setRef={this.props.setRef}
+                toggleShowExtraButtons={() => {
+                    this.processEvent('toggleShowExtraButtons', null)
+                }}
+                showExtraButtons={this.state.areExtraButtonsShown}
                 isExpanded={this.props.state === 'visible'}
                 getRemoteFunction={this.props.getRemoteFunction}
                 // annotationsManager={this.props.annotationsManager}

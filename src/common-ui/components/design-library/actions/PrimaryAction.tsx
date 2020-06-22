@@ -22,7 +22,6 @@ const Button = styled.button`
 
     /* inherit font & color from ancestor */
     color: inherit;
-    font: inherit;
 
     /* Normalize \`line-height\`. Cannot be changed from \`normal\` in Firefox 4+. */
     line-height: normal;
@@ -40,7 +39,7 @@ const Button = styled.button`
 `
 
 const StyledPrimaryAction = styled(Button)`
-    padding: 10px 20px;
+    padding: 8px 20px;
     background: ${props => (props.disabled ? colorDisabled : colorPrimary)};
     border-radius: 5px;
     cursor: pointer;

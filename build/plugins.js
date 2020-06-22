@@ -38,10 +38,11 @@ export default function ({
     extPackageName = 'extension.zip',
     sourcePackageName = 'source-code.zip',
 }) {
-    const envs = initEnv({ mode })
+    const { defaultEnv, envPath } = initEnv({ mode })
+
     const plugins = [
-        new EnvironmentPlugin(envs),
-        new Dotenv(),
+        new EnvironmentPlugin(defaultEnv),
+        new Dotenv({ path: envPath }),
         new CopyPlugin(staticFiles.copyPatterns),
         new HtmlPlugin({
             title: 'Popup',
@@ -70,7 +71,13 @@ export default function ({
                 environmentHash: {
                     root: process.cwd(),
                     directories: [],
-                    files: ['package-lock.json', 'yarn.lock', '.env'],
+                    files: [
+                        'yarn.lock',
+                        'package-lock.json',
+                        'private/.env.example',
+                        'private/.env.production',
+                        'private/.env.development',
+                    ],
                 },
             }),
         )
@@ -80,6 +87,7 @@ export default function ({
                 release: process.env.npm_package_version,
                 include: output.path,
                 dryRun: !runSentry,
+                debug: true,
             }),
         )
     }

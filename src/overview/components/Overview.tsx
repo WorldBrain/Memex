@@ -15,6 +15,20 @@ import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
+<<<<<<< HEAD
+=======
+import { AnnotationInterface } from 'src/direct-linking/background/types'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { BookmarksInterface } from 'src/bookmarks/background/types'
+import { RemoteTagsInterface } from 'src/tags/background/types'
+import { SearchInterface } from 'src/search/background/types'
+import { auth, featuresBeta } from 'src/util/remote-functions-background'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+
+const styles = require('./overview.styles.css')
+const resultItemStyles = require('src/common-ui/components/result-item.css')
+>>>>>>> develop
 
 export interface Props {
     pageUrl: string
@@ -23,7 +37,88 @@ export interface Props {
     handleReaderViewClick: (url: string) => void
 }
 
+interface State {
+    showPioneer: boolean
+}
+
 class Overview extends PureComponent<Props> {
+<<<<<<< HEAD
+=======
+    private annotationsSidebar: AnnotationsSidebar
+
+    state = {
+        showPioneer: false
+    }
+
+    componentDidMount() {
+        this.props.init() 
+        this.showPioneer()
+    }
+
+    async showPioneer() {
+        if(await auth.isAuthorizedForFeature('beta')){
+            this.setState({
+                showPioneer: true,
+            })
+        }
+    }
+
+    get mockInPageUI() {
+        return {
+            state: {},
+            events: new EventEmitter(),
+            hideRibbon: () => undefined,
+            hideSidebar: () => undefined,
+        }
+    }
+
+    get mockHighlighter() {
+        return {
+            removeTempHighlights: () => undefined,
+            renderHighlight: () => undefined,
+        }
+    }
+
+    private setAnnotsSidebarRef = (sidebar) => {
+        this.annotationsSidebar = sidebar
+    }
+
+    private handleAnnotationSidebarToggle = async (args?: {
+        pageUrl: string
+        pageTitle?: string
+    }) => {
+        const isAlreadyOpenForOtherPage =
+            args.pageUrl !==
+            this.annotationsSidebar.state.showAnnotsForPage?.url
+
+        if (
+            this.annotationsSidebar.state.state === 'hidden' ||
+            isAlreadyOpenForOtherPage
+        ) {
+            await this.annotationsSidebar.processEvent(
+                'togglePageAnnotationsView',
+                args,
+            )
+            this.annotationsSidebar.showSidebar()
+        } else if (this.annotationsSidebar.state.state === 'visible') {
+            this.annotationsSidebar.hideSidebar()
+        }
+    }
+
+    private handleClickOutsideSidebar: React.MouseEventHandler = (e) => {
+        const wasResultAnnotBtnClicked = (e.target as HTMLElement)?.classList?.contains(
+            resultItemStyles.commentBtn,
+        )
+
+        if (
+            !wasResultAnnotBtnClicked &&
+            this.annotationsSidebar.state.state === 'visible'
+        ) {
+            this.annotationsSidebar.hideSidebar()
+        }
+    }
+
+>>>>>>> develop
     handleOnboardingComplete = () => {
         window.location.href = OVERVIEW_URL
         this.props.setShowOnboardingMessage()
@@ -41,6 +136,8 @@ class Overview extends PureComponent<Props> {
     }
 
     renderOverview() {
+
+        console.log(this.state.showPioneer)
         return (
             <div>
                 <Head />
@@ -55,6 +152,7 @@ class Overview extends PureComponent<Props> {
                 />
                 <DeleteConfirmModal message="Delete page and related notes" />
                 <DragElement />
+               
 
                 {/* <div className={styles.productHuntContainer}>
                     <a
@@ -70,7 +168,21 @@ class Overview extends PureComponent<Props> {
                 </div> */}
 
                 <Tooltip />
-                <HelpBtn />
+                <div className={styles.rightCorner} >
+                    {this.state.showPioneer && (
+                            <div 
+                                 onClick={()=>{window.open('#/features')}}
+                                 className={styles.pioneerBadge}>
+                                 <ButtonTooltip
+                                    tooltipText="Thank you for supporting this journey 🙏"
+                                    position="top"
+                                >
+                                👨🏾‍🚀Pioneer Edition
+                                </ButtonTooltip>
+                            </div>
+                    )}
+                    <HelpBtn />
+                </div>
             </div>
         )
     }
@@ -90,6 +202,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
     init: () => {
+        featuresBeta.getFeatureState('copy-paster')
         return dispatch(searchBarActs.init())
     },
     setShowOnboardingMessage: () =>

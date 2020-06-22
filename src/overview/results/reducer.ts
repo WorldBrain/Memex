@@ -4,6 +4,7 @@ import * as acts from './actions'
 import { SearchResult, Result } from '../types'
 import { PageUrlsByDay } from 'src/search/background/types'
 import analytics from 'src/analytics'
+import { Template } from '../copy-paster/types'
 
 export interface State {
     /** Holds the current search results used to render to the UI. */
@@ -24,6 +25,10 @@ export interface State {
     activeListIndex: number
     /** Holds the index of the result which has the sidebar open (-1 by default) */
     activeSidebarIndex: number
+    /** Holds the index of the result which has the copy paster popup open (-1 by default) */
+    activeCopyPasterIndex: number
+    /** Holds copy paster templates */
+    copyPasterTemplates: Template[]
     /** Holds the current page of results that the user has scrolled to (0-based). */
     currentPage: number
     /** Holds the total count of matching results to the current search (includes not-shown results). */
@@ -38,6 +43,8 @@ export interface State {
     annotsByDay: PageUrlsByDay
     /** Denotes the type of search performed */
     searchType: 'notes' | 'page' | 'social'
+    /** Is the user granted access to beta features */
+    isBetaEnabled: boolean
 }
 
 export const defaultState: State = {
@@ -49,6 +56,8 @@ export const defaultState: State = {
     activeTagIndex: -1,
     activeListIndex: -1,
     activeSidebarIndex: -1,
+    activeCopyPasterIndex: -1,
+    copyPasterTemplates: [],
     currentPage: 0,
     totalCount: null,
     searchCount: 0,
@@ -57,6 +66,7 @@ export const defaultState: State = {
     isAnnotsSearch: false,
     annotsByDay: null,
     searchType: 'page',
+    isBetaEnabled: false,
 }
 
 const handleSearchResult = (overwrite: boolean) => (
@@ -103,6 +113,11 @@ const reducer = createReducer<State>({}, defaultState)
 reducer.on(acts.setShowOnboardingMessage, (state, showOnboardingMessage) => ({
     ...state,
     showOnboardingMessage,
+}))
+
+reducer.on(acts.setBetaFeatures, (state, isBetaEnabled) => ({
+    ...state,
+    isBetaEnabled,
 }))
 
 reducer.on(acts.addList, (state, { list, index }) => {
@@ -242,6 +257,21 @@ reducer.on(acts.setActiveListIndex, (state, payload) => ({
     activeListIndex: payload,
 }))
 
+reducer.on(acts.resetActiveCopyPasterIndex, (state) => ({
+    ...state,
+    activeCopyPasterIndex: defaultState.activeCopyPasterIndex,
+}))
+
+reducer.on(acts.setActiveCopyPasterIndex, (state, payload) => ({
+    ...state,
+    activeCopyPasterIndex: payload,
+}))
+
+reducer.on(acts.setCopyPasterTemplates, (state, payload) => ({
+    ...state,
+    copyPasterTemplates: payload,
+}))
+
 reducer.on(acts.resetActiveSidebarIndex, (state) => ({
     ...state,
     activeSidebarIndex: defaultState.activeSidebarIndex,
@@ -285,6 +315,7 @@ reducer.on(acts.setLoading, (state, payload) => ({
     ...state,
     isLoading: payload,
 }))
+
 reducer.on(acts.appendSearchResult, handleSearchResult(false))
 reducer.on(acts.resetSearchResult, (state) => ({
     ...state,
@@ -300,6 +331,25 @@ reducer.on(acts.setSearchResult, handleSearchResult(true))
 reducer.on(acts.setSearchType, (state, searchType) => ({
     ...state,
     searchType,
+}))
+
+// Go over every result, and update their lists if they have `oldName`
+reducer.on(acts.updateListName, (state, [oldName, newName]) => ({
+    ...state,
+    results: state.results.map((res) => {
+        const index = res.lists.indexOf(oldName)
+
+        return index === -1
+            ? res
+            : {
+                  ...res,
+                  lists: [
+                      ...res.lists.slice(0, index),
+                      newName,
+                      ...res.lists.slice(index + 1),
+                  ],
+              }
+    }),
 }))
 
 export default reducer

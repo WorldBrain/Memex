@@ -17,6 +17,7 @@ const commentEmpty = browser.extension.getURL('/img/comment_empty.svg')
 const commentFull = browser.extension.getURL('/img/comment_full.svg')
 const deleteItem = browser.extension.getURL('/img/trash.svg')
 const readerIcon = browser.extension.getURL('/img/eye.svg')
+const copy = browser.extension.getURL('/img/copy.svg')
 
 class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
     get bookmarkClass() {
@@ -43,6 +44,16 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                         e.stopPropagation()
                     }}
                 >
+                    {this.props.isBetaEnabled && (
+                        <ResultItemActionBtn
+                            imgSrc={copy}
+                            onClick={this.props.onCopyPasterBtnClick}
+                            tooltipText="Copy"
+                            className={styles.copy}
+                            refHandler={this.props.setCopyPasterButtonRef}
+                        />
+                    )}
+
                     <ResultItemActionBtn
                         imgSrc={readerIcon}
                         onClick={this.props.onReaderBtnClick}

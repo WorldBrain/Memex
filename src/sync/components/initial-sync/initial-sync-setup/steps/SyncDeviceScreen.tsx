@@ -41,21 +41,18 @@ export const SyncDeviceScreen = ({
         >
             <ProgressBox>
                 <CenterText>
-                    <TypographyBodyBold>
-                        {'Initial sync is in progress... this may take a while'}
-                    </TypographyBodyBold>
-                    <TypographyBodyCenter>
-                        {'Make sure both devices stay connected'}
-                    </TypographyBodyCenter>
-
                     <div className={styles.progressBar}>
                         {!error ? (
                             <div className={styles.progressBox}>
+
+                             <TypographyBodyBold>
+                                    {'Initial sync is in progress... this may take a while'}
+                                </TypographyBodyBold>
+                                <TypographyBodyCenter>
+                                    {'Make sure both devices stay connected'}
+                             </TypographyBodyCenter>
+
                                 <WhiteSpacer20 />
-                                <CancelAction
-                                    label={'Cancel'}
-                                    onClick={() => false}
-                                />
                                 {progressPct === undefined ? (
                                     <LoadingIndicator />
                                 ) : (
@@ -70,11 +67,6 @@ export const SyncDeviceScreen = ({
                         ) : (
                             <div className={styles.progressBox}>
                                 <Warning>⚠️ Something went wrong</Warning>
-                                <PrimaryAction
-                                    label={'Retry Syncing'}
-                                    onClick={handleRetry}
-                                />
-                                <WhiteSpacer30 />
                             </div>
                         )}
                     </div>
@@ -89,7 +81,7 @@ export const SyncDeviceScreen = ({
                         <ExternalLink
                             label={'Help & FAQ'}
                             href={
-                                'https://www.notion.so/worldbrain/Troubleshooting-the-Device-Sync-d1ccb11785774c389c621b44f65bb543'
+                                'https://worldbrain.io/help'
                             }
                         />
                     </HelpBlock>

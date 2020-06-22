@@ -73,6 +73,7 @@
     justify-content: center;
     align-items: center;
     overflow: visible;
+    margin-top: 5px;
 
     &::after {
         left: calc(50% - 3px);
@@ -215,7 +216,9 @@
 }
 
 .closeBtn {
-    height: 14px !important; /* stylelint-disable-line declaration-no-important */
+    & .buttonImg {
+        height: 14px !important; /* stylelint-disable-line declaration-no-important */
+    }
 }
 
 .noShow {

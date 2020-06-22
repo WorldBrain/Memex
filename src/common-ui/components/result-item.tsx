@@ -38,18 +38,22 @@ export interface Props extends Partial<SocialPage> {
     tagHolder: ReactNode
     tagManager: ReactNode
     listManager: ReactNode
+    copyPasterManager: ReactNode
     onTagBtnClick: MouseEventHandler
     onListBtnClick: MouseEventHandler
     onTrashBtnClick: MouseEventHandler
     onReaderBtnClick?: MouseEventHandler
     onCommentBtnClick: MouseEventHandler
     onToggleBookmarkClick: MouseEventHandler
+    onCopyPasterBtnClick: MouseEventHandler
     handleCrossRibbonClick: MouseEventHandler
     goToAnnotation: (annotation: any) => void
     resetUrlDragged: () => void
     setUrlDragged: (url: string) => void
     setTagButtonRef: (el: HTMLElement) => void
     setListButtonRef: (el: HTMLElement) => void
+    setCopyPasterButtonRef: (el: HTMLElement) => void
+    isBetaEnabled: boolean
 }
 
 class ResultItem extends PureComponent<Props> {
@@ -121,6 +125,7 @@ class ResultItem extends PureComponent<Props> {
                 )}
                 {this.props.tagManager}
                 {this.props.listManager}
+                {this.props.copyPasterManager}
                 <div
                     className={cx(styles.rootContainer, {
                         [styles.tweetRootContainer]: this.props.isSocial,

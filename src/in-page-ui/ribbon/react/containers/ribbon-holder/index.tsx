@@ -20,10 +20,12 @@ export default class RibbonHolder extends StatefulUIElement<
     RibbonHolderState,
     RibbonHolderEvents
 > {
-    shouldHide = false
+    mouseInRibbon = false
+    mouseInHolder = false
     isAnyPopupOpen = false
     hideTimeout?: ReturnType<typeof setTimeout>
-    ref: HTMLElement
+    holderEl: HTMLElement
+    ribbonEl: HTMLElement
 
     constructor(props) {
         super(props, new RibbonHolderLogic(props))
@@ -67,60 +69,102 @@ export default class RibbonHolder extends StatefulUIElement<
         }
     }
 
-    handleRef = (ref: HTMLDivElement) => {
-        if (ref) {
-            this.ref = ref
-            this.addEventListeners()
+    private handleHolderRef = (ref: HTMLDivElement) => {
+        if (!ref) {
+            return
         }
+
+        this.holderEl = ref
+        this.holderEl.addEventListener(
+            'mouseenter',
+            this.handleMouseEnterHolder,
+        )
+        this.holderEl.addEventListener('mouseleave', this.hideRibbonWithTimeout)
     }
 
-    addEventListeners() {
-        this.ref.addEventListener('mouseenter', this.handleMouseEnter)
-        this.ref.addEventListener('mouseleave', this.hideRibbonWithTimeout)
+    private handleRibbonRef = (ref: HTMLDivElement) => {
+        if (!ref) {
+            return
+        }
+
+        this.ribbonEl = ref
+        this.ribbonEl.addEventListener(
+            'mouseenter',
+            this.handleMouseEnterRibbon,
+        )
+        this.ribbonEl.addEventListener(
+            'mouseleave',
+            this.handleMouseLeaveRibbon,
+        )
     }
 
-    removeEventListeners() {
-        this.ref.removeEventListener('mouseenter', this.handleMouseEnter)
-        this.ref.removeEventListener('mouseleave', this.hideRibbonWithTimeout)
+    private removeEventListeners() {
+        this.holderEl.removeEventListener(
+            'mouseenter',
+            this.handleMouseEnterHolder,
+        )
+        this.holderEl.removeEventListener(
+            'mouseleave',
+            this.hideRibbonWithTimeout,
+        )
+
+        this.ribbonEl.removeEventListener(
+            'mouseenter',
+            this.handleMouseEnterRibbon,
+        )
+        this.ribbonEl.removeEventListener(
+            'mouseleave',
+            this.handleMouseLeaveRibbon,
+        )
     }
 
-    handleMouseEnter = () => {
-        this.shouldHide = false
+    private handleMouseLeaveRibbon = () => {
+        this.mouseInRibbon = false
+    }
+
+    private handleMouseEnterRibbon = () => {
+        this.mouseInRibbon = true
         this.props.inPageUI.showRibbon()
     }
 
-    showRibbon = () => {
-        this.processEvent('show', null)
+    private handleMouseEnterHolder = () => {
+        this.mouseInHolder = true
+        this.props.inPageUI.showRibbon()
     }
 
-    hideRibbonWithTimeout = () => {
-        this.shouldHide = true
+    private hideRibbonWithTimeout = () => {
+        this.mouseInHolder = false
         if (this.hideTimeout) {
             return
         }
 
         this.hideTimeout = setTimeout(() => {
             delete this.hideTimeout
-            if (this.shouldHide && !this.isAnyPopupOpen) {
+            if (
+                !this.mouseInHolder &&
+                !this.mouseInRibbon &&
+                !this.isAnyPopupOpen
+            ) {
                 this.props.inPageUI.hideRibbon()
             }
         }, RIBBON_HIDE_TIMEOUT)
     }
 
-    hideRibbon = () => {
-        this.processEvent('hide', null)
-    }
+    showRibbon = () => this.processEvent('show', null)
+
+    hideRibbon = () => this.processEvent('hide', null)
 
     render() {
         return (
             <div
-                ref={this.handleRef}
+                ref={this.handleHolderRef}
                 className={cx(styles.holder, {
                     [styles.withSidebar]: this.state.isSidebarOpen,
                 })}
             >
                 <RibbonContainer
                     {...this.props.containerDependencies}
+                    setRef={this.handleRibbonRef}
                     state={this.state.state}
                     inPageUI={this.props.inPageUI}
                     isSidebarOpen={this.state.isSidebarOpen}

@@ -114,7 +114,7 @@ export const EVENT_NOTIFS: EventNotifsDict = {
                     action: {
                         type: actionTypes.OPEN_URL,
                         url:
-                            'https://www.notion.so/worldbrain/2318f14ceeb741d6b7aa6c0ff00cb607',
+                            'https://worldbrain.io/warning/browser_data_loss',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
@@ -258,7 +258,7 @@ export const EVENT_NOTIFS: EventNotifsDict = {
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
+                        url: 'https://worldbrain.io/survey/disappointed',
                         context: 'new-tab',
                     },
                     label: 'Take Survey',
@@ -273,7 +273,7 @@ export const EVENT_NOTIFS: EventNotifsDict = {
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
+                        url: 'https://worldbrain.io/survey/disappointed',
                         context: 'new-tab',
                     },
                     label: 'Take Survey',
@@ -287,7 +287,7 @@ export const EVENT_NOTIFS: EventNotifsDict = {
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
+                        url: 'https://worldbrain.io/survey/disappointed',
                         context: 'new-tab',
                     },
                     label: 'Take Survey',

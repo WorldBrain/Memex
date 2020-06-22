@@ -26,7 +26,11 @@ export interface RemoteCollectionsInterface {
         url: string
         tabId?: number
     }): Promise<{ object: PageListEntry }>
-    updateListName(args: { id: number; name: string }): Promise<void>
+    updateListName(args: {
+        id: number
+        oldName: string
+        newName: string
+    }): Promise<void>
     removeList(args: { id: number }): Promise<any>
     removePageFromList(args: { id: number; url: string }): Promise<void>
     fetchAllLists(args: {

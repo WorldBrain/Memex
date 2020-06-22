@@ -211,6 +211,11 @@ export default class CustomListStorage extends StorageModule {
         return this.operation('findListEntriesByListId', { listId })
     }
 
+    async fetchListIdsByUrl(url: string): Promise<number[]> {
+        const entries = await this.operation('findListEntriesByUrl', { url })
+        return entries.map((entry) => entry.listId)
+    }
+
     async fetchListPagesByUrl({ url }: { url: string }) {
         const pages = await this.operation('findListEntriesByUrl', { url })
 

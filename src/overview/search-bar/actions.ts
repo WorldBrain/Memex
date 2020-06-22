@@ -1,4 +1,5 @@
 import { createAction } from 'redux-act'
+import { HASH_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 
 import { remoteFunction } from '../../util/webextensionRPC'
 import analytics from '../../analytics'
@@ -14,6 +15,7 @@ import {
 import { actions as notifActs } from '../../notifications'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import * as Raven from 'src/util/raven'
+import { auth, featuresBeta } from 'src/util/remote-functions-background'
 
 const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
@@ -42,7 +44,7 @@ export const setQueryTagsDomains: (
         terms.forEach((term) => {
             // If '#tag' pattern in input, and not already tracked, add to filter state
             if (
-                constants.HASH_TAG_PATTERN.test(term) &&
+                HASH_TAG_PATTERN.test(term) &&
                 !filters.tags(state).includes(stripTagPattern(term))
             ) {
                 dispatch(filterActs.toggleTagFilter(stripTagPattern(term)))
@@ -172,4 +174,14 @@ export const search: (args?: any) => Thunk = (
 export const init = () => (dispatch) => {
     dispatch(notifActs.updateUnreadNotif())
     dispatch(search({ overwrite: true, fromOverview: false }))
+
+    const getFeatures = async () => {
+        if (
+            (await auth.isAuthorizedForFeature('beta')) &&
+            (await featuresBeta.getFeatureState('copy-paster'))
+        ) {
+            dispatch(resultsActs.setBetaFeatures(true))
+        }
+    }
+    getFeatures()
 }

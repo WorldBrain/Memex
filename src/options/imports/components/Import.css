@@ -300,12 +300,10 @@
 }
 
 .showDetails {
-    color: #3eb995;
-    font-size: 12px;
-
-    &:hover {
-        cursor: pointer;
-    }
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    cursor: pointer;
 }
 
 .selectFile {

@@ -1,5 +1,7 @@
 import { UILogic, UIEvent } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
+import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
+
 import { KeyEvent, DisplayEntry, PickerUpdateHandler } from './types'
 
 export const INITIAL_STATE: GenericPickerState = {
@@ -399,6 +401,10 @@ export default abstract class GenericPickerLogic extends UILogic<
         if (entry === '') {
             throw Error(
                 `${this.pickerName} Validation: Can't add entry with only whitespace`,
+            )
+        } else if (!VALID_TAG_PATTERN.test(entry)) {
+            throw Error(
+                `${this.pickerName} Validation: Can't add invalid entry`,
             )
         }
 
