@@ -14,7 +14,7 @@
     transition: all 0.2s ease-in-out;
     cursor: default;
     overflow-y: scroll;
-    width: 800px;
+    width: 840px;
     height: fit-content;
     max-height: 95vh;
     max-width: 95vw;

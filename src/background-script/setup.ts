@@ -38,7 +38,7 @@ import {
     createAuthDependencies,
     DevAuthState,
 } from 'src/authentication/background/setup'
-import { FeatureOptIns } from 'src/feature-opt-in/background/feature-opt-ins'
+import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
 import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
 import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
@@ -53,6 +53,7 @@ import { AnalyticsBackground } from 'src/analytics/background'
 import { Analytics } from 'src/analytics/types'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
 import { PipelineRes } from 'src/search'
+import CopyPasterBackground from 'src/overview/copy-paster/background'
 import { ReaderBackground } from 'src/reader/background'
 
 export interface BackgroundModules {
@@ -78,6 +79,7 @@ export interface BackgroundModules {
     features: FeatureOptIns
     pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
+    copyPaster: CopyPasterBackground
     readable: ReaderBackground
 }
 
@@ -195,6 +197,15 @@ export function createBackgroundModules(options: {
           }).processor
         : undefined
 
+    const customLists = new CustomListBackground({
+        storageManager,
+        queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
+        windows: options.browserAPIs.windows,
+        searchIndex: search.searchIndex,
+        pageStorage: pages.storage,
+        localBrowserStorage: options.browserAPIs.storage.local,
+    })
+
     return {
         auth,
         social,
@@ -213,14 +224,7 @@ export function createBackgroundModules(options: {
         }),
         search,
         eventLog: new EventLogBackground({ storageManager }),
-        customLists: new CustomListBackground({
-            storageManager,
-            queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
-            windows: options.browserAPIs.windows,
-            searchIndex: search.searchIndex,
-            pageStorage: pages.storage,
-            localBrowserStorage: options.browserAPIs.storage.local,
-        }),
+        customLists,
         tags,
         bookmarks,
         backupModule: new backup.BackupBackgroundModule({
@@ -248,18 +252,51 @@ export function createBackgroundModules(options: {
             localBrowserStorage: options.browserAPIs.storage.local,
             fetchPageData: options.fetchPageDataProcessor,
             storePageContent,
-            addVisit: (visit) => pages.addVisit(visit.url, visit.time),
+            addVisit: (visit) =>
+                pages.addVisit(visit.normalizedUrl, visit.time),
             addBookmark: async (bookmark) => {
-                if (!(await bookmarks.storage.pageHasBookmark(bookmark.url))) {
-                    await bookmarks.addBookmark(bookmark)
+                if (
+                    !(await bookmarks.storage.pageHasBookmark(
+                        bookmark.normalizedUrl,
+                    ))
+                ) {
+                    await bookmarks.addBookmark({
+                        url: bookmark.normalizedUrl,
+                        time: bookmark.time,
+                    })
                 }
             },
-            addTags: (params) =>
-                Promise.all(
-                    params.tags.map((tag) =>
-                        tags.addTagToPage({ url: params.url, tag }),
-                    ),
-                ),
+            addTags: async (params) => {
+                const existingTags = await tags.storage.fetchPageTags({
+                    url: params.normalizedUrl,
+                })
+                await Promise.all(
+                    params.tags.map(async (tag) => {
+                        if (!existingTags.includes(tag)) {
+                            await tags.addTagToPage({
+                                url: params.normalizedUrl,
+                                tag,
+                            })
+                        }
+                    }),
+                )
+            },
+            addToLists: async (params) => {
+                const existingEntries = await customLists.storage.fetchListIdsByUrl(
+                    params.normalizedUrl,
+                )
+                await Promise.all(
+                    params.lists.map(async (listId) => {
+                        if (!existingEntries.includes(listId)) {
+                            await customLists.storage.insertPageToList({
+                                listId,
+                                pageUrl: params.normalizedUrl,
+                                fullUrl: params.fullUrl,
+                            })
+                        }
+                    }),
+                )
+            },
         }),
         features: new FeatureOptIns(),
         pages,
@@ -272,6 +309,13 @@ export function createBackgroundModules(options: {
         }),
         inPageUI: new InPageUIBackground({
             queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
+            createContextMenuEntry: bindMethod(
+                options.browserAPIs.contextMenus,
+                'create',
+            ),
+        }),
+        copyPaster: new CopyPasterBackground({
+            storageManager,
         }),
     }
 }
@@ -337,6 +381,7 @@ export function getBackgroundStorageModules(
         clientSyncLog: backgroundModules.sync.clientSyncLog,
         syncInfo: backgroundModules.sync.syncInfoStorage,
         pages: backgroundModules.pages.storage,
+        copyPaster: backgroundModules.copyPaster.storage,
         reader: backgroundModules.readable.storage,
     }
 }

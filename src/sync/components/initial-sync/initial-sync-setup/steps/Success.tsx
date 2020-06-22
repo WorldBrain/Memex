@@ -28,9 +28,7 @@ export const Success = ({ onClose }: { onClose: () => void }) => {
                     View our{' '}
                     <ExternalLink
                         label={'Roadmap'}
-                        href={
-                            'https://www.notion.so/262a367f7a2a48ff8115d2c71f700c14'
-                        }
+                        href={'https://worldbrain.io/roadmap'}
                     />{' '}
                     to learn about the full set of upcoming sync and mobile
                     features.

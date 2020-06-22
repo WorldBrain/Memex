@@ -1,4 +1,5 @@
 import { ContentScriptRegistry, TooltipScriptMain } from './types'
+
 import { bodyLoader } from 'src/util/loader'
 import { runOnScriptShutdown } from 'src/in-page-ui/tooltip/utils'
 import {

@@ -11,8 +11,7 @@
 
 .btn {
     composes: helpIcon from '../../../common-ui/icons.css';
-    composes: nakedSquareButton from '../../../common-ui/elements.css';
-    background-size: 30px;
+    mask-size: 30px;
     display: inline-flex;
     width: 40px;
     height: 40px;
@@ -22,5 +21,5 @@
     right: 1em;
     cursor: pointer;
     outline: none;
-    background-color: transparent;
+    background-color: #3a2f45;
 }

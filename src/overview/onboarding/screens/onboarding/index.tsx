@@ -100,7 +100,7 @@ export default class OnboardingScreen extends StatefulUIElement<
         )
         this.processEvent(
             'setTrackingEnabled',
-            await grabVal(TOOLTIP_STORAGE_NAME, defs.isTrackingEnabled),
+            await grabVal(TRACKING_STORAGE_NAME, defs.isTrackingEnabled),
         )
         this.processEvent(
             'setSidebarEnabled',

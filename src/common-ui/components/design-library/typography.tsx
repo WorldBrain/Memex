@@ -4,50 +4,123 @@ import {
     colorText,
 } from 'src/common-ui/components/design-library/colors'
 
-export const fontSizeSmallest = 12
-export const fontSizeSmall = 13
+export const fontSizeSmallest = 10
+export const fontSizeSmall = 12
 export const fontSizeNormal = 14
-export const fontSizeBig = 17
-export const fontSizeTitle = 16
-export const fontSizeBigger = 30
+export const fontSizeBig = 16
+export const fontSizeBigger = 18
+export const fontSizeTitle = 20
+export const fontSizeBiggerTitle = 22
 
-export const TypographyHeadingSmall = styled.span`
-    font-size: ${fontSizeNormal}px;
+export const TypographyBigTitle = styled.span`
+    font-size: ${fontSizeTitle}px;
+
+    @media (max-width: 1300px) {
+        font-size: ${fontSizeBigger}px;
+    }
+`
+export const TypographyHeadingBigger = styled.span`
+    font-size: ${fontSizeBigger}px;
     text-decoration: none;
+    color: ${colorText};
     margin-right: 5px;
+    font-weight: bold;
+    width: 100%;
 `
 
 export const TypographyHeadingBig = styled.span`
     font-size: ${fontSizeBig}px;
     text-decoration: none;
+    color: ${colorText};
     margin-right: 5px;
     font-weight: bold;
     text-align: center;
     width: 100%;
 `
 
-export const TypographyLink = styled.span`
+export const TypographyHeadingNormal = styled.span`
     font-size: ${fontSizeNormal}px;
     text-decoration: none;
+    margin-right: 5px;
+    font-weight: bold;
+    color: ${colorText};
+`
+
+export const TypographyHeadingSmall = styled.span`
+    font-size: ${fontSizeSmall}px;
+    text-decoration: none;
+    margin-right: 5px;
+    font-weight: bold;
+    color: ${colorText};
+`
+
+export const TypographyLink = styled.span`
+    text-decoration: none;
+    font-size: 1em;
     margin: 5px;
     color: ${colorPrimary};
     cursor: pointer;
-    padding: 5px;
 `
 
 export const TypographyHeadingPage = styled.span`
-    font-size: ${fontSizeTitle}px;
+    font-size: ${fontSizeBig}px;
     font-weight: 600;
     font-family: Poppins;
     font-style: normal;
     line-height: 1.4;
     text-align: left;
-    color: #544960;
+    color: ${colorText};
+
+    @media (max-width: 1300px) {
+        font-size: ${fontSizeNormal}px;
+    }
+`
+
+export const TypographySubHeading = styled.span`
+    font-size: ${fontSizeNormal}px;
+    font-weight: 600;
+    font-family: Poppins;
+    font-style: normal;
+    line-height: 1.4;
+    text-align: left;
+    color: ${colorText};
+
+    @media (max-width: 1300px) {
+        font-size: ${fontSizeSmall}px;
+    }
+`
+
+export const TypographyTextNormal = styled.span`
+    font-size: ${fontSizeNormal}px;
+    font-weight: 400;
+    font-family: Poppins;
+    font-style: normal;
+    line-height: 1.4;
+    text-align: left;
+    color: ${colorText};
+
+    @media (max-width: 1300px) {
+        font-size: ${fontSizeSmall}px;
+    }
+`
+
+export const TypographyTextSmall = styled.span`
+    font-size: ${fontSizeSmall}px;
+    font-weight: 400;
+    font-family: Poppins;
+    font-style: normal;
+    line-height: 1.4;
+    text-align: left;
+    color: ${colorText};
+
+    @media (max-width: 1300px) {
+        font-size: ${fontSizeSmallest}px;
+    }
 `
 
 export const TypographyInputTitle = styled.h2`
     font-family: 'Poppins', sans-serif;
-    font-size: ${fontSizeTitle}px;
+    font-size: ${fontSizeBigger}px;
     font-weight: bold;
     box-sizing: border-box;
     margin-bottom: 5px;
@@ -69,6 +142,7 @@ export const TypographyActionText = styled.span`
     font-family: Poppins;
     font-style: normal;
     font-weight: 600;
+    font-size: 1em;
 `
 
 export const TypographyBody = styled.span`

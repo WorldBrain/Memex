@@ -143,14 +143,12 @@
     composes: removeIcon from 'src/common-ui/icons.css';
     composes: onHoverDark from 'src/common-ui/colors.css';
     border-radius: 3px;
-    background-size: 10px;
+    mask-size: 10px;
     display: inline-block;
     cursor: pointer;
     width: 18px;
     height: 18px;
     margin-left: 5px;
-    background-repeat: no-repeat;
-    background-position: center;
 }
 
 .collectionsBtn {

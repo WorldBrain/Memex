@@ -29,16 +29,20 @@ function decideTitle(pageDoc) {
 /**
  * Returns page doc with modified title, isDeleting and tagPills data.
  */
-const editPageResults = ({ modalShown, deleting, tagIndex, listIndex }) => (
-    pageDoc,
-    i,
-) => ({
+const editPageResults = ({
+    modalShown,
+    deleting,
+    tagIndex,
+    listIndex,
+    copyPasterIndex,
+}) => (pageDoc, i) => ({
     ...pageDoc,
     title: decideTitle(pageDoc),
     isDeleting: !modalShown && i === deleting,
     tagPillsData: pageDoc.tags.slice(0, constants.SHOWN_TAGS_LIMIT),
     shouldDisplayTagPopup: i === tagIndex,
     shouldDisplayListPopup: i === listIndex,
+    shouldDisplayCopyPasterPopup: i === copyPasterIndex,
 })
 
 const resultsState = (state: RootState) => state.results
@@ -63,6 +67,19 @@ export const activeTagIndex = createSelector(
 export const activeSidebarIndex = createSelector(
     resultsState,
     (state) => state.activeSidebarIndex,
+)
+export const activeCopyPasterIndex = createSelector(
+    resultsState,
+    (state) => state.activeCopyPasterIndex,
+)
+export const copyPasterTemplates = createSelector(
+    resultsState,
+    (state) => state.copyPasterTemplates,
+)
+
+export const isBetaEnabled = createSelector(
+    resultsState,
+    (state) => state.isBetaEnabled,
 )
 
 export const currentPage = createSelector(
@@ -143,12 +160,23 @@ export const results = createSelector(
     deleteConfSelectors.indexToDelete,
     activeTagIndex,
     activeListIndex,
-    (docs, modalShown, deleting, tagIndex, listIndex) => {
+    activeCopyPasterIndex,
+    isBetaEnabled,
+    (
+        docs,
+        modalShown,
+        deleting,
+        tagIndex,
+        listIndex,
+        copyPasterIndex,
+        isBetaEnabled,
+    ) => {
         const docsMapFn = editPageResults({
             modalShown,
             deleting,
             tagIndex,
             listIndex,
+            copyPasterIndex,
         })
         return docs.map(docsMapFn)
     },

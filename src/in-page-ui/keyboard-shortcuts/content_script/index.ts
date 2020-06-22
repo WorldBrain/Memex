@@ -1,26 +1,18 @@
 import Mousetrap from 'mousetrap'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
-import {
-    userSelectedText,
-    createHighlightFromTooltip,
-} from 'src/in-page-ui/tooltip/content_script/interactions'
-import { createHighlight } from 'src/highlighting/ui'
-import { conditionallyRemoveOnboardingSelectOption } from 'src/in-page-ui/tooltip/onboarding-interactions'
-import { STAGES } from 'src/overview/onboarding/constants'
+import { userSelectedText } from 'src/in-page-ui/tooltip/content_script/interactions'
 import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { KeyboardShortcuts } from '../types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
+import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
 
 type HandleInterface = {
     [key in keyof KeyboardShortcuts]: () => void
 }
 
-export interface KeyboardShortcutsDependencies {
+export interface KeyboardShortcutsDependencies extends AnnotationFunctions {
     inPageUI: InPageUIInterface
-    annotationsManager: AnnotationsManager
-    pageUrl: string
-    pageTitle: string
 }
 
 export async function initKeyboardShortcuts(
@@ -50,9 +42,7 @@ function prepareShortcutHandler(handler: () => void) {
 
 function getShortcutHandlers({
     inPageUI,
-    annotationsManager,
-    pageTitle: title,
-    pageUrl: url,
+    ...annotationFunctions
 }: KeyboardShortcutsDependencies): HandleInterface {
     return {
         addComment: () => inPageUI.showRibbon({ action: 'comment' }),
@@ -63,29 +53,8 @@ function getShortcutHandlers({
             inPageUI.toggleSidebar()
         },
         toggleHighlights: () => inPageUI.toggleHighlights(),
-        createHighlight: () =>
-            createHighlightFromTooltip({
-                annotationsManager,
-                title,
-                url,
-                openSidebar: ({ activeUrl: annotationUrl }) =>
-                    inPageUI.showSidebar({
-                        action: 'show_annotation',
-                        annotationUrl,
-                    }),
-            }),
-        createAnnotation: async () => {
-            if (userSelectedText()) {
-                const highlight = await createHighlight(undefined, true)
-                await inPageUI.showSidebar({
-                    action: 'comment',
-                    anchor: highlight.selector,
-                })
-                await conditionallyRemoveOnboardingSelectOption(
-                    STAGES.annotation.annotationCreated,
-                )
-            }
-        },
+        createHighlight: annotationFunctions.createHighlight,
+        createAnnotation: annotationFunctions.createAnnotation,
         link: async () => {
             if (userSelectedText()) {
                 await createAndCopyDirectLink()

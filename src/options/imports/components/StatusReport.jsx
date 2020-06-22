@@ -1,6 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { TypographyHeadingSmall } from 'src/common-ui/components/design-library/typography'
+
 import localStyles from './Import.css'
 
 const StatusReport = ({
@@ -15,24 +17,16 @@ const StatusReport = ({
             <p>{`Succeeded (${successCount})`}</p>
             <p>
                 {`Failed (${failCount})`} (
-                <a
-                    target="_blank"
-                    href="https://www.notion.so/worldbrain/Imports-fail-and-freeze-3b8a2a55b7da48288ff1e29f6d43b8db"
-                >
+                <a target="_blank" href="https://worldbrain.io/import_bug">
                     ?
                 </a>
                 )
             </p>
             <p>{`Total (${successCount + failCount})`}</p>
             {children && (
-                <p>
-                    <a
-                        className={localStyles.showDetails}
-                        onClick={changeShowDetails}
-                    >
-                        {children}
-                    </a>
-                </p>
+                <TypographyHeadingSmall className={localStyles.showDetails}>
+                    <a onClick={changeShowDetails}>{children}</a>
+                </TypographyHeadingSmall>
             )}
         </div>
     </div>

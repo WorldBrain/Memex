@@ -294,7 +294,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
     ),
     backgroundIntegrationTest(
         "should create + visit two pages, update the text of one of them, then confirm the indexed terms still contain the old text's terms",
-        () => {
+        ({ isSyncTest }) => {
             return {
                 steps: [
                     createPagesStep,
@@ -305,13 +305,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                 .findOneObject<{ terms: string[] }>({
                                     url: DATA.PAGE_1.url,
                                 })
-                            expect(page.terms).toEqual(
-                                expect.arrayContaining([
-                                    'text',
-                                    'dummy',
-                                    'test',
-                                ]),
-                            )
+                            if (!isSyncTest) {
+                                expect(page.terms).toEqual(
+                                    expect.arrayContaining([
+                                        'text',
+                                        'dummy',
+                                        'test',
+                                    ]),
+                                )
+                            }
                         },
                         execute: async ({ setup }) => {
                             await searchModule(setup).searchIndex.addPageTerms({
@@ -333,34 +335,29 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                             '1': 'text',
                                             '2': 'dummy',
                                         },
-                                        text: 'some new updated text',
+                                        ...(!isSyncTest
+                                            ? { text: 'some new updated text' }
+                                            : {}),
                                     },
                                 },
                             }),
                         },
-                        expectedSyncLogEntries: () => [
-                            expect.objectContaining({
-                                collection: 'pages',
-                                pk: DATA.PAGE_1.url,
-                                value: {
-                                    text: 'some new updated text',
-                                },
-                            }),
-                        ],
                         postCheck: async ({ setup }) => {
                             const page = await setup.storageManager
                                 .collection('pages')
                                 .findOneObject<{ terms: string[] }>({
                                     url: DATA.PAGE_1.url,
                                 })
-                            expect(page.terms).toEqual(
-                                expect.arrayContaining([
-                                    'updated',
-                                    'text',
-                                    'dummy',
-                                    'test',
-                                ]),
-                            )
+                            if (!isSyncTest) {
+                                expect(page.terms).toEqual(
+                                    expect.arrayContaining([
+                                        'updated',
+                                        'text',
+                                        'dummy',
+                                        'test',
+                                    ]),
+                                )
+                            }
                         },
                     },
                 ],

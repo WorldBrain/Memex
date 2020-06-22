@@ -15,6 +15,7 @@ import {
     InPageUIEvents,
     SidebarActionOptions,
 } from 'src/in-page-ui/shared-state/types'
+import { acts as resultsActs } from 'src/overview/results'
 
 export interface SidebarContainerProps extends SidebarContainerOptions {
     /** If defined, overrides the default outside click behavior. */
@@ -289,6 +290,7 @@ export class SidebarContainer extends StatefulUIElement<
                     // this.processEvent('closeComments', null),
                 }}
                 resultsContainer={{
+                    isBetaEnabled: false,
                     needsWaypoint:
                         this.state.primarySearchState !== 'running' &&
                         this.state.secondarySearchState !== 'running' &&

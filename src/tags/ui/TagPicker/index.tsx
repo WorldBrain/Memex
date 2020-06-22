@@ -10,19 +10,20 @@ import TagPickerLogic, {
 } from 'src/tags/ui/TagPicker/logic'
 import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
 import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
-import { InitLoader } from 'src/common-ui/GenericPicker/components/InitLoader'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
 import EntryRow, {
     IconStyleWrapper,
     ActOnAllTabsButton,
 } from 'src/common-ui/GenericPicker/components/EntryRow'
-import { EntrySelectedList } from 'src/common-ui/GenericPicker/components/EntrySelectedList'
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { TagResultItem } from './components/TagResultItem'
 import { ActiveTag } from './components/ActiveTag'
+import { EntrySelectedTag } from './components/EntrySelectedTag'
+import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 
 class TagPicker extends StatefulUIElement<
     TagPickerDependencies,
@@ -31,6 +32,11 @@ class TagPicker extends StatefulUIElement<
 > {
     constructor(props: TagPickerDependencies) {
         super(props, new TagPickerLogic(props))
+    }
+
+    get shouldShowAddNew(): boolean {
+        const { newEntryName } = this.state
+        return newEntryName !== '' && VALID_TAG_PATTERN.test(newEntryName)
     }
 
     handleClickOutside = () => {
@@ -122,7 +128,11 @@ class TagPicker extends StatefulUIElement<
 
     renderMainContent() {
         if (this.state.loadingSuggestions) {
-            return <InitLoader size={20} />
+            return (
+                <LoadingBox>
+                    <LoadingIndicator />
+                </LoadingBox>
+            )
         }
 
         return (
@@ -136,15 +146,14 @@ class TagPicker extends StatefulUIElement<
                     value={this.state.query}
                     loading={this.state.loadingQueryResults}
                     before={
-                        <EntrySelectedList
-                            ActiveEntry={ActiveTag}
+                        <EntrySelectedTag
                             dataAttributeName="tag-name"
                             entriesSelected={this.state.selectedEntries}
                             onPress={this.handleSelectedTagPress}
                         />
                     }
                 />
-                {this.state.newEntryName !== '' && (
+                {this.shouldShowAddNew && (
                     <AddNewEntry
                         resultItem={
                             <TagResultItem>
@@ -180,6 +189,14 @@ class TagPicker extends StatefulUIElement<
         )
     }
 }
+
+const LoadingBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+`
 
 const OuterSearchBox = styled.div`
     background: ${(props) => props.theme.background};

@@ -7,6 +7,7 @@ import {
     StorexHubCallbacks_v0,
     HandleRemoteCallResult_v0,
 } from '@worldbrain/storex-hub/lib/public-api'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import {
     FetchPageProcessor,
     PageContent,
@@ -32,9 +33,26 @@ export class StorexHubBackground {
             fetchPageData: FetchPageProcessor
             storePageContent: (content: PageContent) => Promise<void>
             localBrowserStorage: Storage.LocalStorageArea
-            addVisit: (visit: { url: string; time: number }) => void
-            addBookmark: (bookmark: { url: string; time: number }) => void
-            addTags: (params: { url: string; tags: string[] }) => void
+            addVisit: (visit: {
+                normalizedUrl: string
+                fullUrl: string
+                time: number
+            }) => Promise<void>
+            addBookmark: (bookmark: {
+                normalizedUrl: string
+                fullUrl: string
+                time: number
+            }) => Promise<void>
+            addTags: (params: {
+                normalizedUrl: string
+                fullUrl: string
+                tags: string[]
+            }) => Promise<void>
+            addToLists: (params: {
+                normalizedUrl: string
+                fullUrl: string
+                lists: number[]
+            }) => Promise<void>
         },
     ) {
         this.logger = console['log'].bind(console)
@@ -101,10 +119,13 @@ export class StorexHubBackground {
             return { status: 'invalid-args' }
         }
 
+        const fullUrl = args.url
+        const normalizedUrl = normalizeUrl(fullUrl)
+
         let processedData: PipelineRes
         try {
             processedData = await this.dependencies.fetchPageData.process(
-                args.url,
+                fullUrl,
             )
         } catch (e) {
             return {
@@ -126,7 +147,8 @@ export class StorexHubBackground {
 
         try {
             await this.dependencies.addVisit({
-                url: args.url,
+                fullUrl,
+                normalizedUrl,
                 time: args.visitTime ?? Date.now(),
             })
         } catch (e) {
@@ -144,7 +166,8 @@ export class StorexHubBackground {
                         ? null
                         : args.bookmark.creationTime
                 await this.dependencies.addBookmark({
-                    url: args.url,
+                    fullUrl,
+                    normalizedUrl,
                     time: time || Date.now(),
                 })
             }
@@ -159,7 +182,8 @@ export class StorexHubBackground {
         try {
             if (args.tags) {
                 await this.dependencies.addTags({
-                    url: args.url,
+                    fullUrl,
+                    normalizedUrl,
                     tags: args.tags,
                 })
             }
@@ -168,6 +192,22 @@ export class StorexHubBackground {
                 status: 'internal-error',
                 errorStatus: 'could-not-tag',
                 errorText: `Error while adding tags to page: ${e}`,
+            }
+        }
+
+        try {
+            if (args.lists) {
+                await this.dependencies.addToLists({
+                    fullUrl,
+                    normalizedUrl,
+                    lists: args.lists,
+                })
+            }
+        } catch (e) {
+            return {
+                status: 'internal-error',
+                errorStatus: 'could-not-list',
+                errorText: `Error while adding page to lists: ${e}`,
             }
         }
 

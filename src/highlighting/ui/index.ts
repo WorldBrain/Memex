@@ -4,7 +4,10 @@ import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 import { Annotation } from 'src/annotations/types'
 import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
 
-export async function createHighlight(selection?: any, temporary = false) {
+export async function createHighlight(
+    selection?: Selection,
+    temporary = false,
+) {
     const url = window.location.href
     const title = document.title
 

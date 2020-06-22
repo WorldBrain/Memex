@@ -19,7 +19,19 @@
 }
 
 .tooltipTop {
-    transform: translateY(-28px);
+    transform: translateY(-40px);
+    justify-content: center;
+    align-items: center;
+    z-index: 250000;
+
+    &.tooltipBubble {
+        align-items: center;
+        justify-content: center;
+    }
+
+    &.tooltipContainer {
+        align-items: center;
+    }
 }
 
 .tooltipRight {

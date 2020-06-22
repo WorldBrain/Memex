@@ -12,5 +12,4 @@ export const WARN_NOTIF: Partial<NotifOpts> = {
     message: 'Your browser may stop imports suddenly. Find out why',
 }
 
-export const WARN_INFO_URL =
-    'https://www.notion.so/worldbrain/Imports-fail-and-freeze-3b8a2a55b7da48288ff1e29f6d43b8db'
+export const WARN_INFO_URL = 'https://worldbrain.io/import_bug'

@@ -3,4 +3,5 @@ export interface IndexPageArgs {
     visitTime?: number
     bookmark?: true | { creationTime: number }
     tags?: string[]
+    lists?: number[]
 }

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import styles from './CreateListForm.css'
 
-const CreateListForm = props => (
+const CreateListForm = (props) => (
     <div>
         <form
             className={styles.createListForm}
@@ -30,7 +30,7 @@ const CreateListForm = props => (
                         className={cx(styles.tick, styles.button)}
                     />
                 </ButtonTooltip>
-                <ButtonTooltip tooltipText="Cancel" position="right">
+                <ButtonTooltip tooltipText="Cancel" position="bottom">
                     <button
                         onClick={props.closeCreateListForm}
                         className={cx(styles.deleteButton, styles.button)}

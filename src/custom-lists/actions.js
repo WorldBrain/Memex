@@ -2,7 +2,7 @@ import { createAction } from 'redux-act'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
-
+import * as resultActs from 'src/overview/results/actions'
 import { selectors as filters } from 'src/search-filters'
 import analytics from 'src/analytics'
 import * as Raven from 'src/util/raven' // eslint-disable-line
@@ -59,7 +59,7 @@ export const toggleListFilterIndex = createAction(
 
 export const setUrlDragged = createAction(
     'custom-lists/setUrlDragged',
-    url => url,
+    (url) => url,
 )
 export const resetUrlDragged = createAction('custom-lists/resetUrlDragged')
 export const closeCreateListForm = createAction(
@@ -78,7 +78,7 @@ export const removeCommonNameWarning = createAction(
     'custom-lists/removeCommonNameWarning',
 )
 
-export const showEditBox = index => (dispatch, getState) => {
+export const showEditBox = (index) => (dispatch, getState) => {
     const activeListIndex = selectors.activeListIndex(getState())
     if (activeListIndex === index) {
         dispatch(resetActiveListIndex())
@@ -158,11 +158,23 @@ export const createPageList = (name, cb) => async (dispatch, getState) => {
     }
 }
 
-export const updateList = (index, name, id) => async (dispatch, getState) => {
+export const updateList = ([oldName, newName], id) => async (
+    dispatch,
+    getState,
+) => {
     dispatch(resetActiveListIndex())
+    const lists = selectors.allLists(getState())
+    const index = lists.findIndex((list) => list.name === oldName)
+
+    if (index === -1) {
+        return
+    }
+
     try {
-        await remoteFunction('updateListName')({ id, name })
-        dispatch(updateListName(name, index))
+        await remoteFunction('updateListName')({ id, newName, oldName })
+
+        dispatch(updateListName(newName, index))
+        dispatch(resultActs.updateListName([oldName, newName]))
     } catch (err) {
         Raven.captureException(err)
     }
@@ -182,12 +194,9 @@ export const deletePageList = () => async (dispatch, getState) => {
     }
 }
 
-export const addUrltoList = (
-    url,
-    isSocialPost,
-    index,
-    id,
-) => async dispatch => {
+export const addUrltoList = (url, isSocialPost, index, id) => async (
+    dispatch,
+) => {
     const addPagetoListRPC = isSocialPost ? 'addPostToList' : 'insertPageToList'
 
     try {

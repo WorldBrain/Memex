@@ -207,7 +207,8 @@ describe('Custom List Integrations', () => {
 
             await customLists.updateList({
                 id,
-                name: updatedName,
+                newName: updatedName,
+                oldName: '',
             })
 
             const after = await customLists.fetchListById({ id })

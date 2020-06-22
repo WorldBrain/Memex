@@ -63,18 +63,27 @@
 }
 
 .tooltipleft {
-    /*    &::after {
-        border-left: 9px solid #1a2f58;
-        border-top: 9px solid transparent;
-        border-bottom: 9px solid transparent;
-        right: 0;
-        transform: translateY(-50%);
-    } */
-
     &.tooltipBubble {
-        right: 23px;
-        top: -20px;
+        right: 33px;
+        top: -16px;
         overflow: visible;
+    }
+}
+
+.tooltipleft::after {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 10px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent transparent #fff;
+}
+
+.leftSmallWidth {
+    &.tooltipContent {
+        width: 180px;
+        padding: 5px 0;
     }
 }
 

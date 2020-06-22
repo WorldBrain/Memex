@@ -51,6 +51,7 @@ export interface RibbonBookmarkProps {
 }
 
 export interface RibbonTaggingProps extends CommonTaggingProps {
+    pageHasTags: boolean
     showTagsPicker: boolean
     updateTags: PickerUpdateHandler
     tagAllTabs: (value: string) => Promise<void>
@@ -70,6 +71,7 @@ export interface ListEntryArgs {
 }
 
 export interface RibbonListsProps {
+    pageBelongsToList: boolean
     showListsPicker: boolean
     updateLists: PickerUpdateHandler
     listAllTabs: (value: string) => Promise<void>

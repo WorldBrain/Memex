@@ -10,17 +10,17 @@ import ListPickerLogic, {
 } from 'src/custom-lists/ui/CollectionPicker/logic'
 import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
 import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
-import { InitLoader } from 'src/common-ui/GenericPicker/components/InitLoader'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
 import EntryRow, {
     IconStyleWrapper,
     ActOnAllTabsButton,
 } from 'src/common-ui/GenericPicker/components/EntryRow'
-import { EntrySelectedList } from 'src/common-ui/GenericPicker/components/EntrySelectedList'
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import { EntrySelectedList } from './components/EntrySelectedList'
 import { ListResultItem } from './components/ListResultItem'
 import { ActiveList } from './components/ActiveList'
 
@@ -122,7 +122,11 @@ class ListPicker extends StatefulUIElement<
 
     renderMainContent() {
         if (this.state.loadingSuggestions) {
-            return <InitLoader size={20} />
+            return (
+                <LoadingBox>
+                    <LoadingIndicator />
+                </LoadingBox>
+            )
         }
 
         return (
@@ -137,7 +141,6 @@ class ListPicker extends StatefulUIElement<
                     loading={this.state.loadingQueryResults}
                     before={
                         <EntrySelectedList
-                            ActiveEntry={ActiveList}
                             dataAttributeName="list-name"
                             entriesSelected={this.state.selectedEntries}
                             onPress={this.handleSelectedListPress}
@@ -180,6 +183,14 @@ class ListPicker extends StatefulUIElement<
         )
     }
 }
+
+const LoadingBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+`
 
 const OuterSearchBox = styled.div`
     background: ${(props) => props.theme.background};

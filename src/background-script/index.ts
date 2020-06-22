@@ -92,7 +92,7 @@ class BackgroundScript {
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onInstalled
      */
     private setupInstallHooks() {
-        this.runtimeAPI.onInstalled.addListener((details) => {
+        this.runtimeAPI.onInstalled.addListener(async (details) => {
             this.notifsBackground.deliverStaticNotifications()
             this.activityLoggerBackground.trackExistingTabs()
 
@@ -100,7 +100,7 @@ class BackgroundScript {
                 case 'install':
                     return onInstall()
                 case 'update':
-                    this.runQuickAndDirtyMigrations()
+                    await this.runQuickAndDirtyMigrations()
                     return onUpdate()
                 default:
             }
@@ -120,6 +120,7 @@ class BackgroundScript {
 
             await migration({
                 db: this.storageManager.backend['dexieInstance'],
+                localStorage: this.storageAPI.local,
                 normalizeUrl: this.urlNormalizer,
             })
             await this.storageAPI.local.set({ [storageKey]: true })
