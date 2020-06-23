@@ -1,7 +1,7 @@
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { RibbonContainerDependencies } from './types'
 import * as componentTypes from '../../components/types'
-import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { loadInitial } from 'src/util/ui-logic'
 
@@ -59,7 +59,7 @@ export type RibbonContainerEvents = UIEvent<
 >
 
 export interface RibbonContainerOptions extends RibbonContainerDependencies {
-    inPageUI: InPageUIInterface
+    inPageUI: SharedInPageUIInterface
     setRibbonShouldAutoHide: (value: boolean) => void
 }
 

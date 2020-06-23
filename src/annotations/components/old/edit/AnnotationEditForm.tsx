@@ -1,10 +1,10 @@
 import * as React from 'react'
 
-import TagInput from '../../sidebar/react/components/tag-input'
 import AllModesFooter from './all-modes-footer'
 // import * as constants from '../comment-box/constants'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
+import TagInput from 'src/in-page-ui/sidebar/react/components/tag-input'
 
 const styles = require('./edit-mode-content.css')
 
@@ -27,7 +27,7 @@ interface State {
     tags: string[]
 }
 
-class EditModeContent extends React.Component<Props, State> {
+class AnnotationEditForm extends React.Component<Props, State> {
     state: State = {
         isTagInputActive: false,
         commentEditText: this.props.comment ?? '',
@@ -96,7 +96,7 @@ class EditModeContent extends React.Component<Props, State> {
 
     render() {
         return (
-            <React.Fragment>
+            <>
                 <TextInputControlled
                     defaultValue={this.state.commentEditText}
                     onClick={() => this._setTagInputActive(false)}
@@ -125,9 +125,9 @@ class EditModeContent extends React.Component<Props, State> {
                     handleCancelEdit={this.props.handleCancelOperation}
                     handleEditAnnotation={this._handleSaveAnnotation}
                 />
-            </React.Fragment>
+            </>
         )
     }
 }
 
-export default EditModeContent
+export default AnnotationEditForm

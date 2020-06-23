@@ -1,7 +1,5 @@
 import * as React from 'react'
-import cx from 'classnames'
-
-const styles = require('./truncated-text-renderer.css')
+import styled from 'styled-components'
 
 interface Props {
     text: string
@@ -17,7 +15,7 @@ interface State {
     shouldTruncate: boolean
 }
 
-class TruncatedTextRenderer extends React.Component<Props, State> {
+class TextTruncated extends React.Component<Props, State> {
     state = {
         shouldTruncate: true,
     }
@@ -55,18 +53,33 @@ class TruncatedTextRenderer extends React.Component<Props, State> {
             <React.Fragment>
                 {textToBeDisplayed}
                 {isTextTooLong && (
-                    <button
-                        className={cx(styles.showMoreBtn, {
-                            [styles.rotated]: !shouldTruncate,
-                        })}
+                    <ToggleMoreButtonStyled
                         onClick={this._toggleTextTruncation}
                     >
                         {shouldTruncate ? 'More' : 'Less'}
-                    </button>
+                    </ToggleMoreButtonStyled>
                 )}
             </React.Fragment>
         )
     }
 }
 
-export default TruncatedTextRenderer
+const ToggleMoreButtonStyled = styled.button`
+    margin: 5px 0 0 5px;
+    cursor: pointer;
+    display: inline-block;
+    background-image: url('/img/longarrow.svg');
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: 43px;
+    width: 40px;
+    height: 20px;
+    background-position: center;
+    transition: transform 0.15s ease-in;
+    border: none;
+    outline: none;
+    transform-origin: center;
+    transform: ${({ rotate }) => (rotate ? 'rotate(-180deg)' : 'none')};
+`
+
+export default TextTruncated

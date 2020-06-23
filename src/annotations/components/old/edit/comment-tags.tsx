@@ -1,7 +1,7 @@
 import * as React from 'react'
 import cx from 'classnames'
 
-import TruncatedTextRenderer from '../truncated-text-renderer'
+import TextTruncated from '../truncated-text-renderer'
 
 const styles = require('./comment-tags.css')
 
@@ -31,7 +31,7 @@ const CommentTags = ({
     >
         {/* Comment for the annotation. */}
         {!!comment && (
-            <TruncatedTextRenderer
+            <TextTruncated
                 text={comment}
                 getTruncatedTextObject={getTruncatedTextObject}
             />

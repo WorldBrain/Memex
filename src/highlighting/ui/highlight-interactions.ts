@@ -9,14 +9,14 @@ import { descriptorToRange, markRange } from './anchoring/index'
 import * as Raven from 'src/util/raven'
 import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
 import { createHighlight, extractAnchor } from 'src/highlighting/ui'
-import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 
 const styles = require('src/highlighting/ui/styles.css')
 
 export class HighlightInteraction implements HighlightInteractionInterface {
     createHighlight = async (params: {
         annotationsManager: AnnotationsManagerInterface
-        inPageUI: InPageUIInterface
+        inPageUI: SharedInPageUIInterface
     }) => {
         analytics.trackEvent({
             category: 'InPageTooltip',
@@ -49,7 +49,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
 
     createAnnotation = async (params: {
         selection?: Selection
-        inPageUI: InPageUIInterface
+        inPageUI: SharedInPageUIInterface
     }) => {
         analytics.trackEvent({
             category: 'InPageTooltip',

@@ -8,7 +8,7 @@ import {
     INITIAL_RIBBON_COMMENT_BOX_STATE,
     RibbonContainerOptions,
 } from './logic'
-import { InPageUI } from 'src/in-page-ui/shared-state'
+import { SharedInPageUIState } from 'src/in-page-ui/shared-state'
 import { RibbonContainerDependencies } from './types'
 import { Annotation } from 'src/annotations/types'
 
@@ -44,7 +44,7 @@ describe('Ribbon logic', () => {
             removeHighlights: () => {},
         } as any
 
-        const inPageUI = new InPageUI({
+        const inPageUI = new SharedInPageUIState({
             loadComponent: async () => {},
             annotations,
             highlighter,

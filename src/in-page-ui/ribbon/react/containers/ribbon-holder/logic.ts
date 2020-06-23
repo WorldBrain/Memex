@@ -1,7 +1,7 @@
 import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
 import { RibbonContainerDependencies } from '../ribbon/types'
 import {
-    InPageUIInterface,
+    SharedInPageUIInterface,
     InPageUIComponentShowState,
 } from 'src/in-page-ui/shared-state/types'
 
@@ -16,7 +16,7 @@ export type RibbonHolderEvents = UIEvent<{
 }>
 
 export interface RibbonHolderDependencies {
-    inPageUI: InPageUIInterface
+    inPageUI: SharedInPageUIInterface
     containerDependencies: RibbonContainerDependencies
 }
 

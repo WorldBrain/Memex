@@ -16,15 +16,14 @@ import {
     SidebarActionOptions,
 } from 'src/in-page-ui/shared-state/types'
 import { acts as resultsActs } from 'src/overview/results'
-import AnnotationsSidebar from 'src/sidebar-annotations/components/sidebar'
 
 export interface SidebarContainerProps extends SidebarContainerOptions {
     /** If defined, overrides the default outside click behavior. */
     onClickOutside?: React.MouseEventHandler
-    setRef?: (logic: SidebarContainer) => void
+    setRef?: (logic: AnnotationsSidebarContainer) => void
 }
 
-export class SidebarContainer extends StatefulUIElement<
+export class AnnotationsSidebarContainer extends StatefulUIElement<
     SidebarContainerProps,
     SidebarContainerState,
     SidebarContainerEvents
@@ -195,7 +194,7 @@ export class SidebarContainer extends StatefulUIElement<
                 this.props.tags.searchForTagSuggestions({ query }),
         }
         return (
-            <AnnotationsSidebar
+            <Sidebar
                 loadState={this.state.loadState}
                 searchLoadState={this.state.primarySearchState}
                 env={this.props.env}
@@ -223,7 +222,7 @@ export class SidebarContainer extends StatefulUIElement<
                 }}
                 highlighter={this.props.highlighter}
                 isOpen={this.state.state === 'visible'}
-                showCommentBox={this.state.showCommentBox}
+                showCreateAnnotation={this.state.showCommentBox}
                 searchValue={this.state.searchValue}
                 pageInfo={{
                     page: this.state.showAnnotsForPage,
@@ -389,6 +388,45 @@ export class SidebarContainer extends StatefulUIElement<
                             query,
                         }),
                 }}
+                searchTypeSwitch={{
+                    showAnnotationsForOtherPage:
+                        this.state.showAnnotsForPage != null,
+                    allAnnotationsExpanded: this.state.allAnnotationsExpanded,
+                    resultsSearchType: this.state.searchType,
+                    searchType: this.state.searchType,
+                    pageType: this.state.pageType,
+                    pageCount: this.state.pageCount,
+                    annotCount: this.state.annotCount,
+                    handleAllAnnotationsFoldToggle: () =>
+                        this.processEvent('toggleAllAnnotationsFold', null),
+                    handleSwitch: (changes) =>
+                        this.processEvent('switchSearch', { changes }),
+                    setAnnotationsExpanded: (value: boolean) =>
+                        this.processEvent('setAnnotationsExpanded', { value }),
+                    handlePageTypeToggle: () =>
+                        this.processEvent('togglePageType', null),
+                    isOverview: this.props.env === 'overview',
+                    handleAddPageCommentBtnClick: () =>
+                        this.processEvent('addNewPageComment', null),
+                    showSocialSearch: false,
+                }}
+                filtersSidebar={{
+                    env: this.props.env,
+                    showClearFiltersBtn: this.state.showClearFiltersBtn,
+                    isSocialSearch: this.state.isSocialSearch,
+                    clearAllFilters: () =>
+                        this.processEvent('clearAllFilters', null),
+                    fetchSuggestedTags: () =>
+                        this.processEvent('fetchSuggestedTags', null),
+                    fetchSuggestedDomains: () => () =>
+                        this.processEvent('fetchSuggestedDomains', null),
+                    fetchSuggestedUsers: () => {},
+                    fetchSuggestedHashtags: () => {},
+                    resetFilterPopups: () =>
+                        this.processEvent('resetFiterPopups', null),
+                    toggleShowFilters: () =>
+                        this.processEvent('toggleShowFilters', null),
+                }}
                 topBar={{
                     env: this.props.env,
                     searchValue: this.state.searchValue,
@@ -400,6 +438,7 @@ export class SidebarContainer extends StatefulUIElement<
     }
 }
 
-export default onClickOutside<typeof SidebarContainer, SidebarContainerProps>(
-    SidebarContainer,
-)
+export default onClickOutside<
+    typeof AnnotationsSidebarContainer,
+    SidebarContainerProps
+>(AnnotationsSidebarContainer)

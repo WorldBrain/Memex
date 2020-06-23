@@ -1,7 +1,7 @@
-import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 
 import { ToolbarNotificationsInterface } from 'src/toolbar-notification/content_script/types'
-import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 
 export interface TooltipPosition {
     x: number
@@ -9,12 +9,12 @@ export interface TooltipPosition {
 }
 
 export type TooltipInPageUIInterface = Pick<
-    InPageUIInterface,
+    SharedInPageUIInterface,
     'events' | 'hideTooltip' | 'showTooltip' | 'removeTooltip' | 'showSidebar'
 >
 
 export interface TooltipDependencies extends AnnotationFunctions {
-    inPageUI: InPageUIInterface
+    inPageUI: SharedInPageUIInterface
     toolbarNotifications: ToolbarNotificationsInterface
 }
 

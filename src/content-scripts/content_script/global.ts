@@ -18,7 +18,7 @@ import { ContentScriptRegistry } from './types'
 import { ContentScriptsInterface } from '../background/types'
 import { ContentScriptComponent } from '../types'
 import { initKeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/content_script'
-import { InPageUI } from 'src/in-page-ui/shared-state'
+import { SharedInPageUIState } from 'src/in-page-ui/shared-state'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { HighlightInteraction } from 'src/highlighting/ui/highlight-interactions'
@@ -132,7 +132,7 @@ export async function main() {
 
     // 4. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
-    const inPageUI = new InPageUI({
+    const inPageUI = new SharedInPageUIState({
         loadComponent,
         annotations,
         highlighter,

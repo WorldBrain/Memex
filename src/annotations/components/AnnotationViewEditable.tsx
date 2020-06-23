@@ -1,24 +1,24 @@
 import * as React from 'react'
 import cx from 'classnames'
-import noop from 'lodash/fp/noop'
 
-import DefaultDeleteModeContent from './default-delete-mode-content'
-import EditModeContent, { TagsEventProps } from './edit-mode-content'
-import TruncatedTextRenderer from '../truncated-text-renderer'
 import niceTime from 'src/util/nice-time'
 import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
-import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
+import AnnotationEditForm, {
+    TagsEventProps,
+} from 'src/annotations/components/old/edit/AnnotationEditForm'
+import TextTruncated from 'src/annotations/components/TextTruncated'
+import AnnotationView from 'src/annotations/components/AnnotationView'
 
-const styles = require('./annotation-box.css')
+const styles = require('./annotation-editable.css')
 const footerStyles = require('./default-footer.css')
 
-export interface AnnotationBoxGeneralProps {
+export interface AnnotationEditableGeneralProps {
     env: 'inpage' | 'overview'
     highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
 }
 
-export interface AnnotationBoxAnnotationProps {
+export interface AnnotationEditableProps {
     /** Required to decide how to go to an annotation when it's clicked. */
     url: string
     className?: string
@@ -34,7 +34,7 @@ export interface AnnotationBoxAnnotationProps {
     displayCrowdfunding: boolean
 }
 
-export interface AnnotationBoxEventProps {
+export interface AnnotationEditableEventProps {
     handleGoToAnnotation: (url: string) => void
     handleMouseEnter?: (url: string) => void
     handleMouseLeave?: (url: string) => void
@@ -48,12 +48,14 @@ export interface AnnotationBoxEventProps {
     ) => void
 }
 
-type AnnotationBoxProps = AnnotationBoxGeneralProps &
-    AnnotationBoxAnnotationProps &
-    AnnotationBoxEventProps &
+export type AnnotationViewEditableProps = AnnotationEditableGeneralProps &
+    AnnotationEditableProps &
+    AnnotationEditableEventProps &
     TagsEventProps
 
-export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
+export default class AnnotationViewEditable extends React.Component<
+    AnnotationViewEditableProps
+> {
     private _boxRef: HTMLDivElement = null
 
     componentDidMount() {
@@ -223,7 +225,7 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
                 {this.props.body && (
                     <div className={styles.highlight}>
                         <span className={styles.highlightText}>
-                            <TruncatedTextRenderer
+                            <TextTruncated
                                 text={this.props.body}
                                 getTruncatedTextObject={
                                     this._getTruncatedTextObject
@@ -234,7 +236,7 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
                 )}
 
                 {mode !== 'edit' ? (
-                    <DefaultDeleteModeContent
+                    <AnnotationView
                         env={this.props.env}
                         mode={mode}
                         body={this.props.body}
@@ -261,7 +263,7 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
                         handleBookmarkToggle={this.handleBookmarkToggle}
                     />
                 ) : (
-                    <EditModeContent
+                    <AnnotationEditForm
                         rows={2}
                         tags={this.props.tags}
                         comment={this.props.comment}

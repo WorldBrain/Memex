@@ -21,6 +21,7 @@ import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { renderHighlights } from 'src/highlighting/ui/highlight-interactions'
 import { insertTooltip } from 'src/in-page-ui/tooltip/content_script/interactions'
 import AnnotationsManager from 'src/annotations/annotations-manager'
+import AnnotationsSidebar from 'src/sidebar-annotations/components/sidebar'
 
 const resultItemStyles = require('src/common-ui/components/result-item.css')
 
@@ -95,11 +96,6 @@ export default class DashboardResultsContainer extends StatefulUIElement<
             })
             this.setActiveAnnotationUrl(activeUrl)
         })
-        await insertTooltip({
-            inPageUI: this.state.dashboardUI,
-            annotationsManager: new AnnotationsManager(),
-            toolbarNotifications: null,
-        })
     }
     loadAndRenderAnnotations = async (
         fullUrl: string,
@@ -134,20 +130,15 @@ export default class DashboardResultsContainer extends StatefulUIElement<
                     />
                 )}
 
-                {/* NOTE: most of these deps are unused in the overview's usage of the sidebar
-                    - perhaps we should make a separate simplified interface for overview usage? */}
-                <SidebarContainer
-                    env="overview"
-                    normalizeUrl={normalizeUrl}
-                    currentTab={{ url: 'http://worldbrain.io' } as any}
-                    annotations={runInBackground<
+                <AnnotationsSidebar
+                    createAnnotation={runInBackground<
                         AnnotationInterface<'caller'>
                     >()}
                     tags={runInBackground<RemoteTagsInterface>()}
                     bookmarks={runInBackground<BookmarksInterface>()}
                     search={runInBackground<SearchInterface>()}
                     customLists={runInBackground<RemoteCollectionsInterface>()}
-                    inPageUI={this.state.dashboardUI}
+                    inPageUI={this.state.dashboardSharedUIState}
                     setRef={this.setRefSidebarContainer}
                     highlighter={this.state.highlighter as any}
                     onClickOutside={this.handleClickOutsideSidebar}

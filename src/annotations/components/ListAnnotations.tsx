@@ -1,19 +1,19 @@
 import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import { Annotation } from 'src/annotations/types'
-import AnnotationBox, {
-    AnnotationBoxEventProps,
-    AnnotationBoxGeneralProps,
-} from 'src/in-page-ui/components/annotation-box/annotation-box'
-import { TagsEventProps } from 'src/in-page-ui/components/annotation-box/edit-mode-content'
+
 import { LoadingIndicator } from 'src/common-ui/components'
-import { SidebarEnv, AnnotationMode } from '../types'
-import CongratsMessage from './congrats-message'
-import EmptyMessage from './empty-message'
+import AnnotationViewEditable, {
+    AnnotationEditableGeneralProps,
+    AnnotationViewEditableProps,
+} from 'src/annotations/components/AnnotationViewEditable'
+import { TagsEventProps } from 'src/annotations/components/old/edit/AnnotationEditForm'
+import { AnnotationMode } from 'src/in-page-ui/sidebar/react/types'
+import EmptyMessage from 'src/annotations/components/old/empty-message'
+import CongratsMessage from 'src/annotations/components/old/congrats-message'
 
 export interface PageAnnotationsProps {
-    env: SidebarEnv
-    highlighter: AnnotationBoxGeneralProps['highlighter']
+    highlighter: AnnotationEditableGeneralProps['highlighter']
     needsWaypoint: boolean
     appendLoader: boolean
     annotations: Annotation[]
@@ -22,13 +22,13 @@ export interface PageAnnotationsProps {
     }
     activeAnnotationUrl: string | null
     hoverAnnotationUrl: string
-    annotationEventHandlers: AnnotationBoxEventProps
+    annotationEventHandlers: AnnotationViewEditableProps
     showCongratsMessage: boolean
     tagsEventProps: TagsEventProps
     handleScrollPagination: () => void
 }
 
-export default class PageAnnotations extends React.Component<
+export default class ListAnnotations extends React.Component<
     PageAnnotationsProps
 > {
     private handleWaypointEnter = (args: Waypoint.CallbackArgs) => {
@@ -37,9 +37,8 @@ export default class PageAnnotations extends React.Component<
 
     private renderList() {
         const annots = this.props.annotations.map((annot, i) => (
-            <AnnotationBox
+            <AnnotationViewEditable
                 key={i}
-                env={this.props.env}
                 highlighter={this.props.highlighter}
                 mode={this.props.annotationModes[annot.url] || 'default'}
                 displayCrowdfunding={false}

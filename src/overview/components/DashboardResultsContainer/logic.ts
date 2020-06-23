@@ -4,21 +4,23 @@ import {
     DashboardResultsEvent,
     DashboardResultsState,
 } from 'src/overview/components/DashboardResultsContainer/types'
-import { InPageUI } from 'src/in-page-ui/shared-state'
+import { SharedInPageUIState } from 'src/in-page-ui/shared-state'
 import EventEmitter from 'events'
 import TypedEventEmitter from 'typed-emitter'
 import {
-    InPageUIEvents,
-    InPageUIInterface,
+    SharedInPageUIEvents,
+    SharedInPageUIInterface,
 } from 'src/in-page-ui/shared-state/types'
 
 export default class DashboardResultsLogic extends UILogic<
     DashboardResultsState,
     DashboardResultsEvent
 > {
-    overviewUIEvents = new EventEmitter() as TypedEventEmitter<InPageUIEvents>
+    overviewUIEvents = new EventEmitter() as TypedEventEmitter<
+        SharedInPageUIEvents
+    >
 
-    dashboardUI = new InPageUI({
+    dashboardUI = new SharedInPageUIState({
         loadComponent: (c) => null,
         pageUrl: '',
         annotations: null,
@@ -29,13 +31,13 @@ export default class DashboardResultsLogic extends UILogic<
         super()
     }
 
-    get mockInPageUI(): InPageUIInterface {
+    get mockInPageUI(): SharedInPageUIInterface {
         return {
             state: { sidebar: false },
-            events: this.overviewUIEvents as InPageUI['events'],
+            events: this.overviewUIEvents as SharedInPageUIState['events'],
             hideRibbon: () => undefined,
             hideSidebar: () => undefined,
-        } as InPageUIInterface
+        } as SharedInPageUIInterface
     }
 
     get mockHighlighter() {
@@ -49,7 +51,7 @@ export default class DashboardResultsLogic extends UILogic<
         return {
             readerShow: false,
             readerUrl: null,
-            dashboardUI: this.dashboardUI,
+            dashboardSharedUIState: this.dashboardUI,
             highlighter: this.mockHighlighter,
         }
     }

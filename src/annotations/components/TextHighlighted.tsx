@@ -1,9 +1,6 @@
 import * as React from 'react'
-
 import { Anchor } from 'src/highlighting/types'
-
-const localStyles = require('./truncated-text-renderer.css')
-const styles = require('./annotation-box/annotation-box.css')
+import styled from 'styled-components'
 
 interface Props {
     anchor: Anchor
@@ -11,7 +8,7 @@ interface Props {
     setTruncateHighlight: (value: boolean) => void
 }
 
-class AnnotationHighlight extends React.Component<Props> {
+class TextHighlighted extends React.Component<Props> {
     /**
      * Method that decides whether a highlight is too long.
      */
@@ -45,20 +42,45 @@ class AnnotationHighlight extends React.Component<Props> {
         const { truncateHighlight } = this.props
 
         return (
-            <div className={styles.highlight}>
-                <div className={styles.newAnnotation}>New Annotation</div>
-                <span className={styles.highlightText}>
+            <HighlightStyled>
+                <NewAnnotationStyled>New Annotation</NewAnnotationStyled>
+                <HighlightedTextStyled>
                     {this._getHighlightText()}
                     {this._isHighlightLong() && (
-                        <button
-                            className={localStyles.showMoreBtn}
+                        <ShowMoreButtonStyled
                             onClick={this._toggleHighlightTruncation}
                         />
                     )}
-                </span>
-            </div>
+                </HighlightedTextStyled>
+            </HighlightStyled>
         )
     }
 }
 
-export default AnnotationHighlight
+const NewAnnotationStyled = styled.div``
+const HighlightStyled = styled.span``
+const HighlightedTextStyled = styled.span``
+
+const ShowMoreButtonStyled = styled.button`
+    margin: 5px 0 0 5px;
+    cursor: pointer;
+    display: inline-block;
+    background-image: url('/img/longarrow.svg');
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: 43px;
+    width: 40px;
+    height: 20px;
+    background-position: center;
+    transition: transform 0.15s ease-in;
+    transform: rotate(0deg);
+    border: none;
+    outline: none;
+
+    &.rotated {
+        transform: rotate(-180deg);
+        transform-origin: center;
+    }
+`
+
+export default TextHighlighted

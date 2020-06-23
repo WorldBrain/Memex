@@ -14,8 +14,8 @@ import {
 import { conditionallyRemoveOnboardingSelectOption } from '../../onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
 import {
-    InPageUIInterface,
-    InPageUIEvents,
+    SharedInPageUIInterface,
+    SharedInPageUIEvents,
 } from 'src/in-page-ui/shared-state/types'
 import { TooltipInPageUIInterface } from 'src/in-page-ui/tooltip/types'
 
@@ -63,7 +63,7 @@ class TooltipContainer extends React.Component<
         )
     }
 
-    handleUIStateChange: InPageUIEvents['stateChanged'] = (event) => {
+    handleUIStateChange: SharedInPageUIEvents['stateChanged'] = (event) => {
         if (!('tooltip' in event.changes)) {
             return
         }

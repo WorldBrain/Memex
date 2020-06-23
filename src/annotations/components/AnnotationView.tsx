@@ -29,7 +29,7 @@ interface Props {
 }
 
 /* tslint:disable-next-line variable-name */
-const DefaultDeleteModeContent = (props: Props) => (
+const AnnotationView = (props: Props) => (
     <React.Fragment>
         {/* Comment and tags to be displayed. */}
         {(props.comment || (props.tags && props.tags.length !== 0)) && (
@@ -59,4 +59,4 @@ const DefaultDeleteModeContent = (props: Props) => (
     </React.Fragment>
 )
 
-export default DefaultDeleteModeContent
+export default AnnotationView

@@ -1,5 +1,5 @@
 import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
-import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 
 export interface Descriptor {
     strategy: string
@@ -48,10 +48,10 @@ export interface HighlightInteractionInterface {
     removeAnnotationHighlights: (url: string) => void
     createHighlight: (params: {
         annotationsManager: AnnotationsManagerInterface
-        inPageUI: InPageUIInterface
+        inPageUI: SharedInPageUIInterface
     }) => Promise<void>
     createAnnotation: (params: {
         selection?: Selection
-        inPageUI: InPageUIInterface
+        inPageUI: SharedInPageUIInterface
     }) => Promise<void>
 }

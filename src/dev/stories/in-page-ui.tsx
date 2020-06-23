@@ -5,7 +5,7 @@ import { setupBackgroundIntegrationTest } from 'src/tests/background-integration
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import SidebarContainer from 'src/in-page-ui/sidebar/react/containers/sidebar'
 import { WithDependencies } from '../utils'
-import { InPageUI } from 'src/in-page-ui/shared-state'
+import { SharedInPageUIState } from 'src/in-page-ui/shared-state'
 import { SidebarEnv } from 'src/in-page-ui/sidebar/react/types'
 import RibbonHolder from 'src/in-page-ui/ribbon/react/containers/ribbon-holder'
 
@@ -67,7 +67,7 @@ async function createDependencies() {
         title: 'Foo.com: Home',
     }
 
-    const inPageUI = new InPageUI({
+    const inPageUI = new SharedInPageUIState({
         loadComponent: async () => {},
         annotations,
         highlighter,

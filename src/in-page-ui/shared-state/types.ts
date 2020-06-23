@@ -1,5 +1,6 @@
 import TypedEventEmitter from 'typed-emitter'
 import { Anchor } from 'src/highlighting/types'
+import { Annotation } from 'src/annotations/types'
 
 export type InPageUISidebarAction = 'annotate' | 'comment' | 'show_annotation'
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
@@ -12,7 +13,7 @@ export interface SidebarActionOptions {
     anchor?: Anchor
     annotationUrl?: string
 }
-export interface InPageUIEvents {
+export interface SharedInPageUIEvents {
     stateChanged: (event: {
         newState: InPageUIComponentShowState
         changes: Partial<InPageUIComponentShowState>
@@ -24,10 +25,12 @@ export interface InPageUIEvents {
     componentShouldDestroy: (event: { component: InPageUIComponent }) => void
 }
 
-export interface InPageUIInterface {
+export interface SharedInPageUIInterface {
     areHighlightsShown: boolean
-    events: TypedEventEmitter<InPageUIEvents>
+    events: TypedEventEmitter<SharedInPageUIEvents>
     componentsShown: InPageUIComponentShowState
+
+    contentAnnotations: Annotation[]
 
     // Ribbon
     showRibbon(options?: { action?: InPageUIRibbonAction }): void

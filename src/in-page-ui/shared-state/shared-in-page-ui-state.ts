@@ -2,8 +2,8 @@ import EventEmitter from 'events'
 import TypedEventEmitter from 'typed-emitter'
 
 import {
-    InPageUIInterface,
-    InPageUIEvents,
+    SharedInPageUIInterface,
+    SharedInPageUIEvents,
     InPageUIComponentShowState,
     InPageUIComponent,
     InPageUIRibbonAction,
@@ -19,8 +19,8 @@ export interface InPageUIDependencies {
     loadComponent: (component: InPageUIComponent) => void
 }
 
-export class InPageUI implements InPageUIInterface {
-    events = new EventEmitter() as TypedEventEmitter<InPageUIEvents>
+export class SharedInPageUIState implements SharedInPageUIInterface {
+    events = new EventEmitter() as TypedEventEmitter<SharedInPageUIEvents>
     areHighlightsShown = false
     componentsShown: InPageUIComponentShowState = {
         ribbon: false,
@@ -44,7 +44,7 @@ export class InPageUI implements InPageUIInterface {
     }
 
     _handleNewListener = (
-        eventName: keyof InPageUIEvents,
+        eventName: keyof SharedInPageUIEvents,
         listener: (...args: any[]) => void,
     ) => {
         if (eventName !== 'ribbonAction' && eventName !== 'sidebarAction') {
