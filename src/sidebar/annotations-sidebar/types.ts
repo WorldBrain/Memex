@@ -1,5 +1,6 @@
 import { ResultWithIndex } from 'src/overview/types'
 import { SidebarContainerState } from './containers/sidebar-annotations/logic'
+import TypedEventEmitter from 'typed-emitter'
 
 export interface Page {
     url?: string
@@ -22,3 +23,19 @@ export { ResultWithIndex }
 export type StateSelector<ReturnType> = (
     state: SidebarContainerState,
 ) => ReturnType
+
+///
+
+export interface AnnotationsSidebarEvents {
+    pressedCloseSidebar: () => void
+    pressedAnnotationHighlight: () => void
+    savedAnnotationHighlight: () => void
+    changedAnnotationQuery: () => void
+    pressedAnnotationQuery: () => void
+}
+
+export interface AnnotationStorageInterface {}
+
+type AnnotationsSidebarEventEmitter = TypedEventEmitter<
+    AnnotationsSidebarEvents
+>

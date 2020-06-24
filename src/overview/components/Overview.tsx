@@ -23,6 +23,7 @@ import { SearchInterface } from 'src/search/background/types'
 import { auth, featuresBeta } from 'src/util/remote-functions-background'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import AnnotationsSidebar from 'src/sidebar/components/AnnotationsSidebar'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -46,7 +47,7 @@ class Overview extends PureComponent<Props> {
     }
 
     componentDidMount() {
-        this.props.init()
+        // this.props.init()
         this.showPioneer()
     }
 
@@ -55,15 +56,6 @@ class Overview extends PureComponent<Props> {
             this.setState({
                 showPioneer: true,
             })
-        }
-    }
-
-    get mockInPageUI() {
-        return {
-            state: {},
-            events: new EventEmitter(),
-            hideRibbon: () => undefined,
-            hideSidebar: () => undefined,
         }
     }
 
@@ -78,7 +70,7 @@ class Overview extends PureComponent<Props> {
         this.annotationsSidebar = sidebar
     }
 
-    private handleAnnotationSidebarToggle = async (args?: {
+    /*    private handleAnnotationSidebarToggle = async (args?: {
         pageUrl: string
         pageTitle?: string
     }) => {
@@ -111,7 +103,7 @@ class Overview extends PureComponent<Props> {
         ) {
             this.annotationsSidebar.hideSidebar()
         }
-    }
+    }*/
 
     handleOnboardingComplete = () => {
         window.location.href = OVERVIEW_URL

@@ -1,5 +1,7 @@
 @import url('/fonts/Poppins/poppins.css');
 
+/* TODO(sidebar-refactor): Refactor these to styled components */
+
 .sidebar * {
     font-family: 'Poppins', sans-serif;
 }

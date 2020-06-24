@@ -1,7 +1,6 @@
 import * as React from 'react'
-
-import CommentTags from './comment-tags'
-import AllModesFooter from './all-modes-footer'
+import CommentTags from 'src/annotations/components/old/edit/comment-tags'
+import AllModesFooter from './old/edit/all-modes-footer'
 
 interface Props {
     env: 'inpage' | 'overview'

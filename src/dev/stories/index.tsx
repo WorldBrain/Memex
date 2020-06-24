@@ -1,7 +1,7 @@
 import 'core-js'
 import React from 'react'
 
-import './design-library'
+/*import './design-library'
 import './in-page-ui'
 // import './ribbon'
 // import './sidebar'
@@ -13,4 +13,5 @@ import './tagsCurrent'
 import './tagsRefactored'
 import './popup-components'
 import './other'
-import './copy-paster'
+import './copy-paster'*/
+import './annotations-sidebar'

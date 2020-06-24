@@ -4,11 +4,11 @@ import cx from 'classnames'
 import niceTime from 'src/util/nice-time'
 import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
-import AnnotationEditForm, {
-    TagsEventProps,
-} from 'src/annotations/components/old/edit/AnnotationEditForm'
-import TextTruncated from 'src/annotations/components/TextTruncated'
 import AnnotationView from 'src/annotations/components/AnnotationView'
+import AnnotationEdit, {
+    TagsEventProps,
+} from 'src/annotations/components/AnnotationEdit'
+import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 
 const styles = require('./annotation-editable.css')
 const footerStyles = require('./default-footer.css')
@@ -53,7 +53,7 @@ export type AnnotationViewEditableProps = AnnotationEditableGeneralProps &
     AnnotationEditableEventProps &
     TagsEventProps
 
-export default class AnnotationViewEditable extends React.Component<
+export default class AnnotationEditable extends React.Component<
     AnnotationViewEditableProps
 > {
     private _boxRef: HTMLDivElement = null
@@ -263,7 +263,7 @@ export default class AnnotationViewEditable extends React.Component<
                         handleBookmarkToggle={this.handleBookmarkToggle}
                     />
                 ) : (
-                    <AnnotationEditForm
+                    <AnnotationEdit
                         rows={2}
                         tags={this.props.tags}
                         comment={this.props.comment}

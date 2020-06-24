@@ -16,7 +16,7 @@ import {
     SidebarActionOptions,
 } from 'src/in-page-ui/shared-state/types'
 import { acts as resultsActs } from 'src/overview/results'
-import AnnotationsSidebar from 'src/sidebar-annotations/components/sidebar'
+import AnnotationsSidebar from 'src/sidebar/components/sidebar'
 
 export interface SidebarContainerProps extends SidebarContainerOptions {
     /** If defined, overrides the default outside click behavior. */

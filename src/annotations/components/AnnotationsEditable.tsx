@@ -3,32 +3,36 @@ import Waypoint from 'react-waypoint'
 import { Annotation } from 'src/annotations/types'
 
 import { LoadingIndicator } from 'src/common-ui/components'
-import AnnotationViewEditable, {
+import AnnotationEditable, {
     AnnotationEditableGeneralProps,
     AnnotationViewEditableProps,
-} from 'src/annotations/components/AnnotationViewEditable'
-import { TagsEventProps } from 'src/annotations/components/old/edit/AnnotationEditForm'
+} from 'src/annotations/components/AnnotationEditable'
 import { AnnotationMode } from 'src/in-page-ui/sidebar/react/types'
 import EmptyMessage from 'src/annotations/components/old/empty-message'
 import CongratsMessage from 'src/annotations/components/old/congrats-message'
+import { TagsEventProps } from 'src/annotations/components/AnnotationEdit'
 
+// TODO: clean all these up, haven't started working through this component yet
+// (See AnnotationCreate)
 export interface PageAnnotationsProps {
-    highlighter: AnnotationEditableGeneralProps['highlighter']
-    needsWaypoint: boolean
-    appendLoader: boolean
-    annotations: Annotation[]
-    annotationModes: {
+    highlighter?: AnnotationEditableGeneralProps['highlighter']
+    needsWaypoint?: boolean
+    appendLoader?: boolean
+    annotations?: Annotation[]
+    annotationModes?: {
         [annotationUrl: string]: AnnotationMode
     }
-    activeAnnotationUrl: string | null
-    hoverAnnotationUrl: string
-    annotationEventHandlers: AnnotationViewEditableProps
-    showCongratsMessage: boolean
-    tagsEventProps: TagsEventProps
-    handleScrollPagination: () => void
+    activeAnnotationUrl?: string | null
+    hoverAnnotationUrl?: string
+    annotationEventHandlers?: AnnotationViewEditableProps
+    showCongratsMessage?: boolean
+    tagsEventProps?: TagsEventProps
+    handleScrollPagination?: () => void
 }
 
-export default class ListAnnotations extends React.Component<
+// TODO(sidebar-refactor): extract scrollable waypoint list to a generic component
+// TODO(sidebar-refactor): then a component specifically for an annotations list may become unneccassry, just need to `map` where needed (the sidebar)
+export default class AnnotationsEditable extends React.Component<
     PageAnnotationsProps
 > {
     private handleWaypointEnter = (args: Waypoint.CallbackArgs) => {
@@ -36,8 +40,11 @@ export default class ListAnnotations extends React.Component<
     }
 
     private renderList() {
-        const annots = this.props.annotations.map((annot, i) => (
-            <AnnotationViewEditable
+        const annots = this.props.annotations.map((annotation, i) => {
+            // TODO(sidebar-refactor): Just for testing until fixing AnnotationEditable
+            return <pre>{JSON.stringify(annotation)}</pre>
+
+            /*            <AnnotationEditable
                 key={i}
                 highlighter={this.props.highlighter}
                 mode={this.props.annotationModes[annot.url] || 'default'}
@@ -47,8 +54,8 @@ export default class ListAnnotations extends React.Component<
                 {...this.props.tagsEventProps}
                 isActive={this.props.activeAnnotationUrl === annot.url}
                 isHovered={this.props.hoverAnnotationUrl === annot.url}
-            />
-        ))
+            />*/
+        })
 
         if (this.props.needsWaypoint) {
             annots.push(

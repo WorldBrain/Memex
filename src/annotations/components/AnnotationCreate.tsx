@@ -1,97 +1,77 @@
 import * as React from 'react'
-import { Tooltip } from 'src/common-ui/components'
-import TextInputControlled from 'src/common-ui/components/TextInputControlled'
-import { browser } from 'webextension-polyfill-ts'
-import TagPicker from 'src/tags/ui/TagPicker'
-import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import styled from 'styled-components'
-import { ClickHandler } from 'src/in-page-ui/sidebar/react/types'
+import { browser } from 'webextension-polyfill-ts'
 import { Anchor } from 'src/highlighting/types'
-import TextHighlighted from 'src/annotations/components/TextHighlighted'
+import { Tooltip } from 'src/common-ui/components'
+import TagPicker from 'src/tags/ui/TagPicker'
+import TextInputControlled from 'src/common-ui/components/TextInputControlled'
+import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
+import TextHighlighted from 'src/annotations/components/parts/TextHighlighted'
+import { NewAnnotationOptions } from 'src/annotations/types'
+import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 const tagEmpty = browser.extension.getURL('/img/tag_empty.svg')
 const tagFull = browser.extension.getURL('/img/tag_full.svg')
 const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
 const heartFull = browser.extension.getURL('/img/star_full.svg')
 
-interface OwnProps {
-    env?: 'inpage' | 'overview'
-    tags: string[]
-    commentText: string
-    isCommentBookmarked: boolean
-    handleCommentTextChange: (comment: string) => void
-    saveComment: React.EventHandler<React.SyntheticEvent>
-    cancelComment: ClickHandler<HTMLDivElement>
-    toggleBookmark: ClickHandler<HTMLDivElement>
-    toggleTagPicker: () => void
-    queryTagSuggestions: (query: string) => Promise<string[]>
-    fetchInitialTagSuggestions: () => Promise<string[]>
-    updateTags: PickerUpdateHandler
+interface AnnotationCreateState {
+    isTagPickerShown: boolean
+    isBookmarked: boolean
+    text: string
+    tags?: string[]
+}
+
+export interface AnnotationCreateProps {
+    tagPickerDependencies: GenericPickerDependenciesMinusSave
+    onCancel: () => void
+    onSave: (newAnnotation: NewAnnotationOptions) => void
     anchor?: Anchor
-    form: Omit<CommentBoxFormProps, 'saveComment'>
 }
 
-interface CommentBoxFormStateProps {
-    isTagInputActive: boolean
-    showTagsPicker: boolean
-}
-
-export type CommentBoxFormProps = OwnProps & CommentBoxFormStateProps
-
-class AnnotationCreate extends React.Component<CommentBoxFormProps> {
-    private handleTagBtnClick = (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        this.props.toggleTagPicker()
+class AnnotationCreate extends React.Component<
+    AnnotationCreateProps,
+    AnnotationCreateState
+> {
+    state = {
+        isBookmarked: false,
+        isTagInputActive: false,
+        isTagPickerShown: false,
+        text: '',
+        tags: [],
     }
-
-    private handleCancelBtnClick = (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        this.props.cancelComment(e)
-    }
-
-    private handleBookmarkBtnClick = (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        this.props.toggleBookmark(e)
-    }
-
-    private saveComment = (e) => {
-        this.props.saveComment(e)
-    }
-
-    setTagInputActive = (isTagInputActive: boolean) => {
-        this.setState({ isTagInputActive })
-    }
-
-    onEnterSaveHandler = {
-        test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-        handle: (e) => this.saveComment(e),
+    setTagInputActive = (isTagPickerShown: boolean) => {
+        this.setState({ isTagPickerShown })
     }
 
     handleClickOutside(e) {
-        this.props.cancelComment(e)
+        this.props.onCancel()
     }
 
-    save = async (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-
-        const { anchor, form, saveComment } = this.props
-
-        return saveComment(
-            anchor,
-            form.commentText.trim(),
-            form.tags,
-            form.isCommentBookmarked,
-        )
+    handleSave = async () => {
+        this.props.onSave({
+            anchor: this.props.anchor,
+            isBookmarked: this.state.isBookmarked,
+            tags: this.state.tags,
+            text: this.state.text,
+        })
     }
 
     render() {
-        const { anchor, isCommentBookmarked } = this.props
         return (
-            <CommentBoxContainerStyled>
+            <TextBoxContainerStyled>
+                {this.renderHighlight()}
+                {this.renderInput()}
+                {this.renderActionButtons()}
+                {this.renderTagPicker()}
+            </TextBoxContainerStyled>
+        )
+    }
+
+    renderHighlight() {
+        const { anchor } = this.props
+        return (
+            <>
                 {!!anchor && (
                     <TextHighlighted
                         anchor={anchor}
@@ -99,59 +79,90 @@ class AnnotationCreate extends React.Component<CommentBoxFormProps> {
                         setTruncateHighlight={() => {}}
                     />
                 )}
+            </>
+        )
+    }
 
-                <TextInputControlledStyled
-                    defaultValue={this.props.commentText}
-                    onClick={() => {
-                        this.setTagInputActive(false)
-                        this.setState((state) => ({ showTagsPicker: false }))
-                    }}
-                    placeholder="Add a private note... (save with cmd/ctrl+enter)"
-                    onChange={this.props.handleCommentTextChange}
-                    specialHandlers={[this.onEnterSaveHandler]}
-                />
+    renderInput() {
+        const { text } = this.state
+        const { hideTagPicker, handleTextChange } = this
 
-                <FooterStyled>
-                    <Flex>
-                        <InteractionsImgContainerStyled>
-                            <ImgButtonStyled src={tagEmpty} />
-                        </InteractionsImgContainerStyled>
-                        <InteractionsImgContainerStyled>
-                            <ImgButtonStyled
-                                src={
-                                    isCommentBookmarked ? heartFull : heartEmpty
-                                }
-                            />
-                        </InteractionsImgContainerStyled>
-                    </Flex>
-                    <Flex>
-                        <CancelBtnStyled>Cancel</CancelBtnStyled>
-                        <SaveBtnStyled>Save</SaveBtnStyled>
-                    </Flex>
-                </FooterStyled>
+        const onEnterSaveHandler = {
+            test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
+            handle: (e) => this.props.onSave(e),
+        }
 
-                <TagDropdownStyled>
-                    {this.props.showTagsPicker && (
-                        <Tooltip position="bottomLeft">
-                            <TagPicker
-                                queryEntries={this.props.queryTagSuggestions}
-                                onUpdateEntrySelection={this.props.updateTags}
-                                loadDefaultSuggestions={
-                                    this.props.fetchInitialTagSuggestions
-                                }
-                                onEscapeKeyDown={this.props.toggleTagPicker}
-                            />
-                        </Tooltip>
-                    )}
-                </TagDropdownStyled>
-            </CommentBoxContainerStyled>
+        return (
+            <TextInputControlledStyled
+                defaultValue={text}
+                onClick={hideTagPicker}
+                placeholder="Add a private note... (save with cmd/ctrl+enter)"
+                onChange={handleTextChange}
+                specialHandlers={[onEnterSaveHandler]}
+            />
+        )
+    }
+
+    handleTextChange = (text) => {
+        this.setState({ text })
+    }
+
+    renderTagPicker() {
+        const { tagPickerDependencies } = this.props
+        const { isTagPickerShown } = this.state
+
+        return (
+            <TagDropdownStyled>
+                {isTagPickerShown && (
+                    <Tooltip position="bottomLeft">
+                        <TagPicker
+                            onEscapeKeyDown={this.hideTagPicker}
+                            {...tagPickerDependencies}
+                            onUpdateEntrySelection={this.updateTags}
+                        />
+                    </Tooltip>
+                )}
+            </TagDropdownStyled>
+        )
+    }
+
+    updateTags: PickerUpdateHandler = async (args) => {
+        this.setState({ tags: args.selected })
+    }
+
+    hideTagPicker = () => {
+        this.setState({ isTagPickerShown: false })
+    }
+
+    renderActionButtons() {
+        const { onCancel } = this.props
+        const { isBookmarked } = this.state
+        const { handleSave } = this
+
+        return (
+            <FooterStyled>
+                <Flex>
+                    <InteractionsImgContainerStyled>
+                        <ImgButtonStyled src={tagEmpty} />
+                    </InteractionsImgContainerStyled>
+                    <InteractionsImgContainerStyled>
+                        <ImgButtonStyled
+                            src={isBookmarked ? heartFull : heartEmpty}
+                        />
+                    </InteractionsImgContainerStyled>
+                </Flex>
+                <Flex>
+                    <CancelBtnStyled onClick={onCancel}>Cancel</CancelBtnStyled>
+                    <SaveBtnStyled onClick={handleSave}>Save</SaveBtnStyled>
+                </Flex>
+            </FooterStyled>
         )
     }
 }
 
 export default AnnotationCreate
 
-const CommentBoxContainerStyled = styled.div`
+const TextBoxContainerStyled = styled.div`
     box-shadow: none;
     margin-top: 1px;
     cursor: default;

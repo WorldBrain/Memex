@@ -85,8 +85,9 @@ Class to hold state of what component is shown and loaded
 global -> InPageUI #green
 
 InPageUI .. CS #white
-note left of CS: Can we clearly name and organise \n this part into something like \n 'script loading' as n1
+note left of CS: Can we clearly name and organise \n this part into something like \n 'script loading'
 package "src/content-scripts/content_script/" as CS {
+
 
     component RibbonMain [
          <i><u>ribbon.ts

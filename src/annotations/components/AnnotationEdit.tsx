@@ -27,7 +27,7 @@ interface State {
     tags: string[]
 }
 
-class AnnotationEditForm extends React.Component<Props, State> {
+class AnnotationEdit extends React.Component<Props, State> {
     state: State = {
         isTagInputActive: false,
         commentEditText: this.props.comment ?? '',
@@ -130,4 +130,4 @@ class AnnotationEditForm extends React.Component<Props, State> {
     }
 }
 
-export default AnnotationEditForm
+export default AnnotationEdit

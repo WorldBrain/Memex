@@ -25,6 +25,8 @@ export const colorGrey8 = `#4D4754`
 export const colorGrey9 = `#3A2F45`
 export const colorGrey10 = `#281C34`
 
+export const color11 = '#f7f7f7' /* lightgrey for edit fields */
+
 export const boxShadow = css`
     border-radius: 3px;
     box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,

@@ -17,6 +17,13 @@ export interface Annotation {
     hasBookmark?: boolean
 }
 
+export interface NewAnnotationOptions {
+    anchor?: Anchor
+    text: string
+    tags: string[]
+    isBookmarked?: boolean
+}
+
 export interface AnnotationsManagerInterface {
     createAnnotation(input: {
         url: string
