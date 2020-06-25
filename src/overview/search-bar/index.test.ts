@@ -17,11 +17,14 @@ describe('Overview search bar tests', () => {
             { pattern: '#tag_tag', shouldPass: true },
             { pattern: '#tag_tag.tag-tag', shouldPass: true },
             { pattern: '#tag', shouldPass: true },
-            //{ pattern: '#"tag tag"', shouldPass: true },
-            //{ pattern: '#"tag tag tag"', shouldPass: true },
+            { pattern: '#"tag tag"', shouldPass: true },
+            { pattern: '#"tag tag tag"', shouldPass: true },
+            { pattern: '#"tag tag tag tag"', shouldPass: true },
             { pattern: '#tag tag"', shouldPass: false },
             { pattern: '#tag-', shouldPass: false },
             { pattern: '#tag.', shouldPass: false },
+            { pattern: '#tag"', shouldPass: false },
+            { pattern: '#"tag', shouldPass: false },
             { pattern: 'tag', shouldPass: false },
             { pattern: '#', shouldPass: false },
         ]
@@ -31,6 +34,15 @@ describe('Overview search bar tests', () => {
                 pattern,
                 shouldPass,
             ])
+
+            // For the valid patterns, also test their inverse negated hashtag syntax
+            if (shouldPass) {
+                const negatedPattern = `-${pattern}`
+                expect([
+                    negatedPattern,
+                    HASH_TAG_PATTERN.test(negatedPattern),
+                ]).toEqual([negatedPattern, shouldPass])
+            }
         }
     })
 
@@ -46,6 +58,7 @@ describe('Overview search bar tests', () => {
             { pattern: 'tag_tag.tag-tag', shouldPass: true },
             { pattern: 'tag tag', shouldPass: true },
             { pattern: 'tag tag tag', shouldPass: true },
+            { pattern: 'tag tag tag tag', shouldPass: true },
             { pattern: 'tag', shouldPass: true },
             { pattern: 'tag-', shouldPass: false },
             { pattern: 'tag.', shouldPass: false },
@@ -85,6 +98,29 @@ describe('Overview search bar tests', () => {
             {
                 input: 'term -#"tag tag tag" #"tag tag tag"',
                 terms: ['term', '-#"tag tag tag"', '#"tag tag tag"'],
+            },
+            // Missing prefixed quotation mark
+            {
+                input: 'term -#tag tag tag" #"tag tag tag tag"',
+                terms: ['term', '-#tag', 'tag', 'tag"', '#"tag tag tag tag"'],
+            },
+            // Missing postfixed quotation mark
+            {
+                input: 'term -#"tag tag tag #"tag tag tag tag"',
+                terms: ['term', '-#"tag', 'tag', 'tag', '#"tag tag tag tag"'],
+            },
+            {
+                input: 'term -#"tag tag tag" #"tag tag tag tag"',
+                terms: ['term', '-#"tag tag tag"', '#"tag tag tag tag"'],
+            },
+            {
+                input: 'term #"tag-tag tag" #"tag.tag tag" #"tag tag_tag"',
+                terms: [
+                    'term',
+                    '#"tag-tag tag"',
+                    '#"tag.tag tag"',
+                    '#"tag tag_tag"',
+                ],
             },
             {
                 input: 'term -#"tag" #"tag"',
