@@ -39,7 +39,9 @@ export const setQueryTagsDomains: (
 
     if (input[input.length - 1] === ' ' || isEnter) {
         // Split input into terms and try to extract any tag/domain patterns to add to filters
-        const terms = input.toLowerCase().match(/\S+/g) || []
+        const terms =
+            input.toLowerCase().match(constants.SEARCH_INPUT_SPLIT_PATTERN) ||
+            []
 
         terms.forEach((term) => {
             // If '#tag' pattern in input, and not already tracked, add to filter state

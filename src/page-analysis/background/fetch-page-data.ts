@@ -46,9 +46,10 @@ const fetchPageData: FetchPageData = ({
     let normalizedUrl
 
     try {
-        normalizedUrl = normalizeUrl(url, {
-            removeQueryParameters: [/.*/i],
-        })
+        normalizedUrl = 
+            JSON.stringify(normalizeUrl(url, {
+                removeQueryParameters: [/.*/i],
+            }))
     } catch (err) {
         normalizedUrl = url
     }
@@ -160,15 +161,15 @@ function fetchDOMFromUrl(
 function switchOnResponseErrorStatus(status: number) {
     switch (status) {
         case 429:
-            throw new FetchPageDataError('Too many requests', 'temporary')
+            throw new FetchPageDataError('Too many requests to server', 'temporary')
         case 500:
         case 503:
         case 504:
             throw new FetchPageDataError(
-                'Server currently unavailable',
+                status + ' '+ 'Server currently unavailable',
                 'temporary',
             )
         default:
-            throw new FetchPageDataError('Data fetch failed', 'permanent')
+            throw new FetchPageDataError(status + ' '+ 'Data fetch failed', 'permanent')
     }
 }
