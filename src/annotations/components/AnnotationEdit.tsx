@@ -1,12 +1,10 @@
 import * as React from 'react'
+import styled from 'styled-components'
 
-import AllModesFooter from './old/edit/all-modes-footer'
-// import * as constants from '../comment-box/constants'
+import AnnotationFooter from './AnnotationFooter'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import TagInput from 'src/tags/ui/tag-input'
-
-const styles = require('./edit-mode-content.css')
 
 export interface TagsEventProps {
     fetchInitialTagSuggestions: () => Promise<string[]>
@@ -34,33 +32,30 @@ class AnnotationEdit extends React.Component<Props, State> {
         tags: this.props.tags ?? [],
     }
 
-    private _handleSaveAnnotation = () => {
+    private handleSaveAnnotation = () => {
         this.props.handleSaveAnnotation(
             this.state.commentEditText,
             this.state.tags,
         )
     }
 
-    private _handleTagInputKeydown = (
-        e: React.KeyboardEvent<HTMLDivElement>,
-    ) => {
+    private handleTagInputKeydown: React.KeyboardEventHandler = (e) => {
         // Only check for `Tab` and `Shift + Tab`, handle rest of the events normally.
         if (e.key === 'Tab') {
-            this._setTagInputActive(false)
+            this.setTagInputActive(false)
         }
     }
 
-    private _setTagInputActive = (isTagInputActive: boolean) => {
+    private setTagInputActive = (isTagInputActive: boolean) =>
         this.setState({ isTagInputActive })
-    }
+
+    private handleCommentChange = (commentEditText: string) =>
+        this.setState({ commentEditText })
 
     private onEnterSaveHandler = {
         test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-        handle: (e) => this._handleSaveAnnotation(),
+        handle: (e) => this.handleSaveAnnotation(),
     }
-
-    private _handleCommentChange = (comment: string) =>
-        this.setState((state) => ({ commentEditText: comment }))
 
     private addTag = (tag: string) =>
         this.setState((state) => {
@@ -94,40 +89,83 @@ class AnnotationEdit extends React.Component<Props, State> {
         }
     }
 
+    private renderInput() {
+        const { commentEditText } = this.state
+
+        return (
+            <TextInputControlledStyled
+                defaultValue={commentEditText}
+                onClick={() => this.setTagInputActive(false)}
+                placeholder="Add a private note... (save with cmd/ctrl+enter)"
+                onChange={this.handleCommentChange}
+                specialHandlers={[this.onEnterSaveHandler]}
+            />
+        )
+    }
+
+    private renderTagInput() {
+        const { queryTagSuggestions, fetchInitialTagSuggestions } = this.props
+        const { tags, isTagInputActive } = this.state
+
+        return (
+            <TagInput
+                tags={tags}
+                deleteTag={this.deleteTag}
+                updateTags={this.updateTags}
+                setTagInputActive={this.setTagInputActive}
+                isTagInputActive={isTagInputActive}
+                queryTagSuggestions={queryTagSuggestions}
+                fetchInitialTagSuggestions={fetchInitialTagSuggestions}
+                onKeyDown={this.handleTagInputKeydown}
+            />
+        )
+    }
+
+    private renderFooter() {
+        return (
+            <AnnotationFooter
+                mode="edit"
+                handleCancelEdit={this.props.handleCancelOperation}
+                handleEditAnnotation={this.handleSaveAnnotation}
+            />
+        )
+    }
+
     render() {
         return (
             <>
-                <TextInputControlled
-                    defaultValue={this.state.commentEditText}
-                    onClick={() => this._setTagInputActive(false)}
-                    className={styles.textArea}
-                    placeholder="Add a private note... (save with cmd/ctrl+enter)"
-                    onChange={this._handleCommentChange}
-                    specialHandlers={[this.onEnterSaveHandler]}
-                />
-
-                <div onKeyDown={this._handleTagInputKeydown}>
-                    <TagInput
-                        tags={this.state.tags}
-                        deleteTag={this.deleteTag}
-                        updateTags={this.updateTags}
-                        setTagInputActive={this._setTagInputActive}
-                        isTagInputActive={this.state.isTagInputActive}
-                        queryTagSuggestions={this.props.queryTagSuggestions}
-                        fetchInitialTagSuggestions={
-                            this.props.fetchInitialTagSuggestions
-                        }
-                    />
-                </div>
-
-                <AllModesFooter
-                    mode="edit"
-                    handleCancelEdit={this.props.handleCancelOperation}
-                    handleEditAnnotation={this._handleSaveAnnotation}
-                />
+                {this.renderInput()}
+                {this.renderTagInput()}
+                {this.renderFooter()}
             </>
         )
     }
 }
 
 export default AnnotationEdit
+
+const TextInputControlledStyled = styled(TextInputControlled)`
+    background-color: #f7f7f7;
+    box-sizing: border-box;
+    resize: vertical;
+    font-weight: 400;
+    font-size: 14px;
+    color: #222;
+    font-family: 'Poppins', sans-serif;
+    border-radius: 3px;
+    border: none;
+    padding: 10px 7px;
+    margin: 5px 5px 5px 5px;
+
+    &::placeholder {
+        color: #3a2f45;
+    }
+
+    &:focus {
+        outline: none;
+        box-shadow: none;
+        border: none;
+    }
+
+    min-height: 100px;
+`

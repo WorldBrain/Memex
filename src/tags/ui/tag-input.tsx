@@ -11,6 +11,7 @@ export interface Props {
     setTagInputActive: (isTagInputActive: boolean) => void
     deleteTag: (tag: string) => void
     updateTags: PickerUpdateHandler
+    onKeyDown: React.KeyboardEventHandler
     isTagInputActive: boolean
     tags: string[]
 }
@@ -40,7 +41,7 @@ const TagInput = ({
     }
 
     return (
-        <>
+        <div onKeyDown={props.onKeyDown}>
             <TagHolder
                 tags={tags}
                 clickHandler={(e) => {
@@ -50,7 +51,7 @@ const TagInput = ({
                 deleteTag={deleteTag}
             />
             {tagPicker}
-        </>
+        </div>
     )
 }
 
