@@ -4,6 +4,7 @@ import {
 } from '@worldbrain/memex-common/lib/storage/constants'
 
 import { SEARCH_INPUT_SPLIT_PATTERN } from './constants'
+import { stripTagPattern } from './utils'
 
 describe('Overview search bar tests', () => {
     it('hashtag regexp should match desired patterns', () => {
@@ -133,6 +134,32 @@ describe('Overview search bar tests', () => {
                 input,
                 terms,
             ])
+        }
+    })
+
+    it('should be able to strip hashtag patterns from tags intending to be filtered', () => {
+        interface TestCase {
+            input: string
+            output: string
+        }
+
+        const testCases: TestCase[] = [
+            { input: '#tag', output: 'tag' },
+            { input: '#tag-tag', output: 'tag-tag' },
+            { input: '#"tag tag"', output: 'tag tag' },
+            { input: '#tag_tag', output: 'tag_tag' },
+            { input: '#tag.tag', output: 'tag.tag' },
+            { input: '#tag+tag', output: 'tag tag' },
+            { input: '#"tag+tag"', output: 'tag tag' },
+            { input: '#"tag tag.tag"', output: 'tag tag.tag' },
+            { input: '#"tag tag tag tag"', output: 'tag tag tag tag' },
+        ]
+
+        for (const { input, output } of testCases) {
+            expect(stripTagPattern(input)).toEqual(output)
+
+            // Also test their inverse negated hashtag syntax
+            expect(stripTagPattern('-' + input)).toEqual(output)
         }
     })
 })

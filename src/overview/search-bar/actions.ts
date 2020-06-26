@@ -16,6 +16,7 @@ import { actions as notifActs } from '../../notifications'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import * as Raven from 'src/util/raven'
 import { auth, featuresBeta } from 'src/util/remote-functions-background'
+import { stripTagPattern } from './utils'
 
 const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
@@ -28,8 +29,6 @@ export const setEndDate = createAction<number>('header/setEndDate')
 export const setStartDateText = createAction<string>('header/setStartDateText')
 export const setEndDateText = createAction<string>('header/setEndDateText')
 export const clearFilters = createAction('header/clearFilters')
-
-const stripTagPattern = (tag) => tag.slice(1).split('+').join(' ')
 
 export const setQueryTagsDomains: (
     input: string,
