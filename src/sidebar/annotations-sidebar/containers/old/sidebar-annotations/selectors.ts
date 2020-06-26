@@ -1,4 +1,4 @@
-import { StateSelector } from '../../types'
+import { StateSelector } from '../../../types'
 
 interface PickerOpen {
     areTagsOpen?: boolean

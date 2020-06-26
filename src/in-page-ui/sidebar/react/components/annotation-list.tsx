@@ -6,7 +6,7 @@ import AnnotationBox from 'src/in-page-ui/components/annotation-box'
 import { Annotation } from 'src/annotations/types'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { AnnotationBoxEventProps } from 'src/in-page-ui/components/annotation-box/annotation-box'
-import { TagsEventProps } from 'src/in-page-ui/components/annotation-box/edit-mode-content'
+import { TagsEventProps } from 'src/annotations/components/AnnotationEdit'
 import { AnnotationMode, SidebarEnv } from '../types'
 
 const styles = require('./annotation-list.css')

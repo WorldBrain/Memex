@@ -17,7 +17,9 @@ import { Annotation } from 'src/annotations/types'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { TaskState } from 'ui-logic-core/lib/types'
-import PageAnnotations, { PageAnnotationsProps } from './page-annotations'
+import PageAnnotations, {
+    PageAnnotationsProps,
+} from 'src/annotations/components/AnnotationsEditable'
 
 const styles = require('./sidebar.css')
 

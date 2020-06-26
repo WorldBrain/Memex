@@ -3,7 +3,7 @@ import cx from 'classnames'
 import qs from 'query-string'
 
 import extractQueryFilters from 'src/util/nlp-time-filter'
-import CommentBox from 'src/in-page-ui/components/comment-box/comment-box'
+import CommentBox from 'src/sidebar-overlay/comment-box'
 import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
 import {
     shortcuts,

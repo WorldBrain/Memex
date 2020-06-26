@@ -18,7 +18,7 @@ import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
 const styles = require('./annotation-box-container.css')
 const footerStyles = require('./default-footer.css')
 
-interface OwnProps {
+export interface OwnProps {
     /** Required to decide how to go to an annotation when it's clicked. */
     env: 'inpage' | 'overview'
     url: string
@@ -123,7 +123,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     private _getTruncatedTextObject: (
         text: string,
-    ) => { isTextTooLong: boolean; text: string } = text => {
+    ) => { isTextTooLong: boolean; text: string } = (text) => {
         if (text.length > 280) {
             const truncatedText = text.slice(0, 280)
             return {
@@ -272,11 +272,10 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
     }
 }
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
-    handleTagClick: tag => dispatch(filterActs.toggleTagFilter(tag)),
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+) => ({
+    handleTagClick: (tag) => dispatch(filterActs.toggleTagFilter(tag)),
 })
 
 export default withSidebarContext(

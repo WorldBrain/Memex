@@ -4,7 +4,7 @@ import {
     DashboardResultsEvent,
     DashboardResultsState,
 } from 'src/overview/components/DashboardResultsContainer/types'
-import { SharedInPageUIState } from 'src/in-page-ui/shared-state'
+import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import EventEmitter from 'events'
 import TypedEventEmitter from 'typed-emitter'
 import {
@@ -32,12 +32,13 @@ export default class DashboardResultsLogic extends UILogic<
     }
 
     get mockInPageUI(): SharedInPageUIInterface {
+        // TODO: fix this up
         return {
             state: { sidebar: false },
             events: this.overviewUIEvents as SharedInPageUIState['events'],
             hideRibbon: () => undefined,
             hideSidebar: () => undefined,
-        } as SharedInPageUIInterface
+        } as any
     }
 
     get mockHighlighter() {

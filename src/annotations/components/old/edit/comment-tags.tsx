@@ -1,7 +1,7 @@
 import * as React from 'react'
 import cx from 'classnames'
 
-import TextTruncated from '../truncated-text-renderer'
+import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 
 const styles = require('./comment-tags.css')
 

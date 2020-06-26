@@ -13,7 +13,7 @@ import {
     AnnotationMode,
     ResultWithIndex as Result,
     ResultsByUrl,
-} from '../../types'
+} from '../../../types'
 import { Annotation } from 'src/annotations/types'
 import {
     PageUrlsByDay,

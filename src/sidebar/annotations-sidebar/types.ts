@@ -1,5 +1,5 @@
 import { ResultWithIndex } from 'src/overview/types'
-import { SidebarContainerState } from './containers/sidebar-annotations/logic'
+import { SidebarContainerState } from './containers/old/sidebar-annotations/logic'
 import TypedEventEmitter from 'typed-emitter'
 
 export interface Page {

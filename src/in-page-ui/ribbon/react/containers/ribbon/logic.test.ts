@@ -8,7 +8,7 @@ import {
     INITIAL_RIBBON_COMMENT_BOX_STATE,
     RibbonContainerOptions,
 } from './logic'
-import { SharedInPageUIState } from 'src/in-page-ui/shared-state'
+import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { RibbonContainerDependencies } from './types'
 import { Annotation } from 'src/annotations/types'
 

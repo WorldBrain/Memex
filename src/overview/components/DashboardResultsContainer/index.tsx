@@ -21,7 +21,7 @@ import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { renderHighlights } from 'src/highlighting/ui/highlight-interactions'
 import { insertTooltip } from 'src/in-page-ui/tooltip/content_script/interactions'
 import AnnotationsManager from 'src/annotations/annotations-manager'
-import AnnotationsSidebar from 'src/sidebar/components/sidebar'
+import AnnotationsSidebar from 'src/sidebar/annotations-sidebar/components/AnnotationsSidebar'
 
 const resultItemStyles = require('src/common-ui/components/result-item.css')
 

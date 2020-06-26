@@ -13,7 +13,7 @@ async function createDependencies() {
 
     const tagPickerDependencies: GenericPickerDependenciesMinusSave = {
         loadDefaultSuggestions: async () => [],
-    }
+    } as any
 
     const sidebarDependencies: AnnotationsSidebarProps = {
         annotationCreateProps: {
@@ -25,7 +25,7 @@ async function createDependencies() {
         isAnnotationCreateShown: true,
         onSearch: action('onSearch'),
         annotations: [],
-    }
+    } as any
 
     return { sidebarDependencies }
 }

@@ -16,7 +16,7 @@ import {
     SidebarActionOptions,
 } from 'src/in-page-ui/shared-state/types'
 import { acts as resultsActs } from 'src/overview/results'
-import AnnotationsSidebar from 'src/sidebar/components/sidebar'
+import AnnotationsSidebar from 'src/sidebar/annotations-sidebar/components/AnnotationsSidebar'
 
 export interface SidebarContainerProps extends SidebarContainerOptions {
     /** If defined, overrides the default outside click behavior. */
@@ -196,205 +196,206 @@ export class SidebarContainer extends StatefulUIElement<
         }
         return (
             <AnnotationsSidebar
-                loadState={this.state.loadState}
-                searchLoadState={this.state.primarySearchState}
-                env={this.props.env}
-                pageAnnotations={{
-                    env: this.props.env,
-                    highlighter: this.props.highlighter,
-                    needsWaypoint:
-                        this.state.showAnnotsForPage == null &&
-                        this.state.primarySearchState !== 'running' &&
-                        !this.state.noResults,
-                    annotations: this.state.annotations,
-                    annotationModes: this.state.annotationModes.pageAnnotations,
-                    activeAnnotationUrl: this.state.activeAnnotationUrl,
-                    hoverAnnotationUrl: this.state.hoverAnnotationUrl
-                        .pageAnnotations,
-                    appendLoader: false,
-                    annotationEventHandlers: createAnnotationEventHandlers(
-                        'pageAnnotations',
-                    ),
-                    handleScrollPagination: () => {
-                        this.processEvent('paginateSearch', null)
-                    },
-                    showCongratsMessage: this.state.showCongratsMessage,
-                    tagsEventProps,
-                }}
-                highlighter={this.props.highlighter}
-                isOpen={this.state.state === 'visible'}
-                showCommentBox={this.state.showCommentBox}
-                searchValue={this.state.searchValue}
-                pageInfo={{
-                    page: this.state.showAnnotsForPage,
-                    resetPage: () =>
-                        this.processEvent('resetPageAnnotationsView', null),
-                }}
-                pageType={this.state.pageType}
-                showFiltersSidebar={this.state.showFiltersSidebar}
-                showSocialSearch={false}
-                closeSidebar={this.hideSidebar}
-                handleAddPageCommentBtnClick={() =>
-                    this.processEvent('addNewPageComment', null)
-                }
-                onQueryEnter={(searchQuery) =>
-                    this.processEvent('enterSearchQuery', { searchQuery })
-                }
-                onQueryChange={(searchQuery) => {
-                    this.processEvent('changeSearchQuery', { searchQuery })
-                }}
-                onShowFiltersSidebarChange={() => {}}
-                onOpenSettings={() => {}}
-                clearAllFilters={() => {}}
-                // Subcomponents
-                createAnnotation={{
-                    ...this.state.commentBox,
-                    env: this.props.env,
-                    isSocialPost: false,
-                    form: {
-                        env: this.props.env,
-                        ...this.state.commentBox.form,
-                        handleCommentTextChange: (comment: string) =>
-                            this.processEvent('changePageCommentText', {
-                                comment,
-                            }),
-                        cancelComment: () =>
-                            this.processEvent('cancelNewPageComment', null),
-                        toggleBookmark: () =>
-                            this.processEvent(
-                                'toggleNewPageCommentBookmark',
-                                null,
-                            ),
-                        toggleTagPicker: () =>
-                            this.processEvent(
-                                'toggleNewPageCommentTagPicker',
-                                null,
-                            ),
-                        updateTags: (args) =>
-                            this.processEvent('updateTagsForNewComment', args),
-                        ...tagsEventProps,
-                    },
-                    saveComment: (
-                        anchor: Anchor,
-                        commentText: string,
-                        tags: string[],
-                        bookmarked: boolean,
-                    ) =>
-                        this.processEvent('saveNewPageComment', {
-                            anchor,
-                            commentText,
-                            tags,
-                            bookmarked,
-                        }),
-                    closeComments: () => {
-                        // .log('close comments')
-                    },
-                    // this.processEvent('closeComments', null),
-                }}
-                resultsContainer={{
-                    isBetaEnabled: false,
-                    needsWaypoint:
-                        this.state.primarySearchState !== 'running' &&
-                        this.state.secondarySearchState !== 'running' &&
-                        !this.state.noResults,
-                    noResults:
-                        this.state.searchResultSkip === 0 &&
-                        this.state.noResults,
-                    isBadTerm: this.state.isBadTerm,
-                    areAnnotationsExpanded: this.state.allAnnotationsExpanded,
-                    shouldShowCount: this.state.shouldShowCount,
-                    isInvalidSearch: this.state.isInvalidSearch,
-                    totalResultCount: this.state.totalResultCount,
-                    toggleAreAnnotationsExpanded: (
-                        e: React.SyntheticEvent,
-                    ) => {},
+                {...({} as any)}
+                // loadState={this.state.loadState}
+                // searchLoadState={this.state.primarySearchState}
+                // env={this.props.env}
+                // pageAnnotations={{
+                //     env: this.props.env,
+                //     highlighter: this.props.highlighter,
+                //     needsWaypoint:
+                //         this.state.showAnnotsForPage == null &&
+                //         this.state.primarySearchState !== 'running' &&
+                //         !this.state.noResults,
+                //     annotations: this.state.annotations,
+                //     annotationModes: this.state.annotationModes.pageAnnotations,
+                //     activeAnnotationUrl: this.state.activeAnnotationUrl,
+                //     hoverAnnotationUrl: this.state.hoverAnnotationUrl
+                //         .pageAnnotations,
+                //     appendLoader: false,
+                //     annotationEventHandlers: createAnnotationEventHandlers(
+                //         'pageAnnotations',
+                //     ),
+                //     handleScrollPagination: () => {
+                //         this.processEvent('paginateSearch', null)
+                //     },
+                //     showCongratsMessage: this.state.showCongratsMessage,
+                //     tagsEventProps,
+                // }}
+                // highlighter={this.props.highlighter}
+                // isOpen={this.state.state === 'visible'}
+                // showCommentBox={this.state.showCommentBox}
+                // searchValue={this.state.searchValue}
+                // pageInfo={{
+                //     page: this.state.showAnnotsForPage,
+                //     resetPage: () =>
+                //         this.processEvent('resetPageAnnotationsView', null),
+                // }}
+                // pageType={this.state.pageType}
+                // showFiltersSidebar={this.state.showFiltersSidebar}
+                // showSocialSearch={false}
+                // closeSidebar={this.hideSidebar}
+                // handleAddPageCommentBtnClick={() =>
+                //     this.processEvent('addNewPageComment', null)
+                // }
+                // onQueryEnter={(searchQuery) =>
+                //     this.processEvent('enterSearchQuery', { searchQuery })
+                // }
+                // onQueryChange={(searchQuery) => {
+                //     this.processEvent('changeSearchQuery', { searchQuery })
+                // }}
+                // onShowFiltersSidebarChange={() => {}}
+                // onOpenSettings={() => {}}
+                // clearAllFilters={() => {}}
+                // // Subcomponents
+                // createAnnotation={{
+                //     ...this.state.commentBox,
+                //     env: this.props.env,
+                //     isSocialPost: false,
+                //     form: {
+                //         env: this.props.env,
+                //         ...this.state.commentBox.form,
+                //         handleCommentTextChange: (comment: string) =>
+                //             this.processEvent('changePageCommentText', {
+                //                 comment,
+                //             }),
+                //         cancelComment: () =>
+                //             this.processEvent('cancelNewPageComment', null),
+                //         toggleBookmark: () =>
+                //             this.processEvent(
+                //                 'toggleNewPageCommentBookmark',
+                //                 null,
+                //             ),
+                //         toggleTagPicker: () =>
+                //             this.processEvent(
+                //                 'toggleNewPageCommentTagPicker',
+                //                 null,
+                //             ),
+                //         updateTags: (args) =>
+                //             this.processEvent('updateTagsForNewComment', args),
+                //         ...tagsEventProps,
+                //     },
+                //     saveComment: (
+                //         anchor: Anchor,
+                //         commentText: string,
+                //         tags: string[],
+                //         bookmarked: boolean,
+                //     ) =>
+                //         this.processEvent('saveNewPageComment', {
+                //             anchor,
+                //             commentText,
+                //             tags,
+                //             bookmarked,
+                //         }),
+                //     closeComments: () => {
+                //         // .log('close comments')
+                //     },
+                //     // this.processEvent('closeComments', null),
+                // }}
+                // resultsContainer={{
+                //     isBetaEnabled: false,
+                //     needsWaypoint:
+                //         this.state.primarySearchState !== 'running' &&
+                //         this.state.secondarySearchState !== 'running' &&
+                //         !this.state.noResults,
+                //     noResults:
+                //         this.state.searchResultSkip === 0 &&
+                //         this.state.noResults,
+                //     isBadTerm: this.state.isBadTerm,
+                //     areAnnotationsExpanded: this.state.allAnnotationsExpanded,
+                //     shouldShowCount: this.state.shouldShowCount,
+                //     isInvalidSearch: this.state.isInvalidSearch,
+                //     totalResultCount: this.state.totalResultCount,
+                //     toggleAreAnnotationsExpanded: (
+                //         e: React.SyntheticEvent,
+                //     ) => {},
 
-                    isPaginating: this.state.secondarySearchState !== 'success',
-                    isNewSearchLoading:
-                        this.state.primarySearchState !== 'success',
-                    isListFilterActive: this.state.isListFilterActive,
-                    isTermsSearch: this.state.searchValue.length > 0,
-                    resultsByUrl: this.state.resultsByUrl,
-                    resultsClusteredByDay:
-                        this.state.searchType === 'notes' &&
-                        this.state.pageType === 'all',
-                    annotsByDay: this.state.annotsByDay,
-                    isSocialSearch: this.state.isSocialSearch,
-                    highlighter: this.props.highlighter,
-                    annotationModes: this.state.annotationModes.searchResults,
-                    annotationEventHandlers: createAnnotationEventHandlers(
-                        'searchResults',
-                    ),
-                    pageDeleteProps: {
-                        pageUrlToDelete: this.state.deletePageConfirm
-                            .pageUrlToDelete,
-                        handleDeletePage: () =>
-                            this.processEvent('deletePage', null),
-                        handleDeletePageModalClose: () =>
-                            this.processEvent('closeDeletePageModal', null),
-                    },
-                    resetUrlDragged: () => {},
-                    resetActiveTagIndex: () => {},
-                    setUrlDragged: (url: string) => {},
-                    updateTags: (url: string) => (args) =>
-                        this.processEvent('updateTagsForResult', {
-                            url,
-                            ...args,
-                        }),
-                    updateLists: (url: string) => (args) =>
-                        this.processEvent('updateListsForPageResult', {
-                            url,
-                            ...args,
-                        }),
-                    handlePillClick: (tag: string) => () => {
-                        // console.log('handlePillClick')
-                    },
-                    handleTagBtnClick: (result) => {
-                        this.processEvent('togglePageTagPicker', {
-                            pageUrl: result.url,
-                        })
-                    },
-                    handleListBtnClick: (result) => {
-                        this.processEvent('togglePageListPicker', {
-                            pageUrl: result.url,
-                        })
-                    },
-                    handleCommentBtnClick: (result) => {
-                        this.processEvent('togglePageAnnotationsView', {
-                            pageUrl: result.url,
-                            pageTitle: result.title,
-                        })
-                    },
-                    handleCrossRibbonClick: () => {
-                        // console.log('handleCrossRibbonClick')
-                    },
-                    handleScrollPagination: () => {
-                        this.processEvent('paginateSearch', null)
-                    },
-                    handleToggleBm: (result) => {
-                        this.processEvent('togglePageBookmark', {
-                            pageUrl: result.url,
-                        })
-                    },
-                    handleTrashBtnClick: (result) => {
-                        this.processEvent('showPageDeleteConfirm', {
-                            pageUrl: result.url,
-                        })
-                    },
-                    ...tagsEventProps,
-                    fetchInitialListSuggestions: () =>
-                        this.props.customLists.fetchInitialListSuggestions(),
-                    queryListSuggestions: (query: string) =>
-                        this.props.customLists.searchForListSuggestions({
-                            query,
-                        }),
-                }}
-                topBar={{
-                    env: this.props.env,
-                    searchValue: this.state.searchValue,
-                    showClearFiltersBtn: this.state.showClearFiltersBtn,
-                    disableAddCommentBtn: this.state.showCommentBox,
-                }}
+                //     isPaginating: this.state.secondarySearchState !== 'success',
+                //     isNewSearchLoading:
+                //         this.state.primarySearchState !== 'success',
+                //     isListFilterActive: this.state.isListFilterActive,
+                //     isTermsSearch: this.state.searchValue.length > 0,
+                //     resultsByUrl: this.state.resultsByUrl,
+                //     resultsClusteredByDay:
+                //         this.state.searchType === 'notes' &&
+                //         this.state.pageType === 'all',
+                //     annotsByDay: this.state.annotsByDay,
+                //     isSocialSearch: this.state.isSocialSearch,
+                //     highlighter: this.props.highlighter,
+                //     annotationModes: this.state.annotationModes.searchResults,
+                //     annotationEventHandlers: createAnnotationEventHandlers(
+                //         'searchResults',
+                //     ),
+                //     pageDeleteProps: {
+                //         pageUrlToDelete: this.state.deletePageConfirm
+                //             .pageUrlToDelete,
+                //         handleDeletePage: () =>
+                //             this.processEvent('deletePage', null),
+                //         handleDeletePageModalClose: () =>
+                //             this.processEvent('closeDeletePageModal', null),
+                //     },
+                //     resetUrlDragged: () => {},
+                //     resetActiveTagIndex: () => {},
+                //     setUrlDragged: (url: string) => {},
+                //     updateTags: (url: string) => (args) =>
+                //         this.processEvent('updateTagsForResult', {
+                //             url,
+                //             ...args,
+                //         }),
+                //     updateLists: (url: string) => (args) =>
+                //         this.processEvent('updateListsForPageResult', {
+                //             url,
+                //             ...args,
+                //         }),
+                //     handlePillClick: (tag: string) => () => {
+                //         // console.log('handlePillClick')
+                //     },
+                //     handleTagBtnClick: (result) => {
+                //         this.processEvent('togglePageTagPicker', {
+                //             pageUrl: result.url,
+                //         })
+                //     },
+                //     handleListBtnClick: (result) => {
+                //         this.processEvent('togglePageListPicker', {
+                //             pageUrl: result.url,
+                //         })
+                //     },
+                //     handleCommentBtnClick: (result) => {
+                //         this.processEvent('togglePageAnnotationsView', {
+                //             pageUrl: result.url,
+                //             pageTitle: result.title,
+                //         })
+                //     },
+                //     handleCrossRibbonClick: () => {
+                //         // console.log('handleCrossRibbonClick')
+                //     },
+                //     handleScrollPagination: () => {
+                //         this.processEvent('paginateSearch', null)
+                //     },
+                //     handleToggleBm: (result) => {
+                //         this.processEvent('togglePageBookmark', {
+                //             pageUrl: result.url,
+                //         })
+                //     },
+                //     handleTrashBtnClick: (result) => {
+                //         this.processEvent('showPageDeleteConfirm', {
+                //             pageUrl: result.url,
+                //         })
+                //     },
+                //     ...tagsEventProps,
+                //     fetchInitialListSuggestions: () =>
+                //         this.props.customLists.fetchInitialListSuggestions(),
+                //     queryListSuggestions: (query: string) =>
+                //         this.props.customLists.searchForListSuggestions({
+                //             query,
+                //         }),
+                // }}
+                // topBar={{
+                //     env: this.props.env,
+                //     searchValue: this.state.searchValue,
+                //     showClearFiltersBtn: this.state.showClearFiltersBtn,
+                //     disableAddCommentBtn: this.state.showCommentBox,
+                // }}
             />
         )
     }

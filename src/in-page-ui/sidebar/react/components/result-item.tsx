@@ -14,8 +14,8 @@ import SocialResultItem from 'src/common-ui/components/social-result-item'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { AnnotationBoxEventProps } from 'src/in-page-ui/components/annotation-box/annotation-box'
 import { AnnotationMode, SidebarEnv } from '../types'
-import { TagsEventProps } from 'src/in-page-ui/components/annotation-box/edit-mode-content'
-import AllModesFooter from 'src/in-page-ui/components/annotation-box/all-modes-footer'
+import { TagsEventProps } from 'src/annotations/components/AnnotationEdit'
+import AllModesFooter from 'src/annotations/components/old/edit/all-modes-footer'
 
 const styles = require('./result-item.css')
 

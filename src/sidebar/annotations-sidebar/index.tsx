@@ -2,8 +2,8 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { StyleSheetManager } from 'styled-components'
 
-import SidebarContainer from './containers/sidebar-annotations'
-import { SidebarContainerDependencies } from './containers/sidebar-annotations/types'
+// import SidebarContainer from './containers/old/sidebar-annotations'
+import { SidebarContainerDependencies } from './containers/old/sidebar-annotations/types'
 import { SidebarEnv } from './types'
 
 export function setupSidebarUI(
@@ -13,7 +13,7 @@ export function setupSidebarUI(
 ) {
     ReactDOM.render(
         <StyleSheetManager target={target}>
-            <SidebarContainer {...options} {...dependencies} />
+            {/* <SidebarContainer {...options} {...dependencies} /> */}
         </StyleSheetManager>,
         target,
     )

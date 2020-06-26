@@ -1,7 +1,5 @@
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
-
 import { ToolbarNotificationsInterface } from 'src/toolbar-notification/content_script/types'
-import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 
 export interface TooltipPosition {
     x: number

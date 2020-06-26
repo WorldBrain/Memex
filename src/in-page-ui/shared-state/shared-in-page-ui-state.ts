@@ -11,6 +11,7 @@ import {
 } from './types'
 import { HighlightInteraction } from 'src/highlighting/ui/highlight-interactions'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
+import { Annotation } from 'src/annotations/types'
 
 export interface InPageUIDependencies {
     pageUrl: string
@@ -20,6 +21,7 @@ export interface InPageUIDependencies {
 }
 
 export class SharedInPageUIState implements SharedInPageUIInterface {
+    contentAnnotations: Annotation[]
     events = new EventEmitter() as TypedEventEmitter<SharedInPageUIEvents>
     areHighlightsShown = false
     componentsShown: InPageUIComponentShowState = {

@@ -23,7 +23,7 @@ import { SearchInterface } from 'src/search/background/types'
 import { auth, featuresBeta } from 'src/util/remote-functions-background'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
-import AnnotationsSidebar from 'src/sidebar/components/AnnotationsSidebar'
+import AnnotationsSidebar from 'src/sidebar/annotations-sidebar/components/AnnotationsSidebar'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
