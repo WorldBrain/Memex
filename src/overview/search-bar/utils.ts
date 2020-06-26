@@ -1,6 +1,6 @@
-import { TAG_CLEAN_PATTERN } from './constants'
+import { SEARCH_INPUT_SPLIT_PATTERN, TAG_CLEAN_PATTERN } from './constants'
 
-export const stripTagPattern = (tag: string) => {
+export const stripTagPattern = (tag: string): string => {
     if (!tag.length) {
         return tag
     }
@@ -11,3 +11,6 @@ export const stripTagPattern = (tag: string) => {
 
     return tag.replace(TAG_CLEAN_PATTERN, '').split('+').join(' ')
 }
+
+export const splitInputIntoTerms = (input: string): string[] =>
+    input.toLowerCase().match(SEARCH_INPUT_SPLIT_PATTERN) || []

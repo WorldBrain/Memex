@@ -4,7 +4,7 @@ import {
 } from '@worldbrain/memex-common/lib/storage/constants'
 
 import { SEARCH_INPUT_SPLIT_PATTERN } from './constants'
-import { stripTagPattern } from './utils'
+import { stripTagPattern, splitInputIntoTerms } from './utils'
 
 describe('Overview search bar tests', () => {
     it('hashtag regexp should match desired patterns', () => {
@@ -134,6 +134,7 @@ describe('Overview search bar tests', () => {
                 input,
                 terms,
             ])
+            expect(splitInputIntoTerms(input)).toEqual(terms)
         }
     })
 

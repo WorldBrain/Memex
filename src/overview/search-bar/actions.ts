@@ -16,7 +16,7 @@ import { actions as notifActs } from '../../notifications'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import * as Raven from 'src/util/raven'
 import { auth, featuresBeta } from 'src/util/remote-functions-background'
-import { stripTagPattern } from './utils'
+import { stripTagPattern, splitInputIntoTerms } from './utils'
 
 const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
@@ -37,10 +37,7 @@ export const setQueryTagsDomains: (
     const state = getState()
 
     if (input[input.length - 1] === ' ' || isEnter) {
-        // Split input into terms and try to extract any tag/domain patterns to add to filters
-        const terms =
-            input.toLowerCase().match(constants.SEARCH_INPUT_SPLIT_PATTERN) ||
-            []
+        const terms = splitInputIntoTerms(input)
 
         terms.forEach((term) => {
             // If '#tag' pattern in input, and not already tracked, add to filter state
