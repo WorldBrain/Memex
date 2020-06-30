@@ -2,8 +2,6 @@ import * as DATA from './index.test.data'
 import { FavIcon } from './models'
 import { SearchIndex } from './types'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import StorageOperationLogger from 'src/tests/storage-operation-logger'
-import TagStorage from 'src/tags/background/storage'
 import TagsBackground from 'src/tags/background'
 
 jest.mock('./models/abstract-model')

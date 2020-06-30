@@ -9,7 +9,6 @@ import * as sidebarLeft from '../sidebar-left/selectors'
 import { query } from '../search-bar/selectors'
 import * as constants from './constants'
 import { ResultsByUrl } from '../types'
-import { defaultState } from './reducer'
 
 /**
  * Either set display title to be the top-level title field, else look in content. Fallback is the URL.

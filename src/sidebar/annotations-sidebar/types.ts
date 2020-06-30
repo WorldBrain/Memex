@@ -1,6 +1,6 @@
 import { ResultWithIndex } from 'src/overview/types'
-import { SidebarContainerState } from './containers/sidebar-annotations/logic'
 import TypedEventEmitter from 'typed-emitter'
+import { SidebarContainerState } from 'src/sidebar/annotations-sidebar/containers/old/sidebar-annotations/logic'
 
 export interface Page {
     url?: string

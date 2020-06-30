@@ -1,7 +1,6 @@
 import { createReducer } from 'redux-act'
 
 import * as acts from './actions'
-import { PageList } from '../../custom-lists/background/types'
 
 export interface State {
     /** Denotes whether or not the popup should show the collections picker. */

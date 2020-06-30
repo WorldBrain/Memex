@@ -1,8 +1,5 @@
 import React, { Component } from 'react'
-import ReactDOM from 'react-dom'
 import { SyncDevice } from 'src/sync/components/types'
-import Button from 'src/popup/components/Button'
-import moment from 'moment'
 import styled from 'styled-components'
 import { formatTime } from 'src/util/time'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
@@ -60,7 +57,7 @@ const MiddleItem = styled.div`
 const RemoveButton = styled.div`
     cursor: pointer;
     padding: 5px 10px;
-    background: ${props => (props.disabled ? colorDisabled : colorError)};
+    background: ${(props) => (props.disabled ? colorDisabled : colorError)};
     border-radius: 5px;
     cursor: pointer;
     display: inline-block;

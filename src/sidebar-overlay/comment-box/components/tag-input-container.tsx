@@ -5,7 +5,6 @@ import * as actions from '../actions'
 import * as selectors from '../selectors'
 import State from '../types'
 import { MapDispatchToProps } from '../../types'
-import { remoteFunction } from 'src/util/webextensionRPC'
 import { tags } from 'src/util/remote-functions-background'
 import TagPicker from 'src/tags/ui/TagPicker'
 

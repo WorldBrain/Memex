@@ -1,13 +1,8 @@
 import expect from 'expect'
 import Storex from '@worldbrain/storex'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
 import * as DATA from './dexie-utils.test.data'
-import initStorageManager from 'src/search/memory-storex'
 import { DexieUtilsPlugin } from './dexie-utils'
-import CustomListStorage from 'src/custom-lists/background/storage'
-import BookmarksStorage from 'src/bookmarks/background/storage'
-import AnnotationStorage from 'src/direct-linking/background/storage'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
 describe('Dexie Utils storex plugin', () => {

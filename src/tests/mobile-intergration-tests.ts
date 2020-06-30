@@ -6,15 +6,12 @@ import { MetaPickerStorage } from '@worldbrain/memex-storage/lib/mobile-app/feat
 import { OverviewStorage } from '@worldbrain/memex-storage/lib/mobile-app/features/overview/storage'
 import { PageEditorStorage } from '@worldbrain/memex-storage/lib/mobile-app/features/page-editor/storage'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
-import SyncBackground from 'src/sync/background'
 import MemoryBrowserStorage from 'src/util/tests/browser-storage'
 import SyncService, {
     SignalTransportFactory,
 } from '@worldbrain/memex-common/lib/sync'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
-import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
-import { AuthBackground } from 'src/authentication/background'
 import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { SyncInfoStorage } from '@worldbrain/memex-common/lib/sync/storage'
 import { MemexExtSyncSettingStore } from 'src/sync/background/setting-store'

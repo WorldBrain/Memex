@@ -7,8 +7,6 @@ import {
     COLLECTION_NAMES,
 } from '@worldbrain/memex-storage/lib/notifications/constants'
 
-import createNotif from '../../util/notifications'
-import { browser } from 'webextension-polyfill-ts'
 import { Notification } from '../types'
 
 export default class NotificationStorage extends StorageModule {

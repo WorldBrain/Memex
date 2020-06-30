@@ -5,7 +5,6 @@ import React from 'react'
 import { PairDeviceScreen } from 'src/sync/components/initial-sync/initial-sync-setup/steps/PairDeviceScreen'
 import { SyncDeviceScreen } from 'src/sync/components/initial-sync/initial-sync-setup/steps/SyncDeviceScreen'
 import InitialSyncSetup from 'src/sync/components/initial-sync/initial-sync-setup'
-import _ from 'lodash'
 import TypedEventEmitter from 'typed-emitter'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 import {

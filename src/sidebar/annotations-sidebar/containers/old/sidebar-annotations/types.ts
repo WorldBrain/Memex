@@ -1,6 +1,5 @@
 import { URLNormalizer } from '@worldbrain/memex-url-utils'
 
-import { AnnotationsManagerInterface } from 'src/annotations/types'
 import { SearchInterface } from 'src/search/background/types'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'

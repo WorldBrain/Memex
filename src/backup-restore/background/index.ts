@@ -3,7 +3,6 @@ import Storex from '@worldbrain/storex'
 import Queue, { Options as QueueOpts } from 'queue'
 
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
-import { setLocalStorage } from 'src/util/storage'
 import { setupRequestInterceptors } from './redirect'
 import BackupStorage, { BackupInfoStorage } from './storage'
 import { BackupBackend } from './backend'
@@ -149,7 +148,7 @@ export class BackupBackgroundModule {
                     this.setupRequestInterceptor()
                     this.initBackendDependants()
                 },
-                getBackendLocation: async info => {
+                getBackendLocation: async (info) => {
                     this.backendLocation = await this.backendSelect.restoreBackendLocation()
                     return this.backendLocation
                 },

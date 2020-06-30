@@ -1,7 +1,6 @@
 import { createSelector } from 'reselect'
 
 import * as RootSelectors from '../selectors'
-import { toggleShowTagsPicker } from 'src/overview/results/actions'
 
 export const ribbon = RootSelectors.ribbon
 

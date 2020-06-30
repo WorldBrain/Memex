@@ -3,8 +3,6 @@ import ToggleSwitch from 'src/common-ui/components/ToggleSwitch'
 import React from 'react'
 import {
     TypographyHeadingBig,
-    TypographySubHeading,
-    TypographyHeadingSmall,
     TypographyHeadingNormal,
     TypographyHeadingBigger,
     TypographyLink,

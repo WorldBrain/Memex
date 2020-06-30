@@ -3,7 +3,6 @@ import { Template } from '../types'
 import styled from 'styled-components'
 import ResultItemActionBtn from 'src/common-ui/components/result-item-action-btn'
 import { browser } from 'webextension-polyfill-ts'
-import { ButtonTooltip } from 'src/common-ui/components'
 
 const starImg = browser.extension.getURL('/img/star_full_grey.svg')
 const emptyStarImg = browser.extension.getURL('/img/star_empty_grey.svg')

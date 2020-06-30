@@ -1,4 +1,4 @@
-import { StateSelector } from '../../types'
+import { StateSelector } from 'src/sidebar/annotations-sidebar/types'
 
 interface PickerOpen {
     areTagsOpen?: boolean

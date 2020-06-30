@@ -3,14 +3,14 @@ import Waypoint from 'react-waypoint'
 import { Annotation } from 'src/annotations/types'
 
 import { LoadingIndicator } from 'src/common-ui/components'
-import AnnotationEditable, {
+import {
     AnnotationEditableGeneralProps,
     AnnotationViewEditableProps,
 } from 'src/annotations/components/AnnotationEditable'
-import { AnnotationMode } from 'src/in-page-ui/sidebar/react/types'
 import EmptyMessage from 'src/annotations/components/old/empty-message'
 import CongratsMessage from 'src/annotations/components/old/congrats-message'
 import { TagsEventProps } from 'src/annotations/components/AnnotationEdit'
+import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 
 // TODO: clean all these up, haven't started working through this component yet
 // (See AnnotationCreate)

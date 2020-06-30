@@ -1,6 +1,5 @@
 import { createReducer } from 'redux-act'
 
-import browserIsChrome from 'src/util/check-browser'
 import * as acts from './actions'
 import { VISIT_DELAY_RANGE } from './constants'
 
@@ -22,7 +21,7 @@ export const defaultState: State = {
     visitDelay: VISIT_DELAY_RANGE.DEF,
 }
 
-const toggleState = key => (state: State) => ({
+const toggleState = (key) => (state: State) => ({
     ...state,
     [key]: !state[key],
 })

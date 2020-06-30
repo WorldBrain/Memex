@@ -1,5 +1,3 @@
-import initStorageManager from '../../search/memory-storex'
-import TagsBackground from './'
 import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 

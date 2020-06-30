@@ -1,7 +1,6 @@
 import * as React from 'react'
-
-import { maxPossibleTags } from '../utils'
-import { ClickHandler } from '../types'
+import { maxPossibleTags } from 'src/sidebar/annotations-sidebar/utils'
+import { ClickHandler } from 'src/sidebar/annotations-sidebar/types'
 
 const styles = require('./tag-holder.css')
 

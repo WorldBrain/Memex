@@ -2,14 +2,6 @@ import { browser } from 'webextension-polyfill-ts'
 
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import * as constants from './constants'
-import {
-    KeyboardShortcuts,
-    Shortcut,
-} from 'src/in-page-ui/keyboard-shortcuts/types'
-import {
-    KEYBOARDSHORTCUTS_DEFAULT_STATE,
-    KEYBOARDSHORTCUTS_STORAGE_NAME,
-} from 'src/in-page-ui/keyboard-shortcuts/constants'
 
 export const delayed = (f, delay) => {
     let timeout = null

@@ -1,10 +1,10 @@
 import * as React from 'react'
 
-import AllModesFooter from './all-modes-footer'
+import AllModesFooter from './old/edit/all-modes-footer'
 // import * as constants from '../comment-box/constants'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
-import TagInput from 'src/in-page-ui/sidebar/react/components/tag-input'
+import TagInput from 'src/tags/ui/tag-input'
 
 const styles = require('./edit-mode-content.css')
 

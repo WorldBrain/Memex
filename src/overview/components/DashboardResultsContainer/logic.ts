@@ -4,13 +4,13 @@ import {
     DashboardResultsEvent,
     DashboardResultsState,
 } from 'src/overview/components/DashboardResultsContainer/types'
-import { SharedInPageUIState } from 'src/in-page-ui/shared-state'
 import EventEmitter from 'events'
 import TypedEventEmitter from 'typed-emitter'
 import {
     SharedInPageUIEvents,
     SharedInPageUIInterface,
 } from 'src/in-page-ui/shared-state/types'
+import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 
 export default class DashboardResultsLogic extends UILogic<
     DashboardResultsState,
@@ -31,28 +31,10 @@ export default class DashboardResultsLogic extends UILogic<
         super()
     }
 
-    get mockInPageUI(): SharedInPageUIInterface {
-        return {
-            state: { sidebar: false },
-            events: this.overviewUIEvents as SharedInPageUIState['events'],
-            hideRibbon: () => undefined,
-            hideSidebar: () => undefined,
-        } as SharedInPageUIInterface
-    }
-
-    get mockHighlighter() {
-        return {
-            removeTempHighlights: () => undefined,
-            renderHighlight: () => undefined,
-        }
-    }
-
     getInitialState(): DashboardResultsState {
         return {
             readerShow: false,
             readerUrl: null,
-            dashboardSharedUIState: this.dashboardUI,
-            highlighter: this.mockHighlighter,
         }
     }
 

@@ -5,18 +5,12 @@ import {
 } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { auth, subscription } from 'src/util/remote-functions-background'
-import {
-    PlanTitle,
-    PlanName,
-    PlanBox,
-} from 'src/authentication/components/Subscription/pricing.style'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import SubscriptionInnerOptions from 'src/authentication/components/Subscription/SubscriptionInnerOptions'
 import {
     CenterText,
     WhiteSpacer10,
 } from 'src/common-ui/components/design-library/typography'
-import styled from 'styled-components'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { AuthContextInterface } from 'src/authentication/background/types'

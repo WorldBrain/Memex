@@ -2,7 +2,6 @@ import React from 'react'
 import styled from 'styled-components'
 import {
     colorDisabled,
-    colorPrimary,
     colorError,
 } from 'src/common-ui/components/design-library/colors'
 import {
@@ -12,7 +11,7 @@ import {
 
 const StyledCancelAction = styled.div`
     padding: 10px 20px;
-    background: ${props => (props.disabled ? colorDisabled : colorError)};
+    background: ${(props) => (props.disabled ? colorDisabled : colorError)};
     border-radius: 5px;
     cursor: pointer;
     display: flex;

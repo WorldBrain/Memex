@@ -4,7 +4,6 @@ import { userSelectedText } from 'src/in-page-ui/tooltip/content_script/interact
 import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { KeyboardShortcuts } from '../types'
-import AnnotationsManager from 'src/annotations/annotations-manager'
 import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
 
 type HandleInterface = {

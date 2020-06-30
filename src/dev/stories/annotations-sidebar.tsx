@@ -13,6 +13,10 @@ async function createDependencies() {
 
     const tagPickerDependencies: GenericPickerDependenciesMinusSave = {
         loadDefaultSuggestions: async () => [],
+        queryEntries: async () => [],
+        actOnAllTabs: async () => null,
+        onEscapeKeyDown: async () => null,
+        initialSelectedEntries: () => [],
     }
 
     const sidebarDependencies: AnnotationsSidebarProps = {
@@ -22,7 +26,14 @@ async function createDependencies() {
             onSave: action('onSave'),
             tagPickerDependencies,
         },
+        annotationEditProps: {
+            anchor: null,
+            onCancel: action('onCancel'),
+            onSave: action('onSave'),
+            tagPickerDependencies,
+        },
         isAnnotationCreateShown: true,
+        isSearchLoading: 'pristine',
         onSearch: action('onSearch'),
         annotations: [],
     }

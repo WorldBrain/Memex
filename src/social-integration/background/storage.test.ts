@@ -1,10 +1,4 @@
-import Storex from '@worldbrain/storex'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
-
-import initStorageManager from 'src/search/memory-storex'
 import CustomListBg from 'src/custom-lists/background'
-import AnnotsBg from 'src/direct-linking/background'
-import SocialBackground from './'
 import SocialStorage from './storage'
 import * as DATA from './storage.test.data'
 import { Tweet, SocialPage } from '../types'

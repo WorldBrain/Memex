@@ -12,7 +12,6 @@ import LinkButton from './components/LinkButton'
 import ButtonIcon from './components/ButtonIcon'
 import { TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
-import { NotifButton } from './notif-button'
 import { HistoryPauser } from './pause-button'
 import {
     selectors as tagsSelectors,

@@ -10,7 +10,6 @@ import {
     shortcuts,
     ShortcutElData,
 } from 'src/options/settings/keyboard-shortcuts'
-import * as utils from 'src/in-page-ui/tooltip/utils'
 import * as getKeyboardShortcutsState from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import {
     KeyboardShortcuts,

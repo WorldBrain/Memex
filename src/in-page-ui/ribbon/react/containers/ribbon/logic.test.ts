@@ -8,9 +8,8 @@ import {
     INITIAL_RIBBON_COMMENT_BOX_STATE,
     RibbonContainerOptions,
 } from './logic'
-import { SharedInPageUIState } from 'src/in-page-ui/shared-state'
-import { RibbonContainerDependencies } from './types'
 import { Annotation } from 'src/annotations/types'
+import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 
 function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
     return mapValues(remoteFunctions, (f) => {

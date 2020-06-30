@@ -2,9 +2,9 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { StyleSheetManager } from 'styled-components'
 
-import SidebarContainer from './containers/sidebar-annotations'
-import { SidebarContainerDependencies } from './containers/sidebar-annotations/types'
 import { SidebarEnv } from './types'
+import { SidebarContainerDependencies } from 'src/sidebar/annotations-sidebar/containers/old/sidebar-annotations/types'
+import { SidebarContainer } from 'src/overview/sidebar-left'
 
 export function setupSidebarUI(
     target: HTMLElement,

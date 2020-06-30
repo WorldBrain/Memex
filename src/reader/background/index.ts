@@ -1,6 +1,5 @@
 import ReaderStorage from 'src/reader/background/storage'
 import StorageManager from '@worldbrain/storex'
-import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { RemoteReaderInterface } from 'src/reader/types'
 
 export class ReaderBackground {

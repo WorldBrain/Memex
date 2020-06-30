@@ -10,7 +10,6 @@ import cx from 'classnames'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
 import { browser } from 'webextension-polyfill-ts'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 
 const commentAdd = browser.extension.getURL('/img/comment_add.svg')
 
