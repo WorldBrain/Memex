@@ -4,6 +4,7 @@ import {
 } from '@worldbrain/memex-common/lib/storage/constants'
 
 import { SEARCH_INPUT_SPLIT_PATTERN } from './constants'
+import { stripTagPattern, splitInputIntoTerms } from './utils'
 
 describe('Overview search bar tests', () => {
     it('hashtag regexp should match desired patterns', () => {
@@ -17,11 +18,14 @@ describe('Overview search bar tests', () => {
             { pattern: '#tag_tag', shouldPass: true },
             { pattern: '#tag_tag.tag-tag', shouldPass: true },
             { pattern: '#tag', shouldPass: true },
-            //{ pattern: '#"tag tag"', shouldPass: true },
-            //{ pattern: '#"tag tag tag"', shouldPass: true },
+            { pattern: '#"tag tag"', shouldPass: true },
+            { pattern: '#"tag tag tag"', shouldPass: true },
+            { pattern: '#"tag tag tag tag"', shouldPass: true },
             { pattern: '#tag tag"', shouldPass: false },
             { pattern: '#tag-', shouldPass: false },
             { pattern: '#tag.', shouldPass: false },
+            { pattern: '#tag"', shouldPass: false },
+            { pattern: '#"tag', shouldPass: false },
             { pattern: 'tag', shouldPass: false },
             { pattern: '#', shouldPass: false },
         ]
@@ -31,6 +35,15 @@ describe('Overview search bar tests', () => {
                 pattern,
                 shouldPass,
             ])
+
+            // For the valid patterns, also test their inverse negated hashtag syntax
+            if (shouldPass) {
+                const negatedPattern = `-${pattern}`
+                expect([
+                    negatedPattern,
+                    HASH_TAG_PATTERN.test(negatedPattern),
+                ]).toEqual([negatedPattern, shouldPass])
+            }
         }
     })
 
@@ -46,6 +59,7 @@ describe('Overview search bar tests', () => {
             { pattern: 'tag_tag.tag-tag', shouldPass: true },
             { pattern: 'tag tag', shouldPass: true },
             { pattern: 'tag tag tag', shouldPass: true },
+            { pattern: 'tag tag tag tag', shouldPass: true },
             { pattern: 'tag', shouldPass: true },
             { pattern: 'tag-', shouldPass: false },
             { pattern: 'tag.', shouldPass: false },
@@ -86,6 +100,29 @@ describe('Overview search bar tests', () => {
                 input: 'term -#"tag tag tag" #"tag tag tag"',
                 terms: ['term', '-#"tag tag tag"', '#"tag tag tag"'],
             },
+            // Missing prefixed quotation mark
+            {
+                input: 'term -#tag tag tag" #"tag tag tag tag"',
+                terms: ['term', '-#tag', 'tag', 'tag"', '#"tag tag tag tag"'],
+            },
+            // Missing postfixed quotation mark
+            {
+                input: 'term -#"tag tag tag #"tag tag tag tag"',
+                terms: ['term', '-#"tag', 'tag', 'tag', '#"tag tag tag tag"'],
+            },
+            {
+                input: 'term -#"tag tag tag" #"tag tag tag tag"',
+                terms: ['term', '-#"tag tag tag"', '#"tag tag tag tag"'],
+            },
+            {
+                input: 'term #"tag-tag tag" #"tag.tag tag" #"tag tag_tag"',
+                terms: [
+                    'term',
+                    '#"tag-tag tag"',
+                    '#"tag.tag tag"',
+                    '#"tag tag_tag"',
+                ],
+            },
             {
                 input: 'term -#"tag" #"tag"',
                 terms: ['term', '-#"tag"', '#"tag"'],
@@ -97,6 +134,33 @@ describe('Overview search bar tests', () => {
                 input,
                 terms,
             ])
+            expect(splitInputIntoTerms(input)).toEqual(terms)
+        }
+    })
+
+    it('should be able to strip hashtag patterns from tags intending to be filtered', () => {
+        interface TestCase {
+            input: string
+            output: string
+        }
+
+        const testCases: TestCase[] = [
+            { input: '#tag', output: 'tag' },
+            { input: '#tag-tag', output: 'tag-tag' },
+            { input: '#"tag tag"', output: 'tag tag' },
+            { input: '#tag_tag', output: 'tag_tag' },
+            { input: '#tag.tag', output: 'tag.tag' },
+            { input: '#tag+tag', output: 'tag tag' },
+            { input: '#"tag+tag"', output: 'tag tag' },
+            { input: '#"tag tag.tag"', output: 'tag tag.tag' },
+            { input: '#"tag tag tag tag"', output: 'tag tag tag tag' },
+        ]
+
+        for (const { input, output } of testCases) {
+            expect(stripTagPattern(input)).toEqual(output)
+
+            // Also test their inverse negated hashtag syntax
+            expect(stripTagPattern('-' + input)).toEqual(output)
         }
     })
 })

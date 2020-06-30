@@ -2,6 +2,7 @@ import { HASH_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants
 
 import transformPageText from 'src/util/transform-page-text'
 import * as constants from '../overview/search-bar/constants'
+import { splitInputIntoTerms } from '../overview/search-bar/utils'
 import { DEFAULT_TERM_SEPARATOR } from './util'
 
 class QueryBuilder {
@@ -153,7 +154,7 @@ class QueryBuilder {
         }
 
         // STAGE 1: Filter out tags/domains
-        const terms = QueryBuilder.getTermsFromInput(input, /\s+/)
+        const terms = splitInputIntoTerms(input)
         const { include, exclude } = this._extractTermsPatterns(terms)
 
         // Short-circuit if all terms filtered out as tags/domains
