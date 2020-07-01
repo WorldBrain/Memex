@@ -1,16 +1,16 @@
 import * as React from 'react'
+import styled from 'styled-components'
 import Waypoint from 'react-waypoint'
 import { Annotation } from 'src/annotations/types'
 
 import { LoadingIndicator } from 'src/common-ui/components'
-import {
+import AnnotationEditable, {
     AnnotationEditableGeneralProps,
     Props as AnnotationViewEditableProps,
 } from 'src/annotations/components/AnnotationEditable'
-import EmptyMessage from 'src/annotations/components/old/empty-message'
-import CongratsMessage from 'src/annotations/components/old/congrats-message'
 import { TagsEventProps } from 'src/annotations/components/AnnotationEdit'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
+import CongratsMessage from './parts/CongratsMessage'
 
 // TODO: clean all these up, haven't started working through this component yet
 // (See AnnotationCreate)
@@ -32,30 +32,25 @@ export interface PageAnnotationsProps {
 
 // TODO(sidebar-refactor): extract scrollable waypoint list to a generic component
 // TODO(sidebar-refactor): then a component specifically for an annotations list may become unneccassry, just need to `map` where needed (the sidebar)
-export default class AnnotationsEditable extends React.Component<
-    PageAnnotationsProps
-> {
+class AnnotationsEditable extends React.Component<PageAnnotationsProps> {
     private handleWaypointEnter = (args: Waypoint.CallbackArgs) => {
         this.props.handleScrollPagination()
     }
 
     private renderList() {
-        const annots = this.props.annotations.map((annotation, i) => {
-            // TODO(sidebar-refactor): Just for testing until fixing AnnotationEditable
-            return <pre>{JSON.stringify(annotation)}</pre>
-
-            /*            <AnnotationEditable
+        const annots = this.props.annotations.map((annot, i) => (
+            <AnnotationEditable
                 key={i}
                 highlighter={this.props.highlighter}
-                mode={this.props.annotationModes[annot.url] || 'default'}
+                mode={this.props.annotationModes[annot.url] ?? 'default'}
                 displayCrowdfunding={false}
                 {...annot}
                 {...this.props.annotationEventHandlers}
                 {...this.props.tagsEventProps}
                 isActive={this.props.activeAnnotationUrl === annot.url}
                 isHovered={this.props.hoverAnnotationUrl === annot.url}
-            />*/
-        })
+            />
+        ))
 
         if (this.props.needsWaypoint) {
             annots.push(
@@ -79,10 +74,42 @@ export default class AnnotationsEditable extends React.Component<
         }
 
         return (
-            <React.Fragment>
+            <>
                 {this.renderList()}
                 {this.props.showCongratsMessage && <CongratsMessage />}
-            </React.Fragment>
+            </>
         )
     }
 }
+
+export default AnnotationsEditable
+
+const EmptyMessage = () => (
+    <EmptyMessageStyled>
+        <EmptyMessageEmojiStyled>¯\_(ツ)_/¯</EmptyMessageEmojiStyled>
+        <EmptyMessageTextStyled>
+            No notes or highlights on this page
+        </EmptyMessageTextStyled>
+    </EmptyMessageStyled>
+)
+
+const EmptyMessageStyled = styled.div`
+    width: 80%;
+    margin: 0px auto;
+    text-align: center;
+    margin-top: 90px;
+    animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+`
+
+const EmptyMessageEmojiStyled = styled.div`
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: rgb(54, 54, 46);
+`
+
+const EmptyMessageTextStyled = styled.div`
+    margin-bottom: 15px;
+    font-weight: 400;
+    font-size: 15px;
+    color: #a2a2a2;
+`
