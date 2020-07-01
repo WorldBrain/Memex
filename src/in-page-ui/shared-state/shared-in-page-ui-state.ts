@@ -21,7 +21,7 @@ export interface InPageUIDependencies {
 }
 
 export class SharedInPageUIState implements SharedInPageUIInterface {
-    contentAnnotations: Annotation[]
+    contentAnnotations: Annotation[] = []
     events = new EventEmitter() as TypedEventEmitter<SharedInPageUIEvents>
     areHighlightsShown = false
     componentsShown: InPageUIComponentShowState = {
@@ -40,7 +40,6 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         } & SidebarActionOptions
         ribbonAction?: { emittedWhen: number; action: InPageUIRibbonAction }
     } = {}
-    contentAnnotations = []
 
     constructor(private options: InPageUIDependencies) {
         this.events.on('newListener' as any, this._handleNewListener)

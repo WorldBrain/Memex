@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 import { ButtonTooltip } from 'src/common-ui/components'
-import { AnnotationMode } from 'src/in-page-ui/sidebar/react/types'
+import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 
 export interface Props {
     mode: AnnotationMode

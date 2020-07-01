@@ -105,21 +105,18 @@ class EditModeContent extends React.Component<Props, State> {
                     onChange={this._handleCommentChange}
                     specialHandlers={[this.onEnterSaveHandler]}
                 />
-
-                <div onKeyDown={this._handleTagInputKeydown}>
-                    <TagInput
-                        tags={this.state.tags}
-                        deleteTag={this.deleteTag}
-                        updateTags={this.updateTags}
-                        setTagInputActive={this._setTagInputActive}
-                        isTagInputActive={this.state.isTagInputActive}
-                        queryTagSuggestions={this.props.queryTagSuggestions}
-                        fetchInitialTagSuggestions={
-                            this.props.fetchInitialTagSuggestions
-                        }
-                    />
-                </div>
-
+                <TagInput
+                    tags={this.state.tags}
+                    deleteTag={this.deleteTag}
+                    updateTags={this.updateTags}
+                    onKeyDown={this._handleTagInputKeydown}
+                    setTagInputActive={this._setTagInputActive}
+                    isTagInputActive={this.state.isTagInputActive}
+                    queryTagSuggestions={this.props.queryTagSuggestions}
+                    fetchInitialTagSuggestions={
+                        this.props.fetchInitialTagSuggestions
+                    }
+                />
                 <AllModesFooter
                     mode="edit"
                     handleCancelEdit={this.props.handleCancelOperation}

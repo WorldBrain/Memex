@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
-import { AnnotationMode } from 'src/in-page-ui/sidebar/react/types'
+import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import AnnotationFooter from './AnnotationFooter'
 
 interface Props {

@@ -443,24 +443,25 @@ export default class Ribbon extends Component<Props, State> {
                                                             false,
                                                         )
                                                     }
-                                                    saveComment={
-                                                        this.props.commentBox
-                                                            .saveComment
-                                                    }
-                                                    form={{
-                                                        env: 'inpage',
-                                                        ...this.props
-                                                            .commentBox,
-                                                        toggleTagPicker: this
-                                                            .props.commentBox
-                                                            .toggleCommentBoxTagPicker,
-                                                        toggleBookmark: this
-                                                            .props.commentBox
-                                                            .toggleCommentBoxBookmark,
-                                                        updateTags: this.props
-                                                            .commentBox
-                                                            .updateCommentTags,
-                                                    }}
+                                                    // TODO: fix these
+                                                    // saveComment={
+                                                    //     this.props.commentBox
+                                                    //         .saveComment as any
+                                                    // }
+                                                    // form={{
+                                                    //     env: 'inpage',
+                                                    //     ...this.props
+                                                    //         .commentBox,
+                                                    //     toggleTagPicker: this
+                                                    //         .props.commentBox
+                                                    //         .toggleCommentBoxTagPicker,
+                                                    //     toggleBookmark: this
+                                                    //         .props.commentBox
+                                                    //         .toggleCommentBoxBookmark,
+                                                    //     updateTags: this.props
+                                                    //         .commentBox
+                                                    //         .updateCommentTags,
+                                                    // }}
                                                 />
                                             }
                                         </Tooltip>
