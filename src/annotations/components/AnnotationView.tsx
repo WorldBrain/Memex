@@ -42,7 +42,7 @@ class AnnotationView extends React.Component<Props> {
 
     private renderCommentAndTags() {
         if (!this.props.comment) {
-            return
+            return this.renderTags()
         }
 
         return (

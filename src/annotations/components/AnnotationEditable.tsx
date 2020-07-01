@@ -12,7 +12,9 @@ import AnnotationEdit, {
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 
 export interface AnnotationEditableGeneralProps {
+    displayCrowdfunding: boolean
     env: 'inpage' | 'overview'
+    mode: AnnotationMode
     highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
 }
 
@@ -28,8 +30,6 @@ export interface AnnotationEditableProps {
     comment?: string
     tags: string[]
     hasBookmark?: boolean
-    mode: AnnotationMode
-    displayCrowdfunding: boolean
 }
 
 export interface AnnotationEditableEventProps {
@@ -181,7 +181,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         this.props.handleAnnotationModeSwitch(this.props.url, 'default')
     }
 
-    private handleBookmarkToggle = () => {
+    private _handleBookmarkToggle = () => {
         this.props.handleBookmarkToggle(this.props.url)
     }
 
@@ -226,7 +226,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                 hasBookmark={!!this.props.hasBookmark}
                 editIconClickHandler={this._handleEditIconClick}
                 handleGoToAnnotation={this._handleGoToAnnotation}
-                handleBookmarkToggle={this.handleBookmarkToggle}
+                handleBookmarkToggle={this._handleBookmarkToggle}
                 trashIconClickHandler={this._handleTrashIconClick}
                 shareIconClickHandler={this._handleShareIconClick}
                 handleCancelOperation={this._handleCancelOperation}

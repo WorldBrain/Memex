@@ -7,13 +7,18 @@ import AnnotationCreate, {
     AnnotationCreateProps,
 } from 'src/annotations/components/AnnotationCreate'
 import AnnotationEditable, {
-    Props as AnnotationEditableProps,
+    AnnotationEditableGeneralProps,
+    AnnotationEditableEventProps,
 } from 'src/annotations/components/AnnotationEditable'
+import { TagsEventProps } from 'src/annotations/components/AnnotationEdit'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
 import { Annotation } from 'src/annotations/types'
 import { TaskState } from 'ui-logic-react/lib/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
+
+type AnnotationEditProps = AnnotationEditableGeneralProps &
+    AnnotationEditableEventProps
 
 export interface AnnotationsSidebarProps {
     // setEventEmitter: (events: AnnotationsSidebarEventEmitter) => void
@@ -30,7 +35,8 @@ export interface AnnotationsSidebarProps {
     onSearch: (search) => void
     isSearchLoading: TaskState
     annotationCreateProps: AnnotationCreateProps
-    annotationEditProps: AnnotationEditableProps
+    annotationEditProps: AnnotationEditProps
+    annotationTagProps: TagsEventProps
     isAnnotationCreateShown: boolean
     annotations: Annotation[]
 
@@ -137,6 +143,7 @@ export default class AnnotationsSidebar extends React.Component<
         const annots = this.props.annotations.map((annot, i) => (
             <AnnotationEditable
                 key={i}
+                {...this.props.annotationTagProps}
                 {...this.props.annotationEditProps}
                 displayCrowdfunding={false}
                 {...annot}
