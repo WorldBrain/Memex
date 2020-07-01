@@ -15,13 +15,7 @@ import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
-import { AnnotationInterface } from 'src/direct-linking/background/types'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import { BookmarksInterface } from 'src/bookmarks/background/types'
-import { RemoteTagsInterface } from 'src/tags/background/types'
-import { SearchInterface } from 'src/search/background/types'
 import { auth, featuresBeta } from 'src/util/remote-functions-background'
-import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import AnnotationsSidebar from 'src/sidebar/annotations-sidebar/components/AnnotationsSidebar'
 
@@ -69,6 +63,8 @@ class Overview extends PureComponent<Props> {
     private setAnnotsSidebarRef = (sidebar) => {
         this.annotationsSidebar = sidebar
     }
+
+    // TODO: (sidebar-refactor, prior1)
 
     /*    private handleAnnotationSidebarToggle = async (args?: {
         pageUrl: string

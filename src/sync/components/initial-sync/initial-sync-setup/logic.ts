@@ -2,7 +2,6 @@ import { UILogic, UIEvent } from 'ui-logic-core'
 import TypedEventEmitter from 'typed-emitter'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 import { FastSyncEvents } from '@worldbrain/storex-sync/lib/fast-sync'
-import * as Raven from 'src/util/raven'
 import analytics from 'src/analytics'
 import { now } from 'moment'
 

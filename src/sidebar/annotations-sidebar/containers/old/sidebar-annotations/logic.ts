@@ -7,13 +7,6 @@ import {
     UIMutation,
 } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
-import {
-    SidebarEnv,
-    Page,
-    AnnotationMode,
-    ResultWithIndex as Result,
-    ResultsByUrl,
-} from '../../../types'
 import { Annotation } from 'src/annotations/types'
 import {
     PageUrlsByDay,
@@ -30,6 +23,12 @@ import {
     SearchTypeChange,
 } from './types'
 import { featuresBeta } from 'src/util/remote-functions-background'
+import {
+    AnnotationMode,
+    Page,
+    ResultsByUrl,
+    SidebarEnv,
+} from 'src/sidebar/annotations-sidebar/types'
 
 export interface SidebarContainerState {
     loadState: TaskState

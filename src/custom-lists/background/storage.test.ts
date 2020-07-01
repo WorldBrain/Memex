@@ -1,4 +1,3 @@
-import StorageManager from '@worldbrain/storex'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
 import CustomListBackground from './'

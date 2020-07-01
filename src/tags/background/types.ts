@@ -1,5 +1,3 @@
-import { SuggestType } from 'src/search/plugins/suggest'
-
 export interface RemoteTagsInterface {
     addTagToExistingUrl(args: { tag: string; url: string }): Promise<void>
     addTagToPage(args: {

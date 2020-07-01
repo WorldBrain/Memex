@@ -21,7 +21,6 @@ import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { TagResultItem } from './components/TagResultItem'
-import { ActiveTag } from './components/ActiveTag'
 import { EntrySelectedTag } from './components/EntrySelectedTag'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 

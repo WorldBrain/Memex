@@ -1,5 +1,4 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { Omit } from '../sidebar-overlay/types'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import analytics from 'src/analytics'
 import { BackgroundSearchParams } from 'src/search/background/types'

@@ -1,5 +1,4 @@
 import React, { PureComponent } from 'react'
-import cx from 'classnames'
 
 const styles = require('./LoadingIndicator.css')
 

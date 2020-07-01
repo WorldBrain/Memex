@@ -7,7 +7,6 @@ import { Link } from 'react-router'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import cx from 'classnames'
 
-import InboxButton from 'src/notifications/components/InboxButton'
 import BackupStatus from 'src/backup-restore/ui/backup-status-bar/BackupStatusBarContainer'
 import { OVERVIEW_URL } from 'src/constants'
 import BackToSearch from 'src/overview/sidebar-left/components/BackToSearch'

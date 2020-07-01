@@ -5,7 +5,6 @@ import AccountInfo from 'src/authentication/components/AccountInfo'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { LOGIN_URL } from 'src/constants'
 import { AuthContextInterface } from 'src/authentication/background/types'
-import { auth } from 'src/util/remote-functions-background'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 const styles = require('./styles.css')

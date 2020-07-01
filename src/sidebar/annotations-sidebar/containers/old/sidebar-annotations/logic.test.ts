@@ -6,8 +6,8 @@ import {
 } from 'src/tests/ui-logic-tests'
 import * as DATA from './logic.test.data'
 import { Annotation } from 'src/annotations/types'
-import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { PageUrlsByDay } from 'src/search/background/types'
+import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 
 function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
     return mapValues(remoteFunctions, (f) => {

@@ -25,8 +25,6 @@ import TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
 import { AuthRemoteEvents } from 'src/authentication/background/types'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
-import { Claims } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'

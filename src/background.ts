@@ -24,8 +24,6 @@ import {
 import { createLazySharedSyncLog } from './sync/background/shared-sync-log'
 import { createFirebaseSignalTransport } from './sync/background/signalling'
 import { DevAuthState } from 'src/authentication/background/setup'
-import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
 import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'

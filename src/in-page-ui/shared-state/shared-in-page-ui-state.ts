@@ -40,6 +40,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         } & SidebarActionOptions
         ribbonAction?: { emittedWhen: number; action: InPageUIRibbonAction }
     } = {}
+    contentAnnotations = []
 
     constructor(private options: InPageUIDependencies) {
         this.events.on('newListener' as any, this._handleNewListener)

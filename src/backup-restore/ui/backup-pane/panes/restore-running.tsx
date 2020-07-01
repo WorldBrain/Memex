@@ -1,6 +1,6 @@
 import React from 'react'
 import RunningProcess from './running-process'
-import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
+
 const settingsStyle = require('src/options/settings/components/settings.css')
 
 const styles = require('../../styles.css')

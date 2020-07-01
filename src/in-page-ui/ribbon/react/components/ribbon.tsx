@@ -14,7 +14,6 @@ import {
     KeyboardShortcuts,
     Shortcut,
 } from 'src/in-page-ui/keyboard-shortcuts/types'
-import SearchBox from './search-box'
 import ExtraButtonsPanel from './extra-buttons-panel'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { RibbonSubcomponentProps } from './types'

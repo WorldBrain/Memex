@@ -13,7 +13,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { actions as filterActs } from 'src/search-filters'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
-import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
+import { HighlightInteractionInterface } from 'src/highlighting/types'
 
 const styles = require('./annotation-box-container.css')
 const footerStyles = require('./default-footer.css')

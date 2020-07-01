@@ -23,7 +23,6 @@ import {
     TimeButtonBox,
     LinkSpan,
 } from 'src/authentication/components/Subscription/pricing.style'
-import { TypographyBodyBold } from 'src/common-ui/components/design-library/typography'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { AuthContextInterface } from 'src/authentication/background/types'

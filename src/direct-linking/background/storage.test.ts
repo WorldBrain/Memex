@@ -1,11 +1,8 @@
 import omitBy from 'lodash/omitBy'
 import endsWith from 'lodash/endsWith'
 import Storex from '@worldbrain/storex'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
-import initStorageManager from '../../search/memory-storex'
-import AnnotationBackground from './'
 import AnnotationStorage from './storage'
 import CustomListBackground from 'src/custom-lists/background'
 import * as DATA from './storage.test.data'
@@ -95,13 +92,13 @@ describe('Annotations storage', () => {
         })
 
         describe('Update operations: ', () => {
-            const checkIsDefined = async annotation => {
+            const checkIsDefined = async (annotation) => {
                 expect(annotation).toBeDefined()
                 expect(annotation).not.toBeNull()
             }
 
             test('update comment', async () => {
-                const stripTerms = comment =>
+                const stripTerms = (comment) =>
                     omitBy(comment, (value, key) => endsWith(key, '_terms'))
 
                 const oldComment = await annotationStorage.getAnnotationByPk(

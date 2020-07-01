@@ -1,6 +1,5 @@
 import Storex from '@worldbrain/storex'
 import { bindMethod } from 'src/util/functions'
-import { BrowserSettingsStore } from 'src/util/settings'
 import CopyPasterStorage from './storage'
 import { RemoteCopyPasterInterface } from './types'
 import { Template } from '../types'

@@ -3,7 +3,10 @@ import { browser } from 'webextension-polyfill-ts'
 import { IGNORE_CLICK_OUTSIDE_CLASS } from '../constants'
 import { ContentScriptRegistry, SidebarScriptMain } from './types'
 import { createInPageUI } from 'src/in-page-ui/utils'
-import { setupSidebarUI, destroySidebarUI } from 'src/in-page-ui/sidebar/react'
+import {
+    setupSidebarUI,
+    destroySidebarUI,
+} from 'src/sidebar/annotations-sidebar/index'
 
 export const main: SidebarScriptMain = async (dependencies) => {
     const cssFile = browser.extension.getURL(`/content_script_sidebar.css`)

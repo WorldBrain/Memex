@@ -1,6 +1,5 @@
 import { ContentScriptsInterface } from './types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { tabId } from 'src/popup/selectors'
 import { Tabs } from 'webextension-polyfill-ts'
 
 export class ContentScriptsBackground {

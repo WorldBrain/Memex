@@ -3,11 +3,11 @@ import { storiesOf } from '@storybook/react'
 import React from 'react'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import AnnotationsManager from 'src/annotations/annotations-manager'
-import SidebarContainer from 'src/in-page-ui/sidebar/react/containers/sidebar'
 import { WithDependencies } from '../utils'
-import { SharedInPageUIState } from 'src/in-page-ui/shared-state'
-import { SidebarEnv } from 'src/in-page-ui/sidebar/react/types'
 import RibbonHolder from 'src/in-page-ui/ribbon/react/containers/ribbon-holder'
+import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
+import { SidebarEnv } from 'src/sidebar/annotations-sidebar/types'
+import { SidebarContainer } from 'src/overview/sidebar-left'
 
 const stories = storiesOf('In-page UI', module)
 
