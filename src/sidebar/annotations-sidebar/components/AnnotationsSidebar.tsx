@@ -1,25 +1,36 @@
 import * as React from 'react'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import Waypoint from 'react-waypoint'
 import styled, { css } from 'styled-components'
+
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import AnnotationCreate, {
     AnnotationCreateProps,
 } from 'src/annotations/components/AnnotationCreate'
+import AnnotationEditable, {
+    Props as AnnotationEditableProps,
+} from 'src/annotations/components/AnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
 import { Annotation } from 'src/annotations/types'
 import { TaskState } from 'ui-logic-react/lib/types'
-import AnnotationsEditable from 'src/annotations/components/AnnotationsEditable'
-
-// TODO: are these the same? I'm not sure yet, depends what the edit component needs.
-type AnnotationEditProps = AnnotationCreateProps
+import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
 
 export interface AnnotationsSidebarProps {
     // setEventEmitter: (events: AnnotationsSidebarEventEmitter) => void
 
+    // NOTE: This group of props were all brought over from AnnotationsEditable
+    showCongratsMessage?: boolean
+    activeAnnotationUrl?: string | null
+    hoverAnnotationUrl?: string
+    needsWaypoint?: boolean
+    appendLoader?: boolean
+    handleScrollPagination?: () => void
+    // ^ Until here ^
+
     onSearch: (search) => void
     isSearchLoading: TaskState
     annotationCreateProps: AnnotationCreateProps
-    annotationEditProps: AnnotationEditProps
+    annotationEditProps: AnnotationEditableProps
     isAnnotationCreateShown: boolean
     annotations: Annotation[]
 
@@ -116,16 +127,51 @@ export default class AnnotationsSidebar extends React.Component<
         )
     }
 
+    private renderAnnotationsEditable() {
+        const { annotations } = this.props
+
+        if (!annotations.length) {
+            return <EmptyMessage />
+        }
+
+        const annots = this.props.annotations.map((annot, i) => (
+            <AnnotationEditable
+                key={i}
+                {...this.props.annotationEditProps}
+                displayCrowdfunding={false}
+                {...annot}
+                isActive={this.props.activeAnnotationUrl === annot.url}
+                isHovered={this.props.hoverAnnotationUrl === annot.url}
+            />
+        ))
+
+        if (this.props.needsWaypoint) {
+            annots.push(
+                <Waypoint
+                    onEnter={() => this.props.handleScrollPagination}
+                    key="sidebar-waypoint"
+                />,
+            )
+        }
+
+        if (this.props.appendLoader) {
+            annots.push(<LoadingIndicator key="spinner" />)
+        }
+
+        if (this.props.showCongratsMessage) {
+            annots.push(<CongratsMessage />)
+        }
+
+        return annots
+    }
+
     private renderResultsBody() {
         return (
             <AnnotationsSectionStyled>
                 {this.props.isSearchLoading === 'running' && (
                     <LoadingIndicatorStyled />
                 )}
-                <AnnotationsEditable
-                    annotations={this.props.annotations}
-                    {...this.props.annotationEditProps}
-                />
+                {this.renderAnnotationsEditable()}
             </AnnotationsSectionStyled>
         )
     }
@@ -274,4 +320,34 @@ const TopSectionStyled = styled.div`
     background: white;
     overflow: hidden;
     padding: 0 5px;
+`
+
+const EmptyMessage = () => (
+    <EmptyMessageStyled>
+        <EmptyMessageEmojiStyled>¯\_(ツ)_/¯</EmptyMessageEmojiStyled>
+        <EmptyMessageTextStyled>
+            No notes or highlights on this page
+        </EmptyMessageTextStyled>
+    </EmptyMessageStyled>
+)
+
+const EmptyMessageStyled = styled.div`
+    width: 80%;
+    margin: 0px auto;
+    text-align: center;
+    margin-top: 90px;
+    animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+`
+
+const EmptyMessageEmojiStyled = styled.div`
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: rgb(54, 54, 46);
+`
+
+const EmptyMessageTextStyled = styled.div`
+    margin-bottom: 15px;
+    font-weight: 400;
+    font-size: 15px;
+    color: #a2a2a2;
 `
