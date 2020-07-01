@@ -5,7 +5,7 @@ import { Annotation } from 'src/annotations/types'
 import { LoadingIndicator } from 'src/common-ui/components'
 import {
     AnnotationEditableGeneralProps,
-    AnnotationViewEditableProps,
+    Props as AnnotationViewEditableProps,
 } from 'src/annotations/components/AnnotationEditable'
 import EmptyMessage from 'src/annotations/components/old/empty-message'
 import CongratsMessage from 'src/annotations/components/old/congrats-message'
