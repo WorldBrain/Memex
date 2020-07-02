@@ -1,7 +1,7 @@
 import React from 'react'
 import { browser, Storage } from 'webextension-polyfill-ts'
 
-import { StatefulUIElement } from 'src/overview/types'
+import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic, { State, Event } from './logic'
 import OnboardingBox from '../../components/onboarding-box'
 import OnboardingStep from '../../components/onboarding-step'

@@ -4,24 +4,21 @@ import styled, { css } from 'styled-components'
 
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import AnnotationCreate, {
-    AnnotationCreateProps,
+    AnnotationCreateGeneralProps,
 } from 'src/annotations/components/AnnotationCreate'
 import AnnotationEditable, {
     AnnotationEditableGeneralProps,
-    AnnotationEditableEventProps,
 } from 'src/annotations/components/AnnotationEditable'
 import { TagsEventProps } from 'src/annotations/components/AnnotationEdit'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
 import { Annotation } from 'src/annotations/types'
-import { TaskState } from 'ui-logic-react/lib/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
+import { AnnotationsSidebarEventEmitter } from '../types'
 
-type AnnotationEditProps = AnnotationEditableGeneralProps &
-    AnnotationEditableEventProps
-
-export interface AnnotationsSidebarProps {
-    // setEventEmitter: (events: AnnotationsSidebarEventEmitter) => void
+export interface AnnotationsSidebarProps
+    extends AnnotationEditableGeneralProps {
+    events: AnnotationsSidebarEventEmitter
 
     // NOTE: This group of props were all brought over from AnnotationsEditable
     showCongratsMessage?: boolean
@@ -29,28 +26,14 @@ export interface AnnotationsSidebarProps {
     hoverAnnotationUrl?: string
     needsWaypoint?: boolean
     appendLoader?: boolean
-    handleScrollPagination?: () => void
+    // handleScrollPagination?: () => void
     // ^ Until here ^
 
-    onSearch: (search) => void
-    isSearchLoading: TaskState
-    annotationCreateProps: AnnotationCreateProps
-    annotationEditProps: AnnotationEditProps
+    annotationCreateProps: AnnotationCreateGeneralProps
     annotationTagProps: TagsEventProps
+    isSearchLoading: boolean
     isAnnotationCreateShown: boolean
     annotations: Annotation[]
-
-    //
-    // loadState?: TaskState
-    // searchLoadState?: TaskState
-    // isOpen?: boolean // TODO: move this to wrapper component
-    //
-    //
-    // // TODO: things like go to highlight on page should fire an event up
-    // and be caught by a wrapper component (may do different things in page, on dashboard, etc)
-    // highlighter?: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
-    //
-    // annotationsStorage?: AnnotationStorageInterface
 }
 
 interface AnnotationsSidebarState {
@@ -65,21 +48,24 @@ export default class AnnotationsSidebar extends React.Component<
         searchText: '',
     }
 
-    render() {
-        return (
-            <SidebarStyled>
-                {this.renderSearchSection()}
-                {this.renderNewAnnotation()}
-                {this.renderResultsBody()}
-            </SidebarStyled>
-        )
+    private searchEnterHandler = {
+        test: (e) => e.key === 'Enter',
+        handle: () =>
+            this.props.events.emit('queryAnnotations', {
+                query: this.state.searchText,
+            }),
     }
-    private renderSearchSection() {
-        const searchEnterHandler = {
-            test: (e) => e.key === 'Enter',
-            handle: this.handleSearchEnter,
-        }
 
+    private handleSearchChange = (searchText) => {
+        this.setState({ searchText })
+    }
+
+    private handleSearchClear = () => {
+        this.setState({ searchText: '' })
+        this.props.events.emit('queryAnnotations', { query: '' })
+    }
+
+    private renderSearchSection() {
         return (
             <TopSectionStyled>
                 <TopBarStyled>
@@ -89,14 +75,14 @@ export default class AnnotationsSidebar extends React.Component<
                             <SearchIcon />{' '}
                         </ButtonStyled>
                         <SearchInputStyled
-                            autoFocus={true}
+                            autoFocus
+                            type="input"
                             name="query"
-                            placeholder="Search Annotations"
                             autoComplete="off"
+                            placeholder="Search Annotations"
                             onChange={this.handleSearchChange}
-                            specialHandlers={[searchEnterHandler]}
                             defaultValue={this.state.searchText}
-                            type={'input'}
+                            specialHandlers={[this.searchEnterHandler]}
                         />
                         {this.state.searchText !== '' && (
                             <CloseButtonStyled onClick={this.handleSearchClear}>
@@ -110,31 +96,33 @@ export default class AnnotationsSidebar extends React.Component<
         )
     }
 
-    handleSearchChange = (searchText) => {
-        this.setState({ searchText })
-    }
-
-    handleSearchEnter = () => {
-        this.props.onSearch(this.state.searchText)
-    }
-
-    handleSearchClear = () => {
-        this.setState({ searchText: '' })
-        this.props.onSearch('')
-    }
-
     private renderNewAnnotation() {
+        const { events: eventEmitter, isAnnotationCreateShown } = this.props
+
+        if (!isAnnotationCreateShown) {
+            return
+        }
+
         return (
-            this.props.isAnnotationCreateShown && (
-                <NewAnnotationBoxStyled>
-                    <AnnotationCreate {...this.props.annotationCreateProps} />
-                </NewAnnotationBoxStyled>
-            )
+            <NewAnnotationBoxStyled>
+                <AnnotationCreate
+                    onSave={(args) =>
+                        eventEmitter.emit(
+                            'clickConfirmAnnotationCreateBtn',
+                            args,
+                        )
+                    }
+                    onCancel={() =>
+                        eventEmitter.emit('clickCancelAnnotationCreateBtn')
+                    }
+                    {...this.props.annotationCreateProps}
+                />
+            </NewAnnotationBoxStyled>
         )
     }
 
     private renderAnnotationsEditable() {
-        const { annotations } = this.props
+        const { annotations, events: eventEmitter } = this.props
 
         if (!annotations.length) {
             return <EmptyMessage />
@@ -143,10 +131,38 @@ export default class AnnotationsSidebar extends React.Component<
         const annots = this.props.annotations.map((annot, i) => (
             <AnnotationEditable
                 key={i}
-                {...this.props.annotationTagProps}
-                {...this.props.annotationEditProps}
-                displayCrowdfunding={false}
                 {...annot}
+                {...this.props}
+                {...this.props.annotationTagProps}
+                removeTempHighlights={() =>
+                    eventEmitter.emit('removeTemporaryHighlights')
+                }
+                handleAnnotationTagClick={(url, tag) =>
+                    eventEmitter.emit('clickAnnotationTag', { url, tag })
+                }
+                handleBookmarkToggle={(url) =>
+                    eventEmitter.emit('clickAnnotationBookmarkBtn', { url })
+                }
+                handleConfirmAnnotationEdit={(args) =>
+                    eventEmitter.emit('clickConfirmAnnotationEditBtn', args)
+                }
+                handleConfirmDelete={(url) =>
+                    eventEmitter.emit('clickConfirmAnnotationDeleteBtn', {
+                        url,
+                    })
+                }
+                handleCancelDelete={(url) =>
+                    eventEmitter.emit('clickCancelAnnotationDeleteBtn', { url })
+                }
+                handleEditBtnClick={(url) =>
+                    eventEmitter.emit('clickAnnotationEditBtn', { url })
+                }
+                handleGoToAnnotation={(url) =>
+                    eventEmitter.emit('clickAnnotation', { url })
+                }
+                handleTrashBtnClick={(url) =>
+                    eventEmitter.emit('clickAnnotationDeleteBtn', { url })
+                }
                 isActive={this.props.activeAnnotationUrl === annot.url}
                 isHovered={this.props.hoverAnnotationUrl === annot.url}
             />
@@ -155,14 +171,16 @@ export default class AnnotationsSidebar extends React.Component<
         if (this.props.needsWaypoint) {
             annots.push(
                 <Waypoint
-                    onEnter={() => this.props.handleScrollPagination}
-                    key="sidebar-waypoint"
+                    key="sidebar-pagination-waypoint"
+                    onEnter={() =>
+                        this.props.events.emit('paginateAnnotations')
+                    }
                 />,
             )
         }
 
         if (this.props.appendLoader) {
-            annots.push(<LoadingIndicator key="spinner" />)
+            annots.push(<LoadingIndicator key="sidebar-pagination-spinner" />)
         }
 
         if (this.props.showCongratsMessage) {
@@ -175,11 +193,19 @@ export default class AnnotationsSidebar extends React.Component<
     private renderResultsBody() {
         return (
             <AnnotationsSectionStyled>
-                {this.props.isSearchLoading === 'running' && (
-                    <LoadingIndicatorStyled />
-                )}
+                {this.props.isSearchLoading && <LoadingIndicatorStyled />}
                 {this.renderAnnotationsEditable()}
             </AnnotationsSectionStyled>
+        )
+    }
+
+    render() {
+        return (
+            <SidebarStyled>
+                {this.renderSearchSection()}
+                {this.renderNewAnnotation()}
+                {this.renderResultsBody()}
+            </SidebarStyled>
         )
     }
 }
@@ -258,7 +284,6 @@ const CloseButtonStyled = styled.button`
     outline: none;
 `
 
-///
 const SidebarStyled = styled.div``
 
 const TopBarStyled = styled.div`

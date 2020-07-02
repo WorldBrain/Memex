@@ -113,7 +113,7 @@ export type SidebarContainerEvents = UIEvent<{
     setNewPageCommentAnchor: { anchor: Anchor }
     changePageCommentText: { comment: string }
     saveNewPageComment: {
-        anchor: Anchor
+        anchor?: Anchor
         commentText: string
         tags: string[]
         bookmarked: boolean

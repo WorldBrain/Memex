@@ -15,8 +15,8 @@ interface Props {
     timestamp: string
     hasBookmark: boolean
     handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
-    handleDeleteAnnotation: () => void
-    handleCancelOperation: () => void
+    handleConfirmDelete: () => void
+    handleCancelDelete: () => void
     editIconClickHandler: () => void
     trashIconClickHandler: () => void
     shareIconClickHandler: () => void
@@ -79,7 +79,7 @@ class AnnotationView extends React.Component<Props> {
                 displayGoToAnnotation={
                     this.props.body && this.props.env === 'overview'
                 }
-                handleCancelDeletion={this.props.handleCancelOperation}
+                handleCancelDeletion={this.props.handleCancelDelete}
             />
         )
     }

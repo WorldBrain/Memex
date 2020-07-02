@@ -11,12 +11,15 @@ export interface TagsEventProps {
     queryTagSuggestions: (query: string) => Promise<string[]>
 }
 
-interface Props extends TagsEventProps {
+export interface AnnotationEditEventProps {
+    handleCancelEdit: () => void
+    handleConfirmEdit: (args: { comment: string; tags: string[] }) => void
+}
+
+export interface Props extends TagsEventProps, AnnotationEditEventProps {
     comment?: string
     rows: number
     tags: string[]
-    handleCancelOperation: () => void
-    handleSaveAnnotation: (commentText: string, tagsInput: string[]) => void
 }
 
 interface State {
@@ -33,10 +36,10 @@ class AnnotationEdit extends React.Component<Props, State> {
     }
 
     private handleSaveAnnotation = () => {
-        this.props.handleSaveAnnotation(
-            this.state.commentEditText,
-            this.state.tags,
-        )
+        this.props.handleConfirmEdit({
+            comment: this.state.commentEditText,
+            tags: this.state.tags,
+        })
     }
 
     private handleTagInputKeydown: React.KeyboardEventHandler = (e) => {
@@ -125,7 +128,7 @@ class AnnotationEdit extends React.Component<Props, State> {
         return (
             <AnnotationFooter
                 mode="edit"
-                handleCancelEdit={this.props.handleCancelOperation}
+                handleCancelEdit={this.props.handleCancelEdit}
                 handleEditAnnotation={this.handleSaveAnnotation}
             />
         )

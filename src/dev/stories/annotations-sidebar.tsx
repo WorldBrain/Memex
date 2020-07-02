@@ -1,11 +1,14 @@
 import { storiesOf } from '@storybook/react'
+import { EventEmitter } from 'events'
 import React from 'react'
+
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { action } from '@storybook/addon-actions'
 import { WithDependencies } from 'src/dev/utils'
 import AnnotationsSidebar, {
     AnnotationsSidebarProps,
 } from 'src/sidebar/annotations-sidebar/components/AnnotationsSidebar'
+import { AnnotationsSidebarEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 
 const DAY_MS = 60000 * 60 * 24
@@ -13,6 +16,28 @@ const TAGS = ['tag A', 'tag B', 'tag C', 'tag Z']
 
 async function createDependencies() {
     // const background = await setupBackgroundIntegrationTest()
+    const events = new EventEmitter() as AnnotationsSidebarEventEmitter
+
+    events.on('queryAnnotations', action('onSearch'))
+    events.on('removeTemporaryHighlights', action('removeTempHighlights'))
+    events.on('clickAnnotationDeleteBtn', action('clickDeleteBtn'))
+    events.on('clickAnnotationTag', action('clickAnnotationTag'))
+    events.on('clickAnnotationBookmarkBtn', action('toggleBookmark'))
+    events.on('clickAnnotationDeleteBtn', action('deleteAnnotation'))
+    events.on('clickAnnotationEditBtn', action('editAnnotation'))
+    events.on(
+        'clickCancelAnnotationCreateBtn',
+        action('cancelAnnotationCreate'),
+    )
+    events.on(
+        'clickConfirmAnnotationCreateBtn',
+        action('confirmAnnotationCreate'),
+    )
+    events.on('clickAnnotationTagBtn', action('clickAnnotationTagBtn'))
+    events.on('changeAnnotationQuery', action('changeAnnotationQuery'))
+    events.on('clickAnnotation', action('goToAnnotation'))
+    events.on('startAnnotationHover', action('mouseEnter'))
+    events.on('endAnnotationHover', action('mouseLeave'))
 
     const tagPickerDependencies: GenericPickerDependenciesMinusSave = {
         loadDefaultSuggestions: async () => [],
@@ -23,6 +48,12 @@ async function createDependencies() {
     }
 
     const sidebarDependencies: AnnotationsSidebarProps = {
+        env: 'inpage',
+        mode: 'default',
+        events,
+        isAnnotationCreateShown: true,
+        isSearchLoading: false,
+        // displayCrowdfunding: false,
         annotationTagProps: {
             fetchInitialTagSuggestions: async () => TAGS,
             queryTagSuggestions: async (query) =>
@@ -30,29 +61,9 @@ async function createDependencies() {
         },
         annotationCreateProps: {
             anchor: null,
-            onCancel: action('onCancel'),
-            onSave: action('onSave'),
             tagPickerDependencies,
         },
-        annotationEditProps: {
-            env: 'inpage',
-            mode: 'default',
-            displayCrowdfunding: false,
-            highlighter: {
-                removeTempHighlights: action('removeTempHighlights'),
-            },
-            handleAnnotationModeSwitch: action('switchMode'),
-            handleAnnotationTagClick: action('clickAnnotationTag'),
-            handleBookmarkToggle: action('toggleBookmarks'),
-            handleDeleteAnnotation: action('deleteAnnotation'),
-            handleEditAnnotation: action('editAnnotation'),
-            handleGoToAnnotation: action('goToAnnotation'),
-            handleMouseEnter: action('mouseEnter'),
-            handleMouseLeave: action('mouseLeave'),
-        },
-        isAnnotationCreateShown: true,
-        isSearchLoading: 'pristine',
-        onSearch: action('onSearch'),
+
         annotations: [
             {
                 url: 'test.com#1',

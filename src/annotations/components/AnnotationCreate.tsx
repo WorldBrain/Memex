@@ -22,12 +22,19 @@ interface AnnotationCreateState {
     tags?: string[]
 }
 
-export interface AnnotationCreateProps {
-    tagPickerDependencies: GenericPickerDependenciesMinusSave
+export interface AnnotationCreateEventProps {
     onCancel: () => void
     onSave: (newAnnotation: NewAnnotationOptions) => void
-    anchor?: Anchor
 }
+
+export interface AnnotationCreateGeneralProps {
+    anchor?: Anchor
+    tagPickerDependencies: GenericPickerDependenciesMinusSave
+}
+
+interface AnnotationCreateProps
+    extends AnnotationCreateGeneralProps,
+        AnnotationCreateEventProps {}
 
 class AnnotationCreate extends React.Component<
     AnnotationCreateProps,
@@ -40,6 +47,7 @@ class AnnotationCreate extends React.Component<
         text: '',
         tags: [],
     }
+
     setTagInputActive = (isTagPickerShown: boolean) => {
         this.setState({ isTagPickerShown })
     }
@@ -69,17 +77,16 @@ class AnnotationCreate extends React.Component<
     }
 
     renderHighlight() {
-        const { anchor } = this.props
+        if (!this.props.anchor) {
+            return
+        }
+
         return (
-            <>
-                {!!anchor && (
-                    <TextHighlighted
-                        anchor={anchor}
-                        truncateHighlight={false}
-                        setTruncateHighlight={() => {}}
-                    />
-                )}
-            </>
+            <TextHighlighted
+                anchor={this.props.anchor}
+                truncateHighlight={false}
+                setTruncateHighlight={() => {}}
+            />
         )
     }
 

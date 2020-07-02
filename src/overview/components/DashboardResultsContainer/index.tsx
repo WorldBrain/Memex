@@ -17,7 +17,7 @@ import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { renderHighlights } from 'src/highlighting/ui/highlight-interactions'
 import AnnotationsSidebar from 'src/sidebar/annotations-sidebar/components/AnnotationsSidebar'
 import { TaskState } from 'ui-logic-react/lib/types'
-import { AnnotationCreateProps } from 'src/annotations/components/AnnotationCreate'
+import { AnnotationCreateGeneralProps } from 'src/annotations/components/AnnotationCreate'
 import { Annotation } from 'src/annotations/types'
 
 const resultItemStyles = require('src/common-ui/components/result-item.css')

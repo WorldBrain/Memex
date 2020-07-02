@@ -3,8 +3,7 @@ import styled from 'styled-components'
 
 import niceTime from 'src/util/nice-time'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
-import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
-import { HighlightInteractionInterface } from 'src/highlighting/types'
+// import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import AnnotationView from 'src/annotations/components/AnnotationView'
 import AnnotationEdit, {
     TagsEventProps,
@@ -12,10 +11,9 @@ import AnnotationEdit, {
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 
 export interface AnnotationEditableGeneralProps {
-    displayCrowdfunding: boolean
+    // displayCrowdfunding: boolean
     env: 'inpage' | 'overview'
     mode: AnnotationMode
-    highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
 }
 
 export interface AnnotationEditableProps {
@@ -33,14 +31,21 @@ export interface AnnotationEditableProps {
 }
 
 export interface AnnotationEditableEventProps {
+    removeTempHighlights: () => void
     handleGoToAnnotation: (url: string) => void
     handleMouseEnter?: (url: string) => void
     handleMouseLeave?: (url: string) => void
-    handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
-    handleDeleteAnnotation: (url: string) => void
+    handleConfirmDelete: (url: string) => void
+    handleCancelDelete: (url: string) => void
+    handleEditBtnClick: (url: string) => void
+    handleTrashBtnClick: (url: string) => void
     handleBookmarkToggle: (url: string) => void
     handleAnnotationTagClick: (url: string, tag: string) => void
-    handleAnnotationModeSwitch: (url: string, mode: AnnotationMode) => void
+    handleConfirmAnnotationEdit: (props: {
+        url: string
+        comment: string
+        tags: string[]
+    }) => void
 }
 
 export type Props = AnnotationEditableGeneralProps &
@@ -94,23 +99,6 @@ export default class AnnotationEditable extends React.Component<Props> {
         }
     }
 
-    private _setDisplayCrowdfunding = async (
-        value: boolean,
-        event: 'clickReplyButton' | 'clickShareButton' = undefined,
-    ) => {
-        // TODO: determine if this is needed anymore
-        if (event) {
-            // OLD: internal analytics code
-            // const type =
-            //     event === 'clickReplyButton'
-            //         ? EVENT_NAMES.CLICK_REPLY_BUTTON
-            //         : EVENT_NAMES.CLICK_SHARE_BUTTON
-            // await this._processEventRPC({ type })
-        }
-
-        this.setState({ displayCrowdfunding: value })
-    }
-
     private _getFormattedTimestamp = () =>
         niceTime(this.props.lastEdited ?? this.props.createdWhen)
 
@@ -144,12 +132,12 @@ export default class AnnotationEditable extends React.Component<Props> {
         }
     }
 
-    private _handleEditAnnotation = (
-        commentText: string,
-        tagsInput: string[],
-    ) => {
+    private _handleEditAnnotation = (args: {
+        comment: string
+        tags: string[]
+    }) => {
         const { url } = this.props
-        this.props.handleEditAnnotation(url, commentText.trim(), tagsInput)
+        this.props.handleConfirmAnnotationEdit({ url, ...args })
     }
 
     private _handleGoToAnnotation = () => {
@@ -160,25 +148,25 @@ export default class AnnotationEditable extends React.Component<Props> {
         this.props.handleGoToAnnotation(this.props.url)
     }
 
-    private _handleDeleteAnnotation = () => {
-        this.props.handleDeleteAnnotation(this.props.url)
+    private _handleConfirmDelete = () => {
+        this.props.handleConfirmDelete(this.props.url)
     }
 
     private _handleEditIconClick = () => {
-        this.props.handleAnnotationModeSwitch(this.props.url, 'edit')
+        this.props.handleEditBtnClick(this.props.url)
     }
 
     private _handleTrashIconClick = () => {
-        this.props.handleAnnotationModeSwitch(this.props.url, 'delete')
+        this.props.handleTrashBtnClick(this.props.url)
     }
 
     private _handleShareIconClick = () => {
-        this._setDisplayCrowdfunding(true, 'clickShareButton')
+        // TODO: what does this do?
     }
 
-    private _handleCancelOperation = () => {
-        this.props.highlighter.removeTempHighlights()
-        this.props.handleAnnotationModeSwitch(this.props.url, 'default')
+    private _handleCancelDelete = () => {
+        this.props.removeTempHighlights()
+        this.props.handleCancelDelete(this.props.url)
     }
 
     private _handleBookmarkToggle = () => {
@@ -212,8 +200,8 @@ export default class AnnotationEditable extends React.Component<Props> {
                 <AnnotationEdit
                     {...this.props}
                     rows={2}
-                    handleSaveAnnotation={this._handleEditAnnotation}
-                    handleCancelOperation={this._handleCancelOperation}
+                    handleConfirmEdit={this._handleEditAnnotation}
+                    handleCancelEdit={this._handleCancelDelete}
                 />
             )
         }
@@ -229,8 +217,8 @@ export default class AnnotationEditable extends React.Component<Props> {
                 handleBookmarkToggle={this._handleBookmarkToggle}
                 trashIconClickHandler={this._handleTrashIconClick}
                 shareIconClickHandler={this._handleShareIconClick}
-                handleCancelOperation={this._handleCancelOperation}
-                handleDeleteAnnotation={this._handleDeleteAnnotation}
+                handleCancelDelete={this._handleCancelDelete}
+                handleConfirmDelete={this._handleConfirmDelete}
                 getTruncatedTextObject={this._getTruncatedTextObject}
                 handleTagClick={(tag) =>
                     this.props.handleAnnotationTagClick(this.props.url, tag)
@@ -240,13 +228,13 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     render() {
-        if (this.props.displayCrowdfunding) {
-            return (
-                <CrowdfundingBox
-                    onClose={() => this._setDisplayCrowdfunding(false)}
-                />
-            )
-        }
+        // if (this.props.displayCrowdfunding) {
+        //     return (
+        //         <CrowdfundingBox
+        //             onClose={() => console.log('close')}
+        //         />
+        //     )
+        // }
 
         return (
             <AnnotationStyled
