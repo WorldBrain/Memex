@@ -1,19 +1,12 @@
 import debounce from 'lodash/debounce'
-import {
-    UILogic,
-    UIEvent,
-    IncomingUIEvent,
-    UIEventHandler,
-    UIMutation,
-} from 'ui-logic-core'
+import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
 
 import { Annotation } from 'src/annotations/types'
-import { PageUrlsByDay } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
 import { SidebarContainerDependencies } from './types'
-import { AnnotationsSidebarInPageEventEmitter } from '../../../types'
+import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { featuresBeta } from 'src/util/remote-functions-background'
 import {
     AnnotationMode,
@@ -30,6 +23,7 @@ export interface SidebarContainerState {
 
     state: 'visible' | 'hidden'
 
+    pageUrl?: string
     annotations: Annotation[]
     annotationModes: {
         [context in AnnotationEventContext]: {
@@ -72,7 +66,6 @@ export interface SidebarContainerState {
     showCongratsMessage: boolean
     showClearFiltersBtn: boolean
     isSocialPost: boolean
-    showAnnotsForPage?: Page
     isBetaEnabled: boolean
 
     // Filter sidebar props
@@ -154,6 +147,8 @@ export type SidebarContainerEvents = UIEvent<{
     annotationMouseLeave: {
         annotationUrl: string
     }
+
+    setPageUrl: { pageUrl: string }
 
     // Search
     // enterSearchQuery: { searchQuery: string }
@@ -244,7 +239,6 @@ export class SidebarContainerLogic extends UILogic<
             showCommentBox: false,
             showCongratsMessage: false,
             showClearFiltersBtn: false,
-            showAnnotsForPage: undefined,
             showFiltersSidebar: false,
             showSocialSearch: false,
 
@@ -349,6 +343,12 @@ export class SidebarContainerLogic extends UILogic<
         await this.doSearch(nextState, { overwrite: false })
     }
 
+    setPageUrl: EventHandler<'setPageUrl'> = ({ event }) => {
+        this.emitMutation({
+            pageUrl: { $set: event.pageUrl },
+        })
+    }
+
     hide: EventHandler<'hide'> = () => {
         return {
             state: { $set: 'hidden' },
@@ -391,7 +391,7 @@ export class SidebarContainerLogic extends UILogic<
 
         const pageUrl =
             this.options.env === 'overview'
-                ? previousState.showAnnotsForPage?.url
+                ? previousState.pageUrl
                 : this.options.currentTab.url
 
         const dummyAnnotation = {
@@ -423,7 +423,6 @@ export class SidebarContainerLogic extends UILogic<
                 {
                     url: pageUrl,
                     bookmarked: event.bookmarked,
-                    title: previousState.showAnnotsForPage?.title,
                     body: dummyAnnotation.body,
                     comment: dummyAnnotation.comment,
                     selector: dummyAnnotation.selector,
@@ -576,10 +575,7 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        if (
-            previousState.showAnnotsForPage != null &&
-            this.options.env !== 'overview'
-        ) {
+        if (this.options.env !== 'overview') {
             return
         }
 

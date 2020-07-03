@@ -17,7 +17,7 @@ import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
 import { auth, featuresBeta } from 'src/util/remote-functions-background'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
-import AnnotationsSidebar from 'src/sidebar/annotations-sidebar/components/AnnotationsSidebar'
+import { AnnotationsSidebarInDashboardResults as AnnotationsSidebar } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -60,28 +60,23 @@ class Overview extends PureComponent<Props> {
         }
     }
 
-    private setAnnotsSidebarRef = (sidebar) => {
+    private setAnnotsSidebarRef = (sidebar: AnnotationsSidebar) => {
         this.annotationsSidebar = sidebar
     }
 
     // TODO: (sidebar-refactor, prior1)
 
-    /*    private handleAnnotationSidebarToggle = async (args?: {
+    private handleAnnotationSidebarToggle = async (args?: {
         pageUrl: string
         pageTitle?: string
     }) => {
         const isAlreadyOpenForOtherPage =
-            args.pageUrl !==
-            this.annotationsSidebar.state.showAnnotsForPage?.url
+            args.pageUrl !== this.annotationsSidebar.state.pageUrl
 
         if (
             this.annotationsSidebar.state.state === 'hidden' ||
             isAlreadyOpenForOtherPage
         ) {
-            await this.annotationsSidebar.processEvent(
-                'togglePageAnnotationsView',
-                args,
-            )
             this.annotationsSidebar.showSidebar()
         } else if (this.annotationsSidebar.state.state === 'visible') {
             this.annotationsSidebar.hideSidebar()
@@ -99,7 +94,7 @@ class Overview extends PureComponent<Props> {
         ) {
             this.annotationsSidebar.hideSidebar()
         }
-    }*/
+    }
 
     handleOnboardingComplete = () => {
         window.location.href = OVERVIEW_URL
@@ -146,6 +141,11 @@ class Overview extends PureComponent<Props> {
                         />
                     </a>
                 </div> */}
+                {/* <AnnotationsSidebar
+                    currentTab={}
+                    env="overview"
+                    setRef={this.setAnnotsSidebarRef}
+                /> */}
 
                 <Tooltip />
                 <div className={styles.rightCorner}>

@@ -5,7 +5,7 @@ import { ContentScriptRegistry, SidebarScriptMain } from './types'
 import { createInPageUI } from 'src/in-page-ui/utils'
 import {
     setupInPageSidebarUI,
-    destroySidebarUI,
+    destroyInPageSidebarUI,
 } from 'src/sidebar/annotations-sidebar/index'
 
 export const main: SidebarScriptMain = async (dependencies) => {
@@ -44,7 +44,7 @@ export const main: SidebarScriptMain = async (dependencies) => {
             return
         }
 
-        destroySidebarUI(mount.rootElement, mount.shadowRoot)
+        destroyInPageSidebarUI(mount.rootElement, mount.shadowRoot)
     }
 }
 

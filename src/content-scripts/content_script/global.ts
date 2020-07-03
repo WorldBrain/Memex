@@ -117,8 +117,6 @@ export async function main() {
                 annotations,
                 currentTab,
                 tags: runInBackground<RemoteTagsInterface>(),
-                bookmarks: runInBackground<BookmarksInterface>(),
-                search: runInBackground<SearchInterface>(),
                 customLists: runInBackground<RemoteCollectionsInterface>(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
             })

@@ -5,7 +5,6 @@ import {
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
 import * as DATA from './logic.test.data'
-import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 
 function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
     return mapValues(remoteFunctions, (f) => {
@@ -51,10 +50,10 @@ const setupLogicHelper = async ({
         tags: backgroundModules.tags.remoteFunctions,
         customLists: backgroundModules.customLists.remoteFunctions,
         annotations,
-        search: {
-            ...backgroundModules.search.remoteFunctions.search,
-        },
-        bookmarks: backgroundModules.search.remoteFunctions.bookmarks,
+        // search: {
+        //     ...backgroundModules.search.remoteFunctions.search,
+        // },
+        // bookmarks: backgroundModules.search.remoteFunctions.bookmarks,
         // inPageUI,
         // highlighter,
         initialState: 'hidden',

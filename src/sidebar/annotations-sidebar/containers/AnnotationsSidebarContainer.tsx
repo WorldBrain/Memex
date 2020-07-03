@@ -10,27 +10,32 @@ import {
     SidebarContainerEvents,
     SidebarContainerOptions,
     AnnotationEventContext,
-} from './old/sidebar-annotations/logic'
-import {} from '../types'
+} from './logic'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
 }
 
-export interface Props extends SidebarContainerOptions {}
+export interface Props extends SidebarContainerOptions {
+    setRef?: (sidebar: AnnotationsSidebarContainer) => void
+}
 
 export class AnnotationsSidebarContainer<
     P extends Props = Props
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
     constructor(props: P) {
         super(props, new SidebarContainerLogic(props))
+
+        if (props.setRef) {
+            props.setRef(this)
+        }
     }
 
-    protected showSidebar = () => {
+    showSidebar = () => {
         this.processEvent('show', null)
     }
 
-    protected hideSidebar = () => {
+    hideSidebar = () => {
         this.processEvent('hide', null)
     }
 

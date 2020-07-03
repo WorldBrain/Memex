@@ -12,8 +12,8 @@ export interface SidebarContainerDependencies {
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>
     customLists: RemoteCollectionsInterface
-    search: SearchInterface
-    bookmarks: BookmarksInterface
+    // search: SearchInterface
+    // bookmarks: BookmarksInterface
 }
 
 export type SearchType = 'notes' | 'page' | 'social'

@@ -2,7 +2,7 @@ import TypedEventEmitter from 'typed-emitter'
 
 import { Highlight } from 'src/highlighting/types'
 import { ResultWithIndex } from 'src/overview/types'
-import { SidebarContainerState } from 'src/sidebar/annotations-sidebar/containers/old/sidebar-annotations/logic'
+import { SidebarContainerState } from 'src/sidebar/annotations-sidebar/containers/logic'
 
 export interface Page {
     url?: string
