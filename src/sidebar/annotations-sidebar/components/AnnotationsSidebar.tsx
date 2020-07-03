@@ -5,20 +5,22 @@ import styled, { css } from 'styled-components'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import AnnotationCreate, {
     AnnotationCreateGeneralProps,
+    AnnotationCreateEventProps,
 } from 'src/annotations/components/AnnotationCreate'
 import AnnotationEditable, {
     AnnotationEditableGeneralProps,
+    AnnotationEditableEventProps,
 } from 'src/annotations/components/AnnotationEditable'
-import { TagsEventProps } from 'src/annotations/components/AnnotationEdit'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
 import { Annotation } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
-import { AnnotationsSidebarEventEmitter } from '../types'
+import { AnnotationsSidebarEventEmitter, AnnotationMode } from '../types'
+import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 
-export interface AnnotationsSidebarProps
-    extends AnnotationEditableGeneralProps {
+export interface AnnotationsSidebarProps {
     events: AnnotationsSidebarEventEmitter
+    annotationModes: { [url: string]: AnnotationMode }
 
     // NOTE: This group of props were all brought over from AnnotationsEditable
     showCongratsMessage?: boolean
@@ -26,11 +28,15 @@ export interface AnnotationsSidebarProps
     hoverAnnotationUrl?: string
     needsWaypoint?: boolean
     appendLoader?: boolean
-    // handleScrollPagination?: () => void
+    handleScrollPagination: () => void
     // ^ Until here ^
 
-    annotationCreateProps: AnnotationCreateGeneralProps
-    annotationTagProps: TagsEventProps
+    annotationEditProps: AnnotationEditableGeneralProps &
+        AnnotationEditableEventProps
+    annotationCreateProps: AnnotationCreateGeneralProps &
+        AnnotationCreateEventProps
+    annotationTagProps: GenericPickerDependenciesMinusSave
+
     isSearchLoading: boolean
     isAnnotationCreateShown: boolean
     annotations: Annotation[]
@@ -50,10 +56,7 @@ export default class AnnotationsSidebar extends React.Component<
 
     private searchEnterHandler = {
         test: (e) => e.key === 'Enter',
-        handle: () =>
-            this.props.events.emit('queryAnnotations', {
-                query: this.state.searchText,
-            }),
+        handle: () => undefined,
     }
 
     private handleSearchChange = (searchText) => {
@@ -62,7 +65,6 @@ export default class AnnotationsSidebar extends React.Component<
 
     private handleSearchClear = () => {
         this.setState({ searchText: '' })
-        this.props.events.emit('queryAnnotations', { query: '' })
     }
 
     // NOTE: Currently not used
@@ -107,16 +109,8 @@ export default class AnnotationsSidebar extends React.Component<
         return (
             <NewAnnotationBoxStyled>
                 <AnnotationCreate
-                    onSave={(args) =>
-                        eventEmitter.emit(
-                            'clickConfirmAnnotationCreateBtn',
-                            args,
-                        )
-                    }
-                    onCancel={() =>
-                        eventEmitter.emit('clickCancelAnnotationCreateBtn')
-                    }
                     {...this.props.annotationCreateProps}
+                    tagPickerDependencies={this.props.annotationTagProps}
                 />
             </NewAnnotationBoxStyled>
         )
@@ -134,36 +128,9 @@ export default class AnnotationsSidebar extends React.Component<
                 key={i}
                 {...annot}
                 {...this.props}
-                {...this.props.annotationTagProps}
-                removeTempHighlights={() =>
-                    eventEmitter.emit('removeTemporaryHighlights')
-                }
-                handleAnnotationTagClick={(url, tag) =>
-                    eventEmitter.emit('clickAnnotationTag', { url, tag })
-                }
-                handleBookmarkToggle={(url) =>
-                    eventEmitter.emit('clickAnnotationBookmarkBtn', { url })
-                }
-                handleConfirmAnnotationEdit={(args) =>
-                    eventEmitter.emit('clickConfirmAnnotationEditBtn', args)
-                }
-                handleConfirmDelete={(url) =>
-                    eventEmitter.emit('clickConfirmAnnotationDeleteBtn', {
-                        url,
-                    })
-                }
-                handleCancelDelete={(url) =>
-                    eventEmitter.emit('clickCancelAnnotationDeleteBtn', { url })
-                }
-                handleEditBtnClick={(url) =>
-                    eventEmitter.emit('clickAnnotationEditBtn', { url })
-                }
-                handleGoToAnnotation={(url) =>
-                    eventEmitter.emit('clickAnnotation', { url })
-                }
-                handleTrashBtnClick={(url) =>
-                    eventEmitter.emit('clickAnnotationDeleteBtn', { url })
-                }
+                {...this.props.annotationEditProps}
+                mode={this.props.annotationModes[annot.url]}
+                tagPickerDependencies={this.props.annotationTagProps}
                 isActive={this.props.activeAnnotationUrl === annot.url}
                 isHovered={this.props.hoverAnnotationUrl === annot.url}
             />
@@ -173,9 +140,7 @@ export default class AnnotationsSidebar extends React.Component<
             annots.push(
                 <Waypoint
                     key="sidebar-pagination-waypoint"
-                    onEnter={() =>
-                        this.props.events.emit('paginateAnnotations')
-                    }
+                    onEnter={this.props.handleScrollPagination}
                 />,
             )
         }

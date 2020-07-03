@@ -4,19 +4,16 @@ import styled from 'styled-components'
 import AnnotationFooter from './AnnotationFooter'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
+import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TagInput from 'src/tags/ui/tag-input'
-
-export interface TagsEventProps {
-    fetchInitialTagSuggestions: () => Promise<string[]>
-    queryTagSuggestions: (query: string) => Promise<string[]>
-}
 
 export interface AnnotationEditEventProps {
     handleCancelEdit: () => void
     handleConfirmEdit: (args: { comment: string; tags: string[] }) => void
 }
 
-export interface Props extends TagsEventProps, AnnotationEditEventProps {
+export interface Props extends AnnotationEditEventProps {
+    tagPickerDependencies: GenericPickerDependenciesMinusSave
     comment?: string
     rows: number
     tags: string[]
@@ -107,7 +104,10 @@ class AnnotationEdit extends React.Component<Props, State> {
     }
 
     private renderTagInput() {
-        const { queryTagSuggestions, fetchInitialTagSuggestions } = this.props
+        const {
+            loadDefaultSuggestions,
+            queryEntries,
+        } = this.props.tagPickerDependencies
         const { tags, isTagInputActive } = this.state
 
         return (
@@ -117,8 +117,8 @@ class AnnotationEdit extends React.Component<Props, State> {
                 updateTags={this.updateTags}
                 setTagInputActive={this.setTagInputActive}
                 isTagInputActive={isTagInputActive}
-                queryTagSuggestions={queryTagSuggestions}
-                fetchInitialTagSuggestions={fetchInitialTagSuggestions}
+                queryTagSuggestions={queryEntries}
+                fetchInitialTagSuggestions={loadDefaultSuggestions}
                 onKeyDown={this.handleTagInputKeydown}
             />
         )

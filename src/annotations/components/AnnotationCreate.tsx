@@ -29,12 +29,13 @@ export interface AnnotationCreateEventProps {
 
 export interface AnnotationCreateGeneralProps {
     anchor?: Anchor
-    tagPickerDependencies: GenericPickerDependenciesMinusSave
 }
 
-interface AnnotationCreateProps
+export interface AnnotationCreateProps
     extends AnnotationCreateGeneralProps,
-        AnnotationCreateEventProps {}
+        AnnotationCreateEventProps {
+    tagPickerDependencies: GenericPickerDependenciesMinusSave
+}
 
 class AnnotationCreate extends React.Component<
     AnnotationCreateProps,
@@ -92,7 +93,6 @@ class AnnotationCreate extends React.Component<
 
     renderInput() {
         const { text } = this.state
-        const { hideTagPicker, handleTextChange } = this
 
         const onEnterSaveHandler = {
             test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
@@ -102,9 +102,9 @@ class AnnotationCreate extends React.Component<
         return (
             <TextInputControlledStyled
                 defaultValue={text}
-                onClick={hideTagPicker}
+                onClick={this.hideTagPicker}
                 placeholder="Add a private note... (save with cmd/ctrl+enter)"
-                onChange={handleTextChange}
+                onChange={this.handleTextChange}
                 specialHandlers={[onEnterSaveHandler]}
             />
         )
@@ -144,7 +144,6 @@ class AnnotationCreate extends React.Component<
     renderActionButtons() {
         const { onCancel } = this.props
         const { isBookmarked } = this.state
-        const { handleSave } = this
 
         return (
             <FooterStyled>
@@ -160,7 +159,9 @@ class AnnotationCreate extends React.Component<
                 </Flex>
                 <Flex>
                     <CancelBtnStyled onClick={onCancel}>Cancel</CancelBtnStyled>
-                    <SaveBtnStyled onClick={handleSave}>Save</SaveBtnStyled>
+                    <SaveBtnStyled onClick={this.handleSave}>
+                        Save
+                    </SaveBtnStyled>
                 </Flex>
             </FooterStyled>
         )

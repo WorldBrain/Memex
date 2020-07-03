@@ -5,15 +5,13 @@ import niceTime from 'src/util/nice-time'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 // import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import AnnotationView from 'src/annotations/components/AnnotationView'
-import AnnotationEdit, {
-    TagsEventProps,
-} from 'src/annotations/components/AnnotationEdit'
+import AnnotationEdit from 'src/annotations/components/AnnotationEdit'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
+import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 
 export interface AnnotationEditableGeneralProps {
     // displayCrowdfunding: boolean
     env: 'inpage' | 'overview'
-    mode: AnnotationMode
 }
 
 export interface AnnotationEditableProps {
@@ -28,10 +26,11 @@ export interface AnnotationEditableProps {
     comment?: string
     tags: string[]
     hasBookmark?: boolean
+    mode: AnnotationMode
+    tagPickerDependencies: GenericPickerDependenciesMinusSave
 }
 
 export interface AnnotationEditableEventProps {
-    removeTempHighlights: () => void
     handleGoToAnnotation: (url: string) => void
     handleMouseEnter?: (url: string) => void
     handleMouseLeave?: (url: string) => void
@@ -50,8 +49,7 @@ export interface AnnotationEditableEventProps {
 
 export type Props = AnnotationEditableGeneralProps &
     AnnotationEditableProps &
-    AnnotationEditableEventProps &
-    TagsEventProps
+    AnnotationEditableEventProps
 
 export default class AnnotationEditable extends React.Component<Props> {
     private _boxRef: HTMLDivElement = null
@@ -165,7 +163,8 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     private _handleCancelDelete = () => {
-        this.props.removeTempHighlights()
+        // TODO: fix this
+        // this.props.removeTempHighlights()
         this.props.handleCancelDelete(this.props.url)
     }
 

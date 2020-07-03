@@ -1,15 +1,24 @@
 import * as React from 'react'
 import { EventEmitter } from 'events'
 
+import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { AnnotationsSidebarEventEmitter } from '../types'
+import AnnotationsSidebar, {
+    AnnotationsSidebarProps,
+} from '../components/AnnotationsSidebar'
+import { RemoteTagsInterface } from 'src/tags/background/types'
 import {
     SidebarContainerLogic,
     SidebarContainerState,
     SidebarContainerEvents,
     SidebarContainerOptions,
+    AnnotationEventContext,
 } from './old/sidebar-annotations/logic'
-import AnnotationsSidebar from '../components/AnnotationsSidebar'
+
+const DEF_CONTEXT: { context: AnnotationEventContext } = {
+    context: 'pageAnnotations',
+}
 
 export class AnnotationsSidebarContainer extends StatefulUIElement<
     SidebarContainerOptions,
@@ -17,130 +26,95 @@ export class AnnotationsSidebarContainer extends StatefulUIElement<
     SidebarContainerEvents
 > {
     events = new EventEmitter() as AnnotationsSidebarEventEmitter
+    private tags: RemoteTagsInterface
 
     constructor(props: SidebarContainerOptions) {
         super(props, new SidebarContainerLogic(props))
+
+        this.tags = runInBackground()
     }
 
-    componentDidMount() {
-        super.componentDidMount()
-
-        this.setupEventForwarding()
-    }
-
-    componentWillUnmount() {
-        super.componentWillUnmount()
-
-        this.cleanupEventForwarding()
-    }
-
-    private setupEventForwarding() {
-        this.events.on('clickAnnotation', ({ url }) =>
-            this.processEvent('goToAnnotationInPage', {
-                annotationUrl: url,
-                context: 'pageAnnotations',
-            }),
-        )
-        this.events.on('clickAnnotationTag', (args) =>
-            console.log('CLICKED TAG:', args),
-        )
-        this.events.on('clickAnnotationBookmarkBtn', ({ url }) =>
+    private getEditProps = (): AnnotationsSidebarProps['annotationEditProps'] => ({
+        env: this.props.env,
+        handleMouseEnter: (url) =>
+            this.processEvent('annotationMouseEnter', { annotationUrl: url }),
+        handleMouseLeave: (url) =>
+            this.processEvent('annotationMouseLeave', { annotationUrl: url }),
+        handleAnnotationTagClick: (url, tag) =>
+            console.log('clicked tag:', url, tag),
+        handleBookmarkToggle: (url) =>
             this.processEvent('toggleAnnotationBookmark', {
                 annotationUrl: url,
-                context: 'pageAnnotations',
+                ...DEF_CONTEXT,
             }),
-        )
-        this.events.on('clickAnnotationDeleteBtn', ({ url }) =>
-            this.processEvent('switchAnnotationMode', {
-                annotationUrl: url,
-                context: 'pageAnnotations',
-                mode: 'delete',
-            }),
-        )
-        this.events.on('clickAnnotationEditBtn', ({ url }) =>
-            this.processEvent('switchAnnotationMode', {
-                annotationUrl: url,
-                context: 'pageAnnotations',
-                mode: 'edit',
-            }),
-        )
-
-        this.events.on('clickConfirmAnnotationEditBtn', ({ url, ...args }) =>
-            this.processEvent('editAnnotation', {
-                annotationUrl: url,
-                context: 'pageAnnotations',
-                ...args,
-            }),
-        )
-        this.events.on('clickConfirmAnnotationDeleteBtn', ({ url }) =>
+        handleConfirmDelete: (url) =>
             this.processEvent('deleteAnnotation', {
                 annotationUrl: url,
-                context: 'pageAnnotations',
+                ...DEF_CONTEXT,
             }),
-        )
-        this.events.on(
-            'clickConfirmAnnotationCreateBtn',
-            ({ text, isBookmarked, ...args }) =>
-                this.processEvent('saveNewPageComment', {
-                    commentText: text,
-                    bookmarked: isBookmarked,
-                    ...args,
-                }),
-        )
-
-        this.events.on('clickCancelAnnotationDeleteBtn', ({ url }) =>
+        handleTrashBtnClick: (url) =>
             this.processEvent('switchAnnotationMode', {
                 annotationUrl: url,
-                context: 'pageAnnotations',
-                mode: 'default',
+                mode: 'delete',
+                ...DEF_CONTEXT,
             }),
-        )
-        this.events.on('clickCancelAnnotationEditBtn', ({ url }) =>
+        handleCancelDelete: (url) =>
             this.processEvent('switchAnnotationMode', {
                 annotationUrl: url,
-                context: 'pageAnnotations',
                 mode: 'default',
+                ...DEF_CONTEXT,
             }),
-        )
-        this.events.on('clickCancelAnnotationCreateBtn', () =>
-            this.processEvent('cancelNewPageComment', null),
-        )
+        handleConfirmAnnotationEdit: ({ url, ...args }) =>
+            this.processEvent('editAnnotation', {
+                annotationUrl: url,
+                ...args,
+                ...DEF_CONTEXT,
+            }),
+        handleEditBtnClick: (url) =>
+            this.processEvent('switchAnnotationMode', {
+                annotationUrl: url,
+                mode: 'edit',
+                ...DEF_CONTEXT,
+            }),
+        handleGoToAnnotation: (url) =>
+            this.processEvent('goToAnnotationInPage', {
+                annotationUrl: url,
+                ...DEF_CONTEXT,
+            }),
+    })
 
-        this.events.on('paginateAnnotations', () =>
-            this.processEvent('paginateSearch', null),
-        )
-        // this.events.on('queryAnnotations', ({ query }) =>
-        //     this.processEvent('changeSearchQuery', { searchQuery: query }),
-        // )
+    private getCreateProps = (): AnnotationsSidebarProps['annotationCreateProps'] => ({
+        anchor: this.state.commentBox.anchor,
+        onCancel: () => this.processEvent('cancelNewPageComment', null),
+        onSave: ({ text, isBookmarked, ...args }) =>
+            this.processEvent('saveNewPageComment', {
+                commentText: text,
+                bookmarked: isBookmarked,
+                ...args,
+            }),
+    })
 
-        this.events.on('removeTemporaryHighlights', () =>
-            console.log('REMOVE HIGHLIGHTS'),
-        )
-    }
-
-    private cleanupEventForwarding() {
-        for (const event of this.events.eventNames()) {
-            this.events.removeAllListeners(event)
-        }
-    }
+    private getTagProps = (): AnnotationsSidebarProps['annotationTagProps'] => ({
+        loadDefaultSuggestions: () => this.tags.fetchInitialTagSuggestions(),
+        queryEntries: (query) => this.tags.searchForTagSuggestions({ query }),
+    })
 
     render() {
-        // TODO: properly set up tags picker deps
         return (
             <AnnotationsSidebar
                 events={this.events}
                 {...this.state}
-                env={this.props.env}
-                mode="default"
-                isAnnotationCreateShown={this.state.showCommentBox}
                 isSearchLoading={this.state.primarySearchState === 'running'}
                 appendLoader={this.state.secondarySearchState === 'running'}
+                annotationModes={this.state.annotationModes.pageAnnotations}
+                isAnnotationCreateShown={this.state.showCommentBox}
                 hoverAnnotationUrl={this.state.hoverAnnotationUrl}
-                annotationCreateProps={{
-                    anchor: this.state.commentBox.anchor,
-                    tagPickerDependencies: {} as any,
-                }}
-                annotationTagProps={{} as any}
+                annotationCreateProps={this.getCreateProps()}
+                annotationEditProps={this.getEditProps()}
+                annotationTagProps={this.getTagProps()}
+                handleScrollPagination={() =>
+                    this.processEvent('paginateSearch', null)
+                }
             />
         )
     }

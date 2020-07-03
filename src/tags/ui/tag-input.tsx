@@ -7,7 +7,7 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 export interface Props {
     queryTagSuggestions: (query: string) => Promise<string[]>
-    fetchInitialTagSuggestions: () => Promise<string[]>
+    fetchInitialTagSuggestions: () => string[] | Promise<string[]>
     setTagInputActive: (isTagInputActive: boolean) => void
     deleteTag: (tag: string) => void
     updateTags: PickerUpdateHandler
