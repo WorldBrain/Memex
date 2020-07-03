@@ -40,36 +40,24 @@ const setupLogicHelper = async ({
         getAllAnnotationsByUrl: () => undefined,
     } as any
 
-    const highlighter = {
-        removeAnnotationHighlights: () => undefined,
-        removeTempHighlights: () => undefined,
-        renderHighlight: () => undefined,
-    } as any
-
     const currentTab = {
         id: 654,
         url: currentTabUrl,
         title: 'Foo.com: Home',
     }
-    const inPageUI = new SharedInPageUIState({
-        loadComponent: async () => {},
-        annotations,
-        highlighter,
-        pageUrl: currentTab.url,
-    })
 
     const sidebarLogic = new SidebarContainerLogic({
         currentTab,
         tags: backgroundModules.tags.remoteFunctions,
         customLists: backgroundModules.customLists.remoteFunctions,
         annotations,
-        normalizeUrl: (url) => url,
         search: {
             ...backgroundModules.search.remoteFunctions.search,
         },
         bookmarks: backgroundModules.search.remoteFunctions.bookmarks,
-        inPageUI,
-        highlighter,
+        // inPageUI,
+        // highlighter,
+        initialState: 'hidden',
         env: 'inpage',
         searchResultLimit: 10,
     })

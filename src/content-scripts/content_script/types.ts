@@ -1,7 +1,7 @@
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { RibbonContainerDependencies } from 'src/in-page-ui/ribbon/react/containers/ribbon/types'
 import { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
-import { SidebarContainerDependencies } from 'src/sidebar/annotations-sidebar/containers/old/sidebar-annotations/types'
+import { Props as SidebarContainerDependencies } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInPage'
 
 export interface ContentScriptRegistry {
     registerRibbonScript(main: RibbonScriptMain): Promise<void>

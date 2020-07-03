@@ -13,6 +13,7 @@ import { PageUrlsByDay } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
 import { SidebarContainerDependencies } from './types'
+import { AnnotationsSidebarInPageEventEmitter } from '../../../types'
 import { featuresBeta } from 'src/util/remote-functions-background'
 import {
     AnnotationMode,
@@ -20,6 +21,7 @@ import {
     ResultsByUrl,
     SidebarEnv,
 } from 'src/sidebar/annotations-sidebar/types'
+import { EventEmitter } from 'typeorm/platform/PlatformTools'
 
 export interface SidebarContainerState {
     loadState: TaskState
@@ -179,13 +181,9 @@ export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     env: SidebarEnv
+    events?: AnnotationsSidebarInPageEventEmitter
 }
 
-type Incoming<EventName extends keyof SidebarContainerEvents> = IncomingUIEvent<
-    SidebarContainerState,
-    SidebarContainerEvents,
-    EventName
->
 type EventHandler<
     EventName extends keyof SidebarContainerEvents
 > = UIEventHandler<SidebarContainerState, SidebarContainerEvents, EventName>
@@ -207,6 +205,10 @@ export class SidebarContainerLogic extends UILogic<
 > {
     constructor(private options: SidebarContainerOptions) {
         super()
+
+        if (!options.events) {
+            options.events = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
+        }
     }
 
     getInitialState(): SidebarContainerState {
@@ -215,9 +217,7 @@ export class SidebarContainerLogic extends UILogic<
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',
 
-            state: this.options.inPageUI.componentsShown.sidebar
-                ? 'visible'
-                : 'hidden',
+            state: this.options.initialState,
             annotationModes: {
                 pageAnnotations: {},
                 searchResults: {},
@@ -265,25 +265,6 @@ export class SidebarContainerLogic extends UILogic<
             searchResultSkip: 0,
 
             isBetaEnabled: false,
-        }
-    }
-
-    private static findIndexOfAnnotsByDay(
-        annotationUrl: string,
-        annotsByDay: PageUrlsByDay,
-    ): { time: number; pageUrl: string; index: number } {
-        for (const [time, annotsByPageObj] of Object.entries(annotsByDay)) {
-            for (const [pageUrl, annotations] of Object.entries(
-                annotsByPageObj as { [pageUrl: string]: Annotation[] },
-            )) {
-                const index = annotations.findIndex(
-                    (annot) => annot.url === annotationUrl,
-                )
-                if (index === -1) {
-                    continue
-                }
-                return { time, pageUrl, index } as any
-            }
         }
     }
 
@@ -470,19 +451,10 @@ export class SidebarContainerLogic extends UILogic<
                 return
             }
 
-            this.options.highlighter.removeTempHighlights()
-            await this.options.highlighter.renderHighlight(
-                { ...dummyAnnotation, url: annotationUrl },
-                () => {
-                    this.options.inPageUI.showSidebar(
-                        annotationUrl && {
-                            anchor: dummyAnnotation.selector,
-                            annotationUrl,
-                            action: 'show_annotation',
-                        },
-                    )
-                },
-            )
+            this.options.events.emit('removeTemporaryHighlights')
+            this.options.events.emit('renderHighlight', {
+                highlight: { ...dummyAnnotation, url: annotationUrl },
+            })
         } catch (err) {
             updateState({ annotations: previousState.annotations })
             throw err
@@ -490,7 +462,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
-        this.options.highlighter.removeTempHighlights()
+        this.options.events.emit('removeTemporaryHighlights')
         return {
             commentBox: { $set: INITIAL_COMMENT_BOX_STATE },
             showCommentBox: { $set: false },
@@ -630,9 +602,9 @@ export class SidebarContainerLogic extends UILogic<
             })
         }
 
-        this.options.highlighter.highlightAndScroll({
+        this.options.events.emit('highlightAndScroll', {
             url: event.annotationUrl,
-        } as any)
+        })
     }
 
     editAnnotation: EventHandler<'editAnnotation'> = async ({

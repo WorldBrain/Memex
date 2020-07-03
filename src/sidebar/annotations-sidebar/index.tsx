@@ -2,18 +2,18 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { StyleSheetManager } from 'styled-components'
 
-import { SidebarEnv } from './types'
-import { SidebarContainerDependencies } from 'src/sidebar/annotations-sidebar/containers/old/sidebar-annotations/types'
-import { SidebarContainer } from 'src/overview/sidebar-left'
+import {
+    AnnotationSidebarInPage,
+    Props as SidebarContainerDependencies,
+} from './containers/AnnotationsSidebarInPage'
 
-export function setupSidebarUI(
+export function setupInPageSidebarUI(
     target: HTMLElement,
     dependencies: SidebarContainerDependencies,
-    options: { env: SidebarEnv },
 ) {
     ReactDOM.render(
         <StyleSheetManager target={target}>
-            {/* <SidebarContainer {...options} {...dependencies} /> */}
+            <AnnotationSidebarInPage {...dependencies} env="inpage" />
         </StyleSheetManager>,
         target,
     )

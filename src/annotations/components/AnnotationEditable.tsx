@@ -163,8 +163,6 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     private _handleCancelDelete = () => {
-        // TODO: fix this
-        // this.props.removeTempHighlights()
         this.props.handleCancelDelete(this.props.url)
     }
 

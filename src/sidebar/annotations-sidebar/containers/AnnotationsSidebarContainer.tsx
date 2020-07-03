@@ -1,13 +1,9 @@
 import * as React from 'react'
-import { EventEmitter } from 'events'
 
-import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
-import { AnnotationsSidebarEventEmitter } from '../types'
 import AnnotationsSidebar, {
     AnnotationsSidebarProps,
 } from '../components/AnnotationsSidebar'
-import { RemoteTagsInterface } from 'src/tags/background/types'
 import {
     SidebarContainerLogic,
     SidebarContainerState,
@@ -15,26 +11,30 @@ import {
     SidebarContainerOptions,
     AnnotationEventContext,
 } from './old/sidebar-annotations/logic'
+import {} from '../types'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
 }
 
-export class AnnotationsSidebarContainer extends StatefulUIElement<
-    SidebarContainerOptions,
-    SidebarContainerState,
-    SidebarContainerEvents
-> {
-    events = new EventEmitter() as AnnotationsSidebarEventEmitter
-    private tags: RemoteTagsInterface
+export interface Props extends SidebarContainerOptions {}
 
-    constructor(props: SidebarContainerOptions) {
+export class AnnotationsSidebarContainer<
+    P extends Props = Props
+> extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
+    constructor(props: P) {
         super(props, new SidebarContainerLogic(props))
-
-        this.tags = runInBackground()
     }
 
-    private getEditProps = (): AnnotationsSidebarProps['annotationEditProps'] => ({
+    protected showSidebar = () => {
+        this.processEvent('show', null)
+    }
+
+    protected hideSidebar = () => {
+        this.processEvent('hide', null)
+    }
+
+    protected getEditProps = (): AnnotationsSidebarProps['annotationEditProps'] => ({
         env: this.props.env,
         handleMouseEnter: (url) =>
             this.processEvent('annotationMouseEnter', { annotationUrl: url }),
@@ -83,7 +83,7 @@ export class AnnotationsSidebarContainer extends StatefulUIElement<
             }),
     })
 
-    private getCreateProps = (): AnnotationsSidebarProps['annotationCreateProps'] => ({
+    protected getCreateProps = (): AnnotationsSidebarProps['annotationCreateProps'] => ({
         anchor: this.state.commentBox.anchor,
         onCancel: () => this.processEvent('cancelNewPageComment', null),
         onSave: ({ text, isBookmarked, ...args }) =>
@@ -94,15 +94,16 @@ export class AnnotationsSidebarContainer extends StatefulUIElement<
             }),
     })
 
-    private getTagProps = (): AnnotationsSidebarProps['annotationTagProps'] => ({
-        loadDefaultSuggestions: () => this.tags.fetchInitialTagSuggestions(),
-        queryEntries: (query) => this.tags.searchForTagSuggestions({ query }),
+    protected getTagProps = (): AnnotationsSidebarProps['annotationTagProps'] => ({
+        loadDefaultSuggestions: () =>
+            this.props.tags.fetchInitialTagSuggestions(),
+        queryEntries: (query) =>
+            this.props.tags.searchForTagSuggestions({ query }),
     })
 
     render() {
         return (
             <AnnotationsSidebar
-                events={this.events}
                 {...this.state}
                 isSearchLoading={this.state.primarySearchState === 'running'}
                 appendLoader={this.state.secondarySearchState === 'running'}

@@ -15,11 +15,10 @@ import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
 import { Annotation } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
-import { AnnotationsSidebarEventEmitter, AnnotationMode } from '../types'
+import { AnnotationMode } from '../types'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 
 export interface AnnotationsSidebarProps {
-    events: AnnotationsSidebarEventEmitter
     annotationModes: { [url: string]: AnnotationMode }
 
     // NOTE: This group of props were all brought over from AnnotationsEditable
@@ -100,9 +99,7 @@ export default class AnnotationsSidebar extends React.Component<
     }
 
     private renderNewAnnotation() {
-        const { events: eventEmitter, isAnnotationCreateShown } = this.props
-
-        if (!isAnnotationCreateShown) {
+        if (!this.props.isAnnotationCreateShown) {
             return
         }
 
@@ -117,9 +114,7 @@ export default class AnnotationsSidebar extends React.Component<
     }
 
     private renderAnnotationsEditable() {
-        const { annotations, events: eventEmitter } = this.props
-
-        if (!annotations.length) {
+        if (!this.props.annotations.length) {
             return <EmptyMessage />
         }
 

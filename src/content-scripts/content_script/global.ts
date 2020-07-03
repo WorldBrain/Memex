@@ -33,6 +33,8 @@ import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
 import * as constants from '../constants'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
+import { EventEmitter } from 'typeorm/platform/PlatformTools'
+import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 
 // TODO:(page-indexing)[high] Fix this with a proper restructuring of how pages are indexed
 setupPageContentRPC()
@@ -105,6 +107,11 @@ export async function main() {
         },
         async registerSidebarScript(execute): Promise<void> {
             await execute({
+                events: new EventEmitter() as AnnotationsSidebarInPageEventEmitter,
+                initialState: inPageUI.componentsShown.sidebar
+                    ? 'visible'
+                    : 'hidden',
+                env: 'inpage',
                 inPageUI,
                 highlighter,
                 annotations,
@@ -113,7 +120,6 @@ export async function main() {
                 bookmarks: runInBackground<BookmarksInterface>(),
                 search: runInBackground<SearchInterface>(),
                 customLists: runInBackground<RemoteCollectionsInterface>(),
-                normalizeUrl,
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
             })
             components.sidebar!.resolve()

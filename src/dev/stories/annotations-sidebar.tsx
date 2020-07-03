@@ -1,5 +1,4 @@
 import { storiesOf } from '@storybook/react'
-import { EventEmitter } from 'events'
 import React from 'react'
 
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
@@ -8,14 +7,12 @@ import { WithDependencies } from 'src/dev/utils'
 import AnnotationsSidebar, {
     AnnotationsSidebarProps,
 } from 'src/sidebar/annotations-sidebar/components/AnnotationsSidebar'
-import { AnnotationsSidebarEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 
 const DAY_MS = 60000 * 60 * 24
 const TAGS = ['tag A', 'tag B', 'tag C', 'tag Z']
 
 async function createDependencies() {
     // const background = await setupBackgroundIntegrationTest()
-    const events = new EventEmitter() as AnnotationsSidebarEventEmitter
 
     const annotations = [
         {
@@ -70,7 +67,6 @@ async function createDependencies() {
     ]
 
     const sidebarDependencies: AnnotationsSidebarProps = {
-        events,
         isAnnotationCreateShown: true,
         isSearchLoading: false,
         // displayCrowdfunding: false,

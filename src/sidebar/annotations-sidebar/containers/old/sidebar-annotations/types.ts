@@ -1,19 +1,13 @@
-import { URLNormalizer } from '@worldbrain/memex-url-utils'
-
 import { SearchInterface } from 'src/search/background/types'
-import { HighlightInteractionInterface } from 'src/highlighting/types'
-import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 
 export interface SidebarContainerDependencies {
-    inPageUI: SharedInPageUIInterface
     currentTab: { id: number; url: string }
-    normalizeUrl: URLNormalizer
-    highlighter: HighlightInteractionInterface
     searchResultLimit: number
+    initialState: 'visible' | 'hidden'
 
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>
