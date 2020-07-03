@@ -65,6 +65,7 @@ export default class AnnotationsSidebar extends React.Component<
         this.props.events.emit('queryAnnotations', { query: '' })
     }
 
+    // NOTE: Currently not used
     private renderSearchSection() {
         return (
             <TopSectionStyled>
@@ -202,7 +203,7 @@ export default class AnnotationsSidebar extends React.Component<
     render() {
         return (
             <SidebarStyled>
-                {this.renderSearchSection()}
+                {/* {this.renderSearchSection()} */}
                 {this.renderNewAnnotation()}
                 {this.renderResultsBody()}
             </SidebarStyled>

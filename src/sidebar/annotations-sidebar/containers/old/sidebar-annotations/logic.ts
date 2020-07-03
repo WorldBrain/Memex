@@ -7,21 +7,12 @@ import {
     UIMutation,
 } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
+
 import { Annotation } from 'src/annotations/types'
-import {
-    PageUrlsByDay,
-    StandardSearchResponse,
-    AnnotationsSearchResponse,
-} from 'src/search/background/types'
-import { mergeAnnotsByDay, areAnnotsByDayObjsDifferent } from 'src/search/util'
+import { PageUrlsByDay } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
-import {
-    SidebarContainerDependencies,
-    PageType,
-    SearchType,
-    SearchTypeChange,
-} from './types'
+import { SidebarContainerDependencies } from './types'
 import { featuresBeta } from 'src/util/remote-functions-background'
 import {
     AnnotationMode,
@@ -36,8 +27,6 @@ export interface SidebarContainerState {
     secondarySearchState: TaskState
 
     state: 'visible' | 'hidden'
-    // needsWaypoint: boolean
-    // appendLoader: boolean
 
     annotations: Annotation[]
     annotationModes: {
@@ -46,9 +35,7 @@ export interface SidebarContainerState {
         }
     }
     activeAnnotationUrl: string | null
-    hoverAnnotationUrl: {
-        [context in AnnotationEventContext]: string
-    }
+    hoverAnnotationUrl: string | null
 
     showCommentBox: boolean
     commentBox: {
@@ -62,21 +49,21 @@ export interface SidebarContainerState {
         }
     }
 
-    deletePageConfirm: {
-        pageUrlToDelete?: string
-        // isDeletePageModalShown: boolean
-    }
+    // deletePageConfirm: {
+    //     pageUrlToDelete?: string
+    //     // isDeletePageModalShown: boolean
+    // }
 
-    searchValue: string
-    pageType: PageType
-    searchType: SearchType
-    resultsSearchType: SearchType
-    pageCount?: number
+    // searchValue: string
+    // pageType: PageType
+    // searchType: SearchType
+    // resultsSearchType: SearchType
+    pageCount: number
     noResults: boolean
-    isBadTerm: boolean
-    resultsByUrl: ResultsByUrl
-    resultsClusteredByDay: boolean
-    annotsByDay: PageUrlsByDay
+    // isBadTerm: boolean
+    // resultsByUrl: ResultsByUrl
+    // resultsClusteredByDay: boolean
+    // annotsByDay: PageUrlsByDay
 
     // Everything below here is temporary
 
@@ -124,16 +111,11 @@ export type SidebarContainerEvents = UIEvent<{
     toggleNewPageCommentTagPicker: null
 
     updateTagsForNewComment: { added: string; deleted: string }
-    updateTagsForResult: { added: string; deleted: string; url: string }
+    // updateTagsForResult: { added: string; deleted: string; url: string }
     updateListsForPageResult: { added: string; deleted: string; url: string }
     addNewPageCommentTag: { tag: string }
     deleteNewPageCommentTag: { tag: string }
     // closeComments: null,
-
-    // Delete page(s) modal
-    deletePage: null
-    closeDeletePageModal: null
-    showPageDeleteConfirm: { pageUrl: string }
 
     // Annotation boxes
     goToAnnotationInPage: {
@@ -165,34 +147,33 @@ export type SidebarContainerEvents = UIEvent<{
         mode: AnnotationMode
     }
     annotationMouseEnter: {
-        context: AnnotationEventContext
         annotationUrl: string
     }
     annotationMouseLeave: {
-        context: AnnotationEventContext
         annotationUrl: string
     }
 
     // Search
-    enterSearchQuery: { searchQuery: string }
-    changeSearchQuery: { searchQuery: string }
+    // enterSearchQuery: { searchQuery: string }
+    // changeSearchQuery: { searchQuery: string }
+    // togglePageType: null
+    // switchSearch: { changes: SearchTypeChange }
+    // clearAllFilters: null
+    // resetFilterPopups: null
+    // toggleShowFilters: null
+
     paginateSearch: null
-    togglePageType: null
-    switchSearch: { changes: SearchTypeChange }
     setAnnotationsExpanded: { value: boolean }
     toggleAllAnnotationsFold: null
-    clearAllFilters: null
     fetchSuggestedTags: null
     fetchSuggestedDomains: null
-    resetFiterPopups: null
-    toggleShowFilters: null
 
     // Page search result interactions
-    togglePageBookmark: { pageUrl: string }
-    togglePageTagPicker: { pageUrl: string }
-    togglePageListPicker: { pageUrl: string }
-    togglePageAnnotationsView: { pageUrl: string; pageTitle?: string }
-    resetPageAnnotationsView: null
+    // togglePageBookmark: { pageUrl: string }
+    // togglePageTagPicker: { pageUrl: string }
+    // togglePageListPicker: { pageUrl: string }
+    // togglePageAnnotationsView: { pageUrl: string; pageTitle?: string }
+    // resetPageAnnotationsView: null
 }>
 export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
 
@@ -243,42 +224,43 @@ export class SidebarContainerLogic extends UILogic<
             },
 
             commentBox: { ...INITIAL_COMMENT_BOX_STATE },
-            deletePageConfirm: {
-                pageUrlToDelete: undefined,
-                // isDeletePageModalShown: false,
-            },
+            // deletePageConfirm: {
+            //     pageUrlToDelete: undefined,
+            //     // isDeletePageModalShown: false,
+            // },
 
             // pageType: 'all',
-            pageType: 'page',
-            searchType: 'notes',
+            // pageType: 'page',
+            // searchType: 'notes',
             // searchType: 'page',
-            resultsSearchType: 'page',
+            // resultsSearchType: 'page',
 
             allAnnotationsExpanded: false,
             isSocialPost: false,
-            // needsWaypoint: false,
-            // appendLoader: false,
             annotations: [],
             activeAnnotationUrl: null,
-            hoverAnnotationUrl: { pageAnnotations: '', searchResults: '' },
+            hoverAnnotationUrl: null,
+
             showCommentBox: false,
-            searchValue: '',
             showCongratsMessage: false,
             showClearFiltersBtn: false,
             showAnnotsForPage: undefined,
             showFiltersSidebar: false,
             showSocialSearch: false,
+
+            // searchValue: '',
             pageCount: 0,
-            annotCount: 0,
             noResults: false,
-            isBadTerm: false,
+            // isBadTerm: false,
+            // resultsByUrl: {},
+            // resultsClusteredByDay: false,
+            // annotsByDay: {},
+
+            annotCount: 0,
             shouldShowCount: false,
             isInvalidSearch: false,
             totalResultCount: 0,
             isListFilterActive: false,
-            resultsByUrl: {},
-            resultsClusteredByDay: false,
-            annotsByDay: {},
             isSocialSearch: false,
             searchResultSkip: 0,
 
@@ -322,6 +304,14 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ isBetaEnabled: { $set: copyPasterEnabled } })
     }
 
+    show: EventHandler<'show'> = async () => {
+        this.emitMutation({ state: { $set: 'visible' } })
+
+        if (this.options.env === 'inpage') {
+            await this._doSearch(this.getInitialState(), { overwrite: true })
+        }
+    }
+
     private doSearch = debounce(this._doSearch, 300)
 
     private async _doSearch(
@@ -332,250 +322,50 @@ export class SidebarContainerLogic extends UILogic<
             this,
             opts.overwrite ? 'primarySearchState' : 'secondarySearchState',
             async () => {
-                if (state.searchType === 'page') {
-                    return this.doPageSearch(state, opts)
-                } else if (state.searchType === 'notes') {
-                    return this.doAnnotationSearch(state, opts)
-                } else {
-                    throw new Error('Unknown search type')
-                }
+                return this.doAnnotationSearch(state, opts)
             },
         )
-    }
-
-    private async doPageSearch(
-        state: SidebarContainerState,
-        opts: { overwrite: boolean },
-    ) {
-        const query = state.searchValue.trim().length
-            ? state.searchValue.trim()
-            : undefined
-
-        const results = (
-            await this.options.search.searchPages({
-                base64Img: true,
-                query,
-                contentTypes: {
-                    pages: true,
-                    notes: true,
-                    highlights: true,
-                },
-                limit: this.options.searchResultLimit,
-                skip: state.searchResultSkip,
-            })
-        ).docs
-
-        this.emitMutation({
-            pageCount: { $set: results.length },
-            noResults: { $set: results.length === 0 },
-            resultsByUrl: {
-                $apply: (prev) => {
-                    const resultsByUrl = createResultsByUrlObj(results)
-
-                    return opts.overwrite
-                        ? resultsByUrl
-                        : { ...prev, ...resultsByUrl }
-                },
-            },
-        })
     }
 
     private async doAnnotationSearch(
         state: SidebarContainerState,
         opts: { overwrite: boolean },
     ) {
-        let mutation: UIMutation<SidebarContainerState> = {}
+        const url = this.options.currentTab.url
 
-        const query = state.searchValue.trim().length
-            ? state.searchValue.trim()
-            : undefined
-        const url =
-            state.pageType === 'page' ? this.options.currentTab.url : undefined
-
-        const results = await this.options.search.searchAnnotations({
-            base64Img: true,
-            query,
-            url,
-            limit: this.options.searchResultLimit,
-            skip: state.searchResultSkip,
-        })
-
-        if (state.pageType === 'page') {
-            mutation = this.calcPageAnnotationsSearchMutation(
-                results,
-                state.annotations,
-                {
-                    ...opts,
-                    isTermsSearch: !!query,
-                },
-            )
-        } else {
-            mutation = this.calcAllAnnotationsSearchMutation(
-                results,
-                state.annotsByDay,
-                { ...opts, isTermsSearch: !!query },
-            )
-        }
+        const annotations = await this.options.annotations.getAllAnnotationsByUrl(
+            {
+                base64Img: true,
+                query: '',
+                url,
+                limit: this.options.searchResultLimit,
+                skip: state.searchResultSkip,
+            },
+        )
 
         this.emitMutation({
-            ...mutation,
-            resultsByUrl: {
-                $apply: (prev) => {
-                    const resultsByUrl = createResultsByUrlObj(results.docs)
-
-                    return opts.overwrite
-                        ? resultsByUrl
-                        : { ...prev, ...resultsByUrl }
-                },
-            },
+            annotations: { $set: annotations },
+            pageCount: { $set: annotations.length },
+            noResults: { $set: annotations.length === 0 },
         })
     }
 
-    private calcAllAnnotationsSearchMutation(
-        results: StandardSearchResponse | AnnotationsSearchResponse,
-        existingAnnotsByDay: PageUrlsByDay,
-        opts: {
-            isTermsSearch: boolean
-            overwrite: boolean
-        },
-    ): UIMutation<SidebarContainerState> {
-        // Terms search doesn't return the same result shape :S
-        if (opts.isTermsSearch) {
-            return {
-                pageCount: { $set: results.docs.length },
-                noResults: { $set: !results.docs.length },
-            }
+    paginateSearch: EventHandler<'paginateSearch'> = async ({
+        previousState,
+    }) => {
+        if (previousState.noResults) {
+            return
         }
 
-        const { annotsByDay } = results as AnnotationsSearchResponse
-
-        // NOTE: search pagination does not seem to be working here, hence why
-        //  we're comparing the prev state with the current state to determine
-        //  whether we need to fetch more or not... :(
-        if (
-            opts.overwrite ||
-            areAnnotsByDayObjsDifferent(existingAnnotsByDay, annotsByDay)
-        ) {
-            return {
-                annotsByDay: {
-                    $apply: (prev) =>
-                        opts.overwrite
-                            ? annotsByDay
-                            : mergeAnnotsByDay(prev, annotsByDay),
-                },
-                pageCount: { $set: results.docs.length },
-                noResults: { $set: results.docs.length === 0 },
-            }
-        }
-
-        return {
-            noResults: { $set: true },
-        }
-    }
-
-    private calcPageAnnotationsSearchMutation(
-        results: StandardSearchResponse | AnnotationsSearchResponse,
-        existingAnnotations: Annotation[],
-        opts: {
-            isTermsSearch: boolean
-            overwrite: boolean
-        },
-    ): UIMutation<SidebarContainerState> {
-        const url = this.options.normalizeUrl(this.options.currentTab.url)
-        const annotations: Annotation[] = []
-
-        const uniqAnnotsByUrl = (
-            a: Annotation[],
-            b: Annotation[],
-        ): Annotation[] => {
-            const urls = new Set(a.map((annot) => annot.url))
-            return [...a, ...b.filter((annot) => !urls.has(annot.url))]
-        }
-
-        const diffAnnotsByUrl = (
-            a: Annotation[],
-            b: Annotation[],
-        ): Annotation[] => {
-            const urlsA = new Set(a.map((annot) => annot.url))
-            const urlsB = new Set(b.map((annot) => annot.url))
-
-            return [...a, ...b].filter(
-                (annot) => !(urlsA.has(annot.url) && urlsB.has(annot.url)),
-            )
-        }
-
-        // NOTE: the annots search end point doesn't properly implement the `skip` arg for pagination.
-        //  That, coupled with the usage of that cluster of annots indexed by page then by day, leads
-        //  to this big mess
-        const annotsMutation: UIMutation<SidebarContainerState> = {
-            pageCount: {
-                $apply: () =>
-                    opts.overwrite
-                        ? annotations.length
-                        : uniqAnnotsByUrl(existingAnnotations, annotations)
-                              .length,
-            },
-            noResults: {
-                $apply: () =>
-                    diffAnnotsByUrl(existingAnnotations, annotations).length ===
-                    0,
-            },
-            annotations: {
-                $apply: (prev) =>
-                    opts.overwrite
-                        ? annotations
-                        : uniqAnnotsByUrl(prev, annotations),
+        const mutation: UIMutation<SidebarContainerState> = {
+            searchResultSkip: {
+                $apply: (prev) => prev + this.options.searchResultLimit,
             },
         }
+        this.emitMutation(mutation)
+        const nextState = this.withMutation(previousState, mutation)
 
-        if (opts.isTermsSearch) {
-            for (const doc of results.docs) {
-                if (doc.url === url) {
-                    annotations.push(
-                        ...doc.annotations.map((annot) => ({
-                            ...annot,
-                            createdWhen: annot.createdWhen?.valueOf(),
-                            lastEdited: annot.lastEdited?.valueOf(),
-                        })),
-                    )
-                }
-            }
-
-            return annotsMutation
-        }
-
-        const { annotsByDay } = results as AnnotationsSearchResponse
-        const sortedKeys = Object.keys(annotsByDay).sort().reverse()
-
-        for (const day of sortedKeys) {
-            const cluster = annotsByDay[day]
-
-            for (const pageUrl of Object.keys(cluster)) {
-                if (pageUrl === url) {
-                    annotations.push(...cluster[pageUrl])
-                }
-            }
-        }
-
-        return {
-            ...annotsMutation,
-            annotsByDay: {
-                $apply: (prev) =>
-                    opts.overwrite
-                        ? annotsByDay
-                        : mergeAnnotsByDay(prev, annotsByDay),
-            },
-        }
-    }
-
-    cleanup() {}
-
-    show: EventHandler<'show'> = async () => {
-        this.emitMutation({ state: { $set: 'visible' } })
-
-        if (this.options.env === 'inpage') {
-            await this._doSearch(this.getInitialState(), { overwrite: true })
-        }
+        await this.doSearch(nextState, { overwrite: false })
     }
 
     hide: EventHandler<'hide'> = () => {
@@ -748,45 +538,6 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    updateTagsForResult: EventHandler<'updateTagsForResult'> = async ({
-        event,
-    }) => {
-        const backendResult = this.options.tags.updateTagForPage({
-            added: event.added,
-            deleted: event.deleted,
-            url: event.url,
-        })
-
-        let tagsStateUpdater: (tags: string[]) => string[]
-
-        if (event.added) {
-            tagsStateUpdater = (tags) => {
-                const tag = event.added
-                return tags.includes(tag) ? tags : [...tags, tag]
-            }
-        }
-
-        if (event.deleted) {
-            tagsStateUpdater = (tags) => {
-                const index = tags.indexOf(event.deleted)
-                if (index === -1) {
-                    return tags
-                }
-
-                return [...tags.slice(0, index), ...tags.slice(index + 1)]
-            }
-        }
-        this.emitMutation({
-            resultsByUrl: {
-                [event.url]: {
-                    tags: { $apply: tagsStateUpdater },
-                },
-            },
-        })
-
-        return backendResult
-    }
-
     updateListsForPageResult: EventHandler<
         'updateListsForPageResult'
     > = async ({ event }) => {
@@ -864,45 +615,16 @@ export class SidebarContainerLogic extends UILogic<
             activeAnnotationUrl: { $set: event.annotationUrl },
         })
 
-        const { url } = this.options.currentTab
-        const normalizedUrl = this.options.normalizeUrl(url)
-        let annotation: Annotation
-
-        const goToAnnotationInNewTab = (args: {
-            url: string
-            annotation: Annotation
-        }) => this.options.annotations.goToAnnotationFromSidebar(args)
-
-        if (event.context === 'searchResults') {
-            const {
-                time,
-                pageUrl,
-                index,
-            } = SidebarContainerLogic.findIndexOfAnnotsByDay(
-                event.annotationUrl,
-                previousState.annotsByDay,
-            )
-
-            annotation = previousState.annotsByDay[time][pageUrl][index] as any
-
-            if (pageUrl !== normalizedUrl) {
-                return goToAnnotationInNewTab({
-                    url: annotation.pageUrl,
-                    annotation,
-                })
-            }
-        } else {
-            annotation = previousState.annotations.find(
-                (annot) => annot.url === event.annotationUrl,
-            )
-        }
+        const annotation = previousState.annotations.find(
+            (annot) => annot.url === event.annotationUrl,
+        )
 
         if (!annotation?.body?.length) {
             return
         }
 
         if (this.options.env === 'overview') {
-            return goToAnnotationInNewTab({
+            return this.options.annotations.goToAnnotationFromSidebar({
                 url: annotation.pageUrl,
                 annotation,
             })
@@ -917,50 +639,9 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        let mutation: any
-        let resetMutation: any
-
-        if (event.context === 'searchResults') {
-            const {
-                time,
-                pageUrl,
-                index,
-            } = SidebarContainerLogic.findIndexOfAnnotsByDay(
-                event.annotationUrl,
-                previousState.annotsByDay,
-            )
-
-            mutation = {
-                annotsByDay: {
-                    [time]: {
-                        [pageUrl]: {
-                            [index]: {
-                                tags: { $set: event.tags },
-                                comment: { $set: event.comment },
-                                lastEdited: { $set: Date.now() },
-                            },
-                        },
-                    },
-                },
-            }
-
-            resetMutation = { annotsByDay: { $set: previousState.annotsByDay } }
-        } else {
-            const resultIndex = previousState.annotations.findIndex(
-                (annot) => annot.url === event.annotationUrl,
-            )
-            mutation = {
-                annotations: {
-                    [resultIndex]: {
-                        tags: { $set: event.tags },
-                        comment: { $set: event.comment },
-                        lastEdited: { $set: Date.now() },
-                    },
-                },
-            }
-
-            resetMutation = { annotations: { $set: previousState.annotations } }
-        }
+        const resultIndex = previousState.annotations.findIndex(
+            (annot) => annot.url === event.annotationUrl,
+        )
 
         this.emitMutation({
             annotationModes: {
@@ -968,7 +649,13 @@ export class SidebarContainerLogic extends UILogic<
                     [event.annotationUrl]: { $set: 'default' },
                 },
             },
-            ...mutation,
+            annotations: {
+                [resultIndex]: {
+                    tags: { $set: event.tags },
+                    comment: { $set: event.comment },
+                    lastEdited: { $set: Date.now() },
+                },
+            },
         })
 
         try {
@@ -981,7 +668,9 @@ export class SidebarContainerLogic extends UILogic<
                 tags: event.tags,
             })
         } catch (err) {
-            this.emitMutation(resetMutation)
+            this.emitMutation({
+                annotations: { $set: previousState.annotations },
+            })
             throw err
         }
     }
@@ -990,55 +679,9 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        let mutation: any
-        let resetMutation: any
-
-        if (event.context === 'searchResults') {
-            const {
-                time,
-                pageUrl,
-                index,
-            } = SidebarContainerLogic.findIndexOfAnnotsByDay(
-                event.annotationUrl,
-                previousState.annotsByDay,
-            )
-
-            // If only one annot left for the page, remove the page
-            if (previousState.annotsByDay[time]?.[pageUrl]?.length === 1) {
-                mutation = {
-                    annotsByDay: {
-                        [time]: {
-                            $unset: [pageUrl],
-                        },
-                    },
-                }
-            } else {
-                mutation = {
-                    annotsByDay: {
-                        [time]: {
-                            [pageUrl]: {
-                                $unset: [index],
-                            },
-                        },
-                    },
-                }
-            }
-
-            resetMutation = { annotsByDay: { $set: previousState.annotsByDay } }
-        } else {
-            const resultIndex = previousState.annotations.findIndex(
-                (annot) => annot.url === event.annotationUrl,
-            )
-            mutation = {
-                annotations: {
-                    $apply: (annotations) => [
-                        ...annotations.slice(0, resultIndex),
-                        ...annotations.slice(resultIndex + 1),
-                    ],
-                },
-            }
-            resetMutation = { annotations: { $set: previousState.annotations } }
-        }
+        const resultIndex = previousState.annotations.findIndex(
+            (annot) => annot.url === event.annotationUrl,
+        )
 
         this.emitMutation({
             annotationModes: {
@@ -1046,13 +689,20 @@ export class SidebarContainerLogic extends UILogic<
                     [event.annotationUrl]: { $set: 'default' },
                 },
             },
-            ...mutation,
+            annotations: {
+                $apply: (annotations) => [
+                    ...annotations.slice(0, resultIndex),
+                    ...annotations.slice(resultIndex + 1),
+                ],
+            },
         })
 
         try {
             await this.options.annotations.deleteAnnotation(event.annotationUrl)
         } catch (err) {
-            this.emitMutation(resetMutation)
+            this.emitMutation({
+                annotations: { $set: previousState.annotations },
+            })
             throw err
         }
     }
@@ -1060,52 +710,21 @@ export class SidebarContainerLogic extends UILogic<
     toggleAnnotationBookmark: EventHandler<
         'toggleAnnotationBookmark'
     > = async ({ previousState, event }) => {
-        let updateState: (hasBookmark: boolean) => void
-        let currentlyBookmarked: boolean
+        const resultIndex = previousState.annotations.findIndex(
+            (annotation) => annotation.url === event.annotationUrl,
+        )
 
-        if (event.context === 'searchResults') {
-            const {
-                time,
-                pageUrl,
-                index,
-            } = SidebarContainerLogic.findIndexOfAnnotsByDay(
-                event.annotationUrl,
-                previousState.annotsByDay,
-            )
+        const currentlyBookmarked = !!previousState.annotations[resultIndex]
+            ?.hasBookmark
 
-            currentlyBookmarked = !!previousState.annotsByDay[time]?.[
-                pageUrl
-            ]?.[index]?.hasBookmark
-
-            updateState = (hasBookmark) =>
-                this.emitMutation({
-                    annotsByDay: {
-                        [time]: {
-                            [pageUrl]: {
-                                [index]: {
-                                    hasBookmark: { $set: hasBookmark },
-                                },
-                            },
-                        },
+        const updateState = (hasBookmark) =>
+            this.emitMutation({
+                annotations: {
+                    [resultIndex]: {
+                        hasBookmark: { $set: hasBookmark },
                     },
-                })
-        } else {
-            const resultIndex = previousState.annotations.findIndex(
-                (annotation) => annotation.url === event.annotationUrl,
-            )
-
-            currentlyBookmarked = !!previousState.annotations[resultIndex]
-                ?.hasBookmark
-
-            updateState = (hasBookmark) =>
-                this.emitMutation({
-                    annotations: {
-                        [resultIndex]: {
-                            hasBookmark: { $set: hasBookmark },
-                        },
-                    },
-                })
-        }
+                },
+            })
 
         const shouldBeBookmarked = !currentlyBookmarked
         updateState(shouldBeBookmarked)
@@ -1133,244 +752,15 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    showPageDeleteConfirm: EventHandler<'showPageDeleteConfirm'> = ({
-        event,
-    }) => {
-        return {
-            deletePageConfirm: {
-                pageUrlToDelete: {
-                    $apply: (prev) =>
-                        prev === event.pageUrl ? undefined : event.pageUrl,
-                },
-            },
-        }
-    }
-
-    deletePage: EventHandler<'deletePage'> = async ({ previousState }) => {
-        const { pageUrlToDelete } = previousState.deletePageConfirm
-
-        this.emitMutation({
-            resultsByUrl: {
-                $unset: [pageUrlToDelete],
-            },
-            deletePageConfirm: {
-                $unset: ['pageUrlToDelete'],
-            },
-        })
-
-        try {
-            await this.options.search.delPages([pageUrlToDelete])
-        } catch (err) {
-            this.emitMutation({
-                resultsByUrl: { $set: previousState.resultsByUrl },
-            })
-
-            throw err
-        }
-    }
-
-    closeDeletePageModal: EventHandler<'closeDeletePageModal'> = () => {
-        return {
-            deletePageConfirm: {
-                pageUrlToDelete: { $set: undefined },
-            },
-        }
-    }
-
-    togglePageBookmark: EventHandler<'togglePageBookmark'> = async ({
-        previousState,
-        event,
-    }) => {
-        const toggleBookmarkState = (hasBookmark: boolean) =>
-            this.emitMutation({
-                resultsByUrl: {
-                    [event.pageUrl]: {
-                        hasBookmark: { $set: hasBookmark },
-                    },
-                },
-            })
-
-        const currentlyBookmarked = !!previousState.resultsByUrl[event.pageUrl]
-            ?.hasBookmark
-        const shouldBeBookmarked = !currentlyBookmarked
-
-        toggleBookmarkState(shouldBeBookmarked)
-
-        const pending = shouldBeBookmarked
-            ? this.options.bookmarks.addPageBookmark({ url: event.pageUrl })
-            : this.options.bookmarks.delPageBookmark({ url: event.pageUrl })
-
-        try {
-            await pending
-        } catch (err) {
-            toggleBookmarkState(!shouldBeBookmarked)
-            throw err
-        }
-    }
-
-    togglePageTagPicker: EventHandler<'togglePageTagPicker'> = ({
-        previousState,
-        event,
-    }) => {
-        const currentlyShown = !!previousState.resultsByUrl[event.pageUrl]
-            ?.shouldDisplayTagPopup
-        const shouldBeShown = !currentlyShown
-
-        return {
-            resultsByUrl: {
-                [event.pageUrl]: {
-                    shouldDisplayTagPopup: { $set: shouldBeShown },
-                },
-            },
-        }
-    }
-
-    togglePageListPicker: EventHandler<'togglePageListPicker'> = ({
-        previousState,
-        event,
-    }) => {
-        const currentlyShown = !!previousState.resultsByUrl[event.pageUrl]
-            ?.shouldDisplayListPopup
-        const shouldBeShown = !currentlyShown
-
-        return {
-            resultsByUrl: {
-                [event.pageUrl]: {
-                    shouldDisplayListPopup: { $set: shouldBeShown },
-                },
-            },
-        }
-    }
-
-    togglePageAnnotationsView: EventHandler<
-        'togglePageAnnotationsView'
-    > = async ({ event }) => {
-        const annotations = await this.options.annotations.getAllAnnotationsByUrl(
-            { url: event.pageUrl, limit: 100 },
-        )
-
-        this.emitMutation({
-            searchType: { $set: 'notes' },
-            pageType: { $set: 'page' },
-            annotations: { $set: annotations },
-            showAnnotsForPage: {
-                $set: { url: event.pageUrl, title: event.pageTitle },
-            },
-        })
-    }
-
-    resetPageAnnotationsView: EventHandler<
-        'resetPageAnnotationsView'
-    > = async ({ event }) => {
-        this.emitMutation({
-            searchType: { $set: 'page' },
-            showAnnotsForPage: { $set: undefined },
-        })
-    }
-
-    // annotationMouseEnter: EventHandler<'annotationMouseEnter'> = incoming => {
-    //     return { hoverAnnotationUrl}
-    // }
-
-    enterSearchQuery: EventHandler<'enterSearchQuery'> = async ({
-        event,
-        previousState,
-    }) => {
-        await this.doSearch(
-            this.withMutation(previousState, {
-                searchValue: { $set: event.searchQuery },
-                searchResultSkip: { $set: 0 },
-            }),
-            { overwrite: true },
-        )
-    }
-
-    changeSearchQuery: EventHandler<'changeSearchQuery'> = async ({
-        event,
-        previousState,
-    }) => {
-        const mutation: UIMutation<SidebarContainerState> = {
-            searchValue: { $set: event.searchQuery },
-            searchResultSkip: { $set: 0 },
-        }
-        this.emitMutation(mutation)
-        const nextState = this.withMutation(previousState, mutation)
-
-        if (nextState.searchValue.trim() !== previousState.searchValue.trim()) {
-            await this.doSearch(nextState, { overwrite: true })
-        }
-    }
-
-    paginateSearch: EventHandler<'paginateSearch'> = async ({
-        previousState,
-    }) => {
-        if (previousState.noResults) {
-            return
-        }
-
-        const mutation: UIMutation<SidebarContainerState> = {
-            searchResultSkip: {
-                $apply: (prev) => prev + this.options.searchResultLimit,
-            },
-        }
-        this.emitMutation(mutation)
-        const nextState = this.withMutation(previousState, mutation)
-
-        await this.doSearch(nextState, { overwrite: false })
-    }
-
-    togglePageType: EventHandler<'togglePageType'> = async (incoming) => {
-        const currentPageType = incoming.previousState.pageType
-        const toggledPageType = currentPageType === 'all' ? 'page' : 'all'
-        await this.switchSearch({
-            ...incoming,
-            event: { changes: { pageType: toggledPageType } },
-        })
-    }
-
-    switchSearch: EventHandler<'switchSearch'> = async ({
-        previousState,
-        event,
-    }) => {
-        const mutation: UIMutation<SidebarContainerState> = {
-            searchResultSkip: { $set: 0 },
-            showAnnotsForPage: { $set: undefined },
-        }
-
-        if (event.changes.pageType) {
-            mutation.pageType = { $set: event.changes.pageType }
-        }
-        if (event.changes.searchType) {
-            mutation.searchType = { $set: event.changes.searchType }
-        }
-        if (event.changes.resultsSearchType) {
-            mutation.resultsSearchType = {
-                $set: event.changes.resultsSearchType,
-            }
-        }
-        this.emitMutation(mutation)
-        await this._doSearch(this.withMutation(previousState, mutation), {
-            overwrite: true,
-        })
-    }
-
     setAnnotationsExpanded: EventHandler<'setAnnotationsExpanded'> = (
         incoming,
     ) => {}
-
-    clearAllFilters: EventHandler<'clearAllFilters'> = (incoming) => {}
 
     fetchSuggestedTags: EventHandler<'fetchSuggestedTags'> = (incoming) => {}
 
     fetchSuggestedDomains: EventHandler<'fetchSuggestedDomains'> = (
         incoming,
     ) => {}
-
-    resetFiterPopups: EventHandler<'resetFiterPopups'> = (incoming) => {}
-
-    toggleShowFilters: EventHandler<'toggleShowFilters'> = (incoming) => {
-        return { showFiltersSidebar: { $apply: (show) => !show } }
-    }
 
     toggleAllAnnotationsFold: EventHandler<'toggleAllAnnotationsFold'> = (
         incoming,
@@ -1381,16 +771,14 @@ export class SidebarContainerLogic extends UILogic<
     annotationMouseEnter: EventHandler<'annotationMouseEnter'> = (incoming) => {
         return {
             hoverAnnotationUrl: {
-                [incoming.event.context]: {
-                    $set: incoming.event.annotationUrl,
-                },
+                $set: incoming.event.annotationUrl,
             },
         }
     }
 
     annotationMouseLeave: EventHandler<'annotationMouseLeave'> = (incoming) => {
         return {
-            hoverAnnotationUrl: { [incoming.event.context]: { $set: '' } },
+            hoverAnnotationUrl: { $set: null },
         }
     }
 }

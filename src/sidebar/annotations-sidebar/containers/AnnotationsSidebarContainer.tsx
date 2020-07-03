@@ -109,9 +109,9 @@ export class AnnotationsSidebarContainer extends StatefulUIElement<
         this.events.on('paginateAnnotations', () =>
             this.processEvent('paginateSearch', null),
         )
-        this.events.on('queryAnnotations', ({ query }) =>
-            this.processEvent('changeSearchQuery', { searchQuery: query }),
-        )
+        // this.events.on('queryAnnotations', ({ query }) =>
+        //     this.processEvent('changeSearchQuery', { searchQuery: query }),
+        // )
 
         this.events.on('removeTemporaryHighlights', () =>
             console.log('REMOVE HIGHLIGHTS'),
@@ -135,9 +135,7 @@ export class AnnotationsSidebarContainer extends StatefulUIElement<
                 isAnnotationCreateShown={this.state.showCommentBox}
                 isSearchLoading={this.state.primarySearchState === 'running'}
                 appendLoader={this.state.secondarySearchState === 'running'}
-                hoverAnnotationUrl={
-                    this.state.hoverAnnotationUrl.pageAnnotations
-                }
+                hoverAnnotationUrl={this.state.hoverAnnotationUrl}
                 annotationCreateProps={{
                     anchor: this.state.commentBox.anchor,
                     tagPickerDependencies: {} as any,
