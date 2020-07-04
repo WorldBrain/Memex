@@ -18,6 +18,10 @@ import { isDuringInstall } from '../onboarding/utils'
 import { auth, featuresBeta } from 'src/util/remote-functions-background'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { AnnotationsSidebarInDashboardResults as AnnotationsSidebar } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
+import { runInBackground } from 'src/util/webextensionRPC'
+import { AnnotationInterface } from 'src/direct-linking/background/types'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { RemoteTagsInterface } from 'src/tags/background/types'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -33,8 +37,11 @@ interface State {
     showPioneer: boolean
 }
 
-class Overview extends PureComponent<Props> {
+class Overview extends PureComponent<Props, State> {
     private annotationsSidebar: AnnotationsSidebar
+    private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
+    private customListsBG = runInBackground<RemoteCollectionsInterface>()
+    private tagsBG = runInBackground<RemoteTagsInterface>()
 
     state = {
         showPioneer: false,
@@ -47,9 +54,7 @@ class Overview extends PureComponent<Props> {
 
     async showPioneer() {
         if (await auth.isAuthorizedForFeature('beta')) {
-            this.setState({
-                showPioneer: true,
-            })
+            this.setState({ showPioneer: true })
         }
     }
 
@@ -64,8 +69,6 @@ class Overview extends PureComponent<Props> {
         this.annotationsSidebar = sidebar
     }
 
-    // TODO: (sidebar-refactor, prior1)
-
     private handleAnnotationSidebarToggle = async (args?: {
         pageUrl: string
         pageTitle?: string
@@ -74,11 +77,12 @@ class Overview extends PureComponent<Props> {
             args.pageUrl !== this.annotationsSidebar.state.pageUrl
 
         if (
-            this.annotationsSidebar.state.state === 'hidden' ||
+            this.annotationsSidebar.state.showState === 'hidden' ||
             isAlreadyOpenForOtherPage
         ) {
+            this.annotationsSidebar.setPageUrl(args.pageUrl)
             this.annotationsSidebar.showSidebar()
-        } else if (this.annotationsSidebar.state.state === 'visible') {
+        } else if (this.annotationsSidebar.state.showState === 'visible') {
             this.annotationsSidebar.hideSidebar()
         }
     }
@@ -90,7 +94,7 @@ class Overview extends PureComponent<Props> {
 
         if (
             !wasResultAnnotBtnClicked &&
-            this.annotationsSidebar.state.state === 'visible'
+            this.annotationsSidebar.state.showState === 'visible'
         ) {
             this.annotationsSidebar.hideSidebar()
         }
@@ -113,7 +117,6 @@ class Overview extends PureComponent<Props> {
     }
 
     renderOverview() {
-        console.log(this.state.showPioneer)
         return (
             <div>
                 <Head />
@@ -122,7 +125,7 @@ class Overview extends PureComponent<Props> {
                 <SidebarLeft />
                 <Results
                     toggleAnnotationsSidebar={
-                        this.props.toggleAnnotationsSidebar
+                        this.handleAnnotationSidebarToggle
                     }
                     handleReaderViewClick={this.props.handleReaderViewClick}
                 />
@@ -141,11 +144,14 @@ class Overview extends PureComponent<Props> {
                         />
                     </a>
                 </div> */}
-                {/* <AnnotationsSidebar
-                    currentTab={}
+                <AnnotationsSidebar
                     env="overview"
+                    tags={this.tagsBG}
+                    annotations={this.annotationsBG}
+                    customLists={this.customListsBG}
                     setRef={this.setAnnotsSidebarRef}
-                /> */}
+                    // onClickOutside={this.handleClickOutsideSidebar}
+                />
 
                 <Tooltip />
                 <div className={styles.rightCorner}>

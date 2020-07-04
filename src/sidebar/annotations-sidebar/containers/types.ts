@@ -8,6 +8,7 @@ export interface SidebarContainerDependencies {
     pageUrl?: string
     searchResultLimit?: number
     initialState?: 'visible' | 'hidden'
+    onClickOutside?: React.MouseEventHandler
 
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>

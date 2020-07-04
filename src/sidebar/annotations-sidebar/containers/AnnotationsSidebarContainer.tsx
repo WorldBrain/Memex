@@ -39,6 +39,25 @@ export class AnnotationsSidebarContainer<
         this.processEvent('hide', null)
     }
 
+    setPageUrl = (pageUrl: string) => {
+        this.processEvent('setPageUrl', { pageUrl })
+    }
+
+    handleClickOutside = (e) => {
+        if (this.props.onClickOutside) {
+            return this.props.onClickOutside(e)
+        }
+
+        // Do not close the sidebar if clicked on a highlight in the page
+        if (e.target?.dataset?.annotation) {
+            return
+        }
+
+        if (this.state.showState === 'visible') {
+            this.hideSidebar()
+        }
+    }
+
     protected getEditProps = (): AnnotationsSidebarProps['annotationEditProps'] => ({
         env: this.props.env,
         handleMouseEnter: (url) =>
