@@ -22,7 +22,7 @@ export interface SidebarContainerState {
     primarySearchState: TaskState
     secondarySearchState: TaskState
 
-    state: 'visible' | 'hidden'
+    showState: 'visible' | 'hidden'
 
     pageUrl?: string
     annotations: Annotation[]
@@ -199,16 +199,18 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
     SidebarContainerEvents
 > {
+    private inPageEvents: AnnotationsSidebarInPageEventEmitter
+
     constructor(private options: SidebarContainerOptions) {
         super()
 
-        if (!options.events) {
-            options.events = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
-        }
+        this.inPageEvents =
+            options.events ??
+            (new EventEmitter() as AnnotationsSidebarInPageEventEmitter)
+    }
 
-        if (options.searchResultLimit == null) {
-            options.searchResultLimit = DEF_RESULT_LIMIT
-        }
+    private get resultLimit(): number {
+        return this.options.searchResultLimit ?? DEF_RESULT_LIMIT
     }
 
     getInitialState(): SidebarContainerState {
@@ -218,7 +220,7 @@ export class SidebarContainerLogic extends UILogic<
             secondarySearchState: 'pristine',
 
             pageUrl: this.options.pageUrl,
-            state: this.options.initialState ?? 'hidden',
+            showState: this.options.initialState ?? 'hidden',
             annotationModes: {
                 pageAnnotations: {},
                 searchResults: {},
@@ -287,7 +289,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     show: EventHandler<'show'> = async () => {
-        this.emitMutation({ state: { $set: 'visible' } })
+        this.emitMutation({ showState: { $set: 'visible' } })
 
         if (this.options.env === 'inpage') {
             await this._doSearch(this.getInitialState(), { overwrite: true })
@@ -318,7 +320,7 @@ export class SidebarContainerLogic extends UILogic<
                 base64Img: true,
                 url: state.pageUrl,
                 skip: state.searchResultSkip,
-                limit: this.options.searchResultLimit,
+                limit: this.resultLimit,
             },
         )
 
@@ -338,7 +340,7 @@ export class SidebarContainerLogic extends UILogic<
 
         const mutation: UIMutation<SidebarContainerState> = {
             searchResultSkip: {
-                $apply: (prev) => prev + this.options.searchResultLimit,
+                $apply: (prev) => prev + this.resultLimit,
             },
         }
         this.emitMutation(mutation)
@@ -359,7 +361,7 @@ export class SidebarContainerLogic extends UILogic<
 
     hide: EventHandler<'hide'> = () => {
         return {
-            state: { $set: 'hidden' },
+            showState: { $set: 'hidden' },
             activeAnnotationUrl: { $set: null },
         }
     }
@@ -455,8 +457,8 @@ export class SidebarContainerLogic extends UILogic<
                 return
             }
 
-            this.options.events.emit('removeTemporaryHighlights')
-            this.options.events.emit('renderHighlight', {
+            this.inPageEvents.emit('removeTemporaryHighlights')
+            this.inPageEvents.emit('renderHighlight', {
                 highlight: { ...dummyAnnotation, url: annotationUrl },
             })
         } catch (err) {
@@ -466,7 +468,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
-        this.options.events.emit('removeTemporaryHighlights')
+        this.inPageEvents.emit('removeTemporaryHighlights')
         return {
             commentBox: { $set: INITIAL_COMMENT_BOX_STATE },
             showCommentBox: { $set: false },
@@ -603,7 +605,7 @@ export class SidebarContainerLogic extends UILogic<
             })
         }
 
-        this.options.events.emit('highlightAndScroll', {
+        this.inPageEvents.emit('highlightAndScroll', {
             url: event.annotationUrl,
         })
     }
