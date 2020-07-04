@@ -5,9 +5,9 @@ import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 
 export interface SidebarContainerDependencies {
-    currentTab: { id: number; url: string }
-    searchResultLimit: number
-    initialState: 'visible' | 'hidden'
+    pageUrl?: string
+    searchResultLimit?: number
+    initialState?: 'visible' | 'hidden'
 
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>

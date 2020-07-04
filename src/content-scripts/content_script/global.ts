@@ -115,7 +115,7 @@ export async function main() {
                 inPageUI,
                 highlighter,
                 annotations,
-                currentTab,
+                pageUrl: currentTab.url,
                 tags: runInBackground<RemoteTagsInterface>(),
                 customLists: runInBackground<RemoteCollectionsInterface>(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,

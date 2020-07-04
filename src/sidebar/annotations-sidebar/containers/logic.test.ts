@@ -16,11 +16,11 @@ function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
 
 const setupLogicHelper = async ({
     device,
-    currentTabUrl = DATA.CURRENT_TAB_URL_1,
+    pageUrl = DATA.CURRENT_TAB_URL_1,
     initSearchType = 'pages',
 }: {
     device: UILogicTestDevice
-    currentTabUrl?: string
+    pageUrl?: string
     initSearchType?: 'pageAnnots' | 'allAnnots' | 'pages'
 }) => {
     const { backgroundModules } = device
@@ -39,14 +39,8 @@ const setupLogicHelper = async ({
         getAllAnnotationsByUrl: () => undefined,
     } as any
 
-    const currentTab = {
-        id: 654,
-        url: currentTabUrl,
-        title: 'Foo.com: Home',
-    }
-
     const sidebarLogic = new SidebarContainerLogic({
-        currentTab,
+        pageUrl,
         tags: backgroundModules.tags.remoteFunctions,
         customLists: backgroundModules.customLists.remoteFunctions,
         annotations,

@@ -15,6 +15,7 @@ import {
     SidebarEnv,
 } from 'src/sidebar/annotations-sidebar/types'
 import { EventEmitter } from 'typeorm/platform/PlatformTools'
+import { DEF_RESULT_LIMIT } from '../constants'
 
 export interface SidebarContainerState {
     loadState: TaskState
@@ -204,6 +205,10 @@ export class SidebarContainerLogic extends UILogic<
         if (!options.events) {
             options.events = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
         }
+
+        if (options.searchResultLimit == null) {
+            options.searchResultLimit = DEF_RESULT_LIMIT
+        }
     }
 
     getInitialState(): SidebarContainerState {
@@ -212,7 +217,8 @@ export class SidebarContainerLogic extends UILogic<
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',
 
-            state: this.options.initialState,
+            pageUrl: this.options.pageUrl,
+            state: this.options.initialState ?? 'hidden',
             annotationModes: {
                 pageAnnotations: {},
                 searchResults: {},
@@ -264,7 +270,8 @@ export class SidebarContainerLogic extends UILogic<
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial<SidebarContainerState>(this, async () => {
-            if (this.options.env === 'inpage') {
+            // If `pageUrl` prop passed down, load search results on init, else just wait
+            if (this.options.pageUrl != null) {
                 await this._doSearch(previousState, { overwrite: true })
             }
             // await this.loadBeta()
@@ -306,15 +313,12 @@ export class SidebarContainerLogic extends UILogic<
         state: SidebarContainerState,
         opts: { overwrite: boolean },
     ) {
-        const url = this.options.currentTab.url
-
         const annotations = await this.options.annotations.getAllAnnotationsByUrl(
             {
                 base64Img: true,
-                query: '',
-                url,
-                limit: this.options.searchResultLimit,
+                url: state.pageUrl,
                 skip: state.searchResultSkip,
+                limit: this.options.searchResultLimit,
             },
         )
 
@@ -343,10 +347,14 @@ export class SidebarContainerLogic extends UILogic<
         await this.doSearch(nextState, { overwrite: false })
     }
 
-    setPageUrl: EventHandler<'setPageUrl'> = ({ event }) => {
-        this.emitMutation({
+    setPageUrl: EventHandler<'setPageUrl'> = ({ previousState, event }) => {
+        const mutation: UIMutation<SidebarContainerState> = {
             pageUrl: { $set: event.pageUrl },
-        })
+        }
+        this.emitMutation(mutation)
+        const nextState = this.withMutation(previousState, mutation)
+
+        return this._doSearch(nextState, { overwrite: true })
     }
 
     hide: EventHandler<'hide'> = () => {
@@ -389,10 +397,7 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        const pageUrl =
-            this.options.env === 'overview'
-                ? previousState.pageUrl
-                : this.options.currentTab.url
+        const pageUrl = previousState.pageUrl
 
         const dummyAnnotation = {
             pageUrl,
