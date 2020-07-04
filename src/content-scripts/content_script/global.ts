@@ -1,5 +1,7 @@
 import 'core-js'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { EventEmitter } from 'events'
+// import { normalizeUrl } from '@worldbrain/memex-url-utils'
+
 import { setupScrollReporter } from 'src/activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
 import { shouldIncludeSearchInjection } from 'src/search-injection/detection'
@@ -33,7 +35,6 @@ import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
 import * as constants from '../constants'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
-import { EventEmitter } from 'typeorm/platform/PlatformTools'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 
 // TODO:(page-indexing)[high] Fix this with a proper restructuring of how pages are indexed

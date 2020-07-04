@@ -1,6 +1,7 @@
 import debounce from 'lodash/debounce'
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
+import { EventEmitter } from 'events'
 
 import { Annotation } from 'src/annotations/types'
 import { Anchor } from 'src/highlighting/types'
@@ -14,7 +15,6 @@ import {
     ResultsByUrl,
     SidebarEnv,
 } from 'src/sidebar/annotations-sidebar/types'
-import { EventEmitter } from 'typeorm/platform/PlatformTools'
 import { DEF_RESULT_LIMIT } from '../constants'
 
 export interface SidebarContainerState {
