@@ -87,9 +87,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
             styles[temporary ? 'memex-highlight-tmp' : 'memex-highlight']
         try {
             await Raven.context(async () => {
-                const descriptor = highlight.anchors
-                    ? highlight.anchors[0].descriptor
-                    : highlight.selector.descriptor
+                const descriptor = highlight.selector.descriptor
 
                 Raven.captureBreadcrumb({
                     message: 'annotation-selector-received',

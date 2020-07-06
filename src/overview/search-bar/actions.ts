@@ -6,7 +6,6 @@ import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as constants from './constants'
 import * as selectors from './selectors'
-import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import { acts as resultsActs, selectors as results } from '../results'
 import {
     actions as filterActs,
@@ -105,10 +104,6 @@ export const search: (args?: any) => Thunk = (
     const query = selectors.query(firstState)
     const startDate = selectors.startDate(firstState)
     const endDate = selectors.endDate(firstState)
-
-    if (fromOverview) {
-        dispatch(sidebarActs.closeSidebar())
-    }
 
     dispatch(resultsActs.resetActiveSidebarIndex())
     dispatch(resultsActs.setLoading(true))

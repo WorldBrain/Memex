@@ -19,7 +19,7 @@ export interface Props extends ContainerProps {
     highlighter: HighlightInteractionInterface
 }
 
-export class AnnotationSidebarInPage extends AnnotationsSidebarContainer<
+export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     Props
 > {
     componentDidMount() {
@@ -50,8 +50,8 @@ export class AnnotationSidebarInPage extends AnnotationsSidebarContainer<
         this.props.events.on('renderHighlight', ({ highlight }) =>
             highlighter.renderHighlight(highlight, () => {
                 inPageUI.showSidebar({
-                    anchor: highlight.selector as any,
                     annotationUrl: highlight.url,
+                    anchor: highlight.selector,
                     action: 'show_annotation',
                 })
             }),
@@ -67,14 +67,16 @@ export class AnnotationSidebarInPage extends AnnotationsSidebarContainer<
         }
     }
 
-    private getDocument(): Document {
+    private getDocument(): Document | undefined {
+        // TODO: This doesn't work. fix it
         const containerNode = ReactDOM.findDOMNode(this)
-        return containerNode.getRootNode() as Document
+
+        return containerNode?.getRootNode() as Document
     }
 
     private activateAnnotation(url: string) {
         this.processEvent('setActiveAnnotationUrl', url)
-        const annotationBoxNode = this.getDocument().getElementById(url)
+        const annotationBoxNode = this.getDocument()?.getElementById(url)
 
         if (!annotationBoxNode) {
             return
@@ -115,13 +117,13 @@ export class AnnotationSidebarInPage extends AnnotationsSidebarContainer<
         }
     }
 
-    hideSidebar = () => {
+    hideSidebar() {
         super.hideSidebar()
         this.props.inPageUI.hideRibbon()
         this.props.inPageUI.hideSidebar()
     }
 
-    protected getCreateProps = () => {
+    protected getCreateProps() {
         const props = super.getCreateProps()
 
         return {
@@ -133,7 +135,7 @@ export class AnnotationSidebarInPage extends AnnotationsSidebarContainer<
         }
     }
 
-    protected getEditProps = () => {
+    protected getEditProps() {
         const props = super.getEditProps()
 
         return {
@@ -143,5 +145,10 @@ export class AnnotationSidebarInPage extends AnnotationsSidebarContainer<
                 this.props.highlighter.removeAnnotationHighlights(url)
             },
         }
+    }
+
+    protected renderTopBarLeft() {
+        // TODO: Figure out what we're now rendering here
+        return <div />
     }
 }

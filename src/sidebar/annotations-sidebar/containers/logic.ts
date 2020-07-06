@@ -11,7 +11,6 @@ import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { featuresBeta } from 'src/util/remote-functions-background'
 import {
     AnnotationMode,
-    Page,
     ResultsByUrl,
     SidebarEnv,
 } from 'src/sidebar/annotations-sidebar/types'
@@ -36,7 +35,7 @@ export interface SidebarContainerState {
 
     showCommentBox: boolean
     commentBox: {
-        anchor: Anchor
+        anchor: Anchor | null
         form: {
             isCommentBookmarked: boolean
             isTagInputActive: boolean
