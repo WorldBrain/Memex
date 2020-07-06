@@ -19,12 +19,12 @@ interface AnnotationCreateState {
     isTagPickerShown: boolean
     isBookmarked: boolean
     text: string
-    tags?: string[]
+    tags: string[]
 }
 
 export interface AnnotationCreateEventProps {
-    onCancel: () => void
     onSave: (newAnnotation: NewAnnotationOptions) => void
+    onCancel: () => void
 }
 
 export interface AnnotationCreateGeneralProps {
@@ -43,41 +43,22 @@ class AnnotationCreate extends React.Component<
 > {
     state = {
         isBookmarked: false,
-        isTagInputActive: false,
         isTagPickerShown: false,
         text: '',
         tags: [],
     }
 
-    setTagInputActive = (isTagPickerShown: boolean) => {
-        this.setState({ isTagPickerShown })
-    }
-
-    handleClickOutside(e) {
-        this.props.onCancel()
-    }
-
-    handleSave = async () => {
+    private handleSave = () =>
         this.props.onSave({
             anchor: this.props.anchor,
             isBookmarked: this.state.isBookmarked,
             tags: this.state.tags,
             text: this.state.text,
         })
-    }
 
-    render() {
-        return (
-            <TextBoxContainerStyled>
-                {this.renderHighlight()}
-                {this.renderInput()}
-                {this.renderActionButtons()}
-                {this.renderTagPicker()}
-            </TextBoxContainerStyled>
-        )
-    }
+    private hideTagPicker = () => this.setState({ isTagPickerShown: false })
 
-    renderHighlight() {
+    private renderHighlight() {
         if (!this.props.anchor) {
             return
         }
@@ -91,9 +72,7 @@ class AnnotationCreate extends React.Component<
         )
     }
 
-    renderInput() {
-        const { text } = this.state
-
+    private renderInput() {
         const onEnterSaveHandler = {
             test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
             handle: (e) => this.props.onSave(e),
@@ -101,20 +80,16 @@ class AnnotationCreate extends React.Component<
 
         return (
             <TextInputControlledStyled
-                defaultValue={text}
+                defaultValue={this.state.text}
                 onClick={this.hideTagPicker}
                 placeholder="Add a private note... (save with cmd/ctrl+enter)"
-                onChange={this.handleTextChange}
+                onChange={(text) => this.setState({ text })}
                 specialHandlers={[onEnterSaveHandler]}
             />
         )
     }
 
-    handleTextChange = (text) => {
-        this.setState({ text })
-    }
-
-    renderTagPicker() {
+    private renderTagPicker() {
         const { tagPickerDependencies } = this.props
         const { isTagPickerShown } = this.state
 
@@ -125,7 +100,9 @@ class AnnotationCreate extends React.Component<
                         <TagPicker
                             onEscapeKeyDown={this.hideTagPicker}
                             {...tagPickerDependencies}
-                            onUpdateEntrySelection={this.updateTags}
+                            onUpdateEntrySelection={async ({
+                                selected: tags,
+                            }) => this.setState({ tags })}
                         />
                     </Tooltip>
                 )}
@@ -133,27 +110,32 @@ class AnnotationCreate extends React.Component<
         )
     }
 
-    updateTags: PickerUpdateHandler = async (args) => {
-        this.setState({ tags: args.selected })
-    }
-
-    hideTagPicker = () => {
-        this.setState({ isTagPickerShown: false })
-    }
-
-    renderActionButtons() {
+    private renderActionButtons() {
         const { onCancel } = this.props
-        const { isBookmarked } = this.state
 
         return (
             <FooterStyled>
                 <Flex>
                     <InteractionsImgContainerStyled>
-                        <ImgButtonStyled src={tagEmpty} />
+                        <ImgButtonStyled
+                            src={tagEmpty}
+                            onClick={() =>
+                                this.setState((state) => ({
+                                    isTagPickerShown: !state.isTagPickerShown,
+                                }))
+                            }
+                        />
                     </InteractionsImgContainerStyled>
                     <InteractionsImgContainerStyled>
                         <ImgButtonStyled
-                            src={isBookmarked ? heartFull : heartEmpty}
+                            src={
+                                this.state.isBookmarked ? heartFull : heartEmpty
+                            }
+                            onClick={() =>
+                                this.setState((state) => ({
+                                    isBookmarked: !state.isBookmarked,
+                                }))
+                            }
                         />
                     </InteractionsImgContainerStyled>
                 </Flex>
@@ -164,6 +146,17 @@ class AnnotationCreate extends React.Component<
                     </SaveBtnStyled>
                 </Flex>
             </FooterStyled>
+        )
+    }
+
+    render() {
+        return (
+            <TextBoxContainerStyled>
+                {this.renderHighlight()}
+                {this.renderInput()}
+                {this.renderActionButtons()}
+                {this.renderTagPicker()}
+            </TextBoxContainerStyled>
         )
     }
 }

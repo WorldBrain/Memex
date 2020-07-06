@@ -55,6 +55,10 @@ export default class AnnotationEditable extends React.Component<Props> {
     private _boxRef: HTMLDivElement = null
     private removeEventListeners?: () => void
 
+    static defaultProps: Partial<Props> = {
+        mode: 'default',
+    }
+
     componentDidMount() {
         this._setupEventListeners()
     }
