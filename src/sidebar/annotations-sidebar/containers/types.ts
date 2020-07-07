@@ -5,6 +5,9 @@ import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 
 export interface SidebarContainerDependencies {
+    elements?: {
+        topBarLeft?: JSX.Element
+    }
     pageUrl?: string
     searchResultLimit?: number
     initialState?: 'visible' | 'hidden'

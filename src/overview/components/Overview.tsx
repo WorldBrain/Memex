@@ -17,11 +17,12 @@ import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
 import { auth, featuresBeta } from 'src/util/remote-functions-background'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
-import { AnnotationsSidebarInDashboardResults as AnnotationsSidebar } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
+import { AnnotationsSidebarInDashboardResults } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
+import { AnnotationsSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -38,10 +39,16 @@ interface State {
 }
 
 class Overview extends PureComponent<Props, State> {
-    private annotationsSidebar: AnnotationsSidebar
     private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     private customListsBG = runInBackground<RemoteCollectionsInterface>()
     private tagsBG = runInBackground<RemoteTagsInterface>()
+
+    private annotationsSidebarRef = React.createRef<
+        AnnotationsSidebarContainer
+    >()
+    get annotationsSidebar(): AnnotationsSidebarContainer {
+        return this.annotationsSidebarRef.current
+    }
 
     state = {
         showPioneer: false,
@@ -63,10 +70,6 @@ class Overview extends PureComponent<Props, State> {
             removeTempHighlights: () => undefined,
             renderHighlight: () => undefined,
         }
-    }
-
-    private setAnnotsSidebarRef = (sidebar: AnnotationsSidebar) => {
-        this.annotationsSidebar = sidebar
     }
 
     private handleAnnotationSidebarToggle = async (args?: {
@@ -148,7 +151,7 @@ class Overview extends PureComponent<Props, State> {
                     tags={this.tagsBG}
                     annotations={this.annotationsBG}
                     customLists={this.customListsBG}
-                    setRef={this.setAnnotsSidebarRef}
+                    refSidebar={this.annotationsSidebarRef}
                     onClickOutside={this.handleClickOutsideSidebar}
                 />
 

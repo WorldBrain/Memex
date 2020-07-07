@@ -115,6 +115,16 @@ class AnnotationsSidebar extends React.Component<
         }
     }
 
+    render() {
+        return (
+            <SidebarStyled>
+                {/* {this.renderSearchSection()} */}
+                {this.renderNewAnnotation()}
+                {this.renderResultsBody()}
+            </SidebarStyled>
+        )
+    }
+
     private renderNewAnnotation() {
         if (!this.props.isAnnotationCreateShown) {
             return
@@ -127,6 +137,15 @@ class AnnotationsSidebar extends React.Component<
                     tagPickerDependencies={this.props.annotationTagProps}
                 />
             </NewAnnotationBoxStyled>
+        )
+    }
+
+    private renderResultsBody() {
+        return (
+            <AnnotationsSectionStyled>
+                {this.props.isSearchLoading && <LoadingIndicatorStyled />}
+                {this.renderAnnotationsEditable()}
+            </AnnotationsSectionStyled>
         )
     }
 
@@ -170,25 +189,6 @@ class AnnotationsSidebar extends React.Component<
         }
 
         return annots
-    }
-
-    private renderResultsBody() {
-        return (
-            <AnnotationsSectionStyled>
-                {this.props.isSearchLoading && <LoadingIndicatorStyled />}
-                {this.renderAnnotationsEditable()}
-            </AnnotationsSectionStyled>
-        )
-    }
-
-    render() {
-        return (
-            <SidebarStyled>
-                {/* {this.renderSearchSection()} */}
-                {this.renderNewAnnotation()}
-                {this.renderResultsBody()}
-            </SidebarStyled>
-        )
     }
 }
 

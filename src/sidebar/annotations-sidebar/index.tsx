@@ -3,8 +3,8 @@ import * as ReactDOM from 'react-dom'
 import { StyleSheetManager } from 'styled-components'
 
 import {
+    AnnotationsSidebarInPage,
     Props as AnnotationsSidebarDependencies,
-    AnnotationsSidebarInPage as AnnotationsSidebar,
 } from './containers/AnnotationsSidebarInPage'
 
 export function setupInPageSidebarUI(
@@ -13,7 +13,7 @@ export function setupInPageSidebarUI(
 ) {
     ReactDOM.render(
         <StyleSheetManager target={target}>
-            <AnnotationsSidebar {...dependencies} env="inpage" />
+            <AnnotationsSidebarInPage {...dependencies} />
         </StyleSheetManager>,
         target,
     )

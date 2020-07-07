@@ -149,9 +149,4 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             },
         }
     }
-
-    protected renderTopBarLeft() {
-        // TODO: Figure out what we're now rendering here
-        return <div />
-    }
 }

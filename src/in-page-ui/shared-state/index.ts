@@ -1,4 +1,4 @@
-import EventEmitter from 'events'
+import { EventEmitter } from 'events'
 import TypedEventEmitter from 'typed-emitter'
 
 import {

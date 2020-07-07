@@ -4,7 +4,7 @@ import {
     DashboardResultsEvent,
     DashboardResultsState,
 } from 'src/overview/components/DashboardResultsContainer/types'
-import EventEmitter from 'events'
+import { EventEmitter } from 'events'
 import TypedEventEmitter from 'typed-emitter'
 import {
     SharedInPageUIEvents,
