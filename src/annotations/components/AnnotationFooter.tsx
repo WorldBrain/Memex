@@ -4,20 +4,22 @@ import styled from 'styled-components'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 
-export interface Props {
+export interface Props extends AnnotationFooterEventProps {
     mode: AnnotationMode
     isEdited?: boolean
     timestamp?: string
     hasBookmark?: boolean
-    displayGoToAnnotation?: boolean
-    handleCancelEdit?: () => void
-    handleEditAnnotation?: () => void
-    handleCancelDelete?: () => void
-    editIconClickHandler?: () => void
-    handleBookmarkToggle?: () => void
-    handleGoToAnnotation?: (e: React.MouseEvent<HTMLElement>) => void
-    trashIconClickHandler?: () => void
-    handleConfirmDelete?: () => void
+}
+
+export interface AnnotationFooterEventProps {
+    onDeleteConfirm: () => void
+    onDeleteCancel: () => void
+    onDeleteIconClick: () => void
+    onEditConfirm: () => void
+    onEditCancel: () => void
+    onEditIconClick: () => void
+    toggleBookmark: () => void
+    onGoToAnnotation?: () => void
 }
 
 class AnnotationFooter extends React.Component<Props> {
@@ -26,7 +28,7 @@ class AnnotationFooter extends React.Component<Props> {
             title: 'Toggle star',
             onClick: (e) => {
                 e.stopPropagation()
-                this.props.handleBookmarkToggle()
+                this.props.toggleBookmark()
             },
         }
 
@@ -39,23 +41,17 @@ class AnnotationFooter extends React.Component<Props> {
                 <DefaultFooterBtnContainerStyled>
                     <TrashBtnStyled
                         title="Delete note"
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            this.props.trashIconClickHandler()
-                        }}
+                        onClick={this.props.onDeleteIconClick}
                     />
-                    {this.props.displayGoToAnnotation && (
+                    {this.props.onGoToAnnotation && (
                         <GoToPageBtnStyled
                             title="Go to annotation"
-                            onClick={this.props.handleGoToAnnotation}
+                            onClick={this.props.onGoToAnnotation}
                         />
                     )}
                     <EditBtnStyled
                         title="Edit note"
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            this.props.editIconClickHandler()
-                        }}
+                        onClick={this.props.onEditIconClick}
                     />
                     {this.props.hasBookmark ? (
                         <BookmarkedBtnStyled {...bookmarkBtnProps} />
@@ -76,12 +72,12 @@ class AnnotationFooter extends React.Component<Props> {
 
         if (mode === 'delete') {
             actionBtnText = 'Delete'
-            actionBtnHandler = this.props.handleConfirmDelete
-            cancelBtnHandler = this.props.handleCancelDelete
+            actionBtnHandler = this.props.onDeleteConfirm
+            cancelBtnHandler = this.props.onDeleteCancel
         } else if (mode === 'edit') {
             actionBtnText = 'Save'
-            actionBtnHandler = this.props.handleEditAnnotation
-            cancelBtnHandler = this.props.handleCancelEdit
+            actionBtnHandler = this.props.onEditConfirm
+            cancelBtnHandler = this.props.onEditCancel
         } else {
             return
         }

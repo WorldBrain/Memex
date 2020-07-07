@@ -1,103 +1,53 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-import AnnotationFooter from './AnnotationFooter'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TagInput from 'src/tags/ui/tag-input'
 
 export interface AnnotationEditEventProps {
-    handleCancelEdit: () => void
-    handleConfirmEdit: (args: { comment: string; tags: string[] }) => void
+    onEditConfirm: (url: string) => void
+    onCommentChange: (comment: string) => void
+    setTagInputActive: (active: boolean) => void
+    updateTags: PickerUpdateHandler
+    deleteSingleTag: (tag: string) => void
 }
 
-export interface Props extends AnnotationEditEventProps {
-    tagPickerDependencies: GenericPickerDependenciesMinusSave
-    comment?: string
-    rows: number
-    tags: string[]
-}
-
-interface State {
+export interface AnnotationEditGeneralProps {
     isTagInputActive: boolean
-    commentEditText: string
+    comment: string
     tags: string[]
 }
 
-class AnnotationEdit extends React.Component<Props, State> {
-    state: State = {
-        isTagInputActive: false,
-        commentEditText: this.props.comment ?? '',
-        tags: this.props.tags ?? [],
-    }
+export interface Props
+    extends AnnotationEditEventProps,
+        AnnotationEditGeneralProps {
+    tagPickerDependencies: GenericPickerDependenciesMinusSave
+    url: string
+    rows: number
+}
 
-    private handleSaveAnnotation = () => {
-        this.props.handleConfirmEdit({
-            comment: this.state.commentEditText,
-            tags: this.state.tags,
-        })
-    }
-
+class AnnotationEdit extends React.Component<Props> {
     private handleTagInputKeydown: React.KeyboardEventHandler = (e) => {
         // Only check for `Tab` and `Shift + Tab`, handle rest of the events normally.
         if (e.key === 'Tab') {
-            this.setTagInputActive(false)
+            this.props.setTagInputActive(false)
         }
     }
-
-    private setTagInputActive = (isTagInputActive: boolean) =>
-        this.setState({ isTagInputActive })
-
-    private handleCommentChange = (commentEditText: string) =>
-        this.setState({ commentEditText })
 
     private onEnterSaveHandler = {
         test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-        handle: (e) => this.handleSaveAnnotation(),
-    }
-
-    private addTag = (tag: string) =>
-        this.setState((state) => {
-            const index = state.tags.indexOf(tag)
-
-            if (index !== -1) {
-                return
-            }
-
-            return { tags: [...state.tags, tag] }
-        })
-
-    private deleteTag = (tag: string) =>
-        this.setState((state) => {
-            const index = state.tags.indexOf(tag)
-            return {
-                tags: [
-                    ...state.tags.slice(0, index),
-                    ...state.tags.slice(index + 1),
-                ],
-            }
-        })
-
-    private updateTags: PickerUpdateHandler = async (args) => {
-        if (args.added) {
-            return this.addTag(args.added)
-        }
-
-        if (args.deleted) {
-            return this.deleteTag(args.deleted)
-        }
+        handle: (e) => this.props.onEditConfirm(this.props.url),
     }
 
     private renderInput() {
-        const { commentEditText } = this.state
-
         return (
             <TextInputControlledStyled
-                defaultValue={commentEditText}
-                onClick={() => this.setTagInputActive(false)}
+                defaultValue={this.props.comment}
+                onClick={() => this.props.setTagInputActive(false)}
                 placeholder="Add a private note... (save with cmd/ctrl+enter)"
-                onChange={this.handleCommentChange}
+                onChange={this.props.onCommentChange}
                 specialHandlers={[this.onEnterSaveHandler]}
             />
         )
@@ -108,28 +58,17 @@ class AnnotationEdit extends React.Component<Props, State> {
             loadDefaultSuggestions,
             queryEntries,
         } = this.props.tagPickerDependencies
-        const { tags, isTagInputActive } = this.state
 
         return (
             <TagInput
-                tags={tags}
-                deleteTag={this.deleteTag}
-                updateTags={this.updateTags}
-                setTagInputActive={this.setTagInputActive}
-                isTagInputActive={isTagInputActive}
+                tags={this.props.tags}
+                deleteTag={this.props.deleteSingleTag}
+                updateTags={this.props.updateTags}
+                setTagInputActive={this.props.setTagInputActive}
+                isTagInputActive={this.props.isTagInputActive}
                 queryTagSuggestions={queryEntries}
                 fetchInitialTagSuggestions={loadDefaultSuggestions}
                 onKeyDown={this.handleTagInputKeydown}
-            />
-        )
-    }
-
-    private renderFooter() {
-        return (
-            <AnnotationFooter
-                mode="edit"
-                handleCancelEdit={this.props.handleCancelEdit}
-                handleEditAnnotation={this.handleSaveAnnotation}
             />
         )
     }
@@ -139,7 +78,6 @@ class AnnotationEdit extends React.Component<Props, State> {
             <>
                 {this.renderInput()}
                 {this.renderTagInput()}
-                {this.renderFooter()}
             </>
         )
     }

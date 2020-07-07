@@ -83,7 +83,7 @@ async function createDependencies() {
             [annotations[4].url]: 'edit',
             [annotations[5].url]: 'delete',
         },
-        annotationEditProps: {
+        annotationEditableProps: {
             env: 'inpage',
             handleAnnotationTagClick: action('clickAnnotationTag'),
             handleBookmarkToggle: action('toggleBookmark'),
@@ -91,10 +91,10 @@ async function createDependencies() {
             handleConfirmAnnotationEdit: action('confirmEdit'),
             handleConfirmDelete: action('confirmDelete'),
             handleEditBtnClick: action('clickEditBtn'),
-            handleGoToAnnotation: action('clickAnnotation'),
+            onGoToAnnotation: action('clickAnnotation'),
             handleTrashBtnClick: action('clickTrashBtn'),
-            handleMouseEnter: action('startMouseOver'),
-            handleMouseLeave: action('endMouseOver'),
+            onMouseEnter: action('startMouseOver'),
+            onMouseLeave: action('endMouseOver'),
         },
         annotationTagProps: {
             loadDefaultSuggestions: async () => TAGS,

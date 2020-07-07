@@ -1,5 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
+import onClickOutside from 'react-onclickoutside'
 
 import { AnnotationsSidebarContainer } from './AnnotationsSidebarContainer'
 import { ButtonTooltip } from 'src/common-ui/components'
@@ -24,6 +25,8 @@ export class AnnotationsSidebarInDashboardResults extends AnnotationsSidebarCont
         )
     }
 }
+
+export default onClickOutside(AnnotationsSidebarInDashboardResults)
 
 const CloseBtn = styled.button`
     cursor: pointer;

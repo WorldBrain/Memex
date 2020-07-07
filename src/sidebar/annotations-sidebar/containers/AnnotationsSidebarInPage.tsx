@@ -1,5 +1,6 @@
 import * as React from 'react'
 import ReactDOM from 'react-dom'
+import onClickOutside from 'react-onclickoutside'
 
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import {
@@ -19,9 +20,7 @@ export interface Props extends ContainerProps {
     highlighter: HighlightInteractionInterface
 }
 
-export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
-    Props
-> {
+class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<Props> {
     componentDidMount() {
         super.componentDidMount()
         this.setupEventForwarding()
@@ -135,14 +134,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         }
     }
 
-    protected getEditProps() {
-        const props = super.getEditProps()
+    protected bindAnnotationFooterEventProps(annotationUrl: string) {
+        const boundProps = super.bindAnnotationFooterEventProps(annotationUrl)
 
         return {
-            ...props,
-            handleConfirmDelete: (url) => {
-                props.handleConfirmDelete(url)
-                this.props.highlighter.removeAnnotationHighlights(url)
+            ...boundProps,
+            onDeleteConfirm: () => {
+                boundProps.onDeleteConfirm()
+                this.props.highlighter.removeAnnotationHighlights(annotationUrl)
             },
         }
     }
@@ -152,3 +151,5 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         return <div />
     }
 }
+
+export default onClickOutside(AnnotationsSidebarInPage)

@@ -108,11 +108,12 @@ describe('SidebarContainerLogic', () => {
                 sidebar.state.annotationModes[context][DATA.ANNOT_1.url],
             ).toEqual('edit')
 
+            await sidebar.processEvent('changePageCommentText', {
+                comment: editedComment,
+            })
             await sidebar.processEvent('editAnnotation', {
                 context,
                 annotationUrl: DATA.ANNOT_1.url,
-                comment: editedComment,
-                tags: [],
             })
             expect(
                 sidebar.state.annotationModes[context][annotation.url],
@@ -146,11 +147,18 @@ describe('SidebarContainerLogic', () => {
                 sidebar.state.annotationModes[context][DATA.ANNOT_1.url],
             ).toEqual('edit')
 
+            await sidebar.processEvent('changePageCommentText', {
+                comment: editedComment,
+            })
+            await sidebar.processEvent('updateTagsForNewComment', {
+                added: DATA.TAG_1,
+            })
+            await sidebar.processEvent('updateTagsForNewComment', {
+                added: DATA.TAG_2,
+            })
             await sidebar.processEvent('editAnnotation', {
                 context,
                 annotationUrl: DATA.ANNOT_1.url,
-                comment: editedComment,
-                tags: [DATA.TAG_1, DATA.TAG_2],
             })
             expect(
                 sidebar.state.annotationModes[context][annotation.url],
@@ -291,11 +299,9 @@ describe('SidebarContainerLogic', () => {
                 DATA.COMMENT_1,
             )
 
-            expect(sidebar.state.commentBox.form.isCommentBookmarked).toBe(
-                false,
-            )
+            expect(sidebar.state.commentBox.form.isBookmarked).toBe(false)
             await sidebar.processEvent('toggleNewPageCommentBookmark', null)
-            expect(sidebar.state.commentBox.form.isCommentBookmarked).toBe(true)
+            expect(sidebar.state.commentBox.form.isBookmarked).toBe(true)
 
             await sidebar.processEvent('saveNewPageComment', {
                 commentText: DATA.COMMENT_1,
@@ -309,9 +315,7 @@ describe('SidebarContainerLogic', () => {
                     tags: [],
                 }),
             ])
-            expect(sidebar.state.commentBox.form.isCommentBookmarked).toBe(
-                false,
-            )
+            expect(sidebar.state.commentBox.form.isBookmarked).toBe(false)
             expect(sidebar.state.commentBox.form.commentText).toEqual('')
             expect(sidebar.state.showCommentBox).toBe(false)
         })
@@ -363,9 +367,7 @@ describe('SidebarContainerLogic', () => {
                 }),
             ])
             expect(sidebar.state.commentBox.form.tags).toEqual([])
-            expect(sidebar.state.commentBox.form.isCommentBookmarked).toBe(
-                false,
-            )
+            expect(sidebar.state.commentBox.form.isBookmarked).toBe(false)
             expect(sidebar.state.commentBox.form.commentText).toEqual('')
             expect(sidebar.state.showCommentBox).toBe(false)
         })

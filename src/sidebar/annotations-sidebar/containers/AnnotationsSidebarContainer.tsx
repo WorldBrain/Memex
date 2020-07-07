@@ -13,6 +13,7 @@ import {
     AnnotationEventContext,
 } from './logic'
 import { ButtonTooltip } from 'src/common-ui/components'
+import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -60,53 +61,92 @@ export abstract class AnnotationsSidebarContainer<
         }
     }
 
-    protected getEditProps(): AnnotationsSidebarProps['annotationEditProps'] {
+    protected bindAnnotationFooterEventProps(
+        annotationUrl: string,
+    ): AnnotationFooterEventProps {
         return {
-            env: this.props.env,
-            handleMouseEnter: (url) =>
-                this.processEvent('annotationMouseEnter', {
-                    annotationUrl: url,
+            onEditIconClick: () =>
+                this.processEvent('setAnnotationEditMode', {
+                    annotationUrl,
+                    ...DEF_CONTEXT,
                 }),
-            handleMouseLeave: (url) =>
-                this.processEvent('annotationMouseLeave', {
-                    annotationUrl: url,
-                }),
-            handleBookmarkToggle: (url) =>
+            toggleBookmark: () =>
                 this.processEvent('toggleAnnotationBookmark', {
-                    annotationUrl: url,
+                    annotationUrl,
                     ...DEF_CONTEXT,
                 }),
-            handleConfirmDelete: (url) =>
-                this.processEvent('deleteAnnotation', {
-                    annotationUrl: url,
-                    ...DEF_CONTEXT,
-                }),
-            handleTrashBtnClick: (url) =>
+            onDeleteIconClick: () =>
                 this.processEvent('switchAnnotationMode', {
-                    annotationUrl: url,
+                    annotationUrl,
                     mode: 'delete',
                     ...DEF_CONTEXT,
                 }),
-            handleCancelDelete: (url) =>
+            onDeleteCancel: () =>
                 this.processEvent('switchAnnotationMode', {
-                    annotationUrl: url,
+                    annotationUrl,
                     mode: 'default',
                     ...DEF_CONTEXT,
                 }),
-            handleConfirmAnnotationEdit: ({ url, ...args }) =>
-                this.processEvent('editAnnotation', {
-                    annotationUrl: url,
-                    ...args,
+            onDeleteConfirm: () =>
+                this.processEvent('deleteAnnotation', {
+                    annotationUrl,
                     ...DEF_CONTEXT,
                 }),
-            handleEditBtnClick: (url) =>
+            onEditCancel: () =>
                 this.processEvent('switchAnnotationMode', {
-                    annotationUrl: url,
-                    mode: 'edit',
+                    annotationUrl,
+                    mode: 'default',
                     ...DEF_CONTEXT,
                 }),
-            handleGoToAnnotation: (url) =>
-                this.processEvent('goToAnnotationInPage', {
+            onEditConfirm: () =>
+                this.processEvent('editAnnotation', {
+                    annotationUrl,
+                    ...DEF_CONTEXT,
+                }),
+            onGoToAnnotation: () =>
+                this.processEvent('goToAnnotation', {
+                    annotationUrl,
+                    ...DEF_CONTEXT,
+                }),
+        }
+    }
+
+    protected getEditProps(): AnnotationsSidebarProps['annotationEditProps'] {
+        const { commentBox } = this.state
+
+        return {
+            isTagInputActive: commentBox.form.isTagInputActive,
+            comment: commentBox.form.commentText,
+            tags: commentBox.form.tags,
+            updateTags: (args) =>
+                this.processEvent('updateTagsForNewComment', args),
+            deleteSingleTag: (tag) =>
+                this.processEvent('deleteNewPageCommentTag', { tag }),
+            setTagInputActive: (active) =>
+                this.processEvent('setNewPageCommentTagPicker', { active }),
+            onCommentChange: (comment) =>
+                this.processEvent('changePageCommentText', { comment }),
+            onEditConfirm: (annotationUrl) =>
+                this.processEvent('editAnnotation', {
+                    annotationUrl,
+                    ...DEF_CONTEXT,
+                }),
+        }
+    }
+
+    protected getEditableProps(): AnnotationsSidebarProps['annotationEditableProps'] {
+        return {
+            env: this.props.env,
+            onMouseEnter: (url) =>
+                this.processEvent('annotationMouseEnter', {
+                    annotationUrl: url,
+                }),
+            onMouseLeave: (url) =>
+                this.processEvent('annotationMouseLeave', {
+                    annotationUrl: url,
+                }),
+            onGoToAnnotation: (url) =>
+                this.processEvent('goToAnnotation', {
                     annotationUrl: url,
                     ...DEF_CONTEXT,
                 }),
@@ -171,18 +211,22 @@ export abstract class AnnotationsSidebarContainer<
                 {this.renderTopBar()}
                 <AnnotationsSidebar
                     {...this.state}
-                    isSearchLoading={
-                        this.state.primarySearchState === 'running'
-                    }
                     appendLoader={this.state.secondarySearchState === 'running'}
                     annotationModes={this.state.annotationModes.pageAnnotations}
                     isAnnotationCreateShown={this.state.showCommentBox}
                     hoverAnnotationUrl={this.state.hoverAnnotationUrl}
-                    annotationCreateProps={this.getCreateProps()}
-                    annotationEditProps={this.getEditProps()}
                     annotationTagProps={this.getTagProps()}
+                    annotationEditProps={this.getEditProps()}
+                    annotationCreateProps={this.getCreateProps()}
+                    annotationEditableProps={this.getEditableProps()}
+                    bindAnnotationFooterEventProps={(url) =>
+                        this.bindAnnotationFooterEventProps(url)
+                    }
                     handleScrollPagination={() =>
                         this.processEvent('paginateSearch', null)
+                    }
+                    isSearchLoading={
+                        this.state.primarySearchState === 'running'
                     }
                 />
             </ContainerStyled>

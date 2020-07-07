@@ -17,6 +17,11 @@ import { Annotation } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
 import { AnnotationMode } from '../types'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
+import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
+import {
+    AnnotationEditGeneralProps,
+    AnnotationEditEventProps,
+} from 'src/annotations/components/AnnotationEdit'
 
 export interface AnnotationsSidebarProps {
     annotationModes: { [url: string]: AnnotationMode }
@@ -30,7 +35,11 @@ export interface AnnotationsSidebarProps {
     handleScrollPagination: () => void
     // ^ Until here ^
 
-    annotationEditProps: AnnotationEditableGeneralProps &
+    bindAnnotationFooterEventProps: (
+        annotationUrl: string,
+    ) => AnnotationFooterEventProps
+    annotationEditProps: AnnotationEditGeneralProps & AnnotationEditEventProps
+    annotationEditableProps: AnnotationEditableGeneralProps &
         AnnotationEditableEventProps
     annotationCreateProps: AnnotationCreateGeneralProps &
         AnnotationCreateEventProps
@@ -123,11 +132,15 @@ export default class AnnotationsSidebar extends React.Component<
                 key={i}
                 {...annot}
                 {...this.props}
-                {...this.props.annotationEditProps}
+                {...this.props.annotationEditableProps}
                 mode={this.props.annotationModes[annot.url]}
-                tagPickerDependencies={this.props.annotationTagProps}
                 isActive={this.props.activeAnnotationUrl === annot.url}
                 isHovered={this.props.hoverAnnotationUrl === annot.url}
+                tagPickerDependencies={this.props.annotationTagProps}
+                annotationEditDependencies={this.props.annotationEditProps}
+                annotationFooterDependencies={this.props.bindAnnotationFooterEventProps(
+                    annot.url,
+                )}
             />
         ))
 

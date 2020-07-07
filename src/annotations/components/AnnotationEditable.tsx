@@ -4,10 +4,14 @@ import styled from 'styled-components'
 import niceTime from 'src/util/nice-time'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 // import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
-import AnnotationView, {
-    AnnotationViewEventProps,
-} from 'src/annotations/components/AnnotationView'
-import AnnotationEdit from 'src/annotations/components/AnnotationEdit'
+import AnnotationView from 'src/annotations/components/AnnotationView'
+import AnnotationFooter, {
+    AnnotationFooterEventProps,
+} from 'src/annotations/components/AnnotationFooter'
+import AnnotationEdit, {
+    AnnotationEditGeneralProps,
+    AnnotationEditEventProps,
+} from 'src/annotations/components/AnnotationEdit'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 
@@ -60,23 +64,15 @@ export interface AnnotationEditableProps {
     hasBookmark?: boolean
     mode: AnnotationMode
     tagPickerDependencies: GenericPickerDependenciesMinusSave
+    annotationEditDependencies: AnnotationEditGeneralProps &
+        AnnotationEditEventProps
+    annotationFooterDependencies: AnnotationFooterEventProps
 }
 
 export interface AnnotationEditableEventProps {
-    handleGoToAnnotation: (url: string) => void
-    handleMouseEnter?: (url: string) => void
-    handleMouseLeave?: (url: string) => void
-    handleConfirmDelete: (url: string) => void
-    handleCancelDelete: (url: string) => void
-    handleEditBtnClick: (url: string) => void
-    handleTrashBtnClick: (url: string) => void
-    handleBookmarkToggle: (url: string) => void
-    handleAnnotationTagClick: (url: string, tag: string) => void
-    handleConfirmAnnotationEdit: (props: {
-        url: string
-        comment: string
-        tags: string[]
-    }) => void
+    onGoToAnnotation: (url: string) => void
+    onMouseEnter?: (url: string) => void
+    onMouseLeave?: (url: string) => void
 }
 
 export type Props = AnnotationEditableGeneralProps &
@@ -115,9 +111,9 @@ export default class AnnotationEditable extends React.Component<Props> {
     private setupEventListeners = () => {
         if (this.boxRef) {
             const handleMouseEnter = () =>
-                this.props.handleMouseEnter(this.props.url)
+                this.props.onMouseEnter(this.props.url)
             const handleMouseLeave = () =>
-                this.props.handleMouseLeave(this.props.url)
+                this.props.onMouseLeave(this.props.url)
 
             this.boxRef.addEventListener('mouseenter', handleMouseEnter)
             this.boxRef.addEventListener('mouseleave', handleMouseLeave)
@@ -141,7 +137,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             return
         }
 
-        this.props.handleGoToAnnotation(this.props.url)
+        this.props.onGoToAnnotation(this.props.url)
     }
 
     private renderHighlightBody() {
@@ -161,30 +157,30 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
-    private renderMainAnnotation() {
-        const { url, mode } = this.props
+    private renderFooter() {
+        const {
+            annotationFooterDependencies,
+            onGoToAnnotation,
+            ...props
+        } = this.props
 
-        const eventHandlers: AnnotationViewEventProps = {
-            getTruncatedTextObject,
-            handleGoToAnnotation: this.handleGoToAnnotation,
-            editIconClickHandler: () => this.props.handleEditBtnClick(url),
-            handleBookmarkToggle: () => this.props.handleBookmarkToggle(url),
-            trashIconClickHandler: () => this.props.handleTrashBtnClick(url),
-            handleCancelDelete: () => this.props.handleCancelDelete(url),
-            handleConfirmDelete: () => this.props.handleConfirmDelete(url),
-            handleTagClick: (tag) =>
-                this.props.handleAnnotationTagClick(url, tag),
-        }
+        return <AnnotationFooter {...props} {...annotationFooterDependencies} />
+    }
+
+    private renderMainAnnotation() {
+        const {
+            mode,
+            annotationEditDependencies,
+            tagPickerDependencies,
+        } = this.props
 
         if (mode === 'edit') {
             return (
                 <AnnotationEdit
                     {...this.props}
+                    {...annotationEditDependencies}
+                    tagPickerDependencies={tagPickerDependencies}
                     rows={2}
-                    handleConfirmEdit={(args) =>
-                        this.props.handleConfirmAnnotationEdit({ url, ...args })
-                    }
-                    handleCancelEdit={() => this.props.handleCancelDelete(url)}
                 />
             )
         }
@@ -192,7 +188,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         return (
             <AnnotationView
                 {...this.props}
-                {...eventHandlers}
+                getTruncatedTextObject={getTruncatedTextObject}
                 isEdited={this.isEdited}
                 timestamp={this.getFormattedTimestamp()}
                 hasBookmark={!!this.props.hasBookmark}
@@ -218,6 +214,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             >
                 {this.renderHighlightBody()}
                 {this.renderMainAnnotation()}
+                {this.renderFooter()}
             </AnnotationStyled>
         )
     }

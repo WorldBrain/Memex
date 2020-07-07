@@ -3,9 +3,8 @@ import styled from 'styled-components'
 
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
-import AnnotationFooter from './AnnotationFooter'
 
-export interface Props extends AnnotationViewEventProps {
+export interface Props {
     env: 'inpage' | 'overview'
     mode: AnnotationMode
     body?: string
@@ -14,16 +13,7 @@ export interface Props extends AnnotationViewEventProps {
     isEdited: boolean
     timestamp: string
     hasBookmark: boolean
-}
-
-export interface AnnotationViewEventProps {
-    handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
-    handleConfirmDelete: () => void
-    handleCancelDelete: () => void
-    editIconClickHandler: () => void
-    trashIconClickHandler: () => void
-    handleTagClick?: (tag: string) => void
-    handleBookmarkToggle: () => void
+    onTagClick?: (tag: string) => void
     getTruncatedTextObject: (
         text: string,
     ) => {
@@ -40,34 +30,15 @@ class AnnotationView extends React.Component<Props> {
         event.preventDefault()
         event.stopPropagation()
 
-        if (this.props.handleTagClick) {
-            return this.props.handleTagClick(tag)
+        if (this.props.onTagClick) {
+            return this.props.onTagClick(tag)
         }
-    }
-
-    private renderCommentAndTags() {
-        if (!this.props.comment) {
-            return this.renderTags()
-        }
-
-        return (
-            <CommentBox {...this.props}>
-                <TextTruncated text={this.props.comment} {...this.props} />
-                {this.renderTags()}
-            </CommentBox>
-        )
     }
 
     private renderTags() {
-        const { tags } = this.props
-
-        if (!tags.length) {
-            return
-        }
-
         return (
             <TagsContainerStyled {...this.props}>
-                {tags.map((tag) => (
+                {this.props.tags.map((tag) => (
                     <TagPillStyled
                         key={tag}
                         onClick={this.bindHandleTagPillClick(tag)}
@@ -79,24 +50,17 @@ class AnnotationView extends React.Component<Props> {
         )
     }
 
-    private renderFooter() {
-        return (
-            <AnnotationFooter
-                {...this.props}
-                displayGoToAnnotation={
-                    this.props.body && this.props.env === 'overview'
-                }
-                handleCancelDelete={this.props.handleCancelDelete}
-            />
-        )
-    }
-
     render() {
+        const { comment, tags } = this.props
+        if (!comment && !tags) {
+            return !tags?.length ? null : this.renderTags()
+        }
+
         return (
-            <>
-                {this.renderCommentAndTags()}
-                {this.renderFooter()}
-            </>
+            <CommentBox {...this.props}>
+                <TextTruncated text={comment} {...this.props} />
+                {this.renderTags()}
+            </CommentBox>
         )
     }
 }

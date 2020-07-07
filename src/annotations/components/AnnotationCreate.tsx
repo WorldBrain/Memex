@@ -1,7 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { browser } from 'webextension-polyfill-ts'
-
 import { Anchor } from 'src/highlighting/types'
 import { Tooltip } from 'src/common-ui/components'
 import TagPicker from 'src/tags/ui/TagPicker'
