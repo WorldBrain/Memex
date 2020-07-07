@@ -144,8 +144,7 @@ class Overview extends PureComponent<Props, State> {
                         />
                     </a>
                 </div> */}
-                <AnnotationsSidebar
-                    env="overview"
+                <AnnotationsSidebarInDashboardResults
                     tags={this.tagsBG}
                     annotations={this.annotationsBG}
                     customLists={this.customListsBG}

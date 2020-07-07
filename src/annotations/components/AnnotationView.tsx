@@ -5,7 +5,6 @@ import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 
 export interface Props {
-    env: 'inpage' | 'overview'
     mode: AnnotationMode
     body?: string
     comment?: string

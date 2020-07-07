@@ -104,7 +104,6 @@ async function createDependencies() {
             updateTags: action('updateTags') as any,
         },
         annotationEditableProps: {
-            env: 'inpage',
             onGoToAnnotation: action('clickAnnotation'),
             onMouseEnter: action('startMouseOver'),
             onMouseLeave: action('endMouseOver'),

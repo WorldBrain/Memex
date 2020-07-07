@@ -173,7 +173,6 @@ export type SidebarContainerEvents = UIEvent<{
 export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
-    env: SidebarEnv
     events?: AnnotationsSidebarInPageEventEmitter
 }
 
@@ -288,9 +287,13 @@ export class SidebarContainerLogic extends UILogic<
     show: EventHandler<'show'> = async () => {
         this.emitMutation({ showState: { $set: 'visible' } })
 
-        if (this.options.env === 'inpage') {
-            await this._doSearch(this.getInitialState(), { overwrite: true })
-        }
+        // TODO: (sidebar-refactor) show shouldn't have conditional side effects
+        // figure out when this is needed and do it from higher up
+        // or this may go away when storing the annotations higher up in the shared state class
+        //
+        // if (this.options.env === 'inpage') {
+        //     await this._doSearch(this.getInitialState(), { overwrite: true })
+        // }
     }
 
     private doSearch = debounce(this._doSearch, 300)
@@ -423,6 +426,7 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         try {
+            // TODO: (sidebar - refactor) Fix env usage
             const annotationUrl = await this.options.annotations.createAnnotation(
                 {
                     url: pageUrl,
@@ -431,7 +435,7 @@ export class SidebarContainerLogic extends UILogic<
                     comment: dummyAnnotation.comment,
                     selector: dummyAnnotation.selector,
                 },
-                { skipPageIndexing: this.options.env === 'overview' },
+                // { skipPageIndexing: this.options.env === 'overview' },
             )
 
             this.emitMutation({
@@ -602,12 +606,13 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        if (this.options.env === 'overview') {
-            return this.options.annotations.goToAnnotationFromSidebar({
-                url: annotation.pageUrl,
-                annotation,
-            })
-        }
+        // TODO: (sidebar - refactor) Fix env usage
+        // if (this.options.env === 'overview') {
+        //     return this.options.annotations.goToAnnotationFromSidebar({
+        //         url: annotation.pageUrl,
+        //         annotation,
+        //     })
+        // }
 
         this.inPageEvents.emit('highlightAndScroll', {
             url: event.annotationUrl,

@@ -112,7 +112,6 @@ export async function main() {
                 initialState: inPageUI.componentsShown.sidebar
                     ? 'visible'
                     : 'hidden',
-                env: 'inpage',
                 inPageUI,
                 highlighter,
                 annotations,

@@ -47,7 +47,6 @@ const getTruncatedTextObject: (
 
 export interface AnnotationEditableGeneralProps {
     // displayCrowdfunding: boolean
-    env: 'inpage' | 'overview'
 }
 
 export interface AnnotationEditableProps {
@@ -105,7 +104,8 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     private get isClickable(): boolean {
-        return this.props.body && this.props.env !== 'overview'
+        // TODO (sidebar-refactor) remove env usage
+        return this.props.body != null // && this.props.env !== 'overview'
     }
 
     private setupEventListeners = () => {
@@ -268,12 +268,13 @@ const AnnotationStyled = styled.div`
         box-shadow: 0px 0px 5px 1px #00000080;
     `}
 
-    ${(props: Props) =>
-        props.body &&
-        props.env === 'overview' &&
-        `
-        cursor: pointer;
-    `}
+    // TODO (sidebar-refactor) remove env usage
+    // (props: Props) =>
+    //     props.body &&
+    //     props.env === 'overview' &&
+    //
+    //     cursor: pointer;
+    // }
 
     ${(props: Props) =>
         props.mode === 'edit' &&

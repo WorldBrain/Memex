@@ -139,7 +139,6 @@ export abstract class AnnotationsSidebarContainer<
 
     protected getEditableProps(): AnnotationsSidebarProps['annotationEditableProps'] {
         return {
-            env: this.props.env,
             onMouseEnter: (url) =>
                 this.processEvent('annotationMouseEnter', {
                     annotationUrl: url,
@@ -188,12 +187,10 @@ export abstract class AnnotationsSidebarContainer<
         }
     }
 
-    protected abstract renderTopBarLeft(): JSX.Element
-
     private renderTopBar() {
         return (
             <TopBarContainerStyled>
-                {this.renderTopBarLeft()}
+                {this.props?.elements?.topBarLeft}
                 <ButtonTooltip
                     tooltipText="Add notes to page"
                     position="leftNarrow"
@@ -243,8 +240,10 @@ const ContainerStyled = styled.div`
     height: 100%;
     width: 450px;
     position: fixed;
-    right: ${(props: Props) => (props.env === 'overview' ? 0 : 40)}px;
-    top: ${(props: Props) => (props.env === 'overview' ? 55 : 0)}px;
+
+    // TODO (sidebar-refactor) remove env usage
+    //right: (props: Props) => (props.env === 'overview' ? 0 : 40)}px;
+    //top: (props: Props) => (props.env === 'overview' ? 55 : 0)}px;
 
     z-index: 9999999; /* This is to combat pages setting high values on certain elements under the sidebar */
     background: #fff;
