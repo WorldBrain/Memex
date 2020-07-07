@@ -2,8 +2,9 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { StyleSheetManager } from 'styled-components'
 
-import AnnotationsSidebar, {
+import {
     Props as AnnotationsSidebarDependencies,
+    AnnotationsSidebarInPage as AnnotationsSidebar,
 } from './containers/AnnotationsSidebarInPage'
 
 export function setupInPageSidebarUI(

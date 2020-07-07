@@ -1,6 +1,5 @@
 import * as React from 'react'
 import ReactDOM from 'react-dom'
-import onClickOutside from 'react-onclickoutside'
 
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import {
@@ -21,7 +20,9 @@ export interface Props extends ContainerProps {
     highlighter: HighlightInteractionInterface
 }
 
-class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<Props> {
+export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
+    Props
+> {
     componentDidMount() {
         super.componentDidMount()
         this.setupEventForwarding()
@@ -154,5 +155,3 @@ class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<Props> {
         return <div />
     }
 }
-
-export default onClickOutside(AnnotationsSidebarInPage)

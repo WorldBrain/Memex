@@ -1,6 +1,7 @@
 import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import styled, { css } from 'styled-components'
+import onClickOutside from 'react-onclickoutside'
 
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import AnnotationCreate, {
@@ -35,6 +36,7 @@ export interface AnnotationsSidebarProps {
     handleScrollPagination: () => void
     // ^ Until here ^
 
+    onClickOutside: React.MouseEventHandler
     bindAnnotationFooterEventProps: (
         annotation: Annotation,
     ) => AnnotationFooterEventProps
@@ -54,7 +56,7 @@ interface AnnotationsSidebarState {
     searchText?: string
 }
 
-export default class AnnotationsSidebar extends React.Component<
+class AnnotationsSidebar extends React.Component<
     AnnotationsSidebarProps,
     AnnotationsSidebarState
 > {
@@ -105,6 +107,12 @@ export default class AnnotationsSidebar extends React.Component<
                 </TopBarStyled>
             </TopSectionStyled>
         )
+    }
+
+    handleClickOutside: React.MouseEventHandler = (e) => {
+        if (this.props.onClickOutside) {
+            return this.props.onClickOutside(e)
+        }
     }
 
     private renderNewAnnotation() {
@@ -183,6 +191,8 @@ export default class AnnotationsSidebar extends React.Component<
         )
     }
 }
+
+export default onClickOutside(AnnotationsSidebar)
 
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css

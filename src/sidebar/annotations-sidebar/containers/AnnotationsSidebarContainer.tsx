@@ -47,7 +47,7 @@ export abstract class AnnotationsSidebarContainer<
         this.processEvent('setPageUrl', { pageUrl })
     }
 
-    handleClickOutside = (e) => {
+    private handleClickOutside = (e) => {
         if (this.props.onClickOutside) {
             return this.props.onClickOutside(e)
         }
@@ -231,6 +231,7 @@ export abstract class AnnotationsSidebarContainer<
                     isSearchLoading={
                         this.state.primarySearchState === 'running'
                     }
+                    onClickOutside={this.handleClickOutside}
                 />
             </ContainerStyled>
         )

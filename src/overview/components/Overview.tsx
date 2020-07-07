@@ -17,9 +17,7 @@ import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
 import { auth, featuresBeta } from 'src/util/remote-functions-background'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
-import AnnotationsSidebar, {
-    AnnotationsSidebarInDashboardResults as BaseAnnotationsSidebar,
-} from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
+import { AnnotationsSidebarInDashboardResults as AnnotationsSidebar } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
@@ -40,7 +38,7 @@ interface State {
 }
 
 class Overview extends PureComponent<Props, State> {
-    private annotationsSidebar: BaseAnnotationsSidebar
+    private annotationsSidebar: AnnotationsSidebar
     private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     private customListsBG = runInBackground<RemoteCollectionsInterface>()
     private tagsBG = runInBackground<RemoteTagsInterface>()
@@ -67,7 +65,7 @@ class Overview extends PureComponent<Props, State> {
         }
     }
 
-    private setAnnotsSidebarRef = (sidebar: BaseAnnotationsSidebar) => {
+    private setAnnotsSidebarRef = (sidebar: AnnotationsSidebar) => {
         this.annotationsSidebar = sidebar
     }
 
@@ -152,7 +150,7 @@ class Overview extends PureComponent<Props, State> {
                     annotations={this.annotationsBG}
                     customLists={this.customListsBG}
                     setRef={this.setAnnotsSidebarRef}
-                    // onClickOutside={this.handleClickOutsideSidebar}
+                    onClickOutside={this.handleClickOutsideSidebar}
                 />
 
                 <Tooltip />
