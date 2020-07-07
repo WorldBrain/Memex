@@ -16,6 +16,10 @@ interface State {
 }
 
 class TextTruncated extends React.Component<Props, State> {
+    static defaultProps: Partial<Props> = {
+        text: '',
+    }
+
     state = {
         shouldTruncate: true,
     }
