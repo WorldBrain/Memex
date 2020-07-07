@@ -14,6 +14,7 @@ import {
 } from './logic'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
+import { Annotation } from 'src/annotations/types'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -62,52 +63,54 @@ export abstract class AnnotationsSidebarContainer<
     }
 
     protected bindAnnotationFooterEventProps(
-        annotationUrl: string,
+        annotation: Annotation,
     ): AnnotationFooterEventProps {
         return {
             onEditIconClick: () =>
                 this.processEvent('setAnnotationEditMode', {
-                    annotationUrl,
+                    annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
             toggleBookmark: () =>
                 this.processEvent('toggleAnnotationBookmark', {
-                    annotationUrl,
+                    annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
             onDeleteIconClick: () =>
                 this.processEvent('switchAnnotationMode', {
-                    annotationUrl,
+                    annotationUrl: annotation.url,
                     mode: 'delete',
                     ...DEF_CONTEXT,
                 }),
             onDeleteCancel: () =>
                 this.processEvent('switchAnnotationMode', {
-                    annotationUrl,
+                    annotationUrl: annotation.url,
                     mode: 'default',
                     ...DEF_CONTEXT,
                 }),
             onDeleteConfirm: () =>
                 this.processEvent('deleteAnnotation', {
-                    annotationUrl,
+                    annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
             onEditCancel: () =>
                 this.processEvent('switchAnnotationMode', {
-                    annotationUrl,
+                    annotationUrl: annotation.url,
                     mode: 'default',
                     ...DEF_CONTEXT,
                 }),
             onEditConfirm: () =>
                 this.processEvent('editAnnotation', {
-                    annotationUrl,
+                    annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
-            onGoToAnnotation: () =>
-                this.processEvent('goToAnnotation', {
-                    annotationUrl,
-                    ...DEF_CONTEXT,
-                }),
+            onGoToAnnotation: annotation.body?.length
+                ? () =>
+                      this.processEvent('goToAnnotation', {
+                          annotationUrl: annotation.url,
+                          ...DEF_CONTEXT,
+                      })
+                : undefined,
         }
     }
 

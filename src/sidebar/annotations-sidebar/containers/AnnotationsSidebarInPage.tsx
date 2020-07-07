@@ -13,6 +13,7 @@ import {
     Props as ContainerProps,
 } from './AnnotationsSidebarContainer'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
+import { Annotation } from 'src/annotations/types'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -134,14 +135,16 @@ class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<Props> {
         }
     }
 
-    protected bindAnnotationFooterEventProps(annotationUrl: string) {
-        const boundProps = super.bindAnnotationFooterEventProps(annotationUrl)
+    protected bindAnnotationFooterEventProps(annotation: Annotation) {
+        const boundProps = super.bindAnnotationFooterEventProps(annotation)
 
         return {
             ...boundProps,
             onDeleteConfirm: () => {
                 boundProps.onDeleteConfirm()
-                this.props.highlighter.removeAnnotationHighlights(annotationUrl)
+                this.props.highlighter.removeAnnotationHighlights(
+                    annotation.url,
+                )
             },
         }
     }

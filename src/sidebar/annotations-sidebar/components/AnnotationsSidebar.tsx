@@ -36,7 +36,7 @@ export interface AnnotationsSidebarProps {
     // ^ Until here ^
 
     bindAnnotationFooterEventProps: (
-        annotationUrl: string,
+        annotation: Annotation,
     ) => AnnotationFooterEventProps
     annotationEditProps: AnnotationEditGeneralProps & AnnotationEditEventProps
     annotationEditableProps: AnnotationEditableGeneralProps &
@@ -139,7 +139,7 @@ export default class AnnotationsSidebar extends React.Component<
                 tagPickerDependencies={this.props.annotationTagProps}
                 annotationEditDependencies={this.props.annotationEditProps}
                 annotationFooterDependencies={this.props.bindAnnotationFooterEventProps(
-                    annot.url,
+                    annot,
                 )}
             />
         ))
