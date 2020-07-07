@@ -12,12 +12,12 @@ export interface Props {
     displayGoToAnnotation?: boolean
     handleCancelEdit?: () => void
     handleEditAnnotation?: () => void
-    handleCancelDeletion?: () => void
+    handleCancelDelete?: () => void
     editIconClickHandler?: () => void
     handleBookmarkToggle?: () => void
     handleGoToAnnotation?: (e: React.MouseEvent<HTMLElement>) => void
     trashIconClickHandler?: () => void
-    handleDeleteAnnotation?: () => void
+    handleConfirmDelete?: () => void
 }
 
 class AnnotationFooter extends React.Component<Props> {
@@ -57,14 +57,6 @@ class AnnotationFooter extends React.Component<Props> {
                             this.props.editIconClickHandler()
                         }}
                     />
-                    {/* <button
-                        className={cx(styles.commonIcon, styles.shareIcon)}
-                        title="Share this note"
-                        onClick={e => {
-                            e.stopPropagation()
-                            shareIconClickHandler()
-                        }}
-                    /> */}
                     {this.props.hasBookmark ? (
                         <BookmarkedBtnStyled {...bookmarkBtnProps} />
                     ) : (
@@ -84,8 +76,8 @@ class AnnotationFooter extends React.Component<Props> {
 
         if (mode === 'delete') {
             actionBtnText = 'Delete'
-            actionBtnHandler = this.props.handleDeleteAnnotation
-            cancelBtnHandler = this.props.handleCancelDeletion
+            actionBtnHandler = this.props.handleConfirmDelete
+            cancelBtnHandler = this.props.handleCancelDelete
         } else if (mode === 'edit') {
             actionBtnText = 'Save'
             actionBtnHandler = this.props.handleEditAnnotation
@@ -103,24 +95,14 @@ class AnnotationFooter extends React.Component<Props> {
                 </div>
                 <BtnContainerStyled>
                     <ButtonTooltip
-                        tooltipText={'ctr/cmd + Enter'}
+                        tooltipText="ctrl/cmd + Enter"
                         position="top"
                     >
-                        <ActionBtnStyled
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                actionBtnHandler()
-                            }}
-                        >
+                        <ActionBtnStyled onClick={actionBtnHandler}>
                             {actionBtnText}
                         </ActionBtnStyled>
                     </ButtonTooltip>
-                    <CancelBtnStyled
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            cancelBtnHandler()
-                        }}
-                    >
+                    <CancelBtnStyled onClick={cancelBtnHandler}>
                         Cancel
                     </CancelBtnStyled>
                 </BtnContainerStyled>

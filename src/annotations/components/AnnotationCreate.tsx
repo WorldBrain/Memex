@@ -1,6 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { browser } from 'webextension-polyfill-ts'
+
 import { Anchor } from 'src/highlighting/types'
 import { Tooltip } from 'src/common-ui/components'
 import TagPicker from 'src/tags/ui/TagPicker'
@@ -8,7 +9,6 @@ import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TextHighlighted from 'src/annotations/components/parts/TextHighlighted'
 import { NewAnnotationOptions } from 'src/annotations/types'
-import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 const tagEmpty = browser.extension.getURL('/img/tag_empty.svg')
 const tagFull = browser.extension.getURL('/img/tag_full.svg')
@@ -180,24 +180,6 @@ const TextBoxContainerStyled = styled.div`
 
     & * {
         font-family: 'Poppins', sans-serif;
-    }
-`
-
-const TagInput = styled.div`
-    width: 300px;
-    height: 18px;
-    border-radius: 10px;
-    background-color: #fdfbfb;
-    margin-left: 8px;
-    margin-bottom: 6px;
-    font-size: 11px;
-    padding: 2px 10px 3px 10px;
-    color: #3eb995;
-    box-shadow: #0000005c 0px 0px 5px 0px inset;
-    border: 0.5px #0000005c solid;
-
-    &::placeholder {
-        color: #3eb995;
     }
 `
 

@@ -4,10 +4,42 @@ import styled from 'styled-components'
 import niceTime from 'src/util/nice-time'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 // import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
-import AnnotationView from 'src/annotations/components/AnnotationView'
+import AnnotationView, {
+    AnnotationViewEventProps,
+} from 'src/annotations/components/AnnotationView'
 import AnnotationEdit from 'src/annotations/components/AnnotationEdit'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
+
+const getTruncatedTextObject: (
+    text: string,
+) => { isTextTooLong: boolean; text: string } = (text) => {
+    if (text.length > 280) {
+        const truncatedText = text.slice(0, 280)
+        return {
+            isTextTooLong: true,
+            text: truncatedText,
+        }
+    }
+
+    for (let i = 0, newlineCount = 0; i < text.length; ++i) {
+        if (text[i] === '\n') {
+            newlineCount++
+            if (newlineCount > 4) {
+                const truncatedText = text.slice(0, i)
+                return {
+                    isTextTooLong: true,
+                    text: truncatedText,
+                }
+            }
+        }
+    }
+
+    return {
+        isTextTooLong: false,
+        text,
+    }
+}
 
 export interface AnnotationEditableGeneralProps {
     // displayCrowdfunding: boolean
@@ -52,7 +84,7 @@ export type Props = AnnotationEditableGeneralProps &
     AnnotationEditableEventProps
 
 export default class AnnotationEditable extends React.Component<Props> {
-    private _boxRef: HTMLDivElement = null
+    private boxRef: HTMLDivElement = null
     private removeEventListeners?: () => void
 
     static defaultProps: Partial<Props> = {
@@ -60,122 +92,56 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     componentDidMount() {
-        this._setupEventListeners()
+        this.setupEventListeners()
     }
 
     componentWillUnmount() {
-        this._removeEventListeners()
+        if (this.boxRef && this.removeEventListeners) {
+            this.removeEventListeners()
+        }
     }
 
-    private get isEdited() {
+    private get isEdited(): boolean {
         return (
             this.props.lastEdited &&
             this.props.lastEdited !== this.props.createdWhen
         )
     }
 
-    private get isClickable() {
+    private get isClickable(): boolean {
         return this.props.body && this.props.env !== 'overview'
     }
 
-    private _setupEventListeners = () => {
-        if (this._boxRef) {
+    private setupEventListeners = () => {
+        if (this.boxRef) {
             const handleMouseEnter = () =>
                 this.props.handleMouseEnter(this.props.url)
             const handleMouseLeave = () =>
                 this.props.handleMouseLeave(this.props.url)
 
-            this._boxRef.addEventListener('mouseenter', handleMouseEnter)
-            this._boxRef.addEventListener('mouseleave', handleMouseLeave)
+            this.boxRef.addEventListener('mouseenter', handleMouseEnter)
+            this.boxRef.addEventListener('mouseleave', handleMouseLeave)
 
             this.removeEventListeners = () => {
-                this._boxRef.removeEventListener('mouseenter', handleMouseEnter)
-                this._boxRef.removeEventListener('mouseleave', handleMouseLeave)
+                this.boxRef.removeEventListener('mouseenter', handleMouseEnter)
+                this.boxRef.removeEventListener('mouseleave', handleMouseLeave)
             }
         }
     }
 
-    private _removeEventListeners = () => {
-        if (this._boxRef && this.removeEventListeners) {
-            this.removeEventListeners()
-        }
+    private setBoxRef = (ref: HTMLDivElement) => {
+        this.boxRef = ref
     }
 
-    private _getFormattedTimestamp = () =>
+    private getFormattedTimestamp = () =>
         niceTime(this.props.lastEdited ?? this.props.createdWhen)
 
-    private _getTruncatedTextObject: (
-        text: string,
-    ) => { isTextTooLong: boolean; text: string } = (text) => {
-        if (text.length > 280) {
-            const truncatedText = text.slice(0, 280)
-            return {
-                isTextTooLong: true,
-                text: truncatedText,
-            }
-        }
-
-        for (let i = 0, newlineCount = 0; i < text.length; ++i) {
-            if (text[i] === '\n') {
-                newlineCount++
-                if (newlineCount > 4) {
-                    const truncatedText = text.slice(0, i)
-                    return {
-                        isTextTooLong: true,
-                        text: truncatedText,
-                    }
-                }
-            }
-        }
-
-        return {
-            isTextTooLong: false,
-            text,
-        }
-    }
-
-    private _handleEditAnnotation = (args: {
-        comment: string
-        tags: string[]
-    }) => {
-        const { url } = this.props
-        this.props.handleConfirmAnnotationEdit({ url, ...args })
-    }
-
-    private _handleGoToAnnotation = () => {
+    private handleGoToAnnotation = () => {
         if (!this.isClickable) {
             return
         }
 
         this.props.handleGoToAnnotation(this.props.url)
-    }
-
-    private _handleConfirmDelete = () => {
-        this.props.handleConfirmDelete(this.props.url)
-    }
-
-    private _handleEditIconClick = () => {
-        this.props.handleEditBtnClick(this.props.url)
-    }
-
-    private _handleTrashIconClick = () => {
-        this.props.handleTrashBtnClick(this.props.url)
-    }
-
-    private _handleShareIconClick = () => {
-        // TODO: what does this do?
-    }
-
-    private _handleCancelDelete = () => {
-        this.props.handleCancelDelete(this.props.url)
-    }
-
-    private _handleBookmarkToggle = () => {
-        this.props.handleBookmarkToggle(this.props.url)
-    }
-
-    private _setBoxRef = (ref: HTMLDivElement) => {
-        this._boxRef = ref
     }
 
     private renderHighlightBody() {
@@ -188,7 +154,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                 <HighlightTextStyled>
                     <TextTruncated
                         text={this.props.body}
-                        getTruncatedTextObject={this._getTruncatedTextObject}
+                        getTruncatedTextObject={getTruncatedTextObject}
                     />
                 </HighlightTextStyled>
             </HighlightStyled>
@@ -196,13 +162,29 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     private renderMainAnnotation() {
-        if (this.props.mode === 'edit') {
+        const { url, mode } = this.props
+
+        const eventHandlers: AnnotationViewEventProps = {
+            getTruncatedTextObject,
+            handleGoToAnnotation: this.handleGoToAnnotation,
+            editIconClickHandler: () => this.props.handleEditBtnClick(url),
+            handleBookmarkToggle: () => this.props.handleBookmarkToggle(url),
+            trashIconClickHandler: () => this.props.handleTrashBtnClick(url),
+            handleCancelDelete: () => this.props.handleCancelDelete(url),
+            handleConfirmDelete: () => this.props.handleConfirmDelete(url),
+            handleTagClick: (tag) =>
+                this.props.handleAnnotationTagClick(url, tag),
+        }
+
+        if (mode === 'edit') {
             return (
                 <AnnotationEdit
                     {...this.props}
                     rows={2}
-                    handleConfirmEdit={this._handleEditAnnotation}
-                    handleCancelEdit={this._handleCancelDelete}
+                    handleConfirmEdit={(args) =>
+                        this.props.handleConfirmAnnotationEdit({ url, ...args })
+                    }
+                    handleCancelEdit={() => this.props.handleCancelDelete(url)}
                 />
             )
         }
@@ -210,20 +192,10 @@ export default class AnnotationEditable extends React.Component<Props> {
         return (
             <AnnotationView
                 {...this.props}
+                {...eventHandlers}
                 isEdited={this.isEdited}
-                timestamp={this._getFormattedTimestamp()}
+                timestamp={this.getFormattedTimestamp()}
                 hasBookmark={!!this.props.hasBookmark}
-                editIconClickHandler={this._handleEditIconClick}
-                handleGoToAnnotation={this._handleGoToAnnotation}
-                handleBookmarkToggle={this._handleBookmarkToggle}
-                trashIconClickHandler={this._handleTrashIconClick}
-                shareIconClickHandler={this._handleShareIconClick}
-                handleCancelDelete={this._handleCancelDelete}
-                handleConfirmDelete={this._handleConfirmDelete}
-                getTruncatedTextObject={this._getTruncatedTextObject}
-                handleTagClick={(tag) =>
-                    this.props.handleAnnotationTagClick(this.props.url, tag)
-                }
             />
         )
     }
@@ -239,9 +211,10 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <AnnotationStyled
+                {...this.props}
                 id={this.props.url} // Focusing on annotation relies on this ID.
-                ref={this._setBoxRef}
-                onClick={this._handleGoToAnnotation}
+                ref={this.setBoxRef}
+                onClick={this.handleGoToAnnotation}
             >
                 {this.renderHighlightBody()}
                 {this.renderMainAnnotation()}

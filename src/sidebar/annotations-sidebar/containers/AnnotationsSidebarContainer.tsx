@@ -71,8 +71,6 @@ export abstract class AnnotationsSidebarContainer<
                 this.processEvent('annotationMouseLeave', {
                     annotationUrl: url,
                 }),
-            handleAnnotationTagClick: (url, tag) =>
-                console.log('clicked tag:', url, tag),
             handleBookmarkToggle: (url) =>
                 this.processEvent('toggleAnnotationBookmark', {
                     annotationUrl: url,
