@@ -1,6 +1,5 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import { browser } from 'webextension-polyfill-ts'
 import { Anchor } from 'src/highlighting/types'
 import { Tooltip } from 'src/common-ui/components'
 import TagPicker from 'src/tags/ui/TagPicker'
@@ -8,11 +7,12 @@ import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TextHighlighted from 'src/annotations/components/parts/TextHighlighted'
 import { NewAnnotationOptions } from 'src/annotations/types'
-
-const tagEmpty = browser.extension.getURL('/img/tag_empty.svg')
-const tagFull = browser.extension.getURL('/img/tag_full.svg')
-const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
-const heartFull = browser.extension.getURL('/img/star_full.svg')
+import {
+    tagEmpty,
+    tagFull,
+    heartEmpty,
+    heartFull,
+} from 'src/common-ui/components/design-library/icons'
 
 interface AnnotationCreateState {
     isTagPickerShown: boolean
