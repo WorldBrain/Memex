@@ -51,7 +51,6 @@ const setupLogicHelper = async ({
         // inPageUI,
         // highlighter,
         initialState: 'hidden',
-        env: 'inpage',
         searchResultLimit: 10,
     })
 
