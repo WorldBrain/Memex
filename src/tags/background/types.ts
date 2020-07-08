@@ -25,6 +25,7 @@ export interface RemoteTagsInterface {
         url: string
         tabId?: number
     }): Promise<void>
+    setTagsForPage(args: { url: string; tags: string[] }): Promise<void>
 }
 
 export interface TagTab {

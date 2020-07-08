@@ -12,3 +12,5 @@ export const TAGS_3 = {
     tag: 'third',
     url: 'https://www.ipsum.com/lorem/third/',
 }
+
+export const URL_1 = 'http://test.com'
