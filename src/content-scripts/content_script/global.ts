@@ -36,6 +36,7 @@ import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
 import * as constants from '../constants'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
+import { AnnotationsCache } from 'src/annotations/annotations-cache'
 
 // TODO:(page-indexing)[high] Fix this with a proper restructuring of how pages are indexed
 setupPageContentRPC()
@@ -70,13 +71,34 @@ export async function main() {
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
 
+    // 3. Creates an instance of the InPageUI manager class to encapsulate
+    // business logic of initialising and hide/showing components.
+    const inPageUI = new SharedInPageUIState({
+        loadComponent,
+        annotations,
+        highlighter,
+        pageUrl: currentTab.url,
+    })
+
+    const annotationsCache = new AnnotationsCache({
+        backendOperations: {
+            // TODO: (sidebar-refactor) massage the params from Annotation to the likes of CreateAnnotationParams
+            load: async (url) => [],
+            create: async (annotation) => null,
+            update: async (annotation) => null,
+            delete: async (annotation) => null,
+            updateTags: async (annotation) => null,
+        },
+    })
+    annotationsCache.load(currentTab.url)
+
     const annotationFunctions: AnnotationFunctions = {
         createHighlight: () =>
             highlighter.createHighlight({ annotationsManager, inPageUI }),
         createAnnotation: () => highlighter.createAnnotation({ inPageUI }),
     }
 
-    // 3. Create a contentScriptRegistry object with functions for each content script
+    // 4. Create a contentScriptRegistry object with functions for each content script
     // component, that when run, initialise the respective component with it's
     // dependencies
     const contentScriptRegistry: ContentScriptRegistry = {
@@ -104,7 +126,7 @@ export async function main() {
             components.ribbon!.resolve()
         },
         async registerHighlightingScript(execute): Promise<void> {
-            execute()
+            execute() // TODO(sidebar-refactor) - this should take highlights / annotations deps but it doesn't, code smell, something needs refactoring
         },
         async registerSidebarScript(execute): Promise<void> {
             await execute({
@@ -113,6 +135,7 @@ export async function main() {
                     ? 'visible'
                     : 'hidden',
                 inPageUI,
+                annotationsCache,
                 highlighter,
                 annotations,
                 pageUrl: currentTab.url,
@@ -132,15 +155,6 @@ export async function main() {
         },
     }
     window['contentScriptRegistry'] = contentScriptRegistry
-
-    // 4. Creates an instance of the InPageUI manager class to encapsulate
-    // business logic of initialising and hide/showing components.
-    const inPageUI = new SharedInPageUIState({
-        loadComponent,
-        annotations,
-        highlighter,
-        pageUrl: currentTab.url,
-    })
 
     // 5. Registers remote functions that can be used to interact with components
     // in this tab.

@@ -243,7 +243,6 @@ const AnnotationStyled = styled.div`
 
     color: rgb(54, 54, 46);
 
-    border-radius: radius3;
     box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 2px 4px;
     transition: background 120ms ease-in 0s;

@@ -13,24 +13,45 @@ import {
 } from './AnnotationsSidebarContainer'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { Annotation } from 'src/annotations/types'
+import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
+import { Subscription } from 'rxjs/Subscription'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
     inPageUI: SharedInPageUIInterface
+    annotationsCache: AnnotationsCacheInterface
     highlighter: HighlightInteractionInterface
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     Props
 > {
+    annotationSubscription: Subscription
+
     componentDidMount() {
         super.componentDidMount()
         this.setupEventForwarding()
+        this.setupAnnotationCacheListeners()
     }
 
     componentWillUnmount() {
         super.componentWillUnmount()
         this.cleanupEventForwarding()
+        this.cleanupAnnotationCacheListeners()
+    }
+
+    private updateAnnotationsFromCache(annotations: Annotation[]) {
+        this.setState({ annotations })
+    }
+
+    private setupAnnotationCacheListeners() {
+        this.annotationSubscription = this.props.annotationsCache.annotations.subscribe(
+            this.updateAnnotationsFromCache,
+        )
+    }
+
+    private cleanupAnnotationCacheListeners() {
+        this.annotationSubscription.unsubscribe()
     }
 
     private setupEventForwarding() {
