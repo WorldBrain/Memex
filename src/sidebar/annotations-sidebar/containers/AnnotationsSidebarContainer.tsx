@@ -244,6 +244,8 @@ const ContainerStyled = styled.div`
     // TODO (sidebar-refactor) remove env usage
     //right: (props: Props) => (props.env === 'overview' ? 0 : 40)}px;
     //top: (props: Props) => (props.env === 'overview' ? 55 : 0)}px;
+    right: 0;
+    top: 0;
 
     z-index: 9999999; /* This is to combat pages setting high values on certain elements under the sidebar */
     background: #fff;
