@@ -16,7 +16,7 @@ import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
 import { Annotation } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
-import { AnnotationMode } from '../types'
+import { AnnotationMode, SidebarTheme } from '../types'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import {
@@ -50,6 +50,7 @@ export interface AnnotationsSidebarProps {
     isSearchLoading: boolean
     isAnnotationCreateShown: boolean
     annotations: Annotation[]
+    theme: Partial<SidebarTheme>
 }
 
 interface AnnotationsSidebarState {
@@ -168,6 +169,10 @@ class AnnotationsSidebar extends React.Component<
                 annotationFooterDependencies={this.props.bindAnnotationFooterEventProps(
                     annot,
                 )}
+                isClickable={
+                    this.props.theme.canClickAnnotations &&
+                    annot.body?.length > 0
+                }
             />
         ))
 

@@ -42,3 +42,9 @@ export interface AnnotationStorageInterface {}
 export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<
     AnnotationsSidebarInPageEvents
 >
+
+export interface SidebarTheme {
+    canClickAnnotations: boolean
+    rightOffsetPx: number
+    topOffsetPx: number
+}

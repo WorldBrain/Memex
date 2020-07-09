@@ -1,5 +1,5 @@
 import * as React from 'react'
-import styled from 'styled-components'
+import styled, { ThemeProvider } from 'styled-components'
 import { Subscription } from 'rxjs/Subscription'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -224,31 +224,38 @@ export class AnnotationsSidebarContainer<
         }
 
         return (
-            <ContainerStyled className="ignore-react-onclickoutside">
-                {this.renderTopBar()}
-                <AnnotationsSidebar
-                    {...this.state}
-                    needsWaypoint={!this.state.noResults}
-                    appendLoader={this.state.secondarySearchState === 'running'}
-                    annotationModes={this.state.annotationModes.pageAnnotations}
-                    isAnnotationCreateShown={this.state.showCommentBox}
-                    hoverAnnotationUrl={this.state.hoverAnnotationUrl}
-                    annotationTagProps={this.getTagProps()}
-                    annotationEditProps={this.getEditProps()}
-                    annotationCreateProps={this.getCreateProps()}
-                    annotationEditableProps={this.getEditableProps()}
-                    bindAnnotationFooterEventProps={(url) =>
-                        this.bindAnnotationFooterEventProps(url)
-                    }
-                    handleScrollPagination={() =>
-                        this.processEvent('paginateSearch', null)
-                    }
-                    isSearchLoading={
-                        this.state.primarySearchState === 'running'
-                    }
-                    onClickOutside={this.handleClickOutside}
-                />
-            </ContainerStyled>
+            <ThemeProvider theme={this.props.theme}>
+                <ContainerStyled className="ignore-react-onclickoutside">
+                    {this.renderTopBar()}
+                    <AnnotationsSidebar
+                        {...this.state}
+                        needsWaypoint={!this.state.noResults}
+                        appendLoader={
+                            this.state.secondarySearchState === 'running'
+                        }
+                        annotationModes={
+                            this.state.annotationModes.pageAnnotations
+                        }
+                        isAnnotationCreateShown={this.state.showCommentBox}
+                        hoverAnnotationUrl={this.state.hoverAnnotationUrl}
+                        annotationTagProps={this.getTagProps()}
+                        annotationEditProps={this.getEditProps()}
+                        annotationCreateProps={this.getCreateProps()}
+                        annotationEditableProps={this.getEditableProps()}
+                        bindAnnotationFooterEventProps={(url) =>
+                            this.bindAnnotationFooterEventProps(url)
+                        }
+                        handleScrollPagination={() =>
+                            this.processEvent('paginateSearch', null)
+                        }
+                        isSearchLoading={
+                            this.state.primarySearchState === 'running'
+                        }
+                        onClickOutside={this.handleClickOutside}
+                        theme={this.props.theme}
+                    />
+                </ContainerStyled>
+            </ThemeProvider>
         )
     }
 }
@@ -259,11 +266,8 @@ const ContainerStyled = styled.div`
     width: 450px;
     position: fixed;
 
-    // TODO (sidebar-refactor) remove env usage
-    //right: (props: Props) => (props.env === 'overview' ? 0 : 40)}px;
-    //top: (props: Props) => (props.env === 'overview' ? 55 : 0)}px;
-    right: 0;
-    top: 0;
+    right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
+    top: ${({ theme }: Props) => theme?.topOffsetPx ?? 0}px;
 
     z-index: 9999999; /* This is to combat pages setting high values on certain elements under the sidebar */
     background: #fff;

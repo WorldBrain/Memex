@@ -13,13 +13,15 @@ type Props = SidebarContainerOptions & {
 export class AnnotationsSidebarInDashboardResults extends React.Component<
     Props
 > {
+    static defaultProps: Partial<Props> = {
+        theme: { topOffsetPx: 55 },
+    }
+
     render() {
         const { refSidebar, ...props } = this.props
         return (
             <AnnotationsSidebarContainer
-                elements={{
-                    topBarLeft: this.renderTopBarLeft(),
-                }}
+                elements={{ topBarLeft: this.renderTopBarLeft() }}
                 ref={refSidebar}
                 {...props}
             />

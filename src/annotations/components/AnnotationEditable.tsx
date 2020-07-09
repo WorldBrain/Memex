@@ -1,5 +1,5 @@
 import * as React from 'react'
-import styled from 'styled-components'
+import styled, { ThemeProvider } from 'styled-components'
 
 import niceTime from 'src/util/nice-time'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
@@ -14,6 +14,7 @@ import AnnotationEdit, {
 } from 'src/annotations/components/AnnotationEdit'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
+import { SidebarAnnotationTheme } from '../types'
 
 const getTruncatedTextObject: (
     text: string,
@@ -45,9 +46,7 @@ const getTruncatedTextObject: (
     }
 }
 
-export interface AnnotationEditableGeneralProps {
-    // displayCrowdfunding: boolean
-}
+export interface AnnotationEditableGeneralProps {}
 
 export interface AnnotationEditableProps {
     /** Required to decide how to go to an annotation when it's clicked. */
@@ -55,6 +54,7 @@ export interface AnnotationEditableProps {
     className?: string
     isActive?: boolean
     isHovered?: boolean
+    isClickable?: boolean
     createdWhen: number
     lastEdited: number
     body?: string
@@ -103,9 +103,14 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
-    private get isClickable(): boolean {
-        // TODO (sidebar-refactor) remove env usage
-        return this.props.body != null // && this.props.env !== 'overview'
+    private get theme(): SidebarAnnotationTheme {
+        return {
+            cursor: this.props.isClickable ? 'pointer' : 'auto',
+            hasComment: this.props.comment?.length > 0,
+            hasHighlight: this.props.body?.length > 0,
+            isActive: this.props.isActive,
+            isEditing: this.props.mode === 'edit',
+        }
     }
 
     private setupEventListeners = () => {
@@ -133,7 +138,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         niceTime(this.props.lastEdited ?? this.props.createdWhen)
 
     private handleGoToAnnotation = () => {
-        if (!this.isClickable) {
+        if (!this.props.isClickable) {
             return
         }
 
@@ -195,6 +200,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         return (
             <AnnotationView
                 {...this.props}
+                theme={this.theme}
                 getTruncatedTextObject={getTruncatedTextObject}
             />
         )
@@ -210,17 +216,17 @@ export default class AnnotationEditable extends React.Component<Props> {
         // }
 
         return (
-            <AnnotationStyled
-                mode={this.props.mode}
-                isActive={this.props.isActive}
-                id={this.props.url} // Focusing on annotation relies on this ID.
-                ref={this.setBoxRef}
-                onClick={this.handleGoToAnnotation}
-            >
-                {this.renderHighlightBody()}
-                {this.renderMainAnnotation()}
-                {this.renderFooter()}
-            </AnnotationStyled>
+            <ThemeProvider theme={this.theme}>
+                <AnnotationStyled
+                    id={this.props.url} // Focusing on annotation relies on this ID.
+                    ref={this.setBoxRef}
+                    onClick={this.handleGoToAnnotation}
+                >
+                    {this.renderHighlightBody()}
+                    {this.renderMainAnnotation()}
+                    {this.renderFooter()}
+                </AnnotationStyled>
+            </ThemeProvider>
         )
     }
 }
@@ -266,22 +272,16 @@ const AnnotationStyled = styled.div`
     cursor: pointer;
     animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
 
-    ${(props: Props) =>
-        props.isActive &&
+    ${({ theme }) =>
+        theme.isActive &&
         `
         box-shadow: 0px 0px 5px 1px #00000080;
     `}
 
-    // TODO (sidebar-refactor) remove env usage
-    // (props: Props) =>
-    //     props.body &&
-    //     props.env === 'overview' &&
-    //
-    //     cursor: pointer;
-    // }
+    cursor: ${({ theme }) => theme.cursor}
 
-    ${(props: Props) =>
-        props.mode === 'edit' &&
+    ${({ theme }) =>
+        theme.isEditing &&
         `
         background-color: white;
         cursor: default;

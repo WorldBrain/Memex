@@ -23,6 +23,10 @@ export interface Props extends ContainerProps {
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     Props
 > {
+    static defaultProps: Partial<Props> = {
+        theme: { rightOffsetPx: 40, canClickAnnotations: true },
+    }
+
     componentDidMount() {
         super.componentDidMount()
         this.setupEventForwarding()

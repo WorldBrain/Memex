@@ -42,3 +42,11 @@ export interface AnnotationsManagerInterface {
         isSocialPost?: boolean,
     ): Promise<Annotation[]>
 }
+
+export interface SidebarAnnotationTheme {
+    hasHighlight: boolean
+    hasComment: boolean
+    isEditing: boolean
+    isActive: boolean
+    cursor: 'pointer' | 'auto'
+}

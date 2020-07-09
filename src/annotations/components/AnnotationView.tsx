@@ -1,12 +1,14 @@
 import * as React from 'react'
-import styled from 'styled-components'
+import styled, { ThemeProvider } from 'styled-components'
 
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
+import { SidebarAnnotationTheme } from '../types'
 
 export interface Props {
     hasHighlight?: boolean
     comment?: string
     tags: string[]
+    theme: SidebarAnnotationTheme
     onTagClick?: (tag: string) => void
     getTruncatedTextObject: (
         text: string,
@@ -51,13 +53,17 @@ class AnnotationView extends React.Component<Props> {
         }
 
         return (
-            <CommentBox hasHighlight={this.props.hasHighlight}>
-                <TextTruncated
-                    text={comment}
-                    getTruncatedTextObject={this.props.getTruncatedTextObject}
-                />
-                {this.renderTags()}
-            </CommentBox>
+            <ThemeProvider theme={this.props.theme}>
+                <CommentBox hasHighlight={this.props.hasHighlight}>
+                    <TextTruncated
+                        text={comment}
+                        getTruncatedTextObject={
+                            this.props.getTruncatedTextObject
+                        }
+                    />
+                    {this.renderTags()}
+                </CommentBox>
+            </ThemeProvider>
         )
     }
 }
@@ -86,8 +92,8 @@ const TagsContainerStyled = styled.div`
     display: flex;
     flex-wrap: wrap;
 
-    ${(props: Props) =>
-        !props.comment &&
+    ${({ theme }: Props) =>
+        !theme.hasComment &&
         `
         margin-top: -8px;
         margin-left: 15px;
@@ -108,8 +114,8 @@ const CommentBox = styled.div`
     line-height: 1.4;
     text-align: left;
 
-    ${(props: Props) =>
-        !props.hasHighlight &&
+    ${({ theme }: Props) =>
+        !theme.hasHighlight &&
         `
         border-top: none;
         border-top-left-radius: 5px;

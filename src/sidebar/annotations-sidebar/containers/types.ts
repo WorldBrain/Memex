@@ -4,6 +4,7 @@ import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
+import { SidebarTheme } from '../types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -18,6 +19,7 @@ export interface SidebarContainerDependencies {
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>
     customLists: RemoteCollectionsInterface
+    theme?: Partial<SidebarTheme>
     // search: SearchInterface
     // bookmarks: BookmarksInterface
 }

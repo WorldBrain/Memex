@@ -116,6 +116,7 @@ async function createDependencies() {
         handleScrollPagination: () => undefined,
         onClickOutside: action('clickOutside'),
         annotations,
+        theme: {},
     }
 
     return { sidebarDependencies }
