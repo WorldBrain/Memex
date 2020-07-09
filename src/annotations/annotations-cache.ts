@@ -2,6 +2,42 @@ import { Annotation } from 'src/annotations/types'
 import TypedEventEmitter from 'typed-emitter'
 import { Observable } from 'rxjs'
 import { EventEmitter } from 'events'
+import { RemoteTagsInterface } from 'src/tags/background/types'
+import { AnnotationInterface } from 'src/direct-linking/background/types'
+
+export const createAnnotationsCache = (bgModules: {
+    tags: RemoteTagsInterface
+    annotations: AnnotationInterface<'caller'>
+}): AnnotationsCache =>
+    new AnnotationsCache({
+        backendOperations: {
+            load: async (url, { limit, skip }) =>
+                bgModules.annotations.getAllAnnotationsByUrl({
+                    url,
+                    limit,
+                    skip,
+                    base64Img: true,
+                }),
+            create: async ({ createdWhen, ...annotation }) => {
+                await bgModules.annotations.createAnnotation({
+                    ...annotation,
+                    bookmarked: annotation.hasBookmark,
+                    createdWhen: createdWhen
+                        ? new Date(createdWhen)
+                        : undefined,
+                })
+            },
+            update: async (annotation) =>
+                bgModules.annotations.editAnnotation(
+                    annotation.url,
+                    annotation.comment,
+                ),
+            delete: async (annotation) =>
+                bgModules.annotations.deleteAnnotation(annotation.url),
+            updateTags: async (annotationUrl, tags) =>
+                bgModules.tags.setTagsForPage({ url: annotationUrl, tags }),
+        },
+    })
 
 export interface AnnotationCacheChanges {
     created: (annotation: Annotation) => void

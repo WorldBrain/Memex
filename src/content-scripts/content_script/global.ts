@@ -36,7 +36,7 @@ import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
 import * as constants from '../constants'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
-import { AnnotationsCache } from 'src/annotations/annotations-cache'
+import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 
 // TODO:(page-indexing)[high] Fix this with a proper restructuring of how pages are indexed
 setupPageContentRPC()
@@ -81,32 +81,9 @@ export async function main() {
         pageUrl: currentTab.url,
     })
 
-    const annotationsCache = new AnnotationsCache({
-        backendOperations: {
-            load: async (url, { limit, skip }) =>
-                annotationsBG.getAllAnnotationsByUrl({
-                    url,
-                    limit,
-                    skip,
-                }),
-            create: async ({ createdWhen, ...annotation }) => {
-                await annotationsBG.createAnnotation({
-                    ...annotation,
-                    createdWhen: createdWhen
-                        ? new Date(createdWhen)
-                        : undefined,
-                })
-            },
-            update: async (annotation) =>
-                annotationsBG.editAnnotation(
-                    annotation.url,
-                    annotation.comment,
-                ),
-            delete: async (annotation) =>
-                annotationsBG.deleteAnnotation(annotation.url),
-            updateTags: async (annotationUrl, tags) =>
-                tagsBG.setTagsForPage({ url: annotationUrl, tags }),
-        },
+    const annotationsCache = createAnnotationsCache({
+        tags: tagsBG,
+        annotations: annotationsBG,
     })
     annotationsCache.load(currentTab.url)
 

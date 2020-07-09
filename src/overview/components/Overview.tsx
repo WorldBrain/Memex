@@ -23,7 +23,10 @@ import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationsSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
-import { AnnotationsCache } from 'src/annotations/annotations-cache'
+import {
+    createAnnotationsCache,
+    AnnotationsCache,
+} from 'src/annotations/annotations-cache'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -59,32 +62,9 @@ class Overview extends PureComponent<Props, State> {
     constructor(props: Props) {
         super(props)
 
-        this.annotationsCache = new AnnotationsCache({
-            backendOperations: {
-                load: async (url, { limit, skip }) =>
-                    this.annotationsBG.getAllAnnotationsByUrl({
-                        url,
-                        limit,
-                        skip,
-                    }),
-                create: async ({ createdWhen, ...annotation }) => {
-                    await this.annotationsBG.createAnnotation({
-                        ...annotation,
-                        createdWhen: createdWhen
-                            ? new Date(createdWhen)
-                            : undefined,
-                    })
-                },
-                update: async (annotation) =>
-                    this.annotationsBG.editAnnotation(
-                        annotation.url,
-                        annotation.comment,
-                    ),
-                delete: async (annotation) =>
-                    this.annotationsBG.deleteAnnotation(annotation.url),
-                updateTags: async (annotationUrl, tags) =>
-                    this.tagsBG.setTagsForPage({ url: annotationUrl, tags }),
-            },
+        this.annotationsCache = createAnnotationsCache({
+            annotations: this.annotationsBG,
+            tags: this.tagsBG,
         })
     }
 
