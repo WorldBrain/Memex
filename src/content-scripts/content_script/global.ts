@@ -64,7 +64,8 @@ export async function main() {
 
     // 2. Initialise dependencies required by content scripts
     const currentTab = await getCurrentTab()
-    const annotations = runInBackground<AnnotationInterface<'caller'>>()
+    const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
+    const tagsBG = runInBackground<RemoteTagsInterface>()
     const remoteFunctionRegistry = new RemoteFunctionRegistry()
     const annotationsManager = new AnnotationsManager()
     const highlighter = new HighlightInteraction()
@@ -75,19 +76,36 @@ export async function main() {
     // business logic of initialising and hide/showing components.
     const inPageUI = new SharedInPageUIState({
         loadComponent,
-        annotations,
+        annotations: annotationsBG,
         highlighter,
         pageUrl: currentTab.url,
     })
 
     const annotationsCache = new AnnotationsCache({
         backendOperations: {
-            // TODO: (sidebar-refactor) massage the params from Annotation to the likes of CreateAnnotationParams
-            load: async (url) => [],
-            create: async (annotation) => null,
-            update: async (annotation) => null,
-            delete: async (annotation) => null,
-            updateTags: async (annotation) => null,
+            load: async (url, { limit, skip }) =>
+                annotationsBG.getAllAnnotationsByUrl({
+                    url,
+                    limit,
+                    skip,
+                }),
+            create: async ({ createdWhen, ...annotation }) => {
+                await annotationsBG.createAnnotation({
+                    ...annotation,
+                    createdWhen: createdWhen
+                        ? new Date(createdWhen)
+                        : undefined,
+                })
+            },
+            update: async (annotation) =>
+                annotationsBG.editAnnotation(
+                    annotation.url,
+                    annotation.comment,
+                ),
+            delete: async (annotation) =>
+                annotationsBG.deleteAnnotation(annotation.url),
+            updateTags: async (annotationUrl, tags) =>
+                tagsBG.setTagsForPage({ url: annotationUrl, tags }),
         },
     })
     annotationsCache.load(currentTab.url)
@@ -108,11 +126,11 @@ export async function main() {
                 annotationsManager,
                 getRemoteFunction: remoteFunction,
                 highlighter,
-                annotations,
+                annotations: annotationsBG,
                 currentTab,
+                tags: tagsBG,
                 customLists: runInBackground<RemoteCollectionsInterface>(),
                 bookmarks: runInBackground<BookmarksInterface>(),
-                tags: runInBackground<RemoteTagsInterface>(),
                 activityLogger: runInBackground<ActivityLoggerInterface>(),
                 tooltip: {
                     getState: tooltipUtils.getTooltipState,
@@ -137,9 +155,9 @@ export async function main() {
                 inPageUI,
                 annotationsCache,
                 highlighter,
-                annotations,
+                annotations: annotationsBG,
+                tags: tagsBG,
                 pageUrl: currentTab.url,
-                tags: runInBackground<RemoteTagsInterface>(),
                 customLists: runInBackground<RemoteCollectionsInterface>(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
             })
@@ -173,7 +191,7 @@ export async function main() {
         goToHighlight: async (annotation, pageAnnotations) => {
             await highlighter.renderHighlights(
                 pageAnnotations,
-                annotations.toggleSidebarOverlay,
+                annotationsBG.toggleSidebarOverlay,
             )
             await highlighter.highlightAndScroll(annotation)
         },

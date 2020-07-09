@@ -61,12 +61,29 @@ class Overview extends PureComponent<Props, State> {
 
         this.annotationsCache = new AnnotationsCache({
             backendOperations: {
-                // TODO: (sidebar-refactor) massage the params from Annotation to the likes of CreateAnnotationParams
-                load: async (url) => [],
-                create: async (annotation) => null,
-                update: async (annotation) => null,
-                delete: async (annotation) => null,
-                updateTags: async (annotation) => null,
+                load: async (url, { limit, skip }) =>
+                    this.annotationsBG.getAllAnnotationsByUrl({
+                        url,
+                        limit,
+                        skip,
+                    }),
+                create: async ({ createdWhen, ...annotation }) => {
+                    await this.annotationsBG.createAnnotation({
+                        ...annotation,
+                        createdWhen: createdWhen
+                            ? new Date(createdWhen)
+                            : undefined,
+                    })
+                },
+                update: async (annotation) =>
+                    this.annotationsBG.editAnnotation(
+                        annotation.url,
+                        annotation.comment,
+                    ),
+                delete: async (annotation) =>
+                    this.annotationsBG.deleteAnnotation(annotation.url),
+                updateTags: async (annotationUrl, tags) =>
+                    this.tagsBG.setTagsForPage({ url: annotationUrl, tags }),
             },
         })
     }

@@ -1,6 +1,7 @@
 import { Annotation } from 'src/annotations/types'
 import TypedEventEmitter from 'typed-emitter'
 import { Observable } from 'rxjs'
+import { EventEmitter } from 'events'
 
 export interface AnnotationCacheChanges {
     created: (annotation: Annotation) => void
@@ -13,7 +14,10 @@ export interface AnnotationCacheChanges {
 
 export interface AnnotationsCacheDependencies {
     backendOperations?: {
-        load: (url) => Promise<Annotation[]> // url should become one concrete example of a contentFingerprint to load annotations for
+        load: (
+            pageUrl: string,
+            args?: { limit?: number; skip?: number },
+        ) => Promise<Annotation[]> // url should become one concrete example of a contentFingerprint to load annotations for
         create: (annotation: Annotation) => Promise<void>
         update: (annotation: Annotation) => Promise<void>
         updateTags: (
@@ -25,7 +29,10 @@ export interface AnnotationsCacheDependencies {
 }
 
 export interface AnnotationsCacheInterface {
-    load: (url) => Promise<void>
+    load: (
+        pageUrl: string,
+        args?: { limit?: number; skip?: number },
+    ) => Promise<void>
     create: (annotation: Annotation) => void
     update: (annotation: Annotation) => void
     delete: (annotation: Annotation) => void
@@ -35,12 +42,17 @@ export interface AnnotationsCacheInterface {
 
 export class AnnotationsCache implements AnnotationsCacheInterface {
     private _annotations: Annotation[]
-    public annotationChanges: TypedEventEmitter<AnnotationCacheChanges>
+    public annotationChanges = new EventEmitter() as TypedEventEmitter<
+        AnnotationCacheChanges
+    >
 
     constructor(private dependencies: AnnotationsCacheDependencies) {}
 
-    load = async (url) => {
-        this._annotations = await this.dependencies.backendOperations.load(url)
+    load = async (url, args = {}) => {
+        this._annotations = await this.dependencies.backendOperations.load(
+            url,
+            args,
+        )
         this.annotationChanges.emit('load', this._annotations)
     }
 
