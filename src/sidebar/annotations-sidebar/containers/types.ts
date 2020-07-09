@@ -12,6 +12,7 @@ export interface SidebarContainerDependencies {
     }
     pageUrl?: string
     searchResultLimit?: number
+    showGoToAnnotationBtn?: boolean
     initialState?: 'visible' | 'hidden'
     onClickOutside?: React.MouseEventHandler
     annotationsCache: AnnotationsCacheInterface

@@ -121,13 +121,14 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
-            onGoToAnnotation: annotation.body?.length
-                ? () =>
-                      this.processEvent('goToAnnotation', {
-                          annotationUrl: annotation.url,
-                          ...DEF_CONTEXT,
-                      })
-                : undefined,
+            onGoToAnnotation:
+                this.props.showGoToAnnotationBtn && annotation.body?.length > 0
+                    ? () =>
+                          this.processEvent('goToAnnotationInNewTab', {
+                              annotationUrl: annotation.url,
+                              ...DEF_CONTEXT,
+                          })
+                    : undefined,
         }
     }
 

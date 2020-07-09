@@ -114,6 +114,10 @@ export type SidebarContainerEvents = UIEvent<{
         context: AnnotationEventContext
         annotationUrl: string
     }
+    goToAnnotationInNewTab: {
+        context: AnnotationEventContext
+        annotationUrl: string
+    }
     setActiveAnnotationUrl: string
     setAnnotationEditMode: {
         context: AnnotationEventContext
@@ -600,6 +604,24 @@ export class SidebarContainerLogic extends UILogic<
     setActiveAnnotationUrl = async ({ event }) =>
         this.emitMutation({ activeAnnotationUrl: { $set: event } })
 
+    goToAnnotationInNewTab: EventHandler<'goToAnnotationInNewTab'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            activeAnnotationUrl: { $set: event.annotationUrl },
+        })
+
+        const annotation = previousState.annotations.find(
+            (annot) => annot.url === event.annotationUrl,
+        )
+
+        return this.options.annotations.goToAnnotationFromSidebar({
+            url: annotation.pageUrl,
+            annotation,
+        })
+    }
+
     goToAnnotation: EventHandler<'goToAnnotation'> = async ({
         event,
         previousState,
@@ -615,14 +637,6 @@ export class SidebarContainerLogic extends UILogic<
         if (!annotation?.body?.length) {
             return
         }
-
-        // TODO: (sidebar - refactor) Fix env usage
-        // if (this.options.env === 'overview') {
-        //     return this.options.annotations.goToAnnotationFromSidebar({
-        //         url: annotation.pageUrl,
-        //         annotation,
-        //     })
-        // }
 
         this.inPageEvents.emit('highlightAndScroll', {
             url: event.annotationUrl,
