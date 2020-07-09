@@ -1,10 +1,12 @@
 import mapValues from 'lodash/mapValues'
+
 import { SidebarContainerLogic } from './logic'
 import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
 import * as DATA from './logic.test.data'
+import { AnnotationsCache } from 'src/annotations/annotations-cache'
 
 function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
     return mapValues(remoteFunctions, (f) => {
@@ -39,6 +41,17 @@ const setupLogicHelper = async ({
         getAllAnnotationsByUrl: () => undefined,
     } as any
 
+    const annotationsCache = new AnnotationsCache({
+        backendOperations: {
+            // TODO: (sidebar-refactor) massage the params from Annotation to the likes of CreateAnnotationParams
+            load: async (url) => [],
+            create: async (annotation) => null,
+            update: async (annotation) => null,
+            delete: async (annotation) => null,
+            updateTags: async (annotation) => null,
+        },
+    })
+
     const sidebarLogic = new SidebarContainerLogic({
         pageUrl,
         tags: backgroundModules.tags.remoteFunctions,
@@ -50,6 +63,7 @@ const setupLogicHelper = async ({
         // bookmarks: backgroundModules.search.remoteFunctions.bookmarks,
         // inPageUI,
         // highlighter,
+        annotationsCache,
         initialState: 'hidden',
         searchResultLimit: 10,
     })

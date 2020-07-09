@@ -1,5 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
+import { Subscription } from 'rxjs/Subscription'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import AnnotationsSidebar, {
@@ -24,15 +25,37 @@ export interface Props extends SidebarContainerOptions {
     setRef?: (sidebar: AnnotationsSidebarContainer) => void
 }
 
-export abstract class AnnotationsSidebarContainer<
+export class AnnotationsSidebarContainer<
     P extends Props = Props
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
+    annotationSubscription: Subscription
+
     constructor(props: P) {
         super(props, new SidebarContainerLogic(props))
 
         if (props.setRef) {
             props.setRef(this)
         }
+    }
+
+    componentDidMount() {
+        super.componentDidMount()
+        this.setupAnnotationCacheListeners()
+    }
+
+    componentWillUnmount() {
+        super.componentWillUnmount()
+        this.cleanupAnnotationCacheListeners()
+    }
+
+    private setupAnnotationCacheListeners() {
+        this.annotationSubscription = this.props.annotationsCache.annotations.subscribe(
+            (annotations) => this.setState({ annotations }),
+        )
+    }
+
+    private cleanupAnnotationCacheListeners() {
+        this.annotationSubscription.unsubscribe()
     }
 
     showSidebar() {

@@ -3,6 +3,7 @@ import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
+import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -12,6 +13,7 @@ export interface SidebarContainerDependencies {
     searchResultLimit?: number
     initialState?: 'visible' | 'hidden'
     onClickOutside?: React.MouseEventHandler
+    annotationsCache: AnnotationsCacheInterface
 
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>

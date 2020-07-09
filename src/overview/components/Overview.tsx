@@ -23,6 +23,7 @@ import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationsSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
+import { AnnotationsCache } from 'src/annotations/annotations-cache'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -39,6 +40,7 @@ interface State {
 }
 
 class Overview extends PureComponent<Props, State> {
+    private annotationsCache: AnnotationsCache
     private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     private customListsBG = runInBackground<RemoteCollectionsInterface>()
     private tagsBG = runInBackground<RemoteTagsInterface>()
@@ -52,6 +54,21 @@ class Overview extends PureComponent<Props, State> {
 
     state = {
         showPioneer: false,
+    }
+
+    constructor(props: Props) {
+        super(props)
+
+        this.annotationsCache = new AnnotationsCache({
+            backendOperations: {
+                // TODO: (sidebar-refactor) massage the params from Annotation to the likes of CreateAnnotationParams
+                load: async (url) => [],
+                create: async (annotation) => null,
+                update: async (annotation) => null,
+                delete: async (annotation) => null,
+                updateTags: async (annotation) => null,
+            },
+        })
     }
 
     componentDidMount() {
@@ -152,6 +169,7 @@ class Overview extends PureComponent<Props, State> {
                     annotations={this.annotationsBG}
                     customLists={this.customListsBG}
                     refSidebar={this.annotationsSidebarRef}
+                    annotationsCache={this.annotationsCache}
                     onClickOutside={this.handleClickOutsideSidebar}
                 />
 
