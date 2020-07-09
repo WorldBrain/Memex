@@ -230,7 +230,7 @@ export class AnnotationsSidebarContainer<
         }
 
         return (
-            <ContainerStyled>
+            <ContainerStyled className="ignore-react-onclickoutside">
                 {this.renderTopBar()}
                 <AnnotationsSidebar
                     {...this.state}
