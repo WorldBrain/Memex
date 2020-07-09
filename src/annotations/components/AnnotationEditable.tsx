@@ -63,9 +63,9 @@ export interface AnnotationEditableProps {
     hasBookmark?: boolean
     mode: AnnotationMode
     tagPickerDependencies: GenericPickerDependenciesMinusSave
+    annotationFooterDependencies: AnnotationFooterEventProps
     annotationEditDependencies: AnnotationEditGeneralProps &
         AnnotationEditEventProps
-    annotationFooterDependencies: AnnotationFooterEventProps
 }
 
 export interface AnnotationEditableEventProps {
@@ -164,7 +164,14 @@ export default class AnnotationEditable extends React.Component<Props> {
             ...props
         } = this.props
 
-        return <AnnotationFooter {...props} {...annotationFooterDependencies} />
+        return (
+            <AnnotationFooter
+                {...props}
+                {...annotationFooterDependencies}
+                isEdited={this.isEdited}
+                timestamp={this.getFormattedTimestamp()}
+            />
+        )
     }
 
     private renderMainAnnotation() {
@@ -189,9 +196,6 @@ export default class AnnotationEditable extends React.Component<Props> {
             <AnnotationView
                 {...this.props}
                 getTruncatedTextObject={getTruncatedTextObject}
-                isEdited={this.isEdited}
-                timestamp={this.getFormattedTimestamp()}
-                hasBookmark={!!this.props.hasBookmark}
             />
         )
     }

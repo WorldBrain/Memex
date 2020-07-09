@@ -30,7 +30,7 @@ export class AnnotationsSidebarInDashboardResults extends React.Component<
         // this.hideSidebar()
     }
 
-    protected renderTopBarLeft() {
+    private renderTopBarLeft() {
         return (
             <ButtonTooltip tooltipText="Close (ESC)" position="rightCentered">
                 <CloseBtn

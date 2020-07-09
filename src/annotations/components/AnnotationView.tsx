@@ -2,16 +2,11 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
-import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 
 export interface Props {
-    mode: AnnotationMode
-    body?: string
+    hasHighlight?: boolean
     comment?: string
     tags: string[]
-    isEdited: boolean
-    timestamp: string
-    hasBookmark: boolean
     onTagClick?: (tag: string) => void
     getTruncatedTextObject: (
         text: string,
@@ -56,8 +51,11 @@ class AnnotationView extends React.Component<Props> {
         }
 
         return (
-            <CommentBox body={this.props.body}>
-                <TextTruncated text={comment} {...this.props} />
+            <CommentBox hasHighlight={this.props.hasHighlight}>
+                <TextTruncated
+                    text={comment}
+                    getTruncatedTextObject={this.props.getTruncatedTextObject}
+                />
                 {this.renderTags()}
             </CommentBox>
         )
@@ -111,7 +109,7 @@ const CommentBox = styled.div`
     text-align: left;
 
     ${(props: Props) =>
-        !props.body &&
+        !props.hasHighlight &&
         `
         border-top: none;
         border-top-left-radius: 5px;

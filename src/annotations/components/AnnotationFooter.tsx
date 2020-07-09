@@ -84,11 +84,9 @@ class AnnotationFooter extends React.Component<Props> {
 
         return (
             <InnerFooterContainerStyled>
-                <div>
-                    {mode === 'delete' && (
-                        <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
-                    )}
-                </div>
+                {mode === 'delete' && (
+                    <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
+                )}
                 <BtnContainerStyled>
                     <ButtonTooltip
                         tooltipText="ctrl/cmd + Enter"

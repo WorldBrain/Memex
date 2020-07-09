@@ -9,10 +9,7 @@ import { loadInitial, executeUITask } from 'src/util/ui-logic'
 import { SidebarContainerDependencies } from './types'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { featuresBeta } from 'src/util/remote-functions-background'
-import {
-    AnnotationMode,
-    SidebarEnv,
-} from 'src/sidebar/annotations-sidebar/types'
+import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { DEF_RESULT_LIMIT } from '../constants'
 
 export interface SidebarContainerState {
@@ -533,7 +530,9 @@ export class SidebarContainerLogic extends UILogic<
     > = () => {
         this.emitMutation({
             commentBox: {
-                form: { showTagsPicker: { $apply: (active) => !active } },
+                form: {
+                    isTagInputActive: { $apply: (active) => !active },
+                },
             },
         })
     }
@@ -543,7 +542,9 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({
             commentBox: {
-                form: { showTagsPicker: { $set: event.active } },
+                form: {
+                    isTagInputActive: { $set: event.active },
+                },
             },
         })
     }
