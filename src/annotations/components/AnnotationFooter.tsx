@@ -3,6 +3,7 @@ import styled from 'styled-components'
 
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface Props extends AnnotationFooterEventProps {
     mode: AnnotationMode
@@ -24,40 +25,37 @@ export interface AnnotationFooterEventProps {
 
 class AnnotationFooter extends React.Component<Props> {
     private renderDefaultFooter() {
-        const bookmarkBtnProps = {
-            title: 'Toggle star',
-            onClick: (e) => {
-                e.stopPropagation()
-                this.props.toggleBookmark()
-            },
-        }
+        const { isEdited, timestamp, hasBookmark } = this.props
 
         return (
             <DefaultInnerFooterContainerStyled>
                 <TimestampStyled>
-                    {this.props.isEdited && <span>Last Edit: </span>}
-                    {this.props.timestamp}
+                    {isEdited && <span>Last Edit: </span>}
+                    {timestamp}
                 </TimestampStyled>
                 <DefaultFooterBtnContainerStyled>
-                    <TrashBtnStyled
-                        title="Delete note"
+                    <IconStyled
                         onClick={this.props.onDeleteIconClick}
+                        title="Delete note"
+                        src={icons.trash}
                     />
                     {this.props.onGoToAnnotation && (
-                        <GoToPageBtnStyled
-                            title="Go to annotation"
+                        <IconStyled
                             onClick={this.props.onGoToAnnotation}
+                            title="Go to annotation"
+                            src={icons.goTo}
                         />
                     )}
-                    <EditBtnStyled
-                        title="Edit note"
+                    <IconStyled
                         onClick={this.props.onEditIconClick}
+                        title="Edit note"
+                        src={icons.edit}
                     />
-                    {this.props.hasBookmark ? (
-                        <BookmarkedBtnStyled {...bookmarkBtnProps} />
-                    ) : (
-                        <NotBookmarkedBtnStyled {...bookmarkBtnProps} />
-                    )}
+                    <IconStyled
+                        onClick={this.props.toggleBookmark}
+                        title="Toggle star"
+                        src={hasBookmark ? icons.heartFull : icons.heartEmpty}
+                    />
                 </DefaultFooterBtnContainerStyled>
             </DefaultInnerFooterContainerStyled>
         )
@@ -225,7 +223,7 @@ const DefaultFooterBtnContainerStyled = styled.div`
     z-index: 0;
 `
 
-const CommonBtnStyled = styled.button`
+const IconStyled = styled.img`
     border: none;
     z-index: 2500;
     min-width: 20px;
@@ -240,39 +238,6 @@ const CommonBtnStyled = styled.button`
     width: stretch;
     margin-left: 4px;
     opacity: 0.3;
-`
-
-const TrashBtnStyled = styled(CommonBtnStyled)`
-    background-image: url('/img/trash.svg');
-
-    &:hover {
-        opacity: 0.6;
-    }
-`
-
-const EditBtnStyled = styled(CommonBtnStyled)`
-    background-image: url('/img/comment_edit.svg');
-
-    &:hover {
-        opacity: 0.6;
-    }
-`
-
-const GoToPageBtnStyled = styled(CommonBtnStyled)`
-    background-image: url('/img/open.svg');
-
-    &:hover {
-        opacity: 0.6;
-    }
-`
-
-const BookmarkedBtnStyled = styled(CommonBtnStyled)`
-    background-image: url('/img/star_full.svg');
-    opacity: 1;
-`
-
-const NotBookmarkedBtnStyled = styled(CommonBtnStyled)`
-    background-image: url('/img/star_empty.svg');
 
     &:hover {
         opacity: 0.6;
