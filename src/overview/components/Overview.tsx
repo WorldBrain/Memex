@@ -117,6 +117,10 @@ class Overview extends PureComponent<Props, State> {
         }
     }
 
+    private handleCloseSidebarBtnClick: React.MouseEventHandler = (e) => {
+        this.annotationsSidebar.hideSidebar()
+    }
+
     handleOnboardingComplete = () => {
         window.location.href = OVERVIEW_URL
         this.props.setShowOnboardingMessage()
@@ -168,6 +172,7 @@ class Overview extends PureComponent<Props, State> {
                     refSidebar={this.annotationsSidebarRef}
                     annotationsCache={this.annotationsCache}
                     onClickOutside={this.handleClickOutsideSidebar}
+                    onCloseSidebarBtnClick={this.handleCloseSidebarBtnClick}
                 />
 
                 <Tooltip />

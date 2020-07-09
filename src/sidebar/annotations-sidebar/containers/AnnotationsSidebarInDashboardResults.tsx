@@ -6,6 +6,7 @@ import { ButtonTooltip } from 'src/common-ui/components'
 import { SidebarContainerOptions } from 'src/sidebar/annotations-sidebar/containers/logic'
 
 type Props = SidebarContainerOptions & {
+    onCloseSidebarBtnClick: React.MouseEventHandler
     refSidebar?: React.Ref<AnnotationsSidebarContainer>
 }
 
@@ -25,17 +26,11 @@ export class AnnotationsSidebarInDashboardResults extends React.Component<
         )
     }
 
-    private handleCloseSidebarBtnClick: React.MouseEventHandler = (e) => {
-        e.preventDefault()
-
-        // this.hideSidebar()
-    }
-
     private renderTopBarLeft() {
         return (
             <ButtonTooltip tooltipText="Close (ESC)" position="rightCentered">
                 <CloseBtn
-                    onClick={this.handleCloseSidebarBtnClick}
+                    onClick={this.props.onCloseSidebarBtnClick}
                     title="Close sidebar"
                 >
                     <CloseIcon />
