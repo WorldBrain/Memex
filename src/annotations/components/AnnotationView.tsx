@@ -36,7 +36,7 @@ class AnnotationView extends React.Component<Props> {
 
     private renderTags() {
         return (
-            <TagsContainerStyled {...this.props}>
+            <TagsContainerStyled comment={this.props.comment}>
                 {this.props.tags.map((tag) => (
                     <TagPillStyled
                         key={tag}
@@ -56,7 +56,7 @@ class AnnotationView extends React.Component<Props> {
         }
 
         return (
-            <CommentBox {...this.props}>
+            <CommentBox body={this.props.body}>
                 <TextTruncated text={comment} {...this.props} />
                 {this.renderTags()}
             </CommentBox>

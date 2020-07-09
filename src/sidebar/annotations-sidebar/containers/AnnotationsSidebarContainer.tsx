@@ -230,7 +230,7 @@ export class AnnotationsSidebarContainer<
         }
 
         return (
-            <ContainerStyled {...this.props}>
+            <ContainerStyled>
                 {this.renderTopBar()}
                 <AnnotationsSidebar
                     {...this.state}

@@ -207,7 +207,8 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <AnnotationStyled
-                {...this.props}
+                mode={this.props.mode}
+                isActive={this.props.isActive}
                 id={this.props.url} // Focusing on annotation relies on this ID.
                 ref={this.setBoxRef}
                 onClick={this.handleGoToAnnotation}
