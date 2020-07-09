@@ -21,9 +21,7 @@ const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
 }
 
-export interface Props extends SidebarContainerOptions {
-    setRef?: (sidebar: AnnotationsSidebarContainer) => void
-}
+export interface Props extends SidebarContainerOptions {}
 
 export class AnnotationsSidebarContainer<
     P extends Props = Props
@@ -32,10 +30,6 @@ export class AnnotationsSidebarContainer<
 
     constructor(props: P) {
         super(props, new SidebarContainerLogic(props))
-
-        if (props.setRef) {
-            props.setRef(this)
-        }
     }
 
     componentDidMount() {
@@ -234,6 +228,7 @@ export class AnnotationsSidebarContainer<
                 {this.renderTopBar()}
                 <AnnotationsSidebar
                     {...this.state}
+                    needsWaypoint={!this.state.noResults}
                     appendLoader={this.state.secondarySearchState === 'running'}
                     annotationModes={this.state.annotationModes.pageAnnotations}
                     isAnnotationCreateShown={this.state.showCommentBox}

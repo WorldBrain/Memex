@@ -321,11 +321,20 @@ export class SidebarContainerLogic extends UILogic<
             },
         )
 
-        this.emitMutation({
-            annotations: { $set: annotations },
-            pageCount: { $set: annotations.length },
-            noResults: { $set: annotations.length === 0 },
-        })
+        if (opts.overwrite) {
+            this.emitMutation({
+                annotations: { $set: annotations },
+                pageCount: { $set: annotations.length },
+                noResults: { $set: annotations.length < this.resultLimit },
+                searchResultSkip: { $set: 0 },
+            })
+        } else {
+            this.emitMutation({
+                annotations: { $apply: (prev) => [...prev, ...annotations] },
+                pageCount: { $apply: (prev) => prev + annotations.length },
+                noResults: { $set: annotations.length < this.resultLimit },
+            })
+        }
     }
 
     paginateSearch: EventHandler<'paginateSearch'> = async ({
