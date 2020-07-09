@@ -8,6 +8,7 @@ import { SidebarContainerOptions } from 'src/sidebar/annotations-sidebar/contain
 type Props = SidebarContainerOptions & {
     refSidebar?: React.Ref<AnnotationsSidebarContainer>
 }
+
 export class AnnotationsSidebarInDashboardResults extends React.Component<
     Props
 > {

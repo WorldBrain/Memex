@@ -293,6 +293,8 @@ const LoadingIndicatorStyled = styled(LoadingIndicator)`
 `
 
 const AnnotationsSectionStyled = styled.section`
+    overflow-y: auto;
+    height: 90vh;
     width: 100%;
     background: #fff;
     display: flex;
