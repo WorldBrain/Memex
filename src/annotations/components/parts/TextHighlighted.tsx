@@ -46,12 +46,12 @@ class TextHighlighted extends React.Component<Props> {
                 <NewAnnotationStyled>New Annotation</NewAnnotationStyled>
                 <HighlightedTextStyled>
                     {this._getHighlightText()}
-                    {this._isHighlightLong() && (
-                        <ShowMoreButtonStyled
-                            onClick={this._toggleHighlightTruncation}
-                        />
-                    )}
                 </HighlightedTextStyled>
+                {this._isHighlightLong() && (
+                    <ShowMoreButtonStyled
+                        onClick={this._toggleHighlightTruncation}
+                    />
+                )}
             </HighlightStyled>
         )
     }
@@ -59,13 +59,18 @@ class TextHighlighted extends React.Component<Props> {
 
 const NewAnnotationStyled = styled.div``
 const HighlightStyled = styled.span``
-const HighlightedTextStyled = styled.span``
+const HighlightedTextStyled = styled.span`
+    background-color: #00d88b;
+    padding: 2px 0;
+    line-height: 25px;
+    font-style: normal;
+    color: #3a2f45;
+`
 
 const ShowMoreButtonStyled = styled.button`
     margin: 5px 0 0 5px;
     cursor: pointer;
     display: inline-block;
-    background-image: url('/img/longarrow.svg');
     background-color: transparent;
     background-repeat: no-repeat;
     background-size: 43px;

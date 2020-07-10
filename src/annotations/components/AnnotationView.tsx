@@ -48,21 +48,24 @@ class AnnotationView extends React.Component<Props> {
 
     render() {
         const { comment, tags } = this.props
-        if (!comment && !tags) {
-            return !tags?.length ? null : this.renderTags()
-        }
 
         return (
             <ThemeProvider theme={this.props.theme}>
-                <CommentBox hasHighlight={this.props.hasHighlight}>
-                    <TextTruncated
-                        text={comment}
-                        getTruncatedTextObject={
-                            this.props.getTruncatedTextObject
-                        }
-                    />
-                    {this.renderTags()}
-                </CommentBox>
+                {this.props.comment?.length > 0 && 
+                    <CommentBox hasHighlight={this.props.hasHighlight}>
+                        <TextTruncated
+                            text={comment}
+                            getTruncatedTextObject={
+                                this.props.getTruncatedTextObject
+                            }
+                        />
+                    </CommentBox>
+                }
+                {this.props.tags?.length > 0 && 
+                    <TagBox>
+                        {this.renderTags()}
+                    </TagBox>
+                }
             </ThemeProvider>
         )
     }
@@ -88,17 +91,10 @@ const TagPillStyled = styled.div`
 
 const TagsContainerStyled = styled.div`
     height: auto;
-    padding-top: 13px;
     display: flex;
     flex-wrap: wrap;
-
-    ${({ theme }: Props) =>
-        !theme.hasComment &&
-        `
-        margin-top: -8px;
-        margin-left: 15px;
-        padding-bottom: 15px;
-    `}
+    margin-left: 15px;
+    padding-bottom: 10px;
 `
 
 const CommentBox = styled.div`
@@ -122,4 +118,7 @@ const CommentBox = styled.div`
         border-top-right-radius: 5px;
         padding: 15px 15px 15px;
     `}
+`
+
+const TagBox = styled.div `
 `

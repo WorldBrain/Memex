@@ -194,7 +194,7 @@ const TextInputControlledStyled = styled(TextInputControlled)`
     border-radius: 3px;
     border: none;
     padding: 10px 7px;
-    margin: 5px 5px 5px 5px;
+    margin: 5px 10px 5px 10px;
     min-height: 100px;
     width: auto;
 

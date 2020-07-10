@@ -47,4 +47,5 @@ export interface SidebarTheme {
     canClickAnnotations: boolean
     rightOffsetPx: number
     topOffsetPx: number
+    paddingRight: number
 }

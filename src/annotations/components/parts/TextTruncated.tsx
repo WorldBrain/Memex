@@ -55,35 +55,41 @@ class TextTruncated extends React.Component<Props, State> {
 
         return (
             <React.Fragment>
-                {textToBeDisplayed}
+            {textToBeDisplayed}
+            <CommentTextBox>
                 {isTextTooLong && (
                     <ToggleMoreButtonStyled
                         onClick={this._toggleTextTruncation}
                     >
-                        {shouldTruncate ? 'More' : 'Less'}
+                        {shouldTruncate ? 'Show More' : 'Show Less'}
                     </ToggleMoreButtonStyled>
                 )}
+            </CommentTextBox>
             </React.Fragment>
         )
     }
 }
 
-const ToggleMoreButtonStyled = styled.button`
-    margin: 5px 0 0 5px;
+const ToggleMoreButtonStyled = styled.div`
+    margin: 2px 0 0 -8px;
     cursor: pointer;
-    display: inline-block;
-    background-image: url('/img/longarrow.svg');
-    background-color: transparent;
-    background-repeat: no-repeat;
-    background-size: 43px;
-    width: 40px;
-    height: 20px;
-    background-position: center;
-    transition: transform 0.15s ease-in;
-    border: none;
-    outline: none;
-    transform-origin: center;
-    transform: ${({ rotate }) => (rotate ? 'rotate(-180deg)' : 'none')};
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size 12px;
+    color: grey;
+    line-height: 18px;
+
+    &: hover {
+        background-color: #e0e0e0;
+        color: #3a2f45;
+    }
+`
+
+const CommentTextBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
 `
 
 export default TextTruncated

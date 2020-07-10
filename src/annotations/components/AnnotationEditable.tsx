@@ -207,14 +207,6 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     render() {
-        // if (this.props.displayCrowdfunding) {
-        //     return (
-        //         <CrowdfundingBox
-        //             onClose={() => console.log('close')}
-        //         />
-        //     )
-        // }
-
         return (
             <ThemeProvider theme={this.theme}>
                 <AnnotationStyled
@@ -285,5 +277,9 @@ const AnnotationStyled = styled.div`
         `
         background-color: white;
         cursor: default;
+
+        &:hover {
+            background-color: white;
+        }
     `}
 `

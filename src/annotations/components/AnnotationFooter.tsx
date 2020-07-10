@@ -36,29 +36,15 @@ class AnnotationFooter extends React.Component<Props> {
                 <DefaultFooterBtnContainerStyled>
                     <ButtonTooltip
                         position={'bottom'}
-                        tooltipText={'Delete Note'}
+                        tooltipText={'Bookmark Note'}
                     >
                         <IconBox>
                             <IconStyled
-                                onClick={this.props.onDeleteIconClick}
-                                title="Delete note"
-                                src={icons.trash}
+                                onClick={this.props.toggleBookmark}
+                                title="Toggle star"
+                                src={hasBookmark ? icons.heartFull : icons.heartEmpty}
                             />
                         </IconBox>
-                    </ButtonTooltip>
-                    <ButtonTooltip
-                        position={'bottom'}
-                        tooltipText={'Open in Page'}
-                    >
-                        {this.props.onGoToAnnotation && (
-                            <IconBox>
-                                <IconStyled
-                                    onClick={this.props.onGoToAnnotation}
-                                    title="Go to annotation"
-                                    src={icons.goTo}
-                                />
-                            </IconBox>
-                        )}
                     </ButtonTooltip>
                     <ButtonTooltip
                         position={'bottom'}
@@ -74,16 +60,31 @@ class AnnotationFooter extends React.Component<Props> {
                     </ButtonTooltip>
                     <ButtonTooltip
                         position={'bottom'}
-                        tooltipText={'Bookmark Note'}
+                        tooltipText={'Delete Note'}
                     >
                         <IconBox>
                             <IconStyled
-                                onClick={this.props.toggleBookmark}
-                                title="Toggle star"
-                                src={hasBookmark ? icons.heartFull : icons.heartEmpty}
+                                onClick={this.props.onDeleteIconClick}
+                                title="Delete note"
+                                src={icons.trash}
                             />
                         </IconBox>
                     </ButtonTooltip>
+                    {this.props.onGoToAnnotation && (
+                        <ButtonTooltip
+                            position={'bottom'}
+                            tooltipText={'Open in Page'}
+                        >
+                            
+                                <IconBox>
+                                    <IconStyled
+                                        onClick={this.props.onGoToAnnotation}
+                                        title="Go to annotation"
+                                        src={icons.goTo}
+                                    />
+                                </IconBox>
+                        </ButtonTooltip>
+                    )}
                 </DefaultFooterBtnContainerStyled>
             </DefaultInnerFooterContainerStyled>
         )
@@ -252,16 +253,20 @@ const DefaultFooterBtnContainerStyled = styled.div`
     grid-auto-flow: column;
     display: inline-grid;
     grid-gap: 3px;
+    grid-template-columns: repeat(6, 24px);
+    height: 24px;
+    direction: rtl;
 `
 
 const IconBox = styled.div `
-    height: 24px;
-    width: 24px;
     padding: 4px;
     border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: fill-available;
 
     &:hover {
-        opacity: 0.6;
         background-color: #e0e0e0;
     }
 

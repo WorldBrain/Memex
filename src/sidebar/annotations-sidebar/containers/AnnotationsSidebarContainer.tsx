@@ -295,6 +295,7 @@ const ContainerStyled = styled.div`
 
     right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
     top: ${({ theme }: Props) => theme?.topOffsetPx ?? 0}px;
+    padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
 
     z-index: 9999999; /* This is to combat pages setting high values on certain elements under the sidebar */
     background: #fff;
