@@ -25,6 +25,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 > {
     static defaultProps: Partial<Props> = {
         theme: { rightOffsetPx: 40, canClickAnnotations: true },
+        skipTopBarRender: true,
     }
 
     componentDidMount() {

@@ -15,9 +15,7 @@ export class AnnotationsSidebarInDashboardResults extends React.Component<
         const { refSidebar, ...props } = this.props
         return (
             <AnnotationsSidebarContainer
-                elements={{
-                    topBarLeft: this.renderTopBarLeft(),
-                }}
+                elements={{ topBarLeft: this.renderTopBarLeft() }}
                 ref={refSidebar}
                 {...props}
             />

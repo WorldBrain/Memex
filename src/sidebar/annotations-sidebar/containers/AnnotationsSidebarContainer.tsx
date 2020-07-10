@@ -21,7 +21,9 @@ const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
 }
 
-export interface Props extends SidebarContainerOptions {}
+export interface Props extends SidebarContainerOptions {
+    skipTopBarRender?: boolean
+}
 
 export class AnnotationsSidebarContainer<
     P extends Props = Props
@@ -227,7 +229,7 @@ export class AnnotationsSidebarContainer<
         return (
             <ThemeProvider theme={this.props.theme}>
                 <ContainerStyled className="ignore-react-onclickoutside">
-                    {this.renderTopBar()}
+                    {!this.props.skipTopBarRender && this.renderTopBar()}
                     <AnnotationsSidebar
                         {...this.state}
                         needsWaypoint={!this.state.noResults}
