@@ -202,7 +202,11 @@ class AnnotationsSidebar extends React.Component<
         }
 
         if (this.props.appendLoader) {
-            annots.push(<LoadingIndicator key="sidebar-pagination-spinner" />)
+            annots.push(
+                <LoadingIndicatorSection>
+                    <LoadingIndicator key="sidebar-pagination-spinner" />
+                </LoadingIndicatorSection>
+            )
         }
 
         if (this.props.showCongratsMessage) {

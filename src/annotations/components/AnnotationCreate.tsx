@@ -177,7 +177,6 @@ export default AnnotationCreate
 
 const TextBoxContainerStyled = styled.div`
     box-shadow: none;
-    margin-top: 1px;
     cursor: default;
     box-sizing: border-box;
     display: flex;
@@ -207,7 +206,7 @@ const TextInputControlledStyled = styled(TextInputControlled)`
     border-radius: 3px;
     border: none;
     padding: 10px 7px;
-    margin: 5px 10px 5px 10px;
+    margin: 10px 10px 5px 10px;
     min-height: 100px;
     width: auto;
 
@@ -323,11 +322,11 @@ const InteractionItemsBox = styled.div`
 `
 
 const ImgButtonStyled = styled.img`
-    width: 18px;
+    width: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 18px;
+    height: 16px;
     opacity: 0.6;
     background-color: transparent;
     cursor: pointer;
