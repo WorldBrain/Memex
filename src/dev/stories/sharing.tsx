@@ -3,6 +3,7 @@ import { storiesOf } from '@storybook/react'
 import { withKnobs, boolean } from '@storybook/addon-knobs'
 
 import ShareModalContent from 'src/overview/sharing/components/ShareModalContent'
+import ShareNonPioneerInfo from 'src/overview/sharing/components/ShareNonPioneerInfo'
 
 const stories = storiesOf('Sharing', module)
 
@@ -33,12 +34,16 @@ stories.add('Modal content - public & uploading', () => (
     <ShareModalContent
         collectionName={'Reading List'}
         isPublic={boolean('isPublic', true)}
-        isUploading={true}
+        isUploading
         shareUrl={'https://memex.social/collections/jdfjf81d'}
         onClickToggle={() => {}}
         onClickLetUsKnow={() => {}}
         onClickViewRoadmap={() => {}}
     />
+))
+
+stories.add('Modal content - not a pioneer', () => (
+    <ShareNonPioneerInfo onClickUpgrade={() => {}} />
 ))
 
 stories.addDecorator(withKnobs)
