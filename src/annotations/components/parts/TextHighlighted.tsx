@@ -42,50 +42,35 @@ class TextHighlighted extends React.Component<Props> {
         const { truncateHighlight } = this.props
 
         return (
-            <HighlightStyled>
-                <NewAnnotationStyled>New Annotation</NewAnnotationStyled>
-                <HighlightedTextStyled>
-                    {this._getHighlightText()}
-                </HighlightedTextStyled>
-                {this._isHighlightLong() && (
-                    <ShowMoreButtonStyled
-                        onClick={this._toggleHighlightTruncation}
-                    />
-                )}
-            </HighlightStyled>
+            <>
+                <HighlightStyled>
+                    <HighlightedTextStyled>
+                        {this._getHighlightText()}
+                    </HighlightedTextStyled>
+                </HighlightStyled>
+            </>
         )
     }
 }
 
-const NewAnnotationStyled = styled.div``
-const HighlightStyled = styled.span``
+const HighlightStyled = styled.span`
+    margin: 10px;
+`
+
 const HighlightedTextStyled = styled.span`
     background-color: #00d88b;
     padding: 2px 0;
     line-height: 25px;
     font-style: normal;
     color: #3a2f45;
+    font-size: 14px;
 `
 
 const ShowMoreButtonStyled = styled.button`
-    margin: 5px 0 0 5px;
-    cursor: pointer;
-    display: inline-block;
-    background-color: transparent;
-    background-repeat: no-repeat;
-    background-size: 43px;
-    width: 40px;
-    height: 20px;
-    background-position: center;
-    transition: transform 0.15s ease-in;
-    transform: rotate(0deg);
+    padding: 3px 5px;
     border: none;
     outline: none;
-
-    &.rotated {
-        transform: rotate(-180deg);
-        transform-origin: center;
-    }
+    text: 'Show';
 `
 
 export default TextHighlighted

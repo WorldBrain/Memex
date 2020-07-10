@@ -36,7 +36,7 @@ class AnnotationFooter extends React.Component<Props> {
                 <DefaultFooterBtnContainerStyled>
                     <ButtonTooltip
                         position={'bottom'}
-                        tooltipText={'Bookmark Note'}
+                        tooltipText={hasBookmark ? 'Un-Favorite' : 'Favorite'}
                     >
                         <IconBox>
                             <IconStyled
@@ -115,17 +115,17 @@ class AnnotationFooter extends React.Component<Props> {
                     <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
                 )}
                 <BtnContainerStyled>
+                    <CancelBtnStyled onClick={cancelBtnHandler}>
+                        Cancel
+                    </CancelBtnStyled>
                     <ButtonTooltip
                         tooltipText="ctrl/cmd + Enter"
-                        position="top"
+                        position="bottom"
                     >
                         <ActionBtnStyled onClick={actionBtnHandler}>
                             {actionBtnText}
                         </ActionBtnStyled>
                     </ButtonTooltip>
-                    <CancelBtnStyled onClick={cancelBtnHandler}>
-                        Cancel
-                    </CancelBtnStyled>
                 </BtnContainerStyled>
             </InnerFooterContainerStyled>
         )
@@ -147,50 +147,47 @@ class AnnotationFooter extends React.Component<Props> {
 export default AnnotationFooter
 
 const ActionBtnStyled = styled.button`
-    padding: 3px 8px 3px 8px;
-    border-radius: radius3;
-    font-weight: 500;
-
     box-sizing: border-box;
     cursor: pointer;
     font-size: 14px;
     border: none;
-    font-weight: 700;
     outline: none;
-    background: none;
+    padding: 3px 5px;
+    margin-right: 5px;
+    background: transparent;
+    border-radius: 3px;
+    font-weight: 700;
 
     &:focus {
-        background-color: #e8e8e8;
+        background-color: grey;
     }
 
     &:hover {
-        background-color: #e8e8e8;
-        color: rgb(54, 54, 46);
+        background-color: #e0e0e0
+    }
+
+    &:focus {
+        background-color: #79797945;
     }
 `
 
 const CancelBtnStyled = styled.button`
-    padding: 3px 8px 3px 8px;
-    border-radius: radius3;
-    font-weight: 500;
-
-    color: #f29d9d;
-
     box-sizing: border-box;
     cursor: pointer;
     font-size: 14px;
     border: none;
     outline: none;
-    margin-right: -6px;
+    padding: 3px 5px;
     background: transparent;
-
-    &:focus {
-        background-color: #e8e8e8;
-    }
+    border-radius: 3px;
+    color: red;
 
     &:hover {
-        background-color: #e8e8e8;
-        color: rgb(54, 54, 46);
+        background-color: #e0e0e0
+    }
+
+    &:focus {
+        background-color: #79797945;
     }
 `
 

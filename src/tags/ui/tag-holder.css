@@ -12,6 +12,9 @@
 
 .tag {
     composes: tagPillRemove from 'src/common-ui/elements.css';
+    display: flex;
+    align-items: center;
+    padding: 3px 4px 3px 9px;
 }
 
 .tagIcon {
@@ -43,6 +46,10 @@
     }
 }
 
+.placeholder_alt {
+    margin-left: 0px;
+}
+
 .plus {
     font-size: 21px;
     position: absolute;
@@ -59,15 +66,10 @@
 
 .remove {
     composes: closeIcon from 'src/common-ui/icons.css';
-    composes: nakedButton hoverColor from 'src/common-ui/colors.css';
-    padding: 3px;
-    width: 5px;
-    height: 5px;
-    background-size: 9px;
-    margin-left: 3px;
+    padding: 2px;
+    width: 6px;
+    height: 6px;
+    margin-left: 6px;
+    margin-right: 3px;
     opacity: 0.7;
-
-    &:hover {
-        background-color: white;
-    }
 }

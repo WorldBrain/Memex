@@ -135,12 +135,14 @@ class AnnotationsSidebar extends React.Component<
 
         return (
             <NewAnnotationSection>
+                <NewAnnotationStyled>New Annotation</NewAnnotationStyled>
                 <NewAnnotationBoxStyled>
                     <AnnotationCreate
                         {...this.props.annotationCreateProps}
                         tagPickerDependencies={this.props.annotationTagProps}
                     />
                 </NewAnnotationBoxStyled>
+                <NewAnnotationSeparator/>
             </NewAnnotationSection>
         )
     }
@@ -222,6 +224,11 @@ const ButtonStyled = styled.button`
     background: transparent;
     border: none;
     outline: none;
+`
+
+const NewAnnotationStyled = styled.div`
+    font-weight: 600;
+    color: #3a2f45;
 `
 
 const SearchIcon = styled.span`
@@ -345,7 +352,14 @@ const NewAnnotationSection = styled.section`
     justify-content: flex-start;
     align-items: flex-start;
     padding-left: 5px;
-    margin-bottom: 30px;
+    padding-top: 30px;
+`
+
+const NewAnnotationSeparator = styled.div`
+    align-self: center;
+    width: 60%;
+    margin-top: 30px;
+    border-bottom: 1px solid #e0e0e0
 `
 
 const AnnotationsSectionStyled = styled.section`
@@ -360,6 +374,7 @@ const AnnotationsSectionStyled = styled.section`
     margin-bottom: 30px;
     padding-bottom: 100px;
     padding-left: 5px;
+    padding-top: 30px;
 `
 
 const NewAnnotationBoxStyled = styled.div`

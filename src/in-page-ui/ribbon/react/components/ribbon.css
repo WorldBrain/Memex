@@ -22,8 +22,6 @@
     border-bottom-left-radius: 5px;
     border: 1px solid #7777775c;
     border-right: none; */
-    transform: translate(0, -20px);
-    transition: all 0.1s ease-in-out;
     width: 8px;
     height: 40vh;
 
@@ -59,7 +57,7 @@
 .innerRibbon {
     position: absolute;
     right: 10px;
-    top: 50px;
+    top: 40px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -82,7 +80,7 @@
     top: 0px;
     justify-content: flex-start;
     padding-right: 16px;
-    padding-top: 55px;
+    padding-top: 45px;
     width: 20px;
     align-items: flex-end;
     display: flex;

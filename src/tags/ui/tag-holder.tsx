@@ -1,4 +1,5 @@
 import * as React from 'react'
+import classNames from 'classnames'
 
 import { maxPossibleTags } from 'src/sidebar/annotations-sidebar/utils'
 import { ClickHandler } from 'src/sidebar/annotations-sidebar/types'
@@ -85,15 +86,14 @@ class TagHolder extends React.Component<Props, State> {
 
         return (
             <div className={styles.tagHolder} onClick={clickHandler}>
-                {!tags.length && (
-                    <span className={styles.placeholder}>
-                        <span className={styles.tagIcon} />
-                        Add tag
-                    </span>
-                )}
-
                 {this._renderTags()}
-                {this._renderNumberOfRemainingTags()}
+                <span className={classNames(
+                    styles.placeholder, 
+                    tags.length > 0 && styles.placeholder_alt
+                )}>
+                        {!tags.length && (<span className={styles.tagIcon} />)}
+                        <span className={styles.addTag}>Add tag</span>
+                </span>
             </div>
         )
     }

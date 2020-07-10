@@ -310,7 +310,7 @@ export default class Ribbon extends Component<Props, State> {
                         <React.Fragment>
                             <div className={styles.generalActions}>
                                 <ButtonTooltip
-                                    tooltipText={'Close Toolbar Once.'}
+                                    tooltipText={'Close Toolbar for session'}
                                     position="left"
                                 >
                                     <button

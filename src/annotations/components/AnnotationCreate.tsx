@@ -2,6 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Anchor } from 'src/highlighting/types'
 import { Tooltip } from 'src/common-ui/components'
+import { ButtonTooltip } from 'src/common-ui/components'
 import TagPicker from 'src/tags/ui/TagPicker'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
@@ -114,7 +115,7 @@ class AnnotationCreate extends React.Component<
 
         return (
             <FooterStyled>
-                <Flex>
+                <InteractionItemsBox>
                     <InteractionsImgContainerStyled>
                         <ImgButtonStyled
                             src={tagEmpty}
@@ -125,24 +126,36 @@ class AnnotationCreate extends React.Component<
                             }
                         />
                     </InteractionsImgContainerStyled>
-                    <InteractionsImgContainerStyled>
-                        <ImgButtonStyled
-                            src={
-                                this.state.isBookmarked ? heartFull : heartEmpty
-                            }
-                            onClick={() =>
-                                this.setState((state) => ({
-                                    isBookmarked: !state.isBookmarked,
-                                }))
-                            }
-                        />
-                    </InteractionsImgContainerStyled>
-                </Flex>
+                    <ButtonTooltip
+                        tooltipText="Favorite"
+                        position="bottom"
+                    >
+                        <InteractionsImgContainerStyled>
+                            <ImgButtonStyled
+                                src={
+                                    this.state.isBookmarked ? heartFull : heartEmpty
+                                }
+                                onClick={() =>
+                                    this.setState((state) => ({
+                                        isBookmarked: !state.isBookmarked,
+                                    }))
+                                }
+                            />
+                        </InteractionsImgContainerStyled>
+                    </ButtonTooltip>
+                </InteractionItemsBox>
                 <Flex>
-                    <CancelBtnStyled onClick={onCancel}>Cancel</CancelBtnStyled>
-                    <SaveBtnStyled onClick={this.handleSave}>
-                        Save
-                    </SaveBtnStyled>
+                    <ButtonTooltip
+                        tooltipText="ctrl/cmd + Enter"
+                        position="bottom"
+                    >
+                        <SaveBtnStyled onClick={this.handleSave}>
+                            Save
+                        </SaveBtnStyled>
+                    </ButtonTooltip>
+                    <CancelBtnStyled onClick={onCancel}>
+                        Cancel
+                    </CancelBtnStyled>
                 </Flex>
             </FooterStyled>
         )
@@ -218,7 +231,7 @@ const FooterStyled = styled.div`
     flex-direction: row-reverse;
     justify-content: space-between;
     align-items: center;
-    margin: 0px 12px 4px 4px;
+    margin: 0px 12px 4px 12px;
     height: 26px;
     animation: slideIn 0.2s ease-in-out;
     animation-fill-mode: forwards;
@@ -229,13 +242,19 @@ const SaveBtnStyled = styled.div`
     cursor: pointer;
     font-size: 14px;
     border: none;
-    font-weight: 700;
     outline: none;
-    margin-left: 2px;
+    padding: 3px 5px;
+    margin-right: 5px;
     background: transparent;
+    border-radius: 3px;
+    font-weight: 700;
 
     &:focus {
         background-color: grey;
+    }
+
+    &:hover {
+        background-color: #e0e0e0
     }
 
     &:focus {
@@ -249,8 +268,14 @@ const CancelBtnStyled = styled.div`
     font-size: 14px;
     border: none;
     outline: none;
-    margin-right: -6px;
+    padding: 3px 5px;
     background: transparent;
+    border-radius: 3px;
+    color: red;
+
+    &:hover {
+        background-color: #e0e0e0
+    }
 
     &:focus {
         background-color: #79797945;
@@ -260,10 +285,15 @@ const ConfirmBtnStyled = styled.div`
     box-sizing: border-box;
     cursor: pointer;
     font-size: 14px;
+    padding: 3px 5px;
     border: none;
     outline: none;
     margin-right: -6px;
     background: transparent;
+
+    &:hover {
+        background-color: #e0e0e0
+    }
 
     &:focus {
         background-color: #79797945;
@@ -271,34 +301,41 @@ const ConfirmBtnStyled = styled.div`
 `
 
 const InteractionsImgContainerStyled = styled.div`
-    width: 20px;
-    height: 18px;
-    background-size: contain;
-    margin-left: 6px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 3px;
+    
+    &:hover {
+        opacity: 0.8;
+        background-color: #e0e0e0
+    }
+`
+const InteractionItemsBox = styled.div`
+    display: grid;
+    grid-template-columns: repeat(2, 24px);
+    grid-gap: 3px;
+    justify-content: center;
+    align-items: center;
 `
 
 const ImgButtonStyled = styled.img`
-    width: 100%;
-    height: 100%;
+    width: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 18px;
     opacity: 0.6;
     background-color: transparent;
     cursor: pointer;
 
-    &:hover {
-        opacity: 0.75;
-    }
 
     &:active {
         opacity: 1;
     }
-
-    /*    &:focus {
-        outline: none;
-    } */
-`
-
-const Flex = styled.div`
-    display: flex;
 `
 
 const TagDropdownStyled = styled.span`
@@ -306,3 +343,8 @@ const TagDropdownStyled = styled.span`
     top: 3px;
     right: 150px;
 `
+
+const Flex = styled.div`
+    display: flex;
+`
+
