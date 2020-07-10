@@ -21,7 +21,6 @@ import {
     setupBackgroundModules,
     registerBackgroundModuleCollections,
 } from './background-script/setup'
-import { createLazySharedSyncLog } from './sync/background/shared-sync-log'
 import { createFirebaseSignalTransport } from './sync/background/signalling'
 import { DevAuthState } from 'src/authentication/background/setup'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
@@ -34,6 +33,10 @@ import { setStorageMiddleware } from './storage/middleware'
 import { getFirebase } from './util/firebase-app-initialized'
 import { FeaturesBeta } from './features/background/feature-beta'
 import setupDataSeeders from 'src/util/tests/seed-data'
+import {
+    createLazyServerStorage,
+    createServerStorageManager,
+} from './storage/server'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -41,7 +44,7 @@ export async function main() {
     })
     initSentry({ storageChangesManager: localStorageChangesManager })
 
-    const getSharedSyncLog = createLazySharedSyncLog()
+    const getServerStorage = createLazyServerStorage(createServerStorageManager)
     const fetchPageDataProcessor = new FetchPageDataProcessor({
         fetchPageData,
         pagePipeline: pipeline,
@@ -49,13 +52,15 @@ export async function main() {
 
     const storageManager = initStorex()
     const backgroundModules = createBackgroundModules({
+        getServerStorage,
         signalTransportFactory: createFirebaseSignalTransport,
         includePostSyncProcessor: true,
         analyticsManager: analytics,
         localStorageChangesManager,
         fetchPageDataProcessor,
         browserAPIs: browser,
-        getSharedSyncLog,
+        getSharedSyncLog: async () =>
+            (await getServerStorage()).storageModules.sharedSyncLog,
         storageManager,
         authOptions: {
             devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,

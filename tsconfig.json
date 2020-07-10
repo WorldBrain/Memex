@@ -85,6 +85,9 @@
             "@worldbrain/memex-url-utils": [
                 "external/@worldbrain/memex-url-utils/ts"
             ],
+            "@worldbrain/memex-url-utils/lib/*": [
+                "external/@worldbrain/memex-url-utils/ts/*"
+            ],
             "user-logic": ["external/user-logic/ts"],
             "user-logic/lib/*": ["external/user-logic/ts/*"],
             "ui-logic-core": ["external/ui-logic/packages/ui-logic-core/ts"],
