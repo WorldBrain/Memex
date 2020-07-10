@@ -74,7 +74,7 @@ class AnnotationCreate extends React.Component<
     private renderInput() {
         const onEnterSaveHandler = {
             test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-            handle: (e) => this.props.onSave(e),
+            handle: (e) => this.handleSave(),
         }
 
         return (
