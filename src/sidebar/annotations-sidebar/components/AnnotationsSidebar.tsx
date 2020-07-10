@@ -132,21 +132,31 @@ class AnnotationsSidebar extends React.Component<
         }
 
         return (
-            <NewAnnotationBoxStyled>
-                <AnnotationCreate
-                    {...this.props.annotationCreateProps}
-                    tagPickerDependencies={this.props.annotationTagProps}
-                />
-            </NewAnnotationBoxStyled>
+            <NewAnnotationSection>
+                <NewAnnotationBoxStyled>
+                    <AnnotationCreate
+                        {...this.props.annotationCreateProps}
+                        tagPickerDependencies={this.props.annotationTagProps}
+                    />
+                </NewAnnotationBoxStyled>
+            </NewAnnotationSection>
         )
     }
 
     private renderResultsBody() {
         return (
-            <AnnotationsSectionStyled>
-                {this.props.isSearchLoading && <LoadingIndicatorStyled />}
-                {this.renderAnnotationsEditable()}
-            </AnnotationsSectionStyled>
+            <>
+            {this.props.isSearchLoading ? (
+                <LoadingIndicatorSection>
+                    <LoadingIndicatorStyled />
+                </LoadingIndicatorSection>
+                ):(
+                <AnnotationsSectionStyled>
+                    {this.renderAnnotationsEditable()}
+                </AnnotationsSectionStyled>
+                ) 
+            }
+            </>
         )
     }
 
@@ -203,7 +213,7 @@ export default onClickOutside(AnnotationsSidebar)
 // TODO: Move icons to styled components library, refactored shared css
 const ButtonStyled = styled.button`
     cursor: pointer;
-    z-index: 2147483647;
+    z-index: 3000;
     line-height: normal;
     background: transparent;
     border: none;
@@ -251,15 +261,15 @@ const SearchInputStyled = styled(TextInputControlled)`
 const CloseIconStyled = styled.div`
     mask-position: center;
     mask-repeat: no-repeat;
-    mask-size: 16px;
+    mask-size: 100%;
     background-color: #3a2f45;
     mask-image: url('/img/close.svg');
     background-size: 12px;
     display: block;
     cursor: pointer;
     background-repeat: no-repeat;
-    width: 22px;
-    height: 22px;
+    width: 100%;
+    height: 100%;
     background-position: center;
     border-radius: 3px;
 `
@@ -273,10 +283,14 @@ const CloseButtonStyled = styled.button`
     outline: none;
 `
 
-const SidebarStyled = styled.div``
+const SidebarStyled = styled.div`
+    overflow-y: scroll;
+    height: fill-available;
+    padding-right: 5px;
+`
 
 const TopBarStyled = styled.div`
-    position: sticky;
+    position: static;
     top: 0;
     background: #fff;
     display: flex;
@@ -286,8 +300,16 @@ const TopBarStyled = styled.div`
     padding: 7px 8px 5px 3px;
     height: 40px;
     box-sizing: border-box;
-    margin-top: 3px;
+    width: 100%;
 `
+
+const LoadingIndicatorSection = styled.div`
+    width: 100%;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+` 
 
 const LoadingIndicatorStyled = styled(LoadingIndicator)`
     width: 100%;
@@ -297,23 +319,12 @@ const LoadingIndicatorStyled = styled(LoadingIndicator)`
     justify-content: center;
 `
 
-const AnnotationsSectionStyled = styled.section`
-    overflow-y: auto;
-    height: 90vh;
-    width: 100%;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    margin-bottom: 30px;
-`
-
 const annotationCardStyle = css`
     border-radius: 3px;
     box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 2px 4px;
     transition: background 120ms ease-in 0s;
+    background: white;
 
     &:hover {
         transition: background 120ms ease-in 0s;
@@ -321,15 +332,37 @@ const annotationCardStyle = css`
     }
 `
 
+const NewAnnotationSection = styled.section`
+    height: auto;
+    width: 100%;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding-left: 5px;
+    margin-bottom: 30px;
+`
+
+const AnnotationsSectionStyled = styled.section`
+    overflow-y: visible;
+    height: auto;
+    width: 100%;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    padding-bottom: 100px;
+    padding-left: 5px;
+`
+
 const NewAnnotationBoxStyled = styled.div`
     ${annotationCardStyle}
-
-    background: white;
-    border-radius: 3px;
-    top: 10px;
-    margin: 0 10px 40px;
+    margin: 10px 0 5px 0;
     position: relative;
-    width: 93%;
+    width: 97%;
 
     &:hover {
         background: white;

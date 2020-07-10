@@ -49,7 +49,7 @@
     }
 
     &:hover .button {
-        opacity: 0.4;
+        opacity: 0.6;
         display: flex;
     }
 
@@ -59,7 +59,6 @@
 
     & .button {
         display: none;
-        padding: 0;
     }
 }
 
@@ -68,8 +67,6 @@
     height: fit-content;
 
     & .button {
-        height: 16px;
-        padding: 0.2;
         display: flex;
     }
 
@@ -92,7 +89,6 @@
     }
 
     & .permanentButton {
-        height: 16px;
     }
 }
 
@@ -301,13 +297,12 @@
 }
 
 .buttonsContainer {
-    display: flex;
+    display: grid;
     flex-direction: row;
-    float: right;
-    align-items: flex-start;
-    justify-content: flex-end;
-    margin-left: 20px;
-    height: 20px;
+    margin: 0 7px 3px;
+    z-index: 0;
+    grid-auto-flow: column;
+    grid-gap: 3px;
 }
 
 .detailsContainer {
@@ -316,6 +311,7 @@
     justify-content: flex-end;
     align-items: flex-start;
     height: 20px;
+    margin-top: -3px;
 }
 
 .displayTime {
@@ -327,99 +323,58 @@
 .button {
     border: none;
     z-index: 2500;
-    width: auto;
-    display: flex;
-    opacity: 0.2;
-    height: 14px;
+    width: 24px;
+    height: 24px;
+    padding: 4px;
     background-repeat: no-repeat;
     cursor: pointer;
     outline: none;
     background-position: center center;
     background-size: contain;
-    margin-left: 8px;
+    opacity: 0.2;
+    border-radius: 3px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
 
     &:hover {
         opacity: 1;
-        cursor: pointer;
+        background-color: #e0e0e0;
     }
 }
 
 .permanentButton {
     border: none;
     z-index: 2500;
-    height: 14px;
+    height: 24px;
+    width: 24px;
+    padding: 4px;
+    opacity: 0.6;
     background-repeat: no-repeat;
     cursor: pointer;
     outline: none;
     background-position: center center;
     background-size: contain;
-    margin-left: 8px;
-    display: flex;
-    opacity: 0.8;
+    border-radius: 3px;
 
     &:hover {
         opacity: 0.6;
+        background-color: #e0e0e0;
     }
 }
 
 .img {
     height: 100%;
+    max-width: 100%;
 }
 
 .actionItems {
     display: flex;
     align-items: center;
-    height: 20px;
-}
-
-.commentActive {
-    opacity: 0.8;
-}
-
-.bookmark {
-    opacity: 0.8;
-}
-
-.notBookmark {
-    &:hover {
-        opacity: 0.6;
-    }
-}
-
-.tag {
-    &:hover {
-        opacity: 0.6;
-    }
-}
-
-.trash {
-    &:hover {
-        opacity: 0.6;
-    }
-}
-
-.copy {
-    &:hover {
-        opacity: 0.6;
-    }
-}
-
-.reader {
-    height: 16px;
-
-    &:hover {
-        opacity: 0.6;
-    }
 }
 
 .commentBtn {
     /* only used to ID if button is clicked - multiple buttons so cannot use a real `id` att */
-}
-
-.comment {
-    &:hover {
-        opacity: 0.6;
-    }
 }
 
 .tagList {

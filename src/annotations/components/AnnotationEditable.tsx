@@ -264,7 +264,7 @@ const AnnotationStyled = styled.div`
     }
 
     box-sizing: border-box;
-    width: 100%;
+    width: 97%;
     display: flex;
     flex-direction: column;
     font-size: 14px;

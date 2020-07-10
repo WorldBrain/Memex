@@ -34,28 +34,56 @@ class AnnotationFooter extends React.Component<Props> {
                     {timestamp}
                 </TimestampStyled>
                 <DefaultFooterBtnContainerStyled>
-                    <IconStyled
-                        onClick={this.props.onDeleteIconClick}
-                        title="Delete note"
-                        src={icons.trash}
-                    />
-                    {this.props.onGoToAnnotation && (
-                        <IconStyled
-                            onClick={this.props.onGoToAnnotation}
-                            title="Go to annotation"
-                            src={icons.goTo}
-                        />
-                    )}
-                    <IconStyled
-                        onClick={this.props.onEditIconClick}
-                        title="Edit note"
-                        src={icons.edit}
-                    />
-                    <IconStyled
-                        onClick={this.props.toggleBookmark}
-                        title="Toggle star"
-                        src={hasBookmark ? icons.heartFull : icons.heartEmpty}
-                    />
+                    <ButtonTooltip
+                        position={'bottom'}
+                        tooltipText={'Delete Note'}
+                    >
+                        <IconBox>
+                            <IconStyled
+                                onClick={this.props.onDeleteIconClick}
+                                title="Delete note"
+                                src={icons.trash}
+                            />
+                        </IconBox>
+                    </ButtonTooltip>
+                    <ButtonTooltip
+                        position={'bottom'}
+                        tooltipText={'Open in Page'}
+                    >
+                        {this.props.onGoToAnnotation && (
+                            <IconBox>
+                                <IconStyled
+                                    onClick={this.props.onGoToAnnotation}
+                                    title="Go to annotation"
+                                    src={icons.goTo}
+                                />
+                            </IconBox>
+                        )}
+                    </ButtonTooltip>
+                    <ButtonTooltip
+                        position={'bottom'}
+                        tooltipText={'Edit Note'}
+                    >
+                        <IconBox>
+                            <IconStyled
+                                onClick={this.props.onEditIconClick}
+                                title="Edit note"
+                                src={icons.edit}
+                            />
+                        </IconBox>
+                    </ButtonTooltip>
+                    <ButtonTooltip
+                        position={'bottom'}
+                        tooltipText={'Bookmark Note'}
+                    >
+                        <IconBox>
+                            <IconStyled
+                                onClick={this.props.toggleBookmark}
+                                title="Toggle star"
+                                src={hasBookmark ? icons.heartFull : icons.heartEmpty}
+                            />
+                        </IconBox>
+                    </ButtonTooltip>
                 </DefaultFooterBtnContainerStyled>
             </DefaultInnerFooterContainerStyled>
         )
@@ -217,29 +245,35 @@ const TimestampStyled = styled.div`
 `
 
 const DefaultFooterBtnContainerStyled = styled.div`
-    display: flex;
+    display: grid;
     flex-direction: row;
     margin: 0 7px 3px;
     z-index: 0;
+    grid-auto-flow: column;
+    display: inline-grid;
+    grid-gap: 3px;
 `
 
-const IconStyled = styled.img`
-    border: none;
-    z-index: 2500;
-    min-width: 20px;
-    height: 16px;
-    background-repeat: no-repeat;
-    cursor: pointer;
-    outline: none;
-    background-position: center center;
+const IconBox = styled.div `
+    height: 24px;
+    width: 24px;
+    padding: 4px;
     border-radius: 3px;
-    background-size: contain;
-    max-width: 30px;
-    width: stretch;
-    margin-left: 4px;
-    opacity: 0.3;
 
     &:hover {
         opacity: 0.6;
+        background-color: #e0e0e0;
     }
+
+
+`
+const IconStyled = styled.img`
+    border: none;
+    z-index: 2500;
+    cursor: pointer;
+    outline: none;
+    border-radius: 3px;
+    width: 100%;
+    height: 100%;
+    opacity: 0.6;
 `

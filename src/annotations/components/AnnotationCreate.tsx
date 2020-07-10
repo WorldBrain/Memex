@@ -172,6 +172,7 @@ const TextBoxContainerStyled = styled.div`
     font-size: 13px;
     background: white;
     width: 100%;
+    border-radius: 5px;
 
     &:hover {
         background: white;

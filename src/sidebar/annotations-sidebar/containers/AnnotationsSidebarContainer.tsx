@@ -262,8 +262,8 @@ export class AnnotationsSidebarContainer<
 }
 
 const ContainerStyled = styled.div`
-    padding: 10px;
-    height: 100%;
+    padding: 0px 0px 10px 5px;
+    height: fill-available;
     width: 450px;
     position: fixed;
 
@@ -278,16 +278,18 @@ const ContainerStyled = styled.div`
 `
 
 const TopBarContainerStyled = styled.div`
-    position: sticky;
+    position: static;
     top: 0;
     background: #fff;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 7px 8px 5px 3px;
-    height: 40px;
+    height: 34px;
     box-sizing: border-box;
-    margin-top: 3px;
+    padding: 5px 5px 5px 0px;
+    width: 97%;
+    margin-bottom: 2px;
+    box-shadow: 0px 3px 5px -3px #e0e0e0;
 `
 
 // TODO: inheirits from .nakedSquareButton
@@ -297,13 +299,11 @@ const CommentBtn = styled.button`
     border-radius: 3px;
     padding: 2px;
     background-image: url('/img/comment_add.svg');
-
-    width: 25px;
-    height: 25px;
+    width: 24px;
+    height: 24px;
     border-radius: 3px;
     opacity: 0.8;
-    margin-left: 4px;
-    background-size: 18px 18px;
+    background-size: 20px 20px;
     background-repeat: no-repeat;
     background-position: center;
     border: none;
@@ -312,6 +312,7 @@ const CommentBtn = styled.button`
 
     &:hover {
         opacity: 1;
+        background-color: #e0e0e0
     }
 
     &:active {

@@ -50,6 +50,15 @@ const CloseBtn = styled.button`
     background: transparent;
     border: none;
     outline: none;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    border-radius: 3px;
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
 `
 
 // TODO: inherits from .closeIcon
@@ -57,9 +66,9 @@ const CloseIcon = styled.span`
     mask-position: center;
     mask-repeat: no-repeat;
     display: flex;
-    height: 20px;
-    width: 20px;
-    mask-size: 16px;
+    height: 100%;
+    width: 100%;
+    mask-size: 100%;
     background-color: #3a2f45;
     mask-image: url('/img/close.svg');
 `

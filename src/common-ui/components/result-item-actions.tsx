@@ -17,7 +17,7 @@ const commentEmpty = browser.extension.getURL('/img/comment_empty.svg')
 const commentFull = browser.extension.getURL('/img/comment_full.svg')
 const deleteItem = browser.extension.getURL('/img/trash.svg')
 const copy = browser.extension.getURL('/img/copy.svg')
-const readerIcon = browser.extension.getURL('/img/eye.svg')
+const readerIcon = browser.extension.getURL('/img/reader.svg')
 
 class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
     get bookmarkClass() {

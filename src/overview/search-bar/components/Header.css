@@ -105,15 +105,24 @@
     }
 }
 
+.settingsBox {
+    width: 24px;
+    height: 24px;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
+}
+
 .settingsIcon {
     composes: settingsIcon from 'src/common-ui/icons.css';
-    composes: nakedSquareButton from 'src/common-ui/elements.css';
-    height: 25px;
-    width: 25px;
-    padding: 5px;
-    display: flex;
-    margin-left: 15px;
-    background-size: 21px;
+    height: 24px;
+    width: 24px;
 }
 
 .button {
