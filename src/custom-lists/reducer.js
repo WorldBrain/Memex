@@ -39,6 +39,10 @@ const defaultState = {
     showCreateListForm: false,
     showCommonNameWarning: false,
     showCrowdFundingModal: false,
+    shareModalProps: {
+        isShown: false,
+        index: undefined,
+    },
 }
 
 const fetchAllLists = (state, lists) => ({
@@ -100,7 +104,30 @@ const showDeleteConfirm = (state, { id, index }) => {
     }
 }
 
-const payloadReducer = key => (state, payload) => ({ ...state, [key]: payload })
+const showShareModal = (state, { index }) => {
+    return {
+        ...state,
+        shareModalProps: {
+            isShown: true,
+            index,
+        },
+    }
+}
+
+const closeShareModal = (state) => {
+    return {
+        ...state,
+        shareModalProps: {
+            isShown: false,
+            index: -1,
+        },
+    }
+}
+
+const payloadReducer = (key) => (state, payload) => ({
+    ...state,
+    [key]: payload,
+})
 
 const toggleListFilterIndex = (state, index) => {
     const { listFilterIndex } = state
@@ -131,34 +158,34 @@ const setShowCrowdFundingModal = (state, value) => {
     }
 }
 
-const resetUrlDragged = state => {
+const resetUrlDragged = (state) => {
     return {
         ...state,
         urlDragged: '',
     }
 }
 
-const openCreateListForm = state => ({
+const openCreateListForm = (state) => ({
     ...state,
     showCreateListForm: true,
 })
 
-const closeCreateListForm = state => ({
+const closeCreateListForm = (state) => ({
     ...state,
     showCreateListForm: false,
 })
 
-const toggleCreateListForm = state => ({
+const toggleCreateListForm = (state) => ({
     ...state,
     showCreateListForm: !state.showCreateListForm,
 })
 
-const showCommonNameWarning = state => ({
+const showCommonNameWarning = (state) => ({
     ...state,
     showCommonNameWarning: true,
 })
 
-const removeCommonNameWarning = state => ({
+const removeCommonNameWarning = (state) => ({
     ...state,
     showCommonNameWarning: false,
 })
@@ -166,7 +193,7 @@ const removeCommonNameWarning = state => ({
 export default createReducer(
     {
         [actions.fetchAllLists]: fetchAllLists,
-        [actions.resetActiveListIndex]: state => ({
+        [actions.resetActiveListIndex]: (state) => ({
             ...state,
             activeListIndex: defaultState.activeListIndex,
         }),
@@ -176,8 +203,10 @@ export default createReducer(
         [actions.deleteList]: deleteList,
         [actions.addPagetoList]: addPageToList,
         [actions.showListDeleteModal]: showDeleteConfirm,
+        [actions.showShareModal]: showShareModal,
+        [actions.closeShareModal]: closeShareModal,
         [actions.toggleListFilterIndex]: toggleListFilterIndex,
-        [actions.resetListDeleteModal]: state => ({
+        [actions.resetListDeleteModal]: (state) => ({
             ...state,
             deleteConfirmProps: { ...defaultState.deleteConfirmProps },
         }),

@@ -42,6 +42,13 @@
     outline: none;
 }
 
+.shareButton {
+    background-image: url('/img/share.svg');
+    width: 24px;
+    height: 24px;
+    background-position: center;
+}
+
 .editButton {
     background-image: url('/img/edit.svg');
     width: 24px;

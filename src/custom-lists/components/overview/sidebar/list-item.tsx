@@ -9,6 +9,7 @@ export interface Props {
     listName: string
     isMobileList: boolean
     isFiltered: boolean
+    onShareButtonClick: React.MouseEventHandler<HTMLButtonElement>
     onEditButtonClick: React.MouseEventHandler<HTMLButtonElement>
     onCrossButtonClick: React.MouseEventHandler<HTMLButtonElement>
     onAddPageToList: (url: string, isSocialPost: boolean) => void
@@ -114,6 +115,13 @@ class ListItem extends Component<Props, State> {
         this.props.onAddPageToList(url, isSocialPost)
     }
 
+    private handleShareBtnClick: React.MouseEventHandler<HTMLButtonElement> = (
+        e,
+    ) => {
+        e.stopPropagation()
+        this.props.onShareButtonClick(e)
+    }
+
     private handleEditBtnClick: React.MouseEventHandler<HTMLButtonElement> = (
         e,
     ) => {
@@ -144,6 +152,14 @@ class ListItem extends Component<Props, State> {
                 <div className={styles.buttonContainer}>
                     {!this.props.isMobileList && this.state.isMouseInside && (
                         <React.Fragment>
+                            <button
+                                className={cx(
+                                    styles.shareButton,
+                                    styles.button,
+                                )}
+                                onClick={this.handleShareBtnClick}
+                                title={'Share'}
+                            />
                             <button
                                 className={cx(styles.editButton, styles.button)}
                                 onClick={this.handleEditBtnClick}

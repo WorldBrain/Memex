@@ -180,7 +180,7 @@ export default class ShareModalContent extends PureComponent<
                     <Button onClick={this.props.onClickLetUsKnow}>
                         Let us know >>
                     </Button>
-                    <Button onClicke={this.props.onClickViewRoadmap}>
+                    <Button onClick={this.props.onClickViewRoadmap}>
                         View the Roadmap >>
                     </Button>
                 </ButtonsContainer>

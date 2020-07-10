@@ -52,18 +52,18 @@ export default class ListContainer extends Component<Props> {
         this.props.getListFromDB()
     }
 
-    setInputRef = el => (this.inputEl = el)
+    setInputRef = (el) => (this.inputEl = el)
 
-    handleSearchChange = field => event => {
+    handleSearchChange = (field) => (event) => {
         const { value } = event.target
 
-        this.setState(state => ({
+        this.setState((state) => ({
             ...state,
             [field]: value,
         }))
     }
 
-    handleSearchKeyDown = (field, listName = '') => e => {
+    handleSearchKeyDown = (field, listName = '') => (e) => {
         if (
             this.props.env === 'inpage' &&
             !(e.ctrlKey || e.metaKey) &&
@@ -72,7 +72,7 @@ export default class ListContainer extends Component<Props> {
             e.preventDefault()
             e.stopPropagation()
 
-            this.setState(state => ({
+            this.setState((state) => ({
                 ...state,
                 [field]:
                     (state[field] !== null ? state[field] : listName) + e.key,
@@ -80,9 +80,9 @@ export default class ListContainer extends Component<Props> {
         }
     }
 
-    getSearchVal = value => value.trim().replace(/\s\s+/g, ' ')
+    getSearchVal = (value) => value.trim().replace(/\s\s+/g, ' ')
 
-    handleCreateListSubmit = event => {
+    handleCreateListSubmit = (event) => {
         event.preventDefault()
         event.stopPropagation()
         const { value } = event.target.elements['listName']
@@ -94,18 +94,18 @@ export default class ListContainer extends Component<Props> {
     }
 
     vacateInputField = () => {
-        this.setState(state => ({
+        this.setState((state) => ({
             ...state,
             listName: null,
         }))
     }
 
-    handleUpdateList = ({ id }, index) => event => {
+    handleUpdateList = ({ id }, index) => (event) => {
         event.preventDefault()
         const { value } = event.target.elements['listName']
         // value = list name
         this.props.updateList(index, this.getSearchVal(value), id)
-        this.setState(state => ({
+        this.setState((state) => ({
             ...state,
             updatedListName: null,
         }))
@@ -141,6 +141,12 @@ export default class ListContainer extends Component<Props> {
                     key={i}
                     listName={list.name}
                     isFiltered={list.isFilterIndex}
+                    onShareButtonClick={() => {
+                        // TODO
+                        console.log(
+                            'TODO: share from /in-page-ui/sidebar/react/components/lists-container.tsx',
+                        )
+                    }}
                     onEditButtonClick={() => {
                         event.preventDefault()
                         this.props.handleEditBtnClick(i)
@@ -201,7 +207,7 @@ export default class ListContainer extends Component<Props> {
                 />
                 {this.props.showCrowdFundingModal && (
                     <CrowdfundingModal
-                        onClose={e => {
+                        onClose={(e) => {
                             e.preventDefault()
                             e.stopPropagation()
                             this.props.setShowCrowdFundingModal(false)
