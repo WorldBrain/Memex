@@ -93,7 +93,7 @@ async function createDependencies() {
             toggleBookmark: action('toggleBookmark'),
             onGoToAnnotation: action('goToAnnotation'),
         }),
-        annotationEditProps: {
+        bindAnnotationEditProps: (a) => ({
             comment: '',
             tags: [],
             isTagInputActive: false,
@@ -102,7 +102,7 @@ async function createDependencies() {
             deleteSingleTag: action('deleteSingleTag'),
             setTagInputActive: action('activateTagInput'),
             updateTags: action('updateTags') as any,
-        },
+        }),
         annotationEditableProps: {
             onGoToAnnotation: action('clickAnnotation'),
             onMouseEnter: action('startMouseOver'),

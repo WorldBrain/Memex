@@ -12,6 +12,14 @@ import { featuresBeta } from 'src/util/remote-functions-background'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { DEF_RESULT_LIMIT } from '../constants'
 
+interface EditForm {
+    isBookmarked: boolean
+    isTagInputActive: boolean
+    showTagsPicker: boolean
+    commentText: string
+    tags: string[]
+}
+
 export interface SidebarContainerState {
     loadState: TaskState
     primarySearchState: TaskState
@@ -32,13 +40,11 @@ export interface SidebarContainerState {
     showCommentBox: boolean
     commentBox: {
         anchor: Anchor | null
-        form: {
-            isBookmarked: boolean
-            isTagInputActive: boolean
-            showTagsPicker: boolean
-            commentText: string
-            tags: string[]
-        }
+        form: EditForm
+    }
+
+    editForms: {
+        [annotationUrl: string]: EditForm
     }
 
     // deletePageConfirm: {
@@ -90,22 +96,30 @@ export type SidebarContainerEvents = UIEvent<{
     addNewPageComment: null
     setNewPageCommentAnchor: { anchor: Anchor }
     changePageCommentText: { comment: string }
+    changeEditCommentText: { annotationUrl: string; comment: string }
     saveNewPageComment: {
         anchor?: Anchor
         commentText: string
-        tags: string[]
         bookmarked: boolean
+        tags: string[]
     }
     cancelNewPageComment: null
     toggleNewPageCommentBookmark: null
     togglePageCommentTags: null
     toggleNewPageCommentTagPicker: null
     setNewPageCommentTagPicker: { active: boolean }
+    setEditCommentTagPicker: { annotationUrl: string; active: boolean }
 
+    updateTagsForEdit: {
+        added?: string
+        deleted?: string
+        annotationUrl: string
+    }
     updateTagsForNewComment: { added?: string; deleted?: string }
     // updateTagsForResult: { added: string; deleted: string; url: string }
     updateListsForPageResult: { added?: string; deleted?: string; url: string }
     addNewPageCommentTag: { tag: string }
+    deleteEditCommentTag: { tag: string; annotationUrl: string }
     deleteNewPageCommentTag: { tag: string }
     // closeComments: null,
 
@@ -181,7 +195,7 @@ type EventHandler<
     EventName extends keyof SidebarContainerEvents
 > = UIEventHandler<SidebarContainerState, SidebarContainerEvents, EventName>
 
-const INITIAL_COMMENT_BOX_STATE: SidebarContainerState['commentBox'] = {
+export const INIT_FORM_STATE: SidebarContainerState['commentBox'] = {
     anchor: null,
     form: {
         isBookmarked: false,
@@ -190,6 +204,14 @@ const INITIAL_COMMENT_BOX_STATE: SidebarContainerState['commentBox'] = {
         commentText: '',
         tags: [],
     },
+}
+
+const createEditFormsForAnnotations = (annots: Annotation[]) => {
+    const state: { [annotationUrl: string]: EditForm } = {}
+    for (const annot of annots) {
+        state[annot.url] = { ...INIT_FORM_STATE.form }
+    }
+    return state
 }
 
 export class SidebarContainerLogic extends UILogic<
@@ -223,7 +245,8 @@ export class SidebarContainerLogic extends UILogic<
                 searchResults: {},
             },
 
-            commentBox: { ...INITIAL_COMMENT_BOX_STATE },
+            commentBox: { ...INIT_FORM_STATE },
+            editForms: {},
             // deletePageConfirm: {
             //     pageUrlToDelete: undefined,
             //     // isDeletePageModalShown: false,
@@ -328,6 +351,7 @@ export class SidebarContainerLogic extends UILogic<
         if (opts.overwrite) {
             this.emitMutation({
                 annotations: { $set: annotations },
+                editForms: { $set: createEditFormsForAnnotations(annotations) },
                 pageCount: { $set: annotations.length },
                 noResults: { $set: annotations.length < this.resultLimit },
                 searchResultSkip: { $set: 0 },
@@ -335,6 +359,12 @@ export class SidebarContainerLogic extends UILogic<
         } else {
             this.emitMutation({
                 annotations: { $apply: (prev) => [...prev, ...annotations] },
+                editForms: {
+                    $apply: (prev) => ({
+                        ...prev,
+                        ...createEditFormsForAnnotations(annotations),
+                    }),
+                },
                 pageCount: { $apply: (prev) => prev + annotations.length },
                 noResults: { $set: annotations.length < this.resultLimit },
             })
@@ -388,12 +418,21 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    changePageCommentText: EventHandler<'changePageCommentText'> = (
-        incoming,
-    ) => {
+    changeEditCommentText: EventHandler<'changeEditCommentText'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            editForms: {
+                [event.annotationUrl]: { commentText: { $set: event.comment } },
+            },
+        })
+    }
+    changePageCommentText: EventHandler<'changePageCommentText'> = ({
+        event,
+    }) => {
         this.emitMutation({
             commentBox: {
-                form: { commentText: { $set: incoming.event.comment } },
+                form: { commentText: { $set: event.comment } },
             },
         })
     }
@@ -424,7 +463,7 @@ export class SidebarContainerLogic extends UILogic<
 
         const updateState = (args: { annotations: Annotation[] }) =>
             this.emitMutation({
-                commentBox: { $set: INITIAL_COMMENT_BOX_STATE },
+                commentBox: { $set: INIT_FORM_STATE },
                 showCommentBox: { $set: false },
                 annotations: {
                     $set: args.annotations,
@@ -454,6 +493,9 @@ export class SidebarContainerLogic extends UILogic<
                         url: { $set: annotationUrl },
                     },
                 },
+                editForms: {
+                    [annotationUrl]: { $set: INIT_FORM_STATE.form },
+                },
             })
 
             for (const tag of event.tags) {
@@ -481,7 +523,7 @@ export class SidebarContainerLogic extends UILogic<
     cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
         this.inPageEvents.emit('removeTemporaryHighlights')
         this.emitMutation({
-            commentBox: { $set: INITIAL_COMMENT_BOX_STATE },
+            commentBox: { $set: INIT_FORM_STATE },
             showCommentBox: { $set: false },
         })
     }
@@ -500,28 +542,43 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    updateTagsForNewComment: EventHandler<'updateTagsForNewComment'> = async ({
-        event,
-    }) => {
-        let tagsStateUpdater: (tags: string[]) => string[]
-
-        if (event.added) {
-            tagsStateUpdater = (tags) => {
-                const tag = event.added
+    private createTagsStateUpdater = (args: {
+        added?: string
+        deleted?: string
+    }): ((tags: string[]) => string[]) => {
+        if (args.added) {
+            return (tags) => {
+                const tag = args.added
                 return tags.includes(tag) ? tags : [...tags, tag]
             }
         }
 
-        if (event.deleted) {
-            tagsStateUpdater = (tags) => {
-                const index = tags.indexOf(event.deleted)
-                if (index === -1) {
-                    return tags
-                }
-
-                return [...tags.slice(0, index), ...tags.slice(index + 1)]
+        return (tags) => {
+            const index = tags.indexOf(args.deleted)
+            if (index === -1) {
+                return tags
             }
+
+            return [...tags.slice(0, index), ...tags.slice(index + 1)]
         }
+    }
+
+    updateTagsForEdit: EventHandler<'updateTagsForEdit'> = async ({
+        event,
+    }) => {
+        const tagsStateUpdater = this.createTagsStateUpdater(event)
+
+        this.emitMutation({
+            editForms: {
+                [event.annotationUrl]: { tags: { $apply: tagsStateUpdater } },
+            },
+        })
+    }
+
+    updateTagsForNewComment: EventHandler<'updateTagsForNewComment'> = async ({
+        event,
+    }) => {
+        const tagsStateUpdater = this.createTagsStateUpdater(event)
 
         this.emitMutation({
             commentBox: { form: { tags: { $apply: tagsStateUpdater } } },
@@ -545,6 +602,18 @@ export class SidebarContainerLogic extends UILogic<
             commentBox: {
                 form: {
                     isTagInputActive: { $apply: (active) => !active },
+                },
+            },
+        })
+    }
+
+    setEditCommentTagPicker: EventHandler<'setEditCommentTagPicker'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            editForms: {
+                [event.annotationUrl]: {
+                    isTagInputActive: { $set: event.active },
                 },
             },
         })
@@ -577,24 +646,41 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    deleteNewPageCommentTag: EventHandler<'deleteNewPageCommentTag'> = (
-        incoming,
+    private createTagStateDeleteUpdater = (args: { tag: string }) => (
+        tags: string[],
     ) => {
+        const tagIndex = tags.indexOf(args.tag)
+        if (tagIndex === -1) {
+            return tags
+        }
+
+        tags = [...tags]
+        tags.splice(tagIndex, 1)
+        return tags
+    }
+
+    deleteEditCommentTag: EventHandler<'deleteEditCommentTag'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            editForms: {
+                [event.annotationUrl]: {
+                    tags: {
+                        $apply: this.createTagStateDeleteUpdater(event),
+                    },
+                },
+            },
+        })
+    }
+
+    deleteNewPageCommentTag: EventHandler<'deleteNewPageCommentTag'> = ({
+        event,
+    }) => {
         this.emitMutation({
             commentBox: {
                 form: {
                     tags: {
-                        $apply: (tags: string[]) => {
-                            const tag = incoming.event.tag
-                            const tagIndex = tags.indexOf(tag)
-                            if (tagIndex === -1) {
-                                return tags
-                            }
-
-                            tags = [...tags]
-                            tags.splice(tagIndex, 1)
-                            return tags
-                        },
+                        $apply: this.createTagStateDeleteUpdater(event),
                     },
                 },
             },
@@ -648,8 +734,9 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
     }) => {
         const {
-            commentBox: { form },
+            editForms: { [event.annotationUrl]: form },
         } = previousState
+
         const resultIndex = previousState.annotations.findIndex(
             (annot) => annot.url === event.annotationUrl,
         )
@@ -668,8 +755,10 @@ export class SidebarContainerLogic extends UILogic<
                     lastEdited: { $set: Date.now() },
                 },
             },
-            commentBox: {
-                $set: { ...INITIAL_COMMENT_BOX_STATE },
+            editForms: {
+                [event.annotationUrl]: {
+                    $set: { ...INIT_FORM_STATE.form },
+                },
             },
         })
 
@@ -685,6 +774,7 @@ export class SidebarContainerLogic extends UILogic<
         } catch (err) {
             this.emitMutation({
                 annotations: { $set: previousState.annotations },
+                editForms: { $set: previousState.editForms },
             })
             throw err
         }
@@ -710,6 +800,9 @@ export class SidebarContainerLogic extends UILogic<
                     ...annotations.slice(resultIndex + 1),
                 ],
             },
+            editForms: {
+                $unset: [event.annotationUrl],
+            },
         })
 
         try {
@@ -717,6 +810,7 @@ export class SidebarContainerLogic extends UILogic<
         } catch (err) {
             this.emitMutation({
                 annotations: { $set: previousState.annotations },
+                editForms: { $set: previousState.editForms },
             })
             throw err
         }
@@ -764,8 +858,8 @@ export class SidebarContainerLogic extends UILogic<
         )
 
         this.emitMutation({
-            commentBox: {
-                form: {
+            editForms: {
+                [event.annotationUrl]: {
                     commentText: { $set: annotation.comment ?? '' },
                     tags: { $set: annotation.tags ?? [] },
                     isBookmarked: { $set: !!annotation.hasBookmark },

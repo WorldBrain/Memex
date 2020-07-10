@@ -12,10 +12,15 @@ import {
     SidebarContainerEvents,
     SidebarContainerOptions,
     AnnotationEventContext,
+    INIT_FORM_STATE,
 } from './logic'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import { Annotation } from 'src/annotations/types'
+import {
+    AnnotationEditEventProps,
+    AnnotationEditGeneralProps,
+} from 'src/annotations/components/AnnotationEdit'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -134,24 +139,41 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    protected getEditProps(): AnnotationsSidebarProps['annotationEditProps'] {
-        const { commentBox } = this.state
+    protected bindAnnotationEditProps(
+        annotation: Annotation,
+    ): AnnotationEditEventProps & AnnotationEditGeneralProps {
+        const { editForms } = this.state
+        // Should only ever be undefined for a moment, between creating a new annot state and
+        //  the time it takes for the BG method to return the generated PK
+        const form = editForms[annotation.url] ?? { ...INIT_FORM_STATE.form }
 
         return {
-            isTagInputActive: commentBox.form.isTagInputActive,
-            comment: commentBox.form.commentText,
-            tags: commentBox.form.tags,
+            isTagInputActive: form.isTagInputActive,
+            comment: form.commentText,
+            tags: form.tags,
             updateTags: (args) =>
-                this.processEvent('updateTagsForNewComment', args),
+                this.processEvent('updateTagsForEdit', {
+                    annotationUrl: annotation.url,
+                    ...args,
+                }),
             deleteSingleTag: (tag) =>
-                this.processEvent('deleteNewPageCommentTag', { tag }),
+                this.processEvent('deleteEditCommentTag', {
+                    annotationUrl: annotation.url,
+                    tag,
+                }),
             setTagInputActive: (active) =>
-                this.processEvent('setNewPageCommentTagPicker', { active }),
+                this.processEvent('setEditCommentTagPicker', {
+                    annotationUrl: annotation.url,
+                    active,
+                }),
             onCommentChange: (comment) =>
-                this.processEvent('changePageCommentText', { comment }),
-            onEditConfirm: (annotationUrl) =>
+                this.processEvent('changeEditCommentText', {
+                    annotationUrl: annotation.url,
+                    comment,
+                }),
+            onEditConfirm: () =>
                 this.processEvent('editAnnotation', {
-                    annotationUrl,
+                    annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
         }
@@ -242,11 +264,13 @@ export class AnnotationsSidebarContainer<
                         isAnnotationCreateShown={this.state.showCommentBox}
                         hoverAnnotationUrl={this.state.hoverAnnotationUrl}
                         annotationTagProps={this.getTagProps()}
-                        annotationEditProps={this.getEditProps()}
                         annotationCreateProps={this.getCreateProps()}
                         annotationEditableProps={this.getEditableProps()}
                         bindAnnotationFooterEventProps={(url) =>
                             this.bindAnnotationFooterEventProps(url)
+                        }
+                        bindAnnotationEditProps={(url) =>
+                            this.bindAnnotationEditProps(url)
                         }
                         handleScrollPagination={() =>
                             this.processEvent('paginateSearch', null)

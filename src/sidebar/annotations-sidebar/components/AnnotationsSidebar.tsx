@@ -40,7 +40,9 @@ export interface AnnotationsSidebarProps {
     bindAnnotationFooterEventProps: (
         annotation: Annotation,
     ) => AnnotationFooterEventProps
-    annotationEditProps: AnnotationEditGeneralProps & AnnotationEditEventProps
+    bindAnnotationEditProps: (
+        annotation: Annotation,
+    ) => AnnotationEditGeneralProps & AnnotationEditEventProps
     annotationEditableProps: AnnotationEditableGeneralProps &
         AnnotationEditableEventProps
     annotationCreateProps: AnnotationCreateGeneralProps &
@@ -175,7 +177,9 @@ class AnnotationsSidebar extends React.Component<
                 isActive={this.props.activeAnnotationUrl === annot.url}
                 isHovered={this.props.hoverAnnotationUrl === annot.url}
                 tagPickerDependencies={this.props.annotationTagProps}
-                annotationEditDependencies={this.props.annotationEditProps}
+                annotationEditDependencies={this.props.bindAnnotationEditProps(
+                    annot,
+                )}
                 annotationFooterDependencies={this.props.bindAnnotationFooterEventProps(
                     annot,
                 )}
