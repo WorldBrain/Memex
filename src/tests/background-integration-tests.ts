@@ -165,6 +165,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         storageChangeDetector,
         authService,
         subscriptionService,
+        getServerStorage,
     }
 }
 
