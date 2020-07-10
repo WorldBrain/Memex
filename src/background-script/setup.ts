@@ -318,6 +318,8 @@ export function createBackgroundModules(options: {
         }),
         contentSharing: new ContentSharingBackground({
             storageManager,
+            customLists: customLists.storage,
+            auth,
             getContentSharing: async () =>
                 (await options.getServerStorage()).storageModules
                     .contentSharing,
@@ -387,6 +389,7 @@ export function getBackgroundStorageModules(
         syncInfo: backgroundModules.sync.syncInfoStorage,
         pages: backgroundModules.pages.storage,
         copyPaster: backgroundModules.copyPaster.storage,
+        contentSharing: backgroundModules.contentSharing.storage,
     }
 }
 

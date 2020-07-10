@@ -3,9 +3,10 @@ import 'firebase/database'
 import 'firebase/firestore'
 import StorageManager from '@worldbrain/storex'
 import { FirestoreStorageBackend } from '@worldbrain/storex-backend-firestore'
-import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-log/storex'
-import ContentSharingStorage from 'src/content-sharing/background/storage'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-log/storex'
+import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
+import { ContentSharingStorage } from 'src/content-sharing/background/storage'
 import { ServerStorage } from './types'
 
 export function createServerStorageManager() {
@@ -20,34 +21,43 @@ export function createServerStorageManager() {
 export function createLazyServerStorage(
     createStorageManager: () => StorageManager,
 ) {
-    let serverStorage: ServerStorage
+    let serverStoragePromise: Promise<ServerStorage>
 
     return async () => {
-        if (serverStorage) {
-            return serverStorage
+        if (serverStoragePromise) {
+            return serverStoragePromise
         }
 
-        const storageManager = createStorageManager()
-        const sharedSyncLog = new SharedSyncLogStorage({
-            storageManager,
-            autoPkType: 'string',
-        })
-        const contentSharing = new ContentSharingStorage({
-            storageManager,
-        })
-        serverStorage = {
-            storageManager,
-            storageModules: {
+        serverStoragePromise = (async () => {
+            const storageManager = createStorageManager()
+            const sharedSyncLog = new SharedSyncLogStorage({
+                storageManager,
+                autoPkType: 'string',
+            })
+            const contentSharing = new ContentSharingStorage({
+                storageManager,
+            })
+            const userManagement = new UserStorage({
+                storageManager,
+            })
+            const serverStorage: ServerStorage = {
+                storageManager,
+                storageModules: {
+                    sharedSyncLog,
+                    contentSharing,
+                    userManagement,
+                },
+            }
+            registerModuleMapCollections(storageManager.registry, {
                 sharedSyncLog,
                 contentSharing,
-            },
-        }
-        registerModuleMapCollections(storageManager.registry, {
-            sharedSyncLog,
-            contentSharing,
-        })
-        await storageManager.finishInitialization()
+                userManagement,
+            })
+            await storageManager.finishInitialization()
 
-        return serverStorage
+            return serverStorage
+        })()
+
+        return serverStoragePromise
     }
 }

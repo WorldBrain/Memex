@@ -12,6 +12,7 @@ import { registerBackgroundIntegrationTest } from './background-integration-test
 import MemoryBrowserStorage from 'src/util/tests/browser-storage'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
+import { ServerStorage } from 'src/storage/types'
 
 export interface IntegrationTestSuite<StepContext> {
     description: string
@@ -51,6 +52,7 @@ export interface BackgroundIntegrationTestSetup {
     storageOperationLogger: StorageOperationLogger
     authService: MemoryAuthService
     subscriptionService: MemorySubscriptionsService
+    getServerStorage(): Promise<ServerStorage>
 }
 export interface BackgroundIntegrationTestContext {
     setup: BackgroundIntegrationTestSetup
