@@ -54,6 +54,8 @@ import { Analytics } from 'src/analytics/types'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
 import { PipelineRes } from 'src/search'
 import CopyPasterBackground from 'src/overview/copy-paster/background'
+import { ServerStorage } from 'src/storage/types'
+import ContentSharingBackground from 'src/content-sharing/background'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -79,11 +81,13 @@ export interface BackgroundModules {
     pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
     copyPaster: CopyPasterBackground
+    contentSharing: ContentSharingBackground
 }
 
 export function createBackgroundModules(options: {
     storageManager: StorageManager
     browserAPIs: Browser
+    getServerStorage: () => Promise<ServerStorage>
     signalTransportFactory: SignalTransportFactory
     getSharedSyncLog: () => Promise<SharedSyncLog>
     localStorageChangesManager: StorageChangesManager
@@ -311,6 +315,12 @@ export function createBackgroundModules(options: {
         }),
         copyPaster: new CopyPasterBackground({
             storageManager,
+        }),
+        contentSharing: new ContentSharingBackground({
+            storageManager,
+            getContentSharing: async () =>
+                (await options.getServerStorage()).storageModules
+                    .contentSharing,
         }),
     }
 }
