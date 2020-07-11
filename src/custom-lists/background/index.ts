@@ -59,6 +59,7 @@ export default class CustomListBackground {
                 return this.insertPageToList(params)
             },
             updateListName: bindMethod(this, 'updateList'),
+            updateListDescription: async () => {},
             removeList: bindMethod(this, 'removeList'),
             removePageFromList: bindMethod(this, 'removePageFromList'),
             fetchAllLists: bindMethod(this, 'fetchAllLists'),

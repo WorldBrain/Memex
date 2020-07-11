@@ -81,6 +81,12 @@ export class AuthBackground {
                     await this.subscriptionService.getCurrentUserClaims(),
                 )
             },
+            async getUserProfile(): Promise<{ displayName: string } | null> {
+                return null
+            },
+            async updateUserProfile(updates: {
+                displayName: string
+            }): Promise<void> {},
         }
     }
 

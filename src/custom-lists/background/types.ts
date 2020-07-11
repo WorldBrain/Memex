@@ -1,6 +1,7 @@
 export interface PageList {
     id: number
     name: string
+    description?: string
     pages?: string[]
     isNestable?: boolean
     isDeletable?: boolean
@@ -30,6 +31,10 @@ export interface RemoteCollectionsInterface {
         id: number
         oldName: string
         newName: string
+    }): Promise<void>
+    updateListDescription(args: {
+        listId: number
+        description: string
     }): Promise<void>
     removeList(args: { id: number }): Promise<any>
     removePageFromList(args: { id: number; url: string }): Promise<void>
