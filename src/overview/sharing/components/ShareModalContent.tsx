@@ -184,9 +184,9 @@ export default class ShareModalContent extends PureComponent<
                         inactiveText={'private'}
                         onClickToggle={this.props.onClickToggle}
                     />
-                    <LinkBox onClick={}>
+                    <LinkBox>
                         {this.props.isPublic
-                            ? <ShareUrlBox><ShareUrl>{this.props.shareurl}https://shareurl.com/adlfkasdfjlsakjdflsakfjsdlkfsdfasdfds</ShareUrl><TypographyHeadingSmall>Copy</TypographyHeadingSmall></ShareUrlBox>
+                            ? <ShareUrlBox><ShareUrl>{this.props.shareUrl}</ShareUrl><TypographyHeadingSmall>Copy</TypographyHeadingSmall></ShareUrlBox>
                             : 'turn on sharing to generate link'}
                     </LinkBox>
                 </LinkContainer>
@@ -195,6 +195,7 @@ export default class ShareModalContent extends PureComponent<
                     {this.props.isUploading && (
                         <>
                             <LoadingIndicator />
+                            <br/>
                             <TypographyHeadingNormal>Uploading Collection</TypographyHeadingNormal>
                             <TypographySubTextNormal>You can close this popup</TypographySubTextNormal>
                         </>
