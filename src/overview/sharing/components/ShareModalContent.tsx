@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import styled, { css } from 'styled-components'
 import { LoadingIndicator } from 'src/common-ui/components'
+import { TypographyHeadingBig, TypographyTextNormal, TypographyHeadingBigger, TypographySubTextNormal, TypographyHeadingNormal, TypographyHeadingSmall } from 'src/common-ui/components/design-library/typography'
 
 const HeaderText = styled.div`
     font-family: Poppins;
@@ -42,6 +43,9 @@ const Button = styled.button`
 
 const LinkContainer = styled.div`
     margin-bottom: 10px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
 `
 
 const ShareToggleButton = styled.button`
@@ -49,11 +53,12 @@ const ShareToggleButton = styled.button`
     position: relative;
 
     height: 21px;
-    width: 77px;
+    width: 90px;
     outline: none;
     border: 1px solid #e0e0e0;
     border-radius: 20px;
     background: transparent;
+    margin-right: 10px;
 
     cursor: pointer;
 `
@@ -98,9 +103,34 @@ const ShareToggleText = styled.div`
         `}
 `
 
+const ShareUrlBox = styled.div`
+    background-color: #e0e0e0;
+    padding: 3px 10px;
+    width: 100%;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+`
+
+const ShareUrl = styled.span`
+    font-size: 12px;
+`
+
+const LinkBox = styled.div`
+    width: 100%;
+    height: 26px;
+`
+
 const UploadingContainer = styled.div`
-    height: 75px;
-    margin-bottom: 10px;
+    margin: 30px 0;
+    padding: 10px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3px;
+    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 2px 4px;
 `
 
 interface ShareToggleProps {
@@ -143,8 +173,9 @@ export default class ShareModalContent extends PureComponent<
     render() {
         return (
             <div>
-                <HeaderText>Share "{this.props.collectionName}"</HeaderText>
-                <Text>Anyone with this link can view your collection</Text>
+                <TypographyHeadingBigger>Share "{this.props.collectionName}"</TypographyHeadingBigger>
+                <br/>
+                <TypographyTextNormal>Anyone with this link can view your collection</TypographyTextNormal>
 
                 <LinkContainer>
                     <ShareToggle
@@ -153,20 +184,20 @@ export default class ShareModalContent extends PureComponent<
                         inactiveText={'private'}
                         onClickToggle={this.props.onClickToggle}
                     />
-                    <div>
+                    <LinkBox onClick={}>
                         {this.props.isPublic
-                            ? this.props.shareUrl || <LoadingIndicator />
+                            ? <ShareUrlBox><ShareUrl>{this.props.shareurl}https://shareurl.com/adlfkasdfjlsakjdflsakfjsdlkfsdfasdfds</ShareUrl><TypographyHeadingSmall>Copy</TypographyHeadingSmall></ShareUrlBox>
                             : 'turn on sharing to generate link'}
-                    </div>
+                    </LinkBox>
                 </LinkContainer>
 
                 <UploadingContainer>
                     {this.props.isUploading && (
-                        <div>
+                        <>
                             <LoadingIndicator />
-                            <div>Uploading</div>
-                            <div>You can close this screen</div>
-                        </div>
+                            <TypographyHeadingNormal>Uploading Collection</TypographyHeadingNormal>
+                            <TypographySubTextNormal>You can close this popup</TypographySubTextNormal>
+                        </>
                     )}
                 </UploadingContainer>
 
