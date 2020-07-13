@@ -13,6 +13,9 @@ interface Props {
 
     onClose: () => void
     onUpdateDisplayName: (displayName: string) => void
+
+    onShareList: (listId: number) => void
+    onUnshareList: (listId: number) => void
 }
 
 interface State {
@@ -39,7 +42,7 @@ class ShareModal extends PureComponent<Props, State> {
             return (
                 <ShareNonPioneerInfo
                     onClickUpgrade={() => {
-                        // TODO
+                        // TODO: handle "upgrade" click for non-pioneer
                     }}
                 />
             )
@@ -61,24 +64,28 @@ class ShareModal extends PureComponent<Props, State> {
         }
 
         // otherwise -  show the main modal content
-        const isPublic = false // TODO
-        const shareUrl = '' // TODO
-        const isUploading = false // TODO
+        const isShared = false // TODO: get share status of given list
+        const isUploading = false // TODO: get "uploading" status of a given list
+        const shareUrl = '' // TODO: get "share url" for a given list
 
         return (
             <ShareModalContent
-                isPublic={isPublic}
+                isShared={isShared}
                 shareUrl={shareUrl}
                 isUploading={isUploading}
                 collectionName={this.props.list.name}
                 onClickToggle={() => {
-                    // TODO
+                    if (isShared) {
+                        this.props.onUnshareList(this.props.list.id)
+                    } else {
+                        this.props.onShareList(this.props.list.id)
+                    }
                 }}
                 onClickLetUsKnow={() => {
-                    // TODO
+                    // TODO: handle "let us know" button
                 }}
                 onClickViewRoadmap={() => {
-                    // TODO
+                    // TODO: handle "roadmap" button
                 }}
             />
         )
