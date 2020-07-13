@@ -9,6 +9,7 @@ import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { RemoteCopyPasterInterface } from 'src/overview/copy-paster/background/types'
 import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 export interface RemoteFunctionImplementations<
     Role extends 'provider' | 'caller'
@@ -23,6 +24,7 @@ export interface RemoteFunctionImplementations<
     tags: RemoteTagsInterface
     collections: RemoteCollectionsInterface
     copyPaster: RemoteCopyPasterInterface
+    contentSharing: ContentSharingInterface
 }
 
 // See `src/background.ts` for the concrete remote function bindings
@@ -38,6 +40,7 @@ export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
     tags: runInBackground<RemoteTagsInterface>(),
     collections: runInBackground<RemoteCollectionsInterface>(),
     copyPaster: runInBackground<RemoteCopyPasterInterface>(),
+    contentSharing: runInBackground<ContentSharingInterface>(),
 }
 
 export const notifications = remoteFunctions.notifications
@@ -50,3 +53,4 @@ export const featuresBeta = remoteFunctions.featuresBeta
 export const tags = remoteFunctions.tags
 export const collections = remoteFunctions.collections
 export const copyPaster = remoteFunctions.copyPaster
+export const contentSharing = remoteFunctions.contentSharing

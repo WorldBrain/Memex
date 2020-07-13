@@ -11,7 +11,7 @@ const stories = storiesOf('Sharing', module)
 stories.add('Modal content - private', () => (
     <ShareModalContent
         collectionName={'Reading List'}
-        isPublic={false}
+        isShared={false}
         isUploading={false}
         onClickToggle={() => {}}
         onClickLetUsKnow={() => {}}
@@ -22,7 +22,7 @@ stories.add('Modal content - private', () => (
 stories.add('Modal content - public', () => (
     <ShareModalContent
         collectionName={'Reading List'}
-        isPublic={boolean('isPublic', true)}
+        isShared={boolean('isShared', true)}
         isUploading={false}
         shareUrl={'https://memex.social/collections/jdfjf81d'}
         onClickToggle={() => {}}
@@ -34,7 +34,7 @@ stories.add('Modal content - public', () => (
 stories.add('Modal content - public & uploading', () => (
     <ShareModalContent
         collectionName={'Reading List'}
-        isPublic={boolean('isPublic', true)}
+        isShared={boolean('isShared', true)}
         isUploading
         shareUrl={'https://memex.social/collections/jdfjf81d'}
         onClickToggle={() => {}}

@@ -1,7 +1,14 @@
 import React, { PureComponent } from 'react'
 import styled, { css } from 'styled-components'
 import { LoadingIndicator } from 'src/common-ui/components'
-import { TypographyHeadingBig, TypographyTextNormal, TypographyHeadingBigger, TypographySubTextNormal, TypographyHeadingNormal, TypographyHeadingSmall } from 'src/common-ui/components/design-library/typography'
+import {
+    TypographyHeadingBig,
+    TypographyTextNormal,
+    TypographyHeadingBigger,
+    TypographySubTextNormal,
+    TypographyHeadingNormal,
+    TypographyHeadingSmall,
+} from 'src/common-ui/components/design-library/typography'
 
 const HeaderText = styled.div`
     font-family: Poppins;
@@ -130,7 +137,8 @@ const UploadingContainer = styled.div`
     justify-content: center;
     align-items: center;
     border-radius: 3px;
-    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 2px 4px;
+    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
+        rgba(15, 15, 15, 0.1) 0px 2px 4px;
 `
 
 interface ShareToggleProps {
@@ -157,7 +165,7 @@ class ShareToggle extends PureComponent<ShareToggleProps> {
 }
 
 interface ShareModalContentProps {
-    isPublic: boolean
+    isShared: boolean
     collectionName: string
     shareUrl?: string
     isUploading: boolean
@@ -173,21 +181,32 @@ export default class ShareModalContent extends PureComponent<
     render() {
         return (
             <div>
-                <TypographyHeadingBigger>Share "{this.props.collectionName}"</TypographyHeadingBigger>
-                <br/>
-                <TypographyTextNormal>Anyone with this link can view your collection</TypographyTextNormal>
+                <TypographyHeadingBigger>
+                    Share "{this.props.collectionName}"
+                </TypographyHeadingBigger>
+                <br />
+                <TypographyTextNormal>
+                    Anyone with this link can view your collection
+                </TypographyTextNormal>
 
                 <LinkContainer>
                     <ShareToggle
-                        isActive={this.props.isPublic}
+                        isActive={this.props.isShared}
                         activeText={'shared'}
                         inactiveText={'private'}
                         onClickToggle={this.props.onClickToggle}
                     />
                     <LinkBox>
-                        {this.props.isPublic
-                            ? <ShareUrlBox><ShareUrl>{this.props.shareUrl}</ShareUrl><TypographyHeadingSmall>Copy</TypographyHeadingSmall></ShareUrlBox>
-                            : 'turn on sharing to generate link'}
+                        {this.props.isShared ? (
+                            <ShareUrlBox>
+                                <ShareUrl>{this.props.shareUrl}</ShareUrl>
+                                <TypographyHeadingSmall>
+                                    Copy
+                                </TypographyHeadingSmall>
+                            </ShareUrlBox>
+                        ) : (
+                            'turn on sharing to generate link'
+                        )}
                     </LinkBox>
                 </LinkContainer>
 
@@ -195,9 +214,13 @@ export default class ShareModalContent extends PureComponent<
                     {this.props.isUploading && (
                         <>
                             <LoadingIndicator />
-                            <br/>
-                            <TypographyHeadingNormal>Uploading Collection</TypographyHeadingNormal>
-                            <TypographySubTextNormal>You can close this popup</TypographySubTextNormal>
+                            <br />
+                            <TypographyHeadingNormal>
+                                Uploading Collection
+                            </TypographyHeadingNormal>
+                            <TypographySubTextNormal>
+                                You can close this popup
+                            </TypographySubTextNormal>
                         </>
                     )}
                 </UploadingContainer>

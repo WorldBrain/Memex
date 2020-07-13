@@ -12,7 +12,7 @@ import ListItem from './list-item'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import { actions as filterActs } from 'src/search-filters'
 import { selectors as sidebar } from 'src/overview/sidebar-left'
-import { auth } from 'src/util/remote-functions-background'
+import { auth, contentSharing } from 'src/util/remote-functions-background'
 import ShareModal from 'src/overview/sharing/components/ShareModal'
 
 class ListContainer extends Component {
@@ -61,12 +61,12 @@ class ListContainer extends Component {
 
     async getUserInfo() {
         // const isPioneer = await auth.isAuthorizedForFeature('beta')
-        const userProfile = await auth.getUserProfile()
-        const displayName = userProfile ? userProfile.displayName : undefined
+        // const userProfile = await auth.getUserProfile()
+        // const displayName = userProfile ? userProfile.displayName : undefined
 
         this.setState({
-            isPioneer: true, // TODO: use isPioneer from above
-            displayName,
+            isPioneer: true, // TODO: use isPioneer declared above
+            displayName: 'John Smith', // TODO: use displayName declared above
         })
     }
 
@@ -220,6 +220,16 @@ class ListContainer extends Component {
                     isShown={this.props.shareModalProps.isShown}
                     list={this.props.lists[this.props.shareModalProps.index]}
                     onClose={this.props.handleCloseShareModal}
+                    onShareList={(listId) => {
+                        contentSharing.shareList({ listId })
+                        // TODO: requery list share status
+                        // TODO: move logic to actions
+                    }}
+                    onUnshareList={(listId) => {
+                        // TODO: contentSharing.unshareList({ listId })
+                        // TODO: requery list share status
+                        // TODO: move logic to actions
+                    }}
                 />
             </React.Fragment>
         )
