@@ -39,7 +39,7 @@ export const createAnnotationsCache = (bgModules: {
         },
     })
 
-export interface AnnotationCacheChanges {
+interface AnnotationCacheChanges {
     created: (annotation: Annotation) => void
     updated: (annotation: Annotation) => void
     deleted: (annotation: Annotation) => void
@@ -47,6 +47,10 @@ export interface AnnotationCacheChanges {
     load: (annotation: Annotation[]) => void
     rollback: (annotations: Annotation[]) => void
 }
+
+export type AnnotationCacheChangeEvents = TypedEventEmitter<
+    AnnotationCacheChanges
+>
 
 export interface AnnotationsCacheDependencies {
     backendOperations?: {
@@ -78,9 +82,7 @@ export interface AnnotationsCacheInterface {
 
 export class AnnotationsCache implements AnnotationsCacheInterface {
     private _annotations: Annotation[]
-    public annotationChanges = new EventEmitter() as TypedEventEmitter<
-        AnnotationCacheChanges
-    >
+    public annotationChanges = new EventEmitter() as AnnotationCacheChangeEvents
 
     constructor(private dependencies: AnnotationsCacheDependencies) {}
 

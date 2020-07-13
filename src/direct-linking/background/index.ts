@@ -27,6 +27,8 @@ import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from 'src/tags/utils'
 import { TagsSettings } from 'src/tags/background/types'
 import { limitSuggestionsStorageLength } from 'src/tags/background'
+import { now } from 'moment'
+import { generateUniqueAnnotationUrl } from 'src/direct-linking/utils'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -245,7 +247,7 @@ export default class DirectLinkingBackground {
             pageTitle,
             pageUrl: this._normalizeUrl(tab.url),
             body: request.anchor.quote,
-            url: result.url,
+            uniqueAnnotationUrl: result.url,
             selector: request.anchor,
             comment: '',
         })
@@ -287,14 +289,14 @@ export default class DirectLinkingBackground {
             annotations.map(
                 async ({ createdWhen, lastEdited, ...annotation }) => {
                     const tags = await this.annotationStorage.getTagsByAnnotationUrl(
-                        annotation.url,
+                        annotation.uniqueAnnotationUrl,
                     )
 
                     return {
                         ...annotation,
                         hasBookmark: await this.annotationStorage.annotHasBookmark(
                             {
-                                url: annotation.url,
+                                url: annotation.uniqueAnnotationUrl,
                             },
                         ),
                         createdWhen: createdWhen.getTime(),
@@ -317,7 +319,7 @@ export default class DirectLinkingBackground {
         { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
         let pageUrl = this._normalizeUrl(
-            toCreate.url == null ? tab.url : toCreate.url,
+            toCreate.pageUrl == null ? tab.url : toCreate.pageUrl,
         )
 
         if (toCreate.isSocialPost) {
@@ -325,11 +327,16 @@ export default class DirectLinkingBackground {
         }
 
         const pageTitle = toCreate.title == null ? tab.title : toCreate.title
-        const uniqueUrl = `${pageUrl}/#${Date.now()}`
+        const uniqueUrl =
+            toCreate.uniqueUrl ??
+            generateUniqueAnnotationUrl({
+                pageUrl: toCreate.pageUrl,
+                now: () => now(),
+            })
 
         await this.annotationStorage.createAnnotation({
             pageUrl,
-            url: uniqueUrl,
+            uniqueAnnotationUrl: uniqueUrl,
             pageTitle,
             comment: toCreate.comment,
             body: toCreate.body,

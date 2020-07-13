@@ -1,4 +1,4 @@
-import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { HighlightInteractionsInterface } from 'src/highlighting/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
@@ -14,7 +14,7 @@ interface FlagSetterInterface {
 export interface RibbonContainerDependencies {
     currentTab: { id: number; url: string }
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
-    highlighter: HighlightInteractionInterface
+    highlighter: HighlightInteractionsInterface
     annotationsManager: AnnotationsManager
     setSidebarEnabled: (value: boolean) => Promise<void>
     getSidebarEnabled: () => Promise<boolean>

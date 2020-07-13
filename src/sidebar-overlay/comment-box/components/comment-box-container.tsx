@@ -9,7 +9,7 @@ import State from '../types'
 import { AnnotationNewHighlight } from '../../components'
 import CommentBoxForm from './comment-box-form'
 import { MapDispatchToProps } from '../../types'
-import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
+import { Anchor, HighlightInteractionsInterface } from 'src/highlighting/types'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 
 const styles = require('./comment-box-container.css')
@@ -37,7 +37,7 @@ interface OwnProps {
     env?: 'inpage' | 'overview'
     isSocialPost?: boolean
     onSaveCb?: () => void
-    highlighter: HighlightInteractionInterface
+    highlighter: HighlightInteractionsInterface
     closeComments?: () => void
 }
 

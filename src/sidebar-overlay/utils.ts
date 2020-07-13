@@ -63,4 +63,4 @@ export const maxPossibleTags = (tags: string[]) => {
     }
     return tagsAllowed
 }
-export const toggleSidebarOverlay = remoteFunction('toggleSidebarOverlay')
+// export const toggleSidebarOverlay = remoteFunction('toggleSidebarOverlay')

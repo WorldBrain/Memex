@@ -9,19 +9,18 @@ import {
     InPageUIRibbonAction,
     SidebarActionOptions,
 } from './types'
-import { HighlightInteraction } from 'src/highlighting/ui/highlight-interactions'
+import { HighlightInteractions } from 'src/highlighting/ui/highlight-interactions'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { Annotation } from 'src/annotations/types'
 
-export interface InPageUIDependencies {
+export interface SharedInPageUIDependencies {
     pageUrl: string
-    highlighter: HighlightInteraction
+    highlighter: HighlightInteractions
     annotations: AnnotationInterface<'caller'>
     loadComponent: (component: InPageUIComponent) => void
 }
 
 export class SharedInPageUIState implements SharedInPageUIInterface {
-    contentAnnotations: Annotation[] = []
     events = new EventEmitter() as TypedEventEmitter<SharedInPageUIEvents>
     areHighlightsShown = false
     componentsShown: InPageUIComponentShowState = {
@@ -41,7 +40,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         ribbonAction?: { emittedWhen: number; action: InPageUIRibbonAction }
     } = {}
 
-    constructor(private options: InPageUIDependencies) {
+    constructor(private options: SharedInPageUIDependencies) {
         this.events.on('newListener' as any, this._handleNewListener)
     }
 

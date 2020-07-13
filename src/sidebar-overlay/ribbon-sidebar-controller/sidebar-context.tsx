@@ -1,7 +1,7 @@
 import React from 'react'
-import { HighlightInteraction } from 'src/highlighting/ui/highlight-interactions'
+import { HighlightInteractions } from 'src/highlighting/ui/highlight-interactions'
 
-const highlighter = new HighlightInteraction()
+const highlighter = new HighlightInteractions()
 
 type WithInnerRef<T> = T & { innerRef?: any }
 

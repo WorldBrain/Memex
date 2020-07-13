@@ -14,7 +14,7 @@ import {
     Shortcut,
 } from 'src/in-page-ui/keyboard-shortcuts/types'
 import ExtraButtonsPanel from './extra-buttons-panel'
-import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { HighlightInteractionsInterface } from 'src/highlighting/types'
 import { RibbonSubcomponentProps } from './types'
 import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
@@ -34,7 +34,7 @@ export interface Props extends RibbonSubcomponentProps {
     handleRibbonToggle: () => void
     handleRemoveRibbon: () => void
     getUrl: () => string
-    highlighter: Pick<HighlightInteractionInterface, 'removeHighlights'>
+    highlighter: Pick<HighlightInteractionsInterface, 'removeHighlights'>
     hideOnMouseLeave?: boolean
 }
 

@@ -8,7 +8,7 @@ import AnnotationBox from 'src/sidebar-overlay/annotation-box'
 
 import { deleteAnnotation, editAnnotation } from 'src/annotations/actions'
 import { Annotation } from 'src/annotations/types'
-import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { HighlightInteractionsInterface } from 'src/highlighting/types'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 
 const styles = require('./annotation-list.css')
@@ -23,7 +23,7 @@ interface OwnProps {
     pageUrl: string
     /** Opens the annotation sidebar with all of the annotations */
     openAnnotationSidebar: MouseEventHandler
-    highlighter: HighlightInteractionInterface
+    highlighter: HighlightInteractionsInterface
     goToAnnotation: (annotation: Annotation) => void
 }
 

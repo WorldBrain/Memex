@@ -22,7 +22,7 @@ import AnnotationsManager from 'src/annotations/annotations-manager'
 import * as bookmarkActs from 'src/popup/bookmark-button/actions'
 import * as popup from 'src/popup/selectors'
 import { retryUntilErrorResolves } from 'src/util/retry-until'
-import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
+import { Anchor, HighlightInteractionsInterface } from 'src/highlighting/types'
 import { Annotation } from 'src/annotations/types'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 import analytics from 'src/analytics'
@@ -64,7 +64,7 @@ interface OwnProps extends Partial<KeyboardActions> {
     getUrl?: () => string
     handleRemoveRibbon: () => void
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
-    highlighter: HighlightInteractionInterface
+    highlighter: HighlightInteractionsInterface
 }
 
 type Props = StateProps & DispatchProps & OwnProps

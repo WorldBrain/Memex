@@ -1,7 +1,7 @@
 import * as React from 'react'
 import ReactDOM from 'react-dom'
 
-import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { HighlightInteractionsInterface } from 'src/highlighting/types'
 import {
     SharedInPageUIEvents,
     SidebarActionOptions,
@@ -17,7 +17,7 @@ import { Annotation } from 'src/annotations/types'
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
     inPageUI: SharedInPageUIInterface
-    highlighter: HighlightInteractionInterface
+    highlighter: HighlightInteractionsInterface
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<

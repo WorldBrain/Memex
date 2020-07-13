@@ -209,7 +209,7 @@ export default class SocialStorage extends StorageModule {
         lists: PageList[],
         pageEntries: any[],
     ): PageList[] {
-        const mappedLists = lists.map(list => {
+        const mappedLists = lists.map((list) => {
             const page = pageEntries.find(({ listId }) => listId === list.id)
             delete list['_name_terms']
             return {
@@ -309,7 +309,7 @@ export default class SocialStorage extends StorageModule {
         postId: number
     }) {
         await Promise.all(
-            hashtags.map(hashtag =>
+            hashtags.map((hashtag) =>
                 this.operation('createHashTag', {
                     name: hashtag,
                     postId,
@@ -380,7 +380,7 @@ export default class SocialStorage extends StorageModule {
             .collection('annotations')
             .findObjects<Annotation>({ pageUrl: postUrlId })
 
-        const annotIds = annots.map(annot => annot.url)
+        const annotIds = annots.map((annot) => annot.uniqueAnnotationUrl)
 
         return Promise.all([
             this.storageManager
@@ -466,7 +466,7 @@ export default class SocialStorage extends StorageModule {
         base64Img: boolean,
     ): Promise<User[]> {
         return Promise.all(
-            users.map(async user => {
+            users.map(async (user) => {
                 const profilePic = user.profilePic
                     ? await this.encodeImage(user.profilePic, base64Img)
                     : undefined

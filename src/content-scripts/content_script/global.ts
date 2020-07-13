@@ -22,8 +22,15 @@ import { ContentScriptComponent } from '../types'
 import { initKeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/content_script'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
-import { HighlightInteraction } from 'src/highlighting/ui/highlight-interactions'
-import { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
+import {
+    createAnnotationWithSidebar,
+    HighlightRenderer,
+    saveAndRenderHighlightFromTooltip,
+} from 'src/highlighting/ui/highlight-interactions'
+import {
+    InPageUIComponent,
+    SharedInPageUIInterface,
+} from 'src/in-page-ui/shared-state/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
@@ -46,6 +53,11 @@ setupPageContentRPC()
 // and dependencies of content scripts.
 
 export async function main() {
+    // @ts-ignore
+    const getPageUrl: () => window.location.href
+    // @ts-ignore
+    const getPageTitle: () => document.title
+
     // 1. Create a local object with promises to track each content script
     // initialisation and provide a function which can initialise a content script
     // or ignore if already loaded.
@@ -68,9 +80,10 @@ export async function main() {
     const tagsBG = runInBackground<RemoteTagsInterface>()
     const remoteFunctionRegistry = new RemoteFunctionRegistry()
     const annotationsManager = new AnnotationsManager()
-    const highlighter = new HighlightInteraction()
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
+    const highlightRenderer = new HighlightRenderer()
+    const highlighter = new HighlightRenderer()
 
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
@@ -86,12 +99,6 @@ export async function main() {
         annotations: annotationsBG,
     })
     annotationsCache.load(currentTab.url)
-
-    const annotationFunctions: AnnotationFunctions = {
-        createHighlight: () =>
-            highlighter.createHighlight({ annotationsManager, inPageUI }),
-        createAnnotation: () => highlighter.createAnnotation({ inPageUI }),
-    }
 
     // 4. Create a contentScriptRegistry object with functions for each content script
     // component, that when run, initialise the respective component with it's
@@ -144,7 +151,30 @@ export async function main() {
             await execute({
                 inPageUI,
                 toolbarNotifications,
-                ...annotationFunctions,
+                createHighlight: () =>
+                    saveAndRenderHighlightFromTooltip({
+                        annotationsCache,
+                        getUrlAndTitle: () => ({
+                            title: getPageTitle(),
+                            pageUrl: getPageUrl(),
+                        }),
+                        renderer: highlightRenderer,
+                        getSelection: () => document.getSelection(),
+                        onClickHighlight: ({ annotationUrl }) =>
+                            inPageUI.showSidebar({
+                                annotationUrl,
+                                action: 'show_annotation',
+                            }),
+                    }),
+                createAnnotation: () =>
+                    createAnnotationWithSidebar({
+                        getSelection: () => document.getSelection(),
+                        getUrlAndTitle: () => ({
+                            title: getPageTitle(),
+                            pageUrl: getPageUrl(),
+                        }),
+                        inPageUI: inPageUI,
+                    }),
             })
             components.tooltip!.resolve()
         },
@@ -172,7 +202,6 @@ export async function main() {
             )
             await highlighter.highlightAndScroll(annotation)
         },
-        ...annotationFunctions,
     })
 
     // 6. Setup other interactions with this page (things that always run)
@@ -181,7 +210,12 @@ export async function main() {
     setupRemoteDirectLinkFunction()
     initKeyboardShortcuts({
         inPageUI,
-        ...annotationFunctions,
+        async createAnnotation() {
+            // TODO: (sidebar-refactor) - annotations implement me post Annotations Renderer / Interactions refactor
+        },
+        async createHighlight() {
+            // TODO: (sidebar-refactor) - annotations - implement me post Annotations Renderer / Interactions Refactor
+        },
     })
     const loadContentScript = createContentScriptLoader()
     if (shouldIncludeSearchInjection(window.location.hostname)) {

@@ -1,5 +1,6 @@
 import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import { SaveAndRenderHighlightDependencies } from 'src/highlighting/ui/highlight-interactions'
 
 export interface Descriptor {
     strategy: string
@@ -11,9 +12,11 @@ export interface Anchor {
     descriptor: Descriptor
 }
 
-export type Highlight = Pick<Annotation, 'url' | 'selector'>
+export type Highlight = Pick<Annotation, 'url' | 'selector'> & {
+    temporary?: boolean
+}
 
-export interface HighlightInteractionInterface {
+export interface HighlightInteractionsInterface {
     renderHighlights: (
         highlights: Highlight[],
         openSidebar: (args: { activeUrl?: string }) => void,
@@ -37,11 +40,10 @@ export interface HighlightInteractionInterface {
     sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
     _removeHighlight: (highlight: Element) => void
     removeAnnotationHighlights: (url: string) => void
-    createHighlight: (params: {
-        annotationsManager: AnnotationsManagerInterface
-        inPageUI: SharedInPageUIInterface
-    }) => Promise<void>
-    createAnnotation: (params: {
+    saveAndRenderHighlight: (
+        params: SaveAndRenderHighlightDependencies,
+    ) => Promise<void>
+    createAnnotationWithSidebar: (params: {
         selection?: Selection
         inPageUI: SharedInPageUIInterface
     }) => Promise<void>

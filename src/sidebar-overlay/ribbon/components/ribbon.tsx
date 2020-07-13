@@ -17,7 +17,7 @@ import {
 } from 'src/in-page-ui/keyboard-shortcuts/types'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { highlightAnnotations } from 'src/annotations'
-import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { HighlightInteractionsInterface } from 'src/highlighting/types'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 import analytics from 'src/analytics'
 const styles = require('./ribbon.css')
@@ -55,7 +55,7 @@ export interface Props {
     setShowCollectionsPicker: (value: boolean) => void
     setShowSearchBox: (value: boolean) => void
     setSearchValue: (value: string) => void
-    highlighter: HighlightInteractionInterface
+    highlighter: HighlightInteractionsInterface
     hideOnMouseLeave?: boolean
 }
 

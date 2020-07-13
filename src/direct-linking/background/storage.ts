@@ -268,7 +268,7 @@ export default class AnnotationStorage extends StorageModule {
         pageTitle,
         pageUrl,
         body,
-        url,
+        url: uniqueAnnotationUrl,
         comment,
         selector,
         createdWhen = new Date(),
@@ -287,7 +287,7 @@ export default class AnnotationStorage extends StorageModule {
             selector,
             createdWhen,
             lastEdited: createdWhen,
-            url,
+            url: uniqueAnnotationUrl,
         })
     }
 

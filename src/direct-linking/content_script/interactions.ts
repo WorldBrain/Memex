@@ -1,13 +1,13 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { copyToClipboard } from './utils'
-import { extractAnchor } from 'src/highlighting/ui'
+import { extractAnchorFromSelection } from 'src/highlighting/ui/highlight-interactions'
 
 export const createAndCopyDirectLink = async () => {
     const selection = document.getSelection()
     const range = selection.getRangeAt(0)
     const url = window.location.href
 
-    const anchor = await extractAnchor(selection)
+    const anchor = await extractAnchorFromSelection(selection)
     const result: { url: string } = await remoteFunction('createDirectLink')({
         url,
         anchor,

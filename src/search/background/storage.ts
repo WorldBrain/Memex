@@ -250,7 +250,11 @@ export default class SearchStorage extends StorageModule {
             clusteredResults[day] = {}
             for (const [pageUrl, annots] of annotsByPage) {
                 annots.forEach((annot) =>
-                    reverseAnnotMap.set(annot.url, [day, pageUrl, annot]),
+                    reverseAnnotMap.set(annot.uniqueAnnotationUrl, [
+                        day,
+                        pageUrl,
+                        annot,
+                    ]),
                 )
             }
         }
@@ -262,7 +266,7 @@ export default class SearchStorage extends StorageModule {
 
         reverseAnnotMap.forEach(([day, pageUrl, annot]) => {
             // Delete any annots containing excluded tags
-            const tags = annotsToTags.get(annot.url) || []
+            const tags = annotsToTags.get(annot.uniqueAnnotationUrl) || []
 
             // Skip current annot if contains filtered tags
             if (
@@ -279,7 +283,7 @@ export default class SearchStorage extends StorageModule {
                 {
                     ...annot,
                     tags,
-                    hasBookmark: bmUrls.has(annot.url),
+                    hasBookmark: bmUrls.has(annot.uniqueAnnotationUrl),
                 } as any,
             ]
         })
@@ -332,8 +336,8 @@ export default class SearchStorage extends StorageModule {
             docs: pages.map((page) => {
                 const annotations = results.get(page.pageId).map((annot) => ({
                     ...annot,
-                    tags: annotsToTags.get(annot.url) || [],
-                    hasBookmark: bmUrls.has(annot.url),
+                    tags: annotsToTags.get(annot.uniqueAnnotationUrl) || [],
+                    hasBookmark: bmUrls.has(annot.uniqueAnnotationUrl),
                 }))
 
                 return { ...page, annotations }

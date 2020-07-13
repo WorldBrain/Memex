@@ -19,7 +19,7 @@ import { State as ResultsState } from 'src/overview/results/reducer'
 import { State as deleteConfModalState } from 'src/overview/delete-confirm-modal/reducer'
 import { State as CustomListsState } from 'src/custom-lists/types'
 import * as React from 'react'
-import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { HighlightInteractionsInterface } from 'src/highlighting/types'
 
 export default interface RootState {
     ribbon: RibbonState
@@ -58,5 +58,5 @@ export interface OpenSidebarArgs {
 }
 
 export interface SidebarContextInterface {
-    highlighter: HighlightInteractionInterface
+    highlighter: HighlightInteractionsInterface
 }

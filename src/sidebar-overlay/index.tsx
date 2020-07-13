@@ -1,12 +1,12 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
-import { HighlightInteraction } from '../highlighting/ui/highlight-interactions'
+import { HighlightInteractions } from '../highlighting/ui/highlight-interactions'
 import { SidebarContextInterface } from 'src/sidebar-overlay/types'
 
 export const SidebarContext = React.createContext<SidebarContextInterface>(null)
 export const sidebarDependencies = {
-    highlighter: new HighlightInteraction(),
+    highlighter: new HighlightInteractions(),
 }
 
 export const destroyRibbonAndSidebarUI = (

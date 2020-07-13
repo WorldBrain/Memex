@@ -40,8 +40,6 @@ export interface SharedInPageUIInterface {
     events: TypedEventEmitter<SharedInPageUIEvents>
     componentsShown: InPageUIComponentShowState
 
-    contentAnnotations: Annotation[]
-
     // Ribbon
     showRibbon(options?: { action?: InPageUIRibbonAction }): void
     hideRibbon(): void

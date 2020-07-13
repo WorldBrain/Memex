@@ -1,101 +1,197 @@
 import analytics from 'src/analytics'
 import { getOffsetTop } from 'src/sidebar-overlay/utils'
 import {
+    Anchor,
     Highlight,
-    HighlightInteractionInterface,
+    HighlightInteractionsInterface,
 } from 'src/highlighting/types'
 import { retryUntil } from 'src/util/retry-until'
 import { descriptorToRange, markRange } from './anchoring/index'
 import * as Raven from 'src/util/raven'
-import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
-import { createHighlight, extractAnchor } from 'src/highlighting/ui'
+import { Annotation } from 'src/annotations/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import * as anchoring from 'src/highlighting/ui/anchoring'
+import {
+    AnnotationCacheChangeEvents,
+    AnnotationsCacheInterface,
+} from 'src/annotations/annotations-cache'
+import { now } from 'moment'
+import { generateUniqueAnnotationUrl } from 'src/direct-linking/utils'
 
 const styles = require('src/highlighting/ui/styles.css')
 
-export class HighlightInteraction implements HighlightInteractionInterface {
-    createHighlight = async (params: {
-        annotationsManager: AnnotationsManagerInterface
-        inPageUI: SharedInPageUIInterface
-    }) => {
-        analytics.trackEvent({
-            category: 'InPageTooltip',
-            action: 'highlightText',
-        })
+export async function renderHighlightFromSelection(options: {
+    selection: Selection
+    pageUrl: string
+    title: string
+    temporary: boolean
+}) {
+    const { selection, pageUrl, title, temporary } = options
 
-        const anchor = await extractAnchor(document.getSelection())
-        const body = anchor ? anchor.quote : ''
-        const comment = ''
-        const tags = []
+    const anchor = await extractAnchorFromSelection(selection)
+    const body = anchor ? anchor.quote : ''
 
-        const annotation = await params.annotationsManager.createAnnotation({
-            url: window.location.href,
-            title: document.title,
-            body,
-            comment,
-            anchor,
-            tags,
-        })
+    const highlight = {
+        pageUrl,
+        title,
+        comment: '',
+        tags: [],
+        body,
+        selector: anchor,
+    } as Partial<Annotation>
 
-        params.inPageUI.informSidebarOfAnnotation({
-            anchor,
-            annotationUrl: annotation.url,
-            annotationData: {
-                highlightText: body,
-            },
-        })
+    renderHighlight(highlight as Highlight, () => false, temporary)
 
-        renderHighlight(
-            annotation as Highlight,
-            ({ activeUrl: annotationUrl }) =>
-                params.inPageUI.showSidebar({
-                    annotationUrl,
-                    action: 'show_annotation',
-                }),
+    return highlight
+}
+
+export const extractAnchorFromSelection = async (
+    selection: Selection,
+): Promise<Anchor> => {
+    const quote = selection.toString()
+    const descriptor = await anchoring.selectionToDescriptor({ selection })
+    return {
+        quote,
+        descriptor,
+    }
+}
+
+export interface HighlightRenderInterface {
+    renderHighlights: (
+        highlight: Highlight[],
+        onClick: AnnotationClickHandler,
+        temp: boolean,
+    ) => void
+    renderHighlight: (
+        highlight: Highlight,
+        onClick: AnnotationClickHandler,
+    ) => void
+    undoHighlight: (uniqueUrl: string) => void
+    undoAllHighlights: () => void
+}
+
+export type AnnotationClickHandler = (params: { annotationUrl: string }) => void
+
+// TODO: (sidebar-refactor) move to somewhere more highlight content script related
+export const renderAnnotationCacheChanges = (opts: {
+    cacheChanges: AnnotationCacheChangeEvents
+    onClickHighlight: AnnotationClickHandler
+    renderer: HighlightRenderInterface
+}) => {
+    const { cacheChanges, onClickHighlight, renderer } = opts
+    cacheChanges.on('load', (annotations) =>
+        renderer.renderHighlights(
+            annotations as Highlight[],
+            onClickHighlight,
+            false,
+        ),
+    )
+    cacheChanges.on('rollback', (annotations) => {
+        renderer.undoAllHighlights()
+        renderer.renderHighlights(
+            annotations as Highlight[],
+            onClickHighlight,
+            false,
         )
+    })
+    cacheChanges.on('created', (annotation) =>
+        renderer.renderHighlight(annotation as Highlight, onClickHighlight),
+    )
+    cacheChanges.on('deleted', (annotation) =>
+        renderer.undoHighlight(annotation.url),
+    )
+}
+
+// TODO: (sidebar-refactor) move to somewhere more sidebar related
+export const createAnnotationWithSidebar = async (params: {
+    getSelection: () => Selection
+    getUrlAndTitle: () => { pageUrl: string; title: string }
+    inPageUI: SharedInPageUIInterface
+}) => {
+    analytics.trackEvent({
+        category: 'InPageTooltip',
+        action: 'annotateText',
+    })
+
+    const selection = params.getSelection()
+    const { pageUrl, title } = params.getUrlAndTitle()
+
+    if (!selection || selection.isCollapsed) {
+        params.inPageUI.showSidebar({ action: 'comment' })
+        return
     }
 
-    createAnnotation = async (params: {
-        selection?: Selection
-        inPageUI: SharedInPageUIInterface
-    }) => {
-        analytics.trackEvent({
-            category: 'InPageTooltip',
-            action: 'annotateText',
-        })
+    const highlight = await renderHighlightFromSelection({
+        selection,
+        pageUrl,
+        title,
+        temporary: true,
+    })
 
-        const selection = params.selection ?? document.getSelection()
+    params.inPageUI.showSidebar({
+        action: 'comment',
+        anchor: highlight.selector,
+    })
+}
 
-        if (!selection || selection.isCollapsed) {
-            params.inPageUI.showSidebar({ action: 'comment' })
-            return
-        }
+export interface SaveAndRenderHighlightDependencies {
+    annotationsCache: AnnotationsCacheInterface
+    onClickHighlight: AnnotationClickHandler
+    renderer: HighlightRenderInterface
+    getSelection: () => Selection
+    getUrlAndTitle: () => { pageUrl: string; title: string }
+}
+// TODO: (sidebar-refactor) move to somewhere more tooltip related
+export const saveAndRenderHighlightFromTooltip = async (
+    params: SaveAndRenderHighlightDependencies,
+) => {
+    analytics.trackEvent({
+        category: 'InPageTooltip',
+        action: 'highlightText',
+    })
 
-        const highlight = await createHighlight(params.selection, true)
+    const anchor = await extractAnchorFromSelection(getSelection())
+    const body = anchor ? anchor.quote : ''
+    const comment = ''
+    const tags = []
+    const { pageUrl, title } = params.getUrlAndTitle()
 
-        params.inPageUI.showSidebar({
-            action: 'comment',
-            anchor: highlight.selector,
-        })
+    const annotation = {
+        url: generateUniqueAnnotationUrl({ pageUrl, now: () => Date.now() }),
+        body,
+        comment,
+        pageUrl,
+        selector: anchor,
+        tags,
+        createdWhen: now(),
+        lastEdited: now(),
     }
+    await params.annotationsCache.create(annotation)
+
+    params.renderer.renderHighlight(annotation as Highlight, () =>
+        params.onClickHighlight({ annotationUrl: annotation.url }),
+    )
+}
+
+export class HighlightRenderer
+    implements HighlightRenderInterface, HighlightInteractionsInterface {
+    createAnnotationWithSidebar = createAnnotationWithSidebar
+    saveAndRenderHighlight = saveAndRenderHighlightFromTooltip
 
     /**
      * Given an array of highlight objects, highlights all of them.
      */
-    renderHighlights = async (
-        highlights: Highlight[],
-        openSidebar: (args: { activeUrl?: string }) => void,
-    ) => {
+    renderHighlights = async (highlights: Highlight[], onClick) => {
         await Promise.all(
             highlights.map(async (highlight) =>
-                this.renderHighlight(highlight, openSidebar),
+                this.renderHighlight(highlight, onClick),
             ),
         )
     }
 
     renderHighlight = async (
         highlight: Highlight,
-        openSidebar: (args: { activeUrl?: string }) => void,
+        onClick,
         temporary = false,
     ) => {
         const baseClass =
@@ -121,7 +217,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
 
                 markRange({ range, cssClass: baseClass })
 
-                this.attachEventListenersToNewHighlights(highlight, openSidebar)
+                this.attachEventListenersToNewHighlights(highlight, onClick)
             })
         } catch (e) {
             Raven.captureException(e)
@@ -279,6 +375,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
             highlight.classList.add(styles['dark'])
         })
     }
+
     /**
      * Removes all highlight elements in the current page.
      * If `onlyRemoveDarkHighlights` is true, only dark highlights will be removed.
@@ -299,6 +396,8 @@ export class HighlightInteraction implements HighlightInteractionInterface {
             highlights.forEach((highlight) => this._removeHighlight(highlight))
         }
     }
+    undoAllHighlights = this.removeHighlights
+
     /**
      * Finds each annotation's position in page, sorts it by the position and
      * returns the sorted annotations.
@@ -348,11 +447,15 @@ export class HighlightInteraction implements HighlightInteractionInterface {
         )
         highlights.forEach((highlight) => this._removeHighlight(highlight))
     }
+
+    undoHighlight = this.removeAnnotationHighlights
 }
 
 // FIXME: Refactor the parts of the code that need these global function imports
-export const makeHighlightDark = new HighlightInteraction().makeHighlightDark
-export const scrollToHighlight = new HighlightInteraction().scrollToHighlight
-export const renderHighlights = new HighlightInteraction().renderHighlights
-export const renderHighlight = new HighlightInteraction().renderHighlight
-export const removeHighlights = new HighlightInteraction().removeHighlights
+export const makeHighlightDark = new HighlightRenderer().makeHighlightDark
+export const scrollToHighlight = new HighlightRenderer().scrollToHighlight
+export const renderHighlights = new HighlightRenderer().renderHighlights
+export const renderHighlight = new HighlightRenderer().renderHighlight
+export const removeHighlights = new HighlightRenderer().removeHighlights
+export const removeAnnotationHighlights = new HighlightRenderer()
+    .removeAnnotationHighlights

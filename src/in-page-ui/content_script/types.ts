@@ -5,8 +5,7 @@ import {
 import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
 import { Annotation } from 'src/annotations/types'
 
-export interface InPageUIContentScriptRemoteInterface
-    extends AnnotationFunctions {
+export interface InPageUIContentScriptRemoteInterface {
     showSidebar(options?: SidebarActionOptions): Promise<void>
 
     // Ribbon
