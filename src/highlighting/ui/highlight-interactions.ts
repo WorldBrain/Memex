@@ -37,10 +37,12 @@ export class HighlightInteraction implements HighlightInteractionInterface {
             tags,
         })
 
-        params.inPageUI.sendHighlightToSidebar({
+        params.inPageUI.informSidebarOfAnnotation({
             anchor,
             annotationUrl: annotation.url,
-            highlightText: body,
+            annotationData: {
+                highlightText: body,
+            },
         })
 
         renderHighlight(
@@ -61,6 +63,13 @@ export class HighlightInteraction implements HighlightInteractionInterface {
             category: 'InPageTooltip',
             action: 'annotateText',
         })
+
+        const selection = params.selection ?? document.getSelection()
+
+        if (!selection || selection.isCollapsed) {
+            params.inPageUI.showSidebar({ action: 'comment' })
+            return
+        }
 
         const highlight = await createHighlight(params.selection, true)
 

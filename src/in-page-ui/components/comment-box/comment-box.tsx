@@ -23,7 +23,6 @@ interface CommentBoxDispatchProps {
 }
 
 interface OwnProps {
-    env: 'inpage' | 'overview'
     isSocialPost?: boolean
     closeComments?: () => void
 }
@@ -50,14 +49,10 @@ class CommentBoxContainer extends React.Component<CommentBoxProps> {
     }
 
     render() {
-        const { env, anchor } = this.props
+        const { anchor } = this.props
 
         return (
-            <div
-                className={cx(styles.commentBoxContainer, {
-                    [styles.inPage]: env === 'inpage',
-                })}
-            >
+            <div className={cx(styles.commentBoxContainer, styles.inPage)}>
                 {!!anchor && (
                     <AnnotationHighlight
                         anchor={anchor}

@@ -3,7 +3,7 @@ import cx from 'classnames'
 import qs from 'query-string'
 
 import extractQueryFilters from 'src/util/nlp-time-filter'
-import CommentBox from 'src/sidebar-overlay/comment-box'
+import CommentBox from 'src/in-page-ui/components/comment-box/comment-box'
 import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
 import {
     shortcuts,
@@ -437,31 +437,28 @@ export default class Ribbon extends Component<Props, State> {
                                         <Tooltip position="left">
                                             {
                                                 <CommentBox
-                                                    env="inpage"
                                                     closeComments={() =>
                                                         this.props.commentBox.setShowCommentBox(
                                                             false,
                                                         )
                                                     }
-                                                    // TODO: fix these
-                                                    // saveComment={
-                                                    //     this.props.commentBox
-                                                    //         .saveComment as any
-                                                    // }
-                                                    // form={{
-                                                    //     env: 'inpage',
-                                                    //     ...this.props
-                                                    //         .commentBox,
-                                                    //     toggleTagPicker: this
-                                                    //         .props.commentBox
-                                                    //         .toggleCommentBoxTagPicker,
-                                                    //     toggleBookmark: this
-                                                    //         .props.commentBox
-                                                    //         .toggleCommentBoxBookmark,
-                                                    //     updateTags: this.props
-                                                    //         .commentBox
-                                                    //         .updateCommentTags,
-                                                    // }}
+                                                    saveComment={
+                                                        this.props.commentBox
+                                                            .saveComment
+                                                    }
+                                                    form={{
+                                                        ...this.props
+                                                            .commentBox,
+                                                        toggleTagPicker: this
+                                                            .props.commentBox
+                                                            .toggleCommentBoxTagPicker,
+                                                        toggleBookmark: this
+                                                            .props.commentBox
+                                                            .toggleCommentBoxBookmark,
+                                                        updateTags: this.props
+                                                            .commentBox
+                                                            .updateCommentTags,
+                                                    }}
                                                 />
                                             }
                                         </Tooltip>

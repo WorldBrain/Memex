@@ -11,6 +11,7 @@ import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { featuresBeta } from 'src/util/remote-functions-background'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { DEF_RESULT_LIMIT } from '../constants'
+import { IncomingAnnotationData } from 'src/in-page-ui/shared-state/types'
 
 interface EditForm {
     isBookmarked: boolean
@@ -123,10 +124,10 @@ export type SidebarContainerEvents = UIEvent<{
     deleteNewPageCommentTag: { tag: string }
     // closeComments: null,
 
-    addNewHighlight: {
+    receiveNewAnnotation: {
         annotationUrl: string
-        anchor: Anchor
-        highlightText: string
+        annotationData: IncomingAnnotationData
+        anchor?: Anchor
     }
 
     // Annotation boxes
@@ -443,24 +444,31 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    addNewHighlight: EventHandler<'addNewHighlight'> = async ({
-        event,
-        previousState,
+    receiveNewAnnotation: EventHandler<'receiveNewAnnotation'> = async ({
+        event: { annotationUrl, anchor, annotationData },
     }) => {
         const createdWhen = Date.now()
 
         const highlight: Annotation = {
-            url: event.annotationUrl,
-            selector: event.anchor,
-            body: event.highlightText,
+            url: annotationUrl,
+            hasBookmark: annotationData.isBookmarked,
+            comment: annotationData.commentText,
+            body: annotationData.highlightText,
             pageUrl: this.options.pageUrl,
-            createdWhen,
+            tags: annotationData.tags ?? [],
             lastEdited: createdWhen,
-            tags: [],
+            selector: anchor,
+            createdWhen,
         }
 
         this.emitMutation({
             annotations: { $apply: (prev) => [highlight, ...prev] },
+            editForms: {
+                $apply: (prev) => ({
+                    [annotationUrl]: { ...INIT_FORM_STATE.form },
+                    ...prev,
+                }),
+            },
         })
     }
 

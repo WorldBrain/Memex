@@ -256,9 +256,11 @@ export class RibbonContainerLogic extends UILogic<
         return { commentBox: { commentText: { $set: event.value } } }
     }
 
-    saveComment: EventHandler<'saveComment'> = async ({ previousState }) => {
+    saveComment: EventHandler<'saveComment'> = async ({
+        previousState: { commentBox },
+    }) => {
         const { annotations, currentTab } = this.dependencies
-        const comment = previousState.commentBox.commentText.trim()
+        const comment = commentBox.commentText.trim()
 
         if (comment.length === 0) {
             return
@@ -266,17 +268,17 @@ export class RibbonContainerLogic extends UILogic<
 
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
-        const annotUrl = await annotations.createAnnotation(
+        const annotationUrl = await annotations.createAnnotation(
             {
                 comment,
                 url: currentTab.url,
-                bookmarked: previousState.commentBox.isCommentBookmarked,
+                bookmarked: commentBox.isCommentBookmarked,
             },
             { skipPageIndexing: this.skipAnnotationPageIndexing },
         )
         await annotations.editAnnotationTags({
-            url: annotUrl,
-            tagsToBeAdded: previousState.commentBox.tags,
+            url: annotationUrl,
+            tagsToBeAdded: commentBox.tags,
             tagsToBeDeleted: [],
         })
 
@@ -289,6 +291,14 @@ export class RibbonContainerLogic extends UILogic<
             },
         })
         this.dependencies.setRibbonShouldAutoHide(true)
+        this.dependencies.inPageUI.informSidebarOfAnnotation({
+            annotationUrl,
+            annotationData: {
+                commentText: comment,
+                tags: commentBox.tags,
+                isBookmarked: commentBox.isCommentBookmarked,
+            },
+        })
 
         await new Promise((resolve) =>
             setTimeout(resolve, this.commentSavedTimeout),

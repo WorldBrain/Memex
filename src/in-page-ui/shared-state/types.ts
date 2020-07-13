@@ -8,12 +8,21 @@ export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip'
 export type InPageUIComponentShowState = {
     [Component in InPageUIComponent]: boolean
 }
+
+export interface IncomingAnnotationData {
+    highlightText?: string
+    commentText?: string
+    isBookmarked?: boolean
+    tags?: string[]
+}
+
 export interface SidebarActionOptions {
     action: InPageUISidebarAction
     anchor?: Anchor
     annotationUrl?: string
-    highlightText?: string
+    annotationData?: IncomingAnnotationData
 }
+
 export interface SharedInPageUIEvents {
     stateChanged: (event: {
         newState: InPageUIComponentShowState
@@ -46,13 +55,8 @@ export interface SharedInPageUIInterface {
     toggleSidebar(): void
     // TODO: (sidebar-refactor) - this feels out-of-place as part of the public interface here,
     //  but fits in to the idea of SharedInPageUI sending messages between InPageUI comps
-    sendHighlightToSidebar(
-        options: Required<
-            Pick<
-                SidebarActionOptions,
-                'annotationUrl' | 'anchor' | 'highlightText'
-            >
-        >,
+    informSidebarOfAnnotation(
+        options: Omit<SidebarActionOptions, 'action'>,
     ): void
 
     // Tooltip

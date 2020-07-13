@@ -100,9 +100,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 
     private handleExternalAction = (event: SidebarActionOptions) => {
         if (event.action === 'annotate') {
-            this.processEvent('addNewHighlight', {
+            this.processEvent('receiveNewAnnotation', {
+                annotationData: event.annotationData,
                 annotationUrl: event.annotationUrl,
-                highlightText: event.highlightText,
                 anchor: event.anchor,
             })
         }
