@@ -48,6 +48,7 @@ class ListContainer extends Component {
             updatedListName: null,
             showWarning: false,
             isPioneer: false,
+            displayName: null,
         }
     }
 
@@ -55,15 +56,18 @@ class ListContainer extends Component {
         // Gets all the list from the DB to populate the sidebar.
         this.props.getListFromDB()
 
-        this.isPioneer()
+        this.getUserInfo()
     }
 
-    async isPioneer() {
-        if (await auth.isAuthorizedForFeature('beta')) {
-            this.setState({
-                isPioneer: true,
-            })
-        }
+    async getUserInfo() {
+        // const isPioneer = await auth.isAuthorizedForFeature('beta')
+        const userProfile = await auth.getUserProfile()
+        const displayName = userProfile ? userProfile.displayName : undefined
+
+        this.setState({
+            isPioneer: true, // TODO: use isPioneer from above
+            displayName,
+        })
     }
 
     setInputRef = (el) => (this.inputEl = el)
@@ -206,6 +210,13 @@ class ListContainer extends Component {
                 />
                 <ShareModal
                     isPioneer={this.state.isPioneer}
+                    displayName={this.state.displayName}
+                    onUpdateDisplayName={(displayName) => {
+                        // optimisitc update, we could also requery with `this.getUserInfo()`
+                        this.setState({ displayName })
+
+                        auth.updateUserProfile({ displayName })
+                    }}
                     isShown={this.props.shareModalProps.isShown}
                     list={this.props.lists[this.props.shareModalProps.index]}
                     onClose={this.props.handleCloseShareModal}
