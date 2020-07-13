@@ -175,9 +175,39 @@ interface ShareModalContentProps {
     onClickViewRoadmap: () => void
 }
 
+const COPY_TIMEOUT = 2000
+
 export default class ShareModalContent extends PureComponent<
     ShareModalContentProps
 > {
+    state = {
+        hasCopied: false,
+    }
+
+    copyTimeout?: ReturnType<typeof setTimeout>
+
+    onClickCopy() {
+        navigator.clipboard.writeText(this.props.shareUrl).catch((e) => {
+            console.error(e)
+        })
+
+        this.setState({ hasCopied: true })
+
+        if (this.copyTimeout) {
+            clearTimeout(this.copyTimeout)
+        }
+
+        this.copyTimeout = setTimeout(() => {
+            this.setState({ hasCopied: false })
+        }, COPY_TIMEOUT)
+    }
+
+    componentWillUnmount() {
+        if (this.copyTimeout) {
+            clearTimeout(this.copyTimeout)
+        }
+    }
+
     render() {
         return (
             <div>
@@ -198,10 +228,12 @@ export default class ShareModalContent extends PureComponent<
                     />
                     <LinkBox>
                         {this.props.isShared ? (
-                            <ShareUrlBox>
+                            <ShareUrlBox onClick={() => this.onClickCopy()}>
                                 <ShareUrl>{this.props.shareUrl}</ShareUrl>
                                 <TypographyHeadingSmall>
-                                    Copy
+                                    {this.state.hasCopied
+                                        ? 'Copied to Clipboard'
+                                        : 'Copy'}
                                 </TypographyHeadingSmall>
                             </ShareUrlBox>
                         ) : (
