@@ -472,6 +472,7 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    // TODO (sidebar-refactor) reconcile this duplicate code with ribbon notes save
     saveNewPageComment: EventHandler<'saveNewPageComment'> = async ({
         event,
         previousState,

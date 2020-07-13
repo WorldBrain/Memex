@@ -4,6 +4,8 @@ import * as componentTypes from '../../components/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { loadInitial } from 'src/util/ui-logic'
+import { Annotation, NewAnnotationOptions } from 'src/annotations/types'
+import { INIT_FORM_STATE } from 'src/sidebar/annotations-sidebar/containers/logic'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -47,6 +49,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleRibbon: null
         highlightAnnotations: null
         toggleShowExtraButtons: null
+        saveNewPageComment: (annotation: NewAnnotationOptions) => void
     } & SubcomponentHandlers<'highlights'> &
         SubcomponentHandlers<'tooltip'> &
         // SubcomponentHandlers<'sidebar'> &
@@ -257,11 +260,12 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     saveComment: EventHandler<'saveComment'> = async ({
+        event,
         previousState: { commentBox },
     }) => {
         const { annotations, currentTab } = this.dependencies
-        const comment = commentBox.commentText.trim()
-
+        const comment = event.value.text.trim()
+        const { isBookmarked, tags } = event.value
         if (comment.length === 0) {
             return
         }
@@ -272,14 +276,13 @@ export class RibbonContainerLogic extends UILogic<
             {
                 comment,
                 url: currentTab.url,
-                bookmarked: commentBox.isCommentBookmarked,
+                bookmarked: event.value.isBookmarked,
             },
             { skipPageIndexing: this.skipAnnotationPageIndexing },
         )
-        await annotations.editAnnotationTags({
+        await annotations.updateAnnotationTags({
             url: annotationUrl,
-            tagsToBeAdded: commentBox.tags,
-            tagsToBeDeleted: [],
+            tags,
         })
 
         this.emitMutation({
@@ -295,8 +298,8 @@ export class RibbonContainerLogic extends UILogic<
             annotationUrl,
             annotationData: {
                 commentText: comment,
-                tags: commentBox.tags,
-                isBookmarked: commentBox.isCommentBookmarked,
+                tags,
+                isBookmarked,
             },
         })
 

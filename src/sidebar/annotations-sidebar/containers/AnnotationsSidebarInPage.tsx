@@ -68,11 +68,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         )
     }
 
-    private cleanupEventForwarding() {
+    cleanupEventForwarding = () => {
         this.props.inPageUI.events.removeAllListeners('stateChanged')
         this.props.inPageUI.events.removeAllListeners('sidebarAction')
 
-        for (const event of this.props.events.eventNames()) {
+        for (const event of this.props.events?.eventNames?.() ?? []) {
             this.props.events.removeAllListeners(event)
         }
     }

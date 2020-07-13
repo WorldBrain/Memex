@@ -12,6 +12,7 @@ import {
     heartEmpty,
     heartFull,
 } from 'src/common-ui/components/design-library/icons'
+import onClickOutside from 'react-onclickoutside'
 
 interface AnnotationCreateState {
     isTagPickerShown: boolean
@@ -27,6 +28,7 @@ export interface AnnotationCreateEventProps {
 
 export interface AnnotationCreateGeneralProps {
     anchor?: Anchor
+    handleClickOutside?: () => void
 }
 
 export interface AnnotationCreateProps
@@ -44,6 +46,10 @@ class AnnotationCreate extends React.Component<
         isTagPickerShown: false,
         text: '',
         tags: [],
+    }
+
+    handleClickOutside() {
+        this.props?.handleClickOutside()
     }
 
     private handleSave = () =>
@@ -168,7 +174,7 @@ class AnnotationCreate extends React.Component<
     }
 }
 
-export default AnnotationCreate
+export default onClickOutside(AnnotationCreate)
 
 const TextBoxContainerStyled = styled.div`
     box-shadow: none;
