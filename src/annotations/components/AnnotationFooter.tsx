@@ -38,11 +38,14 @@ class AnnotationFooter extends React.Component<Props> {
                         position={'bottom'}
                         tooltipText={hasBookmark ? 'Un-Favorite' : 'Favorite'}
                     >
-                        <IconBox>
+                        <IconBox onClick={this.props.toggleBookmark}>
                             <IconStyled
-                                onClick={this.props.toggleBookmark}
                                 title="Toggle star"
-                                src={hasBookmark ? icons.heartFull : icons.heartEmpty}
+                                src={
+                                    hasBookmark
+                                        ? icons.heartFull
+                                        : icons.heartEmpty
+                                }
                             />
                         </IconBox>
                     </ButtonTooltip>
@@ -50,24 +53,16 @@ class AnnotationFooter extends React.Component<Props> {
                         position={'bottom'}
                         tooltipText={'Edit Note'}
                     >
-                        <IconBox>
-                            <IconStyled
-                                onClick={this.props.onEditIconClick}
-                                title="Edit note"
-                                src={icons.edit}
-                            />
+                        <IconBox onClick={this.props.onEditIconClick}>
+                            <IconStyled title="Edit note" src={icons.edit} />
                         </IconBox>
                     </ButtonTooltip>
                     <ButtonTooltip
                         position={'bottom'}
                         tooltipText={'Delete Note'}
                     >
-                        <IconBox>
-                            <IconStyled
-                                onClick={this.props.onDeleteIconClick}
-                                title="Delete note"
-                                src={icons.trash}
-                            />
+                        <IconBox onClick={this.props.onDeleteIconClick}>
+                            <IconStyled title="Delete note" src={icons.trash} />
                         </IconBox>
                     </ButtonTooltip>
                     {this.props.onGoToAnnotation && (
@@ -75,14 +70,12 @@ class AnnotationFooter extends React.Component<Props> {
                             position={'bottom'}
                             tooltipText={'Open in Page'}
                         >
-                            
-                                <IconBox>
-                                    <IconStyled
-                                        onClick={this.props.onGoToAnnotation}
-                                        title="Go to annotation"
-                                        src={icons.goTo}
-                                    />
-                                </IconBox>
+                            <IconBox onClick={this.props.onGoToAnnotation}>
+                                <IconStyled
+                                    title="Go to annotation"
+                                    src={icons.goTo}
+                                />
+                            </IconBox>
                         </ButtonTooltip>
                     )}
                 </DefaultFooterBtnContainerStyled>
@@ -163,7 +156,7 @@ const ActionBtnStyled = styled.button`
     }
 
     &:hover {
-        background-color: #e0e0e0
+        background-color: #e0e0e0;
     }
 
     &:focus {
@@ -183,7 +176,7 @@ const CancelBtnStyled = styled.button`
     color: red;
 
     &:hover {
-        background-color: #e0e0e0
+        background-color: #e0e0e0;
     }
 
     &:focus {
@@ -255,7 +248,10 @@ const DefaultFooterBtnContainerStyled = styled.div`
     direction: rtl;
 `
 
-const IconBox = styled.div `
+const IconBox = styled.button`
+    border: none;
+    background: none;
+    cursor: pointer;
     padding: 4px;
     border-radius: 3px;
     display: flex;
@@ -266,13 +262,10 @@ const IconBox = styled.div `
     &:hover {
         background-color: #e0e0e0;
     }
-
-
 `
 const IconStyled = styled.img`
     border: none;
     z-index: 2500;
-    cursor: pointer;
     outline: none;
     border-radius: 3px;
     width: 100%;
