@@ -29,6 +29,10 @@ import { FakeAnalytics } from 'src/analytics/mock'
 import AnalyticsManager from 'src/analytics/analytics'
 import { setStorageMiddleware } from 'src/storage/middleware'
 import { JobDefinition } from 'src/job-scheduler/background/types'
+import { createLazyServerStorage } from 'src/storage/server'
+import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
+import StorageManager from '@worldbrain/storex'
 
 export async function setupBackgroundIntegrationTest(options?: {
     customMiddleware?: StorageMiddleware[]
@@ -50,6 +54,14 @@ export async function setupBackgroundIntegrationTest(options?: {
     const browserLocalStorage =
         (options && options.browserLocalStorage) || new MemoryBrowserStorage()
     const storageManager = initStorex()
+
+    const getServerStorage = createLazyServerStorage(() => {
+        const backend = new DexieStorageBackend({
+            dbName: 'server',
+            idbImplementation: inMemory(),
+        })
+        return new StorageManager({ backend })
+    })
 
     const authService = new MemoryAuthService()
     const subscriptionService = new MemorySubscriptionsService()
@@ -73,6 +85,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         storageManager,
         analyticsManager,
         localStorageChangesManager: null,
+        getServerStorage,
         browserAPIs: {
             storage: {
                 local: browserLocalStorage,
@@ -152,6 +165,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         storageChangeDetector,
         authService,
         subscriptionService,
+        getServerStorage,
     }
 }
 
