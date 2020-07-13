@@ -64,9 +64,9 @@ class ShareModal extends PureComponent<Props, State> {
         }
 
         // otherwise -  show the main modal content
-        const isShared = false // TODO: get share status of given list
+        const isShared = true // TODO: get share status of given list
         const isUploading = false // TODO: get "uploading" status of a given list
-        const shareUrl = '' // TODO: get "share url" for a given list
+        const shareUrl = 'https://memex.social/test-url' // TODO: get "share url" for a given list
 
         return (
             <ShareModalContent
