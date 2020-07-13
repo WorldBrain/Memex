@@ -69,30 +69,20 @@ class TagHolder extends React.Component<Props, State> {
         })
     }
 
-    private _renderNumberOfRemainingTags() {
-        const { maxTagsAllowed } = this.state
-        const tags = [...new Set([...this.props.tags])]
-
-        const numRemainingTags = tags.length - maxTagsAllowed
-        if (!maxTagsAllowed || numRemainingTags < 1) {
-            return null
-        }
-
-        return <span className={styles.tagsLeft}>+{numRemainingTags}</span>
-    }
-
     render() {
         const { tags, clickHandler } = this.props
 
         return (
             <div className={styles.tagHolder} onClick={clickHandler}>
                 {this._renderTags()}
-                <span className={classNames(
-                    styles.placeholder, 
-                    tags.length > 0 && styles.placeholder_alt
-                )}>
-                        {!tags.length && (<span className={styles.tagIcon} />)}
-                        <span className={styles.addTag}>Add tag</span>
+                <span
+                    className={classNames(
+                        styles.placeholder,
+                        tags.length > 0 && styles.placeholder_alt,
+                    )}
+                >
+                    {!tags.length && <span className={styles.tagIcon} />}
+                    <span className={styles.addTag}>Add tag</span>
                 </span>
             </div>
         )

@@ -61,14 +61,11 @@ class AnnotationEdit extends React.Component<Props> {
 
         return (
             <TagInput
-                tags={this.props.tags}
                 deleteTag={this.props.deleteSingleTag}
-                updateTags={this.props.updateTags}
-                setTagInputActive={this.props.setTagInputActive}
-                isTagInputActive={this.props.isTagInputActive}
                 queryTagSuggestions={queryEntries}
                 fetchInitialTagSuggestions={loadDefaultSuggestions}
                 onKeyDown={this.handleTagInputKeydown}
+                {...this.props}
             />
         )
     }

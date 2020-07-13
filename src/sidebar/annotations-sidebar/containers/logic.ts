@@ -876,6 +876,18 @@ export class SidebarContainerLogic extends UILogic<
     switchAnnotationMode: EventHandler<'switchAnnotationMode'> = ({
         event,
     }) => {
+        let extraMutation: UIMutation<SidebarContainerState> = {}
+
+        if (event.mode === 'default') {
+            extraMutation = {
+                editForms: {
+                    [event.annotationUrl]: {
+                        $set: { ...INIT_FORM_STATE.form },
+                    },
+                },
+            }
+        }
+
         this.emitMutation({
             annotationModes: {
                 [event.context]: {
@@ -884,6 +896,7 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 },
             },
+            ...extraMutation,
         })
     }
 

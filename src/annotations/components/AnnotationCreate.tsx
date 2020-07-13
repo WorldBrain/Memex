@@ -1,8 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { Anchor } from 'src/highlighting/types'
-import { Tooltip } from 'src/common-ui/components'
-import { ButtonTooltip } from 'src/common-ui/components'
+import { Tooltip, ButtonTooltip } from 'src/common-ui/components'
 import TagPicker from 'src/tags/ui/TagPicker'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
@@ -10,7 +9,6 @@ import TextHighlighted from 'src/annotations/components/parts/TextHighlighted'
 import { NewAnnotationOptions } from 'src/annotations/types'
 import {
     tagEmpty,
-    tagFull,
     heartEmpty,
     heartFull,
 } from 'src/common-ui/components/design-library/icons'
@@ -126,14 +124,13 @@ class AnnotationCreate extends React.Component<
                             }
                         />
                     </InteractionsImgContainerStyled>
-                    <ButtonTooltip
-                        tooltipText="Favorite"
-                        position="bottom"
-                    >
+                    <ButtonTooltip tooltipText="Favorite" position="bottom">
                         <InteractionsImgContainerStyled>
                             <ImgButtonStyled
                                 src={
-                                    this.state.isBookmarked ? heartFull : heartEmpty
+                                    this.state.isBookmarked
+                                        ? heartFull
+                                        : heartEmpty
                                 }
                                 onClick={() =>
                                     this.setState((state) => ({
@@ -153,9 +150,7 @@ class AnnotationCreate extends React.Component<
                             Save
                         </SaveBtnStyled>
                     </ButtonTooltip>
-                    <CancelBtnStyled onClick={onCancel}>
-                        Cancel
-                    </CancelBtnStyled>
+                    <CancelBtnStyled onClick={onCancel}>Cancel</CancelBtnStyled>
                 </Flex>
             </FooterStyled>
         )
@@ -253,7 +248,7 @@ const SaveBtnStyled = styled.div`
     }
 
     &:hover {
-        background-color: #e0e0e0
+        background-color: #e0e0e0;
     }
 
     &:focus {
@@ -273,7 +268,7 @@ const CancelBtnStyled = styled.div`
     color: red;
 
     &:hover {
-        background-color: #e0e0e0
+        background-color: #e0e0e0;
     }
 
     &:focus {
@@ -291,7 +286,7 @@ const ConfirmBtnStyled = styled.div`
     background: transparent;
 
     &:hover {
-        background-color: #e0e0e0
+        background-color: #e0e0e0;
     }
 
     &:focus {
@@ -307,10 +302,10 @@ const InteractionsImgContainerStyled = styled.div`
     justify-content: center;
     cursor: pointer;
     border-radius: 3px;
-    
+
     &:hover {
         opacity: 0.8;
-        background-color: #e0e0e0
+        background-color: #e0e0e0;
     }
 `
 const InteractionItemsBox = styled.div`
@@ -331,7 +326,6 @@ const ImgButtonStyled = styled.img`
     background-color: transparent;
     cursor: pointer;
 
-
     &:active {
         opacity: 1;
     }
@@ -346,4 +340,3 @@ const TagDropdownStyled = styled.span`
 const Flex = styled.div`
     display: flex;
 `
-

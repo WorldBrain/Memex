@@ -17,42 +17,43 @@ export interface Props {
 }
 
 /* tslint:disable-next-line variable-name */
-const TagInput = ({
-    isTagInputActive,
-    tags,
-    setTagInputActive,
-    deleteTag,
-    ...props
-}: Props) => {
-    let tagPicker
+class TagInput extends React.Component<Props> {
+    private renderTagPicker() {
+        if (!this.props.isTagInputActive) {
+            return null
+        }
 
-    if (isTagInputActive) {
-        tagPicker = (
+        return (
             <HoverBox>
                 <TagPicker
-                    onUpdateEntrySelection={props.updateTags}
-                    queryEntries={props.queryTagSuggestions}
-                    loadDefaultSuggestions={props.fetchInitialTagSuggestions}
-                    initialSelectedEntries={async () => tags}
-                    onEscapeKeyDown={() => setTagInputActive(false)}
+                    onUpdateEntrySelection={this.props.updateTags}
+                    queryEntries={this.props.queryTagSuggestions}
+                    loadDefaultSuggestions={
+                        this.props.fetchInitialTagSuggestions
+                    }
+                    initialSelectedEntries={async () => this.props.tags}
+                    onEscapeKeyDown={() => this.props.setTagInputActive(false)}
                 />
             </HoverBox>
         )
     }
 
-    return (
-        <div onKeyDown={props.onKeyDown}>
-            <TagHolder
-                tags={tags}
-                clickHandler={(e) => {
-                    e.stopPropagation()
-                    setTagInputActive(true)
-                }}
-                deleteTag={deleteTag}
-            />
-            {tagPicker}
-        </div>
-    )
+    render() {
+        return (
+            <div onKeyDown={this.props.onKeyDown}>
+                <TagHolder
+                    clickHandler={(e) => {
+                        e.stopPropagation()
+                        this.props.setTagInputActive(
+                            !this.props.isTagInputActive,
+                        )
+                    }}
+                    {...this.props}
+                />
+                {this.renderTagPicker()}
+            </div>
+        )
+    }
 }
 
 export default TagInput
