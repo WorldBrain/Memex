@@ -67,6 +67,20 @@ class AnnotationsSidebar extends React.Component<
         searchText: '',
     }
 
+    componentDidMount() {
+        document.addEventListener('keydown', this.onKeydown, false)
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.onKeydown, false)
+    }
+
+    private onKeydown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+            this.props.onClickOutside(e as any)
+        }
+    }
+
     private searchEnterHandler = {
         test: (e) => e.key === 'Enter',
         handle: () => undefined,
