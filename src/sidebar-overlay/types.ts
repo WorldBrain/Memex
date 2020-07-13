@@ -6,8 +6,6 @@
 
 import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 
-import { State as RibbonState } from './ribbon'
-import { State as SidebarState } from './sidebar'
 import { State as BookmarkBtnState } from 'src/popup/bookmark-button/reducer'
 import { State as TagsBtnState } from 'src/popup/tags-button/reducer'
 import { State as CollectionsBtnState } from 'src/popup/collections-button/reducer'
@@ -22,8 +20,6 @@ import * as React from 'react'
 import { HighlightInteractionsInterface } from 'src/highlighting/types'
 
 export default interface RootState {
-    ribbon: RibbonState
-    sidebar: SidebarState
     bookmarkBtn: BookmarkBtnState
     tagsBtn: TagsBtnState
     collectionsBtn: CollectionsBtnState
