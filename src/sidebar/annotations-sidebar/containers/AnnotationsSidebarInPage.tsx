@@ -24,7 +24,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     Props
 > {
     static defaultProps: Partial<Props> = {
-        theme: { rightOffsetPx: 0, canClickAnnotations: true, paddingRight: 40 },
+        theme: {
+            rightOffsetPx: 0,
+            canClickAnnotations: true,
+            paddingRight: 40,
+        },
         skipTopBarRender: true,
     }
 
@@ -95,7 +99,15 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     private handleExternalAction = (event: SidebarActionOptions) => {
-        if (event.action === 'annotate' || event.action === 'comment') {
+        if (event.action === 'annotate') {
+            this.processEvent('addNewHighlight', {
+                annotationUrl: event.annotationUrl,
+                highlightText: event.highlightText,
+                anchor: event.anchor,
+            })
+        }
+
+        if (event.action === 'comment') {
             this.processEvent('addNewPageComment', null)
             if (event.anchor) {
                 this.processEvent('setNewPageCommentAnchor', {

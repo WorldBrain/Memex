@@ -37,6 +37,12 @@ export class HighlightInteraction implements HighlightInteractionInterface {
             tags,
         })
 
+        params.inPageUI.sendHighlightToSidebar({
+            anchor,
+            annotationUrl: annotation.url,
+            highlightText: body,
+        })
+
         renderHighlight(
             annotation as Highlight,
             ({ activeUrl: annotationUrl }) =>

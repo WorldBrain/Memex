@@ -68,6 +68,21 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         delete this._pendingEvents[eventName]
     }
 
+    sendHighlightToSidebar(
+        options: Required<
+            Pick<
+                SidebarActionOptions,
+                'annotationUrl' | 'anchor' | 'highlightText'
+            >
+        >,
+    ) {
+        this._emitAction({
+            type: 'sidebarAction',
+            action: 'annotate',
+            ...options,
+        })
+    }
+
     async showSidebar(options?: SidebarActionOptions) {
         const maybeEmitAction = () => {
             if (options?.action) {

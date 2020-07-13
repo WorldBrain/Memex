@@ -12,6 +12,7 @@ export interface SidebarActionOptions {
     action: InPageUISidebarAction
     anchor?: Anchor
     annotationUrl?: string
+    highlightText?: string
 }
 export interface SharedInPageUIEvents {
     stateChanged: (event: {
@@ -43,6 +44,16 @@ export interface SharedInPageUIInterface {
     showSidebar(options?: SidebarActionOptions): void
     hideSidebar(): void
     toggleSidebar(): void
+    // TODO: (sidebar-refactor) - this feels out-of-place as part of the public interface here,
+    //  but fits in to the idea of SharedInPageUI sending messages between InPageUI comps
+    sendHighlightToSidebar(
+        options: Required<
+            Pick<
+                SidebarActionOptions,
+                'annotationUrl' | 'anchor' | 'highlightText'
+            >
+        >,
+    ): void
 
     // Tooltip
     setupTooltip(): void

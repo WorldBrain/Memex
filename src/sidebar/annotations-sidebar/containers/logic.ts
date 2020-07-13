@@ -123,6 +123,12 @@ export type SidebarContainerEvents = UIEvent<{
     deleteNewPageCommentTag: { tag: string }
     // closeComments: null,
 
+    addNewHighlight: {
+        annotationUrl: string
+        anchor: Anchor
+        highlightText: string
+    }
+
     // Annotation boxes
     goToAnnotation: {
         context: AnnotationEventContext
@@ -434,6 +440,27 @@ export class SidebarContainerLogic extends UILogic<
             commentBox: {
                 form: { commentText: { $set: event.comment } },
             },
+        })
+    }
+
+    addNewHighlight: EventHandler<'addNewHighlight'> = async ({
+        event,
+        previousState,
+    }) => {
+        const createdWhen = Date.now()
+
+        const highlight: Annotation = {
+            url: event.annotationUrl,
+            selector: event.anchor,
+            body: event.highlightText,
+            pageUrl: this.options.pageUrl,
+            createdWhen,
+            lastEdited: createdWhen,
+            tags: [],
+        }
+
+        this.emitMutation({
+            annotations: { $apply: (prev) => [highlight, ...prev] },
         })
     }
 
