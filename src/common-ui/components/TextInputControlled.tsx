@@ -79,7 +79,7 @@ class TextInputControlled extends React.Component<
         this.registerEventListeners()
 
         setTimeout(() => {
-            this.textElement.focus()
+            this.textElement?.focus()
         }, 200)
 
         this.updateTextElement({
