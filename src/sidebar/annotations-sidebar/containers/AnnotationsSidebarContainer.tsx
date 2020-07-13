@@ -288,10 +288,11 @@ export class AnnotationsSidebarContainer<
 }
 
 const ContainerStyled = styled.div`
-    padding: 0px 0px 10px 5px;
     height: fill-available;
+    overflow: hidden scroll;
     width: 450px;
     position: fixed;
+    padding: 0px 0px 10px 5px;
 
     right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
     top: ${({ theme }: Props) => theme?.topOffsetPx ?? 0}px;
@@ -339,7 +340,7 @@ const CommentBtn = styled.button`
 
     &:hover {
         opacity: 1;
-        background-color: #e0e0e0
+        background-color: #e0e0e0;
     }
 
     &:active {

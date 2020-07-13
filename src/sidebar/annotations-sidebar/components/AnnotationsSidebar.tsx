@@ -120,11 +120,11 @@ class AnnotationsSidebar extends React.Component<
 
     render() {
         return (
-            <SidebarStyled>
+            <>
                 {/* {this.renderSearchSection()} */}
                 {this.renderNewAnnotation()}
                 {this.renderResultsBody()}
-            </SidebarStyled>
+            </>
         )
     }
 
@@ -142,7 +142,7 @@ class AnnotationsSidebar extends React.Component<
                         tagPickerDependencies={this.props.annotationTagProps}
                     />
                 </NewAnnotationBoxStyled>
-                <NewAnnotationSeparator/>
+                <NewAnnotationSeparator />
             </NewAnnotationSection>
         )
     }
@@ -150,16 +150,15 @@ class AnnotationsSidebar extends React.Component<
     private renderResultsBody() {
         return (
             <>
-            {this.props.isSearchLoading ? (
-                <LoadingIndicatorSection>
-                    <LoadingIndicatorStyled />
-                </LoadingIndicatorSection>
-                ):(
-                <AnnotationsSectionStyled>
-                    {this.renderAnnotationsEditable()}
-                </AnnotationsSectionStyled>
-                ) 
-            }
+                {this.props.isSearchLoading ? (
+                    <LoadingIndicatorContainer>
+                        <LoadingIndicatorStyled />
+                    </LoadingIndicatorContainer>
+                ) : (
+                    <AnnotationsSectionStyled>
+                        {this.renderAnnotationsEditable()}
+                    </AnnotationsSectionStyled>
+                )}
             </>
         )
     }
@@ -203,14 +202,14 @@ class AnnotationsSidebar extends React.Component<
 
         if (this.props.appendLoader) {
             annots.push(
-                <LoadingIndicatorSection>
-                    <LoadingIndicator key="sidebar-pagination-spinner" />
-                </LoadingIndicatorSection>
+                <LoadingIndicatorContainer key="sidebar-pagination-spinner">
+                    <LoadingIndicator />
+                </LoadingIndicatorContainer>,
             )
         }
 
         if (this.props.showCongratsMessage) {
-            annots.push(<CongratsMessage />)
+            annots.push(<CongratsMessage key="sidebar-congrats-msg" />)
         }
 
         return annots
@@ -298,12 +297,6 @@ const CloseButtonStyled = styled.button`
     outline: none;
 `
 
-const SidebarStyled = styled.div`
-    overflow-y: scroll;
-    height: fill-available;
-    padding-right: 5px;
-`
-
 const TopBarStyled = styled.div`
     position: static;
     top: 0;
@@ -318,13 +311,13 @@ const TopBarStyled = styled.div`
     width: 100%;
 `
 
-const LoadingIndicatorSection = styled.div`
+const LoadingIndicatorContainer = styled.div`
     width: 100%;
     height: 100px;
     display: flex;
     justify-content: center;
     align-items: center;
-` 
+`
 
 const LoadingIndicatorStyled = styled(LoadingIndicator)`
     width: 100%;
@@ -363,22 +356,17 @@ const NewAnnotationSeparator = styled.div`
     align-self: center;
     width: 60%;
     margin-top: 30px;
-    border-bottom: 1px solid #e0e0e0
+    border-bottom: 1px solid #e0e0e0;
 `
 
 const AnnotationsSectionStyled = styled.section`
-    overflow-y: visible;
-    height: auto;
-    width: 100%;
     background: #fff;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
     margin-bottom: 30px;
-    padding-bottom: 100px;
-    padding-left: 5px;
-    padding-top: 30px;
+    padding: 30px 5px 100px;
 `
 
 const NewAnnotationBoxStyled = styled.div`
