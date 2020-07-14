@@ -12,6 +12,7 @@ export interface Props {
     deleteTag: (tag: string) => void
     updateTags: PickerUpdateHandler
     onKeyDown: React.KeyboardEventHandler
+    onClickOutsideTagPicker: React.MouseEventHandler
     isTagInputActive: boolean
     tags: string[]
 }
@@ -33,6 +34,7 @@ class TagInput extends React.Component<Props> {
                     }
                     initialSelectedEntries={async () => this.props.tags}
                     onEscapeKeyDown={() => this.props.setTagInputActive(false)}
+                    onClickOutside={this.props.onClickOutsideTagPicker}
                 />
             </HoverBox>
         )

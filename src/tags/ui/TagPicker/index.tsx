@@ -1,7 +1,7 @@
 import React from 'react'
-import onClickOutside from 'react-onclickoutside'
 import styled, { ThemeProvider } from 'styled-components'
 
+import { ClickAway } from 'src/util/click-away-wrapper'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import TagPickerLogic, {
     TagPickerDependencies,
@@ -36,12 +36,6 @@ class TagPicker extends StatefulUIElement<
     get shouldShowAddNew(): boolean {
         const { newEntryName } = this.state
         return newEntryName !== '' && VALID_TAG_PATTERN.test(newEntryName)
-    }
-
-    handleClickOutside = () => {
-        if (this.props.onClickOutside) {
-            this.props.onClickOutside()
-        }
     }
 
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
@@ -177,13 +171,15 @@ class TagPicker extends StatefulUIElement<
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
-                <OuterSearchBox
-                    onKeyPress={this.handleKeyPress}
-                    onClick={this.handleOuterSearchBoxClick}
-                >
-                    {this.renderMainContent()}
-                    {this.props.children}
-                </OuterSearchBox>
+                <ClickAway onClickAway={this.props.onClickOutside}>
+                    <OuterSearchBox
+                        onKeyPress={this.handleKeyPress}
+                        onClick={this.handleOuterSearchBoxClick}
+                    >
+                        {this.renderMainContent()}
+                        {this.props.children}
+                    </OuterSearchBox>
+                </ClickAway>
             </ThemeProvider>
         )
     }
@@ -212,4 +208,4 @@ const EmptyTagsView = styled.div`
     text-align: center;
 `
 
-export default onClickOutside(TagPicker)
+export default TagPicker

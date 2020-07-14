@@ -1,5 +1,7 @@
 import * as React from 'react'
+import ReactDOM from 'react-dom'
 import styled from 'styled-components'
+
 import { Anchor } from 'src/highlighting/types'
 import { Tooltip, ButtonTooltip } from 'src/common-ui/components'
 import TagPicker from 'src/tags/ui/TagPicker'
@@ -49,7 +51,9 @@ class AnnotationCreate extends React.Component<
     }
 
     handleClickOutside() {
-        this.props?.handleClickOutside()
+        if (this.props.handleClickOutside) {
+            this.props?.handleClickOutside()
+        }
     }
 
     private handleSave = () =>
@@ -107,6 +111,9 @@ class AnnotationCreate extends React.Component<
                             onUpdateEntrySelection={async ({
                                 selected: tags,
                             }) => this.setState({ tags })}
+                            onClickOutside={() =>
+                                this.setState({ isTagPickerShown: false })
+                            }
                         />
                     </Tooltip>
                 )}

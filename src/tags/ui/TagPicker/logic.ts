@@ -5,7 +5,7 @@ import GenericPickerLogic, {
 } from 'src/common-ui/GenericPicker/logic'
 
 export interface TagPickerDependencies extends GenericPickerDependencies {
-    onClickOutside?: () => void
+    onClickOutside?: React.MouseEventHandler
 }
 
 export type TagPickerEvent = GenericPickerEvent
