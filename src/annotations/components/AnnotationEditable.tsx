@@ -20,7 +20,7 @@ const getTruncatedTextObject: (
     text: string,
 ) => { isTextTooLong: boolean; text: string } = (text) => {
     if (text.length > 280) {
-        const truncatedText = text.slice(0, 280)
+        const truncatedText = text.slice(0, 280) + '...'
         return {
             isTextTooLong: true,
             text: truncatedText,

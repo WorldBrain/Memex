@@ -15,7 +15,7 @@ const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
 const heartFull = browser.extension.getURL('/img/star_full.svg')
 const commentEmpty = browser.extension.getURL('/img/comment_empty.svg')
 const commentFull = browser.extension.getURL('/img/comment_full.svg')
-const deleteItem = browser.extension.getURL('/img/trash.svg')
+const deleteItem = browser.extension.getURL('/img/remove.svg')
 const copy = browser.extension.getURL('/img/copy.svg')
 const readerIcon = browser.extension.getURL('/img/reader.svg')
 
@@ -67,7 +67,7 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                         className={styles.trash}
                     />
                     <ResultItemActionBtn
-                        permanent={listLength > 0}
+                        permanent={tagsLength > 0}
                         imgSrc={tagsLength > 0 ? tagFull : tagEmpty}
                         className={
                             tagsLength > 0 ? styles.commentActive : styles.tag

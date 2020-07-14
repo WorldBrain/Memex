@@ -288,7 +288,7 @@ export class AnnotationsSidebarContainer<
 }
 
 const ContainerStyled = styled.div`
-    height: fill-available;
+    height: 100%;
     overflow: hidden scroll;
     width: 450px;
     position: fixed;

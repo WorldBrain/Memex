@@ -380,7 +380,7 @@ const AnnotationsSectionStyled = styled.section`
     justify-content: flex-start;
     align-items: flex-start;
     margin-bottom: 30px;
-    padding: 30px 5px 100px;
+    padding: 15px 5px 100px;
 `
 
 const NewAnnotationBoxStyled = styled.div`

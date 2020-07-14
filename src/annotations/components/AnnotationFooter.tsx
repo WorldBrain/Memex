@@ -255,6 +255,7 @@ const IconBox = styled.button`
     padding: 4px;
     border-radius: 3px;
     display: flex;
+    outline: none;
     align-items: center;
     justify-content: center;
     height: fill-available;

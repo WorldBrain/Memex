@@ -10,9 +10,6 @@ export interface Props {
 }
 
 class SemiCircularRibbon extends PureComponent<Props> {
-    static defaultProps = {
-        crossIconSrc: '/img/remove.svg',
-    }
 
     render() {
         return (
@@ -22,7 +19,7 @@ class SemiCircularRibbon extends PureComponent<Props> {
             >
                 <div className={pageStyles.button} onClick={this.props.onClick}>
                     <img
-                        src={'/img/remove.svg'}
+                        src={'/img/removing.svg'}
                         className={pageStyles.img}
                     />
                 </div>
