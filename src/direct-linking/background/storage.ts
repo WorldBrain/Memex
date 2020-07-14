@@ -268,7 +268,7 @@ export default class AnnotationStorage extends StorageModule {
         pageTitle,
         pageUrl,
         body,
-        url: uniqueAnnotationUrl,
+        uniqueAnnotationUrl,
         comment,
         selector,
         createdWhen = new Date(),

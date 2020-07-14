@@ -5,7 +5,6 @@ import React, {
     DragEventHandler,
 } from 'react'
 import cx from 'classnames'
-import AnnotationList from './annotation-list'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { SocialPage } from 'src/social-integration/types'
 import PageResultItem from './page-result-item'
@@ -96,23 +95,6 @@ class ResultItem extends PureComponent<Props> {
         }
     }
 
-    private renderAnnotsList() {
-        if (!(this.props.annotations && this.props.annotations.length)) {
-            return null
-        }
-
-        return (
-            <AnnotationList
-                env={this.environment}
-                isExpandedOverride={this.props.areAnnotationsExpanded}
-                openAnnotationSidebar={this.props.onCommentBtnClick}
-                pageUrl={this.hrefToPage}
-                annotations={this.props.annotations}
-                goToAnnotation={this.props.goToAnnotation}
-            />
-        )
-    }
-
     render() {
         return (
             <li
@@ -152,7 +134,6 @@ class ResultItem extends PureComponent<Props> {
                         )}
                     </a>
                 </div>
-                {this.renderAnnotsList()}
             </li>
         )
     }

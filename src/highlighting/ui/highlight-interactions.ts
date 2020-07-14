@@ -79,13 +79,13 @@ export const renderAnnotationCacheChanges = (opts: {
     renderer: HighlightRenderInterface
 }) => {
     const { cacheChanges, onClickHighlight, renderer } = opts
-    cacheChanges.on('load', (annotations) =>
+    cacheChanges.on('load', (annotations) => {
         renderer.renderHighlights(
             annotations as Highlight[],
             onClickHighlight,
             false,
-        ),
-    )
+        )
+    })
     cacheChanges.on('rollback', (annotations) => {
         renderer.undoAllHighlights()
         renderer.renderHighlights(
@@ -94,9 +94,9 @@ export const renderAnnotationCacheChanges = (opts: {
             false,
         )
     })
-    cacheChanges.on('created', (annotation) =>
-        renderer.renderHighlight(annotation as Highlight, onClickHighlight),
-    )
+    cacheChanges.on('created', (annotation) => {
+        renderer.renderHighlight(annotation as Highlight, onClickHighlight)
+    })
     cacheChanges.on('deleted', (annotation) =>
         renderer.undoHighlight(annotation.url),
     )
@@ -173,8 +173,10 @@ export const saveAndRenderHighlightFromTooltip = async (
     )
 }
 
-export class HighlightRenderer
-    implements HighlightRenderInterface, HighlightInteractionsInterface {
+export type HighlightRendererInterface = HighlightRenderInterface &
+    HighlightInteractionsInterface
+
+export class HighlightRenderer implements HighlightRendererInterface {
     createAnnotationWithSidebar = createAnnotationWithSidebar
     saveAndRenderHighlight = saveAndRenderHighlightFromTooltip
 

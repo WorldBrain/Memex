@@ -285,18 +285,19 @@ export default class DirectLinkingBackground {
             },
         )
 
+        // TODO: performance - Must be a better way than looping through each annotation individually and querying twice?
         const annotResults = (await Promise.all(
             annotations.map(
                 async ({ createdWhen, lastEdited, ...annotation }) => {
                     const tags = await this.annotationStorage.getTagsByAnnotationUrl(
-                        annotation.uniqueAnnotationUrl,
+                        url,
                     )
 
                     return {
                         ...annotation,
                         hasBookmark: await this.annotationStorage.annotHasBookmark(
                             {
-                                url: annotation.uniqueAnnotationUrl,
+                                url,
                             },
                         ),
                         createdWhen: createdWhen.getTime(),
@@ -309,6 +310,8 @@ export default class DirectLinkingBackground {
                 },
             ),
         )) as any
+
+        console.log('annotResults', { annotResults })
 
         return annotResults
     }

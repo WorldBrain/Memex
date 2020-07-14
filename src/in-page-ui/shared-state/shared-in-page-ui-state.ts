@@ -9,13 +9,12 @@ import {
     InPageUIRibbonAction,
     SidebarActionOptions,
 } from './types'
-import { HighlightInteractions } from 'src/highlighting/ui/highlight-interactions'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
-import { Annotation } from 'src/annotations/types'
+import { HighlightRendererInterface } from 'src/highlighting/ui/highlight-interactions'
 
 export interface SharedInPageUIDependencies {
     pageUrl: string
-    highlighter: HighlightInteractions
+    highlighter: HighlightRendererInterface
     annotations: AnnotationInterface<'caller'>
     loadComponent: (component: InPageUIComponent) => void
 }

@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
-import { selectors as sidebarSelectors } from 'src/sidebar-overlay/sidebar'
 import { OVERVIEW_URL } from 'src/constants'
 import Onboarding from '../onboarding'
 import { DeleteConfirmModal } from '../delete-confirm-modal'
@@ -32,7 +31,6 @@ const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
 
 export interface Props {
-    pageUrl: string
     setShowOnboardingMessage: () => void
     toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
     handleReaderViewClick: (url: string) => void
@@ -207,9 +205,7 @@ class Overview extends PureComponent<Props, State> {
     }
 }
 
-const mapStateToProps = (state) => ({
-    pageUrl: sidebarSelectors.pageUrl(state),
-})
+const mapStateToProps = (state) => ({})
 
 const mapDispatchToProps = (dispatch) => ({
     init: () => {

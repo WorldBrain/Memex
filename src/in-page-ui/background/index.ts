@@ -43,8 +43,8 @@ export class InPageUIBackground implements InPageUIInterface<'provider'> {
     }
 
     private createHighlightInTab = (tabId: number) =>
-        runInTab<InPageUIContentScriptRemoteInterface>(tabId).createHighlight()
+        runInTab<InPageUIContentScriptRemoteInterface>(tabId).createHighlight
 
     private createAnnotationInTab = (tabId: number) =>
-        runInTab<InPageUIContentScriptRemoteInterface>(tabId).createAnnotation()
+        runInTab<InPageUIContentScriptRemoteInterface>(tabId).createAnnotation
 }

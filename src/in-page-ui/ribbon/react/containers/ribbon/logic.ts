@@ -5,7 +5,6 @@ import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { loadInitial } from 'src/util/ui-logic'
 import { Annotation, NewAnnotationOptions } from 'src/annotations/types'
-import { INIT_FORM_STATE } from 'src/sidebar/annotations-sidebar/containers/logic'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -275,7 +274,7 @@ export class RibbonContainerLogic extends UILogic<
         const annotationUrl = await annotations.createAnnotation(
             {
                 comment,
-                url: currentTab.url,
+                pageUrl: currentTab.url,
                 bookmarked: event.value.isBookmarked,
             },
             { skipPageIndexing: this.skipAnnotationPageIndexing },

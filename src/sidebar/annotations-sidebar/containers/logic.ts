@@ -514,7 +514,7 @@ export class SidebarContainerLogic extends UILogic<
             // TODO: (sidebar - refactor) Fix env usage
             const annotationUrl = await this.options.annotations.createAnnotation(
                 {
-                    url: pageUrl,
+                    pageUrl,
                     bookmarked: event.bookmarked,
                     body: dummyAnnotation.body,
                     comment: dummyAnnotation.comment,

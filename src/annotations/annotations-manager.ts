@@ -99,6 +99,22 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         } as Annotation
     }
 
+    public fetchAnnotationsWithTags = async (
+        url: string,
+        // limit = 10,
+        // skip = 0,
+        isSocialPost?: boolean,
+    ): Promise<Annotation[]> => {
+        return this._getAllAnnotationsByUrlRPC(
+            {
+                url,
+                // limit,
+                // skip,
+            },
+            isSocialPost,
+        )
+    }
+
     public editAnnotation = async ({
         url,
         comment,

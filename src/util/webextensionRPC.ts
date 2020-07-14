@@ -182,6 +182,7 @@ async function incomingRPCListener(message, sender) {
     const funcName = message.funcName
     const args = message.hasOwnProperty('args') ? message.args : []
     const func = remotelyCallableFunctions[funcName]
+
     if (func === undefined) {
         console.error(`Received RPC for unknown function: ${funcName}`)
         return {
