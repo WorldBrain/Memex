@@ -217,7 +217,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         )
 
         if ((highlightables?.length ?? 0) === 0) {
-            return false
+            return
         }
 
         await highlighter.renderHighlights(highlightables, ({ activeUrl }) =>
@@ -227,7 +227,6 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
             }),
         )
         this.areHighlightsShown = true
-        return this.areHighlightsShown
     }
 
     async toggleHighlights() {

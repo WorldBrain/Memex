@@ -65,7 +65,7 @@ export interface SharedInPageUIInterface {
     toggleTooltip(): void
 
     // Highlights
-    showHighlights(): Promise<boolean>
+    showHighlights(): Promise<void>
     hideHighlights(): Promise<void>
     toggleHighlights(): Promise<void>
 }

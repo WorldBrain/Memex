@@ -37,10 +37,10 @@ import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
-import { SearchInterface } from 'src/search/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
+import * as sidebarUtils from 'src/sidebar-overlay/utils'
 import * as constants from '../constants'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
@@ -232,7 +232,7 @@ export async function main() {
     const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
     if (areHighlightsEnabled) {
         // todo (sidebar-refactor) remove show highlight logic
-        const showHighlights = await inPageUI.showHighlights()
+        await inPageUI.showHighlights()
 
         renderAnnotationCacheChanges({
             cacheChanges: annotationsCache.annotationChanges,
@@ -244,17 +244,12 @@ export async function main() {
                     type: 'sidebarAction',
                 }),
         })
-
-        if (showHighlights) {
-            await inPageUI.loadComponent('sidebar')
-            await inPageUI.loadComponent('ribbon')
-        }
     }
 
-    // global['worldbrainMemex'] = {
-    //     inPageUI,
-    //     controllers,
-    // }
+    const isSidebarEnabled = await sidebarUtils.getSidebarState()
+    if (isSidebarEnabled) {
+        await inPageUI.loadComponent('ribbon')
+    }
 }
 
 type ContentScriptLoader = (component: ContentScriptComponent) => Promise<void>
