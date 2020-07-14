@@ -163,8 +163,6 @@ export const saveAndRenderHighlightFromTooltip = async (
         pageUrl,
         selector: anchor,
         tags,
-        createdWhen: now(),
-        lastEdited: now(),
     }
     await params.annotationsCache.create(annotation)
 

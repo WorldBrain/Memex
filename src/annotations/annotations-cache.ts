@@ -24,9 +24,6 @@ export const createAnnotationsCache = (bgModules: {
                 await bgModules.annotations.createAnnotation({
                     ...annotation,
                     bookmarked: annotation.hasBookmark,
-                    createdWhen: createdWhen
-                        ? new Date(createdWhen)
-                        : undefined,
                 })
             },
             update: async (annotation) =>
@@ -75,15 +72,15 @@ export interface AnnotationsCacheInterface {
         pageUrl: string,
         args?: { limit?: number; skip?: number },
     ) => Promise<void>
-    create: (annotation: Annotation) => void
-    update: (annotation: Annotation) => void
-    delete: (annotation: Annotation) => void
+    create: (annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>) => void
+    update: (annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>) => void
+    delete: (annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>) => void
 
     annotations: Observable<Annotation[]>
 }
 
 export class AnnotationsCache implements AnnotationsCacheInterface {
-    private _annotations: Annotation[]
+    private _annotations: Annotation[] = []
     public annotationChanges = new EventEmitter() as AnnotationCacheChangeEvents
 
     constructor(private dependencies: AnnotationsCacheDependencies) {}
