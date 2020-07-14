@@ -120,28 +120,28 @@ class AnnotationCreate extends React.Component<
         return (
             <FooterStyled>
                 <InteractionItemsBox>
-                    <InteractionsImgContainerStyled>
-                        <ImgButtonStyled
-                            src={tagEmpty}
-                            onClick={() =>
-                                this.setState((state) => ({
-                                    isTagPickerShown: !state.isTagPickerShown,
-                                }))
-                            }
-                        />
+                    <InteractionsImgContainerStyled
+                        onClick={() =>
+                            this.setState((state) => ({
+                                isTagPickerShown: !state.isTagPickerShown,
+                            }))
+                        }
+                    >
+                        <ImgButtonStyled src={tagEmpty} />
                     </InteractionsImgContainerStyled>
                     <ButtonTooltip tooltipText="Favorite" position="bottom">
-                        <InteractionsImgContainerStyled>
+                        <InteractionsImgContainerStyled
+                            onClick={() =>
+                                this.setState((state) => ({
+                                    isBookmarked: !state.isBookmarked,
+                                }))
+                            }
+                        >
                             <ImgButtonStyled
                                 src={
                                     this.state.isBookmarked
                                         ? heartFull
                                         : heartEmpty
-                                }
-                                onClick={() =>
-                                    this.setState((state) => ({
-                                        isBookmarked: !state.isBookmarked,
-                                    }))
                                 }
                             />
                         </InteractionsImgContainerStyled>
@@ -300,7 +300,9 @@ const ConfirmBtnStyled = styled.div`
     }
 `
 
-const InteractionsImgContainerStyled = styled.div`
+const InteractionsImgContainerStyled = styled.button`
+    border: none;
+    background: none;
     width: 24px;
     height: 24px;
     display: flex;
