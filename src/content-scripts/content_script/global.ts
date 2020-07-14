@@ -206,7 +206,8 @@ export async function main() {
             )
             await highlighter.highlightAndScroll(annotation)
         },
-        ...annotationsFunctions,
+        createHighlight: annotationsFunctions.createHighlight,
+        createAnnotation: annotationsFunctions.createAnnotation,
     })
 
     // 6. Setup other interactions with this page (things that always run)
