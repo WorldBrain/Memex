@@ -18,7 +18,6 @@ export const createAnnotationsCache = (bgModules: {
                     skip,
                     base64Img: true,
                 }
-                console.log('getallAnnotationsByUrl', params)
                 return bgModules.annotations.getAllAnnotationsByUrl(params)
             },
             create: async ({ createdWhen, ...annotation }) => {
@@ -90,7 +89,6 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     constructor(private dependencies: AnnotationsCacheDependencies) {}
 
     load = async (url, args = {}) => {
-        console.log('Loading annotations for url', url)
         this._annotations = await this.dependencies.backendOperations.load(
             url,
             args,

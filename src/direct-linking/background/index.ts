@@ -311,8 +311,6 @@ export default class DirectLinkingBackground {
             ),
         )) as any
 
-        console.log('annotResults', { annotResults })
-
         return annotResults
     }
 
