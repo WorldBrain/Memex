@@ -43,11 +43,24 @@ export async function main() {
     await dexie0.delete()
 
     const dexie1 = new Dexie('bugtest')
+
+    // ERROR: to get the DB into astate where it's always throwing the error:
+    //      ConstraintError Failed to execute 'createObjectStore' on 'IDBDatabase'
+    //
+    //  Step 1: Run a build with the below `.stores` call - should be no problems
+    //  Step 2: Comment out this call, and uncomment the next call
+    //  Step 3: Run a build of that - should now throw the error whenever RW a table
     dexie1.version(1).stores({
         foo: '++id',
     })
+
+    // dexie1.version(1).stores({
+    //     foo: '++id, eggs',
+    //     bar: '++id',
+    // })
+
     await dexie1.table('foo').put({ spam: 'test' })
-    // console.log(await dexie1.table('foo').toArray())
+    console.log(await dexie1.table('foo').toArray())
     // await dexie1.close()
 
     const dexie2 = new Dexie('bugtest')
@@ -65,7 +78,9 @@ export async function main() {
     })
     await dexie2.table('foo').put({ spam: 'test' })
     console.log(await dexie2.table('foo').toArray())
-    await dexie2.delete()
+
+    return dexie2
+    // await dexie2.delete()
 
     // const localStorageChangesManager = new StorageChangesManager({
     //     storage: browser.storage,
@@ -187,4 +202,4 @@ export async function main() {
     // })
 }
 
-main()
+window['dex'] = main()
