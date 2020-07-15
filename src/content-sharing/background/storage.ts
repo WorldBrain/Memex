@@ -14,12 +14,58 @@ export class ContentSharingClientStorage extends StorageModule {
                     version: STORAGE_VERSIONS[20].version,
                     fields: {
                         localId: { type: 'int' },
-                        serverId: { type: 'string' },
-                        pushedUntil: { type: 'timestamp' },
+                        remoteId: { type: 'string' },
                     },
                     indices: [{ field: 'localId', pk: true }],
                 },
+                sharedListAction: {
+                    version: STORAGE_VERSIONS[20].version,
+                    fields: {
+                        action: { type: 'json' },
+                    },
+                },
+            },
+            operations: {
+                createMetadata: {
+                    operation: 'createObject',
+                    collection: 'sharedListMetadata',
+                },
+                getMetadata: {
+                    operation: 'findObject',
+                    collection: 'sharedListMetadata',
+                    args: { localId: '$localId:number' },
+                },
+                getPages: {
+                    // TODO: Probably doesn't belong here
+                    operation: 'findObjects',
+                    collection: 'pages',
+                    args: { url: { $in: '$normalizedPageUrls' } },
+                },
             },
         }
+    }
+
+    async storeListId(params: { localId: number; remoteId: string }) {
+        const existing = await this.operation('getMetadata', params)
+        if (existing) {
+            throw new Error(`List #${params.localId} already has server ID`)
+        }
+        await this.operation('createMetadata', {
+            ...params,
+        })
+    }
+
+    async getRemoteListId(params: { localId: number }): Promise<string | null> {
+        const existing = await this.operation('getMetadata', params)
+        return existing?.remoteId ?? null
+    }
+
+    async getPageTitles(params: { normalizedPageUrls: string[] }) {
+        // TODO: Probably doesn't belong here
+        const titles: { [pageUrl: string]: string } = {}
+        for (const page of await this.operation('getPages', params)) {
+            titles[page.url] = page.fullTitle
+        }
+        return titles
     }
 }

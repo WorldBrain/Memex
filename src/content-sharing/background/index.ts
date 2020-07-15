@@ -3,6 +3,7 @@ import { ContentSharingInterface } from './types'
 import { ContentSharingStorage, ContentSharingClientStorage } from './storage'
 import CustomListStorage from 'src/custom-lists/background/storage'
 import { AuthBackground } from 'src/authentication/background'
+import { SharedListEntry } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 export default class ContentSharingBackground {
     remoteFunctions: ContentSharingInterface
@@ -65,10 +66,50 @@ export default class ContentSharingBackground {
                 id: userId,
             },
         })
+        await this.storage.storeListId({
+            localId: options.listId,
+            remoteId: contentSharing.getSharedListLinkID(listReference),
+        })
+
         return {
-            serverListId: contentSharing.getSharedListLinkID(listReference),
+            remoteListId: contentSharing.getSharedListLinkID(listReference),
         }
     }
 
-    shareListEntries: ContentSharingInterface['shareListEntries'] = async () => {}
+    shareListEntries: ContentSharingInterface['shareListEntries'] = async (
+        options,
+    ) => {
+        const userId = (await this.options.auth.authService.getCurrentUser())
+            ?.id
+        if (!userId) {
+            throw new Error(`Tried to share list without being authenticated`)
+        }
+        const remoteId = await this.storage.getRemoteListId({
+            localId: options.listId,
+        })
+        if (!remoteId) {
+            throw new Error(
+                `Tried to share list entries of list that isn't shared yet`,
+            )
+        }
+        const pages = await this.options.customLists.fetchListPagesById({
+            listId: options.listId,
+        })
+        const pageTitles = await this.storage.getPageTitles({
+            normalizedPageUrls: pages.map((entry) => entry.pageUrl),
+        })
+
+        const contentSharing = await this.options.getContentSharing()
+        await contentSharing.createListEntries({
+            listReference: contentSharing.getSharedListReferenceFromLinkID(
+                remoteId,
+            ),
+            listEntries: pages.map((entry) => ({
+                entryTitle: pageTitles[entry.pageUrl],
+                normalizedUrl: entry.pageUrl,
+                originalUrl: entry.fullUrl,
+            })),
+            userReference: { type: 'user-reference', id: userId },
+        })
+    }
 }
