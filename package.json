@@ -51,7 +51,7 @@
         "core-js": "^3.6.4",
         "countly-sdk-web": "^19.8.0",
         "dataurl-to-blob": "^0.0.1",
-        "dexie": "3.0.0-beta.1",
+        "dexie": "^3.0.1",
         "dexie-mongoify": "^1.3.0",
         "diff-match-patch": "^1.0.0",
         "dom-anchor-fragment": "^1.0.4",
