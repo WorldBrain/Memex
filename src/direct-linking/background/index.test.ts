@@ -32,7 +32,7 @@ const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext
                 type: 'create',
                 object: {
                     url: annotUrl,
-                    pageUrl: DATA.ANNOT_1.url,
+                    pageUrl: DATA.PAGE_1.url,
                     pageTitle: DATA.ANNOT_1.title,
                     comment: DATA.ANNOT_1.comment,
                     _comment_terms: ['test', 'comment'],
@@ -72,7 +72,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         type: 'create',
                                         object: {
                                             url: annotUrl,
-                                            pageUrl: DATA.HIGHLIGHT_1.url,
+                                            pageUrl: DATA.PAGE_1.url,
                                             pageTitle: DATA.HIGHLIGHT_1.title,
                                             _pageTitle_terms: ['test'],
                                             body: DATA.HIGHLIGHT_1.body,
@@ -689,7 +689,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         type: 'create',
                                         object: {
                                             url: annotAUrl,
-                                            pageUrl: DATA.ANNOT_1.url,
+                                            pageUrl: DATA.PAGE_1.url,
                                             pageTitle: DATA.ANNOT_1.title,
                                             comment: DATA.ANNOT_1.comment,
                                             _comment_terms: ['test', 'comment'],
@@ -704,7 +704,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         type: 'create',
                                         object: {
                                             url: annotBUrl,
-                                            pageUrl: DATA.ANNOT_1.url,
+                                            pageUrl: DATA.PAGE_1.url,
                                             pageTitle: DATA.ANNOT_1.title,
                                             comment: DATA.ANNOT_1.comment,
                                             _comment_terms: ['test', 'comment'],
@@ -740,7 +740,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual([
                                     {
                                         url: annotBUrl,
-                                        pageUrl: DATA.ANNOT_1.url,
+                                        pageUrl: DATA.PAGE_1.url,
                                         pageTitle: DATA.ANNOT_1.title,
                                         comment: DATA.ANNOT_1.comment,
                                         _comment_terms: ['test', 'comment'],
@@ -773,17 +773,21 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).createCustomList({ name: 'test' })
                                 await customLists(setup).insertPageToList({
                                     id: listId,
-                                    url: DATA.ANNOT_1.url,
+                                    url: DATA.ANNOT_1.uniqueAnnotationUrl,
                                 })
                             },
                             expectedStorageChanges: {
                                 pageListEntries: (): StorageCollectionDiff => ({
-                                    [`[${listId},"${DATA.ANNOT_1.url}"]`]: {
+                                    [`[${listId},"${DATA.ANNOT_1.uniqueAnnotationUrl}"]`]: {
                                         type: 'create',
                                         object: {
                                             listId,
-                                            fullUrl: DATA.ANNOT_1.url,
-                                            pageUrl: DATA.ANNOT_1.url,
+                                            fullUrl:
+                                                DATA.ANNOT_1
+                                                    .uniqueAnnotationUrl,
+                                            pageUrl:
+                                                DATA.ANNOT_1
+                                                    .uniqueAnnotationUrl,
                                             createdAt: expect.any(Date),
                                         },
                                     },
@@ -866,17 +870,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     setup,
                                 ).createAnnotation(
                                     { tab: {} as any },
-                                    DATA.ANNOT_1 as any,
+                                    DATA.ANNOT_1,
                                     { skipPageIndexing: true },
                                 )
                                 annotUrlB = await directLinking(
                                     setup,
                                 ).createAnnotation(
                                     { tab: {} as any },
-                                    {
-                                        ...DATA.ANNOT_2,
-                                        url: DATA.PAGE_1.url,
-                                    } as any,
+                                    DATA.ANNOT_2,
                                     { skipPageIndexing: true },
                                 )
                             },
@@ -886,7 +887,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         type: 'create',
                                         object: {
                                             url: annotUrlA,
-                                            pageUrl: DATA.PAGE_1.url,
+                                            pageUrl: DATA.ANNOT_1.pageUrl,
                                             pageTitle: DATA.ANNOT_1.title,
                                             comment: DATA.ANNOT_1.comment,
                                             _comment_terms: ['test', 'comment'],
@@ -901,7 +902,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         type: 'create',
                                         object: {
                                             url: annotUrlB,
-                                            pageUrl: DATA.PAGE_1.url,
+                                            pageUrl: DATA.ANNOT_2.pageUrl,
                                             pageTitle: DATA.ANNOT_2.title,
                                             comment: DATA.ANNOT_2.comment,
                                             _comment_terms: ['test', 'text'],
@@ -1114,14 +1115,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     setup,
                                 ).createAnnotation(
                                     { tab: {} as any },
-                                    DATA.ANNOT_1 as any,
+                                    DATA.ANNOT_1,
                                     { skipPageIndexing: true },
                                 )
                                 annotUrlB = await directLinking(
                                     setup,
                                 ).createAnnotation(
                                     { tab: {} as any },
-                                    DATA.ANNOT_2 as any,
+                                    DATA.ANNOT_2,
                                     { skipPageIndexing: true },
                                 )
                             },

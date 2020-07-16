@@ -7,7 +7,7 @@ export interface Annotation {
     selector?: Anchor
     createdWhen?: Date
     lastEdited?: Date
-    uniqueAnnotationUrl: string
+    uniqueAnnotationUrl?: string
     comment?: string
     _body_terms?: string[]
     _comment_terms?: string[]

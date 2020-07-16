@@ -3,7 +3,6 @@ export const directLink = {
     pageUrl: 'somerandomurl.com',
     url: 'http://memex.link/3234235/',
     body: 'Some random quote in some random page',
-    comment: '',
     selector: {},
     createdWhen: new Date('2019-01-29T02:14Z'),
 }
@@ -21,7 +20,6 @@ export const highlight = {
     pageUrl,
     body: 'Whooo this is a highlight',
     url: 'https://annotation.url/#12124124124',
-    comment: '',
     selector: {},
     createdWhen: new Date('2019-01-25T12:04Z'),
 }

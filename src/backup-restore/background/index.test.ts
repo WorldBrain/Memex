@@ -26,6 +26,7 @@ describe('Backup feature', () => {
             notifications: { backup: true, watch: true },
             customLists: { backup: true, watch: true },
             pageListEntries: { backup: true, watch: true },
+            readablePageArchives: { backup: true, watch: true },
             socialPosts: { backup: true, watch: true },
             socialUsers: { backup: true, watch: true },
             socialTags: { backup: true, watch: true },

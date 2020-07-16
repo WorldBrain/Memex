@@ -18,22 +18,25 @@ export const PAGE_2 = {
 }
 
 export const ANNOT_1 = {
-    url: PAGE_1.url,
+    uniqueAnnotationUrl: PAGE_1.url + '#1',
     title: 'test',
+    pageUrl: PAGE_1.url,
     comment: 'test comment',
     createdWhen: new Date(1570024800000),
 }
 
 export const ANNOT_2 = {
-    url: PAGE_2.url,
+    uniqueAnnotationUrl: PAGE_2.url + '#1',
     title: 'annotation',
+    pageUrl: PAGE_2.url,
     comment: 'some test text',
     createdWhen: new Date(1570024800000),
 }
 
 export const HIGHLIGHT_1 = {
-    url: PAGE_1.url,
+    uniqueAnnotationUrl: PAGE_1.url + '#2',
     title: 'test',
     body: 'test body',
+    pageUrl: PAGE_1.url,
     createdWhen: new Date(1570024800000),
 }
