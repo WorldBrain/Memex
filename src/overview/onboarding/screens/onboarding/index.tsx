@@ -337,7 +337,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <OnboardingStep
                         goToStep={this.handleStepClick}
                         titleText="Make Highlights & Notes"
-                        subtitleText="Simply select some text on the web to get started."
+                        subtitleText="To annotate websites, right-click on selected text"
                         renderButton={() => (
                             <OnboardingAction
                                 onClick={this.handleNextStepClick}

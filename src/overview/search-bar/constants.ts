@@ -20,3 +20,11 @@ export const TERM_CLEAN_PATTERN = /^-?(site:)?-?(?=\w+)/
 export const DATE_PICKER_DATE_FORMAT = 'DD-MM-YYYY'
 
 export const PAGE_SIZE = 10
+
+export const SEARCH_INPUT_SPLIT_PATTERN = /-?#\"([-.\w]+ ?)+\"|\S+/g
+
+/**
+ * Used to clean the hashtag syntax off any tag filtered via the search bar filter syntax.
+ * eg: #tag #"tag tag" -#tag
+ */
+export const TAG_CLEAN_PATTERN = /[#"]/g

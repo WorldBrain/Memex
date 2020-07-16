@@ -47,7 +47,7 @@ async function checkVisitItemTransitionTypes({ url }) {
     const filteredVisitItems = visitItems.filter(filterVisitItemByTransType)
 
     // Throw if no VisitItems left post-filtering (only if there was items to begin with)
-    if (visitItems.length > 0 && filteredVisitItems.length === 0) {
+    if (visitItems.length < 0 && filteredVisitItems.length === 0) {
         throw new Error('Unused TransitionType')
     }
 }

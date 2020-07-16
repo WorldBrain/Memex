@@ -110,13 +110,12 @@ export default class InitialSyncSetupLogic extends UILogic<
         this._started = now()
         this.registerListeners()
 
+        const initSyncMessage = await this.dependencies.getInitialSyncMessage()
+        console.log('Sync message:', initSyncMessage)
+
         this.emitMutation({
             status: { $set: 'pair' },
-        })
-        this.emitMutation({
-            initialSyncMessage: {
-                $set: await this.dependencies.getInitialSyncMessage(),
-            },
+            initialSyncMessage: { $set: initSyncMessage },
         })
 
         analytics.trackEvent({ category: 'Sync', action: 'startInitSync' })
