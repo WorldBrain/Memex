@@ -3,6 +3,19 @@ export interface ContentSharingInterface {
     shareListEntries(options: { listId: number }): Promise<void>
     getRemoteListId(options: { localListId: number }): Promise<string | null>
     areListsShared(options: {
-        listIds: number[]
+        localListIds: number[]
     }): Promise<{ [listId: number]: boolean }>
+    waitForListSync(options: { localListId: number }): Promise<void>
+}
+
+export type ContentSharingAction = AddSharedListEntryAction
+export interface AddSharedListEntryAction {
+    type: 'add-shared-list-entry'
+    localListId: number
+    remoteListId: string
+    data: {
+        entryTitle: string
+        originalUrl: string
+        normalizedUrl: string
+    }
 }

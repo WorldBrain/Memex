@@ -4,12 +4,14 @@ import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watc
 import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
 import SyncService from '@worldbrain/memex-common/lib/sync'
 import { StorexHubBackground } from 'src/storex-hub/background'
+import ContentSharingBackground from 'src/content-sharing/background'
 
 export async function setStorageMiddleware(
     storageManager: StorageManager,
     options: {
         syncService: SyncService
         storexHub?: StorexHubBackground
+        contentSharing?: ContentSharingBackground
         modifyMiddleware?: (
             middleware: StorageMiddleware[],
         ) => StorageMiddleware[]
@@ -41,7 +43,10 @@ export async function setStorageMiddleware(
                 shouldWatchCollection: (collection) =>
                     syncedCollections.has(collection),
                 postprocessOperation: async (event) => {
-                    await options.storexHub.handlePostStorageChange(event)
+                    await Promise.all([
+                        options.storexHub?.handlePostStorageChange(event),
+                        options.contentSharing?.handlePostStorageChange(event),
+                    ])
                 },
             }),
             await options.syncService.createSyncLoggingMiddleware(),

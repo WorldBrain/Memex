@@ -81,6 +81,7 @@ export async function main() {
     await setStorageMiddleware(storageManager, {
         syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
+        contentSharing: backgroundModules.contentSharing,
     })
     await setupBackgroundModules(backgroundModules, storageManager)
 

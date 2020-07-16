@@ -147,6 +147,7 @@ export async function setupBackgroundIntegrationTest(options?: {
     await setStorageMiddleware(storageManager, {
         syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
+        contentSharing: backgroundModules.contentSharing,
         modifyMiddleware: (originalMiddleware) => [
             ...((options && options.customMiddleware) || []),
             ...(options && options.debugStorageOperations
@@ -181,7 +182,9 @@ export function registerBackgroundIntegrationTest(
                 await runBackgroundIntegrationTest(test)
             },
         )
-        registerSyncBackgroundIntegrationTests(test)
+        if (process.env.SKIP_SYNC_TESTS !== 'true') {
+            registerSyncBackgroundIntegrationTests(test)
+        }
     })
 }
 

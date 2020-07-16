@@ -18,7 +18,7 @@ export class ContentSharingClientStorage extends StorageModule {
                     },
                     indices: [{ field: 'localId', pk: true }],
                 },
-                sharedListAction: {
+                contentSharingAction: {
                     version: STORAGE_VERSIONS[20].version,
                     fields: {
                         action: { type: 'json' },
