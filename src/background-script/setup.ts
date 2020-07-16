@@ -319,6 +319,8 @@ export async function setupBackgroundModules(
     backgroundModules: BackgroundModules,
     storageManager: StorageManager,
 ) {
+    backgroundModules.bgScript.setupWebExtAPIHandlers()
+
     setImportStateManager(
         new ImportStateManager({
             storageManager,
@@ -346,7 +348,6 @@ export async function setupBackgroundModules(
     backgroundModules.bgScript.setupRemoteFunctions()
     backgroundModules.contentScripts.setupRemoteFunctions()
     backgroundModules.inPageUI.setupRemoteFunctions()
-    backgroundModules.bgScript.setupWebExtAPIHandlers()
     backgroundModules.bgScript.setupAlarms(alarms)
     backgroundModules.pageFetchBacklog.setupBacklogProcessing()
     setupNotificationClickListener()

@@ -72,6 +72,7 @@ export async function main() {
     registerBackgroundModuleCollections(storageManager, backgroundModules)
 
     await storageManager.finishInitialization()
+    await setupBackgroundModules(backgroundModules, storageManager)
     await navigator?.storage?.persist?.()
 
     await setStorageMiddleware(storageManager, {
@@ -80,8 +81,6 @@ export async function main() {
     })
 
     setStorex(storageManager)
-
-    await setupBackgroundModules(backgroundModules, storageManager)
 
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({
