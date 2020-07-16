@@ -64,6 +64,9 @@ export default class RestoreWhere extends React.Component<Props> {
                     <strong>STEP 1/2: </strong>
                     FROM WHERE?
                 </div>
+                <div className={settingsStyle.subname}>
+                    <strong>Important:</strong> To restore, pick the parent folder of '/backup'
+                </div>
                 <ProviderList
                     backupPath={
                         this.state.provider === 'local'
