@@ -75,6 +75,8 @@ export async function setupBackgroundIntegrationTest(options?: {
             )
             console['info'](`Ran job ${job.name} returned:`, job.job())
         },
+        getUserManagement: async () =>
+            (await getServerStorage()).storageModules.userManagement,
     })
     const analyticsManager = new AnalyticsManager({
         backend: new FakeAnalytics(),

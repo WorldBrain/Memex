@@ -173,6 +173,9 @@ export function createBackgroundModules(options: {
             scheduleJob: jobScheduler.scheduler.scheduleJobOnce.bind(
                 jobScheduler.scheduler,
             ),
+            getUserManagement: async () =>
+                (await options.getServerStorage()).storageModules
+                    .userManagement,
         })
 
     const connectivityChecker = new ConnectivityCheckerBackground({

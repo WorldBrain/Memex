@@ -9,6 +9,7 @@ import {
     TypographyHeadingNormal,
     TypographyHeadingSmall,
 } from 'src/common-ui/components/design-library/typography'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 const HeaderText = styled.div`
     font-family: Poppins;
@@ -168,7 +169,8 @@ interface ShareModalContentProps {
     isShared: boolean
     collectionName: string
     shareUrl?: string
-    isUploading: boolean
+    listCreationState: TaskState
+    entriesUploadState: TaskState
 
     onClickToggle: () => void
     onClickLetUsKnow: () => void
@@ -229,12 +231,20 @@ export default class ShareModalContent extends PureComponent<
                     <LinkBox>
                         {this.props.isShared ? (
                             <ShareUrlBox onClick={() => this.onClickCopy()}>
-                                <ShareUrl>{this.props.shareUrl}</ShareUrl>
-                                <TypographyHeadingSmall>
-                                    {this.state.hasCopied
-                                        ? 'Copied to Clipboard'
-                                        : 'Copy'}
-                                </TypographyHeadingSmall>
+                                <ShareUrl>
+                                    {this.props.shareUrl}
+                                    {this.props.listCreationState ===
+                                        'running' && 'Creating list...'}
+                                    {this.props.listCreationState === 'error' &&
+                                        'Error while sharing list...'}
+                                </ShareUrl>
+                                {this.props.shareUrl && (
+                                    <TypographyHeadingSmall>
+                                        {this.state.hasCopied
+                                            ? 'Copied to Clipboard'
+                                            : 'Copy'}
+                                    </TypographyHeadingSmall>
+                                )}
                             </ShareUrlBox>
                         ) : (
                             'turn on sharing to generate link'
@@ -243,7 +253,7 @@ export default class ShareModalContent extends PureComponent<
                 </LinkContainer>
 
                 <UploadingContainer>
-                    {this.props.isUploading && (
+                    {this.props.listCreationState === 'running' && (
                         <>
                             <LoadingIndicator />
                             <br />

@@ -31,12 +31,15 @@ export default class ContentSharingBackground {
         this.remoteFunctions = {
             shareList: this.shareList,
             shareListEntries: this.shareListEntries,
+            getRemoteListId: async (options) => {
+                return this.storage.getRemoteListId({
+                    localId: options.localListId,
+                })
+            },
             areListsShared: async (options) => {
-                const shared: { [listId: number]: boolean } = {}
-                for (const listId of options.listIds) {
-                    shared[listId] = false
-                }
-                return shared
+                return this.storage.areListsShared({
+                    localIds: options.listIds,
+                })
             },
         }
     }

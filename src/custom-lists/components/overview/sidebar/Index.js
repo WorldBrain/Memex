@@ -208,29 +208,24 @@ class ListContainer extends Component {
                     onClose={this.props.resetListDeleteModal}
                     deleteDocs={this.props.handleDeleteList}
                 />
-                <ShareModal
-                    isPioneer={this.state.isPioneer}
-                    displayName={this.state.displayName}
-                    onUpdateDisplayName={(displayName) => {
-                        // optimisitc update, we could also requery with `this.getUserInfo()`
-                        this.setState({ displayName })
-
-                        auth.updateUserProfile({ displayName })
-                    }}
-                    isShown={this.props.shareModalProps.isShown}
-                    list={this.props.lists[this.props.shareModalProps.index]}
-                    onClose={this.props.handleCloseShareModal}
-                    onShareList={(listId) => {
-                        contentSharing.shareList({ listId })
-                        // TODO: requery list share status
-                        // TODO: move logic to actions
-                    }}
-                    onUnshareList={(listId) => {
-                        // TODO: contentSharing.unshareList({ listId })
-                        // TODO: requery list share status
-                        // TODO: move logic to actions
-                    }}
-                />
+                {this.props.shareModalProps.isShown && (
+                    <ShareModal
+                        auth={auth}
+                        contentSharing={contentSharing}
+                        isPioneer={this.state.isPioneer}
+                        isShown={this.props.shareModalProps.isShown}
+                        list={
+                            this.props.lists[this.props.shareModalProps.index]
+                        }
+                        onClose={this.props.handleCloseShareModal}
+                        onShareList={(listId) => {}}
+                        onUnshareList={(listId) => {
+                            // TODO: contentSharing.unshareList({ listId })
+                            // TODO: requery list share status
+                            // TODO: move logic to actions
+                        }}
+                    />
+                )}
             </React.Fragment>
         )
     }

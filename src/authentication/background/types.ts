@@ -11,7 +11,7 @@ export interface AuthRemoteFunctionsInterface {
     signOut(): void
     refreshUserInfo(): Promise<void>
 
-    getUserProfile(): Promise<{ displayName: string } | null>
+    getUserProfile(): Promise<{ displayName?: string } | null>
     updateUserProfile(updates: { displayName: string }): Promise<void>
 
     hasValidPlan(plan: UserPlan): Promise<boolean>

@@ -35,6 +35,11 @@ export class ContentSharingClientStorage extends StorageModule {
                     collection: 'sharedListMetadata',
                     args: { localId: '$localId:number' },
                 },
+                getMetadataForLists: {
+                    operation: 'findObjects',
+                    collection: 'sharedListMetadata',
+                    args: { localId: { $in: '$localIds' } },
+                },
                 getPages: {
                     // TODO: Probably doesn't belong here
                     operation: 'findObjects',
@@ -67,5 +72,19 @@ export class ContentSharingClientStorage extends StorageModule {
             titles[page.url] = page.fullTitle
         }
         return titles
+    }
+
+    async areListsShared(options: { localIds: number[] }) {
+        const allMetadata = await this.operation('getMetadataForLists', options)
+        const shared: { [listId: number]: boolean } = {}
+        for (const listMetadata of allMetadata) {
+            shared[listMetadata.localId] = true
+        }
+        for (const localId of options.localIds) {
+            if (!shared[localId]) {
+                shared[localId] = false
+            }
+        }
+        return shared
     }
 }

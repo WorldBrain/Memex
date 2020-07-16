@@ -24,6 +24,7 @@ import { AuthRemoteEvents, AuthRemoteFunctionsInterface } from './types'
 import { JobDefinition } from 'src/job-scheduler/background/types'
 import { isDev } from 'src/analytics/internal/constants'
 import { setupRequestInterceptors } from 'src/authentication/background/redirect'
+import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 
 export class AuthBackground {
     authService: AuthService
@@ -31,16 +32,19 @@ export class AuthBackground {
     remoteFunctions: AuthRemoteFunctionsInterface
     scheduleJob: (job: JobDefinition) => void
     remoteEmitter: RemoteEventEmitter<AuthRemoteEvents>
+    getUserManagement: () => Promise<UserStorage>
 
     constructor(options: {
         authService: AuthService
         subscriptionService: SubscriptionsService
+        getUserManagement: () => Promise<UserStorage>
         scheduleJob: (job: JobDefinition) => void
     }) {
         this.authService = options.authService
         this.subscriptionService = options.subscriptionService
         this.scheduleJob = options.scheduleJob
         this.remoteEmitter = remoteEventEmitter<AuthRemoteEvents>('auth')
+        this.getUserManagement = options.getUserManagement
         this.remoteFunctions = {
             getCurrentUser: () => this.authService.getCurrentUser(),
             signOut: () => this.authService.signOut(),
@@ -81,12 +85,29 @@ export class AuthBackground {
                     await this.subscriptionService.getCurrentUserClaims(),
                 )
             },
-            async getUserProfile(): Promise<{ displayName: string } | null> {
-                return null
+            getUserProfile: async () => {
+                const user = await this.authService.getCurrentUser()
+                if (!user) {
+                    return null
+                }
+                const userManagement = await this.getUserManagement()
+                return userManagement.getUser({
+                    type: 'user-reference',
+                    id: user.id,
+                })
             },
-            async updateUserProfile(updates: {
-                displayName: string
-            }): Promise<void> {},
+            updateUserProfile: async (updates) => {
+                const user = await this.authService.getCurrentUser()
+                if (!user) {
+                    return null
+                }
+                const userManagement = await this.getUserManagement()
+                await userManagement.updateUser(
+                    { type: 'user-reference', id: user.id },
+                    {},
+                    updates,
+                )
+            },
         }
     }
 
