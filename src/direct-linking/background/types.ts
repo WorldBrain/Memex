@@ -63,7 +63,7 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
 }
 
 export interface CreateAnnotationParams {
-    uniqueUrl?: string
+    uniqueAnnotationUrl?: string
     pageUrl: string
     title?: string
     comment?: string

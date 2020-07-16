@@ -328,16 +328,13 @@ export default class DirectLinkingBackground {
         }
 
         const pageTitle = toCreate.title == null ? tab.title : toCreate.title
-        const uniqueUrl =
-            toCreate.uniqueUrl ??
-            generateUniqueAnnotationUrl({
-                pageUrl: toCreate.pageUrl,
-                now: () => now(),
-            })
+        const uniqueAnnotationUrl =
+            toCreate.uniqueAnnotationUrl ??
+            generateUniqueAnnotationUrl({ pageUrl, now: () => now() })
 
         await this.annotationStorage.createAnnotation({
             pageUrl,
-            uniqueAnnotationUrl: uniqueUrl,
+            uniqueAnnotationUrl,
             pageTitle,
             comment: toCreate.comment,
             body: toCreate.body,
@@ -351,10 +348,13 @@ export default class DirectLinkingBackground {
         }
 
         if (toCreate.bookmarked) {
-            await this.toggleAnnotBookmark({ tab }, { url: uniqueUrl })
+            await this.toggleAnnotBookmark(
+                { tab },
+                { url: uniqueAnnotationUrl },
+            )
         }
 
-        return uniqueUrl
+        return uniqueAnnotationUrl
     }
 
     async insertAnnotToList({ tab }: TabArg, params: AnnotListEntry) {

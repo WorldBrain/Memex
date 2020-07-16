@@ -1,88 +1,84 @@
 import omitBy from 'lodash/omitBy'
 import endsWith from 'lodash/endsWith'
-import Storex from '@worldbrain/storex'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
-import AnnotationStorage from './storage'
-import CustomListBackground from 'src/custom-lists/background'
 import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
+import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 
-describe('Annotations storage', () => {
-    let annotationStorage: AnnotationStorage
-    let storageManager: Storex
-    let customListsBg: CustomListBackground
-    let coll1Id: number
-
-    async function insertTestData() {
-        for (const annot of [
-            DATA.directLink,
-            DATA.highlight,
-            DATA.annotation,
-            DATA.comment,
-            DATA.hybrid,
-        ]) {
-            // Pages also need to be seeded to match domains filters against
-            await storageManager.collection('pages').createObject({
-                url: annot.pageUrl,
-                fullUrl: annot.url,
-                hostname: normalizeUrl(annot.pageUrl),
-                domain: normalizeUrl(annot.pageUrl),
-                title: annot.pageTitle,
-                text: '',
-                canonicalUrl: annot.url,
-            })
-
-            await annotationStorage.createAnnotation(annot as any)
-        }
-
-        // Insert bookmarks
-        await annotationStorage.toggleAnnotBookmark({
-            url: DATA.directLink.url,
-        })
-        await annotationStorage.toggleAnnotBookmark({ url: DATA.hybrid.url })
-
-        // Insert collections + collection entries
-        coll1Id = await customListsBg.createCustomList({
-            name: DATA.coll1,
-        })
-        await customListsBg.createCustomList({ name: DATA.coll2 })
-        await annotationStorage.insertAnnotToList({
-            listId: coll1Id,
-            url: DATA.hybrid.url,
+async function insertTestData({
+    storageManager,
+    backgroundModules: {
+        directLinking: { annotationStorage },
+        customLists,
+    },
+}: BackgroundIntegrationTestSetup) {
+    for (const annot of [
+        DATA.directLink,
+        DATA.highlight,
+        DATA.annotation,
+        DATA.comment,
+        DATA.hybrid,
+    ]) {
+        // Pages also need to be seeded to match domains filters against
+        await storageManager.collection('pages').createObject({
+            url: annot.pageUrl,
+            fullUrl: annot.url,
+            hostname: normalizeUrl(annot.pageUrl),
+            domain: normalizeUrl(annot.pageUrl),
+            title: annot.pageTitle,
+            text: '',
+            canonicalUrl: annot.url,
         })
 
-        // Insert tags
-        await annotationStorage.modifyTags(true)(DATA.tag1, DATA.annotation.url)
-        await annotationStorage.modifyTags(true)(DATA.tag2, DATA.annotation.url)
+        await annotationStorage.createAnnotation({
+            ...annot,
+            uniqueAnnotationUrl: annot.url,
+        } as any)
     }
 
-    beforeEach(async () => {
-        const setup = await setupBackgroundIntegrationTest()
-        storageManager = setup.storageManager
-        customListsBg = setup.backgroundModules.customLists
-        annotationStorage =
-            setup.backgroundModules.directLinking.annotationStorage
+    // Insert bookmarks
+    await annotationStorage.toggleAnnotBookmark({
+        url: DATA.directLink.url,
+    })
+    await annotationStorage.toggleAnnotBookmark({ url: DATA.hybrid.url })
 
-        await insertTestData()
+    // Insert collections + collection entries
+    const coll1Id = await customLists.createCustomList({
+        name: DATA.coll1,
+    })
+    await customLists.createCustomList({ name: DATA.coll2 })
+    const res = await annotationStorage.insertAnnotToList({
+        listId: coll1Id,
+        url: DATA.hybrid.url,
     })
 
-    describe('Read operations: ', () => {
-        const assertAnnotation = (received, expected) => {
-            expect(received.body).toEqual(expected.body)
-            expect(received.comment).toEqual(expected.comment)
-            expect(received.pageTitle).toEqual(expected.pageTitle)
-            expect(received.url).toEqual(expected.url)
-            expect(received.selector).toEqual(expected.selector)
-            expect(received.pageUrl).toBeDefined()
-        }
+    // Insert tags
+    await annotationStorage.modifyTags(true)(DATA.tag1, DATA.annotation.url)
+    await annotationStorage.modifyTags(true)(DATA.tag2, DATA.annotation.url)
+}
 
+async function setupTest() {
+    const setup = await setupBackgroundIntegrationTest()
+
+    await insertTestData(setup)
+
+    return {
+        annotationStorage:
+            setup.backgroundModules.directLinking.annotationStorage,
+    }
+}
+
+describe('Annotations storage', () => {
+    describe('Read operations: ', () => {
         const assertTag = (received, expected) => {
             expect(received.name).toEqual(expected)
             expect(received.url).toBeDefined()
         }
 
         test('fetch tags for an annotation', async () => {
+            const { annotationStorage } = await setupTest()
+
             const url = DATA.annotation.url
             const tags = await annotationStorage.getTagsByAnnotationUrl(url)
             expect(tags).toBeDefined()
@@ -98,6 +94,8 @@ describe('Annotations storage', () => {
             }
 
             test('update comment', async () => {
+                const { annotationStorage } = await setupTest()
+
                 const stripTerms = (comment) =>
                     omitBy(comment, (value, key) => endsWith(key, '_terms'))
 
@@ -127,6 +125,8 @@ describe('Annotations storage', () => {
             })
 
             test('add comment to highlight', async () => {
+                const { annotationStorage } = await setupTest()
+
                 const oldHighlight = await annotationStorage.getAnnotationByPk(
                     DATA.highlight.url,
                 )
@@ -149,6 +149,8 @@ describe('Annotations storage', () => {
 
         describe('Delete operations: ', () => {
             test('delete annotation', async () => {
+                const { annotationStorage } = await setupTest()
+
                 const url = DATA.directLink.url
                 const directLink = await annotationStorage.getAnnotationByPk(
                     url,
@@ -165,6 +167,8 @@ describe('Annotations storage', () => {
             })
 
             test('delete tags', async () => {
+                const { annotationStorage } = await setupTest()
+
                 const url = DATA.annotation.url
                 const tagsBefore = await annotationStorage.getTagsByAnnotationUrl(
                     url,
@@ -197,6 +201,8 @@ describe('Annotations storage', () => {
             })
 
             test('delete tags bulk', async () => {
+                const { annotationStorage } = await setupTest()
+
                 const url = DATA.annotation.url
                 const before = await annotationStorage.getTagsByAnnotationUrl(
                     url,
@@ -214,6 +220,8 @@ describe('Annotations storage', () => {
             })
 
             test('delete bookmark', async () => {
+                const { annotationStorage } = await setupTest()
+
                 const url = DATA.directLink.url
 
                 expect(await annotationStorage.annotHasBookmark({ url })).toBe(
@@ -226,11 +234,14 @@ describe('Annotations storage', () => {
             })
 
             test('delete list entries', async () => {
+                const { annotationStorage } = await setupTest()
+
                 const url = DATA.hybrid.url
 
                 const before = await annotationStorage.findListEntriesByUrl({
                     url,
                 })
+
                 expect(before.length).toBe(1)
                 await annotationStorage.deleteListEntriesByUrl({ url })
                 const after = await annotationStorage.findListEntriesByUrl({
