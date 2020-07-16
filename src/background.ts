@@ -72,13 +72,14 @@ export async function main() {
     registerBackgroundModuleCollections(storageManager, backgroundModules)
 
     await storageManager.finishInitialization()
-    await setupBackgroundModules(backgroundModules, storageManager)
-    await navigator?.storage?.persist?.()
 
     await setStorageMiddleware(storageManager, {
         syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
     })
+    await setupBackgroundModules(backgroundModules, storageManager)
+
+    await navigator?.storage?.persist?.()
 
     setStorex(storageManager)
 
