@@ -13,8 +13,8 @@ const Results = props => {
         <div
             className={classNames(
                 styles.MEMEX_CONTAINER,
-                styles[searchEngineClass],
-                styles.MEMEX_CONTAINER_SMALL: props.hideResults,
+                styles[searchEngineClass], {
+                [styles.MEMEX_CONTAINER_SMALL]: props.hideResults }
             )}
         >
             <div className={styles.header}>
