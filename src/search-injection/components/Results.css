@@ -77,6 +77,25 @@
     }
 }
 
+.resultsBox {
+    height: 500px;
+    overflow-y: scroll;
+}
+
+.resultsBoxHidden {
+    height: 0px;
+    overflow-y: hidden;
+}
+
+.loadingBox {
+    border-radius: 3px;
+    margin-bottom: 30px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .resultsText {
     composes: darkBlue from '../../common-ui/colors.css';
     display: inline-block;
