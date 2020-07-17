@@ -60,7 +60,7 @@ const Results = props => {
                 [styles.resultsBoxHidden]: props.hideResults,
             })}>
                 {// Render only if hideResults is false
-                props.hideResults ? ('') : (props.renderResultItems().length > 0 ? (props.renderResultItems()):(<div className={styles.loadingBox}><LoadingIndicator/></div>))
+                props.hideResults ? ('') : (props.renderResultItems().length >= 0 ? (props.renderResultItems()):(<div className={styles.loadingBox}><LoadingIndicator/></div>))
                 }
             </div>
         </div>
