@@ -55,13 +55,18 @@ export async function setupBackgroundIntegrationTest(options?: {
         (options && options.browserLocalStorage) || new MemoryBrowserStorage()
     const storageManager = initStorex()
 
-    const getServerStorage = createLazyServerStorage(() => {
-        const backend = new DexieStorageBackend({
-            dbName: 'server',
-            idbImplementation: inMemory(),
-        })
-        return new StorageManager({ backend })
-    })
+    const getServerStorage = createLazyServerStorage(
+        () => {
+            const backend = new DexieStorageBackend({
+                dbName: 'server',
+                idbImplementation: inMemory(),
+            })
+            return new StorageManager({ backend })
+        },
+        {
+            autoPkType: 'number',
+        },
+    )
 
     const authService = new MemoryAuthService()
     const subscriptionService = new MemorySubscriptionsService()

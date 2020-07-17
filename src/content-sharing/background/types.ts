@@ -8,7 +8,10 @@ export interface ContentSharingInterface {
     waitForListSync(options: { localListId: number }): Promise<void>
 }
 
-export type ContentSharingAction = AddSharedListEntryAction
+export type ContentSharingAction =
+    | AddSharedListEntryAction
+    | ChangeSharedListTitleAction
+    | ChangeSharedListDescriptionAction
 export interface AddSharedListEntryAction {
     type: 'add-shared-list-entry'
     localListId: number
@@ -18,4 +21,18 @@ export interface AddSharedListEntryAction {
         originalUrl: string
         normalizedUrl: string
     }
+}
+
+export interface ChangeSharedListTitleAction {
+    type: 'change-shared-list-title'
+    localListId: number
+    remoteListId: string
+    newTitle: string
+}
+
+export interface ChangeSharedListDescriptionAction {
+    type: 'change-shared-list-description'
+    localListId: number
+    remoteListId: string
+    newDescription: string
 }

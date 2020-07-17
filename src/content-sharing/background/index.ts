@@ -134,32 +134,51 @@ export default class ContentSharingBackground {
 
     async executeAction(action: ContentSharingAction) {
         if (action.type === 'add-shared-list-entry') {
-            const push: ListPush = {
-                startedWhen: Date.now(),
-                promise: createResolvable(),
-            }
-            this.listPushes[action.localListId] = push
-
-            const userId = (
-                await this.options.auth.authService.getCurrentUser()
-            )?.id
-            if (!userId) {
-                throw new Error(
-                    `Tried to share list without being authenticated`,
-                )
-            }
-            const contentSharing = await this.options.getContentSharing()
-            await contentSharing.createListEntries({
-                listReference: contentSharing.getSharedListReferenceFromLinkID(
-                    action.remoteListId,
-                ),
-                listEntries: [action.data],
-                userReference: { type: 'user-reference', id: userId },
+            await this.doPush({ localListId: action.localListId }, async () => {
+                const userId = (
+                    await this.options.auth.authService.getCurrentUser()
+                )?.id
+                if (!userId) {
+                    throw new Error(
+                        `Tried to share list without being authenticated`,
+                    )
+                }
+                const contentSharing = await this.options.getContentSharing()
+                await contentSharing.createListEntries({
+                    listReference: contentSharing.getSharedListReferenceFromLinkID(
+                        action.remoteListId,
+                    ),
+                    listEntries: [action.data],
+                    userReference: { type: 'user-reference', id: userId },
+                })
             })
-
-            push.finishedWhen = Date.now()
-            push.promise.resolve()
+        } else if (action.type === 'change-shared-list-title') {
+            await this.doPush({ localListId: action.localListId }, async () => {
+                const contentSharing = await this.options.getContentSharing()
+                await contentSharing.updateListTitle(
+                    contentSharing.getSharedListReferenceFromLinkID(
+                        action.remoteListId,
+                    ),
+                    action.newTitle,
+                )
+            })
         }
+    }
+
+    async doPush(
+        options: { localListId: number },
+        execute: () => Promise<void>,
+    ) {
+        await this.listPushes[options.localListId]?.promise
+
+        const push: ListPush = {
+            startedWhen: Date.now(),
+            promise: createResolvable(),
+        }
+        this.listPushes[options.localListId] = push
+        await execute()
+        push.finishedWhen = Date.now()
+        push.promise.resolve()
     }
 
     async handlePostStorageChange(event: StorageOperationEvent<'post'>) {
@@ -192,6 +211,27 @@ export default class ContentSharingBackground {
                             originalUrl: listEntry.fullUrl,
                         },
                     })
+                }
+            } else if (change.type === 'modify') {
+                if (change.collection === 'customLists') {
+                    for (const pk of change.pks) {
+                        const localListId = pk as number
+                        const remoteListId = await this.storage.getRemoteListId(
+                            {
+                                localId: localListId,
+                            },
+                        )
+                        if (!remoteListId) {
+                            continue
+                        }
+
+                        await this.scheduleAction({
+                            type: 'change-shared-list-title',
+                            localListId,
+                            remoteListId,
+                            newTitle: change.updates.name,
+                        })
+                    }
                 }
             }
         }

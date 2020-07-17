@@ -137,8 +137,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should share new entries to an already existing list',
-            { mark: true },
+            'should share new entries to an already shared list',
             () => {
                 let localListId: number
 
@@ -201,6 +200,65 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         normalizedUrl: 'fish.com/cheese',
                                         entryTitle: 'Fish.com title',
                                     }),
+                                ])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should sync the title when changing the title of an already shared list',
+            () => {
+                let localListId: number
+
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                setup.authService.setUser(TEST_USER)
+
+                                const initialTitle = 'My shared list'
+                                localListId = await setup.backgroundModules.customLists.createCustomList(
+                                    {
+                                        name: initialTitle,
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.shareList(
+                                    { listId: localListId },
+                                )
+
+                                const updatedTitle =
+                                    'My shared list (updated title)'
+                                await setup.backgroundModules.customLists.updateList(
+                                    {
+                                        id: localListId,
+                                        oldName: initialTitle,
+                                        newName: updatedTitle,
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.waitForListSync(
+                                    {
+                                        localListId,
+                                    },
+                                )
+
+                                const serverStorage = await setup.getServerStorage()
+                                expect(
+                                    await serverStorage.storageManager.operation(
+                                        'findObjects',
+                                        'sharedList',
+                                        {},
+                                    ),
+                                ).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: TEST_USER.id,
+                                        createdWhen: expect.any(Number),
+                                        updatedWhen: expect.any(Number),
+                                        title: updatedTitle,
+                                        description: null,
+                                    },
                                 ])
                             },
                         },

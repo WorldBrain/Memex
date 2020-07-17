@@ -44,7 +44,12 @@ export async function main() {
     })
     initSentry({ storageChangesManager: localStorageChangesManager })
 
-    const getServerStorage = createLazyServerStorage(createServerStorageManager)
+    const getServerStorage = createLazyServerStorage(
+        createServerStorageManager,
+        {
+            autoPkType: 'string',
+        },
+    )
     const fetchPageDataProcessor = new FetchPageDataProcessor({
         fetchPageData,
         pagePipeline: pipeline,

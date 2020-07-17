@@ -26,6 +26,7 @@ export function createServerStorageManager() {
 
 export function createLazyServerStorage(
     createStorageManager: () => StorageManager,
+    options: { autoPkType: 'string' | 'number' },
 ) {
     let serverStoragePromise: Promise<ServerStorage>
 
@@ -42,6 +43,7 @@ export function createLazyServerStorage(
             })
             const contentSharing = new ContentSharingStorage({
                 storageManager,
+                ...options,
             })
             const userManagement = new UserStorage({
                 storageManager,
