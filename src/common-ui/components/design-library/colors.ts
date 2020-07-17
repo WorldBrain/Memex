@@ -24,6 +24,7 @@ export const colorGrey7 = `#72727F`
 export const colorGrey8 = `#4D4754`
 export const colorGrey9 = `#3A2F45`
 export const colorGrey10 = `#281C34`
+export const formBackground = `#e0e0e0`
 
 // Themes. Passed to the ThemeProvider currently only on the Tag Picket
 export const lightTheme = {

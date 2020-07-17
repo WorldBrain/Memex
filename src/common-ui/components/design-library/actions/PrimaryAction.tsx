@@ -16,6 +16,7 @@ const Button = styled.button`
     margin: 0;
     padding: 0;
     width: auto;
+    height: 35px;
     overflow: visible;
 
     background: transparent;

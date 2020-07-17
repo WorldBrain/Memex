@@ -172,10 +172,10 @@ class ShareModal extends Component<Props, State> {
                     }
                 }}
                 onClickLetUsKnow={() => {
-                    // TODO: handle "let us know" button
+                    window.open('https://worldbrain.io/feedback/betafeatures')
                 }}
                 onClickViewRoadmap={() => {
-                    // TODO: handle "roadmap" button
+                    window.open('https://worldbrain.io/roadmap')
                 }}
             />
         )

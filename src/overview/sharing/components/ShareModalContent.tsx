@@ -10,6 +10,12 @@ import {
     TypographyHeadingSmall,
 } from 'src/common-ui/components/design-library/typography'
 import { TaskState } from 'ui-logic-core/lib/types'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+
+
+const Margin20 = styled.div`
+    height: 20px;
+`
 
 const HeaderText = styled.div`
     font-family: Poppins;
@@ -49,66 +55,24 @@ const Button = styled.button`
     background: transparent;
 `
 
+const InstructionsContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+`
+
+const InstructionsBox = styled.div`
+    display: flex;
+    flex-direction: column; 
+    align-items: flex-start;
+`
+
 const LinkContainer = styled.div`
     margin-bottom: 10px;
     margin-top: 20px;
     display: flex;
     align-items: center;
-`
-
-const ShareToggleButton = styled.button`
-    display: block;
-    position: relative;
-
-    height: 21px;
-    width: 90px;
-    outline: none;
-    border: 1px solid #e0e0e0;
-    border-radius: 20px;
-    background: transparent;
-    margin-right: 10px;
-
-    cursor: pointer;
-`
-
-const ShareToggleKnob = styled.div`
-    width: 19px;
-    height: 19px;
-    border-radius: 50%;
-
-    position: absolute;
-    top: 0px;
-    left: 0px;
-
-    transition: 0.3s;
-    background-color: #888888;
-
-    ${(props) =>
-        props.enabled &&
-        css`
-            background-color: #5cd9a6;
-            transform: translate(58px);
-        `}
-`
-
-const ShareToggleText = styled.div`
-    font-family: Poppins;
-    font-style: normal;
-    font-weight: 600;
-    font-size: 10px;
-    letter-spacing: 0.01em;
-
-    transition: 0.3s;
-
-    transform: translate(7px);
-    color: #b8b8b8;
-
-    ${(props) =>
-        props.enabled &&
-        css`
-            transform: translate(-5px);
-            color: #494949;
-        `}
 `
 
 const ShareUrlBox = styled.div`
@@ -119,6 +83,7 @@ const ShareUrlBox = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
+    cursor: pointer;
 `
 
 const ShareUrl = styled.span`
@@ -132,7 +97,7 @@ const LinkBox = styled.div`
 
 const UploadingContainer = styled.div`
     margin: 30px 0;
-    padding: 10px 0;
+    padding: 20px 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -142,27 +107,21 @@ const UploadingContainer = styled.div`
         rgba(15, 15, 15, 0.1) 0px 2px 4px;
 `
 
+const BetaInfoContainer = styled.div`
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+`
+
+
+
 interface ShareToggleProps {
     isActive: boolean
     activeText: string
     inactiveText: string
 
     onClickToggle: () => void
-}
-
-class ShareToggle extends PureComponent<ShareToggleProps> {
-    render() {
-        return (
-            <ShareToggleButton onClick={this.props.onClickToggle}>
-                <ShareToggleText enabled={this.props.isActive}>
-                    {this.props.isActive
-                        ? this.props.activeText
-                        : this.props.inactiveText}
-                </ShareToggleText>
-                <ShareToggleKnob enabled={this.props.isActive} />
-            </ShareToggleButton>
-        )
-    }
 }
 
 interface ShareModalContentProps {
@@ -213,23 +172,26 @@ export default class ShareModalContent extends PureComponent<
     render() {
         return (
             <div>
-                <TypographyHeadingBigger>
-                    Share "{this.props.collectionName}"
-                </TypographyHeadingBigger>
-                <br />
-                <TypographyTextNormal>
-                    Anyone with this link can view your collection
-                </TypographyTextNormal>
+                <InstructionsContainer>
+                    <InstructionsBox>
+                        <TypographyHeadingBigger>
+                            Share "{this.props.collectionName}"
+                        </TypographyHeadingBigger>
+                        <TypographyTextNormal>
+                            Anyone with this link can view your collection
+                        </TypographyTextNormal>
+                    </InstructionsBox>
+                    {!this.props.isShared &&
+                        <PrimaryAction 
+                            label={'Generate Link'}
+                            onClick={this.props.onClickToggle}
+                        />
+                    }
+                </InstructionsContainer>
 
                 <LinkContainer>
-                    <ShareToggle
-                        isActive={this.props.isShared}
-                        activeText={'shared'}
-                        inactiveText={'private'}
-                        onClickToggle={this.props.onClickToggle}
-                    />
                     <LinkBox>
-                        {this.props.isShared ? (
+                        {this.props.isShared && (
                             <ShareUrlBox onClick={() => this.onClickCopy()}>
                                 <ShareUrl>
                                     {this.props.shareUrl}
@@ -246,41 +208,39 @@ export default class ShareModalContent extends PureComponent<
                                     </TypographyHeadingSmall>
                                 )}
                             </ShareUrlBox>
-                        ) : (
-                            'turn on sharing to generate link'
                         )}
                     </LinkBox>
                 </LinkContainer>
 
-                <UploadingContainer>
-                    {this.props.listCreationState === 'running' && (
-                        <>
-                            <LoadingIndicator />
-                            <br />
-                            <TypographyHeadingNormal>
-                                Uploading Collection
-                            </TypographyHeadingNormal>
-                            <TypographySubTextNormal>
-                                You can close this popup
-                            </TypographySubTextNormal>
-                        </>
-                    )}
-                </UploadingContainer>
+                {this.props.listCreationState === 'running' && (
+                    <UploadingContainer>
+                        <LoadingIndicator />
+                        <Margin20/>
+                        <TypographyHeadingNormal>
+                            Uploading Collection
+                        </TypographyHeadingNormal>
+                        <TypographySubTextNormal>
+                            You can close this popup
+                        </TypographySubTextNormal>
+                    </UploadingContainer>
+                )}
 
-                <Text>
-                    This feature is intentionally simple. We want to find out
-                    more about how you want to share your web knowledge and
-                    filter your incoming information streams.
-                </Text>
+                <BetaInfoContainer>
+                    <Text>
+                        This is a beta feature. We want to learn more about what you need to integrate it into your workflow. 
+                    </Text>
 
-                <ButtonsContainer>
-                    <Button onClick={this.props.onClickLetUsKnow}>
-                        Let us know >>
-                    </Button>
-                    <Button onClick={this.props.onClickViewRoadmap}>
-                        View the Roadmap >>
-                    </Button>
-                </ButtonsContainer>
+                    <ButtonsContainer>
+                        <PrimaryAction 
+                            label={'Share Feedback'}
+                            onClick={this.props.onClickLetUsKnow}
+                        />
+                        <Button onClick={this.props.onClickViewRoadmap}>
+                            View Roadmap
+                        </Button>
+                    </ButtonsContainer>
+
+                </BetaInfoContainer>
             </div>
         )
     }
