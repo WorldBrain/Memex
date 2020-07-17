@@ -7,6 +7,7 @@ import { SharedListEntry } from '@worldbrain/memex-common/lib/content-sharing/ty
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { PageListEntry } from 'src/custom-lists/background/types'
 import createResolvable, { Resolvable } from '@josephg/resolvable'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 interface ListPush {
     startedWhen: number
@@ -116,7 +117,7 @@ export default class ContentSharingBackground {
             listEntries: pages.map((entry) => ({
                 entryTitle: pageTitles[entry.pageUrl],
                 normalizedUrl: entry.pageUrl,
-                originalUrl: entry.fullUrl,
+                originalUrl: 'https://' + normalizeUrl(entry.fullUrl),
             })),
             userReference: { type: 'user-reference', id: userId },
         })
@@ -208,7 +209,7 @@ export default class ContentSharingBackground {
                         data: {
                             entryTitle: pageTitle,
                             normalizedUrl: pageUrl,
-                            originalUrl: listEntry.fullUrl,
+                            originalUrl: 'https://' + normalizeUrl(listEntry.fullUrl),
                         },
                     })
                 }
