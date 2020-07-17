@@ -1,11 +1,14 @@
 import React, { Component, DragEventHandler } from 'react'
 import cx from 'classnames'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { AuthContextInterface } from 'src/authentication/background/types'
+import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 import analytics from 'src/analytics'
 
 const styles = require('./list-item.css')
 
-export interface Props {
+export interface Props extends AuthContextInterface {
     listName: string
     isMobileList: boolean
     isFiltered: boolean
@@ -14,6 +17,7 @@ export interface Props {
     onCrossButtonClick: React.MouseEventHandler<HTMLButtonElement>
     onAddPageToList: (url: string, isSocialPost: boolean) => void
     onListItemClick: () => void
+    plans?: UserPlan[]
 }
 
 interface State {
@@ -152,14 +156,16 @@ class ListItem extends Component<Props, State> {
                 <div className={styles.buttonContainer}>
                     {!this.props.isMobileList && this.state.isMouseInside && (
                         <React.Fragment>
-                            <button
-                                className={cx(
-                                    styles.shareButton,
-                                    styles.button,
-                                )}
-                                onClick={this.handleShareBtnClick}
-                                title={'Share'}
-                            />
+                            {this.props.currentUser?.authorizedFeatures?.includes('beta') &&
+                                <button
+                                    className={cx(
+                                        styles.shareButton,
+                                        styles.button,
+                                    )}
+                                    onClick={this.handleShareBtnClick}
+                                    title={'Share'}
+                                />
+                            }
                             <button
                                 className={cx(styles.editButton, styles.button)}
                                 onClick={this.handleEditBtnClick}
@@ -181,4 +187,4 @@ class ListItem extends Component<Props, State> {
     }
 }
 
-export default ListItem
+export default withCurrentUser(ListItem)
