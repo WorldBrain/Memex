@@ -15,7 +15,7 @@ export function createServerStorageManager() {
         firebase: firebase as any,
         firestore: firebase.firestore() as any,
     })
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.USE_FIREBASE_EMULATOR === 'true') {
         firebase.firestore().settings({
             host: 'localhost:8080',
             ssl: false,
