@@ -8,12 +8,13 @@ import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 
 const Results = props => {
     const searchEngineClass = `${props.searchEngine}_${props.position}`
-    
+
     return (
         <div
             className={classNames(
                 styles.MEMEX_CONTAINER,
                 styles[searchEngineClass],
+                styles.MEMEX_CONTAINER_SMALL: props.hideResults,
             )}
         >
             <div className={styles.header}>
