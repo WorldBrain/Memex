@@ -33,6 +33,7 @@ import pipeline from 'src/search/pipeline'
 import { setStorageMiddleware } from './storage/middleware'
 import { getFirebase } from './util/firebase-app-initialized'
 import { FeaturesBeta } from './features/background/feature-beta'
+import setupDataSeeders from 'src/util/tests/seed-data'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -109,6 +110,7 @@ export async function main() {
     window['bgModules'] = backgroundModules
     window['analytics'] = analytics
     window['tabMan'] = backgroundModules.activityLogger.tabManager
+    window['dataSeeders'] = setupDataSeeders(storageManager)
 
     window['selfTests'] = await createSelfTests({
         storage: {
