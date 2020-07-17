@@ -1,5 +1,4 @@
 import Storex from '@worldbrain/storex'
-import { ClientSyncLogEntry } from '@worldbrain/storex-sync/lib/client-sync-log/types'
 
 export const seedClientSyncLogEntries = (db: Storex) => async ({
     amount = 100,
@@ -12,7 +11,7 @@ export const seedClientSyncLogEntries = (db: Storex) => async ({
 }) => {
     const time = Date.now()
 
-    const data: ClientSyncLogEntry[] = [...Array(amount)].map((a, index) => ({
+    const data = [...Array(amount)].map((a, index) => ({
         needsIntegration: Math.random() > needsIntegrationChance,
         sharedOn: Math.random() > sharedOnChance ? time - index : undefined,
         collection: 'testCollection',
