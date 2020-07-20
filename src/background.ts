@@ -33,6 +33,7 @@ import pipeline from 'src/search/pipeline'
 import { setStorageMiddleware } from './storage/middleware'
 import { getFirebase } from './util/firebase-app-initialized'
 import { FeaturesBeta } from './features/background/feature-beta'
+import setupDataSeeders from 'src/util/tests/seed-data'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -71,16 +72,16 @@ export async function main() {
     registerBackgroundModuleCollections(storageManager, backgroundModules)
 
     await storageManager.finishInitialization()
-    await navigator?.storage?.persist?.()
 
     await setStorageMiddleware(storageManager, {
         syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
     })
+    await setupBackgroundModules(backgroundModules, storageManager)
+
+    await navigator?.storage?.persist?.()
 
     setStorex(storageManager)
-
-    await setupBackgroundModules(backgroundModules, storageManager)
 
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({
@@ -109,6 +110,7 @@ export async function main() {
     window['bgModules'] = backgroundModules
     window['analytics'] = analytics
     window['tabMan'] = backgroundModules.activityLogger.tabManager
+    window['dataSeeders'] = setupDataSeeders(storageManager)
 
     window['selfTests'] = await createSelfTests({
         storage: {

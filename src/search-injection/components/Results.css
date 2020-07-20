@@ -17,14 +17,24 @@
     flex-direction: column;
     border-bottom: #dedede solid 1px;
     margin-bottom: 20px;
-    padding-bottom: 10px;
     margin-right: 20px;
+    background: #fff;
+    padding: 0px 5px 20px 5px;
 }
 
 .header {
     display: flex;
     align-items: center;
-    margin-bottom: 6px;
+    height: 40px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.MEMEX_CONTAINER_SMALL {
+    padding: 0px 5px 0px 5px;
+
+    & .header {
+        border: none;
+    }
 }
 
 .resultLength {
@@ -77,6 +87,25 @@
     }
 }
 
+.resultsBox {
+    height: 500px;
+    overflow-y: scroll;
+}
+
+.resultsBoxHidden {
+    height: 0px;
+    overflow-y: hidden;
+}
+
+.loadingBox {
+    border-radius: 3px;
+    margin-bottom: 30px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .resultsText {
     composes: darkBlue from '../../common-ui/colors.css';
     display: inline-block;
@@ -84,6 +113,7 @@
     font-weight: 600;
     width: 71%;
     margin-right: 10px;
+    padding-left: 11px;
 }
 
 .resultsText > a {
@@ -158,17 +188,14 @@
     margin-top: 7px;
     margin-bottom: 15px;
 
-    & .linksContainer {
-        margin-top: 4px;
-        margin-bottom: 8px;
-    }
-
     & .resultsText {
-        width: 76%;
+        width: 73%;
+        padding-left: 11px;
     }
 
     & .settingsButton {
-        top: 6px;
+        right: 5px;
+        top: 9px;
     }
 
     & .dropdown {
@@ -182,6 +209,7 @@
 
     & .resultsText {
         font-size: 1.05em;
+        width: 65%;
     }
 
     & .links {
@@ -189,8 +217,8 @@
     }
 
     & .settingsButton {
-        right: -4px;
-        top: 9px;
+        right: 5px;
+        top: 8px;
     }
 
     & .dropdown {

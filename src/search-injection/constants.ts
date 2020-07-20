@@ -2,8 +2,8 @@ import { SearchEngineName, SearchEngineInfo } from './types'
 
 // Limit for the number of search results to be fetched
 export const LIMIT = {
-    above: 4,
-    side: 15,
+    above: 20,
+    side: 20,
 }
 
 // regex - Regular Expression to match the url
