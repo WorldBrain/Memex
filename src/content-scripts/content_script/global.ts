@@ -26,26 +26,23 @@ import {
     createAnnotationWithSidebar,
     HighlightRenderer,
     renderAnnotationCacheChanges,
-    saveAndRenderHighlightFromTooltip,
+    saveAndRenderHighlight,
 } from 'src/highlighting/ui/highlight-interactions'
-import {
-    InPageUIComponent,
-    SharedInPageUIInterface,
-} from 'src/in-page-ui/shared-state/types'
+import { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
-import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
 import * as sidebarUtils from 'src/sidebar-overlay/utils'
 import * as constants from '../constants'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
-
+import { AnalyticsEvent } from 'src/analytics/types'
+import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
 // TODO:(page-indexing)[high] Fix this with a proper restructuring of how pages are indexed
 setupPageContentRPC()
 
@@ -64,6 +61,7 @@ export async function main() {
         ribbon?: Resolvable<void>
         sidebar?: Resolvable<void>
         tooltip?: Resolvable<void>
+        highlights?: Resolvable<void>
     } = {}
     async function loadComponent(component: InPageUIComponent) {
         if (!components[component]) {
@@ -83,25 +81,26 @@ export async function main() {
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
     const highlightRenderer = new HighlightRenderer()
     const highlighter = new HighlightRenderer()
-
-    // 3. Creates an instance of the InPageUI manager class to encapsulate
-    // business logic of initialising and hide/showing components.
-    const inPageUI = new SharedInPageUIState({
-        loadComponent,
-        annotations: annotationsBG,
-        highlighter,
-        pageUrl: currentTab.url,
-    })
+    const annotationEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
     const annotationsCache = createAnnotationsCache({
         tags: tagsBG,
         annotations: annotationsBG,
     })
+
+    // 3. Creates an instance of the InPageUI manager class to encapsulate
+    // business logic of initialising and hide/showing components.
+    const inPageUI = new SharedInPageUIState({
+        loadComponent,
+        pageUrl: currentTab.url,
+    })
     annotationsCache.load(getPageUrl())
 
     const annotationsFunctions = {
-        createHighlight: () =>
-            saveAndRenderHighlightFromTooltip({
+        createHighlight: (
+            analyticsEvent?: AnalyticsEvent<'Highlights'>,
+        ) => () =>
+            saveAndRenderHighlight({
                 annotationsCache,
                 getUrlAndTitle: () => ({
                     title: getPageTitle(),
@@ -114,8 +113,11 @@ export async function main() {
                         annotationUrl,
                         action: 'show_annotation',
                     }),
+                analyticsEvent,
             }),
-        createAnnotation: () =>
+        createAnnotation: (
+            analyticsEvent?: AnalyticsEvent<'Annotations'>,
+        ) => () =>
             createAnnotationWithSidebar({
                 getSelection: () => document.getSelection(),
                 getUrlAndTitle: () => ({
@@ -123,6 +125,7 @@ export async function main() {
                     pageUrl: getPageUrl(),
                 }),
                 inPageUI,
+                analyticsEvent,
             }),
     }
 
@@ -137,6 +140,7 @@ export async function main() {
                 getRemoteFunction: remoteFunction,
                 highlighter,
                 annotations: annotationsBG,
+                annotationsCache,
                 currentTab,
                 tags: tagsBG,
                 customLists: runInBackground<RemoteCollectionsInterface>(),
@@ -154,11 +158,18 @@ export async function main() {
             components.ribbon!.resolve()
         },
         async registerHighlightingScript(execute): Promise<void> {
-            execute() // TODO(sidebar-refactor) - this should take highlights / annotations deps but it doesn't, code smell, something needs refactoring
+            execute({
+                inPageUI,
+                annotationsCache,
+                highlightRenderer,
+                annotations: annotationsBG,
+                annotationsManager,
+            })
+            components.highlights?.resolve()
         },
         async registerSidebarScript(execute): Promise<void> {
             await execute({
-                events: new EventEmitter() as AnnotationsSidebarInPageEventEmitter,
+                events: annotationEvents,
                 initialState: inPageUI.componentsShown.sidebar
                     ? 'visible'
                     : 'hidden',
@@ -177,13 +188,24 @@ export async function main() {
             await execute({
                 inPageUI,
                 toolbarNotifications,
-                ...annotationsFunctions,
+                createHighlight: annotationsFunctions.createHighlight({
+                    category: 'Highlights',
+                    action: 'createFromTooltip',
+                }),
+                createAnnotation: annotationsFunctions.createAnnotation({
+                    category: 'Annotations',
+                    action: 'createFromTooltip',
+                }),
             })
             components.tooltip!.resolve()
         },
     }
 
     window['contentScriptRegistry'] = contentScriptRegistry
+
+    // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,
+    // so it is included in this global content script where it adds less than 500kb.
+    await contentScriptRegistry.registerHighlightingScript(highlightMain)
 
     // 5. Registers remote functions that can be used to interact with components
     // in this tab.
@@ -206,8 +228,14 @@ export async function main() {
             )
             await highlighter.highlightAndScroll(annotation)
         },
-        createHighlight: annotationsFunctions.createHighlight,
-        createAnnotation: annotationsFunctions.createAnnotation,
+        createHighlight: annotationsFunctions.createHighlight({
+            category: 'Highlights',
+            action: 'createFromContextMenu',
+        }),
+        createAnnotation: annotationsFunctions.createAnnotation({
+            category: 'Annotations',
+            action: 'createFromContextMenu',
+        }),
     })
 
     // 6. Setup other interactions with this page (things that always run)
@@ -216,7 +244,14 @@ export async function main() {
     setupRemoteDirectLinkFunction()
     initKeyboardShortcuts({
         inPageUI,
-        ...annotationsFunctions,
+        createHighlight: annotationsFunctions.createHighlight({
+            category: 'Highlights',
+            action: 'createFromShortcut',
+        }),
+        createAnnotation: annotationsFunctions.createAnnotation({
+            category: 'Annotations',
+            action: 'createFromShortcut',
+        }),
     })
     const loadContentScript = createContentScriptLoader()
     if (shouldIncludeSearchInjection(window.location.hostname)) {
@@ -229,21 +264,13 @@ export async function main() {
         await inPageUI.setupTooltip()
     }
 
+    await inPageUI.loadComponent('highlights')
     const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
     if (areHighlightsEnabled) {
-        // todo (sidebar-refactor) remove show highlight logic
-        await inPageUI.showHighlights()
-
-        renderAnnotationCacheChanges({
-            cacheChanges: annotationsCache.annotationChanges,
-            renderer: highlightRenderer,
-            onClickHighlight: ({ annotationUrl }) =>
-                inPageUI._emitAction({
-                    action: 'show_annotation',
-                    annotationUrl,
-                    type: 'sidebarAction',
-                }),
-        })
+        inPageUI.showHighlights()
+        if (!annotationsCache.isEmpty) {
+            inPageUI.loadComponent('sidebar')
+        }
     }
 
     const isSidebarEnabled = await sidebarUtils.getSidebarState()
@@ -287,5 +314,4 @@ const getCurrentTab = (() => {
         return currentTab
     }
 })()
-
 main()

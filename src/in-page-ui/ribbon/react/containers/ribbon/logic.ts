@@ -293,14 +293,6 @@ export class RibbonContainerLogic extends UILogic<
             },
         })
         this.dependencies.setRibbonShouldAutoHide(true)
-        this.dependencies.inPageUI.informSidebarOfAnnotation({
-            annotationUrl,
-            annotationData: {
-                commentText: comment,
-                tags,
-                isBookmarked,
-            },
-        })
 
         await new Promise((resolve) =>
             setTimeout(resolve, this.commentSavedTimeout),

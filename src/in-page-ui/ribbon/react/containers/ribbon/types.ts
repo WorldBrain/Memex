@@ -5,6 +5,7 @@ import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
+import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 
 interface FlagSetterInterface {
     getState(): Promise<boolean>
@@ -22,6 +23,7 @@ export interface RibbonContainerDependencies {
     customLists: RemoteCollectionsInterface
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>
+    annotationsCache: AnnotationsCacheInterface
     activityLogger: ActivityLoggerInterface
     tooltip: FlagSetterInterface
     highlights: FlagSetterInterface

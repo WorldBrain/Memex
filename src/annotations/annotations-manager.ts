@@ -63,12 +63,12 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         if (tags && tags.length) {
             analytics.trackEvent({
                 category: 'Annotations',
-                action: 'createWithTags',
+                action: 'saveWithTags',
             })
         } else {
             analytics.trackEvent({
                 category: 'Annotations',
-                action: 'createWithoutTags',
+                action: 'saveWithoutTags',
             })
         }
 

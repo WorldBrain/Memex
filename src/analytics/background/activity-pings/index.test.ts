@@ -25,13 +25,13 @@ describe('Analytics activity pings', () => {
         activityPings._getNow = () => firstPing
         expect(
             activityPings.isActivityPing({
-                category: 'Annotations',
-                action: 'createWithTags',
+                category: 'ActivityPings',
+                action: 'daily',
             }),
         ).toBe(true)
         await activityPings.storeActivity({
-            category: 'Annotations',
-            action: 'createWithTags',
+            category: 'ActivityPings',
+            action: 'daily',
         })
 
         await activityPings.maybePing()
@@ -141,13 +141,13 @@ describe('Analytics activity pings', () => {
         const firstPing = 1000 * 60 * 60 * 24 + 2
         expect(
             activityPings.isActivityPing({
-                category: 'Annotations',
-                action: 'createWithTags',
+                category: 'ActivityPings',
+                action: 'daily',
             }),
         ).toBe(true)
         await activityPings.storeActivity({
-            category: 'Annotations',
-            action: 'createWithTags',
+            category: 'ActivityPings',
+            action: 'daily',
         })
 
         activityPings._getNow = () => firstPing

@@ -15,8 +15,8 @@ import {
     AnnotationCacheChangeEvents,
     AnnotationsCacheInterface,
 } from 'src/annotations/annotations-cache'
-import { now } from 'moment'
 import { generateUniqueAnnotationUrl } from 'src/direct-linking/utils'
+import { AnalyticsEvent } from 'src/analytics/types'
 
 const styles = require('src/highlighting/ui/styles.css')
 
@@ -58,9 +58,9 @@ export const extractAnchorFromSelection = async (
 
 export interface HighlightRenderInterface {
     renderHighlights: (
-        highlight: Highlight[],
+        highlights: Highlight[],
         onClick: AnnotationClickHandler,
-        temp: boolean,
+        temp?: boolean,
     ) => void
     renderHighlight: (
         highlight: Highlight,
@@ -79,27 +79,41 @@ export const renderAnnotationCacheChanges = (opts: {
     renderer: HighlightRenderInterface
 }) => {
     const { cacheChanges, onClickHighlight, renderer } = opts
-    cacheChanges.on('load', (annotations) => {
+
+    const onLoad = (annotations) => {
+        console.log('Rendering Highlights from onLoad,', { annotations })
         renderer.renderHighlights(
             annotations as Highlight[],
             onClickHighlight,
             false,
         )
-    })
-    cacheChanges.on('rollback', (annotations) => {
+    }
+    const onRollback = (annotations) => {
         renderer.undoAllHighlights()
         renderer.renderHighlights(
             annotations as Highlight[],
             onClickHighlight,
             false,
         )
-    })
-    cacheChanges.on('created', (annotation) => {
+    }
+    const onCreated = (annotation) => {
         renderer.renderHighlight(annotation as Highlight, onClickHighlight)
-    })
-    cacheChanges.on('deleted', (annotation) =>
-        renderer.undoHighlight(annotation.url),
-    )
+    }
+    const onDeleted = (annotation) => {
+        renderer.undoHighlight(annotation.url)
+    }
+
+    cacheChanges.on('load', onLoad)
+    cacheChanges.on('rollback', onRollback)
+    cacheChanges.on('created', onCreated)
+    cacheChanges.on('deleted', onDeleted)
+
+    return () => {
+        cacheChanges.removeListener('load', onLoad)
+        cacheChanges.removeListener('rollback', onRollback)
+        cacheChanges.removeListener('created', onCreated)
+        cacheChanges.removeListener('deleted', onDeleted)
+    }
 }
 
 // TODO: (sidebar-refactor) move to somewhere more sidebar related
@@ -107,11 +121,14 @@ export const createAnnotationWithSidebar = async (params: {
     getSelection: () => Selection
     getUrlAndTitle: () => { pageUrl: string; title: string }
     inPageUI: SharedInPageUIInterface
+    analyticsEvent?: AnalyticsEvent
 }) => {
-    analytics.trackEvent({
-        category: 'InPageTooltip',
-        action: 'annotateText',
-    })
+    analytics.trackEvent(
+        params.analyticsEvent ?? {
+            category: 'Annotations',
+            action: 'create',
+        },
+    )
 
     const selection = params.getSelection()
     const { pageUrl, title } = params.getUrlAndTitle()
@@ -140,15 +157,15 @@ export interface SaveAndRenderHighlightDependencies {
     renderer: HighlightRenderInterface
     getSelection: () => Selection
     getUrlAndTitle: () => { pageUrl: string; title: string }
+    analyticsEvent?: AnalyticsEvent
 }
 // TODO: (sidebar-refactor) move to somewhere more tooltip related
-export const saveAndRenderHighlightFromTooltip = async (
+export const saveAndRenderHighlight = async (
     params: SaveAndRenderHighlightDependencies,
 ) => {
-    analytics.trackEvent({
-        category: 'InPageTooltip',
-        action: 'highlightText',
-    })
+    analytics.trackEvent(
+        params.analyticsEvent ?? { category: 'Highlights', action: 'create' },
+    )
 
     const anchor = await extractAnchorFromSelection(getSelection())
     const body = anchor ? anchor.quote : ''
@@ -176,7 +193,7 @@ export type HighlightRendererInterface = HighlightRenderInterface &
 
 export class HighlightRenderer implements HighlightRendererInterface {
     createAnnotationWithSidebar = createAnnotationWithSidebar
-    saveAndRenderHighlight = saveAndRenderHighlightFromTooltip
+    saveAndRenderHighlight = saveAndRenderHighlight
 
     /**
      * Given an array of highlight objects, highlights all of them.
@@ -194,6 +211,10 @@ export class HighlightRenderer implements HighlightRendererInterface {
         onClick,
         temporary = false,
     ) => {
+        if (!highlight?.selector?.descriptor?.content) {
+            return
+        }
+
         const baseClass =
             styles[temporary ? 'memex-highlight-tmp' : 'memex-highlight']
         try {

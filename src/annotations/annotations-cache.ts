@@ -11,14 +11,25 @@ export const createAnnotationsCache = (bgModules: {
 }): AnnotationsCache =>
     new AnnotationsCache({
         backendOperations: {
-            load: async (url, { limit = 0, skip = 0 }) => {
+            load: async (url, { limit = 100, skip = 0 }) => {
                 const params = {
                     url,
                     limit,
                     skip,
                     base64Img: true,
                 }
-                return bgModules.annotations.getAllAnnotationsByUrl(params)
+                console.log(
+                    'bgModules.annotations.getAllAnnotationsByUrl....',
+                    { params },
+                )
+                const results = await bgModules.annotations.getAllAnnotationsByUrl(
+                    params,
+                )
+                console.log(
+                    'bgModules.annotations.getAllAnnotationsByUrl => ',
+                    { results },
+                )
+                return results
             },
             create: async ({ createdWhen, ...annotation }) => {
                 await bgModules.annotations.createAnnotation({
@@ -76,7 +87,9 @@ export interface AnnotationsCacheInterface {
     update: (annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>) => void
     delete: (annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>) => void
 
-    annotations: Observable<Annotation[]>
+    annotations: Annotation[]
+    annotationChanges: AnnotationCacheChangeEvents
+    isEmpty: boolean
 }
 
 export class AnnotationsCache implements AnnotationsCacheInterface {
@@ -86,20 +99,24 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     constructor(private dependencies: AnnotationsCacheDependencies) {}
 
     load = async (url, args = {}) => {
+        console.log('AnnotationsCache loading...', { url, args })
         this._annotations = await this.dependencies.backendOperations.load(
             url,
             args,
         )
+        console.log('AnnotationsCache loaded', {
+            annotations: this._annotations,
+        })
+
         this.annotationChanges.emit('load', this._annotations)
+        this.annotationChanges.emit('newState', this._annotations)
     }
 
     get annotations() {
-        return new Observable<Annotation[]>((subscriber) => {
-            subscriber.next(this._annotations)
-            this.annotationChanges.on('load', (annotations) => {
-                subscriber.next(annotations)
-            })
-        })
+        return this._annotations
+    }
+    get isEmpty() {
+        return this._annotations.length === 0
     }
 
     create = (annotation: Annotation) => {

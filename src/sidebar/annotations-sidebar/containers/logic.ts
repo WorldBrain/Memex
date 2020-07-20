@@ -12,6 +12,7 @@ import { featuresBeta } from 'src/util/remote-functions-background'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { DEF_RESULT_LIMIT } from '../constants'
 import { IncomingAnnotationData } from 'src/in-page-ui/shared-state/types'
+import { generateUniqueAnnotationUrl } from 'src/direct-linking/utils'
 
 interface EditForm {
     isBookmarked: boolean
@@ -233,6 +234,12 @@ export class SidebarContainerLogic extends UILogic<
         this.inPageEvents =
             options.events ??
             (new EventEmitter() as AnnotationsSidebarInPageEventEmitter)
+
+        this.options.annotationsCache.annotationChanges.addListener(
+            'newState',
+            (annotations) =>
+                this.emitMutation({ annotations: { $set: annotations } }),
+        )
     }
 
     private get resultLimit(): number {
@@ -317,14 +324,6 @@ export class SidebarContainerLogic extends UILogic<
 
     show: EventHandler<'show'> = async () => {
         this.emitMutation({ showState: { $set: 'visible' } })
-
-        // TODO: (sidebar-refactor) show shouldn't have conditional side effects
-        // figure out when this is needed and do it from higher up
-        // or this may go away when storing the annotations higher up in the shared state class
-        //
-        // if (this.options.env === 'inpage') {
-        //     await this._doSearch(this.getInitialState(), { overwrite: true })
-        // }
     }
 
     private doSearch = debounce(this._doSearch, 300)
@@ -497,63 +496,31 @@ export class SidebarContainerLogic extends UILogic<
             lastEdited: Date.now(),
         } as Annotation
 
-        const updateState = (args: { annotations: Annotation[] }) =>
-            this.emitMutation({
-                commentBox: { $set: INIT_FORM_STATE },
-                showCommentBox: { $set: false },
-                annotations: {
-                    $set: args.annotations,
-                },
-            })
-
-        updateState({
-            annotations: [dummyAnnotation, ...previousState.annotations],
+        const url = generateUniqueAnnotationUrl({
+            pageUrl,
+            now: () => Date.now(),
         })
-
-        try {
-            // TODO: (sidebar - refactor) Fix env usage
-            const annotationUrl = await this.options.annotations.createAnnotation(
-                {
-                    pageUrl,
-                    bookmarked: event.bookmarked,
-                    body: dummyAnnotation.body,
-                    comment: dummyAnnotation.comment,
-                    selector: dummyAnnotation.selector,
-                },
-                // { skipPageIndexing: this.options.env === 'overview' },
-            )
-
-            this.emitMutation({
-                annotations: {
-                    [0]: {
-                        url: { $set: annotationUrl },
-                    },
-                },
-                editForms: {
-                    [annotationUrl]: { $set: INIT_FORM_STATE.form },
-                },
-            })
-
-            for (const tag of event.tags) {
-                await this.options.annotations.addAnnotationTag({
-                    tag,
-                    url: annotationUrl,
-                })
-            }
-
-            // No need to attempt to render annots that don't have a highlight
-            if (!dummyAnnotation.body?.length) {
-                return
-            }
-
-            this.inPageEvents.emit('removeTemporaryHighlights')
-            this.inPageEvents.emit('renderHighlight', {
-                highlight: { ...dummyAnnotation, url: annotationUrl },
-            })
-        } catch (err) {
-            updateState({ annotations: previousState.annotations })
-            throw err
+        const annotation = {
+            url,
+            pageUrl,
+            bookmarked: event.bookmarked,
+            body: dummyAnnotation.body,
+            comment: dummyAnnotation.comment,
+            selector: dummyAnnotation.selector,
+            tags: event.tags,
         }
+
+        // TODO: (sidebar-refactor) there was a env condition removed here to do with indexing/skip indexing, is it needed when creating an annotation for a page here?
+        await this.options.annotationsCache.create(annotation)
+        this.inPageEvents.emit('removeTemporaryHighlights')
+
+        this.emitMutation({
+            editForms: {
+                [url]: { $set: INIT_FORM_STATE.form },
+            },
+            commentBox: { $set: INIT_FORM_STATE },
+            showCommentBox: { $set: false },
+        })
     }
 
     cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
@@ -776,19 +743,14 @@ export class SidebarContainerLogic extends UILogic<
         const resultIndex = previousState.annotations.findIndex(
             (annot) => annot.url === event.annotationUrl,
         )
+        const annotation = previousState.annotations[resultIndex]
         const comment = form.commentText.trim()
 
+        this.options.annotationsCache.update({ ...annotation, comment })
         this.emitMutation({
             annotationModes: {
                 [event.context]: {
                     [event.annotationUrl]: { $set: 'default' },
-                },
-            },
-            annotations: {
-                [resultIndex]: {
-                    tags: { $set: form.tags },
-                    comment: { $set: comment },
-                    lastEdited: { $set: Date.now() },
                 },
             },
             editForms: {
@@ -797,23 +759,6 @@ export class SidebarContainerLogic extends UILogic<
                 },
             },
         })
-
-        try {
-            await this.options.annotations.editAnnotation(
-                event.annotationUrl,
-                comment,
-            )
-            await this.options.annotations.updateAnnotationTags({
-                url: event.annotationUrl,
-                tags: form.tags,
-            })
-        } catch (err) {
-            this.emitMutation({
-                annotations: { $set: previousState.annotations },
-                editForms: { $set: previousState.editForms },
-            })
-            throw err
-        }
     }
 
     deleteAnnotation: EventHandler<'deleteAnnotation'> = async ({
@@ -823,66 +768,20 @@ export class SidebarContainerLogic extends UILogic<
         const resultIndex = previousState.annotations.findIndex(
             (annot) => annot.url === event.annotationUrl,
         )
-
-        this.emitMutation({
-            annotationModes: {
-                [event.context]: {
-                    [event.annotationUrl]: { $set: 'default' },
-                },
-            },
-            annotations: {
-                $apply: (annotations) => [
-                    ...annotations.slice(0, resultIndex),
-                    ...annotations.slice(resultIndex + 1),
-                ],
-            },
-            editForms: {
-                $unset: [event.annotationUrl],
-            },
-        })
-
-        try {
-            await this.options.annotations.deleteAnnotation(event.annotationUrl)
-        } catch (err) {
-            this.emitMutation({
-                annotations: { $set: previousState.annotations },
-                editForms: { $set: previousState.editForms },
-            })
-            throw err
-        }
+        const annotation = previousState.annotations[resultIndex]
+        this.options.annotationsCache.delete(annotation)
     }
 
     toggleAnnotationBookmark: EventHandler<
         'toggleAnnotationBookmark'
     > = async ({ previousState, event }) => {
         const resultIndex = previousState.annotations.findIndex(
-            (annotation) => annotation.url === event.annotationUrl,
+            (annot) => annot.url === event.annotationUrl,
         )
+        const annotation = previousState.annotations[resultIndex]
+        const hasBookmark = !!annotation?.hasBookmark
 
-        const currentlyBookmarked = !!previousState.annotations[resultIndex]
-            ?.hasBookmark
-
-        const updateState = (hasBookmark) =>
-            this.emitMutation({
-                annotations: {
-                    [resultIndex]: {
-                        hasBookmark: { $set: hasBookmark },
-                    },
-                },
-            })
-
-        const shouldBeBookmarked = !currentlyBookmarked
-        updateState(shouldBeBookmarked)
-
-        try {
-            await this.options.annotations.toggleAnnotBookmark({
-                url: event.annotationUrl,
-            })
-        } catch (err) {
-            updateState(!shouldBeBookmarked)
-
-            throw err
-        }
+        this.options.annotationsCache.update({ ...annotation, hasBookmark })
     }
 
     setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({

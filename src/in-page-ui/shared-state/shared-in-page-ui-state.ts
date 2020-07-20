@@ -9,28 +9,25 @@ import {
     InPageUIRibbonAction,
     SidebarActionOptions,
 } from './types'
-import { AnnotationInterface } from 'src/direct-linking/background/types'
-import { HighlightRendererInterface } from 'src/highlighting/ui/highlight-interactions'
 
 export interface SharedInPageUIDependencies {
     pageUrl: string
-    highlighter: HighlightRendererInterface
-    annotations: AnnotationInterface<'caller'>
     loadComponent: (component: InPageUIComponent) => void
 }
 
 export class SharedInPageUIState implements SharedInPageUIInterface {
     events = new EventEmitter() as TypedEventEmitter<SharedInPageUIEvents>
-    areHighlightsShown = false
     componentsShown: InPageUIComponentShowState = {
         ribbon: false,
         sidebar: false,
         tooltip: false,
+        highlights: false,
     }
     componentsSetUp: InPageUIComponentShowState = {
         ribbon: false,
         sidebar: false,
         tooltip: false,
+        highlights: false,
     }
     _pendingEvents: {
         sidebarAction?: {
@@ -64,14 +61,6 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         }
 
         delete this._pendingEvents[eventName]
-    }
-
-    informSidebarOfAnnotation(options: Omit<SidebarActionOptions, 'action'>) {
-        this._emitAction({
-            type: 'sidebarAction',
-            action: 'annotate',
-            ...options,
-        })
     }
 
     async showSidebar(options?: SidebarActionOptions) {
@@ -201,36 +190,15 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
     }
 
     async hideHighlights() {
-        await this.options.highlighter.removeHighlights()
-        this.areHighlightsShown = false
+        await this._setState('highlights', false)
     }
 
     async showHighlights() {
-        const { annotations, highlighter, pageUrl: url } = this.options
-
-        const pageAnnotations = await annotations.getAllAnnotationsByUrl({
-            url,
-        })
-
-        const highlightables = pageAnnotations.filter(
-            (annotation) => annotation.selector,
-        )
-
-        if ((highlightables?.length ?? 0) === 0) {
-            return
-        }
-
-        await highlighter.renderHighlights(highlightables, ({ activeUrl }) =>
-            this.showSidebar({
-                annotationUrl: activeUrl,
-                action: 'show_annotation',
-            }),
-        )
-        this.areHighlightsShown = true
+        await this._setState('highlights', true)
     }
 
     async toggleHighlights() {
-        if (this.areHighlightsShown) {
+        if (this.componentsShown.highlights) {
             await this.hideHighlights()
         } else {
             await this.showHighlights()

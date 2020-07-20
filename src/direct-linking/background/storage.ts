@@ -257,8 +257,13 @@ export default class AnnotationStorage extends StorageModule {
     }
 
     async getAllAnnotationsByUrl(params: AnnotSearchParams) {
+        console.log('background storage getAllAnnotationsByUrl...', { params })
         const results: Annotation[] = await this.operation('listAnnotsByPage', {
+            //  ?
             params,
+        })
+        console.log('background storage getAllAnnotationsByUrl => ', {
+            results,
         })
 
         return results

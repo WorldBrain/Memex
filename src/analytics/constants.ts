@@ -41,11 +41,41 @@ export const ANALYTICS_EVENTS: {
         },
     },
     Annotations: {
-        createWithTags: {
+        saveWithTags: {
             description: 'The creation of an annotation with tags',
         },
-        createWithoutTags: {
+        saveWithoutTags: {
             description: 'The creation of an annotation without tags',
+        },
+        createFromContextMenu: {
+            description:
+                'The creation of an annotation via the browser context menu',
+        },
+        createFromTooltip: {
+            description: 'The creation of an annotation via the Memex Tooltip',
+        },
+        createFromShortcut: {
+            description: 'The creation of an annotation via keyboard shortcuts',
+        },
+        create: {
+            description:
+                'The creation of an annotation without a specific initiator',
+        },
+    },
+    Highlights: {
+        createFromContextMenu: {
+            description:
+                'The creation of a highlight via the browser context menu',
+        },
+        createFromTooltip: {
+            description: 'The creation of a highlight via the Memex Tooltip',
+        },
+        createFromShortcut: {
+            description: 'The creation of a highlight via keyboard shortcuts',
+        },
+        create: {
+            description:
+                'The creation of a highlight without a specific initiator',
         },
     },
     Pages: {

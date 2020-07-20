@@ -4,7 +4,7 @@ import { Annotation } from 'src/annotations/types'
 
 export type InPageUISidebarAction = 'annotate' | 'comment' | 'show_annotation'
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
-export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip'
+export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip' | 'highlights'
 export type InPageUIComponentShowState = {
     [Component in InPageUIComponent]: boolean
 }
@@ -36,7 +36,6 @@ export interface SharedInPageUIEvents {
 }
 
 export interface SharedInPageUIInterface {
-    areHighlightsShown: boolean
     events: TypedEventEmitter<SharedInPageUIEvents>
     componentsShown: InPageUIComponentShowState
 
@@ -51,11 +50,6 @@ export interface SharedInPageUIInterface {
     showSidebar(options?: SidebarActionOptions): void
     hideSidebar(): void
     toggleSidebar(): void
-    // TODO: (sidebar-refactor) - this feels out-of-place as part of the public interface here,
-    //  but fits in to the idea of SharedInPageUI sending messages between InPageUI comps
-    informSidebarOfAnnotation(
-        options: Omit<SidebarActionOptions, 'action'>,
-    ): void
 
     // Tooltip
     setupTooltip(): void
@@ -65,7 +59,7 @@ export interface SharedInPageUIInterface {
     toggleTooltip(): void
 
     // Highlights
-    showHighlights(): Promise<void>
-    hideHighlights(): Promise<void>
-    toggleHighlights(): Promise<void>
+    showHighlights(): void
+    hideHighlights(): void
+    toggleHighlights(): void
 }

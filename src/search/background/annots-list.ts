@@ -185,6 +185,8 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
     private async mapUrlsToAnnots(urls: string[]): Promise<Annotation[]> {
         const annotUrlMap = new Map<string, Annotation>()
 
+        console.log('mapUrlsToAnnots', { urls })
+
         await this.backend.dexieInstance
             .table(AnnotsStorage.ANNOTS_COLL)
             .where('url')
@@ -473,16 +475,25 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         let results: string[] = []
         let continueLookup: boolean
 
+        console.log('search background listAnnotsByPage ...', { limit, params })
+
         do {
             // The results found in this iteration
             let innerResults: string[] = []
 
+            console.log('search background listAnnotsByPage listWithUrl', {
+                params,
+            })
             innerResults = await this.listWithUrl(params)
                 .limit(innerLimit)
                 .primaryKeys()
 
             continueLookup = innerResults.length >= innerLimit
 
+            console.log('search background listAnnotsByPage filterResults', {
+                innerResults,
+                params,
+            })
             innerResults = await this.filterResults(innerResults, params)
 
             results = [...results, ...innerResults]
@@ -492,6 +503,8 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         if (results.length > limit) {
             results = [...results].slice(skip, skip + limit)
         }
+
+        console.log('search background listAnnotsByPage=>', { results })
 
         return this.mapUrlsToAnnots(results)
     }

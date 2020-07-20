@@ -10,6 +10,9 @@ import {
 } from './logic'
 import { Annotation } from 'src/annotations/types'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
+import { createAnnotationsCache } from 'src/annotations/annotations-cache'
+import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
+import { EventEmitter } from 'events'
 
 function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
     return mapValues(remoteFunctions, (f) => {
@@ -45,8 +48,6 @@ describe('Ribbon logic', () => {
 
         const inPageUI = new SharedInPageUIState({
             loadComponent: async () => {},
-            annotations,
-            highlighter,
             pageUrl: currentTab.url,
         })
 
@@ -82,6 +83,10 @@ describe('Ribbon logic', () => {
                     globalHighlightsState = value
                 },
             },
+            annotationsCache: createAnnotationsCache({
+                ...backgroundModules,
+                annotations,
+            }),
         })
 
         const ribbon = device.createElement(ribbonLogic)

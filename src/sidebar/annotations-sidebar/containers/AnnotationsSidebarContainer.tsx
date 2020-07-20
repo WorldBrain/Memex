@@ -33,8 +33,6 @@ export interface Props extends SidebarContainerOptions {
 export class AnnotationsSidebarContainer<
     P extends Props = Props
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
-    annotationSubscription: Subscription
-
     constructor(props: P) {
         super(props, new SidebarContainerLogic(props))
     }
@@ -50,14 +48,21 @@ export class AnnotationsSidebarContainer<
     }
 
     private setupAnnotationCacheListeners() {
-        this.annotationSubscription = this.props.annotationsCache.annotations.subscribe(
-            (annotations) => this.setState({ annotations }),
+        this.props.annotationsCache.annotationChanges.addListener(
+            'newState',
+            this.annotationSubscription,
         )
     }
 
     private cleanupAnnotationCacheListeners() {
-        this.annotationSubscription.unsubscribe()
+        this.props.annotationsCache.annotationChanges.removeListener(
+            'newState',
+            this.annotationSubscription,
+        )
     }
+
+    private annotationSubscription = (annotations) =>
+        this.setState({ annotations })
 
     showSidebar() {
         this.processEvent('show', null)

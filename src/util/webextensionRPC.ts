@@ -67,7 +67,7 @@ interface RPCOpts {
     tabId?: number
 }
 
-// runInBackground and runInTab create a Proxy object that looks like the real interface but actually calls remote functions
+// runInBackground and runInTab create a Proxy object that look like the real interface but actually call remote functions
 //
 // When the Proxy is asked for a property (such as a method)
 // return a function that executes the requested method over the RPC interface

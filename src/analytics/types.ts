@@ -23,7 +23,18 @@ export interface AnalyticsTrackEventOptions {
 
 export interface AnalyticsEvents {
     ActivityPings: 'daily' | 'weekly' | 'monthly'
-    Annotations: 'createWithTags' | 'createWithoutTags'
+    Annotations:
+        | 'saveWithTags'
+        | 'saveWithoutTags'
+        | 'create'
+        | 'createFromTooltip'
+        | 'createFromShortcut'
+        | 'createFromContextMenu'
+    Highlights:
+        | 'create'
+        | 'createFromTooltip'
+        | 'createFromShortcut'
+        | 'createFromContextMenu'
     Bookmarks: 'createForPage' | 'deleteForPage'
     Pages:
         | 'deleteViaRegexBlacklist'

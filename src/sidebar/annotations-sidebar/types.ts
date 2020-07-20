@@ -33,6 +33,8 @@ export interface HighlighterEvents {
     highlightAndScroll: (args: { url: string }) => void
     removeTemporaryHighlights: () => void
     removeAnnotationHighlights: (args: { url: string }) => void
+    hideHighlights: () => void
+    showHighlights: () => void
 }
 
 export interface AnnotationsSidebarInPageEvents extends HighlighterEvents {}
