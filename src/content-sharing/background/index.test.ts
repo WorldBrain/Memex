@@ -61,6 +61,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 setup.authService.setUser(TEST_USER)
 
                                 localListId = await createTestList(setup)
+                                const localListEntries = await setup.storageManager.operation(
+                                    'findObjects',
+                                    'pageListEntries',
+                                    {
+                                        sort: [['createdAt', 'desc']],
+                                    },
+                                )
+
                                 const listShareResult = await setup.backgroundModules.contentSharing.shareList(
                                     { listId: localListId },
                                 )
@@ -90,7 +98,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     await serverStorage.storageManager.operation(
                                         'findObjects',
                                         'sharedListEntry',
-                                        {},
+                                        { sort: [['createdWhen', 'desc']] },
                                     ),
                                 ).toEqual([
                                     {
@@ -98,7 +106,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         creator: TEST_USER.id,
                                         sharedList:
                                             listShareResult.remoteListId,
-                                        createdWhen: expect.any(Number),
+                                        createdWhen: localListEntries[0].createdAt.getTime(),
                                         updatedWhen: expect.any(Number),
                                         originalUrl: 'https://www.eggs.com/foo',
                                         normalizedUrl: 'eggs.com/foo',
@@ -109,7 +117,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         creator: TEST_USER.id,
                                         sharedList:
                                             listShareResult.remoteListId,
-                                        createdWhen: expect.any(Number),
+                                        createdWhen: localListEntries[1].createdAt.getTime(),
                                         updatedWhen: expect.any(Number),
                                         originalUrl: 'https://www.spam.com/foo',
                                         normalizedUrl: 'spam.com/foo',
@@ -117,6 +125,40 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 ])
                             },
+                            expectedSyncLogEntries: () => [
+                                expect.objectContaining({
+                                    operation: 'create',
+                                    collection: 'customLists',
+                                }),
+                                expect.objectContaining({
+                                    operation: 'create',
+                                    collection: 'pages',
+                                }),
+                                expect.objectContaining({
+                                    operation: 'create',
+                                    collection: 'visits',
+                                }),
+                                expect.objectContaining({
+                                    operation: 'create',
+                                    collection: 'pageListEntries',
+                                }),
+                                expect.objectContaining({
+                                    operation: 'create',
+                                    collection: 'pages',
+                                }),
+                                expect.objectContaining({
+                                    operation: 'create',
+                                    collection: 'visits',
+                                }),
+                                expect.objectContaining({
+                                    operation: 'create',
+                                    collection: 'pageListEntries',
+                                }),
+                                expect.objectContaining({
+                                    operation: 'create',
+                                    collection: 'sharedListMetadata',
+                                }),
+                            ],
                             preCheck: async ({ setup }) => {},
                             postCheck: async ({ setup }) => {
                                 const listMetadata = await setup.storageManager.operation(

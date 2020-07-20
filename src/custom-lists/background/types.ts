@@ -10,7 +10,7 @@ export interface PageList {
 
 export interface PageListEntry {
     pageUrl: string
-    crearedAt: Date
+    createdAt: Date
     listId: number
     fullUrl: string
 }

@@ -75,6 +75,7 @@ export default class ContentSharingBackground {
                 type: 'user-reference',
                 id: userId,
             },
+            localListId: options.listId,
         })
         await this.storage.storeListId({
             localId: options.listId,
@@ -115,6 +116,7 @@ export default class ContentSharingBackground {
                 remoteId,
             ),
             listEntries: pages.map((entry) => ({
+                createdWhen: entry.createdAt?.getTime() ?? '$now',
                 entryTitle: pageTitles[entry.pageUrl],
                 normalizedUrl: entry.pageUrl,
                 originalUrl: 'https://' + normalizeUrl(entry.fullUrl),
