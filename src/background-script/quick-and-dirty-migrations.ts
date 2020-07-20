@@ -15,6 +15,20 @@ export interface Migrations {
 
 export const migrations: Migrations = {
     /*
+     * We want to add indicies on two currently optional fields.
+     * Add an index on an optional field is fine, it simply results in a sparse index.
+     * Though we want to be able to query the entire dataset, hence the need for this migration.
+     */
+    'fill-out-empty-sync-log-fields': async ({ db }) => {
+        await db
+            .table('clientSyncLogEntry')
+            .toCollection()
+            .modify((entry) => {
+                entry.sharedOn = entry.sharedOn ?? 0
+                entry.needsIntegration = entry.needsIntegration ? 1 : 0
+            })
+    },
+    /*
      * There was a bug in the ext where collection renames weren't also updating
      * the cache, resulting in out-of-sync cache to DB. Therefore seed the
      * collections suggestion cache with entries from the DB.

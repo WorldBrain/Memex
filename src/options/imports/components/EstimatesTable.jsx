@@ -55,9 +55,6 @@ const EstimatesTable = ({
                             <span className={localStyles.checkboxText}>
                                 Browser History
                             </span>
-                            <span className={localStyles.checkboxSubText}>
-                                from last 90 days
-                            </span>
                         </div>
                     </Checkbox>
                 </td>

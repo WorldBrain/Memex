@@ -3,14 +3,18 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import Dropdown from './Dropdown'
 import styles from './Results.css'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+
 
 const Results = props => {
     const searchEngineClass = `${props.searchEngine}_${props.position}`
+
     return (
         <div
             className={classNames(
                 styles.MEMEX_CONTAINER,
-                styles[searchEngineClass],
+                styles[searchEngineClass], {
+                [styles.MEMEX_CONTAINER_SMALL]: props.hideResults }
             )}
         >
             <div className={styles.header}>
@@ -53,9 +57,11 @@ const Results = props => {
             </div>
             <div className={classNames(styles.resultsBox, {
                 [styles.isBlurred]: props.renderNotification,
+                [styles.resultsBoxHidden]: props.hideResults,
             })}>
                 {// Render only if hideResults is false
-                props.hideResults ? '' : props.renderResultItems()}
+                props.hideResults ? ('') : (props.renderResultItems().length >= 0 ? (props.renderResultItems()):(<div className={styles.loadingBox}><LoadingIndicator/></div>))
+                }
             </div>
         </div>
     )
