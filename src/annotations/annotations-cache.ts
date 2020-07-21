@@ -11,31 +11,10 @@ export const createAnnotationsCache = (bgModules: {
 }): AnnotationsCache =>
     new AnnotationsCache({
         backendOperations: {
-            load: async (url, { limit = 100, skip = 0 }) => {
-                const params = {
-                    url,
-                    limit,
-                    skip,
-                    base64Img: true,
-                }
-                console.log(
-                    'bgModules.annotations.getAllAnnotationsByUrl....',
-                    { params },
-                )
-                const results = await bgModules.annotations.getAllAnnotationsByUrl(
-                    params,
-                )
-                console.log(
-                    'bgModules.annotations.getAllAnnotationsByUrl => ',
-                    { results },
-                )
-                return results
-            },
-            create: async ({ createdWhen, ...annotation }) => {
-                await bgModules.annotations.createAnnotation({
-                    ...annotation,
-                    bookmarked: annotation.hasBookmark,
-                })
+            load: async (pageUrl) =>
+                bgModules.annotations.listAnnotationsByPageUrl({ pageUrl }),
+            create: async (annotation) => {
+                await bgModules.annotations.createAnnotation(annotation)
             },
             update: async (annotation) =>
                 bgModules.annotations.editAnnotation(
@@ -99,15 +78,10 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     constructor(private dependencies: AnnotationsCacheDependencies) {}
 
     load = async (url, args = {}) => {
-        console.log('AnnotationsCache loading...', { url, args })
         this._annotations = await this.dependencies.backendOperations.load(
             url,
             args,
         )
-        console.log('AnnotationsCache loaded', {
-            annotations: this._annotations,
-        })
-
         this.annotationChanges.emit('load', this._annotations)
         this.annotationChanges.emit('newState', this._annotations)
     }

@@ -47,7 +47,7 @@ describe.skip('annots search plugin', () => {
                 domain: normalizeUrl(annot.pageUrl),
                 title: annot.pageTitle,
                 text: annot.body,
-                canonicalUrl: annot.uniqueAnnotationUrl,
+                canonicalUrl: annot.url,
             })
 
             // Create a dummy visit 30 secs before annot creation time
@@ -61,7 +61,7 @@ describe.skip('annots search plugin', () => {
             if (hasBookmark) {
                 await annotsBg.toggleAnnotBookmark(
                     { tab: null },
-                    { url: annot.uniqueAnnotationUrl },
+                    { url: annot.url },
                 )
             }
 
@@ -70,7 +70,7 @@ describe.skip('annots search plugin', () => {
                     await storageManager
                         .collection('annotListEntries')
                         .createObject({
-                            url: annot.uniqueAnnotationUrl,
+                            url: annot.url,
                             listId,
                         })
                 }
@@ -79,7 +79,7 @@ describe.skip('annots search plugin', () => {
             if (tags) {
                 for (const name of tags) {
                     await storageManager.collection('tags').createObject({
-                        url: annot.uniqueAnnotationUrl,
+                        url: annot.url,
                         name,
                     })
                 }

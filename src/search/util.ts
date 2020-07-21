@@ -34,14 +34,10 @@ export const mergeAnnotsByPage = (
                 continue
             }
 
-            const existingUrls = new Set(
-                merged[pageUrl].map((a) => a.uniqueAnnotationUrl),
-            )
+            const existingUrls = new Set(merged[pageUrl].map((a) => a.url))
             merged[pageUrl] = [
                 ...merged[pageUrl],
-                ...annotations.filter(
-                    (a) => !existingUrls.has(a.uniqueAnnotationUrl),
-                ),
+                ...annotations.filter((a) => !existingUrls.has(a.url)),
             ]
         }
     }
@@ -73,12 +69,10 @@ export const areAnnotsByPageObjsDifferent = (
             return true
         }
 
-        const existingUrlsB = new Set(
-            b[pageUrl].map((annot) => annot.uniqueAnnotationUrl),
-        )
+        const existingUrlsB = new Set(b[pageUrl].map((annot) => annot.url))
 
         for (const annot of annotations) {
-            if (!existingUrlsB.has(annot.uniqueAnnotationUrl)) {
+            if (!existingUrlsB.has(annot.url)) {
                 return true
             }
         }

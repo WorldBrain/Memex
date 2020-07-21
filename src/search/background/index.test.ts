@@ -73,7 +73,7 @@ describe('Annotations search', () => {
 
             await annotsStorage.createAnnotation({
                 ...annot,
-                uniqueAnnotationUrl: annot.url,
+                url: annot.url,
             } as any)
         }
 

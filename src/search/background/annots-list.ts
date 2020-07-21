@@ -445,13 +445,11 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
 
             const filteredPks = new Set(
                 await this.filterResults(
-                    annots.map((a) => a.uniqueAnnotationUrl),
+                    annots.map((a) => a.url),
                     params,
                 ),
             )
-            annots = annots.filter((annot) =>
-                filteredPks.has(annot.uniqueAnnotationUrl),
-            )
+            annots = annots.filter((annot) => filteredPks.has(annot.url))
 
             this.mergeResults(results, this.clusterAnnotsByPage(annots))
         }
@@ -481,7 +479,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             // The results found in this iteration
             let innerResults: string[] = []
 
-            console.log('search background listAnnotsByPage listWithUrl', {
+            console.log('search background listAnnotsByPage listWithUrl:', {
                 params,
             })
             innerResults = await this.listWithUrl(params)
@@ -490,7 +488,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
 
             continueLookup = innerResults.length >= innerLimit
 
-            console.log('search background listAnnotsByPage filterResults', {
+            console.log('search background listAnnotsByPage filterResults:', {
                 innerResults,
                 params,
             })
@@ -504,7 +502,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             results = [...results].slice(skip, skip + limit)
         }
 
-        console.log('search background listAnnotsByPage=>', { results })
+        console.log('search background listAnnotsByPage =>', { results })
 
         return this.mapUrlsToAnnots(results)
     }

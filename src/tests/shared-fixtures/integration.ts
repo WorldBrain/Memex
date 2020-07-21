@@ -76,7 +76,7 @@ export async function insertIntegrationTestData(
                 createdWhen: new Date('2019-10-11'),
                 body: 'test body',
                 selector: 'test selector' as any,
-                bookmarked: false,
+                isBookmarked: false,
                 isSocialPost: false,
             },
             { skipPageIndexing: true },

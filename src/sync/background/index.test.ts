@@ -820,7 +820,7 @@ function extensionSyncTests(suiteOptions: {
                 insertData: async ({ device }) => {
                     await device.backgroundModules.directLinking.annotationStorage.createAnnotation(
                         {
-                            uniqueAnnotationUrl: 'bla.com#12345',
+                            url: 'bla.com#12345',
                             pageUrl: 'bla.com',
                             pageTitle: 'bla title',
                             comment: 'rgreggre',

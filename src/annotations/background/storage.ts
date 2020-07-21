@@ -19,8 +19,8 @@ import { AnnotSearchParams } from 'src/search/background/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import PageStorage from 'src/page-indexing/background/storage'
 import { Annotation, AnnotListEntry } from 'src/annotations/types'
+import { URLNormalizer, normalizeUrl } from '@worldbrain/memex-url-utils'
 
-// TODO: Move to src/annotations in the future
 export default class AnnotationStorage extends StorageModule {
     static PAGES_COLL = PAGE_COLLECTION_NAMES.page
     static ANNOTS_COLL = COLLECTION_NAMES.annotation
@@ -168,8 +168,88 @@ export default class AnnotationStorage extends StorageModule {
                 operation: AnnotationsListPlugin.LIST_BY_PAGE_OP_ID,
                 args: ['$params:any'],
             },
+            listAnnotationsByPageUrl: {
+                collection: AnnotationStorage.ANNOTS_COLL,
+                operation: 'findObjects',
+                args: { pageUrl: '$pageUrl:string' },
+            },
+            listAnnotationTagsForAnnotations: {
+                collection: AnnotationStorage.TAGS_COLL,
+                operation: 'findObjects',
+                args: { url: { $in: '$annotationUrls:string[]' } },
+            },
+            listAnnotationBookmarksForAnnotations: {
+                collection: AnnotationStorage.BMS_COLL,
+                operation: 'findObjects',
+                args: { url: { $in: '$annotationUrls:string[]' } },
+            },
         },
     })
+
+    async listAnnotationsByPageUrl({
+        pageUrl,
+        withTags,
+        withBookmarks,
+    }: {
+        pageUrl: string
+        withTags?: boolean
+        withBookmarks?: boolean
+    }) {
+        pageUrl = normalizeUrl(pageUrl)
+
+        console.log('background storage listAnnotationsByPageUrl...', {
+            pageUrl,
+        })
+        const annotations: Annotation[] = await this.operation(
+            'listAnnotationsByPageUrl',
+            { pageUrl },
+        )
+        console.log(
+            'background storage listAnnotationsByPageUrl (plain results) => ',
+            {
+                annotations,
+            },
+        )
+
+        // Efficiently query and join Bookmarks and Tags from their respective collections
+        const annotationUrls = annotations.map((annotation) => annotation.url)
+        let annotationsBookmarkMap = new Map()
+        let annotationsTagMap = new Map()
+        if (withBookmarks !== false) {
+            annotationsBookmarkMap = new Map(
+                (
+                    await this.operation(
+                        'listAnnotationBookmarksForAnnotations',
+                        { annotationUrls },
+                    )
+                ).map((result) => [result.url, result]),
+            )
+        }
+        if (withTags !== false) {
+            annotationsTagMap = new Map(
+                (
+                    await this.operation('listAnnotationTagsForAnnotations', {
+                        annotationUrls,
+                    })
+                ).map((result) => [result.url, result]),
+            )
+        }
+        if (annotationsTagMap.size > 0 || annotationsBookmarkMap.size > 0) {
+            annotations.forEach((annotation) => {
+                annotation.tags = annotationsTagMap.get(annotation.url) ?? []
+                annotation.isBookmarked =
+                    annotationsBookmarkMap.get(annotation.url) ?? false
+            })
+        }
+
+        console.log(
+            'background storage listAnnotationsByPageUrl (with tags and bookmarks) => ',
+            {
+                annotations,
+            },
+        )
+        return annotations
+    }
 
     private async getListById({ listId }: { listId: number }) {
         const list = await this.db
@@ -256,21 +336,6 @@ export default class AnnotationStorage extends StorageModule {
         return this.operation('findAnnotationByUrl', { url })
     }
 
-    async getAllAnnotationsByPageUrl({ pageUrl }: { pageUrl: string }) {
-        console.log('background storage getAllAnnotationsByPageUrl...', {
-            pageUrl,
-        })
-        const results: Annotation[] = await this.operation('', {
-            //  ?
-            pageUrl,
-        })
-        console.log('background storage getAllAnnotationsByPageUrl => ', {
-            results,
-        })
-
-        return results
-    }
-
     async getAllAnnotationsByUrl(params: AnnotSearchParams) {
         console.log('background storage getAllAnnotationsByUrl...', { params })
         const results: Annotation[] = await this.operation('listAnnotsByPage', {
@@ -288,7 +353,7 @@ export default class AnnotationStorage extends StorageModule {
         pageTitle,
         pageUrl,
         body,
-        uniqueAnnotationUrl,
+        url,
         comment,
         selector,
         createdWhen = new Date(),
@@ -307,7 +372,7 @@ export default class AnnotationStorage extends StorageModule {
             selector,
             createdWhen,
             lastEdited: createdWhen,
-            url: uniqueAnnotationUrl,
+            url,
         })
     }
 

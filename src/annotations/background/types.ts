@@ -14,6 +14,11 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
         [AnnotSearchParams] | [AnnotSearchParams, boolean],
         Annotation[]
     >
+    listAnnotationsByPageUrl: RemoteFunction<
+        Role,
+        { pageUrl: string },
+        Annotation[]
+    >
     createAnnotation: RemotePositionalFunction<
         Role,
         | [CreateAnnotationParams]
@@ -63,13 +68,13 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
 }
 
 export interface CreateAnnotationParams {
-    uniqueAnnotationUrl?: string
+    url?: string
     pageUrl: string
     title?: string
     comment?: string
     body?: string
     selector?: Anchor
-    bookmarked?: boolean
+    isBookmarked?: boolean
     isSocialPost?: boolean
     createdWhen?: Date
 }

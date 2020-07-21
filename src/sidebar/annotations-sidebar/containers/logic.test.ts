@@ -209,17 +209,17 @@ describe('SidebarContainerLogic', () => {
                 annotations: { $set: [DATA.ANNOT_1] },
             })
 
-            expect(sidebar.state.annotations[0].hasBookmark).toBe(undefined)
+            expect(sidebar.state.annotations[0].isBookmarked).toBe(undefined)
             await sidebar.processEvent('toggleAnnotationBookmark', {
                 context,
                 annotationUrl: DATA.ANNOT_1.url,
             })
-            expect(sidebar.state.annotations[0].hasBookmark).toBe(true)
+            expect(sidebar.state.annotations[0].isBookmarked).toBe(true)
             await sidebar.processEvent('toggleAnnotationBookmark', {
                 context,
                 annotationUrl: DATA.ANNOT_1.url,
             })
-            expect(sidebar.state.annotations[0].hasBookmark).toBe(false)
+            expect(sidebar.state.annotations[0].isBookmarked).toBe(false)
         })
 
         it('should be able to go to an annotation highlight on the page', async () => {})

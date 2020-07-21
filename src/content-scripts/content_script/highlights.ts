@@ -4,9 +4,15 @@ import {
     HighlightsScriptMain,
 } from './types'
 import { bodyLoader } from 'src/util/loader'
-import { renderAnnotationCacheChanges } from 'src/highlighting/ui/highlight-interactions'
+import {
+    AnnotationClickHandler,
+    renderAnnotationCacheChanges,
+} from 'src/highlighting/ui/highlight-interactions'
 
 export const main: HighlightsScriptMain = async (options) => {
+    showHighlights(options)
+
+    //TODO: Why are these events not being heard?
     options.inPageUI.events.on('componentShouldSetUp', async (event) => {
         if (event.component === 'highlights') {
             console.log('componentShouldSetUp highlights')
@@ -32,12 +38,22 @@ export const main: HighlightsScriptMain = async (options) => {
 
 let highlightChangesDeregister = () => null
 const showHighlights = (options: HighlightDependencies) => {
-    console.log('showHighlights')
-    const onClickHighlight = ({ annotationUrl }) =>
-        options.inPageUI.events.emit('sidebarAction', {
-            action: 'show_annotation',
-            annotationUrl,
-        })
+    const onClickHighlight: AnnotationClickHandler = ({
+        annotationUrl,
+        openSidebar,
+    }) => {
+        if (openSidebar) {
+            options.inPageUI.showSidebar({
+                action: 'show_annotation',
+                annotationUrl,
+            })
+        } else {
+            options.inPageUI.events.emit('sidebarAction', {
+                action: 'show_annotation',
+                annotationUrl,
+            })
+        }
+    }
 
     options.highlightRenderer.renderHighlights(
         options.annotationsCache.annotations,

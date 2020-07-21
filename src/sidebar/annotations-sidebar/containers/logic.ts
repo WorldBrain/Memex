@@ -12,7 +12,7 @@ import { featuresBeta } from 'src/util/remote-functions-background'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { DEF_RESULT_LIMIT } from '../constants'
 import { IncomingAnnotationData } from 'src/in-page-ui/shared-state/types'
-import { generateUniqueAnnotationUrl } from 'src/annotations/utils'
+import { generateurl } from 'src/annotations/utils'
 
 interface EditForm {
     isBookmarked: boolean
@@ -446,14 +446,15 @@ export class SidebarContainerLogic extends UILogic<
     receiveNewAnnotation: EventHandler<'receiveNewAnnotation'> = async ({
         event: { annotationUrl, anchor, annotationData },
     }) => {
-        const createdWhen = Date.now()
+        const createdWhen = new Date()
 
         const highlight: Annotation = {
             url: annotationUrl,
-            hasBookmark: annotationData.isBookmarked,
+            isBookmarked: annotationData.isBookmarked,
             comment: annotationData.commentText,
             body: annotationData.highlightText,
             pageUrl: this.options.pageUrl,
+            pageTitle: this.options.pageTitle,
             tags: annotationData.tags ?? [],
             lastEdited: createdWhen,
             selector: anchor,
@@ -485,30 +486,22 @@ export class SidebarContainerLogic extends UILogic<
 
         const pageUrl = previousState.pageUrl
 
-        const dummyAnnotation = {
+        const url = generateurl({
+            pageUrl,
+            now: () => Date.now(),
+        })
+
+        const annotation = {
+            url,
             pageUrl,
             comment,
             body,
             tags: event.tags,
-            hasBookmark: event.bookmarked,
+            isBookmarked: event.bookmarked,
             selector: event.anchor,
-            createdWhen: Date.now(),
-            lastEdited: Date.now(),
+            createdWhen: new Date(),
+            lastEdited: new Date(),
         } as Annotation
-
-        const url = generateUniqueAnnotationUrl({
-            pageUrl,
-            now: () => Date.now(),
-        })
-        const annotation = {
-            url,
-            pageUrl,
-            bookmarked: event.bookmarked,
-            body: dummyAnnotation.body,
-            comment: dummyAnnotation.comment,
-            selector: dummyAnnotation.selector,
-            tags: event.tags,
-        }
 
         // TODO: (sidebar-refactor) there was a env condition removed here to do with indexing/skip indexing, is it needed when creating an annotation for a page here?
         await this.options.annotationsCache.create(annotation)
@@ -779,9 +772,12 @@ export class SidebarContainerLogic extends UILogic<
             (annot) => annot.url === event.annotationUrl,
         )
         const annotation = previousState.annotations[resultIndex]
-        const hasBookmark = !!annotation?.hasBookmark
+        const hasBookmark = !!annotation?.isBookmarked
 
-        this.options.annotationsCache.update({ ...annotation, hasBookmark })
+        this.options.annotationsCache.update({
+            ...annotation,
+            isBookmarked: hasBookmark,
+        })
     }
 
     setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({
@@ -797,7 +793,7 @@ export class SidebarContainerLogic extends UILogic<
                 [event.annotationUrl]: {
                     commentText: { $set: annotation.comment ?? '' },
                     tags: { $set: annotation.tags ?? [] },
-                    isBookmarked: { $set: !!annotation.hasBookmark },
+                    isBookmarked: { $set: !!annotation.isBookmarked },
                 },
             },
             annotationModes: {

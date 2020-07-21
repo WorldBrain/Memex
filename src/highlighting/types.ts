@@ -1,6 +1,9 @@
 import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
-import { SaveAndRenderHighlightDependencies } from 'src/highlighting/ui/highlight-interactions'
+import {
+    AnnotationClickHandler,
+    SaveAndRenderHighlightDependencies,
+} from 'src/highlighting/ui/highlight-interactions'
 
 export interface Descriptor {
     strategy: string
@@ -19,18 +22,18 @@ export type Highlight = Pick<Annotation, 'url' | 'selector'> & {
 export interface HighlightInteractionsInterface {
     renderHighlights: (
         highlights: Highlight[],
-        openSidebar: (args: { activeUrl?: string }) => void,
+        openSidebar: AnnotationClickHandler,
     ) => Promise<void>
     renderHighlight: (
         highlight: Highlight,
-        openSidebar: (args: { activeUrl?: string }) => void,
+        openSidebar: AnnotationClickHandler,
         temporary?: boolean,
     ) => Promise<boolean>
     scrollToHighlight: ({ url }: Highlight) => number
     highlightAndScroll: (annotation: Annotation) => number
     attachEventListenersToNewHighlights: (
         highlight: Highlight,
-        openSidebar: (args: { activeUrl?: string }) => void,
+        openSidebar: AnnotationClickHandler,
     ) => void
     removeMediumHighlights: () => void
     removeTempHighlights: () => void

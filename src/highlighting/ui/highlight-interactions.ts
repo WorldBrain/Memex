@@ -15,7 +15,7 @@ import {
     AnnotationCacheChangeEvents,
     AnnotationsCacheInterface,
 } from 'src/annotations/annotations-cache'
-import { generateUniqueAnnotationUrl } from 'src/annotations/utils'
+import { generateurl } from 'src/annotations/utils'
 import { AnalyticsEvent } from 'src/analytics/types'
 
 const styles = require('src/highlighting/ui/styles.css')
@@ -70,7 +70,10 @@ export interface HighlightRenderInterface {
     undoAllHighlights: () => void
 }
 
-export type AnnotationClickHandler = (params: { annotationUrl: string }) => void
+export type AnnotationClickHandler = (params: {
+    annotationUrl: string
+    openSidebar?: boolean
+}) => void
 
 // TODO: (sidebar-refactor) move to somewhere more highlight content script related
 export const renderAnnotationCacheChanges = (opts: {
@@ -81,7 +84,6 @@ export const renderAnnotationCacheChanges = (opts: {
     const { cacheChanges, onClickHighlight, renderer } = opts
 
     const onLoad = (annotations) => {
-        console.log('Rendering Highlights from onLoad,', { annotations })
         renderer.renderHighlights(
             annotations as Highlight[],
             onClickHighlight,
@@ -174,17 +176,21 @@ export const saveAndRenderHighlight = async (
     const { pageUrl, title } = params.getUrlAndTitle()
 
     const annotation = {
-        url: generateUniqueAnnotationUrl({ pageUrl, now: () => Date.now() }),
+        url: generateurl({ pageUrl, now: () => Date.now() }),
         body,
         comment,
         pageUrl,
+        pageTitle: title,
         selector: anchor,
         tags,
-    }
+    } as Annotation
     await params.annotationsCache.create(annotation)
 
     params.renderer.renderHighlight(annotation as Highlight, () =>
-        params.onClickHighlight({ annotationUrl: annotation.url }),
+        params.onClickHighlight({
+            annotationUrl: annotation.url,
+            openSidebar: true,
+        }),
     )
 }
 
@@ -208,7 +214,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
     renderHighlight = async (
         highlight: Highlight,
-        onClick,
+        onClick: AnnotationClickHandler,
         temporary = false,
     ) => {
         if (!highlight?.selector?.descriptor?.content) {
@@ -293,10 +299,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
      */
     attachEventListenersToNewHighlights = (
         highlight: Highlight,
-        openSidebar: (args: {
-            activeUrl?: string
-            openSidebar?: boolean
-        }) => void,
+        openSidebar: AnnotationClickHandler,
     ) => {
         const newHighlights = document.querySelectorAll(
             `.${styles['memex-highlight']}:not([data-annotation])`,
@@ -318,7 +321,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 if (!e.target.dataset.annotation) {
                     return
                 }
-                openSidebar({ activeUrl: highlight.url, openSidebar: true })
+                openSidebar({ annotationUrl: highlight.url, openSidebar: true })
                 this.removeHighlights(true)
                 this.makeHighlightDark(highlight)
             }

@@ -33,7 +33,7 @@ async function insertTestData({
 
         await annotationStorage.createAnnotation({
             ...annot,
-            uniqueAnnotationUrl: annot.url,
+            url: annot.url,
         } as any)
     }
 

@@ -275,7 +275,7 @@ export class RibbonContainerLogic extends UILogic<
             {
                 comment,
                 pageUrl: currentTab.url,
-                bookmarked: event.value.isBookmarked,
+                isBookmarked: event.value.isBookmarked,
             },
             { skipPageIndexing: this.skipAnnotationPageIndexing },
         )

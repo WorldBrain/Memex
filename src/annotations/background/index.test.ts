@@ -773,21 +773,17 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).createCustomList({ name: 'test' })
                                 await customLists(setup).insertPageToList({
                                     id: listId,
-                                    url: DATA.ANNOT_1.uniqueAnnotationUrl,
+                                    url: DATA.ANNOT_1.url,
                                 })
                             },
                             expectedStorageChanges: {
                                 pageListEntries: (): StorageCollectionDiff => ({
-                                    [`[${listId},"${DATA.ANNOT_1.uniqueAnnotationUrl}"]`]: {
+                                    [`[${listId},"${DATA.ANNOT_1.url}"]`]: {
                                         type: 'create',
                                         object: {
                                             listId,
-                                            fullUrl:
-                                                DATA.ANNOT_1
-                                                    .uniqueAnnotationUrl,
-                                            pageUrl:
-                                                DATA.ANNOT_1
-                                                    .uniqueAnnotationUrl,
+                                            fullUrl: DATA.ANNOT_1.url,
+                                            pageUrl: DATA.ANNOT_1.url,
                                             createdAt: expect.any(Date),
                                         },
                                     },

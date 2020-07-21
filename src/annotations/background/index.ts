@@ -31,7 +31,7 @@ import { updateSuggestionsCache } from 'src/tags/utils'
 import { TagsSettings } from 'src/tags/background/types'
 import { limitSuggestionsStorageLength } from 'src/tags/background'
 import { now } from 'moment'
-import { generateUniqueAnnotationUrl } from 'src/annotations/utils'
+import { generateurl } from 'src/annotations/utils'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -84,6 +84,7 @@ export default class DirectLinkingBackground {
         this.remoteFunctions = {
             createDirectLink: this.createDirectLink.bind(this),
             getAllAnnotationsByUrl: this.getAllAnnotationsByUrl.bind(this),
+            listAnnotationsByPageUrl: this.listAnnotationsByPageUrl.bind(this),
             createAnnotation: this.createAnnotation.bind(this),
             editAnnotation: this.editAnnotation.bind(this),
             editAnnotationTags: this.editAnnotationTags.bind(this),
@@ -250,7 +251,7 @@ export default class DirectLinkingBackground {
             pageTitle,
             pageUrl: this._normalizeUrl(tab.url),
             body: request.anchor.quote,
-            uniqueAnnotationUrl: result.url,
+            url: result.url,
             selector: request.anchor,
             comment: '',
         })
@@ -261,8 +262,8 @@ export default class DirectLinkingBackground {
         return result
     }
 
-    getAllAnnotationsByPageUrl = async ({ tab }: TabArg, { pageUrl }) => {
-        const annotations = this.annotationStorage.getAllAnnotationsByUrl()
+    listAnnotationsByPageUrl = async ({ tab }: TabArg, { pageUrl }) => {
+        return this.annotationStorage.listAnnotationsByPageUrl({ pageUrl })
     }
 
     getAllAnnotationsByUrl = async (
@@ -278,12 +279,15 @@ export default class DirectLinkingBackground {
             }
         >
     > => {
-        console.log('this.annotationStorage.getAllAnnotationsByUrl...', {
-            url,
-            limit,
-            skip,
-            ...params,
-        })
+        console.warn(
+            'DEPRECIATED this.annotationStorage.getAllAnnotationsByUrl...',
+            {
+                url,
+                limit,
+                skip,
+                ...params,
+            },
+        )
 
         url = url == null && tab != null ? tab.url : url
         url = isSocialPost
@@ -299,27 +303,24 @@ export default class DirectLinkingBackground {
             },
         )
 
-        console.log('this.annotationStorage.getAllAnnotationsByUrl =>', {
-            annotations,
-        })
-
-        // TODO: performance - Must be a better way than looping through each annotation individually and querying twice?
+        // TODO: performance - Must be a better way than looping through each annotation individually and querying twice
+        // TODO: Depreciated this and use the above listAnnotationsByPageUrl (implement pagination / or other required search)
         const annotResults = (await Promise.all(
             annotations.map(
                 async ({ createdWhen, lastEdited, ...annotation }) => {
                     try {
                         const tags = await this.annotationStorage.getTagsByAnnotationUrl(
-                            annotation.uniqueAnnotationUrl,
+                            annotation.url,
                         )
 
                         return {
                             ...annotation,
                             hasBookmark: await this.annotationStorage.annotHasBookmark(
                                 {
-                                    url: annotation.uniqueAnnotationUrl,
+                                    url: annotation.url,
                                 },
                             ),
-                            createdWhen: createdWhen.getTime(),
+                            createdWhen,
                             tags: tags.map((t) => t.name),
                             lastEdited:
                                 lastEdited && lastEdited instanceof Date
@@ -327,14 +328,16 @@ export default class DirectLinkingBackground {
                                     : undefined,
                         }
                     } catch (e) {
-                        console.log('Error getting extra annotation data', e)
+                        console.error('Error getting extra annotation data', e)
                         throw e
                     }
                 },
             ),
         )) as any
 
-        console.log('getAllAnnotationsByUrl', { annotResults })
+        console.log('this.annotationStorage.getAllAnnotationsByUrl =>', {
+            annotResults,
+        })
 
         return annotResults
     }
@@ -353,13 +356,12 @@ export default class DirectLinkingBackground {
         }
 
         const pageTitle = toCreate.title == null ? tab.title : toCreate.title
-        const uniqueAnnotationUrl =
-            toCreate.uniqueAnnotationUrl ??
-            generateUniqueAnnotationUrl({ pageUrl, now: () => Date.now() })
+        const url =
+            toCreate.url ?? generateurl({ pageUrl, now: () => Date.now() })
 
         await this.annotationStorage.createAnnotation({
             pageUrl,
-            uniqueAnnotationUrl,
+            url,
             pageTitle,
             comment: toCreate.comment,
             body: toCreate.body,
@@ -372,14 +374,11 @@ export default class DirectLinkingBackground {
             this.annotationStorage.indexPageFromTab(tab)
         }
 
-        if (toCreate.bookmarked) {
-            await this.toggleAnnotBookmark(
-                { tab },
-                { url: uniqueAnnotationUrl },
-            )
+        if (toCreate.isBookmarked) {
+            await this.toggleAnnotBookmark({ tab }, { url })
         }
 
-        return uniqueAnnotationUrl
+        return url
     }
 
     async insertAnnotToList({ tab }: TabArg, params: AnnotListEntry) {

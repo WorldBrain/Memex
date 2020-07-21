@@ -380,7 +380,7 @@ export default class SocialStorage extends StorageModule {
             .collection('annotations')
             .findObjects<Annotation>({ pageUrl: postUrlId })
 
-        const annotIds = annots.map((annot) => annot.uniqueAnnotationUrl)
+        const annotIds = annots.map((annot) => annot.url)
 
         return Promise.all([
             this.storageManager

@@ -18,19 +18,19 @@ import { Anchor } from 'src/highlighting/types'
 // }
 
 export interface Annotation {
-    url?: string
-    pageTitle: string
+    url: string
+    pageTitle?: string
     pageUrl: string
     body?: string
     selector?: Anchor
     createdWhen?: Date
     lastEdited?: Date
-    uniqueAnnotationUrl?: string
     comment?: string
     _body_terms?: string[]
     _comment_terms?: string[]
-    hasBookmark?: boolean
+    isBookmarked?: boolean
     tags: string[]
+    isSocialPost?: boolean
 }
 
 export interface NewAnnotationOptions {
@@ -42,8 +42,8 @@ export interface NewAnnotationOptions {
 
 export interface AnnotationsManagerInterface {
     createAnnotation(input: {
-        url: string
-        title: string
+        pageUrl: string
+        pageTitle: string
         body: string
         comment: string
         anchor: Anchor

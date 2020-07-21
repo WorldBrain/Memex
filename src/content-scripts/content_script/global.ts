@@ -267,11 +267,11 @@ export async function main() {
     await inPageUI.loadComponent('highlights')
     const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
     if (areHighlightsEnabled) {
-        inPageUI.showHighlights()
         if (!annotationsCache.isEmpty) {
             inPageUI.loadComponent('sidebar')
         }
     }
+    inPageUI.showHighlights()
 
     const isSidebarEnabled = await sidebarUtils.getSidebarState()
     if (isSidebarEnabled) {

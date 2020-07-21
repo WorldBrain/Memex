@@ -55,8 +55,8 @@ export interface AnnotationEditableProps {
     isActive?: boolean
     isHovered?: boolean
     isClickable?: boolean
-    createdWhen: number
-    lastEdited: number
+    createdWhen: Date
+    lastEdited: Date
     body?: string
     comment?: string
     tags: string[]
