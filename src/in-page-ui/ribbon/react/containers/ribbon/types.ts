@@ -3,7 +3,7 @@ import AnnotationsManager from 'src/annotations/annotations-manager'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
-import { AnnotationInterface } from 'src/direct-linking/background/types'
+import { AnnotationInterface } from 'src/annotations/background/types'
 import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 

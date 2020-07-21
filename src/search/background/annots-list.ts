@@ -3,8 +3,8 @@ import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 import { AnnotSearchParams } from './types'
 import { transformUrl } from '../pipeline'
-import { Annotation } from 'src/direct-linking/types'
-import AnnotsStorage from 'src/direct-linking/background/storage'
+import AnnotsStorage from 'src/annotations/background/storage'
+import { Annotation } from 'src/annotations/types'
 const moment = require('moment-timezone')
 
 export class AnnotationsListPlugin extends StorageBackendPlugin<

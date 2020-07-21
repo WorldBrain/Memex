@@ -16,9 +16,9 @@ import { Tag, SearchIndex } from 'src/search'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
 import { AnnotationsListPlugin } from 'src/search/background/annots-list'
 import { AnnotSearchParams } from 'src/search/background/types'
-import { Annotation, AnnotListEntry } from '../types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import PageStorage from 'src/page-indexing/background/storage'
+import { Annotation, AnnotListEntry } from 'src/annotations/types'
 
 // TODO: Move to src/annotations in the future
 export default class AnnotationStorage extends StorageModule {
@@ -254,6 +254,21 @@ export default class AnnotationStorage extends StorageModule {
 
     async getAnnotationByPk(url: string): Promise<Annotation> {
         return this.operation('findAnnotationByUrl', { url })
+    }
+
+    async getAllAnnotationsByPageUrl({ pageUrl }: { pageUrl: string }) {
+        console.log('background storage getAllAnnotationsByPageUrl...', {
+            pageUrl,
+        })
+        const results: Annotation[] = await this.operation('', {
+            //  ?
+            pageUrl,
+        })
+        console.log('background storage getAllAnnotationsByPageUrl => ', {
+            results,
+        })
+
+        return results
     }
 
     async getAllAnnotationsByUrl(params: AnnotSearchParams) {

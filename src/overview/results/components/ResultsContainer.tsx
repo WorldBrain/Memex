@@ -16,7 +16,7 @@ import * as selectors from '../selectors'
 import { RootState } from 'src/options/types'
 import { features } from 'src/util/remote-functions-background'
 import MobileAppMessage from './mobile-app-message'
-import { AnnotationInterface } from 'src/direct-linking/background/types'
+import { AnnotationInterface } from 'src/annotations/background/types'
 import { Annotation } from 'src/annotations/types'
 
 const styles = require('./ResultList.css')

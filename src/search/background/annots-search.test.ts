@@ -6,9 +6,9 @@ import { setStorex } from '../get-db'
 import { AnnotationsListPlugin } from './annots-list'
 import * as DATA from './annots-search.test.data'
 import CustomListBg from 'src/custom-lists/background'
-import AnnotsBg from 'src/direct-linking/background'
-import { Annotation } from 'src/direct-linking/types'
+import AnnotsBg from 'src/annotations/background'
 import { AnnotSearchParams } from './types'
+import { Annotation } from 'src/annotations/types'
 
 const countAnnots = (res: Map<number, Map<string, Annotation[]>>) => {
     let count = 0

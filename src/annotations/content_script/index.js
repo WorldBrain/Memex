@@ -16,7 +16,7 @@ export async function loadAnnotationWhenReady() {
 export function setupAnchorFallbackOverlay() {}
 
 export function setupRemoteDirectLinkFunction() {
-    browser.runtime.onMessage.addListener(request => {
+    browser.runtime.onMessage.addListener((request) => {
         if (request.type !== 'direct-link') {
             return
         }

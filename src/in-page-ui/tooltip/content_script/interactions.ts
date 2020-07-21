@@ -2,7 +2,7 @@ import { browser } from 'webextension-polyfill-ts'
 
 import analytics from 'src/analytics'
 import { delayed, getPositionState } from '../utils'
-import { createAndCopyDirectLink } from '../../../direct-linking/content_script/interactions'
+import { createAndCopyDirectLink } from '../../../annotations/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
 import { remoteFunction } from '../../../util/webextensionRPC'
 import { injectCSS } from '../../../util/content-injection'

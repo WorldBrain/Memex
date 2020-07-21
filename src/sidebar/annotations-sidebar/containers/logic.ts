@@ -12,7 +12,7 @@ import { featuresBeta } from 'src/util/remote-functions-background'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { DEF_RESULT_LIMIT } from '../constants'
 import { IncomingAnnotationData } from 'src/in-page-ui/shared-state/types'
-import { generateUniqueAnnotationUrl } from 'src/direct-linking/utils'
+import { generateUniqueAnnotationUrl } from 'src/annotations/utils'
 
 interface EditForm {
     isBookmarked: boolean

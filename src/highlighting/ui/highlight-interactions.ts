@@ -15,7 +15,7 @@ import {
     AnnotationCacheChangeEvents,
     AnnotationsCacheInterface,
 } from 'src/annotations/annotations-cache'
-import { generateUniqueAnnotationUrl } from 'src/direct-linking/utils'
+import { generateUniqueAnnotationUrl } from 'src/annotations/utils'
 import { AnalyticsEvent } from 'src/analytics/types'
 
 const styles = require('src/highlighting/ui/styles.css')

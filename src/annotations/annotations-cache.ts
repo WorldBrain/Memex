@@ -3,7 +3,7 @@ import TypedEventEmitter from 'typed-emitter'
 import { Observable } from 'rxjs'
 import { EventEmitter } from 'events'
 import { RemoteTagsInterface } from 'src/tags/background/types'
-import { AnnotationInterface } from 'src/direct-linking/background/types'
+import { AnnotationInterface } from 'src/annotations/background/types'
 
 export const createAnnotationsCache = (bgModules: {
     tags: RemoteTagsInterface

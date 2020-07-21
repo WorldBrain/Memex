@@ -11,7 +11,6 @@ import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
 import AnnotationStorage from './storage'
-import { AnnotationSender, AnnotListEntry } from '../types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
@@ -19,7 +18,11 @@ import SocialBG from 'src/social-integration/background'
 import { buildPostUrlId } from 'src/social-integration/util'
 import { SearchIndex } from 'src/search'
 import PageStorage from 'src/page-indexing/background/storage'
-import { Annotation } from 'src/annotations/types'
+import {
+    Annotation,
+    AnnotationSender,
+    AnnotListEntry,
+} from 'src/annotations/types'
 import { AnnotationInterface, CreateAnnotationParams } from './types'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
@@ -28,7 +31,7 @@ import { updateSuggestionsCache } from 'src/tags/utils'
 import { TagsSettings } from 'src/tags/background/types'
 import { limitSuggestionsStorageLength } from 'src/tags/background'
 import { now } from 'moment'
-import { generateUniqueAnnotationUrl } from 'src/direct-linking/utils'
+import { generateUniqueAnnotationUrl } from 'src/annotations/utils'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -256,6 +259,10 @@ export default class DirectLinkingBackground {
         this.annotationStorage.indexPageFromTab(tab)
 
         return result
+    }
+
+    getAllAnnotationsByPageUrl = async ({ tab }: TabArg, { pageUrl }) => {
+        const annotations = this.annotationStorage.getAllAnnotationsByUrl()
     }
 
     getAllAnnotationsByUrl = async (

@@ -1,21 +1,23 @@
+import DirectLinkingBackend from './backend'
 import {
+    AnnotationRequest,
     AnnotationSender,
     StoredAnnotationRequestMap,
-    AnnotationRequest,
-} from '../types'
-import DirectLinkingBackend from './backend'
+} from 'src/annotations/types'
 
 // This thing sends the annotation back to the tab once it's loaded
 export class AnnotationRequests {
     private requests: StoredAnnotationRequestMap = {}
     private preventAutomaticAnchoring = null
 
-    constructor(private backend: DirectLinkingBackend, private annotationSender: AnnotationSender) {
-    }
+    constructor(
+        private backend: DirectLinkingBackend,
+        private annotationSender: AnnotationSender,
+    ) {}
 
     pauseAutomaticAnchoring() {
         const prevent = {}
-        prevent['promise'] = new Promise(resolve => {
+        prevent['promise'] = new Promise((resolve) => {
             prevent['resolve'] = resolve
         })
         this.preventAutomaticAnchoring = prevent
@@ -29,7 +31,9 @@ export class AnnotationRequests {
     request(request: AnnotationRequest) {
         let annotationPromise = this.backend.fetchAnnotationData(request)
         if (this.preventAutomaticAnchoring) {
-            annotationPromise = annotationPromise.then(response => this.preventAutomaticAnchoring.promise.then(() => response))
+            annotationPromise = annotationPromise.then((response) =>
+                this.preventAutomaticAnchoring.promise.then(() => response),
+            )
         }
         this.requests[request.tabId] = { ...request, annotationPromise }
     }
@@ -41,10 +45,12 @@ export class AnnotationRequests {
             return false
         }
 
-        request.annotationPromise = request.annotationPromise.then(annotation => {
-            this.annotationSender({ annotation, tabId })
-            return annotation
-        })
+        request.annotationPromise = request.annotationPromise.then(
+            (annotation) => {
+                this.annotationSender({ annotation, tabId })
+                return annotation
+            },
+        )
 
         return true
     }

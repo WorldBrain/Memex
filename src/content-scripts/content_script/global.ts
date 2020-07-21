@@ -8,7 +8,7 @@ import { shouldIncludeSearchInjection } from 'src/search-injection/detection'
 import {
     loadAnnotationWhenReady,
     setupRemoteDirectLinkFunction,
-} from 'src/direct-linking/content_script'
+} from 'src/annotations/content_script'
 import {
     runInBackground,
     makeRemotelyCallableType,
@@ -32,7 +32,7 @@ import { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
-import { AnnotationInterface } from 'src/direct-linking/background/types'
+import { AnnotationInterface } from 'src/annotations/background/types'
 import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'

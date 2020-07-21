@@ -1,7 +1,7 @@
 import Mousetrap from 'mousetrap'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { userSelectedText } from 'src/in-page-ui/tooltip/content_script/interactions'
-import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
+import { createAndCopyDirectLink } from 'src/annotations/content_script/interactions'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { KeyboardShortcuts } from '../types'
 import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'

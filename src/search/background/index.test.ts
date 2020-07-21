@@ -5,7 +5,7 @@ import * as DATA from './index.test.data'
 import { PageUrlsByDay } from './types'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { BackgroundModules } from 'src/background-script/setup'
-import { Annotation } from 'src/direct-linking/types'
+import { Annotation } from 'src/annotations/types'
 
 const mockEvent = { addListener: () => undefined }
 

@@ -11,8 +11,8 @@ import {
 import { SuggestPlugin } from 'src/search/plugins'
 import { Tweet, User } from '../types'
 import { PageList } from 'src/custom-lists/background/types'
-import { Annotation } from 'src/direct-linking/types'
 import { buildPostUrlId } from '../util'
+import { Annotation } from 'src/annotations/types'
 
 export interface SocialStorageProps {
     storageManager: Storex

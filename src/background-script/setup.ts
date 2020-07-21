@@ -3,7 +3,7 @@ import StorageManager from '@worldbrain/storex'
 import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import NotificationBackground from 'src/notifications/background'
 import SocialBackground from 'src/social-integration/background'
-import DirectLinkingBackground from 'src/direct-linking/background'
+import DirectLinkingBackground from 'src/annotations/background'
 import ActivityLoggerBackground, {
     TabManager,
 } from 'src/activity-logger/background'

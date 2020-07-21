@@ -1,20 +1,36 @@
 import { Anchor } from 'src/highlighting/types'
 
+// export interface Annotation {
+//     /** Unique URL for this annotation. Used as more of an ID; probably not for display. */
+//     url: string
+//     /** URL for display. */
+//     pageUrl: string
+//     /** Defined for annotations with highlighted text. */
+//     body?: string
+//     /** Defined for annotations with a user comment. */
+//     comment?: string
+//     /** Selector required for highlighting annotations. */
+//     selector?: Anchor
+//     createdWhen: number
+//     lastEdited: number
+//     tags: string[]
+//     hasBookmark?: boolean
+// }
+
 export interface Annotation {
-    /** Unique URL for this annotation. Used as more of an ID; probably not for display. */
-    url: string
-    /** URL for display. */
+    url?: string
+    pageTitle: string
     pageUrl: string
-    /** Defined for annotations with highlighted text. */
     body?: string
-    /** Defined for annotations with a user comment. */
-    comment?: string
-    /** Selector required for highlighting annotations. */
     selector?: Anchor
-    createdWhen: number
-    lastEdited: number
-    tags: string[]
+    createdWhen?: Date
+    lastEdited?: Date
+    uniqueAnnotationUrl?: string
+    comment?: string
+    _body_terms?: string[]
+    _comment_terms?: string[]
     hasBookmark?: boolean
+    tags: string[]
 }
 
 export interface NewAnnotationOptions {
@@ -50,3 +66,31 @@ export interface SidebarAnnotationTheme {
     isActive: boolean
     cursor: 'pointer' | 'auto'
 }
+
+export interface AnnotListEntry {
+    listId: number
+    url: string
+}
+
+export interface AnnotationRequest {
+    memexLinkOrigin: string
+    // urlWithoutProtocol: string
+    annotationId: string
+    tabId: string
+}
+
+interface StoredAnnotationRequest extends AnnotationRequest {
+    annotationPromise: Promise<Annotation>
+}
+
+export interface StoredAnnotationRequestMap {
+    [tabId: string]: StoredAnnotationRequest
+}
+
+export type AnnotationSender = ({
+    annotation,
+    tabId,
+}: {
+    annotation: Annotation
+    tabId: number
+}) => void
