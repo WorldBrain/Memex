@@ -119,7 +119,7 @@ export default class ContentSharingBackground {
                 createdWhen: entry.createdAt?.getTime() ?? '$now',
                 entryTitle: pageTitles[entry.pageUrl],
                 normalizedUrl: entry.pageUrl,
-                originalUrl: 'https://' + normalizeUrl(entry.fullUrl),
+                originalUrl: entry.fullUrl,
             })),
             userReference: { type: 'user-reference', id: userId },
         })
@@ -153,6 +153,16 @@ export default class ContentSharingBackground {
                     ),
                     listEntries: [action.data],
                     userReference: { type: 'user-reference', id: userId },
+                })
+            })
+        } else if (action.type === 'remove-shared-list-entry') {
+            await this.doPush({ localListId: action.localListId }, async () => {
+                const contentSharing = await this.options.getContentSharing()
+                await contentSharing.removeListEntries({
+                    listReference: contentSharing.getSharedListReferenceFromLinkID(
+                        action.remoteListId,
+                    ),
+                    normalizedUrl: action.normalizedUrl,
                 })
             })
         } else if (action.type === 'change-shared-list-title') {
@@ -211,7 +221,8 @@ export default class ContentSharingBackground {
                         data: {
                             entryTitle: pageTitle,
                             normalizedUrl: pageUrl,
-                            originalUrl: 'https://' + normalizeUrl(listEntry.fullUrl),
+                            originalUrl:
+                                'https://' + normalizeUrl(listEntry.fullUrl),
                         },
                     })
                 }
@@ -233,6 +244,27 @@ export default class ContentSharingBackground {
                             localListId,
                             remoteListId,
                             newTitle: change.updates.name,
+                        })
+                    }
+                }
+            } else if (change.type === 'delete') {
+                if (change.collection === 'pageListEntries') {
+                    for (const pk of change.pks) {
+                        const [localListId, pageUrl] = pk as [number, string]
+                        const remoteListId = await this.storage.getRemoteListId(
+                            {
+                                localId: localListId,
+                            },
+                        )
+                        if (!remoteListId) {
+                            continue
+                        }
+
+                        await this.scheduleAction({
+                            type: 'remove-shared-list-entry',
+                            localListId,
+                            remoteListId,
+                            normalizedUrl: pageUrl,
                         })
                     }
                 }

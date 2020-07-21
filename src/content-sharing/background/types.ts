@@ -10,6 +10,7 @@ export interface ContentSharingInterface {
 
 export type ContentSharingAction =
     | AddSharedListEntryAction
+    | RemoveSharedListEntryAction
     | ChangeSharedListTitleAction
     | ChangeSharedListDescriptionAction
 export interface AddSharedListEntryAction {
@@ -21,6 +22,12 @@ export interface AddSharedListEntryAction {
         originalUrl: string
         normalizedUrl: string
     }
+}
+export interface RemoveSharedListEntryAction {
+    type: 'remove-shared-list-entry'
+    localListId: number
+    remoteListId: string
+    normalizedUrl: string
 }
 
 export interface ChangeSharedListTitleAction {

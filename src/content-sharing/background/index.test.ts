@@ -308,5 +308,54 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }
             },
         ),
+        backgroundIntegrationTest(
+            'should delete list entries of an already shared list',
+            () => {
+                let localListId: number
+
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                setup.authService.setUser(TEST_USER)
+
+                                localListId = await createTestList(setup)
+                                await setup.backgroundModules.contentSharing.shareList(
+                                    { listId: localListId },
+                                )
+                                await setup.backgroundModules.contentSharing.shareListEntries(
+                                    { listId: localListId },
+                                )
+
+                                await setup.backgroundModules.customLists.removePageFromList(
+                                    {
+                                        id: localListId,
+                                        url: 'https://www.spam.com/foo',
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.waitForListSync(
+                                    {
+                                        localListId,
+                                    },
+                                )
+
+                                const serverStorage = await setup.getServerStorage()
+                                expect(
+                                    await serverStorage.storageManager.operation(
+                                        'findObjects',
+                                        'sharedListEntry',
+                                        {},
+                                    ),
+                                ).toEqual([
+                                    expect.objectContaining({
+                                        entryTitle: 'Eggs.com title',
+                                    }),
+                                ])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
     ],
 )
