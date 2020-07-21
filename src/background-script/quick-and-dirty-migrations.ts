@@ -125,4 +125,18 @@ export const migrations: Migrations = {
         await db.table('annotations').where('pageUrl').equals('').delete()
         await db.table('pageListEntries').where('pageUrl').equals('').delete()
     },
+    /**
+     * There was a bug that caused all page entries added to a custom list to
+     * contain a normalized URL as their full URL.
+     */
+    'denormalize-list-entry-full-urls': async ({ db }) => {
+        await db
+            .table('pageListEntries')
+            .toCollection()
+            .modify((entry) => {
+                if (entry.fullUrl && !entry.fullUrl.startsWith('http')) {
+                    entry.fullUrl = 'http://' + entry.fullUrl
+                }
+            })
+    },
 }
