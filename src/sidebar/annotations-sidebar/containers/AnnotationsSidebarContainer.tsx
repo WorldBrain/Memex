@@ -209,7 +209,7 @@ export class AnnotationsSidebarContainer<
             onSave: ({ text, isBookmarked, ...args }) =>
                 this.processEvent('saveNewPageComment', {
                     commentText: text,
-                    bookmarked: isBookmarked,
+                    isBookmarked,
                     ...args,
                 }),
         }

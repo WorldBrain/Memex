@@ -308,6 +308,26 @@ export default class AnnotationStorage extends StorageModule {
         return bookmark != null
     }
 
+    async updateAnnotationBookmark({
+        url,
+        isBookmarked,
+    }: {
+        url: string
+        isBookmarked: boolean
+    }) {
+        const existingBookmark = await this.operation('findBookmarkByUrl', {
+            url,
+        })
+        if (!!existingBookmark !== isBookmarked) {
+            return isBookmarked
+                ? this.operation('createBookmark', {
+                      url,
+                      createdAt: new Date(),
+                  })
+                : this.operation('deleteBookmarkByUrl', { url })
+        }
+    }
+
     private async fetchIndexingPrefs(): Promise<{ shouldIndexLinks: boolean }> {
         const storage = await this._browserStorageArea.get(
             IDXING_PREF_KEYS.LINKS,
@@ -337,15 +357,9 @@ export default class AnnotationStorage extends StorageModule {
     }
 
     async getAllAnnotationsByUrl(params: AnnotSearchParams) {
-        console.log('background storage getAllAnnotationsByUrl...', { params })
         const results: Annotation[] = await this.operation('listAnnotsByPage', {
-            //  ?
             params,
         })
-        console.log('background storage getAllAnnotationsByUrl => ', {
-            results,
-        })
-
         return results
     }
 
@@ -381,7 +395,11 @@ export default class AnnotationStorage extends StorageModule {
         comment: string,
         lastEdited = new Date(),
     ) {
-        return this.operation('editAnnotation', { url, comment, lastEdited })
+        return this.operation('editAnnotation', {
+            url,
+            comment,
+            lastEdited: new Date(),
+        })
     }
 
     async deleteAnnotation(url: string) {

@@ -16,11 +16,17 @@ export const createAnnotationsCache = (bgModules: {
             create: async (annotation) => {
                 await bgModules.annotations.createAnnotation(annotation)
             },
-            update: async (annotation) =>
-                bgModules.annotations.editAnnotation(
+            async update(annotation) {
+                await bgModules.annotations.updateAnnotationBookmark({
+                    url: annotation.url,
+                    isBookmarked: annotation.isBookmarked,
+                })
+
+                return bgModules.annotations.editAnnotation(
                     annotation.url,
                     annotation.comment,
-                ),
+                )
+            },
             delete: async (annotation) =>
                 bgModules.annotations.deleteAnnotation(annotation.url),
             updateTags: async (annotationUrl, tags) =>
@@ -117,14 +123,14 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     update = (annotation: Annotation) => {
         const stateBeforeModifications = this._annotations
 
-        const resultIndex = this._annotations.findIndex(
+        const resultIndex = stateBeforeModifications.findIndex(
             (existingAnnotation) => existingAnnotation.url === annotation.url,
         )
 
         this._annotations = [
-            ...this._annotations.slice(0, resultIndex),
+            ...stateBeforeModifications.slice(0, resultIndex),
             annotation,
-            ...this._annotations.slice(resultIndex + 1),
+            ...stateBeforeModifications.slice(resultIndex + 1),
         ]
 
         this.annotationChanges.emit('updated', annotation)

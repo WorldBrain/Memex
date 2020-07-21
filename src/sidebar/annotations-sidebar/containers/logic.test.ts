@@ -281,7 +281,7 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('saveNewPageComment', {
                 commentText: DATA.COMMENT_1,
                 tags: [],
-                bookmarked: false,
+                isBookmarked: false,
                 anchor: {} as any,
             })
             expect(sidebar.state.annotations.length).toBe(1)
@@ -319,7 +319,7 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('saveNewPageComment', {
                 commentText: DATA.COMMENT_1,
                 tags: [],
-                bookmarked: true,
+                isBookmarked: true,
                 anchor: {} as any,
             })
             expect(sidebar.state.annotations).toEqual([
@@ -370,7 +370,7 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('saveNewPageComment', {
                 commentText: DATA.COMMENT_1,
                 tags: [DATA.TAG_1],
-                bookmarked: false,
+                isBookmarked: false,
                 anchor: {} as any,
             })
             expect(sidebar.state.annotations).toEqual([

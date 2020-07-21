@@ -102,7 +102,7 @@ export type SidebarContainerEvents = UIEvent<{
     saveNewPageComment: {
         anchor?: Anchor
         commentText: string
-        bookmarked: boolean
+        isBookmarked: boolean
         tags: string[]
     }
     cancelNewPageComment: null
@@ -497,7 +497,7 @@ export class SidebarContainerLogic extends UILogic<
             comment,
             body,
             tags: event.tags,
-            isBookmarked: event.bookmarked,
+            isBookmarked: event.isBookmarked,
             selector: event.anchor,
             createdWhen: new Date(),
             lastEdited: new Date(),
@@ -772,11 +772,11 @@ export class SidebarContainerLogic extends UILogic<
             (annot) => annot.url === event.annotationUrl,
         )
         const annotation = previousState.annotations[resultIndex]
-        const hasBookmark = !!annotation?.isBookmarked
+        const isBookmarked = !!annotation?.isBookmarked
 
         this.options.annotationsCache.update({
             ...annotation,
-            isBookmarked: hasBookmark,
+            isBookmarked,
         })
     }
 

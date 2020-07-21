@@ -93,9 +93,11 @@ export default class DirectLinkingBackground {
             getAnnotationTags: this.getTagsByAnnotationUrl.bind(this),
             addAnnotationTag: this.addTagForAnnotation.bind(this),
             delAnnotationTag: this.delTagForAnnotation.bind(this),
+            updateAnnotationBookmark: this.updateAnnotationBookmark.bind(this),
             followAnnotationRequest: this.followAnnotationRequest.bind(this),
             toggleSidebarOverlay: this.toggleSidebarOverlay.bind(this),
             toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
+            getAnnotBookmark: this.getAnnotBookmark.bind(this),
             insertAnnotToList: this.insertAnnotToList.bind(this),
             removeAnnotFromList: this.removeAnnotFromList.bind(this),
             goToAnnotationFromSidebar: this.goToAnnotationFromDashboardSidebar.bind(
@@ -394,9 +396,19 @@ export default class DirectLinkingBackground {
     }
 
     async toggleAnnotBookmark({ tab }: TabArg, { url }: { url: string }) {
-        url = url == null ? tab.url : url
-
         return this.annotationStorage.toggleAnnotBookmark({ url })
+    }
+    async getAnnotBookmark({ tab }: TabArg, { url }: { url: string }) {
+        return this.annotationStorage.annotHasBookmark({ url })
+    }
+    async updateAnnotationBookmark(
+        { tab }: TabArg,
+        { url, isBookmarked }: { url: string; isBookmarked: boolean },
+    ) {
+        return this.annotationStorage.updateAnnotationBookmark({
+            url,
+            isBookmarked,
+        })
     }
 
     async editAnnotation(_, pk, comment, isSocialPost?: boolean) {
