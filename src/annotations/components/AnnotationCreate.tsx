@@ -15,6 +15,7 @@ import {
     heartFull,
 } from 'src/common-ui/components/design-library/icons'
 import onClickOutside from 'react-onclickoutside'
+import TagInput from 'src/tags/ui/tag-input'
 
 interface AnnotationCreateState {
     isTagPickerShown: boolean
@@ -102,22 +103,26 @@ class AnnotationCreate extends React.Component<
         const { isTagPickerShown } = this.state
 
         return (
-            <TagDropdownStyled>
-                {isTagPickerShown && (
-                    <Tooltip position="bottomLeft">
-                        <TagPicker
-                            onEscapeKeyDown={this.hideTagPicker}
-                            {...tagPickerDependencies}
-                            onUpdateEntrySelection={async ({
-                                selected: tags,
-                            }) => this.setState({ tags })}
-                            onClickOutside={() =>
-                                this.setState({ isTagPickerShown: false })
-                            }
-                        />
-                    </Tooltip>
-                )}
-            </TagDropdownStyled>
+            <TagInput
+                queryTagSuggestions={tagPickerDependencies.queryEntries}
+                updateTags={async ({ selected: tags }) =>
+                    this.setState({ tags })
+                }
+                handleClose={() => this.setState({ isTagPickerShown: false })}
+                isTagInputActive={isTagPickerShown}
+                setTagInputActive={() =>
+                    this.setState({ isTagPickerShown: true })
+                }
+                tags={this.state.tags}
+                fetchInitialTagSuggestions={
+                    tagPickerDependencies.loadDefaultSuggestions
+                }
+                deleteTag={async (tag) =>
+                    this.setState({
+                        tags: this.state.tags.filter((_tag) => _tag !== tag),
+                    })
+                }
+            />
         )
     }
 
@@ -127,15 +132,6 @@ class AnnotationCreate extends React.Component<
         return (
             <FooterStyled>
                 <InteractionItemsBox>
-                    <InteractionsImgContainerStyled
-                        onClick={() =>
-                            this.setState((state) => ({
-                                isTagPickerShown: !state.isTagPickerShown,
-                            }))
-                        }
-                    >
-                        <ImgButtonStyled src={tagEmpty} />
-                    </InteractionsImgContainerStyled>
                     <ButtonTooltip tooltipText="Favorite" position="bottom">
                         <InteractionsImgContainerStyled
                             onClick={() =>
@@ -174,8 +170,8 @@ class AnnotationCreate extends React.Component<
             <TextBoxContainerStyled>
                 {this.renderHighlight()}
                 {this.renderInput()}
-                {this.renderActionButtons()}
                 {this.renderTagPicker()}
+                {this.renderActionButtons()}
             </TextBoxContainerStyled>
         )
     }
@@ -344,12 +340,6 @@ const ImgButtonStyled = styled.img`
     &:active {
         opacity: 1;
     }
-`
-
-const TagDropdownStyled = styled.span`
-    position: relative;
-    top: 3px;
-    right: 150px;
 `
 
 const Flex = styled.div`

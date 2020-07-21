@@ -171,15 +171,13 @@ class TagPicker extends StatefulUIElement<
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
-                <ClickAway onClickAway={this.props.onClickOutside}>
-                    <OuterSearchBox
-                        onKeyPress={this.handleKeyPress}
-                        onClick={this.handleOuterSearchBoxClick}
-                    >
-                        {this.renderMainContent()}
-                        {this.props.children}
-                    </OuterSearchBox>
-                </ClickAway>
+                <OuterSearchBox
+                    onKeyPress={this.handleKeyPress}
+                    onClick={this.handleOuterSearchBoxClick}
+                >
+                    {this.renderMainContent()}
+                    {this.props.children}
+                </OuterSearchBox>
             </ThemeProvider>
         )
     }

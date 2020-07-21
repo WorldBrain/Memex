@@ -66,9 +66,7 @@ class AnnotationEdit extends React.Component<Props> {
                 fetchInitialTagSuggestions={loadDefaultSuggestions}
                 onKeyDown={this.handleTagInputKeydown}
                 {...this.props}
-                onClickOutsideTagPicker={() =>
-                    this.props.setTagInputActive(false)
-                }
+                handleClose={() => this.props.setTagInputActive(false)}
             />
         )
     }
