@@ -49,13 +49,6 @@ export const setActiveListIndex = createAction(
     'custom-lists/setActiveListIndex',
 )
 
-export const showShareModal = createAction(
-    'custom-lists/showShareModal',
-    (index) => ({ index }),
-)
-
-export const closeShareModal = createAction('custom-lists/closeShareModal')
-
 export const setShowCrowdFundingModal = createAction(
     'custom-lists/setShowCrowdFundingModal',
 )

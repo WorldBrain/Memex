@@ -13,17 +13,14 @@ import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/Del
 import { actions as filterActs } from 'src/search-filters'
 import { selectors as sidebar } from 'src/overview/sidebar-left'
 import { auth, contentSharing } from 'src/util/remote-functions-background'
-import ShareModal from 'src/overview/sharing/components/ShareModal'
+import { show } from 'src/overview/modals/actions'
 
 class ListContainer extends Component {
     static propTypes = {
         getListFromDB: PropTypes.func.isRequired,
         lists: PropTypes.array.isRequired,
-        handleShareButtonClick: PropTypes.func.isRequired,
-        handleCloseShareModal: PropTypes.func.isRequired,
         handleEditBtnClick: PropTypes.func.isRequired,
         isDeleteConfShown: PropTypes.bool.isRequired,
-        shareModalProps: PropTypes.object.isRequired,
         resetListDeleteModal: PropTypes.func.isRequired,
         handleCrossBtnClick: PropTypes.func.isRequired,
         handleListItemClick: PropTypes.func.isRequired,
@@ -33,6 +30,7 @@ class ListContainer extends Component {
         handleDeleteList: PropTypes.func.isRequired,
         toggleCreateListForm: PropTypes.func.isRequired,
         showCreateList: PropTypes.bool.isRequired,
+        showShareModal: PropTypes.func.isRequired,
         showCommonNameWarning: PropTypes.bool.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
         isSidebarLocked: PropTypes.bool.isRequired,
@@ -113,6 +111,10 @@ class ListContainer extends Component {
         }))
     }
 
+    handleShareButtonClick = (i) => () => {
+        return this.props.showShareModal({ list: this.props.lists[i] })
+    }
+
     renderAllLists = () => {
         return this.props.lists.map((list, i) => {
             if (list.isEditing) {
@@ -139,7 +141,7 @@ class ListContainer extends Component {
                     listName={list.name}
                     isMobileList={list.isMobileList}
                     isFiltered={list.isFilterIndex}
-                    onShareButtonClick={this.props.handleShareButtonClick(i)}
+                    onShareButtonClick={this.handleShareButtonClick(i)}
                     onEditButtonClick={this.props.handleEditBtnClick(i)}
                     onListItemClick={this.props.handleListItemClick(list, i)}
                     onAddPageToList={this.props.handleAddPageList(list, i)}
@@ -208,24 +210,7 @@ class ListContainer extends Component {
                     onClose={this.props.resetListDeleteModal}
                     deleteDocs={this.props.handleDeleteList}
                 />
-                {this.props.shareModalProps.isShown && (
-                    <ShareModal
-                        auth={auth}
-                        contentSharing={contentSharing}
-                        isPioneer={this.state.isPioneer}
-                        isShown={this.props.shareModalProps.isShown}
-                        list={
-                            this.props.lists[this.props.shareModalProps.index]
-                        }
-                        onClose={this.props.handleCloseShareModal}
-                        onShareList={(listId) => {}}
-                        onUnshareList={(listId) => {
-                            // TODO: contentSharing.unshareList({ listId })
-                            // TODO: requery list share status
-                            // TODO: move logic to actions
-                        }}
-                    />
-                )}
+}
             </React.Fragment>
         )
     }
@@ -241,7 +226,7 @@ const mapStateToProps = (state) => ({
     isSidebarLocked: sidebar.sidebarLocked(state),
 })
 
-const mapDispatchToProps = (dispatch, getState) => ({
+const mapDispatchToProps = (dispatch, ownProps) => ({
     ...bindActionCreators(
         {
             resetListDeleteModal: actions.resetListDeleteModal,
@@ -254,13 +239,6 @@ const mapDispatchToProps = (dispatch, getState) => ({
         },
         dispatch,
     ),
-    handleCloseShareModal: () => {
-        dispatch(actions.closeShareModal())
-    },
-    handleShareButtonClick: (index) => (event) => {
-        event.preventDefault()
-        dispatch(actions.showShareModal(index))
-    },
     handleEditBtnClick: (index) => (event) => {
         event.preventDefault()
         dispatch(actions.showEditBox(index))
@@ -288,6 +266,17 @@ const mapDispatchToProps = (dispatch, getState) => ({
         dispatch(actions.deletePageList())
         dispatch(filterActs.delListFilter())
     },
+    showShareModal: ({list}) => dispatch(show({
+        modalId: 'ShareModal',
+        options: {
+            list,
+            auth:auth,
+            contentSharing:contentSharing,
+            isPioneer:true,
+            isShown:true,
+        },
+    }
+    )),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListContainer)

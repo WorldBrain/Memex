@@ -104,26 +104,6 @@ const showDeleteConfirm = (state, { id, index }) => {
     }
 }
 
-const showShareModal = (state, { index }) => {
-    return {
-        ...state,
-        shareModalProps: {
-            isShown: true,
-            index,
-        },
-    }
-}
-
-const closeShareModal = (state) => {
-    return {
-        ...state,
-        shareModalProps: {
-            isShown: false,
-            index: -1,
-        },
-    }
-}
-
 const payloadReducer = (key) => (state, payload) => ({
     ...state,
     [key]: payload,
@@ -203,8 +183,6 @@ export default createReducer(
         [actions.deleteList]: deleteList,
         [actions.addPagetoList]: addPageToList,
         [actions.showListDeleteModal]: showDeleteConfirm,
-        [actions.showShareModal]: showShareModal,
-        [actions.closeShareModal]: closeShareModal,
         [actions.toggleListFilterIndex]: toggleListFilterIndex,
         [actions.resetListDeleteModal]: (state) => ({
             ...state,
