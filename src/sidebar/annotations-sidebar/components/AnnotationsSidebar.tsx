@@ -356,7 +356,6 @@ const annotationCardStyle = css`
 
 const NewAnnotationSection = styled.section`
     height: auto;
-    width: 100%;
     background: #fff;
     display: flex;
     flex-direction: column;

@@ -7,6 +7,8 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { LesserLink } from 'src/common-ui/components/design-library/actions/LesserLink'
 import styled from 'styled-components'
 import { Link } from 'src/common-ui/components/design-library/actions/Link'
+import { ButtonTooltip } from 'src/common-ui/components'
+
 
 export interface Props {
     queryTagSuggestions: (query: string) => Promise<string[]>
@@ -28,12 +30,19 @@ class TagInput extends React.Component<Props> {
 
         return (
             <HoverBox>
-                <TopRow>
-                    <LesserLinkStyled
-                        label={'Close'}
+                    <TopRow
                         onClick={(e) => this.props.handleClose(e)}
-                    />
-                </TopRow>
+                    >
+                      <ButtonTooltip
+                        tooltipText="ESC"
+                        position="bottom"
+                        >
+                            <LesserLinkStyled
+                                label={'Close'}
+                                onClick={(e) => this.props.handleClose(e)}
+                            />
+                        </ButtonTooltip>
+                    </TopRow>
                 <TagPicker
                     onUpdateEntrySelection={this.props.updateTags}
                     queryEntries={this.props.queryTagSuggestions}
@@ -66,14 +75,22 @@ class TagInput extends React.Component<Props> {
 }
 
 const LesserLinkStyled = styled(LesserLink)`
-    padding-top: 5px;
-    padding-right: 5px;
 `
 
 const TopRow = styled.div`
     display: flex;
-    flex-direction: row-reverse;
+    justify-content: center;
     flex: 1;
+    margin: 4px 4px 0 4px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
+
+    & span {
+        font-family: sans-serif;
+    }
 `
 
 export default TagInput
