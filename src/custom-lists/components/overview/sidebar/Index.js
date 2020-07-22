@@ -213,7 +213,6 @@ class ListContainer extends Component {
                     onClose={this.props.resetListDeleteModal}
                     deleteDocs={this.props.handleDeleteList}
                 />
-}
             </React.Fragment>
         )
     }
