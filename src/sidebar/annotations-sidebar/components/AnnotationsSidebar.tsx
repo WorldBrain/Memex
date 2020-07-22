@@ -362,8 +362,7 @@ const NewAnnotationSection = styled.section`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    padding-left: 5px;
-    padding-top: 30px;
+    padding: 30px 5px 0px 5px;
 `
 
 const NewAnnotationSeparator = styled.div`

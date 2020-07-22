@@ -313,6 +313,7 @@ const InteractionsImgContainerStyled = styled.button`
     justify-content: center;
     cursor: pointer;
     border-radius: 3px;
+    outline: none;
 
     &:hover {
         opacity: 0.8;
@@ -325,6 +326,7 @@ const InteractionItemsBox = styled.div`
     grid-gap: 3px;
     justify-content: center;
     align-items: center;
+    direction: rtl;
 `
 
 const ImgButtonStyled = styled.img`
@@ -336,6 +338,7 @@ const ImgButtonStyled = styled.img`
     opacity: 0.6;
     background-color: transparent;
     cursor: pointer;
+    outline: none;
 
     &:active {
         opacity: 1;
