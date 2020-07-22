@@ -1,4 +1,4 @@
-export type UserBetaFeatureId = 'reader' | 'copy-paster' | 'pdf-annotations'
+export type UserBetaFeatureId = 'reader' | 'copy-paster' | 'pdf-annotations' | 'sharing-collections'
 
 export interface UserBetaFeature {
     id: UserBetaFeatureId
@@ -24,6 +24,15 @@ const allFeatures: UserBetaFeature[] = [
         description:
             'Create custom templates to copy pages and annotations into your own workflow',
         link: 'https://worldbrain.io/projects/copy-paster',
+        enabled: false,
+        available: true,
+    },
+    {
+        id: 'sharing-collections',
+        name: 'Sharing Collections',
+        description:
+            'Share your collections with pages and (soon) annotations',
+        link: 'https://worldbrain.io/projects/shared-collections',
         enabled: false,
         available: true,
     },

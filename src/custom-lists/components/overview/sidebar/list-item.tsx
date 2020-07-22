@@ -3,6 +3,7 @@ import cx from 'classnames'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { AuthContextInterface } from 'src/authentication/background/types'
 import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
+import { featuresBeta } from 'src/util/remote-functions-background'
 
 import analytics from 'src/analytics'
 
@@ -18,11 +19,13 @@ export interface Props extends AuthContextInterface {
     onAddPageToList: (url: string, isSocialPost: boolean) => void
     onListItemClick: () => void
     plans?: UserPlan[]
+    sharedAccess: boolean
 }
 
 interface State {
     isMouseInside: boolean
     isDragInside: boolean
+    sharedAccess: boolean
 }
 
 class ListItem extends Component<Props, State> {
@@ -33,11 +36,13 @@ class ListItem extends Component<Props, State> {
         this.state = {
             isMouseInside: false,
             isDragInside: false,
+            sharedAccess: false,
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         this.attachEventListeners()
+        this.getSharedAccess()
     }
 
     componentWillUnmount() {
@@ -81,6 +86,14 @@ class ListItem extends Component<Props, State> {
             isMouseInside: true,
         }))
     }
+
+    async getSharedAccess() {
+        if (await featuresBeta.getFeatureState('sharing-collections')) {
+            this.setState({
+                sharedAccess: true,
+            })
+        }
+     }
 
     private handleMouseLeave = () => {
         this.setState((state) => ({
@@ -156,7 +169,7 @@ class ListItem extends Component<Props, State> {
                 <div className={styles.buttonContainer}>
                     {!this.props.isMobileList && this.state.isMouseInside && (
                         <React.Fragment>
-                            {this.props.currentUser?.authorizedFeatures?.includes('beta') &&
+                            {this.state.sharedAccess &&
                                 <button
                                     className={cx(
                                         styles.shareButton,

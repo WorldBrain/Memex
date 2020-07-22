@@ -47,6 +47,7 @@ class ListContainer extends Component {
             showWarning: false,
             isPioneer: false,
             displayName: null,
+            shareAccess: false,
         }
     }
 
@@ -116,6 +117,7 @@ class ListContainer extends Component {
     }
 
     renderAllLists = () => {
+
         return this.props.lists.map((list, i) => {
             if (list.isEditing) {
                 return (
@@ -165,6 +167,7 @@ class ListContainer extends Component {
         )
 
     render() {
+
         return (
             <React.Fragment>
                 <MyCollection
