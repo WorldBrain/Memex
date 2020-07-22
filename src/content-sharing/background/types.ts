@@ -9,19 +9,20 @@ export interface ContentSharingInterface {
 }
 
 export type ContentSharingAction =
-    | AddSharedListEntryAction
+    | AddSharedListEntriesAction
     | RemoveSharedListEntryAction
     | ChangeSharedListTitleAction
     | ChangeSharedListDescriptionAction
-export interface AddSharedListEntryAction {
-    type: 'add-shared-list-entry'
+export interface AddSharedListEntriesAction {
+    type: 'add-shared-list-entries'
     localListId: number
     remoteListId: string
-    data: {
+    data: Array<{
+        createdWhen: number | '$now'
         entryTitle: string
         originalUrl: string
         normalizedUrl: string
-    }
+    }>
 }
 export interface RemoveSharedListEntryAction {
     type: 'remove-shared-list-entry'

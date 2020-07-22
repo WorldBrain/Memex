@@ -1,4 +1,5 @@
 import expect from 'expect'
+import sinon from 'sinon'
 
 import {
     backgroundIntegrationTestSuite,
@@ -104,8 +105,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
-                                        sharedList:
+                                        sharedList: parseInt(
                                             listShareResult.remoteListId,
+                                            10,
+                                        ),
                                         createdWhen: localListEntries[0].createdAt.getTime(),
                                         updatedWhen: expect.any(Number),
                                         originalUrl: 'https://www.eggs.com/foo',
@@ -115,8 +118,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
-                                        sharedList:
+                                        sharedList: parseInt(
                                             listShareResult.remoteListId,
+                                            10,
+                                        ),
                                         createdWhen: localListEntries[1].createdAt.getTime(),
                                         updatedWhen: expect.any(Number),
                                         originalUrl: 'https://www.spam.com/foo',
@@ -340,6 +345,148 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
 
                                 const serverStorage = await setup.getServerStorage()
+                                expect(
+                                    await serverStorage.storageManager.operation(
+                                        'findObjects',
+                                        'sharedListEntry',
+                                        {},
+                                    ),
+                                ).toEqual([
+                                    expect.objectContaining({
+                                        entryTitle: 'Eggs.com title',
+                                    }),
+                                ])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            `should schedule a retry when we cannot upload list entries`,
+            { mark: true },
+            () => {
+                let localListId: number
+
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                setup.authService.setUser(TEST_USER)
+
+                                localListId = await createTestList(setup)
+                                await setup.backgroundModules.contentSharing.shareList(
+                                    { listId: localListId },
+                                )
+                                const setTimeout = sinon.fake()
+                                setup.backgroundModules.contentSharing._setTimeout = setTimeout as any
+
+                                const serverStorage = await setup.getServerStorage()
+                                const sharingStorage =
+                                    serverStorage.storageModules.contentSharing
+
+                                sinon.replace(
+                                    sharingStorage,
+                                    'createListEntries',
+                                    async () => {
+                                        throw Error(
+                                            `There's a monkey in your WiFi`,
+                                        )
+                                    },
+                                )
+                                try {
+                                    await expect(
+                                        setup.backgroundModules.contentSharing.shareListEntries(
+                                            { listId: localListId },
+                                        ),
+                                    ).rejects.toThrow(
+                                        `There's a monkey in your WiFi`,
+                                    )
+                                } finally {
+                                    sinon.restore()
+                                }
+                                expect(setTimeout.calledOnce).toBe(true)
+                                await setTimeout.firstCall.args[0]()
+
+                                expect(
+                                    await serverStorage.storageManager.operation(
+                                        'findObjects',
+                                        'sharedListEntry',
+                                        {},
+                                    ),
+                                ).toEqual([
+                                    expect.objectContaining({
+                                        entryTitle: 'Eggs.com title',
+                                    }),
+                                    expect.objectContaining({
+                                        entryTitle: 'Spam.com title',
+                                    }),
+                                ])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            `should schedule a retry when we cannot upload changes`,
+            { mark: true },
+            () => {
+                let localListId: number
+
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                setup.authService.setUser(TEST_USER)
+
+                                localListId = await createTestList(setup)
+                                await setup.backgroundModules.contentSharing.shareList(
+                                    { listId: localListId },
+                                )
+                                await setup.backgroundModules.contentSharing.shareListEntries(
+                                    { listId: localListId },
+                                )
+
+                                const setTimeout = sinon.fake()
+                                setup.backgroundModules.contentSharing._setTimeout = setTimeout as any
+
+                                const serverStorage = await setup.getServerStorage()
+                                const sharingStorage =
+                                    serverStorage.storageModules.contentSharing
+
+                                sinon.replace(
+                                    sharingStorage,
+                                    'removeListEntries',
+                                    async () => {
+                                        throw Error(
+                                            `There's a monkey in your WiFi`,
+                                        )
+                                    },
+                                )
+                                try {
+                                    await expect(
+                                        setup.backgroundModules.customLists.removePageFromList(
+                                            {
+                                                id: localListId,
+                                                url: 'https://www.spam.com/foo',
+                                            },
+                                        ),
+                                    ).rejects.toThrow(
+                                        `There's a monkey in your WiFi`,
+                                    )
+                                } finally {
+                                    sinon.restore()
+                                }
+                                expect(setTimeout.calledOnce).toBe(true)
+                                await setTimeout.firstCall.args[0]()
+
+                                await setup.backgroundModules.contentSharing.waitForListSync(
+                                    {
+                                        localListId,
+                                    },
+                                )
+
                                 expect(
                                     await serverStorage.storageManager.operation(
                                         'findObjects',

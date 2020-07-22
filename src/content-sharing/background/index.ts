@@ -1,5 +1,9 @@
 import StorageManager from '@worldbrain/storex'
-import { ContentSharingInterface, ContentSharingAction } from './types'
+import {
+    ContentSharingInterface,
+    ContentSharingAction,
+    AddSharedListEntriesAction,
+} from './types'
 import { ContentSharingStorage, ContentSharingClientStorage } from './storage'
 import CustomListStorage from 'src/custom-lists/background/storage'
 import { AuthBackground } from 'src/authentication/background'
@@ -9,18 +13,23 @@ import { PageListEntry } from 'src/custom-lists/background/types'
 import createResolvable, { Resolvable } from '@josephg/resolvable'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
-interface ListPush {
-    startedWhen: number
-    finishedWhen?: number
-    promise: Resolvable<void>
-}
+// interface ListPush {
+//     actionsPending: number
+//     promise: Resolvable<void> | null
+// }
 
 export default class ContentSharingBackground {
     remoteFunctions: ContentSharingInterface
     storage: ContentSharingClientStorage
-    listPushes: {
-        [localListId: number]: ListPush
-    } = {}
+
+    _hasPendingActions = false
+    _pendingActionsRetry?: Resolvable<void>
+    _executingPendingActions?: Resolvable<{ result: 'success' | 'error' }>
+    private readonly ACTION_RETRY_INTERVAL = 1000 * 60 * 5
+
+    // _listPushes: {
+    //     [localListId: number]: ListPush
+    // } = {}
 
     constructor(
         private options: {
@@ -50,6 +59,17 @@ export default class ContentSharingBackground {
             waitForListSync: this.waitForListSync,
         }
     }
+
+    async setup() {
+        try {
+            await this.executePendingActions()
+        } catch (e) {
+            // Log the error, but don't stop the entire extension setup
+            // when we can't reach the sharing back-end
+            console.error(e)
+        }
+    }
+    _setTimeout = setTimeout
 
     shareList: ContentSharingInterface['shareList'] = async (options) => {
         const localList = await this.options.customLists.fetchListById(
@@ -110,88 +130,105 @@ export default class ContentSharingBackground {
             normalizedPageUrls: pages.map((entry) => entry.pageUrl),
         })
 
-        const contentSharing = await this.options.getContentSharing()
-        await contentSharing.createListEntries({
-            listReference: contentSharing.getSharedListReferenceFromLinkID(
-                remoteId,
-            ),
-            listEntries: pages.map((entry) => ({
-                createdWhen: entry.createdAt?.getTime() ?? '$now',
-                entryTitle: pageTitles[entry.pageUrl],
-                normalizedUrl: entry.pageUrl,
-                originalUrl: entry.fullUrl,
-            })),
-            userReference: { type: 'user-reference', id: userId },
+        const data: AddSharedListEntriesAction['data'] = pages.map((entry) => ({
+            createdWhen: entry.createdAt?.getTime() ?? '$now',
+            entryTitle: pageTitles[entry.pageUrl],
+            normalizedUrl: entry.pageUrl,
+            originalUrl: entry.fullUrl,
+        }))
+        await this.scheduleAction({
+            type: 'add-shared-list-entries',
+            localListId: options.listId,
+            remoteListId: remoteId,
+            data,
         })
     }
 
     waitForListSync: ContentSharingInterface['waitForListSync'] = async (
         options,
     ) => {
-        return this.listPushes[options.localListId]?.promise
+        await this._executingPendingActions
     }
 
     async scheduleAction(action: ContentSharingAction) {
-        await this.executeAction(action)
+        this._hasPendingActions = true
+        await this.storage.queueAction({ action })
+        if (!this._pendingActionsRetry) {
+            await this.executePendingActions()
+        }
+    }
+
+    async executePendingActions() {
+        if (this._executingPendingActions || !this._hasPendingActions) {
+            return
+        }
+
+        const executingPendingActions = (this._executingPendingActions = createResolvable())
+        if (this._pendingActionsRetry) {
+            this._pendingActionsRetry.resolve()
+            delete this._pendingActionsRetry
+        }
+
+        try {
+            while (true) {
+                const action = await this.storage.peekAction()
+                if (!action) {
+                    break
+                }
+
+                await this.executeAction(action)
+                await this.storage.removeAction({ actionId: action.id })
+            }
+            this._hasPendingActions = false
+            executingPendingActions.resolve({ result: 'success' })
+        } catch (e) {
+            this._pendingActionsRetry = createResolvable()
+            executingPendingActions.resolve({ result: 'error' })
+            this._setTimeout(
+                () => this.executePendingActions(),
+                this.ACTION_RETRY_INTERVAL,
+            )
+            throw e
+        } finally {
+            delete this._executingPendingActions
+        }
     }
 
     async executeAction(action: ContentSharingAction) {
-        if (action.type === 'add-shared-list-entry') {
-            await this.doPush({ localListId: action.localListId }, async () => {
-                const userId = (
-                    await this.options.auth.authService.getCurrentUser()
-                )?.id
-                if (!userId) {
-                    throw new Error(
-                        `Tried to share list without being authenticated`,
-                    )
-                }
-                const contentSharing = await this.options.getContentSharing()
-                await contentSharing.createListEntries({
-                    listReference: contentSharing.getSharedListReferenceFromLinkID(
-                        action.remoteListId,
-                    ),
-                    listEntries: [action.data],
-                    userReference: { type: 'user-reference', id: userId },
-                })
+        if (action.type === 'add-shared-list-entries') {
+            const userId = (
+                await this.options.auth.authService.getCurrentUser()
+            )?.id
+            if (!userId) {
+                throw new Error(
+                    `Tried to share list without being authenticated`,
+                )
+            }
+            const contentSharing = await this.options.getContentSharing()
+            await contentSharing.createListEntries({
+                listReference: contentSharing.getSharedListReferenceFromLinkID(
+                    action.remoteListId,
+                ),
+                listEntries: action.data,
+                userReference: { type: 'user-reference', id: userId },
             })
         } else if (action.type === 'remove-shared-list-entry') {
-            await this.doPush({ localListId: action.localListId }, async () => {
-                const contentSharing = await this.options.getContentSharing()
-                await contentSharing.removeListEntries({
-                    listReference: contentSharing.getSharedListReferenceFromLinkID(
-                        action.remoteListId,
-                    ),
-                    normalizedUrl: action.normalizedUrl,
-                })
+            const contentSharing = await this.options.getContentSharing()
+            await contentSharing.removeListEntries({
+                listReference: contentSharing.getSharedListReferenceFromLinkID(
+                    action.remoteListId,
+                ),
+                normalizedUrl: action.normalizedUrl,
             })
         } else if (action.type === 'change-shared-list-title') {
-            await this.doPush({ localListId: action.localListId }, async () => {
-                const contentSharing = await this.options.getContentSharing()
-                await contentSharing.updateListTitle(
-                    contentSharing.getSharedListReferenceFromLinkID(
-                        action.remoteListId,
-                    ),
-                    action.newTitle,
-                )
-            })
+            const contentSharing = await this.options.getContentSharing()
+            await contentSharing.updateListTitle(
+                contentSharing.getSharedListReferenceFromLinkID(
+                    action.remoteListId,
+                ),
+                action.newTitle,
+            )
         }
-    }
-
-    async doPush(
-        options: { localListId: number },
-        execute: () => Promise<void>,
-    ) {
-        await this.listPushes[options.localListId]?.promise
-
-        const push: ListPush = {
-            startedWhen: Date.now(),
-            promise: createResolvable(),
-        }
-        this.listPushes[options.localListId] = push
-        await execute()
-        push.finishedWhen = Date.now()
-        push.promise.resolve()
     }
 
     async handlePostStorageChange(event: StorageOperationEvent<'post'>) {
@@ -215,15 +252,19 @@ export default class ContentSharingBackground {
                     })
                     const pageTitle = pageTitles[pageUrl]
                     await this.scheduleAction({
-                        type: 'add-shared-list-entry',
+                        type: 'add-shared-list-entries',
                         localListId,
                         remoteListId,
-                        data: {
-                            entryTitle: pageTitle,
-                            normalizedUrl: pageUrl,
-                            originalUrl:
-                                'https://' + normalizeUrl(listEntry.fullUrl),
-                        },
+                        data: [
+                            {
+                                createdWhen: Date.now(),
+                                entryTitle: pageTitle,
+                                normalizedUrl: pageUrl,
+                                originalUrl:
+                                    'https://' +
+                                    normalizeUrl(listEntry.fullUrl),
+                            },
+                        ],
                     })
                 }
             } else if (change.type === 'modify') {

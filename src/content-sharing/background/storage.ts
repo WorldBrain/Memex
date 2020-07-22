@@ -3,6 +3,7 @@ import {
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
+import { ContentSharingAction } from './types'
 
 export { default as ContentSharingStorage } from '@worldbrain/memex-common/lib/content-sharing/storage'
 
@@ -21,8 +22,10 @@ export class ContentSharingClientStorage extends StorageModule {
                 contentSharingAction: {
                     version: STORAGE_VERSIONS[20].version,
                     fields: {
+                        createdWhen: { type: 'timestamp' },
                         action: { type: 'json' },
                     },
+                    indices: [{ field: 'createdWhen' }],
                 },
             },
             operations: {
@@ -45,6 +48,20 @@ export class ContentSharingClientStorage extends StorageModule {
                     operation: 'findObjects',
                     collection: 'pages',
                     args: { url: { $in: '$normalizedPageUrls' } },
+                },
+                createAction: {
+                    operation: 'createObject',
+                    collection: 'contentSharingAction',
+                },
+                getOldestAction: {
+                    operation: 'findObject',
+                    collection: 'contentSharingAction',
+                    args: [{}, { order: [['createdWhen', 'asc']] }],
+                },
+                deleteActionById: {
+                    operation: 'deleteObject',
+                    collection: 'contentSharingAction',
+                    args: { id: '$actionId' },
                 },
             },
         }
@@ -74,17 +91,43 @@ export class ContentSharingClientStorage extends StorageModule {
         return titles
     }
 
-    async areListsShared(options: { localIds: number[] }) {
-        const allMetadata = await this.operation('getMetadataForLists', options)
+    async areListsShared(params: { localIds: number[] }) {
+        const allMetadata = await this.operation('getMetadataForLists', params)
         const shared: { [listId: number]: boolean } = {}
         for (const listMetadata of allMetadata) {
             shared[listMetadata.localId] = true
         }
-        for (const localId of options.localIds) {
+        for (const localId of params.localIds) {
             if (!shared[localId]) {
                 shared[localId] = false
             }
         }
         return shared
+    }
+
+    async queueAction(params: {
+        action: ContentSharingAction
+    }): Promise<{ actionId: number }> {
+        const { object } = await this.operation('createAction', {
+            createdWhen: '$now',
+            ...params,
+        })
+        return { actionId: object.id }
+    }
+
+    async peekAction(): Promise<
+        (ContentSharingAction & { id: number }) | null
+    > {
+        const firstAction = await this.operation('getOldestAction', {})
+        return firstAction
+            ? {
+                  id: firstAction.id,
+                  ...firstAction.action,
+              }
+            : null
+    }
+
+    async removeAction(params: { actionId: number }) {
+        await this.operation('deleteActionById', params)
     }
 }
