@@ -1025,6 +1025,7 @@ function mobileSyncTests(suiteOptions: {
             pageUrl: 'test.com',
             pageTitle: 'This is a test page',
             body: 'this is some highlighted text from the page',
+            comment: null,
         })
 
         const beforeSync = {
@@ -1112,6 +1113,7 @@ function mobileSyncTests(suiteOptions: {
             pageUrl: testPage.fullUrl,
             body: 'Test note',
             selector: 'sel.ect',
+            comment: null,
         })
 
         await devices.mobile.services.sync.continuousSync.forceIncrementalSync()
