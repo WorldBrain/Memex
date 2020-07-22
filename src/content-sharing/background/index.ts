@@ -130,18 +130,27 @@ export default class ContentSharingBackground {
             normalizedPageUrls: pages.map((entry) => entry.pageUrl),
         })
 
-        const data: AddSharedListEntriesAction['data'] = pages.map((entry) => ({
-            createdWhen: entry.createdAt?.getTime() ?? '$now',
-            entryTitle: pageTitles[entry.pageUrl],
-            normalizedUrl: entry.pageUrl,
-            originalUrl: entry.fullUrl,
-        }))
-        await this.scheduleAction({
-            type: 'add-shared-list-entries',
-            localListId: options.listId,
-            remoteListId: remoteId,
-            data,
-        })
+        const chunkSize = 100
+        for (
+            let startIndex = 0;
+            startIndex < pages.length;
+            startIndex += chunkSize
+        ) {
+            const data: AddSharedListEntriesAction['data'] = pages
+                .slice(startIndex, startIndex + chunkSize)
+                .map((entry) => ({
+                    createdWhen: entry.createdAt?.getTime() ?? '$now',
+                    entryTitle: pageTitles[entry.pageUrl],
+                    normalizedUrl: entry.pageUrl,
+                    originalUrl: entry.fullUrl,
+                }))
+            await this.scheduleAction({
+                type: 'add-shared-list-entries',
+                localListId: options.listId,
+                remoteListId: remoteId,
+                data,
+            })
+        }
     }
 
     waitForListSync: ContentSharingInterface['waitForListSync'] = async (
