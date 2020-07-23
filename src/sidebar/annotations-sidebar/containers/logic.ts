@@ -491,6 +491,8 @@ export class SidebarContainerLogic extends UILogic<
             now: () => Date.now(),
         })
 
+        const createdWhen = new Date()
+
         const annotation = {
             url,
             pageUrl,
@@ -499,8 +501,8 @@ export class SidebarContainerLogic extends UILogic<
             tags: event.tags,
             isBookmarked: event.isBookmarked,
             selector: event.anchor,
-            createdWhen: new Date(),
-            lastEdited: new Date(),
+            createdWhen,
+            lastEdited: createdWhen,
         } as Annotation
 
         // TODO: (sidebar-refactor) there was a env condition removed here to do with indexing/skip indexing, is it needed when creating an annotation for a page here?
@@ -772,7 +774,7 @@ export class SidebarContainerLogic extends UILogic<
             (annot) => annot.url === event.annotationUrl,
         )
         const annotation = previousState.annotations[resultIndex]
-        const isBookmarked = !!annotation?.isBookmarked
+        const isBookmarked = !annotation.isBookmarked
 
         this.options.annotationsCache.update({
             ...annotation,

@@ -1,6 +1,5 @@
 import { Annotation } from 'src/annotations/types'
 import TypedEventEmitter from 'typed-emitter'
-import { Observable } from 'rxjs'
 import { EventEmitter } from 'events'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
@@ -13,9 +12,8 @@ export const createAnnotationsCache = (bgModules: {
         backendOperations: {
             load: async (pageUrl) =>
                 bgModules.annotations.listAnnotationsByPageUrl({ pageUrl }),
-            create: async (annotation) => {
-                await bgModules.annotations.createAnnotation(annotation)
-            },
+            create: async (annotation) =>
+                bgModules.annotations.createAnnotation(annotation),
             async update(annotation) {
                 await bgModules.annotations.updateAnnotationBookmark({
                     url: annotation.url,
@@ -53,7 +51,7 @@ export interface AnnotationsCacheDependencies {
             pageUrl: string,
             args?: { limit?: number; skip?: number },
         ) => Promise<Annotation[]> // url should become one concrete example of a contentFingerprint to load annotations for
-        create: (annotation: Annotation) => Promise<void>
+        create: (annotation: Annotation) => Promise<string>
         update: (annotation: Annotation) => Promise<void>
         updateTags: (
             annotationUrl: Annotation['url'],
@@ -84,12 +82,16 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     constructor(private dependencies: AnnotationsCacheDependencies) {}
 
     load = async (url, args = {}) => {
-        this._annotations = await this.dependencies.backendOperations.load(
+        this.annotations = await this.dependencies.backendOperations.load(
             url,
             args,
         )
         this.annotationChanges.emit('load', this._annotations)
         this.annotationChanges.emit('newState', this._annotations)
+    }
+
+    set annotations(annotations: Annotation[]) {
+        this._annotations = formatAnnotations(annotations)
     }
 
     get annotations() {
@@ -100,6 +102,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     }
 
     create = (annotation: Annotation) => {
+        const { backendOperations } = this.dependencies
         const stateBeforeModifications = this._annotations
         this._annotations.push(annotation)
         this.annotationChanges.emit('created', annotation)
@@ -107,7 +110,8 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         const asyncUpstream = async () => {
             try {
-                await this.dependencies.backendOperations.create(annotation)
+                const annotUrl = await backendOperations.create(annotation)
+                await backendOperations.updateTags(annotUrl, annotation.tags)
             } catch (e) {
                 this._annotations = stateBeforeModifications
                 this.annotationChanges.emit(
@@ -127,7 +131,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             (existingAnnotation) => existingAnnotation.url === annotation.url,
         )
 
-        this._annotations = [
+        this.annotations = [
             ...stateBeforeModifications.slice(0, resultIndex),
             annotation,
             ...stateBeforeModifications.slice(resultIndex + 1),
@@ -139,10 +143,18 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         const asyncUpstream = async () => {
             try {
                 await this.dependencies.backendOperations.update(annotation)
-                await this.dependencies.backendOperations.updateTags(
-                    annotation.url,
-                    annotation.tags,
-                )
+
+                if (
+                    haveTagsChanged(
+                        stateBeforeModifications[resultIndex].tags,
+                        annotation.tags,
+                    )
+                ) {
+                    await this.dependencies.backendOperations.updateTags(
+                        annotation.url,
+                        annotation.tags,
+                    )
+                }
             } catch (e) {
                 this._annotations = stateBeforeModifications
                 this.annotationChanges.emit(
@@ -162,7 +174,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             (existingAnnotation) => existingAnnotation.url === annotation.url,
         )
 
-        this._annotations = [
+        this.annotations = [
             ...this._annotations.slice(0, resultIndex),
             ...this._annotations.slice(resultIndex + 1),
         ]
@@ -184,4 +196,21 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         }
         asyncUpstream().then(() => true)
     }
+}
+
+function haveTagsChanged(before: string[], after: string[]): boolean {
+    if (before.length !== after.length) {
+        return true
+    }
+
+    const afterSet = new Set(after)
+    return !before.every((tag) => afterSet.has(tag))
+}
+
+function formatAnnotations(annotations: Annotation[]): Annotation[] {
+    return annotations.map((a) => ({
+        ...a,
+        tags: a.tags ?? [],
+        isBookmarked: a.isBookmarked ?? false,
+    }))
 }

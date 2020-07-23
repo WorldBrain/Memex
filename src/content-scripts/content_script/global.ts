@@ -264,7 +264,6 @@ export async function main() {
         await inPageUI.setupTooltip()
     }
 
-    await inPageUI.loadComponent('highlights')
     const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
     if (areHighlightsEnabled) {
         if (!annotationsCache.isEmpty) {
