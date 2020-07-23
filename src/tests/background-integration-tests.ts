@@ -124,6 +124,7 @@ export async function setupBackgroundIntegrationTest(options?: {
     backgroundModules.customLists._createPage =
         backgroundModules.search.searchIndex.createTestPage
     backgroundModules.sync.initialSync.wrtc = wrtc
+    backgroundModules.sync.initialSync.debug = false
 
     registerBackgroundModuleCollections(storageManager, backgroundModules)
 

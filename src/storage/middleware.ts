@@ -21,6 +21,17 @@ export async function setStorageMiddleware(
         options.modifyMiddleware ?? ((middleware) => middleware)
 
     const syncedCollections = new Set(SYNCED_COLLECTIONS)
+    const changeWatchMiddleware = new ChangeWatchMiddleware({
+        storageManager,
+        shouldWatchCollection: (collection) =>
+            syncedCollections.has(collection),
+        postprocessOperation: async (event) => {
+            await Promise.all([
+                options.storexHub?.handlePostStorageChange(event),
+                options.contentSharing?.handlePostStorageChange(event),
+            ])
+        },
+    })
     storageManager.setMiddleware(
         modifyMiddleware([
             // {
@@ -38,18 +49,25 @@ export async function setStorageMiddleware(
             //         return result
             //     },
             // },
-            new ChangeWatchMiddleware({
-                storageManager,
-                shouldWatchCollection: (collection) =>
-                    syncedCollections.has(collection),
-                postprocessOperation: async (event) => {
-                    await Promise.all([
-                        options.storexHub?.handlePostStorageChange(event),
-                        options.contentSharing?.handlePostStorageChange(event),
-                    ])
-                },
-            }),
+            changeWatchMiddleware,
             await options.syncService.createSyncLoggingMiddleware(),
         ]),
     )
+    options.syncService.executeReconciliationOperation = async (
+        operationName: string,
+        ...operationArgs: any[]
+    ) => {
+        return changeWatchMiddleware.process({
+            operation: [operationName, ...operationArgs],
+            extraData: {},
+            next: {
+                process: (context) => {
+                    return storageManager.backend.operation(
+                        context.operation[0],
+                        ...context.operation.slice(1),
+                    )
+                },
+            },
+        })
+    }
 }
