@@ -44,6 +44,14 @@ export default class TagStorage extends StorageModule {
         },
     })
 
+    async fetchAnnotationTags({ url }: { url: string }): Promise<string[]> {
+        const tags: Array<{
+            name: string
+        }> = await this.operation('findAllTagsOfPage', { url })
+
+        return tags.map(({ name }) => name)
+    }
+
     async fetchPageTags({ url }: { url: string }): Promise<string[]> {
         const tags: Array<{
             name: string
@@ -59,6 +67,14 @@ export default class TagStorage extends StorageModule {
         }
 
         url = normalizeUrl(url, {})
+        return this.operation('createTag', { name, url })
+    }
+
+    async addAnnotationTag({ name, url }: { name: string; url: string }) {
+        if (!VALID_TAG_PATTERN.test(name)) {
+            throw new Error(`Attempted to create a badly shaped tag: ${name}`)
+        }
+
         return this.operation('createTag', { name, url })
     }
 

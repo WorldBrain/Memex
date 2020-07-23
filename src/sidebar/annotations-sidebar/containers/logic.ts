@@ -741,7 +741,12 @@ export class SidebarContainerLogic extends UILogic<
         const annotation = previousState.annotations[resultIndex]
         const comment = form.commentText.trim()
 
-        this.options.annotationsCache.update({ ...annotation, comment })
+        this.options.annotationsCache.update({
+            ...annotation,
+            comment,
+            tags: form.tags,
+        })
+
         this.emitMutation({
             annotationModes: {
                 [event.context]: {

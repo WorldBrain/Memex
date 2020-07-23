@@ -28,7 +28,10 @@ export const createAnnotationsCache = (bgModules: {
             delete: async (annotation) =>
                 bgModules.annotations.deleteAnnotation(annotation.url),
             updateTags: async (annotationUrl, tags) =>
-                bgModules.tags.setTagsForPage({ url: annotationUrl, tags }),
+                bgModules.tags.setTagsForAnnotation({
+                    url: annotationUrl,
+                    tags,
+                }),
         },
     })
 

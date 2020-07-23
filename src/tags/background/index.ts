@@ -50,7 +50,7 @@ export default class TagsBackground {
             delTag: bindMethod(this, 'delTag'),
             addTagToPage: bindMethod(this, 'addTagToPage'),
             updateTagForPage: bindMethod(this, 'updateTagForPage'),
-            setTagsForPage: bindMethod(this, 'setTagsForPage'),
+            setTagsForAnnotation: bindMethod(this, 'setTagsForAnnotation'),
             fetchPageTags: bindMethod(this, 'fetchPageTags'),
             addTagsToOpenTabs: bindMethod(this, 'addTagsToOpenTabs'),
             delTagsFromOpenTabs: bindMethod(this, 'delTagsFromOpenTabs'),
@@ -153,6 +153,10 @@ export default class TagsBackground {
         return this.storage.fetchPageTags({ url })
     }
 
+    async fetchAnnotationTags({ url }: { url: string }) {
+        return this.storage.fetchAnnotationTags({ url })
+    }
+
     async addTagToExistingUrl({ tag, url }: { tag: string; url: string }) {
         this.options.analytics.trackEvent({
             category: 'Tags',
@@ -160,6 +164,19 @@ export default class TagsBackground {
         })
         await this._updateTagSuggestionsCache({ added: tag })
         return this.storage.addTag({ name: tag, url })
+    }
+
+    async addTagsToExistingAnnotationUrl({
+        tags,
+        url,
+    }: {
+        tags: string[]
+        url: string
+    }) {
+        for (const tag of tags) {
+            await this._updateTagSuggestionsCache({ added: tag })
+            await this.storage.addAnnotationTag({ name: tag, url })
+        }
     }
 
     async addTagsToExistingUrl({ tags, url }: { tags: string[]; url: string }) {
@@ -261,21 +278,24 @@ export default class TagsBackground {
         return this.storage.deleteTagsForPage({ url, tags })
     }
 
-    async setTagsForPage({
+    async setTagsForAnnotation({
         url,
         tags: newTags,
     }: {
         url: string
         tags: string[]
     }) {
-        const existingTags = await this.fetchPageTags({ url })
+        const existingTags = await this.fetchAnnotationTags({ url })
         const existingTagsSet = new Set(existingTags)
         const newTagsSet = new Set(newTags)
 
         const toAdd = newTags.filter((tag) => !existingTagsSet.has(tag))
         const toDelete = existingTags.filter((tag) => !newTagsSet.has(tag))
 
-        await this.addTagsToExistingUrl({ url, tags: toAdd })
+        await this.addTagsToExistingAnnotationUrl({
+            url,
+            tags: toAdd,
+        })
         await this.deleteTagsForPage({ url, tags: toDelete })
     }
 }

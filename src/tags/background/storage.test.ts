@@ -23,7 +23,7 @@ describe('Tags background interface', () => {
 
             expect(await tagsModule.fetchPageTags({ url })).toEqual([])
 
-            await tagsModule.setTagsForPage({ url, tags: testTags })
+            await tagsModule.setTagsForAnnotation({ url, tags: testTags })
 
             expect(await tagsModule.fetchPageTags({ url })).toEqual(
                 expect.arrayContaining(testTags),
@@ -46,7 +46,7 @@ describe('Tags background interface', () => {
                 expect.arrayContaining(testTagsBefore),
             )
 
-            await tagsModule.setTagsForPage({ url, tags: testTagsAfter })
+            await tagsModule.setTagsForAnnotation({ url, tags: testTagsAfter })
 
             expect(await tagsModule.fetchPageTags({ url })).toEqual(
                 expect.arrayContaining(testTagsAfter),
