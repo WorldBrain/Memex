@@ -12,6 +12,7 @@ import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watc
 import { PageListEntry } from 'src/custom-lists/background/types'
 import createResolvable, { Resolvable } from '@josephg/resolvable'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { Analytics } from 'src/analytics/types'
 
 // interface ListPush {
 //     actionsPending: number
@@ -36,6 +37,7 @@ export default class ContentSharingBackground {
             storageManager: StorageManager
             customLists: CustomListStorage
             auth: AuthBackground
+            analytics: Analytics
             getContentSharing: () => Promise<ContentSharingStorage>
         },
     ) {
@@ -100,6 +102,11 @@ export default class ContentSharingBackground {
         await this.storage.storeListId({
             localId: options.listId,
             remoteId: contentSharing.getSharedListLinkID(listReference),
+        })
+
+        this.options.analytics.trackEvent({
+            category: 'ContentSharing',
+            action: 'shareList',
         })
 
         return {

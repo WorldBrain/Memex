@@ -48,6 +48,11 @@ export const ANALYTICS_EVENTS: {
             description: 'The creation of an annotation without tags',
         },
     },
+    ContentSharing: {
+        shareList: {
+            description: 'A list is newly shared',
+        },
+    },
     Pages: {
         deleteViaRegexBlacklist: {
             description:

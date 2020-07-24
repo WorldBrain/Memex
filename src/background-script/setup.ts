@@ -323,6 +323,7 @@ export function createBackgroundModules(options: {
             storageManager,
             customLists: customLists.storage,
             auth,
+            analytics: options.analyticsManager,
             getContentSharing: async () =>
                 (await options.getServerStorage()).storageModules
                     .contentSharing,
