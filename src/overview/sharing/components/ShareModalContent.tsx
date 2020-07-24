@@ -96,15 +96,14 @@ const LinkBox = styled.div`
 `
 
 const UploadingContainer = styled.div`
-    margin: 30px 0;
-    padding: 20px 0;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    flex-direction: row;
+    justify-content: flex-end;
     align-items: center;
-    border-radius: 3px;
-    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
-        rgba(15, 15, 15, 0.1) 0px 2px 4px;
+
+    & div {
+        margin-left: 10px;
+    }
 `
 
 const BetaInfoContainer = styled.div`
@@ -112,6 +111,10 @@ const BetaInfoContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
+    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
+        rgba(15, 15, 15, 0.1) 0px 2px 4px;
+    border-radius: 3px;
+    padding: 20px;
 `
 
 
@@ -187,6 +190,15 @@ export default class ShareModalContent extends PureComponent<
                             onClick={this.props.onClickToggle}
                         />
                     }
+                    {this.props.listCreationState === 'running' && (
+                        <UploadingContainer>
+                            <TypographyHeadingNormal>
+                                Uploading Collection
+                            </TypographyHeadingNormal>
+                            <LoadingIndicator />
+                        </UploadingContainer>
+                    )}
+
                 </InstructionsContainer>
 
                 <LinkContainer>
@@ -211,20 +223,6 @@ export default class ShareModalContent extends PureComponent<
                         )}
                     </LinkBox>
                 </LinkContainer>
-
-                {this.props.listCreationState === 'running' && (
-                    <UploadingContainer>
-                        <LoadingIndicator />
-                        <Margin20/>
-                        <TypographyHeadingNormal>
-                            Uploading Collection
-                        </TypographyHeadingNormal>
-                        <TypographySubTextNormal>
-                            You can close this popup
-                        </TypographySubTextNormal>
-                    </UploadingContainer>
-                )}
-
                 <BetaInfoContainer>
                     <Text>
                         This is a beta feature. We want to learn more about what you need to integrate it into your workflow. 
