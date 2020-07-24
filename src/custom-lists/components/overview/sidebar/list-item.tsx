@@ -13,7 +13,7 @@ export interface Props extends AuthContextInterface {
     listName: string
     isMobileList: boolean
     isFiltered: boolean
-    onShareButtonClick: React.MouseEventHandler<HTMLButtonElement>
+    onShareButtonClick?: React.MouseEventHandler<HTMLButtonElement>
     onEditButtonClick: React.MouseEventHandler<HTMLButtonElement>
     onCrossButtonClick: React.MouseEventHandler<HTMLButtonElement>
     onAddPageToList: (url: string, isSocialPost: boolean) => void
@@ -87,13 +87,13 @@ class ListItem extends Component<Props, State> {
         }))
     }
 
-    async getSharedAccess() {
-        if (await featuresBeta.getFeatureState('sharing-collections')) {
+    async getSharedAccess() {
+        if (await featuresBeta.getFeatureState('sharing-collections')) {
             this.setState({
                 sharedAccess: true,
             })
         }
-     }
+    }
 
     private handleMouseLeave = () => {
         this.setState((state) => ({
@@ -136,7 +136,7 @@ class ListItem extends Component<Props, State> {
         e,
     ) => {
         e.stopPropagation()
-        this.props.onShareButtonClick(e)
+        this.props.onShareButtonClick?.(e)
     }
 
     private handleEditBtnClick: React.MouseEventHandler<HTMLButtonElement> = (
@@ -169,7 +169,7 @@ class ListItem extends Component<Props, State> {
                 <div className={styles.buttonContainer}>
                     {!this.props.isMobileList && this.state.isMouseInside && (
                         <React.Fragment>
-                            {this.state.sharedAccess &&
+                            {this.state.sharedAccess && (
                                 <button
                                     className={cx(
                                         styles.shareButton,
@@ -178,7 +178,7 @@ class ListItem extends Component<Props, State> {
                                     onClick={this.handleShareBtnClick}
                                     title={'Share'}
                                 />
-                            }
+                            )}
                             <button
                                 className={cx(styles.editButton, styles.button)}
                                 onClick={this.handleEditBtnClick}
