@@ -177,6 +177,9 @@ class ShareModal extends Component<Props, State> {
                 onClickViewRoadmap={() => {
                     window.open('https://worldbrain.io/roadmap')
                 }}
+                onClickKnownIssues={() => {
+                    window.open('https://worldbrain.io/feature/sharing-collections/knownissues')
+                }}
             />
         )
     }

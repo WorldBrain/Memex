@@ -11,6 +11,7 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
 
 const Margin20 = styled.div`
@@ -40,6 +41,10 @@ const ButtonsContainer = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+
+    & > * {
+        margin: 0 5px;
+    }  
 `
 
 const Button = styled.button`
@@ -137,6 +142,7 @@ interface ShareModalContentProps {
     onClickToggle: () => void
     onClickLetUsKnow: () => void
     onClickViewRoadmap: () => void
+    onClickKnownIssues: () => void
 }
 
 const COPY_TIMEOUT = 2000
@@ -233,11 +239,15 @@ export default class ShareModalContent extends PureComponent<
                             label={'Share Feedback'}
                             onClick={this.props.onClickLetUsKnow}
                         />
-                        <Button onClick={this.props.onClickViewRoadmap}>
-                            View Roadmap
-                        </Button>
+                        <SecondaryAction 
+                            label={'View Roadmap'}
+                            onClick={this.props.onClickViewRoadmap}
+                        />
+                        <SecondaryAction 
+                            label={'Known Issues'}
+                            onClick={this.props.onClickKnownIssues}
+                        />
                     </ButtonsContainer>
-
                 </BetaInfoContainer>
             </div>
         )
