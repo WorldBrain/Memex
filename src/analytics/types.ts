@@ -47,7 +47,7 @@ export interface AnalyticsEvents {
         | 'clickPairNewDevice'
         | 'generateQRPairingCode'
     Collections: 'create' | 'addPageViaPopup' | 'addPageViaDragAndDrop'
-    ContentSharing: 'shareList'
+    ContentSharing: 'shareList' | 'shareListEntryBatch' | 'unshareListEntry'
     InPageTooltip:
         | 'highlightText'
         | 'annotateText'

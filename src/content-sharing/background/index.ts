@@ -228,6 +228,12 @@ export default class ContentSharingBackground {
                 listEntries: action.data,
                 userReference: { type: 'user-reference', id: userId },
             })
+
+            this.options.analytics.trackEvent({
+                category: 'ContentSharing',
+                action: 'shareListEntryBatch',
+                value: { size: action.data.length },
+            })
         } else if (action.type === 'remove-shared-list-entry') {
             const contentSharing = await this.options.getContentSharing()
             await contentSharing.removeListEntries({
@@ -235,6 +241,11 @@ export default class ContentSharingBackground {
                     action.remoteListId,
                 ),
                 normalizedUrl: action.normalizedUrl,
+            })
+
+            this.options.analytics.trackEvent({
+                category: 'ContentSharing',
+                action: 'unshareListEntry',
             })
         } else if (action.type === 'change-shared-list-title') {
             const contentSharing = await this.options.getContentSharing()
