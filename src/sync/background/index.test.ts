@@ -1334,6 +1334,83 @@ function mobileSyncTests(suiteOptions: {
             }),
         ])
     })
+
+    it('should unshare list entries removed from a shared list on mobile and synced to the extension', async (setup: TestSetup) => {
+        const {
+            devices: { extension, mobile },
+        } = await setup()
+        const localListId = await extension.backgroundModules.customLists.createCustomList(
+            {
+                name: 'My shared list',
+            },
+        )
+        await extension.backgroundModules.search.searchIndex.addPage({
+            pageDoc: {
+                url: 'https://www.spam.com/foo',
+                content: {
+                    title: 'Spam.com title',
+                },
+            },
+            visits: [],
+            rejectNoContent: false,
+        })
+        await extension.backgroundModules.customLists.insertPageToList({
+            id: localListId,
+            url: 'https://www.spam.com/foo',
+        })
+        await extension.backgroundModules.search.searchIndex.addPage({
+            pageDoc: {
+                url: 'https://www.eggs.com/foo',
+                content: {
+                    title: 'Eggs.com title',
+                },
+            },
+            visits: [],
+            rejectNoContent: false,
+        })
+        await extension.backgroundModules.customLists.insertPageToList({
+            id: localListId,
+            url: 'https://www.eggs.com/foo',
+        })
+        await extension.backgroundModules.contentSharing.shareList({
+            listId: localListId,
+        })
+        await extension.backgroundModules.contentSharing.shareListEntries({
+            listId: localListId,
+        })
+        await extension.backgroundModules.contentSharing.waitForListSync({
+            localListId,
+        })
+        await doInitialSync({
+            source: extension.backgroundModules.sync,
+            target: mobile.services.sync,
+        })
+
+        await mobile.storage.modules.metaPicker.deletePageEntryFromList({
+            listId: localListId,
+            url: 'eggs.com/foo',
+        })
+        await mobile.services.sync.continuousSync.forceIncrementalSync()
+        await extension.backgroundModules.sync.continuousSync.forceIncrementalSync()
+        await extension.backgroundModules.contentSharing.waitForListSync({
+            localListId,
+        })
+        await new Promise((resolve) => setTimeout(resolve, 200))
+
+        const serverStorage = await extension.getServerStorage()
+        expect(
+            await serverStorage.storageManager.operation(
+                'findObjects',
+                'sharedListEntry',
+                {},
+            ),
+        ).toEqual([
+            expect.objectContaining({
+                normalizedUrl: 'spam.com/foo',
+                entryTitle: 'Spam.com title',
+            }),
+        ])
+    })
 }
 
 describe('SyncBackground', () => {
