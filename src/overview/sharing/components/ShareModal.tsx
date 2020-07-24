@@ -50,6 +50,7 @@ class ShareModal extends Component<Props, State> {
                     localListId: this.props.list.id,
                 },
             )
+            console.log(remoteListId)
             const isShared = !!remoteListId
             const profile = await this.props.auth.getUserProfile()
             this.setState({

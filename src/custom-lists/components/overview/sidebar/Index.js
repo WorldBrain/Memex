@@ -140,6 +140,7 @@ class ListContainer extends Component {
             return (
                 <ListItem
                     key={i}
+                    listId={list.id}
                     listName={list.name}
                     isMobileList={list.isMobileList}
                     isFiltered={list.isFilterIndex}

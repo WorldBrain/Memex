@@ -1,9 +1,14 @@
 import React, { Component, DragEventHandler } from 'react'
 import cx from 'classnames'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { PageList } from 'src/custom-lists/background/types'
 import { AuthContextInterface } from 'src/authentication/background/types'
 import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { featuresBeta } from 'src/util/remote-functions-background'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { ContentSharingClientStorage } from 'src/content-sharing/background/storage'
+import CustomListStorage from 'src/custom-lists/background/storage'
+
 
 import analytics from 'src/analytics'
 
@@ -11,6 +16,7 @@ const styles = require('./list-item.css')
 
 export interface Props extends AuthContextInterface {
     listName: string
+    listId: number
     isMobileList: boolean
     isFiltered: boolean
     onShareButtonClick?: React.MouseEventHandler<HTMLButtonElement>
@@ -19,16 +25,20 @@ export interface Props extends AuthContextInterface {
     onAddPageToList: (url: string, isSocialPost: boolean) => void
     onListItemClick: () => void
     plans?: UserPlan[]
+    contentSharing: ContentSharingInterface
     sharedAccess: boolean
+    customLists: CustomListStorage
 }
 
 interface State {
     isMouseInside: boolean
     isDragInside: boolean
     sharedAccess: boolean
+    isShared: boolean
 }
 
 class ListItem extends Component<Props, State> {
+    storage: ContentSharingClientStorage
     private listItemRef: HTMLElement
 
     constructor(props) {
@@ -37,12 +47,14 @@ class ListItem extends Component<Props, State> {
             isMouseInside: false,
             isDragInside: false,
             sharedAccess: false,
+            isShared: false,
         }
     }
 
     async componentDidMount() {
         this.attachEventListeners()
         this.getSharedAccess()
+        this.checkIfShared()
     }
 
     componentWillUnmount() {
@@ -169,16 +181,6 @@ class ListItem extends Component<Props, State> {
                 <div className={styles.buttonContainer}>
                     {!this.props.isMobileList && this.state.isMouseInside && (
                         <React.Fragment>
-                            {this.state.sharedAccess && (
-                                <button
-                                    className={cx(
-                                        styles.shareButton,
-                                        styles.button,
-                                    )}
-                                    onClick={this.handleShareBtnClick}
-                                    title={'Share'}
-                                />
-                            )}
                             <button
                                 className={cx(styles.editButton, styles.button)}
                                 onClick={this.handleEditBtnClick}
@@ -192,8 +194,28 @@ class ListItem extends Component<Props, State> {
                                 onClick={this.handleCrossBtnClick}
                                 title={'Delete'}
                             />
+                            {this.state.sharedAccess &&
+                                <button
+                                    className={cx(
+                                        styles.shareButton,
+                                        styles.button,
+                                    )}
+                                    onClick={this.handleShareBtnClick}
+                                    title={'Share'}
+                                />
+                            }
                         </React.Fragment>
                     )}
+                    {this.state.isShared &&
+                        <button
+                            className={cx(
+                                styles.shareButton,
+                                styles.button,
+                            )}
+                            onClick={this.handleShareBtnClick}
+                            title={'Share'}
+                        />
+                    }
                 </div>
             </div>
         )
