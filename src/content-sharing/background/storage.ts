@@ -9,7 +9,7 @@ export { default as ContentSharingStorage } from '@worldbrain/memex-common/lib/c
 
 export class ContentSharingClientStorage extends StorageModule {
     getConfig(): StorageModuleConfig {
-        return {
+        const config: StorageModuleConfig = {
             collections: {
                 sharedListMetadata: {
                     version: STORAGE_VERSIONS[20].version,
@@ -26,6 +26,8 @@ export class ContentSharingClientStorage extends StorageModule {
                         action: { type: 'json' },
                     },
                     indices: [{ field: 'createdWhen' }],
+                    backup: false,
+                    watch: false,
                 },
             },
             operations: {
@@ -65,6 +67,7 @@ export class ContentSharingClientStorage extends StorageModule {
                 },
             },
         }
+        return config
     }
 
     async storeListId(params: { localId: number; remoteId: string }) {
