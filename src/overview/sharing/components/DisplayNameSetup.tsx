@@ -59,6 +59,10 @@ const InputContainer = styled.div`
     align-items: center;
 `
 
+const TypographyTextNormalAlert =styled(TypographyTextNormal)`
+    color: red;
+`
+
 export default class DisplayNameSetup extends PureComponent<
     DisplayNameSetupProps
 > {
@@ -73,8 +77,10 @@ export default class DisplayNameSetup extends PureComponent<
                         </TypographyHeadingBigger>
                         <TypographyTextNormal>
                             This is how people know who the shared content is from.<br/>
-                            You can edit it later via Settings > My Account.
                         </TypographyTextNormal>
+                        <TypographyTextNormalAlert>
+                            <strong>You can't edit this name in the next 2 weeks</strong>
+                        </TypographyTextNormalAlert>
                     </InstructionsBox>
                 </InstructionsContainer>
 
