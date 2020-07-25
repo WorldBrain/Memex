@@ -181,33 +181,43 @@ class ListItem extends Component<Props, State> {
                 onDragLeave={this.handleDragLeave}
             >
                 <div className={styles.listName}>{this.props.listName}</div>
-                <div className={styles.buttonContainer}>
-                    {!this.props.isMobileList && this.state.isMouseInside && (
-                        <React.Fragment>
-                            <button
-                                className={cx(styles.editButton, styles.button)}
-                                onClick={this.handleEditBtnClick}
-                                title={'Edit'}
-                            />
-                            <button
-                                className={cx(
-                                    styles.deleteButton,
-                                    styles.button,
-                                )}
-                                onClick={this.handleCrossBtnClick}
-                                title={'Delete'}
-                            />
-                        </React.Fragment>
+                {!this.props.isMobileList &&
+                    (this.state.isMouseInside || this.state.isShared) && (
+                        <div className={styles.buttonContainer}>
+                            {this.state.isMouseInside && (
+                                <React.Fragment>
+                                    <button
+                                        className={cx(
+                                            styles.editButton,
+                                            styles.button,
+                                        )}
+                                        onClick={this.handleEditBtnClick}
+                                        title={'Edit'}
+                                    />
+                                    <button
+                                        className={cx(
+                                            styles.deleteButton,
+                                            styles.button,
+                                        )}
+                                        onClick={this.handleCrossBtnClick}
+                                        title={'Delete'}
+                                    />
+                                </React.Fragment>
+                            )}
+                            {((!this.props.isMobileList &&
+                                this.state.isMouseInside) ||
+                                this.state.isShared) && (
+                                <button
+                                    className={cx(
+                                        styles.shareButton,
+                                        styles.button,
+                                    )}
+                                    onClick={this.handleShareBtnClick}
+                                    title={'Share'}
+                                />
+                            )}
+                        </div>
                     )}
-                    {((!this.props.isMobileList && this.state.isMouseInside) ||
-                        this.state.isShared) && (
-                        <button
-                            className={cx(styles.shareButton, styles.button)}
-                            onClick={this.handleShareBtnClick}
-                            title={'Share'}
-                        />
-                    )}
-                </div>
             </div>
         )
     }

@@ -11,10 +11,6 @@
 
     &:hover {
         background-color: color8;
-
-        & .buttonContainer {
-            display: flex;
-        }
     }
 }
 
@@ -78,11 +74,11 @@
 }
 
 .buttonContainer {
+    display: flex;
     margin-right: 5px;
     justify-content: flex-end;
     width: fit-content;
     align-items: center;
-    display: none;
 }
 
 @keyframes appear {
