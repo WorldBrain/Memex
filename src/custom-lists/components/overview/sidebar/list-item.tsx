@@ -6,11 +6,10 @@ import { AuthContextInterface } from 'src/authentication/background/types'
 import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { featuresBeta } from 'src/util/remote-functions-background'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
-import { ContentSharingClientStorage } from 'src/content-sharing/background/storage'
 import CustomListStorage from 'src/custom-lists/background/storage'
 
-
 import analytics from 'src/analytics'
+import { runInBackground } from 'src/util/webextensionRPC'
 
 const styles = require('./list-item.css')
 
@@ -38,7 +37,6 @@ interface State {
 }
 
 class ListItem extends Component<Props, State> {
-    storage: ContentSharingClientStorage
     private listItemRef: HTMLElement
 
     constructor(props) {
@@ -54,7 +52,12 @@ class ListItem extends Component<Props, State> {
     async componentDidMount() {
         this.attachEventListeners()
         this.getSharedAccess()
-        this.checkIfShared()
+
+        const contentSharing = runInBackground<ContentSharingInterface>()
+        const remoteId = await contentSharing.getRemoteListId({
+            localListId: this.props.listId,
+        })
+        this.setState({ isShared: !!remoteId })
     }
 
     componentWillUnmount() {
@@ -184,7 +187,7 @@ class ListItem extends Component<Props, State> {
                             <button
                                 className={cx(styles.editButton, styles.button)}
                                 onClick={this.handleEditBtnClick}
-                                title={'Edt'}
+                                title={'Edit'}
                             />
                             <button
                                 className={cx(
@@ -194,28 +197,16 @@ class ListItem extends Component<Props, State> {
                                 onClick={this.handleCrossBtnClick}
                                 title={'Delete'}
                             />
-                            {this.state.sharedAccess &&
-                                <button
-                                    className={cx(
-                                        styles.shareButton,
-                                        styles.button,
-                                    )}
-                                    onClick={this.handleShareBtnClick}
-                                    title={'Share'}
-                                />
-                            }
                         </React.Fragment>
                     )}
-                    {this.state.isShared &&
+                    {((!this.props.isMobileList && this.state.isMouseInside) ||
+                        this.state.isShared) && (
                         <button
-                            className={cx(
-                                styles.shareButton,
-                                styles.button,
-                            )}
+                            className={cx(styles.shareButton, styles.button)}
                             onClick={this.handleShareBtnClick}
                             title={'Share'}
                         />
-                    }
+                    )}
                 </div>
             </div>
         )

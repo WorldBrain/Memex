@@ -50,7 +50,6 @@ class ShareModal extends Component<Props, State> {
                     localListId: this.props.list.id,
                 },
             )
-            console.log(remoteListId)
             const isShared = !!remoteListId
             const profile = await this.props.auth.getUserProfile()
             this.setState({
@@ -179,7 +178,9 @@ class ShareModal extends Component<Props, State> {
                     window.open('https://worldbrain.io/roadmap')
                 }}
                 onClickKnownIssues={() => {
-                    window.open('https://worldbrain.io/feature/sharing-collections/knownissues')
+                    window.open(
+                        'https://worldbrain.io/feature/sharing-collections/knownissues',
+                    )
                 }}
             />
         )
