@@ -1,6 +1,5 @@
 import * as React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
-import { Subscription } from 'rxjs/Subscription'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import AnnotationsSidebar, {

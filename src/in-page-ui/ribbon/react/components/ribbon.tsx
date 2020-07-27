@@ -445,7 +445,7 @@ export default class Ribbon extends Component<Props, State> {
                                                         .queryTagSuggestions,
                                                     loadDefaultSuggestions: this
                                                         .props.tagging
-                                                        .fetchInitialTagSelections,
+                                                        .fetchInitialTagSuggestions,
                                                 }}
                                                 onSave={
                                                     this.props.commentBox

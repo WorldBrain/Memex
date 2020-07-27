@@ -69,7 +69,7 @@ export interface AnnotationsCacheInterface {
         pageUrl: string,
         args?: { limit?: number; skip?: number },
     ) => Promise<void>
-    create: (annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>) => void
+    create: (annotation: Annotation) => void
     update: (annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>) => void
     delete: (annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>) => void
 

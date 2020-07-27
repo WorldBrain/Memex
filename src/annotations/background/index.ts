@@ -31,7 +31,7 @@ import { updateSuggestionsCache } from 'src/tags/utils'
 import { TagsSettings } from 'src/tags/background/types'
 import { limitSuggestionsStorageLength } from 'src/tags/background'
 import { now } from 'moment'
-import { generateurl } from 'src/annotations/utils'
+import { generateUrl } from 'src/annotations/utils'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -359,7 +359,7 @@ export default class DirectLinkingBackground {
 
         const pageTitle = toCreate.title == null ? tab.title : toCreate.title
         const url =
-            toCreate.url ?? generateurl({ pageUrl, now: () => Date.now() })
+            toCreate.url ?? generateUrl({ pageUrl, now: () => Date.now() })
 
         await this.annotationStorage.createAnnotation({
             pageUrl,

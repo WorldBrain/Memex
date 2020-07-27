@@ -12,7 +12,7 @@ import { featuresBeta } from 'src/util/remote-functions-background'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { DEF_RESULT_LIMIT } from '../constants'
 import { IncomingAnnotationData } from 'src/in-page-ui/shared-state/types'
-import { generateurl } from 'src/annotations/utils'
+import { generateUrl } from 'src/annotations/utils'
 
 interface EditForm {
     isBookmarked: boolean
@@ -238,7 +238,12 @@ export class SidebarContainerLogic extends UILogic<
         this.options.annotationsCache.annotationChanges.addListener(
             'newState',
             (annotations) =>
-                this.emitMutation({ annotations: { $set: annotations } }),
+                this.emitMutation({
+                    annotations: { $set: annotations },
+                    editForms: {
+                        $set: createEditFormsForAnnotations(annotations),
+                    },
+                }),
         )
     }
 
@@ -485,15 +490,13 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         const pageUrl = previousState.pageUrl
-
-        const url = generateurl({
+        const createdWhen = new Date()
+        const url = generateUrl({
             pageUrl,
             now: () => Date.now(),
         })
 
-        const createdWhen = new Date()
-
-        const annotation = {
+        this.options.annotationsCache.create({
             url,
             pageUrl,
             comment,
@@ -503,16 +506,9 @@ export class SidebarContainerLogic extends UILogic<
             selector: event.anchor,
             createdWhen,
             lastEdited: createdWhen,
-        } as Annotation
-
-        // TODO: (sidebar-refactor) there was a env condition removed here to do with indexing/skip indexing, is it needed when creating an annotation for a page here?
-        await this.options.annotationsCache.create(annotation)
-        this.inPageEvents.emit('removeTemporaryHighlights')
+        })
 
         this.emitMutation({
-            editForms: {
-                [url]: { $set: INIT_FORM_STATE.form },
-            },
             commentBox: { $set: INIT_FORM_STATE },
             showCommentBox: { $set: false },
         })

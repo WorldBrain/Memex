@@ -1,8 +1,6 @@
-import { SearchInterface } from 'src/search/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
-import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 import { SidebarTheme } from '../types'
 

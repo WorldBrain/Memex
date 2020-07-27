@@ -4,7 +4,8 @@ import * as componentTypes from '../../components/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { loadInitial } from 'src/util/ui-logic'
-import { Annotation, NewAnnotationOptions } from 'src/annotations/types'
+import { NewAnnotationOptions } from 'src/annotations/types'
+import { generateUrl } from 'src/annotations/utils'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -258,11 +259,8 @@ export class RibbonContainerLogic extends UILogic<
         return { commentBox: { commentText: { $set: event.value } } }
     }
 
-    saveComment: EventHandler<'saveComment'> = async ({
-        event,
-        previousState: { commentBox },
-    }) => {
-        const { annotations, currentTab } = this.dependencies
+    saveComment: EventHandler<'saveComment'> = async ({ event }) => {
+        const { currentTab, annotationsCache } = this.dependencies
         const comment = event.value.text.trim()
         const { isBookmarked, tags } = event.value
         if (comment.length === 0) {
@@ -271,17 +269,20 @@ export class RibbonContainerLogic extends UILogic<
 
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
-        const annotationUrl = await annotations.createAnnotation(
-            {
-                comment,
-                pageUrl: currentTab.url,
-                isBookmarked: event.value.isBookmarked,
-            },
-            { skipPageIndexing: this.skipAnnotationPageIndexing },
-        )
-        await annotations.updateAnnotationTags({
+        const createdWhen = new Date()
+        const annotationUrl = generateUrl({
+            pageUrl: currentTab.url,
+            now: () => Date.now(),
+        })
+
+        annotationsCache.create({
             url: annotationUrl,
+            pageUrl: currentTab.url,
+            comment,
+            isBookmarked,
             tags,
+            createdWhen,
+            lastEdited: createdWhen,
         })
 
         this.emitMutation({

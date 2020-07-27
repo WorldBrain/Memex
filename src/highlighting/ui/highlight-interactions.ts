@@ -15,7 +15,7 @@ import {
     AnnotationCacheChangeEvents,
     AnnotationsCacheInterface,
 } from 'src/annotations/annotations-cache'
-import { generateurl } from 'src/annotations/utils'
+import { generateUrl } from 'src/annotations/utils'
 import { AnalyticsEvent } from 'src/analytics/types'
 
 const styles = require('src/highlighting/ui/styles.css')
@@ -177,7 +177,7 @@ export const saveAndRenderHighlight = async (
     const createdWhen = new Date()
 
     const annotation = {
-        url: generateurl({ pageUrl, now: () => Date.now() }),
+        url: generateUrl({ pageUrl, now: () => Date.now() }),
         body,
         comment,
         pageUrl,
@@ -187,7 +187,7 @@ export const saveAndRenderHighlight = async (
         createdWhen,
         lastEdited: createdWhen,
     } as Annotation
-    await params.annotationsCache.create(annotation)
+    params.annotationsCache.create(annotation)
 
     params.renderer.renderHighlight(annotation as Highlight, () =>
         params.onClickHighlight({
@@ -226,6 +226,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
         const baseClass =
             styles[temporary ? 'memex-highlight-tmp' : 'memex-highlight']
+
         try {
             await Raven.context(async () => {
                 const descriptor = highlight.selector.descriptor
