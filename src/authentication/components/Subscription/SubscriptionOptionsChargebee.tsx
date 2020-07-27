@@ -20,6 +20,7 @@ import styled from 'styled-components'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { AuthContextInterface } from 'src/authentication/background/types'
+import { isDev } from 'src/analytics/internal/constants'
 
 interface Props {
     user: AuthenticatedUser | null
@@ -66,7 +67,11 @@ class SubscriptionOptionsChargebee extends React.Component<
         this.setState({
             loadingPortal: true,
         })
-        const portalLink = await subscription.getManageLink()
+        const subDomain = isDev ? 'worldbrain-test' : 'worldbrain'
+        const forwardUrl = `https://${subDomain}.chargebee.com/portal/v2/subscriptions/subscription_id/edit`
+        const portalLink = await subscription.getManageLink({
+            forwardUrl,
+        } as any)
 
         if (portalLink?.access_url) {
             window.open(portalLink?.access_url)
@@ -171,26 +176,21 @@ class SubscriptionOptionsChargebee extends React.Component<
     }
 
     render() {
-
         console.log(this.props.plans)
 
         return (
             <div className={''}>
                 <div>
-                        <SubscriptionInnerOptions
-                            openCheckoutBackupMonthly={
-                                this.openCheckoutMonthly
-                            }
-                            openCheckoutBackupYearly={
-                                this.openCheckoutYearly
-                            }
-                            openPortal={this.openPortal}
-                            plans={this.props.plans}
-                            loadingMonthly={this.state.loadingMonthly}
-                            loadingYearly={this.state.loadingYearly}
-                            loadingPortal={this.state.loadingPortal}
-                        />
-                        <WhiteSpacer10 />
+                    <SubscriptionInnerOptions
+                        openCheckoutBackupMonthly={this.openCheckoutMonthly}
+                        openCheckoutBackupYearly={this.openCheckoutYearly}
+                        openPortal={this.openPortal}
+                        plans={this.props.plans}
+                        loadingMonthly={this.state.loadingMonthly}
+                        loadingYearly={this.state.loadingYearly}
+                        loadingPortal={this.state.loadingPortal}
+                    />
+                    <WhiteSpacer10 />
                 </div>
             </div>
         )
