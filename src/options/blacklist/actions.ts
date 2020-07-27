@@ -69,6 +69,7 @@ export const addToBlacklist = (expression) => async (dispatch, getState) => {
     dispatch(addSiteToBlacklist(newEntry))
     dispatch(resetSiteInputValue())
     dispatch(setIsLoading(true))
+    dispatch(setModalShow(true))
     try {
         await window['browser'].storage.local.set({
             [STORAGE_KEY]: JSON.stringify([newEntry, ...oldBlacklist]),
@@ -76,7 +77,6 @@ export const addToBlacklist = (expression) => async (dispatch, getState) => {
         const count = await getMatchingPageCount(expression)
 
         if (count > 0) {
-            dispatch(setModalShow(true))
             dispatch(setMatchedCount(count))
         }
     } catch (error) {

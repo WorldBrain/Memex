@@ -152,13 +152,15 @@ class BlacklistContainer extends Component {
                         {this.renderBlacklistRows()}
                     </BlacklistTable>
                 </div>
-                <BlacklistRemoveModal
-                    isLoading={this.props.isLoading}
-                    matchedCount={this.props.matchedDocCount}
-                    isShown={this.props.showRemoveModal}
-                    onCancel={this.props.hideModal}
-                    onConfirm={this.handleRemoveMatching}
-                />
+                {this.props.showRemoveModal && 
+                    <BlacklistRemoveModal
+                        isLoading={this.props.isLoading}
+                        matchedCount={this.props.matchedDocCount}
+                        isShown={this.props.showRemoveModal}
+                        onCancel={this.props.hideModal}
+                        onConfirm={this.handleRemoveMatching}
+                    />
+                }
             </React.Fragment>
         )
     }

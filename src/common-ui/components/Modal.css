@@ -1,8 +1,9 @@
 .popup {
     composes: toolTips from 'src/common-ui/elements.css';
     background: #fff;
-    width: 340px;
-    height: 150px;
+    min-width: 500px;
+    min-height: 200px;
+    padding: 20px;
     position: relative;
     transition: all 0.2s ease-in-out;
     cursor: default;
