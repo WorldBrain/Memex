@@ -45,6 +45,14 @@
     background-position: center;
 }
 
+.shareButtonPermanent {
+    opacity: 0.6;
+}
+
+.shareButtonPermanentHover {
+    opacity: 1;
+}
+
 .editButton {
     background-image: url('/img/edit.svg');
     width: 24px;
@@ -53,7 +61,7 @@
 }
 
 .deleteButton {
-    background-image: url('/img/trash.svg');
+    background-image: url('/img/remove.svg');
     width: 24px;
     height: 24px;
     background-position: center;

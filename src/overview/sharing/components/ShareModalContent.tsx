@@ -33,7 +33,7 @@ const Text = styled.div`
     font-weight: normal;
     font-size: 14px;
     line-height: 21px;
-
+    text-align: center;
     margin-bottom: 10px;
 `
 
@@ -100,6 +100,10 @@ const LinkBox = styled.div`
     height: 26px;
 `
 
+const ShareModalBox = styled.div`
+    width: 100%;
+`
+
 const UploadingContainer = styled.div`
     display: flex;
     flex-direction: row;
@@ -120,9 +124,13 @@ const BetaInfoContainer = styled.div`
         rgba(15, 15, 15, 0.1) 0px 2px 4px;
     border-radius: 3px;
     padding: 20px;
+    justify-content: center;
 `
 
-
+const BlockHeading = styled(TypographyHeadingNormal)`
+    margin-bottom: 10px;
+    font-size: 18px;
+`
 
 interface ShareToggleProps {
     isActive: boolean
@@ -180,7 +188,7 @@ export default class ShareModalContent extends PureComponent<
 
     render() {
         return (
-            <div>
+            <ShareModalBox>
                 <InstructionsContainer>
                     <InstructionsBox>
                         <TypographyHeadingBigger>
@@ -230,8 +238,11 @@ export default class ShareModalContent extends PureComponent<
                     </LinkBox>
                 </LinkContainer>
                 <BetaInfoContainer>
+                   <BlockHeading>
+                      🚀 This is a beta feature
+                   </BlockHeading>
                     <Text>
-                        This is a beta feature. We want to learn more about what you need to integrate it into your workflow. 
+                        We want to learn more about what you need to integrate it into your workflow. 
                     </Text>
 
                     <ButtonsContainer>
@@ -249,7 +260,7 @@ export default class ShareModalContent extends PureComponent<
                         />
                     </ButtonsContainer>
                 </BetaInfoContainer>
-            </div>
+            </ShareModalBox>
         )
     }
 }

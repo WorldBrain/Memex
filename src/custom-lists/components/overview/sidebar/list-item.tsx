@@ -52,16 +52,19 @@ class ListItem extends Component<Props, State> {
     async componentDidMount() {
         this.attachEventListeners()
         this.getSharedAccess()
+        this.getSharedState()
+    }
 
+    componentWillUnmount() {
+        this.removeEventListeners()
+    }
+
+    async getSharedState() {
         const contentSharing = runInBackground<ContentSharingInterface>()
         const remoteId = await contentSharing.getRemoteListId({
             localListId: this.props.listId,
         })
         this.setState({ isShared: !!remoteId })
-    }
-
-    componentWillUnmount() {
-        this.removeEventListeners()
     }
 
     private attachEventListeners() {
@@ -204,13 +207,14 @@ class ListItem extends Component<Props, State> {
                                     />
                                 </React.Fragment>
                             )}
-                            {((!this.props.isMobileList &&
-                                this.state.isMouseInside) ||
+                            {((!this.props.isMobileList && this.state.isMouseInside) ||
                                 this.state.isShared) && (
                                 <button
                                     className={cx(
                                         styles.shareButton,
                                         styles.button,
+                                        styles.shareButtonPermanent,
+                                        {[styles.shareButtonPermanentHover] : this.state.isMouseInside},
                                     )}
                                     onClick={this.handleShareBtnClick}
                                     title={'Share'}
