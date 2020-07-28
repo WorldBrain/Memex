@@ -234,17 +234,6 @@ export class SidebarContainerLogic extends UILogic<
         this.inPageEvents =
             options.events ??
             (new EventEmitter() as AnnotationsSidebarInPageEventEmitter)
-
-        this.options.annotationsCache.annotationChanges.addListener(
-            'newState',
-            (annotations) =>
-                this.emitMutation({
-                    annotations: { $set: annotations },
-                    editForms: {
-                        $set: createEditFormsForAnnotations(annotations),
-                    },
-                }),
-        )
     }
 
     private get resultLimit(): number {
@@ -310,6 +299,14 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
+        this.options.annotationsCache.annotationChanges.addListener(
+            'newState',
+            this.annotationSubscription,
+        )
+
+        // Set initial state, based on what's in the cache (assuming it already has been hydrated)
+        this.annotationSubscription(this.options.annotationsCache.annotations)
+
         await loadInitial<SidebarContainerState>(this, async () => {
             // If `pageUrl` prop passed down, load search results on init, else just wait
             if (this.options.pageUrl != null) {
@@ -318,6 +315,21 @@ export class SidebarContainerLogic extends UILogic<
             // await this.loadBeta()
         })
     }
+
+    cleanup = () => {
+        this.options.annotationsCache.annotationChanges.removeListener(
+            'newState',
+            this.annotationSubscription,
+        )
+    }
+
+    private annotationSubscription = (annotations: Annotation[]) =>
+        this.emitMutation({
+            annotations: { $set: annotations },
+            editForms: {
+                $set: createEditFormsForAnnotations(annotations),
+            },
+        })
 
     private async loadBeta() {
         // Check if user is allowed for beta too

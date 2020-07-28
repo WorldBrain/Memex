@@ -36,33 +36,6 @@ export class AnnotationsSidebarContainer<
         super(props, new SidebarContainerLogic(props))
     }
 
-    componentDidMount() {
-        super.componentDidMount()
-        this.setupAnnotationCacheListeners()
-    }
-
-    componentWillUnmount() {
-        super.componentWillUnmount()
-        this.cleanupAnnotationCacheListeners()
-    }
-
-    private setupAnnotationCacheListeners() {
-        this.props.annotationsCache.annotationChanges.addListener(
-            'newState',
-            this.annotationSubscription,
-        )
-    }
-
-    private cleanupAnnotationCacheListeners() {
-        this.props.annotationsCache.annotationChanges.removeListener(
-            'newState',
-            this.annotationSubscription,
-        )
-    }
-
-    private annotationSubscription = (annotations) =>
-        this.setState({ annotations })
-
     showSidebar() {
         this.processEvent('show', null)
     }
