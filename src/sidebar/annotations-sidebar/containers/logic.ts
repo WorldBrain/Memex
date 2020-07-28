@@ -362,36 +362,39 @@ export class SidebarContainerLogic extends UILogic<
         state: SidebarContainerState,
         opts: { overwrite: boolean },
     ) {
-        const annotations = await this.options.annotations.getAllAnnotationsByUrl(
-            {
-                base64Img: true,
-                url: state.pageUrl,
-                skip: state.searchResultSkip,
-                limit: this.resultLimit,
-            },
-        )
-
-        if (opts.overwrite) {
-            this.emitMutation({
-                annotations: { $set: annotations },
-                editForms: { $set: createEditFormsForAnnotations(annotations) },
-                pageCount: { $set: annotations.length },
-                noResults: { $set: annotations.length < this.resultLimit },
-                searchResultSkip: { $set: 0 },
-            })
-        } else {
-            this.emitMutation({
-                annotations: { $apply: (prev) => [...prev, ...annotations] },
-                editForms: {
-                    $apply: (prev) => ({
-                        ...prev,
-                        ...createEditFormsForAnnotations(annotations),
-                    }),
-                },
-                pageCount: { $apply: (prev) => prev + annotations.length },
-                noResults: { $set: annotations.length < this.resultLimit },
-            })
-        }
+        // this.options.annotationsCache.load()
+        // this.emitMutation({
+        //     annotations: { $set:  },
+        // })
+        // const annotations = await this.options.annotations.getAllAnnotationsByUrl(
+        //     {
+        //         base64Img: true,
+        //         url: state.pageUrl,
+        //         skip: state.searchResultSkip,
+        //         limit: this.resultLimit,
+        //     },
+        // )
+        // if (opts.overwrite) {
+        //     this.emitMutation({
+        //         annotations: { $set: annotations },
+        //         editForms: { $set: createEditFormsForAnnotations(annotations) },
+        //         pageCount: { $set: annotations.length },
+        //         noResults: { $set: annotations.length < this.resultLimit },
+        //         searchResultSkip: { $set: 0 },
+        //     })
+        // } else {
+        //     this.emitMutation({
+        //         annotations: { $apply: (prev) => [...prev, ...annotations] },
+        //         editForms: {
+        //             $apply: (prev) => ({
+        //                 ...prev,
+        //                 ...createEditFormsForAnnotations(annotations),
+        //             }),
+        //         },
+        //         pageCount: { $apply: (prev) => prev + annotations.length },
+        //         noResults: { $set: annotations.length < this.resultLimit },
+        //     })
+        // }
     }
 
     paginateSearch: EventHandler<'paginateSearch'> = async ({
