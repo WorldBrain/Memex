@@ -469,40 +469,32 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         innerLimitMultiplier = AnnotationsListPlugin.DEF_INNER_LIMIT_MULTI,
     ): Promise<Annotation[]> {
         const innerLimit = limit * innerLimitMultiplier
+        let innerSkip = 0
 
         let results: string[] = []
         let continueLookup: boolean
-
-        console.log('search background listAnnotsByPage ...', { limit, params })
 
         do {
             // The results found in this iteration
             let innerResults: string[] = []
 
-            console.log('search background listAnnotsByPage listWithUrl:', {
-                params,
-            })
             innerResults = await this.listWithUrl(params)
+                .offset(innerSkip)
                 .limit(innerLimit)
                 .primaryKeys()
 
             continueLookup = innerResults.length >= innerLimit
 
-            console.log('search background listAnnotsByPage filterResults:', {
-                innerResults,
-                params,
-            })
             innerResults = await this.filterResults(innerResults, params)
 
             results = [...results, ...innerResults]
+            innerSkip += innerLimit
         } while (continueLookup)
 
         // Cut off any excess
         if (results.length > limit) {
             results = [...results].slice(skip, skip + limit)
         }
-
-        console.log('search background listAnnotsByPage =>', { results })
 
         return this.mapUrlsToAnnots(results)
     }
