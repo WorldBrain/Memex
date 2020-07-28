@@ -9,7 +9,7 @@ export interface Props extends AnnotationFooterEventProps {
     mode: AnnotationMode
     isEdited?: boolean
     timestamp?: string
-    hasBookmark?: boolean
+    isBookmarked?: boolean
 }
 
 export interface AnnotationFooterEventProps {
@@ -25,7 +25,7 @@ export interface AnnotationFooterEventProps {
 
 class AnnotationFooter extends React.Component<Props> {
     private renderDefaultFooter() {
-        const { isEdited, timestamp, hasBookmark } = this.props
+        const { isEdited, timestamp, isBookmarked } = this.props
 
         return (
             <DefaultInnerFooterContainerStyled>
@@ -36,13 +36,13 @@ class AnnotationFooter extends React.Component<Props> {
                 <DefaultFooterBtnContainerStyled>
                     <ButtonTooltip
                         position={'bottom'}
-                        tooltipText={hasBookmark ? 'Un-Favorite' : 'Favorite'}
+                        tooltipText={isBookmarked ? 'Un-Favorite' : 'Favorite'}
                     >
                         <IconBox onClick={this.props.toggleBookmark}>
                             <IconStyled
                                 title="Toggle star"
                                 src={
-                                    hasBookmark
+                                    isBookmarked
                                         ? icons.heartFull
                                         : icons.heartEmpty
                                 }
