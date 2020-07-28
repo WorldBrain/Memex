@@ -213,8 +213,9 @@ export default class AnnotationStorage extends StorageModule {
 
         // Efficiently query and join Bookmarks and Tags from their respective collections
         const annotationUrls = annotations.map((annotation) => annotation.url)
-        let annotationsBookmarkMap = new Map()
-        let annotationsTagMap = new Map()
+        let annotationsBookmarkMap = new Map<string, boolean>()
+        let annotationsTagMap = new Map<string, string[]>()
+
         if (withBookmarks !== false) {
             annotationsBookmarkMap = new Map(
                 (
@@ -225,15 +226,22 @@ export default class AnnotationStorage extends StorageModule {
                 ).map((result) => [result.url, result]),
             )
         }
+
         if (withTags !== false) {
-            annotationsTagMap = new Map(
-                (
-                    await this.operation('listAnnotationTagsForAnnotations', {
-                        annotationUrls,
-                    })
-                ).map((result) => [result.url, result]),
+            const annotationTags: Tag[] = await this.operation(
+                'listAnnotationTagsForAnnotations',
+                {
+                    annotationUrls,
+                },
             )
+            annotationsTagMap = new Map()
+
+            for (const tag of annotationTags) {
+                const prev = annotationsTagMap.get(tag.url) ?? []
+                annotationsTagMap.set(tag.url, [...prev, tag.name])
+            }
         }
+
         if (annotationsTagMap.size > 0 || annotationsBookmarkMap.size > 0) {
             annotations.forEach((annotation) => {
                 annotation.tags = annotationsTagMap.get(annotation.url) ?? []
