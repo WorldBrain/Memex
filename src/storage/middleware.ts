@@ -28,7 +28,9 @@ export async function setStorageMiddleware(
         postprocessOperation: async (event) => {
             await Promise.all([
                 options.storexHub?.handlePostStorageChange(event),
-                options.contentSharing?.handlePostStorageChange(event),
+                options.contentSharing?.handlePostStorageChange(event, {
+                    source: 'local',
+                }),
             ])
         },
     })
@@ -53,11 +55,25 @@ export async function setStorageMiddleware(
             await options.syncService.createSyncLoggingMiddleware(),
         ]),
     )
+
+    const syncChangeWatchMiddleware = new ChangeWatchMiddleware({
+        storageManager,
+        shouldWatchCollection: (collection) =>
+            syncedCollections.has(collection),
+        postprocessOperation: async (event) => {
+            await Promise.all([
+                options.storexHub?.handlePostStorageChange(event),
+                options.contentSharing?.handlePostStorageChange(event, {
+                    source: 'sync',
+                }),
+            ])
+        },
+    })
     options.syncService.executeReconciliationOperation = async (
         operationName: string,
         ...operationArgs: any[]
     ) => {
-        return changeWatchMiddleware.process({
+        return syncChangeWatchMiddleware.process({
             operation: [operationName, ...operationArgs],
             extraData: {},
             next: {

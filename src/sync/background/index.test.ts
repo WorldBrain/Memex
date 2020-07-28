@@ -31,11 +31,13 @@ import {
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import SyncBackground from '.'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
+import { ServerStorage } from 'src/storage/types'
+import { createLazyMemoryServerStorage } from 'src/storage/server'
 
 const registerTest = it
 
 interface TestDependencies {
-    sharedSyncLog: SharedSyncLogStorage
+    getServerStorage: () => Promise<ServerStorage>
     userId?: string
 }
 type WithTestDependencies = (
@@ -151,14 +153,14 @@ function extensionSyncTests(suiteOptions: {
             ] = [
                 await setupBackgroundIntegrationTest({
                     signalTransportFactory,
-                    sharedSyncLog: options.sharedSyncLog,
+                    getServerStorage: options.getServerStorage,
                     includePostSyncProcessor: conf.enablePostProcessing,
                     fetchPageProcessor,
                     enableSyncEncyption: conf.enableSyncEncyption,
                 }),
                 await setupBackgroundIntegrationTest({
                     signalTransportFactory,
-                    sharedSyncLog: options.sharedSyncLog,
+                    getServerStorage: options.getServerStorage,
                     includePostSyncProcessor: conf.enablePostProcessing,
                     fetchPageProcessor,
                     enableSyncEncyption: conf.enableSyncEncyption,
@@ -185,7 +187,8 @@ function extensionSyncTests(suiteOptions: {
                 syncModule,
                 searchModule,
                 customLists,
-                sharedSyncLog: options.sharedSyncLog,
+                sharedSyncLog: (await options.getServerStorage()).storageModules
+                    .sharedSyncLog,
                 userId,
                 fetchPageProcessor,
             }
@@ -893,12 +896,13 @@ function mobileSyncTests(suiteOptions: {
             const devices = {
                 extension: await setupBackgroundIntegrationTest({
                     signalTransportFactory,
-                    sharedSyncLog: dependencies.sharedSyncLog,
+                    getServerStorage: dependencies.getServerStorage,
                     fetchPageProcessor,
                 }),
                 mobile: await setupMobileIntegrationTest({
                     signalTransportFactory,
-                    sharedSyncLog: dependencies.sharedSyncLog,
+                    sharedSyncLog: (await dependencies.getServerStorage())
+                        .storageModules.sharedSyncLog,
                 }),
             }
 
@@ -1430,7 +1434,7 @@ describe('SyncBackground', () => {
         syncTests({
             withDependencies: async (body) => {
                 await body({
-                    sharedSyncLog: await createMemorySharedSyncLog(),
+                    getServerStorage: await createLazyMemoryServerStorage(),
                 })
             },
         })
@@ -1458,7 +1462,14 @@ describe('SyncBackground', () => {
                     async ({ storageManager, modules }) => {
                         const sharedSyncLog = modules.sharedSyncLog as SharedSyncLogStorage
                         await body({
-                            sharedSyncLog,
+                            getServerStorage: async () => ({
+                                storageManager,
+                                storageModules: {
+                                    sharedSyncLog,
+                                    contentSharing: null,
+                                    userManagement: null,
+                                },
+                            }),
                             userId,
                         })
                     },

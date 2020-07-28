@@ -22,6 +22,7 @@ import { Analytics } from 'src/analytics/types'
 export default class ContentSharingBackground {
     remoteFunctions: ContentSharingInterface
     storage: ContentSharingClientStorage
+    shouldProcessSyncChanges = true
 
     _hasPendingActions = false
     _pendingActionsRetry?: Resolvable<void>
@@ -258,7 +259,16 @@ export default class ContentSharingBackground {
         }
     }
 
-    async handlePostStorageChange(event: StorageOperationEvent<'post'>) {
+    async handlePostStorageChange(
+        event: StorageOperationEvent<'post'>,
+        options: {
+            source: 'sync' | 'local'
+        },
+    ) {
+        if (options.source === 'sync' && !this.shouldProcessSyncChanges) {
+            return
+        }
+
         for (const change of event.info.changes) {
             if (change.type === 'create') {
                 if (change.collection === 'pageListEntries') {

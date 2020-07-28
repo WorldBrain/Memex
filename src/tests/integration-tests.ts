@@ -22,11 +22,13 @@ export interface IntegrationTestSuite<StepContext> {
 export interface IntegrationTest<StepContext> {
     description: string
     mark?: boolean
+    skipConflictTests?: boolean
     instantiate: (options: {
         isSyncTest?: boolean
     }) => IntegrationTestInstance<StepContext>
 }
 export interface IntegrationTestInstance<StepContext> {
+    setup?: (options: StepContext) => Promise<void>
     steps: Array<IntegrationTestStep<StepContext>>
 }
 
@@ -81,6 +83,7 @@ export function backgroundIntegrationTestSuite(
 
 export interface BackgroundIntegrationTestOptions {
     mark?: boolean
+    skipConflictTests?: boolean
 }
 export function backgroundIntegrationTest(
     description: string,
@@ -110,6 +113,7 @@ export function backgroundIntegrationTest(
     const options = typeof paramA === 'object' ? paramA : {}
     return {
         description,
+        skipConflictTests: options?.skipConflictTests,
         instantiate: test,
         ...options,
     }

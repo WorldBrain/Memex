@@ -142,12 +142,7 @@ class ListContainer extends Component {
                     key={i}
                     listName={list.name}
                     isFiltered={list.isFilterIndex}
-                    onShareButtonClick={() => {
-                        // TODO
-                        console.log(
-                            'TODO: share from /sidebar-overlay/sidebar/components/lists-container.js',
-                        )
-                    }}
+                    onShareButtonClick={() => {}}
                     onEditButtonClick={this.props.handleEditBtnClick(i)}
                     onListItemClick={this.props.handleListItemClick(list, i)}
                     onAddPageToList={this.props.handleAddPageList(list, i)}

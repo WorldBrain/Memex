@@ -141,12 +141,7 @@ export default class ListContainer extends Component<Props> {
                     key={i}
                     listName={list.name}
                     isFiltered={list.isFilterIndex}
-                    onShareButtonClick={() => {
-                        // TODO
-                        console.log(
-                            'TODO: share from /in-page-ui/sidebar/react/components/lists-container.tsx',
-                        )
-                    }}
+                    onShareButtonClick={() => {}}
                     onEditButtonClick={() => {
                         event.preventDefault()
                         this.props.handleEditBtnClick(i)

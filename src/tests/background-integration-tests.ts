@@ -29,16 +29,20 @@ import { FakeAnalytics } from 'src/analytics/mock'
 import AnalyticsManager from 'src/analytics/analytics'
 import { setStorageMiddleware } from 'src/storage/middleware'
 import { JobDefinition } from 'src/job-scheduler/background/types'
-import { createLazyServerStorage } from 'src/storage/server'
+import {
+    createLazyServerStorage,
+    createLazyMemoryServerStorage,
+} from 'src/storage/server'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import StorageManager from '@worldbrain/storex'
+import { ServerStorage } from 'src/storage/types'
 
 export async function setupBackgroundIntegrationTest(options?: {
     customMiddleware?: StorageMiddleware[]
     tabManager?: TabManager
     signalTransportFactory?: SignalTransportFactory
-    sharedSyncLog?: SharedSyncLog
+    getServerStorage?: () => Promise<ServerStorage>
     browserLocalStorage?: MemoryBrowserStorage
     debugStorageOperations?: boolean
     fetchPageProcessor?: FetchPageProcessor
@@ -49,24 +53,12 @@ export async function setupBackgroundIntegrationTest(options?: {
         global['URL'] = URL
     }
 
-    const needsSync = !!(options && options.sharedSyncLog)
-
     const browserLocalStorage =
         (options && options.browserLocalStorage) || new MemoryBrowserStorage()
     const storageManager = initStorex()
 
-    const getServerStorage = createLazyServerStorage(
-        () => {
-            const backend = new DexieStorageBackend({
-                dbName: 'server',
-                idbImplementation: inMemory(),
-            })
-            return new StorageManager({ backend })
-        },
-        {
-            autoPkType: 'number',
-        },
-    )
+    const getServerStorage =
+        options?.getServerStorage ?? createLazyMemoryServerStorage()
 
     const authService = new MemoryAuthService()
     const subscriptionService = new MemorySubscriptionsService()
@@ -114,7 +106,8 @@ export async function setupBackgroundIntegrationTest(options?: {
         } as any,
         tabManager: options?.tabManager,
         signalTransportFactory: options?.signalTransportFactory,
-        getSharedSyncLog: async () => options?.sharedSyncLog,
+        getSharedSyncLog: async () =>
+            (await getServerStorage()).storageModules.sharedSyncLog,
         includePostSyncProcessor: options?.includePostSyncProcessor,
         fetchPageDataProcessor:
             options?.fetchPageProcessor ?? new MockFetchPageDataProcessor(),
