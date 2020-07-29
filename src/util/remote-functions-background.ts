@@ -25,7 +25,7 @@ export interface RemoteFunctionImplementations<
     tags: RemoteTagsInterface
     collections: RemoteCollectionsInterface
     copyPaster: RemoteCopyPasterInterface
-    readable: RemoteReaderInterface
+    readablePageArchives: RemoteReaderInterface
     contentSharing: ContentSharingInterface
 }
 
@@ -42,7 +42,7 @@ export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
     tags: runInBackground<RemoteTagsInterface>(),
     collections: runInBackground<RemoteCollectionsInterface>(),
     copyPaster: runInBackground<RemoteCopyPasterInterface>(),
-    readable: runInBackground<RemoteReaderInterface>(),
+    readablePageArchives: runInBackground<RemoteReaderInterface>(),
     contentSharing: runInBackground<ContentSharingInterface>(),
 }
 
@@ -56,5 +56,5 @@ export const featuresBeta = remoteFunctions.featuresBeta
 export const tags = remoteFunctions.tags
 export const collections = remoteFunctions.collections
 export const copyPaster = remoteFunctions.copyPaster
-export const readable = remoteFunctions.readable
+export const readable = remoteFunctions.readablePageArchives
 export const contentSharing = remoteFunctions.contentSharing

@@ -40,7 +40,7 @@ describe('Analytics activity pings', () => {
                 eventArgs: {
                     category: 'ActivityPings',
                     action: 'daily',
-                    value: { usedFeatures: ['Annotations'] },
+                    value: { usedFeatures: ['ActivityPings'] },
                 },
             },
         ])
@@ -48,8 +48,8 @@ describe('Analytics activity pings', () => {
             lastPingTimestamps: { daily: firstPing, weekly: 1, monthly: 1 },
             pendingActivityPings: {
                 daily: [],
-                weekly: ['Annotations'],
-                monthly: ['Annotations'],
+                weekly: ['ActivityPings'],
+                monthly: ['ActivityPings'],
             },
         })
 
@@ -68,7 +68,7 @@ describe('Analytics activity pings', () => {
                 eventArgs: {
                     category: 'ActivityPings',
                     action: 'weekly',
-                    value: { usedFeatures: ['Annotations'] },
+                    value: { usedFeatures: ['ActivityPings'] },
                 },
             },
         ])
@@ -81,7 +81,7 @@ describe('Analytics activity pings', () => {
             pendingActivityPings: {
                 daily: [],
                 weekly: [],
-                monthly: ['Annotations'],
+                monthly: ['ActivityPings'],
             },
         })
 
@@ -107,7 +107,7 @@ describe('Analytics activity pings', () => {
                 eventArgs: {
                     category: 'ActivityPings',
                     action: 'monthly',
-                    value: { usedFeatures: ['Annotations'] },
+                    value: { usedFeatures: ['ActivityPings'] },
                 },
             },
         ])
@@ -157,8 +157,8 @@ describe('Analytics activity pings', () => {
             lastPingTimestamps: { daily: firstPing, weekly: 1, monthly: 1 },
             pendingActivityPings: {
                 daily: [],
-                weekly: ['Annotations'],
-                monthly: ['Annotations'],
+                weekly: ['ActivityPings'],
+                monthly: ['ActivityPings'],
             },
         })
 
@@ -168,8 +168,8 @@ describe('Analytics activity pings', () => {
             lastPingTimestamps: { daily: firstPing, weekly: 1, monthly: 1 },
             pendingActivityPings: {
                 daily: [],
-                weekly: ['Annotations'],
-                monthly: ['Annotations'],
+                weekly: ['ActivityPings'],
+                monthly: ['ActivityPings'],
             },
         })
     })

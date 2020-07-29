@@ -110,7 +110,7 @@ export async function main() {
         featuresBeta: new FeaturesBeta(),
         tags: backgroundModules.tags.remoteFunctions,
         collections: backgroundModules.customLists.remoteFunctions,
-        readable: backgroundModules.readable.remoteFunctions,
+        readablePageArchives: backgroundModules.readable.remoteFunctions,
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
     })

@@ -8,41 +8,31 @@ import { ReadableData } from 'src/reader/types'
 import { now } from 'moment'
 import Readability from 'readability/Readability'
 import { fetchDOMFromUrl } from 'src/page-analysis/background/fetch-page-data'
+import {
+    COLLECTION_DEFINITIONS,
+    COLLECTION_NAMES,
+} from '@worldbrain/memex-storage/lib/reader/constants'
 import DOMPurify from 'dompurify'
 
 export default class ReaderStorage extends StorageModule {
+    static READER_COLL = COLLECTION_NAMES.readablePage
+
     constructor(private options: StorageModuleConstructorArgs) {
         super(options)
     }
 
     getConfig = (): StorageModuleConfig => ({
         collections: {
-            readable: {
-                version: new Date('2020-05-12'),
-                fields: {
-                    url: { type: 'string' },
-                    fullUrl: { type: 'text' },
-                    title: { type: 'string' },
-                    length: { type: 'string' },
-                    content: { type: 'text', optional: true },
-                    textContent: { type: 'text', optional: true },
-                    strategy: { type: 'string' },
-                },
-                indices: [
-                    { field: 'url', pk: true },
-                    { field: 'fullUrl' },
-                    { field: 'title' },
-                ],
-            },
+            ...COLLECTION_DEFINITIONS,
         },
         operations: {
             createReadable: {
                 operation: 'createObject',
-                collection: 'readable',
+                collection: ReaderStorage.READER_COLL,
             },
             findReadableByUrl: {
                 operation: 'findObject',
-                collection: 'readable',
+                collection: ReaderStorage.READER_COLL,
                 args: {
                     url: '$url:string',
                 },
