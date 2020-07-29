@@ -9,6 +9,7 @@ import { Success } from 'src/sync/components/initial-sync/initial-sync-setup/ste
 import { Introduction } from 'src/sync/components/initial-sync/initial-sync-setup/steps/Introduction'
 import { PairDeviceScreen } from 'src/sync/components/initial-sync/initial-sync-setup/steps/PairDeviceScreen'
 import { SyncDeviceScreen } from 'src/sync/components/initial-sync/initial-sync-setup/steps/SyncDeviceScreen'
+import { NoConnectionScreen } from 'src/sync/components/initial-sync/initial-sync-setup/steps/NoConnectionScreen'
 import Modal from 'src/common-ui/components/Modal'
 
 export default class InitialSyncSetup extends StatefulUIElement<
@@ -50,7 +51,13 @@ export default class InitialSyncSetup extends StatefulUIElement<
                     />
                 )
             case 'done':
-                return <Success onClose={this.close} />
+                return ( 
+                    <Success onClose={this.close} />
+                )
+            case 'noConnection': 
+                return (
+                    <NoConnectionScreen onClose={this.close} />
+                )
             default:
                 throw Error(`Unknown Sync Setup state ${this.state.status}`)
         }
