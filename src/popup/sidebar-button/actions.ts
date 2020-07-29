@@ -46,5 +46,7 @@ export const openSideBar: () => Thunk = () => async (dispatch, getState) => {
         return
     }
 
-    await remoteFunction('showSidebar')()
+    const tabId = popup.tabId(state)
+
+    await runInTab<InPageUIContentScriptRemoteInterface>(tabId).showSidebar()
 }
