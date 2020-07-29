@@ -16,6 +16,7 @@ import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-lo
 import { SyncInfoStorage } from '@worldbrain/memex-common/lib/sync/storage'
 import { MemexExtSyncSettingStore } from 'src/sync/background/setting-store'
 import { setStorageMiddleware } from 'src/storage/middleware'
+import { ContentSharingClientStorage } from 'src/content-sharing/background/storage'
 
 export interface MobileIntegrationTestSetup {
     storage: {
@@ -100,6 +101,7 @@ export async function setupMobileIntegrationTest(options?: {
         ...storageModules,
         clientSyncLog: sync.clientSyncLog,
         syncInfo: sync.syncInfoStorage,
+        contentSharing: new ContentSharingClientStorage({ storageManager }),
     })
     await storageManager.finishInitialization()
 

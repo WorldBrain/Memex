@@ -11,10 +11,6 @@
 
     &:hover {
         background-color: color8;
-
-        & .buttonContainer {
-            display: flex;
-        }
     }
 }
 
@@ -42,6 +38,21 @@
     outline: none;
 }
 
+.shareButton {
+    background-image: url('/img/share.svg');
+    width: 24px;
+    height: 24px;
+    background-position: center;
+}
+
+.shareButtonPermanent {
+    opacity: 0.6;
+}
+
+.shareButtonPermanentHover {
+    opacity: 1;
+}
+
 .editButton {
     background-image: url('/img/edit.svg');
     width: 24px;
@@ -50,7 +61,7 @@
 }
 
 .deleteButton {
-    background-image: url('/img/trash.svg');
+    background-image: url('/img/remove.svg');
     width: 24px;
     height: 24px;
     background-position: center;
@@ -71,11 +82,11 @@
 }
 
 .buttonContainer {
+    display: flex;
     margin-right: 5px;
     justify-content: flex-end;
     width: fit-content;
     align-items: center;
-    display: none;
 }
 
 @keyframes appear {

@@ -15,7 +15,7 @@ const CreateListForm = (props) => (
                 name="listName"
                 type="text"
                 autoComplete="off"
-                placeholder="List Name"
+                placeholder="Collection Name"
                 value={props.value || ''}
                 onChange={props.handleNameChange}
                 onKeyDown={props.handleNameKeyDown}

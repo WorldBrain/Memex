@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import { ModalIds } from 'src/overview/modals/reducer'
 import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
+import ShareModal from 'src/overview/sharing/components/ShareModal'
 
 export interface Props {
     modalId?: ModalIds
@@ -11,6 +12,9 @@ export interface Props {
 const modalsMap = {
     Subscription: ({ modalOptions, onClose }) => (
         <SubscribeModal onClose={onClose} {...modalOptions} />
+    ),
+    ShareModal: ({ modalOptions, onClose }) => (
+        <ShareModal onClose={onClose} {...modalOptions} />
     ),
 }
 

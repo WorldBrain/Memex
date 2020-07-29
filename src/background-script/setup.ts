@@ -55,6 +55,8 @@ import { subscriptionRedirect } from 'src/authentication/background/redirect'
 import { PipelineRes } from 'src/search'
 import CopyPasterBackground from 'src/overview/copy-paster/background'
 import { ReaderBackground } from 'src/reader/background'
+import { ServerStorage } from 'src/storage/types'
+import ContentSharingBackground from 'src/content-sharing/background'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -81,11 +83,13 @@ export interface BackgroundModules {
     storexHub: StorexHubBackground
     copyPaster: CopyPasterBackground
     readable: ReaderBackground
+    contentSharing: ContentSharingBackground
 }
 
 export function createBackgroundModules(options: {
     storageManager: StorageManager
     browserAPIs: Browser
+    getServerStorage: () => Promise<ServerStorage>
     signalTransportFactory: SignalTransportFactory
     getSharedSyncLog: () => Promise<SharedSyncLog>
     localStorageChangesManager: StorageChangesManager
@@ -173,6 +177,9 @@ export function createBackgroundModules(options: {
             scheduleJob: jobScheduler.scheduler.scheduleJobOnce.bind(
                 jobScheduler.scheduler,
             ),
+            getUserManagement: async () =>
+                (await options.getServerStorage()).storageModules
+                    .userManagement,
         })
 
     const connectivityChecker = new ConnectivityCheckerBackground({
@@ -317,6 +324,15 @@ export function createBackgroundModules(options: {
         copyPaster: new CopyPasterBackground({
             storageManager,
         }),
+        contentSharing: new ContentSharingBackground({
+            storageManager,
+            customLists: customLists.storage,
+            auth,
+            analytics: options.analyticsManager,
+            getContentSharing: async () =>
+                (await options.getServerStorage()).storageModules
+                    .contentSharing,
+        }),
     }
 }
 
@@ -324,6 +340,8 @@ export async function setupBackgroundModules(
     backgroundModules: BackgroundModules,
     storageManager: StorageManager,
 ) {
+    backgroundModules.bgScript.setupWebExtAPIHandlers()
+
     setImportStateManager(
         new ImportStateManager({
             storageManager,
@@ -351,7 +369,6 @@ export async function setupBackgroundModules(
     backgroundModules.bgScript.setupRemoteFunctions()
     backgroundModules.contentScripts.setupRemoteFunctions()
     backgroundModules.inPageUI.setupRemoteFunctions()
-    backgroundModules.bgScript.setupWebExtAPIHandlers()
     backgroundModules.bgScript.setupAlarms(alarms)
     backgroundModules.pageFetchBacklog.setupBacklogProcessing()
     setupNotificationClickListener()
@@ -383,6 +400,7 @@ export function getBackgroundStorageModules(
         pages: backgroundModules.pages.storage,
         copyPaster: backgroundModules.copyPaster.storage,
         reader: backgroundModules.readable.storage,
+        contentSharing: backgroundModules.contentSharing.storage,
     }
 }
 

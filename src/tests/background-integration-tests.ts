@@ -29,6 +29,10 @@ import { FakeAnalytics } from 'src/analytics/mock'
 import AnalyticsManager from 'src/analytics/analytics'
 import { setStorageMiddleware } from 'src/storage/middleware'
 import { JobDefinition } from 'src/job-scheduler/background/types'
+import { createLazyServerStorage } from 'src/storage/server'
+import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
+import StorageManager from '@worldbrain/storex'
 
 export async function setupBackgroundIntegrationTest(options?: {
     customMiddleware?: StorageMiddleware[]
@@ -51,6 +55,19 @@ export async function setupBackgroundIntegrationTest(options?: {
         (options && options.browserLocalStorage) || new MemoryBrowserStorage()
     const storageManager = initStorex()
 
+    const getServerStorage = createLazyServerStorage(
+        () => {
+            const backend = new DexieStorageBackend({
+                dbName: 'server',
+                idbImplementation: inMemory(),
+            })
+            return new StorageManager({ backend })
+        },
+        {
+            autoPkType: 'number',
+        },
+    )
+
     const authService = new MemoryAuthService()
     const subscriptionService = new MemorySubscriptionsService()
     const auth: AuthBackground = new AuthBackground({
@@ -63,6 +80,8 @@ export async function setupBackgroundIntegrationTest(options?: {
             )
             console['info'](`Ran job ${job.name} returned:`, job.job())
         },
+        getUserManagement: async () =>
+            (await getServerStorage()).storageModules.userManagement,
     })
     const analyticsManager = new AnalyticsManager({
         backend: new FakeAnalytics(),
@@ -73,6 +92,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         storageManager,
         analyticsManager,
         localStorageChangesManager: null,
+        getServerStorage,
         browserAPIs: {
             storage: {
                 local: browserLocalStorage,
@@ -104,6 +124,7 @@ export async function setupBackgroundIntegrationTest(options?: {
     backgroundModules.customLists._createPage =
         backgroundModules.search.searchIndex.createTestPage
     backgroundModules.sync.initialSync.wrtc = wrtc
+    backgroundModules.sync.initialSync.debug = false
 
     registerBackgroundModuleCollections(storageManager, backgroundModules)
 
@@ -132,6 +153,7 @@ export async function setupBackgroundIntegrationTest(options?: {
     await setStorageMiddleware(storageManager, {
         syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
+        contentSharing: backgroundModules.contentSharing,
         modifyMiddleware: (originalMiddleware) => [
             ...((options && options.customMiddleware) || []),
             ...(options && options.debugStorageOperations
@@ -152,6 +174,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         storageChangeDetector,
         authService,
         subscriptionService,
+        getServerStorage,
     }
 }
 
@@ -165,7 +188,9 @@ export function registerBackgroundIntegrationTest(
                 await runBackgroundIntegrationTest(test)
             },
         )
-        registerSyncBackgroundIntegrationTests(test)
+        if (process.env.SKIP_SYNC_TESTS !== 'true') {
+            registerSyncBackgroundIntegrationTests(test)
+        }
     })
 }
 

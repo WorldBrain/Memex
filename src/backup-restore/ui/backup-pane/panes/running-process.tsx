@@ -146,6 +146,7 @@ export default class RunningProcess extends React.Component<Props> {
 
     async handleCancel() {
         this.setState({ canceling: true })
+        await localStorage.removeItem('backup.restore.restore-running')
         await remoteFunction(this.props.functionNames.cancel)()
         this.props.onFinish()
     }
@@ -160,15 +161,16 @@ export default class RunningProcess extends React.Component<Props> {
             <div>
                 {this.props.renderHeader()}
                 <WhiteSpacer10 />
-                <div className={overviewStyles.showWarning}>
-                    <span className={overviewStyles.WarningIcon} />
-                    <span className={overviewStyles.showWarningText}>
-                        {
-                            'With a lot of data (> 25.000 pages) it is recommended'
-                        }
-                        running this over night.
-                    </span>
-                </div>
+                {localStorage.getItem('backup.restore.restore-running') ===
+                    'false' && (
+                    <div className={overviewStyles.showWarning}>
+                        <span className={overviewStyles.WarningIcon} />
+                        <span className={overviewStyles.showWarningText}>
+                            With a lot of data (> 25.000 pages) it is
+                            recommended running this over night.
+                        </span>
+                    </div>
+                )}
                 <WhiteSpacer30 />
                 <div className={localStyles.steps}>
                     {this.renderSteps(info)}

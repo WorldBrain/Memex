@@ -12,6 +12,8 @@ import ListItem from './list-item'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import { actions as filterActs } from 'src/search-filters'
 import { selectors as sidebar } from 'src/overview/sidebar-left'
+import { auth, contentSharing } from 'src/util/remote-functions-background'
+import { show } from 'src/overview/modals/actions'
 
 class ListContainer extends Component {
     static propTypes = {
@@ -28,6 +30,7 @@ class ListContainer extends Component {
         handleDeleteList: PropTypes.func.isRequired,
         toggleCreateListForm: PropTypes.func.isRequired,
         showCreateList: PropTypes.bool.isRequired,
+        showShareModal: PropTypes.func.isRequired,
         showCommonNameWarning: PropTypes.bool.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
         isSidebarLocked: PropTypes.bool.isRequired,
@@ -37,16 +40,33 @@ class ListContainer extends Component {
 
     constructor(props) {
         super(props)
+
         this.state = {
             listName: null,
             updatedListName: null,
             showWarning: false,
+            isPioneer: false,
+            displayName: null,
+            shareAccess: false,
         }
     }
 
     async componentDidMount() {
         // Gets all the list from the DB to populate the sidebar.
         this.props.getListFromDB()
+
+        this.getUserInfo()
+    }
+
+    async getUserInfo() {
+        // const isPioneer = await auth.isAuthorizedForFeature('beta')
+        // const userProfile = await auth.getUserProfile()
+        // const displayName = userProfile ? userProfile.displayName : undefined
+
+        this.setState({
+            isPioneer: true, // TODO: use isPioneer declared above
+            displayName: 'John Smith', // TODO: use displayName declared above
+        })
     }
 
     setInputRef = (el) => (this.inputEl = el)
@@ -92,6 +112,10 @@ class ListContainer extends Component {
         }))
     }
 
+    handleShareButtonClick = (i) => () => {
+        return this.props.showShareModal({ list: this.props.lists[i] })
+    }
+
     renderAllLists = () => {
         return this.props.lists.map((list, i) => {
             if (list.isEditing) {
@@ -115,9 +139,11 @@ class ListContainer extends Component {
             return (
                 <ListItem
                     key={i}
+                    listId={list.id}
                     listName={list.name}
                     isMobileList={list.isMobileList}
                     isFiltered={list.isFilterIndex}
+                    onShareButtonClick={this.handleShareButtonClick(i)}
                     onEditButtonClick={this.props.handleEditBtnClick(i)}
                     onListItemClick={this.props.handleListItemClick(list, i)}
                     onAddPageToList={this.props.handleAddPageList(list, i)}
@@ -194,13 +220,14 @@ class ListContainer extends Component {
 const mapStateToProps = (state) => ({
     lists: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
+    shareModalProps: selectors.shareModalProps(state),
     showCreateList: selectors.showCreateListForm(state),
     showCommonNameWarning: selectors.showCommonNameWarning(state),
     isSidebarOpen: sidebar.isSidebarOpen(state),
     isSidebarLocked: sidebar.sidebarLocked(state),
 })
 
-const mapDispatchToProps = (dispatch, getState) => ({
+const mapDispatchToProps = (dispatch, ownProps) => ({
     ...bindActionCreators(
         {
             resetListDeleteModal: actions.resetListDeleteModal,
@@ -240,6 +267,19 @@ const mapDispatchToProps = (dispatch, getState) => ({
         dispatch(actions.deletePageList())
         dispatch(filterActs.delListFilter())
     },
+    showShareModal: ({ list }) =>
+        dispatch(
+            show({
+                modalId: 'ShareModal',
+                options: {
+                    list,
+                    auth: auth,
+                    contentSharing: contentSharing,
+                    isPioneer: true,
+                    isShown: true,
+                },
+            }),
+        ),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListContainer)

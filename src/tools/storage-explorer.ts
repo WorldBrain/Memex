@@ -51,6 +51,7 @@ async function main() {
 
     const storageManager = initStorex()
     const backgroundModules = createBackgroundModules({
+        getServerStorage: () => Promise.reject(), // FIXME
         getSharedSyncLog: null,
         signalTransportFactory: null,
         analyticsManager: null,

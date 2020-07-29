@@ -49,6 +49,7 @@ class BetaFeaturesScreen extends React.Component<
         const featureOptions = await featuresBeta.getFeatures()
         const featureEnabled = {
             'copy-paster': true,
+            'sharing-collections': true,
             reader: false,
             'pdf-annotations': false,
         }

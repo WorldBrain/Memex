@@ -21,7 +21,6 @@ import {
     setupBackgroundModules,
     registerBackgroundModuleCollections,
 } from './background-script/setup'
-import { createLazySharedSyncLog } from './sync/background/shared-sync-log'
 import { createFirebaseSignalTransport } from './sync/background/signalling'
 import { DevAuthState } from 'src/authentication/background/setup'
 import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
@@ -31,6 +30,11 @@ import pipeline from 'src/search/pipeline'
 import { setStorageMiddleware } from './storage/middleware'
 import { getFirebase } from './util/firebase-app-initialized'
 import { FeaturesBeta } from './features/background/feature-beta'
+import setupDataSeeders from 'src/util/tests/seed-data'
+import {
+    createLazyServerStorage,
+    createServerStorageManager,
+} from './storage/server'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -38,7 +42,12 @@ export async function main() {
     })
     initSentry({ storageChangesManager: localStorageChangesManager })
 
-    const getSharedSyncLog = createLazySharedSyncLog()
+    const getServerStorage = createLazyServerStorage(
+        createServerStorageManager,
+        {
+            autoPkType: 'string',
+        },
+    )
     const fetchPageDataProcessor = new FetchPageDataProcessor({
         fetchPageData,
         pagePipeline: pipeline,
@@ -46,13 +55,15 @@ export async function main() {
 
     const storageManager = initStorex()
     const backgroundModules = createBackgroundModules({
+        getServerStorage,
         signalTransportFactory: createFirebaseSignalTransport,
         includePostSyncProcessor: true,
         analyticsManager: analytics,
         localStorageChangesManager,
         fetchPageDataProcessor,
         browserAPIs: browser,
-        getSharedSyncLog,
+        getSharedSyncLog: async () =>
+            (await getServerStorage()).storageModules.sharedSyncLog,
         storageManager,
         authOptions: {
             devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,
@@ -69,16 +80,17 @@ export async function main() {
     registerBackgroundModuleCollections(storageManager, backgroundModules)
 
     await storageManager.finishInitialization()
-    await navigator?.storage?.persist?.()
 
     await setStorageMiddleware(storageManager, {
         syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
+        contentSharing: backgroundModules.contentSharing,
     })
+    await setupBackgroundModules(backgroundModules, storageManager)
+
+    await navigator?.storage?.persist?.()
 
     setStorex(storageManager)
-
-    await setupBackgroundModules(backgroundModules, storageManager)
 
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({
@@ -100,6 +112,7 @@ export async function main() {
         collections: backgroundModules.customLists.remoteFunctions,
         readable: backgroundModules.readable.remoteFunctions,
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
+        contentSharing: backgroundModules.contentSharing.remoteFunctions,
     })
 
     // Attach interesting features onto global window scope for interested users
@@ -108,6 +121,7 @@ export async function main() {
     window['bgModules'] = backgroundModules
     window['analytics'] = analytics
     window['tabMan'] = backgroundModules.activityLogger.tabManager
+    window['dataSeeders'] = setupDataSeeders(storageManager)
 
     window['selfTests'] = await createSelfTests({
         storage: {

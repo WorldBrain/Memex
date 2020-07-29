@@ -15,3 +15,5 @@ import './popup-components'
 import './other'
 import './copy-paster'*/
 import './annotations-sidebar'
+import './copy-paster'
+import './sharing'

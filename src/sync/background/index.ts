@@ -17,7 +17,7 @@ import {
     MemexExtSyncInfoStorage,
 } from './storage'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
-import { filterSyncLog } from './sync-logging'
+import { filterSyncLog } from '@worldbrain/memex-common/lib/sync//sync-logging'
 import { MemexExtSyncSettingStore } from './setting-store'
 import { resolvablePromise } from 'src/util/promises'
 import { remoteEventEmitter } from 'src/util/webextensionRPC'

@@ -16,6 +16,7 @@ import ActionButton from '../../notifications/components/ActionButton'
 import OptIn from '../../notifications/components/OptIn'
 import ToggleSwitch from '../../common-ui/components/ToggleSwitch'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 
 class Container extends React.Component<any, any> {
     static propTypes = {

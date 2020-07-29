@@ -2,6 +2,8 @@ import styled from 'styled-components'
 import {
     colorPrimary,
     colorText,
+    colorGrey8,
+    colorGrey7,
 } from 'src/common-ui/components/design-library/colors'
 
 export const fontSizeSmallest = 10
@@ -41,7 +43,6 @@ export const TypographyHeadingBig = styled.span`
 export const TypographyHeadingNormal = styled.span`
     font-size: ${fontSizeNormal}px;
     text-decoration: none;
-    margin-right: 5px;
     font-weight: bold;
     color: ${colorText};
 `
@@ -98,6 +99,20 @@ export const TypographyTextNormal = styled.span`
     line-height: 1.4;
     text-align: left;
     color: ${colorText};
+
+    @media (max-width: 1300px) {
+        font-size: ${fontSizeSmall}px;
+    }
+`
+
+export const TypographySubTextNormal = styled.span`
+    font-size: ${fontSizeNormal}px;
+    font-weight: 400;
+    font-family: Poppins;
+    font-style: normal;
+    line-height: 1.4;
+    text-align: left;
+    color: ${colorGrey7};
 
     @media (max-width: 1300px) {
         font-size: ${fontSizeSmall}px;
