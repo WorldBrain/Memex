@@ -184,8 +184,7 @@ class ListItem extends Component<Props, State> {
                 onDragLeave={this.handleDragLeave}
             >
                 <div className={styles.listName}>{this.props.listName}</div>
-                {!this.props.isMobileList &&
-                    (this.state.isMouseInside || this.state.isShared) && (
+                {!this.props.isMobileList && (
                         <div className={styles.buttonContainer}>
                             {this.state.isMouseInside && (
                                 <React.Fragment>
@@ -205,21 +204,30 @@ class ListItem extends Component<Props, State> {
                                         onClick={this.handleCrossBtnClick}
                                         title={'Delete'}
                                     />
+                                    {this.state.sharedAccess && !this.state.isShared && (
+                                        <button
+                                            className={cx(
+                                                styles.shareButton,
+                                                styles.button,
+                                            )}
+                                            onClick={this.handleShareBtnClick}
+                                            title={'Share'}
+                                        />
+                                    )}
                                 </React.Fragment>
                             )}
-                            {((!this.props.isMobileList && this.state.isMouseInside) ||
-                                this.state.isShared) && (
-                                <button
-                                    className={cx(
-                                        styles.shareButton,
-                                        styles.button,
-                                        styles.shareButtonPermanent,
-                                        {[styles.shareButtonPermanentHover] : this.state.isMouseInside},
-                                    )}
-                                    onClick={this.handleShareBtnClick}
-                                    title={'Share'}
-                                />
-                            )}
+                                {this.state.isShared && (
+                                    <button
+                                        className={cx(
+                                            styles.shareButton,
+                                            styles.button,
+                                            {[styles.shareButtonPermanent] : this.state.isShared},
+                                            {[styles.shareButtonPermanentHover] : this.state.isMouseInside},
+                                        )}
+                                        onClick={this.handleShareBtnClick}
+                                        title={'Shared'}
+                                    />
+                                )}
                         </div>
                     )}
             </div>
