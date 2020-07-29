@@ -142,10 +142,6 @@ class BlacklistContainer extends Component {
                     </div>
                     {this.renderError()}
                     {this.renderBlacklistInputRow()}
-                    <div className={settingsStyle.infoTextSmall}>
-                        You can use <a href="https://regexr.com/">RegExp's</a>{' '}
-                        too!
-                    </div>
                     <div className={settingsStyle.whiteSpacer30} />
                     {this.renderAddBlacklistSites()}
                     <BlacklistTable>
