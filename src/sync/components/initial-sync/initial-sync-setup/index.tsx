@@ -23,7 +23,7 @@ export default class InitialSyncSetup extends StatefulUIElement<
     renderInner = () => {
         switch (this.state.status) {
             case 'introduction':
-                localStorage.removeItem('firebase:previous_websocket_failure')
+                this.removeFirebaseFlag()
                 return (
                     <Introduction
                         handleStart={() => this.processEvent('start', {})}
@@ -54,6 +54,10 @@ export default class InitialSyncSetup extends StatefulUIElement<
             default:
                 throw Error(`Unknown Sync Setup state ${this.state.status}`)
         }
+    }
+
+    async removeFirebaseFlag(){
+        await localStorage.removeItem('firebase:previous_websocket_failure')
     }
 
     close = () => (this.state.status === 'sync' ? false : this.props.onClose())
