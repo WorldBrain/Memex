@@ -23,6 +23,7 @@ export default class InitialSyncSetup extends StatefulUIElement<
     renderInner = () => {
         switch (this.state.status) {
             case 'introduction':
+                localStorage.removeItem('firebase:previous_websocket_failure')
                 return (
                     <Introduction
                         handleStart={() => this.processEvent('start', {})}
