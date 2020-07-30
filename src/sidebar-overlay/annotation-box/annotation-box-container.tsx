@@ -12,7 +12,6 @@ import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { actions as filterActs } from 'src/search-filters'
-import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 import { HighlightInteractionsInterface } from 'src/highlighting/types'
 
 const styles = require('./annotation-box-container.css')
@@ -37,7 +36,6 @@ export interface OwnProps {
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
     handleBookmarkToggle: (url: string) => void
-    highlighter: HighlightInteractionsInterface
 }
 
 interface DispatchProps {
@@ -181,7 +179,6 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
     }
 
     private _handleCancelOperation = () => {
-        this.props.highlighter.removeTempHighlights()
         this.setState({ mode: 'default' })
     }
 
@@ -278,6 +275,4 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     handleTagClick: (tag) => dispatch(filterActs.toggleTagFilter(tag)),
 })
 
-export default withSidebarContext(
-    connect(null, mapDispatchToProps)(AnnotationBoxContainer),
-)
+export default connect(null, mapDispatchToProps)(AnnotationBoxContainer)

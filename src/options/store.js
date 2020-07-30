@@ -18,6 +18,7 @@ import { reducer as modals } from '../overview/modals/reducer'
 // Search filters in the sidebar
 import { reducer as searchFilters } from 'src/search-filters'
 import { reducer as sidebarLeft } from 'src/overview/sidebar-left'
+import { reducer as sidebar } from 'src/sidebar-overlay/sidebar'
 
 import * as notifications from '../notifications'
 import { authReducer } from '../authentication/redux'
@@ -32,6 +33,7 @@ const rootReducer = combineReducers({
     customLists,
     searchFilters,
     sidebarLeft,
+    sidebar,
     notifications: notifications.reducer,
     deleteConfModal,
     modals,

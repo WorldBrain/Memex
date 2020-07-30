@@ -2,7 +2,6 @@ import * as React from 'react'
 
 import { TagInput } from '../components'
 import AllModesFooter from './all-modes-footer'
-import * as constants from '../comment-box/constants'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
@@ -29,7 +28,7 @@ class EditModeContent extends React.Component<Props, State> {
     state = {
         commentText: this.props.comment ? this.props.comment : '',
         tagsInput: this.props.tags ? this.props.tags : [],
-        rows: constants.NUM_DEFAULT_ROWS,
+        rows: 5,
         isTagInputActive: false,
         tagSuggestions: [],
     }

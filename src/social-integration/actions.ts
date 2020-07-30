@@ -1,4 +1,3 @@
-import { Thunk } from './types'
 import { acts as tagActs } from 'src/popup/tags-button'
 import { acts as collectionActs } from 'src/popup/collections-button'
 import { remoteFunction } from 'src/util/webextensionRPC'
@@ -11,6 +10,8 @@ const fetchAllListsRPC = remoteFunction('fetchAllLists')
 const addBookmarkRPC = remoteFunction('addSocialBookmark')
 const delBookmarkRPC = remoteFunction('delSocialBookmark')
 const addTweetRPC = remoteFunction('addTweet')
+
+type Thunk = any
 
 export const initState: (url: string) => Thunk = (url) => async (dispatch) => {
     try {

@@ -11,13 +11,9 @@ import {
     fetchOnboardingStage,
     setOnboardingStage,
 } from 'src/overview/onboarding/utils'
-import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications } from 'src/util/remote-functions-background'
-import {
-    fetchAnnotationsForPageUrl,
-    setAnnotations,
-} from 'src/annotations/actions'
+import { setAnnotations } from 'src/annotations/actions'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')
@@ -61,41 +57,11 @@ export const setIsSocialPost = createAction<boolean>('sidebar/setIsSocialPost')
 /**
  * Hydrates the initial state of the sidebar.
  */
-export const initState: () => Thunk = () => dispatch => {
+export const initState: () => Thunk = () => (dispatch) => {
     dispatch(resetResultsPage())
 }
 
-export const openSidebar: (
-    args: OpenSidebarArgs & {
-        url?: string
-        title?: string
-        forceFetch?: boolean
-        isSocialPost?: boolean
-    },
-) => Thunk = ({
-    url,
-    title,
-    activeUrl,
-    forceFetch,
-    isSocialPost = false,
-} = {}) => async (dispatch, getState) => {
-    dispatch(setPage({ url, title }))
-    dispatch(setSidebarOpen(true))
-    dispatch(setIsSocialPost(isSocialPost))
-
-    const annots = selectors.annotations(getState())
-    if (forceFetch || !annots.length) {
-        await dispatch(fetchAnnotationsForPageUrl(isSocialPost))
-    }
-
-    if (activeUrl) {
-        dispatch(setActiveAnnotationUrl(activeUrl))
-    }
-
-    await processEventRPC({ type: EVENT_NAMES.OPEN_SIDEBAR_PAGE })
-}
-
-export const closeSidebar: () => Thunk = () => async dispatch => {
+export const closeSidebar: () => Thunk = () => async (dispatch) => {
     dispatch(setSidebarOpen(false))
     await processEventRPC({ type: EVENT_NAMES.CLOSE_SIDEBAR_PAGE })
 }
@@ -125,14 +91,16 @@ export const checkAndSetCongratsMessage: () => Thunk = () => async (
     }
 }
 
-export const toggleBookmark: (url: string) => Thunk = url => async (
+export const toggleBookmark: (url: string) => Thunk = (url) => async (
     dispatch,
     getState,
 ) => {
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
     const annotations = selectors.annotations(state)
-    const index = annotations.findIndex(annot => annot.url === url)
+    console.log('annots:', annotations)
+    const index = annotations.findIndex((annot) => annot.url === url)
+    console.log('index:', index)
     dispatch(toggleBookmarkState(index))
 
     try {
@@ -140,7 +108,7 @@ export const toggleBookmark: (url: string) => Thunk = url => async (
     } catch (err) {
         dispatch(toggleBookmarkState(index))
         handleDBQuotaErrors(
-            error =>
+            (error) =>
                 notifications.create({
                     requireInteraction: false,
                     title: 'Memex error: starring page',
@@ -152,7 +120,7 @@ export const toggleBookmark: (url: string) => Thunk = url => async (
 }
 
 // Only toggles UI state; no DB side-effects
-export const toggleBookmarkState: (i: number) => Thunk = i => (
+export const toggleBookmarkState: (i: number) => Thunk = (i) => (
     dispatch,
     getState,
 ) => {
@@ -162,7 +130,7 @@ export const toggleBookmarkState: (i: number) => Thunk = i => (
     dispatch(
         setAnnotations([
             ...annotations.slice(0, i),
-            { ...annotation, hasBookmark: !annotation.hasBookmark },
+            { ...annotation, isBookmarked: !annotation.isBookmarked },
             ...annotations.slice(i + 1),
         ]),
     )

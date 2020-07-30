@@ -9,7 +9,6 @@ import AnnotationBox from 'src/sidebar-overlay/annotation-box'
 import { deleteAnnotation, editAnnotation } from 'src/annotations/actions'
 import { Annotation } from 'src/annotations/types'
 import { HighlightInteractionsInterface } from 'src/highlighting/types'
-import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 
 const styles = require('./annotation-list.css')
 
@@ -23,7 +22,6 @@ interface OwnProps {
     pageUrl: string
     /** Opens the annotation sidebar with all of the annotations */
     openAnnotationSidebar: MouseEventHandler
-    highlighter: HighlightInteractionsInterface
     goToAnnotation: (annotation: Annotation) => void
 }
 
@@ -99,7 +97,7 @@ class AnnotationList extends Component<Props, State> {
 
         const newAnnotations: Annotation[] = [
             ...annotations.slice(0, index),
-            { ...annotation, comment, tags, lastEdited: Date.now() },
+            { ...annotation, comment, tags, lastEdited: new Date() },
             ...annotations.slice(index + 1),
         ]
 
@@ -108,15 +106,10 @@ class AnnotationList extends Component<Props, State> {
         this.setState({
             annotations: newAnnotations,
         })
-        this.props.highlighter.removeTempHighlights()
     }
 
     private handleDeleteAnnotation = (url: string) => {
-        // Note this only get's called when editing the annotation on the dashboard results list, not the sidebar
-        // TODO: Why is this state not linked to the redux state?
-
         this.props.handleDeleteAnnotation(url)
-        this.props.highlighter.removeAnnotationHighlights(url)
 
         // Delete the annotation in the state too
         const { annotations } = this.state
@@ -141,7 +134,7 @@ class AnnotationList extends Component<Props, State> {
         const annotation: Annotation = annotations[index]
         const newAnnotations: Annotation[] = [
             ...annotations.slice(0, index),
-            { ...annotation, hasBookmark: !annotation.hasBookmark },
+            { ...annotation, isBookmarked: !annotation.isBookmarked },
             ...annotations.slice(index + 1),
         ]
 
@@ -172,6 +165,8 @@ class AnnotationList extends Component<Props, State> {
                 handleEditAnnotation={this.handleEditAnnotation}
                 handleBookmarkToggle={this.handleBookmarkToggle}
                 {...annot}
+                lastEdited={annot.lastEdited?.valueOf()}
+                createdWhen={annot.createdWhen?.valueOf()}
             />
         ))
     }
@@ -222,6 +217,4 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     handleBookmarkToggle: (url) => dispatch(actions.toggleBookmark(url)),
 })
 
-export default withSidebarContext(
-    connect(null, mapDispatchToProps)(AnnotationList),
-)
+export default connect(null, mapDispatchToProps)(AnnotationList)
