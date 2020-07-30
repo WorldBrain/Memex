@@ -1,0 +1,303 @@
+@import url('/fonts/Poppins/poppins.css');
+
+:host * {
+    font-family: 'Poppins', sans-serif;
+}
+
+.horizontalLine {
+    width: 18px;
+    border: solid 0.5px #d8d8d8;
+    border-radius: 5px;
+    margin: 10px 0px;
+}
+
+.ribbon {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: center;
+    right: 0;
+    width: 35px;
+    top: 25%;
+    height: 50%;
+    z-index: 2147483645;
+
+    /* z-index: 2147483647;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border: 1px solid #7777775c;
+    border-right: none; */
+    transform: translate(0, -20px);
+    transition: all 0.1s ease-in-out;
+
+    /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
+    line-height: normal;
+    text-align: start;
+    align-items: center;
+}
+
+.ribbonExpanded {
+    display: flex;
+    width: 35px;
+    transition: all 0.1s ease-in-out;
+}
+
+.ribbonSidebarOpen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: none;
+    background: white;
+    height: 105vh;
+    width: 35px;
+    top: 0px;
+
+    & .removeSidebar {
+        visibility: hidden;
+        display: flex;
+    }
+}
+
+.removeSidebar {
+    display: flex;
+}
+
+.innerRibbonExpanded {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    box-shadow: -1px 1px 7px 2px #13131321;
+    background: white;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 5px 0;
+    margin-top: 0px;
+}
+
+.innerRibbonSidebarOpen {
+    box-shadow: none;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+}
+
+/* SECTIONS */
+
+.generalActions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: fit-content;
+    justify-content: space-between;
+}
+
+.pageActions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: fit-content;
+    justify-content: space-between;
+}
+
+.settingsActions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: fit-content;
+    justify-content: space-between;
+}
+
+/* ICONS */
+
+.buttons {
+    align-items: center;
+    display: block;
+}
+
+.button {
+    width: 18px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    cursor: pointer;
+    margin: 5px 0;
+
+    &:hover {
+        opacity: 0.7;
+    }
+
+    &:active {
+        opacity: 1;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.logo {
+    background-image: url('/img/open.svg');
+}
+
+.dashboard {
+    background-image: url('/img/open.svg');
+}
+
+.arrow {
+    background-image: url('/img/openSidebar.svg');
+    transition: 0.2s cubic-bezier(0.55, 0.09, 0.68, 0.53);
+}
+
+.arrowReverse {
+    background-image: url('/img/openSidebar.svg');
+    transform: rotate(180deg);
+    transition: 0.2s cubic-bezier(0.55, 0.09, 0.68, 0.53);
+}
+
+.active {
+    background-color: #dadada;
+    border-radius: 3px;
+    background-size: 80%;
+}
+
+.search {
+    background-image: url('/img/search.svg');
+}
+
+.tag {
+    background-image: url('/img/tag_empty.svg');
+}
+
+.collection {
+    background-image: url('/img/collections_add.svg');
+}
+
+.comments {
+    background-image: url('/img/comment_add.svg');
+}
+
+.bookmark {
+    background-image: url('/img/star_full.svg');
+}
+
+.notBookmark {
+    background-image: url('/img/star_empty.svg');
+}
+
+.settings {
+    background-image: url('/img/settings.svg');
+}
+
+.highlightsOn {
+    background-image: url('/img/highlightOn.svg');
+}
+
+.highlightsOff {
+    background-image: url('/img/highlightOff.svg');
+}
+
+.tooltipOn {
+    background-image: url('/img/tooltip_full.svg');
+}
+
+.tooltipOff {
+    background-image: url('/img/tooltip_empty.svg');
+}
+
+.ribbonOn {
+    background-image: url('/img/ribbonOn.svg');
+}
+
+.ribbonOff {
+    background-image: url('/img/ribbonOff.svg');
+}
+
+.pauseIcon {
+    background-image: url('/img/pause.svg');
+}
+
+.playIcon {
+    background-image: url('/img/pause_active.svg');
+
+    &:hover {
+        background-image: url('/img/play.svg');
+    }
+}
+
+/* Interaction Modals */
+
+.collectionDiv {
+    border-radius: 3px;
+}
+
+.searchInput {
+    composes: searchField from '../../../common-ui/elements.css';
+    border-radius: 3px;
+    border: none;
+    padding: 0 15px;
+    height: 35px;
+    font-size: 13px;
+    overflow: hidden;
+    width: calc(100% - 37px);
+    display: flex;
+    flex-wrap: nowrap;
+    text-overflow: ellipsis;
+    margin: 4px;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.commentBox {
+    width: 300px;
+    height: 150px;
+    border: 2px solid #5cd9a6;
+    top: 50px;
+    background: white;
+}
+
+.commentSaved {
+    border-radius: 50px;
+    border: 1px solid #5cd9a6;
+    height: 28px;
+    width: 28px;
+}
+
+.commentText {
+    font-size: 15px;
+    margin-left: 50px;
+}
+
+.saveBox {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.saveIcon {
+    background-image: url('/img/saveIcon.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 28px;
+    height: 28px;
+    background-size: 30px;
+}
+
+.toggler,
+.cancel {
+    background-repeat: no-repeat;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.cancel {
+    background-image: url('/img/close.svg');
+    background-size: 14px;
+}
