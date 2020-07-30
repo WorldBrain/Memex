@@ -25,6 +25,7 @@ import { AnnotationsSidebarContainer } from 'src/sidebar/annotations-sidebar/con
 import {
     createAnnotationsCache,
     AnnotationsCache,
+    AnnotationsCacheInterface,
 } from 'src/annotations/annotations-cache'
 
 const styles = require('./overview.styles.css')
@@ -41,7 +42,7 @@ interface State {
 }
 
 class Overview extends PureComponent<Props, State> {
-    private annotationsCache: AnnotationsCache
+    private annotationsCache: AnnotationsCacheInterface
     private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     private customListsBG = runInBackground<RemoteCollectionsInterface>()
     private tagsBG = runInBackground<RemoteTagsInterface>()

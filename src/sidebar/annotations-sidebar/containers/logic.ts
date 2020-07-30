@@ -353,7 +353,10 @@ export class SidebarContainerLogic extends UILogic<
             this,
             opts.overwrite ? 'primarySearchState' : 'secondarySearchState',
             async () => {
-                return this.doAnnotationSearch(state, opts)
+                if (opts.overwrite && state.pageUrl != null) {
+                    await this.options.annotationsCache.load(state.pageUrl)
+                }
+                // return this.doAnnotationSearch(state, opts)
             },
         )
     }
