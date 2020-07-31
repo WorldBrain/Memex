@@ -136,7 +136,7 @@ class ResultListContainer extends PureComponent<Props> {
     private handleOutsideClick: EventListener = (event) => {
         // Reduces to `true` if any on input elements were clicked
         const wereAnyClicked = reduce((res, el) => {
-            const isEqual = el != null ? el.isEqualNode(event.target) : false
+            const isEqual = el != null ? el.contains(event.target) : false
             return res || isEqual
         }, false)
 
