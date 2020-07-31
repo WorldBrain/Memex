@@ -63,13 +63,6 @@ export async function main() {
         tooltip?: Resolvable<void>
         highlights?: Resolvable<void>
     } = {}
-    async function loadComponent(component: InPageUIComponent) {
-        if (!components[component]) {
-            components[component] = resolvablePromise<void>()
-            loadContentScript(component)
-        }
-        return components[component]!
-    }
 
     // 2. Initialise dependencies required by content scripts
     const currentTab = await getCurrentTab()
@@ -91,7 +84,16 @@ export async function main() {
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
     const inPageUI = new SharedInPageUIState({
-        loadComponent,
+        loadComponent: (component) => {
+            if (!components[component]) {
+                components[component] = resolvablePromise<void>()
+                loadContentScript(component)
+            }
+            return components[component]!
+        },
+        unloadComponent: (component) => {
+            delete components[component]
+        },
         pageUrl: currentTab.url,
     })
     annotationsCache.load(getPageUrl())
@@ -155,7 +157,7 @@ export async function main() {
                     setState: tooltipUtils.setHighlightsState,
                 },
             })
-            components.ribbon!.resolve()
+            components.ribbon?.resolve()
         },
         async registerHighlightingScript(execute): Promise<void> {
             execute({
@@ -182,7 +184,7 @@ export async function main() {
                 customLists: runInBackground<RemoteCollectionsInterface>(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
             })
-            components.sidebar!.resolve()
+            components.sidebar?.resolve()
         },
         async registerTooltipScript(execute): Promise<void> {
             await execute({
@@ -197,7 +199,7 @@ export async function main() {
                     action: 'createFromTooltip',
                 }),
             })
-            components.tooltip!.resolve()
+            components.tooltip?.resolve()
         },
     }
 

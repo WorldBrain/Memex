@@ -13,6 +13,7 @@ import {
 export interface SharedInPageUIDependencies {
     pageUrl: string
     loadComponent: (component: InPageUIComponent) => void
+    unloadComponent: (component: InPageUIComponent) => void
 }
 
 export class SharedInPageUIState implements SharedInPageUIInterface {
@@ -222,6 +223,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
     }
 
     _removeComponent(component: InPageUIComponent) {
+        this.options.unloadComponent(component)
         this.componentsShown[component] = false
         this.componentsSetUp[component] = false
         this.events.emit('componentShouldDestroy', { component })
