@@ -73,7 +73,6 @@ export async function main() {
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
     const highlightRenderer = new HighlightRenderer()
-    const highlighter = new HighlightRenderer()
     const annotationEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
     const annotationsCache = createAnnotationsCache({
@@ -140,7 +139,7 @@ export async function main() {
                 inPageUI,
                 annotationsManager,
                 getRemoteFunction: remoteFunction,
-                highlighter,
+                highlighter: highlightRenderer,
                 annotations: annotationsBG,
                 annotationsCache,
                 currentTab,
@@ -177,7 +176,7 @@ export async function main() {
                     : 'hidden',
                 inPageUI,
                 annotationsCache,
-                highlighter,
+                highlighter: highlightRenderer,
                 annotations: annotationsBG,
                 tags: tagsBG,
                 pageUrl: currentTab.url,
@@ -224,11 +223,11 @@ export async function main() {
         removeTooltip: async () => inPageUI.removeTooltip(),
         insertOrRemoveTooltip: async () => inPageUI.toggleTooltip(),
         goToHighlight: async (annotation, pageAnnotations) => {
-            await highlighter.renderHighlights(
+            await highlightRenderer.renderHighlights(
                 pageAnnotations,
                 annotationsBG.toggleSidebarOverlay,
             )
-            await highlighter.highlightAndScroll(annotation)
+            await highlightRenderer.highlightAndScroll(annotation)
         },
         createHighlight: annotationsFunctions.createHighlight({
             category: 'Highlights',
