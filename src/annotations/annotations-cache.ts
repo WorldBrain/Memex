@@ -85,10 +85,12 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     constructor(private dependencies: AnnotationsCacheDependencies) {}
 
     load = async (url, args = {}) => {
-        this.annotations = await this.dependencies.backendOperations.load(
+        const annotations = await this.dependencies.backendOperations.load(
             url,
             args,
         )
+
+        this.annotations = annotations.reverse()
         this.annotationChanges.emit('load', this._annotations)
         this.annotationChanges.emit('newState', this._annotations)
     }
@@ -107,7 +109,9 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     create = (annotation: Annotation) => {
         const { backendOperations } = this.dependencies
         const stateBeforeModifications = this._annotations
-        this._annotations.push(annotation)
+
+        this.annotations = [annotation, ...stateBeforeModifications]
+
         this.annotationChanges.emit('created', annotation)
         this.annotationChanges.emit('newState', this._annotations)
 
