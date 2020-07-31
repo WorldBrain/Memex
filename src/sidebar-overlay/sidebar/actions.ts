@@ -98,9 +98,7 @@ export const toggleBookmark: (url: string) => Thunk = (url) => async (
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
     const annotations = selectors.annotations(state)
-    console.log('annots:', annotations)
     const index = annotations.findIndex((annot) => annot.url === url)
-    console.log('index:', index)
     dispatch(toggleBookmarkState(index))
 
     try {

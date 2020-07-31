@@ -1,8 +1,10 @@
 import React, { PureComponent, MouseEventHandler, MouseEvent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import Waypoint from 'react-waypoint'
-import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
+import reduce from 'lodash/fp/reduce'
+import omit from 'lodash/omit'
+
 import { selectors as opt } from 'src/options/settings'
 import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
 import ResultList from './ResultList'
@@ -28,7 +30,6 @@ import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-l
 import CopyPaster from 'src/overview/copy-paster'
 import { renderTemplate } from 'src/overview/copy-paster/utils'
 import { Template } from 'src/overview/copy-paster/types'
-import omit from 'lodash/omit'
 
 const styles = require('./ResultList.css')
 

@@ -1,19 +1,18 @@
 import React, { Component, MouseEventHandler } from 'react'
-import { connect } from 'react-redux'
 import cx from 'classnames'
 
-import { MapDispatchToProps } from 'src/sidebar-overlay/types'
-import * as actions from 'src/sidebar-overlay/sidebar/actions'
 import AnnotationBox from 'src/sidebar-overlay/annotation-box'
-
-import { deleteAnnotation, editAnnotation } from 'src/annotations/actions'
-import { Annotation } from 'src/annotations/types'
-import { HighlightInteractionsInterface } from 'src/highlighting/types'
+import { Annotation as AnnotationFlawed } from 'src/annotations/types'
 
 const styles = require('./annotation-list.css')
 
-interface OwnProps {
-    env: 'inpage' | 'overview'
+// TODO (sidebar-refactor): somewhere this type regressed and `isBookmarked` got
+//  changed to `hasBookmark`
+type Annotation = Omit<AnnotationFlawed, 'isBookmarked'> & {
+    hasBookmark: boolean
+}
+
+export interface Props {
     /** Override for expanding annotations by default */
     isExpandedOverride: boolean
     /** Array of matched annotations, limited to 3 */
@@ -23,17 +22,10 @@ interface OwnProps {
     /** Opens the annotation sidebar with all of the annotations */
     openAnnotationSidebar: MouseEventHandler
     goToAnnotation: (annotation: Annotation) => void
-}
-
-interface DispatchProps {
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
     handleBookmarkToggle: (url: string) => void
 }
-
-interface StateProps {}
-
-type Props = OwnProps & DispatchProps & StateProps
 
 interface State {
     /** Boolean to denote whether the list is expanded or not */
@@ -45,7 +37,7 @@ interface State {
 }
 
 class AnnotationList extends Component<Props, State> {
-    state = {
+    state: State = {
         /* The initial value is set to the isExpandedOverride which is
         fetched from localStorage. */
         isExpanded: this.props.isExpandedOverride,
@@ -134,7 +126,7 @@ class AnnotationList extends Component<Props, State> {
         const annotation: Annotation = annotations[index]
         const newAnnotations: Annotation[] = [
             ...annotations.slice(0, index),
-            { ...annotation, isBookmarked: !annotation.isBookmarked },
+            { ...annotation, hasBookmark: !annotation.hasBookmark },
             ...annotations.slice(index + 1),
         ]
 
@@ -154,17 +146,15 @@ class AnnotationList extends Component<Props, State> {
     private renderAnnotations() {
         return this.state.annotations.map((annot) => (
             <AnnotationBox
+                env="overview"
                 key={annot.url}
-                className={cx({
-                    [styles.annotation]: this.props.env === 'overview',
-                    [styles.annotationBoxInpage]: this.props.env === 'inpage',
-                })}
-                env={this.props.env}
+                className={styles.annotation}
                 handleGoToAnnotation={this.handleGoToAnnotation(annot)}
                 handleDeleteAnnotation={this.handleDeleteAnnotation}
                 handleEditAnnotation={this.handleEditAnnotation}
                 handleBookmarkToggle={this.handleBookmarkToggle}
                 {...annot}
+                hasBookmark={annot.hasBookmark}
                 lastEdited={annot.lastEdited?.valueOf()}
                 createdWhen={annot.createdWhen?.valueOf()}
             />
@@ -177,8 +167,6 @@ class AnnotationList extends Component<Props, State> {
             <div
                 className={cx({
                     [styles.parentExpanded]: isExpanded,
-                    [styles.parentExpandedSidebar]:
-                        isExpanded && this.props.env === 'inpage',
                 })}
             >
                 {/* Annotation count text and toggle arrow */}
@@ -206,15 +194,4 @@ class AnnotationList extends Component<Props, State> {
     }
 }
 
-const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
-    dispatch,
-) => ({
-    handleEditAnnotation: (url, comment, tags) =>
-        dispatch(editAnnotation(url, comment, tags)),
-    handleDeleteAnnotation: (url) => {
-        dispatch(deleteAnnotation(url))
-    },
-    handleBookmarkToggle: (url) => dispatch(actions.toggleBookmark(url)),
-})
-
-export default connect(null, mapDispatchToProps)(AnnotationList)
+export default AnnotationList

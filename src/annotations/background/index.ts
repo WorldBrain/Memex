@@ -337,10 +337,6 @@ export default class DirectLinkingBackground {
             ),
         )) as any
 
-        console.log('this.annotationStorage.getAllAnnotationsByUrl =>', {
-            annotResults,
-        })
-
         return annotResults
     }
 
