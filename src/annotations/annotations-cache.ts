@@ -1,6 +1,7 @@
-import { Annotation } from 'src/annotations/types'
 import TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
+
+import { Annotation } from 'src/annotations/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
 
@@ -14,7 +15,7 @@ export const createAnnotationsCache = (bgModules: {
                 bgModules.annotations.listAnnotationsByPageUrl({ pageUrl }),
             create: async (annotation) =>
                 bgModules.annotations.createAnnotation(annotation),
-            async update(annotation) {
+            update: async (annotation) => {
                 await bgModules.annotations.updateAnnotationBookmark({
                     url: annotation.url,
                     isBookmarked: annotation.isBookmarked,
@@ -36,12 +37,12 @@ export const createAnnotationsCache = (bgModules: {
     })
 
 interface AnnotationCacheChanges {
+    rollback: (annotations: Annotation[]) => void
+    newState: (annotation: Annotation[]) => void
     created: (annotation: Annotation) => void
     updated: (annotation: Annotation) => void
     deleted: (annotation: Annotation) => void
-    newState: (annotation: Annotation[]) => void
     load: (annotation: Annotation[]) => void
-    rollback: (annotations: Annotation[]) => void
 }
 
 export type AnnotationCacheChangeEvents = TypedEventEmitter<
@@ -69,9 +70,13 @@ export interface AnnotationsCacheInterface {
         pageUrl: string,
         args?: { limit?: number; skip?: number },
     ) => Promise<void>
-    create: (annotation: Annotation) => void
-    update: (annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>) => void
-    delete: (annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>) => void
+    create: (annotation: Annotation) => Promise<void>
+    update: (
+        annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>,
+    ) => Promise<void>
+    delete: (
+        annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>,
+    ) => Promise<void>
 
     annotations: Annotation[]
     annotationChanges: AnnotationCacheChangeEvents
@@ -84,6 +89,18 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
     constructor(private dependencies: AnnotationsCacheDependencies) {}
 
+    set annotations(annotations: Annotation[]) {
+        this._annotations = formatAnnotations(annotations)
+    }
+
+    get annotations(): Annotation[] {
+        return this._annotations
+    }
+
+    get isEmpty(): boolean {
+        return this._annotations.length === 0
+    }
+
     load = async (url, args = {}) => {
         const annotations = await this.dependencies.backendOperations.load(
             url,
@@ -95,18 +112,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         this.annotationChanges.emit('newState', this._annotations)
     }
 
-    set annotations(annotations: Annotation[]) {
-        this._annotations = formatAnnotations(annotations)
-    }
-
-    get annotations() {
-        return this._annotations
-    }
-    get isEmpty() {
-        return this._annotations.length === 0
-    }
-
-    create = (annotation: Annotation) => {
+    create = async (annotation: Annotation) => {
         const { backendOperations } = this.dependencies
         const stateBeforeModifications = this._annotations
 
@@ -115,23 +121,17 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         this.annotationChanges.emit('created', annotation)
         this.annotationChanges.emit('newState', this._annotations)
 
-        const asyncUpstream = async () => {
-            try {
-                const annotUrl = await backendOperations.create(annotation)
-                await backendOperations.updateTags(annotUrl, annotation.tags)
-            } catch (e) {
-                this._annotations = stateBeforeModifications
-                this.annotationChanges.emit(
-                    'rollback',
-                    stateBeforeModifications,
-                )
-                throw e
-            }
+        try {
+            const annotUrl = await backendOperations.create(annotation)
+            await backendOperations.updateTags(annotUrl, annotation.tags)
+        } catch (e) {
+            this._annotations = stateBeforeModifications
+            this.annotationChanges.emit('rollback', stateBeforeModifications)
+            throw e
         }
-        asyncUpstream().then(() => true)
     }
 
-    update = (annotation: Annotation) => {
+    update = async (annotation: Annotation) => {
         const stateBeforeModifications = this._annotations
 
         const resultIndex = stateBeforeModifications.findIndex(
@@ -147,34 +147,28 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         this.annotationChanges.emit('updated', annotation)
         this.annotationChanges.emit('newState', this._annotations)
 
-        const asyncUpstream = async () => {
-            try {
-                await this.dependencies.backendOperations.update(annotation)
+        try {
+            await this.dependencies.backendOperations.update(annotation)
 
-                if (
-                    haveTagsChanged(
-                        stateBeforeModifications[resultIndex].tags,
-                        annotation.tags,
-                    )
-                ) {
-                    await this.dependencies.backendOperations.updateTags(
-                        annotation.url,
-                        annotation.tags,
-                    )
-                }
-            } catch (e) {
-                this._annotations = stateBeforeModifications
-                this.annotationChanges.emit(
-                    'rollback',
-                    stateBeforeModifications,
+            if (
+                haveTagsChanged(
+                    stateBeforeModifications[resultIndex].tags,
+                    annotation.tags,
                 )
-                throw e
+            ) {
+                await this.dependencies.backendOperations.updateTags(
+                    annotation.url,
+                    annotation.tags,
+                )
             }
+        } catch (e) {
+            this._annotations = stateBeforeModifications
+            this.annotationChanges.emit('rollback', stateBeforeModifications)
+            throw e
         }
-        asyncUpstream().then(() => true)
     }
 
-    delete = (annotation: Annotation) => {
+    delete = async (annotation: Annotation) => {
         const stateBeforeModifications = this._annotations
 
         const resultIndex = this._annotations.findIndex(
@@ -189,19 +183,13 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         this.annotationChanges.emit('deleted', annotation)
         this.annotationChanges.emit('newState', this._annotations)
 
-        const asyncUpstream = async () => {
-            try {
-                await this.dependencies.backendOperations.delete(annotation)
-            } catch (e) {
-                this._annotations = stateBeforeModifications
-                this.annotationChanges.emit(
-                    'rollback',
-                    stateBeforeModifications,
-                )
-                throw e
-            }
+        try {
+            await this.dependencies.backendOperations.delete(annotation)
+        } catch (e) {
+            this._annotations = stateBeforeModifications
+            this.annotationChanges.emit('rollback', stateBeforeModifications)
+            throw e
         }
-        asyncUpstream().then(() => true)
     }
 }
 
