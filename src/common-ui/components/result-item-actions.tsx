@@ -54,12 +54,13 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                         />
                     )}
 
-                    {/*<ResultItemActionBtn*/}
-                    {/*    imgSrc={readerIcon}*/}
-                    {/*    onClick={this.props.onReaderBtnClick}*/}
-                    {/*    tooltipText="Open in reader view"*/}
-                    {/*    className={styles.reader}*/}
-                    {/*/>*/}
+                    <ResultItemActionBtn
+                        imgSrc={readerIcon}
+                        onClick={this.props.onReaderBtnClick}
+                        tooltipText="Open in reader view"
+                        className={styles.reader}
+                    />
+
                     <ResultItemActionBtn
                         imgSrc={deleteItem}
                         onClick={this.props.onTrashBtnClick}
