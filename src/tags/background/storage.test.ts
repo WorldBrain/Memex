@@ -15,17 +15,17 @@ describe('Tags background interface', () => {
     }
 
     describe('BG public interface', () => {
-        it('should be able to set tags for a page', async () => {
+        it('should be able to set tags for an annotation', async () => {
             const testTags = ['A', 'B', 'C']
             const url = DATA.URL_1
 
             const { tagsModule } = await setupTest()
 
-            expect(await tagsModule.fetchPageTags({ url })).toEqual([])
+            expect(await tagsModule.fetchAnnotationTags({ url })).toEqual([])
 
             await tagsModule.setTagsForAnnotation({ url, tags: testTags })
 
-            expect(await tagsModule.fetchPageTags({ url })).toEqual(
+            expect(await tagsModule.fetchAnnotationTags({ url })).toEqual(
                 expect.arrayContaining(testTags),
             )
         })
@@ -36,19 +36,19 @@ describe('Tags background interface', () => {
             const url = DATA.URL_1
 
             const { tagsModule } = await setupTest(async (bg) => {
-                await bg.tags.addTagsToExistingUrl({
+                await bg.tags.addTagsToExistingAnnotationUrl({
                     tags: testTagsBefore,
                     url,
                 })
             })
 
-            expect(await tagsModule.fetchPageTags({ url })).toEqual(
+            expect(await tagsModule.fetchAnnotationTags({ url })).toEqual(
                 expect.arrayContaining(testTagsBefore),
             )
 
             await tagsModule.setTagsForAnnotation({ url, tags: testTagsAfter })
 
-            expect(await tagsModule.fetchPageTags({ url })).toEqual(
+            expect(await tagsModule.fetchAnnotationTags({ url })).toEqual(
                 expect.arrayContaining(testTagsAfter),
             )
         })

@@ -140,7 +140,7 @@ describe('Annotations storage', () => {
 
                 checkIsDefined(oldHighlight)
                 checkIsDefined(newHighlight)
-                expect(oldHighlight.comment).toBe('')
+                expect(oldHighlight.comment).toBeUndefined()
                 expect(newHighlight.comment).toBe(
                     'Adding a comment to the highlight.',
                 )
