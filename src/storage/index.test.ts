@@ -512,6 +512,8 @@ describe('Storage initialization', () => {
                         bookmarks: 'url, time',
                         clientSyncLogEntry:
                             '[deviceId+createdOn], [collection+pk], createdOn, needsIntegration, sharedOn',
+                        contentSharingAction: '++id, createdWhen',
+                        customListDescriptions: 'listId',
                         customLists:
                             'id, createdAt, isDeletable, isNestable, name',
                         directLinks:
@@ -521,8 +523,11 @@ describe('Storage initialization', () => {
                         notifications: 'id',
                         pageFetchBacklog: '++id, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        pageListEntryDescriptions: '[listId+pageUrl]',
                         pages:
                             'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
+                        sharedListMetadata: 'localId',
                         socialBookmarks: '++id, createdAt, postId',
                         socialPostListEntries: '++id, listId, postId',
                         socialPosts:

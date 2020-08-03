@@ -142,23 +142,21 @@ class BlacklistContainer extends Component {
                     </div>
                     {this.renderError()}
                     {this.renderBlacklistInputRow()}
-                    <div className={settingsStyle.infoTextSmall}>
-                        You can use <a href="https://regexr.com/">RegExp's</a>{' '}
-                        too!
-                    </div>
                     <div className={settingsStyle.whiteSpacer30} />
                     {this.renderAddBlacklistSites()}
                     <BlacklistTable>
                         {this.renderBlacklistRows()}
                     </BlacklistTable>
                 </div>
-                <BlacklistRemoveModal
-                    isLoading={this.props.isLoading}
-                    matchedCount={this.props.matchedDocCount}
-                    isShown={this.props.showRemoveModal}
-                    onCancel={this.props.hideModal}
-                    onConfirm={this.handleRemoveMatching}
-                />
+                {this.props.showRemoveModal && 
+                    <BlacklistRemoveModal
+                        isLoading={this.props.isLoading}
+                        matchedCount={this.props.matchedDocCount}
+                        isShown={this.props.showRemoveModal}
+                        onCancel={this.props.hideModal}
+                        onConfirm={this.handleRemoveMatching}
+                    />
+                }
             </React.Fragment>
         )
     }

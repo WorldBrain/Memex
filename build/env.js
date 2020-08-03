@@ -46,6 +46,7 @@ export default ({ mode }) => {
         BACKUP_START_SCREEN: '',
         BACKUP_TEST_SIZE_ESTIMATION: '',
         DEV_AUTH_STATE: '',
+        USE_FIREBASE_EMULATOR: process.env.USE_FIREBASE_EMULATOR || 'false',
     }
 
     if (mode === 'development') {

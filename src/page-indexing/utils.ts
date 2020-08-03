@@ -3,7 +3,10 @@ import PageStorage from './background/storage'
 import * as Raven from 'src/util/raven'
 
 export function pageIsStub(page: PipelineRes): boolean {
-    return page.text == null && (page.terms == null || !page.terms.length)
+    return (
+        (page.text == null || !page.text.length) &&
+        (page.terms == null || !page.terms.length)
+    )
 }
 
 export async function maybeIndexTabs(

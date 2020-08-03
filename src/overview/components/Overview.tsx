@@ -195,7 +195,7 @@ class Overview extends PureComponent<Props> {
                                     tooltipText="Thank you for supporting this journey 🙏"
                                     position="top"
                                 >
-                                👨🏾‍🚀Pioneer Edition
+                                🚀 Pioneer Edition
                                 </ButtonTooltip>
                             </div>
                     )}
@@ -221,6 +221,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = (dispatch) => ({
     init: () => {
         featuresBeta.getFeatureState('copy-paster')
+        featuresBeta.getFeatureState('sharing-collections')
         return dispatch(searchBarActs.init())
     },
     setShowOnboardingMessage: () =>

@@ -12,6 +12,7 @@ import { registerBackgroundIntegrationTest } from './background-integration-test
 import MemoryBrowserStorage from 'src/util/tests/browser-storage'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
+import { ServerStorage } from 'src/storage/types'
 
 export interface IntegrationTestSuite<StepContext> {
     description: string
@@ -21,11 +22,13 @@ export interface IntegrationTestSuite<StepContext> {
 export interface IntegrationTest<StepContext> {
     description: string
     mark?: boolean
+    skipConflictTests?: boolean
     instantiate: (options: {
         isSyncTest?: boolean
     }) => IntegrationTestInstance<StepContext>
 }
 export interface IntegrationTestInstance<StepContext> {
+    setup?: (options: StepContext) => Promise<void>
     steps: Array<IntegrationTestStep<StepContext>>
 }
 
@@ -51,6 +54,7 @@ export interface BackgroundIntegrationTestSetup {
     storageOperationLogger: StorageOperationLogger
     authService: MemoryAuthService
     subscriptionService: MemorySubscriptionsService
+    getServerStorage(): Promise<ServerStorage>
 }
 export interface BackgroundIntegrationTestContext {
     setup: BackgroundIntegrationTestSetup
@@ -79,6 +83,7 @@ export function backgroundIntegrationTestSuite(
 
 export interface BackgroundIntegrationTestOptions {
     mark?: boolean
+    skipConflictTests?: boolean
 }
 export function backgroundIntegrationTest(
     description: string,
@@ -108,6 +113,7 @@ export function backgroundIntegrationTest(
     const options = typeof paramA === 'object' ? paramA : {}
     return {
         description,
+        skipConflictTests: options?.skipConflictTests,
         instantiate: test,
         ...options,
     }

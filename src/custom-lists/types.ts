@@ -14,4 +14,8 @@ export interface State {
     showCreateListForm: boolean
     showCommonNameWarning: boolean
     showCrowdFundingModal: boolean
+    shareModalProps: {
+        isShown: boolean
+        index: number
+    }
 }

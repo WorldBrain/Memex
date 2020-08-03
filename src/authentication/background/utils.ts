@@ -55,6 +55,9 @@ export function isAuthorizedForFeature(
 ): boolean {
     if (claims != null && claims.features != null) {
         const featureObject = claims.features[feature]
+        if (!featureObject) {
+            return false
+        }
         return isExpiryInFuture(featureObject)
     }
     return false

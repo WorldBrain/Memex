@@ -31,11 +31,13 @@ import {
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import SyncBackground from '.'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
+import { ServerStorage } from 'src/storage/types'
+import { createLazyMemoryServerStorage } from 'src/storage/server'
 
 const registerTest = it
 
 interface TestDependencies {
-    sharedSyncLog: SharedSyncLogStorage
+    getServerStorage: () => Promise<ServerStorage>
     userId?: string
 }
 type WithTestDependencies = (
@@ -151,14 +153,14 @@ function extensionSyncTests(suiteOptions: {
             ] = [
                 await setupBackgroundIntegrationTest({
                     signalTransportFactory,
-                    sharedSyncLog: options.sharedSyncLog,
+                    getServerStorage: options.getServerStorage,
                     includePostSyncProcessor: conf.enablePostProcessing,
                     fetchPageProcessor,
                     enableSyncEncyption: conf.enableSyncEncyption,
                 }),
                 await setupBackgroundIntegrationTest({
                     signalTransportFactory,
-                    sharedSyncLog: options.sharedSyncLog,
+                    getServerStorage: options.getServerStorage,
                     includePostSyncProcessor: conf.enablePostProcessing,
                     fetchPageProcessor,
                     enableSyncEncyption: conf.enableSyncEncyption,
@@ -185,7 +187,8 @@ function extensionSyncTests(suiteOptions: {
                 syncModule,
                 searchModule,
                 customLists,
-                sharedSyncLog: options.sharedSyncLog,
+                sharedSyncLog: (await options.getServerStorage()).storageModules
+                    .sharedSyncLog,
                 userId,
                 fetchPageProcessor,
             }
@@ -893,12 +896,13 @@ function mobileSyncTests(suiteOptions: {
             const devices = {
                 extension: await setupBackgroundIntegrationTest({
                     signalTransportFactory,
-                    sharedSyncLog: dependencies.sharedSyncLog,
+                    getServerStorage: dependencies.getServerStorage,
                     fetchPageProcessor,
                 }),
                 mobile: await setupMobileIntegrationTest({
                     signalTransportFactory,
-                    sharedSyncLog: dependencies.sharedSyncLog,
+                    sharedSyncLog: (await dependencies.getServerStorage())
+                        .storageModules.sharedSyncLog,
                 }),
             }
 
@@ -1025,6 +1029,7 @@ function mobileSyncTests(suiteOptions: {
             pageUrl: 'test.com',
             pageTitle: 'This is a test page',
             body: 'this is some highlighted text from the page',
+            comment: null,
         })
 
         const beforeSync = {
@@ -1112,6 +1117,7 @@ function mobileSyncTests(suiteOptions: {
             pageUrl: testPage.fullUrl,
             body: 'Test note',
             selector: 'sel.ect',
+            comment: null,
         })
 
         await devices.mobile.services.sync.continuousSync.forceIncrementalSync()
@@ -1261,6 +1267,154 @@ function mobileSyncTests(suiteOptions: {
             syncDeviceInfo: expectedDeviceInfo,
         })
     })
+
+    it('should share list entries added to a shared list on mobile and synced to the extension', async (setup: TestSetup) => {
+        const {
+            devices: { extension, mobile },
+        } = await setup()
+        const localListId = await extension.backgroundModules.customLists.createCustomList(
+            {
+                name: 'My shared list',
+            },
+        )
+        await extension.backgroundModules.search.searchIndex.addPage({
+            pageDoc: {
+                url: 'https://www.spam.com/foo',
+                content: {
+                    title: 'Spam.com title',
+                },
+            },
+            visits: [],
+            rejectNoContent: false,
+        })
+        await extension.backgroundModules.customLists.insertPageToList({
+            id: localListId,
+            url: 'https://www.spam.com/foo',
+        })
+        await extension.backgroundModules.contentSharing.shareList({
+            listId: localListId,
+        })
+        await extension.backgroundModules.contentSharing.shareListEntries({
+            listId: localListId,
+        })
+        await doInitialSync({
+            source: extension.backgroundModules.sync,
+            target: mobile.services.sync,
+        })
+
+        await mobile.storage.modules.overview.createPage({
+            url: 'eggs.com/foo',
+            fullUrl: 'https://www.eggs.com/foo',
+            fullTitle: 'Eggs.com title',
+            text: '',
+        })
+        await mobile.storage.modules.metaPicker.createPageListEntry({
+            listId: localListId,
+            pageUrl: 'https://www.eggs.com/foo',
+        })
+
+        await mobile.services.sync.continuousSync.forceIncrementalSync()
+        await extension.backgroundModules.sync.continuousSync.forceIncrementalSync()
+        await extension.backgroundModules.contentSharing.waitForListSync({
+            localListId,
+        })
+        await new Promise((resolve) => setTimeout(resolve, 200))
+
+        const serverStorage = await extension.getServerStorage()
+        expect(
+            await serverStorage.storageManager.operation(
+                'findObjects',
+                'sharedListEntry',
+                {},
+            ),
+        ).toEqual([
+            expect.objectContaining({
+                normalizedUrl: 'spam.com/foo',
+                entryTitle: 'Spam.com title',
+            }),
+            expect.objectContaining({
+                normalizedUrl: 'eggs.com/foo',
+                entryTitle: 'Eggs.com title',
+            }),
+        ])
+    })
+
+    it('should unshare list entries removed from a shared list on mobile and synced to the extension', async (setup: TestSetup) => {
+        const {
+            devices: { extension, mobile },
+        } = await setup()
+        const localListId = await extension.backgroundModules.customLists.createCustomList(
+            {
+                name: 'My shared list',
+            },
+        )
+        await extension.backgroundModules.search.searchIndex.addPage({
+            pageDoc: {
+                url: 'https://www.spam.com/foo',
+                content: {
+                    title: 'Spam.com title',
+                },
+            },
+            visits: [],
+            rejectNoContent: false,
+        })
+        await extension.backgroundModules.customLists.insertPageToList({
+            id: localListId,
+            url: 'https://www.spam.com/foo',
+        })
+        await extension.backgroundModules.search.searchIndex.addPage({
+            pageDoc: {
+                url: 'https://www.eggs.com/foo',
+                content: {
+                    title: 'Eggs.com title',
+                },
+            },
+            visits: [],
+            rejectNoContent: false,
+        })
+        await extension.backgroundModules.customLists.insertPageToList({
+            id: localListId,
+            url: 'https://www.eggs.com/foo',
+        })
+        await extension.backgroundModules.contentSharing.shareList({
+            listId: localListId,
+        })
+        await extension.backgroundModules.contentSharing.shareListEntries({
+            listId: localListId,
+        })
+        await extension.backgroundModules.contentSharing.waitForListSync({
+            localListId,
+        })
+        await doInitialSync({
+            source: extension.backgroundModules.sync,
+            target: mobile.services.sync,
+        })
+
+        await mobile.storage.modules.metaPicker.deletePageEntryFromList({
+            listId: localListId,
+            url: 'eggs.com/foo',
+        })
+        await mobile.services.sync.continuousSync.forceIncrementalSync()
+        await extension.backgroundModules.sync.continuousSync.forceIncrementalSync()
+        await extension.backgroundModules.contentSharing.waitForListSync({
+            localListId,
+        })
+        await new Promise((resolve) => setTimeout(resolve, 200))
+
+        const serverStorage = await extension.getServerStorage()
+        expect(
+            await serverStorage.storageManager.operation(
+                'findObjects',
+                'sharedListEntry',
+                {},
+            ),
+        ).toEqual([
+            expect.objectContaining({
+                normalizedUrl: 'spam.com/foo',
+                entryTitle: 'Spam.com title',
+            }),
+        ])
+    })
 }
 
 describe('SyncBackground', () => {
@@ -1280,7 +1434,7 @@ describe('SyncBackground', () => {
         syncTests({
             withDependencies: async (body) => {
                 await body({
-                    sharedSyncLog: await createMemorySharedSyncLog(),
+                    getServerStorage: await createLazyMemoryServerStorage(),
                 })
             },
         })
@@ -1308,7 +1462,14 @@ describe('SyncBackground', () => {
                     async ({ storageManager, modules }) => {
                         const sharedSyncLog = modules.sharedSyncLog as SharedSyncLogStorage
                         await body({
-                            sharedSyncLog,
+                            getServerStorage: async () => ({
+                                storageManager,
+                                storageModules: {
+                                    sharedSyncLog,
+                                    contentSharing: null,
+                                    userManagement: null,
+                                },
+                            }),
                             userId,
                         })
                     },

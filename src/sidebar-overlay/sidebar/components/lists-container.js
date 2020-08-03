@@ -142,6 +142,7 @@ class ListContainer extends Component {
                     key={i}
                     listName={list.name}
                     isFiltered={list.isFilterIndex}
+                    onShareButtonClick={() => {}}
                     onEditButtonClick={this.props.handleEditBtnClick(i)}
                     onListItemClick={this.props.handleListItemClick(list, i)}
                     onAddPageToList={this.props.handleAddPageList(list, i)}

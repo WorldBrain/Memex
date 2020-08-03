@@ -16,6 +16,7 @@ describe('Backup feature', () => {
 
         expect(backedUp).toEqual({
             pages: { backup: true, watch: true },
+            readablePageArchives: { backup: true, watch: true },
             visits: { backup: true, watch: true },
             bookmarks: { backup: true, watch: true },
             favIcons: { backup: true, watch: true },
@@ -25,7 +26,9 @@ describe('Backup feature', () => {
             directLinks: { backup: true, watch: true },
             notifications: { backup: true, watch: true },
             customLists: { backup: true, watch: true },
+            customListDescriptions: { backup: true, watch: true },
             pageListEntries: { backup: true, watch: true },
+            pageListEntryDescriptions: { backup: true, watch: true },
             socialPosts: { backup: true, watch: true },
             socialUsers: { backup: true, watch: true },
             socialTags: { backup: true, watch: true },
@@ -33,7 +36,9 @@ describe('Backup feature', () => {
             socialPostListEntries: { backup: true, watch: true },
             tags: { backup: true, watch: true },
             templates: { backup: true, watch: true },
+            sharedListMetadata: { backup: true, watch: true },
 
+            contentSharingAction: { backup: false, watch: false },
             pageFetchBacklog: { backup: false, watch: false },
             backupChanges: { backup: false, watch: false },
             eventLog: { backup: false, watch: false },

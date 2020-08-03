@@ -69,9 +69,9 @@ class ResultItem extends PureComponent<Props> {
     }
 
     dragStart: DragEventHandler = (e) => {
-        const { url, setUrlDragged, isSocial } = this.props
+        const { fullUrl, setUrlDragged, isSocial } = this.props
 
-        setUrlDragged(url)
+        setUrlDragged(fullUrl)
         const crt = this.props.isOverview
             ? document.getElementById('dragged-element')
             : (document
@@ -80,7 +80,7 @@ class ResultItem extends PureComponent<Props> {
         crt.style.display = 'block'
 
         const data = JSON.stringify({
-            url,
+            url: fullUrl,
             isSocialPost: isSocial,
         })
 
