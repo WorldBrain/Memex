@@ -1,6 +1,6 @@
 import mapValues from 'lodash/mapValues'
 
-import { SidebarContainerLogic } from './logic'
+import { SidebarContainerLogic, createEditFormsForAnnotations } from './logic'
 import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
@@ -107,6 +107,9 @@ describe('SidebarContainerLogic', () => {
 
             sidebar.processMutation({
                 annotations: { $set: [DATA.ANNOT_1] },
+                editForms: {
+                    $set: createEditFormsForAnnotations([DATA.ANNOT_1]),
+                },
             })
 
             const annotation = sidebar.state.annotations[0]
@@ -121,12 +124,13 @@ describe('SidebarContainerLogic', () => {
                 sidebar.state.annotationModes[context][DATA.ANNOT_1.url],
             ).toEqual('edit')
 
-            await sidebar.processEvent('changePageCommentText', {
+            await sidebar.processEvent('changeEditCommentText', {
+                annotationUrl: DATA.ANNOT_1.url,
                 comment: editedComment,
             })
             await sidebar.processEvent('editAnnotation', {
-                context,
                 annotationUrl: DATA.ANNOT_1.url,
+                context,
             })
             expect(
                 sidebar.state.annotationModes[context][annotation.url],
@@ -146,6 +150,9 @@ describe('SidebarContainerLogic', () => {
 
             sidebar.processMutation({
                 annotations: { $set: [DATA.ANNOT_1] },
+                editForms: {
+                    $set: createEditFormsForAnnotations([DATA.ANNOT_1]),
+                },
             })
 
             const annotation = sidebar.state.annotations[0]
@@ -160,18 +167,21 @@ describe('SidebarContainerLogic', () => {
                 sidebar.state.annotationModes[context][DATA.ANNOT_1.url],
             ).toEqual('edit')
 
-            await sidebar.processEvent('changePageCommentText', {
+            await sidebar.processEvent('changeEditCommentText', {
+                annotationUrl: DATA.ANNOT_1.url,
                 comment: editedComment,
             })
-            await sidebar.processEvent('updateTagsForNewComment', {
+            await sidebar.processEvent('updateTagsForEdit', {
+                annotationUrl: DATA.ANNOT_1.url,
                 added: DATA.TAG_1,
             })
-            await sidebar.processEvent('updateTagsForNewComment', {
+            await sidebar.processEvent('updateTagsForEdit', {
+                annotationUrl: DATA.ANNOT_1.url,
                 added: DATA.TAG_2,
             })
             await sidebar.processEvent('editAnnotation', {
-                context,
                 annotationUrl: DATA.ANNOT_1.url,
+                context,
             })
             expect(
                 sidebar.state.annotationModes[context][annotation.url],
@@ -191,6 +201,9 @@ describe('SidebarContainerLogic', () => {
 
             sidebar.processMutation({
                 annotations: { $set: [DATA.ANNOT_1] },
+                editForms: {
+                    $set: createEditFormsForAnnotations([DATA.ANNOT_1]),
+                },
             })
 
             await sidebar.processEvent('deleteAnnotation', {
@@ -207,6 +220,9 @@ describe('SidebarContainerLogic', () => {
 
             sidebar.processMutation({
                 annotations: { $set: [DATA.ANNOT_1] },
+                editForms: {
+                    $set: createEditFormsForAnnotations([DATA.ANNOT_1]),
+                },
             })
 
             expect(sidebar.state.annotations[0].isBookmarked).toBe(undefined)
@@ -258,9 +274,9 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('addNewPageComment', null)
             expect(sidebar.state.showCommentBox).toBe(true)
 
-            expect(sidebar.state.commentBox.form.showTagsPicker).toBe(false)
+            expect(sidebar.state.commentBox.form.isTagInputActive).toBe(false)
             await sidebar.processEvent('toggleNewPageCommentTagPicker', null)
-            expect(sidebar.state.commentBox.form.showTagsPicker).toBe(true)
+            expect(sidebar.state.commentBox.form.isTagInputActive).toBe(true)
         })
 
         it('should be able to save a new comment', async ({ device }) => {

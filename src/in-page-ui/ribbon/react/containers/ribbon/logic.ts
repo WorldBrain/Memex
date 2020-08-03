@@ -85,7 +85,6 @@ export class RibbonContainerLogic extends UILogic<
     RibbonContainerEvents
 > {
     commentSavedTimeout = 2000
-    skipAnnotationPageIndexing = false
 
     constructor(private dependencies: RibbonContainerOptions) {
         super()
@@ -253,12 +252,6 @@ export class RibbonContainerLogic extends UILogic<
         }
     }
 
-    handleCommentTextChange: EventHandler<'handleCommentTextChange'> = ({
-        event,
-    }) => {
-        return { commentBox: { commentText: { $set: event.value } } }
-    }
-
     saveComment: EventHandler<'saveComment'> = async ({ event }) => {
         const { currentTab, annotationsCache } = this.dependencies
         const comment = event.value.text.trim()
@@ -275,7 +268,7 @@ export class RibbonContainerLogic extends UILogic<
             now: () => Date.now(),
         })
 
-        annotationsCache.create({
+        await annotationsCache.create({
             url: annotationUrl,
             pageUrl: currentTab.url,
             comment,
@@ -308,22 +301,6 @@ export class RibbonContainerLogic extends UILogic<
         return { commentBox: { showCommentBox: { $set: false } } }
     }
 
-    toggleCommentBoxBookmark: EventHandler<'toggleCommentBoxBookmark'> = ({
-        event,
-        previousState,
-    }) => {
-        return {
-            commentBox: { isCommentBookmarked: { $apply: (prev) => !prev } },
-        }
-    }
-
-    toggleCommentBoxTagPicker: EventHandler<'toggleCommentBoxTagPicker'> = ({
-        event,
-        previousState,
-    }) => {
-        return { commentBox: { showTagsPicker: { $apply: (prev) => !prev } } }
-    }
-
     //
     // Tagging
     //
@@ -347,9 +324,7 @@ export class RibbonContainerLogic extends UILogic<
 
     private _updateTags: (
         context: 'commentBox' | 'tagging',
-    ) => EventHandler<'updateTags' | 'updateCommentTags'> = (
-        context,
-    ) => async ({ event }) => {
+    ) => EventHandler<'updateTags'> = (context) => async ({ event }) => {
         const backendResult =
             context === 'commentBox'
                 ? Promise.resolve()

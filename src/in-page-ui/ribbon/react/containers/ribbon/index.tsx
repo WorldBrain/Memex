@@ -111,26 +111,12 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 commentBox={{
                     ...this.state.commentBox,
-                    handleCommentTextChange: (comment: string) =>
-                        this.processEvent('handleCommentTextChange', {
-                            value: comment,
-                        }),
                     saveComment: (value) =>
                         this.processEvent('saveComment', { value }),
                     cancelComment: () =>
                         this.processEvent('cancelComment', null),
-                    toggleCommentBoxBookmark: () =>
-                        this.processEvent('toggleCommentBoxBookmark', null),
-                    toggleCommentBoxTagPicker: () =>
-                        this.processEvent('toggleCommentBoxTagPicker', null),
                     setShowCommentBox: (value) =>
                         this.processEvent('setShowCommentBox', { value }),
-                    updateCommentTags: (value) =>
-                        this.processEvent('updateCommentTags', { value }),
-                    fetchInitialTagSuggestions: () =>
-                        this.props.tags.fetchInitialTagSuggestions(),
-                    queryTagSuggestions: (query: string) =>
-                        this.props.tags.searchForTagSuggestions({ query }),
                 }}
                 bookmark={{
                     ...this.state.bookmark,

@@ -1,16 +1,13 @@
 import * as React from 'react'
-import ReactDOM from 'react-dom'
 import styled from 'styled-components'
 
 import { Anchor } from 'src/highlighting/types'
-import { Tooltip, ButtonTooltip } from 'src/common-ui/components'
-import TagPicker from 'src/tags/ui/TagPicker'
+import { ButtonTooltip } from 'src/common-ui/components'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TextHighlighted from 'src/annotations/components/parts/TextHighlighted'
 import { NewAnnotationOptions } from 'src/annotations/types'
 import {
-    tagEmpty,
     heartEmpty,
     heartFull,
 } from 'src/common-ui/components/design-library/icons'

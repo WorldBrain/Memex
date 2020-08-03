@@ -31,20 +31,17 @@ export interface RibbonSidebarProps {
     setShowSidebarCommentBox: (value: boolean) => void
 }
 
-export interface RibbonCommentBoxProps extends CommonTaggingProps {
+export interface RibbonCommentBoxProps
+    extends Pick<CommonTaggingProps, 'tags'> {
     commentText: string
     showCommentBox: boolean
     isCommentSaved: boolean
     isCommentBookmarked: boolean
     isTagInputActive: boolean
     showTagsPicker: boolean
-    handleCommentTextChange: (comment: string) => void
     saveComment: (annotation: NewAnnotationOptions) => void
     cancelComment: () => void
-    toggleCommentBoxBookmark: () => void
-    toggleCommentBoxTagPicker: () => void
     setShowCommentBox: (value: boolean) => void
-    updateCommentTags: PickerUpdateHandler
 }
 
 export interface RibbonBookmarkProps {

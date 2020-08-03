@@ -30,7 +30,6 @@ import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from 'src/tags/utils'
 import { TagsSettings } from 'src/tags/background/types'
 import { limitSuggestionsStorageLength } from 'src/tags/background'
-import { now } from 'moment'
 import { generateUrl } from 'src/annotations/utils'
 
 interface TabArg {

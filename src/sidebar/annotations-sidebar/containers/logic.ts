@@ -17,7 +17,6 @@ import { generateUrl } from 'src/annotations/utils'
 interface EditForm {
     isBookmarked: boolean
     isTagInputActive: boolean
-    showTagsPicker: boolean
     commentText: string
     tags: string[]
 }
@@ -208,13 +207,12 @@ export const INIT_FORM_STATE: SidebarContainerState['commentBox'] = {
     form: {
         isBookmarked: false,
         isTagInputActive: false,
-        showTagsPicker: false,
         commentText: '',
         tags: [],
     },
 }
 
-const createEditFormsForAnnotations = (annots: Annotation[]) => {
+export const createEditFormsForAnnotations = (annots: Annotation[]) => {
     const state: { [annotationUrl: string]: EditForm } = {}
     for (const annot of annots) {
         state[annot.url] = { ...INIT_FORM_STATE.form }

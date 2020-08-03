@@ -5,16 +5,21 @@ import { Annotation } from 'src/annotations/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
 
-export const createAnnotationsCache = (bgModules: {
-    tags: RemoteTagsInterface
-    annotations: AnnotationInterface<'caller'>
-}): AnnotationsCache =>
+export const createAnnotationsCache = (
+    bgModules: {
+        tags: RemoteTagsInterface
+        annotations: AnnotationInterface<'caller'>
+    },
+    options: { skipPageIndexing?: boolean } = {},
+): AnnotationsCache =>
     new AnnotationsCache({
         backendOperations: {
             load: async (pageUrl) =>
                 bgModules.annotations.listAnnotationsByPageUrl({ pageUrl }),
             create: async (annotation) =>
-                bgModules.annotations.createAnnotation(annotation),
+                bgModules.annotations.createAnnotation(annotation, {
+                    skipPageIndexing: options.skipPageIndexing,
+                }),
             update: async (annotation) => {
                 await bgModules.annotations.updateAnnotationBookmark({
                     url: annotation.url,
@@ -132,6 +137,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     }
 
     update = async (annotation: Annotation) => {
+        annotation.lastEdited = new Date()
         const stateBeforeModifications = this._annotations
 
         const resultIndex = stateBeforeModifications.findIndex(

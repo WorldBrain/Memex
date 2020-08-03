@@ -11,8 +11,6 @@ import {
 import { Annotation } from 'src/annotations/types'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
-import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
-import { EventEmitter } from 'events'
 
 function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
     return mapValues(remoteFunctions, (f) => {
@@ -84,10 +82,13 @@ describe('Ribbon logic', () => {
                     globalHighlightsState = value
                 },
             },
-            annotationsCache: createAnnotationsCache({
-                ...backgroundModules,
-                annotations,
-            }),
+            annotationsCache: createAnnotationsCache(
+                {
+                    ...backgroundModules,
+                    annotations,
+                },
+                { skipPageIndexing: true },
+            ),
         })
 
         const ribbon = device.createElement(ribbonLogic)
@@ -130,7 +131,7 @@ describe('Ribbon logic', () => {
             expect(ribbon.state.isRibbonEnabled).toBe(value)
             expect(inPageUI).toEqual(
                 expect.objectContaining({
-                    state: expect.objectContaining({ ribbon: value }),
+                    componentsShown: expect.objectContaining({ ribbon: value }),
                     componentsSetUp: expect.objectContaining({ ribbon: value }),
                 }),
             )
@@ -229,27 +230,14 @@ describe('Ribbon logic', () => {
             showCommentBox: true,
         })
 
-        await ribbon.processEvent('handleCommentTextChange', {
-            value: 'comment',
-        })
-        expect(ribbon.state.commentBox).toEqual({
-            ...INITIAL_RIBBON_COMMENT_BOX_STATE,
-            showCommentBox: true,
-            commentText: 'comment',
-        })
-
-        await ribbon.processEvent('toggleCommentBoxBookmark', null)
-        expect(ribbon.state.commentBox).toEqual({
-            ...INITIAL_RIBBON_COMMENT_BOX_STATE,
-            showCommentBox: true,
-            commentText: 'comment',
-            isCommentBookmarked: true,
-        })
-
-        // TODO: Once we make page indexing more testable, fully test down to the DB level
-        ribbonLogic.skipAnnotationPageIndexing = true
         ribbonLogic.commentSavedTimeout = 1
-        await ribbon.processEvent('saveComment', null)
+        await ribbon.processEvent('saveComment', {
+            value: {
+                isBookmarked: true,
+                text: 'comment',
+                tags: [],
+            },
+        })
         expect(ribbon.state.commentBox).toEqual({
             ...INITIAL_RIBBON_COMMENT_BOX_STATE,
         })
