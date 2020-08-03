@@ -1,6 +1,6 @@
 .tagHolder {
     position: relative;
-    display: inline-bloc;
+    display: inline-block;
     justify-content: flex-start;
     align-items: center;
     box-sizing: border-box;
@@ -34,7 +34,7 @@
 }
 
 .tagText {
-    vertical-align: center
+    vertical-align: center;
 }
 
 .placeholder {
