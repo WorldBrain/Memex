@@ -54,16 +54,15 @@ class TagHolder extends React.Component<Props, State> {
     private _renderTags() {
         const tags = [...new Set([...this.props.tags])]
         return tags.map((tag, index) => {
-            if (index >= this.state.maxTagsAllowed) {
-                return null
-            }
             return (
                 <span key={tag} className={styles.tag}>
-                    {tag}
-                    <span
-                        className={styles.remove}
-                        onClick={this._deleteFn(tag)}
-                    />
+                    <div className={styles.tagContent}>
+                        {tag}
+                        <span
+                            className={styles.remove}
+                            onClick={this._deleteFn(tag)}
+                        />
+                    </div>
                 </span>
             )
         })

@@ -1,8 +1,6 @@
 .tagHolder {
-    height: 40px;
-    overflow-x: hidden;
     position: relative;
-    display: flex;
+    display: inline-bloc;
     justify-content: flex-start;
     align-items: center;
     box-sizing: border-box;
@@ -12,9 +10,14 @@
 
 .tag {
     composes: tagPillRemove from 'src/common-ui/elements.css';
-    display: flex;
+    display: inline-block;
     align-items: center;
     padding: 3px 4px 3px 9px;
+}
+
+.tagContent {
+    display: flex;
+    align-items: center;
 }
 
 .tagIcon {
@@ -28,6 +31,10 @@
     opacity: 0.6;
     display: flex;
     margin-right: 5px;
+}
+
+.tagText {
+    vertical-align: center
 }
 
 .placeholder {
@@ -65,10 +72,10 @@
 }
 
 .remove {
-    composes: closeIcon from 'src/common-ui/icons.css';
+    composes: closeIconThin from 'src/common-ui/icons.css';
     padding: 2px;
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
     margin-left: 6px;
     margin-right: 3px;
     opacity: 0.7;

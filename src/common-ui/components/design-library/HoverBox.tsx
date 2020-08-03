@@ -5,12 +5,13 @@ export const HoverBox = styled.div`
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
     overflow: hidden;
 
-    margin-top: 30px;
     position: absolute;
+    margin-top: -40px;
+    border-radius: 3px;
     width: 300px;
-    z-index: 1;
+    z-index: 5;
     background-color: #fff;
-    margin-left: 115px;
+    margin-left: 11px;
     border-radius: 3px;
 `
 

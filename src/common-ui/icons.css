@@ -231,6 +231,11 @@
     mask-image: url('/img/close.svg');
 }
 
+.closeIconThin {
+    composes: iconPosition standardIcon;
+    mask-image: url('/img/closeThin.svg');
+}
+
 .reload {
     composes: iconPosition standardIcon;
     mask-image: url('/img/reload.svg');
