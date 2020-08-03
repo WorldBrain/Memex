@@ -21,7 +21,7 @@ const Results = (props) => {
             <div className={styles.header}>
                 <span className={styles.resultsText}>
                     <span className={styles.resultLength}>
-                        {props.totalCount}
+                        {props.totalCount - 1}
                     </span>{' '}
                     Memex results
                     <a className={styles.links} onClick={props.seeMoreResults}>
