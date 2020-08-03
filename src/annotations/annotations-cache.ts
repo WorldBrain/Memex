@@ -75,7 +75,9 @@ export interface AnnotationsCacheInterface {
         pageUrl: string,
         args?: { limit?: number; skip?: number },
     ) => Promise<void>
-    create: (annotation: Annotation) => Promise<void>
+    create: (
+        annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>,
+    ) => Promise<void>
     update: (
         annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>,
     ) => Promise<void>
@@ -118,6 +120,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     }
 
     create = async (annotation: Annotation) => {
+        annotation.createdWhen = new Date()
         const { backendOperations } = this.dependencies
         const stateBeforeModifications = this._annotations
 

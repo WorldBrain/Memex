@@ -19,7 +19,7 @@ import { AnnotSearchParams } from 'src/search/background/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import PageStorage from 'src/page-indexing/background/storage'
 import { Annotation, AnnotListEntry } from 'src/annotations/types'
-import { URLNormalizer, normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 export default class AnnotationStorage extends StorageModule {
     static PAGES_COLL = PAGE_COLLECTION_NAMES.page

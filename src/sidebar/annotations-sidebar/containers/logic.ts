@@ -506,7 +506,6 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         const pageUrl = previousState.pageUrl
-        const createdWhen = new Date()
         const url = generateUrl({
             pageUrl,
             now: () => Date.now(),
@@ -520,8 +519,6 @@ export class SidebarContainerLogic extends UILogic<
             tags: event.tags,
             isBookmarked: event.isBookmarked,
             selector: event.anchor,
-            createdWhen,
-            lastEdited: createdWhen,
         })
 
         this.emitMutation({

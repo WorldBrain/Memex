@@ -174,7 +174,6 @@ export const saveAndRenderHighlight = async (
     const comment = ''
     const tags = []
     const { pageUrl, title } = params.getUrlAndTitle()
-    const createdWhen = new Date()
 
     const annotation = {
         url: generateUrl({ pageUrl, now: () => Date.now() }),
@@ -184,8 +183,6 @@ export const saveAndRenderHighlight = async (
         pageTitle: title,
         selector: anchor,
         tags,
-        createdWhen,
-        lastEdited: createdWhen,
     } as Annotation
     params.annotationsCache.create(annotation)
 

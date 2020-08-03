@@ -363,7 +363,7 @@ export default class DirectLinkingBackground {
             comment: toCreate.comment,
             body: toCreate.body,
             selector: toCreate.selector,
-            createdWhen: toCreate.createdWhen,
+            createdWhen: new Date(toCreate.createdWhen),
         })
 
         // Attempt to (re-)index, if user preference set, but don't wait for it

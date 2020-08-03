@@ -262,7 +262,6 @@ export class RibbonContainerLogic extends UILogic<
 
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
-        const createdWhen = new Date()
         const annotationUrl = generateUrl({
             pageUrl: currentTab.url,
             now: () => Date.now(),
@@ -274,8 +273,6 @@ export class RibbonContainerLogic extends UILogic<
             comment,
             isBookmarked,
             tags,
-            createdWhen,
-            lastEdited: createdWhen,
         })
 
         this.emitMutation({
