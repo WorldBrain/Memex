@@ -19,6 +19,14 @@ export const createPageStep: IntegrationTestStep<BackgroundIntegrationTestContex
             visits: [DATA.VISIT_1],
             rejectNoContent: false,
         })
+        await searchModule(setup).searchIndex.addPage({
+            pageDoc: {
+                url: DATA.PAGE_2.fullUrl,
+                content: {},
+            },
+            visits: [DATA.VISIT_2],
+            rejectNoContent: false,
+        })
     },
     expectedStorageChanges: {
         pages: (): StorageCollectionDiff => ({
@@ -32,6 +40,16 @@ export const createPageStep: IntegrationTestStep<BackgroundIntegrationTestContex
                     urlTerms: [],
                 },
             },
+            [DATA.PAGE_2.url]: {
+                type: 'create',
+                object: {
+                    url: DATA.PAGE_2.url,
+                    fullUrl: DATA.PAGE_2.fullUrl,
+                    domain: DATA.PAGE_2.domain,
+                    hostname: DATA.PAGE_2.hostname,
+                    urlTerms: [],
+                },
+            },
         }),
         visits: (): StorageCollectionDiff => ({
             [`[${DATA.VISIT_1},"${DATA.PAGE_1.url}"]`]: {
@@ -39,6 +57,13 @@ export const createPageStep: IntegrationTestStep<BackgroundIntegrationTestContex
                 object: {
                     time: DATA.VISIT_1,
                     url: DATA.PAGE_1.url,
+                },
+            },
+            [`[${DATA.VISIT_2},"${DATA.PAGE_2.url}"]`]: {
+                type: 'create',
+                object: {
+                    time: DATA.VISIT_2,
+                    url: DATA.PAGE_2.url,
                 },
             },
         }),

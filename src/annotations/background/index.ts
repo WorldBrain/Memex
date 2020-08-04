@@ -321,7 +321,7 @@ export default class DirectLinkingBackground {
                                     url: annotation.url,
                                 },
                             ),
-                            createdWhen,
+                            createdWhen: createdWhen.getTime(),
                             tags: tags.map((t) => t.name),
                             lastEdited:
                                 lastEdited && lastEdited instanceof Date
