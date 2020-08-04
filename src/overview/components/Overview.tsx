@@ -187,7 +187,7 @@ class Overview extends PureComponent<Props, State> {
                                 tooltipText="Thank you for supporting this journey 🙏"
                                 position="top"
                             >
-                                👨🏾‍🚀Pioneer Edition
+                                🚀 Pioneer Edition
                             </ButtonTooltip>
                         </div>
                     )}

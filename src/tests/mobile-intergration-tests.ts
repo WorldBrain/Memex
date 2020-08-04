@@ -6,14 +6,15 @@ import { MetaPickerStorage } from '@worldbrain/memex-storage/lib/mobile-app/feat
 import { OverviewStorage } from '@worldbrain/memex-storage/lib/mobile-app/features/overview/storage'
 import { PageEditorStorage } from '@worldbrain/memex-storage/lib/mobile-app/features/page-editor/storage'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
-import MemoryBrowserStorage from 'src/util/tests/browser-storage'
+import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
+import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
+import { COLLECTION_DEFINITIONS as READER_COLLECTION_DEFINITIONS } from '@worldbrain/memex-storage/lib/reader/constants'
 import SyncService, {
     SignalTransportFactory,
 } from '@worldbrain/memex-common/lib/sync'
-import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
-import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { SyncInfoStorage } from '@worldbrain/memex-common/lib/sync/storage'
+import MemoryBrowserStorage from 'src/util/tests/browser-storage'
 import { MemexExtSyncSettingStore } from 'src/sync/background/setting-store'
 import { setStorageMiddleware } from 'src/storage/middleware'
 import { ContentSharingClientStorage } from 'src/content-sharing/background/storage'
@@ -103,6 +104,10 @@ export async function setupMobileIntegrationTest(options?: {
         syncInfo: sync.syncInfoStorage,
         contentSharing: new ContentSharingClientStorage({ storageManager }),
     })
+
+    // REMOVE THIS LINE WHEN MERGING READER
+    storageManager.registry.registerCollections(READER_COLLECTION_DEFINITIONS)
+
     await storageManager.finishInitialization()
 
     await setStorageMiddleware(storageManager, {

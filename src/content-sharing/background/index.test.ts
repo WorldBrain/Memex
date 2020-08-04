@@ -51,11 +51,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     [
         backgroundIntegrationTest(
             'should share a new list with its entries',
+            { skipConflictTests: true },
             () => {
                 let localListId: number
                 let remoteListId: string
 
                 return {
+                    setup: async ({ setup }) => {
+                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
+                    },
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -185,10 +189,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             'should share new entries to an already shared list',
+            { skipConflictTests: true },
             () => {
                 let localListId: number
 
                 return {
+                    setup: async ({ setup }) => {
+                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
+                    },
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -256,10 +264,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             'should sync the title when changing the title of an already shared list',
+            { skipConflictTests: true },
             () => {
                 let localListId: number
 
                 return {
+                    setup: async ({ setup }) => {
+                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
+                    },
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -315,10 +327,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             'should delete list entries of an already shared list',
+            { skipConflictTests: true },
             () => {
                 let localListId: number
 
                 return {
+                    setup: async ({ setup }) => {
+                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
+                    },
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -364,11 +380,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             `should schedule a retry when we cannot upload list entries`,
-            { mark: true },
+            { skipConflictTests: true },
             () => {
                 let localListId: number
 
                 return {
+                    setup: async ({ setup }) => {
+                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
+                    },
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -430,11 +449,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             `should schedule a retry when we cannot upload changes`,
-            { mark: true },
+            { skipConflictTests: true },
             () => {
                 let localListId: number
 
                 return {
+                    setup: async ({ setup }) => {
+                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
+                    },
                     steps: [
                         {
                             execute: async ({ setup }) => {

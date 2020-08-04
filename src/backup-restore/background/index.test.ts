@@ -16,6 +16,7 @@ describe('Backup feature', () => {
 
         expect(backedUp).toEqual({
             pages: { backup: true, watch: true },
+            readablePageArchives: { backup: true, watch: true },
             visits: { backup: true, watch: true },
             bookmarks: { backup: true, watch: true },
             favIcons: { backup: true, watch: true },
@@ -27,7 +28,6 @@ describe('Backup feature', () => {
             customLists: { backup: true, watch: true },
             customListDescriptions: { backup: true, watch: true },
             pageListEntries: { backup: true, watch: true },
-            readablePageArchives: { backup: true, watch: true },
             pageListEntryDescriptions: { backup: true, watch: true },
             socialPosts: { backup: true, watch: true },
             socialUsers: { backup: true, watch: true },

@@ -8,6 +8,8 @@ import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-lo
 import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 import { ContentSharingStorage } from 'src/content-sharing/background/storage'
 import { ServerStorage } from './types'
+import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 
 export function createServerStorageManager() {
     const firebase = getFirebase()
@@ -26,7 +28,10 @@ export function createServerStorageManager() {
 
 export function createLazyServerStorage(
     createStorageManager: () => StorageManager,
-    options: { autoPkType: 'string' | 'number' },
+    options: {
+        autoPkType: 'string' | 'number'
+        sharedSyncLog?: SharedSyncLogStorage
+    },
 ) {
     let serverStoragePromise: Promise<ServerStorage>
 
@@ -37,10 +42,12 @@ export function createLazyServerStorage(
 
         serverStoragePromise = (async () => {
             const storageManager = createStorageManager()
-            const sharedSyncLog = new SharedSyncLogStorage({
-                storageManager,
-                autoPkType: 'string',
-            })
+            const sharedSyncLog =
+                options.sharedSyncLog ??
+                new SharedSyncLogStorage({
+                    storageManager,
+                    autoPkType: 'string',
+                })
             const contentSharing = new ContentSharingStorage({
                 storageManager,
                 ...options,
@@ -68,4 +75,19 @@ export function createLazyServerStorage(
 
         return serverStoragePromise
     }
+}
+
+export function createLazyMemoryServerStorage() {
+    return createLazyServerStorage(
+        () => {
+            const backend = new DexieStorageBackend({
+                dbName: 'server',
+                idbImplementation: inMemory(),
+            })
+            return new StorageManager({ backend })
+        },
+        {
+            autoPkType: 'number',
+        },
+    )
 }

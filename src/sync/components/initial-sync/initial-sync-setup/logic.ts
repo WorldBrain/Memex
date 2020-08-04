@@ -5,7 +5,7 @@ import { FastSyncEvents } from '@worldbrain/storex-sync/lib/fast-sync'
 import analytics from 'src/analytics'
 import { now } from 'moment'
 
-type SyncSetupState = 'introduction' | 'pair' | 'sync' | 'done'
+type SyncSetupState = 'introduction' | 'pair' | 'sync' | 'done' | 'noConnection'
 
 export interface InitialSyncSetupState {
     status: SyncSetupState
@@ -105,7 +105,30 @@ export default class InitialSyncSetupLogic extends UILogic<
         }
     }
 
+    async detectFirebaseFlag() {
+        if (await localStorage.getItem('firebase:previous_websocket_failure')) {
+            this.emitMutation({
+                status: { $set: 'noConnection' },
+            })
+        }
+    }
+
     start = async () => {
+        this.emitMutation({
+            status: { $set: 'pair' },
+        })
+        this.detectFirebaseFlag()
+
+        setTimeout(() => {
+            this.detectFirebaseFlag()
+        }, 2000)
+        setTimeout(() => {
+            this.detectFirebaseFlag()
+        }, 10000)
+        setTimeout(() => {
+            this.detectFirebaseFlag()
+        }, 15000)
+
         this.eventEmitter = this.dependencies.getSyncEventEmitter()
         this._started = now()
         this.registerListeners()
@@ -114,7 +137,6 @@ export default class InitialSyncSetupLogic extends UILogic<
         console.log('Sync message:', initSyncMessage)
 
         this.emitMutation({
-            status: { $set: 'pair' },
             initialSyncMessage: { $set: initSyncMessage },
         })
 

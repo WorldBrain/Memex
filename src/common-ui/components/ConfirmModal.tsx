@@ -25,8 +25,14 @@ class ConfirmModal extends PureComponent<Props> {
                         [styles.textContainerLoading]: this.props.isLoading,
                     })}
                 >
-                    {this.props.message}
-                    <Spinner />
+                    {this.props.isLoading && (
+                        <div className={styles.loadingSpinnerBox}>
+                            <Spinner />
+                        </div>
+                    )}
+                    <div className={styles.messageBox}>
+                        {this.props.message}
+                    </div>
                 </div>
                 <div className={styles.btnBar} tabIndex={0}>
                     {this.props.children}
