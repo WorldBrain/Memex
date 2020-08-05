@@ -166,6 +166,7 @@ class Overview extends PureComponent<Props, State> {
         this.props.setShowOnboardingMessage()
         localStorage.setItem('stage.Onboarding', 'true')
         localStorage.setItem('stage.MobileAppAd', 'true')
+        window.location.reload();
     }
 
     renderOnboarding() {
