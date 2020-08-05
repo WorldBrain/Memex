@@ -14,7 +14,7 @@ import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
-import { auth, featuresBeta } from 'src/util/remote-functions-background'
+import { auth, featuresBeta, subscription } from 'src/util/remote-functions-background'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { AnnotationsSidebarInDashboardResults } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { runInBackground } from 'src/util/webextensionRPC'
@@ -27,6 +27,9 @@ import {
     AnnotationsCache,
     AnnotationsCacheInterface,
 } from 'src/annotations/annotations-cache'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { show } from 'src/overview/modals/actions'
+
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -35,10 +38,12 @@ export interface Props {
     setShowOnboardingMessage: () => void
     toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
     handleReaderViewClick: (url: string) => void
+    showSubscriptionModal: () => void
 }
 
 interface State {
     showPioneer: boolean
+    showUpgrade: boolean
 }
 
 class Overview extends PureComponent<Props, State> {
@@ -56,6 +61,7 @@ class Overview extends PureComponent<Props, State> {
 
     state = {
         showPioneer: false,
+        showUpgrade: false,
     }
 
     constructor(props: Props) {
@@ -69,12 +75,19 @@ class Overview extends PureComponent<Props, State> {
 
     componentDidMount() {
         // this.props.init()
-        this.showPioneer()
+        this.upgradeState()
     }
 
-    async showPioneer() {
+    async upgradeState() {
+
+        const plans = await auth.getAuthorizedPlans()
+
         if (await auth.isAuthorizedForFeature('beta')) {
-            this.setState({ showPioneer: true })
+            this.setState({ showPioneer: true, showUpgrade: false })
+        }
+        if (plans.length === 0 ) {
+            console.log(plans.length)
+            this.setState({ showUpgrade: true })
         }
     }
 
@@ -191,6 +204,14 @@ class Overview extends PureComponent<Props, State> {
                             </ButtonTooltip>
                         </div>
                     )}
+                    {this.state.showUpgrade && (
+                        <div
+                            onClick={this.props.showSubscriptionModal}
+                            className={styles.pioneerBadge}
+                        >
+                                ⭐️ Upgrade Memex
+                        </div>
+                    )}
                     <HelpBtn />
                 </div>
             </div>
@@ -216,6 +237,10 @@ const mapDispatchToProps = (dispatch) => ({
     },
     setShowOnboardingMessage: () =>
         dispatch(resultActs.setShowOnboardingMessage(true)),
+    showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(Overview)
+export default connect(
+        mapStateToProps, 
+        mapDispatchToProps,
+)(Overview)
