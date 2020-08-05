@@ -13,6 +13,8 @@ import { PageListEntry } from 'src/custom-lists/background/types'
 import createResolvable, { Resolvable } from '@josephg/resolvable'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { Analytics } from 'src/analytics/types'
+import DirectLinkingBackground from 'src/annotations/background'
+import AnnotationStorage from 'src/annotations/background/storage'
 
 // interface ListPush {
 //     actionsPending: number
@@ -37,6 +39,7 @@ export default class ContentSharingBackground {
         private options: {
             storageManager: StorageManager
             customLists: CustomListStorage
+            annotationStorage: AnnotationStorage
             auth: AuthBackground
             analytics: Analytics
             getContentSharing: () => Promise<ContentSharingStorage>
@@ -49,6 +52,7 @@ export default class ContentSharingBackground {
         this.remoteFunctions = {
             shareList: this.shareList,
             shareListEntries: this.shareListEntries,
+            shareAnnotation: this.shareAnnotation,
             getRemoteListId: async (options) => {
                 return this.storage.getRemoteListId({
                     localId: options.localListId,
@@ -59,7 +63,7 @@ export default class ContentSharingBackground {
                     localIds: options.localListIds,
                 })
             },
-            waitForListSync: this.waitForListSync,
+            waitForSync: this.waitForSync,
         }
     }
 
@@ -161,9 +165,38 @@ export default class ContentSharingBackground {
         }
     }
 
-    waitForListSync: ContentSharingInterface['waitForListSync'] = async (
+    shareAnnotation: ContentSharingInterface['shareAnnotation'] = async (
         options,
     ) => {
+        const annotation = await this.options.annotationStorage.getAnnotationByPk(
+            options.annotationUrl,
+        )
+        const listIds = await this.options.customLists.fetchListIdsByUrl(
+            annotation.pageUrl,
+        )
+        const areListsShared = await this.storage.areListsShared({
+            localIds: listIds,
+        })
+        const sharedListIds = Object.entries(areListsShared)
+            .filter(([, shared]) => shared)
+            .map(([listId]) => parseInt(listId, 10))
+        await this.scheduleAction({
+            type: 'share-annotations',
+            localListIds: sharedListIds,
+            data: {
+                [annotation.pageUrl]: [
+                    {
+                        createdWhen: annotation.createdWhen?.getTime?.(),
+                        body: annotation.body,
+                        comment: annotation.comment,
+                        selector: JSON.stringify(annotation.selector),
+                    },
+                ],
+            },
+        })
+    }
+
+    waitForSync: ContentSharingInterface['waitForSync'] = async () => {
         await this._executingPendingActions
     }
 
@@ -212,16 +245,16 @@ export default class ContentSharingBackground {
     }
 
     async executeAction(action: ContentSharingAction) {
+        const contentSharing = await this.options.getContentSharing()
+        const userId = (await this.options.auth.authService.getCurrentUser())
+            ?.id
+        if (!userId) {
+            throw new Error(
+                `Tried to execute sharing action without being authenticated`,
+            )
+        }
+
         if (action.type === 'add-shared-list-entries') {
-            const userId = (
-                await this.options.auth.authService.getCurrentUser()
-            )?.id
-            if (!userId) {
-                throw new Error(
-                    `Tried to share list without being authenticated`,
-                )
-            }
-            const contentSharing = await this.options.getContentSharing()
             await contentSharing.createListEntries({
                 listReference: contentSharing.getSharedListReferenceFromLinkID(
                     action.remoteListId,
@@ -236,7 +269,6 @@ export default class ContentSharingBackground {
                 value: { size: action.data.length },
             })
         } else if (action.type === 'remove-shared-list-entry') {
-            const contentSharing = await this.options.getContentSharing()
             await contentSharing.removeListEntries({
                 listReference: contentSharing.getSharedListReferenceFromLinkID(
                     action.remoteListId,
@@ -249,13 +281,25 @@ export default class ContentSharingBackground {
                 action: 'unshareListEntry',
             })
         } else if (action.type === 'change-shared-list-title') {
-            const contentSharing = await this.options.getContentSharing()
             await contentSharing.updateListTitle(
                 contentSharing.getSharedListReferenceFromLinkID(
                     action.remoteListId,
                 ),
                 action.newTitle,
             )
+        } else if (action.type === 'share-annotations') {
+            const remoteListIds = await Promise.all(
+                action.localListIds.map((localId) =>
+                    this.storage.getRemoteListId({ localId }),
+                ),
+            )
+            await contentSharing.createAnnotations({
+                creator: { type: 'user-reference', id: userId },
+                listReferences: remoteListIds.map((remoteId) =>
+                    contentSharing.getSharedListReferenceFromLinkID(remoteId),
+                ),
+                annotationsByPage: action.data,
+            })
         }
     }
 

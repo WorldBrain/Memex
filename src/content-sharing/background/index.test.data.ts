@@ -1,8 +1,10 @@
-export const CONTENT_SHARING_TEST_LIST_DATA = {
+import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
+
+export const LIST_DATA = {
     name: 'My shared list',
 }
 
-export const CONTENT_SHARING_TEST_PAGE_1_DATA = {
+export const PAGE_1_DATA = {
     pageDoc: {
         url: 'https://www.spam.com/foo',
         content: {
@@ -13,11 +15,11 @@ export const CONTENT_SHARING_TEST_PAGE_1_DATA = {
     rejectNoContent: false,
 }
 
-export const CONTENT_SHARING_TEST_ENTRY_1_DATA = {
+export const ENTRY_1_DATA = {
     url: 'https://www.spam.com/foo',
 }
 
-export const CONTENT_SHARING_TEST_PAGE_2_DATA = {
+export const PAGE_2_DATA = {
     pageDoc: {
         url: 'https://www.eggs.com/foo',
         content: {
@@ -28,6 +30,37 @@ export const CONTENT_SHARING_TEST_PAGE_2_DATA = {
     rejectNoContent: false,
 }
 
-export const CONTENT_SHARING_TEST_2_ENTRY = {
+export const LIST_ENTRY_2 = {
     url: 'https://www.eggs.com/foo',
+}
+
+export const ANNOTATION_1_DATA = {
+    pageUrl: ENTRY_1_DATA.url,
+    title: 'Page title',
+    body: 'Annot body',
+    comment: 'Annot comment',
+    selector: {
+        descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
+        quote: 'dawadawd',
+    },
+}
+
+export async function createContentSharingTestList(
+    setup: BackgroundIntegrationTestSetup,
+) {
+    const localListId = await setup.backgroundModules.customLists.createCustomList(
+        LIST_DATA,
+    )
+    await setup.backgroundModules.search.searchIndex.addPage(PAGE_1_DATA)
+    await setup.backgroundModules.customLists.insertPageToList({
+        id: localListId,
+        ...ENTRY_1_DATA,
+    })
+    await setup.backgroundModules.search.searchIndex.addPage(PAGE_2_DATA)
+    await setup.backgroundModules.customLists.insertPageToList({
+        id: localListId,
+        ...LIST_ENTRY_2,
+    })
+
+    return localListId
 }

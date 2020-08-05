@@ -38,6 +38,9 @@ export interface SidebarContainerState {
             [annotationUrl: string]: AnnotationMode
         }
     }
+    annotationShareStates: {
+        [annotationUrl: string]: TaskState
+    }
     activeAnnotationUrl: string | null
     hoverAnnotationUrl: string | null
 
@@ -258,6 +261,7 @@ export class SidebarContainerLogic extends UILogic<
                 pageAnnotations: {},
                 searchResults: {},
             },
+            annotationShareStates: {},
 
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
@@ -793,14 +797,33 @@ export class SidebarContainerLogic extends UILogic<
         this.options.annotationsCache.delete(annotation)
     }
 
-    shareAnnotation: EventHandler<'shareAnnotation'> = async ({
-        event,
-        previousState,
-    }) => {
+    shareAnnotation: EventHandler<'shareAnnotation'> = async ({ event }) => {
         // const resultIndex = previousState.annotations.findIndex(
         //     (annot) => annot.url === event.annotationUrl,
         // )
         // const annotation = previousState.annotations[resultIndex]
+
+        const updateAnnotationShareState = (state: TaskState) =>
+            this.emitMutation({
+                annotationShareStates: {
+                    [event.annotationUrl]: { $set: state },
+                },
+            })
+
+        updateAnnotationShareState('running')
+        try {
+            console.log('sharing')
+            console.log('!!!')
+            console.log('!!!')
+            console.log('!!!')
+            await this.options.contentSharing.shareAnnotation({
+                annotationUrl: event.annotationUrl,
+            })
+            updateAnnotationShareState('success')
+        } catch (e) {
+            updateAnnotationShareState('error')
+            throw e
+        }
     }
 
     toggleAnnotationBookmark: EventHandler<

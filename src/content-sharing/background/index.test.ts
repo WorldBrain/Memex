@@ -8,30 +8,7 @@ import {
 } from 'src/tests/integration-tests'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import * as data from './index.test.data'
-
-export async function createContentSharingTestList(
-    setup: BackgroundIntegrationTestSetup,
-) {
-    const localListId = await setup.backgroundModules.customLists.createCustomList(
-        data.CONTENT_SHARING_TEST_LIST_DATA,
-    )
-    await setup.backgroundModules.search.searchIndex.addPage(
-        data.CONTENT_SHARING_TEST_PAGE_1_DATA,
-    )
-    await setup.backgroundModules.customLists.insertPageToList({
-        id: localListId,
-        ...data.CONTENT_SHARING_TEST_ENTRY_1_DATA,
-    })
-    await setup.backgroundModules.search.searchIndex.addPage(
-        data.CONTENT_SHARING_TEST_PAGE_2_DATA,
-    )
-    await setup.backgroundModules.customLists.insertPageToList({
-        id: localListId,
-        ...data.CONTENT_SHARING_TEST_2_ENTRY,
-    })
-
-    return localListId
-}
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     'Content sharing',
@@ -52,7 +29,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 setup.authService.setUser(TEST_USER)
 
-                                localListId = await createContentSharingTestList(
+                                localListId = await data.createContentSharingTestList(
                                     setup,
                                 )
                                 const localListEntries = await setup.storageManager.operation(
@@ -191,7 +168,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 setup.authService.setUser(TEST_USER)
 
-                                localListId = await createContentSharingTestList(
+                                localListId = await data.createContentSharingTestList(
                                     setup,
                                 )
                                 await setup.backgroundModules.contentSharing.shareList(
@@ -220,11 +197,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         url: 'https://www.fish.com/cheese',
                                     },
                                 )
-                                await setup.backgroundModules.contentSharing.waitForListSync(
-                                    {
-                                        localListId,
-                                    },
-                                )
+                                await setup.backgroundModules.contentSharing.waitForSync()
 
                                 const serverStorage = await setup.getServerStorage()
                                 expect(
@@ -246,6 +219,93 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         normalizedUrl: 'fish.com/cheese',
                                         entryTitle: 'Fish.com title',
                                     }),
+                                ])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should share newly shared annotations in an already shared list',
+            { skipConflictTests: true },
+            () => {
+                let localListId: number
+
+                return {
+                    setup: async ({ setup }) => {
+                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
+                    },
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                setup.authService.setUser(TEST_USER)
+
+                                localListId = await data.createContentSharingTestList(
+                                    setup,
+                                )
+                                await setup.backgroundModules.contentSharing.shareList(
+                                    { listId: localListId },
+                                )
+                                await setup.backgroundModules.contentSharing.shareListEntries(
+                                    { listId: localListId },
+                                )
+                                const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    {} as any,
+                                    data.ANNOTATION_1_DATA,
+                                    { skipPageIndexing: true },
+                                )
+                                await setup.backgroundModules.contentSharing.shareAnnotation(
+                                    {
+                                        annotationUrl,
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.waitForSync()
+
+                                const serverStorage = await setup.getServerStorage()
+                                const getShared = (collection: string) =>
+                                    serverStorage.storageManager.operation(
+                                        'findObjects',
+                                        collection,
+                                        {},
+                                    )
+                                const sharedAnnotations = await getShared(
+                                    'sharedAnnotation',
+                                )
+                                expect(sharedAnnotations).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: TEST_USER.id,
+                                        normalizedPageUrl: normalizeUrl(
+                                            data.ANNOTATION_1_DATA.pageUrl,
+                                        ),
+                                        createdWhen: expect.any(Number),
+                                        uploadedWhen: expect.any(Number),
+                                        updatedWhen: expect.any(Number),
+                                        comment: data.ANNOTATION_1_DATA.comment,
+                                        body: data.ANNOTATION_1_DATA.body,
+                                        selector: JSON.stringify(
+                                            data.ANNOTATION_1_DATA.selector,
+                                        ),
+                                    },
+                                ])
+                                const sharedAnnotationListEntries = await getShared(
+                                    'sharedAnnotationListEntry',
+                                )
+                                expect(sharedAnnotationListEntries).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: TEST_USER.id,
+                                        normalizedPageUrl: normalizeUrl(
+                                            data.ANNOTATION_1_DATA.pageUrl,
+                                        ),
+                                        createdWhen: expect.any(Number),
+                                        uploadedWhen: expect.any(Number),
+                                        updatedWhen: expect.any(Number),
+                                        sharedList: expect.any(Number),
+                                        sharedAnnotation:
+                                            sharedAnnotations[0].id,
+                                    },
                                 ])
                             },
                         },
@@ -287,11 +347,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         newName: updatedTitle,
                                     },
                                 )
-                                await setup.backgroundModules.contentSharing.waitForListSync(
-                                    {
-                                        localListId,
-                                    },
-                                )
+                                await setup.backgroundModules.contentSharing.waitForSync()
 
                                 const serverStorage = await setup.getServerStorage()
                                 expect(
@@ -331,7 +387,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 setup.authService.setUser(TEST_USER)
 
-                                localListId = await createContentSharingTestList(
+                                localListId = await data.createContentSharingTestList(
                                     setup,
                                 )
                                 await setup.backgroundModules.contentSharing.shareList(
@@ -347,11 +403,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         url: 'https://www.spam.com/foo',
                                     },
                                 )
-                                await setup.backgroundModules.contentSharing.waitForListSync(
-                                    {
-                                        localListId,
-                                    },
-                                )
+                                await setup.backgroundModules.contentSharing.waitForSync()
 
                                 const serverStorage = await setup.getServerStorage()
                                 expect(
@@ -386,7 +438,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 setup.authService.setUser(TEST_USER)
 
-                                localListId = await createContentSharingTestList(
+                                localListId = await data.createContentSharingTestList(
                                     setup,
                                 )
                                 await setup.backgroundModules.contentSharing.shareList(
@@ -457,7 +509,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 setup.authService.setUser(TEST_USER)
 
-                                localListId = await createContentSharingTestList(
+                                localListId = await data.createContentSharingTestList(
                                     setup,
                                 )
                                 await setup.backgroundModules.contentSharing.shareList(
@@ -500,11 +552,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(setTimeout.calledOnce).toBe(true)
                                 await setTimeout.firstCall.args[0]()
 
-                                await setup.backgroundModules.contentSharing.waitForListSync(
-                                    {
-                                        localListId,
-                                    },
-                                )
+                                await setup.backgroundModules.contentSharing.waitForSync()
 
                                 expect(
                                     await serverStorage.storageManager.operation(

@@ -7,8 +7,7 @@ import {
 } from 'src/tests/ui-logic-tests'
 import * as DATA from './logic.test.data'
 import { AnnotationsCache } from 'src/annotations/annotations-cache'
-import { createContentSharingTestList } from 'src/content-sharing/background/index.test'
-import { CONTENT_SHARING_TEST_PAGE_1_DATA } from 'src/content-sharing/background/index.test.data'
+import * as sharingTestData from 'src/content-sharing/background/index.test.data'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
 function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
@@ -409,7 +408,9 @@ describe('SidebarContainerLogic', () => {
     it('should detect if the page in a shared list', async ({ device }) => {
         device.authService.setUser(TEST_USER)
 
-        const localListId = await createContentSharingTestList(device)
+        const localListId = await sharingTestData.createContentSharingTestList(
+            device,
+        )
         await device.backgroundModules.contentSharing.shareList({
             listId: localListId,
         })
@@ -417,7 +418,7 @@ describe('SidebarContainerLogic', () => {
             listId: localListId,
         })
 
-        const pageUrl = CONTENT_SHARING_TEST_PAGE_1_DATA.pageDoc.url
+        const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
         const { sidebar, sidebarLogic } = await setupLogicHelper({
             device,
             pageUrl,
@@ -429,14 +430,16 @@ describe('SidebarContainerLogic', () => {
     it('should share annotations', async ({ device }) => {
         device.authService.setUser(TEST_USER)
 
-        const localListId = await createContentSharingTestList(device)
+        const localListId = await sharingTestData.createContentSharingTestList(
+            device,
+        )
         await device.backgroundModules.contentSharing.shareList({
             listId: localListId,
         })
         await device.backgroundModules.contentSharing.shareListEntries({
             listId: localListId,
         })
-        const pageUrl = CONTENT_SHARING_TEST_PAGE_1_DATA.pageDoc.url
+        const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
         const annotationUrl = await device.backgroundModules.directLinking.createAnnotation(
             {} as any,
             {
@@ -452,16 +455,17 @@ describe('SidebarContainerLogic', () => {
             { skipPageIndexing: true },
         )
 
-        const { sidebar } = await setupLogicHelper({ device })
+        const { sidebar } = await setupLogicHelper({ device, pageUrl })
         expect(sidebar.state.annotations).toEqual([{}])
         await sidebar.processEvent('shareAnnotation', {
             context: 'pageAnnotations',
             annotationUrl,
         })
+        await device.backgroundModules.contentSharing.waitForSync()
         const serverStorage = await device.getServerStorage()
         expect(
             await serverStorage.storageManager
-                .collection('sharedAnnotations')
+                .collection('sharedAnnotation')
                 .findObjects({}),
         ).toEqual([{}])
     })
