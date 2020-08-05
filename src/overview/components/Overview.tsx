@@ -15,7 +15,11 @@ import DragElement from './DragElement'
 import TrialExpiryWarning from './TrialExpiryWarning'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
-import { auth, featuresBeta, subscription } from 'src/util/remote-functions-background'
+import {
+    auth,
+    featuresBeta,
+    subscription,
+} from 'src/util/remote-functions-background'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { AnnotationsSidebarInDashboardResults } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { runInBackground } from 'src/util/webextensionRPC'
@@ -25,13 +29,12 @@ import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationsSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
 import {
     createAnnotationsCache,
-    AnnotationsCache,
     AnnotationsCacheInterface,
 } from 'src/annotations/annotations-cache'
-import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { show } from 'src/overview/modals/actions'
 import classNames from 'classnames'
 
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -67,7 +70,7 @@ class Overview extends PureComponent<Props, State> {
         showPioneer: false,
         showUpgrade: false,
         trialExpiry: false,
-        expiryDate: undefined
+        expiryDate: undefined,
     }
 
     constructor(props: Props) {
@@ -80,7 +83,6 @@ class Overview extends PureComponent<Props, State> {
     }
 
     closeTrialExpiryNotif() {
-
         this.setState({
             trialExpiry: false,
         })
@@ -94,13 +96,14 @@ class Overview extends PureComponent<Props, State> {
 
     async expiryDate() {
         const date = await auth.getSubscriptionExpiry()
-        const dateNow = Math.floor(new Date().getTime() / 1000);
+        const dateNow = Math.floor(new Date().getTime() / 1000)
         const inTrial = await auth.getSubscriptionStatus()
 
-        if (date - dateNow < 259200 && inTrial === 'in_trial') {  //3 days notification window
+        if (date - dateNow < 259200 && inTrial === 'in_trial') {
+            //3 days notification window
             this.setState({
                 trialExpiry: true,
-                expiryDate: date
+                expiryDate: date,
             })
         }
 
@@ -108,13 +111,12 @@ class Overview extends PureComponent<Props, State> {
     }
 
     async upgradeState() {
-
         const plans = await auth.getAuthorizedPlans()
 
         if (await auth.isAuthorizedForFeature('beta')) {
             this.setState({ showPioneer: true, showUpgrade: false })
         }
-        if (plans.length === 0 ) {
+        if (plans.length === 0) {
             this.setState({ showUpgrade: true })
         }
     }
@@ -166,7 +168,7 @@ class Overview extends PureComponent<Props, State> {
         this.props.setShowOnboardingMessage()
         localStorage.setItem('stage.Onboarding', 'true')
         localStorage.setItem('stage.MobileAppAd', 'true')
-        window.location.reload();
+        window.location.reload()
     }
 
     renderOnboarding() {
@@ -179,18 +181,18 @@ class Overview extends PureComponent<Props, State> {
     }
 
     renderOverview() {
-
         return (
             <div className={styles.mainWindow}>
-                <div className={classNames(styles.Overview,
-                    {[styles.OverviewWithNotif] : this.state.trialExpiry,}
-                    )}
+                <div
+                    className={classNames(styles.Overview, {
+                        [styles.OverviewWithNotif]: this.state.trialExpiry,
+                    })}
                 >
                     <Head />
                     <CollectionsButton />
                     <Header />
                     <SidebarLeft />
-                    
+
                     <Results
                         toggleAnnotationsSidebar={
                             this.handleAnnotationSidebarToggle
@@ -244,23 +246,27 @@ class Overview extends PureComponent<Props, State> {
                                 onClick={this.props.showSubscriptionModal}
                                 className={styles.pioneerBadge}
                             >
-                                    ⭐️ Upgrade Memex
+                                ⭐️ Upgrade Memex
                             </div>
                         )}
                         <HelpBtn />
                     </div>
                 </div>
-                 {this.state.trialExpiry &&
+                {this.state.trialExpiry && (
                     <div className={styles.notifications}>
-                     {this.state.trialExpiry && 
-                        <TrialExpiryWarning
-                            expiryDate={this.state.expiryDate}
-                            showPaymentWindow={this.props.showSubscriptionModal}
-                            closeTrialNotif={()=> this.closeTrialExpiryNotif()}
-                        />
-                    }
+                        {this.state.trialExpiry && (
+                            <TrialExpiryWarning
+                                expiryDate={this.state.expiryDate}
+                                showPaymentWindow={
+                                    this.props.showSubscriptionModal
+                                }
+                                closeTrialNotif={() =>
+                                    this.closeTrialExpiryNotif()
+                                }
+                            />
+                        )}
                     </div>
-                }
+                )}
             </div>
         )
     }
@@ -287,7 +293,4 @@ const mapDispatchToProps = (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
 })
 
-export default connect(
-        mapStateToProps, 
-        mapDispatchToProps,
-)(Overview)
+export default connect(mapStateToProps, mapDispatchToProps)(Overview)

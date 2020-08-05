@@ -1,4 +1,5 @@
 import debounce from 'lodash/debounce'
+import some from 'lodash/some'
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { EventEmitter } from 'events'
@@ -27,6 +28,8 @@ export interface SidebarContainerState {
     secondarySearchState: TaskState
 
     showState: 'visible' | 'hidden'
+
+    isPageShared?: boolean
 
     pageUrl?: string
     annotations: Annotation[]
@@ -152,6 +155,10 @@ export type SidebarContainerEvents = UIEvent<{
         context: AnnotationEventContext
         annotationUrl: string
     }
+    shareAnnotation: {
+        context: AnnotationEventContext
+        annotationUrl: string
+    }
     toggleAnnotationBookmark: {
         context: AnnotationEventContext
         annotationUrl: string
@@ -225,6 +232,7 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerEvents
 > {
     private inPageEvents: AnnotationsSidebarInPageEventEmitter
+    _detectedPageSharingStatus: Promise<void>
 
     constructor(private options: SidebarContainerOptions) {
         super()
@@ -305,6 +313,9 @@ export class SidebarContainerLogic extends UILogic<
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.annotationSubscription(this.options.annotationsCache.annotations)
 
+        if (this.options.pageUrl) {
+            this._detectPageSharingStatus(this.options.pageUrl)
+        }
         await loadInitial<SidebarContainerState>(this, async () => {
             // If `pageUrl` prop passed down, load search results on init, else just wait
             if (this.options.pageUrl != null) {
@@ -423,6 +434,7 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
 
+        this._detectPageSharingStatus(event.pageUrl)
         return this._doSearch(nextState, { overwrite: true })
     }
 
@@ -781,6 +793,16 @@ export class SidebarContainerLogic extends UILogic<
         this.options.annotationsCache.delete(annotation)
     }
 
+    shareAnnotation: EventHandler<'shareAnnotation'> = async ({
+        event,
+        previousState,
+    }) => {
+        // const resultIndex = previousState.annotations.findIndex(
+        //     (annot) => annot.url === event.annotationUrl,
+        // )
+        // const annotation = previousState.annotations[resultIndex]
+    }
+
     toggleAnnotationBookmark: EventHandler<
         'toggleAnnotationBookmark'
     > = async ({ previousState, event }) => {
@@ -875,5 +897,21 @@ export class SidebarContainerLogic extends UILogic<
         return {
             hoverAnnotationUrl: { $set: null },
         }
+    }
+
+    _detectPageSharingStatus(pageUrl: string) {
+        this._detectedPageSharingStatus = (async () => {
+            const listIds = await this.options.customLists.fetchListIdsByUrl({
+                url: pageUrl,
+            })
+            const areListsShared = await this.options.contentSharing.areListsShared(
+                { localListIds: listIds },
+            )
+            this.emitMutation({
+                isPageShared: {
+                    $set: some(Object.values(areListsShared)) as boolean,
+                },
+            })
+        })()
     }
 }

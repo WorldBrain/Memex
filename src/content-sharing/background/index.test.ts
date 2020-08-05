@@ -7,40 +7,27 @@ import {
     BackgroundIntegrationTestSetup,
 } from 'src/tests/integration-tests'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import * as data from './index.test.data'
 
-async function createTestList(setup: BackgroundIntegrationTestSetup) {
+export async function createContentSharingTestList(
+    setup: BackgroundIntegrationTestSetup,
+) {
     const localListId = await setup.backgroundModules.customLists.createCustomList(
-        {
-            name: 'My shared list',
-        },
+        data.CONTENT_SHARING_TEST_LIST_DATA,
     )
-    await setup.backgroundModules.search.searchIndex.addPage({
-        pageDoc: {
-            url: 'https://www.spam.com/foo',
-            content: {
-                title: 'Spam.com title',
-            },
-        },
-        visits: [],
-        rejectNoContent: false,
-    })
+    await setup.backgroundModules.search.searchIndex.addPage(
+        data.CONTENT_SHARING_TEST_PAGE_1_DATA,
+    )
     await setup.backgroundModules.customLists.insertPageToList({
         id: localListId,
-        url: 'https://www.spam.com/foo',
+        ...data.CONTENT_SHARING_TEST_ENTRY_1_DATA,
     })
-    await setup.backgroundModules.search.searchIndex.addPage({
-        pageDoc: {
-            url: 'https://www.eggs.com/foo',
-            content: {
-                title: 'Eggs.com title',
-            },
-        },
-        visits: [],
-        rejectNoContent: false,
-    })
+    await setup.backgroundModules.search.searchIndex.addPage(
+        data.CONTENT_SHARING_TEST_PAGE_2_DATA,
+    )
     await setup.backgroundModules.customLists.insertPageToList({
         id: localListId,
-        url: 'https://www.eggs.com/foo',
+        ...data.CONTENT_SHARING_TEST_2_ENTRY,
     })
 
     return localListId
@@ -65,7 +52,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 setup.authService.setUser(TEST_USER)
 
-                                localListId = await createTestList(setup)
+                                localListId = await createContentSharingTestList(
+                                    setup,
+                                )
                                 const localListEntries = await setup.storageManager.operation(
                                     'findObjects',
                                     'pageListEntries',
@@ -202,7 +191,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 setup.authService.setUser(TEST_USER)
 
-                                localListId = await createTestList(setup)
+                                localListId = await createContentSharingTestList(
+                                    setup,
+                                )
                                 await setup.backgroundModules.contentSharing.shareList(
                                     { listId: localListId },
                                 )
@@ -340,7 +331,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 setup.authService.setUser(TEST_USER)
 
-                                localListId = await createTestList(setup)
+                                localListId = await createContentSharingTestList(
+                                    setup,
+                                )
                                 await setup.backgroundModules.contentSharing.shareList(
                                     { listId: localListId },
                                 )
@@ -393,7 +386,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 setup.authService.setUser(TEST_USER)
 
-                                localListId = await createTestList(setup)
+                                localListId = await createContentSharingTestList(
+                                    setup,
+                                )
                                 await setup.backgroundModules.contentSharing.shareList(
                                     { listId: localListId },
                                 )
@@ -462,7 +457,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 setup.authService.setUser(TEST_USER)
 
-                                localListId = await createTestList(setup)
+                                localListId = await createContentSharingTestList(
+                                    setup,
+                                )
                                 await setup.backgroundModules.contentSharing.shareList(
                                     { listId: localListId },
                                 )
