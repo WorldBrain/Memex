@@ -1,3 +1,4 @@
+import { TaskState } from 'ui-logic-core/lib/types'
 import * as React from 'react'
 import styled from 'styled-components'
 
@@ -10,6 +11,8 @@ export interface Props extends AnnotationFooterEventProps {
     isEdited?: boolean
     timestamp?: string
     isBookmarked?: boolean
+    canShare: boolean
+    sharingState?: TaskState
 }
 
 export interface AnnotationFooterEventProps {
@@ -19,6 +22,7 @@ export interface AnnotationFooterEventProps {
     onEditConfirm: () => void
     onEditCancel: () => void
     onEditIconClick: () => void
+    onShareIconClick: () => void
     toggleBookmark: () => void
     onGoToAnnotation?: () => void
 }
@@ -65,6 +69,37 @@ class AnnotationFooter extends React.Component<Props> {
                             <IconStyled title="Delete note" src={icons.trash} />
                         </IconBox>
                     </ButtonTooltip>
+                    {this.props.canShare && (
+                        <ButtonTooltip
+                            position={'bottom'}
+                            tooltipText={'Share Note'}
+                        >
+                            <IconBox
+                                onClick={
+                                    this.props.onShareIconClick ?? (() => {})
+                                }
+                            >
+                                {!this.props.sharingState && (
+                                    <IconStyled
+                                        title="Share note"
+                                        src={icons.trash}
+                                    />
+                                )}
+                                {this.props.sharingState === 'running' && (
+                                    <IconStyled
+                                        title="Sharing note"
+                                        src={icons.trash}
+                                    />
+                                )}
+                                {this.props.sharingState === 'success' && (
+                                    <IconStyled
+                                        title="Note shared!"
+                                        src={icons.trash}
+                                    />
+                                )}
+                            </IconBox>
+                        </ButtonTooltip>
+                    )}
                     {this.props.onGoToAnnotation && (
                         <ButtonTooltip
                             position={'bottom'}

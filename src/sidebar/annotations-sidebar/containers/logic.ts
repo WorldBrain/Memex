@@ -38,7 +38,7 @@ export interface SidebarContainerState {
             [annotationUrl: string]: AnnotationMode
         }
     }
-    annotationShareStates: {
+    annotationSharingStates: {
         [annotationUrl: string]: TaskState
     }
     activeAnnotationUrl: string | null
@@ -261,7 +261,7 @@ export class SidebarContainerLogic extends UILogic<
                 pageAnnotations: {},
                 searchResults: {},
             },
-            annotationShareStates: {},
+            annotationSharingStates: {},
 
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
@@ -805,7 +805,7 @@ export class SidebarContainerLogic extends UILogic<
 
         const updateAnnotationShareState = (state: TaskState) =>
             this.emitMutation({
-                annotationShareStates: {
+                annotationSharingStates: {
                     [event.annotationUrl]: { $set: state },
                 },
             })

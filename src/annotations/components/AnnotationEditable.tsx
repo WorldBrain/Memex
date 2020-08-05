@@ -62,6 +62,7 @@ export interface AnnotationEditableProps {
     tags: string[]
     hasBookmark?: boolean
     mode: AnnotationMode
+    canShare: boolean
     tagPickerDependencies: GenericPickerDependenciesMinusSave
     annotationFooterDependencies: AnnotationFooterEventProps
     annotationEditDependencies: AnnotationEditGeneralProps &

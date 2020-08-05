@@ -49,6 +49,7 @@ export interface AnnotationsSidebarProps {
         AnnotationCreateEventProps
     annotationTagProps: GenericPickerDependenciesMinusSave
 
+    isPageShared: boolean
     isSearchLoading: boolean
     isAnnotationCreateShown: boolean
     annotations: Annotation[]
@@ -188,6 +189,7 @@ class AnnotationsSidebar extends React.Component<
                 {...annot}
                 {...this.props}
                 {...this.props.annotationEditableProps}
+                canShare={this.props.isPageShared}
                 mode={this.props.annotationModes[annot.url]}
                 isActive={this.props.activeAnnotationUrl === annot.url}
                 isHovered={this.props.hoverAnnotationUrl === annot.url}

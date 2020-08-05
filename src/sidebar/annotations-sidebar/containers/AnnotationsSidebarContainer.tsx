@@ -105,6 +105,11 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
+            onShareIconClick: () =>
+                this.processEvent('shareAnnotation', {
+                    annotationUrl: annotation.url,
+                    ...DEF_CONTEXT,
+                }),
             onGoToAnnotation:
                 this.props.showGoToAnnotationBtn && annotation.body?.length > 0
                     ? () =>
@@ -231,6 +236,7 @@ export class AnnotationsSidebarContainer<
                     {!this.props.skipTopBarRender && this.renderTopBar()}
                     <AnnotationsSidebar
                         {...this.state}
+                        isPageShared={this.state.isPageShared}
                         needsWaypoint={!this.state.noResults}
                         appendLoader={
                             this.state.secondarySearchState === 'running'
