@@ -246,7 +246,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     },
     handleCrossBtnClick: ({ id }, index) => (event) => {
         event.preventDefault()
-        dispatch(actions.showListDeleteModal(id, index))
+        dispatch(actions.showListDeleteModal(id, index - 1))
     },
     handleListItemClick: ({ id, isMobileList }, index) => () => {
         dispatch(actions.toggleListFilterIndex(index))
