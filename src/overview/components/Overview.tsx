@@ -12,6 +12,7 @@ import { Header, acts as searchBarActs } from '../search-bar'
 import { Results, acts as resultActs } from '../results'
 import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
+import TrialExpiryWarning from './TrialExpiryWarning'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
 import { auth, featuresBeta, subscription } from 'src/util/remote-functions-background'
@@ -29,6 +30,7 @@ import {
 } from 'src/annotations/annotations-cache'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { show } from 'src/overview/modals/actions'
+import classNames from 'classnames'
 
 
 const styles = require('./overview.styles.css')
@@ -44,6 +46,8 @@ export interface Props {
 interface State {
     showPioneer: boolean
     showUpgrade: boolean
+    trialExpiry: boolean
+    expiryDate: number
 }
 
 class Overview extends PureComponent<Props, State> {
@@ -62,6 +66,8 @@ class Overview extends PureComponent<Props, State> {
     state = {
         showPioneer: false,
         showUpgrade: false,
+        trialExpiry: false,
+        expiryDate: undefined
     }
 
     constructor(props: Props) {
@@ -73,9 +79,32 @@ class Overview extends PureComponent<Props, State> {
         })
     }
 
+    closeTrialExpiryNotif() {
+
+        this.setState({
+            trialExpiry: false,
+        })
+    }
+
     componentDidMount() {
         // this.props.init()
         this.upgradeState()
+        this.expiryDate()
+    }
+
+    async expiryDate() {
+        const date = await auth.getSubscriptionExpiry()
+        const dateNow = Math.floor(new Date().getTime() / 1000);
+        const inTrial = await auth.getSubscriptionStatus()
+
+        if (date - dateNow < 259200 && inTrial === 'in_trial') {  //3 days notification window
+            this.setState({
+                trialExpiry: true,
+                expiryDate: date
+            })
+        }
+
+        return date
     }
 
     async upgradeState() {
@@ -86,7 +115,6 @@ class Overview extends PureComponent<Props, State> {
             this.setState({ showPioneer: true, showUpgrade: false })
         }
         if (plans.length === 0 ) {
-            console.log(plans.length)
             this.setState({ showUpgrade: true })
         }
     }
@@ -150,70 +178,88 @@ class Overview extends PureComponent<Props, State> {
     }
 
     renderOverview() {
+
         return (
-            <div>
-                <Head />
-                <CollectionsButton />
-                <Header />
-                <SidebarLeft />
-                <Results
-                    toggleAnnotationsSidebar={
-                        this.handleAnnotationSidebarToggle
-                    }
-                    handleReaderViewClick={this.props.handleReaderViewClick}
-                />
-                <DeleteConfirmModal message="Delete page and related notes" />
-                <DragElement />
+            <div className={styles.mainWindow}>
+                <div className={classNames(styles.Overview,
+                    {[styles.OverviewWithNotif] : this.state.trialExpiry,}
+                    )}
+                >
+                    <Head />
+                    <CollectionsButton />
+                    <Header />
+                    <SidebarLeft />
+                    
+                    <Results
+                        toggleAnnotationsSidebar={
+                            this.handleAnnotationSidebarToggle
+                        }
+                        handleReaderViewClick={this.props.handleReaderViewClick}
+                    />
+                    <DeleteConfirmModal message="Delete page and related notes" />
+                    <DragElement />
 
-                {/* <div className={styles.productHuntContainer}>
-                    <a
-                        href="https://www.producthunt.com/posts/memex-1-0?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-memex-1-0"
-                        target="_blank"
-                    >
-                        <img
-                            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=151367&theme=dark"
-                            alt="Memex 1.0 - Annotate, search and organize what you've read online. | Product Hunt Embed"
-                            className={styles.productHuntBatch}
-                        />
-                    </a>
-                </div> */}
-                <AnnotationsSidebarInDashboardResults
-                    tags={this.tagsBG}
-                    annotations={this.annotationsBG}
-                    customLists={this.customListsBG}
-                    refSidebar={this.annotationsSidebarRef}
-                    annotationsCache={this.annotationsCache}
-                    onClickOutside={this.handleClickOutsideSidebar}
-                    onCloseSidebarBtnClick={this.handleCloseSidebarBtnClick}
-                />
-
-                <Tooltip />
-                <div className={styles.rightCorner}>
-                    {this.state.showPioneer && (
-                        <div
-                            onClick={() => {
-                                window.open('#/features')
-                            }}
-                            className={styles.pioneerBadge}
+                    {/* <div className={styles.productHuntContainer}>
+                        <a
+                            href="https://www.producthunt.com/posts/memex-1-0?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-memex-1-0"
+                            target="_blank"
                         >
-                            <ButtonTooltip
-                                tooltipText="Thank you for supporting this journey 🙏"
-                                position="top"
+                            <img
+                                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=151367&theme=dark"
+                                alt="Memex 1.0 - Annotate, search and organize what you've read online. | Product Hunt Embed"
+                                className={styles.productHuntBatch}
+                            />
+                        </a>
+                    </div> */}
+                    <AnnotationsSidebarInDashboardResults
+                        tags={this.tagsBG}
+                        annotations={this.annotationsBG}
+                        customLists={this.customListsBG}
+                        refSidebar={this.annotationsSidebarRef}
+                        annotationsCache={this.annotationsCache}
+                        onClickOutside={this.handleClickOutsideSidebar}
+                        onCloseSidebarBtnClick={this.handleCloseSidebarBtnClick}
+                    />
+
+                    <Tooltip />
+                    <div className={styles.rightCorner}>
+                        {this.state.showPioneer && (
+                            <div
+                                onClick={() => {
+                                    window.open('#/features')
+                                }}
+                                className={styles.pioneerBadge}
                             >
-                                🚀 Pioneer Edition
-                            </ButtonTooltip>
-                        </div>
-                    )}
-                    {this.state.showUpgrade && (
-                        <div
-                            onClick={this.props.showSubscriptionModal}
-                            className={styles.pioneerBadge}
-                        >
-                                ⭐️ Upgrade Memex
-                        </div>
-                    )}
-                    <HelpBtn />
+                                <ButtonTooltip
+                                    tooltipText="Thank you for supporting this journey 🙏"
+                                    position="top"
+                                >
+                                    🚀 Pioneer Edition
+                                </ButtonTooltip>
+                            </div>
+                        )}
+                        {this.state.showUpgrade && (
+                            <div
+                                onClick={this.props.showSubscriptionModal}
+                                className={styles.pioneerBadge}
+                            >
+                                    ⭐️ Upgrade Memex
+                            </div>
+                        )}
+                        <HelpBtn />
+                    </div>
                 </div>
+                 {this.state.trialExpiry &&
+                    <div className={styles.notifications}>
+                     {this.state.trialExpiry && 
+                        <TrialExpiryWarning
+                            expiryDate={this.state.expiryDate}
+                            showPaymentWindow={this.props.showSubscriptionModal}
+                            closeTrialNotif={()=> this.closeTrialExpiryNotif()}
+                        />
+                    }
+                    </div>
+                }
             </div>
         )
     }

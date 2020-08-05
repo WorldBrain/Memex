@@ -1,0 +1,29 @@
+.box {
+    height: 30px;
+    z-index: 25000;
+    background: red;
+    color: white;
+    position: relative;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 13px;
+    font-weight: normal;
+
+    & strong {
+        padding: 0 5px;
+    }
+}
+
+.closeButton {
+    position: relative;
+    padding: 3px 10px;
+    margin-left: 10px;
+    background: white;
+    color: #3a2f45;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
