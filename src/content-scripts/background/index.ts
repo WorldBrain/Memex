@@ -1,6 +1,6 @@
 import { ContentScriptsInterface } from './types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { Tabs } from 'webextension-polyfill-ts'
+import { Tabs, WebNavigation } from 'webextension-polyfill-ts'
 
 export class ContentScriptsBackground {
     remoteFunctions: ContentScriptsInterface<'provider'>
@@ -12,6 +12,7 @@ export class ContentScriptsBackground {
                 options: { file: string },
             ) => void
             getTab: Tabs.Static['get']
+            webNavigation: WebNavigation.Static
         },
     ) {
         this.remoteFunctions = {
@@ -21,6 +22,13 @@ export class ContentScriptsBackground {
                 url: (await options.getTab(tab.id)).url,
             }),
         }
+
+        this.options.webNavigation.onHistoryStateUpdated.addListener(
+            ({ tabId }) =>
+                this.options.injectScriptInTab(tabId, {
+                    file: `/content_script.js`,
+                }),
+        )
     }
 
     setupRemoteFunctions() {
