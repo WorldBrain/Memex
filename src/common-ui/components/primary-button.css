@@ -8,8 +8,8 @@
     text-align: center;
 
     @media (max-width: 767px) {
-		font-size: 12px;
-		padding: 5px 10px;
+        font-size: 12px;
+        padding: 5px 10px;
     }
 }
 

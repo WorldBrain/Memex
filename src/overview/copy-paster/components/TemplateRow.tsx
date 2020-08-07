@@ -3,7 +3,6 @@ import { Template } from '../types'
 import styled from 'styled-components'
 import ResultItemActionBtn from 'src/common-ui/components/result-item-action-btn'
 import { browser } from 'webextension-polyfill-ts'
-import { ButtonTooltip } from 'src/common-ui/components'
 
 const starImg = browser.extension.getURL('/img/star_full_grey.svg')
 const emptyStarImg = browser.extension.getURL('/img/star_empty_grey.svg')
@@ -18,7 +17,7 @@ const Row = styled.div`
     padding: 0px 10px 0 15px;
 
     &:hover {
-        background-color: #efefef
+        background-color: #efefef;
     }
 `
 
@@ -81,7 +80,6 @@ export default class TemplateRow extends Component<TemplateRowProps> {
 
         this.copyTimeout = setTimeout(() => {
             this.setState({ hasCopied: false })
-            
         }, COPY_TIMEOUT)
     }
 
@@ -103,7 +101,7 @@ export default class TemplateRow extends Component<TemplateRowProps> {
             >
                 {hasCopied ? (
                     <Title>Copied to clipboard</Title>
-                    ):(
+                ) : (
                     <Title>{title}</Title>
                 )}
                 <ActionsContainer>

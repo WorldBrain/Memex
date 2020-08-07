@@ -2,10 +2,8 @@ import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
 import { browser } from 'webextension-polyfill-ts'
 import moment from 'moment'
-import { features, sync } from 'src/util/remote-functions-background'
 import ToggleSwitch from '../../../../common-ui/components/ToggleSwitch'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { SyncDevice } from 'src/sync/components/types'
 
 import ConfirmModalBtn from '../../../../common-ui/components/ConfirmModalBtn'
 import { BackupTimes } from 'src/backup-restore/types'
@@ -130,7 +128,9 @@ export default class StatusOverlay extends PureComponent<Props> {
                         </div>
                         <WhiteSpacer20 />
                         <div className={styles.backupSection}>
-                            <div className={settingsStyle.buttonAreaSyncOverlay}>
+                            <div
+                                className={settingsStyle.buttonAreaSyncOverlay}
+                            >
                                 <div className={settingsStyle.sectionTitle}>
                                     {header && <span>{header}</span>}
                                 </div>
@@ -164,7 +164,10 @@ export default class StatusOverlay extends PureComponent<Props> {
                                 </div>
                                 {buttonText && (
                                     <div className={styles.button}>
-                                        <ConfirmModalBtn disabled href={buttonUrl}>
+                                        <ConfirmModalBtn
+                                            disabled
+                                            href={buttonUrl}
+                                        >
                                             {buttonText}
                                         </ConfirmModalBtn>
                                     </div>

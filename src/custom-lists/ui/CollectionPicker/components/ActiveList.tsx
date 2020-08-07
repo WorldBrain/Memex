@@ -1,8 +1,5 @@
 import styled from 'styled-components'
-import {
-    fontSizeSmall,
-    HoverColor,
-} from 'src/common-ui/components/design-library/typography'
+import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 
 export const ActiveList = styled.div`
     align-items: center;

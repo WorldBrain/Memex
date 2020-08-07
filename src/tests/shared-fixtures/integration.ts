@@ -70,13 +70,13 @@ export async function insertIntegrationTestData(
         annotUrl = await backgroundModules.directLinking.createAnnotation(
             { tab: {} as any },
             {
-                url: pages[0].url,
+                pageUrl: pages[0].url,
                 title: 'test',
                 comment: 'test comment',
                 createdWhen: new Date('2019-10-11'),
                 body: 'test body',
                 selector: 'test selector' as any,
-                bookmarked: false,
+                isBookmarked: false,
                 isSocialPost: false,
             },
             { skipPageIndexing: true },

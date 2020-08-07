@@ -1,7 +1,7 @@
 import React from 'react'
 import { browser, Storage } from 'webextension-polyfill-ts'
 
-import { StatefulUIElement } from 'src/overview/types'
+import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic, { State, Event } from './logic'
 import OnboardingBox from '../../components/onboarding-box'
 import OnboardingStep from '../../components/onboarding-step'
@@ -337,7 +337,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <OnboardingStep
                         goToStep={this.handleStepClick}
                         titleText="Make Highlights & Notes"
-                        subtitleText="To annotate websites, right-click on selected text" 
+                        subtitleText="To annotate websites, right-click on selected text"
                         renderButton={() => (
                             <OnboardingAction
                                 onClick={this.handleNextStepClick}

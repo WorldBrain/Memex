@@ -42,9 +42,9 @@ class BlacklistContainer extends Component {
     }
 
     focusInput = () => this.input.focus()
-    assignRef = input => (this.input = input)
+    assignRef = (input) => (this.input = input)
 
-    onNewBlacklistItemAdded = event => {
+    onNewBlacklistItemAdded = (event) => {
         event.preventDefault()
         // Make sure to interpret '.' as "period" rather than "any single character", as it is common in hostnames
         // also ignore all whitespace
@@ -61,7 +61,7 @@ class BlacklistContainer extends Component {
     }
 
     // TODO(AM): Undo? Confirmation?
-    onDeleteClicked = index => () => this.props.removeFromBlacklist(index)
+    onDeleteClicked = (index) => () => this.props.removeFromBlacklist(index)
 
     onInputChange = (event = { target: {} }) => {
         const value = event.target.value || ''
@@ -148,7 +148,7 @@ class BlacklistContainer extends Component {
                         {this.renderBlacklistRows()}
                     </BlacklistTable>
                 </div>
-                {this.props.showRemoveModal && 
+                {this.props.showRemoveModal && (
                     <BlacklistRemoveModal
                         isLoading={this.props.isLoading}
                         matchedCount={this.props.matchedDocCount}
@@ -156,13 +156,13 @@ class BlacklistContainer extends Component {
                         onCancel={this.props.hideModal}
                         onConfirm={this.handleRemoveMatching}
                     />
-                }
+                )}
             </React.Fragment>
         )
     }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     inputVal: selectors.siteInputValue(state),
     blacklist: selectors.normalizedBlacklist(state),
     isInputRegexInvalid: selectors.isInputRegexInvalid(state),
@@ -175,15 +175,17 @@ const mapStateToProps = state => ({
     lastValue: selectors.lastValue(state),
 })
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
     initBlacklist: () => dispatch(actions.initBlacklist()),
     hideModal: () => dispatch(actions.setModalShow(false)),
     resetInputVal: () => dispatch(actions.resetSiteInputValue()),
-    addToBlacklist: expression => dispatch(actions.addToBlacklist(expression)),
-    removeFromBlacklist: index => dispatch(actions.removeFromBlacklist(index)),
-    removeMatchingDocs: expression =>
+    addToBlacklist: (expression) =>
+        dispatch(actions.addToBlacklist(expression)),
+    removeFromBlacklist: (index) =>
+        dispatch(actions.removeFromBlacklist(index)),
+    removeMatchingDocs: (expression) =>
         dispatch(actions.removeMatchingDocs(expression)),
-    setInputVal: siteInputValue =>
+    setInputVal: (siteInputValue) =>
         dispatch(actions.setSiteInputValue({ siteInputValue })),
 })
 

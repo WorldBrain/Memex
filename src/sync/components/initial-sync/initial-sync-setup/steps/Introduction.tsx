@@ -5,7 +5,6 @@ import {
     ModalColRight,
 } from 'src/common-ui/components/design-library/ModalBox'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import {
     TypographyBodyBlock,
     TypographyHeadingPage,

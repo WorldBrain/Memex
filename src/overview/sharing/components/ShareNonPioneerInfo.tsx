@@ -1,5 +1,10 @@
 import React, { PureComponent } from 'react'
-import { TypographyHeadingBig, TypographyTextNormal, TypographyHeadingBigger, TypographySubTextNormal } from 'src/common-ui/components/design-library/typography'
+import {
+    TypographyHeadingBig,
+    TypographyTextNormal,
+    TypographyHeadingBigger,
+    TypographySubTextNormal,
+} from 'src/common-ui/components/design-library/typography'
 import styled from 'styled-components'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
@@ -13,20 +18,23 @@ export default class ShareNonPioneerInfo extends PureComponent<
     render() {
         return (
             <ModalBox>
-                <TypographyHeadingBigger>This is a beta feature</TypographyHeadingBigger>
+                <TypographyHeadingBigger>
+                    This is a beta feature
+                </TypographyHeadingBigger>
                 <div>
                     <TypographyTextNormal>
                         For now, this feature is only available to Pioneer
                         supporters
                     </TypographyTextNormal>
                 </div>
-                <br/>
-                    <TypographySubTextNormal>
-                        Memex is built on a strong foundation to take no VC money to
-                        protect your data & privacy.<br/>Early supporters like you make
-                        this journey possible.
-                    </TypographySubTextNormal>
-                <br/>
+                <br />
+                <TypographySubTextNormal>
+                    Memex is built on a strong foundation to take no VC money to
+                    protect your data & privacy.
+                    <br />
+                    Early supporters like you make this journey possible.
+                </TypographySubTextNormal>
+                <br />
                 <PrimaryAction
                     onClick={this.props.onClickUpgrade}
                     label={'Upgrade'}
@@ -41,9 +49,8 @@ const ModalBox = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-        
+
     & span {
         text-align: center;
     }
 `
-

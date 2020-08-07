@@ -84,7 +84,7 @@ class ListContainer extends Component {
     handleCreateListSubmit = (event) => {
         event.preventDefault()
         event.stopPropagation()
-        const { value } = event.target.elements['listName']
+        const { value } = event.target.elements.listName
         // value = list name
         this.props.createPageList(
             this.getSearchVal(value),
@@ -101,7 +101,7 @@ class ListContainer extends Component {
 
     handleUpdateList = ({ id, name: oldName }, index) => (event) => {
         event.preventDefault()
-        const { value } = event.target.elements['listName']
+        const { value } = event.target.elements.listName
         const newName = this.getSearchVal(value)
 
         this.props.updateList([oldName, newName], id)

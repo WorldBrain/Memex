@@ -1,5 +1,9 @@
 import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
-import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import {
+    AnnotationClickHandler,
+    SaveAndRenderHighlightDependencies,
+} from 'src/highlighting/ui/highlight-interactions'
 
 export interface Descriptor {
     strategy: string
@@ -11,32 +15,25 @@ export interface Anchor {
     descriptor: Descriptor
 }
 
-// TODO this seems to be a polymorphic type coming from the coffeescript anchoring, fill it in
-export interface DOMSelector {
-    descriptor: Descriptor
+export type Highlight = Pick<Annotation, 'url' | 'selector'> & {
+    temporary?: boolean
 }
 
-export interface Highlight {
-    url: string
-    anchors?: Anchor[]
-    selector?: DOMSelector
-}
-
-export interface HighlightInteractionInterface {
+export interface HighlightInteractionsInterface {
     renderHighlights: (
         highlights: Highlight[],
-        openSidebar: (args: { activeUrl?: string }) => void,
+        openSidebar: AnnotationClickHandler,
     ) => Promise<void>
     renderHighlight: (
         highlight: Highlight,
-        openSidebar: (args: { activeUrl?: string }) => void,
+        openSidebar: AnnotationClickHandler,
         temporary?: boolean,
     ) => Promise<boolean>
     scrollToHighlight: ({ url }: Highlight) => number
     highlightAndScroll: (annotation: Annotation) => number
     attachEventListenersToNewHighlights: (
         highlight: Highlight,
-        openSidebar: (args: { activeUrl?: string }) => void,
+        openSidebar: AnnotationClickHandler,
     ) => void
     removeMediumHighlights: () => void
     removeTempHighlights: () => void
@@ -46,12 +43,11 @@ export interface HighlightInteractionInterface {
     sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
     _removeHighlight: (highlight: Element) => void
     removeAnnotationHighlights: (url: string) => void
-    createHighlight: (params: {
-        annotationsManager: AnnotationsManagerInterface
-        inPageUI: InPageUIInterface
-    }) => Promise<void>
-    createAnnotation: (params: {
+    saveAndRenderHighlight: (
+        params: SaveAndRenderHighlightDependencies,
+    ) => Promise<void>
+    createAnnotationWithSidebar: (params: {
         selection?: Selection
-        inPageUI: InPageUIInterface
+        inPageUI: SharedInPageUIInterface
     }) => Promise<void>
 }

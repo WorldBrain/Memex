@@ -1,5 +1,5 @@
 import retargetEvents from 'react-shadow-dom-retarget-events'
-import { createInPageUIRoot } from './dom'
+import { createInPageUIRoot, destroyRootElement } from './dom'
 
 export function createInPageUI(
     name: string,
@@ -17,4 +17,8 @@ export function createInPageUI(
     retargetEvents(mount.shadowRoot)
 
     return mount
+}
+
+export function destroyInPageUI(name: string) {
+    return destroyRootElement(`memex-${name}-container`)
 }

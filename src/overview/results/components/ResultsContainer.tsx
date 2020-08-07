@@ -16,7 +16,7 @@ import * as selectors from '../selectors'
 import { RootState } from 'src/options/types'
 import { features } from 'src/util/remote-functions-background'
 import MobileAppMessage from './mobile-app-message'
-import { AnnotationInterface } from 'src/direct-linking/background/types'
+import { AnnotationInterface } from 'src/annotations/background/types'
 import { Annotation } from 'src/annotations/types'
 
 const styles = require('./ResultList.css')
@@ -42,6 +42,7 @@ export interface DispatchProps {
 
 export interface OwnProps {
     toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
+    handleReaderViewClick: (url: string) => void
 }
 
 export type Props = StateProps & DispatchProps & OwnProps
@@ -142,6 +143,7 @@ class ResultsContainer extends React.Component<Props, State> {
                 )}
                 <ResultList
                     {...this.props}
+                    handleReaderViewClick={this.props.handleReaderViewClick}
                     goToAnnotation={this.goToAnnotation}
                 />
             </React.Fragment>

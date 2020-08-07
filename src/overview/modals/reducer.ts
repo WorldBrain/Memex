@@ -24,7 +24,7 @@ reducer.on(acts.show, (state, { modalId, options }) => {
     }
 })
 
-reducer.on(acts.close, state => {
+reducer.on(acts.close, (state) => {
     return {
         ...state,
         modalId: null,

@@ -84,7 +84,7 @@ class ListContainer extends Component {
 
     handleCreateListSubmit = (event) => {
         event.preventDefault()
-        const { value } = event.target.elements['listName']
+        const { value } = event.target.elements.listName
         // value = list name
         this.props.createPageList(
             this.getSearchVal(value),
@@ -101,7 +101,7 @@ class ListContainer extends Component {
 
     handleUpdateList = ({ id, name: oldName }, index) => (event) => {
         event.preventDefault()
-        const { value } = event.target.elements['listName']
+        const { value } = event.target.elements.listName
         const newName = this.getSearchVal(value)
 
         this.props.updateList([oldName, newName], id)
@@ -117,7 +117,6 @@ class ListContainer extends Component {
     }
 
     renderAllLists = () => {
-
         return this.props.lists.map((list, i) => {
             if (list.isEditing) {
                 return (
@@ -168,7 +167,6 @@ class ListContainer extends Component {
         )
 
     render() {
-
         return (
             <React.Fragment>
                 <MyCollection
@@ -248,7 +246,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     },
     handleCrossBtnClick: ({ id }, index) => (event) => {
         event.preventDefault()
-        dispatch(actions.showListDeleteModal(id, index))
+        dispatch(actions.showListDeleteModal(id, index - 1))
     },
     handleListItemClick: ({ id, isMobileList }, index) => () => {
         dispatch(actions.toggleListFilterIndex(index))
@@ -269,17 +267,19 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
         dispatch(actions.deletePageList())
         dispatch(filterActs.delListFilter())
     },
-    showShareModal: ({list}) => dispatch(show({
-        modalId: 'ShareModal',
-        options: {
-            list,
-            auth:auth,
-            contentSharing:contentSharing,
-            isPioneer:true,
-            isShown:true,
-        },
-    }
-    )),
+    showShareModal: ({ list }) =>
+        dispatch(
+            show({
+                modalId: 'ShareModal',
+                options: {
+                    list,
+                    auth: auth,
+                    contentSharing: contentSharing,
+                    isPioneer: true,
+                    isShown: true,
+                },
+            }),
+        ),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListContainer)

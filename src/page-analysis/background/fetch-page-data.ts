@@ -12,6 +12,7 @@ import { FetchPageDataError } from './fetch-page-data-error'
 export type FetchPageData = (args: {
     url: string
     timeout?: number
+    domParser?: (html: string) => Document
     opts?: FetchPageDataOpts
 }) => FetchPageDataReturnValue
 export type RunXHR = () => Promise<PageDataResult>
@@ -41,15 +42,17 @@ export const defaultOpts: FetchPageDataOpts = {
 const fetchPageData: FetchPageData = ({
     url,
     timeout = 10000,
+    domParser,
     opts = defaultOpts,
 }) => {
     let normalizedUrl
 
     try {
-        normalizedUrl = 
-            JSON.stringify(normalizeUrl(url, {
+        normalizedUrl = JSON.stringify(
+            normalizeUrl(url, {
                 removeQueryParameters: [/.*/i],
-            }))
+            }),
+        )
     } catch (err) {
         normalizedUrl = url
     }
@@ -66,7 +69,7 @@ const fetchPageData: FetchPageData = ({
         })
         cancel = () => undefined
     } else {
-        const req = fetchDOMFromUrl(url, timeout)
+        const req = fetchDOMFromUrl(url, timeout, domParser)
         cancel = req.cancel
 
         /**
@@ -124,9 +127,10 @@ const fetchTimeout = (
  * Uses native XMLHttpRequest API, as newer Fetch API doesn't seem to support fetching of
  * the DOM; the Response object must be parsed.
  */
-function fetchDOMFromUrl(
+export function fetchDOMFromUrl(
     url: string,
     timeout: number,
+    domParser?: (html: string) => Document,
 ): { run: () => Promise<Document>; cancel: CancelXHR } {
     const controller = new AbortController()
 
@@ -143,7 +147,11 @@ function fetchDOMFromUrl(
                 }
                 const text = await response.text()
 
-                return new DOMParser().parseFromString(text, 'text/html')
+                const doc = domParser
+                    ? domParser(text)
+                    : new DOMParser().parseFromString(text, 'text/html')
+
+                return doc
             } catch (error) {
                 if (error.name === 'AbortError') {
                     throw new FetchPageDataError(
@@ -161,15 +169,21 @@ function fetchDOMFromUrl(
 function switchOnResponseErrorStatus(status: number) {
     switch (status) {
         case 429:
-            throw new FetchPageDataError('Too many requests to server', 'temporary')
+            throw new FetchPageDataError(
+                'Too many requests to server',
+                'temporary',
+            )
         case 500:
         case 503:
         case 504:
             throw new FetchPageDataError(
-                status + ' '+ 'Server currently unavailable',
+                status + ' ' + 'Server currently unavailable',
                 'temporary',
             )
         default:
-            throw new FetchPageDataError(status + ' '+ 'Data fetch failed', 'permanent')
+            throw new FetchPageDataError(
+                status + ' ' + 'Data fetch failed',
+                'permanent',
+            )
     }
 }

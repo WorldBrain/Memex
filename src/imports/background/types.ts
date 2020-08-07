@@ -1,4 +1,4 @@
-import { Annotation } from 'src/direct-linking/types'
+import { Annotation } from 'src/annotations/types'
 
 export type ImportItemType = 'h' | 'b'
 

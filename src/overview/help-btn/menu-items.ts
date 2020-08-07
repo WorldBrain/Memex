@@ -3,8 +3,7 @@ import { MenuOptions } from './types'
 export const menuItems: MenuOptions = [
     {
         text: 'Tutorials and FAQs',
-        link:
-            'https://worldbrain.io/tutorials',
+        link: 'https://worldbrain.io/tutorials',
     },
     '-',
     {

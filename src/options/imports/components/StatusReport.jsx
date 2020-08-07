@@ -1,9 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import {
-    TypographyHeadingSmall,
-} from 'src/common-ui/components/design-library/typography'
+import { TypographyHeadingSmall } from 'src/common-ui/components/design-library/typography'
 
 import localStyles from './Import.css'
 
@@ -19,10 +17,7 @@ const StatusReport = ({
             <p>{`Succeeded (${successCount})`}</p>
             <p>
                 {`Failed (${failCount})`} (
-                <a
-                    target="_blank"
-                    href="https://worldbrain.io/import_bug"
-                >
+                <a target="_blank" href="https://worldbrain.io/import_bug">
                     ?
                 </a>
                 )
@@ -30,11 +25,7 @@ const StatusReport = ({
             <p>{`Total (${successCount + failCount})`}</p>
             {children && (
                 <TypographyHeadingSmall className={localStyles.showDetails}>
-                    <a
-                        onClick={changeShowDetails}
-                    >
-                        {children}
-                    </a>
+                    <a onClick={changeShowDetails}>{children}</a>
                 </TypographyHeadingSmall>
             )}
         </div>

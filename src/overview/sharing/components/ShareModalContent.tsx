@@ -13,7 +13,6 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
-
 const Margin20 = styled.div`
     height: 20px;
 `
@@ -44,7 +43,7 @@ const ButtonsContainer = styled.div`
 
     & > * {
         margin: 0 5px;
-    }  
+    }
 `
 
 const Button = styled.button`
@@ -69,7 +68,7 @@ const InstructionsContainer = styled.div`
 
 const InstructionsBox = styled.div`
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
     align-items: flex-start;
 `
 
@@ -198,12 +197,12 @@ export default class ShareModalContent extends PureComponent<
                             Anyone with this link can view your collection
                         </TypographyTextNormal>
                     </InstructionsBox>
-                    {!this.props.isShared &&
-                        <PrimaryAction 
+                    {!this.props.isShared && (
+                        <PrimaryAction
                             label={'Generate Link'}
                             onClick={this.props.onClickToggle}
                         />
-                    }
+                    )}
                     {this.props.listCreationState === 'running' && (
                         <UploadingContainer>
                             <TypographyHeadingNormal>
@@ -212,7 +211,6 @@ export default class ShareModalContent extends PureComponent<
                             <LoadingIndicator />
                         </UploadingContainer>
                     )}
-
                 </InstructionsContainer>
 
                 <LinkContainer>
@@ -238,23 +236,22 @@ export default class ShareModalContent extends PureComponent<
                     </LinkBox>
                 </LinkContainer>
                 <BetaInfoContainer>
-                   <BlockHeading>
-                      🚀 This is a beta feature
-                   </BlockHeading>
+                    <BlockHeading>🚀 This is a beta feature</BlockHeading>
                     <Text>
-                        We want to learn more about what you need to integrate it into your workflow. 
+                        We want to learn more about what you need to integrate
+                        it into your workflow.
                     </Text>
 
                     <ButtonsContainer>
-                        <PrimaryAction 
+                        <PrimaryAction
                             label={'Share Feedback'}
                             onClick={this.props.onClickLetUsKnow}
                         />
-                        <SecondaryAction 
+                        <SecondaryAction
                             label={'View Roadmap'}
                             onClick={this.props.onClickViewRoadmap}
                         />
-                        <SecondaryAction 
+                        <SecondaryAction
                             label={'Known Issues'}
                             onClick={this.props.onClickKnownIssues}
                         />

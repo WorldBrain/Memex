@@ -1,5 +1,5 @@
 import { lighten, darken, desaturate } from 'polished'
-
+import { css } from 'styled-components'
 export const colorButtonHighlightBackground = `rgba(196, 196, 196, 1)`
 
 export const colorBrandMintGreen = `#5CD9A6`
@@ -25,6 +25,20 @@ export const colorGrey8 = `#4D4754`
 export const colorGrey9 = `#3A2F45`
 export const colorGrey10 = `#281C34`
 export const formBackground = `#e0e0e0`
+
+export const color11 = '#f7f7f7' /* lightgrey for edit fields */
+
+export const boxShadow = css`
+    border-radius: 3px;
+    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
+        rgba(15, 15, 15, 0.1) 0px 2px 4px;
+    transition: background 120ms ease-in 0s;
+
+    &:hover {
+        transition: background 120ms ease-in 0s;
+        background-color: rgba(55, 53, 47, 0.03);
+    }
+`
 
 // Themes. Passed to the ThemeProvider currently only on the Tag Picket
 export const lightTheme = {

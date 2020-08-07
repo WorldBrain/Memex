@@ -25,8 +25,6 @@ import TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
 import { AuthRemoteEvents } from 'src/authentication/background/types'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
-import { Claims } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -69,7 +67,7 @@ interface RPCOpts {
     tabId?: number
 }
 
-// runInBackground and runInTab create a Proxy object that looks like the real interface but actually calls remote functions
+// runInBackground and runInTab create a Proxy object that look like the real interface but actually call remote functions
 //
 // When the Proxy is asked for a property (such as a method)
 // return a function that executes the requested method over the RPC interface
@@ -184,6 +182,7 @@ async function incomingRPCListener(message, sender) {
     const funcName = message.funcName
     const args = message.hasOwnProperty('args') ? message.args : []
     const func = remotelyCallableFunctions[funcName]
+
     if (func === undefined) {
         console.error(`Received RPC for unknown function: ${funcName}`)
         return {
@@ -353,6 +352,7 @@ function registerRemoteEventForwarder() {
     }
     browser.runtime.onMessage.addListener(remoteEventForwarder)
 }
+
 const remoteEventForwarder = (message, _) => {
     if (message == null || message[__REMOTE_EVENT__] !== __REMOTE_EVENT__) {
         return

@@ -51,19 +51,15 @@ export default class InitialSyncSetup extends StatefulUIElement<
                     />
                 )
             case 'done':
-                return ( 
-                    <Success onClose={this.close} />
-                )
-            case 'noConnection': 
-                return (
-                    <NoConnectionScreen onClose={this.close} />
-                )
+                return <Success onClose={this.close} />
+            case 'noConnection':
+                return <NoConnectionScreen onClose={this.close} />
             default:
                 throw Error(`Unknown Sync Setup state ${this.state.status}`)
         }
     }
 
-    async removeFirebaseFlag(){
+    async removeFirebaseFlag() {
         await localStorage.removeItem('firebase:previous_websocket_failure')
     }
 

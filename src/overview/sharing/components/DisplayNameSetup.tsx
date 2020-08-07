@@ -28,7 +28,6 @@ const NameInput = styled.input`
     height: 35px;
     margin: 0 0 20px 0;
     text-align: center;
-
 `
 const InstructionsContainer = styled.div`
     display: flex;
@@ -40,7 +39,7 @@ const InstructionsContainer = styled.div`
 
 const InstructionsBox = styled.div`
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
     align-items: center;
 
     & div {
@@ -59,14 +58,13 @@ const InputContainer = styled.div`
     align-items: center;
 `
 
-const TypographyTextNormalAlert =styled(TypographyTextNormal)`
+const TypographyTextNormalAlert = styled(TypographyTextNormal)`
     color: red;
 `
 
 export default class DisplayNameSetup extends PureComponent<
     DisplayNameSetupProps
 > {
-
     render() {
         return (
             <div>
@@ -76,10 +74,14 @@ export default class DisplayNameSetup extends PureComponent<
                             Setup your display name
                         </TypographyHeadingBigger>
                         <TypographyTextNormal>
-                            This is how people know who the shared content is from.<br/>
+                            This is how people know who the shared content is
+                            from.
+                            <br />
                         </TypographyTextNormal>
                         <TypographyTextNormalAlert>
-                            <strong>You can't edit this name in the next 2 weeks</strong>
+                            <strong>
+                                You can't edit this name in the next 2 weeks
+                            </strong>
                         </TypographyTextNormalAlert>
                     </InstructionsBox>
                 </InstructionsContainer>
@@ -90,7 +92,7 @@ export default class DisplayNameSetup extends PureComponent<
                         onChange={(e) => this.props.onChange(e.target.value)}
                     />
 
-                    <PrimaryAction 
+                    <PrimaryAction
                         label={'Save'}
                         onClick={this.props.onClickNext}
                     />

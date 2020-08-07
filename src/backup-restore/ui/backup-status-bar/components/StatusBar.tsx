@@ -1,11 +1,9 @@
 import React from 'react'
-import ActionButton from '../../../../notifications/components/ActionButton'
 import classNames from 'classnames'
 import { BackupUIState } from 'src/backup-restore/ui/backup-status-bar/BackupStatusBarContainer'
 import StatusOverlay from 'src/backup-restore/ui/backup-status-bar/components/StatusOverlay'
 import { BackupTimes } from 'src/backup-restore/types'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import { sync, auth, subscription } from 'src/util/remote-functions-background'
 
 const styles = require('./StatusBar.css')
 
@@ -46,22 +44,23 @@ const StatusBar = (props: Props, state: State) => {
                 <div className={styles.headerBox}>
                     <div className={styles.header}>Sync Status</div>
                     <div className={styles.IconBox}>
-                        {(props.backupUIState.state === 'fail' && props.isAutomaticBackupEnabled) || state.syncError ? (
-                                <span
-                                    className={classNames(
-                                        styles.failIcon,
-                                        styles.icon,
-                                    )}
-                                />
-                            ):(
-                                <span
-                                    className={classNames(
-                                        styles.syncIcon,
-                                        styles.icon,
-                                    )}
-                                />
-                            )
-                        }
+                        {(props.backupUIState.state === 'fail' &&
+                            props.isAutomaticBackupEnabled) ||
+                        state.syncError ? (
+                            <span
+                                className={classNames(
+                                    styles.failIcon,
+                                    styles.icon,
+                                )}
+                            />
+                        ) : (
+                            <span
+                                className={classNames(
+                                    styles.syncIcon,
+                                    styles.icon,
+                                )}
+                            />
+                        )}
                     </div>
                 </div>
                 <div className={styles.backupOverlay}>

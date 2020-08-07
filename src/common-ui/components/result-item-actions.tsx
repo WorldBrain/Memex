@@ -15,8 +15,9 @@ const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
 const heartFull = browser.extension.getURL('/img/star_full.svg')
 const commentEmpty = browser.extension.getURL('/img/comment_empty.svg')
 const commentFull = browser.extension.getURL('/img/comment_full.svg')
-const deleteItem = browser.extension.getURL('/img/trash.svg')
+const deleteItem = browser.extension.getURL('/img/remove.svg')
 const copy = browser.extension.getURL('/img/copy.svg')
+const readerIcon = browser.extension.getURL('/img/reader.svg')
 
 class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
     get bookmarkClass() {
@@ -27,6 +28,9 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
     }
 
     render() {
+        const listLength = this.props.lists?.length ?? 0
+        const tagsLength = this.props.tags?.length ?? 0
+
         return (
             <div
                 className={cx(styles.detailsContainer, {
@@ -50,6 +54,12 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                         />
                     )}
 
+                    {/*<ResultItemActionBtn*/}
+                    {/*    imgSrc={readerIcon}*/}
+                    {/*    onClick={this.props.onReaderBtnClick}*/}
+                    {/*    tooltipText="Open in reader view"*/}
+                    {/*    className={styles.reader}*/}
+                    {/*/>*/}
                     <ResultItemActionBtn
                         imgSrc={deleteItem}
                         onClick={this.props.onTrashBtnClick}
@@ -57,26 +67,20 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                         className={styles.trash}
                     />
                     <ResultItemActionBtn
-                        permanent={this.props.tags.length > 0}
-                        imgSrc={this.props.tags.length > 0 ? tagFull : tagEmpty}
+                        permanent={tagsLength > 0}
+                        imgSrc={tagsLength > 0 ? tagFull : tagEmpty}
                         className={
-                            this.props.tags.length > 0
-                                ? styles.commentActive
-                                : styles.tag
+                            tagsLength > 0 ? styles.commentActive : styles.tag
                         }
                         onClick={this.props.onTagBtnClick}
                         tooltipText="Edit Tags"
                         refHandler={this.props.setTagButtonRef}
                     />
                     <ResultItemActionBtn
-                        permanent={this.props.lists.length > 0}
-                        imgSrc={
-                            this.props.lists.length > 0 ? listFull : listAdd
-                        }
+                        permanent={listLength > 0}
+                        imgSrc={listLength > 0 ? listFull : listAdd}
                         className={
-                            this.props.lists.length > 0
-                                ? styles.commentActive
-                                : styles.tag
+                            listLength > 0 ? styles.commentActive : styles.tag
                         }
                         onClick={this.props.onListBtnClick}
                         tooltipText="Edit Collections"

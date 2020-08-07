@@ -1,6 +1,5 @@
 import React from 'react'
 import { ModalBox } from 'src/common-ui/components/design-library/ModalBox'
-import { Link } from 'src/common-ui/components/design-library/actions/Link'
 import ProgressBar from 'src/common-ui/components/ProgressBar'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
@@ -15,8 +14,6 @@ import {
     WhiteSpacer20,
     WhiteSpacer30,
 } from 'src/common-ui/components/design-library/typography'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import { CancelAction } from 'src/common-ui/components/design-library/actions/CancelAction'
 
 const styles = require('./styles.css')
 
@@ -44,13 +41,14 @@ export const SyncDeviceScreen = ({
                     <div className={styles.progressBar}>
                         {!error ? (
                             <div className={styles.progressBox}>
-
-                             <TypographyBodyBold>
-                                    {'Initial sync is in progress... this may take a while'}
+                                <TypographyBodyBold>
+                                    {
+                                        'Initial sync is in progress... this may take a while'
+                                    }
                                 </TypographyBodyBold>
                                 <TypographyBodyCenter>
                                     {'Make sure both devices stay connected'}
-                             </TypographyBodyCenter>
+                                </TypographyBodyCenter>
 
                                 <WhiteSpacer20 />
                                 {progressPct === undefined ? (
@@ -80,9 +78,7 @@ export const SyncDeviceScreen = ({
                         />
                         <ExternalLink
                             label={'Help & FAQ'}
-                            href={
-                                'https://worldbrain.io/help'
-                            }
+                            href={'https://worldbrain.io/help'}
                         />
                     </HelpBlock>
                 </CenterText>

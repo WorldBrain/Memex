@@ -16,13 +16,13 @@ import {
     PageUrlsByDay,
     SocialSearchParams,
 } from './types'
-import { Annotation } from 'src/direct-linking/types'
 import { PageUrlMapperPlugin } from './page-url-mapper'
 import { reshapeParamsForOldSearch } from './utils'
 import { AnnotationsListPlugin } from './annots-list'
 import { SocialSearchPlugin } from './social-search'
 import { SocialPage } from 'src/social-integration/types'
 import { SuggestPlugin, SuggestType } from '../plugins/suggest'
+import { Annotation } from 'src/annotations/types'
 
 export interface SearchStorageProps {
     storageManager: Storex

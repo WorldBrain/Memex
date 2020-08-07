@@ -2,14 +2,13 @@ import { browser } from 'webextension-polyfill-ts'
 
 import analytics from 'src/analytics'
 import { delayed, getPositionState } from '../utils'
-import { createAndCopyDirectLink } from '../../../direct-linking/content_script/interactions'
+import { createAndCopyDirectLink } from '../../../annotations/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
 import { remoteFunction } from '../../../util/webextensionRPC'
 import { injectCSS } from '../../../util/content-injection'
 import { conditionallyShowHighlightNotification } from '../onboarding-interactions'
-import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
-import { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
 import { TooltipPosition } from '../types'
+import { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null

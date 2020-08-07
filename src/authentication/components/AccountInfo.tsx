@@ -151,7 +151,10 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                     ) : (
                                         <div className={styles.button}>
                                             <PrimaryButton
-                                                onClick={this.props.showSubscriptionModal}
+                                                onClick={
+                                                    this.props
+                                                        .showSubscriptionModal
+                                                }
                                             >
                                                 {'Edit Subscriptions'}
                                             </PrimaryButton>

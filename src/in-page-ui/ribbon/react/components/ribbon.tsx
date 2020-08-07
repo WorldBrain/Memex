@@ -3,7 +3,6 @@ import cx from 'classnames'
 import qs from 'query-string'
 
 import extractQueryFilters from 'src/util/nlp-time-filter'
-import CommentBox from 'src/in-page-ui/components/comment-box/comment-box'
 import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
 import {
     shortcuts,
@@ -14,12 +13,12 @@ import {
     KeyboardShortcuts,
     Shortcut,
 } from 'src/in-page-ui/keyboard-shortcuts/types'
-import SearchBox from './search-box'
 import ExtraButtonsPanel from './extra-buttons-panel'
-import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { HighlightInteractionsInterface } from 'src/highlighting/types'
 import { RibbonSubcomponentProps } from './types'
 import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+import AnnotationCreate from 'src/annotations/components/AnnotationCreate'
 
 const styles = require('./ribbon.css')
 
@@ -35,7 +34,7 @@ export interface Props extends RibbonSubcomponentProps {
     handleRibbonToggle: () => void
     handleRemoveRibbon: () => void
     getUrl: () => string
-    highlighter: Pick<HighlightInteractionInterface, 'removeHighlights'>
+    highlighter: Pick<HighlightInteractionsInterface, 'removeHighlights'>
     hideOnMouseLeave?: boolean
 }
 
@@ -311,7 +310,7 @@ export default class Ribbon extends Component<Props, State> {
                         <React.Fragment>
                             <div className={styles.generalActions}>
                                 <ButtonTooltip
-                                    tooltipText={'Close Toolbar Once.'}
+                                    tooltipText={'Close Toolbar for session'}
                                     position="left"
                                 >
                                     <button
@@ -426,42 +425,42 @@ export default class Ribbon extends Component<Props, State> {
                                     <div
                                         className={cx(
                                             styles.button,
-                                            styles.comments, {
-                                                [styles.saveIcon]: this.props.commentBox.isCommentSaved
-                                            }
+                                            styles.comments,
+                                            {
+                                                [styles.saveIcon]: this.props
+                                                    .commentBox.isCommentSaved,
+                                            },
                                         )}
                                         onClick={this.handleCommentIconBtnClick}
                                     />
                                     {this.props.commentBox.showCommentBox && (
                                         <Tooltip position="left">
-                                            {
-                                                <CommentBox
-                                                    env="inpage"
-                                                    closeComments={() =>
-                                                        this.props.commentBox.setShowCommentBox(
-                                                            false,
-                                                        )
-                                                    }
-                                                    saveComment={
+                                            <AnnotationCreate
+                                                tagPickerDependencies={{
+                                                    initialSelectedEntries: () =>
                                                         this.props.commentBox
-                                                            .saveComment
-                                                    }
-                                                    form={{
-                                                        env: 'inpage',
-                                                        ...this.props
-                                                            .commentBox,
-                                                        toggleTagPicker: this
-                                                            .props.commentBox
-                                                            .toggleCommentBoxTagPicker,
-                                                        toggleBookmark: this
-                                                            .props.commentBox
-                                                            .toggleCommentBoxBookmark,
-                                                        updateTags: this.props
-                                                            .commentBox
-                                                            .updateCommentTags,
-                                                    }}
-                                                />
-                                            }
+                                                            .tags,
+                                                    queryEntries: this.props
+                                                        .tagging
+                                                        .queryTagSuggestions,
+                                                    loadDefaultSuggestions: this
+                                                        .props.tagging
+                                                        .fetchInitialTagSuggestions,
+                                                }}
+                                                onSave={
+                                                    this.props.commentBox
+                                                        .saveComment
+                                                }
+                                                onCancel={
+                                                    this.props.commentBox
+                                                        .cancelComment
+                                                }
+                                                handleClickOutside={() =>
+                                                    this.props.commentBox.setShowCommentBox(
+                                                        false,
+                                                    )
+                                                }
+                                            />
                                         </Tooltip>
                                     )}
                                 </ButtonTooltip>

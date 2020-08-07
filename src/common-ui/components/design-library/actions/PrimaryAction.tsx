@@ -41,7 +41,7 @@ const Button = styled.button`
 
 const StyledPrimaryAction = styled(Button)`
     padding: 8px 20px;
-    background: ${props => (props.disabled ? colorDisabled : colorPrimary)};
+    background: ${(props) => (props.disabled ? colorDisabled : colorPrimary)};
     border-radius: 5px;
     cursor: pointer;
     display: inline-block;
@@ -68,7 +68,7 @@ export const PrimaryAction = ({
         onClick={disabled === true ? undefined : onClick}
         disabled={disabled}
         ref={innerRef}
-        onKeyPress={e => (e.key === 'Enter' ? onClick() : false)}
+        onKeyPress={(e) => (e.key === 'Enter' ? onClick() : false)}
     >
         <StyledPrimaryActionLinkText>{label}</StyledPrimaryActionLinkText>
     </StyledPrimaryAction>

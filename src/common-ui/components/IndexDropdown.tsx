@@ -8,9 +8,6 @@ const styles = require('./IndexDropdown.css')
 
 const searchImg = browser.extension.getURL('/img/search.svg')
 
-import { PageList } from 'src/custom-lists/background/types'
-import { ClickHandler } from 'src/popup/types'
-
 export interface Props {
     children?: any[]
     onTagSearchChange?: (s: string) => void

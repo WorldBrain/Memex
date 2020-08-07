@@ -1,5 +1,5 @@
 .pioneerBadge {
-	font-size: 14px;
+    font-size: 14px;
     cursor: pointer;
     width: 150px;
     height: 40px;
@@ -10,4 +10,24 @@
     align-items: center;
     display: flex;
     justify-content: flex-end;
+}
+
+.mainWindow {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow-y: hidden;
+}
+
+.notifications {
+    position: absolute;
+    width: 100%;
+    bottom: 0px;
+}
+
+.Overview {
+    position: relative;
+    top: 0px;
+    height: 100%;
+    width: 100%;
 }

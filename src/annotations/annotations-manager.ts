@@ -1,10 +1,10 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { Omit } from '../sidebar-overlay/types'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import analytics from 'src/analytics'
 import { BackgroundSearchParams } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
 import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
+import { generateUrl } from 'src/annotations/utils'
 
 export default class AnnotationsManager implements AnnotationsManagerInterface {
     private _isSetUp = false
@@ -40,8 +40,8 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
     }
 
     public createAnnotation = async ({
-        url,
-        title,
+        pageUrl,
+        pageTitle,
         body,
         comment,
         anchor,
@@ -49,8 +49,8 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         bookmarked,
         isSocialPost,
     }: {
-        url: string
-        title: string
+        pageUrl: string
+        pageTitle: string
         body: string
         comment: string
         anchor: Anchor
@@ -64,40 +64,40 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         if (tags && tags.length) {
             analytics.trackEvent({
                 category: 'Annotations',
-                action: 'createWithTags',
+                action: 'saveWithTags',
             })
         } else {
             analytics.trackEvent({
                 category: 'Annotations',
-                action: 'createWithoutTags',
+                action: 'saveWithoutTags',
             })
         }
 
         const annotation = {
-            url,
-            title,
+            url: generateUrl({ pageUrl, now: () => Date.now() }),
+            pageUrl,
+            pageTitle,
             body,
             comment,
             selector: anchor,
             bookmarked,
             isSocialPost,
-        }
+            createdWhen: new Date(),
+            lastEdited: new Date(),
+            tags,
+        } as Annotation
+
         // Write annotation to database.
-        const uniqueUrl = await this._createAnnotationRPC(annotation)
+        await this._createAnnotationRPC(annotation)
 
         // Write tags to database.
-        tags.forEach(async (tag) => {
-            await this._addAnnotationTagRPC({ tag, url: uniqueUrl })
-        })
+        await Promise.all(
+            tags.map(async (tag) => {
+                await this._addAnnotationTagRPC({ tag, url: pageUrl })
+            }),
+        )
 
-        return {
-            ...annotation,
-            pageUrl: annotation.url,
-            url: uniqueUrl, // Weird materialised surrogate key made when creating an annotation for saving.
-            tags,
-            createdWhen: Date.now(),
-            lastEdited: Date.now(),
-        } as Annotation
+        return annotation
     }
 
     public fetchAnnotationsWithTags = async (

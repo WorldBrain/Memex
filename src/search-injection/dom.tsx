@@ -11,7 +11,6 @@ import * as constants from './constants'
 import { injectCSS } from '../util/content-injection'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 
-
 export const handleRender = async (
     { docs, totalCount, requiresMigration },
     searchEngine,
@@ -70,40 +69,44 @@ export const handleRender = async (
         )
     }
 
-
     const renderLoading = async () => {
-            const position = await utils.getLocalStorage(
-                constants.POSITION_KEY,
-                'side',
-            )
+        const position = await utils.getLocalStorage(
+            constants.POSITION_KEY,
+            'side',
+        )
 
-            const searchEngineObj = constants.SEARCH_ENGINES[searchEngine]
-            if (!searchEngineObj) {
-                return false
-            }
-            const containerType = searchEngineObj.containerType
-            const containerIdentifier = searchEngineObj.container[position]
-            const container =
-                containerType === 'class'
-                    ? document.getElementsByClassName(containerIdentifier)[0]
-                    : document.getElementById(containerIdentifier)
+        const searchEngineObj = constants.SEARCH_ENGINES[searchEngine]
+        if (!searchEngineObj) {
+            return false
+        }
+        const containerType = searchEngineObj.containerType
+        const containerIdentifier = searchEngineObj.container[position]
+        const container =
+            containerType === 'class'
+                ? document.getElementsByClassName(containerIdentifier)[0]
+                : document.getElementById(containerIdentifier)
 
-            // If re-rendering remove the already present component
-            const component = document.getElementById('memexResults')
-            if (component) {
-                component.parentNode.removeChild(component)
-            }
+        // If re-rendering remove the already present component
+        const component = document.getElementById('memexResults')
+        if (component) {
+            component.parentNode.removeChild(component)
+        }
 
-            const target = document.createElement('div')
-            target.setAttribute('id', 'memexResults')
-            container.insertBefore(target, container.firstChild)
+        const target = document.createElement('div')
+        target.setAttribute('id', 'memexResults')
+        container.insertBefore(target, container.firstChild)
 
-            // Number of results to limit
-            const limit = constants.LIMIT[position]
+        // Number of results to limit
+        const limit = constants.LIMIT[position]
 
-            // Render the React component on the target element
-            // Passing this same function so that it can change position
-            ReactDOM.render(<div><LoadingIndicator/></div>,target,)
+        // Render the React component on the target element
+        // Passing this same function so that it can change position
+        ReactDOM.render(
+            <div>
+                <LoadingIndicator />
+            </div>,
+            target,
+        )
     }
 
     const cssFile = browser.extension.getURL(
@@ -120,9 +123,11 @@ export const handleRender = async (
     // else attach it to the DOMContentLoaded event listener
     renderComponent()
     if (
-        !(document.readyState === 'complete'  ||
-        document.readyState === 'interactive' ||
-        document.readyState === 'loading')
+        !(
+            document.readyState === 'complete' ||
+            document.readyState === 'interactive' ||
+            document.readyState === 'loading'
+        )
     ) {
         document.addEventListener('DOMContentLoaded', renderComponent, true)
     }

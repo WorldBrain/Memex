@@ -13,7 +13,7 @@ class AnimationWrapper extends React.Component {
         children: PropTypes.node.isRequired,
     }
 
-    setRef = node => (this.container = node)
+    setRef = (node) => (this.container = node)
 
     render() {
         return (

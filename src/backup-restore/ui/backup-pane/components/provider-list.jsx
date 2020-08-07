@@ -34,7 +34,7 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                             {backupPath !== null ? (
                                 <button
                                     className={Styles.destination}
-                                    onClick={e => {
+                                    onClick={(e) => {
                                         e.preventDefault()
                                         handleChangeBackupPath()
                                     }}
@@ -76,14 +76,16 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                                 </span>
                             </div>
                             <p className={settingsStyle.infoText}>
-                                Use the same Google Account as the one logged into
-                                your browser profile. (creates a hidden folder)
+                                Use the same Google Account as the one logged
+                                into your browser profile. (creates a hidden
+                                folder)
                                 <a
                                     className={Styles.link}
                                     target="_blank"
                                     href="https://worldbrain.io/tutorials/backups"
                                 >
-                                    {' '}Learn More ▸
+                                    {' '}
+                                    Learn More ▸
                                 </a>
                             </p>
                         </div>

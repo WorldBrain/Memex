@@ -2,7 +2,6 @@ import { UILogic, UIEvent } from 'ui-logic-core'
 import TypedEventEmitter from 'typed-emitter'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 import { FastSyncEvents } from '@worldbrain/storex-sync/lib/fast-sync'
-import * as Raven from 'src/util/raven'
 import analytics from 'src/analytics'
 import { now } from 'moment'
 
@@ -106,8 +105,8 @@ export default class InitialSyncSetupLogic extends UILogic<
         }
     }
 
-    async detectFirebaseFlag(){
-        if(await localStorage.getItem('firebase:previous_websocket_failure')) {
+    async detectFirebaseFlag() {
+        if (await localStorage.getItem('firebase:previous_websocket_failure')) {
             this.emitMutation({
                 status: { $set: 'noConnection' },
             })
@@ -120,13 +119,13 @@ export default class InitialSyncSetupLogic extends UILogic<
         })
         this.detectFirebaseFlag()
 
-        setTimeout(()=>{
+        setTimeout(() => {
             this.detectFirebaseFlag()
         }, 2000)
-        setTimeout(()=>{
+        setTimeout(() => {
             this.detectFirebaseFlag()
         }, 10000)
-        setTimeout(()=>{
+        setTimeout(() => {
             this.detectFirebaseFlag()
         }, 15000)
 

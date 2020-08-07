@@ -32,6 +32,11 @@ export interface GenericPickerDependencies {
     children?: any
 }
 
+export type GenericPickerDependenciesMinusSave = Omit<
+    GenericPickerDependencies,
+    'onUpdateEntrySelection'
+>
+
 export type GenericPickerEvent = UIEvent<{
     setSearchInputRef: { ref: HTMLInputElement }
     loadedSuggestions: {}

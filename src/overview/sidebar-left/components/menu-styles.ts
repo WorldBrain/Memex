@@ -12,7 +12,7 @@ const baseStyles = {
         position: 'fixed',
         right: 'inherit',
         zIndex: '1100',
-        height: '100vh',
+        height: '80vh',
         width: '250px',
         top: '55px',
         opacity: '0',
@@ -42,6 +42,7 @@ const menuStyles = (isSidebarLocked, isSidebarOpen) => {
         ;((baseStyles.bmMenuWrap.background as unknown) as string) = '#edf0f4'
         ;((baseStyles.bmMenuWrap.marginLeft as unknown) as string) = '0px'
         ;((baseStyles.bmMenuWrap.opacity as unknown) as string) = '1'
+        ;((baseStyles.bmMenuWrap.height as unknown) as string) = '100vh'
     }
 
     return baseStyles

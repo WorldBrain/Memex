@@ -2,8 +2,11 @@ import { browser } from 'webextension-polyfill-ts'
 
 import { IGNORE_CLICK_OUTSIDE_CLASS } from '../constants'
 import { ContentScriptRegistry, SidebarScriptMain } from './types'
-import { createInPageUI } from 'src/in-page-ui/utils'
-import { setupSidebarUI, destroySidebarUI } from 'src/in-page-ui/sidebar/react'
+import { createInPageUI, destroyInPageUI } from 'src/in-page-ui/utils'
+import {
+    setupInPageSidebarUI,
+    destroyInPageSidebarUI,
+} from 'src/sidebar/annotations-sidebar/index'
 
 export const main: SidebarScriptMain = async (dependencies) => {
     const cssFile = browser.extension.getURL(`/content_script_sidebar.css`)
@@ -33,9 +36,7 @@ export const main: SidebarScriptMain = async (dependencies) => {
 
     const setUp = () => {
         createMount()
-        setupSidebarUI(mount.rootElement, dependencies, {
-            env: 'inpage',
-        })
+        setupInPageSidebarUI(mount.rootElement, dependencies)
     }
 
     const destroy = () => {
@@ -43,7 +44,8 @@ export const main: SidebarScriptMain = async (dependencies) => {
             return
         }
 
-        destroySidebarUI(mount.rootElement, mount.shadowRoot)
+        destroyInPageUI('sidebar')
+        destroyInPageSidebarUI(mount.rootElement, mount.shadowRoot)
     }
 }
 

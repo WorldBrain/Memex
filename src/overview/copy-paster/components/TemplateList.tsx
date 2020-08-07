@@ -75,13 +75,18 @@ class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
         const { templates } = this.props
 
         if (templates.length === 0) {
-            return <NoResultsBox>
-                        <NoResults>Create custom templates to copy/paste content into your workflow</NoResults>
-                        <LesserLink
-                            label={'Learn More >'}
-                            onClick={this.props.onClickHowto}
-                        />
-                    </NoResultsBox>
+            return (
+                <NoResultsBox>
+                    <NoResults>
+                        Create custom templates to copy/paste content into your
+                        workflow
+                    </NoResults>
+                    <LesserLink
+                        label={'Learn More >'}
+                        onClick={this.props.onClickHowto}
+                    />
+                </NoResultsBox>
+            )
         }
 
         return templates.map((template) => (

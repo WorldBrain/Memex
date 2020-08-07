@@ -1,7 +1,7 @@
-import { Annotation } from 'src/direct-linking/types'
 import { User } from 'src/social-integration/types'
 import SearchStorage from './storage'
 import { SearchIndex } from '../types'
+import { Annotation } from 'src/annotations/types'
 
 export interface AnnotPage {
     url: string

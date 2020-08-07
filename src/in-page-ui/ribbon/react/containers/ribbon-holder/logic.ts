@@ -1,8 +1,8 @@
 import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
 import { RibbonContainerDependencies } from '../ribbon/types'
 import {
-    InPageUIInterface,
-    InPageUIState,
+    SharedInPageUIInterface,
+    InPageUIComponentShowState,
 } from 'src/in-page-ui/shared-state/types'
 
 export interface RibbonHolderState {
@@ -16,7 +16,7 @@ export type RibbonHolderEvents = UIEvent<{
 }>
 
 export interface RibbonHolderDependencies {
-    inPageUI: InPageUIInterface
+    inPageUI: SharedInPageUIInterface
     containerDependencies: RibbonContainerDependencies
 }
 
@@ -36,10 +36,10 @@ export class RibbonHolderLogic extends UILogic<
 
     getInitialState(): RibbonHolderState {
         return {
-            state: this.dependencies.inPageUI.state.ribbon
+            state: this.dependencies.inPageUI.componentsShown.ribbon
                 ? 'visible'
                 : 'hidden',
-            isSidebarOpen: this.dependencies.inPageUI.state.sidebar,
+            isSidebarOpen: this.dependencies.inPageUI.componentsShown.sidebar,
         }
     }
 
@@ -69,7 +69,9 @@ export class RibbonHolderLogic extends UILogic<
         return { state: { $set: 'hidden' } }
     }
 
-    _handleUIStateChange = (event: { newState: InPageUIState }) => {
+    _handleUIStateChange = (event: {
+        newState: InPageUIComponentShowState
+    }) => {
         this.emitMutation({ isSidebarOpen: { $set: event.newState.sidebar } })
     }
 }

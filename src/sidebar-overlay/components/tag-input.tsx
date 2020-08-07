@@ -1,6 +1,5 @@
 import * as React from 'react'
 
-import { IndexDropdown } from 'src/common-ui/containers'
 import TagHolder from './tag-holder'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { tags } from 'src/util/remote-functions-background'

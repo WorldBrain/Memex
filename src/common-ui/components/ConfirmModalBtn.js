@@ -4,7 +4,12 @@ import cx from 'classnames'
 
 import styles from './ConfirmModal.css'
 
-const ConfirmModalBtn = ({ disabled, children, cancel = false, ...btnProps }) => (
+const ConfirmModalBtn = ({
+    disabled,
+    children,
+    cancel = false,
+    ...btnProps
+}) => (
     <a
         className={cx(styles.btn, styles.confirmBtn, {
             [styles.cancelBtn]: cancel,

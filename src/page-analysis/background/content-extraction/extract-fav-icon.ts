@@ -32,9 +32,9 @@ async function getFavIcon(favIconUrl) {
     const response = await fetch(favIconUrl)
 
     if (response.status >= 400 && response.status < 600) {
-        try{
+        try {
             throw new Error(`Bad response from server: ${response.status}`)
-        } catch(err) {
+        } catch (err) {
             return undefined
         }
     }

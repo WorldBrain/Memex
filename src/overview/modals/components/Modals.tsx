@@ -13,9 +13,9 @@ const modalsMap = {
     Subscription: ({ modalOptions, onClose }) => (
         <SubscribeModal onClose={onClose} {...modalOptions} />
     ),
-    ShareModal: ({modalOptions, onClose }) => (
+    ShareModal: ({ modalOptions, onClose }) => (
         <ShareModal onClose={onClose} {...modalOptions} />
-    )
+    ),
 }
 
 class Modals extends PureComponent<Props> {

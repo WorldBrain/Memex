@@ -1,6 +1,5 @@
 import React from 'react'
 import RunningProcess from './running-process'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import {
     WhiteSpacer20,
     WhiteSpacer30,

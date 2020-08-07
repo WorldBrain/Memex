@@ -78,7 +78,7 @@ export function reactEventHandler<Dependencies extends object = null>(
         dependencies = null,
     }: { actions?: ActionMap; dependencies?: Dependencies } = {},
 ) {
-    return event => {
+    return (event) => {
         handleEvent({
             eventProcessor,
             state: component.state,
@@ -114,7 +114,7 @@ export function _doDispatch(
 
 export function fakeState(initial) {
     const state = { ...initial }
-    const setState = updates => {
+    const setState = (updates) => {
         Object.assign(state, updates)
     }
     return { state, setState }
@@ -123,7 +123,7 @@ export function fakeState(initial) {
 export function fakeEventProps(eventNames) {
     const events = { log: [] }
     const props = fromPairs(
-        eventNames.map(eventName => [
+        eventNames.map((eventName) => [
             eventName,
             (...args) => events.log.push({ event: eventName, args }),
         ]),

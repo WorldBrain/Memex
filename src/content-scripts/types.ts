@@ -2,5 +2,5 @@ export type ContentScriptComponent =
     | 'tooltip'
     | 'sidebar'
     | 'ribbon'
-    | 'highlighting'
+    | 'highlights'
     | 'search_injection'

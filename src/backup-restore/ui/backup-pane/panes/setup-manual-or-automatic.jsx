@@ -21,9 +21,9 @@ class SetupManualOrAutomatic extends React.Component {
     }
 
     async fetchAuthorizedFeatures() {
-        if(await this.props.currentUser?.authorizedFeatures.includes(
-            'backup',
-        )){
+        if (
+            await this.props.currentUser?.authorizedFeatures.includes('backup')
+        ) {
             this.setState({
                 automatic: true,
             })
@@ -42,9 +42,7 @@ class SetupManualOrAutomatic extends React.Component {
                         className={Styles.selectionlist}
                         onModeChange={(mode) => this.setState({ mode })}
                         showSubscriptionModal={this.props.showSubscriptionModal}
-                        isAuthorizedForAutomaticBackup={
-                            this.state.automatic
-                        }
+                        isAuthorizedForAutomaticBackup={this.state.automatic}
                     />
                     <div className={settingsStyle.buttonArea}>
                         <SecondaryAction

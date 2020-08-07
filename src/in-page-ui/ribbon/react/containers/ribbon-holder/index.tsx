@@ -8,7 +8,7 @@ import {
 } from './logic'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import RibbonContainer from '../ribbon'
-import { InPageUIEvents } from 'src/in-page-ui/shared-state/types'
+import { SharedInPageUIEvents } from 'src/in-page-ui/shared-state/types'
 const styles = require('./styles.css')
 
 const RIBBON_HIDE_TIMEOUT = 700
@@ -57,7 +57,7 @@ export default class RibbonHolder extends StatefulUIElement<
         }
     }
 
-    handleInPageUIStateChange: InPageUIEvents['stateChanged'] = ({
+    handleInPageUIStateChange: SharedInPageUIEvents['stateChanged'] = ({
         changes,
     }) => {
         if ('ribbon' in changes) {

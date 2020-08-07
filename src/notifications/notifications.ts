@@ -113,8 +113,7 @@ export const EVENT_NOTIFS: EventNotifsDict = {
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url:
-                            'https://worldbrain.io/warning/browser_data_loss',
+                        url: 'https://worldbrain.io/warning/browser_data_loss',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
@@ -252,8 +251,7 @@ export const EVENT_NOTIFS: EventNotifsDict = {
         id: 'usage_survey_1',
         search: {
             title: 'How disappointed would you be if Memex does not exist?',
-            message:
-                'Take a 2-5min survey, get 1 month Memex Pro',
+            message: 'Take a 2-5min survey, get 1 month Memex Pro',
             buttons: [
                 {
                     action: {

@@ -14,12 +14,13 @@ import {
 import { conditionallyRemoveOnboardingSelectOption } from '../../onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
 import {
-    InPageUIInterface,
-    InPageUIEvents,
+    SharedInPageUIInterface,
+    SharedInPageUIEvents,
 } from 'src/in-page-ui/shared-state/types'
+import { TooltipInPageUIInterface } from 'src/in-page-ui/tooltip/types'
 
 interface TooltipContainerProps {
-    inPageUI: InPageUIInterface
+    inPageUI: TooltipInPageUIInterface
     onInit: any
     createAndCopyDirectLink: any
     createAnnotation: any
@@ -48,7 +49,7 @@ class TooltipContainer extends React.Component<
     }
 
     async componentDidMount() {
-        this.props.inPageUI.events.on('stateChanged', this.handleUIStateChange)
+        this.props.inPageUI.events?.on('stateChanged', this.handleUIStateChange)
         this.props.onInit(this.showTooltip)
         this.setState({
             showCreateLink: await features.getFeature('DirectLink'),
@@ -56,13 +57,13 @@ class TooltipContainer extends React.Component<
     }
 
     componentWillUnmount() {
-        this.props.inPageUI.events.removeListener(
+        this.props.inPageUI.events?.removeListener(
             'stateChanged',
             this.handleUIStateChange,
         )
     }
 
-    handleUIStateChange: InPageUIEvents['stateChanged'] = (event) => {
+    handleUIStateChange: SharedInPageUIEvents['stateChanged'] = (event) => {
         if (!('tooltip' in event.changes)) {
             return
         }

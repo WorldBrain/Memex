@@ -5,6 +5,9 @@ import React, {
     DragEventHandler,
 } from 'react'
 import cx from 'classnames'
+
+import { runInBackground } from 'src/util/webextensionRPC'
+import { AnnotationInterface } from 'src/annotations/background/types'
 import AnnotationList from './annotation-list'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { SocialPage } from 'src/social-integration/types'
@@ -12,6 +15,10 @@ import PageResultItem from './page-result-item'
 import SocialResultItem from './social-result-item'
 
 const styles = require('./result-item.css')
+
+// TODO (sidebar-refactor): I'm simply setting this up and passing this down
+//  to the baby comps to save time, but all these components need to be sorted sometime
+const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
 
 export interface Props extends Partial<SocialPage> {
     url: string
@@ -42,6 +49,7 @@ export interface Props extends Partial<SocialPage> {
     onTagBtnClick: MouseEventHandler
     onListBtnClick: MouseEventHandler
     onTrashBtnClick: MouseEventHandler
+    onReaderBtnClick?: MouseEventHandler
     onCommentBtnClick: MouseEventHandler
     onToggleBookmarkClick: MouseEventHandler
     onCopyPasterBtnClick: MouseEventHandler
@@ -58,14 +66,6 @@ export interface Props extends Partial<SocialPage> {
 class ResultItem extends PureComponent<Props> {
     get hrefToPage() {
         return `${this.props.fullUrl}`
-    }
-
-    get environment() {
-        if (this.props.isOverview) {
-            return 'overview'
-        } else {
-            return 'inpage'
-        }
     }
 
     dragStart: DragEventHandler = (e) => {
@@ -102,12 +102,21 @@ class ResultItem extends PureComponent<Props> {
 
         return (
             <AnnotationList
-                env={this.environment}
                 isExpandedOverride={this.props.areAnnotationsExpanded}
                 openAnnotationSidebar={this.props.onCommentBtnClick}
                 pageUrl={this.hrefToPage}
                 annotations={this.props.annotations}
                 goToAnnotation={this.props.goToAnnotation}
+                handleBookmarkToggle={(url) =>
+                    annotationsBG.toggleAnnotBookmark({ url })
+                }
+                handleDeleteAnnotation={(url) =>
+                    annotationsBG.deleteAnnotation(url)
+                }
+                handleEditAnnotation={async (url, comment, tags) => {
+                    await annotationsBG.editAnnotation(url, comment)
+                    await annotationsBG.updateAnnotationTags({ url, tags })
+                }}
             />
         )
     }
@@ -126,20 +135,21 @@ class ResultItem extends PureComponent<Props> {
                 {this.props.listManager}
                 {this.props.copyPasterManager}
                 <div
-                    className={cx(styles.rootContainer, {
-                        [styles.tweetRootContainer]: this.props.isSocial,
-                        [styles.rootContainerOverview]: this.props.isOverview,
-                        [styles.isSidebarOpen]: this.props
-                            .isResponsibleForSidebar,
-                    })}
+                    className={cx(
+                        styles.rootContainer,
+                        styles.rootContainerOverview,
+                        {
+                            [styles.tweetRootContainer]: this.props.isSocial,
+                            [styles.isSidebarOpen]: this.props
+                                .isResponsibleForSidebar,
+                        },
+                    )}
                 >
                     <a
                         onClick={this.handleClick}
                         onDragStart={this.dragStart}
                         onDragEnd={this.props.resetUrlDragged}
-                        className={cx(styles.root, {
-                            [styles.rootOverview]: this.props.isOverview,
-                        })}
+                        className={cx(styles.root, styles.rootOverview)}
                         draggable
                         href={this.hrefToPage}
                         target="_blank"

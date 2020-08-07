@@ -95,6 +95,8 @@ export class SyncNowOverlayPaneContainer extends Component<
         this.refreshDevices()
     }
 
+    // TODO: investigate if a race condition is here
+
     handleOnClickSync = async () => {
         this.setState({ isSyncing: true })
         const syncing = await sync.forceIncrementalSync()

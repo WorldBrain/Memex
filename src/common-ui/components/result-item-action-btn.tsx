@@ -22,11 +22,11 @@ const ResultItemActionBtn: React.SFC<Props> = (props) => (
     >
         <div
             className={props.permanent ? styles.permanentButton : styles.button}
+            onClick={props.onClick}
+            ref={props.refHandler}
         >
             <img
-                ref={props.refHandler}
                 src={props.imgSrc}
-                onClick={props.onClick}
                 className={cx(styles.img, props.className)}
             />
         </div>

@@ -3,8 +3,6 @@ import ToggleSwitch from 'src/common-ui/components/ToggleSwitch'
 import React from 'react'
 import {
     TypographyHeadingBig,
-    TypographySubHeading,
-    TypographyHeadingSmall,
     TypographyHeadingNormal,
     TypographyHeadingBigger,
     TypographyLink,
@@ -83,11 +81,14 @@ class BetaFeaturesScreen extends React.Component<
                             ) ? (
                                 <div>
                                     <TypographyTextNormal>
-                                        Thanks so much for your support. Without you this would not be possible! <br/>
-                                        If you run into issues with Beta features,{' '}
+                                        Thanks so much for your support. Without
+                                        you this would not be possible! <br />
+                                        If you run into issues with Beta
+                                        features,{' '}
                                         <a href="http://worldbrain.io/feedback/betafeatures">
                                             let us know
-                                        </a>.
+                                        </a>
+                                        .
                                     </TypographyTextNormal>
                                 </div>
                             ) : (
@@ -116,9 +117,9 @@ class BetaFeaturesScreen extends React.Component<
                         </PrimaryButton>
                     </div>
                     <div className={settingsStyle.titleSpace}>
-                    <TypographyHeadingBig>
+                        <TypographyHeadingBig>
                             Available Beta Features
-                    </TypographyHeadingBig>
+                        </TypographyHeadingBig>
                     </div>
                     {Object.values(this.state.featureOptions)?.map(
                         (feature) => (

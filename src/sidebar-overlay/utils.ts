@@ -18,7 +18,7 @@ export const getOffsetTop = (element: HTMLElement) => {
     return offset
 }
 
-export const getSidebarState = async () =>
+export const getSidebarState = async (): Promise<boolean> =>
     getLocalStorage(
         constants.SIDEBAR_STORAGE_NAME,
         constants.SIDEBAR_DEFAULT_OPTION,
@@ -63,4 +63,4 @@ export const maxPossibleTags = (tags: string[]) => {
     }
     return tagsAllowed
 }
-export const toggleSidebarOverlay = remoteFunction('toggleSidebarOverlay')
+// export const toggleSidebarOverlay = remoteFunction('toggleSidebarOverlay')

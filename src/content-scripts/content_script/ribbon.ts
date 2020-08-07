@@ -3,7 +3,7 @@ import { browser } from 'webextension-polyfill-ts'
 import { IGNORE_CLICK_OUTSIDE_CLASS } from '../constants'
 import { ContentScriptRegistry, RibbonScriptMain } from './types'
 import { setupRibbonUI, destroyRibbonUI } from 'src/in-page-ui/ribbon/react'
-import { createInPageUI } from 'src/in-page-ui/utils'
+import { createInPageUI, destroyInPageUI } from 'src/in-page-ui/utils'
 import { setSidebarState, getSidebarState } from 'src/sidebar-overlay/utils'
 
 export const main: RibbonScriptMain = async (options) => {
@@ -46,6 +46,7 @@ export const main: RibbonScriptMain = async (options) => {
             return
         }
 
+        destroyInPageUI('ribbon')
         destroyRibbonUI(mount.rootElement, mount.shadowRoot)
     }
 }

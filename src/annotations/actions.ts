@@ -2,59 +2,20 @@ import { createAction } from 'redux-act'
 import { Thunk } from 'src/sidebar-overlay/types'
 import * as selectors from 'src/sidebar-overlay/sidebar/selectors'
 import { RES_PAGE_SIZE } from 'src/sidebar-overlay/sidebar/constants'
-import { Anchor, Highlight } from 'src/highlighting/types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import {
-    checkAndSetCongratsMessage,
     nextResultsPage,
-    resetResultsPage,
     setIsLoading,
     setResultsExhausted,
 } from 'src/sidebar-overlay/sidebar/actions'
 import { Annotation } from 'src/annotations/types'
-import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
-import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
-import { extractAnchor } from 'src/highlighting/ui'
-import { highlightAnnotations } from 'src/annotations/index'
 
 export const setAnnotations = createAction<Annotation[]>('setAnnotations')
 export const appendAnnotations = createAction<Annotation[]>(
     'sidebar/appendAnnotations',
 )
 
-export const fetchAnnotationsForPageUrl: (
-    isSocialPost?: boolean,
-    highlight?: boolean,
-) => Thunk = (isSocialPost: boolean, highlight: boolean) => async (
-    dispatch,
-    getState,
-) => {
-    dispatch(setIsLoading(true))
-    dispatch(resetResultsPage())
-
-    const state = getState()
-    const annotationsManager = selectors.annotationsManager(state)
-    const { url } = selectors.page(state)
-
-    // TODO (ch - annotations): Why would there not be an annotationManager when fetching annotations? This feels like an error/bug
-    if (annotationsManager) {
-        const annotations = await annotationsManager.fetchAnnotationsWithTags(
-            url,
-            isSocialPost,
-        )
-        annotations.reverse()
-        dispatch(setAnnotations(annotations))
-        dispatch(nextResultsPage())
-        dispatch(setResultsExhausted(annotations.length < RES_PAGE_SIZE))
-
-        if (highlight) {
-            highlightAnnotations(annotations)
-        }
-    }
-
-    dispatch(setIsLoading(false))
-}
 export const fetchMoreAnnotationsForPageUrl: (
     isSocialPost?: boolean,
 ) => Thunk = (isSocialPost) => async (dispatch, getState) => {
@@ -80,55 +41,6 @@ export const fetchMoreAnnotationsForPageUrl: (
 
     dispatch(setIsLoading(false))
 }
-export const createAnnotation: (
-    anchor?: Anchor,
-    body?: string,
-    comment?: string,
-    tags?: string[],
-    bookmarked?: boolean,
-    isSocialPost?: boolean,
-    options?: {
-        skipRender?: boolean
-    },
-) => Thunk = (
-    anchor,
-    body,
-    comment,
-    tags,
-    bookmarked,
-    isSocialPost,
-    options,
-) => async (dispatch, getState) => {
-    const state = getState()
-    const annotationsManager = selectors.annotationsManager(state)
-    const { url, title } = selectors.page(state)
-
-    anchor = anchor || (await extractAnchor(document.getSelection()))
-    body = body || anchor ? anchor.quote : ''
-    comment = comment || ''
-    tags = tags || []
-
-    if (annotationsManager) {
-        const annotation = await annotationsManager.createAnnotation({
-            url,
-            title,
-            body,
-            comment,
-            anchor,
-            tags,
-            bookmarked,
-            isSocialPost,
-        })
-
-        dispatch(appendAnnotations([annotation]))
-
-        if (!options?.skipRender) {
-            renderHighlight(annotation as Highlight, toggleSidebarOverlay)
-        }
-
-        dispatch(checkAndSetCongratsMessage())
-    }
-}
 
 /* export const updateAnnotationState: (
     isSocialPost?: boolean,
@@ -136,7 +48,6 @@ export const createAnnotation: (
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
     const { url } = selectors.page(state)
-
     dispatch(setAnnotations({ ...state., annotation }))
 } */
 

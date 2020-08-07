@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import styles from './CreateListForm.css'
 
-const CreateListForm = props => (
+const CreateListForm = (props) => (
     <div>
         <form
             className={styles.createListForm}

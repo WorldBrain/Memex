@@ -7,6 +7,7 @@ import { PublicSyncInterface } from 'src/sync/background/types'
 import { FeaturesInterface } from 'src/features/background/feature-opt-ins'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { RemoteReaderInterface } from 'src/reader/types'
 import { RemoteCopyPasterInterface } from 'src/overview/copy-paster/background/types'
 import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
@@ -24,6 +25,7 @@ export interface RemoteFunctionImplementations<
     tags: RemoteTagsInterface
     collections: RemoteCollectionsInterface
     copyPaster: RemoteCopyPasterInterface
+    readablePageArchives: RemoteReaderInterface
     contentSharing: ContentSharingInterface
 }
 
@@ -40,6 +42,7 @@ export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
     tags: runInBackground<RemoteTagsInterface>(),
     collections: runInBackground<RemoteCollectionsInterface>(),
     copyPaster: runInBackground<RemoteCopyPasterInterface>(),
+    readablePageArchives: runInBackground<RemoteReaderInterface>(),
     contentSharing: runInBackground<ContentSharingInterface>(),
 }
 
@@ -53,4 +56,5 @@ export const featuresBeta = remoteFunctions.featuresBeta
 export const tags = remoteFunctions.tags
 export const collections = remoteFunctions.collections
 export const copyPaster = remoteFunctions.copyPaster
+export const readable = remoteFunctions.readablePageArchives
 export const contentSharing = remoteFunctions.contentSharing

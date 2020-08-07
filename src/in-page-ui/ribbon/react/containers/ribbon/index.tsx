@@ -8,6 +8,7 @@ import {
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Ribbon from '../../components/ribbon'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
+import { AnnotationsSidebarProps } from 'src/sidebar/annotations-sidebar/components/AnnotationsSidebar'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
@@ -37,6 +38,24 @@ export default class RibbonContainer extends StatefulUIElement<
             'ribbonAction',
             this.handleExternalAction,
         )
+    }
+
+    protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
+        return {
+            anchor: null,
+            onCancel: () => this.processEvent('cancelComment', null),
+            onSave: (annotation) =>
+                this.processEvent('saveComment', { value: annotation }),
+        }
+    }
+
+    protected getTagProps(): AnnotationsSidebarProps['annotationTagProps'] {
+        return {
+            loadDefaultSuggestions: () =>
+                this.props.tags.fetchInitialTagSuggestions(),
+            queryEntries: (query) =>
+                this.props.tags.searchForTagSuggestions({ query }),
+        }
     }
 
     handleExternalAction = (event: { action: InPageUIRibbonAction }) => {
@@ -92,25 +111,12 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 commentBox={{
                     ...this.state.commentBox,
-                    handleCommentTextChange: (comment: string) =>
-                        this.processEvent('handleCommentTextChange', {
-                            value: comment,
-                        }),
-                    saveComment: () => this.processEvent('saveComment', null),
+                    saveComment: (value) =>
+                        this.processEvent('saveComment', { value }),
                     cancelComment: () =>
                         this.processEvent('cancelComment', null),
-                    toggleCommentBoxBookmark: () =>
-                        this.processEvent('toggleCommentBoxBookmark', null),
-                    toggleCommentBoxTagPicker: () =>
-                        this.processEvent('toggleCommentBoxTagPicker', null),
                     setShowCommentBox: (value) =>
                         this.processEvent('setShowCommentBox', { value }),
-                    updateCommentTags: (value) =>
-                        this.processEvent('updateCommentTags', { value }),
-                    fetchInitialTagSuggestions: () =>
-                        this.props.tags.fetchInitialTagSuggestions(),
-                    queryTagSuggestions: (query: string) =>
-                        this.props.tags.searchForTagSuggestions({ query }),
                 }}
                 bookmark={{
                     ...this.state.bookmark,

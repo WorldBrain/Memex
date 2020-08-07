@@ -1,12 +1,14 @@
 import 'core-js'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { EventEmitter } from 'events'
+// import { normalizeUrl } from '@worldbrain/memex-url-utils'
+
 import { setupScrollReporter } from 'src/activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
 import { shouldIncludeSearchInjection } from 'src/search-injection/detection'
 import {
     loadAnnotationWhenReady,
     setupRemoteDirectLinkFunction,
-} from 'src/direct-linking/content_script'
+} from 'src/annotations/content_script'
 import {
     runInBackground,
     makeRemotelyCallableType,
@@ -18,67 +20,132 @@ import { ContentScriptRegistry } from './types'
 import { ContentScriptsInterface } from '../background/types'
 import { ContentScriptComponent } from '../types'
 import { initKeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/content_script'
-import { InPageUI } from 'src/in-page-ui/shared-state'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
-import { HighlightInteraction } from 'src/highlighting/ui/highlight-interactions'
+import {
+    createAnnotationWithSidebar,
+    HighlightRenderer,
+    renderAnnotationCacheChanges,
+    saveAndRenderHighlight,
+} from 'src/highlighting/ui/highlight-interactions'
 import { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
-import { getSidebarState } from 'src/sidebar-overlay/utils'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
-import { AnnotationInterface } from 'src/direct-linking/background/types'
+import { AnnotationInterface } from 'src/annotations/background/types'
 import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
-import { SearchInterface } from 'src/search/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
-import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
+import * as sidebarUtils from 'src/sidebar-overlay/utils'
 import * as constants from '../constants'
-
-// Set this up globally to prevent race conditions
-// TODO: Fix this with a proper restructuring of how pages are indexed
+import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
+import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
+import { createAnnotationsCache } from 'src/annotations/annotations-cache'
+import { AnalyticsEvent } from 'src/analytics/types'
+import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
+// TODO:(page-indexing)[high] Fix this with a proper restructuring of how pages are indexed
 setupPageContentRPC()
 
+// Content Scripts are separate bundles of javascript code that can be loaded
+// on demand by the browser, as needed. This main function manages the initialisation
+// and dependencies of content scripts.
+
 export async function main() {
+    const getPageUrl = () => window.location.href
+    const getPageTitle = () => document.title
+
+    // 1. Create a local object with promises to track each content script
+    // initialisation and provide a function which can initialise a content script
+    // or ignore if already loaded.
     const components: {
         ribbon?: Resolvable<void>
         sidebar?: Resolvable<void>
         tooltip?: Resolvable<void>
+        highlights?: Resolvable<void>
     } = {}
-    async function loadComponent(component: InPageUIComponent) {
-        if (!components[component]) {
-            components[component] = resolvablePromise<void>()
-            loadContentScript(component)
-        }
-        return components[component]!
-    }
 
+    // 2. Initialise dependencies required by content scripts
     const currentTab = await getCurrentTab()
-    const annotations = runInBackground<AnnotationInterface<'caller'>>()
+    const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
+    const tagsBG = runInBackground<RemoteTagsInterface>()
     const remoteFunctionRegistry = new RemoteFunctionRegistry()
     const annotationsManager = new AnnotationsManager()
-    const highlighter = new HighlightInteraction()
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
+    const highlightRenderer = new HighlightRenderer()
+    const annotationEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
-    const annotationFunctions: AnnotationFunctions = {
-        createHighlight: () =>
-            highlighter.createHighlight({ annotationsManager, inPageUI }),
-        createAnnotation: () => highlighter.createAnnotation({ inPageUI }),
+    const annotationsCache = createAnnotationsCache({
+        tags: tagsBG,
+        annotations: annotationsBG,
+    })
+
+    // 3. Creates an instance of the InPageUI manager class to encapsulate
+    // business logic of initialising and hide/showing components.
+    const inPageUI = new SharedInPageUIState({
+        loadComponent: (component) => {
+            if (!components[component]) {
+                components[component] = resolvablePromise<void>()
+                loadContentScript(component)
+            }
+            return components[component]!
+        },
+        unloadComponent: (component) => {
+            delete components[component]
+        },
+        pageUrl: currentTab.url,
+    })
+    annotationsCache.load(getPageUrl())
+
+    const annotationsFunctions = {
+        createHighlight: (
+            analyticsEvent?: AnalyticsEvent<'Highlights'>,
+        ) => () =>
+            saveAndRenderHighlight({
+                annotationsCache,
+                getUrlAndTitle: () => ({
+                    title: getPageTitle(),
+                    pageUrl: getPageUrl(),
+                }),
+                renderer: highlightRenderer,
+                getSelection: () => document.getSelection(),
+                onClickHighlight: ({ annotationUrl }) =>
+                    inPageUI.showSidebar({
+                        annotationUrl,
+                        action: 'show_annotation',
+                    }),
+                analyticsEvent,
+            }),
+        createAnnotation: (
+            analyticsEvent?: AnalyticsEvent<'Annotations'>,
+        ) => () =>
+            createAnnotationWithSidebar({
+                getSelection: () => document.getSelection(),
+                getUrlAndTitle: () => ({
+                    title: getPageTitle(),
+                    pageUrl: getPageUrl(),
+                }),
+                inPageUI,
+                analyticsEvent,
+            }),
     }
 
+    // 4. Create a contentScriptRegistry object with functions for each content script
+    // component, that when run, initialise the respective component with it's
+    // dependencies
     const contentScriptRegistry: ContentScriptRegistry = {
         async registerRibbonScript(execute): Promise<void> {
             await execute({
                 inPageUI,
                 annotationsManager,
                 getRemoteFunction: remoteFunction,
-                highlighter,
-                annotations,
+                highlighter: highlightRenderer,
+                annotations: annotationsBG,
+                annotationsCache,
                 currentTab,
+                tags: tagsBG,
                 customLists: runInBackground<RemoteCollectionsInterface>(),
                 bookmarks: runInBackground<BookmarksInterface>(),
-                tags: runInBackground<RemoteTagsInterface>(),
                 activityLogger: runInBackground<ActivityLoggerInterface>(),
                 tooltip: {
                     getState: tooltipUtils.getTooltipState,
@@ -89,44 +156,61 @@ export async function main() {
                     setState: tooltipUtils.setHighlightsState,
                 },
             })
-            components.ribbon!.resolve()
+            components.ribbon?.resolve()
         },
         async registerHighlightingScript(execute): Promise<void> {
-            execute()
+            execute({
+                inPageUI,
+                annotationsCache,
+                highlightRenderer,
+                annotations: annotationsBG,
+                annotationsManager,
+            })
+            components.highlights?.resolve()
         },
         async registerSidebarScript(execute): Promise<void> {
             await execute({
+                events: annotationEvents,
+                initialState: inPageUI.componentsShown.sidebar
+                    ? 'visible'
+                    : 'hidden',
                 inPageUI,
-                highlighter,
-                annotations,
-                currentTab,
-                tags: runInBackground<RemoteTagsInterface>(),
-                bookmarks: runInBackground<BookmarksInterface>(),
-                search: runInBackground<SearchInterface>(),
+                annotationsCache,
+                highlighter: highlightRenderer,
+                annotations: annotationsBG,
+                tags: tagsBG,
+                pageUrl: currentTab.url,
                 customLists: runInBackground<RemoteCollectionsInterface>(),
-                normalizeUrl,
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
             })
-            components.sidebar!.resolve()
+            components.sidebar?.resolve()
         },
         async registerTooltipScript(execute): Promise<void> {
             await execute({
                 inPageUI,
                 toolbarNotifications,
-                ...annotationFunctions,
+                createHighlight: annotationsFunctions.createHighlight({
+                    category: 'Highlights',
+                    action: 'createFromTooltip',
+                }),
+                createAnnotation: annotationsFunctions.createAnnotation({
+                    category: 'Annotations',
+                    action: 'createFromTooltip',
+                }),
             })
-            components.tooltip!.resolve()
+            components.tooltip?.resolve()
         },
     }
+
     window['contentScriptRegistry'] = contentScriptRegistry
 
-    const inPageUI = new InPageUI({
-        loadComponent,
-        annotations,
-        highlighter,
-        pageUrl: currentTab.url,
-    })
+    // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,
+    // so it is included in this global content script where it adds less than 500kb.
+    await contentScriptRegistry.registerHighlightingScript(highlightMain)
 
+    // 5. Registers remote functions that can be used to interact with components
+    // in this tab.
+    // TODO:(remote-functions) Move these to the inPageUI class too
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
         showRibbon: inPageUI.showRibbon.bind(inPageUI),
@@ -139,51 +223,60 @@ export async function main() {
         removeTooltip: async () => inPageUI.removeTooltip(),
         insertOrRemoveTooltip: async () => inPageUI.toggleTooltip(),
         goToHighlight: async (annotation, pageAnnotations) => {
-            await highlighter.renderHighlights(
+            await highlightRenderer.renderHighlights(
                 pageAnnotations,
-                annotations.toggleSidebarOverlay,
+                annotationsBG.toggleSidebarOverlay,
             )
-            await highlighter.highlightAndScroll(annotation)
+            await highlightRenderer.highlightAndScroll(annotation)
         },
-        ...annotationFunctions,
+        createHighlight: annotationsFunctions.createHighlight({
+            category: 'Highlights',
+            action: 'createFromContextMenu',
+        }),
+        createAnnotation: annotationsFunctions.createAnnotation({
+            category: 'Annotations',
+            action: 'createFromContextMenu',
+        }),
     })
 
+    // 6. Setup other interactions with this page (things that always run)
     setupScrollReporter()
     loadAnnotationWhenReady()
     setupRemoteDirectLinkFunction()
     initKeyboardShortcuts({
         inPageUI,
-        ...annotationFunctions,
+        createHighlight: annotationsFunctions.createHighlight({
+            category: 'Highlights',
+            action: 'createFromShortcut',
+        }),
+        createAnnotation: annotationsFunctions.createAnnotation({
+            category: 'Annotations',
+            action: 'createFromShortcut',
+        }),
     })
-
     const loadContentScript = createContentScriptLoader()
     if (shouldIncludeSearchInjection(window.location.hostname)) {
         loadContentScript('search_injection')
     }
 
-    if (await getSidebarState()) {
-        setupOnDemandInPageUi(() => inPageUI.loadComponent('ribbon'))
-    }
-
+    // 7. Load components and associated content scripts if they are set to autoload
+    // on each page.
     if (await tooltipUtils.getTooltipState()) {
         await inPageUI.setupTooltip()
     }
 
     const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
     if (areHighlightsEnabled) {
-        if (await inPageUI.showHighlights()) {
-            await inPageUI.loadComponent('sidebar')
-            await inPageUI.loadComponent('ribbon')
+        if (!annotationsCache.isEmpty) {
+            inPageUI.loadComponent('sidebar')
         }
     }
-    // if (window.location.hostname === 'worldbrain.io') {
-    //     sniffWordpressWorldbrainUser()
-    // }
+    inPageUI.showHighlights()
 
-    // global['worldbrainMemex'] = {
-    //     inPageUI,
-    //     controllers,
-    // }
+    const isSidebarEnabled = await sidebarUtils.getSidebarState()
+    if (isSidebarEnabled) {
+        await inPageUI.loadComponent('ribbon')
+    }
 }
 
 type ContentScriptLoader = (component: ContentScriptComponent) => Promise<void>
@@ -200,7 +293,7 @@ export function createContentScriptLoader() {
     return loader
 }
 
-export function setupOnDemandInPageUi(loadRibbon: () => void) {
+export function loadRibbonOnMouseOver(loadRibbon: () => void) {
     const listener = (event: MouseEvent) => {
         if (event.clientX > window.innerWidth - 200) {
             loadRibbon()
@@ -221,5 +314,4 @@ const getCurrentTab = (() => {
         return currentTab
     }
 })()
-
 main()

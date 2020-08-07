@@ -65,7 +65,8 @@ export default class RestoreWhere extends React.Component<Props> {
                     FROM WHERE?
                 </div>
                 <div className={settingsStyle.subname}>
-                    <strong>Important:</strong> To restore, pick the parent folder of '/backup'
+                    <strong>Important:</strong> To restore, pick the parent
+                    folder of '/backup'
                 </div>
                 <ProviderList
                     backupPath={
@@ -74,7 +75,7 @@ export default class RestoreWhere extends React.Component<Props> {
                             : null
                     }
                     handleChangeBackupPath={this.handleChangeBackupPath}
-                    onChange={async value => {
+                    onChange={async (value) => {
                         this.handleEvent({ type: 'onProviderChoice', value })
                         if (value === 'local') {
                             await this.proceedIfServerIsRunning()
@@ -83,7 +84,7 @@ export default class RestoreWhere extends React.Component<Props> {
                 />
                 <DownloadOverlay
                     disabled={this.state.overlay !== 'download'}
-                    onClick={async action => {
+                    onClick={async (action) => {
                         if (action === 'continue') {
                             this.handleEvent({
                                 type: 'onChangeOverlay',

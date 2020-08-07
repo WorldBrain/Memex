@@ -1,9 +1,11 @@
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { RibbonContainerDependencies } from './types'
 import * as componentTypes from '../../components/types'
-import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { loadInitial } from 'src/util/ui-logic'
+import { NewAnnotationOptions } from 'src/annotations/types'
+import { generateUrl } from 'src/annotations/utils'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -47,6 +49,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleRibbon: null
         highlightAnnotations: null
         toggleShowExtraButtons: null
+        saveNewPageComment: (annotation: NewAnnotationOptions) => void
     } & SubcomponentHandlers<'highlights'> &
         SubcomponentHandlers<'tooltip'> &
         // SubcomponentHandlers<'sidebar'> &
@@ -59,7 +62,7 @@ export type RibbonContainerEvents = UIEvent<
 >
 
 export interface RibbonContainerOptions extends RibbonContainerDependencies {
-    inPageUI: InPageUIInterface
+    inPageUI: SharedInPageUIInterface
     setRibbonShouldAutoHide: (value: boolean) => void
 }
 
@@ -82,7 +85,6 @@ export class RibbonContainerLogic extends UILogic<
     RibbonContainerEvents
 > {
     commentSavedTimeout = 2000
-    skipAnnotationPageIndexing = false
 
     constructor(private dependencies: RibbonContainerOptions) {
         super()
@@ -250,34 +252,27 @@ export class RibbonContainerLogic extends UILogic<
         }
     }
 
-    handleCommentTextChange: EventHandler<'handleCommentTextChange'> = ({
-        event,
-    }) => {
-        return { commentBox: { commentText: { $set: event.value } } }
-    }
-
-    saveComment: EventHandler<'saveComment'> = async ({ previousState }) => {
-        const { annotations, currentTab } = this.dependencies
-        const comment = previousState.commentBox.commentText.trim()
-
+    saveComment: EventHandler<'saveComment'> = async ({ event }) => {
+        const { currentTab, annotationsCache } = this.dependencies
+        const comment = event.value.text.trim()
+        const { isBookmarked, tags } = event.value
         if (comment.length === 0) {
             return
         }
 
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
-        const annotUrl = await annotations.createAnnotation(
-            {
-                comment,
-                url: currentTab.url,
-                bookmarked: previousState.commentBox.isCommentBookmarked,
-            },
-            { skipPageIndexing: this.skipAnnotationPageIndexing },
-        )
-        await annotations.editAnnotationTags({
-            url: annotUrl,
-            tagsToBeAdded: previousState.commentBox.tags,
-            tagsToBeDeleted: [],
+        const annotationUrl = generateUrl({
+            pageUrl: currentTab.url,
+            now: () => Date.now(),
+        })
+
+        await annotationsCache.create({
+            url: annotationUrl,
+            pageUrl: currentTab.url,
+            comment,
+            isBookmarked,
+            tags,
         })
 
         this.emitMutation({
@@ -303,22 +298,6 @@ export class RibbonContainerLogic extends UILogic<
         return { commentBox: { showCommentBox: { $set: false } } }
     }
 
-    toggleCommentBoxBookmark: EventHandler<'toggleCommentBoxBookmark'> = ({
-        event,
-        previousState,
-    }) => {
-        return {
-            commentBox: { isCommentBookmarked: { $apply: (prev) => !prev } },
-        }
-    }
-
-    toggleCommentBoxTagPicker: EventHandler<'toggleCommentBoxTagPicker'> = ({
-        event,
-        previousState,
-    }) => {
-        return { commentBox: { showTagsPicker: { $apply: (prev) => !prev } } }
-    }
-
     //
     // Tagging
     //
@@ -342,9 +321,7 @@ export class RibbonContainerLogic extends UILogic<
 
     private _updateTags: (
         context: 'commentBox' | 'tagging',
-    ) => EventHandler<'updateTags' | 'updateCommentTags'> = (
-        context,
-    ) => async ({ event }) => {
+    ) => EventHandler<'updateTags'> = (context) => async ({ event }) => {
         const backendResult =
             context === 'commentBox'
                 ? Promise.resolve()

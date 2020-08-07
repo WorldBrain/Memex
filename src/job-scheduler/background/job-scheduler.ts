@@ -2,7 +2,6 @@ import { Alarms, Storage } from 'webextension-polyfill-ts'
 
 import { JobDefinition, PrimedJob } from './types'
 import { SCHEDULES } from '../constants'
-import { isDev } from 'src/analytics/internal/constants'
 
 export type Period = 'month' | 'week' | 'day'
 

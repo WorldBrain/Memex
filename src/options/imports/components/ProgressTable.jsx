@@ -39,10 +39,7 @@ const ProgressTable = ({ progress, allowTypes }) => (
                 <th>Successful</th>
                 <th>
                     Failed (
-                    <a
-                        target="_blank"
-                        href="https://worldbrain.io/import_bug"
-                    >
+                    <a target="_blank" href="https://worldbrain.io/import_bug">
                         ?
                     </a>
                     )

@@ -22,7 +22,6 @@ import { fontSizeNormal } from 'src/common-ui/components/design-library/typograp
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { EntrySelectedList } from './components/EntrySelectedList'
 import { ListResultItem } from './components/ListResultItem'
-import { ActiveList } from './components/ActiveList'
 
 class ListPicker extends StatefulUIElement<
     ListPickerDependencies,

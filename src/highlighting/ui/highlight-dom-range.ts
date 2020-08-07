@@ -18,7 +18,7 @@
 export const highlightDOMRange = (
     rangeObject: Range,
     highlightClass: string,
-) => {
+): HTMLElement[] => {
     // Ignore range if empty.
     if (rangeObject.collapsed) {
         return
@@ -35,8 +35,10 @@ export const highlightDOMRange = (
     const { startContainer, startOffset, endContainer, endOffset } = rangeObject
 
     // Highlight each node
-    // const highlights: HTMLElement[] =
-    nodes.forEach(node => highlightNode(node, highlightClass))
+    const highlights: HTMLElement[] = []
+    for (const node of nodes) {
+        highlights.push(highlightNode(node, highlightClass))
+    }
 
     // Reset selection
     clearBrowserSelection()
@@ -44,6 +46,8 @@ export const highlightDOMRange = (
     // The rangeObject gets messed up by our DOM changes. Be kind and restore.
     rangeObject.setStart(startContainer, startOffset)
     rangeObject.setEnd(endContainer, endOffset)
+
+    return highlights
 }
 
 // Resets any selected content in the window, useful to stop content script popping up again inconsistently.

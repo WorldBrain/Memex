@@ -12,5 +12,4 @@ export const WARN_NOTIF: Partial<NotifOpts> = {
     message: 'Your browser may stop imports suddenly. Find out why',
 }
 
-export const WARN_INFO_URL =
-    'https://worldbrain.io/import_bug'
+export const WARN_INFO_URL = 'https://worldbrain.io/import_bug'

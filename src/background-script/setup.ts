@@ -4,7 +4,7 @@ import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import { COLLECTION_DEFINITIONS as READER_COLLECTION_DEFINITIONS } from '@worldbrain/memex-storage/lib/reader/constants'
 import NotificationBackground from 'src/notifications/background'
 import SocialBackground from 'src/social-integration/background'
-import DirectLinkingBackground from 'src/direct-linking/background'
+import DirectLinkingBackground from 'src/annotations/background'
 import ActivityLoggerBackground, {
     TabManager,
 } from 'src/activity-logger/background'
@@ -55,6 +55,7 @@ import { Analytics } from 'src/analytics/types'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
 import { PipelineRes } from 'src/search'
 import CopyPasterBackground from 'src/overview/copy-paster/background'
+import { ReaderBackground } from 'src/reader/background'
 import { ServerStorage } from 'src/storage/types'
 import ContentSharingBackground from 'src/content-sharing/background'
 
@@ -82,6 +83,7 @@ export interface BackgroundModules {
     pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
     copyPaster: CopyPasterBackground
+    readable: ReaderBackground
     contentSharing: ContentSharingBackground
 }
 
@@ -145,6 +147,8 @@ export function createBackgroundModules(options: {
         analytics,
         localBrowserStorage: options.browserAPIs.storage.local,
     })
+
+    const reader = new ReaderBackground({ storageManager })
 
     const notifications = new NotificationBackground({ storageManager })
 
@@ -218,6 +222,7 @@ export function createBackgroundModules(options: {
         notifications,
         activityLogger,
         connectivityChecker,
+        readable: reader,
         directLinking: new DirectLinkingBackground({
             browserAPIs: options.browserAPIs,
             storageManager,
@@ -395,6 +400,7 @@ export function getBackgroundStorageModules(
         syncInfo: backgroundModules.sync.syncInfoStorage,
         pages: backgroundModules.pages.storage,
         copyPaster: backgroundModules.copyPaster.storage,
+        reader: backgroundModules.readable.storage,
         contentSharing: backgroundModules.contentSharing.storage,
     }
 }

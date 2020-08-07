@@ -3,7 +3,6 @@
  * Default export is the Sidebar's state's type declaration.
  */
 
-import { State as CommentBoxState } from '../comment-box'
 import AnnotationsManager from '../../annotations/annotations-manager'
 import { Annotation } from 'src/annotations/types'
 
@@ -31,8 +30,6 @@ export default interface State {
     activeAnnotationUrl: string | null
     /** URL for the currently hovered annotation. */
     hoverAnnotationUrl: string | null
-    /** State for the comment box. */
-    commentBox: CommentBoxState
     /** Denotes whether to to show the congrats message during onboarding or not. */
     showCongratsMessage: boolean
     /** Represents the latest page of annotations being fetched. */

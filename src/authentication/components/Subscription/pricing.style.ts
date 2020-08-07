@@ -17,13 +17,11 @@ import {
     TypographyTextSmall,
 } from 'src/common-ui/components/design-library/typography'
 
-
 const SubscriptionOptionsContainer = styled.div`
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
 `
-
 
 const PricingTable = styled.div`
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
@@ -172,19 +170,19 @@ const TimeButtonBox = styled.div`
 `
 
 const TimeButtonRight = styled(TypographyTextNormal)`
-    border-color: #E0E0E0;
+    border-color: #e0e0e0;
     border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px; 
+    border-bottom-right-radius: 5px;
     border-width: 1px;
     border-style: solid;
     padding: 5px 15px;
     cursor: pointer;
     border-left: 0.5px;
-    background-color: ${(props)=>props.active ? '#E0E0E0':'white'}
+    background-color: ${(props) => (props.active ? '#E0E0E0' : 'white')};
 `
 
 const TimeButtonLeft = styled(TypographyTextNormal)`
-    border-color: #E0E0E0;
+    border-color: #e0e0e0;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
     border-width: 1px;
@@ -192,7 +190,7 @@ const TimeButtonLeft = styled(TypographyTextNormal)`
     padding: 5px 15px;
     border-right: 0.5px;
     cursor: pointer;
-    background-color: ${(props)=>props.active ? '#E0E0E0':'white'}
+    background-color: ${(props) => (props.active ? '#E0E0E0' : 'white')};
 `
 
 const ListItem = styled.div`
@@ -341,7 +339,7 @@ const PricingGridPlanTitle = styled(TypographyHeadingPage)`
     display: flex;
     justify-content: center;
     align-items: center;
-    color: ${(props)=>props.active ? '#5cd9a6':'#3a2f45'};
+    color: ${(props) => (props.active ? '#5cd9a6' : '#3a2f45')};
 `
 
 const PricingGridFeatureTitle = styled(TypographyBodyBold)`
@@ -369,14 +367,13 @@ const PricingGridCheck = styled.div`
     mask-repeat: no-repeat;
     mask-position: center;
     mask-image: url('/img/check.svg');
-    background-color: ${(props)=>props.active ? '#5cd9a6':'#3a2f45'};
+    background-color: ${(props) => (props.active ? '#5cd9a6' : '#3a2f45')};
     color: #2f2f2f;
 
     @media (max-width: 700px) {
         padding: 10px 5px;
         mask-size: 12px;
     }
-
 `
 
 const PricingGridButton = styled(PricingButton)``
@@ -404,7 +401,7 @@ const ColThinker = styled.div`
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: ${(props)=>props.active ? '#E0E0E0':'white'}
+    background-color: ${(props) => (props.active ? '#E0E0E0' : 'white')};
 `
 
 const ColPioneer = styled.div`

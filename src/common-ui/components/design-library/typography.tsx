@@ -14,7 +14,6 @@ export const fontSizeBigger = 18
 export const fontSizeTitle = 20
 export const fontSizeBiggerTitle = 22
 
-
 export const TypographyBigTitle = styled.span`
     font-size: ${fontSizeTitle}px;
 

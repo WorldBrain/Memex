@@ -1,10 +1,12 @@
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
+import { Anchor } from 'src/highlighting/types'
+import { NewAnnotationOptions } from 'src/annotations/types'
 
 export interface RibbonSubcomponentProps {
     highlights: RibbonHighlightsProps
     tooltip: RibbonTooltipProps
     sidebar: RibbonSidebarProps
-    commentBox: RibbonCommentBoxProps
+    commentBox: RibbonCommentBoxProps // TODO: (sidebar-refactor) depreciated ,remove when new annotation interface below is complete
     bookmark: RibbonBookmarkProps
     tagging: RibbonTaggingProps
     lists: RibbonListsProps
@@ -29,20 +31,17 @@ export interface RibbonSidebarProps {
     setShowSidebarCommentBox: (value: boolean) => void
 }
 
-export interface RibbonCommentBoxProps extends CommonTaggingProps {
+export interface RibbonCommentBoxProps
+    extends Pick<CommonTaggingProps, 'tags'> {
     commentText: string
     showCommentBox: boolean
     isCommentSaved: boolean
     isCommentBookmarked: boolean
     isTagInputActive: boolean
     showTagsPicker: boolean
-    handleCommentTextChange: (comment: string) => void
-    saveComment: () => void
+    saveComment: (annotation: NewAnnotationOptions) => void
     cancelComment: () => void
-    toggleCommentBoxBookmark: () => void
-    toggleCommentBoxTagPicker: () => void
     setShowCommentBox: (value: boolean) => void
-    updateCommentTags: PickerUpdateHandler
 }
 
 export interface RibbonBookmarkProps {

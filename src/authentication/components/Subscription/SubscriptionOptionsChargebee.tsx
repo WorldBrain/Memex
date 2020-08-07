@@ -5,18 +5,12 @@ import {
 } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { auth, subscription } from 'src/util/remote-functions-background'
-import {
-    PlanTitle,
-    PlanName,
-    PlanBox,
-} from 'src/authentication/components/Subscription/pricing.style'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import SubscriptionInnerOptions from 'src/authentication/components/Subscription/SubscriptionInnerOptions'
 import {
     CenterText,
     WhiteSpacer10,
 } from 'src/common-ui/components/design-library/typography'
-import styled from 'styled-components'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { AuthContextInterface } from 'src/authentication/background/types'
@@ -171,26 +165,19 @@ class SubscriptionOptionsChargebee extends React.Component<
     }
 
     render() {
-
-        console.log(this.props.plans)
-
         return (
             <div className={''}>
                 <div>
-                        <SubscriptionInnerOptions
-                            openCheckoutBackupMonthly={
-                                this.openCheckoutMonthly
-                            }
-                            openCheckoutBackupYearly={
-                                this.openCheckoutYearly
-                            }
-                            openPortal={this.openPortal}
-                            plans={this.props.plans}
-                            loadingMonthly={this.state.loadingMonthly}
-                            loadingYearly={this.state.loadingYearly}
-                            loadingPortal={this.state.loadingPortal}
-                        />
-                        <WhiteSpacer10 />
+                    <SubscriptionInnerOptions
+                        openCheckoutBackupMonthly={this.openCheckoutMonthly}
+                        openCheckoutBackupYearly={this.openCheckoutYearly}
+                        openPortal={this.openPortal}
+                        plans={this.props.plans}
+                        loadingMonthly={this.state.loadingMonthly}
+                        loadingYearly={this.state.loadingYearly}
+                        loadingPortal={this.state.loadingPortal}
+                    />
+                    <WhiteSpacer10 />
                 </div>
             </div>
         )

@@ -1,8 +1,10 @@
-import React, { PureComponent, MouseEventHandler } from 'react'
+import React, { PureComponent, MouseEventHandler, MouseEvent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import Waypoint from 'react-waypoint'
-import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
+import reduce from 'lodash/fp/reduce'
+import omit from 'lodash/omit'
+
 import { selectors as opt } from 'src/options/settings'
 import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
 import ResultList from './ResultList'
@@ -28,7 +30,6 @@ import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-l
 import CopyPaster from 'src/overview/copy-paster'
 import { renderTemplate } from 'src/overview/copy-paster/utils'
 import { Template } from 'src/overview/copy-paster/types'
-import omit from 'lodash/omit'
 
 const styles = require('./ResultList.css')
 
@@ -87,6 +88,7 @@ export interface DispatchProps {
 export interface OwnProps {
     goToAnnotation: (annotation: any) => void
     toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
+    handleReaderViewClick: (fullUrl: string) => void
 }
 
 export type Props = StateProps & DispatchProps & OwnProps
@@ -135,7 +137,7 @@ class ResultListContainer extends PureComponent<Props> {
     private handleOutsideClick: EventListener = (event) => {
         // Reduces to `true` if any on input elements were clicked
         const wereAnyClicked = reduce((res, el) => {
-            const isEqual = el != null ? el.isEqualNode(event.target) : false
+            const isEqual = el != null ? el.contains(event.target) : false
             return res || isEqual
         }, false)
 
@@ -333,7 +335,9 @@ class ResultListContainer extends PureComponent<Props> {
                             this.setState({ tmpCopyPasterTemplate: undefined })
                         }}
                         onClickHowto={() => {
-                            window.open('https://worldbrain.io/tutorials/copy-templates')
+                            window.open(
+                                'https://worldbrain.io/tutorials/copy-templates',
+                            )
                         }}
                         onTitleChange={(title) => {
                             this.setState({
@@ -391,6 +395,13 @@ class ResultListContainer extends PureComponent<Props> {
         })
     }
 
+    private handleReaderBtnClick = (doc: Result, i: number) => async (
+        event: MouseEvent,
+    ) => {
+        const fullUrl = doc.fullUrl
+        this.props.handleReaderViewClick(fullUrl)
+    }
+
     private attachDocWithPageResultItem(doc: Result, index, key) {
         const isSocialPost = doc.hasOwnProperty('user')
 
@@ -418,6 +429,7 @@ class ResultListContainer extends PureComponent<Props> {
                 onListBtnClick={this.props.handleListBtnClick(index)}
                 isListFilterActive={this.props.isListFilterActive}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
+                onReaderBtnClick={this.handleReaderBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
                 onCommentBtnClick={this.props.handleCommentBtnClick(
                     doc,

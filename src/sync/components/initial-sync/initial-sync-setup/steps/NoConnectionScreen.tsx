@@ -20,11 +20,11 @@ export const NoConnectionScreen = ({ onClose }: { onClose: () => void }) => {
             actions={null}
             key={`dialog-success`}
         >
-                <CenterText>
-                    <TypographyBodyBlock>
-                        Connect to a stable internet connection and reload this tab.
-                    </TypographyBodyBlock>
-                </CenterText>
+            <CenterText>
+                <TypographyBodyBlock>
+                    Connect to a stable internet connection and reload this tab.
+                </TypographyBodyBlock>
+            </CenterText>
         </ModalBox>
     )
 }

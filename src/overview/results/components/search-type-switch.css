@@ -8,9 +8,11 @@
     max-width: 800px;
     width: 100%;
     align-items: center;
-    padding-top: 60px;
     padding-bottom: 5px;
     border-bottom: 1px solid color14;
+    margin-top: 5px;
+    z-index: 30000;
+    background: white;
 }
 
 .unfoldAllBtn {

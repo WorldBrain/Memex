@@ -1,6 +1,6 @@
 import Storex from '@worldbrain/storex'
 import { Windows, Tabs, Storage } from 'webextension-polyfill-ts'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { URLNormalizer, normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import TagStorage from './storage'
 import { SearchIndex } from 'src/search'
@@ -39,6 +39,7 @@ export default class TagsBackground {
             windows?: Windows.Static
             searchBackgroundModule: SearchBackground
             localBrowserStorage: Storage.LocalStorageArea
+            normalizeUrl?: URLNormalizer
         },
     ) {
         this.storage = new TagStorage({
@@ -49,6 +50,7 @@ export default class TagsBackground {
             delTag: bindMethod(this, 'delTag'),
             addTagToPage: bindMethod(this, 'addTagToPage'),
             updateTagForPage: bindMethod(this, 'updateTagForPage'),
+            setTagsForAnnotation: bindMethod(this, 'setTagsForAnnotation'),
             fetchPageTags: bindMethod(this, 'fetchPageTags'),
             addTagsToOpenTabs: bindMethod(this, 'addTagsToOpenTabs'),
             delTagsFromOpenTabs: bindMethod(this, 'delTagsFromOpenTabs'),
@@ -68,6 +70,10 @@ export default class TagsBackground {
             options.localBrowserStorage,
             { prefix: 'tags_' },
         )
+    }
+
+    private get normalizeUrl(): URLNormalizer {
+        return this.options.normalizeUrl ?? normalizeUrl
     }
 
     async searchForTagSuggestions(args: { query: string; limit?: number }) {
@@ -147,6 +153,10 @@ export default class TagsBackground {
         return this.storage.fetchPageTags({ url })
     }
 
+    async fetchAnnotationTags({ url }: { url: string }) {
+        return this.storage.fetchAnnotationTags({ url })
+    }
+
     async addTagToExistingUrl({ tag, url }: { tag: string; url: string }) {
         this.options.analytics.trackEvent({
             category: 'Tags',
@@ -154,6 +164,26 @@ export default class TagsBackground {
         })
         await this._updateTagSuggestionsCache({ added: tag })
         return this.storage.addTag({ name: tag, url })
+    }
+
+    async addTagsToExistingAnnotationUrl({
+        tags,
+        url,
+    }: {
+        tags: string[]
+        url: string
+    }) {
+        for (const tag of tags) {
+            await this._updateTagSuggestionsCache({ added: tag })
+            await this.storage.addAnnotationTag({ name: tag, url })
+        }
+    }
+
+    async addTagsToExistingUrl({ tags, url }: { tags: string[]; url: string }) {
+        for (const tag of tags) {
+            await this._updateTagSuggestionsCache({ added: tag })
+            await this.storage.addTag({ name: tag, url })
+        }
     }
 
     async _updateTagSuggestionsCache(args: {
@@ -189,7 +219,7 @@ export default class TagsBackground {
         let page = await this.options.pageStorage.getPage(url)
 
         const fullUrl = url
-        const normalizedUrl = normalizeUrl(url, {})
+        const normalizedUrl = this.normalizeUrl(url, {})
 
         const {
             [IDXING_PREF_KEYS.BOOKMARKS]: shouldFullyIndex,
@@ -238,5 +268,34 @@ export default class TagsBackground {
         if (deleted) {
             await this.delTag({ url, tag: deleted })
         }
+    }
+
+    async deleteAllTagsForPage({ url }: { url: string }) {
+        return this.storage.deleteAllTagsForPage({ url })
+    }
+
+    async deleteTagsForPage({ url, tags }: { url: string; tags: string[] }) {
+        return this.storage.deleteTagsForPage({ url, tags })
+    }
+
+    async setTagsForAnnotation({
+        url,
+        tags: newTags,
+    }: {
+        url: string
+        tags: string[]
+    }) {
+        const existingTags = await this.fetchAnnotationTags({ url })
+        const existingTagsSet = new Set(existingTags)
+        const newTagsSet = new Set(newTags)
+
+        const toAdd = newTags.filter((tag) => !existingTagsSet.has(tag))
+        const toDelete = existingTags.filter((tag) => !newTagsSet.has(tag))
+
+        await this.addTagsToExistingAnnotationUrl({
+            url,
+            tags: toAdd,
+        })
+        await this.deleteTagsForPage({ url, tags: toDelete })
     }
 }
