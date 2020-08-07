@@ -168,7 +168,7 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
 
 // === Executing side ===
 
-const remotelyCallableFunctions =
+let remotelyCallableFunctions =
     typeof window !== 'undefined' ? window['remoteFunctions'] || {} : {}
 if (typeof window !== 'undefined') {
     window['remoteFunctions'] = remotelyCallableFunctions
@@ -223,6 +223,19 @@ async function incomingRPCListener(message, sender) {
 
 // A bit of global state to ensure we only attach the event listener once.
 let enabled = false
+
+export function deregisterRemotelyCallables<T>(
+    functionNames?: Array<keyof T>,
+): void {
+    if (functionNames == null) {
+        remotelyCallableFunctions = {}
+        return
+    }
+
+    for (const name of functionNames) {
+        delete remotelyCallableFunctions[name]
+    }
+}
 
 export function setupRemoteFunctionsImplementations<T>(
     implementations: RemoteFunctionImplementations<'provider'>,
