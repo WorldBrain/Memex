@@ -1,5 +1,6 @@
 import { ContentScriptsInterface } from './types'
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
+import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { Tabs, WebNavigation } from 'webextension-polyfill-ts'
 
 export class ContentScriptsBackground {
@@ -24,10 +25,31 @@ export class ContentScriptsBackground {
         }
 
         this.options.webNavigation.onHistoryStateUpdated.addListener(
-            ({ tabId }) =>
+            async ({ tabId }) => {
+                try {
+                    await runInTab<InPageUIContentScriptRemoteInterface>(
+                        tabId,
+                    ).removeRibbon()
+                } catch (err) {
+                    console.log(
+                        'BG: got an error in content script when removing ribbon',
+                    )
+                }
+
+                try {
+                    await runInTab<InPageUIContentScriptRemoteInterface>(
+                        tabId,
+                    ).removeTooltip()
+                } catch (err) {
+                    console.log(
+                        'BG: got an error in content script when removing tooltip',
+                    )
+                }
+
                 this.options.injectScriptInTab(tabId, {
                     file: `/content_script.js`,
-                }),
+                })
+            },
         )
     }
 
