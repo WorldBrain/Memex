@@ -3639,7 +3639,7 @@
 
 "@types/json5@^0.0.29":
   version "0.0.29"
-  resolved "http://registry.npmjs.org/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
+  resolved "https://registry.npmjs.org/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
 
 "@types/long@*", "@types/long@^4.0.0":
   version "4.0.0"
@@ -6929,7 +6929,7 @@ comma-separated-tokens@^1.0.0:
 
 commander@2.15.1:
   version "2.15.1"
-  resolved "http://registry.npmjs.org/commander/-/commander-2.15.1.tgz#df46e867d0fc2aec66a34662b406a9ccafff5b0f"
+  resolved "https://registry.npmjs.org/commander/-/commander-2.15.1.tgz#df46e867d0fc2aec66a34662b406a9ccafff5b0f"
 
 commander@2.16.x, commander@^2.12.1, commander@^2.5.0, commander@^2.6.0, commander@^2.9.0, commander@~2.16.0:
   version "2.16.0"
@@ -9119,7 +9119,7 @@ event-emitter@^0.3.5, event-emitter@~0.3.5:
 
 event-stream@~3.3.0:
   version "3.3.4"
-  resolved "http://registry.npmjs.org/event-stream/-/event-stream-3.3.4.tgz#4ab4c9a0f5a54db9338b4c34d86bfce8f4b35571"
+  resolved "https://registry.npmjs.org/event-stream/-/event-stream-3.3.4.tgz#4ab4c9a0f5a54db9338b4c34d86bfce8f4b35571"
   dependencies:
     duplexer "~0.1.1"
     from "~0"
@@ -12574,9 +12574,10 @@ join-path@^1.1.1:
     url-join "0.0.1"
     valid-url "^1"
 
-jquery@^3.3.1:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.3.1.tgz#958ce29e81c9790f31be7792df5d4d95fc57fbca"
+jquery@^3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.5.0.tgz#9980b97d9e4194611c36530e7dc46a58d7340fc9"
+  integrity sha512-Xb7SVYMvygPxbFMpTFQiHh1J7HClEaThguL15N/Gg37Lri/qKyhRGZYzHRyLH8Stq3Aow0LsHO2O2ci86fCrNQ==
 
 js-base64@^2.1.9:
   version "2.4.5"
@@ -14889,7 +14890,7 @@ onecolor@^3.0.4:
 
 onetime@^1.0.0:
   version "1.1.0"
-  resolved "http://registry.npmjs.org/onetime/-/onetime-1.1.0.tgz#a1f7838f8314c516f05ecefcbc4ccfe04b4ed789"
+  resolved "https://registry.npmjs.org/onetime/-/onetime-1.1.0.tgz#a1f7838f8314c516f05ecefcbc4ccfe04b4ed789"
 
 onetime@^2.0.0:
   version "2.0.1"
