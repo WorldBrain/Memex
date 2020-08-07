@@ -2,6 +2,7 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import * as React from 'react'
 import styled from 'styled-components'
 
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import * as icons from 'src/common-ui/components/design-library/icons'
@@ -82,19 +83,16 @@ class AnnotationFooter extends React.Component<Props> {
                                 {!this.props.sharingState && (
                                     <IconStyled
                                         title="Share note"
-                                        src={icons.trash}
+                                        src={icons.shareEmpty}
                                     />
                                 )}
                                 {this.props.sharingState === 'running' && (
-                                    <IconStyled
-                                        title="Sharing note"
-                                        src={icons.trash}
-                                    />
+                                    <LoadingIndicator/>
                                 )}
                                 {this.props.sharingState === 'success' && (
                                     <IconStyled
                                         title="Note shared!"
-                                        src={icons.trash}
+                                        src={icons.share}
                                     />
                                 )}
                             </IconBox>

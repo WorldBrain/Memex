@@ -7,6 +7,8 @@ export const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
 export const edit = browser.extension.getURL('/img/comment_edit.svg')
 export const trash = browser.extension.getURL('/img/trash.svg')
 export const goTo = browser.extension.getURL('/img/open.svg')
+export const share = browser.extension.getURL('/img/share.svg')
+export const shareEmpty = browser.extension.getURL('/img/shareEmpty.svg')
 
 export const longArrow = browser.extension.getURL('/img/longarrow.svg')
 
