@@ -26,25 +26,9 @@ export class ContentScriptsBackground {
 
         this.options.webNavigation.onHistoryStateUpdated.addListener(
             async ({ tabId }) => {
-                try {
-                    await runInTab<InPageUIContentScriptRemoteInterface>(
-                        tabId,
-                    ).removeRibbon()
-                } catch (err) {
-                    console.log(
-                        'BG: got an error in content script when removing ribbon',
-                    )
-                }
-
-                try {
-                    await runInTab<InPageUIContentScriptRemoteInterface>(
-                        tabId,
-                    ).removeTooltip()
-                } catch (err) {
-                    console.log(
-                        'BG: got an error in content script when removing tooltip',
-                    )
-                }
+                await runInTab<InPageUIContentScriptRemoteInterface>(
+                    tabId,
+                ).removeEverything()
 
                 this.options.injectScriptInTab(tabId, {
                     file: `/content_script.js`,

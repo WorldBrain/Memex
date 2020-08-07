@@ -27,4 +27,6 @@ export interface InPageUIContentScriptRemoteInterface
         annotation: Annotation,
         pageAnnotations: Annotation[],
     ): Promise<void>
+
+    removeEverything(): Promise<void>
 }
