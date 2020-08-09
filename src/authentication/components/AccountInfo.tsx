@@ -24,6 +24,7 @@ interface Props {
 export class AccountInfo extends React.Component<Props & AuthContextInterface> {
     state = {
         loadingChargebee: false,
+        plans: []
     }
 
     openPortal = async () => {
@@ -37,10 +38,17 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
         })
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         if (this.props.refreshUser) {
             this.handleRefresh()
         }
+
+        const user = await this.props.currentUser
+        const plans = await this.props.currentUser.authorizedPlans
+
+        await this.setState({
+            plans: plans
+        })
     }
 
     handleRefresh = async () => {
@@ -51,30 +59,79 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
         const user = this.props.currentUser
         const features = user?.authorizedFeatures
         const plans = user?.authorizedPlans
+
         return (
             <FullPage>
                 {user != null && (
                     <div>
-                        <TypographyInputTitle>
-                            {' '}
-                            Email Address{' '}
-                        </TypographyInputTitle>
+                        <div className={styles.section}>
+                            <TypographyInputTitle>
+                                {' '}
+                                Email Address{' '}
+                            </TypographyInputTitle>
 
-                        <InputTextField
-                            type={'text'}
-                            defaultValue={user.email}
-                            readonly
-                            disabled
-                        />
-                        {!user.subscriptionStatus && (
                             <InputTextField
-                                name={'Plans'}
-                                defaultValue={'No subscriptions yet'}
-                                readOnly
+                                type={'text'}
+                                defaultValue={user.email}
+                                readonly
+                                disabled
                             />
+                        </div>
+                        {!user.subscriptionStatus &&  (
+                            <div className={styles.section}>
+                                <TypographyInputTitle>
+                                    {' '}
+                                    Your Plan {' '}
+                                </TypographyInputTitle>
+                                <div className={styles.lineEditBox}>
+                                    <InputTextField
+                                        name={'Plans'}
+                                        defaultValue={'Free Tier'}
+                                        readOnly
+                                    />
+                                    <PrimaryButton
+                                        onClick={
+                                            this.props.showSubscriptionModal
+                                        }
+                                    >
+                                        {'Upgrade'}
+                                    </PrimaryButton>
+                                </div>
+                            </div>
                         )}
-                        {user.subscriptionStatus && (
-                            <div>
+
+                        {this.state.plans.length > 0  && (
+                            <div className={styles.section}>
+                                <TypographyInputTitle>
+                                    {' '}
+                                    Your Plan {' '}
+                                </TypographyInputTitle>
+                                <div className={styles.lineEditBox}>
+                                    <InputTextField
+                                        name={'plan'}
+                                        defaultValue={this.state.plans}
+                                        readOnly
+                                    />
+                                    {this.state.loadingChargebee ||
+                                    this.props.loadingUser ? (
+                                        <PrimaryButton onClick={() => null}>
+                                            <LoadingIndicator />
+                                        </PrimaryButton>
+                                    ) : (
+                                        <PrimaryButton
+                                            onClick={
+                                                this
+                                                    .openPortal
+                                            }
+                                        >
+                                            {'Edit Subscriptions'}
+                                        </PrimaryButton>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        {user.subscriptionStatus && user.subscriptionStatus !== 'in_trial' && (
+                            <div className={styles.section}>
                                 <TypographyInputTitle>
                                     {' '}
                                     Subscription Status{' '}
@@ -87,8 +144,31 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                             </div>
                         )}
 
+                        {user.subscriptionStatus === 'in_trial' && (
+                            <div className={styles.section}>
+                                <TypographyInputTitle>
+                                    {' '}
+                                    Subscription Status{' '}
+                                </TypographyInputTitle>
+                                <div className={styles.lineEditBox}>
+                                    <InputTextField
+                                        name={'subscriptionStatus'}
+                                        defaultValue={user.subscriptionStatus}
+                                        readOnly
+                                    />
+                                    <PrimaryButton
+                                        onClick={
+                                            this.openPortal
+                                        }
+                                    >
+                                        {'Add Payment Methods'}
+                                    </PrimaryButton>
+                                </div>
+                            </div>
+                        )}
+
                         {user.subscriptionExpiry && (
-                            <div>
+                            <div className={styles.section}>
                                 {user.subscriptionStatus === 'non_renewing' ? (
                                     <div>
                                         <TypographyInputTitle>
@@ -109,10 +189,18 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                     </div>
                                 ) : (
                                     <div>
+                                        {user.subscriptionStatus === 'in_trial' ? (
+                                            <TypographyInputTitle>
+                                            {' '}
+                                            Trial Ends on{' '}
+                                        </TypographyInputTitle>
+
+                                            ):(
                                         <TypographyInputTitle>
                                             {' '}
-                                            Renewal Date{' '}
+                                            Subscription Renewal Date{' '}
                                         </TypographyInputTitle>
+                                        )}
                                         <InputTextField
                                             name={'subscriptionExpiry'}
                                             defaultValue={
@@ -129,40 +217,6 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                             </div>
                         )}
                         <div className={styles.buttonBox}>
-                            {!user.subscriptionStatus ? (
-                                <div className={styles.button}>
-                                    <PrimaryButton
-                                        onClick={
-                                            this.props.showSubscriptionModal
-                                        }
-                                    >
-                                        {'Upgrade Subscription'}
-                                    </PrimaryButton>
-                                </div>
-                            ) : (
-                                <div>
-                                    {this.state.loadingChargebee ||
-                                    this.props.loadingUser ? (
-                                        <div className={styles.button}>
-                                            <PrimaryButton onClick={() => null}>
-                                                <LoadingIndicator />
-                                            </PrimaryButton>
-                                        </div>
-                                    ) : (
-                                        <div className={styles.button}>
-                                            <PrimaryButton
-                                                onClick={
-                                                    this.props
-                                                        .showSubscriptionModal
-                                                }
-                                            >
-                                                {'Edit Subscriptions'}
-                                            </PrimaryButton>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                            <span className={styles.horizontalSpace} />
                             {this.state.loadingChargebee ||
                             this.props.loadingUser ? (
                                 <PrimaryButton onClick={() => null}>
