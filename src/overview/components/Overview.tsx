@@ -255,7 +255,7 @@ class Overview extends PureComponent<Props, State> {
                      {this.state.trialExpiry && 
                         <TrialExpiryWarning
                             expiryDate={this.state.expiryDate}
-                            showPaymentWindow={this.props.showSubscriptionModal}
+                            showPaymentWindow={()=>window.open('#/account')}
                             closeTrialNotif={()=> this.closeTrialExpiryNotif()}
                         />
                     }
