@@ -10,7 +10,7 @@ export const getDefaultState = () =>
         isSidebarEnabled: true,
         isTrackingEnabled: true,
         areShortcutsEnabled: false,
-        areStubsEnabled: true,
+        areStubsEnabled: false,
         areVisitsEnabled: true,
         areBookmarksEnabled: true,
         areAnnotationsEnabled: true,
