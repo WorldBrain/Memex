@@ -4,17 +4,25 @@ import { PageList } from 'src/custom-lists/background/types'
 import ShareNonPioneerInfo from './ShareNonPioneerInfo'
 import ShareModalContent from './ShareModalContent'
 import DisplayNameSetup from './DisplayNameSetup'
+import BetaFeatureNotif from './BetaFeatureNotif'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { getListShareUrl } from 'src/content-sharing/utils'
+import {
+    auth,
+} from 'src/util/remote-functions-background'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { connect } from 'react-redux'
+import { show } from 'src/overview/modals/actions'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 
 interface Props {
     isPioneer: boolean
     auth: AuthRemoteFunctionsInterface
     contentSharing: ContentSharingInterface
     list: PageList
-
+    showSubscriptionModal: () => void
     onClose: () => void
 }
 
@@ -28,6 +36,7 @@ interface State {
     newDisplayName?: string
     isShared?: boolean
     shareUrl?: string
+    showBetaNotif: boolean
 }
 
 class ShareModal extends Component<Props, State> {
@@ -35,14 +44,27 @@ class ShareModal extends Component<Props, State> {
         super(props)
 
         this.state = {
-            loadState: 'pristine',
+            loadState: 'running',
             listCreationState: 'pristine',
             entriesUploadState: 'pristine',
             updateProfileState: 'pristine',
+            showBetaNotif: true,
         }
     }
 
-    async componentDidMount() {
+    componentDidMount() {
+        this.setState({ loadState: 'running' })
+        this.getListOverview()
+        this.getBetaNotifStatus()
+    }
+
+    async getBetaNotifStatus() {
+          if (await auth.isAuthorizedForFeature('beta')) {
+            this.setState({ showBetaNotif: false })
+        }
+    }
+
+    async getListOverview() {
         this.setState({ loadState: 'running' })
         try {
             const remoteListId = await this.props.contentSharing.getRemoteListId(
@@ -125,7 +147,7 @@ class ShareModal extends Component<Props, State> {
         // }
 
         // // if display name is not set - prompt to set
-        if (!this.state.displayName) {
+        if (!this.state.displayName && !this.state.showBetaNotif) {
             return (
                 <DisplayNameSetup
                     name={this.state.newDisplayName}
@@ -152,6 +174,14 @@ class ShareModal extends Component<Props, State> {
                             throw e
                         }
                     }}
+                />
+            )
+        }
+
+        if (this.state.showBetaNotif) {
+            return  (
+                <BetaFeatureNotif
+                    showSubscriptionModal={this.props.showSubscriptionModal}
                 />
             )
         }
@@ -191,7 +221,7 @@ class ShareModal extends Component<Props, State> {
             this.state.loadState === 'pristine' ||
             this.state.loadState === 'running'
         ) {
-            return null // TODO: Show loading indicator
+            return <LoadingIndicator/>
         }
 
         return (
@@ -204,4 +234,6 @@ class ShareModal extends Component<Props, State> {
     }
 }
 
-export default ShareModal
+export default connect(null, (dispatch) => ({
+    showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
+}))(withCurrentUser(ShareModal))
