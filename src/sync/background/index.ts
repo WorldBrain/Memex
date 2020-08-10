@@ -181,6 +181,7 @@ export default class SyncBackground extends SyncService {
             return remoteEmitter.emit('channelTimeout', {})
         })
         this.initialSync.events.on('packageStalled', () => {
+            captureException(`InitialSyncError - packageStalled`)
             return remoteEmitter.emit('packageStalled', {})
         })
     }
