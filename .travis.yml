@@ -5,10 +5,10 @@ install:
     - git submodule update --init --recursive
     - yarn install --frozen-lockfile --network-concurrency 1
 script:
-    - npm run test -- --detectOpenHandles
-    - npm run lint
-    - npm run build:ci
-    - npm run storybook:ci
+    - yarn test --detectOpenHandles
+    - yarn lint
+    - yarn build:ci
+    - yarn storybook:ci
 cache:
     yarn: true
     directories:
