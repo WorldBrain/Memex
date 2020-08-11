@@ -186,6 +186,7 @@ export default class ContentSharingBackground {
             data: {
                 [annotation.pageUrl]: [
                     {
+                        localId: annotation.url,
                         createdWhen: annotation.createdWhen?.getTime?.(),
                         body: annotation.body,
                         comment: annotation.comment,
@@ -293,13 +294,25 @@ export default class ContentSharingBackground {
                     this.storage.getRemoteListId({ localId }),
                 ),
             )
-            await contentSharing.createAnnotations({
+            const {
+                sharedAnnotationReferences,
+            } = await contentSharing.createAnnotations({
                 creator: { type: 'user-reference', id: userId },
                 listReferences: remoteListIds.map((remoteId) =>
                     contentSharing.getSharedListReferenceFromLinkID(remoteId),
                 ),
                 annotationsByPage: action.data,
             })
+
+            const remoteIds: { [localId: string]: string } = {}
+            for (const [localId, sharedAnnotationReference] of Object.entries(
+                sharedAnnotationReferences,
+            )) {
+                remoteIds[localId] = contentSharing.getSharedAnnotationLinkID(
+                    sharedAnnotationReference,
+                )
+            }
+            await this.storage.storeAnnotationIds({ remoteIds })
         }
     }
 

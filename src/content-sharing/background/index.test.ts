@@ -262,6 +262,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 await setup.backgroundModules.contentSharing.waitForSync()
 
+                                const remoteAnnotationIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
+                                    {
+                                        localIds: [annotationUrl],
+                                    },
+                                )
+                                expect(remoteAnnotationIds).toEqual({
+                                    [annotationUrl]: expect.anything(),
+                                })
+
                                 const serverStorage = await setup.getServerStorage()
                                 const getShared = (collection: string) =>
                                     serverStorage.storageManager.operation(
@@ -274,7 +283,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 expect(sharedAnnotations).toEqual([
                                     {
-                                        id: expect.anything(),
+                                        id:
+                                            parseInt(
+                                                remoteAnnotationIds[
+                                                    annotationUrl
+                                                ],
+                                                10,
+                                            ) ||
+                                            remoteAnnotationIds[annotationUrl],
                                         creator: TEST_USER.id,
                                         normalizedPageUrl: normalizeUrl(
                                             data.ANNOTATION_1_DATA.pageUrl,
@@ -304,7 +320,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         updatedWhen: expect.any(Number),
                                         sharedList: expect.any(Number),
                                         sharedAnnotation:
-                                            sharedAnnotations[0].id,
+                                            parseInt(
+                                                remoteAnnotationIds[
+                                                    annotationUrl
+                                                ],
+                                                10,
+                                            ) ||
+                                            remoteAnnotationIds[annotationUrl],
                                     },
                                 ])
                             },
