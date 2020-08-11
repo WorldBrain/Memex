@@ -24,7 +24,8 @@ interface Props {
 export class AccountInfo extends React.Component<Props & AuthContextInterface> {
     state = {
         loadingChargebee: false,
-        plans: []
+        plans: [],
+        features: []
     }
 
     openPortal = async () => {
@@ -39,20 +40,24 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
     }
 
     async componentDidMount() {
-        if (this.props.refreshUser) {
-            this.handleRefresh()
-        }
-
-        const user = await this.props.currentUser
-        const plans = await this.props.currentUser.authorizedPlans
-
-        await this.setState({
-            plans: plans
-        })
+        this.handleRefresh()     
     }
 
     handleRefresh = async () => {
-        await auth.refreshUserInfo()
+        await auth.refreshUserInfo().then(()=>{
+            this.updateUserInfo()
+        })  
+    }
+
+    async updateUserInfo() {
+        const user = await this.props.currentUser
+        const plans = await this.props.currentUser.authorizedPlans
+        const features = await this.props.currentUser.authorizedFeatures
+
+        await this.setState({
+            plans: plans,
+            features: features
+        })
     }
 
     render() {
@@ -63,7 +68,20 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
         return (
             <FullPage>
                 {user != null && (
-                    <div>
+                    <div className={styles.AccountInfoBox}>
+
+                        {this.state.features.includes('beta') && (
+                           <div className={styles.pioneerBox}>
+                               <div className={styles.pioneerTitle}>
+                                   🚀 Pioneer Edition
+                               </div>
+                               <div className={styles.pioneerSubtitle}>
+                                   Thank you for your support. You make this possible!
+                               </div>
+                           </div>
+                        )}
+
+
                         <div className={styles.section}>
                             <TypographyInputTitle>
                                 {' '}

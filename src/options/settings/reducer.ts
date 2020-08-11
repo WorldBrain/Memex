@@ -13,7 +13,7 @@ export interface State {
 }
 
 export const defaultState: State = {
-    stubs: true,
+    stubs: false,
     visits: true,
     bookmarks: true,
     memexLinks: true,
