@@ -81,7 +81,8 @@ export default class ContentSharingBackground {
             console.error(e)
         }
     }
-    _setTimeout = setTimeout
+    _setTimeout = (f: () => void, miliseconds: number) =>
+        setTimeout(f, miliseconds)
 
     shareList: ContentSharingInterface['shareList'] = async (options) => {
         const localList = await this.options.customLists.fetchListById(
@@ -193,9 +194,11 @@ export default class ContentSharingBackground {
                     {
                         localId: annotation.url,
                         createdWhen: annotation.createdWhen?.getTime?.(),
-                        body: annotation.body,
-                        comment: annotation.comment,
-                        selector: JSON.stringify(annotation.selector),
+                        body: annotation.body ?? null,
+                        comment: annotation.comment ?? null,
+                        selector: annotation.selector
+                            ? JSON.stringify(annotation.selector)
+                            : null,
                     },
                 ],
             },
