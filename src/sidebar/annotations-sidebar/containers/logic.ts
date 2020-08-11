@@ -165,6 +165,10 @@ export type SidebarContainerEvents = UIEvent<{
         context: AnnotationEventContext
         annotationUrl: string
     }
+    unshareAnnotation: {
+        context: AnnotationEventContext
+        annotationUrl: string
+    }
     toggleAnnotationBookmark: {
         context: AnnotationEventContext
         annotationUrl: string
@@ -832,6 +836,12 @@ export class SidebarContainerLogic extends UILogic<
             updateAnnotationShareState({ status: 'shared', taskState: 'error' })
             throw e
         }
+    }
+
+    unshareAnnotation: EventHandler<'unshareAnnotation'> = async ({
+        event,
+    }) => {
+        throw new Error(`Unsharing annotations is not implemented yet`)
     }
 
     toggleAnnotationBookmark: EventHandler<

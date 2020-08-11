@@ -23,7 +23,8 @@ export interface AnnotationFooterEventProps {
     onEditConfirm: () => void
     onEditCancel: () => void
     onEditIconClick: () => void
-    onShareIconClick: () => void
+    onShareClick: () => void
+    onUnshareClick: () => void
     toggleBookmark: () => void
     onGoToAnnotation?: () => void
 }
@@ -89,11 +90,7 @@ class AnnotationFooter extends React.Component<Props> {
                             position={'bottom'}
                             tooltipText={SHARE_BUTTON_LABELS[shareButtonState]}
                         >
-                            <IconBox
-                                onClick={
-                                    this.props.onShareIconClick ?? (() => {})
-                                }
-                            >
+                            <IconBox onClick={this.getShareButtonAction()}>
                                 <IconStyled src={icons.shareEmpty} />
                             </IconBox>
                         </ButtonTooltip>
@@ -188,6 +185,26 @@ class AnnotationFooter extends React.Component<Props> {
             }
         }
         return 'not-shared-yet'
+    }
+
+    private getShareButtonAction() {
+        const info = this.props.sharingInfo ?? {
+            status: 'unshared',
+            taskState: 'pristine',
+        }
+        if (
+            info.status === 'unshared' &&
+            (info.taskState === 'pristine' || info.taskState === 'success')
+        ) {
+            return this.props.onShareClick
+        }
+        if (
+            info.status === 'shared' &&
+            (info.taskState === 'pristine' || info.taskState === 'success')
+        ) {
+            return this.props.onUnshareClick
+        }
+        return () => {}
     }
 
     render() {

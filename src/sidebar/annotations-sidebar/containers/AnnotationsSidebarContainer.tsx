@@ -105,8 +105,13 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
-            onShareIconClick: () =>
+            onShareClick: () =>
                 this.processEvent('shareAnnotation', {
+                    annotationUrl: annotation.url,
+                    ...DEF_CONTEXT,
+                }),
+            onUnshareClick: () =>
+                this.processEvent('unshareAnnotation', {
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
