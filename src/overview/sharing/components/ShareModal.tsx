@@ -37,6 +37,7 @@ interface State {
     isShared?: boolean
     shareUrl?: string
     showBetaNotif: boolean
+    hasSubscription: boolean
 }
 
 class ShareModal extends Component<Props, State> {
@@ -49,6 +50,7 @@ class ShareModal extends Component<Props, State> {
             entriesUploadState: 'pristine',
             updateProfileState: 'pristine',
             showBetaNotif: true,
+            hasSubscription: false,
         }
     }
 
@@ -56,12 +58,23 @@ class ShareModal extends Component<Props, State> {
         this.setState({ loadState: 'running' })
         this.getListOverview()
         this.getBetaNotifStatus()
+        this.hasSubscription()
     }
 
     async getBetaNotifStatus() {
           if (await auth.isAuthorizedForFeature('beta')) {
             this.setState({ showBetaNotif: false })
         }
+    }
+
+    async hasSubscription() {
+
+        const plans = await this.props.auth.getAuthorizedPlans()
+
+        if (plans.length > 0) {
+            await this.setState({ hasSubscription: true })    
+        }
+        
     }
 
     async getListOverview() {
@@ -179,9 +192,13 @@ class ShareModal extends Component<Props, State> {
         }
 
         if (this.state.showBetaNotif) {
+
+            console.log(this.state.hasSubscription)
             return  (
                 <BetaFeatureNotif
                     showSubscriptionModal={this.props.showSubscriptionModal}
+                    isPioneer={true}
+                    hasSubscription={this.state.hasSubscription}
                 />
             )
         }
