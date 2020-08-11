@@ -124,10 +124,11 @@ class ResultItem extends PureComponent<Props> {
     render() {
         return (
             <li
-                className={cx({
+                className={cx(styles.listItem, {
                     [styles.isDeleting]: this.props.isDeleting,
                 })}
             >
+                <div>
                 {this.props.isDeleting && (
                     <LoadingIndicator className={styles.deletingSpinner} />
                 )}
@@ -162,6 +163,7 @@ class ResultItem extends PureComponent<Props> {
                     </a>
                 </div>
                 {this.renderAnnotsList()}
+                </div>
             </li>
         )
     }

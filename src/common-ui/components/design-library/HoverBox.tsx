@@ -24,6 +24,6 @@ export const HoverBoxDashboard = styled.div`
     z-index: 1;
     background-color: #fff;
     border-radius: 3px;
-    margin-left: ${(props) => (props.marginLeftOffset ?? 0) + 500}px;
-    margin-top: 45px;
+    right: 20px;
+    margin-top: 50px;
 `

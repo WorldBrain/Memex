@@ -37,6 +37,7 @@
     height: fit-content;
     min-height: var(--height);
     width: 100%;
+    max-width: 800px;
     border-bottom: 0.75px solid #e1e1e1;
 
     &:hover {
@@ -63,7 +64,8 @@
 }
 
 .rootContainerOverview {
-    width: var(--resultWidth);
+    max-width: var(--resultWidth);
+    width: 100%;
     height: fit-content;
 
     & .button {
@@ -181,6 +183,12 @@
         width: auto;
         height: auto;
     }
+}
+
+.listItem {
+    width: 98%;
+    max-width: 800px;
+    position: relative;
 }
 
 .tagContainer {
