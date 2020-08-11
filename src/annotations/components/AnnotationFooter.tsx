@@ -1,4 +1,3 @@
-import { TaskState } from 'ui-logic-core/lib/types'
 import * as React from 'react'
 import styled from 'styled-components'
 
@@ -6,6 +5,7 @@ import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 
 export interface Props extends AnnotationFooterEventProps {
     mode: AnnotationMode
@@ -13,7 +13,7 @@ export interface Props extends AnnotationFooterEventProps {
     timestamp?: string
     isBookmarked?: boolean
     canShare: boolean
-    sharingState?: TaskState
+    sharingInfo?: AnnotationSharingInfo
 }
 
 export interface AnnotationFooterEventProps {
@@ -31,6 +31,20 @@ export interface AnnotationFooterEventProps {
 class AnnotationFooter extends React.Component<Props> {
     private renderDefaultFooter() {
         const { isEdited, timestamp, isBookmarked } = this.props
+
+        const shareButtonState = this.getShareButtonState()
+        const SHARE_BUTTON_LABELS: {
+            [Key in typeof shareButtonState]: string
+        } = {
+            'not-shared-yet': 'Share note',
+            'already-shared': 'Unshare note',
+            sharing: 'Sharing note...',
+            'sharing-success': 'Note shared!',
+            'sharing-error': 'Could not share note :(',
+            unsharing: 'Unsharing note...',
+            'unsharing-success': 'Note unshared!',
+            'unsharing-error': 'Could not unshare note :(',
+        }
 
         return (
             <DefaultInnerFooterContainerStyled>
@@ -73,28 +87,14 @@ class AnnotationFooter extends React.Component<Props> {
                     {this.props.canShare && (
                         <ButtonTooltip
                             position={'bottom'}
-                            tooltipText={'Share Note'}
+                            tooltipText={SHARE_BUTTON_LABELS[shareButtonState]}
                         >
                             <IconBox
                                 onClick={
                                     this.props.onShareIconClick ?? (() => {})
                                 }
                             >
-                                {!this.props.sharingState && (
-                                    <IconStyled
-                                        title="Share note"
-                                        src={icons.shareEmpty}
-                                    />
-                                )}
-                                {this.props.sharingState === 'running' && (
-                                    <LoadingIndicator/>
-                                )}
-                                {this.props.sharingState === 'success' && (
-                                    <IconStyled
-                                        title="Note shared!"
-                                        src={icons.share}
-                                    />
-                                )}
+                                <IconStyled src={icons.shareEmpty} />
                             </IconBox>
                         </ButtonTooltip>
                     )}
@@ -155,6 +155,39 @@ class AnnotationFooter extends React.Component<Props> {
                 </BtnContainerStyled>
             </InnerFooterContainerStyled>
         )
+    }
+
+    private getShareButtonState() {
+        const info = this.props.sharingInfo ?? {
+            status: 'unshared',
+            taskState: 'pristine',
+        }
+        if (info.status === 'shared') {
+            if (info.taskState === 'pristine') {
+                return 'already-shared'
+            }
+            if (info.taskState === 'running') {
+                return 'sharing'
+            }
+            if (info.taskState === 'success') {
+                return 'sharing-success'
+            }
+            if (info.taskState === 'error') {
+                return 'sharing-error'
+            }
+        }
+        if (info.status === 'unshared') {
+            if (info.taskState === 'running') {
+                return 'unsharing'
+            }
+            if (info.taskState === 'success') {
+                return 'unsharing-success'
+            }
+            if (info.taskState === 'error') {
+                return 'unsharing-error'
+            }
+        }
+        return 'not-shared-yet'
     }
 
     render() {

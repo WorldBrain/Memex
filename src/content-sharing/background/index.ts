@@ -58,6 +58,11 @@ export default class ContentSharingBackground {
                     localId: options.localListId,
                 })
             },
+            getRemoteAnnotationIds: async (options) => {
+                return this.storage.getRemoteAnnotationIds({
+                    localIds: options.annotationUrls,
+                })
+            },
             areListsShared: async (options) => {
                 return this.storage.areListsShared({
                     localIds: options.localListIds,

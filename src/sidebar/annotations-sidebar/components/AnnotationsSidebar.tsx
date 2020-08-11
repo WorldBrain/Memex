@@ -23,9 +23,11 @@ import {
     AnnotationEditGeneralProps,
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
+import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 
 export interface AnnotationsSidebarProps {
     annotationModes: { [url: string]: AnnotationMode }
+    annotationSharingInfo: { [annotationUrl: string]: AnnotationSharingInfo }
 
     // NOTE: This group of props were all brought over from AnnotationsEditable
     showCongratsMessage?: boolean
@@ -191,6 +193,7 @@ class AnnotationsSidebar extends React.Component<
                 {...this.props.annotationEditableProps}
                 canShare={this.props.isPageShared}
                 mode={this.props.annotationModes[annot.url]}
+                sharingInfo={this.props.annotationSharingInfo[annot.url]}
                 isActive={this.props.activeAnnotationUrl === annot.url}
                 isHovered={this.props.hoverAnnotationUrl === annot.url}
                 tagPickerDependencies={this.props.annotationTagProps}

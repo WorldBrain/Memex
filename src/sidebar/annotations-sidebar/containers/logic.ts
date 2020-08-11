@@ -14,6 +14,8 @@ import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { DEF_RESULT_LIMIT } from '../constants'
 import { IncomingAnnotationData } from 'src/in-page-ui/shared-state/types'
 import { generateUrl } from 'src/annotations/utils'
+import createResolvable from '@josephg/resolvable'
+import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 
 interface EditForm {
     isBookmarked: boolean
@@ -30,6 +32,7 @@ export interface SidebarContainerState {
     showState: 'visible' | 'hidden'
 
     isPageShared?: boolean
+    hasCheckedSharedAnnotations?: boolean
 
     pageUrl?: string
     annotations: Annotation[]
@@ -38,8 +41,8 @@ export interface SidebarContainerState {
             [annotationUrl: string]: AnnotationMode
         }
     }
-    annotationSharingStates: {
-        [annotationUrl: string]: TaskState
+    annotationSharingInfo: {
+        [annotationUrl: string]: AnnotationSharingInfo
     }
     activeAnnotationUrl: string | null
     hoverAnnotationUrl: string | null
@@ -236,6 +239,7 @@ export class SidebarContainerLogic extends UILogic<
 > {
     private inPageEvents: AnnotationsSidebarInPageEventEmitter
     _detectedPageSharingStatus: Promise<void>
+    _detectedSharedAnnotations = createResolvable()
 
     constructor(private options: SidebarContainerOptions) {
         super()
@@ -261,7 +265,7 @@ export class SidebarContainerLogic extends UILogic<
                 pageAnnotations: {},
                 searchResults: {},
             },
-            annotationSharingStates: {},
+            annotationSharingInfo: {},
 
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
@@ -317,13 +321,13 @@ export class SidebarContainerLogic extends UILogic<
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.annotationSubscription(this.options.annotationsCache.annotations)
 
-        if (this.options.pageUrl) {
-            this._detectPageSharingStatus(this.options.pageUrl)
-        }
         await loadInitial<SidebarContainerState>(this, async () => {
             // If `pageUrl` prop passed down, load search results on init, else just wait
             if (this.options.pageUrl != null) {
                 await this._doSearch(previousState, { overwrite: true })
+            }
+            if (this.options.pageUrl) {
+                this._detectPageSharingStatus(this.options.pageUrl)
             }
             // await this.loadBeta()
         })
@@ -336,13 +340,17 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    private annotationSubscription = (annotations: Annotation[]) =>
+    private annotationSubscription = (annotations: Annotation[]) => {
         this.emitMutation({
             annotations: { $set: annotations },
             editForms: {
                 $set: createEditFormsForAnnotations(annotations),
             },
         })
+        this._detectSharedAnnotations(
+            annotations.map((annotation) => annotation.url),
+        )
+    }
 
     private async loadBeta() {
         // Check if user is allowed for beta too
@@ -803,25 +811,25 @@ export class SidebarContainerLogic extends UILogic<
         // )
         // const annotation = previousState.annotations[resultIndex]
 
-        const updateAnnotationShareState = (state: TaskState) =>
+        const updateAnnotationShareState = (params: AnnotationSharingInfo) =>
             this.emitMutation({
-                annotationSharingStates: {
-                    [event.annotationUrl]: { $set: state },
+                annotationSharingInfo: {
+                    [event.annotationUrl]: { $set: params },
                 },
             })
 
-        updateAnnotationShareState('running')
+        updateAnnotationShareState({ status: 'shared', taskState: 'running' })
         try {
-            console.log('sharing')
-            console.log('!!!')
-            console.log('!!!')
-            console.log('!!!')
+            // await new Promise(resolve => { })
             await this.options.contentSharing.shareAnnotation({
                 annotationUrl: event.annotationUrl,
             })
-            updateAnnotationShareState('success')
+            updateAnnotationShareState({
+                status: 'shared',
+                taskState: 'success',
+            })
         } catch (e) {
-            updateAnnotationShareState('error')
+            updateAnnotationShareState({ status: 'shared', taskState: 'error' })
             throw e
         }
     }
@@ -936,5 +944,26 @@ export class SidebarContainerLogic extends UILogic<
                 },
             })
         })()
+    }
+
+    async _detectSharedAnnotations(annotationUrls: string[]) {
+        const annotationSharingInfo: UIMutation<
+            SidebarContainerState['annotationSharingInfo']
+        > = {}
+        const remoteIds = await this.options.contentSharing.getRemoteAnnotationIds(
+            { annotationUrls },
+        )
+        for (const localId of Object.keys(remoteIds)) {
+            annotationSharingInfo[localId] = {
+                $set: {
+                    status: 'shared',
+                    taskState: 'pristine',
+                },
+            }
+        }
+        this.emitMutation({
+            hasCheckedSharedAnnotations: { $set: true },
+            annotationSharingInfo,
+        })
     }
 }

@@ -1,3 +1,4 @@
+import { TaskState } from 'ui-logic-core/lib/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'

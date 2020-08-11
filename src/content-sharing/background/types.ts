@@ -5,6 +5,9 @@ export interface ContentSharingInterface {
     shareListEntries(options: { listId: number }): Promise<void>
     shareAnnotation(options: { annotationUrl: string }): Promise<void>
     getRemoteListId(options: { localListId: number }): Promise<string | null>
+    getRemoteAnnotationIds(params: {
+        annotationUrls: string[]
+    }): Promise<{ [localId: string]: string }>
     areListsShared(options: {
         localListIds: number[]
     }): Promise<{ [listId: number]: boolean }>
