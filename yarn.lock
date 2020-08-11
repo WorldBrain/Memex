@@ -9547,13 +9547,6 @@ fathom-web@^2.1.0:
     jsdom "^11.2.0"
     wu "^2.1.0"
 
-"fathom-web@git://github.com/Treora/fathom.git#npm-testable":
-  version "1.1.2"
-  resolved "git://github.com/Treora/fathom.git#913009da10176f525274d0530d974a61cb6c93f2"
-  dependencies:
-    babel-runtime "^6.22.0"
-    wu "^2.1.0"
-
 fault@^1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/fault/-/fault-1.0.3.tgz#4da88cf979b6b792b4e13c7ec836767725170b7e"
@@ -15084,11 +15077,10 @@ package-json@^4.0.0:
     registry-url "^3.0.3"
     semver "^5.1.0"
 
-"page-metadata-parser@git+https://github.com/Treora/page-metadata-parser.git#npm-testable":
-  version "0.6.0"
-  resolved "git+https://github.com/Treora/page-metadata-parser.git#07fe4ebfdee0b6b3197a41eb2b90fea8e3f07bf5"
-  dependencies:
-    fathom-web "git://github.com/Treora/fathom.git#npm-testable"
+page-metadata-parser@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/page-metadata-parser/-/page-metadata-parser-1.1.4.tgz#52cea38eb6d084d1808a10abb659ee8e9233bd4d"
+  integrity sha512-TbPNw7GddbHs4c2DyYinFvh51BVsaMfdrweeylzGlg8qeuzALGxq2NF+6jbmeKc7DnU2BZRDOuWNnEjDwUSqRQ==
 
 pako@~1.0.2, pako@~1.0.5:
   version "1.0.6"
