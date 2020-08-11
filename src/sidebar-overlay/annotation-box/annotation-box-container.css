@@ -54,11 +54,12 @@
 }
 
 .highlightText {
-    background-color: #00d88b;
-    padding: 2px 0;
+    background-color: #65ffc8;
     line-height: 25px;
     font-style: normal;
     color: #3a2f45;
+    padding: 2px 5px;
+    box-decoration-break: clone;
 }
 
 .newAnnotation {

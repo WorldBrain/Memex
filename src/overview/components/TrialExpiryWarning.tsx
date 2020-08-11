@@ -1,15 +1,15 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 const styles = require('./TrialExpiryWarning.css')
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+
 
 interface Props {
 	showPaymentWindow: () => void
 	expiryDate: any
 	closeTrialNotif: () => void
+    loadingPortal: boolean
 }
-
-
-
 
 class TrialExpiryWarning extends PureComponent<Props> {
 
@@ -21,16 +21,25 @@ class TrialExpiryWarning extends PureComponent<Props> {
 		return expiryDays
 	}
 
-
     render() {
         return (
             <div id="TrialExpiryWarning" className={styles.box}>
-            	Your trial is is expiring in <strong>{this.getExpiryinClearLanguage()}</strong> days
+            	Your trial is expiring in <strong>{this.getExpiryinClearLanguage()}</strong> days
             	<span
             		onClick={this.props.showPaymentWindow}
             		className={styles.closeButton}
-            	>Update Payment Methods</span>
+            	>{this.props.loadingPortal ? (
+                                <LoadingIndicator/>
+                    ):('Update Payment Methods'
+                )}
+                </span>
 
+                <span
+                    onClick={this.props.closeTrialNotif}
+                    className={styles.closeButton}
+                >
+                    Close
+                </span>
             	{/*<span
             		onClick={this.props.closeTrialNotif}
             		className={styles.closeButton}
