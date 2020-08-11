@@ -89,10 +89,10 @@ export default class InitialSyncSetupLogic extends UILogic<
         this.eventEmitter.on('progress', this.updateProgress)
         this.eventEmitter.on('roleSwitch', this.updateRole)
         this.eventEmitter.on('error', this.updateError)
-        this.eventEmitter.on(
-            'packageStalled',
-            this.handleTimeout(new Error('Package send/receive timed out')),
-        )
+        // this.eventEmitter.on(
+        //     'packageStalled',
+        //     this.handleTimeout(new Error('Package send/receive timed out')),
+        // )
         this.eventEmitter.on(
             'channelTimeout',
             this.handleTimeout(new Error(`Fast sync channel timed out`)),
@@ -106,7 +106,7 @@ export default class InitialSyncSetupLogic extends UILogic<
             this.eventEmitter.removeAllListeners('roleSwitch')
             this.eventEmitter.removeAllListeners('error')
             this.eventEmitter.removeAllListeners('finished')
-            this.eventEmitter.removeAllListeners('packageStalled')
+            // this.eventEmitter.removeAllListeners('packageStalled')
             this.eventEmitter.removeAllListeners('channelTimeout')
         }
     }
