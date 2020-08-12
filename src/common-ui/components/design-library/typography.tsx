@@ -135,7 +135,7 @@ export const TypographyTextSmall = styled.span`
 
 export const TypographyInputTitle = styled.h2`
     font-family: 'Poppins', sans-serif;
-    font-size: ${fontSizeBigger}px;
+    font-size: ${fontSizeBig}px;
     font-weight: bold;
     box-sizing: border-box;
     margin-bottom: 5px;

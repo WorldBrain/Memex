@@ -5,7 +5,8 @@
     margin-bottom: 35px;
     display: flex;
     flex-direction: column;
-    width: 783px;
+    max-width: 783px;
+    width: 98%;
 }
 
 .parentExpandedSidebar {

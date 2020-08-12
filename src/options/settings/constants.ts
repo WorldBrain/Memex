@@ -13,5 +13,5 @@ export const STORAGE_KEYS = {
 export const VISIT_DELAY_RANGE = {
     MIN: 0,
     MAX: 600,
-    DEF: 5,
+    DEF: 20,
 }

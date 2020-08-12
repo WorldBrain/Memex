@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "2.3.0",
+    "version": "2.4.1",
     "homepage": "https://worldbrain.io",
     "license": "MIT",
     "repository": "https://github.com/WorldBrain/Memex",
@@ -76,7 +76,7 @@
         "normalize-url": "^4.3.0",
         "object-path": "^0.11.4",
         "openpgp": "^4.6.2",
-        "page-metadata-parser": "git+https://github.com/Treora/page-metadata-parser.git#npm-testable",
+        "page-metadata-parser": "^1.1.4",
         "pdfjs-dist": "^1.8.492",
         "polished": "^3.5.1",
         "postcss-modules-values": "^2.0.0",

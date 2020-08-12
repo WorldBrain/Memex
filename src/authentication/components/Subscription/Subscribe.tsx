@@ -115,15 +115,8 @@ class Subscribe extends React.Component<Props, State> {
     renderSubscribed = () => (
         <div className={styles.PriceBox}>
             <PricingPlanTitle className={''}>
-                💫 You're already subscribed!
+                💫 You successfully subscribed!
             </PricingPlanTitle>
-            <SubscriptionOptionsChargebee
-                user={this.props.currentUser}
-                plans={this.props.currentUser?.authorizedPlans}
-                onClose={this.handleClose}
-                onSubscriptionClicked={this.handleSubscriptionClicked}
-                onSubscriptionOpened={this.handleSubscriptionOpened}
-            />
         </div>
     )
 

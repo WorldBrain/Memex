@@ -48,6 +48,7 @@ interface State {
     showUpgrade: boolean
     trialExpiry: boolean
     expiryDate: number
+    loadingPortal: boolean,
 }
 
 class Overview extends PureComponent<Props, State> {
@@ -67,7 +68,8 @@ class Overview extends PureComponent<Props, State> {
         showPioneer: false,
         showUpgrade: false,
         trialExpiry: false,
-        expiryDate: undefined
+        expiryDate: undefined,
+        loadingPortal: false,
     }
 
     constructor(props: Props) {
@@ -80,10 +82,11 @@ class Overview extends PureComponent<Props, State> {
     }
 
     closeTrialExpiryNotif() {
-
         this.setState({
             trialExpiry: false,
         })
+
+        localStorage.setItem('TrialExpiryWarning_Close_Time', JSON.stringify(Math.floor(Date.now() / 1000)))
     }
 
     componentDidMount() {
@@ -96,13 +99,14 @@ class Overview extends PureComponent<Props, State> {
         const date = await auth.getSubscriptionExpiry()
         const dateNow = Math.floor(new Date().getTime() / 1000);
         const inTrial = await auth.getSubscriptionStatus()
+        const lastCloseTime = parseFloat(localStorage.getItem('TrialExpiryWarning_Close_Time'))
 
-        if (date - dateNow < 259200 && inTrial === 'in_trial') {  //3 days notification window
-            this.setState({
-                trialExpiry: true,
-                expiryDate: date
-            })
-        }
+        if (date - dateNow < 259200 && inTrial === 'in_trial' && dateNow - lastCloseTime > 86400) { //3 days notification window - 24h waiting until showing the trial notif again
+                this.setState({
+                    trialExpiry: true,
+                    expiryDate: date
+                })
+            }
 
         return date
     }
@@ -125,6 +129,16 @@ class Overview extends PureComponent<Props, State> {
             renderHighlight: () => undefined,
         }
     }
+
+
+    openPortal = async () => {
+        this.setState({
+            loadingPortal: true
+        })
+        const portalLink = await subscription.getManageLink()
+        window.open(portalLink['access_url'])
+    }
+
 
     private handleAnnotationSidebarToggle = async (args?: {
         pageUrl: string
@@ -255,8 +269,9 @@ class Overview extends PureComponent<Props, State> {
                      {this.state.trialExpiry && 
                         <TrialExpiryWarning
                             expiryDate={this.state.expiryDate}
-                            showPaymentWindow={this.props.showSubscriptionModal}
+                            showPaymentWindow={this.openPortal}
                             closeTrialNotif={()=> this.closeTrialExpiryNotif()}
+                            loadingPortal={this.state.loadingPortal}
                         />
                     }
                     </div>

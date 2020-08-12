@@ -57,18 +57,18 @@ export default class SearchSettings extends React.PureComponent<Props> {
             return titles
         }
 
-        let base = 'You can full-text search all pages you '
+        let base = 'Full-text search all pages you '
 
         if (this.props.visits) {
-            base += `visited for more than ${this.props.visitDelay} seconds, `
+            base += `viewed for ${this.props.visitDelay} seconds, `
         }
 
         if (this.props.bookmarks) {
-            base += 'bookmarked, tagged or put into collections, '
+            base += 'bookmarked, tagged or put into collections '
         }
 
         if (this.props.annotations) {
-            base += 'annotated or made highlights on, '
+            base += 'or annotated, '
         }
 
         // Replace any trailing ', ' with '.'

@@ -47,14 +47,37 @@
     width: 100%;
 }
 
+.AccountInfoBox {
+    min-width: 430px;
+}
+
+.pioneerBox {
+    padding: 15px 30px;
+    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 2px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+}
+
+.pioneerTitle {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.pioneerSubtitle {
+    font-size: 12px;
+}
+
 .buttonBox {
     display: flex;
     flex-direction: row;
     align-items: center;
+    margin-top: 30px;
 
     & > div {
-        height: 41px;
-        width: 240px;
+        width: 100%;
         text-align: center;
         justify-content: center;
         display: flex;
@@ -73,8 +96,8 @@
 .section {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding-bottom: 20px;
+    align-items: flex-start;
+    margin-bottom: 1em;
 }
 
 .horizontalSpace {
@@ -93,4 +116,15 @@
     font-size: 15px;
     text-align: center;
     margin: 10px 0 30px 0;
+}
+
+.lineEditBox {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    & input {
+        flex: 1;
+    }
 }
