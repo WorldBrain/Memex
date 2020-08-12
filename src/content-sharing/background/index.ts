@@ -321,6 +321,13 @@ export default class ContentSharingBackground {
                 )
             }
             await this.storage.storeAnnotationIds({ remoteIds })
+        } else if (action.type === 'update-annotation-comment') {
+            await contentSharing.updateAnnotationComment({
+                sharedAnnotationReference: contentSharing.getSharedAnnotationReferenceFromLinkID(
+                    action.remoteAnnotationId,
+                ),
+                updatedComment: action.updatedComment,
+            })
         }
     }
 
@@ -387,6 +394,27 @@ export default class ContentSharingBackground {
                             localListId,
                             remoteListId,
                             newTitle: change.updates.name,
+                        })
+                    }
+                } else if (change.collection === 'annotations') {
+                    if (!change.updates.comment) {
+                        continue
+                    }
+
+                    const remoteAnnotationIds = await this.storage.getRemoteAnnotationIds(
+                        {
+                            localIds: change.pks as string[],
+                        },
+                    )
+                    for (const [
+                        localAnnotationId,
+                        remoteAnnotationId,
+                    ] of Object.entries(remoteAnnotationIds)) {
+                        await this.scheduleAction({
+                            type: 'update-annotation-comment',
+                            localAnnotationId,
+                            remoteAnnotationId: remoteAnnotationId as string,
+                            updatedComment: change.updates.comment,
                         })
                     }
                 }

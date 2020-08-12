@@ -241,7 +241,7 @@ export class AnnotationsSidebarContainer<
                     {!this.props.skipTopBarRender && this.renderTopBar()}
                     <AnnotationsSidebar
                         {...this.state}
-                        isPageShared={this.state.isPageShared}
+                        sharingAccess={this.state.annotationSharingAccess}
                         needsWaypoint={!this.state.noResults}
                         appendLoader={
                             this.state.secondarySearchState === 'running'

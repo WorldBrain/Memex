@@ -23,7 +23,10 @@ import {
     AnnotationEditGeneralProps,
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
-import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
+import {
+    AnnotationSharingInfo,
+    AnnotationSharingAccess,
+} from 'src/content-sharing/ui/types'
 
 export interface AnnotationsSidebarProps {
     annotationModes: { [url: string]: AnnotationMode }
@@ -51,7 +54,7 @@ export interface AnnotationsSidebarProps {
         AnnotationCreateEventProps
     annotationTagProps: GenericPickerDependenciesMinusSave
 
-    isPageShared: boolean
+    sharingAccess: AnnotationSharingAccess
     isSearchLoading: boolean
     isAnnotationCreateShown: boolean
     annotations: Annotation[]
@@ -191,7 +194,7 @@ class AnnotationsSidebar extends React.Component<
                 {...annot}
                 {...this.props}
                 {...this.props.annotationEditableProps}
-                canShare={this.props.isPageShared}
+                sharingAccess={this.props.sharingAccess}
                 mode={this.props.annotationModes[annot.url]}
                 sharingInfo={this.props.annotationSharingInfo[annot.url]}
                 isActive={this.props.activeAnnotationUrl === annot.url}

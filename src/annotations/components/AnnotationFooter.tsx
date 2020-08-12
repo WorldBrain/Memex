@@ -5,14 +5,17 @@ import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
+import {
+    AnnotationSharingInfo,
+    AnnotationSharingAccess,
+} from 'src/content-sharing/ui/types'
 
 export interface Props extends AnnotationFooterEventProps {
     mode: AnnotationMode
     isEdited?: boolean
     timestamp?: string
     isBookmarked?: boolean
-    canShare: boolean
+    sharingAccess: AnnotationSharingAccess
     sharingInfo?: AnnotationSharingInfo
 }
 
@@ -100,7 +103,7 @@ class AnnotationFooter extends React.Component<Props> {
                             <IconStyled title="Delete note" src={icons.trash} />
                         </IconBox>
                     </ButtonTooltip>
-                    {this.props.canShare && (
+                    {this.props.sharingAccess && (
                         <ButtonTooltip
                             position={'bottom'}
                             tooltipText={SHARE_BUTTON_LABELS[shareButtonState]}

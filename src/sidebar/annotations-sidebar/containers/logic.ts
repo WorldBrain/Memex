@@ -15,7 +15,10 @@ import { DEF_RESULT_LIMIT } from '../constants'
 import { IncomingAnnotationData } from 'src/in-page-ui/shared-state/types'
 import { generateUrl } from 'src/annotations/utils'
 import createResolvable from '@josephg/resolvable'
-import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
+import {
+    AnnotationSharingInfo,
+    AnnotationSharingAccess,
+} from 'src/content-sharing/ui/types'
 
 interface EditForm {
     isBookmarked: boolean
@@ -31,7 +34,7 @@ export interface SidebarContainerState {
 
     showState: 'visible' | 'hidden'
 
-    isPageShared?: boolean
+    annotationSharingAccess: AnnotationSharingAccess
     hasCheckedSharedAnnotations?: boolean
 
     pageUrl?: string
@@ -270,6 +273,7 @@ export class SidebarContainerLogic extends UILogic<
                 searchResults: {},
             },
             annotationSharingInfo: {},
+            annotationSharingAccess: 'feature-disabled',
 
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
@@ -949,8 +953,10 @@ export class SidebarContainerLogic extends UILogic<
                 { localListIds: listIds },
             )
             this.emitMutation({
-                isPageShared: {
-                    $set: some(Object.values(areListsShared)) as boolean,
+                annotationSharingAccess: {
+                    $set: some(Object.values(areListsShared))
+                        ? 'sharing-allowed'
+                        : 'page-not-shared',
                 },
             })
         })()
