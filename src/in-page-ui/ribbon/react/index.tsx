@@ -22,9 +22,6 @@ export function setupRibbonUI(
 }
 
 export function destroyRibbonUI(target: HTMLElement, shadowRoot?: ShadowRoot) {
-    console.log('`destroyRibbonUI` called: ')
-    console.log('target:', target)
-    console.log('shadowRoot:', shadowRoot)
     ReactDOM.unmountComponentAtNode(target)
 
     if (shadowRoot) {
