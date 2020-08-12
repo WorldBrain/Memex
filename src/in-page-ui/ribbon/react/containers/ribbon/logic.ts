@@ -27,6 +27,7 @@ type SubcomponentHandlers<
 > = HandlersOf<componentTypes.RibbonSubcomponentProps[Subcomponent]>
 
 export interface RibbonContainerState {
+    url: string
     loadState: TaskState
     isRibbonEnabled: boolean | null
     areExtraButtonsShown: boolean
@@ -49,6 +50,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleRibbon: null
         highlightAnnotations: null
         toggleShowExtraButtons: null
+        hydrateStateFromDB: { url: string }
         saveNewPageComment: (annotation: NewAnnotationOptions) => void
     } & SubcomponentHandlers<'highlights'> &
         SubcomponentHandlers<'tooltip'> &
@@ -92,6 +94,7 @@ export class RibbonContainerLogic extends UILogic<
 
     getInitialState(): RibbonContainerState {
         return {
+            url: this.dependencies.currentTab.url,
             loadState: 'pristine',
             areExtraButtonsShown: false,
             isRibbonEnabled: null,
@@ -124,52 +127,58 @@ export class RibbonContainerLogic extends UILogic<
         }
     }
 
-    init: EventHandler<'init'> = async ({ previousState }) => {
+    init: EventHandler<'init'> = async (incoming) => {
         await loadInitial<RibbonContainerState>(this, async () => {
             const { url } = this.dependencies.currentTab
+            await this.hydrateStateFromDB({ ...incoming, event: { url } })
+        })
+    }
 
-            const tags = await this.dependencies.tags.fetchPageTags({ url })
-            const lists = await this.dependencies.customLists.fetchPageLists({
-                url,
-            })
+    hydrateStateFromDB: EventHandler<'hydrateStateFromDB'> = async ({
+        event: { url },
+    }) => {
+        const tags = await this.dependencies.tags.fetchPageTags({ url })
+        const lists = await this.dependencies.customLists.fetchPageLists({
+            url,
+        })
 
-            this.emitMutation({
-                pausing: {
-                    isPaused: {
-                        $set: await this.dependencies.activityLogger.isLoggingPaused(),
-                    },
+        this.emitMutation({
+            url: { $set: url },
+            pausing: {
+                isPaused: {
+                    $set: await this.dependencies.activityLogger.isLoggingPaused(),
                 },
-                bookmark: {
-                    isBookmarked: {
-                        $set: await this.dependencies.bookmarks.pageHasBookmark(
-                            this.dependencies.currentTab.url,
-                        ),
-                    },
+            },
+            bookmark: {
+                isBookmarked: {
+                    $set: await this.dependencies.bookmarks.pageHasBookmark(
+                        url,
+                    ),
                 },
-                isRibbonEnabled: {
-                    $set: await this.dependencies.getSidebarEnabled(),
+            },
+            isRibbonEnabled: {
+                $set: await this.dependencies.getSidebarEnabled(),
+            },
+            tooltip: {
+                isTooltipEnabled: {
+                    $set: await this.dependencies.tooltip.getState(),
                 },
-                tooltip: {
-                    isTooltipEnabled: {
-                        $set: await this.dependencies.tooltip.getState(),
-                    },
+            },
+            highlights: {
+                areHighlightsEnabled: {
+                    $set: await this.dependencies.highlights.getState(),
                 },
-                highlights: {
-                    areHighlightsEnabled: {
-                        $set: await this.dependencies.highlights.getState(),
-                    },
+            },
+            tagging: {
+                pageHasTags: {
+                    $set: tags.length > 0,
                 },
-                tagging: {
-                    pageHasTags: {
-                        $set: tags.length > 0,
-                    },
+            },
+            lists: {
+                pageBelongsToList: {
+                    $set: lists.length > 0,
                 },
-                lists: {
-                    pageBelongsToList: {
-                        $set: lists.length > 0,
-                    },
-                },
-            })
+            },
         })
     }
 
@@ -217,12 +226,12 @@ export class RibbonContainerLogic extends UILogic<
         try {
             if (shouldBeBookmarked) {
                 await this.dependencies.bookmarks.addPageBookmark({
-                    url: this.dependencies.currentTab.url,
+                    url: previousState.url,
                     tabId: this.dependencies.currentTab.id,
                 })
             } else {
                 await this.dependencies.bookmarks.delPageBookmark({
-                    url: this.dependencies.currentTab.url,
+                    url: previousState.url,
                 })
             }
         } catch (err) {
@@ -252,8 +261,11 @@ export class RibbonContainerLogic extends UILogic<
         }
     }
 
-    saveComment: EventHandler<'saveComment'> = async ({ event }) => {
-        const { currentTab, annotationsCache } = this.dependencies
+    saveComment: EventHandler<'saveComment'> = async ({
+        previousState,
+        event,
+    }) => {
+        const { annotationsCache } = this.dependencies
         const comment = event.value.text.trim()
         const { isBookmarked, tags } = event.value
         if (comment.length === 0) {
@@ -263,13 +275,13 @@ export class RibbonContainerLogic extends UILogic<
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
         const annotationUrl = generateUrl({
-            pageUrl: currentTab.url,
+            pageUrl: previousState.url,
             now: () => Date.now(),
         })
 
         await annotationsCache.create({
             url: annotationUrl,
-            pageUrl: currentTab.url,
+            pageUrl: previousState.url,
             comment,
             isBookmarked,
             tags,
@@ -321,14 +333,17 @@ export class RibbonContainerLogic extends UILogic<
 
     private _updateTags: (
         context: 'commentBox' | 'tagging',
-    ) => EventHandler<'updateTags'> = (context) => async ({ event }) => {
+    ) => EventHandler<'updateTags'> = (context) => async ({
+        previousState,
+        event,
+    }) => {
         const backendResult =
             context === 'commentBox'
                 ? Promise.resolve()
                 : this.dependencies.tags.updateTagForPage({
                       added: event.value.added,
                       deleted: event.value.deleted,
-                      url: this.dependencies.currentTab.url,
+                      url: previousState.url,
                       tabId: this.dependencies.currentTab.id,
                   })
 
@@ -370,11 +385,14 @@ export class RibbonContainerLogic extends UILogic<
     //
     // Lists
     //
-    updateLists: EventHandler<'updateLists'> = async ({ event }) => {
+    updateLists: EventHandler<'updateLists'> = async ({
+        previousState,
+        event,
+    }) => {
         return this.dependencies.customLists.updateListForPage({
             added: event.value.added,
             deleted: event.value.deleted,
-            url: this.dependencies.currentTab.url,
+            url: previousState.url,
             tabId: this.dependencies.currentTab.id,
         })
     }

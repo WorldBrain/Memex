@@ -41,10 +41,10 @@ export default class RibbonContainer extends StatefulUIElement<
     }
 
     componentDidUpdate(prevProps: RibbonContainerProps) {
-        // If the ribbon's URL changes, re-run the init logic to hydrate UI state from DB
-        if (this.props.currentTab.url !== prevProps.currentTab.url) {
-            this.logic['dependencies'] = this.props
-            this.processEvent('init', null)
+        const { currentTab } = this.props
+
+        if (currentTab.url !== prevProps.currentTab.url) {
+            this.processEvent('hydrateStateFromDB', { url: currentTab.url })
         }
     }
 
