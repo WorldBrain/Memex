@@ -47,6 +47,21 @@ class AnnotationFooter extends React.Component<Props> {
             'unsharing-error': 'Could not unshare note :(',
         }
 
+        const SHARE_BUTTON_ICONS: {
+            [Key in typeof shareButtonState]: string
+        } = {
+            'not-shared-yet': icons.shareEmpty,
+            'already-shared': icons.share,
+            sharing: icons.share,
+            'sharing-success': icons.share,
+            'sharing-error': icons.shareEmpty,
+            unsharing: icons.shareEmpty,
+            'unsharing-success': icons.shareEmpty,
+            'unsharing-error': icons.share,
+        }
+
+        const shareButtonLoading = shareButtonState === 'sharing' || shareButtonState === 'unsharing'
+
         return (
             <DefaultInnerFooterContainerStyled>
                 <TimestampStyled>
@@ -90,9 +105,14 @@ class AnnotationFooter extends React.Component<Props> {
                             position={'bottom'}
                             tooltipText={SHARE_BUTTON_LABELS[shareButtonState]}
                         >
+                        {shareButtonLoading && (
+                            <LoadingIndicator/>
+                        )}
+                        {!shareButtonLoading && (
                             <IconBox onClick={this.getShareButtonAction()}>
-                                <IconStyled src={icons.shareEmpty} />
+                                <IconStyled src={SHARE_BUTTON_ICONS[shareButtonState]} />
                             </IconBox>
+                        )}   
                         </ButtonTooltip>
                     )}
                     {this.props.onGoToAnnotation && (
