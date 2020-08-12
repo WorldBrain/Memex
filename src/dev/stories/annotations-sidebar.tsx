@@ -67,7 +67,7 @@ async function createDependencies() {
     ]
 
     const sidebarDependencies: AnnotationsSidebarProps = {
-        isPageShared: true,
+        sharingAccess: 'sharing-allowed',
         isAnnotationCreateShown: true,
         isSearchLoading: false,
         // displayCrowdfunding: false,

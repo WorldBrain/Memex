@@ -424,7 +424,7 @@ describe('SidebarContainerLogic', () => {
             pageUrl,
         })
         await sidebarLogic._detectedPageSharingStatus
-        expect(sidebar.state.isPageShared).toBe(true)
+        expect(sidebar.state.annotationSharingAccess).toBe(true)
     })
 
     it('should share annotations', async ({ device }) => {
