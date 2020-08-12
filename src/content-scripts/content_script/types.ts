@@ -2,11 +2,7 @@ import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { RibbonContainerDependencies } from 'src/in-page-ui/ribbon/react/containers/ribbon/types'
 import { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
 import { Props as SidebarContainerDependencies } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInPage'
-import { HighlightInteractionsInterface } from 'src/highlighting/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
-import { BookmarksInterface } from 'src/bookmarks/background/types'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 import { HighlightRendererInterface } from 'src/highlighting/ui/highlight-interactions'
@@ -19,13 +15,13 @@ export interface ContentScriptRegistry {
 }
 
 export type SidebarScriptMain = (
-    dependencies: SidebarContainerDependencies,
+    dependencies: Omit<SidebarContainerDependencies, 'pageUrl'>,
 ) => Promise<void>
 
 export type RibbonScriptMain = (
     options: Omit<
         RibbonContainerDependencies,
-        'setSidebarEnabled' | 'getSidebarEnabled'
+        'setSidebarEnabled' | 'getSidebarEnabled' | 'currentTab'
     > & {
         inPageUI: SharedInPageUIInterface
     },

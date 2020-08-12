@@ -6,12 +6,8 @@ import {
 } from 'src/overview/components/DashboardResultsContainer/types'
 import { EventEmitter } from 'events'
 import TypedEventEmitter from 'typed-emitter'
-import {
-    SharedInPageUIEvents,
-    SharedInPageUIInterface,
-} from 'src/in-page-ui/shared-state/types'
+import { SharedInPageUIEvents } from 'src/in-page-ui/shared-state/types'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
-import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 
 export default class DashboardResultsLogic extends UILogic<
     DashboardResultsState,
@@ -24,7 +20,6 @@ export default class DashboardResultsLogic extends UILogic<
     dashboardUI = new SharedInPageUIState({
         loadComponent: (c) => null,
         unloadComponent: (c) => null,
-        pageUrl: '',
     })
 
     constructor(private dependencies: DashboardResultsDependencies) {

@@ -11,7 +11,6 @@ import {
 } from './types'
 
 export interface SharedInPageUIDependencies {
-    pageUrl: string
     loadComponent: (component: InPageUIComponent) => void
     unloadComponent: (component: InPageUIComponent) => void
 }

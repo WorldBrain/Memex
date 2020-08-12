@@ -47,7 +47,6 @@ describe('Ribbon logic', () => {
         const inPageUI = new SharedInPageUIState({
             loadComponent: () => {},
             unloadComponent: () => {},
-            pageUrl: currentTab.url,
         })
 
         const annotationsManager = {} as any
