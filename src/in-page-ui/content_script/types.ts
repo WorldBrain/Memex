@@ -13,6 +13,7 @@ export interface InPageUIContentScriptRemoteInterface
     showRibbon(options?: { action?: InPageUIRibbonAction }): Promise<void>
     insertRibbon(): Promise<void>
     removeRibbon(): Promise<void>
+    reloadRibbon(): Promise<void>
     insertOrRemoveRibbon(): Promise<void>
     updateRibbon(): Promise<void>
 
@@ -27,6 +28,5 @@ export interface InPageUIContentScriptRemoteInterface
         annotation: Annotation,
         pageAnnotations: Annotation[],
     ): Promise<void>
-
-    removeEverything(): Promise<void>
+    removeHighlights(): Promise<void>
 }

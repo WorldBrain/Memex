@@ -26,13 +26,12 @@ export class ContentScriptsBackground {
 
         this.options.webNavigation.onHistoryStateUpdated.addListener(
             async ({ tabId }) => {
-                await runInTab<InPageUIContentScriptRemoteInterface>(
+                const inPage = runInTab<InPageUIContentScriptRemoteInterface>(
                     tabId,
-                ).removeEverything()
+                )
 
-                this.options.injectScriptInTab(tabId, {
-                    file: `/content_script.js`,
-                })
+                await inPage.removeHighlights()
+                await inPage.reloadRibbon()
             },
         )
     }

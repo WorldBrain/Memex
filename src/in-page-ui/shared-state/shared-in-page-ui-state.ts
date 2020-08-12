@@ -228,6 +228,11 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         this.events.emit('componentShouldDestroy', { component })
     }
 
+    async reloadComponent(component: InPageUIComponent) {
+        await this.options.loadComponent(component)
+        this.events.emit('componentShouldSetUp', { component })
+    }
+
     _maybeEmitShouldSetUp(component: InPageUIComponent) {
         if (!this.componentsSetUp[component]) {
             this.events.emit('componentShouldSetUp', { component })

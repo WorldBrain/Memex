@@ -14,7 +14,6 @@ import {
     runInBackground,
     RemoteFunctionRegistry,
     makeRemotelyCallableType,
-    deregisterRemotelyCallables,
 } from 'src/util/webextensionRPC'
 import { Resolvable, resolvablePromise } from 'src/util/resolvable'
 import { ContentScriptRegistry } from './types'
@@ -209,6 +208,7 @@ export async function main() {
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
         showRibbon: inPageUI.showRibbon.bind(inPageUI),
+        reloadRibbon: () => inPageUI.reloadComponent('ribbon'),
         insertRibbon: async () => inPageUI.loadComponent('ribbon'),
         removeRibbon: async () => inPageUI.removeRibbon(),
         insertOrRemoveRibbon: async () => inPageUI.toggleRibbon(),
@@ -228,43 +228,11 @@ export async function main() {
             category: 'Highlights',
             action: 'createFromContextMenu',
         }),
+        removeHighlights: async () => highlightRenderer.removeHighlights(),
         createAnnotation: annotationsFunctions.createAnnotation({
             category: 'Annotations',
             action: 'createFromContextMenu',
         }),
-        removeEverything: async () => {
-            try {
-                await inPageUI.removeRibbon()
-            } catch (err) {
-                console.log(
-                    'BG: got an error in content script when removing ribbon',
-                )
-            }
-            try {
-                await inPageUI.removeTooltip()
-            } catch (err) {
-                console.log(
-                    'BG: got an error in content script when removing tooltip',
-                )
-            }
-
-            deregisterRemotelyCallables<InPageUIContentScriptRemoteInterface>([
-                'showSidebar',
-                'showRibbon',
-                'insertRibbon',
-                'removeRibbon',
-                'insertOrRemoveRibbon',
-                'updateRibbon',
-                'showContentTooltip',
-                'insertTooltip',
-                'removeTooltip',
-                'insertOrRemoveTooltip',
-                'goToHighlight',
-                'createHighlight',
-                'createAnnotation',
-                'removeEverything',
-            ])
-        },
     })
 
     // 6. Setup other interactions with this page (things that always run)
