@@ -227,115 +227,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should share newly shared annotations in an already shared list',
-            { skipConflictTests: true },
-            () => {
-                let localListId: number
-
-                return {
-                    setup: async ({ setup }) => {
-                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-                    },
-                    steps: [
-                        {
-                            execute: async ({ setup }) => {
-                                setup.authService.setUser(TEST_USER)
-
-                                localListId = await data.createContentSharingTestList(
-                                    setup,
-                                )
-                                await setup.backgroundModules.contentSharing.shareList(
-                                    { listId: localListId },
-                                )
-                                await setup.backgroundModules.contentSharing.shareListEntries(
-                                    { listId: localListId },
-                                )
-                                const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
-                                    {} as any,
-                                    data.ANNOTATION_1_DATA,
-                                    { skipPageIndexing: true },
-                                )
-                                await setup.backgroundModules.contentSharing.shareAnnotation(
-                                    {
-                                        annotationUrl,
-                                    },
-                                )
-                                await setup.backgroundModules.contentSharing.waitForSync()
-
-                                const remoteAnnotationIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
-                                    {
-                                        localIds: [annotationUrl],
-                                    },
-                                )
-                                expect(remoteAnnotationIds).toEqual({
-                                    [annotationUrl]: expect.anything(),
-                                })
-
-                                const serverStorage = await setup.getServerStorage()
-                                const getShared = (collection: string) =>
-                                    serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        collection,
-                                        {},
-                                    )
-                                const sharedAnnotations = await getShared(
-                                    'sharedAnnotation',
-                                )
-                                expect(sharedAnnotations).toEqual([
-                                    {
-                                        id:
-                                            parseInt(
-                                                remoteAnnotationIds[
-                                                    annotationUrl
-                                                ],
-                                                10,
-                                            ) ||
-                                            remoteAnnotationIds[annotationUrl],
-                                        creator: TEST_USER.id,
-                                        normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_DATA.pageUrl,
-                                        ),
-                                        createdWhen: expect.any(Number),
-                                        uploadedWhen: expect.any(Number),
-                                        updatedWhen: expect.any(Number),
-                                        comment: data.ANNOTATION_1_DATA.comment,
-                                        body: data.ANNOTATION_1_DATA.body,
-                                        selector: JSON.stringify(
-                                            data.ANNOTATION_1_DATA.selector,
-                                        ),
-                                    },
-                                ])
-                                const sharedAnnotationListEntries = await getShared(
-                                    'sharedAnnotationListEntry',
-                                )
-                                expect(sharedAnnotationListEntries).toEqual([
-                                    {
-                                        id: expect.anything(),
-                                        creator: TEST_USER.id,
-                                        normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_DATA.pageUrl,
-                                        ),
-                                        createdWhen: expect.any(Number),
-                                        uploadedWhen: expect.any(Number),
-                                        updatedWhen: expect.any(Number),
-                                        sharedList: expect.any(Number),
-                                        sharedAnnotation:
-                                            parseInt(
-                                                remoteAnnotationIds[
-                                                    annotationUrl
-                                                ],
-                                                10,
-                                            ) ||
-                                            remoteAnnotationIds[annotationUrl],
-                                    },
-                                ])
-                            },
-                        },
-                    ],
-                }
-            },
-        ),
-        backgroundIntegrationTest(
             'should sync the title when changing the title of an already shared list',
             { skipConflictTests: true },
             () => {
@@ -585,6 +476,180 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual([
                                     expect.objectContaining({
                                         entryTitle: 'Eggs.com title',
+                                    }),
+                                ])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should share newly shared annotations in an already shared list',
+            { skipConflictTests: true },
+            () => {
+                let localListId: number
+
+                return {
+                    setup: async ({ setup }) => {
+                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
+                    },
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                setup.authService.setUser(TEST_USER)
+
+                                localListId = await data.createContentSharingTestList(
+                                    setup,
+                                )
+                                await setup.backgroundModules.contentSharing.shareList(
+                                    { listId: localListId },
+                                )
+                                await setup.backgroundModules.contentSharing.shareListEntries(
+                                    { listId: localListId },
+                                )
+                                const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    {} as any,
+                                    data.ANNOTATION_1_DATA,
+                                    { skipPageIndexing: true },
+                                )
+                                await setup.backgroundModules.contentSharing.shareAnnotation(
+                                    {
+                                        annotationUrl,
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.waitForSync()
+
+                                const remoteAnnotationIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
+                                    {
+                                        localIds: [annotationUrl],
+                                    },
+                                )
+                                expect(remoteAnnotationIds).toEqual({
+                                    [annotationUrl]: expect.anything(),
+                                })
+
+                                const serverStorage = await setup.getServerStorage()
+                                const getShared = (collection: string) =>
+                                    serverStorage.storageManager.operation(
+                                        'findObjects',
+                                        collection,
+                                        {},
+                                    )
+                                const sharedAnnotations = await getShared(
+                                    'sharedAnnotation',
+                                )
+                                expect(sharedAnnotations).toEqual([
+                                    {
+                                        id:
+                                            parseInt(
+                                                remoteAnnotationIds[
+                                                    annotationUrl
+                                                ] as string,
+                                                10,
+                                            ) ||
+                                            remoteAnnotationIds[annotationUrl],
+                                        creator: TEST_USER.id,
+                                        normalizedPageUrl: normalizeUrl(
+                                            data.ANNOTATION_1_DATA.pageUrl,
+                                        ),
+                                        createdWhen: expect.any(Number),
+                                        uploadedWhen: expect.any(Number),
+                                        updatedWhen: expect.any(Number),
+                                        comment: data.ANNOTATION_1_DATA.comment,
+                                        body: data.ANNOTATION_1_DATA.body,
+                                        selector: JSON.stringify(
+                                            data.ANNOTATION_1_DATA.selector,
+                                        ),
+                                    },
+                                ])
+                                const sharedAnnotationListEntries = await getShared(
+                                    'sharedAnnotationListEntry',
+                                )
+                                expect(sharedAnnotationListEntries).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: TEST_USER.id,
+                                        normalizedPageUrl: normalizeUrl(
+                                            data.ANNOTATION_1_DATA.pageUrl,
+                                        ),
+                                        createdWhen: expect.any(Number),
+                                        uploadedWhen: expect.any(Number),
+                                        updatedWhen: expect.any(Number),
+                                        sharedList: expect.any(Number),
+                                        sharedAnnotation:
+                                            parseInt(
+                                                remoteAnnotationIds[
+                                                    annotationUrl
+                                                ] as string,
+                                                10,
+                                            ) ||
+                                            remoteAnnotationIds[annotationUrl],
+                                    },
+                                ])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should update the body of a shared annotation',
+            { skipConflictTests: true },
+            () => {
+                let localListId: number
+
+                return {
+                    setup: async ({ setup }) => {
+                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
+                    },
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                setup.authService.setUser(TEST_USER)
+
+                                localListId = await data.createContentSharingTestList(
+                                    setup,
+                                )
+                                await setup.backgroundModules.contentSharing.shareList(
+                                    { listId: localListId },
+                                )
+                                await setup.backgroundModules.contentSharing.shareListEntries(
+                                    { listId: localListId },
+                                )
+                                const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    {} as any,
+                                    data.ANNOTATION_1_DATA,
+                                    { skipPageIndexing: true },
+                                )
+                                await setup.backgroundModules.contentSharing.shareAnnotation(
+                                    {
+                                        annotationUrl,
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.waitForSync()
+
+                                await setup.backgroundModules.directLinking.editAnnotation(
+                                    null,
+                                    annotationUrl,
+                                    'Updated comment',
+                                )
+                                await setup.backgroundModules.contentSharing.waitForSync()
+
+                                const serverStorage = await setup.getServerStorage()
+                                const getShared = (collection: string) =>
+                                    serverStorage.storageManager.operation(
+                                        'findObjects',
+                                        collection,
+                                        {},
+                                    )
+                                const sharedAnnotations = await getShared(
+                                    'sharedAnnotation',
+                                )
+                                expect(sharedAnnotations).toEqual([
+                                    expect.objectContaining({
+                                        comment: 'Updated comment',
+                                        body: data.ANNOTATION_1_DATA.body,
                                     }),
                                 ])
                             },

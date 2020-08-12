@@ -7,7 +7,7 @@ export interface ContentSharingInterface {
     getRemoteListId(options: { localListId: number }): Promise<string | null>
     getRemoteAnnotationIds(params: {
         annotationUrls: string[]
-    }): Promise<{ [localId: string]: string }>
+    }): Promise<{ [localId: string]: string | number }>
     areListsShared(options: {
         localListIds: number[]
     }): Promise<{ [listId: number]: boolean }>
