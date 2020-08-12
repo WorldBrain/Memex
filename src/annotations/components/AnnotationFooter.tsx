@@ -40,6 +40,8 @@ class AnnotationFooter extends React.Component<Props> {
         const SHARE_BUTTON_LABELS: {
             [Key in typeof shareButtonState]: string
         } = {
+            'feature-disabled': '',
+            'page-not-shared': 'Please add this page to a shared list first',
             'not-shared-yet': 'Share note',
             'already-shared': 'Unshare note',
             sharing: 'Sharing note...',
@@ -51,8 +53,10 @@ class AnnotationFooter extends React.Component<Props> {
         }
 
         const SHARE_BUTTON_ICONS: {
-            [Key in typeof shareButtonState]: string
+            [Key in typeof shareButtonState]: string | null
         } = {
+            'feature-disabled': '',
+            'page-not-shared': icons.shareEmpty,
             'not-shared-yet': icons.shareEmpty,
             'already-shared': icons.share,
             sharing: icons.share,
@@ -63,7 +67,8 @@ class AnnotationFooter extends React.Component<Props> {
             'unsharing-error': icons.share,
         }
 
-        const shareButtonLoading = shareButtonState === 'sharing' || shareButtonState === 'unsharing'
+        const shareButtonLoading =
+            shareButtonState === 'sharing' || shareButtonState === 'unsharing'
 
         return (
             <DefaultInnerFooterContainerStyled>
@@ -103,19 +108,27 @@ class AnnotationFooter extends React.Component<Props> {
                             <IconStyled title="Delete note" src={icons.trash} />
                         </IconBox>
                     </ButtonTooltip>
-                    {this.props.sharingAccess && (
+                    {this.props.sharingAccess !== 'feature-disabled' && (
                         <ButtonTooltip
                             position={'bottom'}
                             tooltipText={SHARE_BUTTON_LABELS[shareButtonState]}
                         >
-                        {shareButtonLoading && (
-                            <LoadingIndicator/>
-                        )}
-                        {!shareButtonLoading && (
-                            <IconBox onClick={this.getShareButtonAction()}>
-                                <IconStyled src={SHARE_BUTTON_ICONS[shareButtonState]} />
-                            </IconBox>
-                        )}   
+                            {shareButtonLoading && <LoadingIndicator />}
+                            {!shareButtonLoading && (
+                                <IconBox
+                                    disabled={
+                                        this.props.sharingAccess ===
+                                        'page-not-shared'
+                                    }
+                                    onClick={this.getShareButtonAction()}
+                                >
+                                    <IconStyled
+                                        src={
+                                            SHARE_BUTTON_ICONS[shareButtonState]
+                                        }
+                                    />
+                                </IconBox>
+                            )}
                         </ButtonTooltip>
                     )}
                     {this.props.onGoToAnnotation && (
@@ -178,6 +191,13 @@ class AnnotationFooter extends React.Component<Props> {
     }
 
     private getShareButtonState() {
+        if (this.props.sharingAccess === 'feature-disabled') {
+            return 'feature-disabled'
+        }
+        if (this.props.sharingAccess === 'page-not-shared') {
+            return 'page-not-shared'
+        }
+
         const info = this.props.sharingInfo ?? {
             status: 'unshared',
             taskState: 'pristine',
@@ -211,6 +231,10 @@ class AnnotationFooter extends React.Component<Props> {
     }
 
     private getShareButtonAction() {
+        if (this.props.sharingAccess !== 'sharing-allowed') {
+            return () => {}
+        }
+
         const info = this.props.sharingInfo ?? {
             status: 'unshared',
             taskState: 'pristine',
@@ -354,10 +378,10 @@ const DefaultFooterBtnContainerStyled = styled.div`
     direction: rtl;
 `
 
-const IconBox = styled.button`
+const IconBox = styled.button<{ disabled?: boolean }>`
     border: none;
     background: none;
-    cursor: pointer;
+    ${(props) => (!props.disabled ? 'cursor: pointer' : '')};
     padding: 4px;
     border-radius: 3px;
     display: flex;
@@ -366,9 +390,12 @@ const IconBox = styled.button`
     justify-content: center;
     height: fill-available;
 
-    &:hover {
+    ${(props) =>
+        !props.disabled
+            ? `&:hover {
         background-color: #e0e0e0;
-    }
+    }`
+            : ''}
 `
 const IconStyled = styled.img`
     border: none;
