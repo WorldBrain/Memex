@@ -260,4 +260,33 @@ describe('Ribbon logic', () => {
             }),
         ])
     })
+
+    it('should rehydrate state on URL change', async ({ device }) => {
+        const pageBookmarksMockDB: { [url: string]: boolean } = {}
+
+        device.backgroundModules.search.remoteFunctions.bookmarks = {
+            pageHasBookmark: async (url) => pageBookmarksMockDB[url] ?? false,
+            addPageBookmark: async (args) => {
+                pageBookmarksMockDB[args.url] = true
+            },
+            delPageBookmark: async (args) => {
+                pageBookmarksMockDB[args.url] = false
+            },
+        }
+
+        const newURL = 'https://www.newurl.com'
+
+        const { ribbon } = await setupTest(device)
+
+        await ribbon.init()
+
+        expect(ribbon.state.bookmark.isBookmarked).toBe(false)
+        await ribbon.processEvent('toggleBookmark', null)
+        expect(ribbon.state.bookmark.isBookmarked).toBe(true)
+
+        expect(ribbon.state.pageUrl).not.toEqual(newURL)
+        await ribbon.processEvent('hydrateStateFromDB', { url: newURL })
+        expect(ribbon.state.bookmark.isBookmarked).toBe(false)
+        expect(ribbon.state.pageUrl).toEqual(newURL)
+    })
 })
