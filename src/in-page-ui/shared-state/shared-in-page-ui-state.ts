@@ -153,6 +153,11 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         await this._removeComponent('ribbon')
     }
 
+    async reloadRibbon() {
+        await this.reloadComponent('ribbon')
+        await this.reloadComponent('sidebar')
+    }
+
     async toggleRibbon() {
         if (this.componentsShown.ribbon) {
             await this.hideRibbon()

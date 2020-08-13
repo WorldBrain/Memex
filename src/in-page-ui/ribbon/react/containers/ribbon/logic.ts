@@ -27,7 +27,7 @@ type SubcomponentHandlers<
 > = HandlersOf<componentTypes.RibbonSubcomponentProps[Subcomponent]>
 
 export interface RibbonContainerState {
-    url: string
+    pageUrl: string
     loadState: TaskState
     isRibbonEnabled: boolean | null
     areExtraButtonsShown: boolean
@@ -94,7 +94,7 @@ export class RibbonContainerLogic extends UILogic<
 
     getInitialState(): RibbonContainerState {
         return {
-            url: this.dependencies.currentTab.url,
+            pageUrl: this.dependencies.currentTab.url,
             loadState: 'pristine',
             areExtraButtonsShown: false,
             isRibbonEnabled: null,
@@ -143,7 +143,7 @@ export class RibbonContainerLogic extends UILogic<
         })
 
         this.emitMutation({
-            url: { $set: url },
+            pageUrl: { $set: url },
             pausing: {
                 isPaused: {
                     $set: await this.dependencies.activityLogger.isLoggingPaused(),
@@ -226,12 +226,12 @@ export class RibbonContainerLogic extends UILogic<
         try {
             if (shouldBeBookmarked) {
                 await this.dependencies.bookmarks.addPageBookmark({
-                    url: previousState.url,
+                    url: previousState.pageUrl,
                     tabId: this.dependencies.currentTab.id,
                 })
             } else {
                 await this.dependencies.bookmarks.delPageBookmark({
-                    url: previousState.url,
+                    url: previousState.pageUrl,
                 })
             }
         } catch (err) {
@@ -275,13 +275,13 @@ export class RibbonContainerLogic extends UILogic<
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
         const annotationUrl = generateUrl({
-            pageUrl: previousState.url,
+            pageUrl: previousState.pageUrl,
             now: () => Date.now(),
         })
 
         await annotationsCache.create({
             url: annotationUrl,
-            pageUrl: previousState.url,
+            pageUrl: previousState.pageUrl,
             comment,
             isBookmarked,
             tags,
@@ -343,7 +343,7 @@ export class RibbonContainerLogic extends UILogic<
                 : this.dependencies.tags.updateTagForPage({
                       added: event.value.added,
                       deleted: event.value.deleted,
-                      url: previousState.url,
+                      url: previousState.pageUrl,
                       tabId: this.dependencies.currentTab.id,
                   })
 
@@ -392,7 +392,7 @@ export class RibbonContainerLogic extends UILogic<
         return this.dependencies.customLists.updateListForPage({
             added: event.value.added,
             deleted: event.value.deleted,
-            url: previousState.url,
+            url: previousState.pageUrl,
             tabId: this.dependencies.currentTab.id,
         })
     }

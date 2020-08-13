@@ -208,7 +208,7 @@ export async function main() {
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
         showRibbon: inPageUI.showRibbon.bind(inPageUI),
-        reloadRibbon: () => inPageUI.reloadComponent('ribbon'),
+        reloadRibbon: () => inPageUI.reloadRibbon(),
         insertRibbon: async () => inPageUI.loadComponent('ribbon'),
         removeRibbon: async () => inPageUI.removeRibbon(),
         insertOrRemoveRibbon: async () => inPageUI.toggleRibbon(),
