@@ -263,13 +263,17 @@ export default class ContentSharingBackground {
             )
         }
 
+        const userReference = {
+            type: 'user-reference' as 'user-reference',
+            id: userId,
+        }
         if (action.type === 'add-shared-list-entries') {
             await contentSharing.createListEntries({
                 listReference: contentSharing.getSharedListReferenceFromLinkID(
                     action.remoteListId,
                 ),
                 listEntries: action.data,
-                userReference: { type: 'user-reference', id: userId },
+                userReference,
             })
 
             this.options.analytics.trackEvent({
@@ -321,6 +325,22 @@ export default class ContentSharingBackground {
                 )
             }
             await this.storage.storeAnnotationIds({ remoteIds })
+        } else if (action.type === 'add-annotation-entries') {
+            await contentSharing.addAnnotationsToLists({
+                creator: userReference,
+                sharedListReferences: action.remoteListIds.map((id) =>
+                    contentSharing.getSharedListReferenceFromLinkID(id),
+                ),
+                sharedAnnotations: action.remoteAnnotations.map(
+                    (annotation) => ({
+                        createdWhen: annotation.createdWhen,
+                        normalizedPageUrl: annotation.normalizedPageUrl,
+                        reference: contentSharing.getSharedAnnotationReferenceFromLinkID(
+                            annotation.remoteId,
+                        ),
+                    }),
+                ),
+            })
         } else if (action.type === 'update-annotation-comment') {
             await contentSharing.updateAnnotationComment({
                 sharedAnnotationReference: contentSharing.getSharedAnnotationReferenceFromLinkID(
@@ -374,6 +394,38 @@ export default class ContentSharingBackground {
                                     normalizeUrl(listEntry.fullUrl),
                             },
                         ],
+                    })
+
+                    const annotationEntries = await this.options.annotationStorage.listAnnotationsByPageUrl(
+                        {
+                            pageUrl,
+                        },
+                    )
+                    const remoteIds = await this.storage.getRemoteAnnotationIds(
+                        {
+                            localIds: annotationEntries.map(
+                                (annotation) => annotation.url,
+                            ),
+                        },
+                    )
+                    const remoteAnnotations = Object.entries(remoteIds).map(
+                        ([localId, remoteId]) => ({
+                            normalizedPageUrl: pageUrl,
+                            remoteId:
+                                typeof remoteId === 'number'
+                                    ? remoteId.toString()
+                                    : remoteId,
+                            createdWhen:
+                                annotationEntries
+                                    .find((entry) => entry.url === localId)
+                                    ?.createdWhen?.getTime() ?? Date.now(),
+                        }),
+                    )
+
+                    await this.scheduleAction({
+                        type: 'add-annotation-entries',
+                        remoteListIds: [remoteListId],
+                        remoteAnnotations,
                     })
                 }
             } else if (change.type === 'modify') {
