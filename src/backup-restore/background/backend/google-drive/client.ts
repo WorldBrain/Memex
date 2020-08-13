@@ -1,5 +1,6 @@
 import { DriveTokenManager } from './token-manager'
-import { setLocalStorage, setLocalStorageTyped } from 'src/util/storage'
+import { setLocalStorageTyped } from 'src/util/storage'
+import { retryUntil } from 'src/util/retry-until'
 
 export class GoogleDriveClient {
     private idCache: {
@@ -210,7 +211,24 @@ export class GoogleDriveClient {
         delete options.prefix
 
         const url = baseUrl + path
-        const response = await fetch(url, options)
+        const response = await retryUntil(
+            () => fetch(url, options),
+            (res) => {
+                if (res.status === 500) {
+                    console.error(
+                        'Received server error from Drive, retrying',
+                        res,
+                    )
+                    return false
+                }
+                return true
+            },
+            {
+                intervalMiliseconds: 1000,
+                timeoutMiliseconds: 10000,
+            },
+        )
+
         if (!response.ok) {
             console.error(
                 'Something went wrong making a request to Drive:',
