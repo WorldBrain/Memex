@@ -1,3 +1,5 @@
+import chunk from 'lodash/chunk'
+import fromPairs from 'lodash/fromPairs'
 import StorageManager from '@worldbrain/storex'
 import {
     ContentSharingInterface,
@@ -15,6 +17,7 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { Analytics } from 'src/analytics/types'
 import DirectLinkingBackground from 'src/annotations/background'
 import AnnotationStorage from 'src/annotations/background/storage'
+import { Annotation } from 'src/annotations/types'
 
 // interface ListPush {
 //     actionsPending: number
@@ -133,10 +136,10 @@ export default class ContentSharingBackground {
         if (!userId) {
             throw new Error(`Tried to share list without being authenticated`)
         }
-        const remoteId = await this.storage.getRemoteListId({
+        const remoteListId = await this.storage.getRemoteListId({
             localId: options.listId,
         })
-        if (!remoteId) {
+        if (!remoteListId) {
             throw new Error(
                 `Tried to share list entries of list that isn't shared yet`,
             )
@@ -144,31 +147,36 @@ export default class ContentSharingBackground {
         const pages = await this.options.customLists.fetchListPagesById({
             listId: options.listId,
         })
+        const normalizedPageUrls = pages.map((entry) => entry.pageUrl)
         const pageTitles = await this.storage.getPageTitles({
-            normalizedPageUrls: pages.map((entry) => entry.pageUrl),
+            normalizedPageUrls,
         })
 
         const chunkSize = 100
-        for (
-            let startIndex = 0;
-            startIndex < pages.length;
-            startIndex += chunkSize
-        ) {
-            const data: AddSharedListEntriesAction['data'] = pages
-                .slice(startIndex, startIndex + chunkSize)
-                .map((entry) => ({
+        for (const entryChunk of chunk(pages, chunkSize)) {
+            const data: AddSharedListEntriesAction['data'] = entryChunk.map(
+                (entry) => ({
                     createdWhen: entry.createdAt?.getTime() ?? '$now',
                     entryTitle: pageTitles[entry.pageUrl],
                     normalizedUrl: entry.pageUrl,
                     originalUrl: entry.fullUrl,
-                }))
+                }),
+            )
             await this.scheduleAction({
                 type: 'add-shared-list-entries',
                 localListId: options.listId,
-                remoteListId: remoteId,
+                remoteListId,
                 data,
             })
         }
+
+        const annotationEntries = await this.options.annotationStorage.listAnnotationsByPageUrls(
+            { pageUrls: normalizedPageUrls },
+        )
+        await this._scheduleAddAnnotationEntries({
+            annotationEntries,
+            remoteListIds: [remoteListId],
+        })
     }
 
     shareAnnotation: ContentSharingInterface['shareAnnotation'] = async (
@@ -351,6 +359,43 @@ export default class ContentSharingBackground {
         }
     }
 
+    async _scheduleAddAnnotationEntries(params: {
+        annotationEntries: Annotation[]
+        remoteListIds: string[]
+    }) {
+        const annotationsByPageUrl: {
+            [annotationUrl: string]: { pageUrl: string; createdWhen?: Date }
+        } = fromPairs(
+            params.annotationEntries.map((annotation) => [
+                annotation.url,
+                annotation,
+            ]),
+        )
+        const remoteIds = await this.storage.getRemoteAnnotationIds({
+            localIds: params.annotationEntries.map(
+                (annotation) => annotation.url,
+            ),
+        })
+        const remoteAnnotations = Object.entries(remoteIds).map(
+            ([localId, remoteId]) => ({
+                normalizedPageUrl: annotationsByPageUrl[localId].pageUrl,
+                remoteId:
+                    typeof remoteId === 'number'
+                        ? remoteId.toString()
+                        : remoteId,
+                createdWhen:
+                    annotationsByPageUrl[localId].createdWhen?.getTime() ??
+                    Date.now(),
+            }),
+        )
+
+        await this.scheduleAction({
+            type: 'add-annotation-entries',
+            remoteListIds: params.remoteListIds,
+            remoteAnnotations,
+        })
+    }
+
     async handlePostStorageChange(
         event: StorageOperationEvent<'post'>,
         options: {
@@ -401,31 +446,10 @@ export default class ContentSharingBackground {
                             pageUrl,
                         },
                     )
-                    const remoteIds = await this.storage.getRemoteAnnotationIds(
-                        {
-                            localIds: annotationEntries.map(
-                                (annotation) => annotation.url,
-                            ),
-                        },
-                    )
-                    const remoteAnnotations = Object.entries(remoteIds).map(
-                        ([localId, remoteId]) => ({
-                            normalizedPageUrl: pageUrl,
-                            remoteId:
-                                typeof remoteId === 'number'
-                                    ? remoteId.toString()
-                                    : remoteId,
-                            createdWhen:
-                                annotationEntries
-                                    .find((entry) => entry.url === localId)
-                                    ?.createdWhen?.getTime() ?? Date.now(),
-                        }),
-                    )
 
-                    await this.scheduleAction({
-                        type: 'add-annotation-entries',
+                    await this._scheduleAddAnnotationEntries({
+                        annotationEntries,
                         remoteListIds: [remoteListId],
-                        remoteAnnotations,
                     })
                 }
             } else if (change.type === 'modify') {

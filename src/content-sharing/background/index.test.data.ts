@@ -30,7 +30,7 @@ export const PAGE_2_DATA = {
     rejectNoContent: false,
 }
 
-export const LIST_ENTRY_2 = {
+export const ENTRY_2_DATA = {
     url: 'https://www.eggs.com/foo',
 }
 
@@ -59,7 +59,7 @@ export async function createContentSharingTestList(
     await setup.backgroundModules.search.searchIndex.addPage(PAGE_2_DATA)
     await setup.backgroundModules.customLists.insertPageToList({
         id: localListId,
-        ...LIST_ENTRY_2,
+        ...ENTRY_2_DATA,
     })
 
     return localListId

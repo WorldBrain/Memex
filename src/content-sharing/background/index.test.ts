@@ -802,5 +802,152 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }
             },
         ),
+        backgroundIntegrationTest(
+            'should share already shared annotations when sharing a list containing already shared pages',
+            { skipConflictTests: true },
+            () => {
+                let firstLocalListId: number
+                let secondLocalListId: number
+
+                return {
+                    setup: async ({ setup }) => {
+                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
+                    },
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                setup.authService.setUser(TEST_USER)
+
+                                firstLocalListId = await data.createContentSharingTestList(
+                                    setup,
+                                )
+                                secondLocalListId = await setup.backgroundModules.customLists.createCustomList(
+                                    {
+                                        name: 'Second list',
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.shareList(
+                                    { listId: firstLocalListId },
+                                )
+                                await setup.backgroundModules.contentSharing.shareListEntries(
+                                    { listId: firstLocalListId },
+                                )
+                                await setup.backgroundModules.contentSharing.waitForSync()
+
+                                const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    {} as any,
+                                    data.ANNOTATION_1_DATA,
+                                    { skipPageIndexing: true },
+                                )
+                                await setup.backgroundModules.contentSharing.shareAnnotation(
+                                    {
+                                        annotationUrl,
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.waitForSync()
+
+                                await setup.backgroundModules.customLists.insertPageToList(
+                                    {
+                                        id: secondLocalListId,
+                                        ...data.ENTRY_1_DATA,
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.shareList(
+                                    { listId: secondLocalListId },
+                                )
+                                await setup.backgroundModules.contentSharing.shareListEntries(
+                                    { listId: secondLocalListId },
+                                )
+
+                                await setup.backgroundModules.contentSharing.waitForSync()
+                                const remoteListIds = await Promise.all(
+                                    [firstLocalListId, secondLocalListId].map(
+                                        (localId) =>
+                                            setup.backgroundModules.contentSharing.storage.getRemoteListId(
+                                                {
+                                                    localId,
+                                                },
+                                            ),
+                                    ),
+                                )
+                                const remoteAnnotationIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
+                                    {
+                                        localIds: [annotationUrl],
+                                    },
+                                )
+
+                                const serverStorage = await setup.getServerStorage()
+                                const getShared = (collection: string) =>
+                                    serverStorage.storageManager.operation(
+                                        'findObjects',
+                                        collection,
+                                        {},
+                                        { order: [['id', 'asc']] },
+                                    )
+                                const sharedAnnotations = await getShared(
+                                    'sharedAnnotation',
+                                )
+                                expect(sharedAnnotations).toEqual([
+                                    {
+                                        id:
+                                            parseInt(
+                                                remoteAnnotationIds[
+                                                    annotationUrl
+                                                ] as string,
+                                                10,
+                                            ) ||
+                                            remoteAnnotationIds[annotationUrl],
+                                        creator: TEST_USER.id,
+                                        normalizedPageUrl: normalizeUrl(
+                                            data.ANNOTATION_1_DATA.pageUrl,
+                                        ),
+                                        createdWhen: expect.any(Number),
+                                        uploadedWhen: expect.any(Number),
+                                        updatedWhen: expect.any(Number),
+                                        comment: data.ANNOTATION_1_DATA.comment,
+                                        body: data.ANNOTATION_1_DATA.body,
+                                        selector: JSON.stringify(
+                                            data.ANNOTATION_1_DATA.selector,
+                                        ),
+                                    },
+                                ])
+                                const sharedAnnotationListEntries = await getShared(
+                                    'sharedAnnotationListEntry',
+                                )
+                                const sharedAnnotationId =
+                                    parseInt(
+                                        remoteAnnotationIds[
+                                            annotationUrl
+                                        ] as string,
+                                        10,
+                                    ) || remoteAnnotationIds[annotationUrl]
+                                expect(sharedAnnotationListEntries).toEqual([
+                                    expect.objectContaining({
+                                        normalizedPageUrl: normalizeUrl(
+                                            data.ANNOTATION_1_DATA.pageUrl,
+                                        ),
+                                        sharedList: parseInt(
+                                            remoteListIds[0],
+                                            10,
+                                        ),
+                                        sharedAnnotation: sharedAnnotationId,
+                                    }),
+                                    expect.objectContaining({
+                                        normalizedPageUrl: normalizeUrl(
+                                            data.ANNOTATION_1_DATA.pageUrl,
+                                        ),
+                                        sharedList: parseInt(
+                                            remoteListIds[1],
+                                            10,
+                                        ),
+                                        sharedAnnotation: sharedAnnotationId,
+                                    }),
+                                ])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
     ],
 )
