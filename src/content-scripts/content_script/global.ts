@@ -43,6 +43,7 @@ import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-si
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { AnalyticsEvent } from 'src/analytics/types'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
+import { Anchor } from 'src/highlighting/types'
 // TODO:(page-indexing)[high] Fix this with a proper restructuring of how pages are indexed
 setupPageContentRPC()
 
@@ -125,7 +126,11 @@ export async function main() {
                     title: getPageTitle(),
                     pageUrl: getPageUrl(),
                 }),
-                inPageUI,
+                showSidebar: (opts: { anchor?: Anchor }) =>
+                    inPageUI.showSidebar({
+                        action: 'comment',
+                        ...opts,
+                    }),
                 analyticsEvent,
             }),
     }

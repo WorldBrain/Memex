@@ -4,6 +4,7 @@ import {
     AnnotationClickHandler,
     SaveAndRenderHighlightDependencies,
 } from 'src/highlighting/ui/highlight-interactions'
+import { AnalyticsEvent } from 'src/analytics/types'
 
 export interface Descriptor {
     strategy: string
@@ -46,8 +47,14 @@ export interface HighlightInteractionsInterface {
     saveAndRenderHighlight: (
         params: SaveAndRenderHighlightDependencies,
     ) => Promise<void>
-    createAnnotationWithSidebar: (params: {
-        selection?: Selection
-        inPageUI: SharedInPageUIInterface
-    }) => Promise<void>
+    createAnnotationWithSidebar: (
+        params: CreateAnnotationsWithSidebarParams,
+    ) => Promise<void>
+}
+
+export interface CreateAnnotationsWithSidebarParams {
+    getSelection: () => Selection
+    getUrlAndTitle: () => { pageUrl: string; title: string }
+    showSidebar: (opts?: { anchor: Anchor }) => void
+    analyticsEvent?: AnalyticsEvent
 }

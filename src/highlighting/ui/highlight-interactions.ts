@@ -4,6 +4,7 @@ import {
     Anchor,
     Highlight,
     HighlightInteractionsInterface,
+    CreateAnnotationsWithSidebarParams,
 } from 'src/highlighting/types'
 import { retryUntil } from 'src/util/retry-until'
 import { descriptorToRange, markRange } from './anchoring/index'
@@ -119,12 +120,9 @@ export const renderAnnotationCacheChanges = (opts: {
 }
 
 // TODO: (sidebar-refactor) move to somewhere more sidebar related
-export const createAnnotationWithSidebar = async (params: {
-    getSelection: () => Selection
-    getUrlAndTitle: () => { pageUrl: string; title: string }
-    inPageUI: SharedInPageUIInterface
-    analyticsEvent?: AnalyticsEvent
-}) => {
+export const createAnnotationWithSidebar = async (
+    params: CreateAnnotationsWithSidebarParams,
+) => {
     analytics.trackEvent(
         params.analyticsEvent ?? {
             category: 'Annotations',
@@ -136,7 +134,7 @@ export const createAnnotationWithSidebar = async (params: {
     const { pageUrl, title } = params.getUrlAndTitle()
 
     if (!selection || selection.isCollapsed) {
-        params.inPageUI.showSidebar({ action: 'comment' })
+        params.showSidebar()
         return
     }
 
@@ -147,8 +145,7 @@ export const createAnnotationWithSidebar = async (params: {
         temporary: true,
     })
 
-    params.inPageUI.showSidebar({
-        action: 'comment',
+    params.showSidebar({
         anchor: highlight.selector,
     })
 }
