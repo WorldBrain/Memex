@@ -89,8 +89,13 @@ export default class InitialSyncSetupLogic extends UILogic<
         this.eventEmitter.on('progress', this.updateProgress)
         this.eventEmitter.on('roleSwitch', this.updateRole)
         this.eventEmitter.on('error', this.updateError)
-        this.eventEmitter.on('channelTimeout', () =>
-            this.error(new Error(`Timed out`)),
+        // this.eventEmitter.on(
+        //     'packageStalled',
+        //     this.handleTimeout(new Error('Package send/receive timed out')),
+        // )
+        this.eventEmitter.on(
+            'channelTimeout',
+            this.handleTimeout(new Error(`Fast sync channel timed out`)),
         )
         this.eventEmitter.on('finished', this.done)
     }
@@ -101,6 +106,7 @@ export default class InitialSyncSetupLogic extends UILogic<
             this.eventEmitter.removeAllListeners('roleSwitch')
             this.eventEmitter.removeAllListeners('error')
             this.eventEmitter.removeAllListeners('finished')
+            // this.eventEmitter.removeAllListeners('packageStalled')
             this.eventEmitter.removeAllListeners('channelTimeout')
         }
     }
@@ -188,14 +194,21 @@ export default class InitialSyncSetupLogic extends UILogic<
         })
     }
 
-    error(e) {
+    private error(e: Error) {
         analytics.trackEvent({
             category: 'Sync',
             action: 'failInitSync',
             duration: this.runningTime,
         })
+
         this.emitMutation({
+            status: { $set: 'sync' },
             error: { $set: `${e}` },
         })
+    }
+
+    private handleTimeout = (e: Error) => async () => {
+        this.error(e)
+        await this.dependencies.abortInitialSync()
     }
 }
