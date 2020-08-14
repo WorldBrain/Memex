@@ -3,6 +3,17 @@ import { LoadingIndicator } from 'src/common-ui/components'
 import styled from 'styled-components'
 import { colorText } from 'src/common-ui/components/design-library/colors'
 import { readable } from 'src/util/remote-functions-background'
+import { AnnotationsSidebarInDashboardResults } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
+import { AnnotationsSidebarInContentReader } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInContentReader'
+import {
+    AnnotationsCacheInterface,
+    createAnnotationsCache,
+} from 'src/annotations/annotations-cache'
+import { runInBackground } from 'src/util/webextensionRPC'
+import { AnnotationInterface } from 'src/annotations/background/types'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { RemoteTagsInterface } from 'src/tags/background/types'
+import { AnnotationsSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
 
 interface Props {
     fullUrl: string
@@ -15,8 +26,33 @@ interface State {
 }
 
 export default class Viewer extends React.Component<Props, State> {
+    private annotationsCache: AnnotationsCacheInterface
+    private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
+    private customListsBG = runInBackground<RemoteCollectionsInterface>()
+    private tagsBG = runInBackground<RemoteTagsInterface>()
+
+    private annotationsSidebarRef = React.createRef<
+        AnnotationsSidebarContainer
+    >()
+    get annotationsSidebar(): AnnotationsSidebarContainer {
+        return this.annotationsSidebarRef.current
+    }
+
     state = { loading: true, readerHtml: null }
     private _readerContainerRef: React.RefObject<HTMLDivElement>
+
+    constructor(props: Props) {
+        super(props)
+
+        this.annotationsCache = createAnnotationsCache({
+            annotations: this.annotationsBG,
+            tags: this.tagsBG,
+        })
+    }
+
+    private handleCloseSidebarBtnClick: React.MouseEventHandler = (e) => {
+        this.annotationsSidebar.hideSidebar()
+    }
 
     async componentDidMount() {
         const url = this.props.fullUrl
@@ -25,6 +61,10 @@ export default class Viewer extends React.Component<Props, State> {
             : await readable.parseAndSaveReadable({ fullUrl: url })
 
         await this.renderArticle(article)
+
+        this.annotationsSidebar.setPageUrl(this.props.fullUrl)
+        this.annotationsSidebar.showSidebar()
+
         this.setState({ loading: false })
 
         this.props?.onInit({ url })
@@ -72,15 +112,25 @@ export default class Viewer extends React.Component<Props, State> {
     }
 
     render() {
-        if (this.state.loading) {
-            return <LoadingIndicator />
-        }
-
         return (
-            <Content
-                ref={(ref) => (this._readerContainerRef = ref)}
-                dangerouslySetInnerHTML={this.state.readerHtml}
-            />
+            <>
+                {this.state.loading ? (
+                    <LoadingIndicator />
+                ) : (
+                    <Content
+                        ref={(ref) => (this._readerContainerRef = ref)}
+                        dangerouslySetInnerHTML={this.state.readerHtml}
+                    />
+                )}
+                <AnnotationsSidebarInContentReader
+                    tags={this.tagsBG}
+                    annotations={this.annotationsBG}
+                    customLists={this.customListsBG}
+                    refSidebar={this.annotationsSidebarRef}
+                    annotationsCache={this.annotationsCache}
+                    onCloseSidebarBtnClick={this.handleCloseSidebarBtnClick}
+                />
+            </>
         )
     }
 }

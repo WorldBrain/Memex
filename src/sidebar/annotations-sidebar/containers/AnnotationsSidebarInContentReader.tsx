@@ -7,6 +7,7 @@ import { SidebarContainerOptions } from 'src/sidebar/annotations-sidebar/contain
 
 type Props = SidebarContainerOptions & {
     refSidebar?: React.Ref<AnnotationsSidebarContainer>
+    onCloseSidebarBtnClick: React.MouseEventHandler
 }
 export class AnnotationsSidebarInContentReader extends React.Component<Props> {
     render() {
@@ -15,22 +16,18 @@ export class AnnotationsSidebarInContentReader extends React.Component<Props> {
             <AnnotationsSidebarContainer
                 elements={{ topBarLeft: this.renderTopBarLeft() }}
                 ref={refSidebar}
+                theme={{ topOffsetPx: 55 }}
+                showGoToAnnotationBtn={true}
                 {...props}
             />
         )
-    }
-
-    private handleCloseSidebarBtnClick: React.MouseEventHandler = (e) => {
-        e.preventDefault()
-
-        // this.hideSidebar()
     }
 
     protected renderTopBarLeft() {
         return (
             <ButtonTooltip tooltipText="Close (ESC)" position="rightCentered">
                 <CloseBtn
-                    onClick={this.handleCloseSidebarBtnClick}
+                    onClick={this.props.onCloseSidebarBtnClick}
                     title="Close sidebar"
                 >
                     <CloseIcon />
