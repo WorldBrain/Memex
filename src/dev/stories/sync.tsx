@@ -116,8 +116,8 @@ storiesOf('Sync', module)
     ))
     .add('Initial Sync - Sync Device', () => (
         <div>
-            <SyncDeviceScreen stage={'1/2'} />
-            <SyncDeviceScreen stage={'1/2'} progressPct={0.5} />
+            <SyncDeviceScreen onClose={() => false}  stage={'1/2'} />
+            <SyncDeviceScreen onClose={() => false}  stage={'1/2'} progressPct={0.5} />
         </div>
     ))
 
@@ -127,6 +127,7 @@ storiesOf('Sync', module)
                 stage={'1/2'}
                 progressPct={0.5}
                 error={'An error with the flux capacitor occurred.'}
+                onClose={() => false} 
             />
         </div>
     ))

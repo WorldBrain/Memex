@@ -5,7 +5,7 @@ import { FastSyncEvents } from '@worldbrain/storex-sync/lib/fast-sync'
 import analytics from 'src/analytics'
 import { now } from 'moment'
 
-type SyncSetupState = 'introduction' | 'pair' | 'sync' | 'done' | 'noConnection'
+type SyncSetupState = 'introduction' | 'pair' | 'sync' | 'done' | 'noConnection' | 'error'
 
 export interface InitialSyncSetupState {
     status: SyncSetupState
@@ -202,13 +202,17 @@ export default class InitialSyncSetupLogic extends UILogic<
         })
 
         this.emitMutation({
-            status: { $set: 'sync' },
+            status: { $set: 'error' },
             error: { $set: `${e}` },
         })
     }
 
     private handleTimeout = (e: Error) => async () => {
         this.error(e)
+        this.emitMutation({
+            status: { $set: 'error' },
+            error: { $set: `${e}` },
+        })
         await this.dependencies.abortInitialSync()
     }
 }
