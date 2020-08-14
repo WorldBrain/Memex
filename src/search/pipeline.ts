@@ -98,7 +98,7 @@ export function extractTerms(text: string): Set<string> {
  * @returns Resolves to an object containing all data needed for Page model.
  */
 const pipeline: PagePipeline = ({
-    pageDoc: { content = {}, url, ...data },
+    pageDoc: { content = {}, url, getFullText, ...data },
     rejectNoContent = true,
 }) => {
     // First apply transformations to the URL
