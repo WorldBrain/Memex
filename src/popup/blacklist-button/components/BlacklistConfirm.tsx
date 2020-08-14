@@ -14,10 +14,9 @@ class BlacklistConfirm extends PureComponent<Props> {
     render() {
         return (
             <div className={styles.container}>
-                <h1 className={styles.header}>Blacklisting successful!</h1>
+                <p className={styles.header}>Added to Blocklist</p>
                 <p className={styles.content}>
-                    Do you also want to delete all past visits of the
-                    blacklisted page?
+                    Do you also want to delete all visits of the blocked page?
                 </p>
                 <div className={styles.btnBar}>
                     <button

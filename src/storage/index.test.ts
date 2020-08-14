@@ -526,6 +526,7 @@ describe('Storage initialization', () => {
                         pageListEntryDescriptions: '[listId+pageUrl]',
                         pages:
                             'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
                         sharedListMetadata: 'localId',
                         socialBookmarks: '++id, createdAt, postId',
                         socialPostListEntries: '++id, listId, postId',

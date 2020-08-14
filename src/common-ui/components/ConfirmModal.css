@@ -9,22 +9,20 @@
     font-size: 16px;
     font-weight: 500;
     margin-bottom: 10px;
-
-    & > div {
-        display: none;
-    }
 }
 
 .textContainerLoading {
-    & > div {
-        display: block;
-    }
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .btnBar {
     display: flex;
     justify-content: center;
     flex-direction: row-reverse;
+    outline: none;
 }
 
 .btn {
@@ -40,6 +38,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    outline: none;
 
     &:disabled,
     &[disabled] {
@@ -54,4 +53,12 @@
 
 .cancelBtn {
     composes: cancelNaked from 'src/common-ui/elements.css';
+}
+
+.noButton {
+    display: none;
+}
+
+.loadingSpinnerBox {
+    margin-bottom: 10px;
 }

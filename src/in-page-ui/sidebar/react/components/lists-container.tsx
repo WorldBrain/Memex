@@ -1,49 +1,50 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import PropTypes from 'prop-types'
 import { bindActionCreators } from 'redux'
 import cx from 'classnames'
 
-import { actions, selectors } from 'src/custom-lists'
-import extStyles from 'src/custom-lists/components/overview/sidebar/Index.css'
+const extStyles = require('src/custom-lists/components/overview/sidebar/Index.css')
 import MyCollection from 'src/custom-lists/components/overview/sidebar/my-collections'
 import CreateListForm from 'src/custom-lists/components/overview/sidebar/CreateListForm'
 import ListItem from 'src/custom-lists/components/overview/sidebar/list-item'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import { CrowdfundingModal } from 'src/common-ui/crowdfunding'
-import { actions as filterActs } from 'src/search-filters'
-import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 
-class ListContainer extends Component {
-    static propTypes = {
-        getListFromDB: PropTypes.func.isRequired,
-        lists: PropTypes.array.isRequired,
-        handleEditBtnClick: PropTypes.func.isRequired,
-        setShowCrowdFundingModal: PropTypes.func.isRequired,
-        isDeleteConfShown: PropTypes.bool.isRequired,
-        resetListDeleteModal: PropTypes.func.isRequired,
-        handleCrossBtnClick: PropTypes.func.isRequired,
-        handleListItemClick: PropTypes.func.isRequired,
-        createPageList: PropTypes.func.isRequired,
-        updateList: PropTypes.func.isRequired,
-        handleAddPageList: PropTypes.func.isRequired,
-        handleDeleteList: PropTypes.func.isRequired,
-        toggleCreateListForm: PropTypes.func.isRequired,
-        showCreateList: PropTypes.bool.isRequired,
-        showCommonNameWarning: PropTypes.bool.isRequired,
-        showCrowdFundingModal: PropTypes.bool.isRequired,
-        closeCreateListForm: PropTypes.func.isRequired,
-        resetUrlDragged: PropTypes.func.isRequired,
-        env: PropTypes.oneOf(['overview', 'inpage']).isRequired,
-    }
+interface StateProps {
+    listName: string
+    updatedListName: string
+    showWarning: boolean
+}
+
+interface OwnProps {
+    env: 'overview' | 'inpage'
+    lists: any[]
+    isDeleteConfShown: boolean
+    showCreateList: boolean
+    showCommonNameWarning: boolean
+    showCrowdFundingModal: boolean
+    getListFromDB: (...args: any[]) => any
+    handleEditBtnClick: (...args: any[]) => any
+    setShowCrowdFundingModal: (...args: any[]) => any
+    resetListDeleteModal: (...args: any[]) => any
+    handleCrossBtnClick: (...args: any[]) => any
+    handleListItemClick: (...args: any[]) => any
+    createPageList: (...args: any[]) => any
+    updateList: (...args: any[]) => any
+    handleAddPageList: (...args: any[]) => any
+    handleDeleteList: (...args: any[]) => any
+    toggleCreateListForm: (...args: any[]) => any
+    closeCreateListForm: (...args: any[]) => any
+    resetUrlDragged: (...args: any[]) => any
+}
+
+type Props = StateProps & OwnProps
+
+export default class ListContainer extends Component<Props> {
+    private inputEl: HTMLInputElement
 
     constructor(props) {
         super(props)
-        this.state = {
-            listName: null,
-            updatedListName: null,
-            showWarning: false,
-        }
     }
 
     async componentDidMount() {
@@ -84,7 +85,7 @@ class ListContainer extends Component {
     handleCreateListSubmit = (event) => {
         event.preventDefault()
         event.stopPropagation()
-        const { value } = event.target.elements.listName
+        const { value } = event.target.elements['listName']
         // value = list name
         this.props.createPageList(
             this.getSearchVal(value),
@@ -99,13 +100,11 @@ class ListContainer extends Component {
         }))
     }
 
-    handleUpdateList = ({ id, name: oldName }, index) => (event) => {
+    handleUpdateList = ({ id }, index) => (event) => {
         event.preventDefault()
-        const { value } = event.target.elements.listName
-        const newName = this.getSearchVal(value)
-
-        this.props.updateList([oldName, newName], id)
-
+        const { value } = event.target.elements['listName']
+        // value = list name
+        this.props.updateList(index, this.getSearchVal(value), id)
         this.setState((state) => ({
             ...state,
             updatedListName: null,
@@ -127,11 +126,11 @@ class ListContainer extends Component {
                             list.name,
                         )}
                         value={
-                            typeof this.state.updatedListName === 'string'
-                                ? this.state.updatedListName
+                            typeof this.props.updatedListName === 'string'
+                                ? this.props.updatedListName
                                 : list.name
                         }
-                        showWarning={this.state.showWarning}
+                        showWarning={this.props.showWarning}
                         setInputRef={this.setInputRef}
                     />
                 )
@@ -143,11 +142,17 @@ class ListContainer extends Component {
                     listName={list.name}
                     isFiltered={list.isFilterIndex}
                     onShareButtonClick={() => {}}
-                    onEditButtonClick={this.props.handleEditBtnClick(i)}
+                    onEditButtonClick={() => {
+                        event.preventDefault()
+                        this.props.handleEditBtnClick(i)
+                    }}
                     onListItemClick={this.props.handleListItemClick(list, i)}
                     onAddPageToList={this.props.handleAddPageList(list, i)}
-                    onCrossButtonClick={this.props.handleCrossBtnClick(list, i)}
-                    resetUrlDragged={this.props.resetUrlDragged}
+                    onCrossButtonClick={() => {
+                        event.preventDefault()
+                        this.props.handleCrossBtnClick(list, i)
+                    }}
+                    // resetUrlDragged={this.props.resetUrlDragged}
                     isMobileList={list.isMobileList}
                 />
             )
@@ -160,7 +165,7 @@ class ListContainer extends Component {
                 onCheckboxClick={this.handleCreateListSubmit}
                 handleNameChange={this.handleSearchChange('listName')}
                 handleNameKeyDown={this.handleSearchKeyDown('listName')}
-                value={this.state.listName}
+                value={this.props.listName}
                 showWarning={this.props.showCommonNameWarning}
                 setInputRef={this.setInputRef}
                 closeCreateListForm={this.props.closeCreateListForm}
@@ -190,11 +195,18 @@ class ListContainer extends Component {
                     message="Delete collection? This does not delete the pages in it"
                     isShown={this.props.isDeleteConfShown}
                     onClose={this.props.resetListDeleteModal}
-                    deleteDocs={this.props.handleDeleteList}
+                    deleteDocs={async () => {
+                        // e.preventDefault()
+                        this.props.handleDeleteList()
+                    }}
                 />
                 {this.props.showCrowdFundingModal && (
                     <CrowdfundingModal
-                        onClose={this.props.setShowCrowdFundingModal(false)}
+                        onClose={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            this.props.setShowCrowdFundingModal(false)
+                        }}
                         context="collections"
                         learnMoreUrl="https://worldbrain.io/pricing/"
                     />
@@ -203,53 +215,3 @@ class ListContainer extends Component {
         )
     }
 }
-
-const mapStateToProps = (state) => ({
-    lists: selectors.results(state),
-    isDeleteConfShown: selectors.isDeleteConfShown(state),
-    showCrowdFundingModal: selectors.showCrowdFundingModal(state),
-    showCreateList: selectors.showCreateListForm(state),
-    showCommonNameWarning: selectors.showCommonNameWarning(state),
-})
-
-const mapDispatchToProps = (dispatch, getState) => ({
-    ...bindActionCreators(
-        {
-            resetListDeleteModal: actions.resetListDeleteModal,
-            getListFromDB: actions.getListFromDB,
-            createPageList: actions.createPageList,
-            updateList: actions.updateList,
-            toggleCreateListForm: actions.toggleCreateListForm,
-            closeCreateListForm: actions.closeCreateListForm,
-            resetUrlDragged: actions.resetUrlDragged,
-        },
-        dispatch,
-    ),
-    handleEditBtnClick: (index) => (event) => {
-        event.preventDefault()
-        dispatch(actions.showEditBox(index))
-    },
-    setShowCrowdFundingModal: (value) => (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        dispatch(actions.setShowCrowdFundingModal(value))
-    },
-    handleCrossBtnClick: ({ id }, index) => (event) => {
-        event.preventDefault()
-        dispatch(actions.showListDeleteModal(id, index))
-    },
-    handleListItemClick: ({ id }, index) => () => {
-        dispatch(sidebarActs.setSearchType('page'))
-        dispatch(actions.toggleListFilterIndex(index.toString()))
-        dispatch(filterActs.toggleListFilter(id.toString()))
-    },
-    handleAddPageList: ({ id }, index) => (url, isSocialPost) => {
-        dispatch(actions.addUrltoList(url, isSocialPost, index, id))
-    },
-    handleDeleteList: (e) => {
-        e.preventDefault()
-        dispatch(actions.deletePageList())
-    },
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(ListContainer)

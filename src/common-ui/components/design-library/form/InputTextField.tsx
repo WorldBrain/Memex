@@ -15,6 +15,5 @@ export const InputTextField = styled.input`
     color: rgb(54, 54, 46);
     border-radius: 3px;
     margin-right: 15px;
-    margin-bottom: 1em;
     display: ${(props) => (props.type === 'hidden' ? 'none' : 'unset')};
 `

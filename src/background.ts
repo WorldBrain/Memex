@@ -88,7 +88,7 @@ export async function main() {
     })
     await setupBackgroundModules(backgroundModules, storageManager)
 
-    await navigator?.storage?.persist?.()
+    navigator?.storage?.persist?.()
 
     setStorex(storageManager)
 

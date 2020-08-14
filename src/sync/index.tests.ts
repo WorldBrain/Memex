@@ -8,6 +8,7 @@ import { setupBackgroundIntegrationTest } from 'src/tests/background-integration
 import { createMemorySharedSyncLog } from './background/index.tests'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { createLazyMemoryServerStorage } from 'src/storage/server'
 
 // to shut up linting
 const debug = console['log'].bind(console)
@@ -26,9 +27,11 @@ export function registerSyncBackgroundIntegrationTests(
         describe('should work when synced in various patterns across 2 devices', () => {
             registerSyncBackAndForthTests(test)
         })
-        describe('should work when doing the same action on two devices, then syncing', () => {
-            registerConflictGenerationTests(test)
-        })
+        if (!test.skipConflictTests) {
+            describe('should work when doing the same action on two devices, then syncing', () => {
+                registerConflictGenerationTests(test)
+            })
+        }
     })
 }
 
@@ -202,6 +205,10 @@ async function runSyncBackgroundTest(options: {
     })
 
     const testInstance = await options.test.instantiate({ isSyncTest: true })
+    for (const setup of setups) {
+        await testInstance.setup?.({ setup })
+    }
+
     for (const sequenceStep of options.sequence) {
         const integrationTestStep =
             testInstance.steps[sequenceStep.integrationStepIndex]
@@ -262,12 +269,12 @@ async function setupSyncBackgroundTest(options: {
     deviceCount: number
     debugStorageOperations?: boolean
 }) {
-    const userId = 'user'
+    const userId = TEST_USER.id
 
-    const sharedSyncLog = await createMemorySharedSyncLog()
+    const getServerStorage = await createLazyMemoryServerStorage()
     const setups: BackgroundIntegrationTestSetup[] = []
     for (let i = 0; i < options.deviceCount; ++i) {
-        setups.push(await setupBackgroundIntegrationTest({ sharedSyncLog }))
+        setups.push(await setupBackgroundIntegrationTest({ getServerStorage }))
     }
 
     // const deviceIds: Array<number | string> = []
@@ -281,7 +288,7 @@ async function setupSyncBackgroundTest(options: {
 
         const memoryAuth = setup.backgroundModules.auth
             .authService as MemoryAuthService
-        memoryAuth.setUser({ ...TEST_USER, id: userId })
+        memoryAuth.setUser({ ...TEST_USER })
         await setup.backgroundModules.sync.continuousSync.initDevice()
         await setup.backgroundModules.sync.continuousSync.enableContinuousSync()
     }

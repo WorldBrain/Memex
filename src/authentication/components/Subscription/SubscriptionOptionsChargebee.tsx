@@ -165,8 +165,6 @@ class SubscriptionOptionsChargebee extends React.Component<
     }
 
     render() {
-        console.log(this.props.plans)
-
         return (
             <div className={''}>
                 <div>

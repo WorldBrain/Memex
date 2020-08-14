@@ -197,18 +197,9 @@ export default class AnnotationStorage extends StorageModule {
     }) {
         pageUrl = normalizeUrl(pageUrl)
 
-        console.log('background storage listAnnotationsByPageUrl...', {
-            pageUrl,
-        })
         const annotations: Annotation[] = await this.operation(
             'listAnnotationsByPageUrl',
             { pageUrl },
-        )
-        console.log(
-            'background storage listAnnotationsByPageUrl (plain results) => ',
-            {
-                annotations,
-            },
         )
 
         // Efficiently query and join Bookmarks and Tags from their respective collections
@@ -250,12 +241,6 @@ export default class AnnotationStorage extends StorageModule {
             })
         }
 
-        console.log(
-            'background storage listAnnotationsByPageUrl (with tags and bookmarks) => ',
-            {
-                annotations,
-            },
-        )
         return annotations
     }
 

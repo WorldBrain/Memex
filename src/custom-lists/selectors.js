@@ -1,29 +1,7 @@
 import { createSelector } from 'reselect'
 import { MOBILE_LIST_NAME } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/constants'
 
-// import { selectors } from '../search-filters'
-// TODO: check why not working the other way around.
 import * as selectors from '../search-filters/selectors'
-// import { selectors as filters } from '../overview/filters'
-
-// TODO: Needs some work.
-const sortAlphabetically = (a, b) => {
-    if (a.name === MOBILE_LIST_NAME) {
-        return -100
-    }
-
-    if (b.name === MOBILE_LIST_NAME) {
-        return 100
-    }
-
-    if (a.name.toLowerCase() < b.name.toLowerCase()) {
-        return -1
-    }
-    if (a.name.toLowerCase() > b.name.toLowerCase()) {
-        return 1
-    }
-    return 0
-}
 
 export const customLists = (state) => state.customLists
 
@@ -44,10 +22,10 @@ export const getSortedLists = createSelector(allLists, (lists) => {
     )
 
     if (mobileListIndex === -1) {
-        lists = [...lists, { name: MOBILE_LIST_NAME, id: -1 }]
+        return [{ name: MOBILE_LIST_NAME, id: -1 }, ...lists]
     }
 
-    return lists.sort(sortAlphabetically)
+    return lists
 })
 
 export const getUrlsToEdit = createSelector(

@@ -164,7 +164,10 @@ export default class StatusOverlay extends PureComponent<Props> {
                                 </div>
                                 {buttonText && (
                                     <div className={styles.button}>
-                                        <ConfirmModalBtn href={buttonUrl}>
+                                        <ConfirmModalBtn
+                                            disabled
+                                            href={buttonUrl}
+                                        >
                                             {buttonText}
                                         </ConfirmModalBtn>
                                     </div>

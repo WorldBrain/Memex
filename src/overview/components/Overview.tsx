@@ -12,9 +12,10 @@ import { Header, acts as searchBarActs } from '../search-bar'
 import { Results, acts as resultActs } from '../results'
 import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
+import TrialExpiryWarning from './TrialExpiryWarning'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
-import { auth, featuresBeta } from 'src/util/remote-functions-background'
+import { auth, featuresBeta, subscription } from 'src/util/remote-functions-background'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { AnnotationsSidebarInDashboardResults } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { runInBackground } from 'src/util/webextensionRPC'
@@ -27,6 +28,10 @@ import {
     AnnotationsCache,
     AnnotationsCacheInterface,
 } from 'src/annotations/annotations-cache'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { show } from 'src/overview/modals/actions'
+import classNames from 'classnames'
+
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -35,10 +40,15 @@ export interface Props {
     setShowOnboardingMessage: () => void
     toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
     handleReaderViewClick: (url: string) => void
+    showSubscriptionModal: () => void
 }
 
 interface State {
     showPioneer: boolean
+    showUpgrade: boolean
+    trialExpiry: boolean
+    expiryDate: number
+    loadingPortal: boolean,
 }
 
 class Overview extends PureComponent<Props, State> {
@@ -56,6 +66,10 @@ class Overview extends PureComponent<Props, State> {
 
     state = {
         showPioneer: false,
+        showUpgrade: false,
+        trialExpiry: false,
+        expiryDate: undefined,
+        loadingPortal: false,
     }
 
     constructor(props: Props) {
@@ -67,14 +81,45 @@ class Overview extends PureComponent<Props, State> {
         })
     }
 
-    componentDidMount() {
-        // this.props.init()
-        this.showPioneer()
+    closeTrialExpiryNotif() {
+        this.setState({
+            trialExpiry: false,
+        })
+
+        localStorage.setItem('TrialExpiryWarning_Close_Time', JSON.stringify(Math.floor(Date.now() / 1000)))
     }
 
-    async showPioneer() {
+    componentDidMount() {
+        // this.props.init()
+        this.upgradeState()
+        this.expiryDate()
+    }
+
+    async expiryDate() {
+        const date = await auth.getSubscriptionExpiry()
+        const dateNow = Math.floor(new Date().getTime() / 1000);
+        const inTrial = await auth.getSubscriptionStatus()
+        const lastCloseTime = parseFloat(localStorage.getItem('TrialExpiryWarning_Close_Time'))
+
+        if (date - dateNow < 259200 && inTrial === 'in_trial' && dateNow - lastCloseTime > 86400) { //3 days notification window - 24h waiting until showing the trial notif again
+                this.setState({
+                    trialExpiry: true,
+                    expiryDate: date
+                })
+            }
+
+        return date
+    }
+
+    async upgradeState() {
+
+        const plans = await auth.getAuthorizedPlans()
+
         if (await auth.isAuthorizedForFeature('beta')) {
-            this.setState({ showPioneer: true })
+            this.setState({ showPioneer: true, showUpgrade: false })
+        }
+        if (plans.length === 0 ) {
+            this.setState({ showUpgrade: true })
         }
     }
 
@@ -84,6 +129,16 @@ class Overview extends PureComponent<Props, State> {
             renderHighlight: () => undefined,
         }
     }
+
+
+    openPortal = async () => {
+        this.setState({
+            loadingPortal: true
+        })
+        const portalLink = await subscription.getManageLink()
+        window.open(portalLink['access_url'])
+    }
+
 
     private handleAnnotationSidebarToggle = async (args?: {
         pageUrl: string
@@ -125,6 +180,7 @@ class Overview extends PureComponent<Props, State> {
         this.props.setShowOnboardingMessage()
         localStorage.setItem('stage.Onboarding', 'true')
         localStorage.setItem('stage.MobileAppAd', 'true')
+        window.location.reload();
     }
 
     renderOnboarding() {
@@ -137,62 +193,89 @@ class Overview extends PureComponent<Props, State> {
     }
 
     renderOverview() {
+
         return (
-            <div>
-                <Head />
-                <CollectionsButton />
-                <Header />
-                <SidebarLeft />
-                <Results
-                    toggleAnnotationsSidebar={
-                        this.handleAnnotationSidebarToggle
-                    }
-                    handleReaderViewClick={this.props.handleReaderViewClick}
-                />
-                <DeleteConfirmModal message="Delete page and related notes" />
-                <DragElement />
-
-                {/* <div className={styles.productHuntContainer}>
-                    <a
-                        href="https://www.producthunt.com/posts/memex-1-0?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-memex-1-0"
-                        target="_blank"
-                    >
-                        <img
-                            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=151367&theme=dark"
-                            alt="Memex 1.0 - Annotate, search and organize what you've read online. | Product Hunt Embed"
-                            className={styles.productHuntBatch}
-                        />
-                    </a>
-                </div> */}
-                <AnnotationsSidebarInDashboardResults
-                    tags={this.tagsBG}
-                    annotations={this.annotationsBG}
-                    customLists={this.customListsBG}
-                    refSidebar={this.annotationsSidebarRef}
-                    annotationsCache={this.annotationsCache}
-                    onClickOutside={this.handleClickOutsideSidebar}
-                    onCloseSidebarBtnClick={this.handleCloseSidebarBtnClick}
-                />
-
-                <Tooltip />
-                <div className={styles.rightCorner}>
-                    {this.state.showPioneer && (
-                        <div
-                            onClick={() => {
-                                window.open('#/features')
-                            }}
-                            className={styles.pioneerBadge}
-                        >
-                            <ButtonTooltip
-                                tooltipText="Thank you for supporting this journey 🙏"
-                                position="top"
-                            >
-                                👨🏾‍🚀Pioneer Edition
-                            </ButtonTooltip>
-                        </div>
+            <div className={styles.mainWindow}>
+                <div className={classNames(styles.Overview,
+                    {[styles.OverviewWithNotif] : this.state.trialExpiry,}
                     )}
-                    <HelpBtn />
+                >
+                    <Head />
+                    <CollectionsButton />
+                    <Header />
+                    <SidebarLeft />
+                    
+                    <Results
+                        toggleAnnotationsSidebar={
+                            this.handleAnnotationSidebarToggle
+                        }
+                        handleReaderViewClick={this.props.handleReaderViewClick}
+                    />
+                    <DeleteConfirmModal message="Delete page and related notes" />
+                    <DragElement />
+
+                    {/* <div className={styles.productHuntContainer}>
+                        <a
+                            href="https://www.producthunt.com/posts/memex-1-0?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-memex-1-0"
+                            target="_blank"
+                        >
+                            <img
+                                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=151367&theme=dark"
+                                alt="Memex 1.0 - Annotate, search and organize what you've read online. | Product Hunt Embed"
+                                className={styles.productHuntBatch}
+                            />
+                        </a>
+                    </div> */}
+                    <AnnotationsSidebarInDashboardResults
+                        tags={this.tagsBG}
+                        annotations={this.annotationsBG}
+                        customLists={this.customListsBG}
+                        refSidebar={this.annotationsSidebarRef}
+                        annotationsCache={this.annotationsCache}
+                        onClickOutside={this.handleClickOutsideSidebar}
+                        onCloseSidebarBtnClick={this.handleCloseSidebarBtnClick}
+                    />
+
+                    <Tooltip />
+                    <div className={styles.rightCorner}>
+                        {this.state.showPioneer && (
+                            <div
+                                onClick={() => {
+                                    window.open('#/features')
+                                }}
+                                className={styles.pioneerBadge}
+                            >
+                                <ButtonTooltip
+                                    tooltipText="Thank you for supporting this journey 🙏"
+                                    position="top"
+                                >
+                                    🚀 Pioneer Edition
+                                </ButtonTooltip>
+                            </div>
+                        )}
+                        {this.state.showUpgrade && (
+                            <div
+                                onClick={this.props.showSubscriptionModal}
+                                className={styles.pioneerBadge}
+                            >
+                                    ⭐️ Upgrade Memex
+                            </div>
+                        )}
+                        <HelpBtn />
+                    </div>
                 </div>
+                 {this.state.trialExpiry &&
+                    <div className={styles.notifications}>
+                     {this.state.trialExpiry && 
+                        <TrialExpiryWarning
+                            expiryDate={this.state.expiryDate}
+                            showPaymentWindow={this.openPortal}
+                            closeTrialNotif={()=> this.closeTrialExpiryNotif()}
+                            loadingPortal={this.state.loadingPortal}
+                        />
+                    }
+                    </div>
+                }
             </div>
         )
     }
@@ -216,6 +299,10 @@ const mapDispatchToProps = (dispatch) => ({
     },
     setShowOnboardingMessage: () =>
         dispatch(resultActs.setShowOnboardingMessage(true)),
+    showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(Overview)
+export default connect(
+        mapStateToProps, 
+        mapDispatchToProps,
+)(Overview)

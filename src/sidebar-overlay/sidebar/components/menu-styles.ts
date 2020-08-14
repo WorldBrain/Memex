@@ -8,7 +8,7 @@ const baseStyles = {
         transition: 'all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1)',
     },
     bmMenu: {
-        position: 'fixed',
+        position: 'relative',
         right: '30px',
         top: '0px',
         zIndex: 2147483646,

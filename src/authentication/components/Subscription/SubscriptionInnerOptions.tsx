@@ -116,9 +116,6 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
     }
 
     render() {
-        console.log(this.state.plan === 'pro')
-        console.log(this.state.plan === 'beta')
-
         return (
             <SubscriptionOptionsContainer>
                 <TimeButtonBox>
