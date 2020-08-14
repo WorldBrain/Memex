@@ -86,6 +86,9 @@ export async function setupBackgroundIntegrationTest(options?: {
         localStorageChangesManager: null,
         getServerStorage,
         browserAPIs: {
+            webNavigation: {
+                onHistoryStateUpdated: { addListener: () => {} },
+            },
             storage: {
                 local: browserLocalStorage,
             },

@@ -10,10 +10,10 @@ import {
     setupRemoteDirectLinkFunction,
 } from 'src/annotations/content_script'
 import {
-    runInBackground,
-    makeRemotelyCallableType,
     remoteFunction,
+    runInBackground,
     RemoteFunctionRegistry,
+    makeRemotelyCallableType,
 } from 'src/util/webextensionRPC'
 import { Resolvable, resolvablePromise } from 'src/util/resolvable'
 import { ContentScriptRegistry } from './types'
@@ -25,10 +25,8 @@ import AnnotationsManager from 'src/annotations/annotations-manager'
 import {
     createAnnotationWithSidebar,
     HighlightRenderer,
-    renderAnnotationCacheChanges,
     saveAndRenderHighlight,
 } from 'src/highlighting/ui/highlight-interactions'
-import { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
@@ -65,7 +63,6 @@ export async function main() {
     } = {}
 
     // 2. Initialise dependencies required by content scripts
-    const currentTab = await getCurrentTab()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const tagsBG = runInBackground<RemoteTagsInterface>()
     const remoteFunctionRegistry = new RemoteFunctionRegistry()
@@ -93,7 +90,6 @@ export async function main() {
         unloadComponent: (component) => {
             delete components[component]
         },
-        pageUrl: currentTab.url,
     })
     annotationsCache.load(getPageUrl())
 
@@ -142,7 +138,6 @@ export async function main() {
                 highlighter: highlightRenderer,
                 annotations: annotationsBG,
                 annotationsCache,
-                currentTab,
                 tags: tagsBG,
                 customLists: runInBackground<RemoteCollectionsInterface>(),
                 bookmarks: runInBackground<BookmarksInterface>(),
@@ -179,7 +174,6 @@ export async function main() {
                 highlighter: highlightRenderer,
                 annotations: annotationsBG,
                 tags: tagsBG,
-                pageUrl: currentTab.url,
                 customLists: runInBackground<RemoteCollectionsInterface>(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
             })
@@ -214,6 +208,7 @@ export async function main() {
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
         showRibbon: inPageUI.showRibbon.bind(inPageUI),
+        reloadRibbon: () => inPageUI.reloadRibbon(),
         insertRibbon: async () => inPageUI.loadComponent('ribbon'),
         removeRibbon: async () => inPageUI.removeRibbon(),
         insertOrRemoveRibbon: async () => inPageUI.toggleRibbon(),
@@ -233,6 +228,7 @@ export async function main() {
             category: 'Highlights',
             action: 'createFromContextMenu',
         }),
+        removeHighlights: async () => highlightRenderer.removeHighlights(),
         createAnnotation: annotationsFunctions.createAnnotation({
             category: 'Annotations',
             action: 'createFromContextMenu',
@@ -303,15 +299,4 @@ export function loadRibbonOnMouseOver(loadRibbon: () => void) {
     document.addEventListener('mousemove', listener)
 }
 
-const getCurrentTab = (() => {
-    let currentTab: { id: number; url: string }
-    return async () => {
-        if (!currentTab) {
-            currentTab = await runInBackground<
-                ContentScriptsInterface<'caller'>
-            >().getCurrentTab()
-        }
-        return currentTab
-    }
-})()
 main()

@@ -310,6 +310,7 @@ export function createBackgroundModules(options: {
         bgScript,
         pageFetchBacklog,
         contentScripts: new ContentScriptsBackground({
+            webNavigation: options.browserAPIs.webNavigation,
             getTab: bindMethod(options.browserAPIs.tabs, 'get'),
             injectScriptInTab: (tabId, injection) =>
                 options.browserAPIs.tabs.executeScript(tabId, injection),

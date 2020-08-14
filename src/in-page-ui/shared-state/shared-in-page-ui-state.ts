@@ -11,7 +11,6 @@ import {
 } from './types'
 
 export interface SharedInPageUIDependencies {
-    pageUrl: string
     loadComponent: (component: InPageUIComponent) => void
     unloadComponent: (component: InPageUIComponent) => void
 }
@@ -154,6 +153,11 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         await this._removeComponent('ribbon')
     }
 
+    async reloadRibbon() {
+        await this.reloadComponent('ribbon')
+        await this.reloadComponent('sidebar')
+    }
+
     async toggleRibbon() {
         if (this.componentsShown.ribbon) {
             await this.hideRibbon()
@@ -227,6 +231,11 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         this.componentsShown[component] = false
         this.componentsSetUp[component] = false
         this.events.emit('componentShouldDestroy', { component })
+    }
+
+    async reloadComponent(component: InPageUIComponent) {
+        await this.options.loadComponent(component)
+        this.events.emit('componentShouldSetUp', { component })
     }
 
     _maybeEmitShouldSetUp(component: InPageUIComponent) {

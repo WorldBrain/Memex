@@ -7,6 +7,8 @@ import {
     setupInPageSidebarUI,
     destroyInPageSidebarUI,
 } from 'src/sidebar/annotations-sidebar/index'
+import { runInBackground } from 'src/util/webextensionRPC'
+import { ContentScriptsInterface } from '../background/types'
 
 export const main: SidebarScriptMain = async (dependencies) => {
     const cssFile = browser.extension.getURL(`/content_script_sidebar.css`)
@@ -34,9 +36,16 @@ export const main: SidebarScriptMain = async (dependencies) => {
         },
     )
 
-    const setUp = () => {
+    const setUp = async () => {
+        const currentTab = await runInBackground<
+            ContentScriptsInterface<'caller'>
+        >().getCurrentTab()
+
         createMount()
-        setupInPageSidebarUI(mount.rootElement, dependencies)
+        setupInPageSidebarUI(mount.rootElement, {
+            ...dependencies,
+            pageUrl: currentTab.url,
+        })
     }
 
     const destroy = () => {

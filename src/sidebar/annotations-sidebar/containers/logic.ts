@@ -28,7 +28,7 @@ export interface SidebarContainerState {
 
     showState: 'visible' | 'hidden'
 
-    pageUrl?: string
+    pageUrl: string
     annotations: Annotation[]
     annotationModes: {
         [context in AnnotationEventContext]: {
