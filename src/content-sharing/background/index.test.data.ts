@@ -47,16 +47,19 @@ export const ANNOTATION_1_DATA = {
 
 export async function createContentSharingTestList(
     setup: BackgroundIntegrationTestSetup,
+    options?: { dontIndexPages?: boolean },
 ) {
     const localListId = await setup.backgroundModules.customLists.createCustomList(
         LIST_DATA,
     )
-    await setup.backgroundModules.search.searchIndex.addPage(PAGE_1_DATA)
+    if (!options?.dontIndexPages) {
+        await setup.backgroundModules.search.searchIndex.addPage(PAGE_1_DATA)
+        await setup.backgroundModules.search.searchIndex.addPage(PAGE_2_DATA)
+    }
     await setup.backgroundModules.customLists.insertPageToList({
         id: localListId,
         ...ENTRY_1_DATA,
     })
-    await setup.backgroundModules.search.searchIndex.addPage(PAGE_2_DATA)
     await setup.backgroundModules.customLists.insertPageToList({
         id: localListId,
         ...ENTRY_2_DATA,

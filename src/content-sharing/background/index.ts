@@ -56,6 +56,7 @@ export default class ContentSharingBackground {
             shareList: this.shareList,
             shareListEntries: this.shareListEntries,
             shareAnnotation: this.shareAnnotation,
+            unshareAnnotation: this.unshareAnnotation,
             getRemoteListId: async (options) => {
                 return this.storage.getRemoteListId({
                     localId: options.localListId,
@@ -213,6 +214,28 @@ export default class ContentSharingBackground {
         })
     }
 
+    unshareAnnotation: ContentSharingInterface['unshareAnnotation'] = async (
+        options,
+    ) => {
+        const remoteAnnotationId = (
+            await this.storage.getRemoteAnnotationIds({
+                localIds: [options.annotationUrl],
+            })
+        )[options.annotationUrl]
+        if (!remoteAnnotationId) {
+            throw new Error(
+                `Tried to unshare an annotation which was not shared`,
+            )
+        }
+        await this.storage.deleteAnnotationMetadata({
+            localIds: [options.annotationUrl],
+        })
+        await this.scheduleAction({
+            type: 'unshare-annotations',
+            remoteAnnotationIds: [remoteAnnotationId],
+        })
+    }
+
     waitForSync: ContentSharingInterface['waitForSync'] = async () => {
         await this._executingPendingActions
     }
@@ -356,6 +379,15 @@ export default class ContentSharingBackground {
                 ),
                 updatedComment: action.updatedComment,
             })
+        } else if (action.type === 'unshare-annotations') {
+            await contentSharing.removeAnnotations({
+                sharedAnnotationReferences: action.remoteAnnotationIds.map(
+                    (remoteAnnotationId) =>
+                        contentSharing.getSharedAnnotationReferenceFromLinkID(
+                            remoteAnnotationId,
+                        ),
+                ),
+            })
         }
     }
 
@@ -379,10 +411,7 @@ export default class ContentSharingBackground {
         const remoteAnnotations = Object.entries(remoteIds).map(
             ([localId, remoteId]) => ({
                 normalizedPageUrl: annotationsByPageUrl[localId].pageUrl,
-                remoteId:
-                    typeof remoteId === 'number'
-                        ? remoteId.toString()
-                        : remoteId,
+                remoteId,
                 createdWhen:
                     annotationsByPageUrl[localId].createdWhen?.getTime() ??
                     Date.now(),

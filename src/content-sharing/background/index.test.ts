@@ -100,41 +100,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 ])
                             },
-                            expectedSyncLogEntries: () => [
-                                expect.objectContaining({
-                                    operation: 'create',
-                                    collection: 'customLists',
-                                }),
-                                expect.objectContaining({
-                                    operation: 'create',
-                                    collection: 'pages',
-                                }),
-                                expect.objectContaining({
-                                    operation: 'create',
-                                    collection: 'visits',
-                                }),
-                                expect.objectContaining({
-                                    operation: 'create',
-                                    collection: 'pageListEntries',
-                                }),
-                                expect.objectContaining({
-                                    operation: 'create',
-                                    collection: 'pages',
-                                }),
-                                expect.objectContaining({
-                                    operation: 'create',
-                                    collection: 'visits',
-                                }),
-                                expect.objectContaining({
-                                    operation: 'create',
-                                    collection: 'pageListEntries',
-                                }),
-                                expect.objectContaining({
-                                    operation: 'create',
-                                    collection: 'sharedListMetadata',
-                                }),
-                            ],
-                            preCheck: async ({ setup }) => {},
                             postCheck: async ({ setup }) => {
                                 const listMetadata = await setup.storageManager.operation(
                                     'findObjects',
@@ -520,13 +485,25 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 await setup.backgroundModules.contentSharing.waitForSync()
 
+                                const sharedAnnotationMetadata = await setup.storageManager.operation(
+                                    'findObjects',
+                                    'sharedAnnotationMetadata',
+                                    {},
+                                )
+                                expect(sharedAnnotationMetadata).toEqual([
+                                    {
+                                        localId: annotationUrl,
+                                        remoteId: expect.anything(),
+                                    },
+                                ])
                                 const remoteAnnotationIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
                                     {
                                         localIds: [annotationUrl],
                                     },
                                 )
                                 expect(remoteAnnotationIds).toEqual({
-                                    [annotationUrl]: expect.anything(),
+                                    [annotationUrl]:
+                                        sharedAnnotationMetadata[0].remoteId,
                                 })
 
                                 const serverStorage = await setup.getServerStorage()
@@ -949,5 +926,120 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }
             },
         ),
+        backgroundIntegrationTest(
+            'should correctly unshare an annotation',
+            { skipConflictTests: true },
+            () => {
+                let localListIds: number[]
+
+                return {
+                    setup: async ({ setup }) => {
+                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
+                    },
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                setup.authService.setUser(TEST_USER)
+
+                                localListIds = [
+                                    await data.createContentSharingTestList(
+                                        setup,
+                                    ),
+                                    await data.createContentSharingTestList(
+                                        setup,
+                                        { dontIndexPages: true },
+                                    ),
+                                ]
+                                for (const localListId of localListIds) {
+                                    await setup.backgroundModules.contentSharing.shareList(
+                                        { listId: localListId },
+                                    )
+                                    await setup.backgroundModules.contentSharing.shareListEntries(
+                                        { listId: localListId },
+                                    )
+                                }
+                                await setup.backgroundModules.contentSharing.waitForSync()
+
+                                const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    {} as any,
+                                    data.ANNOTATION_1_DATA,
+                                    { skipPageIndexing: true },
+                                )
+                                await setup.backgroundModules.contentSharing.shareAnnotation(
+                                    {
+                                        annotationUrl,
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.waitForSync()
+
+                                const serverStorage = await setup.getServerStorage()
+                                const getShared = (collection: string) =>
+                                    serverStorage.storageManager.operation(
+                                        'findObjects',
+                                        collection,
+                                        {},
+                                        { order: [['id', 'asc']] },
+                                    )
+                                expect(
+                                    await getShared('sharedAnnotation'),
+                                ).toEqual([
+                                    expect.objectContaining({
+                                        body: data.ANNOTATION_1_DATA.body,
+                                    }),
+                                ])
+                                expect(
+                                    await getShared(
+                                        'sharedAnnotationListEntry',
+                                    ),
+                                ).toEqual([
+                                    expect.objectContaining({}),
+                                    expect.objectContaining({}),
+                                ])
+
+                                await setup.backgroundModules.contentSharing.unshareAnnotation(
+                                    {
+                                        annotationUrl,
+                                    },
+                                )
+
+                                expect(
+                                    await setup.storageManager.operation(
+                                        'findObjects',
+                                        'sharedAnnotationMetadata',
+                                        {},
+                                    ),
+                                ).toEqual([])
+                                expect(
+                                    await getShared('sharedAnnotation'),
+                                ).toEqual([])
+                                expect(
+                                    await getShared(
+                                        'sharedAnnotationListEntry',
+                                    ),
+                                ).toEqual([])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        // backgroundIntegrationTest(
+        //     'should correctly unshare annotations when removing a page from a shared list',
+        //     { skipConflictTests: true },
+        //     () => {
+        //         return {
+        //             setup: async ({ setup }) => {
+        //                 setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
+        //             },
+        //             steps: [
+        //                 {
+        //                     execute: async ({ setup }) => {
+
+        //                     },
+        //                 },
+        //             ],
+        //         }
+        //     },
+        // ),
     ],
 )
