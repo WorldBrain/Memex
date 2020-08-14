@@ -107,11 +107,11 @@ export default class PageStorage extends StorageModule {
 
     async createPageIfNotExistsOrIsStub(pageData: PipelineRes): Promise<void> {
         const normalizedUrl = normalizeUrl(pageData.url, {})
-        const notExistsOrIsStub = await this.pageExists(normalizedUrl, {
-            expectPageStub: true,
+        const existingPage = await this.operation('findPageByUrl', {
+            url: normalizedUrl,
         })
 
-        if (notExistsOrIsStub) {
+        if (!existingPage || pageIsStub(existingPage)) {
             await this.operation('createPage', {
                 ...pageData,
                 url: normalizedUrl,
@@ -207,18 +207,11 @@ export default class PageStorage extends StorageModule {
         }
     }
 
-    async pageExists(
-        url: string,
-        opts: { expectPageStub?: boolean } = {},
-    ): Promise<boolean> {
+    async pageExists(url: string): Promise<boolean> {
         const normalizedUrl = normalizeUrl(url, {})
         const existingPage = await this.operation('findPageByUrl', {
             url: normalizedUrl,
         })
-
-        if (opts.expectPageStub) {
-            return existingPage != null && pageIsStub(existingPage)
-        }
 
         return !!existingPage
     }
