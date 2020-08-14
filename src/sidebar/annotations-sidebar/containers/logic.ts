@@ -814,30 +814,20 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     shareAnnotation: EventHandler<'shareAnnotation'> = async ({ event }) => {
-        // const resultIndex = previousState.annotations.findIndex(
-        //     (annot) => annot.url === event.annotationUrl,
-        // )
-        // const annotation = previousState.annotations[resultIndex]
-
-        const updateAnnotationShareState = (params: AnnotationSharingInfo) =>
-            this.emitMutation({
-                annotationSharingInfo: {
-                    [event.annotationUrl]: { $set: params },
-                },
+        const updateAnnotationTaskState = (taskState: TaskState) =>
+            this._updateAnnotationShareState(event.annotationUrl, {
+                status: 'shared',
+                taskState,
             })
-
-        updateAnnotationShareState({ status: 'shared', taskState: 'running' })
+        updateAnnotationTaskState('running')
         try {
             // await new Promise(resolve => { })
             await this.options.contentSharing.shareAnnotation({
                 annotationUrl: event.annotationUrl,
             })
-            updateAnnotationShareState({
-                status: 'shared',
-                taskState: 'success',
-            })
+            updateAnnotationTaskState('success')
         } catch (e) {
-            updateAnnotationShareState({ status: 'shared', taskState: 'error' })
+            updateAnnotationTaskState('error')
             throw e
         }
     }
@@ -845,7 +835,22 @@ export class SidebarContainerLogic extends UILogic<
     unshareAnnotation: EventHandler<'unshareAnnotation'> = async ({
         event,
     }) => {
-        throw new Error(`Unsharing annotations is not implemented yet`)
+        const updateAnnotationTaskState = (taskState: TaskState) =>
+            this._updateAnnotationShareState(event.annotationUrl, {
+                status: 'unshared',
+                taskState,
+            })
+        updateAnnotationTaskState('running')
+        try {
+            // await new Promise(resolve => { })
+            await this.options.contentSharing.unshareAnnotation({
+                annotationUrl: event.annotationUrl,
+            })
+            updateAnnotationTaskState('success')
+        } catch (e) {
+            updateAnnotationTaskState('error')
+            throw e
+        }
     }
 
     toggleAnnotationBookmark: EventHandler<
@@ -982,4 +987,14 @@ export class SidebarContainerLogic extends UILogic<
             annotationSharingInfo,
         })
     }
+
+    _updateAnnotationShareState = (
+        annotationUrl: string,
+        info: AnnotationSharingInfo,
+    ) =>
+        this.emitMutation({
+            annotationSharingInfo: {
+                [annotationUrl]: { $set: info },
+            },
+        })
 }
