@@ -154,11 +154,20 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                     {' '}
                                     Subscription Status{' '}
                                 </TypographyInputTitle>
-                                <InputTextField
-                                    name={'subscriptionStatus'}
-                                    defaultValue={user.subscriptionStatus}
-                                    readOnly
-                                />
+                                <div className={styles.lineEditBox}>
+                                    <InputTextField
+                                        name={'subscriptionStatus'}
+                                        defaultValue={user.subscriptionStatus}
+                                        readOnly
+                                    />
+                                     <PrimaryButton
+                                            onClick={
+                                                this.props.showSubscriptionModal
+                                            }
+                                        >
+                                            {'Reactivate'}
+                                    </PrimaryButton>
+                                </div>
                             </div>
                         )}
 
