@@ -4,6 +4,7 @@ import cx from 'classnames'
 
 import { Props } from './result-item'
 import SemiCircularRibbon from './semi-circular-ribbon'
+import { featuresBeta } from 'src/util/remote-functions-background'
 import ResultItemActionBtn from './result-item-action-btn'
 
 const styles = require('./result-item.css')
@@ -27,6 +28,22 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
         })
     }
 
+    state = {
+        copyPasterAccess: false,
+    }
+
+    async componentDidMount() {
+        this.getCopyPasterAccess()
+    }
+
+    async getCopyPasterAccess() {
+        if (await featuresBeta.getFeatureState('copy-paster')) {
+            this.setState({
+                copyPasterAccess: true,
+            })
+        }
+    }
+
     render() {
         const listLength = this.props.lists?.length ?? 0
         const tagsLength = this.props.tags?.length ?? 0
@@ -44,7 +61,7 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                         e.stopPropagation()
                     }}
                 >
-                    {this.props.isBetaEnabled && (
+                    {this.state.copyPasterAccess && (
                         <ResultItemActionBtn
                             imgSrc={copy}
                             onClick={this.props.onCopyPasterBtnClick}
