@@ -22,11 +22,14 @@ export const main: SidebarScriptMain = async (dependencies) => {
     }
     createMount()
 
-    dependencies.inPageUI.events.on('componentShouldSetUp', ({ component }) => {
-        if (component === 'sidebar') {
-            setUp()
-        }
-    })
+    dependencies.inPageUI.events.on(
+        'componentShouldSetUp',
+        ({ component, options }) => {
+            if (component === 'sidebar') {
+                setUp({ showOnLoad: options.showSidebarOnLoad })
+            }
+        },
+    )
     dependencies.inPageUI.events.on(
         'componentShouldDestroy',
         ({ component }) => {
@@ -36,7 +39,7 @@ export const main: SidebarScriptMain = async (dependencies) => {
         },
     )
 
-    const setUp = async () => {
+    const setUp = async (options: { showOnLoad?: boolean } = {}) => {
         const currentTab = await runInBackground<
             ContentScriptsInterface<'caller'>
         >().getCurrentTab()
@@ -45,6 +48,7 @@ export const main: SidebarScriptMain = async (dependencies) => {
         setupInPageSidebarUI(mount.rootElement, {
             ...dependencies,
             pageUrl: currentTab.url,
+            initialState: options.showOnLoad ? 'visible' : 'hidden',
         })
     }
 
