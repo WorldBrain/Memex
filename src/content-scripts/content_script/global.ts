@@ -22,11 +22,7 @@ import { ContentScriptComponent } from '../types'
 import { initKeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/content_script'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
-import {
-    createAnnotationWithSidebar,
-    HighlightRenderer,
-    saveAndRenderHighlight,
-} from 'src/highlighting/ui/highlight-interactions'
+import { HighlightRenderer } from 'src/highlighting/ui/highlight-interactions'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
@@ -81,6 +77,12 @@ export async function main() {
     // business logic of initialising and hide/showing components.
     const inPageUI = new SharedInPageUIState({
         loadComponent: (component) => {
+            // Treat highlights differently as they're not a separate content script
+            if (component === 'highlights') {
+                components.highlights = resolvablePromise<void>()
+                components.highlights.resolve()
+            }
+
             if (!components[component]) {
                 components[component] = resolvablePromise<void>()
                 loadContentScript(component)
@@ -97,7 +99,7 @@ export async function main() {
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
         ) => () =>
-            saveAndRenderHighlight({
+            highlightRenderer.saveAndRenderHighlight({
                 annotationsCache,
                 getUrlAndTitle: () => ({
                     title: getPageTitle(),
@@ -115,7 +117,7 @@ export async function main() {
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
         ) => () =>
-            createAnnotationWithSidebar({
+            highlightRenderer.createAnnotationWithSidebar({
                 getSelection: () => document.getSelection(),
                 getUrlAndTitle: () => ({
                     title: getPageTitle(),
@@ -154,7 +156,7 @@ export async function main() {
             components.ribbon?.resolve()
         },
         async registerHighlightingScript(execute): Promise<void> {
-            execute({
+            await execute({
                 inPageUI,
                 annotationsCache,
                 highlightRenderer,
@@ -263,11 +265,11 @@ export async function main() {
 
     const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
     if (areHighlightsEnabled) {
+        inPageUI.showHighlights()
         if (!annotationsCache.isEmpty) {
             inPageUI.loadComponent('sidebar')
         }
     }
-    inPageUI.showHighlights()
 
     const isSidebarEnabled = await sidebarUtils.getSidebarState()
     if (isSidebarEnabled) {
