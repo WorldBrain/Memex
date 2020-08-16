@@ -16,7 +16,7 @@ import { Introduction } from 'src/sync/components/initial-sync/initial-sync-setu
 import { EventEmitter } from 'events'
 import Modal from 'src/common-ui/components/Modal'
 
-const devices = [
+let devices = [
     {
         deviceId: '123',
         productType: "Tom's Iphone",
@@ -28,6 +28,10 @@ const devices = [
         createdWhen: new Date(),
     },
 ] as SyncDevice[]
+
+const removeAllDevices = async () => {
+    devices = []
+}
 
 storiesOf('Sync', module)
     .add('DevicePane - Subscribed', () => (
@@ -43,6 +47,7 @@ storiesOf('Sync', module)
             handleUpgradeNeeded={() => {}}
             abortInitialSync={async () => {}}
             subscriptionStatus={this.props.subscriptionStatus}
+            removeAllDevices={removeAllDevices}
         />
     ))
     .add('DevicePane - Not Subscribed', () => (
@@ -58,6 +63,7 @@ storiesOf('Sync', module)
             handleUpgradeNeeded={() => {}}
             abortInitialSync={async () => {}}
             subscriptionStatus={this.props.subscriptionStatus}
+            removeAllDevices={removeAllDevices}
         />
     ))
     .add('Initial Sync - Modal', () => (
@@ -76,6 +82,7 @@ storiesOf('Sync', module)
                     )
                 }
                 abortInitialSync={async () => {}}
+                removeAllDevices={removeAllDevices}
                 getSyncEventEmitter={() => {
                     const eventEmitter = new EventEmitter() as TypedEventEmitter<
                         InitialSyncEvents
@@ -116,8 +123,12 @@ storiesOf('Sync', module)
     ))
     .add('Initial Sync - Sync Device', () => (
         <div>
-            <SyncDeviceScreen onClose={() => false}  stage={'1/2'} />
-            <SyncDeviceScreen onClose={() => false}  stage={'1/2'} progressPct={0.5} />
+            <SyncDeviceScreen onClose={() => false} stage={'1/2'} />
+            <SyncDeviceScreen
+                onClose={() => false}
+                stage={'1/2'}
+                progressPct={0.5}
+            />
         </div>
     ))
 
@@ -127,7 +138,7 @@ storiesOf('Sync', module)
                 stage={'1/2'}
                 progressPct={0.5}
                 error={'An error with the flux capacitor occurred.'}
-                onClose={() => false} 
+                onClose={() => false}
             />
         </div>
     ))

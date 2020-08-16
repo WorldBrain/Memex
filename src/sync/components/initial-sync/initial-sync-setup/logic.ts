@@ -5,7 +5,13 @@ import { FastSyncEvents } from '@worldbrain/storex-sync/lib/fast-sync'
 import analytics from 'src/analytics'
 import { now } from 'moment'
 
-type SyncSetupState = 'introduction' | 'pair' | 'sync' | 'done' | 'noConnection' | 'error'
+type SyncSetupState =
+    | 'introduction'
+    | 'pair'
+    | 'sync'
+    | 'done'
+    | 'noConnection'
+    | 'error'
 
 export interface InitialSyncSetupState {
     status: SyncSetupState
@@ -30,6 +36,7 @@ export interface InitialSyncSetupDependencies {
     getSyncEventEmitter: () => TypedEventEmitter<InitialSyncEvents>
     open: boolean
     abortInitialSync: () => Promise<void>
+    removeAllDevices: () => Promise<void>
 }
 
 export default class InitialSyncSetupLogic extends UILogic<
@@ -95,7 +102,7 @@ export default class InitialSyncSetupLogic extends UILogic<
         // )
         this.eventEmitter.on(
             'channelTimeout',
-            this.handleTimeout(new Error(`Fast sync channel timed out`)),
+            this.handleChannelTimeout(new Error(`Fast sync channel timed out`)),
         )
         this.eventEmitter.on('finished', this.done)
     }
@@ -207,12 +214,9 @@ export default class InitialSyncSetupLogic extends UILogic<
         })
     }
 
-    private handleTimeout = (e: Error) => async () => {
+    private handleChannelTimeout = (e: Error) => async () => {
         this.error(e)
-        this.emitMutation({
-            status: { $set: 'error' },
-            error: { $set: `${e}` },
-        })
         await this.dependencies.abortInitialSync()
+        await this.dependencies.removeAllDevices()
     }
 }
