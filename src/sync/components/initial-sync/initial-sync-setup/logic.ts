@@ -5,7 +5,13 @@ import { FastSyncEvents } from '@worldbrain/storex-sync/lib/fast-sync'
 import analytics from 'src/analytics'
 import { now } from 'moment'
 
-type SyncSetupState = 'introduction' | 'pair' | 'sync' | 'done' | 'noConnection'
+type SyncSetupState =
+    | 'introduction'
+    | 'pair'
+    | 'sync'
+    | 'done'
+    | 'noConnection'
+    | 'error'
 
 export interface InitialSyncSetupState {
     status: SyncSetupState
@@ -30,6 +36,7 @@ export interface InitialSyncSetupDependencies {
     getSyncEventEmitter: () => TypedEventEmitter<InitialSyncEvents>
     open: boolean
     abortInitialSync: () => Promise<void>
+    removeAllDevices: () => Promise<void>
 }
 
 export default class InitialSyncSetupLogic extends UILogic<
@@ -89,8 +96,13 @@ export default class InitialSyncSetupLogic extends UILogic<
         this.eventEmitter.on('progress', this.updateProgress)
         this.eventEmitter.on('roleSwitch', this.updateRole)
         this.eventEmitter.on('error', this.updateError)
-        this.eventEmitter.on('channelTimeout', () =>
-            this.error(new Error(`Timed out`)),
+        // this.eventEmitter.on(
+        //     'packageStalled',
+        //     this.handleTimeout(new Error('Package send/receive timed out')),
+        // )
+        this.eventEmitter.on(
+            'channelTimeout',
+            this.handleChannelTimeout(new Error(`Fast sync channel timed out`)),
         )
         this.eventEmitter.on('finished', this.done)
     }
@@ -101,6 +113,7 @@ export default class InitialSyncSetupLogic extends UILogic<
             this.eventEmitter.removeAllListeners('roleSwitch')
             this.eventEmitter.removeAllListeners('error')
             this.eventEmitter.removeAllListeners('finished')
+            // this.eventEmitter.removeAllListeners('packageStalled')
             this.eventEmitter.removeAllListeners('channelTimeout')
         }
     }
@@ -188,14 +201,22 @@ export default class InitialSyncSetupLogic extends UILogic<
         })
     }
 
-    error(e) {
+    private error(e: Error) {
         analytics.trackEvent({
             category: 'Sync',
             action: 'failInitSync',
             duration: this.runningTime,
         })
+
         this.emitMutation({
+            status: { $set: 'error' },
             error: { $set: `${e}` },
         })
+    }
+
+    private handleChannelTimeout = (e: Error) => async () => {
+        this.error(e)
+        await this.dependencies.abortInitialSync()
+        await this.dependencies.removeAllDevices()
     }
 }

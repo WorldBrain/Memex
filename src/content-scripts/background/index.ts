@@ -1,6 +1,7 @@
 import { ContentScriptsInterface } from './types'
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { Tabs } from 'webextension-polyfill-ts'
+import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
+import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import { Tabs, WebNavigation } from 'webextension-polyfill-ts'
 
 export class ContentScriptsBackground {
     remoteFunctions: ContentScriptsInterface<'provider'>
@@ -12,6 +13,7 @@ export class ContentScriptsBackground {
                 options: { file: string },
             ) => void
             getTab: Tabs.Static['get']
+            webNavigation: WebNavigation.Static
         },
     ) {
         this.remoteFunctions = {
@@ -21,6 +23,17 @@ export class ContentScriptsBackground {
                 url: (await options.getTab(tab.id)).url,
             }),
         }
+
+        this.options.webNavigation.onHistoryStateUpdated.addListener(
+            async ({ tabId }) => {
+                const inPage = runInTab<InPageUIContentScriptRemoteInterface>(
+                    tabId,
+                )
+
+                await inPage.removeHighlights()
+                await inPage.reloadRibbon()
+            },
+        )
     }
 
     setupRemoteFunctions() {

@@ -94,6 +94,10 @@ export default class SyncBackground extends SyncService {
             ) as () => Promise<void>,
             listDevices: bindMethod(this.syncInfoStorage, 'listDevices'),
             removeDevice: bindMethod(this.syncInfoStorage, 'removeDevice'),
+            removeAllDevices: bindMethod(
+                this.syncInfoStorage,
+                'removeAllDevices',
+            ),
         }
 
         this.initialSync.debug = true
@@ -181,6 +185,7 @@ export default class SyncBackground extends SyncService {
             return remoteEmitter.emit('channelTimeout', {})
         })
         this.initialSync.events.on('packageStalled', () => {
+            captureException(`InitialSyncError - packageStalled`)
             return remoteEmitter.emit('packageStalled', {})
         })
     }

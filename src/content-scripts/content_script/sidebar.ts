@@ -7,6 +7,8 @@ import {
     setupInPageSidebarUI,
     destroyInPageSidebarUI,
 } from 'src/sidebar/annotations-sidebar/index'
+import { runInBackground } from 'src/util/webextensionRPC'
+import { ContentScriptsInterface } from '../background/types'
 
 export const main: SidebarScriptMain = async (dependencies) => {
     const cssFile = browser.extension.getURL(`/content_script_sidebar.css`)
@@ -20,11 +22,14 @@ export const main: SidebarScriptMain = async (dependencies) => {
     }
     createMount()
 
-    dependencies.inPageUI.events.on('componentShouldSetUp', ({ component }) => {
-        if (component === 'sidebar') {
-            setUp()
-        }
-    })
+    dependencies.inPageUI.events.on(
+        'componentShouldSetUp',
+        ({ component, options }) => {
+            if (component === 'sidebar') {
+                setUp({ showOnLoad: options.showSidebarOnLoad })
+            }
+        },
+    )
     dependencies.inPageUI.events.on(
         'componentShouldDestroy',
         ({ component }) => {
@@ -34,9 +39,17 @@ export const main: SidebarScriptMain = async (dependencies) => {
         },
     )
 
-    const setUp = () => {
+    const setUp = async (options: { showOnLoad?: boolean } = {}) => {
+        const currentTab = await runInBackground<
+            ContentScriptsInterface<'caller'>
+        >().getCurrentTab()
+
         createMount()
-        setupInPageSidebarUI(mount.rootElement, dependencies)
+        setupInPageSidebarUI(mount.rootElement, {
+            ...dependencies,
+            pageUrl: currentTab.url,
+            initialState: options.showOnLoad ? 'visible' : 'hidden',
+        })
     }
 
     const destroy = () => {

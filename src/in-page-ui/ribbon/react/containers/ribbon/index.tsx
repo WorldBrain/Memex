@@ -40,6 +40,14 @@ export default class RibbonContainer extends StatefulUIElement<
         )
     }
 
+    componentDidUpdate(prevProps: RibbonContainerProps) {
+        const { currentTab } = this.props
+
+        if (currentTab.url !== prevProps.currentTab.url) {
+            this.processEvent('hydrateStateFromDB', { url: currentTab.url })
+        }
+    }
+
     protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
         return {
             anchor: null,

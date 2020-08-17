@@ -23,12 +23,14 @@ export const SyncDeviceScreen = ({
     progressPct,
     handleCancel,
     handleRetry,
+    onClose,
 }: {
     error?: string
     stage: string
     progressPct?: number
     handleCancel?: () => void
     handleRetry?: () => void
+    onClose: () => void
 }) => {
     return (
         <ModalBox
@@ -65,9 +67,14 @@ export const SyncDeviceScreen = ({
                         ) : (
                             <div className={styles.progressBox}>
                                 <Warning>⚠️ Something went wrong</Warning>
+                                <TypographyBodyCenter>
+                                    {error}
+                                </TypographyBodyCenter>
+                                <WhiteSpacer20 />
                             </div>
                         )}
                     </div>
+                    <WhiteSpacer20 />
                     <HelpBlock>
                         <span>{'Problem with syncing? '}</span>
                         <ExternalLink

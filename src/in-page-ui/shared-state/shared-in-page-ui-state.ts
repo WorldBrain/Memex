@@ -8,10 +8,10 @@ import {
     InPageUIComponent,
     InPageUIRibbonAction,
     SidebarActionOptions,
+    ShouldSetUpOptions,
 } from './types'
 
 export interface SharedInPageUIDependencies {
-    pageUrl: string
     loadComponent: (component: InPageUIComponent) => void
     unloadComponent: (component: InPageUIComponent) => void
 }
@@ -79,8 +79,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
             return
         }
 
-        this.loadComponent('sidebar')
-        this._setState('sidebar', true)
+        await this._setState('sidebar', true)
         maybeEmitAction()
         this.showRibbon()
     }
@@ -117,9 +116,12 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         }
     }
 
-    async loadComponent(component: InPageUIComponent) {
+    async loadComponent(
+        component: InPageUIComponent,
+        options: ShouldSetUpOptions = {},
+    ) {
         await this.options.loadComponent(component)
-        this._maybeEmitShouldSetUp(component)
+        this._maybeEmitShouldSetUp(component, options)
     }
 
     async showRibbon(options?: { action?: InPageUIRibbonAction }) {
@@ -137,9 +139,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
             return
         }
 
-        await this.loadComponent('ribbon')
-        this._setState('ribbon', true)
-        this.loadComponent('sidebar')
+        await this._setState('ribbon', true)
         maybeEmitAction()
     }
 
@@ -152,6 +152,11 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
             await this._removeComponent('sidebar')
         }
         await this._removeComponent('ribbon')
+    }
+
+    async reloadRibbon() {
+        await this.reloadComponent('ribbon')
+        await this.reloadComponent('sidebar')
     }
 
     async toggleRibbon() {
@@ -206,16 +211,19 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         }
     }
 
-    async _setState(component: InPageUIComponent, visible: boolean) {
+    private async _setState(component: InPageUIComponent, visible: boolean) {
         if (this.componentsShown[component] === visible) {
             return
         }
 
         if (visible) {
-            await this.loadComponent(component)
+            await this.loadComponent(component, {
+                showSidebarOnLoad: component === 'sidebar',
+            })
         }
 
         this.componentsShown[component] = visible
+
         this.events.emit('stateChanged', {
             newState: this.componentsShown,
             changes: { [component]: this.componentsShown[component] },
@@ -229,9 +237,20 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         this.events.emit('componentShouldDestroy', { component })
     }
 
-    _maybeEmitShouldSetUp(component: InPageUIComponent) {
+    async reloadComponent(
+        component: InPageUIComponent,
+        options: ShouldSetUpOptions = {},
+    ) {
+        await this.options.loadComponent(component)
+        this.events.emit('componentShouldSetUp', { component, options })
+    }
+
+    private _maybeEmitShouldSetUp(
+        component: InPageUIComponent,
+        options: ShouldSetUpOptions = {},
+    ) {
         if (!this.componentsSetUp[component]) {
-            this.events.emit('componentShouldSetUp', { component })
+            this.events.emit('componentShouldSetUp', { component, options })
             this.componentsSetUp[component] = true
         }
     }

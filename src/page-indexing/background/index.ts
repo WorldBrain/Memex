@@ -175,7 +175,7 @@ export class PageIndexingBackground {
             rejectNoContent: !props.stubOnly,
         })
 
-        await this.storage.createPageIfNotExists(pageData)
+        await this.storage.createPageIfNotExistsOrIsStub(pageData)
         if (props.visitTime) {
             await this.storage.addPageVisit(pageData.url, props.visitTime)
         }

@@ -31,8 +31,15 @@ export interface SharedInPageUIEvents {
     ribbonAction: (event: { action: InPageUIRibbonAction }) => void
     ribbonUpdate: () => void
     sidebarAction: (event: SidebarActionOptions) => void
-    componentShouldSetUp: (event: { component: InPageUIComponent }) => void
+    componentShouldSetUp: (event: {
+        component: InPageUIComponent
+        options?: ShouldSetUpOptions
+    }) => void
     componentShouldDestroy: (event: { component: InPageUIComponent }) => void
+}
+
+export interface ShouldSetUpOptions {
+    showSidebarOnLoad?: boolean
 }
 
 export interface SharedInPageUIInterface {

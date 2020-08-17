@@ -35,6 +35,7 @@ interface Props {
     refreshDevices: () => Promise<void>
     handleUpgradeNeeded: () => void
     abortInitialSync: () => Promise<void>
+    removeAllDevices: () => Promise<void>
     subscriptionStatus: string
 }
 
@@ -129,7 +130,7 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
                 >
                     <SecondaryAction
                         onClick={this.props.handleUpgradeNeeded}
-                        label={` Pair New Device`}
+                        label="Pair New Device"
                     />
                 </ButtonTooltip>
             )
@@ -144,7 +145,7 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
                     <SecondaryAction
                         onClick={null}
                         disabled
-                        label={`All devices paired`}
+                        label="All devices paired"
                     />
                 </ButtonTooltip>
             )
@@ -158,7 +159,7 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
                 >
                     <SecondaryAction
                         onClick={this.handleLoginNeeded}
-                        label={`Login to Sync`}
+                        label="Login to Sync"
                     />
                 </ButtonTooltip>
             )
@@ -168,7 +169,7 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
             pairButton = (
                 <SecondaryAction
                     onClick={this.handleOpenNewDevice}
-                    label={`Pair New Device`}
+                    label="Pair New Device"
                 />
             )
         }
@@ -226,6 +227,7 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
                 }
                 waitForInitialSync={this.props.waitForInitialSync}
                 abortInitialSync={this.props.abortInitialSync}
+                removeAllDevices={this.props.removeAllDevices}
                 getSyncEventEmitter={() => getRemoteEventEmitter('sync')}
                 open={this.state.isAddingNewDevice}
                 onClose={this.handleCloseNewDevice}
@@ -279,6 +281,8 @@ class SyncDevicesPaneContainer extends React.Component<
     }
 
     abortInitialSync = async () => sync.abortInitialSync()
+
+    removeAllDevices = async () => sync.removeAllDevices()
 
     refreshDevices = async () => {
         const devices = (await sync.listDevices()) as SyncDevice[]
@@ -347,6 +351,7 @@ class SyncDevicesPaneContainer extends React.Component<
                         }
                         refreshDevices={this.refreshDevices}
                         abortInitialSync={this.abortInitialSync}
+                        removeAllDevices={this.removeAllDevices}
                         subscriptionStatus={
                             this.props.currentUser?.subscriptionStatus
                         }

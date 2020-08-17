@@ -101,13 +101,6 @@ export default class SearchSettings extends React.PureComponent<Props> {
         return (
             <div className={styles.container}>
                 <div className={styles.settingsHeader}>General settings</div>
-                <Checkbox
-                    id="index-stubs"
-                    isChecked={this.props.stubs}
-                    handleChange={this.props.toggleStubs}
-                >
-                    Make title and URL always searchable (recommended)
-                </Checkbox>
                 <div className={styles.settingsHeader}>
                     Full-text search websites and PDFs
                 </div>
@@ -153,6 +146,13 @@ export default class SearchSettings extends React.PureComponent<Props> {
                 >
                     Back
                 </a>
+                <Checkbox
+                    id="index-stubs"
+                    isChecked={this.props.stubs}
+                    handleChange={this.props.toggleStubs}
+                >
+                    Make title and URL of every visited page searchable
+                </Checkbox>
             </div>
         )
     }

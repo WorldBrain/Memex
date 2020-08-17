@@ -42,6 +42,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         this.cleanupEventForwarding()
     }
 
+    componentDidUpdate(prevProps: Props) {
+        const { pageUrl } = this.props
+
+        if (pageUrl !== prevProps.pageUrl) {
+            this.processEvent('setPageUrl', { pageUrl })
+        }
+    }
+
     private setupEventForwarding() {
         const { inPageUI, highlighter } = this.props
 

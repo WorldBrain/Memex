@@ -48,12 +48,24 @@ export default class InitialSyncSetup extends StatefulUIElement<
                         stage={this.state.stage}
                         handleCancel={() => this.processEvent('cancel', {})}
                         handleRetry={() => this.processEvent('retry', {})}
+                        onClose={this.close} 
                     />
                 )
             case 'done':
                 return <Success onClose={this.close} />
             case 'noConnection':
                 return <NoConnectionScreen onClose={this.close} />
+            case 'error':
+                return (
+                    <SyncDeviceScreen
+                        error={this.state.error}
+                        progressPct={this.state.progressPct}
+                        stage={this.state.stage}
+                        handleCancel={() => this.processEvent('cancel', {})}
+                        handleRetry={() => this.processEvent('retry', {})}
+                        onClose={this.close} 
+                    />
+                )
             default:
                 throw Error(`Unknown Sync Setup state ${this.state.status}`)
         }

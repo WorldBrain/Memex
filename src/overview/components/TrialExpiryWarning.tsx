@@ -9,41 +9,74 @@ interface Props {
 	expiryDate: any
 	closeTrialNotif: () => void
     loadingPortal: boolean
+    trialOverClosed: () => void
 }
 
 class TrialExpiryWarning extends PureComponent<Props> {
 
-	getExpiryinClearLanguage() {
+    state = {
+        expired: false
+    }
+
+    getExpiryinClearLanguage() {
 		const dateNow = Math.floor(new Date().getTime() / 1000);
 
 		const expiryDays = Math.floor((this.props.expiryDate - dateNow)/ 86400)
-		
-		return expiryDays
+
+
+        if (expiryDays < 1) {
+            const expiryHours = Math.floor((this.props.expiryDate - dateNow)/ 3600)
+            return expiryHours + ' ' + 'hours'
+        } else if ( expiryDays > 1 ){ 
+            return expiryDays + ' ' + 'days'
+        } else if ( expiryDays === 1 ){ 
+            return expiryDays + ' ' + 'day'
+        } else if (expiryDays < 0) {
+            this.setState({
+                expired: true
+            })
+        }
+
 	}
+
+    closeButton() {
+        if (this.state.expired) {
+            this.props.trialOverClosed()
+        } else {
+            this.props.closeTrialNotif()
+        }
+    }
 
     render() {
         return (
             <div id="TrialExpiryWarning" className={styles.box}>
-            	Your trial is expiring in <strong>{this.getExpiryinClearLanguage()}</strong> days
-            	<span
-            		onClick={this.props.showPaymentWindow}
-            		className={styles.closeButton}
-            	>{this.props.loadingPortal ? (
-                                <LoadingIndicator/>
-                    ):('Update Payment Methods'
+                {this.state.expired ? (
+                    <span>
+                        {"Your trial EXPIRED. Premium features disabled"}
+                    </span>
+                ):(
+                    <span>Your trial is expiring in <strong>{this.getExpiryinClearLanguage()}</strong></span>
                 )}
-                </span>
+                    <span
+                        onClick={this.props.showPaymentWindow}
+                        className={styles.closeButton}
+                    >{this.props.loadingPortal ? (
+                                    <LoadingIndicator/>
+                        ):(<span>{this.state.expired ? ('Reactivate'):('Update Payment Methods')}</span>
+                    )}
+                    </span>
 
-                <span
-                    onClick={this.props.closeTrialNotif}
-                    className={styles.closeButton}
-                >
-                    Close
-                </span>
-            	{/*<span
-            		onClick={this.props.closeTrialNotif}
-            		className={styles.closeButton}
-            	>close</span>*/}
+                    {}
+                    <span
+                        onClick={()=>this.closeButton()}
+                        className={styles.closeButton}
+                    >
+                        Close
+                    </span>
+                    {/*<span
+                        onClick={this.props.closeTrialNotif}
+                        className={styles.closeButton}
+                    >close</span>*/}            	
             </div>
         )
     }

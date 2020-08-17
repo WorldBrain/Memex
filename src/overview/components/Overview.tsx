@@ -48,7 +48,7 @@ interface State {
     showUpgrade: boolean
     trialExpiry: boolean
     expiryDate: number
-    loadingPortal: boolean,
+    loadingPortal: boolean
 }
 
 class Overview extends PureComponent<Props, State> {
@@ -89,8 +89,15 @@ class Overview extends PureComponent<Props, State> {
         localStorage.setItem('TrialExpiryWarning_Close_Time', JSON.stringify(Math.floor(Date.now() / 1000)))
     }
 
+    trialOverClosed() {
+        this.setState({
+            trialExpiry: false,
+        })
+        localStorage.setItem('trialOverClosed', 'true')    
+    }
+
     componentDidMount() {
-        // this.props.init()
+        auth.refreshUserInfo()
         this.upgradeState()
         this.expiryDate()
     }
@@ -100,12 +107,28 @@ class Overview extends PureComponent<Props, State> {
         const dateNow = Math.floor(new Date().getTime() / 1000);
         const inTrial = await auth.getSubscriptionStatus()
         const lastCloseTime = parseFloat(localStorage.getItem('TrialExpiryWarning_Close_Time'))
+        const trialOverClosed = localStorage.getItem('trialOverClosed')
 
-        if (date - dateNow < 259200 && inTrial === 'in_trial' && dateNow - lastCloseTime > 86400) { //3 days notification window - 24h waiting until showing the trial notif again
-                this.setState({
-                    trialExpiry: true,
-                    expiryDate: date
-                })
+        if ((date - dateNow < 259200 && inTrial === 'in_trial') || inTrial === 'cancelled') { //3 days notification window - 24h waiting until showing the trial notif again
+
+                if (lastCloseTime && dateNow - lastCloseTime > 86400) {
+                    this.setState({
+                        trialExpiry: true,
+                        expiryDate: date
+                    }) 
+                }
+                if (!lastCloseTime) {
+                    this.setState({
+                        trialExpiry: true,
+                        expiryDate: date
+                    }) 
+                }
+
+                if (trialOverClosed === 'true' && inTrial === 'cancelled') {
+                    this.setState({
+                        trialExpiry: false,
+                    }) 
+                }
             }
 
         return date
@@ -193,7 +216,6 @@ class Overview extends PureComponent<Props, State> {
     }
 
     renderOverview() {
-
         return (
             <div className={styles.mainWindow}>
                 <div className={classNames(styles.Overview,
@@ -272,6 +294,7 @@ class Overview extends PureComponent<Props, State> {
                             showPaymentWindow={this.openPortal}
                             closeTrialNotif={()=> this.closeTrialExpiryNotif()}
                             loadingPortal={this.state.loadingPortal}
+                            trialOverClosed={()=> this.trialOverClosed()}
                         />
                     }
                     </div>
