@@ -22,16 +22,21 @@ class TrialExpiryWarning extends PureComponent<Props> {
 		const dateNow = Math.floor(new Date().getTime() / 1000);
 
 		const expiryDays = Math.floor((this.props.expiryDate - dateNow)/ 86400)
+        const expired = this.props.expiryDate - dateNow
 
+        console.log(expired)
 
-        if (expiryDays < 1) {
+        console.log(expiryDays)
+
+        if (expiryDays < 1 && expiryDays > 0) {
             const expiryHours = Math.floor((this.props.expiryDate - dateNow)/ 3600)
             return expiryHours + ' ' + 'hours'
         } else if ( expiryDays > 1 ){ 
             return expiryDays + ' ' + 'days'
         } else if ( expiryDays === 1 ){ 
             return expiryDays + ' ' + 'day'
-        } else if (expiryDays < 0) {
+        } else if (expired < 0) {
+            console.log('true')
             this.setState({
                 expired: true
             })
