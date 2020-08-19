@@ -34,23 +34,32 @@ export async function setStorageMiddleware(
             ])
         },
     })
+
+    let shouldLogStorageOperations = false
+    const setStorageLoggingEnabled = (value: boolean) =>
+        (shouldLogStorageOperations = value)
+
     storageManager.setMiddleware(
         modifyMiddleware([
-            // {
-            //     process: async (context) => {
-            //         const result = await context.next.process({
-            //             operation: context.operation,
-            //         })
-            //         console.groupCollapsed('operation', context.operation[0])
-            //         console.log({
-            //             operation: context.operation,
-            //             result,
-            //         })
-            //         console.trace()
-            //         console.groupEnd()
-            //         return result
-            //     },
-            // },
+            {
+                process: async (context) => {
+                    const result = await context.next.process({
+                        operation: context.operation,
+                    })
+                    if (!shouldLogStorageOperations) {
+                        return result
+                    }
+
+                    console.groupCollapsed('operation', context.operation[0])
+                    console['log']({
+                        operation: context.operation,
+                        result,
+                    })
+                    console['trace']()
+                    console.groupEnd()
+                    return result
+                },
+            },
             changeWatchMiddleware,
             await options.syncService.createSyncLoggingMiddleware(),
         ]),
@@ -85,5 +94,9 @@ export async function setStorageMiddleware(
                 },
             },
         })
+    }
+
+    return {
+        setStorageLoggingEnabled,
     }
 }
