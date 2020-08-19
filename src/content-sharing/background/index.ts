@@ -542,6 +542,28 @@ export default class ContentSharingBackground {
                             remoteListId,
                             normalizedUrl: pageUrl,
                         })
+
+                        const annotations = await this.options.annotationStorage.listAnnotationsByPageUrl(
+                            { pageUrl },
+                        )
+                        if (!annotations.length) {
+                            continue
+                        }
+
+                        const localAnnotationIds = annotations.map(
+                            (annot) => annot.url,
+                        )
+
+                        const remoteAnnotationIdMap = await this.storage.getRemoteAnnotationIds(
+                            { localIds: localAnnotationIds },
+                        )
+
+                        await this.scheduleAction({
+                            type: 'unshare-annotations',
+                            remoteAnnotationIds: Object.values(
+                                remoteAnnotationIdMap,
+                            ),
+                        })
                     }
                 }
             }
