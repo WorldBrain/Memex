@@ -565,6 +565,20 @@ export default class ContentSharingBackground {
                             ),
                         })
                     }
+                } else if (change.collection === 'annotations') {
+                    const localAnnotationIds = change.pks.map((pk) =>
+                        pk.toString(),
+                    )
+                    const remoteAnnotationIdMap = await this.storage.getRemoteAnnotationIds(
+                        { localIds: localAnnotationIds },
+                    )
+
+                    await this.scheduleAction({
+                        type: 'unshare-annotations',
+                        remoteAnnotationIds: Object.values(
+                            remoteAnnotationIdMap,
+                        ),
+                    })
                 }
             }
         }
