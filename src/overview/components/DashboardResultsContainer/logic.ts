@@ -25,6 +25,7 @@ export default class DashboardResultsLogic extends UILogic<
         loadComponent: (c) => null,
         unloadComponent: (c) => null,
         pageUrl: '',
+        normalizedPageUrl: '',
     })
 
     constructor(private dependencies: DashboardResultsDependencies) {

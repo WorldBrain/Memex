@@ -1,6 +1,6 @@
 import 'core-js'
 import { EventEmitter } from 'events'
-// import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import { setupScrollReporter } from 'src/activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
@@ -95,6 +95,7 @@ export async function main() {
             delete components[component]
         },
         pageUrl: currentTab.url,
+        normalizedPageUrl: normalizeUrl(currentTab.url),
     })
     annotationsCache.load(getPageUrl())
 

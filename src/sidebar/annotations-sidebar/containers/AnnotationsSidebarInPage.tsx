@@ -105,19 +105,19 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 annotationUrl: event.annotationUrl,
                 anchor: event.anchor,
             })
-        }
-
-        if (event.action === 'comment') {
+        } else if (event.action === 'comment') {
             this.processEvent('addNewPageComment', null)
             if (event.anchor) {
                 this.processEvent('setNewPageCommentAnchor', {
                     anchor: event.anchor,
                 })
             }
-        }
-
-        if (event.action === 'show_annotation') {
+        } else if (event.action === 'show_annotation') {
             this.activateAnnotation(event.annotationUrl)
+        } else if (event.action === 'set_sharing_access') {
+            this.processEvent('receiveSharingAccessChange', {
+                sharingAccess: event.annotationSharingAccess,
+            })
         }
 
         this.forceUpdate()

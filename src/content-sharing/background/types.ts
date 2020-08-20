@@ -14,3 +14,8 @@ export interface ContentSharingInterface {
     }): Promise<{ [listId: number]: boolean }>
     waitForSync(): Promise<void>
 }
+
+export interface ContentSharingEvents {
+    pageAddedToSharedList(options: { pageUrl: string }): void
+    pageRemovedFromSharedList(options: { pageUrl: string }): void
+}
