@@ -324,6 +324,20 @@ export default class ContentSharingBackground {
                 category: 'ContentSharing',
                 action: 'unshareListEntry',
             })
+        } else if (action.type === 'remove-shared-annotation-list-entries') {
+            await contentSharing.removeAnnotationsFromLists({
+                sharedListReferences: [
+                    contentSharing.getSharedListReferenceFromLinkID(
+                        action.remoteListId,
+                    ),
+                ],
+                sharedAnnotationReferences: action.remoteAnnotationIds.map(
+                    (remoteId) =>
+                        contentSharing.getSharedAnnotationReferenceFromLinkID(
+                            remoteId,
+                        ),
+                ),
+            })
         } else if (action.type === 'change-shared-list-title') {
             await contentSharing.updateListTitle(
                 contentSharing.getSharedListReferenceFromLinkID(
@@ -559,7 +573,8 @@ export default class ContentSharingBackground {
                         )
 
                         await this.scheduleAction({
-                            type: 'unshare-annotations',
+                            type: 'remove-shared-annotation-list-entries',
+                            remoteListId,
                             remoteAnnotationIds: Object.values(
                                 remoteAnnotationIdMap,
                             ),
