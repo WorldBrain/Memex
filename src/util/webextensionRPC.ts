@@ -316,11 +316,27 @@ const __REMOTE_EVENT_NAME__ = '__REMOTE_EVENT_NAME__'
 // Sending Side, (e.g. background script)
 export function remoteEventEmitter<T>(
     eventType: string,
+    { broadcastToTabs = false } = {},
 ): RemoteEventEmitter<T> {
     const message = {
         __REMOTE_EVENT__,
         __REMOTE_EVENT_TYPE__: eventType,
     }
+
+    if (broadcastToTabs) {
+        return {
+            emit: async (eventName, data) => {
+                for (const { id: tabId } of await browser.tabs.query({})) {
+                    browser.tabs.sendMessage(tabId, {
+                        ...message,
+                        __REMOTE_EVENT_NAME__: eventName,
+                        data,
+                    })
+                }
+            },
+        }
+    }
+
     return {
         emit: async (eventName, data) =>
             browser.runtime.sendMessage({
