@@ -2,22 +2,25 @@ import chunk from 'lodash/chunk'
 import fromPairs from 'lodash/fromPairs'
 import StorageManager from '@worldbrain/storex'
 import {
-    ContentSharingInterface,
-    ContentSharingAction,
     AddSharedListEntriesAction,
+    ContentSharingInterface,
+    ContentSharingEvents,
+    ContentSharingAction,
 } from './types'
 import { ContentSharingStorage, ContentSharingClientStorage } from './storage'
 import CustomListStorage from 'src/custom-lists/background/storage'
 import { AuthBackground } from 'src/authentication/background'
-import { SharedListEntry } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { PageListEntry } from 'src/custom-lists/background/types'
 import createResolvable, { Resolvable } from '@josephg/resolvable'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { Analytics } from 'src/analytics/types'
-import DirectLinkingBackground from 'src/annotations/background'
 import AnnotationStorage from 'src/annotations/background/storage'
 import { Annotation } from 'src/annotations/types'
+import {
+    remoteEventEmitter,
+    RemoteEventEmitter,
+} from 'src/util/webextensionRPC'
 
 // interface ListPush {
 //     actionsPending: number
@@ -25,6 +28,7 @@ import { Annotation } from 'src/annotations/types'
 // }
 
 export default class ContentSharingBackground {
+    remoteEmitter: RemoteEventEmitter<ContentSharingEvents>
     remoteFunctions: ContentSharingInterface
     storage: ContentSharingClientStorage
     shouldProcessSyncChanges = true
@@ -50,6 +54,10 @@ export default class ContentSharingBackground {
     ) {
         this.storage = new ContentSharingClientStorage({
             storageManager: options.storageManager,
+        })
+
+        this.remoteEmitter = remoteEventEmitter('contentSharing', {
+            broadcastToTabs: true,
         })
 
         this.remoteFunctions = {
@@ -494,6 +502,10 @@ export default class ContentSharingBackground {
                         annotationEntries,
                         remoteListIds: [remoteListId],
                     })
+
+                    this.remoteEmitter.emit('pageAddedToSharedList', {
+                        pageUrl,
+                    })
                 }
             } else if (change.type === 'modify') {
                 if (change.collection === 'customLists') {
@@ -578,6 +590,10 @@ export default class ContentSharingBackground {
                             remoteAnnotationIds: Object.values(
                                 remoteAnnotationIdMap,
                             ),
+                        })
+
+                        this.remoteEmitter.emit('pageRemovedFromSharedList', {
+                            pageUrl,
                         })
                     }
                 } else if (change.collection === 'annotations') {

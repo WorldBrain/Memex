@@ -142,6 +142,10 @@ export type SidebarContainerEvents = UIEvent<{
         anchor?: Anchor
     }
 
+    receiveSharingAccessChange: {
+        sharingAccess: AnnotationSharingAccess
+    }
+
     // Annotation boxes
     goToAnnotation: {
         context: AnnotationEventContext
@@ -523,6 +527,12 @@ export class SidebarContainerLogic extends UILogic<
                 }),
             },
         })
+    }
+
+    receiveSharingAccessChange: EventHandler<'receiveSharingAccessChange'> = ({
+        event: { sharingAccess },
+    }) => {
+        this.emitMutation({ annotationSharingAccess: { $set: sharingAccess } })
     }
 
     // TODO (sidebar-refactor) reconcile this duplicate code with ribbon notes save

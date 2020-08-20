@@ -242,6 +242,34 @@ describe('SidebarContainerLogic', () => {
         })
 
         it('should be able to go to an annotation highlight on the page', async () => {})
+
+        it('should be able to change annotation sharing access', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({ device })
+
+            expect(sidebar.state.annotationSharingAccess).toEqual(
+                'feature-disabled',
+            )
+            await sidebar.processEvent('receiveSharingAccessChange', {
+                sharingAccess: 'page-not-shared',
+            })
+            expect(sidebar.state.annotationSharingAccess).toEqual(
+                'page-not-shared',
+            )
+            await sidebar.processEvent('receiveSharingAccessChange', {
+                sharingAccess: 'sharing-allowed',
+            })
+            expect(sidebar.state.annotationSharingAccess).toEqual(
+                'sharing-allowed',
+            )
+            await sidebar.processEvent('receiveSharingAccessChange', {
+                sharingAccess: 'feature-disabled',
+            })
+            expect(sidebar.state.annotationSharingAccess).toEqual(
+                'feature-disabled',
+            )
+        })
     })
 
     // TODO: Figure out why we're passing in all the comment data that's already available in state

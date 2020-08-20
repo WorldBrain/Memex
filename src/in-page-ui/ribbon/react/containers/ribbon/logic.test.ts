@@ -33,6 +33,7 @@ describe('Ribbon logic', () => {
         const currentTab = {
             id: 654,
             url: 'https://www.foo.com',
+            normalizedUrl: 'foo.com',
             title: 'Foo.com: Home',
         }
         const annotations = insertBackgroundFunctionTab(
@@ -48,6 +49,7 @@ describe('Ribbon logic', () => {
             loadComponent: () => {},
             unloadComponent: () => {},
             pageUrl: currentTab.url,
+            normalizedPageUrl: currentTab.normalizedUrl,
         })
 
         const annotationsManager = {} as any

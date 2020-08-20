@@ -25,6 +25,7 @@ import TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
 import { AuthRemoteEvents } from 'src/authentication/background/types'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
+import { ContentSharingEvents } from 'src/content-sharing/background/types'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -360,6 +361,7 @@ export type TypedRemoteEventEmitter<
 interface RemoteEvents {
     auth: AuthRemoteEvents
     sync: InitialSyncEvents
+    contentSharing: ContentSharingEvents
 }
 
 function registerRemoteEventForwarder() {
