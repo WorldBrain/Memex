@@ -234,7 +234,6 @@ export default onClickOutside(AnnotationsSidebar)
 
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css
-
 const ButtonStyled = styled.button`
     cursor: pointer;
     z-index: 3000;
@@ -356,7 +355,6 @@ const annotationCardStyle = css`
 `
 
 const NewAnnotationSection = styled.section`
-    font-family: 'Poppins', sans-serif;
     height: auto;
     background: #fff;
     display: flex;
@@ -374,7 +372,6 @@ const NewAnnotationSeparator = styled.div`
 `
 
 const AnnotationsSectionStyled = styled.section`
-    font-family: 'Poppins', sans-serif;
     background: #fff;
     display: flex;
     flex-direction: column;
