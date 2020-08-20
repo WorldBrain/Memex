@@ -10,6 +10,9 @@ import styles from './settings.css'
 export default () => (
     <React.Fragment>
         <div className={styles.block}>
+        <div className={styles.reloadInformation}>
+            Changes are only applied on new tabs or when you reload existing tabs.
+        </div>
         <KeyboardShortcutsContainer />
         </div>
     	<div className={styles.block}>
