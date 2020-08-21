@@ -5,6 +5,7 @@ import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { AnnotationShareIconRenderer } from './AnnotationShareIconRenderer'
 import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
@@ -35,40 +36,6 @@ export interface AnnotationFooterEventProps {
 class AnnotationFooter extends React.Component<Props> {
     private renderDefaultFooter() {
         const { isEdited, timestamp, isBookmarked } = this.props
-
-        const shareButtonState = this.getShareButtonState()
-        const SHARE_BUTTON_LABELS: {
-            [Key in typeof shareButtonState]: string
-        } = {
-            'feature-disabled': '',
-            'page-not-shared': 'Please add this page to a shared list first',
-            'not-shared-yet': 'Share note',
-            'already-shared': 'Unshare note',
-            sharing: 'Sharing note...',
-            'sharing-success': 'Note shared!',
-            'sharing-error': 'Could not share note :(',
-            unsharing: 'Unsharing note...',
-            'unsharing-success': 'Note unshared!',
-            'unsharing-error': 'Could not unshare note :(',
-        }
-
-        const SHARE_BUTTON_ICONS: {
-            [Key in typeof shareButtonState]: string | null
-        } = {
-            'feature-disabled': '',
-            'page-not-shared': icons.shareEmpty,
-            'not-shared-yet': icons.shareEmpty,
-            'already-shared': icons.share,
-            sharing: icons.share,
-            'sharing-success': icons.share,
-            'sharing-error': icons.shareEmpty,
-            unsharing: icons.shareEmpty,
-            'unsharing-success': icons.shareEmpty,
-            'unsharing-error': icons.share,
-        }
-
-        const shareButtonLoading =
-            shareButtonState === 'sharing' || shareButtonState === 'unsharing'
 
         return (
             <DefaultInnerFooterContainerStyled>
@@ -108,29 +75,31 @@ class AnnotationFooter extends React.Component<Props> {
                             <IconStyled title="Delete note" src={icons.trash} />
                         </IconBox>
                     </ButtonTooltip>
-                    {this.props.sharingAccess !== 'feature-disabled' && (
-                        <ButtonTooltip
-                            position={'bottom'}
-                            tooltipText={SHARE_BUTTON_LABELS[shareButtonState]}
-                        >
-                            {shareButtonLoading && <LoadingIndicator />}
-                            {!shareButtonLoading && (
-                                <IconBox
-                                    disabled={
-                                        this.props.sharingAccess ===
-                                        'page-not-shared'
-                                    }
-                                    onClick={this.getShareButtonAction()}
-                                >
-                                    <IconStyled
-                                        src={
-                                            SHARE_BUTTON_ICONS[shareButtonState]
-                                        }
-                                    />
-                                </IconBox>
-                            )}
-                        </ButtonTooltip>
-                    )}
+                    <AnnotationShareIconRenderer
+                        {...this.props}
+                        onShare={this.props.onShareClick}
+                        onUnshare={this.props.onUnshareClick}
+                        renderShareIcon={(shareIconProps) => (
+                            <ButtonTooltip
+                                position="bottom"
+                                tooltipText={shareIconProps.tooltipText}
+                            >
+                                {shareIconProps.isLoading ? (
+                                    <LoadingIndicator />
+                                ) : (
+                                    <IconBox
+                                        disabled={shareIconProps.isDisabled}
+                                        onClick={shareIconProps.onClickAction}
+                                    >
+                                        <IconStyled
+                                            src={shareIconProps.imgSrc}
+                                        />
+                                    </IconBox>
+                                )}
+                            </ButtonTooltip>
+                        )}
+                    />
+
                     {this.props.onGoToAnnotation && (
                         <ButtonTooltip
                             position={'bottom'}
@@ -188,70 +157,6 @@ class AnnotationFooter extends React.Component<Props> {
                 </BtnContainerStyled>
             </InnerFooterContainerStyled>
         )
-    }
-
-    private getShareButtonState() {
-        if (this.props.sharingAccess === 'feature-disabled') {
-            return 'feature-disabled'
-        }
-        if (this.props.sharingAccess === 'page-not-shared') {
-            return 'page-not-shared'
-        }
-
-        const info = this.props.sharingInfo ?? {
-            status: 'unshared',
-            taskState: 'pristine',
-        }
-        if (info.status === 'shared') {
-            if (info.taskState === 'pristine') {
-                return 'already-shared'
-            }
-            if (info.taskState === 'running') {
-                return 'sharing'
-            }
-            if (info.taskState === 'success') {
-                return 'sharing-success'
-            }
-            if (info.taskState === 'error') {
-                return 'sharing-error'
-            }
-        }
-        if (info.status === 'unshared') {
-            if (info.taskState === 'running') {
-                return 'unsharing'
-            }
-            if (info.taskState === 'success') {
-                return 'unsharing-success'
-            }
-            if (info.taskState === 'error') {
-                return 'unsharing-error'
-            }
-        }
-        return 'not-shared-yet'
-    }
-
-    private getShareButtonAction() {
-        if (this.props.sharingAccess !== 'sharing-allowed') {
-            return () => {}
-        }
-
-        const info = this.props.sharingInfo ?? {
-            status: 'unshared',
-            taskState: 'pristine',
-        }
-        if (
-            info.status === 'unshared' &&
-            (info.taskState === 'pristine' || info.taskState === 'success')
-        ) {
-            return this.props.onShareClick
-        }
-        if (
-            info.status === 'shared' &&
-            (info.taskState === 'pristine' || info.taskState === 'success')
-        ) {
-            return this.props.onUnshareClick
-        }
-        return () => {}
     }
 
     render() {
