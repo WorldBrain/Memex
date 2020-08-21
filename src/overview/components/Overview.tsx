@@ -58,6 +58,7 @@ class Overview extends PureComponent<Props, State> {
     private annotationsCache: AnnotationsCacheInterface
     private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     private customListsBG = runInBackground<RemoteCollectionsInterface>()
+    private contentSharingBG = runInBackground<ContentSharingInterface>()
     private tagsBG = runInBackground<RemoteTagsInterface>()
 
     private annotationsSidebarRef = React.createRef<
@@ -261,6 +262,7 @@ class Overview extends PureComponent<Props, State> {
                         tags={this.tagsBG}
                         annotations={this.annotationsBG}
                         customLists={this.customListsBG}
+                        contentSharing={this.contentSharingBG}
                         refSidebar={this.annotationsSidebarRef}
                         annotationsCache={this.annotationsCache}
                         onClickOutside={this.handleClickOutsideSidebar}
