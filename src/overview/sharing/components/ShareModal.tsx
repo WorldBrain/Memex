@@ -9,9 +9,7 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { getListShareUrl } from 'src/content-sharing/utils'
-import {
-    auth,
-} from 'src/util/remote-functions-background'
+import { auth } from 'src/util/remote-functions-background'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
@@ -37,6 +35,7 @@ interface State {
     isShared?: boolean
     shareUrl?: string
     showBetaNotif: boolean
+    hasSubscription: boolean
 }
 
 class ShareModal extends Component<Props, State> {
@@ -49,6 +48,7 @@ class ShareModal extends Component<Props, State> {
             entriesUploadState: 'pristine',
             updateProfileState: 'pristine',
             showBetaNotif: true,
+            hasSubscription: false,
         }
     }
 
@@ -56,11 +56,20 @@ class ShareModal extends Component<Props, State> {
         this.setState({ loadState: 'running' })
         this.getListOverview()
         this.getBetaNotifStatus()
+        this.hasSubscription()
     }
 
     async getBetaNotifStatus() {
-          if (await auth.isAuthorizedForFeature('beta')) {
+        if (await auth.isAuthorizedForFeature('beta')) {
             this.setState({ showBetaNotif: false })
+        }
+    }
+
+    async hasSubscription() {
+        const plans = await this.props.auth.getAuthorizedPlans()
+
+        if (plans.length > 0) {
+            await this.setState({ hasSubscription: true })
         }
     }
 
@@ -179,9 +188,11 @@ class ShareModal extends Component<Props, State> {
         }
 
         if (this.state.showBetaNotif) {
-            return  (
+            return (
                 <BetaFeatureNotif
                     showSubscriptionModal={this.props.showSubscriptionModal}
+                    isPioneer={true}
+                    hasSubscription={this.state.hasSubscription}
                 />
             )
         }
@@ -221,7 +232,7 @@ class ShareModal extends Component<Props, State> {
             this.state.loadState === 'pristine' ||
             this.state.loadState === 'running'
         ) {
-            return <LoadingIndicator/>
+            return <LoadingIndicator />
         }
 
         return (

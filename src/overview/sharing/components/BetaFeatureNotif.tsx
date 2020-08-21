@@ -1,21 +1,20 @@
 import React, { PureComponent } from 'react'
-import styled, { css } from 'styled-components'
-import { LoadingIndicator } from 'src/common-ui/components'
+import styled from 'styled-components'
+
+import { auth, subscription } from 'src/util/remote-functions-background'
 import {
-    TypographyHeadingBig,
     TypographyTextNormal,
     TypographyHeadingBigger,
-    TypographySubTextNormal,
-    TypographyHeadingNormal,
-    TypographyHeadingSmall,
 } from 'src/common-ui/components/design-library/typography'
+
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-
 import { formBackground } from 'src/common-ui/components/design-library/colors'
 
-interface BetaFeatureNotifProps {
+interface Props {
     showSubscriptionModal: () => void
+    isPioneer: boolean
+    hasSubscription: boolean
 }
 
 const NameInput = styled.input`
@@ -33,7 +32,6 @@ const InstructionsContainer = styled.div`
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    margin-bottom: 30px;
 `
 
 const InstructionsBox = styled.div`
@@ -43,7 +41,7 @@ const InstructionsBox = styled.div`
 
     & > div {
         display: flex;
-        justify-content: center;
+        justify-content: space-between;
     }
 
     & span {
@@ -73,9 +71,53 @@ const Margin = styled.div`
     margin-bottom: 20px;
 `
 
-export default class BetaFeatureNotif extends PureComponent<
-    BetaFeatureNotifProps
-> {
+const InfoBox = styled.div`
+    padding: 15px 30px;
+    display: flex;
+    justify-content: center;
+    align-item: center;
+    margin-top: 30px;
+    background: #f29d9d;
+    border-radius: 5px;
+
+    & strong {
+        margin-right: 5px;
+    }
+`
+
+export default class BetaFeatureNotif extends PureComponent<Props> {
+    state = {
+        loadingChargebee: false,
+        hasSubscription: false,
+        isPioneer: false,
+    }
+
+    openPortal = async () => {
+        this.setState({
+            loadingChargebee: true,
+        })
+        const portalLink = await subscription.getManageLink()
+        window.open(portalLink['access_url'])
+        this.setState({
+            loadingChargebee: false,
+        })
+    }
+
+    componentDidMount() {
+        this.upgradeState()
+    }
+
+    async upgradeState() {
+        const plans = await auth.getAuthorizedPlans()
+
+        if (await auth.isAuthorizedForFeature('beta')) {
+            this.setState({ isPioneer: true })
+        }
+        if (plans.length > 0) {
+            this.setState({ hasSubscription: true })
+        }
+    }
+
     render() {
         return (
             <div>
@@ -85,20 +127,42 @@ export default class BetaFeatureNotif extends PureComponent<
                             🚀 This is a beta feature
                         </TypographyHeadingBigger>
                         <TypographyTextNormal>
-                            Upgrade to the Pioneer Plan to get early access to Beta Features
+                            Upgrade to the Pioneer Plan to get early access to
+                            Beta Features
                         </TypographyTextNormal>
-                        <Margin/>
+                        <Margin />
                         <>
-                        <ButtonBox>
-                            <PrimaryAction
-                                onClick={this.props.showSubscriptionModal}
-                                label={'Upgrade'}
-                            />
-                            <SecondaryAction
-                                onClick={()=> window.open('https://worldbrain.io/tutorials/sharing-features')}
-                                label={'Watch Demo'}
-                            />
-                        </ButtonBox>
+                            <ButtonBox>
+                                {!this.state.isPioneer &&
+                                this.state.hasSubscription ? (
+                                    <PrimaryAction
+                                        onClick={this.openPortal}
+                                        label={'Upgrade'}
+                                    />
+                                ) : (
+                                    <PrimaryAction
+                                        onClick={
+                                            this.props.showSubscriptionModal
+                                        }
+                                        label={'Upgrade'}
+                                    />
+                                )}
+                                <SecondaryAction
+                                    onClick={() =>
+                                        window.open(
+                                            'https://worldbrain.io/tutorials/sharing-features',
+                                        )
+                                    }
+                                    label={'Watch Demo'}
+                                />
+                            </ButtonBox>
+                            {!this.state.isPioneer &&
+                                this.state.hasSubscription && (
+                                    <InfoBox>
+                                        To upgrade go to "Edit Subscription" and
+                                        add the "Pioneer Support" addon
+                                    </InfoBox>
+                                )}
                         </>
                     </InstructionsBox>
                 </InstructionsContainer>

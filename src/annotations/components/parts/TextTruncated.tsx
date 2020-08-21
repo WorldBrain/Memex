@@ -9,6 +9,7 @@ interface Props {
         isTextTooLong: boolean
         text: string
     }
+    isHighlight: boolean
 }
 
 interface State {
@@ -22,6 +23,7 @@ class TextTruncated extends React.Component<Props, State> {
 
     state = {
         shouldTruncate: true,
+        isHighlight: false,
     }
 
     componentDidMount() {
@@ -55,20 +57,25 @@ class TextTruncated extends React.Component<Props, State> {
 
         return (
             <React.Fragment>
-            {textToBeDisplayed}
-            <CommentTextBox>
-                {isTextTooLong && (
-                    <ToggleMoreButtonStyled
-                        onClick={this._toggleTextTruncation}
-                    >
-                        {shouldTruncate ? 'Show More' : 'Show Less'}
-                    </ToggleMoreButtonStyled>
-                )}
-            </CommentTextBox>
+                <TextToBeDisplayed>{textToBeDisplayed}</TextToBeDisplayed>
+                <CommentTextBox>
+                    {isTextTooLong && (
+                        <ToggleMoreButtonStyled
+                            onClick={this._toggleTextTruncation}
+                        >
+                            {shouldTruncate ? 'Show More' : 'Show Less'}
+                        </ToggleMoreButtonStyled>
+                    )}
+                </CommentTextBox>
             </React.Fragment>
         )
     }
 }
+
+const TextToBeDisplayed = styled.span`
+    box-decoration-break: clone;
+    padding: 0 5px;
+`
 
 const ToggleMoreButtonStyled = styled.div`
     margin: 2px 0 0 -8px;

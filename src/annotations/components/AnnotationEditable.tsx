@@ -230,11 +230,15 @@ export default class AnnotationEditable extends React.Component<Props> {
 }
 
 const HighlightTextStyled = styled.span`
-    background-color: #00d88b;
-    padding: 2px 0;
     line-height: 25px;
     font-style: normal;
+    background-color: #65ffc8;
     color: #3a2f45;
+    padding: 2px 0;
+
+    & div {
+        background-color: none;
+    }
 `
 
 const HighlightStyled = styled.div`

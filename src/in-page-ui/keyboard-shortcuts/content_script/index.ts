@@ -21,7 +21,7 @@ export async function initKeyboardShortcuts(
     if (shortcutsEnabled) {
         const handlers = getShortcutHandlers(dependencies)
         for (const [shortcutName, shortcutValue] of Object.entries(shortcuts)) {
-            if (shortcutValue) {
+            if (shortcutValue.enabled) {
                 Mousetrap.bind(
                     shortcutValue.shortcut,
                     prepareShortcutHandler(handlers[shortcutName]),

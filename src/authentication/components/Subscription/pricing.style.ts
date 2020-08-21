@@ -431,6 +431,13 @@ const PriceInputBox = styled.select`
     box-sizing: border-box;
     margin: 0 2px 0 5px;
 `
+
+const EditBox = styled.div`
+    height: 30px
+    background: red;
+    width: 100px;
+`
+
 export {
     SubscriptionOptionsContainer,
     PriceInputBox,
@@ -469,5 +476,6 @@ export {
     TimeButtonRight,
     TimeButtonBox,
     LinkSpan,
+    EditBox,
 }
 export default PricingTable

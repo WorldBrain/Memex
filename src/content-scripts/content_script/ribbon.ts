@@ -5,6 +5,8 @@ import { ContentScriptRegistry, RibbonScriptMain } from './types'
 import { setupRibbonUI, destroyRibbonUI } from 'src/in-page-ui/ribbon/react'
 import { createInPageUI, destroyInPageUI } from 'src/in-page-ui/utils'
 import { setSidebarState, getSidebarState } from 'src/sidebar-overlay/utils'
+import { runInBackground } from 'src/util/webextensionRPC'
+import { ContentScriptsInterface } from '../background/types'
 
 export const main: RibbonScriptMain = async (options) => {
     const cssFile = browser.extension.getURL(`/content_script_ribbon.css`)
@@ -29,11 +31,16 @@ export const main: RibbonScriptMain = async (options) => {
         }
     })
 
-    const setUp = () => {
+    const setUp = async () => {
+        const currentTab = await runInBackground<
+            ContentScriptsInterface<'caller'>
+        >().getCurrentTab()
+
         createMount()
         setupRibbonUI(mount.rootElement, {
             containerDependencies: {
                 ...options,
+                currentTab,
                 setSidebarEnabled: setSidebarState,
                 getSidebarEnabled: getSidebarState,
             },

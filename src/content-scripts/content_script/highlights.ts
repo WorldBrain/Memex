@@ -10,16 +10,13 @@ import {
 } from 'src/highlighting/ui/highlight-interactions'
 
 export const main: HighlightsScriptMain = async (options) => {
-    showHighlights(options)
-
-    //TODO: Why are these events not being heard?
-    options.inPageUI.events.on('componentShouldSetUp', async (event) => {
-        if (event.component === 'highlights') {
-            console.log('componentShouldSetUp highlights')
-            // await bodyLoader()
-            await showHighlights(options)
-        }
-    })
+    // Highlights is currently not a separate script, so no need for this
+    // options.inPageUI.events.on('componentShouldSetUp', async (event) => {
+    //     if (event.component === 'highlights') {
+    //         // await bodyLoader()
+    //         await showHighlights(options)
+    //     }
+    // })
     options.inPageUI.events.on('componentShouldDestroy', async (event) => {
         if (event.component === 'highlights') {
             await hideHighlights(options)
@@ -29,9 +26,11 @@ export const main: HighlightsScriptMain = async (options) => {
         if (!('highlights' in event.changes)) {
             return
         }
+
         if (event.newState.highlights) {
-            console.log('stateChanged highlights')
             showHighlights(options)
+        } else {
+            hideHighlights(options)
         }
     })
 }

@@ -34,8 +34,15 @@ export default class SearchSettings extends React.PureComponent<Props> {
     }
 
     private renderIndexingMessage() {
-        if (this.props.bookmarks && this.props.visits && this.props.annotations && this.props.stubs) {
-            return "Index everything after " + this.props.visitDelay + " seconds"
+        if (
+            this.props.bookmarks &&
+            this.props.visits &&
+            this.props.annotations &&
+            this.props.stubs
+        ) {
+            return (
+                'Index everything after ' + this.props.visitDelay + ' seconds'
+            )
         }
 
         if (
@@ -57,18 +64,18 @@ export default class SearchSettings extends React.PureComponent<Props> {
             return titles
         }
 
-        let base = 'You can full-text search all pages you '
+        let base = 'Full-text search all pages you '
 
         if (this.props.visits) {
-            base += `visited for more than ${this.props.visitDelay} seconds, `
+            base += `viewed for ${this.props.visitDelay} seconds, `
         }
 
         if (this.props.bookmarks) {
-            base += 'bookmarked, tagged or put into collections, '
+            base += 'bookmarked, tagged or put into collections '
         }
 
         if (this.props.annotations) {
-            base += 'annotated or made highlights on, '
+            base += 'or annotated, '
         }
 
         // Replace any trailing ', ' with '.'
@@ -84,7 +91,10 @@ export default class SearchSettings extends React.PureComponent<Props> {
     private renderDisabledSettings() {
         return (
             <>
-                <div className={styles.settingsText}><strong>Current Settings: </strong>{this.renderIndexingMessage()}</div>
+                <div className={styles.settingsText}>
+                    <strong>Current Settings: </strong>
+                    {this.renderIndexingMessage()}
+                </div>
                 <SecondaryAction
                     onClick={this.props.toggleShowSearchSettings}
                     label={'Change settings'}
@@ -101,13 +111,6 @@ export default class SearchSettings extends React.PureComponent<Props> {
         return (
             <div className={styles.container}>
                 <div className={styles.settingsHeader}>General settings</div>
-                <Checkbox
-                    id="index-stubs"
-                    isChecked={this.props.stubs}
-                    handleChange={this.props.toggleStubs}
-                >
-                    Make title and URL always searchable (recommended)
-                </Checkbox>
                 <div className={styles.settingsHeader}>
                     Full-text search websites and PDFs
                 </div>
@@ -153,6 +156,13 @@ export default class SearchSettings extends React.PureComponent<Props> {
                 >
                     Back
                 </a>
+                <Checkbox
+                    id="index-stubs"
+                    isChecked={this.props.stubs}
+                    handleChange={this.props.toggleStubs}
+                >
+                    Make title and URL of every visited page searchable
+                </Checkbox>
             </div>
         )
     }

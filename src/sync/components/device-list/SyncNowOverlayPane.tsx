@@ -6,6 +6,7 @@ import { SyncDevice } from 'src/sync/components/types'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { AuthContextInterface } from 'src/authentication/background/types'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 
 export const subscriptionConfig = {
     site:
@@ -71,6 +72,7 @@ interface ContainerState {
     syncError: any
     isSyncing: boolean
     devices: SyncDevice[]
+    loadingPortal: boolean
 }
 export class SyncNowOverlayPaneContainer extends Component<
     ContainerProps & AuthContextInterface,
@@ -84,6 +86,7 @@ export class SyncNowOverlayPaneContainer extends Component<
         devices: [],
         subscribed: null,
         showSubscriptionOptions: true,
+        loadingPortal: false,
     }
 
     refreshDevices = async () => {
@@ -118,6 +121,9 @@ export class SyncNowOverlayPaneContainer extends Component<
     }
 
     openPortal = async () => {
+        this.setState({
+            loadingPortal: true,
+        })
         const portalLink = await subscription.getManageLink()
         window.open(portalLink['access_url'])
     }
@@ -135,12 +141,19 @@ export class SyncNowOverlayPaneContainer extends Component<
                             onClick={this.openPortal}
                             className={settingsStyle.trialNotif}
                         >
-                            <div className={settingsStyle.trialHeader}>
-                                <strong>Trial Period active</strong>
-                            </div>
-                            <div>
-                                Add payment details to prevent interruptions
-                            </div>
+                            {this.state.loadingPortal ? (
+                                <LoadingIndicator />
+                            ) : (
+                                <>
+                                    <div className={settingsStyle.trialHeader}>
+                                        <strong>Trial Period active</strong>
+                                    </div>
+                                    <div>
+                                        Add payment details to prevent
+                                        interruptions
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 )}

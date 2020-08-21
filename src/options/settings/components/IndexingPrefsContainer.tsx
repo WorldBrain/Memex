@@ -35,19 +35,14 @@ class IndexingPrefsContainer extends React.PureComponent<Props> {
     }
 
     private async hydrateStateFromStorage() {
-        const keys = Object.values(KEYS)
-        const storedVals = await this.props.storage.get(keys)
+        const stored = await this.props.storage.get(Object.values(KEYS))
 
-        // Set default values if nothing present in storage
-        const grabVal = (key: string, defVal: any) =>
-            storedVals[key] != null ? storedVals[key] : defVal
-
-        this.props.initLinks(grabVal(KEYS.BOOKMARKS, defs.bookmarks))
-        this.props.initStubs(grabVal(KEYS.STUBS, defs.stubs))
-        this.props.initVisits(grabVal(KEYS.VISITS, defs.visits))
-        this.props.initBookmarks(grabVal(KEYS.BOOKMARKS, defs.bookmarks))
-        this.props.initScreenshots(grabVal(KEYS.SCREENSHOTS, defs.screenshots))
-        this.props.initVisitDelay(grabVal(KEYS.VISIT_DELAY, defs.visitDelay))
+        this.props.initLinks(stored[KEYS.LINKS] ?? defs.memexLinks)
+        this.props.initStubs(stored[KEYS.STUBS] ?? defs.stubs)
+        this.props.initVisits(stored[KEYS.VISITS] ?? defs.visits)
+        this.props.initBookmarks(stored[KEYS.BOOKMARKS] ?? defs.bookmarks)
+        this.props.initVisitDelay(stored[KEYS.VISIT_DELAY] ?? defs.visitDelay)
+        this.props.initScreenshots(stored[KEYS.SCREENSHOTS] ?? defs.screenshots)
     }
 
     render() {

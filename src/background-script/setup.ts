@@ -1,7 +1,6 @@
 import { Browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
 import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
-import { COLLECTION_DEFINITIONS as READER_COLLECTION_DEFINITIONS } from '@worldbrain/memex-storage/lib/reader/constants'
 import NotificationBackground from 'src/notifications/background'
 import SocialBackground from 'src/social-integration/background'
 import DirectLinkingBackground from 'src/annotations/background'
@@ -312,6 +311,7 @@ export function createBackgroundModules(options: {
         bgScript,
         pageFetchBacklog,
         contentScripts: new ContentScriptsBackground({
+            webNavigation: options.browserAPIs.webNavigation,
             getTab: bindMethod(options.browserAPIs.tabs, 'get'),
             injectScriptInTab: (tabId, injection) =>
                 options.browserAPIs.tabs.executeScript(tabId, injection),
@@ -415,7 +415,4 @@ export function registerBackgroundModuleCollections(
         storageManager.registry,
         getBackgroundStorageModules(backgroundModules),
     )
-
-    // REMOVE THIS LINE WHEN MERGING READER
-    storageManager.registry.registerCollections(READER_COLLECTION_DEFINITIONS)
 }

@@ -13,6 +13,7 @@ import {
 } from '@worldbrain/memex-common/lib/storage/utils'
 import { mergeTermFields } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import decodeBlob from 'src/util/decode-blob'
+import { pageIsStub } from 'src/page-indexing/utils'
 
 export default class PageStorage extends StorageModule {
     disableBlobProcessing = false
@@ -104,9 +105,24 @@ export default class PageStorage extends StorageModule {
         },
     })
 
+    async createPageIfNotExistsOrIsStub(pageData: PipelineRes): Promise<void> {
+        const normalizedUrl = normalizeUrl(pageData.url, {})
+        const existingPage = await this.operation('findPageByUrl', {
+            url: normalizedUrl,
+        })
+
+        if (!existingPage || pageIsStub(existingPage)) {
+            await this.operation('createPage', {
+                ...pageData,
+                url: normalizedUrl,
+            })
+        }
+    }
+
     async createPageIfNotExists(pageData: PipelineRes): Promise<void> {
         const normalizedUrl = normalizeUrl(pageData.url, {})
         const exists = await this.pageExists(normalizedUrl)
+
         if (!exists) {
             await this.operation('createPage', {
                 ...pageData,
@@ -196,6 +212,7 @@ export default class PageStorage extends StorageModule {
         const existingPage = await this.operation('findPageByUrl', {
             url: normalizedUrl,
         })
+
         return !!existingPage
     }
 
