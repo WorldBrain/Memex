@@ -5,10 +5,11 @@ import AllModesFooter from './all-modes-footer'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
+import { ShareAnnotationProps } from './default-footer'
 
 const styles = require('./edit-mode-content.css')
 
-interface Props {
+interface Props extends ShareAnnotationProps {
     env?: 'inpage' | 'overview'
     comment?: string
     tags: string[]
@@ -123,6 +124,7 @@ class EditModeContent extends React.Component<Props, State> {
                 </div>
 
                 <AllModesFooter
+                    {...this.props}
                     mode="edit"
                     handleCancelEdit={this.props.handleCancelOperation}
                     handleEditAnnotation={this._handleEditAnnotation}

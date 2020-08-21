@@ -2,8 +2,9 @@ import * as React from 'react'
 
 import CommentTags from './comment-tags'
 import AllModesFooter from './all-modes-footer'
+import { ShareAnnotationProps } from './default-footer'
 
-interface Props {
+interface Props extends ShareAnnotationProps {
     env: 'inpage' | 'overview'
     mode: 'default' | 'delete'
     body?: string
@@ -44,6 +45,7 @@ const DefaultDeleteModeContent = (props: Props) => (
 
         {/* Footer. */}
         <AllModesFooter
+            {...props}
             mode={props.mode}
             isEdited={props.isEdited}
             timestamp={props.timestamp}

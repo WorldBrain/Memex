@@ -1,9 +1,22 @@
 import * as React from 'react'
 import cx from 'classnames'
 
+import {
+    AnnotationSharingInfo,
+    AnnotationSharingAccess,
+} from 'src/content-sharing/ui/types'
+import { AnnotationShareIconRenderer } from 'src/annotations/components/AnnotationShareIconRenderer'
+
 const styles = require('./default-footer.css')
 
-interface Props {
+export interface ShareAnnotationProps {
+    sharingInfo?: AnnotationSharingInfo
+    sharingAccess: AnnotationSharingAccess
+    onShare: () => void
+    onUnshare: () => void
+}
+
+interface Props extends ShareAnnotationProps {
     displayGoToAnnotation: boolean
     isEdited: boolean
     timestamp: string
@@ -24,6 +37,7 @@ const DefaultFooter = ({
     editIconClickHandler,
     trashIconClickHandler,
     handleBookmarkToggle,
+    ...props
 }: Props) => (
     <div className={styles.annotationBoxDefaultFooter}>
         <div className={styles.timestamp}>
@@ -34,7 +48,7 @@ const DefaultFooter = ({
             <button
                 className={cx(styles.commonIcon, styles.trashIcon)}
                 title="Delete note"
-                onClick={e => {
+                onClick={(e) => {
                     e.stopPropagation()
                     trashIconClickHandler()
                 }}
@@ -49,26 +63,36 @@ const DefaultFooter = ({
             <button
                 className={cx(styles.commonIcon, styles.editIcon)}
                 title="Edit note"
-                onClick={e => {
+                onClick={(e) => {
                     e.stopPropagation()
                     editIconClickHandler()
                 }}
             />
-            {/* <button
-                className={cx(styles.commonIcon, styles.shareIcon)}
-                title="Share this note"
-                onClick={e => {
-                    e.stopPropagation()
-                    shareIconClickHandler()
-                }}
-            /> */}
+            <AnnotationShareIconRenderer
+                {...props}
+                renderShareIcon={(shareIconProps) => (
+                    <button
+                        className={styles.commonIcon}
+                        onClick={shareIconProps.onClickAction}
+                    >
+                        <img
+                            className={cx(styles.shareIcon, {
+                                [styles.shareIconDisabled]:
+                                    shareIconProps.isDisabled,
+                            })}
+                            title={shareIconProps.tooltipText}
+                            src={shareIconProps.imgSrc}
+                        />
+                    </button>
+                )}
+            />
             <button
                 className={cx(styles.commonIcon, {
                     [styles.bookmark]: hasBookmark,
                     [styles.notBookmark]: !hasBookmark,
                 })}
                 title="Toggle star"
-                onClick={e => {
+                onClick={(e) => {
                     e.stopPropagation()
                     handleBookmarkToggle()
                 }}

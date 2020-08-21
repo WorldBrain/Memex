@@ -1,18 +1,20 @@
 import * as React from 'react'
 
 import { Footer } from '../components'
-import DefaultFooter from './default-footer'
+import DefaultFooter, { ShareAnnotationProps } from './default-footer'
 
 const styles = require('./all-modes-footer.css')
 
-interface Props {
+interface Props extends ShareAnnotationProps {
     mode: 'default' | 'edit' | 'delete'
     isEdited?: boolean
+    isShared?: boolean
     timestamp?: string
     hasBookmark?: boolean
     displayGoToAnnotation?: boolean
     handleGoToAnnotation?: (e: React.MouseEvent<HTMLElement>) => void
     handleEditAnnotation?: () => void
+    handleShareAnnotation?: () => void
     handleDeleteAnnotation?: () => void
     handleCancelEdit?: () => void
     handleCancelDeletion?: () => void
@@ -44,6 +46,7 @@ const AllModesFooter = (props: Props) => (
             />
         ) : (
             <DefaultFooter
+                {...props}
                 isEdited={props.isEdited}
                 timestamp={props.timestamp}
                 hasBookmark={props.hasBookmark}

@@ -9,10 +9,11 @@ import EditModeContent from './edit-mode-content'
 import { TruncatedTextRenderer } from '../components'
 import niceTime from '../../util/nice-time'
 import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
-import { remoteFunction } from 'src/util/webextensionRPC'
+import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { actions as filterActs } from 'src/search-filters'
-import { HighlightInteractionsInterface } from 'src/highlighting/types'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { ShareAnnotationProps } from './default-footer'
 
 const styles = require('./annotation-box-container.css')
 const footerStyles = require('./default-footer.css')
@@ -58,6 +59,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     private _processEventRPC = remoteFunction('processEvent')
     private _boxRef: HTMLDivElement = null
+    private contentShareBG = runInBackground<ContentSharingInterface>()
 
     state: State = {
         mode: 'default',
@@ -206,6 +208,18 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
         const isClickable = this.props.body && this.props.env !== 'overview'
 
+        const shareAnnotationProps: ShareAnnotationProps = {
+            onShare: () =>
+                this.contentShareBG.shareAnnotation({
+                    annotationUrl: this.props.url,
+                }),
+            onUnshare: () =>
+                this.contentShareBG.unshareAnnotation({
+                    annotationUrl: this.props.url,
+                }),
+            sharingAccess: 'page-not-shared',
+        }
+
         return (
             <div
                 id={this.props.url} // Focusing on annotation relies on this ID.
@@ -254,6 +268,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         shareIconClickHandler={this._handleShareIconClick}
                         getTruncatedTextObject={this._getTruncatedTextObject}
                         handleBookmarkToggle={this.handleBookmarkToggle}
+                        {...shareAnnotationProps}
                     />
                 ) : (
                     <EditModeContent
@@ -262,6 +277,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         tags={this.props.tags}
                         handleCancelOperation={this._handleCancelOperation}
                         handleEditAnnotation={this._handleEditAnnotation}
+                        {...shareAnnotationProps}
                     />
                 )}
             </div>
