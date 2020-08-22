@@ -234,7 +234,6 @@ export class AnnotationsSidebarContainer<
         if (this.state.showState === 'hidden') {
             return null
         }
-        console.log('statE:', this.state)
 
         return (
             <ThemeProvider theme={this.props.theme}>

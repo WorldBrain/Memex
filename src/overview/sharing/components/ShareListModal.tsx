@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Modal } from 'src/common-ui/components'
 import { PageList } from 'src/custom-lists/background/types'
 import ShareNonPioneerInfo from './ShareNonPioneerInfo'
-import ShareModalContent from './ShareModalContent'
+import ShareListModalContent from './ShareListModalContent'
 import DisplayNameSetup from './DisplayNameSetup'
 import BetaFeatureNotif from './BetaFeatureNotif'
 import { TaskState } from 'ui-logic-core/lib/types'
@@ -38,7 +38,7 @@ interface State {
     hasSubscription: boolean
 }
 
-class ShareModal extends Component<Props, State> {
+class ShareListModal extends Component<Props, State> {
     constructor(props) {
         super(props)
 
@@ -199,7 +199,7 @@ class ShareModal extends Component<Props, State> {
 
         // otherwise -  show the main modal content
         return (
-            <ShareModalContent
+            <ShareListModalContent
                 isShared={this.state.isShared}
                 shareUrl={this.state.shareUrl}
                 listCreationState={this.state.listCreationState}
@@ -247,4 +247,4 @@ class ShareModal extends Component<Props, State> {
 
 export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
-}))(withCurrentUser(ShareModal))
+}))(withCurrentUser(ShareListModal))

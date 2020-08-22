@@ -139,7 +139,7 @@ interface ShareToggleProps {
     onClickToggle: () => void
 }
 
-interface ShareModalContentProps {
+interface Props {
     isShared: boolean
     collectionName: string
     shareUrl?: string
@@ -154,9 +154,7 @@ interface ShareModalContentProps {
 
 const COPY_TIMEOUT = 2000
 
-export default class ShareModalContent extends PureComponent<
-    ShareModalContentProps
-> {
+export default class ShareListModalContent extends PureComponent<Props> {
     state = {
         hasCopied: false,
     }
