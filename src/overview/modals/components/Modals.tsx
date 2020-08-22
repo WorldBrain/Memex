@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react'
 import { ModalIds } from 'src/overview/modals/reducer'
 import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
 import ShareListModal from 'src/overview/sharing/components/ShareListModal'
+import ShareAnnotationModal from 'src/overview/sharing/components/ShareAnnotationModal'
 
 export interface Props {
     modalId?: ModalIds
@@ -15,6 +16,9 @@ const modalsMap = {
     ),
     ShareListModal: ({ modalOptions, onClose }) => (
         <ShareListModal onClose={onClose} {...modalOptions} />
+    ),
+    ShareAnnotationModal: ({ modalOptions, onClose }) => (
+        <ShareAnnotationModal onClose={onClose} {...modalOptions} />
     ),
 }
 

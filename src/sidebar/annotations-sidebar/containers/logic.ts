@@ -19,6 +19,10 @@ import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
+import {
+    getLastSharedAnnotationTimestamp,
+    setLastSharedAnnotationTimestamp,
+} from 'src/annotations/utils'
 
 interface EditForm {
     isBookmarked: boolean
@@ -830,11 +834,11 @@ export class SidebarContainerLogic extends UILogic<
             })
         updateAnnotationTaskState('running')
         try {
-            // await new Promise(resolve => { })
             await this.options.contentSharing.shareAnnotation({
                 annotationUrl: event.annotationUrl,
             })
             updateAnnotationTaskState('success')
+            this.setLastSharedAnnotationTimestamp()
         } catch (e) {
             updateAnnotationTaskState('error')
             throw e
@@ -1005,4 +1009,14 @@ export class SidebarContainerLogic extends UILogic<
                 [annotationUrl]: { $set: info },
             },
         })
+
+    private async setLastSharedAnnotationTimestamp() {
+        const lastShared = await getLastSharedAnnotationTimestamp()
+
+        if (lastShared == null) {
+            this.options.showAnnotationShareModal?.()
+        }
+
+        await setLastSharedAnnotationTimestamp()
+    }
 }

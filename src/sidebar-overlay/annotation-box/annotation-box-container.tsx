@@ -19,6 +19,11 @@ import {
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 import { TaskState } from 'ui-logic-core/lib/types'
+import {
+    getLastSharedAnnotationTimestamp,
+    setLastSharedAnnotationTimestamp,
+} from 'src/annotations/utils'
+import { show } from 'src/overview/modals/actions'
 
 const styles = require('./annotation-box-container.css')
 const footerStyles = require('./default-footer.css')
@@ -50,6 +55,7 @@ export interface OwnProps {
 
 interface DispatchProps {
     handleTagClick: (tag: string) => void
+    showAnnotationShareModal: () => void
 }
 
 type Props = OwnProps & DispatchProps
@@ -83,6 +89,16 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         this._removeEventListeners()
     }
 
+    private async setLastSharedTimestamp() {
+        const lastShared = await getLastSharedAnnotationTimestamp()
+
+        if (lastShared == null) {
+            this.props.showAnnotationShareModal()
+        }
+
+        await setLastSharedAnnotationTimestamp()
+    }
+
     private shareAnnotation = async () => {
         const updateState = (taskState: TaskState) =>
             this.props.updateSharingInfo({
@@ -96,6 +112,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                 annotationUrl: this.props.url,
             })
             updateState('success')
+            this.setLastSharedTimestamp()
         } catch (e) {
             updateState('error')
             throw e
@@ -331,6 +348,8 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     dispatch,
 ) => ({
     handleTagClick: (tag) => dispatch(filterActs.toggleTagFilter(tag)),
+    showAnnotationShareModal: () =>
+        dispatch(show({ modalId: 'ShareAnnotationModal' })),
 })
 
 export default connect(null, mapDispatchToProps)(AnnotationBoxContainer)

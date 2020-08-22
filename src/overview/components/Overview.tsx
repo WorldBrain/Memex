@@ -44,6 +44,7 @@ export interface Props {
     toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
     handleReaderViewClick: (url: string) => void
     showSubscriptionModal: () => void
+    showAnnotationShareModal: () => void
 }
 
 interface State {
@@ -267,6 +268,9 @@ class Overview extends PureComponent<Props, State> {
                         annotationsCache={this.annotationsCache}
                         onClickOutside={this.handleClickOutsideSidebar}
                         onCloseSidebarBtnClick={this.handleCloseSidebarBtnClick}
+                        showAnnotationShareModal={
+                            this.props.showAnnotationShareModal
+                        }
                     />
 
                     <Tooltip />
@@ -336,6 +340,8 @@ const mapDispatchToProps = (dispatch) => ({
     setShowOnboardingMessage: () =>
         dispatch(resultActs.setShowOnboardingMessage(true)),
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
+    showAnnotationShareModal: () =>
+        dispatch(show({ modalId: 'ShareAnnotationModal' })),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Overview)
