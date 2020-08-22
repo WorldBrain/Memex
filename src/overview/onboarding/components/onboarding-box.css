@@ -281,6 +281,16 @@
     align-items: center;
 }
 
+.buttonBar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    & > div {
+        margin: 0 5px;
+    }
+}
+
 @keyframes float {
     0% {
         transform: translateY(0px);
