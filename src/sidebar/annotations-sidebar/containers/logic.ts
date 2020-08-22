@@ -35,7 +35,6 @@ export interface SidebarContainerState {
     showState: 'visible' | 'hidden'
 
     annotationSharingAccess: AnnotationSharingAccess
-    hasCheckedSharedAnnotations?: boolean
 
     pageUrl?: string
     annotations: Annotation[]
@@ -993,7 +992,6 @@ export class SidebarContainerLogic extends UILogic<
             }
         }
         this.emitMutation({
-            hasCheckedSharedAnnotations: { $set: true },
             annotationSharingInfo,
         })
     }

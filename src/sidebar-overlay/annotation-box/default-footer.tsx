@@ -6,6 +6,7 @@ import {
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 import { AnnotationShareIconRenderer } from 'src/annotations/components/AnnotationShareIconRenderer'
+import { LoadingIndicator } from 'src/common-ui/components'
 
 const styles = require('./default-footer.css')
 
@@ -75,14 +76,18 @@ const DefaultFooter = ({
                         className={styles.commonIcon}
                         onClick={shareIconProps.onClickAction}
                     >
-                        <img
-                            className={cx(styles.shareIcon, {
-                                [styles.shareIconDisabled]:
-                                    shareIconProps.isDisabled,
-                            })}
-                            title={shareIconProps.tooltipText}
-                            src={shareIconProps.imgSrc}
-                        />
+                        {shareIconProps.isLoading ? (
+                            <LoadingIndicator />
+                        ) : (
+                            <img
+                                className={cx(styles.shareIcon, {
+                                    [styles.shareIconDisabled]:
+                                        shareIconProps.isDisabled,
+                                })}
+                                title={shareIconProps.tooltipText}
+                                src={shareIconProps.imgSrc}
+                            />
+                        )}
                     </button>
                 )}
             />

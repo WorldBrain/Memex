@@ -14,6 +14,11 @@ import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { actions as filterActs } from 'src/search-filters'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { ShareAnnotationProps } from './default-footer'
+import {
+    AnnotationSharingInfo,
+    AnnotationSharingAccess,
+} from 'src/content-sharing/ui/types'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 const styles = require('./annotation-box-container.css')
 const footerStyles = require('./default-footer.css')
@@ -22,6 +27,7 @@ export interface OwnProps {
     /** Required to decide how to go to an annotation when it's clicked. */
     env: 'inpage' | 'overview'
     url: string
+    pageUrl: string
     className?: string
     isActive?: boolean
     isHovered?: boolean
@@ -31,6 +37,9 @@ export interface OwnProps {
     comment?: string
     tags: string[]
     hasBookmark?: boolean
+    sharingInfo: AnnotationSharingInfo
+    sharingAccess: AnnotationSharingAccess
+    updateSharingInfo: (info: AnnotationSharingInfo) => void
     handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
     handleMouseEnter?: (e: Event) => void
     handleMouseLeave?: (e: Event) => void
@@ -72,6 +81,44 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     componentWillUnmount() {
         this._removeEventListeners()
+    }
+
+    private shareAnnotation = async () => {
+        const updateState = (taskState: TaskState) =>
+            this.props.updateSharingInfo({
+                status: 'shared',
+                taskState,
+            })
+
+        updateState('running')
+        try {
+            await this.contentShareBG.shareAnnotation({
+                annotationUrl: this.props.url,
+            })
+            updateState('success')
+        } catch (e) {
+            updateState('error')
+            throw e
+        }
+    }
+
+    private unshareAnnotation = async () => {
+        const updateState = (taskState: TaskState) =>
+            this.props.updateSharingInfo({
+                status: 'unshared',
+                taskState,
+            })
+
+        updateState('running')
+        try {
+            await this.contentShareBG.unshareAnnotation({
+                annotationUrl: this.props.url,
+            })
+            updateState('success')
+        } catch (e) {
+            updateState('error')
+            throw e
+        }
     }
 
     private get isEdited() {
@@ -209,15 +256,10 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         const isClickable = this.props.body && this.props.env !== 'overview'
 
         const shareAnnotationProps: ShareAnnotationProps = {
-            onShare: () =>
-                this.contentShareBG.shareAnnotation({
-                    annotationUrl: this.props.url,
-                }),
-            onUnshare: () =>
-                this.contentShareBG.unshareAnnotation({
-                    annotationUrl: this.props.url,
-                }),
-            sharingAccess: 'page-not-shared',
+            onShare: this.shareAnnotation,
+            onUnshare: this.unshareAnnotation,
+            sharingInfo: this.props.sharingInfo,
+            sharingAccess: this.props.sharingAccess,
         }
 
         return (
