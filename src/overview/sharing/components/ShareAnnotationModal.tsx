@@ -1,15 +1,16 @@
 import React, { Component } from 'react'
 
-import { Modal } from 'src/common-ui/components'
+import Modal, { Props as ModalProps } from 'src/common-ui/components/Modal'
 
-export interface Props {
+export interface Props
+    extends Pick<ModalProps, 'onClose' | 'requiresExplicitStyles'> {
     onClose: () => void
 }
 
 export default class ShareAnnotationModal extends Component<Props> {
     render() {
         return (
-            <Modal large onClose={this.props.onClose}>
+            <Modal {...this.props} large>
                 Hello share annotation modal!
             </Modal>
         )

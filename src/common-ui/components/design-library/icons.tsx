@@ -1,5 +1,6 @@
 import { browser } from 'webextension-polyfill-ts'
 
+export const close = browser.extension.getURL('/img/close.svg')
 export const tagFull = browser.extension.getURL('/img/tag_full.svg')
 export const tagEmpty = browser.extension.getURL('/img/tag_empty.svg')
 export const heartFull = browser.extension.getURL('/img/star_full.svg')
