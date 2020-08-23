@@ -35,7 +35,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     State,
     Event
 > {
-    static TOTAL_STEPS = 8
+    static TOTAL_STEPS = 7
     static defaultProps: Partial<Props> = {
         storage: browser.storage.local,
     }
@@ -333,7 +333,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         <SecondaryAction
                             onClick={() =>
                                 window.open(
-                                    `https://worldbrain.io/tutorial/organise`,
+                                    `https://worldbrain.io/tutorials/organise`,
                                 )
                             }
                             label={'View Tutorials'}
@@ -359,7 +359,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         <SecondaryAction
                             onClick={() =>
                                 window.open(
-                                    `https://worldbrain.io/tutorial/highlights`,
+                                    `https://worldbrain.io/tutorials/highlights`,
                                 )
                             }
                             label={'View Tutorials'}
@@ -389,7 +389,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <SecondaryAction
                         onClick={() =>
                             window.open(
-                                `https://worldbrain.io/tutorial/search`,
+                                `https://worldbrain.io/tutorials/search`,
                             )
                         }
                         label={'View Tutorials'}
@@ -413,10 +413,18 @@ export default class OnboardingScreen extends StatefulUIElement<
                         currentStep={this.state.currentStep - 1}
                     >
                         <div className={styles.buttonBar}>
+                            <PrimaryAction
+                                onClick={() =>
+                                    window.open(
+                                        `https://worldbrain.io/request-early-access`,
+                                    )
+                                }
+                                label={'Get early access'}
+                            />
                             <SecondaryAction
                                 onClick={() =>
                                     window.open(
-                                        `https://worldbrain.io/tutorial/shortcuts`,
+                                        `https://worldbrain.io/tutorials/share-research`,
                                     )
                                 }
                                 label={'View Tutorials'}
@@ -474,31 +482,6 @@ export default class OnboardingScreen extends StatefulUIElement<
                     </OnboardingStep>
                 )
             case 7:
-                return (
-                    <OnboardingStep
-                        goToStep={this.handleStepClick}
-                        titleText="Backup your data to your favorite providers"
-                        subtitleText="Browsers are unfortunately unreliable data stores. "
-                        subtitleText2="We are working on an external storage."
-                        renderButton={() => (
-                            <OnboardingAction
-                                onClick={this.handleNextStepClick}
-                                label={'Next'}
-                            />
-                        )}
-                        renderImage={this.backupImg}
-                        totalSteps={OnboardingScreen.TOTAL_STEPS}
-                        currentStep={this.state.currentStep - 1}
-                    >
-                        <SecondaryAction
-                            onClick={() =>
-                                window.open(`${OPTIONS_URL}#/backup`)
-                            }
-                            label={'Start Backup'}
-                        />
-                    </OnboardingStep>
-                )
-            case 8:
                 return (
                     <OnboardingStep
                         privacyStep
