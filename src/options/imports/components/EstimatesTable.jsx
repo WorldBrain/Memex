@@ -46,28 +46,6 @@ const EstimatesTable = ({
             <tr className={localStyles.importTableRow}>
                 <td>
                     <Checkbox
-                        id="history"
-                        name="history"
-                        isChecked={allowTypes[TYPE.HISTORY]}
-                        handleChange={onAllowHistoryClick}
-                    >
-                        <div className={localStyles.labelContainer}>
-                            <span className={localStyles.checkboxText}>
-                                Browser History
-                            </span>
-                        </div>
-                    </Checkbox>
-                </td>
-                <td>{estimates[TYPE.HISTORY].complete}</td>
-                <td>{estimates[TYPE.HISTORY].remaining}</td>
-                <td>
-                    {'~'}
-                    {estimates[TYPE.HISTORY].timeRemaining}
-                </td>
-            </tr>
-            <tr className={localStyles.importTableRow}>
-                <td>
-                    <Checkbox
                         name="bookmarks"
                         id="bookmarks"
                         handleChange={onAllowBookmarksClick}
@@ -77,9 +55,6 @@ const EstimatesTable = ({
                         <div className={localStyles.labelContainer}>
                             <span className={localStyles.checkboxText}>
                                 Browser Bookmarks
-                            </span>
-                            <span className={localStyles.checkboxSubText}>
-                                from forever
                             </span>
                         </div>
                     </Checkbox>

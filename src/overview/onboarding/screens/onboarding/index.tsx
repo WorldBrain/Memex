@@ -319,7 +319,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <OnboardingStep
                         goToStep={this.handleStepClick}
                         titleText="Flexibly & Quickly organise websites"
-                        subtitleText="Use tags, collections and bookmarks, and keyboard shortcuts"
+                        subtitleText="Tags, bookmark and add pages to collections. Also with keyboard shortcuts"
                         renderButton={() => (
                             <OnboardingAction
                                 onClick={this.handleNextStepClick}
