@@ -452,7 +452,7 @@ describe('SidebarContainerLogic', () => {
             pageUrl,
         })
         await sidebarLogic._detectedPageSharingStatus
-        expect(sidebar.state.annotationSharingAccess).toBe(true)
+        expect(sidebar.state.annotationSharingAccess).toEqual('sharing-allowed')
     })
 
     it('should share annotations', async ({ device }) => {
@@ -484,7 +484,7 @@ describe('SidebarContainerLogic', () => {
         )
 
         const { sidebar } = await setupLogicHelper({ device, pageUrl })
-        expect(sidebar.state.annotations).toEqual([{}])
+        expect(sidebar.state.annotations).toEqual([])
         await sidebar.processEvent('shareAnnotation', {
             context: 'pageAnnotations',
             annotationUrl,
@@ -495,7 +495,16 @@ describe('SidebarContainerLogic', () => {
             await serverStorage.storageManager
                 .collection('sharedAnnotation')
                 .findObjects({}),
-        ).toEqual([{}])
+        ).toEqual([
+            expect.objectContaining({
+                body: 'Annot body',
+                comment: 'Annot comment',
+                selector: JSON.stringify({
+                    descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
+                    quote: 'dawadawd',
+                }),
+            }),
+        ])
     })
 
     it('should share annotations', async ({ device }) => {

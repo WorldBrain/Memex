@@ -327,7 +327,8 @@ export function remoteEventEmitter<T>(
     if (broadcastToTabs) {
         return {
             emit: async (eventName, data) => {
-                for (const { id: tabId } of await browser.tabs.query({})) {
+                const tabs = (await browser.tabs.query({})) ?? []
+                for (const { id: tabId } of tabs) {
                     browser.tabs.sendMessage(tabId, {
                         ...message,
                         __REMOTE_EVENT_NAME__: eventName,
