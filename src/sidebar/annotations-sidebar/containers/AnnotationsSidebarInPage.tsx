@@ -197,6 +197,17 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                                 shown: false,
                             })
                         }
+                        onClickLetUsKnow={() => {
+                            window.open('https://worldbrain.io/feedback/betafeatures')
+                        }}
+                        onClickViewRoadmap={() => {
+                            window.open('https://worldbrain.io/roadmap')
+                        }}
+                        onClickKnownIssues={() => {
+                            window.open(
+                                'https://worldbrain.io/feature/sharing-collections/knownissues',
+                            )
+                        }}
                     />
                 )}
             </>

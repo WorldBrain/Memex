@@ -15,9 +15,11 @@ const StyledSecondaryAction = styled.div`
     box-sizing: border-box;
     border-radius: 5px;
     cursor: pointer;
-    display: inline-block;
+    display: flex;
     white-space: nowrap;
     vertical-align: middle;
+    align-items: center;
+    justify-content: center;
 
     &: hover {
         background-color: ${colorMidPurple};

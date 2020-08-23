@@ -99,11 +99,11 @@ export class AnnotationShareIconRenderer extends React.Component<Props> {
             'not-shared-yet': 'Share note',
             'already-shared': 'Unshare note',
             sharing: 'Sharing note...',
-            'sharing-success': 'Note shared!',
-            'sharing-error': 'Could not share note :(',
-            unsharing: 'Unsharing note...',
+            'sharing-success': 'Note shared',
+            'sharing-error': 'Error Sharing Note',
+            unsharing: 'Unsharing note',
             'unsharing-success': 'Note unshared!',
-            'unsharing-error': 'Could not unshare note :(',
+            'unsharing-error': 'Error Sharing Note',
         }
 
         const SHARE_BUTTON_ICONS: {
