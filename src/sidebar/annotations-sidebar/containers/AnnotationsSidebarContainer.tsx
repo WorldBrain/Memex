@@ -216,6 +216,10 @@ export class AnnotationsSidebarContainer<
         }
     }
 
+    protected renderModals() {
+        return null
+    }
+
     private renderTopBar() {
         return (
             <TopBarContainerStyled>
@@ -270,6 +274,7 @@ export class AnnotationsSidebarContainer<
                         theme={this.props.theme}
                     />
                 </ContainerStyled>
+                {this.renderModals()}
             </ThemeProvider>
         )
     }

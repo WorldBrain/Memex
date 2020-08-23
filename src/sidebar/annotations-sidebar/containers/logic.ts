@@ -13,16 +13,16 @@ import { featuresBeta } from 'src/util/remote-functions-background'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { DEF_RESULT_LIMIT } from '../constants'
 import { IncomingAnnotationData } from 'src/in-page-ui/shared-state/types'
-import { generateUrl } from 'src/annotations/utils'
+import {
+    generateUrl,
+    getLastSharedAnnotationTimestamp,
+    setLastSharedAnnotationTimestamp,
+} from 'src/annotations/utils'
 import createResolvable from '@josephg/resolvable'
 import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
-import {
-    getLastSharedAnnotationTimestamp,
-    setLastSharedAnnotationTimestamp,
-} from 'src/annotations/utils'
 
 interface EditForm {
     isBookmarked: boolean
@@ -102,6 +102,7 @@ export interface SidebarContainerState {
 
     isListFilterActive: boolean
     isSocialSearch: boolean
+    showAnnotationsShareModal: boolean
 }
 
 export type SidebarContainerEvents = UIEvent<{
@@ -211,6 +212,8 @@ export type SidebarContainerEvents = UIEvent<{
     toggleAllAnnotationsFold: null
     fetchSuggestedTags: null
     fetchSuggestedDomains: null
+
+    setAnnotationShareModalShown: { shown: boolean }
 
     // Page search result interactions
     // togglePageBookmark: { pageUrl: string }
@@ -324,6 +327,7 @@ export class SidebarContainerLogic extends UILogic<
             searchResultSkip: 0,
 
             isBetaEnabled: false,
+            showAnnotationsShareModal: false,
         }
     }
 
@@ -960,6 +964,12 @@ export class SidebarContainerLogic extends UILogic<
         return {
             hoverAnnotationUrl: { $set: null },
         }
+    }
+
+    setAnnotationShareModalShown: EventHandler<
+        'setAnnotationShareModalShown'
+    > = ({ event }) => {
+        this.emitMutation({ showAnnotationsShareModal: { $set: event.shown } })
     }
 
     _detectPageSharingStatus(pageUrl: string) {
