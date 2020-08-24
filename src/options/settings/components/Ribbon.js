@@ -26,11 +26,11 @@ class Ribbon extends React.Component {
     render() {
         return (
             <div className={styles.section}>
-                <div className={styles.sectionTitle}>Website Sidebar</div>
+                <div className={styles.sectionTitle}>Quick Action Ribbon</div>
                 <div className={styles.infoText}>
-                    You can open the sidebar via the Memex icon in the browser
-                    extensions menu or by moving your mouse to the right side of
-                    the screen.
+                    When enabled, you can hover in the top right corner to
+                    activate the Quick Action Ribbon. You can also use keyboard
+                    shortcuts or click on the Memex icon in the browser toolbar.
                 </div>
                 <Checkbox
                     id="show-memex-ribbon"

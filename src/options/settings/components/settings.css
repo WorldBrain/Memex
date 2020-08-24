@@ -139,6 +139,22 @@
     vertical-align: 1px;
 }
 
+.reloadInformation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px 20px;
+    background-color: #f29d9d;
+    color: white;
+    position: sticky;
+    top: 30px;
+    margin-bottom: 30px;
+    border-radius: 3px;
+    font-size: 14px;
+    z-index: 100;
+}
+
 .subText {
     font-size: 14px;
     color: color6;
