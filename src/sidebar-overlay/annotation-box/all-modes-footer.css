@@ -5,8 +5,8 @@
     display: flex;
     align-items: center;
     font-size: 13px;
-    height: 25px;
-    margin: 0 4px 4px 4px;
+    height: 30px;
+    padding: 0 10px 10px;
     box-sizing: border-box;
 }
 

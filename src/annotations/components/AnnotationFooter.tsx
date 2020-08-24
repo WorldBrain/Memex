@@ -40,7 +40,7 @@ class AnnotationFooter extends React.Component<Props> {
         return (
             <DefaultInnerFooterContainerStyled>
                 <TimestampStyled>
-                    {isEdited && <span>Last Edit: </span>}
+                    {isEdited && <LastEdit>Last Edit:</LastEdit>}
                     {timestamp}
                 </TimestampStyled>
                 <DefaultFooterBtnContainerStyled>
@@ -310,4 +310,9 @@ const IconStyled = styled.img`
     width: 100%;
     height: 100%;
     opacity: 0.6;
+`
+
+const LastEdit = styled.span`
+    margin: 0 5px;
+    font-weight: bold;
 `

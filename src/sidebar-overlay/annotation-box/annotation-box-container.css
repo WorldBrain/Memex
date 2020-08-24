@@ -43,25 +43,6 @@
     cursor: pointer;
 }
 
-.highlight {
-    font-weight: 400;
-    font-size: 14px;
-    letter-spacing: 0.5px;
-    margin: 0 0 5px 0;
-    padding: 15px 15px 7px 15px;
-    line-height: 20px;
-    text-align: left;
-}
-
-.highlightText {
-    background-color: #65ffc8;
-    line-height: 25px;
-    font-style: normal;
-    color: #3a2f45;
-    padding: 2px 5px;
-    box-decoration-break: clone;
-}
-
 .newAnnotation {
     composes: h2Color from '../../common-ui/colors.css';
     font-size: 15px;

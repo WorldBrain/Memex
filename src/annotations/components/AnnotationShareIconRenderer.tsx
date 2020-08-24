@@ -95,7 +95,7 @@ export class AnnotationShareIconRenderer extends React.Component<Props> {
             [Key in typeof shareButtonState]: string
         } = {
             'feature-disabled': '',
-            'page-not-shared': 'Please add this page to a shared list first',
+            'page-not-shared': 'Add parent page to shared collections first',
             'not-shared-yet': 'Share note',
             'already-shared': 'Unshare note',
             sharing: 'Sharing note...',

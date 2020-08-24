@@ -8,6 +8,7 @@
     align-items: center;
     box-sizing: border-box;
     cursor: pointer;
+    margin: 5px 10px;
 }
 
 .tag {

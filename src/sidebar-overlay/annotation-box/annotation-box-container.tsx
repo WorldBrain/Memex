@@ -296,16 +296,13 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                 {/* Highlighted text for the annotation. If available, shown in
                 every mode. */}
                 {this.props.body && (
-                    <div className={styles.highlight}>
-                        <span className={styles.highlightText}>
-                            <TruncatedTextRenderer
-                                text={this.props.body}
-                                getTruncatedTextObject={
-                                    this._getTruncatedTextObject
-                                }
-                            />
-                        </span>
-                    </div>
+                    <TruncatedTextRenderer
+                        text={this.props.body}
+                        getTruncatedTextObject={
+                            this._getTruncatedTextObject
+                        }
+                        isHighlight={true}
+                    />
                 )}
 
                 {mode !== 'edit' ? (
