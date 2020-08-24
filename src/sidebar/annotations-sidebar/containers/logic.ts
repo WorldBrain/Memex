@@ -39,6 +39,12 @@ export interface SidebarContainerState {
     showState: 'visible' | 'hidden'
 
     annotationSharingAccess: AnnotationSharingAccess
+    annotationSharingInfo: {
+        [annotationUrl: string]: AnnotationSharingInfo
+    }
+
+    copyPasterAccess: boolean
+    activeCopyPasterAnnotationId: string | undefined
 
     pageUrl?: string
     annotations: Annotation[]
@@ -46,9 +52,6 @@ export interface SidebarContainerState {
         [context in AnnotationEventContext]: {
             [annotationUrl: string]: AnnotationMode
         }
-    }
-    annotationSharingInfo: {
-        [annotationUrl: string]: AnnotationSharingInfo
     }
     activeAnnotationUrl: string | null
     hoverAnnotationUrl: string | null
@@ -84,7 +87,6 @@ export interface SidebarContainerState {
     showCongratsMessage: boolean
     showClearFiltersBtn: boolean
     isSocialPost: boolean
-    isBetaEnabled: boolean
 
     // Filter sidebar props
     showFiltersSidebar: boolean
@@ -215,6 +217,9 @@ export type SidebarContainerEvents = UIEvent<{
 
     setAnnotationShareModalShown: { shown: boolean }
 
+    setCopyPasterAnnotationId: { id: string }
+    resetCopyPasterAnnotationId: null
+
     // Page search result interactions
     // togglePageBookmark: { pageUrl: string }
     // togglePageTagPicker: { pageUrl: string }
@@ -285,6 +290,9 @@ export class SidebarContainerLogic extends UILogic<
             annotationSharingInfo: {},
             annotationSharingAccess: 'feature-disabled',
 
+            copyPasterAccess: false,
+            activeCopyPasterAnnotationId: undefined,
+
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
             // deletePageConfirm: {
@@ -326,7 +334,6 @@ export class SidebarContainerLogic extends UILogic<
             isSocialSearch: false,
             searchResultSkip: 0,
 
-            isBetaEnabled: false,
             showAnnotationsShareModal: false,
         }
     }
@@ -348,7 +355,7 @@ export class SidebarContainerLogic extends UILogic<
             if (this.options.pageUrl) {
                 this._detectPageSharingStatus(this.options.pageUrl)
             }
-            // await this.loadBeta()
+            await this.loadBeta()
         })
     }
 
@@ -372,11 +379,11 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     private async loadBeta() {
-        // Check if user is allowed for beta too
         const copyPasterEnabled = await featuresBeta.getFeatureState(
             'copy-paster',
         )
-        this.emitMutation({ isBetaEnabled: { $set: copyPasterEnabled } })
+
+        this.emitMutation({ copyPasterAccess: { $set: copyPasterEnabled } })
     }
 
     show: EventHandler<'show'> = async () => {
@@ -467,6 +474,24 @@ export class SidebarContainerLogic extends UILogic<
 
         this._detectPageSharingStatus(event.pageUrl)
         return this._doSearch(nextState, { overwrite: true })
+    }
+
+    setCopyPasterAnnotationId: EventHandler<'setCopyPasterAnnotationId'> = ({
+        event,
+        previousState,
+    }) => {
+        const newId =
+            previousState.activeCopyPasterAnnotationId === event.id
+                ? undefined
+                : event.id
+
+        this.emitMutation({ activeCopyPasterAnnotationId: { $set: newId } })
+    }
+
+    resetCopyPasterAnnotationId: EventHandler<
+        'resetCopyPasterAnnotationId'
+    > = () => {
+        this.emitMutation({ activeCopyPasterAnnotationId: { $set: undefined } })
     }
 
     hide: EventHandler<'hide'> = () => {

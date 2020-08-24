@@ -20,6 +20,8 @@ import {
     AnnotationEditEventProps,
     AnnotationEditGeneralProps,
 } from 'src/annotations/components/AnnotationEdit'
+import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import CopyPaster from 'src/overview/copy-paster'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -123,6 +125,12 @@ export class AnnotationsSidebarContainer<
                               ...DEF_CONTEXT,
                           })
                     : undefined,
+            onCopyPasterBtnClick: this.state.copyPasterAccess
+                ? () =>
+                      this.processEvent('setCopyPasterAnnotationId', {
+                          id: annotation.url,
+                      })
+                : undefined,
         }
     }
 
@@ -216,6 +224,33 @@ export class AnnotationsSidebarContainer<
         }
     }
 
+    private renderCopyPasterManager = (id: string) => {
+        if (this.state.activeCopyPasterAnnotationId !== id) {
+            return null
+        }
+
+        return (
+            <HoverBox>
+                <CopyPaster
+                    onClick={(id) => console.log('onClick', id)}
+                    onClickCancel={() => console.log('onClickCancel')}
+                    onClickDelete={() => console.log('onClickDelete')}
+                    onClickEdit={(id) => console.log('onClickEdit', id)}
+                    onClickHowto={() => console.log('onClickHowTo')}
+                    onClickNew={() => console.log('onClickNew')}
+                    onClickSave={() => console.log('onClickSave')}
+                    onTitleChange={() => console.log('onTitleChange')}
+                    onCodeChange={() => console.log('onCodeChange')}
+                    onSetIsFavourite={() => console.log('onSetIsFavorite')}
+                    onClickOutside={() =>
+                        this.processEvent('resetCopyPasterAnnotationId', null)
+                    }
+                    templates={[]}
+                />
+            </HoverBox>
+        )
+    }
+
     protected renderModals() {
         return null
     }
@@ -272,6 +307,9 @@ export class AnnotationsSidebarContainer<
                         }
                         onClickOutside={this.handleClickOutside}
                         theme={this.props.theme}
+                        renderCopyPasterForAnnotation={
+                            this.renderCopyPasterManager
+                        }
                     />
                 </ContainerStyled>
                 {this.renderModals()}

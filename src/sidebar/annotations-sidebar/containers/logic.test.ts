@@ -565,4 +565,20 @@ describe('SidebarContainerLogic', () => {
             },
         })
     })
+
+    it('should be able to set active annotation copy paster', async ({
+        device,
+    }) => {
+        const { sidebar } = await setupLogicHelper({ device })
+        const id1 = 'test1'
+        const id2 = 'test2'
+
+        expect(sidebar.state.activeCopyPasterAnnotationId).toBeUndefined()
+        sidebar.processEvent('setCopyPasterAnnotationId', { id: id1 })
+        expect(sidebar.state.activeCopyPasterAnnotationId).toEqual(id1)
+        sidebar.processEvent('setCopyPasterAnnotationId', { id: id2 })
+        expect(sidebar.state.activeCopyPasterAnnotationId).toEqual(id2)
+        sidebar.processEvent('resetCopyPasterAnnotationId', null)
+        expect(sidebar.state.activeCopyPasterAnnotationId).toBeUndefined()
+    })
 })

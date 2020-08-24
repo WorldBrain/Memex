@@ -32,15 +32,14 @@ export interface AnnotationsSidebarProps {
     annotationModes: { [url: string]: AnnotationMode }
     annotationSharingInfo: { [annotationUrl: string]: AnnotationSharingInfo }
 
-    // NOTE: This group of props were all brought over from AnnotationsEditable
     showCongratsMessage?: boolean
     activeAnnotationUrl?: string | null
     hoverAnnotationUrl?: string
     needsWaypoint?: boolean
     appendLoader?: boolean
     handleScrollPagination: () => void
-    // ^ Until here ^
 
+    renderCopyPasterForAnnotation: (id: string) => JSX.Element
     onClickOutside: React.MouseEventHandler
     bindAnnotationFooterEventProps: (
         annotation: Annotation,
@@ -57,6 +56,7 @@ export interface AnnotationsSidebarProps {
     sharingAccess: AnnotationSharingAccess
     isSearchLoading: boolean
     isAnnotationCreateShown: boolean
+    activeCopyPasterAnnotationId?: string
     annotations: Annotation[]
     theme: Partial<SidebarTheme>
 }

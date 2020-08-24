@@ -31,6 +31,7 @@ export interface AnnotationFooterEventProps {
     onUnshareClick: () => void
     toggleBookmark: () => void
     onGoToAnnotation?: () => void
+    onCopyPasterBtnClick?: () => void
 }
 
 class AnnotationFooter extends React.Component<Props> {
@@ -110,6 +111,17 @@ class AnnotationFooter extends React.Component<Props> {
                                     title="Go to annotation"
                                     src={icons.goTo}
                                 />
+                            </IconBox>
+                        </ButtonTooltip>
+                    )}
+
+                    {this.props.onCopyPasterBtnClick && (
+                        <ButtonTooltip
+                            position="bottom"
+                            tooltipText="Copy Note"
+                        >
+                            <IconBox onClick={this.props.onCopyPasterBtnClick}>
+                                <IconStyled src={icons.copy} />
                             </IconBox>
                         </ButtonTooltip>
                     )}
