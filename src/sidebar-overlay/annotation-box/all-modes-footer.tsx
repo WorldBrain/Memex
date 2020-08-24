@@ -15,6 +15,7 @@ interface Props extends ShareAnnotationProps {
     handleGoToAnnotation?: (e: React.MouseEvent<HTMLElement>) => void
     handleEditAnnotation?: () => void
     handleShareAnnotation?: () => void
+    handleCopyPasterClick?: () => void
     handleDeleteAnnotation?: () => void
     handleCancelEdit?: () => void
     handleCancelDeletion?: () => void
@@ -55,6 +56,7 @@ const AllModesFooter = (props: Props) => (
                 editIconClickHandler={props.editIconClickHandler}
                 trashIconClickHandler={props.trashIconClickHandler}
                 handleBookmarkToggle={props.handleBookmarkToggle}
+                copyIconClickHandler={props.handleCopyPasterClick}
             />
         )}
     </div>

@@ -67,6 +67,7 @@ async function createDependencies() {
     ]
 
     const sidebarDependencies: AnnotationsSidebarProps = {
+        renderCopyPasterForAnnotation: () => null,
         sharingAccess: 'sharing-allowed',
         isAnnotationCreateShown: true,
         isSearchLoading: false,

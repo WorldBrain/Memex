@@ -10,6 +10,8 @@ import {
 import { runInBackground } from 'src/util/webextensionRPC'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import CopyPaster from 'src/overview/copy-paster'
 
 const styles = require('./annotation-list.css')
 
@@ -20,6 +22,7 @@ type Annotation = Omit<AnnotationFlawed, 'isBookmarked'> & {
 }
 
 export interface Props {
+    activeCopyPasterAnnotationId: string | undefined
     /** Override for expanding annotations by default */
     isExpandedOverride: boolean
     /** Array of matched annotations, limited to 3 */
@@ -32,6 +35,7 @@ export interface Props {
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
     handleBookmarkToggle: (url: string) => void
+    setActiveCopyPasterAnnotationId?: (id: string) => void
 }
 
 interface SharingInfo {
@@ -84,7 +88,6 @@ class AnnotationList extends Component<Props, State> {
     }
 
     private async detectPageSharingStatus() {
-        // TODO: get pageURL?
         const listIds = await this.customListsBG.fetchListIdsByUrl({
             url: this.props.pageUrl,
         })
@@ -214,6 +217,33 @@ class AnnotationList extends Component<Props, State> {
         this.props.goToAnnotation(annotation)
     }
 
+    private renderCopyPasterManager(annot: Annotation) {
+        if (this.props.activeCopyPasterAnnotationId !== annot.url) {
+            return null
+        }
+
+        return (
+            <HoverBox>
+                <CopyPaster
+                    onClick={(id) => console.log('onClick', id)}
+                    onClickCancel={() => console.log('onClickCancel')}
+                    onClickDelete={() => console.log('onClickDelete')}
+                    onClickEdit={(id) => console.log('onClickEdit', id)}
+                    onClickHowto={() => console.log('onClickHowTo')}
+                    onClickNew={() => console.log('onClickNew')}
+                    onClickSave={() => console.log('onClickSave')}
+                    onTitleChange={() => console.log('onTitleChange')}
+                    onCodeChange={() => console.log('onCodeChange')}
+                    onSetIsFavourite={() => console.log('onSetIsFavorite')}
+                    onClickOutside={() =>
+                        this.props.setActiveCopyPasterAnnotationId?.(undefined)
+                    }
+                    templates={[]}
+                />
+            </HoverBox>
+        )
+    }
+
     private renderAnnotations() {
         return this.state.annotations.map((annot) => (
             <AnnotationBox
@@ -232,6 +262,15 @@ class AnnotationList extends Component<Props, State> {
                 sharingAccess={this.state.sharingAccess}
                 sharingInfo={this.state.annotationsSharingInfo[annot.url]}
                 updateSharingInfo={this.updateAnnotationShareState(annot.url)}
+                copyPasterManager={this.renderCopyPasterManager(annot)}
+                handleCopyPasterClick={
+                    this.props.setActiveCopyPasterAnnotationId != null
+                        ? () =>
+                              this.props.setActiveCopyPasterAnnotationId(
+                                  annot.url,
+                              )
+                        : undefined
+                }
             />
         ))
     }

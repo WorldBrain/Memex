@@ -25,13 +25,24 @@ import niceTime from 'src/util/nice-time'
 import { Annotation } from 'src/annotations/types'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import TagPicker from 'src/tags/ui/TagPicker'
-import { tags, collections } from 'src/util/remote-functions-background'
+import {
+    tags,
+    collections,
+    featuresBeta,
+} from 'src/util/remote-functions-background'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import CopyPaster from 'src/overview/copy-paster'
 import { renderTemplate } from 'src/overview/copy-paster/utils'
 import { Template } from 'src/overview/copy-paster/types'
 
 const styles = require('./ResultList.css')
+
+interface LocalState {
+    tagSuggestions: string[]
+    copyPasterTemplates: Template[]
+    tmpCopyPasterTemplate: Template | undefined
+    activeCopyPasterAnnotationId: string | undefined
+}
 
 export interface StateProps {
     isLoading: boolean
@@ -82,6 +93,7 @@ export interface DispatchProps {
     getCopyPasterTemplates: () => void
     deleteCopyPasterTemplate: (id: number) => void
     saveNewCopyPasterTemplate: (template: Omit<Template, 'id'>) => void
+    setBetaFeaturesEnabled: (enabled: boolean) => void
     updateCopyPasterTemplate: (template: Template) => void
 }
 
@@ -93,7 +105,7 @@ export interface OwnProps {
 
 export type Props = StateProps & DispatchProps & OwnProps
 
-class ResultListContainer extends PureComponent<Props> {
+class ResultListContainer extends PureComponent<Props, LocalState> {
     private dropdownRefs: HTMLSpanElement[] = []
     private tagBtnRefs: HTMLButtonElement[] = []
     private listBtnRefs: HTMLButtonElement[] = []
@@ -115,10 +127,11 @@ class ResultListContainer extends PureComponent<Props> {
     private setCopyPasterButtonRef = (el: HTMLButtonElement) =>
         this.copyPasterBtnRefs.push(el)
 
-    state = {
+    state: LocalState = {
         tagSuggestions: [],
         copyPasterTemplates: [],
         tmpCopyPasterTemplate: undefined,
+        activeCopyPasterAnnotationId: undefined,
     }
 
     async componentDidMount() {
@@ -126,6 +139,11 @@ class ResultListContainer extends PureComponent<Props> {
         this.setState({ tagSuggestions: tagSuggestions.reverse() })
 
         document.addEventListener('click', this.handleOutsideClick, false)
+
+        const copyPasterEnabled = await featuresBeta.getFeatureState(
+            'copy-paster',
+        )
+        this.props.setBetaFeaturesEnabled(copyPasterEnabled)
 
         this.props.getCopyPasterTemplates()
     }
@@ -204,7 +222,7 @@ class ResultListContainer extends PureComponent<Props> {
         }
 
         return (
-            <HoverBox marginLeftOffset={50}>
+            <HoverBox>
                 <div ref={(ref) => this.setListDivRef(ref)}>
                     <CollectionPicker
                         onUpdateEntrySelection={this.handleListUpdate(index)}
@@ -431,6 +449,17 @@ class ResultListContainer extends PureComponent<Props> {
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
                 onReaderBtnClick={this.handleReaderBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
+                activeCopyPasterAnnotationId={
+                    this.state.activeCopyPasterAnnotationId
+                }
+                setActiveCopyPasterAnnotationId={
+                    this.props.isBetaEnabled
+                        ? (id) =>
+                              this.setState(() => ({
+                                  activeCopyPasterAnnotationId: id,
+                              }))
+                        : undefined
+                }
                 onCommentBtnClick={this.props.handleCommentBtnClick(
                     doc,
                     index,
@@ -638,6 +667,8 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
         dispatch(acts.saveNewCopyPasterTemplate(template)),
     updateCopyPasterTemplate: (template) =>
         dispatch(acts.updateCopyPasterTemplate(template)),
+    setBetaFeaturesEnabled: (enabled) =>
+        dispatch(acts.setBetaFeatures(enabled)),
 })
 
 export default connect(mapState, mapDispatch)(ResultListContainer)

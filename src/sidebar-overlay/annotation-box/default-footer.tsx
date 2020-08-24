@@ -7,6 +7,7 @@ import {
 } from 'src/content-sharing/ui/types'
 import { AnnotationShareIconRenderer } from 'src/annotations/components/AnnotationShareIconRenderer'
 import { LoadingIndicator } from 'src/common-ui/components'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 const styles = require('./default-footer.css')
 
@@ -25,6 +26,7 @@ interface Props extends ShareAnnotationProps {
     goToAnnotationHandler: (e: React.MouseEvent<HTMLElement>) => void
     editIconClickHandler: () => void
     trashIconClickHandler: () => void
+    copyIconClickHandler?: () => void
     handleBookmarkToggle: () => void
 }
 
@@ -37,6 +39,7 @@ const DefaultFooter = ({
     goToAnnotationHandler,
     editIconClickHandler,
     trashIconClickHandler,
+    copyIconClickHandler,
     handleBookmarkToggle,
     ...props
 }: Props) => (
@@ -46,6 +49,17 @@ const DefaultFooter = ({
             {timestamp}
         </div>
         <div className={styles.buttonContainer}>
+            {copyIconClickHandler && (
+                <button
+                    className={styles.commonIcon}
+                    onClick={copyIconClickHandler}
+                >
+                    <img
+                        src={icons.copy}
+                        style={{ width: '100%', height: '100%' }}
+                    />
+                </button>
+            )}
             <button
                 className={cx(styles.commonIcon, styles.trashIcon)}
                 title="Delete note"

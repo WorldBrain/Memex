@@ -44,6 +44,7 @@ export interface OwnProps {
     hasBookmark?: boolean
     sharingInfo: AnnotationSharingInfo
     sharingAccess: AnnotationSharingAccess
+    copyPasterManager: React.ReactNode
     updateSharingInfo: (info: AnnotationSharingInfo) => void
     handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
     handleMouseEnter?: (e: Event) => void
@@ -51,6 +52,7 @@ export interface OwnProps {
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
     handleBookmarkToggle: (url: string) => void
+    handleCopyPasterClick?: () => void
 }
 
 interface DispatchProps {
@@ -327,6 +329,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         shareIconClickHandler={this._handleShareIconClick}
                         getTruncatedTextObject={this._getTruncatedTextObject}
                         handleBookmarkToggle={this.handleBookmarkToggle}
+                        handleCopyPasterClick={this.props.handleCopyPasterClick}
                         {...shareAnnotationProps}
                     />
                 ) : (
@@ -336,9 +339,11 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         tags={this.props.tags}
                         handleCancelOperation={this._handleCancelOperation}
                         handleEditAnnotation={this._handleEditAnnotation}
+                        handleCopyPasterClick={this.props.handleCopyPasterClick}
                         {...shareAnnotationProps}
                     />
                 )}
+                {this.props.copyPasterManager}
             </div>
         )
     }
