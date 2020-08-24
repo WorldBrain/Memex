@@ -2,6 +2,8 @@ import * as React from 'react'
 
 import { maxPossibleTags } from '../utils'
 import { ClickHandler } from '../types'
+import classNames from 'classnames'
+
 
 const styles = require('./tag-holder.css')
 
@@ -85,15 +87,16 @@ class TagHolder extends React.Component<Props, State> {
 
         return (
             <div className={styles.tagHolder} onClick={clickHandler}>
-                {!tags.length && (
-                    <span className={styles.placeholder}>
-                        <span className={styles.tagIcon} />
-                        Add tag
-                    </span>
-                )}
-
                 {this._renderTags()}
-                {this._renderNumberOfRemainingTags()}
+                <span
+                    className={classNames(
+                        styles.placeholder,
+                        tags.length > 0 && styles.placeholder_alt,
+                    )}
+                >
+                    {!tags.length && <span className={styles.tagIcon} />}
+                    <span className={styles.addTag}>Add tag</span>
+                </span>
             </div>
         )
     }
