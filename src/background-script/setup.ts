@@ -213,6 +213,13 @@ export function createBackgroundModules(options: {
         localBrowserStorage: options.browserAPIs.storage.local,
     })
 
+    const directLinking = new DirectLinkingBackground({
+        browserAPIs: options.browserAPIs,
+        storageManager,
+        socialBg: social,
+        searchIndex: search.searchIndex,
+        pageStorage: pages.storage,
+    })
     return {
         auth,
         social,
@@ -222,13 +229,7 @@ export function createBackgroundModules(options: {
         activityLogger,
         connectivityChecker,
         readable: reader,
-        directLinking: new DirectLinkingBackground({
-            browserAPIs: options.browserAPIs,
-            storageManager,
-            socialBg: social,
-            searchIndex: search.searchIndex,
-            pageStorage: pages.storage,
-        }),
+        directLinking,
         search,
         eventLog: new EventLogBackground({ storageManager }),
         customLists,
@@ -328,6 +329,7 @@ export function createBackgroundModules(options: {
         contentSharing: new ContentSharingBackground({
             storageManager,
             customLists: customLists.storage,
+            annotationStorage: directLinking.annotationStorage,
             auth,
             analytics: options.analyticsManager,
             getContentSharing: async () =>

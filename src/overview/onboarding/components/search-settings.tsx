@@ -34,8 +34,15 @@ export default class SearchSettings extends React.PureComponent<Props> {
     }
 
     private renderIndexingMessage() {
-        if (this.props.bookmarks && this.props.visits && this.props.annotations && this.props.stubs) {
-            return "Index everything after " + this.props.visitDelay + " seconds"
+        if (
+            this.props.bookmarks &&
+            this.props.visits &&
+            this.props.annotations &&
+            this.props.stubs
+        ) {
+            return (
+                'Index everything after ' + this.props.visitDelay + ' seconds'
+            )
         }
 
         if (
@@ -84,7 +91,10 @@ export default class SearchSettings extends React.PureComponent<Props> {
     private renderDisabledSettings() {
         return (
             <>
-                <div className={styles.settingsText}><strong>Current Settings: </strong>{this.renderIndexingMessage()}</div>
+                <div className={styles.settingsText}>
+                    <strong>Current Settings: </strong>
+                    {this.renderIndexingMessage()}
+                </div>
                 <SecondaryAction
                     onClick={this.props.toggleShowSearchSettings}
                     label={'Change settings'}

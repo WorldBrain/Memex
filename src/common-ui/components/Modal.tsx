@@ -1,36 +1,29 @@
 import React, { PureComponent, MouseEventHandler } from 'react'
 import styled from 'styled-components'
-import cx from 'classnames'
 
 import Overlay, { Props as OverlayProps } from './Overlay'
-
-const styles = require('./Modal.css')
+import { close as closeIcon } from 'src/common-ui/components/design-library/icons'
 
 export interface Props extends Omit<OverlayProps, 'onClick'> {
+    ignoreClickOutside?: boolean
     onClose?: MouseEventHandler
-    large?: boolean
 }
 
 class Modal extends PureComponent<Props> {
     static propTypes = {}
 
     render() {
-        const { onClose, large, ...props } = this.props
+        const { onClose, ignoreClickOutside, ...props } = this.props
 
         return (
             <Overlay
-                innerClassName={cx({
-                    [styles.popup]: !large,
-                    [styles.popupLarge]: large,
-                })}
-                onClick={onClose}
+                onClick={ignoreClickOutside ? undefined : onClose}
                 {...props}
             >
-                {this.props.onClose && (
-                    <CloseButton
-                        onClick={this.props.onClose}
-                        data-annotation="sidebar"
-                    />
+                {onClose && (
+                    <CloseButton onClick={onClose} data-annotation="sidebar">
+                        <CloseButtonImg src={closeIcon} />
+                    </CloseButton>
                 )}
                 <Content>{this.props.children}</Content>
             </Overlay>
@@ -39,6 +32,11 @@ class Modal extends PureComponent<Props> {
 }
 
 export default Modal
+
+export const CloseButtonImg = styled.img`
+    height: 100%;
+    width: 100%;
+`
 
 export const CloseButton = styled.button`
     position: absolute;
@@ -50,11 +48,11 @@ export const CloseButton = styled.button`
     border: none;
     transition: all 200ms;
     cursor: pointer;
-    background-color: transparent;
-    background-image: url('/img/close.svg');
-    background-repeat: no-repeat;
-    background-position: center;
     border-radius: 3px;
+
+    &:hover {
+        opacity: 0.4;
+    }
 `
 
 export const Content = styled.div`

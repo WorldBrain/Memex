@@ -1,4 +1,5 @@
 import debounce from 'lodash/debounce'
+import some from 'lodash/some'
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { EventEmitter } from 'events'
@@ -12,7 +13,16 @@ import { featuresBeta } from 'src/util/remote-functions-background'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { DEF_RESULT_LIMIT } from '../constants'
 import { IncomingAnnotationData } from 'src/in-page-ui/shared-state/types'
-import { generateUrl } from 'src/annotations/utils'
+import {
+    generateUrl,
+    getLastSharedAnnotationTimestamp,
+    setLastSharedAnnotationTimestamp,
+} from 'src/annotations/utils'
+import createResolvable from '@josephg/resolvable'
+import {
+    AnnotationSharingInfo,
+    AnnotationSharingAccess,
+} from 'src/content-sharing/ui/types'
 
 interface EditForm {
     isBookmarked: boolean
@@ -28,12 +38,17 @@ export interface SidebarContainerState {
 
     showState: 'visible' | 'hidden'
 
-    pageUrl: string
+    annotationSharingAccess: AnnotationSharingAccess
+
+    pageUrl?: string
     annotations: Annotation[]
     annotationModes: {
         [context in AnnotationEventContext]: {
             [annotationUrl: string]: AnnotationMode
         }
+    }
+    annotationSharingInfo: {
+        [annotationUrl: string]: AnnotationSharingInfo
     }
     activeAnnotationUrl: string | null
     hoverAnnotationUrl: string | null
@@ -87,6 +102,7 @@ export interface SidebarContainerState {
 
     isListFilterActive: boolean
     isSocialSearch: boolean
+    showAnnotationsShareModal: boolean
 }
 
 export type SidebarContainerEvents = UIEvent<{
@@ -130,6 +146,10 @@ export type SidebarContainerEvents = UIEvent<{
         anchor?: Anchor
     }
 
+    receiveSharingAccessChange: {
+        sharingAccess: AnnotationSharingAccess
+    }
+
     // Annotation boxes
     goToAnnotation: {
         context: AnnotationEventContext
@@ -149,6 +169,14 @@ export type SidebarContainerEvents = UIEvent<{
         annotationUrl: string
     }
     deleteAnnotation: {
+        context: AnnotationEventContext
+        annotationUrl: string
+    }
+    shareAnnotation: {
+        context: AnnotationEventContext
+        annotationUrl: string
+    }
+    unshareAnnotation: {
         context: AnnotationEventContext
         annotationUrl: string
     }
@@ -184,6 +212,8 @@ export type SidebarContainerEvents = UIEvent<{
     toggleAllAnnotationsFold: null
     fetchSuggestedTags: null
     fetchSuggestedDomains: null
+
+    setAnnotationShareModalShown: { shown: boolean }
 
     // Page search result interactions
     // togglePageBookmark: { pageUrl: string }
@@ -225,6 +255,8 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerEvents
 > {
     private inPageEvents: AnnotationsSidebarInPageEventEmitter
+    _detectedPageSharingStatus: Promise<void>
+    _detectedSharedAnnotations = createResolvable()
 
     constructor(private options: SidebarContainerOptions) {
         super()
@@ -250,6 +282,8 @@ export class SidebarContainerLogic extends UILogic<
                 pageAnnotations: {},
                 searchResults: {},
             },
+            annotationSharingInfo: {},
+            annotationSharingAccess: 'feature-disabled',
 
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
@@ -293,6 +327,7 @@ export class SidebarContainerLogic extends UILogic<
             searchResultSkip: 0,
 
             isBetaEnabled: false,
+            showAnnotationsShareModal: false,
         }
     }
 
@@ -310,6 +345,9 @@ export class SidebarContainerLogic extends UILogic<
             if (this.options.pageUrl != null) {
                 await this._doSearch(previousState, { overwrite: true })
             }
+            if (this.options.pageUrl) {
+                this._detectPageSharingStatus(this.options.pageUrl)
+            }
             // await this.loadBeta()
         })
     }
@@ -321,13 +359,17 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    private annotationSubscription = (annotations: Annotation[]) =>
+    private annotationSubscription = (annotations: Annotation[]) => {
         this.emitMutation({
             annotations: { $set: annotations },
             editForms: {
                 $set: createEditFormsForAnnotations(annotations),
             },
         })
+        this._detectSharedAnnotations(
+            annotations.map((annotation) => annotation.url),
+        )
+    }
 
     private async loadBeta() {
         // Check if user is allowed for beta too
@@ -423,6 +465,7 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
 
+        this._detectPageSharingStatus(event.pageUrl)
         return this._doSearch(nextState, { overwrite: true })
     }
 
@@ -491,6 +534,12 @@ export class SidebarContainerLogic extends UILogic<
                 }),
             },
         })
+    }
+
+    receiveSharingAccessChange: EventHandler<'receiveSharingAccessChange'> = ({
+        event: { sharingAccess },
+    }) => {
+        this.emitMutation({ annotationSharingAccess: { $set: sharingAccess } })
     }
 
     // TODO (sidebar-refactor) reconcile this duplicate code with ribbon notes save
@@ -781,6 +830,46 @@ export class SidebarContainerLogic extends UILogic<
         this.options.annotationsCache.delete(annotation)
     }
 
+    shareAnnotation: EventHandler<'shareAnnotation'> = async ({ event }) => {
+        const updateAnnotationTaskState = (taskState: TaskState) =>
+            this._updateAnnotationShareState(event.annotationUrl, {
+                status: 'shared',
+                taskState,
+            })
+        updateAnnotationTaskState('running')
+        try {
+            await this.options.contentSharing.shareAnnotation({
+                annotationUrl: event.annotationUrl,
+            })
+            updateAnnotationTaskState('success')
+            this.setLastSharedAnnotationTimestamp()
+        } catch (e) {
+            updateAnnotationTaskState('error')
+            throw e
+        }
+    }
+
+    unshareAnnotation: EventHandler<'unshareAnnotation'> = async ({
+        event,
+    }) => {
+        const updateAnnotationTaskState = (taskState: TaskState) =>
+            this._updateAnnotationShareState(event.annotationUrl, {
+                status: 'unshared',
+                taskState,
+            })
+        updateAnnotationTaskState('running')
+        try {
+            // await new Promise(resolve => { })
+            await this.options.contentSharing.unshareAnnotation({
+                annotationUrl: event.annotationUrl,
+            })
+            updateAnnotationTaskState('success')
+        } catch (e) {
+            updateAnnotationTaskState('error')
+            throw e
+        }
+    }
+
     toggleAnnotationBookmark: EventHandler<
         'toggleAnnotationBookmark'
     > = async ({ previousState, event }) => {
@@ -875,5 +964,69 @@ export class SidebarContainerLogic extends UILogic<
         return {
             hoverAnnotationUrl: { $set: null },
         }
+    }
+
+    setAnnotationShareModalShown: EventHandler<
+        'setAnnotationShareModalShown'
+    > = ({ event }) => {
+        this.emitMutation({ showAnnotationsShareModal: { $set: event.shown } })
+    }
+
+    _detectPageSharingStatus(pageUrl: string) {
+        this._detectedPageSharingStatus = (async () => {
+            const listIds = await this.options.customLists.fetchListIdsByUrl({
+                url: pageUrl,
+            })
+            const areListsShared = await this.options.contentSharing.areListsShared(
+                { localListIds: listIds },
+            )
+            this.emitMutation({
+                annotationSharingAccess: {
+                    $set: some(Object.values(areListsShared))
+                        ? 'sharing-allowed'
+                        : 'page-not-shared',
+                },
+            })
+        })()
+    }
+
+    async _detectSharedAnnotations(annotationUrls: string[]) {
+        const annotationSharingInfo: UIMutation<
+            SidebarContainerState['annotationSharingInfo']
+        > = {}
+        const remoteIds = await this.options.contentSharing.getRemoteAnnotationIds(
+            { annotationUrls },
+        )
+        for (const localId of Object.keys(remoteIds)) {
+            annotationSharingInfo[localId] = {
+                $set: {
+                    status: 'shared',
+                    taskState: 'pristine',
+                },
+            }
+        }
+        this.emitMutation({
+            annotationSharingInfo,
+        })
+    }
+
+    _updateAnnotationShareState = (
+        annotationUrl: string,
+        info: AnnotationSharingInfo,
+    ) =>
+        this.emitMutation({
+            annotationSharingInfo: {
+                [annotationUrl]: { $set: info },
+            },
+        })
+
+    private async setLastSharedAnnotationTimestamp() {
+        const lastShared = await getLastSharedAnnotationTimestamp()
+
+        if (lastShared == null) {
+            this.options.showAnnotationShareModal?.()
+        }
+
+        await setLastSharedAnnotationTimestamp()
     }
 }

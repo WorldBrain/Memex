@@ -13,6 +13,7 @@ import {
 } from './AnnotationsSidebarContainer'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { Annotation } from 'src/annotations/types'
+import ShareAnnotationModal from 'src/overview/sharing/components/ShareAnnotationModal'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -30,6 +31,16 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             paddingRight: 40,
         },
         skipTopBarRender: true,
+    }
+
+    constructor(props: Props) {
+        super({
+            ...props,
+            showAnnotationShareModal: () =>
+                this.processEvent('setAnnotationShareModalShown', {
+                    shown: true,
+                }),
+        })
     }
 
     componentDidMount() {
@@ -113,19 +124,19 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 annotationUrl: event.annotationUrl,
                 anchor: event.anchor,
             })
-        }
-
-        if (event.action === 'comment') {
+        } else if (event.action === 'comment') {
             this.processEvent('addNewPageComment', null)
             if (event.anchor) {
                 this.processEvent('setNewPageCommentAnchor', {
                     anchor: event.anchor,
                 })
             }
-        }
-
-        if (event.action === 'show_annotation') {
+        } else if (event.action === 'show_annotation') {
             this.activateAnnotation(event.annotationUrl)
+        } else if (event.action === 'set_sharing_access') {
+            this.processEvent('receiveSharingAccessChange', {
+                sharingAccess: event.annotationSharingAccess,
+            })
         }
 
         this.forceUpdate()
@@ -173,5 +184,33 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 )
             },
         }
+    }
+
+    protected renderModals() {
+        return (
+            <>
+                {this.state.showAnnotationsShareModal && (
+                    <ShareAnnotationModal
+                        requiresExplicitStyles
+                        onClose={() =>
+                            this.processEvent('setAnnotationShareModalShown', {
+                                shown: false,
+                            })
+                        }
+                        onClickLetUsKnow={() => {
+                            window.open('https://worldbrain.io/feedback/betafeatures')
+                        }}
+                        onClickViewRoadmap={() => {
+                            window.open('https://worldbrain.io/roadmap')
+                        }}
+                        onClickKnownIssues={() => {
+                            window.open(
+                                'https://worldbrain.io/feature/sharing-collections/knownissues',
+                            )
+                        }}
+                    />
+                )}
+            </>
+        )
     }
 }

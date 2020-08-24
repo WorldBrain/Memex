@@ -11,11 +11,7 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
 
-export const Success = ({ 
-    onClose 
-}: { 
-    onClose: () => void 
-}) => {
+export const Success = ({ onClose }: { onClose: () => void }) => {
     return (
         <ModalBox
             header={'SUCCESS! - Your devices are now synced!'}

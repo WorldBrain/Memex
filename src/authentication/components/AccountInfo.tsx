@@ -25,7 +25,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
     state = {
         loadingChargebee: false,
         plans: [],
-        features: []
+        features: [],
     }
 
     openPortal = async () => {
@@ -40,13 +40,13 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
     }
 
     async componentDidMount() {
-        this.handleRefresh()     
+        this.handleRefresh()
     }
 
     handleRefresh = async () => {
-        await auth.refreshUserInfo().then(()=>{
+        await auth.refreshUserInfo().then(() => {
             this.updateUserInfo()
-        })  
+        })
     }
 
     async updateUserInfo() {
@@ -56,7 +56,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
 
         await this.setState({
             plans: plans,
-            features: features
+            features: features,
         })
     }
 
@@ -69,18 +69,17 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
             <FullPage>
                 {user != null && (
                     <div className={styles.AccountInfoBox}>
-
                         {this.state.features.includes('beta') && (
-                           <div className={styles.pioneerBox}>
-                               <div className={styles.pioneerTitle}>
-                                   🚀 Pioneer Edition
-                               </div>
-                               <div className={styles.pioneerSubtitle}>
-                                   Thank you for your support. You make this possible!
-                               </div>
-                           </div>
+                            <div className={styles.pioneerBox}>
+                                <div className={styles.pioneerTitle}>
+                                    🚀 Pioneer Edition
+                                </div>
+                                <div className={styles.pioneerSubtitle}>
+                                    Thank you for your support. You make this
+                                    possible!
+                                </div>
+                            </div>
                         )}
-
 
                         <div className={styles.section}>
                             <TypographyInputTitle>
@@ -95,11 +94,11 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                 disabled
                             />
                         </div>
-                        {!user.subscriptionStatus &&  (
+                        {!user.subscriptionStatus && (
                             <div className={styles.section}>
                                 <TypographyInputTitle>
                                     {' '}
-                                    Your Plan {' '}
+                                    Your Plan{' '}
                                 </TypographyInputTitle>
                                 <div className={styles.lineEditBox}>
                                     <InputTextField
@@ -118,11 +117,11 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                             </div>
                         )}
 
-                        {this.state.plans.length > 0  && (
+                        {this.state.plans.length > 0 && (
                             <div className={styles.section}>
                                 <TypographyInputTitle>
                                     {' '}
-                                    Your Plan {' '}
+                                    Your Plan{' '}
                                 </TypographyInputTitle>
                                 <div className={styles.lineEditBox}>
                                     <InputTextField
@@ -137,10 +136,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                         </PrimaryButton>
                                     ) : (
                                         <PrimaryButton
-                                            onClick={
-                                                this
-                                                    .openPortal
-                                            }
+                                            onClick={this.openPortal}
                                         >
                                             {'Edit Subscriptions'}
                                         </PrimaryButton>
@@ -148,28 +144,31 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                 </div>
                             </div>
                         )}
-                        {user.subscriptionStatus && user.subscriptionStatus !== 'in_trial' && (
-                            <div className={styles.section}>
-                                <TypographyInputTitle>
-                                    {' '}
-                                    Subscription Status{' '}
-                                </TypographyInputTitle>
-                                <div className={styles.lineEditBox}>
-                                    <InputTextField
-                                        name={'subscriptionStatus'}
-                                        defaultValue={user.subscriptionStatus}
-                                        readOnly
-                                    />
-                                     <PrimaryButton
+                        {user.subscriptionStatus &&
+                            user.subscriptionStatus !== 'in_trial' && (
+                                <div className={styles.section}>
+                                    <TypographyInputTitle>
+                                        {' '}
+                                        Subscription Status{' '}
+                                    </TypographyInputTitle>
+                                    <div className={styles.lineEditBox}>
+                                        <InputTextField
+                                            name={'subscriptionStatus'}
+                                            defaultValue={
+                                                user.subscriptionStatus
+                                            }
+                                            readOnly
+                                        />
+                                        <PrimaryButton
                                             onClick={
                                                 this.props.showSubscriptionModal
                                             }
                                         >
                                             {'Reactivate'}
-                                    </PrimaryButton>
+                                        </PrimaryButton>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
                         {user.subscriptionStatus === 'in_trial' && (
                             <div className={styles.section}>
@@ -183,11 +182,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                         defaultValue={user.subscriptionStatus}
                                         readOnly
                                     />
-                                    <PrimaryButton
-                                        onClick={
-                                            this.openPortal
-                                        }
-                                    >
+                                    <PrimaryButton onClick={this.openPortal}>
                                         {'Add Payment Methods'}
                                     </PrimaryButton>
                                 </div>
@@ -216,17 +211,17 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                     </div>
                                 ) : (
                                     <div>
-                                        {user.subscriptionStatus === 'in_trial' ? (
+                                        {user.subscriptionStatus ===
+                                        'in_trial' ? (
                                             <TypographyInputTitle>
-                                            {' '}
-                                            Trial Ends on{' '}
-                                        </TypographyInputTitle>
-
-                                            ):(
-                                        <TypographyInputTitle>
-                                            {' '}
-                                            Subscription Renewal Date{' '}
-                                        </TypographyInputTitle>
+                                                {' '}
+                                                Trial Ends on{' '}
+                                            </TypographyInputTitle>
+                                        ) : (
+                                            <TypographyInputTitle>
+                                                {' '}
+                                                Subscription Renewal Date{' '}
+                                            </TypographyInputTitle>
                                         )}
                                         <InputTextField
                                             name={'subscriptionExpiry'}

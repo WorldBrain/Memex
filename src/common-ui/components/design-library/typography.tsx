@@ -28,6 +28,7 @@ export const TypographyHeadingBigger = styled.span`
     margin-right: 5px;
     font-weight: bold;
     width: 100%;
+    font-family: 'Poppins', sans-serif;
 `
 
 export const TypographyHeadingBig = styled.span`
@@ -38,6 +39,7 @@ export const TypographyHeadingBig = styled.span`
     font-weight: bold;
     text-align: center;
     width: 100%;
+    font-family: 'Poppins', sans-serif;
 `
 
 export const TypographyHeadingNormal = styled.span`
@@ -45,6 +47,7 @@ export const TypographyHeadingNormal = styled.span`
     text-decoration: none;
     font-weight: bold;
     color: ${colorText};
+    font-family: 'Poppins', sans-serif;
 `
 
 export const TypographyHeadingSmall = styled.span`
@@ -53,6 +56,7 @@ export const TypographyHeadingSmall = styled.span`
     margin-right: 5px;
     font-weight: bold;
     color: ${colorText};
+    font-family: 'Poppins', sans-serif;
 `
 
 export const TypographyLink = styled.span`
@@ -61,6 +65,7 @@ export const TypographyLink = styled.span`
     margin: 5px;
     color: ${colorPrimary};
     cursor: pointer;
+    font-family: 'Poppins', sans-serif;
 `
 
 export const TypographyHeadingPage = styled.span`
@@ -71,6 +76,7 @@ export const TypographyHeadingPage = styled.span`
     line-height: 1.4;
     text-align: left;
     color: ${colorText};
+    font-family: 'Poppins', sans-serif;
 
     @media (max-width: 1300px) {
         font-size: ${fontSizeNormal}px;
@@ -85,6 +91,7 @@ export const TypographySubHeading = styled.span`
     line-height: 1.4;
     text-align: left;
     color: ${colorText};
+    font-family: 'Poppins', sans-serif;
 
     @media (max-width: 1300px) {
         font-size: ${fontSizeSmall}px;
@@ -99,6 +106,7 @@ export const TypographyTextNormal = styled.span`
     line-height: 1.4;
     text-align: left;
     color: ${colorText};
+    font-family: 'Poppins', sans-serif;
 
     @media (max-width: 1300px) {
         font-size: ${fontSizeSmall}px;
@@ -113,6 +121,7 @@ export const TypographySubTextNormal = styled.span`
     line-height: 1.4;
     text-align: left;
     color: ${colorGrey7};
+    font-family: 'Poppins', sans-serif;
 
     @media (max-width: 1300px) {
         font-size: ${fontSizeSmall}px;
@@ -127,6 +136,7 @@ export const TypographyTextSmall = styled.span`
     line-height: 1.4;
     text-align: left;
     color: ${colorText};
+    font-family: 'Poppins', sans-serif;
 
     @media (max-width: 1300px) {
         font-size: ${fontSizeSmallest}px;
@@ -134,22 +144,22 @@ export const TypographyTextSmall = styled.span`
 `
 
 export const TypographyInputTitle = styled.h2`
-    font-family: 'Poppins', sans-serif;
     font-size: ${fontSizeBig}px;
     font-weight: bold;
     box-sizing: border-box;
     margin-bottom: 5px;
     margin-top: 10px;
+    font-family: 'Poppins', sans-serif;
 `
 
 export const TypographyButtonLabel = styled.span`
-    font-family: Poppins;
     font-style: normal;
     font-weight: 600;
     font-size: ${fontSizeSmall}px;
     line-height: 1.4;
     text-align: center;
     color: #fafafb;
+    font-family: 'Poppins', sans-serif;
 `
 export const TypographyActionText = styled.span`
     line-height: 1.4;
@@ -158,6 +168,7 @@ export const TypographyActionText = styled.span`
     font-style: normal;
     font-weight: 600;
     font-size: 1em;
+    font-family: 'Poppins', sans-serif;
 `
 
 export const TypographyBody = styled.span`
@@ -168,6 +179,7 @@ export const TypographyBody = styled.span`
     margin-top: 20px;
     text-align: left;
     color: ${colorText};
+    font-family: 'Poppins', sans-serif;
 `
 
 export const CenterText = styled.div`
@@ -190,6 +202,7 @@ export const TypographyBodyBold = styled.div`
     font-size: 16px;
     color: #544960;
     text-align: center;
+    font-family: 'Poppins', sans-serif;
 `
 
 export const TypographyBodyCenter = styled.div`
@@ -197,6 +210,7 @@ export const TypographyBodyCenter = styled.div`
     font-size: 16px;
     text-align: center;
     color: #544960;
+    font-family: 'Poppins', sans-serif;
 `
 export const HelpBlock = styled.div`
     display: block;

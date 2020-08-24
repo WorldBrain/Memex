@@ -53,6 +53,7 @@ export interface RemoteCollectionsInterface {
     }): Promise<PageList[]>
     fetchListPagesById(args: { id: number }): Promise<PageListEntry[]>
     fetchPageLists(args: { url: string }): Promise<string[]>
+    fetchListIdsByUrl(args: { url: string }): Promise<number[]>
     fetchListIgnoreCase(args: { name: string }): Promise<PageList[]>
     searchForListSuggestions(args: {
         query: string

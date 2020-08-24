@@ -37,6 +37,7 @@ describe('Backup feature', () => {
             tags: { backup: true, watch: true },
             templates: { backup: true, watch: true },
             sharedListMetadata: { backup: true, watch: true },
+            sharedAnnotationMetadata: { backup: true, watch: true },
 
             contentSharingAction: { backup: false, watch: false },
             pageFetchBacklog: { backup: false, watch: false },

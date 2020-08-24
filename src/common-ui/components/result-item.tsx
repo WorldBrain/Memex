@@ -129,40 +129,41 @@ class ResultItem extends PureComponent<Props> {
                 })}
             >
                 <div>
-                {this.props.isDeleting && (
-                    <LoadingIndicator className={styles.deletingSpinner} />
-                )}
-                {this.props.tagManager}
-                {this.props.listManager}
-                {this.props.copyPasterManager}
-                <div
-                    className={cx(
-                        styles.rootContainer,
-                        styles.rootContainerOverview,
-                        {
-                            [styles.tweetRootContainer]: this.props.isSocial,
-                            [styles.isSidebarOpen]: this.props
-                                .isResponsibleForSidebar,
-                        },
+                    {this.props.isDeleting && (
+                        <LoadingIndicator className={styles.deletingSpinner} />
                     )}
-                >
-                    <a
-                        onClick={this.handleClick}
-                        onDragStart={this.dragStart}
-                        onDragEnd={this.props.resetUrlDragged}
-                        className={cx(styles.root, styles.rootOverview)}
-                        draggable
-                        href={this.hrefToPage}
-                        target="_blank"
-                    >
-                        {this.props.isSocial ? (
-                            <SocialResultItem {...this.props} />
-                        ) : (
-                            <PageResultItem {...this.props} />
+                    {this.props.tagManager}
+                    {this.props.listManager}
+                    {this.props.copyPasterManager}
+                    <div
+                        className={cx(
+                            styles.rootContainer,
+                            styles.rootContainerOverview,
+                            {
+                                [styles.tweetRootContainer]: this.props
+                                    .isSocial,
+                                [styles.isSidebarOpen]: this.props
+                                    .isResponsibleForSidebar,
+                            },
                         )}
-                    </a>
-                </div>
-                {this.renderAnnotsList()}
+                    >
+                        <a
+                            onClick={this.handleClick}
+                            onDragStart={this.dragStart}
+                            onDragEnd={this.props.resetUrlDragged}
+                            className={cx(styles.root, styles.rootOverview)}
+                            draggable
+                            href={this.hrefToPage}
+                            target="_blank"
+                        >
+                            {this.props.isSocial ? (
+                                <SocialResultItem {...this.props} />
+                            ) : (
+                                <PageResultItem {...this.props} />
+                            )}
+                        </a>
+                    </div>
+                    {this.renderAnnotsList()}
                 </div>
             </li>
         )

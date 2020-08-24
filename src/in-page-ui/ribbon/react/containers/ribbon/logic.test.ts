@@ -33,6 +33,7 @@ describe('Ribbon logic', () => {
         const currentTab = {
             id: 654,
             url: 'https://www.foo.com',
+            normalizedUrl: 'foo.com',
             title: 'Foo.com: Home',
         }
         const annotations = insertBackgroundFunctionTab(
@@ -47,6 +48,7 @@ describe('Ribbon logic', () => {
         const inPageUI = new SharedInPageUIState({
             loadComponent: () => {},
             unloadComponent: () => {},
+            getNormalizedPageUrl: () => currentTab.normalizedUrl,
         })
 
         const annotationsManager = {} as any

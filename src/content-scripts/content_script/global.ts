@@ -1,6 +1,6 @@
 import 'core-js'
 import { EventEmitter } from 'events'
-// import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import { setupScrollReporter } from 'src/activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
@@ -37,6 +37,7 @@ import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-si
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { AnalyticsEvent } from 'src/analytics/types'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
 // TODO:(page-indexing)[high] Fix this with a proper restructuring of how pages are indexed
 setupPageContentRPC()
 
@@ -47,6 +48,7 @@ setupPageContentRPC()
 export async function main() {
     const getPageUrl = () => window.location.href
     const getPageTitle = () => document.title
+    const getNormalizedPageUrl = () => normalizeUrl(getPageUrl())
 
     // 1. Create a local object with promises to track each content script
     // initialisation and provide a function which can initialise a content script
@@ -76,6 +78,7 @@ export async function main() {
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
     const inPageUI = new SharedInPageUIState({
+        getNormalizedPageUrl,
         loadComponent: (component) => {
             // Treat highlights differently as they're not a separate content script
             if (component === 'highlights') {
@@ -177,6 +180,7 @@ export async function main() {
                 annotations: annotationsBG,
                 tags: tagsBG,
                 customLists: runInBackground<RemoteCollectionsInterface>(),
+                contentSharing: runInBackground<ContentSharingInterface>(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
             })
             components.sidebar?.resolve()

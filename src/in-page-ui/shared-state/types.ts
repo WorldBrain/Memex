@@ -1,8 +1,12 @@
 import TypedEventEmitter from 'typed-emitter'
 import { Anchor } from 'src/highlighting/types'
-import { Annotation } from 'src/annotations/types'
+import { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 
-export type InPageUISidebarAction = 'annotate' | 'comment' | 'show_annotation'
+export type InPageUISidebarAction =
+    | 'annotate'
+    | 'comment'
+    | 'show_annotation'
+    | 'set_sharing_access'
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip' | 'highlights'
 export type InPageUIComponentShowState = {
@@ -21,6 +25,7 @@ export interface SidebarActionOptions {
     anchor?: Anchor
     annotationUrl?: string
     annotationData?: IncomingAnnotationData
+    annotationSharingAccess?: AnnotationSharingAccess
 }
 
 export interface SharedInPageUIEvents {

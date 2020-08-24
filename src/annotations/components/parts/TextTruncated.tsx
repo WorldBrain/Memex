@@ -57,18 +57,16 @@ class TextTruncated extends React.Component<Props, State> {
 
         return (
             <React.Fragment>
-            <TextToBeDisplayed>
-                {textToBeDisplayed}
-            </TextToBeDisplayed>
-            <CommentTextBox>
-                {isTextTooLong && (
-                    <ToggleMoreButtonStyled
-                        onClick={this._toggleTextTruncation}
-                    >
-                        {shouldTruncate ? 'Show More' : 'Show Less'}
-                    </ToggleMoreButtonStyled>
-                )}
-            </CommentTextBox>
+                <TextToBeDisplayed>{textToBeDisplayed}</TextToBeDisplayed>
+                <CommentTextBox>
+                    {isTextTooLong && (
+                        <ToggleMoreButtonStyled
+                            onClick={this._toggleTextTruncation}
+                        >
+                            {shouldTruncate ? 'Show More' : 'Show Less'}
+                        </ToggleMoreButtonStyled>
+                    )}
+                </CommentTextBox>
             </React.Fragment>
         )
     }

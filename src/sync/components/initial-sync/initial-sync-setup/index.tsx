@@ -48,7 +48,7 @@ export default class InitialSyncSetup extends StatefulUIElement<
                         stage={this.state.stage}
                         handleCancel={() => this.processEvent('cancel', {})}
                         handleRetry={() => this.processEvent('retry', {})}
-                        onClose={this.close} 
+                        onClose={this.close}
                     />
                 )
             case 'done':
@@ -63,7 +63,7 @@ export default class InitialSyncSetup extends StatefulUIElement<
                         stage={this.state.stage}
                         handleCancel={() => this.processEvent('cancel', {})}
                         handleRetry={() => this.processEvent('retry', {})}
-                        onClose={this.close} 
+                        onClose={this.close}
                     />
                 )
             default:

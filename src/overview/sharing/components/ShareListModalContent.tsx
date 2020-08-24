@@ -33,7 +33,8 @@ const Text = styled.div`
     font-size: 14px;
     line-height: 21px;
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 30px;
+    font-family: 'Poppins', sans-serif;
 `
 
 const ButtonsContainer = styled.div`
@@ -139,7 +140,7 @@ interface ShareToggleProps {
     onClickToggle: () => void
 }
 
-interface ShareModalContentProps {
+interface Props {
     isShared: boolean
     collectionName: string
     shareUrl?: string
@@ -154,9 +155,7 @@ interface ShareModalContentProps {
 
 const COPY_TIMEOUT = 2000
 
-export default class ShareModalContent extends PureComponent<
-    ShareModalContentProps
-> {
+export default class ShareListModalContent extends PureComponent<Props> {
     state = {
         hasCopied: false,
     }
@@ -238,8 +237,7 @@ export default class ShareModalContent extends PureComponent<
                 <BetaInfoContainer>
                     <BlockHeading>🚀 This is a beta feature</BlockHeading>
                     <Text>
-                        We want to learn more about what you need to integrate
-                        it into your workflow.
+                        What needs to change so it fits better into your workflow?
                     </Text>
 
                     <ButtonsContainer>

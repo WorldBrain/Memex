@@ -438,7 +438,6 @@ const EditBox = styled.div`
     width: 100px;
 `
 
-
 export {
     SubscriptionOptionsContainer,
     PriceInputBox,

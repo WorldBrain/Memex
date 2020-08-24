@@ -30,7 +30,7 @@ class ListContainer extends Component {
         handleDeleteList: PropTypes.func.isRequired,
         toggleCreateListForm: PropTypes.func.isRequired,
         showCreateList: PropTypes.bool.isRequired,
-        showShareModal: PropTypes.func.isRequired,
+        showListShareModal: PropTypes.func.isRequired,
         showCommonNameWarning: PropTypes.bool.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
         isSidebarLocked: PropTypes.bool.isRequired,
@@ -113,7 +113,7 @@ class ListContainer extends Component {
     }
 
     handleShareButtonClick = (i) => () => {
-        return this.props.showShareModal({ list: this.props.lists[i] })
+        return this.props.showListShareModal({ list: this.props.lists[i] })
     }
 
     renderAllLists = () => {
@@ -267,10 +267,10 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
         dispatch(actions.deletePageList())
         dispatch(filterActs.delListFilter())
     },
-    showShareModal: ({ list }) =>
+    showListShareModal: ({ list }) =>
         dispatch(
             show({
-                modalId: 'ShareModal',
+                modalId: 'ShareListModal',
                 options: {
                     list,
                     auth: auth,

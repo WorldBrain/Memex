@@ -15,6 +15,10 @@ import AnnotationEdit, {
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import { SidebarAnnotationTheme } from '../types'
+import {
+    AnnotationSharingInfo,
+    AnnotationSharingAccess,
+} from 'src/content-sharing/ui/types'
 
 const getTruncatedTextObject: (
     text: string,
@@ -51,6 +55,8 @@ export interface AnnotationEditableGeneralProps {}
 export interface AnnotationEditableProps {
     /** Required to decide how to go to an annotation when it's clicked. */
     url: string
+    sharingInfo: AnnotationSharingInfo
+    sharingAccess: AnnotationSharingAccess
     className?: string
     isActive?: boolean
     isHovered?: boolean

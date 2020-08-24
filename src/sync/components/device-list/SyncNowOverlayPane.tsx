@@ -23,7 +23,6 @@ interface Props {
 const settingsStyle = require('src/options/settings/components/settings.css')
 
 export class SyncNowOverlayPane extends Component<Props> {
-
     renderSyncNowButton() {
         if (this.props.isSyncing) {
             return (
@@ -87,7 +86,7 @@ export class SyncNowOverlayPaneContainer extends Component<
         devices: [],
         subscribed: null,
         showSubscriptionOptions: true,
-        loadingPortal: false
+        loadingPortal: false,
     }
 
     refreshDevices = async () => {
@@ -123,7 +122,7 @@ export class SyncNowOverlayPaneContainer extends Component<
 
     openPortal = async () => {
         this.setState({
-            loadingPortal: true
+            loadingPortal: true,
         })
         const portalLink = await subscription.getManageLink()
         window.open(portalLink['access_url'])
@@ -143,17 +142,18 @@ export class SyncNowOverlayPaneContainer extends Component<
                             className={settingsStyle.trialNotif}
                         >
                             {this.state.loadingPortal ? (
-                                <LoadingIndicator/>
-                                ):(
+                                <LoadingIndicator />
+                            ) : (
                                 <>
                                     <div className={settingsStyle.trialHeader}>
                                         <strong>Trial Period active</strong>
                                     </div>
                                     <div>
-                                        Add payment details to prevent interruptions
+                                        Add payment details to prevent
+                                        interruptions
                                     </div>
                                 </>
-                                )}
+                            )}
                         </div>
                     </div>
                 )}

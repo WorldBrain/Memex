@@ -1,15 +1,23 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { AnnotationShareIconRenderer } from './AnnotationShareIconRenderer'
+import {
+    AnnotationSharingInfo,
+    AnnotationSharingAccess,
+} from 'src/content-sharing/ui/types'
 
 export interface Props extends AnnotationFooterEventProps {
     mode: AnnotationMode
     isEdited?: boolean
     timestamp?: string
     isBookmarked?: boolean
+    sharingAccess: AnnotationSharingAccess
+    sharingInfo?: AnnotationSharingInfo
 }
 
 export interface AnnotationFooterEventProps {
@@ -19,6 +27,8 @@ export interface AnnotationFooterEventProps {
     onEditConfirm: () => void
     onEditCancel: () => void
     onEditIconClick: () => void
+    onShareClick: () => void
+    onUnshareClick: () => void
     toggleBookmark: () => void
     onGoToAnnotation?: () => void
 }
@@ -30,7 +40,7 @@ class AnnotationFooter extends React.Component<Props> {
         return (
             <DefaultInnerFooterContainerStyled>
                 <TimestampStyled>
-                    {isEdited && <span>Last Edit: </span>}
+                    {isEdited && <LastEdit>Last Edit:</LastEdit>}
                     {timestamp}
                 </TimestampStyled>
                 <DefaultFooterBtnContainerStyled>
@@ -65,6 +75,31 @@ class AnnotationFooter extends React.Component<Props> {
                             <IconStyled title="Delete note" src={icons.trash} />
                         </IconBox>
                     </ButtonTooltip>
+                    <AnnotationShareIconRenderer
+                        {...this.props}
+                        onShare={this.props.onShareClick}
+                        onUnshare={this.props.onUnshareClick}
+                        renderShareIcon={(shareIconProps) => (
+                            <ButtonTooltip
+                                position="bottom"
+                                tooltipText={shareIconProps.tooltipText}
+                            >
+                                {shareIconProps.isLoading ? (
+                                    <LoadingIndicator />
+                                ) : (
+                                    <IconBox
+                                        disabled={shareIconProps.isDisabled}
+                                        onClick={shareIconProps.onClickAction}
+                                    >
+                                        <IconStyled
+                                            src={shareIconProps.imgSrc}
+                                        />
+                                    </IconBox>
+                                )}
+                            </ButtonTooltip>
+                        )}
+                    />
+
                     {this.props.onGoToAnnotation && (
                         <ButtonTooltip
                             position={'bottom'}
@@ -248,10 +283,10 @@ const DefaultFooterBtnContainerStyled = styled.div`
     direction: rtl;
 `
 
-const IconBox = styled.button`
+const IconBox = styled.button<{ disabled?: boolean }>`
     border: none;
     background: none;
-    cursor: pointer;
+    ${(props) => (!props.disabled ? 'cursor: pointer' : '')};
     padding: 4px;
     border-radius: 3px;
     display: flex;
@@ -260,9 +295,12 @@ const IconBox = styled.button`
     justify-content: center;
     height: fill-available;
 
-    &:hover {
+    ${(props) =>
+        !props.disabled
+            ? `&:hover {
         background-color: #e0e0e0;
-    }
+    }`
+            : ''}
 `
 const IconStyled = styled.img`
     border: none;
@@ -272,4 +310,9 @@ const IconStyled = styled.img`
     width: 100%;
     height: 100%;
     opacity: 0.6;
+`
+
+const LastEdit = styled.span`
+    margin: 0 5px;
+    font-weight: bold;
 `

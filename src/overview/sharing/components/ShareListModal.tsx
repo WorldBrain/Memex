@@ -2,16 +2,14 @@ import React, { Component } from 'react'
 import { Modal } from 'src/common-ui/components'
 import { PageList } from 'src/custom-lists/background/types'
 import ShareNonPioneerInfo from './ShareNonPioneerInfo'
-import ShareModalContent from './ShareModalContent'
+import ShareListModalContent from './ShareListModalContent'
 import DisplayNameSetup from './DisplayNameSetup'
 import BetaFeatureNotif from './BetaFeatureNotif'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { getListShareUrl } from 'src/content-sharing/utils'
-import {
-    auth,
-} from 'src/util/remote-functions-background'
+import { auth } from 'src/util/remote-functions-background'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
@@ -40,7 +38,7 @@ interface State {
     hasSubscription: boolean
 }
 
-class ShareModal extends Component<Props, State> {
+class ShareListModal extends Component<Props, State> {
     constructor(props) {
         super(props)
 
@@ -62,19 +60,17 @@ class ShareModal extends Component<Props, State> {
     }
 
     async getBetaNotifStatus() {
-          if (await auth.isAuthorizedForFeature('beta')) {
+        if (await auth.isAuthorizedForFeature('beta')) {
             this.setState({ showBetaNotif: false })
         }
     }
 
     async hasSubscription() {
-
         const plans = await this.props.auth.getAuthorizedPlans()
 
         if (plans.length > 0) {
-            await this.setState({ hasSubscription: true })    
+            await this.setState({ hasSubscription: true })
         }
-        
     }
 
     async getListOverview() {
@@ -192,9 +188,7 @@ class ShareModal extends Component<Props, State> {
         }
 
         if (this.state.showBetaNotif) {
-
-            console.log(this.state.hasSubscription)
-            return  (
+            return (
                 <BetaFeatureNotif
                     showSubscriptionModal={this.props.showSubscriptionModal}
                     isPioneer={true}
@@ -205,7 +199,7 @@ class ShareModal extends Component<Props, State> {
 
         // otherwise -  show the main modal content
         return (
-            <ShareModalContent
+            <ShareListModalContent
                 isShared={this.state.isShared}
                 shareUrl={this.state.shareUrl}
                 listCreationState={this.state.listCreationState}
@@ -238,7 +232,7 @@ class ShareModal extends Component<Props, State> {
             this.state.loadState === 'pristine' ||
             this.state.loadState === 'running'
         ) {
-            return <LoadingIndicator/>
+            return <LoadingIndicator />
         }
 
         return (
@@ -253,4 +247,4 @@ class ShareModal extends Component<Props, State> {
 
 export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
-}))(withCurrentUser(ShareModal))
+}))(withCurrentUser(ShareListModal))

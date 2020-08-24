@@ -62,6 +62,14 @@
     }
 }
 
+.shareIcon {
+    height: 100%;
+
+    &:hover {
+        opacity: 0.6;
+    }
+}
+
 .goToPageIcon {
     background-image: url('/img/open.svg');
 

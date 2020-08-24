@@ -1,8 +1,10 @@
+import { TaskState } from 'ui-logic-core/lib/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 import { SidebarTheme } from '../types'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -15,10 +17,12 @@ export interface SidebarContainerDependencies {
     initialState?: 'visible' | 'hidden'
     onClickOutside?: React.MouseEventHandler
     annotationsCache: AnnotationsCacheInterface
+    showAnnotationShareModal?: () => void
 
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>
     customLists: RemoteCollectionsInterface
+    contentSharing: ContentSharingInterface
     theme?: Partial<SidebarTheme>
     // search: SearchInterface
     // bookmarks: BookmarksInterface

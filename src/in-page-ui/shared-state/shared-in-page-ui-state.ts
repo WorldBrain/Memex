@@ -10,13 +10,20 @@ import {
     SidebarActionOptions,
     ShouldSetUpOptions,
 } from './types'
+import {
+    getRemoteEventEmitter,
+    TypedRemoteEventEmitter,
+} from 'src/util/webextensionRPC'
+import { ContentSharingEvents } from 'src/content-sharing/background/types'
 
 export interface SharedInPageUIDependencies {
+    getNormalizedPageUrl: () => string
     loadComponent: (component: InPageUIComponent) => void
     unloadComponent: (component: InPageUIComponent) => void
 }
 
 export class SharedInPageUIState implements SharedInPageUIInterface {
+    contentSharingEvents: TypedRemoteEventEmitter<'contentSharing'>
     events = new EventEmitter() as TypedEventEmitter<SharedInPageUIEvents>
     componentsShown: InPageUIComponentShowState = {
         ribbon: false,
@@ -39,6 +46,44 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
 
     constructor(private options: SharedInPageUIDependencies) {
         this.events.on('newListener' as any, this._handleNewListener)
+
+        this.contentSharingEvents = getRemoteEventEmitter('contentSharing')
+        this.contentSharingEvents.on(
+            'pageAddedToSharedList',
+            this.handlePageAddedToSharedList,
+        )
+        this.contentSharingEvents.on(
+            'pageRemovedFromSharedList',
+            this.handlePageRemovedFromSharedList,
+        )
+    }
+
+    private handlePageAddedToSharedList: ContentSharingEvents['pageAddedToSharedList'] = ({
+        pageUrl,
+    }) => {
+        if (pageUrl !== this.options.getNormalizedPageUrl()) {
+            return
+        }
+
+        this._emitAction({
+            type: 'sidebarAction',
+            action: 'set_sharing_access',
+            annotationSharingAccess: 'sharing-allowed',
+        })
+    }
+
+    private handlePageRemovedFromSharedList: ContentSharingEvents['pageRemovedFromSharedList'] = ({
+        pageUrl,
+    }) => {
+        if (pageUrl !== this.options.getNormalizedPageUrl()) {
+            return
+        }
+
+        this._emitAction({
+            type: 'sidebarAction',
+            action: 'set_sharing_access',
+            annotationSharingAccess: 'page-not-shared',
+        })
     }
 
     _handleNewListener = (

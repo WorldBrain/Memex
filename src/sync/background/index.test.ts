@@ -1315,9 +1315,7 @@ function mobileSyncTests(suiteOptions: {
 
         await mobile.services.sync.continuousSync.forceIncrementalSync()
         await extension.backgroundModules.sync.continuousSync.forceIncrementalSync()
-        await extension.backgroundModules.contentSharing.waitForListSync({
-            localListId,
-        })
+        await extension.backgroundModules.contentSharing.waitForSync()
         await new Promise((resolve) => setTimeout(resolve, 200))
 
         const serverStorage = await extension.getServerStorage()
@@ -1382,9 +1380,7 @@ function mobileSyncTests(suiteOptions: {
         await extension.backgroundModules.contentSharing.shareListEntries({
             listId: localListId,
         })
-        await extension.backgroundModules.contentSharing.waitForListSync({
-            localListId,
-        })
+        await extension.backgroundModules.contentSharing.waitForSync()
         await doInitialSync({
             source: extension.backgroundModules.sync,
             target: mobile.services.sync,
@@ -1396,9 +1392,7 @@ function mobileSyncTests(suiteOptions: {
         })
         await mobile.services.sync.continuousSync.forceIncrementalSync()
         await extension.backgroundModules.sync.continuousSync.forceIncrementalSync()
-        await extension.backgroundModules.contentSharing.waitForListSync({
-            localListId,
-        })
+        await extension.backgroundModules.contentSharing.waitForSync()
         await new Promise((resolve) => setTimeout(resolve, 200))
 
         const serverStorage = await extension.getServerStorage()

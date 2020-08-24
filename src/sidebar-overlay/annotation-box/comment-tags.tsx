@@ -34,6 +34,7 @@ const CommentTags = ({
             <TruncatedTextRenderer
                 text={comment}
                 getTruncatedTextObject={getTruncatedTextObject}
+                isHighlight={false}
             />
         )}
 

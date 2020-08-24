@@ -15,7 +15,11 @@ import DragElement from './DragElement'
 import TrialExpiryWarning from './TrialExpiryWarning'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
-import { auth, featuresBeta, subscription } from 'src/util/remote-functions-background'
+import {
+    auth,
+    featuresBeta,
+    subscription,
+} from 'src/util/remote-functions-background'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { AnnotationsSidebarInDashboardResults } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { runInBackground } from 'src/util/webextensionRPC'
@@ -25,13 +29,12 @@ import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationsSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
 import {
     createAnnotationsCache,
-    AnnotationsCache,
     AnnotationsCacheInterface,
 } from 'src/annotations/annotations-cache'
-import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { show } from 'src/overview/modals/actions'
 import classNames from 'classnames'
 
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -41,6 +44,7 @@ export interface Props {
     toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
     handleReaderViewClick: (url: string) => void
     showSubscriptionModal: () => void
+    showAnnotationShareModal: () => void
 }
 
 interface State {
@@ -55,6 +59,7 @@ class Overview extends PureComponent<Props, State> {
     private annotationsCache: AnnotationsCacheInterface
     private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     private customListsBG = runInBackground<RemoteCollectionsInterface>()
+    private contentSharingBG = runInBackground<ContentSharingInterface>()
     private tagsBG = runInBackground<RemoteTagsInterface>()
 
     private annotationsSidebarRef = React.createRef<
@@ -86,14 +91,17 @@ class Overview extends PureComponent<Props, State> {
             trialExpiry: false,
         })
 
-        localStorage.setItem('TrialExpiryWarning_Close_Time', JSON.stringify(Math.floor(Date.now() / 1000)))
+        localStorage.setItem(
+            'TrialExpiryWarning_Close_Time',
+            JSON.stringify(Math.floor(Date.now() / 1000)),
+        )
     }
 
     trialOverClosed() {
         this.setState({
             trialExpiry: false,
         })
-        localStorage.setItem('trialOverClosed', 'true')    
+        localStorage.setItem('trialOverClosed', 'true')
     }
 
     componentDidMount() {
@@ -104,44 +112,48 @@ class Overview extends PureComponent<Props, State> {
 
     async expiryDate() {
         const date = await auth.getSubscriptionExpiry()
-        const dateNow = Math.floor(new Date().getTime() / 1000);
+        const dateNow = Math.floor(new Date().getTime() / 1000)
         const inTrial = await auth.getSubscriptionStatus()
-        const lastCloseTime = parseFloat(localStorage.getItem('TrialExpiryWarning_Close_Time'))
+        const lastCloseTime = parseFloat(
+            localStorage.getItem('TrialExpiryWarning_Close_Time'),
+        )
         const trialOverClosed = localStorage.getItem('trialOverClosed')
 
-        if ((date - dateNow < 259200 && inTrial === 'in_trial') || inTrial === 'cancelled') { //3 days notification window - 24h waiting until showing the trial notif again
-
-                if (lastCloseTime && dateNow - lastCloseTime > 86400) {
-                    this.setState({
-                        trialExpiry: true,
-                        expiryDate: date
-                    }) 
-                }
-                if (!lastCloseTime) {
-                    this.setState({
-                        trialExpiry: true,
-                        expiryDate: date
-                    }) 
-                }
-
-                if (trialOverClosed === 'true' && inTrial === 'cancelled') {
-                    this.setState({
-                        trialExpiry: false,
-                    }) 
-                }
+        if (
+            (date - dateNow < 259200 && inTrial === 'in_trial') ||
+            inTrial === 'cancelled'
+        ) {
+            //3 days notification window - 24h waiting until showing the trial notif again
+            if (lastCloseTime && dateNow - lastCloseTime > 86400) {
+                this.setState({
+                    trialExpiry: true,
+                    expiryDate: date,
+                })
             }
+            if (!lastCloseTime) {
+                this.setState({
+                    trialExpiry: true,
+                    expiryDate: date,
+                })
+            }
+
+            if (trialOverClosed === 'true' && inTrial === 'cancelled') {
+                this.setState({
+                    trialExpiry: false,
+                })
+            }
+        }
 
         return date
     }
 
     async upgradeState() {
-
         const plans = await auth.getAuthorizedPlans()
 
         if (await auth.isAuthorizedForFeature('beta')) {
             this.setState({ showPioneer: true, showUpgrade: false })
         }
-        if (plans.length === 0 ) {
+        if (plans.length === 0) {
             this.setState({ showUpgrade: true })
         }
     }
@@ -153,15 +165,13 @@ class Overview extends PureComponent<Props, State> {
         }
     }
 
-
     openPortal = async () => {
         this.setState({
-            loadingPortal: true
+            loadingPortal: true,
         })
         const portalLink = await subscription.getManageLink()
         window.open(portalLink['access_url'])
     }
-
 
     private handleAnnotationSidebarToggle = async (args?: {
         pageUrl: string
@@ -203,7 +213,7 @@ class Overview extends PureComponent<Props, State> {
         this.props.setShowOnboardingMessage()
         localStorage.setItem('stage.Onboarding', 'true')
         localStorage.setItem('stage.MobileAppAd', 'true')
-        window.location.reload();
+        window.location.reload()
     }
 
     renderOnboarding() {
@@ -218,15 +228,16 @@ class Overview extends PureComponent<Props, State> {
     renderOverview() {
         return (
             <div className={styles.mainWindow}>
-                <div className={classNames(styles.Overview,
-                    {[styles.OverviewWithNotif] : this.state.trialExpiry,}
-                    )}
+                <div
+                    className={classNames(styles.Overview, {
+                        [styles.OverviewWithNotif]: this.state.trialExpiry,
+                    })}
                 >
                     <Head />
                     <CollectionsButton />
                     <Header />
                     <SidebarLeft />
-                    
+
                     <Results
                         toggleAnnotationsSidebar={
                             this.handleAnnotationSidebarToggle
@@ -252,10 +263,14 @@ class Overview extends PureComponent<Props, State> {
                         tags={this.tagsBG}
                         annotations={this.annotationsBG}
                         customLists={this.customListsBG}
+                        contentSharing={this.contentSharingBG}
                         refSidebar={this.annotationsSidebarRef}
                         annotationsCache={this.annotationsCache}
                         onClickOutside={this.handleClickOutsideSidebar}
                         onCloseSidebarBtnClick={this.handleCloseSidebarBtnClick}
+                        showAnnotationShareModal={
+                            this.props.showAnnotationShareModal
+                        }
                     />
 
                     <Tooltip />
@@ -280,25 +295,27 @@ class Overview extends PureComponent<Props, State> {
                                 onClick={this.props.showSubscriptionModal}
                                 className={styles.pioneerBadge}
                             >
-                                    ⭐️ Upgrade Memex
+                                ⭐️ Upgrade Memex
                             </div>
                         )}
                         <HelpBtn />
                     </div>
                 </div>
-                 {this.state.trialExpiry &&
+                {this.state.trialExpiry && (
                     <div className={styles.notifications}>
-                     {this.state.trialExpiry && 
-                        <TrialExpiryWarning
-                            expiryDate={this.state.expiryDate}
-                            showPaymentWindow={this.openPortal}
-                            closeTrialNotif={()=> this.closeTrialExpiryNotif()}
-                            loadingPortal={this.state.loadingPortal}
-                            trialOverClosed={()=> this.trialOverClosed()}
-                        />
-                    }
+                        {this.state.trialExpiry && (
+                            <TrialExpiryWarning
+                                expiryDate={this.state.expiryDate}
+                                showPaymentWindow={this.openPortal}
+                                closeTrialNotif={() =>
+                                    this.closeTrialExpiryNotif()
+                                }
+                                loadingPortal={this.state.loadingPortal}
+                                trialOverClosed={() => this.trialOverClosed()}
+                            />
+                        )}
                     </div>
-                }
+                )}
             </div>
         )
     }
@@ -323,9 +340,8 @@ const mapDispatchToProps = (dispatch) => ({
     setShowOnboardingMessage: () =>
         dispatch(resultActs.setShowOnboardingMessage(true)),
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
+    showAnnotationShareModal: () =>
+        dispatch(show({ modalId: 'ShareAnnotationModal' })),
 })
 
-export default connect(
-        mapStateToProps, 
-        mapDispatchToProps,
-)(Overview)
+export default connect(mapStateToProps, mapDispatchToProps)(Overview)

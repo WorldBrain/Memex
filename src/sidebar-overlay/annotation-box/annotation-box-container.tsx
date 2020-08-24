@@ -9,10 +9,21 @@ import EditModeContent from './edit-mode-content'
 import { TruncatedTextRenderer } from '../components'
 import niceTime from '../../util/nice-time'
 import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
-import { remoteFunction } from 'src/util/webextensionRPC'
+import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { actions as filterActs } from 'src/search-filters'
-import { HighlightInteractionsInterface } from 'src/highlighting/types'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { ShareAnnotationProps } from './default-footer'
+import {
+    AnnotationSharingInfo,
+    AnnotationSharingAccess,
+} from 'src/content-sharing/ui/types'
+import { TaskState } from 'ui-logic-core/lib/types'
+import {
+    getLastSharedAnnotationTimestamp,
+    setLastSharedAnnotationTimestamp,
+} from 'src/annotations/utils'
+import { show } from 'src/overview/modals/actions'
 
 const styles = require('./annotation-box-container.css')
 const footerStyles = require('./default-footer.css')
@@ -21,6 +32,7 @@ export interface OwnProps {
     /** Required to decide how to go to an annotation when it's clicked. */
     env: 'inpage' | 'overview'
     url: string
+    pageUrl: string
     className?: string
     isActive?: boolean
     isHovered?: boolean
@@ -30,6 +42,9 @@ export interface OwnProps {
     comment?: string
     tags: string[]
     hasBookmark?: boolean
+    sharingInfo: AnnotationSharingInfo
+    sharingAccess: AnnotationSharingAccess
+    updateSharingInfo: (info: AnnotationSharingInfo) => void
     handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
     handleMouseEnter?: (e: Event) => void
     handleMouseLeave?: (e: Event) => void
@@ -40,6 +55,7 @@ export interface OwnProps {
 
 interface DispatchProps {
     handleTagClick: (tag: string) => void
+    showAnnotationShareModal: () => void
 }
 
 type Props = OwnProps & DispatchProps
@@ -58,6 +74,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     private _processEventRPC = remoteFunction('processEvent')
     private _boxRef: HTMLDivElement = null
+    private contentShareBG = runInBackground<ContentSharingInterface>()
 
     state: State = {
         mode: 'default',
@@ -70,6 +87,55 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     componentWillUnmount() {
         this._removeEventListeners()
+    }
+
+    private async setLastSharedTimestamp() {
+        const lastShared = await getLastSharedAnnotationTimestamp()
+
+        if (lastShared == null) {
+            this.props.showAnnotationShareModal()
+        }
+
+        await setLastSharedAnnotationTimestamp()
+    }
+
+    private shareAnnotation = async () => {
+        const updateState = (taskState: TaskState) =>
+            this.props.updateSharingInfo({
+                status: 'shared',
+                taskState,
+            })
+
+        updateState('running')
+        try {
+            await this.contentShareBG.shareAnnotation({
+                annotationUrl: this.props.url,
+            })
+            updateState('success')
+            this.setLastSharedTimestamp()
+        } catch (e) {
+            updateState('error')
+            throw e
+        }
+    }
+
+    private unshareAnnotation = async () => {
+        const updateState = (taskState: TaskState) =>
+            this.props.updateSharingInfo({
+                status: 'unshared',
+                taskState,
+            })
+
+        updateState('running')
+        try {
+            await this.contentShareBG.unshareAnnotation({
+                annotationUrl: this.props.url,
+            })
+            updateState('success')
+        } catch (e) {
+            updateState('error')
+            throw e
+        }
     }
 
     private get isEdited() {
@@ -206,6 +272,13 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
         const isClickable = this.props.body && this.props.env !== 'overview'
 
+        const shareAnnotationProps: ShareAnnotationProps = {
+            onShare: this.shareAnnotation,
+            onUnshare: this.unshareAnnotation,
+            sharingInfo: this.props.sharingInfo,
+            sharingAccess: this.props.sharingAccess,
+        }
+
         return (
             <div
                 id={this.props.url} // Focusing on annotation relies on this ID.
@@ -223,16 +296,13 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                 {/* Highlighted text for the annotation. If available, shown in
                 every mode. */}
                 {this.props.body && (
-                    <div className={styles.highlight}>
-                        <span className={styles.highlightText}>
-                            <TruncatedTextRenderer
-                                text={this.props.body}
-                                getTruncatedTextObject={
-                                    this._getTruncatedTextObject
-                                }
-                            />
-                        </span>
-                    </div>
+                    <TruncatedTextRenderer
+                        text={this.props.body}
+                        getTruncatedTextObject={
+                            this._getTruncatedTextObject
+                        }
+                        isHighlight={true}
+                    />
                 )}
 
                 {mode !== 'edit' ? (
@@ -254,6 +324,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         shareIconClickHandler={this._handleShareIconClick}
                         getTruncatedTextObject={this._getTruncatedTextObject}
                         handleBookmarkToggle={this.handleBookmarkToggle}
+                        {...shareAnnotationProps}
                     />
                 ) : (
                     <EditModeContent
@@ -262,6 +333,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         tags={this.props.tags}
                         handleCancelOperation={this._handleCancelOperation}
                         handleEditAnnotation={this._handleEditAnnotation}
+                        {...shareAnnotationProps}
                     />
                 )}
             </div>
@@ -273,6 +345,8 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     dispatch,
 ) => ({
     handleTagClick: (tag) => dispatch(filterActs.toggleTagFilter(tag)),
+    showAnnotationShareModal: () =>
+        dispatch(show({ modalId: 'ShareAnnotationModal' })),
 })
 
 export default connect(null, mapDispatchToProps)(AnnotationBoxContainer)

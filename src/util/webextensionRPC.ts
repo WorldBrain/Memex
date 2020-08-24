@@ -25,6 +25,7 @@ import TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
 import { AuthRemoteEvents } from 'src/authentication/background/types'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
+import { ContentSharingEvents } from 'src/content-sharing/background/types'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -316,11 +317,28 @@ const __REMOTE_EVENT_NAME__ = '__REMOTE_EVENT_NAME__'
 // Sending Side, (e.g. background script)
 export function remoteEventEmitter<T>(
     eventType: string,
+    { broadcastToTabs = false } = {},
 ): RemoteEventEmitter<T> {
     const message = {
         __REMOTE_EVENT__,
         __REMOTE_EVENT_TYPE__: eventType,
     }
+
+    if (broadcastToTabs) {
+        return {
+            emit: async (eventName, data) => {
+                const tabs = (await browser.tabs.query({})) ?? []
+                for (const { id: tabId } of tabs) {
+                    browser.tabs.sendMessage(tabId, {
+                        ...message,
+                        __REMOTE_EVENT_NAME__: eventName,
+                        data,
+                    })
+                }
+            },
+        }
+    }
+
     return {
         emit: async (eventName, data) =>
             browser.runtime.sendMessage({
@@ -344,6 +362,7 @@ export type TypedRemoteEventEmitter<
 interface RemoteEvents {
     auth: AuthRemoteEvents
     sync: InitialSyncEvents
+    contentSharing: ContentSharingEvents
 }
 
 function registerRemoteEventForwarder() {

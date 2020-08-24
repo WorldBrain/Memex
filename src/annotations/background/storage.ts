@@ -173,6 +173,11 @@ export default class AnnotationStorage extends StorageModule {
                 operation: 'findObjects',
                 args: { pageUrl: '$pageUrl:string' },
             },
+            listAnnotationsByPageUrls: {
+                collection: AnnotationStorage.ANNOTS_COLL,
+                operation: 'findObjects',
+                args: { pageUrl: { $in: '$pageUrls:array:string' } },
+            },
             listAnnotationTagsForAnnotations: {
                 collection: AnnotationStorage.TAGS_COLL,
                 operation: 'findObjects',
@@ -240,6 +245,17 @@ export default class AnnotationStorage extends StorageModule {
                     annotationsBookmarkMap.get(annotation.url) ?? false
             })
         }
+
+        return annotations
+    }
+
+    async listAnnotationsByPageUrls({ pageUrls }: { pageUrls: string[] }) {
+        pageUrls = pageUrls.map((url) => normalizeUrl(url))
+
+        const annotations: Annotation[] = await this.operation(
+            'listAnnotationsByPageUrls',
+            { pageUrls },
+        )
 
         return annotations
     }

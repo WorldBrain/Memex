@@ -67,6 +67,7 @@ async function createDependencies() {
     ]
 
     const sidebarDependencies: AnnotationsSidebarProps = {
+        sharingAccess: 'sharing-allowed',
         isAnnotationCreateShown: true,
         isSearchLoading: false,
         // displayCrowdfunding: false,
@@ -83,11 +84,14 @@ async function createDependencies() {
             [annotations[4].url]: 'edit',
             [annotations[5].url]: 'delete',
         },
+        annotationSharingInfo: {},
         bindAnnotationFooterEventProps: (a) => ({
             onDeleteConfirm: action('confirmDelete'),
             onDeleteCancel: action('cancelDelete'),
             onEditConfirm: action('confirmEdit'),
             onEditCancel: action('cancelEdit'),
+            onShareClick: action('share'),
+            onUnshareClick: action('unshare'),
             onDeleteIconClick: action('clickDeleteIcon'),
             onEditIconClick: action('clickEditIcon'),
             toggleBookmark: action('toggleBookmark'),

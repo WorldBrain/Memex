@@ -20,6 +20,7 @@ export default class DashboardResultsLogic extends UILogic<
     dashboardUI = new SharedInPageUIState({
         loadComponent: (c) => null,
         unloadComponent: (c) => null,
+        getNormalizedPageUrl: () => '',
     })
 
     constructor(private dependencies: DashboardResultsDependencies) {

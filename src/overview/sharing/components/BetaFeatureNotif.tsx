@@ -1,16 +1,10 @@
 import React, { PureComponent } from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 
 import { auth, subscription } from 'src/util/remote-functions-background'
-
-import { LoadingIndicator } from 'src/common-ui/components'
 import {
-    TypographyHeadingBig,
     TypographyTextNormal,
     TypographyHeadingBigger,
-    TypographySubTextNormal,
-    TypographyHeadingNormal,
-    TypographyHeadingSmall,
 } from 'src/common-ui/components/design-library/typography'
 
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
@@ -91,11 +85,8 @@ const InfoBox = styled.div`
     }
 `
 
-export default class BetaFeatureNotif extends PureComponent<
-    Props
-> {
-
-    state = {
+export default class BetaFeatureNotif extends PureComponent<Props> {
+    state = {
         loadingChargebee: false,
         hasSubscription: false,
         isPioneer: false,
@@ -117,17 +108,15 @@ export default class BetaFeatureNotif extends PureComponent<
     }
 
     async upgradeState() {
-
         const plans = await auth.getAuthorizedPlans()
 
         if (await auth.isAuthorizedForFeature('beta')) {
             this.setState({ isPioneer: true })
         }
-        if (plans.length > 0 ) {
-            this.setState({ hasSubscription: true})
+        if (plans.length > 0) {
+            this.setState({ hasSubscription: true })
         }
     }
-
 
     render() {
         return (
@@ -138,33 +127,42 @@ export default class BetaFeatureNotif extends PureComponent<
                             🚀 This is a beta feature
                         </TypographyHeadingBigger>
                         <TypographyTextNormal>
-                            Upgrade to the Pioneer Plan to get early access to Beta Features
+                            Upgrade to the Pioneer Plan to get early access to
+                            Beta Features
                         </TypographyTextNormal>
-                        <Margin/>
+                        <Margin />
                         <>
-                        <ButtonBox>
-                            {!this.state.isPioneer && this.state.hasSubscription ? (
-                                <PrimaryAction
-                                    onClick={this.openPortal}
-                                    label={'Upgrade'}
+                            <ButtonBox>
+                                {!this.state.isPioneer &&
+                                this.state.hasSubscription ? (
+                                    <PrimaryAction
+                                        onClick={this.openPortal}
+                                        label={'Upgrade'}
+                                    />
+                                ) : (
+                                    <PrimaryAction
+                                        onClick={
+                                            this.props.showSubscriptionModal
+                                        }
+                                        label={'Upgrade'}
+                                    />
+                                )}
+                                <SecondaryAction
+                                    onClick={() =>
+                                        window.open(
+                                            'https://worldbrain.io/tutorials/sharing-features',
+                                        )
+                                    }
+                                    label={'Watch Demo'}
                                 />
-                            ):(
-                                <PrimaryAction
-                                    onClick={this.props.showSubscriptionModal}
-                                    label={'Upgrade'}
-                                />
-                            )}
-                            <SecondaryAction
-                                onClick={()=> window.open('https://worldbrain.io/tutorials/sharing-features')}
-                                label={'Watch Demo'}
-                            />
-                        </ButtonBox>
-                        {!this.state.isPioneer && this.state.hasSubscription && (
-                            <InfoBox>
-                                To upgrade go to "Edit Subscription" and add the "Pioneer Support" addon
-                            </InfoBox>
-                            )
-                        }
+                            </ButtonBox>
+                            {!this.state.isPioneer &&
+                                this.state.hasSubscription && (
+                                    <InfoBox>
+                                        To upgrade go to "Edit Subscription" and
+                                        add the "Pioneer Support" addon
+                                    </InfoBox>
+                                )}
                         </>
                     </InstructionsBox>
                 </InstructionsContainer>

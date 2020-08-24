@@ -14,6 +14,7 @@ import {
     TOOLTIP_STORAGE_NAME,
 } from 'src/in-page-ui/tooltip/constants'
 import { OPTIONS_URL } from 'src/constants'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { OnboardingAction } from 'src/common-ui/components/design-library/actions/OnboardingAction'
 import {
@@ -34,7 +35,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     State,
     Event
 > {
-    static TOTAL_STEPS = 8
+    static TOTAL_STEPS = 7
     static defaultProps: Partial<Props> = {
         storage: browser.storage.local,
     }
@@ -148,6 +149,10 @@ export default class OnboardingScreen extends StatefulUIElement<
     )
     private mobileImg = () => (
         <img src={'/img/mobileIllustration.svg'} className={styles.mobileImg} />
+    )
+
+    private shareImg = () => (
+        <img src={'/img/shareIllustration.svg'} className={styles.searchGif} />
     )
 
     private backupImg = () => (
@@ -296,8 +301,8 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <div>
                         <OnboardingStep
                             isInitStep
-                            titleText="Let's get started"
-                            subtitleText="Setup your Memex in less than 1 minute"
+                            titleText="Welcome to your Memex"
+                            subtitleText="Let's get started with a quick setup"
                             totalSteps={OnboardingScreen.TOTAL_STEPS}
                             renderButton={() => (
                                 <OnboardingAction
@@ -313,8 +318,60 @@ export default class OnboardingScreen extends StatefulUIElement<
                 return (
                     <OnboardingStep
                         goToStep={this.handleStepClick}
-                        titleText="Search everything you’ve seen online"
-                        subtitleText="Full-Text search every website & PDF you’ve visited."
+                        titleText="Flexibly & Quickly organise websites"
+                        subtitleText="Tags, bookmark and add pages to collections. Also with keyboard shortcuts"
+                        renderButton={() => (
+                            <OnboardingAction
+                                onClick={this.handleNextStepClick}
+                                label={'Next'}
+                            />
+                        )}
+                        renderImage={this.sidebarImage}
+                        totalSteps={OnboardingScreen.TOTAL_STEPS}
+                        currentStep={this.state.currentStep - 1}
+                    >
+                        <SecondaryAction
+                            onClick={() =>
+                                window.open(
+                                    `https://worldbrain.io/tutorials/organise`,
+                                )
+                            }
+                            label={'View Tutorials'}
+                        />
+                    </OnboardingStep>
+                )
+            case 2:
+                return (
+                    <OnboardingStep
+                        goToStep={this.handleStepClick}
+                        titleText="Make Highlights & Notes"
+                        subtitleText="Highlight and annotate websites. Right-click on selected text or use keyboard shortcuts"
+                        renderButton={() => (
+                            <OnboardingAction
+                                onClick={this.handleNextStepClick}
+                                label={'Next'}
+                            />
+                        )}
+                        renderImage={this.annotationImage}
+                        totalSteps={OnboardingScreen.TOTAL_STEPS}
+                        currentStep={this.state.currentStep - 1}
+                    >
+                        <SecondaryAction
+                            onClick={() =>
+                                window.open(
+                                    `https://worldbrain.io/tutorials/highlights`,
+                                )
+                            }
+                            label={'View Tutorials'}
+                        />
+                    </OnboardingStep>
+                )
+            case 3:
+                return (
+                    <OnboardingStep
+                        goToStep={this.handleStepClick}
+                        titleText="Instantly find saved websites & notes"
+                        subtitleText="Full-Text search every website you've bookmarked, tagged or annotated."
                         renderButton={() => (
                             <OnboardingAction
                                 onClick={this.handleNextStepClick}
@@ -329,89 +386,57 @@ export default class OnboardingScreen extends StatefulUIElement<
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         currentStep={this.state.currentStep - 1}
                     >
-                        {this.renderSearchSettings()}
-                    </OnboardingStep>
-                )
-            case 2:
-                return (
-                    <OnboardingStep
-                        goToStep={this.handleStepClick}
-                        titleText="Make Highlights & Notes"
-                        subtitleText="To annotate websites, right-click on selected text"
-                        renderButton={() => (
-                            <OnboardingAction
-                                onClick={this.handleNextStepClick}
-                                label={'Next'}
-                            />
-                        )}
-                        renderImage={this.annotationImage}
-                        totalSteps={OnboardingScreen.TOTAL_STEPS}
-                        currentStep={this.state.currentStep - 1}
-                    >
-                        <SettingsCheckbox
-                            id="onboarding-tooltip-toggle"
-                            isChecked={this.state.isTooltipEnabled}
-                            handleChange={this.handleTooltipToggle}
-                        >
-                            Show Highlighter when selecting text
-                        </SettingsCheckbox>
-                    </OnboardingStep>
-                )
-            case 3:
-                return (
-                    <OnboardingStep
-                        goToStep={this.handleStepClick}
-                        titleText="Tags, Lists & Favorites"
-                        subtitleText="Quickly organise everything via a web-page sidebar"
-                        renderButton={() => (
-                            <OnboardingAction
-                                onClick={this.handleNextStepClick}
-                                label={'Next'}
-                            />
-                        )}
-                        renderImage={this.sidebarImage}
-                        totalSteps={OnboardingScreen.TOTAL_STEPS}
-                        currentStep={this.state.currentStep - 1}
-                    >
-                        <SettingsCheckbox
-                            id="onboarding-sidebar-toggle"
-                            isChecked={this.state.isSidebarEnabled}
-                            handleChange={this.handleSidebarToggle}
-                        >
-                            Show Sidebar when moving cursor to the right of your
-                            screen
-                        </SettingsCheckbox>
+                    <SecondaryAction
+                        onClick={() =>
+                            window.open(
+                                `https://worldbrain.io/tutorials/search`,
+                            )
+                        }
+                        label={'View Tutorials'}
+                    />
                     </OnboardingStep>
                 )
             case 4:
                 return (
                     <OnboardingStep
                         goToStep={this.handleStepClick}
-                        titleText="Keyboard Shortcuts for Everything"
-                        subtitleText="Enough said."
+                        titleText="Easily share your research"
+                        subtitleText="Share collections of pages, highlights & notes. "
                         renderButton={() => (
                             <OnboardingAction
                                 onClick={this.handleNextStepClick}
                                 label={'Next'}
                             />
                         )}
-                        renderImage={this.keyboardImage}
+                        renderImage={this.shareImg}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         currentStep={this.state.currentStep - 1}
                     >
-                        <SecondaryAction
-                            onClick={() =>
-                                window.open(`${OPTIONS_URL}#/settings`)
-                            }
-                            label={'Change Shortcuts'}
-                        />
+                        <div className={styles.buttonBar}>
+                            <PrimaryAction
+                                onClick={() =>
+                                    window.open(
+                                        `https://worldbrain.io/request-early-access`,
+                                    )
+                                }
+                                label={'Get early access'}
+                            />
+                            <SecondaryAction
+                                onClick={() =>
+                                    window.open(
+                                        `https://worldbrain.io/tutorials/share-research`,
+                                    )
+                                }
+                                label={'View Tutorials'}
+                            />
+                        </div>
                     </OnboardingStep>
                 )
             case 5:
                 return (
                     <OnboardingStep
                         goToStep={this.handleStepClick}
-                        titleText="Save, View & Organise on the Go"
+                        titleText="Save and Annotate Websites on the Go"
                         subtitleText="Install Memex Go for iOS and Android"
                         renderButton={() => (
                             <OnboardingAction
@@ -435,7 +460,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         goToStep={this.handleStepClick}
                         titleText="Your Data & Attention is Yours"
                         subtitleText="All data is stored offline-first and synced with End2End encryption."
-                        subtitleText2="Memex is funded without Venture Capital investments."
+                        subtitleText2="Memex is also funded without Venture Capital investments."
                         renderButton={() => (
                             <OnboardingAction
                                 onClick={this.handleNextStepClick}
@@ -457,31 +482,6 @@ export default class OnboardingScreen extends StatefulUIElement<
                     </OnboardingStep>
                 )
             case 7:
-                return (
-                    <OnboardingStep
-                        goToStep={this.handleStepClick}
-                        titleText="Backup your data to your favorite providers"
-                        subtitleText="Browsers are unfortunately unreliable data stores. "
-                        subtitleText2="We are working on an external storage."
-                        renderButton={() => (
-                            <OnboardingAction
-                                onClick={this.handleNextStepClick}
-                                label={'Next'}
-                            />
-                        )}
-                        renderImage={this.backupImg}
-                        totalSteps={OnboardingScreen.TOTAL_STEPS}
-                        currentStep={this.state.currentStep - 1}
-                    >
-                        <SecondaryAction
-                            onClick={() =>
-                                window.open(`${OPTIONS_URL}#/backup`)
-                            }
-                            label={'Start Backup'}
-                        />
-                    </OnboardingStep>
-                )
-            case 8:
                 return (
                     <OnboardingStep
                         privacyStep

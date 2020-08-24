@@ -105,6 +105,16 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
+            onShareClick: () =>
+                this.processEvent('shareAnnotation', {
+                    annotationUrl: annotation.url,
+                    ...DEF_CONTEXT,
+                }),
+            onUnshareClick: () =>
+                this.processEvent('unshareAnnotation', {
+                    annotationUrl: annotation.url,
+                    ...DEF_CONTEXT,
+                }),
             onGoToAnnotation:
                 this.props.showGoToAnnotationBtn && annotation.body?.length > 0
                     ? () =>
@@ -206,6 +216,10 @@ export class AnnotationsSidebarContainer<
         }
     }
 
+    protected renderModals() {
+        return null
+    }
+
     private renderTopBar() {
         return (
             <TopBarContainerStyled>
@@ -231,6 +245,7 @@ export class AnnotationsSidebarContainer<
                     {!this.props.skipTopBarRender && this.renderTopBar()}
                     <AnnotationsSidebar
                         {...this.state}
+                        sharingAccess={this.state.annotationSharingAccess}
                         needsWaypoint={!this.state.noResults}
                         appendLoader={
                             this.state.secondarySearchState === 'running'
@@ -259,6 +274,7 @@ export class AnnotationsSidebarContainer<
                         theme={this.props.theme}
                     />
                 </ContainerStyled>
+                {this.renderModals()}
             </ThemeProvider>
         )
     }
