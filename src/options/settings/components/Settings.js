@@ -21,8 +21,5 @@ export default () => (
         <div className={styles.block}>
         <Ribbon />
         </div>
-        <div className={styles.block}>
-        <IndexingPrefs />
-        </div>
     </React.Fragment>
 )
