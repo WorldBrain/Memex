@@ -31,9 +31,9 @@ import {
     featuresBeta,
 } from 'src/util/remote-functions-background'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import CopyPaster from 'src/overview/copy-paster'
-import { renderTemplate } from 'src/overview/copy-paster/utils'
-import { Template } from 'src/overview/copy-paster/types'
+import CopyPaster from 'src/copy-paster'
+import { renderTemplate } from 'src/copy-paster/utils'
+import { Template } from 'src/copy-paster/types'
 
 const styles = require('./ResultList.css')
 

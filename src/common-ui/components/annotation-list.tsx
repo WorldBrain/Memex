@@ -11,7 +11,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import CopyPaster from 'src/overview/copy-paster'
+import CopyPaster from 'src/copy-paster'
 
 const styles = require('./annotation-list.css')
 

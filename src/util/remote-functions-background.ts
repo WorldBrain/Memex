@@ -8,7 +8,7 @@ import { FeaturesInterface } from 'src/features/background/feature-opt-ins'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { RemoteReaderInterface } from 'src/reader/types'
-import { RemoteCopyPasterInterface } from 'src/overview/copy-paster/background/types'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 

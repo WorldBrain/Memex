@@ -21,7 +21,7 @@ import {
     AnnotationEditGeneralProps,
 } from 'src/annotations/components/AnnotationEdit'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import CopyPaster from 'src/overview/copy-paster'
+import CopyPaster from 'src/copy-paster'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',

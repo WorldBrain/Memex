@@ -4,7 +4,7 @@ import * as acts from './actions'
 import { SearchResult, Result } from '../types'
 import { PageUrlsByDay } from 'src/search/background/types'
 import analytics from 'src/analytics'
-import { Template } from '../copy-paster/types'
+import { Template } from '../../copy-paster/types'
 
 export interface State {
     /** Holds the current search results used to render to the UI. */

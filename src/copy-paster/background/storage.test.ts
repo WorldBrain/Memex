@@ -1,6 +1,6 @@
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
-import CopyPasterBackground from './'
+import CopyPasterBackground from '.'
 
 async function setupTest() {
     const { backgroundModules } = await setupBackgroundIntegrationTest()

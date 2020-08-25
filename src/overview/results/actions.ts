@@ -15,7 +15,7 @@ import {
     notifications,
     copyPaster,
 } from 'src/util/remote-functions-background'
-import { Template } from '../copy-paster/types'
+import { Template } from '../../copy-paster/types'
 
 const processEventRPC = remoteFunction('processEvent')
 const createSocialBookmarkRPC = remoteFunction('addSocialBookmark')

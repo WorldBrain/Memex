@@ -1,8 +1,8 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
-import TemplateList from 'src/overview/copy-paster/components/TemplateList'
-import TemplateRow from 'src/overview/copy-paster/components/TemplateRow'
-import TemplateEditor from 'src/overview/copy-paster/components/TemplateEditor'
+import TemplateList from 'src/copy-paster/components/TemplateList'
+import TemplateRow from 'src/copy-paster/components/TemplateRow'
+import TemplateEditor from 'src/copy-paster/components/TemplateEditor'
 
 const stories = storiesOf('Copy Paster', module)
 
