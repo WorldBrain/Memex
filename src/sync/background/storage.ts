@@ -18,6 +18,10 @@ export class MemexExtClientSyncLogStorage extends ClientSyncLogStorage {
                     moduleVersion: new Date('2020-07-15'),
                     applicationVersion: STORAGE_VERSIONS[20].version,
                 },
+                {
+                    moduleVersion: new Date('2020-08-21'),
+                    applicationVersion: STORAGE_VERSIONS[21].version,
+                },
             ],
         })
         for (const collectionDefinition of [

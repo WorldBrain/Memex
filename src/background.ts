@@ -81,11 +81,14 @@ export async function main() {
 
     await storageManager.finishInitialization()
 
-    await setStorageMiddleware(storageManager, {
-        syncService: backgroundModules.sync,
-        storexHub: backgroundModules.storexHub,
-        contentSharing: backgroundModules.contentSharing,
-    })
+    const { setStorageLoggingEnabled } = await setStorageMiddleware(
+        storageManager,
+        {
+            syncService: backgroundModules.sync,
+            storexHub: backgroundModules.storexHub,
+            contentSharing: backgroundModules.contentSharing,
+        },
+    )
     await setupBackgroundModules(backgroundModules, storageManager)
 
     navigator?.storage?.persist?.()
@@ -122,6 +125,7 @@ export async function main() {
     window['analytics'] = analytics
     window['tabMan'] = backgroundModules.activityLogger.tabManager
     window['dataSeeders'] = setupDataSeeders(storageManager)
+    window['setStorageLoggingEnabled'] = setStorageLoggingEnabled
 
     window['selfTests'] = await createSelfTests({
         storage: {

@@ -31,9 +31,7 @@ class TrialExpiryWarning extends PureComponent<Props> {
         } else if (expiryDays === 1) {
             return expiryDays + ' ' + 'day'
         } else if (expiryDays < 0) {
-            this.setState({
-                expired: true,
-            })
+            this.setState({ expired: true })
         }
     }
 

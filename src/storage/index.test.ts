@@ -551,7 +551,7 @@ describe('Storage initialization', () => {
                         backupChanges: 'timestamp, collection',
                         bookmarks: 'url, time',
                         clientSyncLogEntry:
-                            '[deviceId+createdOn], [collection+pk], createdOn, needsIntegration, sharedOn',
+                            '[deviceId+createdOn], [collection+pk], [createdOn+sharedOn], createdOn, needsIntegration, sharedOn',
                         contentSharingAction: '++id, createdWhen',
                         customListDescriptions: 'listId',
                         customLists:
