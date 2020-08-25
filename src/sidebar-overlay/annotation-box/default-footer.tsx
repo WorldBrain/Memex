@@ -82,7 +82,7 @@ const DefaultFooter = ({
                         editIconClickHandler()
                     }}
                 >
-                    <IconStyled src={icons.edit} />
+                    <IconStyled src={icons.commentEdit} />
                 </IconBox>
             </ButtonTooltip>
             <AnnotationShareIconRenderer

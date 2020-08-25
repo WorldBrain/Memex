@@ -1,78 +1,40 @@
 import React, { Component } from 'react'
-import { Template } from '../types'
 import styled from 'styled-components'
+
+import { Template } from '../types'
 import ResultItemActionBtn from 'src/common-ui/components/result-item-action-btn'
-import { browser } from 'webextension-polyfill-ts'
-
-const starImg = browser.extension.getURL('/img/star_full_grey.svg')
-const emptyStarImg = browser.extension.getURL('/img/star_empty_grey.svg')
-const editImg = browser.extension.getURL('/img/edit.svg')
-const copyImg = browser.extension.getURL('/img/copy.svg')
-
-const Row = styled.div`
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0px 10px 0 15px;
-
-    &:hover {
-        background-color: #efefef;
-    }
-`
-
-const Title = styled.div`
-    display: block;
-    width: 100%;
-    cursor: pointer;
-    text-align: left;
-
-    font-family: Poppins;
-    font-style: normal;
-    font-weight: normal;
-    font-size: 14px;
-    color: #3a2f45;
-
-    margin: 4px 0;
-
-    outline: none;
-    border: none;
-    background: transparent;
-`
-
-const ActionsContainer = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: flex-end;
-    margin-right: 8px;
-`
+import * as icons from 'src/common-ui/components/design-library/icons'
+import { LoadingIndicator } from 'src/common-ui/components'
 
 const COPY_TIMEOUT = 2000
 
-interface TemplateRowProps {
+export interface Props {
     template: Template
 
-    onClick: () => void
+    onClick: () => Promise<void> | void
     onClickSetIsFavourite: (isFavourite: boolean) => void
     onClickEdit: () => void
 }
 
 interface State {
+    isLoading: boolean
     hasCopied: boolean
 }
 
-export default class TemplateRow extends Component<TemplateRowProps> {
-    state = {
-        hasCopied: false,
+export default class TemplateRow extends Component<Props, State> {
+    copyTimeout?: ReturnType<typeof setTimeout>
+    state: State = { hasCopied: false, isLoading: false }
+
+    componentWillUnmount() {
+        if (this.copyTimeout) {
+            clearTimeout(this.copyTimeout)
+        }
     }
 
-    copyTimeout?: ReturnType<typeof setTimeout>
-
-    onClickCopy() {
-        this.props.onClick()
-
-        this.setState({ hasCopied: true })
+    private onClickCopy = async () => {
+        this.setState({ isLoading: true })
+        await this.props.onClick()
+        this.setState({ hasCopied: true, isLoading: false })
 
         if (this.copyTimeout) {
             clearTimeout(this.copyTimeout)
@@ -83,35 +45,30 @@ export default class TemplateRow extends Component<TemplateRowProps> {
         }, COPY_TIMEOUT)
     }
 
-    componentWillUnmount() {
-        if (this.copyTimeout) {
-            clearTimeout(this.copyTimeout)
-        }
-    }
-
-    render() {
+    private renderRowBody() {
         const { title, isFavourite } = this.props.template
-        const { hasCopied } = this.state
+
+        if (this.state.isLoading) {
+            return (
+                <Title fullWidth>
+                    <LoadingIndicator />
+                </Title>
+            )
+        }
+
+        if (this.state.hasCopied) {
+            return <Title fullWidth>Copied to clipboard</Title>
+        }
 
         return (
-            <Row
-                onClick={() => {
-                    this.onClickCopy()
-                }}
-            >
-                {hasCopied ? (
-                    <Title>Copied to clipboard</Title>
-                ) : (
-                    <Title>{title}</Title>
-                )}
+            <>
+                <Title>{title}</Title>
                 <ActionsContainer>
                     <ResultItemActionBtn
-                        imgSrc={copyImg}
-                        onClick={() => {
-                            this.onClickCopy()
-                        }}
-                        tooltipText={hasCopied ? null : 'Copy'}
+                        onClick={this.onClickCopy}
                         tooltipPosition="left"
+                        imgSrc={icons.copy}
+                        tooltipText="Copy"
                     />
                     {/*<ResultItemActionBtn
                         imgSrc={isFavourite ? starImg : emptyStarImg}
@@ -127,13 +84,57 @@ export default class TemplateRow extends Component<TemplateRowProps> {
                     />
                     */}
                     <ResultItemActionBtn
-                        imgSrc={editImg}
+                        imgSrc={icons.edit}
                         onClick={this.props.onClickEdit}
                         tooltipText="Edit"
                         tooltipPosition="left"
                     />
                 </ActionsContainer>
-            </Row>
+            </>
         )
     }
+
+    render() {
+        return <Row onClick={this.onClickCopy}>{this.renderRowBody()}</Row>
+    }
 }
+
+const Row = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    &:hover {
+        background-color: #efefef;
+    }
+`
+
+const Title = styled.div`
+    display: ${(props) => (props.fullWidth ? 'flex' : 'block')};
+    justify-content: center;
+    width: 100%;
+    cursor: pointer;
+    text-align: left;
+
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: ${(props) => (props.fullWidth ? 'bold' : 'normal')};
+    font-size: 14px;
+    color: #3a2f45;
+
+    padding: 4px 10px;
+
+    outline: none;
+    border: none;
+    background: ${(props) =>
+        props.fullWidth ? 'rgba(196, 196, 196, 0.5)' : 'transparent'};
+`
+
+const ActionsContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-end;
+    margin-right: 8px;
+`

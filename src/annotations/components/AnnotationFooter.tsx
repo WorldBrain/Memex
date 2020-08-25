@@ -65,7 +65,10 @@ class AnnotationFooter extends React.Component<Props> {
                         tooltipText={'Edit Note'}
                     >
                         <IconBox onClick={this.props.onEditIconClick}>
-                            <IconStyled title="Edit note" src={icons.edit} />
+                            <IconStyled
+                                title="Edit note"
+                                src={icons.commentEdit}
+                            />
                         </IconBox>
                     </ButtonTooltip>
                     <ButtonTooltip
