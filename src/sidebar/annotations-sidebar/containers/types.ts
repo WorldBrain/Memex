@@ -5,6 +5,7 @@ import { AnnotationInterface } from 'src/annotations/background/types'
 import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 import { SidebarTheme } from '../types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -18,11 +19,13 @@ export interface SidebarContainerDependencies {
     onClickOutside?: React.MouseEventHandler
     annotationsCache: AnnotationsCacheInterface
     showAnnotationShareModal?: () => void
+    showBetaFeatureNotifModal?: () => void
 
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>
     customLists: RemoteCollectionsInterface
     contentSharing: ContentSharingInterface
+    auth: AuthRemoteFunctionsInterface
     theme?: Partial<SidebarTheme>
     // search: SearchInterface
     // bookmarks: BookmarksInterface

@@ -48,27 +48,18 @@ const DefaultFooter = ({
             {timestamp}
         </TimeStamp>
         <ButtonContainer>
-            <ButtonTooltip
-                position={'bottom'}
-                tooltipText={'Delete'}
-            >
+            <ButtonTooltip position={'bottom'} tooltipText={'Delete'}>
                 <IconBox
                     onClick={(e) => {
                         e.stopPropagation()
                         trashIconClickHandler()
                     }}
                 >
-                
-                    <IconStyled
-                        src={'/img/trash.svg'}
-                    />
+                    <IconStyled src={'/img/trash.svg'} />
                 </IconBox>
             </ButtonTooltip>
             {displayGoToAnnotation && (
-                <ButtonTooltip
-                    position={'bottom'}
-                    tooltipText={'Go to Page'}
-                >
+                <ButtonTooltip position={'bottom'} tooltipText={'Go to Page'}>
                     <IconBox
                         title="Go to annotation"
                         onClick={goToAnnotationHandler}
@@ -80,75 +71,59 @@ const DefaultFooter = ({
                     </IconBox>
                 </ButtonTooltip>
             )}
-            <ButtonTooltip
-                position={'bottom'}
-                tooltipText={'Edit Note'}
-            >
+            <ButtonTooltip position={'bottom'} tooltipText={'Edit Note'}>
                 <IconBox
                     onClick={(e) => {
                         e.stopPropagation()
                         editIconClickHandler()
-                    }}>
-                        <IconStyled
-                            src={'/img/comment_edit.svg'}
-                        />
+                    }}
+                >
+                    <IconStyled src={'/img/comment_edit.svg'} />
                 </IconBox>
             </ButtonTooltip>
             <AnnotationShareIconRenderer
-                    {...props}
-                    renderShareIcon={(shareIconProps) => (
-                        <ButtonTooltip
-                            position={'bottom'}
-                            tooltipText={shareIconProps.tooltipText}
-                        >
-                            <IconBox
-                                onClick={shareIconProps.onClickAction}
-                            >
-                                {shareIconProps.isLoading ? (
-                                    <LoadingIndicator />
-                                ) : (
-                                    <IconStyled
-                                        className={cx(styles.shareIcon, {
-                                            [styles.shareIconDisabled]:
-                                                shareIconProps.isDisabled,
-                                        })}
-                                        src={shareIconProps.imgSrc}
-                                    />
-                                )}
-                            </IconBox>
-                        </ButtonTooltip>
-                    )}
-                />
+                {...props}
+                renderShareIcon={(shareIconProps) => (
+                    <ButtonTooltip
+                        position={'bottom'}
+                        tooltipText={shareIconProps.tooltipText}
+                    >
+                        <IconBox onClick={shareIconProps.onClickAction}>
+                            {shareIconProps.isLoading ? (
+                                <LoadingIndicator />
+                            ) : (
+                                <IconStyled
+                                    className={cx(styles.shareIcon, {
+                                        [styles.shareIconDisabled]:
+                                            shareIconProps.isDisabled,
+                                    })}
+                                    src={shareIconProps.imgSrc}
+                                />
+                            )}
+                        </IconBox>
+                    </ButtonTooltip>
+                )}
+            />
             {hasBookmark ? (
-                <ButtonTooltip
-                    position={'bottom'}
-                    tooltipText={'Un-Bookmark'}
-                >
+                <ButtonTooltip position={'bottom'} tooltipText={'Un-Bookmark'}>
                     <IconBoxPermanent
                         onClick={(e) => {
                             e.stopPropagation()
                             handleBookmarkToggle()
                         }}
-                    > 
-                        <IconStyled
-                            src={'/img/star_full.svg'}
-                        />                  
+                    >
+                        <IconStyled src={'/img/star_full.svg'} />
                     </IconBoxPermanent>
                 </ButtonTooltip>
-            ):(
-                <ButtonTooltip
-                    position={'bottom'}
-                    tooltipText={'Bookmark'}
-                >
+            ) : (
+                <ButtonTooltip position={'bottom'} tooltipText={'Bookmark'}>
                     <IconBox
                         onClick={(e) => {
                             e.stopPropagation()
                             handleBookmarkToggle()
                         }}
-                    > 
-                        <IconStyled
-                            src={'/img/star_empty.svg'}
-                        />                  
+                    >
+                        <IconStyled src={'/img/star_empty.svg'} />
                     </IconBox>
                 </ButtonTooltip>
             )}
@@ -187,16 +162,17 @@ const IconBox = styled.button<{ disabled?: boolean }>`
     width: 24px;
 
     ${(props) =>
-        !props.disabled ? `
+        !props.disabled
+            ? `
             &:hover {
                 background-color: #e0e0e0;
-            
+
                 & > img {
                     opacity: 0.6;
                 }
             }
             `
-        : ''}
+            : ''}
 `
 const IconStyled = styled.img`
     border: none;
@@ -221,7 +197,8 @@ const IconBoxPermanent = styled.button<{ disabled?: boolean }>`
     width: 24px;
 
     ${(props) =>
-        !props.disabled ? `
+        !props.disabled
+            ? `
             &:hover {
                 background-color: #e0e0e0;
             }
@@ -230,7 +207,7 @@ const IconBoxPermanent = styled.button<{ disabled?: boolean }>`
                     opacity: 0.6;
             }
             `
-        : ''}
+            : ''}
 `
 
 const TimeStamp = styled.div`

@@ -6,6 +6,7 @@ export type ModalIds =
     | 'Subscription'
     | 'ShareListModal'
     | 'ShareAnnotationModal'
+    | 'BetaFeatureNotifModal'
     | null
 
 export interface State {

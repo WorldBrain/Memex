@@ -38,6 +38,7 @@ import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { AnalyticsEvent } from 'src/analytics/types'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 // TODO:(page-indexing)[high] Fix this with a proper restructuring of how pages are indexed
 setupPageContentRPC()
 
@@ -179,6 +180,7 @@ export async function main() {
                 highlighter: highlightRenderer,
                 annotations: annotationsBG,
                 tags: tagsBG,
+                auth: runInBackground<AuthRemoteFunctionsInterface>(),
                 customLists: runInBackground<RemoteCollectionsInterface>(),
                 contentSharing: runInBackground<ContentSharingInterface>(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,

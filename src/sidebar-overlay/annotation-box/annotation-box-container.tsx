@@ -56,6 +56,7 @@ export interface OwnProps {
 interface DispatchProps {
     handleTagClick: (tag: string) => void
     showAnnotationShareModal: () => void
+    showBetaFeatureNotifModal: () => void
 }
 
 type Props = OwnProps & DispatchProps
@@ -106,6 +107,11 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                 taskState,
             })
 
+        if (this.props.sharingAccess === 'feature-disabled') {
+            this.props.showBetaFeatureNotifModal()
+            return
+        }
+
         updateState('running')
         try {
             await this.contentShareBG.shareAnnotation({
@@ -125,6 +131,11 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                 status: 'unshared',
                 taskState,
             })
+
+        if (this.props.sharingAccess === 'feature-disabled') {
+            this.props.showBetaFeatureNotifModal()
+            return
+        }
 
         updateState('running')
         try {
@@ -298,9 +309,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                 {this.props.body && (
                     <TruncatedTextRenderer
                         text={this.props.body}
-                        getTruncatedTextObject={
-                            this._getTruncatedTextObject
-                        }
+                        getTruncatedTextObject={this._getTruncatedTextObject}
                         isHighlight={true}
                     />
                 )}
@@ -347,6 +356,8 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     handleTagClick: (tag) => dispatch(filterActs.toggleTagFilter(tag)),
     showAnnotationShareModal: () =>
         dispatch(show({ modalId: 'ShareAnnotationModal' })),
+    showBetaFeatureNotifModal: () =>
+        dispatch(show({ modalId: 'BetaFeatureNotifModal', options: {} })),
 })
 
 export default connect(null, mapDispatchToProps)(AnnotationBoxContainer)

@@ -3,6 +3,7 @@ import { ModalIds } from 'src/overview/modals/reducer'
 import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
 import ShareListModal from 'src/overview/sharing/components/ShareListModal'
 import ShareAnnotationModal from 'src/overview/sharing/components/ShareAnnotationModal'
+import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 
 export interface Props {
     modalId?: ModalIds
@@ -10,7 +11,7 @@ export interface Props {
     onClose: () => any
 }
 
-const modalsMap = {
+const modalsMap: { [key in ModalIds]: (props: Props) => JSX.Element } = {
     Subscription: ({ modalOptions, onClose }) => (
         <SubscribeModal onClose={onClose} {...modalOptions} />
     ),
@@ -19,6 +20,9 @@ const modalsMap = {
     ),
     ShareAnnotationModal: ({ modalOptions, onClose }) => (
         <ShareAnnotationModal onClose={onClose} {...modalOptions} />
+    ),
+    BetaFeatureNotifModal: ({ modalOptions, onClose }) => (
+        <BetaFeatureNotifModal onClose={onClose} {...modalOptions} />
     ),
 }
 

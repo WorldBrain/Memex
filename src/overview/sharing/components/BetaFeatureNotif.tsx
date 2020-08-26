@@ -96,6 +96,10 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
         isPioneer: false,
     }
 
+    get isUnauthorizedUser(): boolean {
+        return this.state.hasSubscription && !this.state.isPioneer
+    }
+
     componentDidMount() {
         this.upgradeState()
     }
@@ -109,13 +113,12 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
 
     private async upgradeState() {
         const plans = await auth.getAuthorizedPlans()
+        const isBetaAuthorized = await auth.isAuthorizedForFeature('beta')
 
-        if (await auth.isAuthorizedForFeature('beta')) {
-            this.setState({ isPioneer: true })
-        }
-        if (plans.length > 0) {
-            this.setState({ hasSubscription: true })
-        }
+        this.setState({
+            isPioneer: isBetaAuthorized,
+            hasSubscription: plans.length > 0,
+        })
     }
 
     render() {
@@ -133,36 +136,29 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
                         <Margin />
                         <>
                             <ButtonBox>
-                                {!this.state.isPioneer &&
-                                this.state.hasSubscription ? (
-                                    <PrimaryAction
-                                        onClick={this.openPortal}
-                                        label={'Upgrade'}
-                                    />
-                                ) : (
-                                    <PrimaryAction
-                                        onClick={
-                                            this.props.showSubscriptionModal
-                                        }
-                                        label={'Upgrade'}
-                                    />
-                                )}
+                                <PrimaryAction
+                                    label="Upgrade"
+                                    onClick={
+                                        this.isUnauthorizedUser
+                                            ? this.openPortal
+                                            : this.props.showSubscriptionModal
+                                    }
+                                />
                                 <SecondaryAction
+                                    label="Watch Demo"
                                     onClick={() =>
                                         window.open(
                                             'https://worldbrain.io/tutorials/sharing-features',
                                         )
                                     }
-                                    label={'Watch Demo'}
                                 />
                             </ButtonBox>
-                            {!this.state.isPioneer &&
-                                this.state.hasSubscription && (
-                                    <InfoBox>
-                                        To upgrade go to "Edit Subscription" and
-                                        add the "Pioneer Support" addon
-                                    </InfoBox>
-                                )}
+                            {this.isUnauthorizedUser && (
+                                <InfoBox>
+                                    To upgrade go to "Edit Subscription" and add
+                                    the "Pioneer Support" addon
+                                </InfoBox>
+                            )}
                         </>
                     </InstructionsBox>
                 </InstructionsContainer>

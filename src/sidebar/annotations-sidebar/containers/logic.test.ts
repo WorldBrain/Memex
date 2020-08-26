@@ -56,6 +56,7 @@ const setupLogicHelper = async ({
 
     const sidebarLogic = new SidebarContainerLogic({
         pageUrl,
+        auth: backgroundModules.auth.remoteFunctions,
         tags: backgroundModules.tags.remoteFunctions,
         customLists: backgroundModules.customLists.remoteFunctions,
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
