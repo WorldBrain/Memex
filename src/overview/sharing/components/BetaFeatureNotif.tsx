@@ -11,10 +11,14 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { formBackground } from 'src/common-ui/components/design-library/colors'
 
-interface Props {
+export interface Props {
     showSubscriptionModal: () => void
+}
+
+interface State {
     isPioneer: boolean
     hasSubscription: boolean
+    loadingChargebee: boolean
 }
 
 const NameInput = styled.input`
@@ -85,29 +89,25 @@ const InfoBox = styled.div`
     }
 `
 
-export default class BetaFeatureNotif extends PureComponent<Props> {
-    state = {
+export default class BetaFeatureNotif extends PureComponent<Props, State> {
+    state: State = {
         loadingChargebee: false,
         hasSubscription: false,
         isPioneer: false,
-    }
-
-    openPortal = async () => {
-        this.setState({
-            loadingChargebee: true,
-        })
-        const portalLink = await subscription.getManageLink()
-        window.open(portalLink['access_url'])
-        this.setState({
-            loadingChargebee: false,
-        })
     }
 
     componentDidMount() {
         this.upgradeState()
     }
 
-    async upgradeState() {
+    private openPortal = async () => {
+        this.setState({ loadingChargebee: true })
+        const portalLink = await subscription.getManageLink()
+        window.open(portalLink['access_url'])
+        this.setState({ loadingChargebee: false })
+    }
+
+    private async upgradeState() {
         const plans = await auth.getAuthorizedPlans()
 
         if (await auth.isAuthorizedForFeature('beta')) {
