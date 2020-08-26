@@ -6,6 +6,7 @@
     font-size: 14px;
     color: #3a2f45;
     text-align: center;
+    white-space: nowrap;
 
     @media (max-width: 767px) {
         font-size: 12px;

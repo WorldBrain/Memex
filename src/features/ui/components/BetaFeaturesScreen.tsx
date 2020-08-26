@@ -94,14 +94,22 @@ class BetaFeaturesScreen extends React.Component<
                             ) : (
                                 <div>
                                     <TypographyTextNormal>
-                                        To access beta features, please
+                                        To access beta features you can support us by
                                         <TypographyLink
                                             onClick={
                                                 this.props.showSubscriptionModal
                                             }
                                         >
-                                            support us with the pioneer upgrade.
+                                            upgrading to the Pioneer Plan
                                         </TypographyLink>
+                                           or
+                                        <TypographyLink
+                                            onClick={
+                                                ()=>{window.open('https://worldbrain.io/request-early-access')}
+                                            }
+                                        >
+                                            request free access via a wait list.
+                                        </TypographyLink>  
                                     </TypographyTextNormal>
                                 </div>
                             )}
