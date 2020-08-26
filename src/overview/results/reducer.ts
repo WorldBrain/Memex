@@ -61,7 +61,7 @@ export const defaultState: State = {
     currentPage: 0,
     totalCount: null,
     searchCount: 0,
-    areAnnotationsExpanded: false,
+    areAnnotationsExpanded: true,
     showOnboardingMessage: false,
     isAnnotsSearch: false,
     annotsByDay: null,
