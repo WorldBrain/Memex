@@ -247,20 +247,14 @@ export class AnnotationsSidebarContainer<
         return (
             <HoverBox>
                 <CopyPaster
-                    onClick={(id) => console.log('onClick', id)}
-                    onClickCancel={() => console.log('onClickCancel')}
-                    onClickDelete={() => console.log('onClickDelete')}
-                    onClickEdit={(id) => console.log('onClickEdit', id)}
-                    onClickHowto={() => console.log('onClickHowTo')}
-                    onClickNew={() => console.log('onClickNew')}
-                    onClickSave={() => console.log('onClickSave')}
-                    onTitleChange={() => console.log('onTitleChange')}
-                    onCodeChange={() => console.log('onCodeChange')}
-                    onSetIsFavourite={() => console.log('onSetIsFavorite')}
+                    templateDoc={{
+                        title: '',
+                        url: '',
+                        tags: [],
+                    }}
                     onClickOutside={() =>
                         this.processEvent('resetCopyPasterAnnotationId', null)
                     }
-                    templates={[]}
                 />
             </HoverBox>
         )

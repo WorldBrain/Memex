@@ -3,7 +3,6 @@ import { connect, MapStateToProps } from 'react-redux'
 import Waypoint from 'react-waypoint'
 import moment from 'moment'
 import reduce from 'lodash/fp/reduce'
-import omit from 'lodash/omit'
 
 import { selectors as opt } from 'src/options/settings'
 import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
@@ -32,15 +31,11 @@ import {
 } from 'src/util/remote-functions-background'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import CopyPaster from 'src/copy-paster'
-import { renderTemplate } from 'src/copy-paster/utils'
-import { Template } from 'src/copy-paster/types'
 
 const styles = require('./ResultList.css')
 
 interface LocalState {
     tagSuggestions: string[]
-    copyPasterTemplates: Template[]
-    tmpCopyPasterTemplate: Template | undefined
     activeCopyPasterAnnotationId: string | undefined
 }
 
@@ -60,7 +55,6 @@ export interface StateProps {
     annotsByDay: PageUrlsByDay
     isFilterBarActive: boolean
     isSocialPost: boolean
-    copyPasterTemplates: Template[]
     isBetaEnabled: boolean
 }
 
@@ -90,11 +84,7 @@ export interface DispatchProps {
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
     handleTrashBtnClick: (doc: Result, i: number) => MouseEventHandler
     resetActiveCopyPasterIndex: () => void
-    getCopyPasterTemplates: () => void
-    deleteCopyPasterTemplate: (id: number) => void
-    saveNewCopyPasterTemplate: (template: Omit<Template, 'id'>) => void
     setBetaFeaturesEnabled: (enabled: boolean) => void
-    updateCopyPasterTemplate: (template: Template) => void
 }
 
 export interface OwnProps {
@@ -129,8 +119,6 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
 
     state: LocalState = {
         tagSuggestions: [],
-        copyPasterTemplates: [],
-        tmpCopyPasterTemplate: undefined,
         activeCopyPasterAnnotationId: undefined,
     }
 
@@ -144,8 +132,6 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
             'copy-paster',
         )
         this.props.setBetaFeaturesEnabled(copyPasterEnabled)
-
-        this.props.getCopyPasterTemplates()
     }
 
     componentWillUnmount() {
@@ -288,104 +274,11 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
             tags: resultTags,
         }
 
-        const templates = this.props.copyPasterTemplates
-        const tmpCopyPasterTemplate = this.state.tmpCopyPasterTemplate
-
         return (
             <HoverBox>
                 <div ref={(ref) => this.setCopyPasterDivRef(ref)}>
                     <CopyPaster
-                        copyPasterEditingTemplate={tmpCopyPasterTemplate}
-                        templates={templates}
-                        onClick={(id) => {
-                            const template = templates.find((t) => t.id === id)
-
-                            if (!template) {
-                                console.error(`can't find template for ${id}`)
-                                return
-                            }
-
-                            const rendered = renderTemplate(template, doc)
-
-                            navigator.clipboard
-                                .writeText(rendered)
-                                .catch((e) => {
-                                    console.error(e)
-                                })
-                        }}
-                        onClickEdit={(id) => {
-                            const template = templates.find((t) => t.id === id)
-                            this.setState({ tmpCopyPasterTemplate: template })
-                        }}
-                        onClickCancel={() => {
-                            this.setState({
-                                tmpCopyPasterTemplate: undefined,
-                            })
-                        }}
-                        onClickNew={() => {
-                            this.setState({
-                                tmpCopyPasterTemplate: {
-                                    id: -1,
-                                    title: '',
-                                    code: '',
-                                    isFavourite: false,
-                                },
-                            })
-                        }}
-                        onClickSave={() => {
-                            if (tmpCopyPasterTemplate.id === -1) {
-                                this.props.saveNewCopyPasterTemplate(
-                                    omit(tmpCopyPasterTemplate, ['id']),
-                                )
-                            } else {
-                                this.props.updateCopyPasterTemplate(
-                                    tmpCopyPasterTemplate,
-                                )
-                            }
-
-                            this.setState({ tmpCopyPasterTemplate: undefined })
-                        }}
-                        onClickDelete={() => {
-                            this.props.deleteCopyPasterTemplate(
-                                tmpCopyPasterTemplate.id,
-                            )
-
-                            this.setState({ tmpCopyPasterTemplate: undefined })
-                        }}
-                        onClickHowto={() => {
-                            window.open(
-                                'https://worldbrain.io/tutorials/copy-templates',
-                            )
-                        }}
-                        onTitleChange={(title) => {
-                            this.setState({
-                                tmpCopyPasterTemplate: {
-                                    ...this.state.tmpCopyPasterTemplate,
-                                    title,
-                                },
-                            })
-                        }}
-                        onCodeChange={(code) => {
-                            this.setState({
-                                tmpCopyPasterTemplate: {
-                                    ...this.state.tmpCopyPasterTemplate,
-                                    code,
-                                },
-                            })
-                        }}
-                        onSetIsFavourite={(id, isFavourite) => {
-                            const template = templates.find((t) => t.id === id)
-
-                            if (!template) {
-                                console.error(`can't find template for ${id}`)
-                                return
-                            }
-
-                            this.props.updateCopyPasterTemplate({
-                                ...template,
-                                isFavourite,
-                            })
-                        }}
+                        templateDoc={doc}
                         onClickOutside={this.props.resetActiveCopyPasterIndex}
                     />
                 </div>
@@ -596,7 +489,6 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
     isFilterBarActive: filters.showFilterBar(state),
     isSocialPost: selectors.isSocialPost(state),
-    copyPasterTemplates: selectors.copyPasterTemplates(state),
     isBetaEnabled: selectors.isBetaEnabled(state),
 })
 
@@ -660,13 +552,6 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     },
     resetActiveCopyPasterIndex: () =>
         dispatch(acts.resetActiveCopyPasterIndex()),
-    getCopyPasterTemplates: () => dispatch(acts.getCopyPasterTemplates()),
-    deleteCopyPasterTemplate: (id) =>
-        dispatch(acts.deleteCopyPasterTemplate(id)),
-    saveNewCopyPasterTemplate: (template) =>
-        dispatch(acts.saveNewCopyPasterTemplate(template)),
-    updateCopyPasterTemplate: (template) =>
-        dispatch(acts.updateCopyPasterTemplate(template)),
     setBetaFeaturesEnabled: (enabled) =>
         dispatch(acts.setBetaFeatures(enabled)),
 })
