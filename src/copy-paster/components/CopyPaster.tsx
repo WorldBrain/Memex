@@ -11,6 +11,7 @@ const CopyPasterWrapper = styled.div`
 `
 
 interface CopyPasterProps {
+    isLoading: boolean
     templates: Template[]
     copyPasterEditingTemplate?: Template
 
@@ -53,8 +54,8 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
                     />
                 ) : (
                     <TemplateList
-                        isLoading={false}
                         templates={templates}
+                        isLoading={this.props.isLoading}
                         onClickSetIsFavourite={this.props.onSetIsFavourite}
                         onClickEdit={(id) => this.props.onClickEdit(id)}
                         onClickHowto={this.props.onClickHowto}

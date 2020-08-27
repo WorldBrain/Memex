@@ -43,7 +43,7 @@ const NoResults = styled.p`
     color: #3a2f45;
 `
 
-const NoResultsBox = styled.p`
+const NoResultsBox = styled.div`
     text-align: center
     font-family: Poppins;
     font-style: normal;
@@ -125,7 +125,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
         }
 
         return (
-            <div>
+            <>
                 <Header>
                     <HeaderText>Copy/Paste Templates</HeaderText>
                     <CreateNewButton onClick={this.props.onClickNew}>
@@ -140,7 +140,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                     onClickEdit={this.props.onClickEdit}
                     onClickHowto={this.props.onClickHowto}
                 />
-            </div>
+            </>
         )
     }
 }

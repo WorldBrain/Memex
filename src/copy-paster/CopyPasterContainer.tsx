@@ -6,8 +6,9 @@ import CopyPaster from './components/CopyPaster'
 import { copyPaster } from 'src/util/remote-functions-background'
 
 interface State {
-    tmpTemplate: Template | undefined
+    isLoading: boolean
     templates: Template[]
+    tmpTemplate: Template | undefined
 }
 
 export interface Props {
@@ -30,6 +31,7 @@ export default class CopyPasterContainer extends React.PureComponent<
     private copyPasterBG = copyPaster
 
     state: State = {
+        isLoading: false,
         tmpTemplate: undefined,
         templates: this.props.initTemplates ?? [],
     }
@@ -39,8 +41,9 @@ export default class CopyPasterContainer extends React.PureComponent<
     }
 
     private async syncTemplates() {
+        this.setState({ isLoading: true })
         const templates = await this.copyPasterBG.findAllTemplates()
-        this.setState({ templates })
+        this.setState({ templates, isLoading: false })
     }
 
     private findTemplateForId(id: number): Template {
@@ -103,13 +106,14 @@ export default class CopyPasterContainer extends React.PureComponent<
     render() {
         return (
             <CopyPaster
-                copyPasterEditingTemplate={this.state.tmpTemplate}
                 templates={this.state.templates}
+                isLoading={this.state.isLoading}
                 onClick={this.handleTemplateCopy}
                 onClickSave={this.handleTemplateSave}
                 onClickDelete={this.handleTemplateDelete}
-                onSetIsFavourite={this.handleTemplateFavourite}
                 onClickOutside={this.props.onClickOutside}
+                onSetIsFavourite={this.handleTemplateFavourite}
+                copyPasterEditingTemplate={this.state.tmpTemplate}
                 onClickEdit={(id) => {
                     const template = this.findTemplateForId(id)
                     this.setState({ tmpTemplate: template })

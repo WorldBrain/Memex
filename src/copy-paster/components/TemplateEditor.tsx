@@ -75,17 +75,22 @@ interface TemplateEditorProps {
 }
 
 export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
+    private get isNewTemplate(): boolean {
+        return this.props.template == null
+    }
+
+    private get isSaveDisabled(): boolean {
+        return !this.props.template?.title.length
+    }
+
     render() {
         const { template } = this.props
-        const isNewTemplate = template === undefined
-
-        const isSaveDisabled = template.title.length === 0
 
         return (
-            <div>
+            <>
                 <FlexContainer>
                     <HeaderText>
-                        {isNewTemplate ? 'Add New' : 'Edit'}
+                        {this.isNewTemplate ? 'Add New' : 'Edit'}
                     </HeaderText>
 
                     <ButtonContainer>
@@ -93,7 +98,7 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                             Cancel
                         </Button>
                         <Button
-                            disabled={isSaveDisabled}
+                            disabled={this.isSaveDisabled}
                             onClick={this.props.onClickSave}
                         >
                             Save
@@ -106,14 +111,14 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                         autoFocus
                         placeholder="Title"
                         type="input"
-                        defaultValue={template ? template.title : ''}
+                        defaultValue={template?.title ?? ''}
                         className={styles.titleInput}
                         onChange={this.props.onTitleChange}
                     />
                     <TextInputControlled
                         placeholder="Code"
                         className={styles.textArea}
-                        defaultValue={template ? template.code : ''}
+                        defaultValue={template?.code ?? ''}
                         onChange={this.props.onCodeChange}
                         rows={5}
                     />
@@ -124,7 +129,7 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                         label={'How to write templates'}
                         onClick={this.props.onClickHowto}
                     />
-                    {!isNewTemplate && (
+                    {!this.isNewTemplate && (
                         <Button
                             small
                             danger
@@ -134,7 +139,7 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                         </Button>
                     )}
                 </FlexContainer>
-            </div>
+            </>
         )
     }
 }
