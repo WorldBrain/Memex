@@ -31,7 +31,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             canClickAnnotations: true,
             paddingRight: 40,
         },
-        skipTopBarRender: true,
     }
 
     constructor(props: Props) {

@@ -9,6 +9,7 @@ export const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
 export const heartEmptyGrey = browser.extension.getURL(
     '/img/star_empty_grey.svg',
 )
+export const commentAdd = browser.extension.getURL('/img/comment_add.svg')
 export const commentEdit = browser.extension.getURL('/img/comment_edit.svg')
 export const trash = browser.extension.getURL('/img/trash.svg')
 export const goTo = browser.extension.getURL('/img/open.svg')

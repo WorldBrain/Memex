@@ -21,6 +21,7 @@ import {
     AnnotationEditGeneralProps,
 } from 'src/annotations/components/AnnotationEdit'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import * as icons from 'src/common-ui/components/design-library/icons'
 import CopyPaster from 'src/copy-paster'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
@@ -224,11 +225,25 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    private renderCopyPasterManager = (id: string) => {
-        if (this.state.activeCopyPasterAnnotationId !== id) {
+    private handleCopyAllNotesClick: React.MouseEventHandler = (e) => {
+        e.preventDefault()
+
+        this.processEvent('setAllNotesCopyPasterShown', {
+            shown: !this.state.showAllNotesCopyPaster,
+        })
+    }
+
+    private renderCopyPasterManagerForAnnotation = (
+        currentAnnotationId: string,
+    ) => {
+        if (this.state.activeCopyPasterAnnotationId !== currentAnnotationId) {
             return null
         }
 
+        return this.renderCopyPasterManager()
+    }
+
+    private renderCopyPasterManager() {
         return (
             <HoverBox>
                 <CopyPaster
@@ -257,15 +272,38 @@ export class AnnotationsSidebarContainer<
 
     private renderTopBar() {
         return (
-            <TopBarContainerStyled>
-                {this.props?.elements?.topBarLeft}
-                <ButtonTooltip
-                    tooltipText="Add notes to page"
-                    position="leftNarrow"
-                >
-                    <CommentBtn onClick={this.handleAddCommentBtnClick} />
-                </ButtonTooltip>
-            </TopBarContainerStyled>
+            <>
+                <TopBarContainerStyled>
+                    <ButtonTooltip
+                        tooltipText="Close (ESC)"
+                        position="rightCentered"
+                    >
+                        <CloseBtn onClick={() => this.hideSidebar()}>
+                            <ActionIcon src={icons.close} />
+                        </CloseBtn>
+                    </ButtonTooltip>
+                    <TopBarActionBtns>
+                        <ButtonTooltip
+                            tooltipText="Copy All Notes"
+                            position="leftNarrow"
+                        >
+                            <ActionBtn onClick={this.handleCopyAllNotesClick}>
+                                <ActionIcon src={icons.copy} />
+                            </ActionBtn>
+                        </ButtonTooltip>
+                        <ButtonTooltip
+                            tooltipText="Add notes to page"
+                            position="leftNarrow"
+                        >
+                            <ActionBtn onClick={this.handleAddCommentBtnClick}>
+                                <ActionIcon src={icons.commentAdd} />
+                            </ActionBtn>
+                        </ButtonTooltip>
+                    </TopBarActionBtns>
+                </TopBarContainerStyled>
+                {this.state.showAllNotesCopyPaster &&
+                    this.renderCopyPasterManager()}
+            </>
         )
     }
 
@@ -308,7 +346,7 @@ export class AnnotationsSidebarContainer<
                         onClickOutside={this.handleClickOutside}
                         theme={this.props.theme}
                         renderCopyPasterForAnnotation={
-                            this.renderCopyPasterManager
+                            this.renderCopyPasterManagerForAnnotation
                         }
                     />
                 </ContainerStyled>
@@ -351,13 +389,39 @@ const TopBarContainerStyled = styled.div`
     box-shadow: 0px 3px 5px -3px #e0e0e0;
 `
 
+const TopBarActionBtns = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`
+
+const CloseBtn = styled.button`
+    cursor: pointer;
+    z-index: 2147483647;
+    line-height: normal;
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    border-radius: 3px;
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
+`
+
+const ActionIcon = styled.img`
+    height: 100%;
+    width: 100%;
+`
+
 // TODO: inheirits from .nakedSquareButton
-const CommentBtn = styled.button`
-    background-color: #e8e8e8;
-    color: rgb(54, 54, 46);
+const ActionBtn = styled.button`
     border-radius: 3px;
     padding: 2px;
-    background-image: url('/img/comment_add.svg');
     width: 24px;
     height: 24px;
     border-radius: 3px;

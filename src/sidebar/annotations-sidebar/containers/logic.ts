@@ -43,6 +43,7 @@ export interface SidebarContainerState {
     }
 
     copyPasterAccess: boolean
+    showAllNotesCopyPaster: boolean
     activeCopyPasterAnnotationId: string | undefined
 
     pageUrl?: string
@@ -218,6 +219,7 @@ export type SidebarContainerEvents = UIEvent<{
     setAnnotationShareModalShown: { shown: boolean }
     setBetaFeatureNotifModalShown: { shown: boolean }
 
+    setAllNotesCopyPasterShown: { shown: boolean }
     setCopyPasterAnnotationId: { id: string }
     resetCopyPasterAnnotationId: null
 
@@ -292,6 +294,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationSharingAccess: 'feature-disabled',
 
             copyPasterAccess: false,
+            showAllNotesCopyPaster: false,
             activeCopyPasterAnnotationId: undefined,
 
             commentBox: { ...INIT_FORM_STATE },
@@ -478,6 +481,15 @@ export class SidebarContainerLogic extends UILogic<
         return this._doSearch(nextState, { overwrite: true })
     }
 
+    setAllNotesCopyPasterShown: EventHandler<'setAllNotesCopyPasterShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            showAllNotesCopyPaster: { $set: event.shown },
+            activeCopyPasterAnnotationId: { $set: undefined },
+        })
+    }
+
     setCopyPasterAnnotationId: EventHandler<'setCopyPasterAnnotationId'> = ({
         event,
         previousState,
@@ -487,7 +499,10 @@ export class SidebarContainerLogic extends UILogic<
                 ? undefined
                 : event.id
 
-        this.emitMutation({ activeCopyPasterAnnotationId: { $set: newId } })
+        this.emitMutation({
+            activeCopyPasterAnnotationId: { $set: newId },
+            showAllNotesCopyPaster: { $set: false },
+        })
     }
 
     resetCopyPasterAnnotationId: EventHandler<
