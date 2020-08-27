@@ -7,11 +7,13 @@ import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
-import { runInBackground } from 'src/util/webextensionRPC'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import CopyPaster from 'src/copy-paster'
+import {
+    collections,
+    contentSharing,
+    auth,
+} from 'src/util/remote-functions-background'
 
 const styles = require('./annotation-list.css')
 
@@ -54,8 +56,9 @@ interface State {
 }
 
 class AnnotationList extends Component<Props, State> {
-    private customListsBG = runInBackground<RemoteCollectionsInterface>()
-    private contentShareBG = runInBackground<ContentSharingInterface>()
+    private authBG = auth
+    private customListsBG = collections
+    private contentShareBG = contentSharing
 
     state: State = {
         /* The initial value is set to the isExpandedOverride which is
@@ -88,6 +91,11 @@ class AnnotationList extends Component<Props, State> {
     }
 
     private async detectPageSharingStatus() {
+        if (!(await this.authBG.isAuthorizedForFeature('beta'))) {
+            this.setState(() => ({ sharingAccess: 'feature-disabled' }))
+            return
+        }
+
         const listIds = await this.customListsBG.fetchListIdsByUrl({
             url: this.props.pageUrl,
         })
@@ -204,9 +212,7 @@ class AnnotationList extends Component<Props, State> {
             ...annotations.slice(index + 1),
         ]
 
-        this.setState({
-            annotations: newAnnotations,
-        })
+        this.setState({ annotations: newAnnotations })
     }
 
     private handleGoToAnnotation = (annotation: Annotation) => (

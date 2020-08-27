@@ -10,12 +10,13 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 
 const StyledSecondaryAction = styled.div`
-    padding: 6px 18px;
+    padding: 8px 20px;
     border: 1px solid ${colorMidPurple};
     box-sizing: border-box;
     border-radius: 5px;
     cursor: pointer;
     display: flex;
+    height: 35px;
     white-space: nowrap;
     vertical-align: middle;
     align-items: center;

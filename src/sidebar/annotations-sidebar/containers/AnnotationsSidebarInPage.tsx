@@ -14,6 +14,7 @@ import {
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { Annotation } from 'src/annotations/types'
 import ShareAnnotationModal from 'src/overview/sharing/components/ShareAnnotationModal'
+import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -36,6 +37,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     constructor(props: Props) {
         super({
             ...props,
+            showBetaFeatureNotifModal: () =>
+                this.processEvent('setBetaFeatureNotifModalShown', {
+                    shown: true,
+                }),
             showAnnotationShareModal: () =>
                 this.processEvent('setAnnotationShareModalShown', {
                     shown: true,
@@ -198,7 +203,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                             })
                         }
                         onClickLetUsKnow={() => {
-                            window.open('https://worldbrain.io/feedback/betafeatures')
+                            window.open(
+                                'https://worldbrain.io/feedback/betafeatures',
+                            )
                         }}
                         onClickViewRoadmap={() => {
                             window.open('https://worldbrain.io/roadmap')
@@ -208,6 +215,19 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                                 'https://worldbrain.io/feature/sharing-collections/knownissues',
                             )
                         }}
+                    />
+                )}
+                {this.state.showBetaFeatureNotifModal && (
+                    <BetaFeatureNotifModal
+                        requiresExplicitStyles
+                        onClose={() =>
+                            this.processEvent('setBetaFeatureNotifModalShown', {
+                                shown: false,
+                            })
+                        }
+                        showSubscriptionModal={() =>
+                            console.log('UPGRADE BTN PRESSED')
+                        }
                     />
                 )}
             </>

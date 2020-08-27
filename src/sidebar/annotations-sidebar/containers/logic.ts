@@ -1,5 +1,4 @@
 import debounce from 'lodash/debounce'
-import some from 'lodash/some'
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { EventEmitter } from 'events'
@@ -105,6 +104,7 @@ export interface SidebarContainerState {
     isListFilterActive: boolean
     isSocialSearch: boolean
     showAnnotationsShareModal: boolean
+    showBetaFeatureNotifModal: boolean
 }
 
 export type SidebarContainerEvents = UIEvent<{
@@ -216,6 +216,7 @@ export type SidebarContainerEvents = UIEvent<{
     fetchSuggestedDomains: null
 
     setAnnotationShareModalShown: { shown: boolean }
+    setBetaFeatureNotifModalShown: { shown: boolean }
 
     setCopyPasterAnnotationId: { id: string }
     resetCopyPasterAnnotationId: null
@@ -335,6 +336,7 @@ export class SidebarContainerLogic extends UILogic<
             searchResultSkip: 0,
 
             showAnnotationsShareModal: false,
+            showBetaFeatureNotifModal: false,
         }
     }
 
@@ -855,12 +857,21 @@ export class SidebarContainerLogic extends UILogic<
         this.options.annotationsCache.delete(annotation)
     }
 
-    shareAnnotation: EventHandler<'shareAnnotation'> = async ({ event }) => {
+    shareAnnotation: EventHandler<'shareAnnotation'> = async ({
+        event,
+        previousState,
+    }) => {
         const updateAnnotationTaskState = (taskState: TaskState) =>
             this._updateAnnotationShareState(event.annotationUrl, {
                 status: 'shared',
                 taskState,
             })
+
+        if (previousState.annotationSharingAccess === 'feature-disabled') {
+            this.options.showBetaFeatureNotifModal?.()
+            return
+        }
+
         updateAnnotationTaskState('running')
         try {
             await this.options.contentSharing.shareAnnotation({
@@ -876,12 +887,19 @@ export class SidebarContainerLogic extends UILogic<
 
     unshareAnnotation: EventHandler<'unshareAnnotation'> = async ({
         event,
+        previousState,
     }) => {
         const updateAnnotationTaskState = (taskState: TaskState) =>
             this._updateAnnotationShareState(event.annotationUrl, {
                 status: 'unshared',
                 taskState,
             })
+
+        if (previousState.annotationSharingAccess === 'feature-disabled') {
+            this.options.showBetaFeatureNotifModal?.()
+            return
+        }
+
         updateAnnotationTaskState('running')
         try {
             // await new Promise(resolve => { })
@@ -997,17 +1015,36 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ showAnnotationsShareModal: { $set: event.shown } })
     }
 
+    setBetaFeatureNotifModalShown: EventHandler<
+        'setBetaFeatureNotifModalShown'
+    > = ({ event }) => {
+        this.emitMutation({ showBetaFeatureNotifModal: { $set: event.shown } })
+    }
+
     _detectPageSharingStatus(pageUrl: string) {
         this._detectedPageSharingStatus = (async () => {
+            if (!(await this.options.auth.isAuthorizedForFeature('beta'))) {
+                this.emitMutation({
+                    annotationSharingAccess: { $set: 'feature-disabled' },
+                })
+                return
+            }
+
             const listIds = await this.options.customLists.fetchListIdsByUrl({
                 url: pageUrl,
             })
             const areListsShared = await this.options.contentSharing.areListsShared(
                 { localListIds: listIds },
             )
+
+            const isPageSharedOnSomeList = Object.values(areListsShared).reduce(
+                (val, acc) => acc || val,
+                false,
+            )
+
             this.emitMutation({
                 annotationSharingAccess: {
-                    $set: some(Object.values(areListsShared))
+                    $set: isPageSharedOnSomeList
                         ? 'sharing-allowed'
                         : 'page-not-shared',
                 },

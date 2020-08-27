@@ -105,7 +105,8 @@
 
 .rootOverview {
     padding: 0;
-    width: var(--resultWidth);
+    max-width: var(--resultWidth);
+    width: 100%;
 }
 
 .crossRibbon {

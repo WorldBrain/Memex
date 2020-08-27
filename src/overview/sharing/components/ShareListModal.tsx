@@ -191,8 +191,6 @@ class ShareListModal extends Component<Props, State> {
             return (
                 <BetaFeatureNotif
                     showSubscriptionModal={this.props.showSubscriptionModal}
-                    isPioneer={true}
-                    hasSubscription={this.state.hasSubscription}
                 />
             )
         }

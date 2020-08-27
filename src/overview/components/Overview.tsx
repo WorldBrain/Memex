@@ -1,5 +1,7 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
+import classNames from 'classnames'
+
 import { OVERVIEW_URL } from 'src/constants'
 import Onboarding from '../onboarding'
 import { DeleteConfirmModal } from '../delete-confirm-modal'
@@ -32,9 +34,8 @@ import {
     AnnotationsCacheInterface,
 } from 'src/annotations/annotations-cache'
 import { show } from 'src/overview/modals/actions'
-import classNames from 'classnames'
-
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -45,6 +46,7 @@ export interface Props {
     handleReaderViewClick: (url: string) => void
     showSubscriptionModal: () => void
     showAnnotationShareModal: () => void
+    showBetaFeatureNotifModal: () => void
 }
 
 interface State {
@@ -61,6 +63,7 @@ class Overview extends PureComponent<Props, State> {
     private customListsBG = runInBackground<RemoteCollectionsInterface>()
     private contentSharingBG = runInBackground<ContentSharingInterface>()
     private tagsBG = runInBackground<RemoteTagsInterface>()
+    private authBG = runInBackground<AuthRemoteFunctionsInterface>()
 
     private annotationsSidebarRef = React.createRef<
         AnnotationsSidebarContainer
@@ -123,7 +126,7 @@ class Overview extends PureComponent<Props, State> {
             (date - dateNow < 259200 && inTrial === 'in_trial') ||
             inTrial === 'cancelled'
         ) {
-            //3 days notification window - 24h waiting until showing the trial notif again
+            // 3 days notification window - 24h waiting until showing the trial notif again
             if (lastCloseTime && dateNow - lastCloseTime > 86400) {
                 this.setState({
                     trialExpiry: true,
@@ -261,6 +264,7 @@ class Overview extends PureComponent<Props, State> {
                     </div> */}
                     <AnnotationsSidebarInDashboardResults
                         tags={this.tagsBG}
+                        auth={this.authBG}
                         annotations={this.annotationsBG}
                         customLists={this.customListsBG}
                         contentSharing={this.contentSharingBG}
@@ -270,6 +274,9 @@ class Overview extends PureComponent<Props, State> {
                         onCloseSidebarBtnClick={this.handleCloseSidebarBtnClick}
                         showAnnotationShareModal={
                             this.props.showAnnotationShareModal
+                        }
+                        showBetaFeatureNotifModal={
+                            this.props.showBetaFeatureNotifModal
                         }
                     />
 
@@ -342,6 +349,8 @@ const mapDispatchToProps = (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
     showAnnotationShareModal: () =>
         dispatch(show({ modalId: 'ShareAnnotationModal' })),
+    showBetaFeatureNotifModal: () =>
+        dispatch(show({ modalId: 'BetaFeatureNotifModal' })),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Overview)

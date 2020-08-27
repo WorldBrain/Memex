@@ -537,6 +537,9 @@ export default class ContentSharingBackground {
                             localIds: change.pks as string[],
                         },
                     )
+                    if (!Object.keys(remoteAnnotationIds).length) {
+                        return
+                    }
                     for (const [
                         localAnnotationId,
                         remoteAnnotationId,
@@ -603,6 +606,9 @@ export default class ContentSharingBackground {
                     const remoteAnnotationIdMap = await this.storage.getRemoteAnnotationIds(
                         { localIds: localAnnotationIds },
                     )
+                    if (!Object.keys(remoteAnnotationIdMap).length) {
+                        return
+                    }
 
                     await this.scheduleAction({
                         type: 'unshare-annotations',
