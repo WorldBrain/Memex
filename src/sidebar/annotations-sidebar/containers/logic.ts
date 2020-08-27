@@ -106,6 +106,7 @@ export interface SidebarContainerState {
     isSocialSearch: boolean
     showAnnotationsShareModal: boolean
     showBetaFeatureNotifModal: boolean
+    showAllNotesShareMenu: boolean
 }
 
 export type SidebarContainerEvents = UIEvent<{
@@ -175,6 +176,7 @@ export type SidebarContainerEvents = UIEvent<{
         context: AnnotationEventContext
         annotationUrl: string
     }
+    setAllNotesShareMenuShown: { shown: boolean }
     shareAnnotation: {
         context: AnnotationEventContext
         annotationUrl: string
@@ -340,6 +342,7 @@ export class SidebarContainerLogic extends UILogic<
 
             showAnnotationsShareModal: false,
             showBetaFeatureNotifModal: false,
+            showAllNotesShareMenu: false,
         }
     }
 
@@ -479,6 +482,14 @@ export class SidebarContainerLogic extends UILogic<
 
         this._detectPageSharingStatus(event.pageUrl)
         return this._doSearch(nextState, { overwrite: true })
+    }
+
+    setAllNotesShareMenuShown: EventHandler<'setAllNotesShareMenuShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            showAllNotesShareMenu: { $set: event.shown },
+        })
     }
 
     setAllNotesCopyPasterShown: EventHandler<'setAllNotesCopyPasterShown'> = ({

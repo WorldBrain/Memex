@@ -16,7 +16,7 @@ export interface Props {
     /** This logic should include handling derendering this share menu view. */
     onUnshareClick: () => Promise<void>
     onShareAllClick: () => Promise<void>
-    onCopyLinkClick: () => void
+    onCopyLinkClick: (createdLink: string) => void
     getAllSharedStatus: () => Promise<boolean>
 }
 
@@ -96,7 +96,7 @@ export class ShareAnnotationMenu extends PureComponent<Props, State> {
 
         if (linkCopier === 'pristine') {
             this.setState({ linkCopier: 'copied' })
-            this.props.onCopyLinkClick()
+            this.props.onCopyLinkClick(this.state.createdLink)
 
             this.copyTimeout = setTimeout(() => {
                 this.setState({ linkCopier: 'pristine' })

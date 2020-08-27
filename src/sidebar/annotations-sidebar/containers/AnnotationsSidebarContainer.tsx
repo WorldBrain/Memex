@@ -22,6 +22,7 @@ import {
 } from 'src/annotations/components/AnnotationEdit'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import NotesShareMenu from 'src/overview/sharing/AllNotesShareModal'
 import CopyPaster from 'src/copy-paster'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
@@ -233,6 +234,14 @@ export class AnnotationsSidebarContainer<
         })
     }
 
+    private handleShareAllNotesClick: React.MouseEventHandler = (e) => {
+        e.preventDefault()
+
+        this.processEvent('setAllNotesShareMenuShown', {
+            shown: !this.state.showAllNotesShareMenu,
+        })
+    }
+
     private renderCopyPasterManagerForAnnotation = (
         currentAnnotationId: string,
     ) => {
@@ -241,6 +250,21 @@ export class AnnotationsSidebarContainer<
         }
 
         return this.renderCopyPasterManager()
+    }
+
+    private renderNotesShareMenu() {
+        return (
+            <HoverBox>
+                <NotesShareMenu
+                    pageUrl={this.props.pageUrl}
+                    closeShareMenu={() =>
+                        this.processEvent('setAllNotesShareMenuShown', {
+                            shown: false,
+                        })
+                    }
+                />
+            </HoverBox>
+        )
     }
 
     private renderCopyPasterManager() {
@@ -286,6 +310,14 @@ export class AnnotationsSidebarContainer<
                             </ActionBtn>
                         </ButtonTooltip>
                         <ButtonTooltip
+                            tooltipText="Share All Notes"
+                            position="leftNarrow"
+                        >
+                            <ActionBtn onClick={this.handleShareAllNotesClick}>
+                                <ActionIcon src={icons.shareEmpty} />
+                            </ActionBtn>
+                        </ButtonTooltip>
+                        <ButtonTooltip
                             tooltipText="Add notes to page"
                             position="leftNarrow"
                         >
@@ -297,6 +329,8 @@ export class AnnotationsSidebarContainer<
                 </TopBarContainerStyled>
                 {this.state.showAllNotesCopyPaster &&
                     this.renderCopyPasterManager()}
+                {this.state.showAllNotesShareMenu &&
+                    this.renderNotesShareMenu()}
             </>
         )
     }
