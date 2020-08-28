@@ -49,4 +49,19 @@ export default class CopyPasterBackground {
     async findAllTemplates() {
         return this.storage.findAllTemplates()
     }
+
+    async renderPageTemplate(params: {
+        normalizedPageUrl: string
+        templateId: number
+    }) {}
+
+    async renderSingleAnnotationTemplate(params: {
+        normalizedPageUrl: string
+        annotationUrl: string
+    }) {}
+
+    async renderMultipleAnnotationsTemplate(params: {
+        normalizedPageUrl: string
+        annotationUrls: string[]
+    }) {}
 }
