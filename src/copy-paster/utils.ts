@@ -5,6 +5,7 @@ import {
     TemplateRequirements,
     TemplateDocKey,
     TemplateDocNote,
+    TemplateDataFetchers,
 } from './types'
 import mustache from 'mustache'
 import { KEYS_TO_REQUIREMENTS, LEGACY_KEYS, NOTE_KEYS } from './constants'
@@ -59,4 +60,14 @@ export function analyzeTemplate(
     }
 
     return { usesLegacyTags, noteUsage, requirements }
+}
+
+export async function generateTemplateDocs(params: {
+    template: Pick<Template, 'code'>
+    normalizedPageUrls: string[]
+    annotationUrls: string[]
+    dataFetchers: TemplateDataFetchers
+}): Promise<TemplateDoc[]> {
+    const templateAnalysis = analyzeTemplate(params.template)
+    return [{}]
 }

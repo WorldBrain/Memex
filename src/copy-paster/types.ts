@@ -46,3 +46,20 @@ export interface TemplateRequirements {
     noteTags?: boolean
     noteLink?: boolean
 }
+
+export interface TemplateDataFetchers {
+    getPages(
+        normalizedPageUrls: string[],
+    ): Promise<{
+        [normalizedPageUrl: string]: { fullTitle: string; fullUrl: string }
+    }>
+    getTagsForPages(
+        normalizedPageUrls: string[],
+    ): Promise<{ [normalizedPageUrl: string]: string[] }>
+    getNotes(
+        annotationUrls: string[],
+    ): Promise<{ [annotationUrl: string]: { body?: string; comment?: string } }>
+    getNoteTags(
+        annotationUrls: string[],
+    ): Promise<{ [annotationUrl: string]: string[] }>
+}

@@ -2,8 +2,9 @@ import Storex from '@worldbrain/storex'
 import { bindMethod } from 'src/util/functions'
 import CopyPasterStorage from './storage'
 import { RemoteCopyPasterInterface } from './types'
-import { Template } from '../types'
+import { Template, TemplateDataFetchers } from '../types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import { generateTemplateDocs, renderTemplate } from '../utils'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage
@@ -50,18 +51,86 @@ export default class CopyPasterBackground {
         return this.storage.findAllTemplates()
     }
 
-    async renderPageTemplate(params: {
-        normalizedPageUrl: string
+    async renderSinglePageTemplate(params: {
         templateId: number
-    }) {}
+        normalizedPageUrl: string
+    }) {
+        const template = await this.storage.findTemplate({
+            id: params.templateId,
+        })
+        const templateDocs = await generateTemplateDocs({
+            template,
+            normalizedPageUrls: [params.normalizedPageUrl],
+            annotationUrls: [],
+            dataFetchers: this._getTemplateDataFetchers(),
+        })
+        return templateDocs
+            .map((templateDoc) => renderTemplate(template, templateDoc))
+            .join('\n\n')
+    }
+
+    async renderMultiplePagesTemplate(params: {
+        templateId: number
+        normalizedPageUrls: string[]
+    }) {
+        const template = await this.storage.findTemplate({
+            id: params.templateId,
+        })
+        const templateDocs = await generateTemplateDocs({
+            template,
+            normalizedPageUrls: params.normalizedPageUrls,
+            annotationUrls: [],
+            dataFetchers: this._getTemplateDataFetchers(),
+        })
+        return templateDocs
+            .map((templateDoc) => renderTemplate(template, templateDoc))
+            .join('\n\n')
+    }
 
     async renderSingleAnnotationTemplate(params: {
+        templateId: number
         normalizedPageUrl: string
         annotationUrl: string
-    }) {}
+    }) {
+        const template = await this.storage.findTemplate({
+            id: params.templateId,
+        })
+        const templateDocs = await generateTemplateDocs({
+            template,
+            normalizedPageUrls: [params.normalizedPageUrl],
+            annotationUrls: [params.annotationUrl],
+            dataFetchers: this._getTemplateDataFetchers(),
+        })
+        return templateDocs
+            .map((templateDoc) => renderTemplate(template, templateDoc))
+            .join('\n\n')
+    }
 
     async renderMultipleAnnotationsTemplate(params: {
+        templateId: number
         normalizedPageUrl: string
         annotationUrls: string[]
-    }) {}
+    }) {
+        const template = await this.storage.findTemplate({
+            id: params.templateId,
+        })
+        const templateDocs = await generateTemplateDocs({
+            template,
+            normalizedPageUrls: [params.normalizedPageUrl],
+            annotationUrls: params.annotationUrls,
+            dataFetchers: this._getTemplateDataFetchers(),
+        })
+        return templateDocs
+            .map((templateDoc) => renderTemplate(template, templateDoc))
+            .join('\n\n')
+    }
+
+    _getTemplateDataFetchers(): TemplateDataFetchers {
+        return {
+            getPages: async () => ({}),
+            getTagsForPages: async () => ({}),
+            getNotes: async () => ({}),
+            getNoteTags: async () => ({}),
+        }
+    }
 }
