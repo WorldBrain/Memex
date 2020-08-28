@@ -1,7 +1,12 @@
-import { TemplateDoc, TemplateRequirements } from './types'
+import {
+    TemplateDoc,
+    TemplateRequirements,
+    TemplateDocKey,
+    TemplateDocNote,
+} from './types'
 
 export const KEYS_TO_REQUIREMENTS: {
-    [Key in keyof TemplateDoc]: keyof TemplateRequirements
+    [Key in TemplateDocKey]: keyof TemplateRequirements
 } = {
     PageUrl: 'page',
     PageTitle: 'page',
@@ -18,4 +23,12 @@ export const KEYS_TO_REQUIREMENTS: {
     tags: 'pageTags',
 }
 
-export const LEGACY_KEYS = new Set<keyof TemplateDoc>(['title', 'tags', 'url'])
+export const NOTE_KEYS: { [Key in keyof TemplateDocNote]-?: true } = {
+    NoteHighlight: true,
+    NoteText: true,
+    NoteTags: true,
+    NoteTagList: true,
+    NoteLink: true,
+}
+
+export const LEGACY_KEYS = new Set<TemplateDocKey>(['title', 'tags', 'url'])

@@ -5,17 +5,18 @@ export interface Template {
     isFavourite: boolean
 }
 
-export interface TemplateDoc {
+export type TemplateDoc = {
+    Notes?: Array<TemplateDocNote>
+} & TemplateDocNote
+
+export type TemplateDocKey = keyof (TemplateDocPage & TemplateDocNote)
+
+export interface TemplateDocPage {
     PageUrl?: string
     PageTitle?: string
     PageTags?: string
     PageTagList?: string
     PageLink?: string
-    NoteHighlight?: string
-    NoteText?: string
-    NoteTags?: string
-    NoteTagList?: string
-    NoteLink?: string
 
     // For backward compatibility
     url?: string
@@ -23,8 +24,17 @@ export interface TemplateDoc {
     tags?: string[]
 }
 
+export interface TemplateDocNote {
+    NoteHighlight?: string
+    NoteText?: string
+    NoteTags?: string
+    NoteTagList?: string
+    NoteLink?: string
+}
+
 export interface TemplateAnalysis {
     usesLegacyTags: boolean
+    noteUsage?: 'single' | 'multiple'
     requirements: TemplateRequirements
 }
 
