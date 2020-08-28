@@ -8,11 +8,11 @@ interface State {
 }
 
 export interface Props {
-    pageUrl: string
+    noteId: string
     closeShareMenu: () => void
 }
 
-export default class AllNotesShareModal extends React.PureComponent<
+export default class SingleNoteShareModal extends React.PureComponent<
     Props,
     State
 > {
@@ -65,7 +65,7 @@ export default class AllNotesShareModal extends React.PureComponent<
                 onClickOutside={this.props.closeShareMenu}
                 getAllSharedStatus={this.getAllSharedStatus}
                 onShareAllClick={this.handleSetAllShareStatus}
-                shareAllText="Share all Notes on this page"
+                shareAllText="Share Note in all collections this page is in"
             />
         )
     }

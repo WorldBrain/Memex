@@ -73,6 +73,7 @@ export interface AnnotationEditableProps {
     annotationEditDependencies: AnnotationEditGeneralProps &
         AnnotationEditEventProps
     renderCopyPasterForAnnotation: (id: string) => JSX.Element
+    renderShareMenuForAnnotation: (id: string) => JSX.Element
 }
 
 export interface AnnotationEditableEventProps {
@@ -225,6 +226,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                     {this.renderMainAnnotation()}
                     {this.renderFooter()}
                     {this.props.renderCopyPasterForAnnotation(this.props.url)}
+                    {this.props.renderShareMenuForAnnotation(this.props.url)}
                 </AnnotationStyled>
             </ThemeProvider>
         )

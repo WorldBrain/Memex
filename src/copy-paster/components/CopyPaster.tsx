@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
-import onClickOutside from 'react-onclickoutside'
 
 import { Template } from '../types'
 import TemplateEditor from './TemplateEditor'
 import TemplateList from './TemplateList'
+import { ClickAway } from 'src/util/click-away-wrapper'
 
 const CopyPasterWrapper = styled.div`
     padding: 0 0 5px 0;
@@ -41,31 +41,33 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
         const { copyPasterEditingTemplate, templates } = this.props
 
         return (
-            <CopyPasterWrapper>
-                {copyPasterEditingTemplate ? (
-                    <TemplateEditor
-                        template={copyPasterEditingTemplate}
-                        onClickSave={() => this.props.onClickSave()}
-                        onClickCancel={this.props.onClickCancel}
-                        onClickDelete={() => this.props.onClickDelete()}
-                        onClickHowto={this.props.onClickHowto}
-                        onTitleChange={(s) => this.props.onTitleChange(s)}
-                        onCodeChange={(s) => this.props.onCodeChange(s)}
-                    />
-                ) : (
-                    <TemplateList
-                        templates={templates}
-                        isLoading={this.props.isLoading}
-                        onClickSetIsFavourite={this.props.onSetIsFavourite}
-                        onClickEdit={(id) => this.props.onClickEdit(id)}
-                        onClickHowto={this.props.onClickHowto}
-                        onClickNew={this.props.onClickNew}
-                        onClick={this.props.onClick}
-                    />
-                )}
-            </CopyPasterWrapper>
+            <ClickAway onClickAway={this.handleClickOutside}>
+                <CopyPasterWrapper>
+                    {copyPasterEditingTemplate ? (
+                        <TemplateEditor
+                            template={copyPasterEditingTemplate}
+                            onClickSave={() => this.props.onClickSave()}
+                            onClickCancel={this.props.onClickCancel}
+                            onClickDelete={() => this.props.onClickDelete()}
+                            onClickHowto={this.props.onClickHowto}
+                            onTitleChange={(s) => this.props.onTitleChange(s)}
+                            onCodeChange={(s) => this.props.onCodeChange(s)}
+                        />
+                    ) : (
+                        <TemplateList
+                            templates={templates}
+                            isLoading={this.props.isLoading}
+                            onClickSetIsFavourite={this.props.onSetIsFavourite}
+                            onClickEdit={(id) => this.props.onClickEdit(id)}
+                            onClickHowto={this.props.onClickHowto}
+                            onClickNew={this.props.onClickNew}
+                            onClick={this.props.onClick}
+                        />
+                    )}
+                </CopyPasterWrapper>
+            </ClickAway>
         )
     }
 }
 
-export default onClickOutside(CopyPaster)
+export default CopyPaster

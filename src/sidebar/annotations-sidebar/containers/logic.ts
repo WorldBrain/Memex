@@ -106,7 +106,9 @@ export interface SidebarContainerState {
     isSocialSearch: boolean
     showAnnotationsShareModal: boolean
     showBetaFeatureNotifModal: boolean
+
     showAllNotesShareMenu: boolean
+    activeShareMenuNoteId: string | undefined
 }
 
 export type SidebarContainerEvents = UIEvent<{
@@ -176,7 +178,6 @@ export type SidebarContainerEvents = UIEvent<{
         context: AnnotationEventContext
         annotationUrl: string
     }
-    setAllNotesShareMenuShown: { shown: boolean }
     shareAnnotation: {
         context: AnnotationEventContext
         annotationUrl: string
@@ -224,6 +225,10 @@ export type SidebarContainerEvents = UIEvent<{
     setAllNotesCopyPasterShown: { shown: boolean }
     setCopyPasterAnnotationId: { id: string }
     resetCopyPasterAnnotationId: null
+
+    setAllNotesShareMenuShown: { shown: boolean }
+    setShareMenuNoteId: { id: string }
+    resetShareMenuNoteId: null
 
     // Page search result interactions
     // togglePageBookmark: { pageUrl: string }
@@ -343,6 +348,7 @@ export class SidebarContainerLogic extends UILogic<
             showAnnotationsShareModal: false,
             showBetaFeatureNotifModal: false,
             showAllNotesShareMenu: false,
+            activeShareMenuNoteId: undefined,
         }
     }
 
@@ -482,6 +488,22 @@ export class SidebarContainerLogic extends UILogic<
 
         this._detectPageSharingStatus(event.pageUrl)
         return this._doSearch(nextState, { overwrite: true })
+    }
+
+    resetShareMenuNoteId: EventHandler<'resetShareMenuNoteId'> = ({}) => {
+        this.emitMutation({ activeShareMenuNoteId: { $set: undefined } })
+    }
+
+    setShareMenuNoteId: EventHandler<'setShareMenuNoteId'> = ({
+        event,
+        previousState,
+    }) => {
+        const newId =
+            previousState.activeShareMenuNoteId === event.id
+                ? undefined
+                : event.id
+
+        this.emitMutation({ activeShareMenuNoteId: { $set: newId } })
     }
 
     setAllNotesShareMenuShown: EventHandler<'setAllNotesShareMenuShown'> = ({
@@ -897,6 +919,10 @@ export class SidebarContainerLogic extends UILogic<
             this.options.showBetaFeatureNotifModal?.()
             return
         }
+
+        this.emitMutation({
+            activeShareMenuNoteId: { $set: event.annotationUrl },
+        })
 
         updateAnnotationTaskState('running')
         try {

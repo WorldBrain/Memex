@@ -22,7 +22,8 @@ import {
 } from 'src/annotations/components/AnnotationEdit'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import NotesShareMenu from 'src/overview/sharing/AllNotesShareModal'
+import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareModal'
+import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareModal'
 import CopyPaster from 'src/copy-paster'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
@@ -252,10 +253,27 @@ export class AnnotationsSidebarContainer<
         return this.renderCopyPasterManager()
     }
 
-    private renderNotesShareMenu() {
+    private renderShareMenuForAnnotation = (currentAnnotationId: string) => {
+        if (this.state.activeShareMenuNoteId !== currentAnnotationId) {
+            return null
+        }
+
         return (
             <HoverBox>
-                <NotesShareMenu
+                <SingleNoteShareMenu
+                    noteId={currentAnnotationId}
+                    closeShareMenu={() =>
+                        this.processEvent('resetShareMenuNoteId', null)
+                    }
+                />
+            </HoverBox>
+        )
+    }
+
+    private renderAllNotesShareMenu() {
+        return (
+            <HoverBox>
+                <AllNotesShareMenu
                     pageUrl={this.props.pageUrl}
                     closeShareMenu={() =>
                         this.processEvent('setAllNotesShareMenuShown', {
@@ -330,7 +348,7 @@ export class AnnotationsSidebarContainer<
                 {this.state.showAllNotesCopyPaster &&
                     this.renderCopyPasterManager()}
                 {this.state.showAllNotesShareMenu &&
-                    this.renderNotesShareMenu()}
+                    this.renderAllNotesShareMenu()}
             </>
         )
     }
@@ -375,6 +393,9 @@ export class AnnotationsSidebarContainer<
                         theme={this.props.theme}
                         renderCopyPasterForAnnotation={
                             this.renderCopyPasterManagerForAnnotation
+                        }
+                        renderShareMenuForAnnotation={
+                            this.renderShareMenuForAnnotation
                         }
                     />
                 </ContainerStyled>

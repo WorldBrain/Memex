@@ -40,6 +40,8 @@ export interface AnnotationsSidebarProps {
     handleScrollPagination: () => void
 
     renderCopyPasterForAnnotation: (id: string) => JSX.Element
+    renderShareMenuForAnnotation: (id: string) => JSX.Element
+
     onClickOutside: React.MouseEventHandler
     bindAnnotationFooterEventProps: (
         annotation: Annotation,

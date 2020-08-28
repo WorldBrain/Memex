@@ -7,12 +7,14 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 import { LoadingIndicator } from 'src/common-ui/components'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { ClickAway } from 'src/util/click-away-wrapper'
 
 const COPY_TIMEOUT = 2000
 
 export interface Props {
     shareAllText: string
     getCreatedLink: () => Promise<string>
+    onClickOutside?: () => void
     /** This logic should include handling derendering this share menu view. */
     onUnshareClick: () => Promise<void>
     onShareAllClick: () => Promise<void>
@@ -27,7 +29,7 @@ export interface State {
     createdLink: string | undefined
 }
 
-export class ShareAnnotationMenu extends PureComponent<Props, State> {
+class ShareAnnotationMenu extends PureComponent<Props, State> {
     copyTimeout?: ReturnType<typeof setTimeout>
     state: State = {
         linkCopier: 'running',
@@ -53,6 +55,12 @@ export class ShareAnnotationMenu extends PureComponent<Props, State> {
     componentWillUnmount() {
         if (this.copyTimeout) {
             clearTimeout(this.copyTimeout)
+        }
+    }
+
+    handleClickOutside = () => {
+        if (this.props.onClickOutside) {
+            this.props.onClickOutside()
         }
     }
 
@@ -154,32 +162,36 @@ export class ShareAnnotationMenu extends PureComponent<Props, State> {
 
     render() {
         return (
-            <Menu>
-                <LinkCopier
-                    state={this.state.linkCopier}
-                    onClick={this.handleLinkClick}
-                >
-                    {this.renderLinkContent()}
-                </LinkCopier>
-                {this.renderShortcutTip({ modifier: 'Alt' })}
-                <ShareAllBtn
-                    state={this.state.shareAllBtn}
-                    onClick={this.handleShareClick}
-                >
-                    {this.renderShareAllContent()}
-                </ShareAllBtn>
-                {this.renderShortcutTip({ modifier: 'Shift' })}
-                <UnshareBtn
-                    state={this.state.unshareBtn}
-                    onClick={this.handleUnshareClick}
-                    disabled={this.state.unshareBtn === 'disabled'}
-                >
-                    {this.renderUnshareContent()}
-                </UnshareBtn>
-            </Menu>
+            <ClickAway onClickAway={this.handleClickOutside}>
+                <Menu>
+                    <LinkCopier
+                        state={this.state.linkCopier}
+                        onClick={this.handleLinkClick}
+                    >
+                        {this.renderLinkContent()}
+                    </LinkCopier>
+                    {this.renderShortcutTip({ modifier: 'Alt' })}
+                    <ShareAllBtn
+                        state={this.state.shareAllBtn}
+                        onClick={this.handleShareClick}
+                    >
+                        {this.renderShareAllContent()}
+                    </ShareAllBtn>
+                    {this.renderShortcutTip({ modifier: 'Shift' })}
+                    <UnshareBtn
+                        state={this.state.unshareBtn}
+                        onClick={this.handleUnshareClick}
+                        disabled={this.state.unshareBtn === 'disabled'}
+                    >
+                        {this.renderUnshareContent()}
+                    </UnshareBtn>
+                </Menu>
+            </ClickAway>
         )
     }
 }
+
+export default ShareAnnotationMenu
 
 const Menu = styled.div``
 
