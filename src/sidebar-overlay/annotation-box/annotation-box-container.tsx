@@ -44,6 +44,7 @@ export interface OwnProps {
     hasBookmark?: boolean
     sharingInfo: AnnotationSharingInfo
     sharingAccess: AnnotationSharingAccess
+    shareMenu: React.ReactNode
     copyPasterManager: React.ReactNode
     updateSharingInfo: (info: AnnotationSharingInfo) => void
     handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
@@ -53,6 +54,7 @@ export interface OwnProps {
     handleDeleteAnnotation: (url: string) => void
     handleBookmarkToggle: (url: string) => void
     handleCopyPasterClick?: () => void
+    openShareMenu?: () => void
 }
 
 interface DispatchProps {
@@ -113,6 +115,8 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
             this.props.showBetaFeatureNotifModal()
             return
         }
+
+        this.props.openShareMenu()
 
         updateState('running')
         try {
@@ -349,6 +353,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         {...shareAnnotationProps}
                     />
                 )}
+                {this.props.shareMenu}
                 {this.props.copyPasterManager}
             </div>
         )

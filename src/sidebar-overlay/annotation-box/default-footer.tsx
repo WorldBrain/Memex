@@ -24,11 +24,11 @@ interface Props extends ShareAnnotationProps {
     isEdited: boolean
     timestamp: string
     hasBookmark: boolean
-    goToAnnotationHandler: (e: React.MouseEvent<HTMLElement>) => void
+    handleBookmarkToggle: () => void
     editIconClickHandler: () => void
     trashIconClickHandler: () => void
     copyIconClickHandler?: () => void
-    handleBookmarkToggle: () => void
+    goToAnnotationHandler: (e: React.MouseEvent<HTMLElement>) => void
 }
 
 /* tslint:disable-next-line variable-name */
@@ -92,18 +92,21 @@ const DefaultFooter = ({
                         position={'bottom'}
                         tooltipText={shareIconProps.tooltipText}
                     >
-                        <IconBox onClick={shareIconProps.onClickAction}>
-                            {shareIconProps.isLoading ? (
-                                <LoadingIndicator />
-                            ) : (
-                                <IconStyled
-                                    className={cx(styles.shareIcon, {
-                                        [styles.shareIconDisabled]:
-                                            shareIconProps.isDisabled,
-                                    })}
-                                    src={shareIconProps.imgSrc}
-                                />
-                            )}
+                        <IconBox
+                            onClick={shareIconProps.onClickAction}
+                            disabled={
+                                shareIconProps.isDisabled ||
+                                shareIconProps.isLoading
+                            }
+                        >
+                            <IconStyled
+                                src={shareIconProps.imgSrc}
+                                className={cx(styles.shareIcon, {
+                                    [styles.shareIconDisabled]:
+                                        shareIconProps.isDisabled ||
+                                        shareIconProps.isLoading,
+                                })}
+                            />
                         </IconBox>
                     </ButtonTooltip>
                 )}

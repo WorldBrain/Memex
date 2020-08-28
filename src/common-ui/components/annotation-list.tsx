@@ -14,6 +14,7 @@ import {
     contentSharing,
     auth,
 } from 'src/util/remote-functions-background'
+import SingleNoteShareModal from 'src/overview/sharing/SingleNoteShareModal'
 
 const styles = require('./annotation-list.css')
 
@@ -24,6 +25,7 @@ type Annotation = Omit<AnnotationFlawed, 'isBookmarked'> & {
 }
 
 export interface Props {
+    activeShareMenuNoteId: string | undefined
     activeCopyPasterAnnotationId: string | undefined
     /** Override for expanding annotations by default */
     isExpandedOverride: boolean
@@ -37,6 +39,7 @@ export interface Props {
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
     handleBookmarkToggle: (url: string) => void
+    setActiveShareMenuNoteId?: (id: string) => void
     setActiveCopyPasterAnnotationId?: (id: string) => void
 }
 
@@ -244,6 +247,23 @@ class AnnotationList extends Component<Props, State> {
         )
     }
 
+    private renderShareMenu(annot: Annotation) {
+        if (this.props.activeShareMenuNoteId !== annot.url) {
+            return null
+        }
+
+        return (
+            <HoverBox>
+                <SingleNoteShareModal
+                    noteId={annot.url}
+                    closeShareMenu={() =>
+                        this.props.setActiveShareMenuNoteId?.(undefined)
+                    }
+                />
+            </HoverBox>
+        )
+    }
+
     private renderAnnotations() {
         return this.state.annotations.map((annot) => (
             <AnnotationBox
@@ -262,7 +282,13 @@ class AnnotationList extends Component<Props, State> {
                 sharingAccess={this.state.sharingAccess}
                 sharingInfo={this.state.annotationsSharingInfo[annot.url]}
                 updateSharingInfo={this.updateAnnotationShareState(annot.url)}
+                shareMenu={this.renderShareMenu(annot)}
                 copyPasterManager={this.renderCopyPasterManager(annot)}
+                openShareMenu={
+                    this.props.setActiveShareMenuNoteId != null
+                        ? () => this.props.setActiveShareMenuNoteId(annot.url)
+                        : undefined
+                }
                 handleCopyPasterClick={
                     this.props.setActiveCopyPasterAnnotationId != null
                         ? () =>
