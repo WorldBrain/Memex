@@ -69,5 +69,33 @@ export async function generateTemplateDocs(params: {
     dataFetchers: TemplateDataFetchers
 }): Promise<TemplateDoc[]> {
     const templateAnalysis = analyzeTemplate(params.template)
+    if (!params.annotationUrls.length) {
+        // user clicked on copy page
+    }
+    if (params.annotationUrls.length === 1) {
+        // user clicked to copy single annotation
+        if (!templateAnalysis.noteUsage) {
+            // but they only want to render page info, so no need to fetch annotations
+        }
+        if (templateAnalysis.noteUsage === 'single') {
+            // they expect the top-level data to be available (NoteText, etc.)
+        }
+        if (templateAnalysis.noteUsage === 'multiple') {
+            // but they're iterating through the Notes array, so make a Notes array with a single note
+        }
+    }
+    if (params.annotationUrls.length > 1) {
+        // user clicked to copy multiple/all annotations on page
+        if (!templateAnalysis.noteUsage) {
+            // but they only want to render page info, so no need to fetch annotations
+        }
+        if (templateAnalysis.noteUsage === 'single') {
+            // but they are using the top-level data (NoteText, etc.) so return
+            // multiple TemplatePageDocs that will later be rendered and joined together
+        }
+        if (templateAnalysis.noteUsage === 'multiple') {
+            // they're iterating through the Notes array, so we only need to generate a single TemplatePageDoc
+        }
+    }
     return [{}]
 }
