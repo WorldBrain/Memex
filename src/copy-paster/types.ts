@@ -7,7 +7,8 @@ export interface Template {
 
 export type TemplateDoc = {
     Notes?: Array<TemplateDocNote>
-} & TemplateDocNote
+} & TemplateDocPage &
+    TemplateDocNote
 
 export type TemplateDocKey = keyof (TemplateDocPage & TemplateDocNote)
 
@@ -15,7 +16,7 @@ export interface TemplateDocPage {
     PageUrl?: string
     PageTitle?: string
     PageTags?: string
-    PageTagList?: string
+    PageTagList?: string[]
     PageLink?: string
 
     // For backward compatibility
@@ -28,7 +29,7 @@ export interface TemplateDocNote {
     NoteHighlight?: string
     NoteText?: string
     NoteTags?: string
-    NoteTagList?: string
+    NoteTagList?: string[]
     NoteLink?: string
 }
 

@@ -1,8 +1,8 @@
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { analyzeTemplate, generateTemplateDocs } from './utils'
+import { analyzeTemplate, generateTemplateDocs, joinTags } from './utils'
 import { KEYS_TO_REQUIREMENTS, LEGACY_KEYS, NOTE_KEYS } from './constants'
-import { TemplateDocKey, TemplateAnalysis, TemplateDataFetchers } from './types'
+import { TemplateDocKey, TemplateAnalysis } from './types'
 import * as DATA from './utils.test.data'
 import { getTemplateDataFetchers } from './background'
 
@@ -127,7 +127,8 @@ describe('Content template doc generation', () => {
             {
                 PageTitle: 'test page A title',
                 PageUrl: DATA.testPageAUrl,
-                PageTags: DATA.testPageATags,
+                PageTags: joinTags(DATA.testPageATags),
+                PageTagList: DATA.testPageATags,
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
                 tags: DATA.testPageATags,
@@ -151,7 +152,8 @@ describe('Content template doc generation', () => {
         ).toEqual([
             {
                 PageTitle: DATA.testPageA.fullTitle,
-                PageTags: DATA.testPageATags,
+                PageTags: joinTags(DATA.testPageATags),
+                PageTagList: DATA.testPageATags,
                 PageUrl: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
                 tags: DATA.testPageATags,
@@ -159,7 +161,8 @@ describe('Content template doc generation', () => {
             },
             {
                 PageTitle: DATA.testPageB.fullTitle,
-                PageTags: DATA.testPageBTags,
+                PageTags: joinTags(DATA.testPageBTags),
+                PageTagList: DATA.testPageBTags,
                 PageUrl: DATA.testPageBUrl,
                 title: DATA.testPageB.fullTitle,
                 tags: DATA.testPageBTags,
@@ -181,7 +184,8 @@ describe('Content template doc generation', () => {
         ).toEqual([
             {
                 PageTitle: DATA.testPageA.fullTitle,
-                PageTags: DATA.testPageATags,
+                PageTags: joinTags(DATA.testPageATags),
+                PageTagList: DATA.testPageATags,
                 PageUrl: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
                 tags: DATA.testPageATags,
@@ -203,7 +207,8 @@ describe('Content template doc generation', () => {
         ).toEqual([
             {
                 PageTitle: DATA.testPageA.fullTitle,
-                PageTags: DATA.testPageATags,
+                PageTags: joinTags(DATA.testPageATags),
+                PageTagList: DATA.testPageATags,
                 PageUrl: DATA.testPageAUrl,
                 NoteText: DATA.testAnnotationAText,
                 NoteTags: DATA.testAnnotationATags,
@@ -231,7 +236,8 @@ describe('Content template doc generation', () => {
         ).toEqual([
             {
                 PageTitle: DATA.testPageA.fullTitle,
-                PageTags: DATA.testPageATags,
+                PageTags: joinTags(DATA.testPageATags),
+                PageTagList: DATA.testPageATags,
                 PageUrl: DATA.testPageAUrl,
                 Notes: [
                     {
@@ -263,7 +269,8 @@ describe('Content template doc generation', () => {
         ).toEqual([
             {
                 PageTitle: DATA.testPageA.fullTitle,
-                PageTags: DATA.testPageATags,
+                PageTags: joinTags(DATA.testPageATags),
+                PageTagList: DATA.testPageATags,
                 PageUrl: DATA.testPageAUrl,
 
                 title: DATA.testPageA.fullTitle,
@@ -289,7 +296,8 @@ describe('Content template doc generation', () => {
         ).toEqual([
             {
                 PageTitle: DATA.testPageA.fullTitle,
-                PageTags: DATA.testPageATags,
+                PageTags: joinTags(DATA.testPageATags),
+                PageTagList: DATA.testPageATags,
                 PageUrl: DATA.testPageAUrl,
                 NoteText: DATA.testAnnotationAText,
 
@@ -319,7 +327,8 @@ describe('Content template doc generation', () => {
         ).toEqual([
             {
                 PageTitle: DATA.testPageA.fullTitle,
-                PageTags: DATA.testPageATags,
+                PageTags: joinTags(DATA.testPageATags),
+                PageTagList: DATA.testPageATags,
                 PageUrl: DATA.testPageAUrl,
                 Notes: [
                     {

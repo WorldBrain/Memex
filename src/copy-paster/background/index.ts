@@ -8,7 +8,11 @@ import CopyPasterStorage from './storage'
 import { RemoteCopyPasterInterface } from './types'
 import { Template, TemplateDataFetchers } from '../types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { generateTemplateDocs, renderTemplate } from '../utils'
+import {
+    generateTemplateDocs,
+    renderTemplate,
+    joinTemplateDocs,
+} from '../utils'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage
@@ -68,9 +72,7 @@ export default class CopyPasterBackground {
             annotationUrls: [],
             dataFetchers: getTemplateDataFetchers(this.options),
         })
-        return templateDocs
-            .map((templateDoc) => renderTemplate(template, templateDoc))
-            .join('\n\n')
+        return joinTemplateDocs(templateDocs, template)
     }
 
     async renderMultiplePagesTemplate(params: {
@@ -86,9 +88,7 @@ export default class CopyPasterBackground {
             annotationUrls: [],
             dataFetchers: getTemplateDataFetchers(this.options),
         })
-        return templateDocs
-            .map((templateDoc) => renderTemplate(template, templateDoc))
-            .join('\n\n')
+        return joinTemplateDocs(templateDocs, template)
     }
 
     async renderSingleAnnotationTemplate(params: {
@@ -105,9 +105,7 @@ export default class CopyPasterBackground {
             annotationUrls: [params.annotationUrl],
             dataFetchers: getTemplateDataFetchers(this.options),
         })
-        return templateDocs
-            .map((templateDoc) => renderTemplate(template, templateDoc))
-            .join('\n\n')
+        return joinTemplateDocs(templateDocs, template)
     }
 
     async renderMultipleAnnotationsTemplate(params: {
@@ -124,9 +122,7 @@ export default class CopyPasterBackground {
             annotationUrls: params.annotationUrls,
             dataFetchers: getTemplateDataFetchers(this.options),
         })
-        return templateDocs
-            .map((templateDoc) => renderTemplate(template, templateDoc))
-            .join('\n\n')
+        return joinTemplateDocs(templateDocs, template)
     }
 }
 
