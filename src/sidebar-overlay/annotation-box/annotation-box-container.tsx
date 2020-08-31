@@ -365,7 +365,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
 ) => ({
     handleTagClick: (tag) => dispatch(filterActs.toggleTagFilter(tag)),
     showAnnotationShareModal: () =>
-        dispatch(show({ modalId: 'ShareAnnotationModal' })),
+        dispatch(show({ modalId: 'ShareAnnotationOnboardingModal' })),
     showBetaFeatureNotifModal: () =>
         dispatch(show({ modalId: 'BetaFeatureNotifModal', options: {} })),
 })

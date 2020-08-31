@@ -343,7 +343,7 @@ const mapDispatchToProps = (dispatch) => ({
         dispatch(resultActs.setShowOnboardingMessage(true)),
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
     showAnnotationShareModal: () =>
-        dispatch(show({ modalId: 'ShareAnnotationModal' })),
+        dispatch(show({ modalId: 'ShareAnnotationOnboardingModal' })),
     showBetaFeatureNotifModal: () =>
         dispatch(show({ modalId: 'BetaFeatureNotifModal' })),
 })

@@ -5,7 +5,7 @@ import * as acts from './actions'
 export type ModalIds =
     | 'Subscription'
     | 'ShareListModal'
-    | 'ShareAnnotationModal'
+    | 'ShareAnnotationOnboardingModal'
     | 'BetaFeatureNotifModal'
     | null
 
