@@ -59,7 +59,7 @@ export interface TemplateDataFetchers {
     getNotes(
         annotationUrls: string[],
     ): Promise<{ [annotationUrl: string]: { body?: string; comment?: string } }>
-    getNoteTags(
+    getTagsForNotes(
         annotationUrls: string[],
     ): Promise<{ [annotationUrl: string]: string[] }>
 }

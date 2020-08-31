@@ -1,4 +1,8 @@
 import Storex from '@worldbrain/storex'
+import { Page } from '@worldbrain/memex-storage/lib/mobile-app/features/overview/types'
+import { Tag } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/types'
+import { Note } from '@worldbrain/memex-storage/lib/mobile-app/features/page-editor/types'
+
 import { bindMethod } from 'src/util/functions'
 import CopyPasterStorage from './storage'
 import { RemoteCopyPasterInterface } from './types'
@@ -62,7 +66,7 @@ export default class CopyPasterBackground {
             template,
             normalizedPageUrls: [params.normalizedPageUrl],
             annotationUrls: [],
-            dataFetchers: this._getTemplateDataFetchers(),
+            dataFetchers: getTemplateDataFetchers(this.options),
         })
         return templateDocs
             .map((templateDoc) => renderTemplate(template, templateDoc))
@@ -80,7 +84,7 @@ export default class CopyPasterBackground {
             template,
             normalizedPageUrls: params.normalizedPageUrls,
             annotationUrls: [],
-            dataFetchers: this._getTemplateDataFetchers(),
+            dataFetchers: getTemplateDataFetchers(this.options),
         })
         return templateDocs
             .map((templateDoc) => renderTemplate(template, templateDoc))
@@ -99,7 +103,7 @@ export default class CopyPasterBackground {
             template,
             normalizedPageUrls: [params.normalizedPageUrl],
             annotationUrls: [params.annotationUrl],
-            dataFetchers: this._getTemplateDataFetchers(),
+            dataFetchers: getTemplateDataFetchers(this.options),
         })
         return templateDocs
             .map((templateDoc) => renderTemplate(template, templateDoc))
@@ -118,19 +122,65 @@ export default class CopyPasterBackground {
             template,
             normalizedPageUrls: [params.normalizedPageUrl],
             annotationUrls: params.annotationUrls,
-            dataFetchers: this._getTemplateDataFetchers(),
+            dataFetchers: getTemplateDataFetchers(this.options),
         })
         return templateDocs
             .map((templateDoc) => renderTemplate(template, templateDoc))
             .join('\n\n')
     }
+}
 
-    _getTemplateDataFetchers(): TemplateDataFetchers {
-        return {
-            getPages: async () => ({}),
-            getTagsForPages: async () => ({}),
-            getNotes: async () => ({}),
-            getNoteTags: async () => ({}),
+export function getTemplateDataFetchers({
+    storageManager,
+}: {
+    storageManager: Storex
+}): TemplateDataFetchers {
+    const getTagsForUrls = async (urls: string[]) => {
+        const tags: Tag[] = await storageManager
+            .collection('tags')
+            .findObjects({ url: { $in: urls } })
+
+        const tagsForUrls: { [url: string]: string[] } = {}
+        for (const tag of tags) {
+            tagsForUrls[tag.url] = [...(tagsForUrls[tag.url] ?? []), tag.name]
         }
+        return tagsForUrls
+    }
+
+    return {
+        getPages: async (normalizedPageUrls) => {
+            const pages: Page[] = await storageManager
+                .collection('pages')
+                .findObjects({ url: { $in: normalizedPageUrls } })
+
+            return pages.reduce(
+                (acc, page) => ({
+                    ...acc,
+                    [page.url]: {
+                        fullTitle: page.fullTitle,
+                        fullUrl: page.fullUrl,
+                    },
+                }),
+                {},
+            )
+        },
+        getNotes: async (annotationUrls) => {
+            const notes: Note[] = await storageManager
+                .collection('annotations')
+                .findObjects({ url: { $in: annotationUrls } })
+
+            return notes.reduce(
+                (acc, note) => ({
+                    ...acc,
+                    [note.url]: {
+                        body: note.body,
+                        comment: note.comment,
+                    },
+                }),
+                {},
+            )
+        },
+        getTagsForPages: getTagsForUrls,
+        getTagsForNotes: getTagsForUrls,
     }
 }
