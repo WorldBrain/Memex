@@ -10,6 +10,10 @@ import { Template, TemplateDataFetchers } from '../types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import generateTemplateDocs from '../template-doc-generation'
 import { joinTemplateDocs, analyzeTemplate } from '../utils'
+import {
+    renderTemplate,
+} from '../utils'
+import ContentSharingBackground from 'src/content-sharing/background'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage
@@ -18,6 +22,10 @@ export default class CopyPasterBackground {
     constructor(
         private options: {
             storageManager: Storex
+            contentSharing: Pick<
+                ContentSharingBackground,
+                'shareAnnotations' | 'sharePage'
+            >
         },
     ) {
         // makes the custom copy paster table in indexed DB
@@ -125,8 +133,13 @@ export default class CopyPasterBackground {
 
 export function getTemplateDataFetchers({
     storageManager,
+    contentSharing,
 }: {
     storageManager: Storex
+    contentSharing: Pick<
+        ContentSharingBackground,
+        'shareAnnotations' | 'sharePage'
+    >
 }): TemplateDataFetchers {
     const getTagsForUrls = async (urls: string[]) => {
         const tags: Tag[] = await storageManager

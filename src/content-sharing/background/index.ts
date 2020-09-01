@@ -6,6 +6,7 @@ import {
     ContentSharingInterface,
     ContentSharingEvents,
     ContentSharingAction,
+    ContentSharingQueueInteraction,
 } from './types'
 import { ContentSharingStorage, ContentSharingClientStorage } from './storage'
 import CustomListStorage from 'src/custom-lists/background/storage'
@@ -34,8 +35,13 @@ export default class ContentSharingBackground {
     shouldProcessSyncChanges = true
 
     _hasPendingActions = false
-    _pendingActionsRetry?: Resolvable<void>
+    _queingAction?: Resolvable<void>
     _executingPendingActions?: Resolvable<{ result: 'success' | 'error' }>
+
+    _pendingActionsRetry?: Resolvable<void>
+    _scheduledRetry: () => Promise<void>
+    _scheduledRetryTimeout: ReturnType<typeof setTimeout>
+
     private readonly ACTION_RETRY_INTERVAL = 1000 * 60 * 5
 
     // _listPushes: {
@@ -64,20 +70,22 @@ export default class ContentSharingBackground {
             shareList: this.shareList,
             shareListEntries: this.shareListEntries,
             shareAnnotation: this.shareAnnotation,
+            shareAnnotationsToLists: this.shareAnnotationsToLists,
+            unshareAnnotationsFromLists: this.unshareAnnotationsFromLists,
             unshareAnnotation: this.unshareAnnotation,
-            getRemoteListId: async (options) => {
+            getRemoteListId: async (callOptions) => {
                 return this.storage.getRemoteListId({
-                    localId: options.localListId,
+                    localId: callOptions.localListId,
                 })
             },
-            getRemoteAnnotationIds: async (options) => {
+            getRemoteAnnotationIds: async (callOptions) => {
                 return this.storage.getRemoteAnnotationIds({
-                    localIds: options.annotationUrls,
+                    localIds: callOptions.annotationUrls,
                 })
             },
-            areListsShared: async (options) => {
+            areListsShared: async (callOptions) => {
                 return this.storage.areListsShared({
-                    localIds: options.localListIds,
+                    localIds: callOptions.localListIds,
                 })
             },
             waitForSync: this.waitForSync,
@@ -93,8 +101,6 @@ export default class ContentSharingBackground {
             console.error(e)
         }
     }
-    _setTimeout = (f: () => void, miliseconds: number) =>
-        setTimeout(f, miliseconds)
 
     shareList: ContentSharingInterface['shareList'] = async (options) => {
         const localList = await this.options.customLists.fetchListById(
@@ -171,12 +177,18 @@ export default class ContentSharingBackground {
                     originalUrl: entry.fullUrl,
                 }),
             )
-            await this.scheduleAction({
-                type: 'add-shared-list-entries',
-                localListId: options.listId,
-                remoteListId,
-                data,
-            })
+            await this.scheduleAction(
+                {
+                    type: 'add-shared-list-entries',
+                    localListId: options.listId,
+                    remoteListId,
+                    data,
+                },
+                {
+                    queueInteraction:
+                        options.queueInteraction ?? 'queue-and-return',
+                },
+            )
         }
 
         const annotationEntries = await this.options.annotationStorage.listAnnotationsByPageUrls(
@@ -185,6 +197,7 @@ export default class ContentSharingBackground {
         await this._scheduleAddAnnotationEntries({
             annotationEntries,
             remoteListIds: [remoteListId],
+            queueInteraction: options.queueInteraction ?? 'queue-and-return',
         })
     }
 
@@ -203,7 +216,8 @@ export default class ContentSharingBackground {
         const sharedListIds = Object.entries(areListsShared)
             .filter(([, shared]) => shared)
             .map(([listId]) => parseInt(listId, 10))
-        await this.scheduleAction({
+
+        const action: ContentSharingAction = {
             type: 'share-annotations',
             localListIds: sharedListIds,
             data: {
@@ -219,7 +233,31 @@ export default class ContentSharingBackground {
                     },
                 ],
             },
+        }
+        await this.scheduleAction(action, {
+            queueInteraction:
+                options.queueInteraction ?? 'queue-and-await-execution',
         })
+    }
+
+    shareAnnotations = async (options: {
+        annotationsUrls: string[]
+    }): Promise<{ [annotationUrl: string]: { remoteId: string } }> => {
+        return {}
+    }
+
+    shareAnnotationsToLists: ContentSharingInterface['shareAnnotationsToLists'] = async (
+        options,
+    ) => {}
+
+    unshareAnnotationsFromLists: ContentSharingInterface['unshareAnnotationsFromLists'] = async (
+        options,
+    ) => {}
+
+    sharePage = async (options: {
+        normalizedUrl: string
+    }): Promise<{ remoteId: string }> => {
+        return { remoteId: '' }
     }
 
     unshareAnnotation: ContentSharingInterface['unshareAnnotation'] = async (
@@ -238,9 +276,13 @@ export default class ContentSharingBackground {
         await this.storage.deleteAnnotationMetadata({
             localIds: [options.annotationUrl],
         })
-        await this.scheduleAction({
+        const action: ContentSharingAction = {
             type: 'unshare-annotations',
             remoteAnnotationIds: [remoteAnnotationId],
+        }
+        await this.scheduleAction(action, {
+            queueInteraction:
+                options.queueInteraction ?? 'queue-and-await-execution',
         })
     }
 
@@ -248,18 +290,38 @@ export default class ContentSharingBackground {
         await this._executingPendingActions
     }
 
-    async scheduleAction(action: ContentSharingAction) {
-        this._hasPendingActions = true
-        await this.storage.queueAction({ action })
-        if (!this._pendingActionsRetry) {
-            await this.executePendingActions()
+    async scheduleAction(
+        action: ContentSharingAction,
+        options: {
+            queueInteraction: ContentSharingQueueInteraction
+        },
+    ) {
+        await this._queingAction
+
+        if (options.queueInteraction === 'skip-queue') {
+            await this.executeAction(action)
         }
+
+        this._hasPendingActions = true
+        this._queingAction = createResolvable()
+        await this.storage.queueAction({ action })
+        this._queingAction.resolve()
+        delete this._queingAction
+
+        const executePendingActions = this.executePendingActions()
+        if (options.queueInteraction === 'queue-and-await-execution') {
+            await executePendingActions
+        }
+        executePendingActions.catch((e) => {
+            console.error(
+                `Error while executing action ${action.type} (retry scheduled):`,
+            )
+            console.error(e)
+        })
     }
 
     async executePendingActions() {
-        if (this._executingPendingActions || !this._hasPendingActions) {
-            return
-        }
+        await this._executingPendingActions
 
         const executingPendingActions = (this._executingPendingActions = createResolvable())
         if (this._pendingActionsRetry) {
@@ -269,6 +331,8 @@ export default class ContentSharingBackground {
 
         try {
             while (true) {
+                await this._queingAction
+
                 const action = await this.storage.peekAction()
                 if (!action) {
                     break
@@ -282,14 +346,23 @@ export default class ContentSharingBackground {
         } catch (e) {
             this._pendingActionsRetry = createResolvable()
             executingPendingActions.resolve({ result: 'error' })
-            this._setTimeout(
-                () => this.executePendingActions(),
+            this._scheduledRetry = async () => {
+                delete this._scheduledRetry
+                delete this._scheduledRetryTimeout
+                await this.executePendingActions()
+            }
+            this._scheduledRetryTimeout = setTimeout(
+                this._scheduledRetry,
                 this.ACTION_RETRY_INTERVAL,
             )
             throw e
         } finally {
             delete this._executingPendingActions
         }
+    }
+
+    async forcePendingActionsRetry() {
+        await this._scheduledRetry()
     }
 
     async executeAction(action: ContentSharingAction) {
@@ -416,6 +489,7 @@ export default class ContentSharingBackground {
     async _scheduleAddAnnotationEntries(params: {
         annotationEntries: Annotation[]
         remoteListIds: string[]
+        queueInteraction: ContentSharingQueueInteraction
     }) {
         const annotationsByPageUrl: {
             [annotationUrl: string]: { pageUrl: string; createdWhen?: Date }
@@ -440,11 +514,14 @@ export default class ContentSharingBackground {
             }),
         )
 
-        await this.scheduleAction({
-            type: 'add-annotation-entries',
-            remoteListIds: params.remoteListIds,
-            remoteAnnotations,
-        })
+        await this.scheduleAction(
+            {
+                type: 'add-annotation-entries',
+                remoteListIds: params.remoteListIds,
+                remoteAnnotations,
+            },
+            { queueInteraction: params.queueInteraction },
+        )
     }
 
     async handlePostStorageChange(
@@ -476,21 +553,24 @@ export default class ContentSharingBackground {
                         normalizedPageUrls: [pageUrl],
                     })
                     const pageTitle = pageTitles[pageUrl]
-                    await this.scheduleAction({
-                        type: 'add-shared-list-entries',
-                        localListId,
-                        remoteListId,
-                        data: [
-                            {
-                                createdWhen: Date.now(),
-                                entryTitle: pageTitle,
-                                normalizedUrl: pageUrl,
-                                originalUrl:
-                                    'https://' +
-                                    normalizeUrl(listEntry.fullUrl),
-                            },
-                        ],
-                    })
+                    await this.scheduleAction(
+                        {
+                            type: 'add-shared-list-entries',
+                            localListId,
+                            remoteListId,
+                            data: [
+                                {
+                                    createdWhen: Date.now(),
+                                    entryTitle: pageTitle,
+                                    normalizedUrl: pageUrl,
+                                    originalUrl:
+                                        'https://' +
+                                        normalizeUrl(listEntry.fullUrl),
+                                },
+                            ],
+                        },
+                        { queueInteraction: 'queue-and-return' },
+                    )
 
                     const annotationEntries = await this.options.annotationStorage.listAnnotationsByPageUrl(
                         {
@@ -501,6 +581,7 @@ export default class ContentSharingBackground {
                     await this._scheduleAddAnnotationEntries({
                         annotationEntries,
                         remoteListIds: [remoteListId],
+                        queueInteraction: 'queue-and-return',
                     })
 
                     this.remoteEmitter.emit('pageAddedToSharedList', {
@@ -520,12 +601,17 @@ export default class ContentSharingBackground {
                             continue
                         }
 
-                        await this.scheduleAction({
-                            type: 'change-shared-list-title',
-                            localListId,
-                            remoteListId,
-                            newTitle: change.updates.name,
-                        })
+                        await this.scheduleAction(
+                            {
+                                type: 'change-shared-list-title',
+                                localListId,
+                                remoteListId,
+                                newTitle: change.updates.name,
+                            },
+                            {
+                                queueInteraction: 'queue-and-return',
+                            },
+                        )
                     }
                 } else if (change.collection === 'annotations') {
                     if (!change.updates.comment) {
@@ -544,12 +630,17 @@ export default class ContentSharingBackground {
                         localAnnotationId,
                         remoteAnnotationId,
                     ] of Object.entries(remoteAnnotationIds)) {
-                        await this.scheduleAction({
-                            type: 'update-annotation-comment',
-                            localAnnotationId,
-                            remoteAnnotationId: remoteAnnotationId as string,
-                            updatedComment: change.updates.comment,
-                        })
+                        await this.scheduleAction(
+                            {
+                                type: 'update-annotation-comment',
+                                localAnnotationId,
+                                remoteAnnotationId: remoteAnnotationId as string,
+                                updatedComment: change.updates.comment,
+                            },
+                            {
+                                queueInteraction: 'queue-and-return',
+                            },
+                        )
                     }
                 }
             } else if (change.type === 'delete') {
@@ -565,12 +656,17 @@ export default class ContentSharingBackground {
                             continue
                         }
 
-                        await this.scheduleAction({
-                            type: 'remove-shared-list-entry',
-                            localListId,
-                            remoteListId,
-                            normalizedUrl: pageUrl,
-                        })
+                        await this.scheduleAction(
+                            {
+                                type: 'remove-shared-list-entry',
+                                localListId,
+                                remoteListId,
+                                normalizedUrl: pageUrl,
+                            },
+                            {
+                                queueInteraction: 'queue-and-return',
+                            },
+                        )
 
                         const annotations = await this.options.annotationStorage.listAnnotationsByPageUrl(
                             { pageUrl },
@@ -587,13 +683,18 @@ export default class ContentSharingBackground {
                             { localIds: localAnnotationIds },
                         )
 
-                        await this.scheduleAction({
-                            type: 'remove-shared-annotation-list-entries',
-                            remoteListId,
-                            remoteAnnotationIds: Object.values(
-                                remoteAnnotationIdMap,
-                            ),
-                        })
+                        await this.scheduleAction(
+                            {
+                                type: 'remove-shared-annotation-list-entries',
+                                remoteListId,
+                                remoteAnnotationIds: Object.values(
+                                    remoteAnnotationIdMap,
+                                ),
+                            },
+                            {
+                                queueInteraction: 'queue-and-return',
+                            },
+                        )
 
                         this.remoteEmitter.emit('pageRemovedFromSharedList', {
                             pageUrl,
@@ -610,12 +711,17 @@ export default class ContentSharingBackground {
                         return
                     }
 
-                    await this.scheduleAction({
-                        type: 'unshare-annotations',
-                        remoteAnnotationIds: Object.values(
-                            remoteAnnotationIdMap,
-                        ),
-                    })
+                    await this.scheduleAction(
+                        {
+                            type: 'unshare-annotations',
+                            remoteAnnotationIds: Object.values(
+                                remoteAnnotationIdMap,
+                            ),
+                        },
+                        {
+                            queueInteraction: 'queue-and-return',
+                        },
+                    )
                 }
             }
         }

@@ -323,8 +323,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await setup.backgroundModules.contentSharing.shareList(
                                     { listId: localListId },
                                 )
-                                const setTimeout = sinon.fake()
-                                setup.backgroundModules.contentSharing._setTimeout = setTimeout as any
 
                                 const serverStorage = await setup.getServerStorage()
                                 const sharingStorage =
@@ -342,7 +340,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 try {
                                     await expect(
                                         setup.backgroundModules.contentSharing.shareListEntries(
-                                            { listId: localListId },
+                                            {
+                                                listId: localListId,
+                                                queueInteraction:
+                                                    'queue-and-await-execution',
+                                            },
                                         ),
                                     ).rejects.toThrow(
                                         `There's a monkey in your WiFi`,
@@ -350,8 +352,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 } finally {
                                     sinon.restore()
                                 }
-                                expect(setTimeout.calledOnce).toBe(true)
-                                await setTimeout.firstCall.args[0]()
+                                expect(
+                                    setup.backgroundModules.contentSharing
+                                        ._scheduledRetry,
+                                ).not.toBe(undefined)
+                                await setup.backgroundModules.contentSharing.forcePendingActionsRetry()
 
                                 expect(
                                     await serverStorage.storageManager.operation(
@@ -398,9 +403,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     { listId: localListId },
                                 )
 
-                                const setTimeout = sinon.fake()
-                                setup.backgroundModules.contentSharing._setTimeout = setTimeout as any
-
                                 const serverStorage = await setup.getServerStorage()
                                 const sharingStorage =
                                     serverStorage.storageModules.contentSharing
@@ -414,23 +416,20 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         )
                                     },
                                 )
-                                try {
-                                    await expect(
-                                        setup.backgroundModules.customLists.removePageFromList(
-                                            {
-                                                id: localListId,
-                                                url: 'https://www.spam.com/foo',
-                                            },
-                                        ),
-                                    ).rejects.toThrow(
-                                        `There's a monkey in your WiFi`,
-                                    )
-                                } finally {
-                                    sinon.restore()
-                                }
-                                expect(setTimeout.calledOnce).toBe(true)
-                                await setTimeout.firstCall.args[0]()
+                                await setup.backgroundModules.customLists.removePageFromList(
+                                    {
+                                        id: localListId,
+                                        url: 'https://www.spam.com/foo',
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.waitForSync()
 
+                                expect(
+                                    setup.backgroundModules.contentSharing
+                                        ._scheduledRetry,
+                                ).not.toBe(undefined)
+                                sinon.restore()
+                                await setup.backgroundModules.contentSharing.forcePendingActionsRetry()
                                 await setup.backgroundModules.contentSharing.waitForSync()
 
                                 expect(
@@ -541,10 +540,21 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         ),
                                     },
                                 ])
-                                const sharedAnnotationListEntries = await getShared(
-                                    'sharedAnnotationListEntry',
-                                )
-                                expect(sharedAnnotationListEntries).toEqual([
+                                // expect(await getShared(
+                                //     'sharedAnnotationListEntry',
+                                // )).toEqual([])
+
+                                // await setup.backgroundModules.contentSharing.shareAnnotationsToLists(
+                                //     {
+                                //         annotationUrls: [annotationUrl],
+                                //     },
+                                // )
+                                // await setup.backgroundModules.contentSharing.waitForSync()
+                                expect(
+                                    await getShared(
+                                        'sharedAnnotationListEntry',
+                                    ),
+                                ).toEqual([
                                     {
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
@@ -1100,6 +1110,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         url: data.PAGE_1_DATA.pageDoc.url,
                                     },
                                 )
+                                await setup.backgroundModules.contentSharing.waitForSync()
 
                                 expect(
                                     await getShared(
@@ -1113,6 +1124,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         url: data.PAGE_1_DATA.pageDoc.url,
                                     },
                                 )
+                                await setup.backgroundModules.contentSharing.waitForSync()
 
                                 expect(
                                     await getShared(
@@ -1199,6 +1211,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     null,
                                     annotationUrl,
                                 )
+                                await setup.backgroundModules.contentSharing.waitForSync()
 
                                 // expect(
                                 //     await setup.storageManager.operation(
