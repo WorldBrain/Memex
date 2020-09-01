@@ -136,14 +136,50 @@ describe('Content template doc generation', () => {
         ])
     })
 
+    // TODO: this case is not yet supported, but likely to be in the future
     it('should correctly generate template docs for multiple pages', async () => {
         const { dataFetchers } = await setupTest()
+
+        // expect(
+        //     await generateTemplateDocs({
+        //         template: {
+        //             ...testTemplate,
+        //             code: '{{#Pages}}{{{PageTitle}}}{{/Pages}}',
+        //         },
+        //         normalizedPageUrls: [DATA.testPageA.url, DATA.testPageB.url],
+        //         annotationUrls: [],
+        //         dataFetchers,
+        //     }),
+        // ).toEqual([
+        //     {
+        //         Pages: [
+        //             {
+        //                 PageTitle: DATA.testPageA.fullTitle,
+        //                 PageTags: joinTags(DATA.testPageATags),
+        //                 PageTagList: DATA.testPageATags,
+        //                 PageUrl: DATA.testPageAUrl,
+        //                 title: DATA.testPageA.fullTitle,
+        //                 tags: DATA.testPageATags,
+        //                 url: DATA.testPageAUrl,
+        //             },
+        //             {
+        //                 PageTitle: DATA.testPageB.fullTitle,
+        //                 PageTags: joinTags(DATA.testPageBTags),
+        //                 PageTagList: DATA.testPageBTags,
+        //                 PageUrl: DATA.testPageBUrl,
+        //                 title: DATA.testPageB.fullTitle,
+        //                 tags: DATA.testPageBTags,
+        //                 url: DATA.testPageBUrl,
+        //             },
+        //         ],
+        //     },
+        // ])
 
         expect(
             await generateTemplateDocs({
                 template: {
                     ...testTemplate,
-                    code: '{{#Pages}}{{{PageTitle}}}{{/Pages}}',
+                    code: '{{{PageTitle}}}',
                 },
                 normalizedPageUrls: [DATA.testPageA.url, DATA.testPageB.url],
                 annotationUrls: [],
@@ -182,7 +218,26 @@ describe('Content template doc generation', () => {
                 dataFetchers,
             }),
         ).toEqual([
-            {
+            expect.objectContaining({
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+            }),
+        ])
+
+        expect(
+            await generateTemplateDocs({
+                template: {
+                    ...testTemplate,
+                    code: '{{{PageTitle}}} {{{PageTags}}}',
+                },
+                normalizedPageUrls: [DATA.testPageA.url],
+                annotationUrls: [DATA.testAnnotationAUrl],
+                dataFetchers,
+            }),
+        ).toEqual([
+            expect.objectContaining({
                 PageTitle: DATA.testPageA.fullTitle,
                 PageTags: joinTags(DATA.testPageATags),
                 PageTagList: DATA.testPageATags,
@@ -190,33 +245,83 @@ describe('Content template doc generation', () => {
                 title: DATA.testPageA.fullTitle,
                 tags: DATA.testPageATags,
                 url: DATA.testPageAUrl,
-            },
+            }),
         ])
     })
 
     it('should correctly generate template docs for single annotation', async () => {
         const { dataFetchers } = await setupTest()
 
-        expect(
-            await generateTemplateDocs({
-                template: { ...testTemplate, code: '{{{NoteText}}}' },
+        const generate = (template: string) =>
+            generateTemplateDocs({
+                template: { ...testTemplate, code: template },
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [DATA.testAnnotationAUrl],
                 dataFetchers,
+            })
+
+        expect(await generate('{{{NoteText}}}')).toEqual([
+            expect.objectContaining({
+                NoteText: DATA.testAnnotationAText,
             }),
-        ).toEqual([
-            {
+        ])
+
+        expect(await generate('{{{NoteText}}} {{{PageTitle}}}')).toEqual([
+            expect.objectContaining({
                 PageTitle: DATA.testPageA.fullTitle,
-                PageTags: joinTags(DATA.testPageATags),
-                PageTagList: DATA.testPageATags,
+                PageUrl: DATA.testPageAUrl,
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+                NoteText: DATA.testAnnotationAText,
+            }),
+        ])
+
+        expect(
+            await generate('{{{NoteText}}} {{{NoteTags}}} {{{PageTitle}}}'),
+        ).toEqual([
+            expect.objectContaining({
+                PageTitle: DATA.testPageA.fullTitle,
                 PageUrl: DATA.testPageAUrl,
                 NoteText: DATA.testAnnotationAText,
-                NoteTags: DATA.testAnnotationATags,
-
+                NoteTags: joinTags(DATA.testAnnotationATags),
+                NoteTagList: DATA.testAnnotationATags,
                 title: DATA.testPageA.fullTitle,
-                tags: DATA.testPageATags,
                 url: DATA.testPageAUrl,
-            },
+            }),
+        ])
+
+        expect(
+            await generate('{{{NoteText}}} {{{PageTitle}}} {{{PageTags}}}'),
+        ).toEqual([
+            expect.objectContaining({
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+                PageTags: joinTags(DATA.testPageATags),
+                PageTagList: DATA.testPageATags,
+                NoteText: DATA.testAnnotationAText,
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+                tags: DATA.testPageATags,
+            }),
+        ])
+
+        expect(
+            await generate(
+                '{{{NoteText}}} {{{NoteTags}}} {{{PageTitle}}} {{{PageTags}}}',
+            ),
+        ).toEqual([
+            expect.objectContaining({
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+                PageTags: joinTags(DATA.testPageATags),
+                PageTagList: DATA.testPageATags,
+                NoteText: DATA.testAnnotationAText,
+                NoteTags: joinTags(DATA.testAnnotationATags),
+                NoteTagList: DATA.testAnnotationATags,
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+                tags: DATA.testPageATags,
+            }),
         ])
     })
 
@@ -235,20 +340,54 @@ describe('Content template doc generation', () => {
             }),
         ).toEqual([
             {
-                PageTitle: DATA.testPageA.fullTitle,
-                PageTags: joinTags(DATA.testPageATags),
-                PageTagList: DATA.testPageATags,
-                PageUrl: DATA.testPageAUrl,
                 Notes: [
                     {
                         NoteText: DATA.testAnnotationAText,
-                        NoteTags: DATA.testAnnotationATags,
                     },
                 ],
+            },
+        ])
 
-                title: DATA.testPageA.fullTitle,
-                tags: DATA.testPageATags,
-                url: DATA.testPageAUrl,
+        // This annot doesn't have any comment, only a highlight
+        expect(
+            await generateTemplateDocs({
+                template: {
+                    ...testTemplate,
+                    code: '{{#Notes}}{{{NoteHighlight}}}{{/Notes}}',
+                },
+                normalizedPageUrls: [DATA.testPageA.url],
+                annotationUrls: [DATA.testAnnotationBUrl],
+                dataFetchers,
+            }),
+        ).toEqual([
+            {
+                Notes: [
+                    {
+                        NoteHighlight: DATA.testAnnotationBHighlight,
+                    },
+                ],
+            },
+        ])
+
+        expect(
+            await generateTemplateDocs({
+                template: {
+                    ...testTemplate,
+                    code: '{{#Notes}}{{{NoteText}}} {{{NoteTags}}}{{/Notes}}',
+                },
+                normalizedPageUrls: [DATA.testPageA.url],
+                annotationUrls: [DATA.testAnnotationAUrl],
+                dataFetchers,
+            }),
+        ).toEqual([
+            {
+                Notes: [
+                    {
+                        NoteText: DATA.testAnnotationAText,
+                        NoteTags: joinTags(DATA.testAnnotationATags),
+                        NoteTagList: DATA.testAnnotationATags,
+                    },
+                ],
             },
         ])
     })
@@ -259,6 +398,29 @@ describe('Content template doc generation', () => {
         expect(
             await generateTemplateDocs({
                 template: { ...testTemplate, code: '{{{PageTitle}}}' },
+                normalizedPageUrls: [DATA.testPageA.url],
+                annotationUrls: [
+                    DATA.testAnnotationAUrl,
+                    DATA.testAnnotationBUrl,
+                ],
+                dataFetchers,
+            }),
+        ).toEqual([
+            {
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+            },
+        ])
+
+        expect(
+            await generateTemplateDocs({
+                template: {
+                    ...testTemplate,
+                    code: '{{{PageTitle}}} {{{PageTags}}}',
+                },
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [
                     DATA.testAnnotationAUrl,
@@ -283,23 +445,81 @@ describe('Content template doc generation', () => {
     it('should correctly generate template docs for multiple annotations, but only referencing top-level annotation', async () => {
         const { dataFetchers } = await setupTest()
 
-        expect(
-            await generateTemplateDocs({
-                template: { ...testTemplate, code: '{{{NoteText}}}' },
+        const generate = (template: string) =>
+            generateTemplateDocs({
+                template: {
+                    ...testTemplate,
+                    code: template,
+                },
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [
                     DATA.testAnnotationAUrl,
                     DATA.testAnnotationBUrl,
                 ],
                 dataFetchers,
-            }),
+            })
+
+        expect(await generate('{{{NoteText}}} {{{NoteTags}}}')).toEqual([
+            {
+                NoteText: DATA.testAnnotationAText,
+                NoteTags: joinTags(DATA.testAnnotationATags),
+                NoteTagList: DATA.testAnnotationATags,
+            },
+            {
+                NoteHighlight: DATA.testAnnotationBHighlight,
+                NoteTags: joinTags(DATA.testAnnotationBTags),
+                NoteTagList: DATA.testAnnotationBTags,
+            },
+        ])
+
+        expect(await generate('{{{NoteText}}}')).toEqual([
+            {
+                NoteText: DATA.testAnnotationAText,
+            },
+            {
+                NoteHighlight: DATA.testAnnotationBHighlight,
+            },
+        ])
+
+        expect(await generate('{{{NoteText}}} {{{PageTitle}}}')).toEqual([
+            {
+                NoteText: DATA.testAnnotationAText,
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+            },
+            {
+                NoteHighlight: DATA.testAnnotationBHighlight,
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+            },
+        ])
+
+        expect(
+            await generate('{{{NoteText}}} {{{PageTitle}}} {{{PageTags}}}'),
         ).toEqual([
             {
+                NoteText: DATA.testAnnotationAText,
                 PageTitle: DATA.testPageA.fullTitle,
                 PageTags: joinTags(DATA.testPageATags),
                 PageTagList: DATA.testPageATags,
                 PageUrl: DATA.testPageAUrl,
-                NoteText: DATA.testAnnotationAText,
+
+                title: DATA.testPageA.fullTitle,
+                tags: DATA.testPageATags,
+                url: DATA.testPageAUrl,
+            },
+            {
+                NoteHighlight: DATA.testAnnotationBHighlight,
+                PageTitle: DATA.testPageA.fullTitle,
+                PageTags: joinTags(DATA.testPageATags),
+                PageTagList: DATA.testPageATags,
+                PageUrl: DATA.testPageAUrl,
 
                 title: DATA.testPageA.fullTitle,
                 tags: DATA.testPageATags,
@@ -311,11 +531,11 @@ describe('Content template doc generation', () => {
     it('should correctly generate template docs for multiple annotations', async () => {
         const { dataFetchers } = await setupTest()
 
-        expect(
-            await generateTemplateDocs({
+        const generate = (template: string) =>
+            generateTemplateDocs({
                 template: {
                     ...testTemplate,
-                    code: '{{#Notes}}{{{NoteText}}}{{/Notes}}',
+                    code: template,
                 },
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [
@@ -323,27 +543,90 @@ describe('Content template doc generation', () => {
                     DATA.testAnnotationBUrl,
                 ],
                 dataFetchers,
-            }),
+            })
+
+        expect(await generate('{{#Notes}}{{{NoteText}}}{{/Notes}}')).toEqual([
+            {
+                Notes: [
+                    expect.objectContaining({
+                        NoteText: DATA.testAnnotationAText,
+                    }),
+                    expect.objectContaining({
+                        NoteHighlight: DATA.testAnnotationBHighlight,
+                    }),
+                ],
+            },
+        ])
+
+        expect(
+            await generate('{{#Notes}}{{{NoteText}}} {{{NoteTags}}}{{/Notes}}'),
         ).toEqual([
             {
+                Notes: [
+                    expect.objectContaining({
+                        NoteText: DATA.testAnnotationAText,
+                        NoteTags: joinTags(DATA.testAnnotationATags),
+                        NoteTagList: DATA.testAnnotationATags,
+                    }),
+                    expect.objectContaining({
+                        NoteHighlight: DATA.testAnnotationBHighlight,
+                        NoteTags: joinTags(DATA.testAnnotationBTags),
+                        NoteTagList: DATA.testAnnotationBTags,
+                    }),
+                ],
+            },
+        ])
+
+        expect(
+            await generate(
+                '{{#Notes}}{{{NoteText}}} {{{NoteTags}}}{{/Notes}} {{{PageTitle}}}',
+            ),
+        ).toEqual([
+            {
+                PageUrl: DATA.testPageAUrl,
+                PageTitle: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+                title: DATA.testPageA.fullTitle,
+                Notes: [
+                    expect.objectContaining({
+                        NoteText: DATA.testAnnotationAText,
+                        NoteTags: joinTags(DATA.testAnnotationATags),
+                        NoteTagList: DATA.testAnnotationATags,
+                    }),
+                    expect.objectContaining({
+                        NoteHighlight: DATA.testAnnotationBHighlight,
+                        NoteTags: joinTags(DATA.testAnnotationBTags),
+                        NoteTagList: DATA.testAnnotationBTags,
+                    }),
+                ],
+            },
+        ])
+
+        expect(
+            await generate(
+                '{{#Notes}}{{{NoteText}}} {{{NoteTags}}}{{/Notes}} {{{PageTitle}}} {{{PageTags}}}',
+            ),
+        ).toEqual([
+            {
+                PageUrl: DATA.testPageAUrl,
                 PageTitle: DATA.testPageA.fullTitle,
                 PageTags: joinTags(DATA.testPageATags),
                 PageTagList: DATA.testPageATags,
-                PageUrl: DATA.testPageAUrl,
-                Notes: [
-                    {
-                        NoteText: DATA.testAnnotationAText,
-                        NoteTags: DATA.testAnnotationATags,
-                    },
-                    {
-                        NoteHighlight: DATA.testAnnotationBHighlight,
-                        NoteTags: DATA.testAnnotationBTags,
-                    },
-                ],
-
-                title: DATA.testPageA.fullTitle,
-                tags: DATA.testPageATags,
                 url: DATA.testPageAUrl,
+                tags: DATA.testPageATags,
+                title: DATA.testPageA.fullTitle,
+                Notes: [
+                    expect.objectContaining({
+                        NoteText: DATA.testAnnotationAText,
+                        NoteTags: joinTags(DATA.testAnnotationATags),
+                        NoteTagList: DATA.testAnnotationATags,
+                    }),
+                    expect.objectContaining({
+                        NoteHighlight: DATA.testAnnotationBHighlight,
+                        NoteTags: joinTags(DATA.testAnnotationBTags),
+                        NoteTagList: DATA.testAnnotationBTags,
+                    }),
+                ],
             },
         ])
     })

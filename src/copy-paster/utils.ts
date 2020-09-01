@@ -6,6 +6,7 @@ import {
     TemplateDocKey,
     TemplateDocNote,
     TemplateDataFetchers,
+    PageTemplateData,
 } from './types'
 import mustache from 'mustache'
 import { KEYS_TO_REQUIREMENTS, LEGACY_KEYS, NOTE_KEYS } from './constants'
@@ -17,11 +18,14 @@ export function renderTemplate(
     return mustache.render(template.code, doc)
 }
 
-export const joinTags = (tags: string[]): string =>
-    tags.reduce(
-        (acc, tag, i) => `${acc} #${tag}${i === tags.length - 1 ? '' : ' '}`,
-        '',
-    )
+export const joinTags = (tags?: string[]): string | undefined =>
+    tags == null
+        ? undefined
+        : tags.reduce(
+              (acc, tag, i) =>
+                  `${acc}#${tag}${i === tags.length - 1 ? '' : ' '}`,
+              '',
+          )
 
 export function joinTemplateDocs(
     templateDocs: TemplateDoc[],
@@ -77,39 +81,135 @@ export function analyzeTemplate(
     return { usesLegacyTags, noteUsage, requirements }
 }
 
-export async function generateTemplateDocs(params: {
+export async function generateTemplateDocs({
+    dataFetchers,
+    ...params
+}: {
     template: Pick<Template, 'code'>
     normalizedPageUrls: string[]
     annotationUrls: string[]
     dataFetchers: TemplateDataFetchers
 }): Promise<TemplateDoc[]> {
     const templateAnalysis = analyzeTemplate(params.template)
+
     if (!params.annotationUrls.length) {
+        const pageData = await dataFetchers.getPages(params.normalizedPageUrls)
+        const pageTagData = await dataFetchers.getTagsForPages(
+            params.normalizedPageUrls,
+        )
+
         // user clicked on copy page
+        const templateDocs: TemplateDoc[] = Object.entries(pageData).map(
+            ([normalizedPageUrl, { fullTitle, fullUrl }]) => {
+                const pageTags = pageTagData[normalizedPageUrl] ?? []
+                return {
+                    PageTitle: fullTitle,
+                    PageTags: joinTags(pageTags),
+                    PageTagList: pageTags,
+                    PageUrl: fullUrl,
+                    title: fullTitle,
+                    tags: pageTags,
+                    url: fullUrl,
+                }
+            },
+        )
+        return templateDocs
     }
-    if (params.annotationUrls.length === 1) {
-        // user clicked to copy single annotation
-        if (!templateAnalysis.noteUsage) {
-            // but they only want to render page info, so no need to fetch annotations
+
+    if (params.annotationUrls.length >= 1) {
+        const notes = await dataFetchers.getNotes(params.annotationUrls)
+        let noteTags = {}
+        let pageData: PageTemplateData = {} as PageTemplateData
+        let pageTagData: string[]
+
+        if (templateAnalysis.requirements.noteTags) {
+            noteTags = await dataFetchers.getTagsForNotes(params.annotationUrls)
         }
-        if (templateAnalysis.noteUsage === 'single') {
-            // they expect the top-level data to be available (NoteText, etc.)
+
+        if (templateAnalysis.requirements.page) {
+            // There will only ever be a single page
+            const pages = await dataFetchers.getPages(params.normalizedPageUrls)
+            pageData = Object.values(pages)?.[0] ?? ({} as PageTemplateData)
         }
-        if (templateAnalysis.noteUsage === 'multiple') {
-            // but they're iterating through the Notes array, so make a Notes array with a single note
+
+        if (templateAnalysis.requirements.pageTags) {
+            // There will only ever be a single page
+            const pageTags = await dataFetchers.getTagsForPages(
+                params.normalizedPageUrls,
+            )
+            pageTagData = Object.values(pageTags)?.[0]
         }
-    }
-    if (params.annotationUrls.length > 1) {
+
         // user clicked to copy multiple/all annotations on page
+        // but they only want to render page info, so no need to fetch annotations
         if (!templateAnalysis.noteUsage) {
-            // but they only want to render page info, so no need to fetch annotations
+            return [
+                {
+                    PageTitle: pageData.fullTitle,
+                    PageTags: joinTags(pageTagData),
+                    PageTagList: pageTagData,
+                    PageUrl: pageData.fullUrl,
+                    title: pageData.fullTitle,
+                    tags: pageTagData,
+                    url: pageData.fullUrl,
+                },
+            ]
         }
+
         if (templateAnalysis.noteUsage === 'single') {
             // but they are using the top-level data (NoteText, etc.) so return
             // multiple TemplatePageDocs that will later be rendered and joined together
+            const templateDocs: TemplateDoc[] = []
+
+            for (const [noteUrl, { body, comment }] of Object.entries(notes)) {
+                templateDocs.push({
+                    NoteText: comment,
+                    NoteHighlight: body,
+                    NoteTagList: noteTags[noteUrl],
+                    NoteTags: joinTags(noteTags[noteUrl]),
+                    PageTitle: pageData.fullTitle,
+                    PageUrl: pageData.fullUrl,
+                    PageTags: joinTags(pageTagData),
+                    PageTagList: pageTagData,
+                    title: pageData.fullTitle,
+                    url: pageData.fullUrl,
+                    tags: pageTagData,
+                })
+            }
+
+            return templateDocs
         }
         if (templateAnalysis.noteUsage === 'multiple') {
             // they're iterating through the Notes array, so we only need to generate a single TemplatePageDoc
+            const noteTemplates = []
+            for (const [noteUrl, { body, comment }] of Object.entries(notes)) {
+                noteTemplates.push({
+                    NoteText: comment,
+                    NoteHighlight: body,
+                    NoteTagList: noteTags[noteUrl],
+                    NoteTags: joinTags(noteTags[noteUrl]),
+                    PageTitle: pageData.fullTitle,
+                    PageUrl: pageData.fullUrl,
+                    PageTags: joinTags(pageTagData),
+                    PageTagList: pageTagData,
+                    title: pageData.fullTitle,
+                    url: pageData.fullUrl,
+                    tags: pageTagData,
+                })
+            }
+
+            return [
+                {
+                    Notes: noteTemplates,
+                    PageTitle: pageData.fullTitle,
+                    PageUrl: pageData.fullUrl,
+                    PageTags: joinTags(pageTagData),
+                    PageTagList: pageTagData,
+                    title: pageData.fullTitle,
+                    url: pageData.fullUrl,
+                    tags: pageTagData,
+                },
+            ]
         }
     }
     return [{}]

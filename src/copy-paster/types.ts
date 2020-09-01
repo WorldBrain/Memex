@@ -7,6 +7,7 @@ export interface Template {
 
 export type TemplateDoc = {
     Notes?: Array<TemplateDocNote>
+    Pages?: Array<TemplateDocPage>
 } & TemplateDocPage &
     TemplateDocNote
 
@@ -51,16 +52,24 @@ export interface TemplateRequirements {
 export interface TemplateDataFetchers {
     getPages(
         normalizedPageUrls: string[],
-    ): Promise<{
-        [normalizedPageUrl: string]: { fullTitle: string; fullUrl: string }
-    }>
+    ): Promise<{ [normalizedPageUrl: string]: PageTemplateData }>
     getTagsForPages(
         normalizedPageUrls: string[],
     ): Promise<{ [normalizedPageUrl: string]: string[] }>
     getNotes(
         annotationUrls: string[],
-    ): Promise<{ [annotationUrl: string]: { body?: string; comment?: string } }>
+    ): Promise<{ [annotationUrl: string]: NoteTemplateData }>
     getTagsForNotes(
         annotationUrls: string[],
     ): Promise<{ [annotationUrl: string]: string[] }>
+}
+
+export interface PageTemplateData {
+    fullUrl: string
+    fullTitle: string
+}
+
+export interface NoteTemplateData {
+    body?: string
+    comment?: string
 }
