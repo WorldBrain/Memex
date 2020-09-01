@@ -9,7 +9,6 @@ import {
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import * as data from './index.test.data'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
-import { annotation } from 'src/annotations/background/storage.test.data'
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     'Content sharing',
@@ -494,6 +493,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         localId: annotationUrl,
                                         remoteId: expect.anything(),
+                                        excludeFromLists: true,
                                     },
                                 ])
                                 const remoteAnnotationIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
@@ -540,16 +540,35 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         ),
                                     },
                                 ])
-                                // expect(await getShared(
-                                //     'sharedAnnotationListEntry',
-                                // )).toEqual([])
+                                expect(
+                                    await getShared(
+                                        'sharedAnnotationListEntry',
+                                    ),
+                                ).toEqual([])
 
-                                // await setup.backgroundModules.contentSharing.shareAnnotationsToLists(
-                                //     {
-                                //         annotationUrls: [annotationUrl],
-                                //     },
-                                // )
-                                // await setup.backgroundModules.contentSharing.waitForSync()
+                                await setup.backgroundModules.contentSharing.shareAnnotationsToLists(
+                                    {
+                                        normalizedPageUrl: normalizeUrl(
+                                            data.ANNOTATION_1_DATA.pageUrl,
+                                        ),
+                                        annotationUrls: [annotationUrl],
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.waitForSync()
+
+                                expect(
+                                    await setup.storageManager.operation(
+                                        'findObjects',
+                                        'sharedAnnotationMetadata',
+                                        {},
+                                    ),
+                                ).toEqual([
+                                    {
+                                        localId: annotationUrl,
+                                        remoteId: expect.anything(),
+                                        excludeFromLists: true,
+                                    },
+                                ])
                                 expect(
                                     await getShared(
                                         'sharedAnnotationListEntry',

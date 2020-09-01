@@ -11,10 +11,12 @@ export interface ContentSharingInterface {
         queueInteraction?: ContentSharingQueueInteraction
     }): Promise<void>
     shareAnnotationsToLists(options: {
+        normalizedPageUrl: string
         annotationUrls: string[]
+        queueInteraction?: ContentSharingQueueInteraction
     }): Promise<void>
     unshareAnnotationsFromLists(options: {
-        annotationUrl: string[]
+        annotationUrls: string[]
     }): Promise<void>
     unshareAnnotation(options: {
         annotationUrl: string

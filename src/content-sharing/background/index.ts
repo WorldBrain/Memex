@@ -248,11 +248,48 @@ export default class ContentSharingBackground {
 
     shareAnnotationsToLists: ContentSharingInterface['shareAnnotationsToLists'] = async (
         options,
-    ) => {}
+    ) => {
+        await this.storage.setAnnotationsExcludedFromLists({
+            localIds: options.annotationUrls,
+            excludeFromLists: false,
+        })
+        const listIds = await this.options.customLists.fetchListIdsByUrl(
+            options.normalizedPageUrl,
+        )
+        const areListsShared = await this.storage.areListsShared({
+            localIds: listIds,
+        })
+        const sharedListIds = Object.entries(areListsShared)
+            .filter(([, shared]) => shared)
+            .map(([listId]) => parseInt(listId, 10))
+
+        const pageAnnotationEntries = await this.options.annotationStorage.listAnnotationsByPageUrl(
+            {
+                pageUrl: options.normalizedPageUrl,
+            },
+        )
+        const annotationEntries = pageAnnotationEntries.filter((annotation) =>
+            options.annotationUrls.includes(annotation.url),
+        )
+        await this._scheduleAddAnnotationEntries({
+            annotationEntries,
+            remoteListIds: Object.values(
+                await this.storage.getRemoteListIds({
+                    localIds: sharedListIds,
+                }),
+            ),
+            queueInteraction: options.queueInteraction ?? 'queue-and-return',
+        })
+    }
 
     unshareAnnotationsFromLists: ContentSharingInterface['unshareAnnotationsFromLists'] = async (
         options,
-    ) => {}
+    ) => {
+        await this.storage.setAnnotationsExcludedFromLists({
+            localIds: options.annotationUrls,
+            excludeFromLists: true,
+        })
+    }
 
     sharePage = async (options: {
         normalizedUrl: string
@@ -436,9 +473,10 @@ export default class ContentSharingBackground {
                 sharedAnnotationReferences,
             } = await contentSharing.createAnnotations({
                 creator: { type: 'user-reference', id: userId },
-                listReferences: remoteListIds.map((remoteId) =>
-                    contentSharing.getSharedListReferenceFromLinkID(remoteId),
-                ),
+                listReferences: [],
+                // listReferences: remoteListIds.map((remoteId) =>
+                //     contentSharing.getSharedListReferenceFromLinkID(remoteId),
+                // ),
                 annotationsByPage: action.data,
             })
 
@@ -450,7 +488,17 @@ export default class ContentSharingBackground {
                     sharedAnnotationReference,
                 )
             }
-            await this.storage.storeAnnotationIds({ remoteIds })
+            await this.storage.storeAnnotationMetadata(
+                Object.entries(sharedAnnotationReferences).map(
+                    ([localId, sharedAnnotationReference]) => ({
+                        localId,
+                        remoteId: contentSharing.getSharedAnnotationLinkID(
+                            sharedAnnotationReference,
+                        ),
+                        excludeFromLists: true,
+                    }),
+                ),
+            )
         } else if (action.type === 'add-annotation-entries') {
             await contentSharing.addAnnotationsToLists({
                 creator: userReference,
