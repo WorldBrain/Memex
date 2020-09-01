@@ -219,7 +219,8 @@ export default class ContentSharingBackground {
 
         const action: ContentSharingAction = {
             type: 'share-annotations',
-            localListIds: sharedListIds,
+            localListIds: [],
+            // localListIds: sharedListIds,
             data: {
                 [annotation.pageUrl]: [
                     {
@@ -473,10 +474,10 @@ export default class ContentSharingBackground {
                 sharedAnnotationReferences,
             } = await contentSharing.createAnnotations({
                 creator: { type: 'user-reference', id: userId },
-                listReferences: [],
-                // listReferences: remoteListIds.map((remoteId) =>
-                //     contentSharing.getSharedListReferenceFromLinkID(remoteId),
-                // ),
+                // listReferences: [],
+                listReferences: remoteListIds.map((remoteId) =>
+                    contentSharing.getSharedListReferenceFromLinkID(remoteId),
+                ),
                 annotationsByPage: action.data,
             })
 

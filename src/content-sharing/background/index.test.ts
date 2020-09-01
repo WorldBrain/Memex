@@ -656,6 +656,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         annotationUrl,
                                     },
                                 )
+                                await setup.backgroundModules.contentSharing.shareAnnotationsToLists(
+                                    {
+                                        normalizedPageUrl: normalizeUrl(
+                                            data.ANNOTATION_1_DATA.pageUrl,
+                                        ),
+                                        annotationUrls: [annotationUrl],
+                                    },
+                                )
                                 await setup.backgroundModules.contentSharing.waitForSync()
 
                                 const remoteAnnotationIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
@@ -851,6 +859,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         annotationUrl,
                                     },
                                 )
+                                await setup.backgroundModules.contentSharing.shareAnnotationsToLists(
+                                    {
+                                        normalizedPageUrl: normalizeUrl(
+                                            data.ANNOTATION_1_DATA.pageUrl,
+                                        ),
+                                        annotationUrls: [annotationUrl],
+                                    },
+                                )
                                 await setup.backgroundModules.contentSharing.waitForSync()
 
                                 await setup.backgroundModules.customLists.insertPageToList(
@@ -1000,6 +1016,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         annotationUrl,
                                     },
                                 )
+                                await setup.backgroundModules.contentSharing.shareAnnotationsToLists(
+                                    {
+                                        normalizedPageUrl: normalizeUrl(
+                                            data.ANNOTATION_1_DATA.pageUrl,
+                                        ),
+                                        annotationUrls: [annotationUrl],
+                                    },
+                                )
                                 await setup.backgroundModules.contentSharing.waitForSync()
 
                                 const serverStorage = await setup.getServerStorage()
@@ -1095,6 +1119,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await setup.backgroundModules.contentSharing.shareAnnotation(
                                     {
                                         annotationUrl,
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.shareAnnotationsToLists(
+                                    {
+                                        normalizedPageUrl: normalizeUrl(
+                                            data.ANNOTATION_1_DATA.pageUrl,
+                                        ),
+                                        annotationUrls: [annotationUrl],
                                     },
                                 )
                                 await setup.backgroundModules.contentSharing.waitForSync()
@@ -1198,6 +1230,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await setup.backgroundModules.contentSharing.shareAnnotation(
                                     {
                                         annotationUrl,
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.shareAnnotationsToLists(
+                                    {
+                                        normalizedPageUrl: normalizeUrl(
+                                            data.ANNOTATION_1_DATA.pageUrl,
+                                        ),
+                                        annotationUrls: [annotationUrl],
                                     },
                                 )
                                 await setup.backgroundModules.contentSharing.waitForSync()
