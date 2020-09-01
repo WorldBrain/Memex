@@ -30,7 +30,7 @@ export async function getLocalStorage(
         key,
     )
 
-    if (value === undefined && defVal) {
+    if (value === undefined && defVal != null) {
         return setLocalStorage(key, defVal)
     }
     return value

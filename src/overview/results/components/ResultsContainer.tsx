@@ -9,6 +9,7 @@ import { selectors as filters } from 'src/search-filters'
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './results-message'
 import ResultList from './ResultListContainer'
+import DeprecatedSearchWarning from './DeprecatedSearchWarning'
 import OnboardingMessage from './onboarding-message'
 import SearchTypeSwitch from './search-type-switch-container'
 import * as actions from '../actions'
@@ -18,6 +19,8 @@ import { features } from 'src/util/remote-functions-background'
 import MobileAppMessage from './mobile-app-message'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import { Annotation } from 'src/annotations/types'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { DEPRECATED_SEARCH_WARNING_KEY } from 'src/overview/constants'
 
 const styles = require('./ResultList.css')
 
@@ -49,11 +52,13 @@ export type Props = StateProps & DispatchProps & OwnProps
 
 interface State {
     showSocialSearch: boolean
+    showDeprecatedSearchWarning: boolean
 }
 
 class ResultsContainer extends React.Component<Props, State> {
-    state = {
+    state: State = {
         showSocialSearch: false,
+        showDeprecatedSearchWarning: false,
     }
 
     private annotations: AnnotationInterface<'caller'>
@@ -66,8 +71,17 @@ class ResultsContainer extends React.Component<Props, State> {
 
     async componentDidMount() {
         this.setState({
+            showDeprecatedSearchWarning: await getLocalStorage(
+                DEPRECATED_SEARCH_WARNING_KEY,
+                true,
+            ),
             showSocialSearch: await features.getFeature('SocialIntegration'),
         })
+    }
+
+    private handleHideDeprecatedSearchWarning = async () => {
+        this.setState({ showDeprecatedSearchWarning: false })
+        await setLocalStorage(DEPRECATED_SEARCH_WARNING_KEY, false)
     }
 
     private goToAnnotation = async (annotation: Annotation) => {
@@ -150,6 +164,23 @@ class ResultsContainer extends React.Component<Props, State> {
         )
     }
 
+    private renderDeprecatedSearchWarning() {
+        if (!this.state.showDeprecatedSearchWarning) {
+            return null
+        }
+
+        return (
+            <DeprecatedSearchWarning
+                onCancelBtnClick={this.handleHideDeprecatedSearchWarning}
+                onInfoBtnClick={() =>
+                    window.open(
+                        'https://www.notion.so/worldbrain/history-search-also-has-been-disabled-for-existing-users-84f9fad4f2994d6ab0fedf7ed8705094',
+                    )
+                }
+            />
+        )
+    }
+
     render() {
         return (
             <div className={styles.main}>
@@ -160,6 +191,7 @@ class ResultsContainer extends React.Component<Props, State> {
                         <SearchTypeSwitch
                             showSocialSearch={this.state.showSocialSearch}
                         />
+                        {this.renderDeprecatedSearchWarning()}
                         {this.renderContent()}
                     </>
                 )}
