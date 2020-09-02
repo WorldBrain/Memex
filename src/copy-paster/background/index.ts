@@ -8,8 +8,8 @@ import CopyPasterStorage from './storage'
 import { RemoteCopyPasterInterface } from './types'
 import { Template, TemplateDataFetchers } from '../types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { generateTemplateDocs } from '../template-doc-generation'
-import { joinTemplateDocs } from '../utils'
+import generateTemplateDocs from '../template-doc-generation'
+import { joinTemplateDocs, analyzeTemplate } from '../utils'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage
@@ -64,7 +64,7 @@ export default class CopyPasterBackground {
             id: params.templateId,
         })
         const templateDocs = await generateTemplateDocs({
-            template,
+            templateAnalysis: analyzeTemplate(template),
             normalizedPageUrls: [params.normalizedPageUrl],
             annotationUrls: [],
             dataFetchers: getTemplateDataFetchers(this.options),
@@ -80,7 +80,7 @@ export default class CopyPasterBackground {
             id: params.templateId,
         })
         const templateDocs = await generateTemplateDocs({
-            template,
+            templateAnalysis: analyzeTemplate(template),
             normalizedPageUrls: params.normalizedPageUrls,
             annotationUrls: [],
             dataFetchers: getTemplateDataFetchers(this.options),
@@ -97,7 +97,7 @@ export default class CopyPasterBackground {
             id: params.templateId,
         })
         const templateDocs = await generateTemplateDocs({
-            template,
+            templateAnalysis: analyzeTemplate(template),
             normalizedPageUrls: [params.normalizedPageUrl],
             annotationUrls: [params.annotationUrl],
             dataFetchers: getTemplateDataFetchers(this.options),
@@ -114,7 +114,7 @@ export default class CopyPasterBackground {
             id: params.templateId,
         })
         const templateDocs = await generateTemplateDocs({
-            template,
+            templateAnalysis: analyzeTemplate(template),
             normalizedPageUrls: [params.normalizedPageUrl],
             annotationUrls: params.annotationUrls,
             dataFetchers: getTemplateDataFetchers(this.options),
@@ -174,6 +174,19 @@ export function getTemplateDataFetchers({
                         body: note.body,
                         comment: note.comment,
                     },
+                }),
+                {},
+            )
+        },
+        getNoteIdsForPages: async (normalizedPageUrls) => {
+            const notes: Note[] = await storageManager
+                .collection('annotations')
+                .findObjects({ pageUrl: { $in: normalizedPageUrls } })
+
+            return notes.reduce(
+                (acc, note) => ({
+                    ...acc,
+                    [note.pageUrl]: [...(acc[note.pageUrl] ?? []), note.url],
                 }),
                 {},
             )

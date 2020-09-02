@@ -1,36 +1,54 @@
-import { joinTags, analyzeTemplate } from './utils'
 import {
     TemplateDataFetchers,
     PageTemplateData,
     TemplateDoc,
-    Template,
+    NoteTemplateData,
+    TemplateAnalysis,
 } from './types'
 
 interface GeneratorInput {
-    template: Pick<Template, 'code'>
+    templateAnalysis: TemplateAnalysis
+    dataFetchers: TemplateDataFetchers
     normalizedPageUrls: string[]
     annotationUrls: string[]
-    dataFetchers: TemplateDataFetchers
 }
 
+/** Simply exists to attempt to clean up typedefs for some intermediate variables. */
+interface UrlMappedData<T> {
+    [url: string]: T
+}
+
+export const joinTags = (tags?: string[]): string | undefined =>
+    tags == null
+        ? undefined
+        : tags.reduce(
+              (acc, tag, i) =>
+                  `${acc}#${tag}${i === tags.length - 1 ? '' : ' '}`,
+              '',
+          )
+
+/**
+ * Exists as a helper as often we're dealing with arrays of page data where there will only ever be
+ * a single entry. e.g. the single parent page of a note.
+ */
 const getFirstPageData = <T>(data: { [url: string]: T }): T | undefined =>
     Object.values(data)?.[0]
 
-const omitUndefinedFields = (docs: TemplateDoc[]): TemplateDoc[] =>
+const omitEmptyFields = (docs: TemplateDoc[]): TemplateDoc[] =>
     docs.map((doc) => {
         if (doc.Notes) {
-            doc.Notes = doc.Notes.map(omitUndefined)
+            doc.Notes = doc.Notes.map(omitEmpty)
         }
         if (doc.Pages) {
-            doc.Pages = doc.Pages.map(omitUndefined)
+            doc.Pages = doc.Pages.map(omitEmpty)
         }
-        return omitUndefined(doc)
+        return omitEmpty(doc)
     })
 
-const omitUndefined = <T>(obj: T): T => {
+const omitEmpty = <T extends any>(obj: T): T => {
     const clone = { ...obj }
     for (const key in clone) {
-        if (clone[key] == null) {
+        if (clone[key] == null || clone[key]?.length === 0) {
             delete clone[key]
         }
     }
@@ -40,62 +58,99 @@ const omitUndefined = <T>(obj: T): T => {
 // Should work for single and multiple pages, but only for top-level page variables
 //   i.e., usage of `Pages` array var not yet supported
 const generateForPages = async ({
+    templateAnalysis,
     dataFetchers,
     ...params
 }: GeneratorInput): Promise<TemplateDoc[]> => {
-    const templateAnalysis = analyzeTemplate(params.template)
     const pageData = await dataFetchers.getPages(params.normalizedPageUrls)
-    const pageTagData = await dataFetchers.getTagsForPages(
-        params.normalizedPageUrls,
-    )
 
-    let pageLinks = {}
+    let noteLinks: UrlMappedData<string> = {}
+    let pageLinks: UrlMappedData<string> = {}
+    let pageTags: UrlMappedData<string[]> = {}
+    let noteTags: UrlMappedData<string[]> = {}
+    let notes: UrlMappedData<NoteTemplateData> = {}
+    let noteUrlsForPages: UrlMappedData<string[]> = {}
+
+    if (templateAnalysis.requirements.pageTags) {
+        pageTags = await dataFetchers.getTagsForPages(params.normalizedPageUrls)
+    }
+
     if (templateAnalysis.requirements.pageLink) {
         pageLinks = await dataFetchers.getPageLinks(params.normalizedPageUrls)
     }
 
-    const templateDocs: TemplateDoc[] = Object.entries(pageData).map(
-        ([normalizedPageUrl, { fullTitle, fullUrl }]) => {
-            const pageTags = pageTagData[normalizedPageUrl] ?? []
+    if (
+        templateAnalysis.requirements.note ||
+        templateAnalysis.requirements.noteTags ||
+        templateAnalysis.requirements.noteLink
+    ) {
+        noteUrlsForPages = await dataFetchers.getNoteIdsForPages(
+            params.normalizedPageUrls,
+        )
+    }
 
-            return {
-                PageTitle: fullTitle,
-                PageTags: joinTags(pageTags),
-                PageTagList: pageTags,
-                PageUrl: fullUrl,
-                PageLink: pageLinks[normalizedPageUrl],
+    const templateDocs: TemplateDoc[] = []
 
-                title: fullTitle,
-                tags: pageTags,
-                url: fullUrl,
-            }
-        },
-    )
+    for (const [normalizedPageUrl, { fullTitle, fullUrl }] of Object.entries(
+        pageData,
+    )) {
+        const tags = pageTags[normalizedPageUrl] ?? []
+        const noteUrls = noteUrlsForPages[normalizedPageUrl] ?? []
+
+        if (templateAnalysis.requirements.note) {
+            notes = await dataFetchers.getNotes(noteUrls)
+        }
+
+        if (templateAnalysis.requirements.noteTags) {
+            noteTags = await dataFetchers.getTagsForNotes(noteUrls)
+        }
+
+        if (templateAnalysis.requirements.noteLink) {
+            noteLinks = await dataFetchers.getNoteLinks(noteUrls)
+        }
+
+        templateDocs.push({
+            PageTitle: fullTitle,
+            PageTags: joinTags(tags),
+            PageTagList: tags,
+            PageUrl: fullUrl,
+            PageLink: pageLinks[normalizedPageUrl],
+
+            Notes: noteUrls.map((url) => ({
+                NoteText: notes[url].comment,
+                NoteHighlight: notes[url].body,
+                NoteTagList: noteTags[url],
+                NoteTags: joinTags(noteTags[url]),
+                NoteLink: noteLinks[url],
+            })),
+
+            title: fullTitle,
+            tags,
+            url: fullUrl,
+        })
+    }
 
     return templateDocs
 }
 
 const generateForNotes = async ({
+    templateAnalysis,
     dataFetchers,
     ...params
 }: GeneratorInput): Promise<TemplateDoc[]> => {
-    const templateAnalysis = analyzeTemplate(params.template)
-
     const notes = await dataFetchers.getNotes(params.annotationUrls)
-    let noteTags = {}
-    let noteLinks = {}
+    let noteTags: UrlMappedData<string[]> = {}
+    let noteLinks: UrlMappedData<string> = {}
     let pageData: PageTemplateData = {} as PageTemplateData
     let pageTagData: string[]
     let pageLink: string
 
     if (templateAnalysis.requirements.page) {
-        // There will only ever be a single page
         const pages = await dataFetchers.getPages(params.normalizedPageUrls)
         pageData = getFirstPageData(pages) ?? ({} as PageTemplateData)
     }
 
     if (templateAnalysis.requirements.pageTags) {
-        // There will only ever be a single page
         const pageTags = await dataFetchers.getTagsForPages(
             params.normalizedPageUrls,
         )
@@ -107,7 +162,6 @@ const generateForNotes = async ({
     }
 
     if (templateAnalysis.requirements.pageLink) {
-        // There will only ever be a single page
         const pageLinks = await dataFetchers.getPageLinks(
             params.normalizedPageUrls,
         )
@@ -204,7 +258,7 @@ const generateForNotes = async ({
     }
 }
 
-export async function generateTemplateDocs(
+export default async function generateTemplateDocs(
     params: GeneratorInput,
 ): Promise<TemplateDoc[]> {
     let docs: TemplateDoc[] = []
@@ -215,5 +269,5 @@ export async function generateTemplateDocs(
         docs = await generateForNotes(params)
     }
 
-    return omitUndefinedFields(docs)
+    return omitEmptyFields(docs)
 }

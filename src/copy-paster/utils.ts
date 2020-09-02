@@ -16,15 +16,6 @@ export function renderTemplate(
     return mustache.render(template.code, doc)
 }
 
-export const joinTags = (tags?: string[]): string | undefined =>
-    tags == null
-        ? undefined
-        : tags.reduce(
-              (acc, tag, i) =>
-                  `${acc}#${tag}${i === tags.length - 1 ? '' : ' '}`,
-              '',
-          )
-
 export function joinTemplateDocs(
     templateDocs: TemplateDoc[],
     template: Pick<Template, 'code'>,

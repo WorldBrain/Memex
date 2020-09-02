@@ -2,10 +2,10 @@ import Storex from '@worldbrain/storex'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { generateTemplateDocs } from './template-doc-generation'
+import generateTemplateDocs, { joinTags } from './template-doc-generation'
+import { analyzeTemplate } from './utils'
 import * as DATA from './template-doc-generation.test.data'
 import { getTemplateDataFetchers } from './background'
-import { joinTags } from './utils'
 
 async function insertTestData(storageManager: Storex) {
     await storageManager.collection('pages').createObject(DATA.testPageA)
@@ -13,11 +13,13 @@ async function insertTestData(storageManager: Storex) {
     await storageManager.collection('annotations').createObject({
         url: DATA.testAnnotationAUrl,
         comment: DATA.testAnnotationAText,
+        pageUrl: DATA.testPageA.url,
     })
 
     await storageManager.collection('annotations').createObject({
         url: DATA.testAnnotationBUrl,
         body: DATA.testAnnotationBHighlight,
+        pageUrl: DATA.testPageA.url,
     })
 
     const insertTags = (url: string, tags: string[]) =>
@@ -49,14 +51,30 @@ async function setupTest() {
 }
 
 describe('Content template doc generation', () => {
-    const testTemplate = { isFavourite: false, title: 'test', id: -1 }
-
     it('should correctly generate template docs for a single page', async () => {
         const { dataFetchers } = await setupTest()
 
         expect(
             await generateTemplateDocs({
-                template: { ...testTemplate, code: '{{{PageTitle}}}' },
+                templateAnalysis: analyzeTemplate({ code: '{{{PageTitle}}}' }),
+                normalizedPageUrls: [DATA.testPageA.url],
+                annotationUrls: [],
+                dataFetchers,
+            }),
+        ).toEqual([
+            {
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+            },
+        ])
+
+        expect(
+            await generateTemplateDocs({
+                templateAnalysis: analyzeTemplate({
+                    code: '{{{PageTitle}}} {{{PageTags}}}',
+                }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [],
                 dataFetchers,
@@ -79,10 +97,28 @@ describe('Content template doc generation', () => {
 
         expect(
             await generateTemplateDocs({
-                template: {
-                    ...testTemplate,
+                templateAnalysis: analyzeTemplate({
                     code: '{{{PageTitle}}} {{{PageLink}}}',
-                },
+                }),
+                normalizedPageUrls: [DATA.testPageA.url],
+                annotationUrls: [],
+                dataFetchers,
+            }),
+        ).toEqual([
+            {
+                PageLink: expect.any(String), // TODO: properly set once implemented
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+            },
+        ])
+
+        expect(
+            await generateTemplateDocs({
+                templateAnalysis: analyzeTemplate({
+                    code: '{{{PageTitle}}} {{{PageLink}}} {{{PageTags}}}',
+                }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [],
                 dataFetchers,
@@ -97,6 +133,140 @@ describe('Content template doc generation', () => {
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
                 tags: DATA.testPageATags,
+            },
+        ])
+    })
+
+    it('should correctly generate template docs for a single page, with notes references', async () => {
+        const { dataFetchers } = await setupTest()
+
+        const generate = (template: string) =>
+            generateTemplateDocs({
+                templateAnalysis: analyzeTemplate({ code: template }),
+                normalizedPageUrls: [DATA.testPageA.url],
+                annotationUrls: [],
+                dataFetchers,
+            })
+
+        expect(
+            await generate(
+                '{{{PageTitle}}} {{#Notes}}{{{NoteText}}}{{/Notes}}',
+            ),
+        ).toEqual([
+            {
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+                Notes: [
+                    {
+                        NoteText: DATA.testAnnotationAText,
+                    },
+                    {
+                        NoteHighlight: DATA.testAnnotationBHighlight,
+                    },
+                ],
+            },
+        ])
+
+        expect(
+            await generate(
+                '{{{PageTitle}}} {{#Notes}}{{{NoteText}}} {{{NoteTags}}}{{/Notes}}',
+            ),
+        ).toEqual([
+            {
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+                Notes: [
+                    {
+                        NoteText: DATA.testAnnotationAText,
+                        NoteTags: joinTags(DATA.testAnnotationATags),
+                        NoteTagList: DATA.testAnnotationATags,
+                    },
+                    {
+                        NoteHighlight: DATA.testAnnotationBHighlight,
+                        NoteTags: joinTags(DATA.testAnnotationBTags),
+                        NoteTagList: DATA.testAnnotationBTags,
+                    },
+                ],
+            },
+        ])
+
+        expect(
+            await generate(
+                '{{{PageTitle}}} {{#Notes}}{{{NoteText}}} {{{NoteLink}}}{{/Notes}}',
+            ),
+        ).toEqual([
+            {
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+                Notes: [
+                    {
+                        NoteText: DATA.testAnnotationAText,
+                        NoteLink: expect.any(String), // TODO: properly set once implemented
+                    },
+                    {
+                        NoteHighlight: DATA.testAnnotationBHighlight,
+                        NoteLink: expect.any(String), // TODO: properly set once implemented
+                    },
+                ],
+            },
+        ])
+
+        expect(
+            await generate(
+                '{{{PageTitle}}} {{{PageTags}}} {{#Notes}}{{{NoteText}}} {{{NoteLink}}}{{/Notes}}',
+            ),
+        ).toEqual([
+            {
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+                PageTags: joinTags(DATA.testPageATags),
+                PageTagList: DATA.testPageATags,
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+                tags: DATA.testPageATags,
+                Notes: [
+                    {
+                        NoteText: DATA.testAnnotationAText,
+                        NoteLink: expect.any(String), // TODO: properly set once implemented
+                    },
+                    {
+                        NoteHighlight: DATA.testAnnotationBHighlight,
+                        NoteLink: expect.any(String), // TODO: properly set once implemented
+                    },
+                ],
+            },
+        ])
+
+        expect(
+            await generate(
+                '{{{PageTitle}}} {{{PageTags}}} {{{PageLink}}} {{#Notes}}{{{NoteText}}} {{{NoteLink}}}{{/Notes}}',
+            ),
+        ).toEqual([
+            {
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+                PageTags: joinTags(DATA.testPageATags),
+                PageTagList: DATA.testPageATags,
+                PageLink: expect.any(String), // TODO: properly set once implemented
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+                tags: DATA.testPageATags,
+                Notes: [
+                    {
+                        NoteText: DATA.testAnnotationAText,
+                        NoteLink: expect.any(String), // TODO: properly set once implemented
+                    },
+                    {
+                        NoteHighlight: DATA.testAnnotationBHighlight,
+                        NoteLink: expect.any(String), // TODO: properly set once implemented
+                    },
+                ],
             },
         ])
     })
@@ -142,10 +312,7 @@ describe('Content template doc generation', () => {
 
         expect(
             await generateTemplateDocs({
-                template: {
-                    ...testTemplate,
-                    code: '{{{PageTitle}}}',
-                },
+                templateAnalysis: analyzeTemplate({ code: '{{{PageTitle}}}' }),
                 normalizedPageUrls: [DATA.testPageA.url, DATA.testPageB.url],
                 annotationUrls: [],
                 dataFetchers,
@@ -153,20 +320,14 @@ describe('Content template doc generation', () => {
         ).toEqual([
             {
                 PageTitle: DATA.testPageA.fullTitle,
-                PageTags: joinTags(DATA.testPageATags),
-                PageTagList: DATA.testPageATags,
                 PageUrl: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
-                tags: DATA.testPageATags,
                 url: DATA.testPageAUrl,
             },
             {
                 PageTitle: DATA.testPageB.fullTitle,
-                PageTags: joinTags(DATA.testPageBTags),
-                PageTagList: DATA.testPageBTags,
                 PageUrl: DATA.testPageBUrl,
                 title: DATA.testPageB.fullTitle,
-                tags: DATA.testPageBTags,
                 url: DATA.testPageBUrl,
             },
         ])
@@ -177,7 +338,7 @@ describe('Content template doc generation', () => {
 
         expect(
             await generateTemplateDocs({
-                template: { ...testTemplate, code: '{{{PageTitle}}}' },
+                templateAnalysis: analyzeTemplate({ code: '{{{PageTitle}}}' }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [DATA.testAnnotationAUrl],
                 dataFetchers,
@@ -193,10 +354,9 @@ describe('Content template doc generation', () => {
 
         expect(
             await generateTemplateDocs({
-                template: {
-                    ...testTemplate,
+                templateAnalysis: analyzeTemplate({
                     code: '{{{PageTitle}}} {{{PageTags}}}',
-                },
+                }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [DATA.testAnnotationAUrl],
                 dataFetchers,
@@ -215,10 +375,9 @@ describe('Content template doc generation', () => {
 
         expect(
             await generateTemplateDocs({
-                template: {
-                    ...testTemplate,
+                templateAnalysis: analyzeTemplate({
                     code: '{{{PageTitle}}} {{{PageTags}}} {{{PageLink}}}',
-                },
+                }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [DATA.testAnnotationAUrl],
                 dataFetchers,
@@ -242,7 +401,7 @@ describe('Content template doc generation', () => {
 
         const generate = (template: string) =>
             generateTemplateDocs({
-                template: { ...testTemplate, code: template },
+                templateAnalysis: analyzeTemplate({ code: template }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [DATA.testAnnotationAUrl],
                 dataFetchers,
@@ -318,10 +477,9 @@ describe('Content template doc generation', () => {
 
         expect(
             await generateTemplateDocs({
-                template: {
-                    ...testTemplate,
+                templateAnalysis: analyzeTemplate({
                     code: '{{{NoteText}}} {{{NoteLink}}}',
-                },
+                }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [DATA.testAnnotationAUrl],
                 dataFetchers,
@@ -339,10 +497,9 @@ describe('Content template doc generation', () => {
 
         expect(
             await generateTemplateDocs({
-                template: {
-                    ...testTemplate,
+                templateAnalysis: analyzeTemplate({
                     code: '{{#Notes}}{{{NoteText}}}{{/Notes}}',
-                },
+                }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [DATA.testAnnotationAUrl],
                 dataFetchers,
@@ -360,10 +517,9 @@ describe('Content template doc generation', () => {
         // This annot doesn't have any comment, only a highlight
         expect(
             await generateTemplateDocs({
-                template: {
-                    ...testTemplate,
+                templateAnalysis: analyzeTemplate({
                     code: '{{#Notes}}{{{NoteHighlight}}}{{/Notes}}',
-                },
+                }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [DATA.testAnnotationBUrl],
                 dataFetchers,
@@ -380,10 +536,9 @@ describe('Content template doc generation', () => {
 
         expect(
             await generateTemplateDocs({
-                template: {
-                    ...testTemplate,
+                templateAnalysis: analyzeTemplate({
                     code: '{{#Notes}}{{{NoteText}}} {{{NoteTags}}}{{/Notes}}',
-                },
+                }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [DATA.testAnnotationAUrl],
                 dataFetchers,
@@ -406,7 +561,7 @@ describe('Content template doc generation', () => {
 
         expect(
             await generateTemplateDocs({
-                template: { ...testTemplate, code: '{{{PageTitle}}}' },
+                templateAnalysis: analyzeTemplate({ code: '{{{PageTitle}}}' }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [
                     DATA.testAnnotationAUrl,
@@ -426,10 +581,9 @@ describe('Content template doc generation', () => {
 
         expect(
             await generateTemplateDocs({
-                template: {
-                    ...testTemplate,
+                templateAnalysis: analyzeTemplate({
                     code: '{{{PageTitle}}} {{{PageTags}}}',
-                },
+                }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [
                     DATA.testAnnotationAUrl,
@@ -452,10 +606,9 @@ describe('Content template doc generation', () => {
 
         expect(
             await generateTemplateDocs({
-                template: {
-                    ...testTemplate,
+                templateAnalysis: analyzeTemplate({
                     code: '{{{PageTitle}}} {{{PageTags}}} {{{PageLink}}}',
-                },
+                }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [
                     DATA.testAnnotationAUrl,
@@ -483,10 +636,7 @@ describe('Content template doc generation', () => {
 
         const generate = (template: string) =>
             generateTemplateDocs({
-                template: {
-                    ...testTemplate,
-                    code: template,
-                },
+                templateAnalysis: analyzeTemplate({ code: template }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [
                     DATA.testAnnotationAUrl,
@@ -569,10 +719,7 @@ describe('Content template doc generation', () => {
 
         const generate = (template: string) =>
             generateTemplateDocs({
-                template: {
-                    ...testTemplate,
-                    code: template,
-                },
+                templateAnalysis: analyzeTemplate({ code: template }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [
                     DATA.testAnnotationAUrl,
@@ -694,10 +841,7 @@ describe('Content template doc generation', () => {
 
         const generate = (template: string) =>
             generateTemplateDocs({
-                template: {
-                    ...testTemplate,
-                    code: template,
-                },
+                templateAnalysis: analyzeTemplate({ code: template }),
                 normalizedPageUrls: [DATA.testPageA.url],
                 annotationUrls: [
                     DATA.testAnnotationAUrl,
