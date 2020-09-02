@@ -68,7 +68,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     private renderShortcutTip({ modifier }: { modifier: 'Shift' | 'Alt' }) {
         return (
             <ShortcutTip>
-                <TypographyTextSmall css="font-weight: 'bold'; margin-right: 5px">
+                <TypographyTextSmall css="font-weight: 'bold'; margin-right: '10px'">
                     <strong>Tip:{' '}</strong>
                 </TypographyTextSmall>
                 <TypographyTextSmall>{modifier} + click </TypographyTextSmall>

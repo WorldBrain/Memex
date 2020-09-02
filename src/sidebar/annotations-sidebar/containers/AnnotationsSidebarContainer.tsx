@@ -439,9 +439,12 @@ const TopBarContainerStyled = styled.div`
 `
 
 const TopBarActionBtns = styled.div`
-    display: flex;
+    display: grid;
     justify-content: space-between;
     align-items: center;
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 8px;
 `
 
 const CloseBtn = styled.button`
@@ -463,8 +466,8 @@ const CloseBtn = styled.button`
 `
 
 const ActionIcon = styled.img`
-    height: 100%;
-    width: 100%;
+    height: 90%;
+    width: auto;
 `
 
 // TODO: inheirits from .nakedSquareButton
@@ -481,6 +484,9 @@ const ActionBtn = styled.button`
     border: none;
     background-color: transparent;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover {
         opacity: 1;
