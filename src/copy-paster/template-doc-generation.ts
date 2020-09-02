@@ -5,6 +5,7 @@ import {
     NoteTemplateData,
     TemplateAnalysis,
 } from './types'
+import fromPairs from 'lodash/fromPairs'
 
 interface GeneratorInput {
     templateAnalysis: TemplateAnalysis
@@ -65,7 +66,6 @@ const generateForPages = async ({
     const pageData = await dataFetchers.getPages(params.normalizedPageUrls)
 
     let noteLinks: UrlMappedData<string> = {}
-    let pageLinks: UrlMappedData<string> = {}
     let pageTags: UrlMappedData<string[]> = {}
     let noteTags: UrlMappedData<string[]> = {}
     let notes: UrlMappedData<NoteTemplateData> = {}
@@ -73,10 +73,6 @@ const generateForPages = async ({
 
     if (templateAnalysis.requirements.pageTags) {
         pageTags = await dataFetchers.getTagsForPages(params.normalizedPageUrls)
-    }
-
-    if (templateAnalysis.requirements.pageLink) {
-        pageLinks = await dataFetchers.getPageLinks(params.normalizedPageUrls)
     }
 
     if (
@@ -109,12 +105,20 @@ const generateForPages = async ({
             noteLinks = await dataFetchers.getNoteLinks(noteUrls)
         }
 
+        const pageLink =
+            templateAnalysis.requirements.pageLink &&
+            (
+                await dataFetchers.getPageLinks({
+                    [normalizedPageUrl]: { annotationUrls: noteUrls },
+                })
+            )[normalizedPageUrl]
+
         templateDocs.push({
             PageTitle: fullTitle,
             PageTags: joinTags(tags),
             PageTagList: tags,
             PageUrl: fullUrl,
-            PageLink: pageLinks[normalizedPageUrl],
+            PageLink: pageLink,
 
             Notes: noteUrls.map((url) => ({
                 NoteText: notes[url].comment,
@@ -163,7 +167,16 @@ const generateForNotes = async ({
 
     if (templateAnalysis.requirements.pageLink) {
         const pageLinks = await dataFetchers.getPageLinks(
-            params.normalizedPageUrls,
+            fromPairs(
+                params.normalizedPageUrls.map((normalizedPageUrl) => [
+                    normalizedPageUrl,
+                    {
+                        annotationUrls: Object.values(notes)
+                            .filter((note) => note.pageUrl)
+                            .map((note) => note.url),
+                    },
+                ]),
+            ),
         )
         pageLink = getFirstPageData(pageLinks)
     }

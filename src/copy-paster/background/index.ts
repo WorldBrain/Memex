@@ -11,7 +11,9 @@ import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import generateTemplateDocs from '../template-doc-generation'
 import { joinTemplateDocs, analyzeTemplate } from '../utils'
 import ContentSharingBackground from 'src/content-sharing/background'
-import { getNoteShareUrl } from 'src/content-sharing/utils'
+import { getNoteShareUrl, getPageShareUrl } from 'src/content-sharing/utils'
+import flatten from 'lodash/flatten'
+import fromPairs from 'lodash/fromPairs'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage
@@ -22,7 +24,10 @@ export default class CopyPasterBackground {
             storageManager: Storex
             contentSharing: Pick<
                 ContentSharingBackground,
-                'shareAnnotations' | 'sharePage' | 'storage'
+                | 'shareAnnotations'
+                | 'sharePage'
+                | 'storage'
+                | 'ensureRemotePageId'
             >
         },
     ) {
@@ -136,7 +141,7 @@ export function getTemplateDataFetchers({
     storageManager: Storex
     contentSharing: Pick<
         ContentSharingBackground,
-        'shareAnnotations' | 'sharePage' | 'storage'
+        'shareAnnotations' | 'sharePage' | 'storage' | 'ensureRemotePageId'
     >
 }): TemplateDataFetchers {
     const getTagsForUrls = async (urls: string[]) => {
@@ -170,9 +175,27 @@ export function getTemplateDataFetchers({
         }
         return noteLinks
     }
-    const getPageLinks = async (urls: string[]) => {
-        // TODO: hook this up to proper call
-        return urls.reduce((acc, url) => ({ ...acc, [url]: url }), {})
+    const getPageLinks = async (notes: {
+        [normalizedPageUrl: string]: { annotationUrls: string[] }
+    }) => {
+        const annotationUrls = flatten(
+            Object.values(notes).map((note) => note.annotationUrls),
+        )
+        await contentSharing.shareAnnotations({
+            annotationUrls,
+            queueInteraction: 'skip-queue',
+        })
+        const pairs = await Promise.all(
+            Object.keys(notes).map(async (normalizedPageUrl) => [
+                normalizedPageUrl,
+                getPageShareUrl({
+                    remotePageInfoId: await contentSharing.ensureRemotePageId(
+                        normalizedPageUrl,
+                    ),
+                }),
+            ]),
+        )
+        return fromPairs(pairs)
     }
 
     return {

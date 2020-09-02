@@ -102,16 +102,15 @@ describe('Content template doc generation', () => {
     it('should correctly generate template docs for a single page, including a page link', async () => {
         const { dataFetchers } = await setupTest()
 
-        expect(
-            await generateTemplateDocs({
-                templateAnalysis: analyzeTemplate({
-                    code: '{{{PageTitle}}} {{{PageLink}}}',
-                }),
-                normalizedPageUrls: [DATA.testPageA.url],
-                annotationUrls: [],
-                dataFetchers,
+        const templateDocs = await generateTemplateDocs({
+            templateAnalysis: analyzeTemplate({
+                code: '{{{PageTitle}}} {{{PageLink}}}',
             }),
-        ).toEqual([
+            normalizedPageUrls: [DATA.testPageA.url],
+            annotationUrls: [],
+            dataFetchers,
+        })
+        expect(templateDocs).toEqual([
             {
                 PageLink: expect.any(String), // TODO: properly set once implemented
                 PageTitle: DATA.testPageA.fullTitle,
@@ -120,6 +119,7 @@ describe('Content template doc generation', () => {
                 url: DATA.testPageAUrl,
             },
         ])
+        expect(isShareUrl(templateDocs[0].PageLink)).toBe(true)
 
         expect(
             await generateTemplateDocs({

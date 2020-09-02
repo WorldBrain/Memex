@@ -65,9 +65,9 @@ export interface TemplateDataFetchers {
     getTagsForPages(
         normalizedPageUrls: string[],
     ): Promise<{ [normalizedPageUrl: string]: string[] }>
-    getPageLinks(
-        normalizedPageUrls: string[],
-    ): Promise<{ [normalizedPageUrl: string]: string }>
+    getPageLinks(notes: {
+        [normalizedPageUrl: string]: { annotationUrls: string[] }
+    }): Promise<{ [normalizedPageUrl: string]: string }>
     getNoteLinks(
         annotationUrls: string[],
     ): Promise<{ [annotationUrl: string]: string }>
@@ -79,6 +79,8 @@ export interface PageTemplateData {
 }
 
 export interface NoteTemplateData {
+    url: string
+    pageUrl: string
     body?: string
     comment?: string
 }
