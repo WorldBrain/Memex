@@ -16,7 +16,9 @@ export interface ContentSharingInterface {
         queueInteraction?: ContentSharingQueueInteraction
     }): Promise<void>
     unshareAnnotationsFromLists(options: {
+        normalizedPageUrl: string
         annotationUrls: string[]
+        queueInteraction?: ContentSharingQueueInteraction
     }): Promise<void>
     unshareAnnotation(options: {
         annotationUrl: string

@@ -34,7 +34,7 @@ export const ENTRY_2_DATA = {
     url: 'https://www.eggs.com/foo',
 }
 
-export const ANNOTATION_1_DATA = {
+export const ANNOTATION_1_1_DATA = {
     pageUrl: ENTRY_1_DATA.url,
     title: 'Page title',
     body: 'Annot body',
@@ -42,6 +42,17 @@ export const ANNOTATION_1_DATA = {
     selector: {
         descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
         quote: 'dawadawd',
+    },
+}
+
+export const ANNOTATION_1_2_DATA = {
+    pageUrl: ENTRY_1_DATA.url,
+    title: 'Page title',
+    body: 'Annot body 2',
+    comment: 'Annot comment 2',
+    selector: {
+        descriptor: { content: { foo: 10 }, strategy: 'eedwdwq 2' },
+        quote: 'dawadawd 2',
     },
 }
 

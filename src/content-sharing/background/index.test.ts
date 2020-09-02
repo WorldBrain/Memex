@@ -491,13 +491,21 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await contentSharing.shareListEntries({
                                     listId: localListId,
                                 })
-                                const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
-                                    data.ANNOTATION_1_DATA,
+                                    data.ANNOTATION_1_1_DATA,
+                                    { skipPageIndexing: true },
+                                )
+                                const secondAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    {} as any,
+                                    data.ANNOTATION_1_2_DATA,
                                     { skipPageIndexing: true },
                                 )
                                 await contentSharing.shareAnnotation({
-                                    annotationUrl,
+                                    annotationUrl: firstAnnotationUrl,
+                                })
+                                await contentSharing.shareAnnotation({
+                                    annotationUrl: secondAnnotationUrl,
                                 })
                                 await contentSharing.waitForSync()
 
@@ -508,19 +516,29 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 expect(sharedAnnotationMetadata).toEqual([
                                     {
-                                        localId: annotationUrl,
+                                        localId: firstAnnotationUrl,
+                                        remoteId: expect.anything(),
+                                        excludeFromLists: true,
+                                    },
+                                    {
+                                        localId: secondAnnotationUrl,
                                         remoteId: expect.anything(),
                                         excludeFromLists: true,
                                     },
                                 ])
                                 const remoteAnnotationIds = await contentSharing.storage.getRemoteAnnotationIds(
                                     {
-                                        localIds: [annotationUrl],
+                                        localIds: [
+                                            firstAnnotationUrl,
+                                            secondAnnotationUrl,
+                                        ],
                                     },
                                 )
                                 expect(remoteAnnotationIds).toEqual({
-                                    [annotationUrl]:
+                                    [firstAnnotationUrl]:
                                         sharedAnnotationMetadata[0].remoteId,
+                                    [secondAnnotationUrl]:
+                                        sharedAnnotationMetadata[1].remoteId,
                                 })
 
                                 const serverStorage = await setup.getServerStorage()
@@ -538,23 +556,29 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         id:
                                             convertRemoteId(
                                                 remoteAnnotationIds[
-                                                    annotationUrl
+                                                    firstAnnotationUrl
                                                 ] as string,
                                             ) ||
-                                            remoteAnnotationIds[annotationUrl],
+                                            remoteAnnotationIds[
+                                                firstAnnotationUrl
+                                            ],
                                         creator: TEST_USER.id,
                                         normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_DATA.pageUrl,
+                                            data.ANNOTATION_1_1_DATA.pageUrl,
                                         ),
                                         createdWhen: expect.any(Number),
                                         uploadedWhen: expect.any(Number),
                                         updatedWhen: expect.any(Number),
-                                        comment: data.ANNOTATION_1_DATA.comment,
-                                        body: data.ANNOTATION_1_DATA.body,
+                                        comment:
+                                            data.ANNOTATION_1_1_DATA.comment,
+                                        body: data.ANNOTATION_1_1_DATA.body,
                                         selector: JSON.stringify(
-                                            data.ANNOTATION_1_DATA.selector,
+                                            data.ANNOTATION_1_1_DATA.selector,
                                         ),
                                     },
+                                    expect.objectContaining({
+                                        body: data.ANNOTATION_1_2_DATA.body,
+                                    }),
                                 ])
                                 expect(
                                     await getShared(
@@ -564,25 +588,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 await contentSharing.shareAnnotationsToLists({
                                     normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_DATA.pageUrl,
+                                        data.ANNOTATION_1_1_DATA.pageUrl,
                                     ),
-                                    annotationUrls: [annotationUrl],
+                                    annotationUrls: [firstAnnotationUrl],
                                 })
                                 await contentSharing.waitForSync()
 
-                                expect(
-                                    await setup.storageManager.operation(
-                                        'findObjects',
-                                        'sharedAnnotationMetadata',
-                                        {},
-                                    ),
-                                ).toEqual([
-                                    {
-                                        localId: annotationUrl,
-                                        remoteId: expect.anything(),
-                                        excludeFromLists: false,
-                                    },
-                                ])
                                 expect(
                                     await getShared(
                                         'sharedAnnotationListEntry',
@@ -592,7 +603,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
                                         normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_DATA.pageUrl,
+                                            data.ANNOTATION_1_1_DATA.pageUrl,
                                         ),
                                         createdWhen: expect.any(Number),
                                         uploadedWhen: expect.any(Number),
@@ -601,10 +612,30 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         sharedAnnotation:
                                             convertRemoteId(
                                                 remoteAnnotationIds[
-                                                    annotationUrl
+                                                    firstAnnotationUrl
                                                 ] as string,
                                             ) ||
-                                            remoteAnnotationIds[annotationUrl],
+                                            remoteAnnotationIds[
+                                                firstAnnotationUrl
+                                            ],
+                                    },
+                                ])
+                                expect(
+                                    await setup.storageManager.operation(
+                                        'findObjects',
+                                        'sharedAnnotationMetadata',
+                                        {},
+                                    ),
+                                ).toEqual([
+                                    {
+                                        localId: firstAnnotationUrl,
+                                        remoteId: expect.anything(),
+                                        excludeFromLists: false,
+                                    },
+                                    {
+                                        localId: secondAnnotationUrl,
+                                        remoteId: expect.anything(),
+                                        excludeFromLists: true,
                                     },
                                 ])
                             },
@@ -642,7 +673,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
-                                    data.ANNOTATION_1_DATA,
+                                    data.ANNOTATION_1_1_DATA,
                                     { skipPageIndexing: true },
                                 )
                                 await contentSharing.shareAnnotation({
@@ -650,7 +681,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await contentSharing.shareAnnotationsToLists({
                                     normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_DATA.pageUrl,
+                                        data.ANNOTATION_1_1_DATA.pageUrl,
                                     ),
                                     annotationUrls: [annotationUrl],
                                 })
@@ -685,9 +716,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ])
                                 await contentSharing.unshareAnnotationsFromLists(
                                     {
+                                        normalizedPageUrl: normalizeUrl(
+                                            data.ANNOTATION_1_1_DATA.pageUrl,
+                                        ),
                                         annotationUrls: [annotationUrl],
                                     },
                                 )
+                                await contentSharing.waitForSync()
+
                                 expect(
                                     await getShared(
                                         'sharedAnnotationListEntry',
@@ -697,7 +733,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     await getShared('sharedAnnotation'),
                                 ).toEqual([
                                     expect.objectContaining({
-                                        sharedAnnotation: convertRemoteId(
+                                        id: convertRemoteId(
                                             remoteAnnotationIds[
                                                 annotationUrl
                                             ] as string,
@@ -772,7 +808,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
-                                    data.ANNOTATION_1_DATA,
+                                    data.ANNOTATION_1_1_DATA,
                                     { skipPageIndexing: true },
                                 )
                                 await contentSharing.shareAnnotation({
@@ -780,7 +816,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await contentSharing.shareAnnotationsToLists({
                                     normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_DATA.pageUrl,
+                                        data.ANNOTATION_1_1_DATA.pageUrl,
                                     ),
                                     annotationUrls: [annotationUrl],
                                 })
@@ -821,15 +857,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             remoteAnnotationIds[annotationUrl],
                                         creator: TEST_USER.id,
                                         normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_DATA.pageUrl,
+                                            data.ANNOTATION_1_1_DATA.pageUrl,
                                         ),
                                         createdWhen: expect.any(Number),
                                         uploadedWhen: expect.any(Number),
                                         updatedWhen: expect.any(Number),
-                                        comment: data.ANNOTATION_1_DATA.comment,
-                                        body: data.ANNOTATION_1_DATA.body,
+                                        comment:
+                                            data.ANNOTATION_1_1_DATA.comment,
+                                        body: data.ANNOTATION_1_1_DATA.body,
                                         selector: JSON.stringify(
-                                            data.ANNOTATION_1_DATA.selector,
+                                            data.ANNOTATION_1_1_DATA.selector,
                                         ),
                                     },
                                 ])
@@ -845,7 +882,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(sharedAnnotationListEntries).toEqual([
                                     expect.objectContaining({
                                         normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_DATA.pageUrl,
+                                            data.ANNOTATION_1_1_DATA.pageUrl,
                                         ),
                                         sharedList: convertRemoteId(
                                             remoteListIds[0],
@@ -854,7 +891,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     }),
                                     expect.objectContaining({
                                         normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_DATA.pageUrl,
+                                            data.ANNOTATION_1_1_DATA.pageUrl,
                                         ),
                                         sharedList: convertRemoteId(
                                             remoteListIds[1],
@@ -897,7 +934,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
-                                    data.ANNOTATION_1_DATA,
+                                    data.ANNOTATION_1_1_DATA,
                                     { skipPageIndexing: true },
                                 )
                                 await contentSharing.shareAnnotation({
@@ -925,7 +962,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(sharedAnnotations).toEqual([
                                     expect.objectContaining({
                                         comment: 'Updated comment',
-                                        body: data.ANNOTATION_1_DATA.body,
+                                        body: data.ANNOTATION_1_1_DATA.body,
                                     }),
                                 ])
                             },
@@ -971,7 +1008,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
-                                    data.ANNOTATION_1_DATA,
+                                    data.ANNOTATION_1_1_DATA,
                                     { skipPageIndexing: true },
                                 )
                                 await contentSharing.shareAnnotation({
@@ -979,7 +1016,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await contentSharing.shareAnnotationsToLists({
                                     normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_DATA.pageUrl,
+                                        data.ANNOTATION_1_1_DATA.pageUrl,
                                     ),
                                     annotationUrls: [annotationUrl],
                                 })
@@ -1037,15 +1074,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             remoteAnnotationIds[annotationUrl],
                                         creator: TEST_USER.id,
                                         normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_DATA.pageUrl,
+                                            data.ANNOTATION_1_1_DATA.pageUrl,
                                         ),
                                         createdWhen: expect.any(Number),
                                         uploadedWhen: expect.any(Number),
                                         updatedWhen: expect.any(Number),
-                                        comment: data.ANNOTATION_1_DATA.comment,
-                                        body: data.ANNOTATION_1_DATA.body,
+                                        comment:
+                                            data.ANNOTATION_1_1_DATA.comment,
+                                        body: data.ANNOTATION_1_1_DATA.body,
                                         selector: JSON.stringify(
-                                            data.ANNOTATION_1_DATA.selector,
+                                            data.ANNOTATION_1_1_DATA.selector,
                                         ),
                                     },
                                 ])
@@ -1061,7 +1099,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(sharedAnnotationListEntries).toEqual([
                                     expect.objectContaining({
                                         normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_DATA.pageUrl,
+                                            data.ANNOTATION_1_1_DATA.pageUrl,
                                         ),
                                         sharedList: convertRemoteId(
                                             remoteListIds[0],
@@ -1070,7 +1108,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     }),
                                     expect.objectContaining({
                                         normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_DATA.pageUrl,
+                                            data.ANNOTATION_1_1_DATA.pageUrl,
                                         ),
                                         sharedList: convertRemoteId(
                                             remoteListIds[1],
@@ -1123,7 +1161,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
-                                    data.ANNOTATION_1_DATA,
+                                    data.ANNOTATION_1_1_DATA,
                                     { skipPageIndexing: true },
                                 )
                                 await contentSharing.shareAnnotation({
@@ -1131,7 +1169,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await contentSharing.shareAnnotationsToLists({
                                     normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_DATA.pageUrl,
+                                        data.ANNOTATION_1_1_DATA.pageUrl,
                                     ),
                                     annotationUrls: [annotationUrl],
                                 })
@@ -1149,7 +1187,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     await getShared('sharedAnnotation'),
                                 ).toEqual([
                                     expect.objectContaining({
-                                        body: data.ANNOTATION_1_DATA.body,
+                                        body: data.ANNOTATION_1_1_DATA.body,
                                     }),
                                 ])
                                 expect(
@@ -1225,7 +1263,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
-                                    data.ANNOTATION_1_DATA,
+                                    data.ANNOTATION_1_1_DATA,
                                     { skipPageIndexing: true },
                                 )
                                 await contentSharing.shareAnnotation({
@@ -1233,7 +1271,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await contentSharing.shareAnnotationsToLists({
                                     normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_DATA.pageUrl,
+                                        data.ANNOTATION_1_1_DATA.pageUrl,
                                     ),
                                     annotationUrls: [annotationUrl],
                                 })
@@ -1251,7 +1289,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     await getShared('sharedAnnotation'),
                                 ).toEqual([
                                     expect.objectContaining({
-                                        body: data.ANNOTATION_1_DATA.body,
+                                        body: data.ANNOTATION_1_1_DATA.body,
                                     }),
                                 ])
                                 expect(
@@ -1335,7 +1373,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
-                                    data.ANNOTATION_1_DATA,
+                                    data.ANNOTATION_1_1_DATA,
                                     { skipPageIndexing: true },
                                 )
                                 await contentSharing.shareAnnotation({
@@ -1343,7 +1381,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await contentSharing.shareAnnotationsToLists({
                                     normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_DATA.pageUrl,
+                                        data.ANNOTATION_1_1_DATA.pageUrl,
                                     ),
                                     annotationUrls: [annotationUrl],
                                 })
@@ -1361,7 +1399,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     await getShared('sharedAnnotation'),
                                 ).toEqual([
                                     expect.objectContaining({
-                                        body: data.ANNOTATION_1_DATA.body,
+                                        body: data.ANNOTATION_1_1_DATA.body,
                                     }),
                                 ])
                                 expect(

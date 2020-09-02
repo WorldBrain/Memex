@@ -207,15 +207,6 @@ export default class ContentSharingBackground {
         const annotation = await this.options.annotationStorage.getAnnotationByPk(
             options.annotationUrl,
         )
-        const listIds = await this.options.customLists.fetchListIdsByUrl(
-            annotation.pageUrl,
-        )
-        const areListsShared = await this.storage.areListsShared({
-            localIds: listIds,
-        })
-        const sharedListIds = Object.entries(areListsShared)
-            .filter(([, shared]) => shared)
-            .map(([listId]) => parseInt(listId, 10))
 
         const action: ContentSharingAction = {
             type: 'share-annotations',
@@ -290,6 +281,29 @@ export default class ContentSharingBackground {
             localIds: options.annotationUrls,
             excludeFromLists: true,
         })
+        const localListIds = await this.options.customLists.fetchListIdsByUrl(
+            options.normalizedPageUrl,
+        )
+        const remoteListIds = await this.storage.getRemoteListIds({
+            localIds: localListIds,
+        })
+        const remoteAnnotationIds = await this.storage.getRemoteAnnotationIds({
+            localIds: options.annotationUrls,
+        })
+
+        for (const remoteListId of Object.values(remoteListIds)) {
+            await this.scheduleAction(
+                {
+                    type: 'remove-shared-annotation-list-entries',
+                    remoteListId,
+                    remoteAnnotationIds: Object.values(remoteAnnotationIds),
+                },
+                {
+                    queueInteraction:
+                        options.queueInteraction ?? 'queue-and-return',
+                },
+            )
+        }
     }
 
     sharePage = async (options: {
