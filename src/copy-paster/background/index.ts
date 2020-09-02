@@ -8,11 +8,8 @@ import CopyPasterStorage from './storage'
 import { RemoteCopyPasterInterface } from './types'
 import { Template, TemplateDataFetchers } from '../types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import {
-    generateTemplateDocs,
-    renderTemplate,
-    joinTemplateDocs,
-} from '../utils'
+import { generateTemplateDocs } from '../template-doc-generation'
+import { joinTemplateDocs } from '../utils'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage
