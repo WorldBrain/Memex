@@ -207,8 +207,25 @@ export default class ContentSharingBackground {
         const annotation = await this.options.annotationStorage.getAnnotationByPk(
             options.annotationUrl,
         )
+        const page = (
+            await this.storage.getPages({
+                normalizedPageUrls: [annotation.pageUrl],
+            })
+        )[annotation.pageUrl]
+        await this.scheduleAction(
+            {
+                type: 'ensure-page-info',
+                data: [
+                    {
+                        createdWhen: '$now',
+                        ...page,
+                    },
+                ],
+            },
+            { queueInteraction: options.queueInteraction ?? 'queue-and-await' },
+        )
 
-        const action: ContentSharingAction = {
+        const shareAnnotationsAction: ContentSharingAction = {
             type: 'share-annotations',
             localListIds: [],
             // localListIds: sharedListIds,
@@ -226,16 +243,61 @@ export default class ContentSharingBackground {
                 ],
             },
         }
-        await this.scheduleAction(action, {
-            queueInteraction:
-                options.queueInteraction ?? 'queue-and-await-execution',
+        await this.scheduleAction(shareAnnotationsAction, {
+            queueInteraction: options.queueInteraction ?? 'queue-and-await',
         })
     }
 
     shareAnnotations = async (options: {
-        annotationsUrls: string[]
-    }): Promise<{ [annotationUrl: string]: { remoteId: string } }> => {
-        return {}
+        normalizedPageUrl: string
+        annotationUrls: string[]
+        queueInteraction?: ContentSharingQueueInteraction
+    }) => {
+        const pageAnnotations = await this.options.annotationStorage.listAnnotationsByPageUrl(
+            {
+                pageUrl: options.normalizedPageUrl,
+            },
+        )
+        const annotations = pageAnnotations.filter((annotation) =>
+            options.annotationUrls.includes(annotation.url),
+        )
+        const page = (
+            await this.storage.getPages({
+                normalizedPageUrls: [options.normalizedPageUrl],
+            })
+        )[options.normalizedPageUrl]
+        await this.scheduleAction(
+            {
+                type: 'ensure-page-info',
+                data: [
+                    {
+                        createdWhen: '$now',
+                        ...page,
+                    },
+                ],
+            },
+            { queueInteraction: options.queueInteraction ?? 'queue-and-await' },
+        )
+
+        const shareAnnotationsAction: ContentSharingAction = {
+            type: 'share-annotations',
+            localListIds: [],
+            // localListIds: sharedListIds,
+            data: {
+                [options.normalizedPageUrl]: annotations.map((annotation) => ({
+                    localId: annotation.url,
+                    createdWhen: annotation.createdWhen?.getTime?.(),
+                    body: annotation.body ?? null,
+                    comment: annotation.comment ?? null,
+                    selector: annotation.selector
+                        ? JSON.stringify(annotation.selector)
+                        : null,
+                })),
+            },
+        }
+        await this.scheduleAction(shareAnnotationsAction, {
+            queueInteraction: options.queueInteraction ?? 'queue-and-await',
+        })
     }
 
     shareAnnotationsToLists: ContentSharingInterface['shareAnnotationsToLists'] = async (
@@ -333,8 +395,7 @@ export default class ContentSharingBackground {
             remoteAnnotationIds: [remoteAnnotationId],
         }
         await this.scheduleAction(action, {
-            queueInteraction:
-                options.queueInteraction ?? 'queue-and-await-execution',
+            queueInteraction: options.queueInteraction ?? 'queue-and-await',
         })
     }
 
@@ -361,7 +422,7 @@ export default class ContentSharingBackground {
         delete this._queingAction
 
         const executePendingActions = this.executePendingActions()
-        if (options.queueInteraction === 'queue-and-await-execution') {
+        if (options.queueInteraction === 'queue-and-await') {
             await executePendingActions
         }
         executePendingActions.catch((e) => {
@@ -546,6 +607,13 @@ export default class ContentSharingBackground {
                         ),
                 ),
             })
+        } else if (action.type === 'ensure-page-info') {
+            for (const pageInfo of action.data) {
+                await contentSharing.ensurePageInfo({
+                    pageInfo,
+                    creatorReference: userReference,
+                })
+            }
         }
     }
 
@@ -562,20 +630,22 @@ export default class ContentSharingBackground {
                 annotation,
             ]),
         )
-        const remoteIds = await this.storage.getRemoteAnnotationIds({
-            localIds: params.annotationEntries.map(
-                (annotation) => annotation.url,
-            ),
-        })
-        const remoteAnnotations = Object.entries(remoteIds).map(
-            ([localId, remoteId]) => ({
+        const annotationMetadata = await this.storage.getRemoteAnnotationMetadata(
+            {
+                localIds: params.annotationEntries.map(
+                    (annotation) => annotation.url,
+                ),
+            },
+        )
+        const remoteAnnotations = Object.entries(annotationMetadata)
+            .filter(([, metadata]) => !metadata.excludeFromLists)
+            .map(([localId, { remoteId }]) => ({
                 normalizedPageUrl: annotationsByPageUrl[localId].pageUrl,
                 remoteId,
                 createdWhen:
                     annotationsByPageUrl[localId].createdWhen?.getTime() ??
                     Date.now(),
-            }),
-        )
+            }))
 
         await this.scheduleAction(
             {

@@ -9,6 +9,7 @@ export interface ContentSharingInterface {
     shareAnnotation(options: {
         annotationUrl: string
         queueInteraction?: ContentSharingQueueInteraction
+        withoutPageInfo?: boolean
     }): Promise<void>
     shareAnnotationsToLists(options: {
         normalizedPageUrl: string
@@ -40,6 +41,6 @@ export interface ContentSharingEvents {
 }
 
 export type ContentSharingQueueInteraction =
-    | 'queue-and-await-execution'
+    | 'queue-and-await'
     | 'queue-and-return'
     | 'skip-queue'
