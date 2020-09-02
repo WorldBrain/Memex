@@ -6,6 +6,8 @@ import generateTemplateDocs, { joinTags } from './template-doc-generation'
 import { analyzeTemplate } from './utils'
 import * as DATA from './template-doc-generation.test.data'
 import { getTemplateDataFetchers } from './background'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { isShareUrl } from 'src/content-sharing/utils'
 
 async function insertTestData(storageManager: Storex) {
     await storageManager.collection('pages').createObject(DATA.testPageA)
@@ -39,14 +41,19 @@ async function setupTest() {
     const {
         backgroundModules,
         storageManager,
+        authService,
     } = await setupBackgroundIntegrationTest()
 
+    authService.setUser(TEST_USER)
     await insertTestData(storageManager)
 
     return {
         backgroundModules,
         storageManager,
-        dataFetchers: getTemplateDataFetchers({ storageManager }),
+        dataFetchers: getTemplateDataFetchers({
+            storageManager,
+            contentSharing: backgroundModules.contentSharing,
+        }),
     }
 }
 
@@ -475,21 +482,21 @@ describe('Content template doc generation', () => {
     it('should correctly generate template docs for single annotation, with a note link', async () => {
         const { dataFetchers } = await setupTest()
 
-        expect(
-            await generateTemplateDocs({
-                templateAnalysis: analyzeTemplate({
-                    code: '{{{NoteText}}} {{{NoteLink}}}',
-                }),
-                normalizedPageUrls: [DATA.testPageA.url],
-                annotationUrls: [DATA.testAnnotationAUrl],
-                dataFetchers,
+        const templateDocs = await generateTemplateDocs({
+            templateAnalysis: analyzeTemplate({
+                code: '{{{NoteText}}} {{{NoteLink}}}',
             }),
-        ).toEqual([
+            normalizedPageUrls: [DATA.testPageA.url],
+            annotationUrls: [DATA.testAnnotationAUrl],
+            dataFetchers,
+        })
+        expect(templateDocs).toEqual([
             {
                 NoteText: DATA.testAnnotationAText,
                 NoteLink: expect.any(String), // TODO: properly set once implemented
             },
         ])
+        expect(isShareUrl(templateDocs[0].NoteLink)).toBe(true)
     })
 
     it('should correctly generate template docs for single annotation, but iterating through the notes array', async () => {

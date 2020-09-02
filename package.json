@@ -152,6 +152,7 @@
         "@testing-library/react": "^9.4.1",
         "@types/jest": "^25.1.4",
         "@types/js-combinatorics": "^0.5.31",
+        "@types/lodash": "^4.14.108",
         "@types/mongodb": "^3.0.21",
         "@types/mustache": "^4.0.1",
         "@types/openpgp": "^4.4.7",

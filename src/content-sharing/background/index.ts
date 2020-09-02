@@ -1,5 +1,6 @@
 import chunk from 'lodash/chunk'
 import fromPairs from 'lodash/fromPairs'
+import pick from 'lodash/pick'
 import StorageManager from '@worldbrain/storex'
 import {
     AddSharedListEntriesAction,
@@ -195,7 +196,7 @@ export default class ContentSharingBackground {
             { pageUrls: normalizedPageUrls },
         )
         await this._scheduleAddAnnotationEntries({
-            annotationEntries,
+            annotations: annotationEntries,
             remoteListIds: [remoteListId],
             queueInteraction: options.queueInteraction ?? 'queue-and-return',
         })
@@ -225,6 +226,15 @@ export default class ContentSharingBackground {
             { queueInteraction: options.queueInteraction ?? 'queue-and-await' },
         )
 
+        const remoteAnnotationId = (
+            await this.storage.getRemoteAnnotationIds({
+                localIds: [options.annotationUrl],
+            })
+        )[options.annotationUrl]
+        if (remoteAnnotationId) {
+            return
+        }
+
         const shareAnnotationsAction: ContentSharingAction = {
             type: 'share-annotations',
             localListIds: [],
@@ -249,42 +259,54 @@ export default class ContentSharingBackground {
     }
 
     shareAnnotations = async (options: {
-        normalizedPageUrl: string
         annotationUrls: string[]
         queueInteraction?: ContentSharingQueueInteraction
     }) => {
-        const pageAnnotations = await this.options.annotationStorage.listAnnotationsByPageUrl(
-            {
-                pageUrl: options.normalizedPageUrl,
-            },
+        const remoteIds = await this.storage.getRemoteAnnotationIds({
+            localIds: options.annotationUrls,
+        })
+        const annotations = (
+            await this.options.annotationStorage.getAnnotations(
+                options.annotationUrls,
+            )
+        ).filter((annotation) => !remoteIds[annotation.url])
+        if (!annotations.length) {
+            return
+        }
+
+        const pageUrls = new Set(
+            annotations.map((annotation) => annotation.pageUrl),
         )
-        const annotations = pageAnnotations.filter((annotation) =>
-            options.annotationUrls.includes(annotation.url),
-        )
-        const page = (
-            await this.storage.getPages({
-                normalizedPageUrls: [options.normalizedPageUrl],
-            })
-        )[options.normalizedPageUrl]
-        await this.scheduleAction(
-            {
-                type: 'ensure-page-info',
-                data: [
-                    {
-                        createdWhen: '$now',
-                        ...page,
-                    },
-                ],
-            },
-            { queueInteraction: options.queueInteraction ?? 'queue-and-await' },
-        )
+        const pages = await this.storage.getPages({
+            normalizedPageUrls: [...pageUrls],
+        })
+        for (const pageUrl of pageUrls) {
+            await this.scheduleAction(
+                {
+                    type: 'ensure-page-info',
+                    data: [
+                        {
+                            createdWhen: '$now',
+                            ...pages[pageUrl],
+                        },
+                    ],
+                },
+                {
+                    queueInteraction:
+                        options.queueInteraction ?? 'queue-and-await',
+                },
+            )
+        }
 
         const shareAnnotationsAction: ContentSharingAction = {
             type: 'share-annotations',
             localListIds: [],
-            // localListIds: sharedListIds,
-            data: {
-                [options.normalizedPageUrl]: annotations.map((annotation) => ({
+            data: {},
+        }
+        for (const pageUrl of pageUrls) {
+            shareAnnotationsAction.data[pageUrl] = annotations
+                .filter((annotation) => annotation.pageUrl === pageUrl)
+                .map((annotation) => ({
                     localId: annotation.url,
                     createdWhen: annotation.createdWhen?.getTime?.(),
                     body: annotation.body ?? null,
@@ -292,8 +314,7 @@ export default class ContentSharingBackground {
                     selector: annotation.selector
                         ? JSON.stringify(annotation.selector)
                         : null,
-                })),
-            },
+                }))
         }
         await this.scheduleAction(shareAnnotationsAction, {
             queueInteraction: options.queueInteraction ?? 'queue-and-await',
@@ -307,33 +328,62 @@ export default class ContentSharingBackground {
             localIds: options.annotationUrls,
             excludeFromLists: false,
         })
-        const listIds = await this.options.customLists.fetchListIdsByUrl(
-            options.normalizedPageUrl,
+        const allAnnotations = await this.options.annotationStorage.getAnnotations(
+            options.annotationUrls,
         )
-        const areListsShared = await this.storage.areListsShared({
-            localIds: listIds,
-        })
-        const sharedListIds = Object.entries(areListsShared)
-            .filter(([, shared]) => shared)
-            .map(([listId]) => parseInt(listId, 10))
+        const pageUrls = new Set(
+            allAnnotations.map((annotation) => annotation.pageUrl),
+        )
+        for (const pageUrl of pageUrls) {
+            const listIds = await this.options.customLists.fetchListIdsByUrl(
+                pageUrl,
+            )
+            const areListsShared = await this.storage.areListsShared({
+                localIds: listIds,
+            })
+            const sharedListIds = Object.entries(areListsShared)
+                .filter(([, shared]) => shared)
+                .map(([listId]) => parseInt(listId, 10))
 
-        const pageAnnotationEntries = await this.options.annotationStorage.listAnnotationsByPageUrl(
-            {
-                pageUrl: options.normalizedPageUrl,
-            },
-        )
-        const annotationEntries = pageAnnotationEntries.filter((annotation) =>
-            options.annotationUrls.includes(annotation.url),
-        )
-        await this._scheduleAddAnnotationEntries({
-            annotationEntries,
-            remoteListIds: Object.values(
-                await this.storage.getRemoteListIds({
-                    localIds: sharedListIds,
-                }),
-            ),
-            queueInteraction: options.queueInteraction ?? 'queue-and-return',
+            await this._scheduleAddAnnotationEntries({
+                annotations: allAnnotations.filter(
+                    (annotation) => annotation.pageUrl === pageUrl,
+                ),
+                remoteListIds: Object.values(
+                    await this.storage.getRemoteListIds({
+                        localIds: sharedListIds,
+                    }),
+                ),
+                queueInteraction:
+                    options.queueInteraction ?? 'queue-and-return',
+            })
+        }
+    }
+
+    async ensureRemotePageId(normalizedPageUrl: string): Promise<string> {
+        const userId = (await this.options.auth.authService.getCurrentUser())
+            ?.id
+        if (!userId) {
+            throw new Error(
+                `Tried to execute sharing action without being authenticated`,
+            )
+        }
+        const userReference = {
+            type: 'user-reference' as 'user-reference',
+            id: userId,
+        }
+
+        const page = (
+            await this.storage.getPages({
+                normalizedPageUrls: [normalizedPageUrl],
+            })
+        )[normalizedPageUrl]
+        const contentSharing = await this.options.getContentSharing()
+        const reference = await contentSharing.ensurePageInfo({
+            pageInfo: pick(page, 'fullTitle', 'originalUrl', 'normalizedUrl'),
+            creatorReference: userReference,
         })
+        return contentSharing.getSharedPageInfoLinkID(reference)
     }
 
     unshareAnnotationsFromLists: ContentSharingInterface['unshareAnnotationsFromLists'] = async (
@@ -343,28 +393,40 @@ export default class ContentSharingBackground {
             localIds: options.annotationUrls,
             excludeFromLists: true,
         })
-        const localListIds = await this.options.customLists.fetchListIdsByUrl(
-            options.normalizedPageUrl,
+        const allAnnotations = await this.options.annotationStorage.getAnnotations(
+            options.annotationUrls,
         )
-        const remoteListIds = await this.storage.getRemoteListIds({
-            localIds: localListIds,
-        })
-        const remoteAnnotationIds = await this.storage.getRemoteAnnotationIds({
-            localIds: options.annotationUrls,
-        })
-
-        for (const remoteListId of Object.values(remoteListIds)) {
-            await this.scheduleAction(
+        const pageUrls = new Set(
+            allAnnotations.map((annotation) => annotation.pageUrl),
+        )
+        for (const pageUrl of pageUrls) {
+            const localListIds = await this.options.customLists.fetchListIdsByUrl(
+                pageUrl,
+            )
+            const remoteListIds = await this.storage.getRemoteListIds({
+                localIds: localListIds,
+            })
+            const remoteAnnotationIds = await this.storage.getRemoteAnnotationIds(
                 {
-                    type: 'remove-shared-annotation-list-entries',
-                    remoteListId,
-                    remoteAnnotationIds: Object.values(remoteAnnotationIds),
-                },
-                {
-                    queueInteraction:
-                        options.queueInteraction ?? 'queue-and-return',
+                    localIds: allAnnotations
+                        .filter((annotation) => annotation.pageUrl === pageUrl)
+                        .map((annotation) => annotation.url),
                 },
             )
+
+            for (const remoteListId of Object.values(remoteListIds)) {
+                await this.scheduleAction(
+                    {
+                        type: 'remove-shared-annotation-list-entries',
+                        remoteListId,
+                        remoteAnnotationIds: Object.values(remoteAnnotationIds),
+                    },
+                    {
+                        queueInteraction:
+                            options.queueInteraction ?? 'queue-and-return',
+                    },
+                )
+            }
         }
     }
 
@@ -618,21 +680,21 @@ export default class ContentSharingBackground {
     }
 
     async _scheduleAddAnnotationEntries(params: {
-        annotationEntries: Annotation[]
+        annotations: Annotation[]
         remoteListIds: string[]
         queueInteraction: ContentSharingQueueInteraction
     }) {
         const annotationsByPageUrl: {
             [annotationUrl: string]: { pageUrl: string; createdWhen?: Date }
         } = fromPairs(
-            params.annotationEntries.map((annotation) => [
+            params.annotations.map((annotation) => [
                 annotation.url,
                 annotation,
             ]),
         )
         const annotationMetadata = await this.storage.getRemoteAnnotationMetadata(
             {
-                localIds: params.annotationEntries.map(
+                localIds: params.annotations.map(
                     (annotation) => annotation.url,
                 ),
             },
@@ -712,7 +774,7 @@ export default class ContentSharingBackground {
                     )
 
                     await this._scheduleAddAnnotationEntries({
-                        annotationEntries,
+                        annotations: annotationEntries,
                         remoteListIds: [remoteListId],
                         queueInteraction: 'queue-and-return',
                     })

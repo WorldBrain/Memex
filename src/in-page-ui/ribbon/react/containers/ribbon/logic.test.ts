@@ -39,7 +39,7 @@ describe('Ribbon logic', () => {
         const annotations = insertBackgroundFunctionTab(
             backgroundModules.directLinking.remoteFunctions,
             currentTab,
-        )
+        ) as any
         const highlighter = {
             renderHighlights: () => {},
             removeHighlights: () => {},

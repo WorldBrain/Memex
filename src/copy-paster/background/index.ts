@@ -10,10 +10,8 @@ import { Template, TemplateDataFetchers } from '../types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import generateTemplateDocs from '../template-doc-generation'
 import { joinTemplateDocs, analyzeTemplate } from '../utils'
-import {
-    renderTemplate,
-} from '../utils'
 import ContentSharingBackground from 'src/content-sharing/background'
+import { getNoteShareUrl } from 'src/content-sharing/utils'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage
@@ -24,7 +22,7 @@ export default class CopyPasterBackground {
             storageManager: Storex
             contentSharing: Pick<
                 ContentSharingBackground,
-                'shareAnnotations' | 'sharePage'
+                'shareAnnotations' | 'sharePage' | 'storage'
             >
         },
     ) {
@@ -138,7 +136,7 @@ export function getTemplateDataFetchers({
     storageManager: Storex
     contentSharing: Pick<
         ContentSharingBackground,
-        'shareAnnotations' | 'sharePage'
+        'shareAnnotations' | 'sharePage' | 'storage'
     >
 }): TemplateDataFetchers {
     const getTagsForUrls = async (urls: string[]) => {
@@ -153,7 +151,26 @@ export function getTemplateDataFetchers({
         return tagsForUrls
     }
 
-    const getLinksForUrls = async (urls: string[]) => {
+    const getNoteLinks = async (annotationUrls: string[]) => {
+        await contentSharing.shareAnnotations({
+            annotationUrls,
+            queueInteraction: 'skip-queue',
+        })
+        const remoteIds = await contentSharing.storage.getRemoteAnnotationIds({
+            localIds: annotationUrls,
+        })
+        const noteLinks: { [annotationUrl: string]: string } = {}
+        for (const [annotationUrl, remoteId] of Object.entries(remoteIds)) {
+            noteLinks[annotationUrl] = getNoteShareUrl({
+                remoteAnnotationId:
+                    typeof remoteId === 'string'
+                        ? remoteId
+                        : remoteId.toString(),
+            })
+        }
+        return noteLinks
+    }
+    const getPageLinks = async (urls: string[]) => {
         // TODO: hook this up to proper call
         return urls.reduce((acc, url) => ({ ...acc, [url]: url }), {})
     }
@@ -206,7 +223,7 @@ export function getTemplateDataFetchers({
         },
         getTagsForPages: getTagsForUrls,
         getTagsForNotes: getTagsForUrls,
-        getNoteLinks: getLinksForUrls,
-        getPageLinks: getLinksForUrls,
+        getNoteLinks,
+        getPageLinks,
     }
 }

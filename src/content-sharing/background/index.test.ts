@@ -508,6 +508,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await contentSharing.waitForSync()
 
+                                // It should not try to upload the same annotation twice
+                                await contentSharing.shareAnnotation({
+                                    annotationUrl: secondAnnotationUrl,
+                                })
+                                await contentSharing.waitForSync()
+
                                 const sharedAnnotationMetadata = await setup.storageManager.operation(
                                     'findObjects',
                                     'sharedAnnotationMetadata',
@@ -586,9 +592,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual([])
 
                                 await contentSharing.shareAnnotationsToLists({
-                                    normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_1_DATA.pageUrl,
-                                    ),
                                     annotationUrls: [firstAnnotationUrl],
                                 })
                                 await contentSharing.waitForSync()
@@ -698,9 +701,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     { skipPageIndexing: true },
                                 )
                                 await contentSharing.shareAnnotations({
-                                    normalizedPageUrl: normalizeUrl(
-                                        data.ENTRY_1_DATA.url,
-                                    ),
+                                    annotationUrls: [
+                                        firstAnnotationUrl,
+                                        secondAnnotationUrl,
+                                    ],
+                                })
+                                await contentSharing.waitForSync()
+
+                                // It should not upload the same annotations more than once
+                                await contentSharing.shareAnnotations({
                                     annotationUrls: [
                                         firstAnnotationUrl,
                                         secondAnnotationUrl,
@@ -786,9 +795,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual([])
 
                                 await contentSharing.shareAnnotationsToLists({
-                                    normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_1_DATA.pageUrl,
-                                    ),
                                     annotationUrls: [firstAnnotationUrl],
                                 })
                                 await contentSharing.waitForSync()
@@ -896,9 +902,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     annotationUrl,
                                 })
                                 await contentSharing.shareAnnotationsToLists({
-                                    normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_1_DATA.pageUrl,
-                                    ),
                                     annotationUrls: [annotationUrl],
                                 })
                                 await contentSharing.waitForSync()
@@ -932,9 +935,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ])
                                 await contentSharing.unshareAnnotationsFromLists(
                                     {
-                                        normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_1_DATA.pageUrl,
-                                        ),
                                         annotationUrls: [annotationUrl],
                                     },
                                 )
@@ -1039,9 +1039,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     annotationUrl: secondAnnotationUrl,
                                 })
                                 await contentSharing.shareAnnotationsToLists({
-                                    normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_1_DATA.pageUrl,
-                                    ),
                                     annotationUrls: [firstAnnotationUrl],
                                 })
                                 await contentSharing.waitForSync()
@@ -1247,9 +1244,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     annotationUrl,
                                 })
                                 await contentSharing.shareAnnotationsToLists({
-                                    normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_1_DATA.pageUrl,
-                                    ),
                                     annotationUrls: [annotationUrl],
                                 })
                                 await contentSharing.waitForSync()
@@ -1400,9 +1394,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     annotationUrl,
                                 })
                                 await contentSharing.shareAnnotationsToLists({
-                                    normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_1_DATA.pageUrl,
-                                    ),
                                     annotationUrls: [annotationUrl],
                                 })
                                 await contentSharing.waitForSync()
@@ -1502,9 +1493,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     annotationUrl,
                                 })
                                 await contentSharing.shareAnnotationsToLists({
-                                    normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_1_DATA.pageUrl,
-                                    ),
                                     annotationUrls: [annotationUrl],
                                 })
                                 await contentSharing.waitForSync()
@@ -1612,9 +1600,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     annotationUrl,
                                 })
                                 await contentSharing.shareAnnotationsToLists({
-                                    normalizedPageUrl: normalizeUrl(
-                                        data.ANNOTATION_1_1_DATA.pageUrl,
-                                    ),
                                     annotationUrls: [annotationUrl],
                                 })
                                 await contentSharing.waitForSync()
