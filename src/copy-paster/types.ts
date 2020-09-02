@@ -53,15 +53,21 @@ export interface TemplateDataFetchers {
     getPages(
         normalizedPageUrls: string[],
     ): Promise<{ [normalizedPageUrl: string]: PageTemplateData }>
-    getTagsForPages(
-        normalizedPageUrls: string[],
-    ): Promise<{ [normalizedPageUrl: string]: string[] }>
     getNotes(
         annotationUrls: string[],
     ): Promise<{ [annotationUrl: string]: NoteTemplateData }>
     getTagsForNotes(
         annotationUrls: string[],
     ): Promise<{ [annotationUrl: string]: string[] }>
+    getTagsForPages(
+        normalizedPageUrls: string[],
+    ): Promise<{ [normalizedPageUrl: string]: string[] }>
+    getPageLinks(
+        normalizedPageUrls: string[],
+    ): Promise<{ [normalizedPageUrl: string]: string }>
+    getNoteLinks(
+        annotationUrls: string[],
+    ): Promise<{ [annotationUrl: string]: string }>
 }
 
 export interface PageTemplateData {

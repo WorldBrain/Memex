@@ -143,6 +143,11 @@ export function getTemplateDataFetchers({
         return tagsForUrls
     }
 
+    const getLinksForUrls = async (urls: string[]) => {
+        // TODO: hook this up to proper call
+        return urls.reduce((acc, url) => ({ ...acc, [url]: url }), {})
+    }
+
     return {
         getPages: async (normalizedPageUrls) => {
             const pages: Page[] = await storageManager
@@ -178,5 +183,7 @@ export function getTemplateDataFetchers({
         },
         getTagsForPages: getTagsForUrls,
         getTagsForNotes: getTagsForUrls,
+        getNoteLinks: getLinksForUrls,
+        getPageLinks: getLinksForUrls,
     }
 }

@@ -30,7 +30,7 @@ export const joinTags = (tags?: string[]): string | undefined =>
 export function joinTemplateDocs(
     templateDocs: TemplateDoc[],
     template: Pick<Template, 'code'>,
-) {
+): string {
     return templateDocs
         .map((templateDoc) => renderTemplate(template, templateDoc))
         .join('\n\n')
@@ -98,6 +98,13 @@ export async function generateTemplateDocs({
             params.normalizedPageUrls,
         )
 
+        let pageLinks = {}
+        if (templateAnalysis.requirements.pageLink) {
+            pageLinks = await dataFetchers.getPageLinks(
+                params.normalizedPageUrls,
+            )
+        }
+
         // user clicked on copy page
         const templateDocs: TemplateDoc[] = Object.entries(pageData).map(
             ([normalizedPageUrl, { fullTitle, fullUrl }]) => {
@@ -107,6 +114,8 @@ export async function generateTemplateDocs({
                     PageTags: joinTags(pageTags),
                     PageTagList: pageTags,
                     PageUrl: fullUrl,
+                    PageLink: pageLinks[normalizedPageUrl],
+
                     title: fullTitle,
                     tags: pageTags,
                     url: fullUrl,
@@ -119,8 +128,10 @@ export async function generateTemplateDocs({
     if (params.annotationUrls.length >= 1) {
         const notes = await dataFetchers.getNotes(params.annotationUrls)
         let noteTags = {}
+        let noteLinks = {}
         let pageData: PageTemplateData = {} as PageTemplateData
         let pageTagData: string[]
+        let pageLink: string
 
         if (templateAnalysis.requirements.noteTags) {
             noteTags = await dataFetchers.getTagsForNotes(params.annotationUrls)
@@ -140,6 +151,18 @@ export async function generateTemplateDocs({
             pageTagData = Object.values(pageTags)?.[0]
         }
 
+        if (templateAnalysis.requirements.pageLink) {
+            // There will only ever be a single page
+            const pageLinks = await dataFetchers.getPageLinks(
+                params.normalizedPageUrls,
+            )
+            pageLink = Object.values(pageLinks)?.[0]
+        }
+
+        if (templateAnalysis.requirements.noteLink) {
+            noteLinks = await dataFetchers.getNoteLinks(params.annotationUrls)
+        }
+
         // user clicked to copy multiple/all annotations on page
         // but they only want to render page info, so no need to fetch annotations
         if (!templateAnalysis.noteUsage) {
@@ -149,6 +172,8 @@ export async function generateTemplateDocs({
                     PageTags: joinTags(pageTagData),
                     PageTagList: pageTagData,
                     PageUrl: pageData.fullUrl,
+                    PageLink: pageLink,
+
                     title: pageData.fullTitle,
                     tags: pageTagData,
                     url: pageData.fullUrl,
@@ -167,10 +192,14 @@ export async function generateTemplateDocs({
                     NoteHighlight: body,
                     NoteTagList: noteTags[noteUrl],
                     NoteTags: joinTags(noteTags[noteUrl]),
+                    NoteLink: noteLinks[noteUrl],
+
                     PageTitle: pageData.fullTitle,
                     PageUrl: pageData.fullUrl,
                     PageTags: joinTags(pageTagData),
                     PageTagList: pageTagData,
+                    PageLink: pageLink,
+
                     title: pageData.fullTitle,
                     url: pageData.fullUrl,
                     tags: pageTagData,
@@ -188,10 +217,14 @@ export async function generateTemplateDocs({
                     NoteHighlight: body,
                     NoteTagList: noteTags[noteUrl],
                     NoteTags: joinTags(noteTags[noteUrl]),
+                    NoteLink: noteLinks[noteUrl],
+
                     PageTitle: pageData.fullTitle,
                     PageUrl: pageData.fullUrl,
                     PageTags: joinTags(pageTagData),
                     PageTagList: pageTagData,
+                    PageLink: pageLink,
+
                     title: pageData.fullTitle,
                     url: pageData.fullUrl,
                     tags: pageTagData,
@@ -205,6 +238,8 @@ export async function generateTemplateDocs({
                     PageUrl: pageData.fullUrl,
                     PageTags: joinTags(pageTagData),
                     PageTagList: pageTagData,
+                    PageLink: pageLink,
+
                     title: pageData.fullTitle,
                     url: pageData.fullUrl,
                     tags: pageTagData,
