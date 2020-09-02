@@ -16,6 +16,7 @@ export const goTo = browser.extension.getURL('/img/open.svg')
 export const copy = browser.extension.getURL('/img/copy.svg')
 export const edit = browser.extension.getURL('/img/edit.svg')
 export const share = browser.extension.getURL('/img/share.svg')
+export const shareWhite = browser.extension.getURL('/img/shareWhite.svg')
 export const shareEmpty = browser.extension.getURL('/img/shareEmpty.svg')
 
 export const longArrow = browser.extension.getURL('/img/longarrow.svg')

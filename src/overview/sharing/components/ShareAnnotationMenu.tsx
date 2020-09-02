@@ -8,6 +8,7 @@ import {
 import { LoadingIndicator } from 'src/common-ui/components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { ClickAway } from 'src/util/click-away-wrapper'
+import { ButtonTooltip } from 'src/common-ui/components'
 
 const COPY_TIMEOUT = 2000
 
@@ -67,11 +68,11 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     private renderShortcutTip({ modifier }: { modifier: 'Shift' | 'Alt' }) {
         return (
             <ShortcutTip>
-                <TypographyTextSmall css="font-weight: 'bold';">
-                    Tip:{' '}
+                <TypographyTextSmall css="font-weight: 'bold'; margin-right: 5px">
+                    <strong>Tip:{' '}</strong>
                 </TypographyTextSmall>
                 <TypographyTextSmall>{modifier} + click </TypographyTextSmall>
-                <TipShareIcon src={icons.share} />
+                <TipShareIcon src={icons.shareWhite} />
             </ShortcutTip>
         )
     }
@@ -126,17 +127,28 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         const { shareAllBtn } = this.state
 
         if (shareAllBtn === 'running') {
-            return <LoadingIndicator />
+            return (
+                <>
+                    <CheckBoxBox>
+                        <LoadingIndicator />
+                    </CheckBoxBox>
+                    <ShareAllText>
+                        {this.props.shareAllText}
+                    </ShareAllText>
+                </> 
+            )
         }
 
         return (
             <>
-                <Checkbox>
-                    <CheckboxInner isChecked={shareAllBtn === 'checked'} />
-                </Checkbox>
-                <TypographyTextNormal>
+                <CheckBoxBox>
+                    <Checkbox>
+                        <CheckboxInner isChecked={shareAllBtn === 'checked'} />
+                    </Checkbox>
+                </CheckBoxBox>
+                <ShareAllText>
                     {this.props.shareAllText}
-                </TypographyTextNormal>
+                </ShareAllText>
             </>
         )
     }
@@ -164,27 +176,53 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         return (
             <ClickAway onClickAway={this.handleClickOutside}>
                 <Menu>
-                    <LinkCopier
-                        state={this.state.linkCopier}
-                        onClick={this.handleLinkClick}
+                    <SectionTitle>
+                        Link to Page
+                    </SectionTitle>
+                    <SectionDescription>
+                        A link to all shared notes on this page.
+                    </SectionDescription>
+                      <ShareAllBox
+                        tooltipText={this.renderShortcutTip({ modifier: 'Alt' })}
+                        position = 'bottom'
                     >
-                        {this.renderLinkContent()}
-                    </LinkCopier>
-                    {this.renderShortcutTip({ modifier: 'Alt' })}
-                    <ShareAllBtn
-                        state={this.state.shareAllBtn}
-                        onClick={this.handleShareClick}
+                        <LinkCopierBox>
+                            <LinkCopier
+                                state={this.state.linkCopier}
+                                onClick={this.handleLinkClick}
+                            >
+                                {this.renderLinkContent()}
+                            </LinkCopier>
+                            <RemoveIcon src={icons.trash}/>
+                        </LinkCopierBox>
+                     </ShareAllBox>
+                    <Spacing/>
+                    <SectionTitle>
+                        Share all Notes
+                    </SectionTitle>
+                    <SectionDescription>
+                        Add all notes on page to shared collections
+                    </SectionDescription>
+                    <ShareAllBox
+                        tooltipText={this.renderShortcutTip({ modifier: 'Shift' })}
+                        position = 'bottom'
                     >
-                        {this.renderShareAllContent()}
-                    </ShareAllBtn>
-                    {this.renderShortcutTip({ modifier: 'Shift' })}
-                    <UnshareBtn
-                        state={this.state.unshareBtn}
-                        onClick={this.handleUnshareClick}
-                        disabled={this.state.unshareBtn === 'disabled'}
-                    >
-                        {this.renderUnshareContent()}
-                    </UnshareBtn>
+                        <ShareAllBtn
+                            state={this.state.shareAllBtn}
+                            onClick={this.handleShareClick}
+                        >
+                            {this.renderShareAllContent()}
+                        </ShareAllBtn>
+                    </ShareAllBox>
+                        {/*<UnshareBtn
+                            state={this.state.unshareBtn}
+                            onClick={this.handleUnshareClick}
+                            disabled={this.state.unshareBtn === 'disabled'}
+                        >
+                            {this.renderUnshareContent()}
+                        </UnshareBtn>
+                        */}
+                    
                 </Menu>
             </ClickAway>
         )
@@ -193,18 +231,133 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
 export default ShareAnnotationMenu
 
-const Menu = styled.div``
+const Menu = styled.div`
+    padding: 10px 15px;
+`
 
-const LinkCopier = styled.button``
-const LinkText = styled.span``
+const Spacing = styled.div`
+height: 15px;
+`
+
+const SectionTitle = styled.div`
+    font-weight: bold;
+    font-size: 14px;
+    color: #3a2f45;
+`
+
+const SectionDescription = styled.div`
+    font-size: 12px;
+    color: #3a2f45;
+`
+
+const LinkCopierBox = styled.div`
+    width: 100%;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 5px 0;
+`
+
+const RemoveIcon = styled.img`
+    width: 24px;
+    height: 24px;
+    margin-left: 10px;
+    border-radius: 3px;
+    padding: 3px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #e0e0e0;
+    } 
+`
+
+const LinkCopier = styled.button`
+    width: 100%
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 0;
+    border-radius: 3px;
+    height: 30px;
+    padding: 0 10px;
+    outline: none;
+    cursor: pointer;
+    overflow: hidden;
+`
+const LinkText = styled.span`
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 90%;
+`
 const LinkCopyIcon = styled.img``
 
-const ShareAllBtn = styled.button``
 // TODO Move these somewhere else for re-use
-const Checkbox = styled.div``
-const CheckboxInner = styled.div``
 
-const UnshareBtn = styled.button``
+const ShareAllBox = styled(ButtonTooltip)`
+    width: 100%;
+`
 
-const TipShareIcon = styled.img``
-const ShortcutTip = styled.div``
+const ShareAllBtn = styled.button`
+    width: 100%
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    border: 0;
+    border-radius: 3px;
+    height: 34px;
+    padding: 0 10px;
+    outline: none;
+    background: none;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #e0e0e0;
+    } 
+`
+
+const CheckBoxBox = styled.div`
+    width: 34px;
+    height: 34px;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+`
+
+const Checkbox = styled.div`
+    border: 1px solid red;
+    width: 14px;
+    height: 14px;
+    outline: none;
+`
+const CheckboxInner = styled.div`
+    border: 1px solid black;
+    width: 14px;
+    height: 14px;
+    outline: none;
+`
+
+const UnshareBtn = styled.button`
+
+`
+
+const ShareAllText = styled(TypographyTextNormal)`
+    margin-left: 10px;
+`
+
+const TipShareIcon = styled.img`
+    height: 15px;
+    width: auto;
+    margin-left: 5px;
+`
+const ShortcutTip = styled.div`
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+    font-size: 8px;
+
+    & * {
+        color: #fff;
+    }
+`
