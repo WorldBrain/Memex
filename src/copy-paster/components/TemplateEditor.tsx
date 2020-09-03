@@ -107,19 +107,22 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                 </FlexContainer>
 
                 <TextInputBox>
-                    <TextInputControlled
-                        autoFocus
+                    <input
+                        type="text"
                         placeholder="Title"
-                        type="input"
-                        defaultValue={template?.title ?? ''}
                         className={styles.titleInput}
-                        onChange={this.props.onTitleChange}
+                        value={template?.title}
+                        onChange={(e) =>
+                            this.props.onTitleChange(e.target.value)
+                        }
                     />
-                    <TextInputControlled
+                    <textarea
                         placeholder="Code"
                         className={styles.textArea}
-                        defaultValue={template?.code ?? ''}
-                        onChange={this.props.onCodeChange}
+                        value={template?.code ?? ''}
+                        onChange={(e) =>
+                            this.props.onCodeChange(e.target.value)
+                        }
                         rows={5}
                     />
                 </TextInputBox>
