@@ -207,3 +207,22 @@
     justify-content: center;
     margin-left: 15px;
 }
+
+.buttonBox {
+    display: grid;
+    grid-gap: 5px;
+
+    & > div {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    & span {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: -8px;
+    }
+}

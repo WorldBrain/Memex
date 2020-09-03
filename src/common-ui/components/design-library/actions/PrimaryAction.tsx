@@ -58,7 +58,7 @@ export const PrimaryAction = ({
     disabled,
     innerRef,
 }: {
-    label: string
+    label: any
     onClick: () => void
     disabled?: boolean
     innerRef?: any

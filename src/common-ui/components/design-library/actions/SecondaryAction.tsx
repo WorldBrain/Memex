@@ -44,7 +44,7 @@ export const SecondaryAction = ({
     onClick,
     disabled,
 }: {
-    label: string
+    label: any
     disabled?: boolean
     onClick: () => void
 }) => (

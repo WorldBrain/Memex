@@ -13,6 +13,8 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { AuthContextInterface } from 'src/authentication/background/types'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import { auth, subscription } from 'src/util/remote-functions-background'
 
 const styles = require('../../styles.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
@@ -45,6 +47,7 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
         billingPeriod: null,
         subscribeModal: false,
         backupPath: null,
+        loadingChargebee: false,
     }
 
     async componentDidMount() {
@@ -70,6 +73,17 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
             backupLocation,
             showWarning,
             backupPath,
+        })
+    }
+
+    openPortal = async () => {
+        this.setState({
+            loadingChargebee: true,
+        })
+        const portalLink = await subscription.getManageLink()
+        window.open(portalLink['access_url'])
+        this.setState({
+            loadingChargebee: false,
         })
     }
 
@@ -233,10 +247,39 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                                         data every 15 minutes.
                                     </span>
                                 </div>
-                                <SecondaryAction
-                                    onClick={this.openSubscriptionModal}
-                                    label={'⭐️ Upgrade'}
-                                />
+                                <div className={settingsStyle.buttonBox}>
+                                    {!this.props.currentUser?.subscriptionStatus ? (
+                                        <>
+                                            {this.state.loadingChargebee && (
+                                                <SecondaryAction
+                                                    onClick={undefined}
+                                                    label={<LoadingIndicator/>}
+                                                />
+                                            )}
+                                            {!this.state.loadingChargebee && (
+                                                <SecondaryAction
+                                                    onClick={this.props.showSubscriptionModal}
+                                                    label={'⭐️ Upgrade'}
+                                                />
+                                            )}
+                                        </>
+                                    ):(
+                                        <>
+                                            {this.state.loadingChargebee && (
+                                                <SecondaryAction
+                                                    onClick={undefined}
+                                                    label={<LoadingIndicator/>}
+                                                />
+                                            )}
+                                            {!this.state.loadingChargebee && (
+                                                   <SecondaryAction
+                                                        onClick={()=> this.openPortal()}
+                                                        label={'⭐️ Upgrade'}
+                                                    />
+                                            )}
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         )}
 
