@@ -161,7 +161,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                         />
                                         <PrimaryButton
                                             onClick={
-                                                this.props.showSubscriptionModal
+                                                this.openPortal
                                             }
                                         >
                                             {'Reactivate'}
