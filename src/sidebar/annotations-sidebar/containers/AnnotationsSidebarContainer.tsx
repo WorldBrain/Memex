@@ -250,7 +250,7 @@ export class AnnotationsSidebarContainer<
             return null
         }
 
-        return this.renderCopyPasterManager()
+        return this.renderCopyPasterManager([currentAnnotationId])
     }
 
     private renderShareMenuForAnnotation = (currentAnnotationId: string) => {
@@ -285,15 +285,12 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderCopyPasterManager() {
+    private renderCopyPasterManager(annotationUrls: string[]) {
         return (
             <HoverBox>
                 <CopyPaster
-                    templateDoc={{
-                        title: '',
-                        url: '',
-                        tags: [],
-                    }}
+                    annotationUrls={annotationUrls}
+                    normalizedPageUrls={[this.state.pageUrl]}
                     onClickOutside={() =>
                         this.processEvent('resetCopyPasterAnnotationId', null)
                     }
@@ -346,7 +343,9 @@ export class AnnotationsSidebarContainer<
                     </TopBarActionBtns>
                 </TopBarContainerStyled>
                 {this.state.showAllNotesCopyPaster &&
-                    this.renderCopyPasterManager()}
+                    this.renderCopyPasterManager(
+                        this.state.annotations.map((annot) => annot.url),
+                    )}
                 {this.state.showAllNotesShareMenu &&
                     this.renderAllNotesShareMenu()}
             </>

@@ -257,30 +257,16 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
         )
     }
 
-    private renderCopyPasterManager(
-        {
-            shouldDisplayCopyPasterPopup,
-            fullUrl,
-            title,
-            tags: resultTags,
-        }: Result,
-        index,
-    ) {
-        if (!shouldDisplayCopyPasterPopup) {
+    private renderCopyPasterManager(doc: Result, index) {
+        if (!doc.shouldDisplayCopyPasterPopup) {
             return null
-        }
-
-        const doc = {
-            url: fullUrl,
-            title,
-            tags: resultTags,
         }
 
         return (
             <HoverBox>
                 <div ref={(ref) => this.setCopyPasterDivRef(ref)}>
                     <CopyPaster
-                        templateDoc={doc}
+                        normalizedPageUrls={[doc.url]}
                         onClickOutside={this.props.resetActiveCopyPasterIndex}
                     />
                 </div>

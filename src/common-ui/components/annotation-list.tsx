@@ -68,6 +68,7 @@ class AnnotationList extends Component<Props, State> {
         fetched from localStorage. */
         isExpanded: this.props.isExpandedOverride,
         prevIsExpandedOverride: this.props.isExpandedOverride,
+        // TODO: This shouldn't be in state - get it out and ensure wherever it gets passed down as props from properly handles state mutations
         annotations: this.props.annotations,
         sharingAccess: 'feature-disabled',
         annotationsSharingInfo: {},
@@ -234,11 +235,8 @@ class AnnotationList extends Component<Props, State> {
         return (
             <HoverBox>
                 <CopyPaster
-                    templateDoc={{
-                        title: '',
-                        url: '',
-                        tags: [],
-                    }}
+                    annotationUrls={[annot.url]}
+                    normalizedPageUrls={[annot.pageUrl]}
                     onClickOutside={() =>
                         this.props.setActiveCopyPasterAnnotationId?.(undefined)
                     }
