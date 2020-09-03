@@ -6,4 +6,9 @@ export interface RemoteCopyPasterInterface {
     updateTemplate(args: Template): Promise<void>
     deleteTemplate(args: { id: number }): Promise<void>
     findAllTemplates(): Promise<Template[]>
+    renderTemplate(args: {
+        id: number
+        annotationUrls: string[]
+        normalizedPageUrls: string[]
+    }): Promise<string>
 }

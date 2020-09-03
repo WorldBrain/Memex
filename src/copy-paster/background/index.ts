@@ -37,10 +37,11 @@ export default class CopyPasterBackground {
         })
 
         this.remoteFunctions = {
-            createTemplate: bindMethod(this, 'createTemplate'),
             findTemplate: bindMethod(this, 'findTemplate'),
+            createTemplate: bindMethod(this, 'createTemplate'),
             updateTemplate: bindMethod(this, 'updateTemplate'),
             deleteTemplate: bindMethod(this, 'deleteTemplate'),
+            renderTemplate: bindMethod(this, 'renderTemplate'),
             findAllTemplates: bindMethod(this, 'findAllTemplates'),
         }
 
@@ -65,6 +66,25 @@ export default class CopyPasterBackground {
 
     async findAllTemplates() {
         return this.storage.findAllTemplates()
+    }
+
+    async renderTemplate({
+        id,
+        annotationUrls,
+        normalizedPageUrls,
+    }: {
+        id: number
+        annotationUrls: string[]
+        normalizedPageUrls: string[]
+    }) {
+        const template = await this.storage.findTemplate({ id })
+        const templateDocs = await generateTemplateDocs({
+            annotationUrls,
+            normalizedPageUrls,
+            templateAnalysis: analyzeTemplate(template),
+            dataFetchers: getTemplateDataFetchers(this.options),
+        })
+        return joinTemplateDocs(templateDocs, template)
     }
 
     async renderSinglePageTemplate(params: {

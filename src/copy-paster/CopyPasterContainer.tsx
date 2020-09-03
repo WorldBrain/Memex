@@ -1,7 +1,6 @@
 import React from 'react'
 
-import { Template, TemplateDoc } from './types'
-import { renderTemplate } from './utils'
+import { Template } from './types'
 import CopyPaster from './components/CopyPaster'
 import { copyPaster } from 'src/util/remote-functions-background'
 
@@ -13,8 +12,9 @@ interface State {
 
 export interface Props {
     onClickOutside: () => void
+    normalizedPageUrls: string[]
+    annotationUrls?: string[]
     initTemplates?: Template[]
-    templateDoc: TemplateDoc
 }
 
 export default class CopyPasterContainer extends React.PureComponent<
@@ -26,6 +26,10 @@ export default class CopyPasterContainer extends React.PureComponent<
         title: '',
         code: '',
         isFavourite: false,
+    }
+
+    static defaultProps: Partial<Props> = {
+        annotationUrls: [],
     }
 
     private copyPasterBG = copyPaster
@@ -81,13 +85,22 @@ export default class CopyPasterContainer extends React.PureComponent<
         await this.syncTemplates()
     }
 
-    private handleTemplateCopy = (id: number) => {
-        const template = this.findTemplateForId(id)
-        const rendered = renderTemplate(template, this.props.templateDoc)
+    private handleTemplateCopy = async (id: number) => {
+        this.setState({ isLoading: true })
 
-        navigator.clipboard.writeText(rendered).catch((e) => {
-            console.error(e)
-        })
+        try {
+            const rendered = await this.copyPasterBG.renderTemplate({
+                id,
+                annotationUrls: this.props.annotationUrls,
+                normalizedPageUrls: this.props.normalizedPageUrls,
+            })
+
+            await navigator.clipboard.writeText(rendered)
+        } catch (err) {
+            console.error('Something went really bad copying:', err.message)
+        } finally {
+            this.setState({ isLoading: false })
+        }
     }
 
     private handleTemplateSave = async () => {
