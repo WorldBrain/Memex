@@ -10,6 +10,10 @@ import { Template, TemplateDataFetchers } from '../types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import generateTemplateDocs from '../template-doc-generation'
 import { joinTemplateDocs, analyzeTemplate } from '../utils'
+import ContentSharingBackground from 'src/content-sharing/background'
+import { getNoteShareUrl, getPageShareUrl } from 'src/content-sharing/utils'
+import flatten from 'lodash/flatten'
+import fromPairs from 'lodash/fromPairs'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage
@@ -18,6 +22,13 @@ export default class CopyPasterBackground {
     constructor(
         private options: {
             storageManager: Storex
+            contentSharing: Pick<
+                ContentSharingBackground,
+                | 'shareAnnotations'
+                | 'sharePage'
+                | 'storage'
+                | 'ensureRemotePageId'
+            >
         },
     ) {
         // makes the custom copy paster table in indexed DB
@@ -125,8 +136,13 @@ export default class CopyPasterBackground {
 
 export function getTemplateDataFetchers({
     storageManager,
+    contentSharing,
 }: {
     storageManager: Storex
+    contentSharing: Pick<
+        ContentSharingBackground,
+        'shareAnnotations' | 'sharePage' | 'storage' | 'ensureRemotePageId'
+    >
 }): TemplateDataFetchers {
     const getTagsForUrls = async (urls: string[]) => {
         const tags: Tag[] = await storageManager
@@ -140,9 +156,46 @@ export function getTemplateDataFetchers({
         return tagsForUrls
     }
 
-    const getLinksForUrls = async (urls: string[]) => {
-        // TODO: hook this up to proper call
-        return urls.reduce((acc, url) => ({ ...acc, [url]: url }), {})
+    const getNoteLinks = async (annotationUrls: string[]) => {
+        await contentSharing.shareAnnotations({
+            annotationUrls,
+            queueInteraction: 'skip-queue',
+        })
+        const remoteIds = await contentSharing.storage.getRemoteAnnotationIds({
+            localIds: annotationUrls,
+        })
+        const noteLinks: { [annotationUrl: string]: string } = {}
+        for (const [annotationUrl, remoteId] of Object.entries(remoteIds)) {
+            noteLinks[annotationUrl] = getNoteShareUrl({
+                remoteAnnotationId:
+                    typeof remoteId === 'string'
+                        ? remoteId
+                        : remoteId.toString(),
+            })
+        }
+        return noteLinks
+    }
+    const getPageLinks = async (notes: {
+        [normalizedPageUrl: string]: { annotationUrls: string[] }
+    }) => {
+        const annotationUrls = flatten(
+            Object.values(notes).map((note) => note.annotationUrls),
+        )
+        await contentSharing.shareAnnotations({
+            annotationUrls,
+            queueInteraction: 'skip-queue',
+        })
+        const pairs = await Promise.all(
+            Object.keys(notes).map(async (normalizedPageUrl) => [
+                normalizedPageUrl,
+                getPageShareUrl({
+                    remotePageInfoId: await contentSharing.ensureRemotePageId(
+                        normalizedPageUrl,
+                    ),
+                }),
+            ]),
+        )
+        return fromPairs(pairs)
     }
 
     return {
@@ -193,7 +246,7 @@ export function getTemplateDataFetchers({
         },
         getTagsForPages: getTagsForUrls,
         getTagsForNotes: getTagsForUrls,
-        getNoteLinks: getLinksForUrls,
-        getPageLinks: getLinksForUrls,
+        getNoteLinks,
+        getPageLinks,
     }
 }

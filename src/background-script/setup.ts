@@ -220,6 +220,15 @@ export function createBackgroundModules(options: {
         searchIndex: search.searchIndex,
         pageStorage: pages.storage,
     })
+    const contentSharing = new ContentSharingBackground({
+        storageManager,
+        customLists: customLists.storage,
+        annotationStorage: directLinking.annotationStorage,
+        auth,
+        analytics: options.analyticsManager,
+        getContentSharing: async () =>
+            (await options.getServerStorage()).storageModules.contentSharing,
+    })
     return {
         auth,
         social,
@@ -325,17 +334,9 @@ export function createBackgroundModules(options: {
         }),
         copyPaster: new CopyPasterBackground({
             storageManager,
+            contentSharing,
         }),
-        contentSharing: new ContentSharingBackground({
-            storageManager,
-            customLists: customLists.storage,
-            annotationStorage: directLinking.annotationStorage,
-            auth,
-            analytics: options.analyticsManager,
-            getContentSharing: async () =>
-                (await options.getServerStorage()).storageModules
-                    .contentSharing,
-        }),
+        contentSharing,
     }
 }
 

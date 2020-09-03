@@ -111,6 +111,11 @@ export default class AnnotationStorage extends StorageModule {
                 operation: 'findObject',
                 args: { url: '$url:pk' },
             },
+            findAnnotationsByUrls: {
+                collection: AnnotationStorage.ANNOTS_COLL,
+                operation: 'findObjects',
+                args: { url: { $in: '$urls:array:pk' } },
+            },
             findListEntriesByUrl: {
                 collection: AnnotationStorage.LIST_ENTRIES_COLL,
                 operation: 'findObjects',
@@ -190,6 +195,10 @@ export default class AnnotationStorage extends StorageModule {
             },
         },
     })
+
+    async getAnnotations(urls: string[]): Promise<Annotation[]> {
+        return this.operation('findAnnotationsByUrls', { urls })
+    }
 
     async listAnnotationsByPageUrl({
         pageUrl,
