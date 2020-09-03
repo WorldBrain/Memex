@@ -174,7 +174,7 @@ class ResultsContainer extends React.Component<Props, State> {
                 onCancelBtnClick={this.handleHideDeprecatedSearchWarning}
                 onInfoBtnClick={() =>
                     window.open(
-                        'https://www.notion.so/worldbrain/history-search-also-has-been-disabled-for-existing-users-84f9fad4f2994d6ab0fedf7ed8705094',
+                        'https://worldbrain.io/announcements/search-deprecation',
                     )
                 }
             />
