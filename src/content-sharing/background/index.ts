@@ -74,6 +74,7 @@ export default class ContentSharingBackground {
             shareAnnotationsToLists: this.shareAnnotationsToLists,
             unshareAnnotationsFromLists: this.unshareAnnotationsFromLists,
             unshareAnnotation: this.unshareAnnotation,
+            ensureRemotePageId: this.ensureRemotePageId,
             getRemoteListId: async (callOptions) => {
                 return this.storage.getRemoteListId({
                     localId: callOptions.localListId,
@@ -360,7 +361,9 @@ export default class ContentSharingBackground {
         }
     }
 
-    async ensureRemotePageId(normalizedPageUrl: string): Promise<string> {
+    ensureRemotePageId: ContentSharingInterface['ensureRemotePageId'] = async (
+        normalizedPageUrl,
+    ) => {
         const userId = (await this.options.auth.authService.getCurrentUser())
             ?.id
         if (!userId) {

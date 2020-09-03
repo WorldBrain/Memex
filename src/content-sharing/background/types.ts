@@ -23,6 +23,7 @@ export interface ContentSharingInterface {
         annotationUrl: string
         queueInteraction?: ContentSharingQueueInteraction
     }): Promise<void>
+    ensureRemotePageId(normalizedPageUrl: string): Promise<string>
     getRemoteListId(options: { localListId: number }): Promise<string | null>
     getRemoteAnnotationIds(params: {
         annotationUrls: string[]

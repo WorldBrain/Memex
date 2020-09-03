@@ -2,6 +2,8 @@ import React from 'react'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import delay from 'src/util/delay'
+import { contentSharing } from 'src/util/remote-functions-background'
+import { getPageShareUrl } from 'src/content-sharing/utils'
 
 interface State {
     isShareAllChecked: boolean
@@ -21,10 +23,10 @@ export default class AllNotesShareModal extends React.PureComponent<
     }
 
     private getCreatedLink = async () => {
-        // TODO: Call BG method
-        await delay(1000)
-
-        return 'memex.social/l/this-is-not-real'
+        const remotePageInfoId = await contentSharing.ensureRemotePageId(
+            this.props.pageUrl,
+        )
+        return getPageShareUrl({ remotePageInfoId })
     }
 
     private getAllSharedStatus = async () => {
