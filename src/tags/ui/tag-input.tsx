@@ -9,7 +9,6 @@ import styled from 'styled-components'
 import { Link } from 'src/common-ui/components/design-library/actions/Link'
 import { ButtonTooltip } from 'src/common-ui/components'
 
-
 export interface Props {
     queryTagSuggestions: (query: string) => Promise<string[]>
     fetchInitialTagSuggestions: () => string[] | Promise<string[]>
@@ -30,19 +29,6 @@ class TagInput extends React.Component<Props> {
 
         return (
             <HoverBox>
-                    <TopRow
-                        onClick={(e) => this.props.handleClose(e)}
-                    >
-                      <ButtonTooltip
-                        tooltipText="ESC"
-                        position="bottom"
-                        >
-                            <LesserLinkStyled
-                                label={'Close'}
-                                onClick={(e) => this.props.handleClose(e)}
-                            />
-                        </ButtonTooltip>
-                    </TopRow>
                 <TagPicker
                     onUpdateEntrySelection={this.props.updateTags}
                     queryEntries={this.props.queryTagSuggestions}
@@ -51,7 +37,7 @@ class TagInput extends React.Component<Props> {
                     }
                     initialSelectedEntries={async () => this.props.tags}
                     onEscapeKeyDown={() => this.props.setTagInputActive(false)}
-                    onClickOutside={() => this.props.handleClose}
+                    onClickOutside={(e) => this.props.handleClose(e)}
                 />
             </HoverBox>
         )
@@ -74,8 +60,7 @@ class TagInput extends React.Component<Props> {
     }
 }
 
-const LesserLinkStyled = styled(LesserLink)`
-`
+const LesserLinkStyled = styled(LesserLink)``
 
 const TopRow = styled.div`
     display: flex;
