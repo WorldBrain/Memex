@@ -25,6 +25,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareModal'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareModal'
 import CopyPaster from 'src/copy-paster'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -290,7 +291,7 @@ export class AnnotationsSidebarContainer<
             <HoverBox>
                 <CopyPaster
                     annotationUrls={annotationUrls}
-                    normalizedPageUrls={[this.state.pageUrl]}
+                    normalizedPageUrls={[normalizeUrl(this.state.pageUrl)]}
                     onClickOutside={() =>
                         this.processEvent('resetCopyPasterAnnotationId', null)
                     }

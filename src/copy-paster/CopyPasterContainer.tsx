@@ -3,6 +3,7 @@ import React from 'react'
 import { Template } from './types'
 import CopyPaster from './components/CopyPaster'
 import { copyPaster } from 'src/util/remote-functions-background'
+import { copyToClipboard } from 'src/annotations/content_script/utils'
 
 interface State {
     isLoading: boolean
@@ -95,7 +96,7 @@ export default class CopyPasterContainer extends React.PureComponent<
                 normalizedPageUrls: this.props.normalizedPageUrls,
             })
 
-            await navigator.clipboard.writeText(rendered)
+            await copyToClipboard(rendered)
         } catch (err) {
             console.error('Something went really bad copying:', err.message)
         } finally {
