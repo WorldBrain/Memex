@@ -541,7 +541,10 @@ export class SidebarContainerLogic extends UILogic<
     resetCopyPasterAnnotationId: EventHandler<
         'resetCopyPasterAnnotationId'
     > = () => {
-        this.emitMutation({ activeCopyPasterAnnotationId: { $set: undefined } })
+        this.emitMutation({
+            showAllNotesCopyPaster: { $set: false },
+            activeCopyPasterAnnotationId: { $set: undefined },
+        })
     }
 
     hide: EventHandler<'hide'> = () => {
