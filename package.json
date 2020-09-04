@@ -117,6 +117,7 @@
         "styled-components": "^4.4.1",
         "styled-props": "^1.1.2",
         "through2": "^2.0.3",
+        "traverse": "^0.6.6",
         "tweetnacl": "^1.0.1",
         "tweetnacl-async": "^2.0.0",
         "tweetnacl-util": "^0.15.0",

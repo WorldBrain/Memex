@@ -1,4 +1,4 @@
-import { analyzeTemplate } from './utils'
+import { analyzeTemplate, renderTemplate } from './utils'
 import { KEYS_TO_REQUIREMENTS, LEGACY_KEYS, NOTE_KEYS } from './constants'
 import { TemplateDocKey, TemplateAnalysis } from './types'
 
@@ -10,7 +10,7 @@ const testAnalysis = (code: string, expected: TemplateAnalysis) => {
     })
 }
 
-describe('Content template rendering', () => {
+describe('Content template analysis', () => {
     it('should correctly analyze templates', () => {
         for (const [key, requirement] of Object.entries(KEYS_TO_REQUIREMENTS)) {
             const code = `{{{${key}}}}`
@@ -68,5 +68,28 @@ describe('Content template rendering', () => {
                 usesLegacyTags: false,
             },
         )
+    })
+})
+
+describe('Content template rendering', () => {
+    it('should strip whitespace from all text fields', () => {
+        expect(
+            renderTemplate(
+                {
+                    code: [
+                        `{{PageTitle}}`,
+                        `{{NoteText}}`,
+                        `{{#Notes}}{{NoteText}}{{/Notes}}`,
+                        `{{#Pages}}{{PageTitle}}{{/Pages}}`,
+                    ].join(' '),
+                },
+                {
+                    PageTitle: '  test1  ',
+                    NoteText: ' test2 ',
+                    Notes: [{ NoteText: '  test3  ' }],
+                    Pages: [{ PageTitle: '  test4  ' }],
+                },
+            ),
+        ).toEqual('test1 test2 test3 test4')
     })
 })

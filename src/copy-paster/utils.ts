@@ -1,3 +1,4 @@
+import traverse from 'traverse'
 import mustache from 'mustache'
 import {
     Template,
@@ -13,6 +14,11 @@ export function renderTemplate(
     template: Pick<Template, 'code'>,
     doc: TemplateDoc,
 ): string {
+    traverse(doc).forEach(function (value) {
+        if (typeof value === 'string') {
+            this.update(value.trim())
+        }
+    })
     return mustache.render(template.code, doc)
 }
 
