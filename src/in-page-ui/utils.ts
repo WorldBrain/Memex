@@ -1,4 +1,4 @@
-import retargetEvents from 'react-shadow-dom-retarget-events'
+// import retargetEvents from 'react-shadow-dom-retarget-events'
 import { createInPageUIRoot, destroyRootElement } from './dom'
 
 export function createInPageUI(
@@ -14,7 +14,7 @@ export function createInPageUI(
         cssFile,
     })
 
-    retargetEvents(mount.shadowRoot)
+    // retargetEvents(mount.shadowRoot)
 
     return mount
 }

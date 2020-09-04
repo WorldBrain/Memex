@@ -69,7 +69,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         return (
             <ShortcutTip>
                 <TypographyTextSmall css="font-weight: 'bold'; margin-right: '10px'">
-                    <strong>Tip:{' '}</strong>
+                    <strong>Tip: </strong>
                 </TypographyTextSmall>
                 <TypographyTextSmall>{modifier} + click </TypographyTextSmall>
                 <TipShareIcon src={icons.shareWhite} />
@@ -132,10 +132,8 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                     <CheckBoxBox>
                         <LoadingIndicator />
                     </CheckBoxBox>
-                    <ShareAllText>
-                        {this.props.shareAllText}
-                    </ShareAllText>
-                </> 
+                    <ShareAllText>{this.props.shareAllText}</ShareAllText>
+                </>
             )
         }
 
@@ -146,9 +144,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                         <CheckboxInner isChecked={shareAllBtn === 'checked'} />
                     </Checkbox>
                 </CheckBoxBox>
-                <ShareAllText>
-                    {this.props.shareAllText}
-                </ShareAllText>
+                <ShareAllText>{this.props.shareAllText}</ShareAllText>
             </>
         )
     }
@@ -176,15 +172,15 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         return (
             <ClickAway onClickAway={this.handleClickOutside}>
                 <Menu>
-                    <SectionTitle>
-                        Link to Page
-                    </SectionTitle>
+                    <SectionTitle>Link to Page</SectionTitle>
                     <SectionDescription>
                         A link to all shared notes on this page.
                     </SectionDescription>
-                      <ShareAllBox
-                        tooltipText={this.renderShortcutTip({ modifier: 'Alt' })}
-                        position = 'bottom'
+                    <ShareAllBox
+                        tooltipText={this.renderShortcutTip({
+                            modifier: 'Alt',
+                        })}
+                        position="bottom"
                     >
                         <LinkCopierBox>
                             <LinkCopier
@@ -193,19 +189,19 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                             >
                                 {this.renderLinkContent()}
                             </LinkCopier>
-                            <RemoveIcon src={icons.trash}/>
+                            <RemoveIcon src={icons.trash} />
                         </LinkCopierBox>
-                     </ShareAllBox>
-                    <Spacing/>
-                    <SectionTitle>
-                        Share all Notes
-                    </SectionTitle>
+                    </ShareAllBox>
+                    <Spacing />
+                    <SectionTitle>Share all Notes</SectionTitle>
                     <SectionDescription>
                         Add all notes on page to shared collections
                     </SectionDescription>
                     <ShareAllBox
-                        tooltipText={this.renderShortcutTip({ modifier: 'Shift' })}
-                        position = 'bottom'
+                        tooltipText={this.renderShortcutTip({
+                            modifier: 'Shift',
+                        })}
+                        position="bottom"
                     >
                         <ShareAllBtn
                             state={this.state.shareAllBtn}
@@ -214,7 +210,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                             {this.renderShareAllContent()}
                         </ShareAllBtn>
                     </ShareAllBox>
-                        {/*<UnshareBtn
+                    {/*<UnshareBtn
                             state={this.state.unshareBtn}
                             onClick={this.handleUnshareClick}
                             disabled={this.state.unshareBtn === 'disabled'}
@@ -222,7 +218,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                             {this.renderUnshareContent()}
                         </UnshareBtn>
                         */}
-                    
                 </Menu>
             </ClickAway>
         )
@@ -236,10 +231,10 @@ const Menu = styled.div`
 `
 
 const Spacing = styled.div`
-height: 15px;
+    height: 15px;
 `
 
-const SectionTitle = styled.div`
+const SectionTitle = styled.div`
     font-weight: bold;
     font-size: 14px;
     color: #3a2f45;
@@ -268,7 +263,7 @@ const RemoveIcon = styled.img`
 
     &:hover {
         background-color: #e0e0e0;
-    } 
+    }
 `
 
 const LinkCopier = styled.button`
@@ -337,9 +332,7 @@ const CheckboxInner = styled.div`
     outline: none;
 `
 
-const UnshareBtn = styled.button`
-
-`
+const UnshareBtn = styled.button``
 
 const ShareAllText = styled(TypographyTextNormal)`
     margin-left: 10px;
