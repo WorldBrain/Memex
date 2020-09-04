@@ -1,7 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TagInput from 'src/tags/ui/tag-input'
@@ -37,18 +36,24 @@ class AnnotationEdit extends React.Component<Props> {
     }
 
     private onEnterSaveHandler = {
-        test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-        handle: (e) => this.props.onEditConfirm(this.props.url),
+        test: (e: React.KeyboardEvent<HTMLTextAreaElement>) =>
+            (e.ctrlKey || e.metaKey) && e.key === 'Enter',
+        handle: (e: React.KeyboardEvent<HTMLTextAreaElement>) =>
+            this.props.onEditConfirm(this.props.url),
     }
 
     private renderInput() {
         return (
-            <TextInputControlledStyled
-                defaultValue={this.props.comment}
+            <StyledTextArea
+                value={this.props.comment}
                 onClick={() => this.props.setTagInputActive(false)}
                 placeholder="Add a private note... (save with cmd/ctrl+enter)"
-                onChange={this.props.onCommentChange}
-                specialHandlers={[this.onEnterSaveHandler]}
+                onChange={(e) => this.props.onCommentChange(e.target.value)}
+                onKeyDown={(e) => {
+                    if (this.onEnterSaveHandler.test(e)) {
+                        this.onEnterSaveHandler.handle(e)
+                    }
+                }}
             />
         )
     }
@@ -83,7 +88,7 @@ class AnnotationEdit extends React.Component<Props> {
 
 export default AnnotationEdit
 
-const TextInputControlledStyled = styled(TextInputControlled)`
+const StyledTextArea = styled.textarea`
     background-color: #f7f7f7;
     box-sizing: border-box;
     resize: vertical;
