@@ -253,7 +253,7 @@ class AnnotationList extends Component<Props, State> {
         return (
             <HoverBox>
                 <SingleNoteShareModal
-                    noteId={annot.url}
+                    annotationUrl={annot.url}
                     closeShareMenu={() =>
                         this.props.setActiveShareMenuNoteId?.(undefined)
                     }

@@ -5,28 +5,26 @@ import {
     TypographyTextNormal,
     TypographyTextSmall,
 } from 'src/common-ui/components/design-library/typography'
-import { LoadingIndicator } from 'src/common-ui/components'
+import { LoadingIndicator, ButtonTooltip } from 'src/common-ui/components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { ClickAway } from 'src/util/click-away-wrapper'
-import { ButtonTooltip } from 'src/common-ui/components'
 
 const COPY_TIMEOUT = 2000
 
 export interface Props {
     shareAllText: string
+    shareAllBtn: 'pristine' | 'running' | 'checked'
     getCreatedLink: () => Promise<string>
     onClickOutside?: () => void
     /** This logic should include handling derendering this share menu view. */
     onUnshareClick: () => Promise<void>
     onShareAllClick: () => Promise<void>
     onCopyLinkClick: (createdLink: string) => void
-    getAllSharedStatus: () => Promise<boolean>
 }
 
 export interface State {
     linkCopier: 'pristine' | 'running' | 'copied'
     unshareBtn: 'pristine' | 'running' | 'disabled'
-    shareAllBtn: 'pristine' | 'running' | 'checked'
     createdLink: string | undefined
 }
 
@@ -35,21 +33,16 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     state: State = {
         linkCopier: 'running',
         unshareBtn: 'disabled',
-        shareAllBtn: 'running',
         createdLink: undefined,
     }
 
     async componentDidMount() {
-        const [isAllShared, createdLink] = await Promise.all([
-            this.props.getAllSharedStatus(),
-            this.props.getCreatedLink(),
-        ])
+        const createdLink = await this.props.getCreatedLink()
 
         this.setState({
             createdLink,
             linkCopier: 'pristine',
             unshareBtn: 'pristine',
-            shareAllBtn: isAllShared ? 'checked' : 'pristine',
         })
     }
 
@@ -86,20 +79,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         }
     }
 
-    private handleShareClick = async () => {
-        const { shareAllBtn } = this.state
-
-        if (shareAllBtn === 'pristine') {
-            this.setState({ shareAllBtn: 'running' })
-            await this.props.onShareAllClick()
-            this.setState({ shareAllBtn: 'checked' })
-        } else if (shareAllBtn === 'checked') {
-            this.setState({ shareAllBtn: 'running' })
-            await this.props.onShareAllClick()
-            this.setState({ shareAllBtn: 'pristine' })
-        }
-    }
-
     private handleLinkClick = async () => {
         const { linkCopier } = this.state
 
@@ -124,7 +103,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     }
 
     private renderShareAllContent() {
-        const { shareAllBtn } = this.state
+        const { shareAllBtn } = this.props
 
         if (shareAllBtn === 'running') {
             return (
@@ -203,10 +182,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                         })}
                         position="bottom"
                     >
-                        <ShareAllBtn
-                            state={this.state.shareAllBtn}
-                            onClick={this.handleShareClick}
-                        >
+                        <ShareAllBtn onClick={this.props.onShareAllClick}>
                             {this.renderShareAllContent()}
                         </ShareAllBtn>
                     </ShareAllBox>
@@ -308,7 +284,7 @@ const ShareAllBtn = styled.button`
 
     &:hover {
         background-color: #e0e0e0;
-    } 
+    }
 `
 
 const CheckBoxBox = styled.div`

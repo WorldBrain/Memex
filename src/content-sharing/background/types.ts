@@ -24,10 +24,22 @@ export interface ContentSharingInterface {
         queueInteraction?: ContentSharingQueueInteraction
     }): Promise<void>
     ensureRemotePageId(normalizedPageUrl: string): Promise<string>
+    getRemoteAnnotationLink(params: {
+        annotationUrl: string
+    }): Promise<string | null>
     getRemoteListId(options: { localListId: number }): Promise<string | null>
     getRemoteAnnotationIds(params: {
         annotationUrls: string[]
     }): Promise<{ [localId: string]: string | number }>
+    getRemoteAnnotationMetadata(params: {
+        annotationUrls: string[]
+    }): Promise<{
+        [localId: string]: {
+            localId: string
+            remoteId: string | number
+            excludeFromLists?: boolean
+        }
+    }>
     areListsShared(options: {
         localListIds: number[]
     }): Promise<{ [listId: number]: boolean }>

@@ -19,6 +19,7 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { Analytics } from 'src/analytics/types'
 import AnnotationStorage from 'src/annotations/background/storage'
 import { Annotation } from 'src/annotations/types'
+import { getNoteShareUrl } from 'src/content-sharing/utils'
 import {
     remoteEventEmitter,
     RemoteEventEmitter,
@@ -75,6 +76,7 @@ export default class ContentSharingBackground {
             unshareAnnotationsFromLists: this.unshareAnnotationsFromLists,
             unshareAnnotation: this.unshareAnnotation,
             ensureRemotePageId: this.ensureRemotePageId,
+            getRemoteAnnotationLink: this.getRemoteAnnotationLink,
             getRemoteListId: async (callOptions) => {
                 return this.storage.getRemoteListId({
                     localId: callOptions.localListId,
@@ -82,6 +84,11 @@ export default class ContentSharingBackground {
             },
             getRemoteAnnotationIds: async (callOptions) => {
                 return this.storage.getRemoteAnnotationIds({
+                    localIds: callOptions.annotationUrls,
+                })
+            },
+            getRemoteAnnotationMetadata: async (callOptions) => {
+                return this.storage.getRemoteAnnotationMetadata({
                     localIds: callOptions.annotationUrls,
                 })
             },
@@ -102,6 +109,21 @@ export default class ContentSharingBackground {
             // when we can't reach the sharing back-end
             console.error(e)
         }
+    }
+
+    private getRemoteAnnotationLink: ContentSharingInterface['getRemoteAnnotationLink'] = async ({
+        annotationUrl,
+    }) => {
+        const remoteIds = await this.storage.getRemoteAnnotationIds({
+            localIds: [annotationUrl],
+        })
+        const remoteAnnotationId = remoteIds[annotationUrl]?.toString()
+
+        if (remoteAnnotationId == null) {
+            return null
+        }
+
+        return getNoteShareUrl({ remoteAnnotationId })
     }
 
     shareList: ContentSharingInterface['shareList'] = async (options) => {

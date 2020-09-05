@@ -262,7 +262,7 @@ export class AnnotationsSidebarContainer<
         return (
             <HoverBox>
                 <SingleNoteShareMenu
-                    noteId={currentAnnotationId}
+                    annotationUrl={currentAnnotationId}
                     closeShareMenu={() =>
                         this.processEvent('resetShareMenuNoteId', null)
                     }

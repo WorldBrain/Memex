@@ -2,13 +2,16 @@ import React from 'react'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import delay from 'src/util/delay'
+import { contentSharing } from 'src/util/remote-functions-background'
 
 interface State {
-    isShareAllChecked: boolean
+    readyToRender: boolean
+    hasBeenShared: boolean
+    shareAllBtn: 'pristine' | 'running' | 'checked'
 }
 
 export interface Props {
-    noteId: string
+    annotationUrl: string
     closeShareMenu: () => void
 }
 
@@ -16,31 +19,57 @@ export default class SingleNoteShareModal extends React.PureComponent<
     Props,
     State
 > {
+    private contentSharingBG = contentSharing
+
     state: State = {
-        isShareAllChecked: false,
+        readyToRender: false,
+        hasBeenShared: false,
+        shareAllBtn: 'pristine',
+    }
+
+    async componentDidMount() {
+        const metadataForAll = await this.contentSharingBG.getRemoteAnnotationMetadata(
+            { annotationUrls: [this.props.annotationUrl] },
+        )
+        const metadata = metadataForAll[this.props.annotationUrl]
+
+        this.setState({
+            hasBeenShared: !metadata,
+            shareAllBtn: metadata?.excludeFromLists ? 'pristine' : 'checked',
+            readyToRender: true,
+        })
     }
 
     private getCreatedLink = async () => {
-        // TODO: Call BG method
-        await delay(1000)
+        const { annotationUrl } = this.props
 
-        return 'memex.social/l/this-is-not-real'
-    }
+        // If it isn't yet, ensure it has been shared
+        const remoteIds = await this.contentSharingBG.getRemoteAnnotationIds({
+            annotationUrls: [annotationUrl],
+        })
+        if (!remoteIds[annotationUrl]) {
+            await this.contentSharingBG.shareAnnotation({ annotationUrl })
+        }
 
-    private getAllSharedStatus = async () => {
-        // TODO: Call BG method
-        await delay(1000)
-
-        return this.state.isShareAllChecked
+        return this.contentSharingBG.getRemoteAnnotationLink({ annotationUrl })
     }
 
     private handleSetAllShareStatus = async () => {
-        // TODO: Call BG method
-        await delay(1000)
+        const annotationUrls = [this.props.annotationUrl]
 
-        return this.setState((state) => ({
-            isShareAllChecked: !state.isShareAllChecked,
-        }))
+        if (this.state.shareAllBtn === 'pristine') {
+            this.setState({ shareAllBtn: 'running' })
+            await this.contentSharingBG.shareAnnotationsToLists({
+                annotationUrls,
+            })
+            this.setState({ shareAllBtn: 'checked' })
+        } else {
+            this.setState({ shareAllBtn: 'running' })
+            await this.contentSharingBG.unshareAnnotationsFromLists({
+                annotationUrls,
+            })
+            this.setState({ shareAllBtn: 'pristine' })
+        }
     }
 
     private handleLinkCopy = (link: string) => {
@@ -57,13 +86,17 @@ export default class SingleNoteShareModal extends React.PureComponent<
     }
 
     render() {
+        if (!this.state.readyToRender) {
+            return null
+        }
+
         return (
             <ShareAnnotationMenu
+                shareAllBtn={this.state.shareAllBtn}
                 onUnshareClick={this.handleUnshare}
                 getCreatedLink={this.getCreatedLink}
                 onCopyLinkClick={this.handleLinkCopy}
                 onClickOutside={this.props.closeShareMenu}
-                getAllSharedStatus={this.getAllSharedStatus}
                 onShareAllClick={this.handleSetAllShareStatus}
                 shareAllText="Share Note in all collections this page is in"
             />
