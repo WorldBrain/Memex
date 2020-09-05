@@ -13,7 +13,7 @@ const COPY_TIMEOUT = 2000
 
 export interface Props {
     shareAllText: string
-    shareAllBtn: 'pristine' | 'running' | 'checked'
+    getAllSharedStatus: () => Promise<boolean>
     getCreatedLink: () => Promise<string>
     onClickOutside?: () => void
     /** This logic should include handling derendering this share menu view. */
@@ -23,6 +23,7 @@ export interface Props {
 }
 
 export interface State {
+    allSharedStatus: 'pristine' | 'running' | 'checked' | 'unchecked'
     linkCopier: 'pristine' | 'running' | 'copied'
     unshareBtn: 'pristine' | 'running' | 'disabled'
     createdLink: string | undefined
@@ -31,6 +32,7 @@ export interface State {
 class ShareAnnotationMenu extends PureComponent<Props, State> {
     copyTimeout?: ReturnType<typeof setTimeout>
     state: State = {
+        allSharedStatus: 'pristine',
         linkCopier: 'running',
         unshareBtn: 'disabled',
         createdLink: undefined,
@@ -38,8 +40,10 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
     async componentDidMount() {
         const createdLink = await this.props.getCreatedLink()
+        const allSharedStatus = await this.props.getAllSharedStatus()
 
         this.setState({
+            allSharedStatus: allSharedStatus ? 'checked' : 'unchecked',
             createdLink,
             linkCopier: 'pristine',
             unshareBtn: 'pristine',
@@ -103,9 +107,9 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     }
 
     private renderShareAllContent() {
-        const { shareAllBtn } = this.props
+        const { allSharedStatus } = this.state
 
-        if (shareAllBtn === 'running') {
+        if (allSharedStatus === 'pristine' || allSharedStatus === 'running') {
             return (
                 <>
                     <CheckBoxBox>
@@ -120,7 +124,9 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
             <>
                 <CheckBoxBox>
                     <Checkbox>
-                        <CheckboxInner isChecked={shareAllBtn === 'checked'} />
+                        <CheckboxInner
+                            isChecked={allSharedStatus === 'checked'}
+                        />
                     </Checkbox>
                 </CheckBoxBox>
                 <ShareAllText>{this.props.shareAllText}</ShareAllText>

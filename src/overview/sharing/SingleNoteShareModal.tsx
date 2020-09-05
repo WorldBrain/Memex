@@ -7,7 +7,7 @@ import { contentSharing } from 'src/util/remote-functions-background'
 interface State {
     readyToRender: boolean
     hasBeenShared: boolean
-    shareAllBtn: 'pristine' | 'running' | 'checked'
+    shareAllBtn: 'pristine' | 'running' | 'unchecked' | 'checked'
 }
 
 export interface Props {
@@ -35,7 +35,7 @@ export default class SingleNoteShareModal extends React.PureComponent<
 
         this.setState({
             hasBeenShared: !metadata,
-            shareAllBtn: metadata?.excludeFromLists ? 'pristine' : 'checked',
+            shareAllBtn: metadata?.excludeFromLists ? 'unchecked' : 'checked',
             readyToRender: true,
         })
     }
@@ -57,7 +57,7 @@ export default class SingleNoteShareModal extends React.PureComponent<
     private handleSetAllShareStatus = async () => {
         const annotationUrls = [this.props.annotationUrl]
 
-        if (this.state.shareAllBtn === 'pristine') {
+        if (this.state.shareAllBtn === 'unchecked') {
             this.setState({ shareAllBtn: 'running' })
             await this.contentSharingBG.shareAnnotationsToLists({
                 annotationUrls,
@@ -68,7 +68,7 @@ export default class SingleNoteShareModal extends React.PureComponent<
             await this.contentSharingBG.unshareAnnotationsFromLists({
                 annotationUrls,
             })
-            this.setState({ shareAllBtn: 'pristine' })
+            this.setState({ shareAllBtn: 'unchecked' })
         }
     }
 
@@ -92,7 +92,9 @@ export default class SingleNoteShareModal extends React.PureComponent<
 
         return (
             <ShareAnnotationMenu
-                shareAllBtn={this.state.shareAllBtn}
+                getAllSharedStatus={async () =>
+                    this.state.shareAllBtn === 'checked'
+                }
                 onUnshareClick={this.handleUnshare}
                 getCreatedLink={this.getCreatedLink}
                 onCopyLinkClick={this.handleLinkCopy}

@@ -77,6 +77,8 @@ export default class CopyPasterBackground {
         annotationUrls: string[]
         normalizedPageUrls: string[]
     }) {
+        console.log('render template', annotationUrls)
+
         const template = await this.storage.findTemplate({ id })
         const templateDocs = await generateTemplateDocs({
             annotationUrls,
@@ -177,6 +179,8 @@ export function getTemplateDataFetchers({
     }
 
     const getNoteLinks = async (annotationUrls: string[]) => {
+        console.log('getNoteLinks', annotationUrls)
+
         await contentSharing.shareAnnotations({
             annotationUrls,
             queueInteraction: 'skip-queue',

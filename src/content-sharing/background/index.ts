@@ -290,6 +290,8 @@ export default class ContentSharingBackground {
         annotationUrls: string[]
         queueInteraction?: ContentSharingQueueInteraction
     }) => {
+        console.log('share annotations', options.annotationUrls)
+
         const remoteIds = await this.storage.getRemoteAnnotationIds({
             localIds: options.annotationUrls,
         })

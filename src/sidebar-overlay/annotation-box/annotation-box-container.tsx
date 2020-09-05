@@ -104,7 +104,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         await setLastSharedAnnotationTimestamp()
     }
 
-    private shareAnnotation: React.MouseEventHandler = async (e) => {
+    private shareAnnotation = async () => {
         // const updateState = (taskState: TaskState) =>
         //     this.props.updateSharingInfo({
         //         status: 'shared',
