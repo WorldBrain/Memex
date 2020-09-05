@@ -242,7 +242,12 @@ export default class ContentSharingBackground {
                 data: [
                     {
                         createdWhen: '$now',
-                        ...page,
+                        ...pick(
+                            page,
+                            'normalizedUrl',
+                            'originalUrl',
+                            'fullTitle',
+                        ),
                     },
                 ],
             },
@@ -288,11 +293,12 @@ export default class ContentSharingBackground {
         const remoteIds = await this.storage.getRemoteAnnotationIds({
             localIds: options.annotationUrls,
         })
-        const annotations = (
-            await this.options.annotationStorage.getAnnotations(
-                options.annotationUrls,
-            )
-        ).filter((annotation) => !remoteIds[annotation.url])
+        const allAnnotations = await this.options.annotationStorage.getAnnotations(
+            options.annotationUrls,
+        )
+        const annotations = allAnnotations.filter(
+            (annotation) => !remoteIds[annotation.url],
+        )
         if (!annotations.length) {
             return
         }
@@ -310,7 +316,12 @@ export default class ContentSharingBackground {
                     data: [
                         {
                             createdWhen: '$now',
-                            ...pages[pageUrl],
+                            ...pick(
+                                pages[pageUrl],
+                                'normalizedUrl',
+                                'originalUrl',
+                                'fullTitle',
+                            ),
                         },
                     ],
                 },
