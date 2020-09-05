@@ -20,7 +20,6 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 
-
 const settingsStyle = require('src/options/settings/components/settings.css')
 import {
     UserBetaFeature,
@@ -36,7 +35,7 @@ interface Props {
 interface State {
     featureOptions: UserBetaFeature[]
     featureEnabled: { [key in UserBetaFeatureId]: boolean }
-    loadingChargebee: boolean,
+    loadingChargebee: boolean
 }
 
 class BetaFeaturesScreen extends React.Component<
@@ -51,7 +50,6 @@ class BetaFeaturesScreen extends React.Component<
 
     componentDidMount = async () => {
         await this.refreshFeatures()
-        await this.props.currentUser?.subscriptionStatus
     }
 
     openPortal = async () => {
@@ -86,9 +84,29 @@ class BetaFeaturesScreen extends React.Component<
         await this.refreshFeatures()
     }
 
-    render() {
+    private renderUpgradeBtn() {
+        if (this.state.loadingChargebee) {
+            return (
+                <PrimaryAction
+                    label={<LoadingIndicator />}
+                    onClick={undefined}
+                />
+            )
+        }
 
-        console.log(this.props.currentUser?.subscriptionStatus)
+        return (
+            <PrimaryAction
+                label="Upgrade"
+                onClick={
+                    this.props.currentUser?.subscriptionStatus
+                        ? this.openPortal
+                        : this.props.showSubscriptionModal
+                }
+            />
+        )
+    }
+
+    render() {
         return (
             <div>
                 <section className={settingsStyle.section}>
@@ -119,38 +137,7 @@ class BetaFeaturesScreen extends React.Component<
                             )}
                         </div>
                         <div className={settingsStyle.buttonBox}>
-                            {!this.props.currentUser?.subscriptionStatus ? (
-                                <>
-                                    {this.state.loadingChargebee && (
-                                        <PrimaryAction
-                                            onClick={undefined}
-                                            label={<LoadingIndicator/>}
-                                        />
-                                    )}
-                                    {!this.state.loadingChargebee && (
-                                        <PrimaryAction
-                                            onClick={this.props.showSubscriptionModal}
-                                            label={'Upgrade'}
-                                        />
-                                    )}
-                                </>
-                            ):(
-                                <>
-                                    {this.state.loadingChargebee && (
-                                        <PrimaryAction
-                                            onClick={undefined}
-                                            label={<LoadingIndicator/>}
-                                        />
-                                    )}
-                                    {!this.state.loadingChargebee && (
-                                           <PrimaryAction
-                                                onClick={()=> this.openPortal()}
-                                                label={'Upgrade'}
-                                            />
-                                    )}
-                                </>
-
-                            )}
+                            {this.renderUpgradeBtn()}
                             <SecondaryAction
                                 onClick={() =>
                                     window.open(

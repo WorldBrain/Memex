@@ -58,7 +58,7 @@ export const PrimaryAction = ({
     disabled,
     innerRef,
 }: {
-    label: any
+    label: React.ReactNode
     onClick: () => void
     disabled?: boolean
     innerRef?: any

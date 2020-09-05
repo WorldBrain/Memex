@@ -111,6 +111,28 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
         this.setState({ automaticBackupEnabled: false })
     }
 
+    private renderUpgradeBtn() {
+        if (this.state.loadingChargebee) {
+            return (
+                <SecondaryAction
+                    label={<LoadingIndicator />}
+                    onClick={undefined}
+                />
+            )
+        }
+
+        return (
+            <SecondaryAction
+                label="⭐️ Upgrade"
+                onClick={
+                    this.props.currentUser?.subscriptionStatus
+                        ? this.openPortal
+                        : this.props.showSubscriptionModal
+                }
+            />
+        )
+    }
+
     render() {
         const automaticBackupsAllowed = this.props.currentUser?.authorizedFeatures?.includes(
             'backup',
@@ -248,37 +270,7 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                                     </span>
                                 </div>
                                 <div className={settingsStyle.buttonBox}>
-                                    {!this.props.currentUser?.subscriptionStatus ? (
-                                        <>
-                                            {this.state.loadingChargebee && (
-                                                <SecondaryAction
-                                                    onClick={undefined}
-                                                    label={<LoadingIndicator/>}
-                                                />
-                                            )}
-                                            {!this.state.loadingChargebee && (
-                                                <SecondaryAction
-                                                    onClick={this.props.showSubscriptionModal}
-                                                    label={'⭐️ Upgrade'}
-                                                />
-                                            )}
-                                        </>
-                                    ):(
-                                        <>
-                                            {this.state.loadingChargebee && (
-                                                <SecondaryAction
-                                                    onClick={undefined}
-                                                    label={<LoadingIndicator/>}
-                                                />
-                                            )}
-                                            {!this.state.loadingChargebee && (
-                                                   <SecondaryAction
-                                                        onClick={()=> this.openPortal()}
-                                                        label={'⭐️ Upgrade'}
-                                                    />
-                                            )}
-                                        </>
-                                    )}
+                                    {this.renderUpgradeBtn()}
                                 </div>
                             </div>
                         )}
