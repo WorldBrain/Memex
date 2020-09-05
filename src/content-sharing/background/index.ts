@@ -290,8 +290,6 @@ export default class ContentSharingBackground {
         annotationUrls: string[]
         queueInteraction?: ContentSharingQueueInteraction
     }) => {
-        console.log('share annotations', options.annotationUrls)
-
         const remoteIds = await this.storage.getRemoteAnnotationIds({
             localIds: options.annotationUrls,
         })
@@ -301,17 +299,17 @@ export default class ContentSharingBackground {
         const annotations = allAnnotations.filter(
             (annotation) => !remoteIds[annotation.url],
         )
-        if (!annotations.length) {
-            return
-        }
 
+        const allPageUrls = new Set(
+            allAnnotations.map((annotation) => annotation.pageUrl),
+        )
         const pageUrls = new Set(
             annotations.map((annotation) => annotation.pageUrl),
         )
-        const pages = await this.storage.getPages({
-            normalizedPageUrls: [...pageUrls],
+        const allPages = await this.storage.getPages({
+            normalizedPageUrls: [...allPageUrls],
         })
-        for (const pageUrl of pageUrls) {
+        for (const pageUrl of allPageUrls) {
             await this.scheduleAction(
                 {
                     type: 'ensure-page-info',
@@ -319,7 +317,7 @@ export default class ContentSharingBackground {
                         {
                             createdWhen: '$now',
                             ...pick(
-                                pages[pageUrl],
+                                allPages[pageUrl],
                                 'normalizedUrl',
                                 'originalUrl',
                                 'fullTitle',
@@ -332,6 +330,9 @@ export default class ContentSharingBackground {
                         options.queueInteraction ?? 'queue-and-await',
                 },
             )
+        }
+        if (!annotations.length) {
+            return
         }
 
         const shareAnnotationsAction: ContentSharingAction = {
