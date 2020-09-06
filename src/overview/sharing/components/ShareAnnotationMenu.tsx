@@ -13,17 +13,16 @@ const COPY_TIMEOUT = 2000
 
 export interface Props {
     shareAllText: string
-    getAllSharedStatus: () => Promise<boolean>
+    shareAllBtn: 'pristine' | 'running' | 'checked' | 'unchecked'
     getCreatedLink: () => Promise<string>
     onClickOutside?: () => void
     /** This logic should include handling derendering this share menu view. */
     onUnshareClick: () => Promise<void>
     onShareAllClick: () => Promise<void>
-    onCopyLinkClick: (createdLink: string) => void
+    onCopyLinkClick: (createdLink: string) => Promise<void>
 }
 
 export interface State {
-    allSharedStatus: 'pristine' | 'running' | 'checked' | 'unchecked'
     linkCopier: 'pristine' | 'running' | 'copied'
     unshareBtn: 'pristine' | 'running' | 'disabled'
     createdLink: string | undefined
@@ -32,7 +31,6 @@ export interface State {
 class ShareAnnotationMenu extends PureComponent<Props, State> {
     copyTimeout?: ReturnType<typeof setTimeout>
     state: State = {
-        allSharedStatus: 'pristine',
         linkCopier: 'running',
         unshareBtn: 'disabled',
         createdLink: undefined,
@@ -40,10 +38,8 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
     async componentDidMount() {
         const createdLink = await this.props.getCreatedLink()
-        const allSharedStatus = await this.props.getAllSharedStatus()
 
         this.setState({
-            allSharedStatus: allSharedStatus ? 'checked' : 'unchecked',
             createdLink,
             linkCopier: 'pristine',
             unshareBtn: 'pristine',
@@ -88,7 +84,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
         if (linkCopier === 'pristine') {
             this.setState({ linkCopier: 'copied' })
-            this.props.onCopyLinkClick(this.state.createdLink)
+            await this.props.onCopyLinkClick(this.state.createdLink)
 
             this.copyTimeout = setTimeout(() => {
                 this.setState({ linkCopier: 'pristine' })
@@ -107,9 +103,9 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     }
 
     private renderShareAllContent() {
-        const { allSharedStatus } = this.state
+        const { shareAllBtn } = this.props
 
-        if (allSharedStatus === 'pristine' || allSharedStatus === 'running') {
+        if (shareAllBtn === 'pristine' || shareAllBtn === 'running') {
             return (
                 <>
                     <CheckBoxBox>
@@ -124,9 +120,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
             <>
                 <CheckBoxBox>
                     <Checkbox>
-                        <CheckboxInner
-                            isChecked={allSharedStatus === 'checked'}
-                        />
+                        <CheckboxInner isChecked={shareAllBtn === 'checked'} />
                     </Checkbox>
                 </CheckBoxBox>
                 <ShareAllText>{this.props.shareAllText}</ShareAllText>

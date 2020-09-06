@@ -6,7 +6,7 @@ import { contentSharing } from 'src/util/remote-functions-background'
 import { getPageShareUrl } from 'src/content-sharing/utils'
 
 interface State {
-    isShareAllChecked: boolean
+    shareAllBtn: 'pristine' | 'running' | 'unchecked' | 'checked'
 }
 
 export interface Props {
@@ -18,38 +18,37 @@ export default class AllNotesShareModal extends React.PureComponent<
     Props,
     State
 > {
+    private contentSharingBG = contentSharing
+
     state: State = {
-        isShareAllChecked: false,
+        shareAllBtn: 'pristine',
+    }
+
+    async componentDidMount() {
+        // TODO: Get status of share all btn by looping through annot metadata for this page
     }
 
     private getCreatedLink = async () => {
-        const remotePageInfoId = await contentSharing.ensureRemotePageId(
+        const remotePageInfoId = await this.contentSharingBG.ensureRemotePageId(
             this.props.pageUrl,
         )
         return getPageShareUrl({ remotePageInfoId })
     }
 
-    private getAllSharedStatus = async () => {
-        // TODO: Call BG method
-        await delay(1000)
-
-        return this.state.isShareAllChecked
-    }
-
     private handleSetAllShareStatus = async () => {
-        // TODO: Call BG method
-        await delay(1000)
-
-        return this.setState((state) => ({
-            isShareAllChecked: !state.isShareAllChecked,
-        }))
+        if (this.state.shareAllBtn === 'unchecked') {
+            this.setState({ shareAllBtn: 'running' })
+            await delay(1000)
+            this.setState({ shareAllBtn: 'checked' })
+        } else {
+            this.setState({ shareAllBtn: 'running' })
+            await delay(1000)
+            this.setState({ shareAllBtn: 'unchecked' })
+        }
     }
 
-    private handleLinkCopy = (link: string) => {
-        navigator.clipboard.writeText(link).catch((e) => {
-            console.error(e)
-        })
-    }
+    private handleLinkCopy = (link: string) =>
+        navigator.clipboard.writeText(link)
 
     private handleUnshare = async () => {
         // TODO: Call BG method
@@ -61,11 +60,11 @@ export default class AllNotesShareModal extends React.PureComponent<
     render() {
         return (
             <ShareAnnotationMenu
+                shareAllBtn={this.state.shareAllBtn}
                 onUnshareClick={this.handleUnshare}
                 getCreatedLink={this.getCreatedLink}
                 onCopyLinkClick={this.handleLinkCopy}
                 onClickOutside={this.props.closeShareMenu}
-                getAllSharedStatus={this.getAllSharedStatus}
                 onShareAllClick={this.handleSetAllShareStatus}
                 shareAllText="Share all Notes on this page"
             />

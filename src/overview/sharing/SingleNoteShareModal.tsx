@@ -6,7 +6,7 @@ import { contentSharing } from 'src/util/remote-functions-background'
 
 interface State {
     readyToRender: boolean
-    hasBeenShared: boolean
+    hasAnnotationBeenShared: boolean
     shareAllBtn: 'pristine' | 'running' | 'unchecked' | 'checked'
 }
 
@@ -23,7 +23,7 @@ export default class SingleNoteShareModal extends React.PureComponent<
 
     state: State = {
         readyToRender: false,
-        hasBeenShared: false,
+        hasAnnotationBeenShared: false,
         shareAllBtn: 'pristine',
     }
 
@@ -34,7 +34,7 @@ export default class SingleNoteShareModal extends React.PureComponent<
         const metadata = metadataForAll[this.props.annotationUrl]
 
         this.setState({
-            hasBeenShared: !metadata,
+            hasAnnotationBeenShared: !metadata,
             shareAllBtn: metadata?.excludeFromLists ? 'unchecked' : 'checked',
             readyToRender: true,
         })
@@ -43,11 +43,7 @@ export default class SingleNoteShareModal extends React.PureComponent<
     private getCreatedLink = async () => {
         const { annotationUrl } = this.props
 
-        // If it isn't yet, ensure it has been shared
-        const remoteIds = await this.contentSharingBG.getRemoteAnnotationIds({
-            annotationUrls: [annotationUrl],
-        })
-        if (!remoteIds[annotationUrl]) {
+        if (!this.state.hasAnnotationBeenShared) {
             await this.contentSharingBG.shareAnnotation({ annotationUrl })
         }
 
@@ -72,11 +68,8 @@ export default class SingleNoteShareModal extends React.PureComponent<
         }
     }
 
-    private handleLinkCopy = (link: string) => {
-        navigator.clipboard.writeText(link).catch((e) => {
-            console.error(e)
-        })
-    }
+    private handleLinkCopy = (link: string) =>
+        navigator.clipboard.writeText(link)
 
     private handleUnshare = async () => {
         // TODO: Call BG method
@@ -92,9 +85,7 @@ export default class SingleNoteShareModal extends React.PureComponent<
 
         return (
             <ShareAnnotationMenu
-                getAllSharedStatus={async () =>
-                    this.state.shareAllBtn === 'checked'
-                }
+                shareAllBtn={this.state.shareAllBtn}
                 onUnshareClick={this.handleUnshare}
                 getCreatedLink={this.getCreatedLink}
                 onCopyLinkClick={this.handleLinkCopy}
