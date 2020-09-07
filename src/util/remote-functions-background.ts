@@ -28,7 +28,6 @@ export interface RemoteFunctionImplementations<
     copyPaster: RemoteCopyPasterInterface
     readablePageArchives: RemoteReaderInterface
     contentSharing: ContentSharingInterface
-    annotations: AnnotationInterface<Role>
 }
 
 // See `src/background.ts` for the concrete remote function bindings
@@ -46,7 +45,6 @@ export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
     copyPaster: runInBackground(),
     readablePageArchives: runInBackground(),
     contentSharing: runInBackground(),
-    annotations: runInBackground(),
 }
 
 export const notifications = remoteFunctions.notifications
@@ -61,4 +59,4 @@ export const collections = remoteFunctions.collections
 export const copyPaster = remoteFunctions.copyPaster
 export const readable = remoteFunctions.readablePageArchives
 export const contentSharing = remoteFunctions.contentSharing
-export const annotations = remoteFunctions.annotations
+export const annotations = runInBackground<AnnotationInterface<'caller'>>()

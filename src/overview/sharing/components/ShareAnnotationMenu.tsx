@@ -17,7 +17,7 @@ export interface Props {
     getCreatedLink: () => Promise<string>
     onClickOutside?: () => void
     /** This logic should include handling derendering this share menu view. */
-    onUnshareClick: () => Promise<void>
+    onUnshareClick?: () => Promise<void>
     onShareAllClick: () => Promise<void>
     onCopyLinkClick: (createdLink: string) => Promise<void>
 }
@@ -71,18 +71,14 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     }
 
     private handleUnshareClick = async () => {
-        const { unshareBtn } = this.state
-
-        if (unshareBtn === 'pristine') {
+        if (this.state.unshareBtn === 'pristine') {
             this.setState({ unshareBtn: 'running' })
             await this.props.onUnshareClick()
         }
     }
 
     private handleLinkClick = async () => {
-        const { linkCopier } = this.state
-
-        if (linkCopier === 'pristine') {
+        if (this.state.linkCopier === 'pristine') {
             this.setState({ linkCopier: 'copied' })
             await this.props.onCopyLinkClick(this.state.createdLink)
 
@@ -92,14 +88,18 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         }
     }
 
-    private renderUnshareContent() {
-        const { unshareBtn } = this.state
+    private renderUnshareIcon() {
+        if (!this.props.onUnshareClick) {
+            return null
+        }
 
-        if (unshareBtn === 'running') {
+        if (this.state.unshareBtn === 'running') {
             return <LoadingIndicator />
         }
 
-        return <TypographyTextSmall>Unshare annotation</TypographyTextSmall>
+        return (
+            <RemoveIcon src={icons.trash} onClick={this.handleUnshareClick} />
+        )
     }
 
     private renderShareAllContent() {
@@ -168,7 +168,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                             >
                                 {this.renderLinkContent()}
                             </LinkCopier>
-                            <RemoveIcon src={icons.trash} />
+                            {this.renderUnshareIcon()}
                         </LinkCopierBox>
                     </ShareAllBox>
                     <Spacing />
@@ -186,14 +186,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                             {this.renderShareAllContent()}
                         </ShareAllBtn>
                     </ShareAllBox>
-                    {/*<UnshareBtn
-                            state={this.state.unshareBtn}
-                            onClick={this.handleUnshareClick}
-                            disabled={this.state.unshareBtn === 'disabled'}
-                        >
-                            {this.renderUnshareContent()}
-                        </UnshareBtn>
-                        */}
                 </Menu>
             </ClickAway>
         )
@@ -264,7 +256,6 @@ const LinkText = styled.span`
 const LinkCopyIcon = styled.img``
 
 // TODO Move these somewhere else for re-use
-
 const ShareAllBox = styled(ButtonTooltip)`
     width: 100%;
 `
@@ -307,8 +298,6 @@ const CheckboxInner = styled.div`
     height: 14px;
     outline: none;
 `
-
-const UnshareBtn = styled.button``
 
 const ShareAllText = styled(TypographyTextNormal)`
     margin-left: 10px;

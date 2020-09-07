@@ -2,7 +2,10 @@ import React from 'react'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import delay from 'src/util/delay'
-import { remoteFunctions } from 'src/util/remote-functions-background'
+import {
+    annotations as annotationsBG,
+    contentSharing,
+} from 'src/util/remote-functions-background'
 import { getPageShareUrl } from 'src/content-sharing/utils'
 
 interface State {
@@ -18,8 +21,8 @@ export default class AllNotesShareModal extends React.PureComponent<
     Props,
     State
 > {
-    private contentSharingBG = remoteFunctions.contentSharing
-    private annotationsBG = remoteFunctions.annotations
+    private contentSharingBG = contentSharing
+    private annotationsBG = annotationsBG
     private annotationUrls: string[]
 
     state: State = {
@@ -73,18 +76,21 @@ export default class AllNotesShareModal extends React.PureComponent<
     private handleLinkCopy = (link: string) =>
         navigator.clipboard.writeText(link)
 
-    private handleUnshare = async () => {
-        // TODO: Call BG method
-        await delay(1000)
+    // TODO: implement in milestone 3.
+    //   It should: "remove the link of that page, so it deletes the shared-page object and all the associated annotation entries"
+    //
+    // private handleUnshare = async () => {
+    //     // TODO: Call BG method
+    //     await delay(1000)
 
-        this.props.closeShareMenu()
-    }
+    //     this.props.closeShareMenu()
+    // }
 
     render() {
         return (
             <ShareAnnotationMenu
                 shareAllBtn={this.state.shareAllBtn}
-                onUnshareClick={this.handleUnshare}
+                // onUnshareClick={this.handleUnshare}
                 getCreatedLink={this.getCreatedLink}
                 onCopyLinkClick={this.handleLinkCopy}
                 onClickOutside={this.props.closeShareMenu}
