@@ -2,6 +2,19 @@ import React from 'react'
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
+import { getLocalStorage } from 'src/util/storage'
+import { INSTALL_TIME_KEY } from 'src/constants'
+import { DEPRECATED_SEARCH_WARNING_KEY } from 'src/overview/constants'
+
+export const shouldShowDeprecatedSearchWarning = async (): Promise<boolean> => {
+    const showWarning = await getLocalStorage(
+        DEPRECATED_SEARCH_WARNING_KEY,
+        true,
+    )
+    const installTime = await getLocalStorage(INSTALL_TIME_KEY)
+
+    return installTime < new Date('2020-08-27').getTime() && showWarning
+}
 
 export interface Props {
     onCancelBtnClick: React.MouseEventHandler
@@ -18,15 +31,19 @@ export default class DeprecatedSearchWarning extends React.Component<Props> {
                     </TitleText>
                     <ContentText>
                         You can still full-text search all pages you organized,
-                        annotated, or shared. <br/>We're sorry for everyone who loved
-                        it and really hope it will come back later.
+                        annotated, or shared. <br />
+                        We're sorry for everyone who loved it and really hope it
+                        will come back later.
                     </ContentText>
                 </TextContainer>
                 <BtnContainer>
                     <InfoBtn onClick={this.props.onInfoBtnClick}>
                         Why?!?
                     </InfoBtn>
-                    <CancelBtn src={icons.close} onClick={this.props.onCancelBtnClick} />
+                    <CancelBtn
+                        src={icons.close}
+                        onClick={this.props.onCancelBtnClick}
+                    />
                 </BtnContainer>
             </Container>
         )
@@ -48,7 +65,7 @@ const Container = styled.div`
 `
 
 const TextContainer = styled.div`
-    width: 80%    
+    width: 80%;
 `
 const BtnContainer = styled.div`
     width: 20%

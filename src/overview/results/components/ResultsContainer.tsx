@@ -1,4 +1,4 @@
-import React, { MouseEventHandler } from 'react'
+import React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
 import { runInBackground } from 'src/util/webextensionRPC'
@@ -9,7 +9,9 @@ import { selectors as filters } from 'src/search-filters'
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './results-message'
 import ResultList from './ResultListContainer'
-import DeprecatedSearchWarning from './DeprecatedSearchWarning'
+import DeprecatedSearchWarning, {
+    shouldShowDeprecatedSearchWarning,
+} from './DeprecatedSearchWarning'
 import OnboardingMessage from './onboarding-message'
 import SearchTypeSwitch from './search-type-switch-container'
 import * as actions from '../actions'
@@ -19,7 +21,7 @@ import { features } from 'src/util/remote-functions-background'
 import MobileAppMessage from './mobile-app-message'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import { Annotation } from 'src/annotations/types'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { setLocalStorage } from 'src/util/storage'
 import { DEPRECATED_SEARCH_WARNING_KEY } from 'src/overview/constants'
 
 const styles = require('./ResultList.css')
@@ -71,10 +73,7 @@ class ResultsContainer extends React.Component<Props, State> {
 
     async componentDidMount() {
         this.setState({
-            showDeprecatedSearchWarning: await getLocalStorage(
-                DEPRECATED_SEARCH_WARNING_KEY,
-                true,
-            ),
+            showDeprecatedSearchWarning: await shouldShowDeprecatedSearchWarning(),
             showSocialSearch: await features.getFeature('SocialIntegration'),
         })
     }
