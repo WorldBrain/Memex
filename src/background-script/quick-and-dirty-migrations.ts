@@ -3,6 +3,8 @@ import { Storage } from 'webextension-polyfill-ts'
 import { URLNormalizer } from '@worldbrain/memex-url-utils'
 import { MOBILE_LIST_NAME } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/constants'
 
+import { STORAGE_KEYS as IDXING_STORAGE_KEYS } from 'src/options/settings/constants'
+
 export interface MigrationProps {
     db: Dexie
     normalizeUrl: URLNormalizer
@@ -14,6 +16,19 @@ export interface Migrations {
 }
 
 export const migrations: Migrations = {
+    /*
+     * Ensure local storage indexing flags are set to disable auto-indexing on visit and
+     * enable on-demand indexing on pages that get bookmarked or have annotations created.
+     */
+    'disable-auto-indexing-on-visit': async ({ localStorage }) => {
+        await localStorage.set({
+            [IDXING_STORAGE_KEYS.LINKS]: true,
+            [IDXING_STORAGE_KEYS.BOOKMARKS]: true,
+            [IDXING_STORAGE_KEYS.STUBS]: false,
+            [IDXING_STORAGE_KEYS.VISITS]: false,
+            [IDXING_STORAGE_KEYS.SCREENSHOTS]: false,
+        })
+    },
     /*
      * We want to add indicies on two currently optional fields.
      * Add an index on an optional field is fine, it simply results in a sparse index.
