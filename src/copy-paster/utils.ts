@@ -20,7 +20,10 @@ export function renderTemplate(
         }
     })
 
-    let rendered = mustache.render(template.code, doc)
+    let rendered = mustache.render(template.code, {
+        ...doc,
+        literal: () => (text: string) => text,
+    })
     const regex = /([ \t]*)@startvalue%([\s\S]+?)@endvalue%/g
     rendered = rendered.replace(regex, (_, whitespace, value) => {
         return whitespace + value.replace(/(?:\n|(?:\r\n))/g, `\n${whitespace}`)

@@ -107,4 +107,15 @@ describe('Content template rendering', () => {
             ),
         ).toEqual(` test1\n test2\n test3\n  test4\n  test5\n  test6\ntest7`)
     })
+
+    it('should not render anything inside the {{#literal}} tag', () => {
+        expect(
+            renderTemplate(
+                {
+                    code: 'test {{#literal}}{{{[TODO]}}}{{/literal}} test',
+                },
+                {},
+            ),
+        ).toEqual(`test {{{[TODO]}}} test`)
+    })
 })
