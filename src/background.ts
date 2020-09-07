@@ -116,6 +116,7 @@ export async function main() {
         readablePageArchives: backgroundModules.readable.remoteFunctions,
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
+        annotations: backgroundModules.directLinking.remoteFunctions,
     })
 
     // Attach interesting features onto global window scope for interested users

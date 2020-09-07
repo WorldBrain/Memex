@@ -2,7 +2,7 @@ import React from 'react'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import delay from 'src/util/delay'
-import { contentSharing } from 'src/util/remote-functions-background'
+import { remoteFunctions } from 'src/util/remote-functions-background'
 import { getPageShareUrl } from 'src/content-sharing/utils'
 
 interface State {
@@ -18,14 +18,35 @@ export default class AllNotesShareModal extends React.PureComponent<
     Props,
     State
 > {
-    private contentSharingBG = contentSharing
+    private contentSharingBG = remoteFunctions.contentSharing
+    private annotationsBG = remoteFunctions.annotations
+    private annotationUrls: string[]
 
     state: State = {
         shareAllBtn: 'pristine',
     }
 
     async componentDidMount() {
-        // TODO: Get status of share all btn by looping through annot metadata for this page
+        const annotations = await this.annotationsBG.listAnnotationsByPageUrl({
+            pageUrl: this.props.pageUrl,
+        })
+        this.annotationUrls = annotations.map((a) => a.url)
+
+        this.setState({ shareAllBtn: await this.getAllSharedBtnState() })
+    }
+
+    private async getAllSharedBtnState(): Promise<'checked' | 'unchecked'> {
+        const annotsMetadata = await this.contentSharingBG.getRemoteAnnotationMetadata(
+            { annotationUrls: this.annotationUrls },
+        )
+
+        for (const localId in annotsMetadata) {
+            if (!annotsMetadata[localId]) {
+                return 'unchecked'
+            }
+        }
+
+        return 'checked'
     }
 
     private getCreatedLink = async () => {
@@ -38,7 +59,9 @@ export default class AllNotesShareModal extends React.PureComponent<
     private handleSetAllShareStatus = async () => {
         if (this.state.shareAllBtn === 'unchecked') {
             this.setState({ shareAllBtn: 'running' })
-            await delay(1000)
+            await this.contentSharingBG.shareAnnotations({
+                annotationUrls: this.annotationUrls,
+            })
             this.setState({ shareAllBtn: 'checked' })
         } else {
             this.setState({ shareAllBtn: 'running' })

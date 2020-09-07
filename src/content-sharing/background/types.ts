@@ -11,6 +11,10 @@ export interface ContentSharingInterface {
         queueInteraction?: ContentSharingQueueInteraction
         withoutPageInfo?: boolean
     }): Promise<void>
+    shareAnnotations(options: {
+        annotationUrls: string[]
+        queueInteraction?: ContentSharingQueueInteraction
+    }): Promise<void>
     shareAnnotationsToLists(options: {
         annotationUrls: string[]
         queueInteraction?: ContentSharingQueueInteraction

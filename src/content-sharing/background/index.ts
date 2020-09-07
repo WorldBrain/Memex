@@ -72,6 +72,7 @@ export default class ContentSharingBackground {
             shareList: this.shareList,
             shareListEntries: this.shareListEntries,
             shareAnnotation: this.shareAnnotation,
+            shareAnnotations: this.shareAnnotations,
             shareAnnotationsToLists: this.shareAnnotationsToLists,
             unshareAnnotationsFromLists: this.unshareAnnotationsFromLists,
             unshareAnnotation: this.unshareAnnotation,
@@ -286,10 +287,9 @@ export default class ContentSharingBackground {
         })
     }
 
-    shareAnnotations = async (options: {
-        annotationUrls: string[]
-        queueInteraction?: ContentSharingQueueInteraction
-    }) => {
+    shareAnnotations: ContentSharingInterface['shareAnnotations'] = async (
+        options,
+    ) => {
         const remoteIds = await this.storage.getRemoteAnnotationIds({
             localIds: options.annotationUrls,
         })
