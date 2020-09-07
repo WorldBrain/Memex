@@ -16,10 +16,17 @@ export function renderTemplate(
 ): string {
     traverse(doc).forEach(function (value) {
         if (typeof value === 'string') {
-            this.update(value.trim())
+            this.update(`@startvalue%${value.trim()}@endvalue%`)
         }
     })
-    return mustache.render(template.code, doc)
+
+    let rendered = mustache.render(template.code, doc)
+    const regex = /([ \t]*)@startvalue%([\s\S]+?)@endvalue%/g
+    rendered = rendered.replace(regex, (_, whitespace, value) => {
+        return whitespace + value.replace(/(?:\n|(?:\r\n))/g, `\n${whitespace}`)
+    })
+
+    return rendered
 }
 
 export function joinTemplateDocs(

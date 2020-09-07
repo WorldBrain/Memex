@@ -92,4 +92,19 @@ describe('Content template rendering', () => {
             ),
         ).toEqual('test1 test2 test3 test4')
     })
+
+    it('should preserve indentation when rendering multi-line values', () => {
+        expect(
+            renderTemplate(
+                {
+                    code: ' {{NoteHighlight}}\n  {{NoteText}}\n{{NoteLink}}',
+                },
+                {
+                    NoteHighlight: 'test1\r\ntest2\ntest3',
+                    NoteText: 'test4\ntest5\ntest6',
+                    NoteLink: 'test7',
+                },
+            ),
+        ).toEqual(` test1\n test2\n test3\n  test4\n  test5\n  test6\ntest7`)
+    })
 })
