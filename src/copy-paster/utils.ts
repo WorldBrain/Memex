@@ -16,20 +16,69 @@ export function renderTemplate(
 ): string {
     traverse(doc).forEach(function (value) {
         if (typeof value === 'string') {
-            this.update(`@startvalue%${value.trim()}@endvalue%`)
+            this.update(
+                `@startvalue%${value
+                    .trim()
+                    .replace(/<br\s*\/?>/g, '\n')}@endvalue%`,
+            )
         }
     })
 
-    let rendered = mustache.render(template.code, {
-        ...doc,
-        literal: () => (text: string) => text,
-    })
-    const regex = /([ \t]*)@startvalue%([\s\S]+?)@endvalue%/g
-    rendered = rendered.replace(regex, (_, whitespace, value) => {
-        return whitespace + value.replace(/(?:\n|(?:\r\n))/g, `\n${whitespace}`)
-    })
+    const rendered = mustache
+        .render(template.code, {
+            ...doc,
+            literal: () => (text: string) => text,
+        })
+        .replace('\r\n', '\n')
 
-    return rendered
+    // Since the String.replace value doesn't correctly pass in the string *after*
+    // each replacement (even though that's supposed to be the last param passed in)
+    // we have to manually keep trying to replace, until nothing has been replaced.
+    let processed = rendered
+    while (true) {
+        const regex = /@startvalue%([\s\S]+?)@endvalue%/g
+
+        // Sadly there's no way to do only one replacement with the /g option,
+        // so we manually keep track of whether we already replaced something
+        let replaced = false
+        processed = processed.replace(
+            regex,
+            (wholeMatch, value, offset: number) => {
+                if (replaced) {
+                    return wholeMatch
+                }
+                replaced = true
+
+                const newlineIndexBeforeValue = processed.lastIndexOf(
+                    '\n',
+                    offset,
+                )
+                let lastSpaceIndexBeforeValue = processed.lastIndexOf(
+                    ' ',
+                    offset,
+                )
+                if (lastSpaceIndexBeforeValue < newlineIndexBeforeValue) {
+                    lastSpaceIndexBeforeValue = offset - 1
+                }
+                const textBeforeValue = processed.substring(
+                    newlineIndexBeforeValue > 0
+                        ? newlineIndexBeforeValue + 1
+                        : 0,
+                    lastSpaceIndexBeforeValue > 0
+                        ? lastSpaceIndexBeforeValue + 1
+                        : offset,
+                )
+                const whitespace = textBeforeValue.replace(/\S/, ' ')
+                return value.replace(/\n/g, `\n${whitespace}`)
+            },
+        )
+
+        if (!replaced) {
+            break
+        }
+    }
+
+    return processed
 }
 
 export function joinTemplateDocs(

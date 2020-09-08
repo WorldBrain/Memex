@@ -93,19 +93,98 @@ describe('Content template rendering', () => {
         ).toEqual('test1 test2 test3 test4')
     })
 
-    it('should preserve indentation when rendering multi-line values', () => {
-        expect(
-            renderTemplate(
-                {
-                    code: ' {{NoteHighlight}}\n  {{NoteText}}\n{{NoteLink}}',
-                },
-                {
-                    NoteHighlight: 'test1\r\ntest2\ntest3',
-                    NoteText: 'test4\ntest5\ntest6',
-                    NoteLink: 'test7',
-                },
-            ),
-        ).toEqual(` test1\n test2\n test3\n  test4\n  test5\n  test6\ntest7`)
+    describe('should preserve indentation when rendering multi-line values', () => {
+        function indentTest(
+            description: string,
+            config: {
+                code: string
+                highlight: string
+                text?: string
+                link?: string
+                expected: string
+            },
+        ) {
+            it(description, () => {
+                expect(
+                    renderTemplate(
+                        {
+                            code: config.code,
+                        },
+                        {
+                            NoteHighlight: config.highlight,
+                            NoteText: config.text,
+                            NoteLink: config.link,
+                        },
+                    ),
+                ).toEqual(config.expected)
+            })
+        }
+
+        indentTest('should work with UNIX linebreaks', {
+            code: '  {{{NoteHighlight}}}',
+            highlight: 'test1\ntest2',
+            expected: '  test1\n  test2',
+        })
+
+        indentTest('should work with DOS linebreaks', {
+            code: '  {{{NoteHighlight}}}',
+            highlight: 'test1\r\ntest2',
+            expected: '  test1\n  test2',
+        })
+
+        indentTest('should work with HTML linebreaks', {
+            code: '  {{{NoteHighlight}}}',
+            highlight: 'test1<br>test2<br/>test3<br />test4',
+            expected: '  test1\n  test2\n  test3\n  test4',
+        })
+
+        indentTest('should work with multiple linebreaks', {
+            code: '  {{{NoteHighlight}}}',
+            highlight: 'test1\ntest2\ntest3',
+            expected: '  test1\n  test2\n  test3',
+        })
+
+        indentTest('should work with multiple values', {
+            code: '  {{{NoteHighlight}}}\n   {{{NoteText}}}\n{{{NoteLink}}}',
+            highlight: 'test1\ntest2',
+            text: 'test3\ntest4',
+            link: 'test5\ntest6',
+            expected: '  test1\n  test2\n   test3\n   test4\ntest5\ntest6',
+        })
+
+        indentTest('should continue bullet point identation', {
+            code: '  * {{{NoteHighlight}}}',
+            highlight: 'test1\ntest2',
+            expected: '  * test1\n    test2',
+        })
+        indentTest(
+            'should continue bullet point identation with multiple values',
+            {
+                code: '  * {{{NoteHighlight}}}\n   * {{{NoteText}}}',
+                highlight: 'test1\ntest2',
+                text: 'test3\ntest4',
+                expected: '  * test1\n    test2\n   * test3\n     test4',
+            },
+        )
+
+        indentTest(
+            'should work if value after bullet point is surrounded by quotes',
+            {
+                code: '  * "{{{NoteHighlight}}}"',
+                highlight: 'test1\ntest2',
+                expected: '  * "test1\n    test2"',
+            },
+        )
+
+        indentTest(
+            'should work if value after bullet point is surrounded by quotes with multiple values',
+            {
+                code: '  * "{{{NoteHighlight}}}"\n   * "{{{NoteText}}}"',
+                highlight: 'test1\ntest2',
+                text: 'test3\ntest4',
+                expected: '  * "test1\n    test2"\n   * "test3\n     test4"',
+            },
+        )
     })
 
     it('should not render anything inside the {{#literal}} tag', () => {
