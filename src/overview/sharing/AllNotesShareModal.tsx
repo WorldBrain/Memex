@@ -13,7 +13,7 @@ interface State {
 }
 
 export interface Props {
-    pageUrl: string
+    normalizedPageUrl: string
     closeShareMenu: () => void
 }
 
@@ -31,7 +31,7 @@ export default class AllNotesShareModal extends React.PureComponent<
 
     async componentDidMount() {
         const annotations = await this.annotationsBG.listAnnotationsByPageUrl({
-            pageUrl: this.props.pageUrl,
+            pageUrl: this.props.normalizedPageUrl,
         })
         this.annotationUrls = annotations.map((a) => a.url)
 
@@ -54,7 +54,7 @@ export default class AllNotesShareModal extends React.PureComponent<
 
     private getCreatedLink = async () => {
         const remotePageInfoId = await this.contentSharingBG.ensureRemotePageId(
-            this.props.pageUrl,
+            this.props.normalizedPageUrl,
         )
         return getPageShareUrl({ remotePageInfoId })
     }
