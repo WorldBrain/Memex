@@ -62,7 +62,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         return (
             <ShortcutTip>
                 <TypographyTextSmall css="font-weight: 'bold'; margin-right: '10px'">
-                    <strong>Tip: </strong>
+                    <strong>Tip:</strong>{'\xa0'}
                 </TypographyTextSmall>
                 <TypographyTextSmall>{modifier} + click </TypographyTextSmall>
                 <TipShareIcon src={icons.shareWhite} />
@@ -315,7 +315,11 @@ const ShortcutTip = styled.div`
     justify-content: center;
     font-size: 8px;
 
-    & * {
+    & span {
+        color: #fff;
+    }
+
+    & div {
         color: #fff;
     }
 `

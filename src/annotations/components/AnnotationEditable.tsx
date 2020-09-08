@@ -254,6 +254,7 @@ const ShareMenuWrapper = styled.div`
 `
 const CopyPasterWrapper = styled.div`
     position: relative;
+    left: 70px;
 `
 
 const HighlightTextStyled = styled.span`

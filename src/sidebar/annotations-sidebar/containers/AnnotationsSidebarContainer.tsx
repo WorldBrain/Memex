@@ -251,7 +251,11 @@ export class AnnotationsSidebarContainer<
             return null
         }
 
-        return this.renderCopyPasterManager([currentAnnotationId])
+        return (
+                <CopyPasterWrapper>
+                    {this.renderCopyPasterManager([currentAnnotationId])}
+                </CopyPasterWrapper>
+                )
     }
 
     private renderShareMenuForAnnotation = (currentAnnotationId: string) => {
@@ -279,7 +283,7 @@ export class AnnotationsSidebarContainer<
         }
 
         return (
-            <ShareMenuWrapper>
+            <ShareMenuWrapperTopBar>
                 <HoverBox>
                     <AllNotesShareMenu
                         normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
@@ -290,13 +294,12 @@ export class AnnotationsSidebarContainer<
                         }
                     />
                 </HoverBox>
-            </ShareMenuWrapper>
+            </ShareMenuWrapperTopBar>
         )
     }
 
     private renderCopyPasterManager(annotationUrls: string[]) {
         return (
-            <CopyPasterWrapper>
                 <HoverBox>
                     <CopyPaster
                         annotationUrls={annotationUrls}
@@ -309,7 +312,6 @@ export class AnnotationsSidebarContainer<
                         }
                     />
                 </HoverBox>
-            </CopyPasterWrapper>
         )
     }
 
@@ -319,9 +321,11 @@ export class AnnotationsSidebarContainer<
         }
 
         const annotUrls = this.state.annotations.map((a) => a.url)
-        return (<>
-                {this.renderCopyPasterManager(annotUrls)}
-        </>)
+        return (
+                    <CopyPasterWrapperTopBar>
+                        {this.renderCopyPasterManager(annotUrls)}
+                    </CopyPasterWrapperTopBar>
+                )
     }
 
     protected renderModals() {
@@ -438,10 +442,23 @@ export class AnnotationsSidebarContainer<
 const ShareMenuWrapper = styled.div`
     position: relative;
     left: 105px;
+    z-index: 1;
+`
+
+const ShareMenuWrapperTopBar = styled.div`
+    position: fixed;
+    right: 375px;
+    z-index: 1;
+`
+
+const CopyPasterWrapperTopBar = styled.div`
+    position: fixed;
+    right: 405px;
+    z-index: 1;
 `
 
 const CopyPasterWrapper = styled.div`
-    position: relative;
+    position: sticky;
     left: 75px;
     z-index: 5;
 `
@@ -451,7 +468,7 @@ const ContainerStyled = styled.div`
     overflow: hidden scroll;
     width: 450px;
     position: fixed;
-    padding: 0px 0px 10px 5px;
+    padding: 0px 0px 10px 0px;
 
     right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
     top: ${({ theme }: Props) => theme?.topOffsetPx ?? 0}px;
@@ -465,16 +482,17 @@ const ContainerStyled = styled.div`
 `
 
 const TopBarContainerStyled = styled.div`
-    position: static;
+    position: sticky;
     top: 0;
+    z-index: 1000;
     background: #fff;
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: 34px;
     box-sizing: border-box;
-    padding: 5px 5px 5px 0px;
-    width: 97%;
+    padding: 5px 15px 5px 5px;
+    width: 100%;
     margin-bottom: 2px;
     box-shadow: 0px 3px 5px -3px #e0e0e0;
 `
@@ -497,9 +515,11 @@ const CloseBtn = styled.button`
     outline: none;
     width: 24px;
     height: 24px;
+    padding: 4px;
     display: flex;
     justify-content: center;
     border-radius: 3px;
+    align-items: center;
 
     &:hover {
         background-color: #e0e0e0;
@@ -517,9 +537,9 @@ const ActionBtn = styled.button`
     padding: 2px;
     width: 24px;
     height: 24px;
+    padding: 3px;
     border-radius: 3px;
     opacity: 0.8;
-    background-size: 20px 20px;
     background-repeat: no-repeat;
     background-position: center;
     border: none;
