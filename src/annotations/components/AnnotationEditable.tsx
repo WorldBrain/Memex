@@ -251,11 +251,9 @@ export default class AnnotationEditable extends React.Component<Props> {
 
 const ShareMenuWrapper = styled.div`
     position: relative;
-    top: 10px;
 `
 const CopyPasterWrapper = styled.div`
     position: relative;
-    top: 10px;
 `
 
 const HighlightTextStyled = styled.span`

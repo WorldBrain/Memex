@@ -20,7 +20,7 @@ import {
     AnnotationEditEventProps,
     AnnotationEditGeneralProps,
 } from 'src/annotations/components/AnnotationEdit'
-import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareModal'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareModal'
@@ -260,14 +260,16 @@ export class AnnotationsSidebarContainer<
         }
 
         return (
-            <HoverBox>
-                <SingleNoteShareMenu
-                    annotationUrl={currentAnnotationId}
-                    closeShareMenu={() =>
-                        this.processEvent('resetShareMenuNoteId', null)
-                    }
-                />
-            </HoverBox>
+            <ShareMenuWrapper>
+                <HoverBox>
+                    <SingleNoteShareMenu
+                        annotationUrl={currentAnnotationId}
+                        closeShareMenu={() =>
+                            this.processEvent('resetShareMenuNoteId', null)
+                        }
+                    />
+                </HoverBox>
+            </ShareMenuWrapper>
         )
     }
 
@@ -277,22 +279,24 @@ export class AnnotationsSidebarContainer<
         }
 
         return (
-            <HoverBox>
-                <AllNotesShareMenu
-                    normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
-                    closeShareMenu={() =>
-                        this.processEvent('setAllNotesShareMenuShown', {
-                            shown: false,
-                        })
-                    }
-                />
-            </HoverBox>
+            <ShareMenuWrapper>
+                <HoverBox>
+                    <AllNotesShareMenu
+                        normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
+                        closeShareMenu={() =>
+                            this.processEvent('setAllNotesShareMenuShown', {
+                                shown: false,
+                            })
+                        }
+                    />
+                </HoverBox>
+            </ShareMenuWrapper>
         )
     }
 
     private renderCopyPasterManager(annotationUrls: string[]) {
         return (
-            <ShareMenuWrapper>
+            <CopyPasterWrapper>
                 <HoverBox>
                     <CopyPaster
                         annotationUrls={annotationUrls}
@@ -305,7 +309,7 @@ export class AnnotationsSidebarContainer<
                         }
                     />
                 </HoverBox>
-            </ShareMenuWrapper>
+            </CopyPasterWrapper>
         )
     }
 
@@ -315,11 +319,9 @@ export class AnnotationsSidebarContainer<
         }
 
         const annotUrls = this.state.annotations.map((a) => a.url)
-        return (
-            <CopyPasterWrapper>
+        return (<>
                 {this.renderCopyPasterManager(annotUrls)}
-            </CopyPasterWrapper>
-        )
+        </>)
     }
 
     protected renderModals() {
@@ -435,12 +437,13 @@ export class AnnotationsSidebarContainer<
 
 const ShareMenuWrapper = styled.div`
     position: relative;
-    top: 10px;
+    left: 105px;
 `
 
 const CopyPasterWrapper = styled.div`
     position: relative;
-    top: 10px;
+    left: 75px;
+    z-index: 5;
 `
 
 const ContainerStyled = styled.div`

@@ -7,7 +7,7 @@ import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
-import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import CopyPaster from 'src/copy-paster'
 import {
     collections,
