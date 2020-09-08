@@ -214,6 +214,22 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
+    private renderShareMenu() {
+        return (
+            <ShareMenuWrapper>
+                {this.props.renderShareMenuForAnnotation(this.props.url)}
+            </ShareMenuWrapper>
+        )
+    }
+
+    private renderCopyPaster() {
+        return (
+            <CopyPasterWrapper>
+                {this.props.renderCopyPasterForAnnotation(this.props.url)}
+            </CopyPasterWrapper>
+        )
+    }
+
     render() {
         return (
             <ThemeProvider theme={this.theme}>
@@ -225,13 +241,22 @@ export default class AnnotationEditable extends React.Component<Props> {
                     {this.renderHighlightBody()}
                     {this.renderMainAnnotation()}
                     {this.renderFooter()}
-                    {this.props.renderCopyPasterForAnnotation(this.props.url)}
-                    {this.props.renderShareMenuForAnnotation(this.props.url)}
+                    {this.renderCopyPaster()}
+                    {this.renderShareMenu()}
                 </AnnotationStyled>
             </ThemeProvider>
         )
     }
 }
+
+const ShareMenuWrapper = styled.div`
+    position: relative;
+    top: 10px;
+`
+const CopyPasterWrapper = styled.div`
+    position: relative;
+    top: 10px;
+`
 
 const HighlightTextStyled = styled.span`
     line-height: 25px;

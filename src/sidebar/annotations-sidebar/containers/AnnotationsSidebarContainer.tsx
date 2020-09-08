@@ -272,6 +272,10 @@ export class AnnotationsSidebarContainer<
     }
 
     private renderAllNotesShareMenu() {
+        if (!this.state.showAllNotesShareMenu) {
+            return null
+        }
+
         return (
             <HoverBox>
                 <AllNotesShareMenu
@@ -288,15 +292,33 @@ export class AnnotationsSidebarContainer<
 
     private renderCopyPasterManager(annotationUrls: string[]) {
         return (
-            <HoverBox>
-                <CopyPaster
-                    annotationUrls={annotationUrls}
-                    normalizedPageUrls={[normalizeUrl(this.state.pageUrl)]}
-                    onClickOutside={() =>
-                        this.processEvent('resetCopyPasterAnnotationId', null)
-                    }
-                />
-            </HoverBox>
+            <ShareMenuWrapper>
+                <HoverBox>
+                    <CopyPaster
+                        annotationUrls={annotationUrls}
+                        normalizedPageUrls={[normalizeUrl(this.state.pageUrl)]}
+                        onClickOutside={() =>
+                            this.processEvent(
+                                'resetCopyPasterAnnotationId',
+                                null,
+                            )
+                        }
+                    />
+                </HoverBox>
+            </ShareMenuWrapper>
+        )
+    }
+
+    private renderAllNotesCopyPaster() {
+        if (!this.state.showAllNotesCopyPaster) {
+            return null
+        }
+
+        const annotUrls = this.state.annotations.map((a) => a.url)
+        return (
+            <CopyPasterWrapper>
+                {this.renderCopyPasterManager(annotUrls)}
+            </CopyPasterWrapper>
         )
     }
 
@@ -305,6 +327,10 @@ export class AnnotationsSidebarContainer<
     }
 
     private renderTopBar() {
+        if (this.props.skipTopBarRender) {
+            return null
+        }
+
         return (
             <>
                 <TopBarContainerStyled>
@@ -343,12 +369,8 @@ export class AnnotationsSidebarContainer<
                         </ButtonTooltip>
                     </TopBarActionBtns>
                 </TopBarContainerStyled>
-                {this.state.showAllNotesCopyPaster &&
-                    this.renderCopyPasterManager(
-                        this.state.annotations.map((annot) => annot.url),
-                    )}
-                {this.state.showAllNotesShareMenu &&
-                    this.renderAllNotesShareMenu()}
+                {this.renderAllNotesCopyPaster()}
+                {this.renderAllNotesShareMenu()}
             </>
         )
     }
@@ -361,7 +383,7 @@ export class AnnotationsSidebarContainer<
         return (
             <ThemeProvider theme={this.props.theme}>
                 <ContainerStyled className="ignore-react-onclickoutside">
-                    {!this.props.skipTopBarRender && this.renderTopBar()}
+                    {this.renderTopBar()}
                     <AnnotationsSidebar
                         {...this.state}
                         sharingAccess={this.state.annotationSharingAccess}
@@ -404,6 +426,16 @@ export class AnnotationsSidebarContainer<
         )
     }
 }
+
+const ShareMenuWrapper = styled.div`
+    position: relative;
+    top: 10px;
+`
+
+const CopyPasterWrapper = styled.div`
+    position: relative;
+    top: 10px;
+`
 
 const ContainerStyled = styled.div`
     height: 100%;
