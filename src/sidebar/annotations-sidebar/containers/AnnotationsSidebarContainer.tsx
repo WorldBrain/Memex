@@ -345,23 +345,29 @@ export class AnnotationsSidebarContainer<
                     <TopBarActionBtns>
                         <ButtonTooltip
                             tooltipText="Copy All Notes"
-                            position="leftNarrow"
+                            position="bottom"
                         >
-                            <ActionBtn onClick={this.handleCopyAllNotesClick}>
+                            <ActionBtn
+                                onClick={this.handleCopyAllNotesClick}
+                                disabled={!this.state.copyPasterAccess}
+                            >
                                 <ActionIcon src={icons.copy} />
                             </ActionBtn>
                         </ButtonTooltip>
                         <ButtonTooltip
                             tooltipText="Share All Notes"
-                            position="leftNarrow"
+                            position="bottom"
                         >
-                            <ActionBtn onClick={this.handleShareAllNotesClick}>
+                            <ActionBtn
+                                onClick={this.handleShareAllNotesClick}
+                                disabled={!this.state.noteSharingAccess}
+                            >
                                 <ActionIcon src={icons.shareEmpty} />
                             </ActionBtn>
                         </ButtonTooltip>
                         <ButtonTooltip
                             tooltipText="Add notes to page"
-                            position="leftNarrow"
+                            position="bottom"
                         >
                             <ActionBtn onClick={this.handleAddCommentBtnClick}>
                                 <ActionIcon src={icons.commentAdd} />
@@ -531,5 +537,10 @@ const ActionBtn = styled.button`
 
     &:focus {
         outline: none;
+    }
+
+    &:disabled {
+        opacity: 0.4;
+        background-color: transparent;
     }
 `

@@ -42,6 +42,7 @@ export interface SidebarContainerState {
         [annotationUrl: string]: AnnotationSharingInfo
     }
 
+    noteSharingAccess: boolean
     copyPasterAccess: boolean
     showAllNotesCopyPaster: boolean
     activeCopyPasterAnnotationId: string | undefined
@@ -300,6 +301,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationSharingInfo: {},
             annotationSharingAccess: 'feature-disabled',
 
+            noteSharingAccess: false,
             copyPasterAccess: false,
             showAllNotesCopyPaster: false,
             activeCopyPasterAnnotationId: undefined,
@@ -393,11 +395,14 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     private async loadBeta() {
-        const copyPasterEnabled = await featuresBeta.getFeatureState(
-            'copy-paster',
-        )
-
-        this.emitMutation({ copyPasterAccess: { $set: copyPasterEnabled } })
+        this.emitMutation({
+            copyPasterAccess: {
+                $set: await featuresBeta.getFeatureState('copy-paster'),
+            },
+            noteSharingAccess: {
+                $set: await featuresBeta.getFeatureState('sharing-collections'),
+            },
+        })
     }
 
     show: EventHandler<'show'> = async () => {
