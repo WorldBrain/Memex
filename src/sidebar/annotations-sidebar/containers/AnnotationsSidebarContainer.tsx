@@ -279,7 +279,7 @@ export class AnnotationsSidebarContainer<
         return (
             <HoverBox>
                 <AllNotesShareMenu
-                    pageUrl={this.props.pageUrl}
+                    pageUrl={this.state.pageUrl}
                     closeShareMenu={() =>
                         this.processEvent('setAllNotesShareMenuShown', {
                             shown: false,
