@@ -1,13 +1,17 @@
 import React from 'react'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import delay from 'src/util/delay'
 import { contentSharing } from 'src/util/remote-functions-background'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
+import { LoadingIndicator } from 'src/common-ui/components'
 
 interface State {
-    readyToRender: boolean
-    hasAnnotationBeenShared: boolean
-    shareAllBtn: 'pristine' | 'running' | 'unchecked' | 'checked'
+    // readyToRender: boolean
+    // hasAnnotationBeenShared?: boolean
+    unshareState: TaskState
 }
 
 export interface Props {
@@ -24,53 +28,48 @@ export default class SingleNoteShareModal extends React.PureComponent<
     private contentSharingBG = contentSharing
 
     state: State = {
-        readyToRender: false,
-        hasAnnotationBeenShared: false,
-        shareAllBtn: 'pristine',
+        // readyToRender: false,
+        unshareState: 'pristine',
     }
 
-    async componentDidMount() {
-        const metadataForAll = await this.contentSharingBG.getRemoteAnnotationMetadata(
-            { annotationUrls: [this.props.annotationUrl] },
-        )
-        const metadata = metadataForAll[this.props.annotationUrl]
+    // async componentDidMount() {
+    // const metadataForAll = await this.contentSharingBG.getRemoteAnnotationMetadata(
+    //     { annotationUrls: [this.props.annotationUrl] },
+    // )
+    // const metadata = metadataForAll[this.props.annotationUrl]
 
-        this.setState({
-            hasAnnotationBeenShared: !!metadata,
-            shareAllBtn: metadata?.excludeFromLists ? 'checked' : 'unchecked',
-            readyToRender: true,
-        })
-    }
+    // this.setState({
+    // hasAnnotationBeenShared: !!metadata,
+    // isSharedToLists: metadata?.excludeFromLists,
+    // readyToRender: true,
+    // })
+    // }
 
-    private getCreatedLink = async () => {
+    private getLink = async () => {
         const { annotationUrl } = this.props
-
-        if (!this.state.hasAnnotationBeenShared) {
-            await this.contentSharingBG.shareAnnotation({ annotationUrl })
-        }
-
+        await this.contentSharingBG.shareAnnotation({ annotationUrl })
         return this.contentSharingBG.getRemoteAnnotationLink({ annotationUrl })
     }
 
-    private handleSetAllShareStatus = async () => {
-        const annotationUrls = [this.props.annotationUrl]
+    // private handleSetAllShareStatus = async () => {
+    // const annotationUrls = [this.props.annotationUrl]
 
-        if (this.state.shareAllBtn === 'unchecked') {
-            this.setState({ shareAllBtn: 'running' })
-            await this.contentSharingBG.shareAnnotationsToLists({
-                annotationUrls,
-            })
-            this.props.postShareHook?.()
-            this.setState({ shareAllBtn: 'checked' })
-        } else {
-            this.setState({ shareAllBtn: 'running' })
-            await this.contentSharingBG.unshareAnnotationsFromLists({
-                annotationUrls,
-            })
-            this.props.postUnshareHook?.()
-            this.setState({ shareAllBtn: 'unchecked' })
-        }
-    }
+    // if (this.state.shareStatusState === 'unchecked') {
+    //     this.setState({ shareStatusState: 'running' })
+    //     await this.contentSharingBG.shareAnnotationsToLists({
+    //         annotationUrls,
+    //     })
+    //     this.props.postShareHook?.()
+    //     this.setState({ shareStatusState: 'checked' })
+    // } else {
+    //     this.setState({ shareStatusState: 'running' })
+    //     await this.contentSharingBG.unshareAnnotationsFromLists({
+    //         annotationUrls,
+    //     })
+    //     this.props.postUnshareHook?.()
+    //     this.setState({ shareStatusState: 'unchecked' })
+    // }
+    // }
 
     private handleLinkCopy = (link: string) =>
         navigator.clipboard.writeText(link)
@@ -83,21 +82,25 @@ export default class SingleNoteShareModal extends React.PureComponent<
     }
 
     render() {
-        if (!this.state.readyToRender) {
-            return null
-        }
-
         return (
             <ShareAnnotationMenu
-                shareAllBtn={this.state.shareAllBtn}
-                onUnshareClick={this.handleUnshare}
-                getCreatedLink={this.getCreatedLink}
+                // shareAllState={this.state.shareStatusState}
+                getLink={this.getLink}
                 onCopyLinkClick={this.handleLinkCopy}
                 onClickOutside={this.props.closeShareMenu}
-                onShareAllClick={this.handleSetAllShareStatus}
-                checkboxTitleCopy="Share Note"
-                checkboxCopy="Share Note in all collections this page is in"
-            />
+                // checkboxTitleCopy="Share Note"
+                // checkboxCopy="Share Note in all collections this page is in"
+            >
+                {this.state.unshareState === 'pristine' && (
+                    <SecondaryAction
+                        label="Unshare"
+                        onClick={this.handleUnshare}
+                    />
+                )}
+                {this.state.unshareState === 'running' && <LoadingIndicator />}
+                {this.state.unshareState === 'error' &&
+                    'Error unsharing annotation...'}
+            </ShareAnnotationMenu>
         )
     }
 }

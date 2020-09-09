@@ -6,10 +6,16 @@ import {
     annotations as annotationsBG,
     contentSharing,
 } from 'src/util/remote-functions-background'
+import { executeReactStateUITask } from 'src/util/ui-logic'
 import { getPageShareUrl } from 'src/content-sharing/utils'
+import { TaskState } from 'ui-logic-core/lib/types'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
+import { LoadingIndicator } from 'src/common-ui/components'
 
 interface State {
-    shareAllBtn: 'pristine' | 'running' | 'unchecked' | 'checked'
+    shareAllState: TaskState
+    unshareAllState: TaskState
 }
 
 export interface Props {
@@ -19,16 +25,14 @@ export interface Props {
     postUnshareAllHook?: () => void
 }
 
-export default class AllNotesShareModal extends React.PureComponent<
-    Props,
-    State
-> {
+export default class AllNotesShareModal extends React.Component<Props, State> {
     private contentSharingBG = contentSharing
     private annotationsBG = annotationsBG
     private annotationUrls: string[]
 
     state: State = {
-        shareAllBtn: 'pristine',
+        shareAllState: 'pristine',
+        unshareAllState: 'pristine',
     }
 
     async componentDidMount() {
@@ -37,9 +41,9 @@ export default class AllNotesShareModal extends React.PureComponent<
         })
         this.annotationUrls = annotations.map((a) => a.url)
 
-        const shareAllBtn = await this.getAllSharedBtnState()
+        // const shareAllBtn = await this.getAllSharedBtnState()
 
-        this.setState({ shareAllBtn })
+        // this.setState({ shareAllBtn })
     }
 
     private async getAllSharedBtnState(): Promise<'checked' | 'unchecked'> {
@@ -63,20 +67,56 @@ export default class AllNotesShareModal extends React.PureComponent<
         return getPageShareUrl({ remotePageInfoId })
     }
 
-    private handleSetAllShareStatus = async () => {
-        if (this.state.shareAllBtn === 'unchecked') {
-            this.setState({ shareAllBtn: 'running' })
-            await this.contentSharingBG.shareAnnotations({
-                annotationUrls: this.annotationUrls,
-            })
-            this.props.postShareAllHook?.()
-            this.setState({ shareAllBtn: 'checked' })
-        } else {
-            this.setState({ shareAllBtn: 'running' })
-            await delay(1000)
-            this.props.postUnshareAllHook?.()
-            this.setState({ shareAllBtn: 'unchecked' })
-        }
+    private handleShareAll = async () => {
+        await executeReactStateUITask<State, 'shareAllState'>(
+            this,
+            'shareAllState',
+            async () => {
+                await this.contentSharingBG.shareAnnotations({
+                    annotationUrls: this.annotationUrls,
+                    queueInteraction: 'skip-queue',
+                })
+                await this.contentSharingBG.shareAnnotationsToLists({
+                    annotationUrls: this.annotationUrls,
+                    queueInteraction: 'skip-queue',
+                })
+            },
+        )
+
+        // if (this.state.shareAllBtn === 'unchecked') {
+        //     this.setState({ shareAllBtn: 'running' })
+        //     await this.contentSharingBG.shareAnnotations({
+        //         annotationUrls: this.annotationUrls,
+        //     })
+        //     this.props.postShareAllHook?.()
+        //     this.setState({ shareAllBtn: 'checked' })
+        // } else {
+        //     this.setState({ shareAllBtn: 'running' })
+        //     await delay(1000)
+        //     this.props.postUnshareAllHook?.()
+        //     this.setState({ shareAllBtn: 'unchecked' })
+        // }
+    }
+
+    private handleUnshareAll = async () => {
+        await executeReactStateUITask<State, 'unshareAllState'>(
+            this,
+            'unshareAllState',
+            async () => {
+                await Promise.all(
+                    this.annotationUrls.map((annotationUrl) =>
+                        this.contentSharingBG.unshareAnnotation({
+                            annotationUrl,
+                            queueInteraction: 'skip-queue',
+                        }),
+                    ),
+                )
+                // await this.contentSharingBG.unshareAnnotations({
+                //     annotationUrls: this.annotationUrls,
+                //     queueInteraction: 'skip-queue',
+                // })
+            },
+        )
     }
 
     private handleLinkCopy = (link: string) =>
@@ -92,21 +132,52 @@ export default class AllNotesShareModal extends React.PureComponent<
     //     this.props.closeShareMenu()
     // }
 
+    shouldShowShareAll() {
+        return (
+            this.state.shareAllState === 'pristine' &&
+            this.state.unshareAllState !== 'running'
+        )
+    }
+
+    shouldShowUnshareAll() {
+        return (
+            this.state.unshareAllState === 'pristine' &&
+            this.state.shareAllState !== 'running'
+        )
+    }
+
     render() {
         return (
             <ShareAnnotationMenu
-                shareAllBtn={this.state.shareAllBtn}
-                // onUnshareClick={this.handleUnshare}
-                getCreatedLink={this.getCreatedLink}
+                // shareAllState={this.state.shareAllBtn}
+                // onUnshareAllClick={this.handleUnshareAll}
+                // onShareAllClick={this.handleShareAll}
+                getLink={this.getCreatedLink}
                 onCopyLinkClick={this.handleLinkCopy}
                 onClickOutside={this.props.closeShareMenu}
-                onShareAllClick={this.handleSetAllShareStatus}
-                checkboxCopy="Share all Notes on this page"
-                checkboxTitleCopy="Share all Notes"
-                checkboxSubtitleCopy="Add all notes on page to shared collections"
+                // checkboxCopy="Share all Notes on this page"
+                // checkboxTitleCopy="Share all Notes"
+                // checkboxSubtitleCopy="Add all notes on page to shared collections"
                 linkTitleCopy="Link to Page"
                 linkSubtitleCopy="A link to all shared notes on this page"
-            />
+            >
+                {this.shouldShowShareAll() && (
+                    <PrimaryAction
+                        label="Share all notes"
+                        onClick={this.handleShareAll}
+                    />
+                )}
+                {this.shouldShowUnshareAll() && (
+                    <SecondaryAction
+                        label="Un-share all notes"
+                        onClick={this.handleUnshareAll}
+                    />
+                )}
+                {(this.state.shareAllState === 'running' ||
+                    this.state.unshareAllState === 'running') && (
+                    <LoadingIndicator />
+                )}
+            </ShareAnnotationMenu>
         )
     }
 }

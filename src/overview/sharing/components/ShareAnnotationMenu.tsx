@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
-
+import { TaskState } from 'ui-logic-core/lib/types'
 import {
     TypographyTextNormal,
     TypographyTextSmall,
@@ -12,42 +12,48 @@ import { ClickAway } from 'src/util/click-away-wrapper'
 const COPY_TIMEOUT = 2000
 
 export interface Props {
-    checkboxCopy: React.ReactNode
+    children: React.ReactNode
+    // shareAllState: TaskState
+    // unshareAllState: TaskState
+    // checkboxCopy: React.ReactNode
     linkTitleCopy?: React.ReactNode
     linkSubtitleCopy?: React.ReactNode
-    checkboxTitleCopy?: React.ReactNode
-    checkboxSubtitleCopy?: React.ReactNode
-    shareAllBtn: 'pristine' | 'running' | 'checked' | 'unchecked'
-    getCreatedLink: () => Promise<string>
+    // checkboxTitleCopy?: React.ReactNode
+    // checkboxSubtitleCopy?: React.ReactNode
+    getLink: () => Promise<string>
     onClickOutside?: () => void
     /** This logic should include handling derendering this share menu view. */
-    onUnshareClick?: () => Promise<void>
-    onShareAllClick: () => Promise<void>
+    // onUnshareClick?: () => Promise<void>
+    // onShareAllClick: () => Promise<void>
+    // onUnshareAllClick: () => Promise<void>
     onCopyLinkClick: (createdLink: string) => Promise<void>
 }
 
 export interface State {
-    linkCopier: 'pristine' | 'running' | 'copied'
-    unshareBtn: 'pristine' | 'running' | 'disabled'
-    createdLink: string | undefined
+    loadState: TaskState
+    copyState: TaskState
+    showCopySuccess: boolean
+    link?: string
 }
 
 class ShareAnnotationMenu extends PureComponent<Props, State> {
     copyTimeout?: ReturnType<typeof setTimeout>
     state: State = {
-        linkCopier: 'running',
-        unshareBtn: 'disabled',
-        createdLink: undefined,
+        loadState: 'running',
+        copyState: 'pristine',
+        showCopySuccess: false,
     }
 
     async componentDidMount() {
-        const createdLink = await this.props.getCreatedLink()
-
-        this.setState({
-            createdLink,
-            linkCopier: 'pristine',
-            unshareBtn: 'pristine',
-        })
+        try {
+            const createdLink = await this.props.getLink()
+            this.setState({
+                link: createdLink,
+                loadState: 'success',
+            })
+        } catch (e) {
+            this.setState({ loadState: 'error' })
+        }
     }
 
     componentWillUnmount() {
@@ -62,85 +68,90 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         }
     }
 
-    private renderShortcutTip({ modifier }: { modifier: 'Shift' | 'Alt' }) {
-        return (
-            <ShortcutTip>
-                <TypographyTextSmall css="font-weight: 'bold'; margin-right: '10px'">
-                    <strong>Tip:</strong>
-                    {'\xa0'}
-                </TypographyTextSmall>
-                <TypographyTextSmall>{modifier} + click </TypographyTextSmall>
-                <TipShareIcon src={icons.shareWhite} />
-            </ShortcutTip>
-        )
-    }
+    // private renderShortcutTip({ modifier }: { modifier: 'Shift' | 'Alt' }) {
+    //     return (
+    //         <ShortcutTip>
+    //             <TypographyTextSmall css="font-weight: 'bold'; margin-right: '10px'">
+    //                 <strong>Tip:</strong>
+    //                 {'\xa0'}
+    //             </TypographyTextSmall>
+    //             <TypographyTextSmall>{modifier} + click </TypographyTextSmall>
+    //             <TipShareIcon src={icons.shareWhite} />
+    //         </ShortcutTip>
+    //     )
+    // }
 
-    private handleUnshareClick = async () => {
-        if (this.state.unshareBtn === 'pristine') {
-            this.setState({ unshareBtn: 'running' })
-            await this.props.onUnshareClick()
-        }
-    }
+    // private handleUnshareClick = async () => {
+    //     if (this.props.unshareAllState === 'pristine') {
+    //         await this.props.onUnshareClick()
+    //     }
+    // }
 
     private handleLinkClick = async () => {
-        if (this.state.linkCopier === 'pristine') {
-            this.setState({ linkCopier: 'copied' })
-            await this.props.onCopyLinkClick(this.state.createdLink)
+        if (this.state.copyState === 'pristine') {
+            this.setState({ copyState: 'running' })
+            try {
+                await this.props.onCopyLinkClick(this.state.link)
+                this.setState({ copyState: 'success' })
 
-            this.copyTimeout = setTimeout(() => {
-                this.setState({ linkCopier: 'pristine' })
-            }, COPY_TIMEOUT)
+                this.copyTimeout = setTimeout(() => {
+                    this.setState({ loadState: 'pristine' })
+                }, COPY_TIMEOUT)
+            } catch (e) {
+                this.setState({ copyState: 'error' })
+                throw e
+            }
         }
     }
 
-    private renderUnshareIcon() {
-        if (!this.props.onUnshareClick) {
-            return null
-        }
+    // private renderUnshareIcon() {
+    //     if (!this.props.onUnshareClick) {
+    //         return null
+    //     }
 
-        if (this.state.unshareBtn === 'running') {
-            return <LoadingIndicator />
-        }
+    //     if (this.props.unshareAllState === 'running') {
+    //         return <LoadingIndicator />
+    //     }
 
-        return (
-            <RemoveIcon src={icons.trash} onClick={this.handleUnshareClick} />
-        )
-    }
+    //     return (
+    //         <RemoveIcon src={icons.trash} onClick={this.handleUnshareClick} />
+    //     )
+    // }
 
-    private renderShareAllContent() {
-        const { shareAllBtn } = this.props
+    // private renderShareAllContent() {
+    //     const { shareAllState: shareAllBtn } = this.props
 
-        return (
-            <>
-                <CheckBoxBox>
-                    {shareAllBtn === 'pristine' || shareAllBtn === 'running' ? (
-                        <LoadingIndicator />
-                    ) : (
-                        <Checkbox>
-                            <CheckboxInner
-                                isChecked={shareAllBtn === 'checked'}
-                            />
-                        </Checkbox>
-                    )}
-                </CheckBoxBox>
-                <ShareAllText>{this.props.checkboxCopy}</ShareAllText>
-            </>
-        )
-    }
+    //     return (
+    //         <>
+    //             <CheckBoxBox>
+    //                 {shareAllBtn === 'pristine' || shareAllBtn === 'running' ? (
+    //                     <LoadingIndicator />
+    //                 ) : (
+    //                     <Checkbox>
+    //                         <CheckboxInner
+    //                             isChecked={shareAllBtn === 'checked'}
+    //                         />
+    //                     </Checkbox>
+    //                 )}
+    //             </CheckBoxBox>
+    //             <ShareAllText>{this.props.checkboxCopy}</ShareAllText>
+    //         </>
+    //     )
+    // }
 
     private renderLinkContent() {
-        const { linkCopier } = this.state
+        const { loadState, copyState } = this.state
 
-        if (linkCopier === 'running') {
+        if (loadState === 'running') {
             return <LoadingIndicator />
-        } else if (linkCopier === 'copied') {
+        } else if (copyState === 'success') {
             return (
                 <TypographyTextNormal>Copied to Clipboard</TypographyTextNormal>
             )
-        } else if (linkCopier === 'pristine') {
+        } else if (loadState === 'pristine') {
             return (
                 <>
-                    <LinkText>{this.state.createdLink}</LinkText>
+                    <LinkText>{this.state.link}</LinkText>
                     <LinkCopyIcon src={icons.copy} />
                 </>
             )
@@ -156,23 +167,24 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                         {this.props.linkSubtitleCopy}
                     </SectionDescription>
                     <ShareAllBox
-                        tooltipText={this.renderShortcutTip({
-                            modifier: 'Alt',
-                        })}
+                        // tooltipText={this.renderShortcutTip({
+                        //     modifier: 'Alt',
+                        // })}
                         position="bottom"
                     >
                         <LinkCopierBox>
                             <LinkCopier
-                                state={this.state.linkCopier}
+                                state={this.state.loadState}
                                 onClick={this.handleLinkClick}
                             >
                                 {this.renderLinkContent()}
                             </LinkCopier>
-                            {this.renderUnshareIcon()}
+                            {/* {this.renderUnshareIcon()} */}
                         </LinkCopierBox>
                     </ShareAllBox>
                     <Spacing />
-                    <SectionTitle>{this.props.checkboxTitleCopy}</SectionTitle>
+                    {this.props.children}
+                    {/* <SectionTitle>{this.props.checkboxTitleCopy}</SectionTitle>
                     <SectionDescription>
                         {this.props.checkboxSubtitleCopy}
                     </SectionDescription>
@@ -185,7 +197,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                         <ShareAllBtn onClick={this.props.onShareAllClick}>
                             {this.renderShareAllContent()}
                         </ShareAllBtn>
-                    </ShareAllBox>
+                    </ShareAllBox> */}
                 </Menu>
             </ClickAway>
         )

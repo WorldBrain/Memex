@@ -282,6 +282,8 @@ export class SidebarContainerLogic extends UILogic<
     constructor(private options: SidebarContainerOptions) {
         super()
 
+        console.log(this.options)
+
         this.inPageEvents =
             options.events ??
             (new EventEmitter() as AnnotationsSidebarInPageEventEmitter)
