@@ -52,10 +52,6 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
             'pageAddedToSharedList',
             this.handlePageAddedToSharedList,
         )
-        this.contentSharingEvents.on(
-            'pageRemovedFromSharedList',
-            this.handlePageRemovedFromSharedList,
-        )
     }
 
     private handlePageAddedToSharedList: ContentSharingEvents['pageAddedToSharedList'] = ({
@@ -69,20 +65,6 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
             type: 'sidebarAction',
             action: 'set_sharing_access',
             annotationSharingAccess: 'sharing-allowed',
-        })
-    }
-
-    private handlePageRemovedFromSharedList: ContentSharingEvents['pageRemovedFromSharedList'] = ({
-        pageUrl,
-    }) => {
-        if (pageUrl !== this.options.getNormalizedPageUrl()) {
-            return
-        }
-
-        this._emitAction({
-            type: 'sidebarAction',
-            action: 'set_sharing_access',
-            annotationSharingAccess: 'page-not-shared',
         })
     }
 

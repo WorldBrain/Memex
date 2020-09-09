@@ -25,9 +25,6 @@ export class AnnotationShareIconRenderer extends React.Component<Props> {
         if (this.props.sharingAccess === 'feature-disabled') {
             return 'feature-disabled'
         }
-        if (this.props.sharingAccess === 'page-not-shared') {
-            return 'page-not-shared'
-        }
 
         const info = this.props.sharingInfo ?? {
             status: 'unshared',
@@ -95,7 +92,6 @@ export class AnnotationShareIconRenderer extends React.Component<Props> {
             [Key in typeof shareButtonState]: string
         } = {
             'feature-disabled': 'Share note',
-            'page-not-shared': 'Add parent page to shared collections first',
             'not-shared-yet': 'Share note',
             'already-shared': 'Unshare note',
             sharing: 'Sharing note...',
@@ -110,7 +106,6 @@ export class AnnotationShareIconRenderer extends React.Component<Props> {
             [Key in typeof shareButtonState]: string | null
         } = {
             'feature-disabled': icons.shareEmpty,
-            'page-not-shared': icons.shareEmpty,
             'not-shared-yet': icons.shareEmpty,
             'already-shared': icons.share,
             sharing: icons.share,
@@ -125,7 +120,7 @@ export class AnnotationShareIconRenderer extends React.Component<Props> {
             onClickAction: this.getShareButtonAction(),
             imgSrc: SHARE_BUTTON_ICONS[shareButtonState],
             tooltipText: SHARE_BUTTON_LABELS[shareButtonState],
-            isDisabled: this.props.sharingAccess === 'page-not-shared',
+            isDisabled: this.props.sharingAccess === 'feature-disabled',
             isLoading:
                 shareButtonState === 'sharing' ||
                 shareButtonState === 'unsharing',

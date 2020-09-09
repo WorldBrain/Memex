@@ -251,25 +251,21 @@ describe('SidebarContainerLogic', () => {
             const { sidebar } = await setupLogicHelper({ device })
 
             expect(sidebar.state.annotationSharingAccess).toEqual(
-                'feature-disabled',
-            )
-            await sidebar.processEvent('receiveSharingAccessChange', {
-                sharingAccess: 'page-not-shared',
-            })
-            expect(sidebar.state.annotationSharingAccess).toEqual(
-                'page-not-shared',
-            )
-            await sidebar.processEvent('receiveSharingAccessChange', {
-                sharingAccess: 'sharing-allowed',
-            })
-            expect(sidebar.state.annotationSharingAccess).toEqual(
                 'sharing-allowed',
             )
+
             await sidebar.processEvent('receiveSharingAccessChange', {
                 sharingAccess: 'feature-disabled',
             })
             expect(sidebar.state.annotationSharingAccess).toEqual(
                 'feature-disabled',
+            )
+
+            await sidebar.processEvent('receiveSharingAccessChange', {
+                sharingAccess: 'sharing-allowed',
+            })
+            expect(sidebar.state.annotationSharingAccess).toEqual(
+                'sharing-allowed',
             )
         })
     })

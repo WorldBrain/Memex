@@ -41,7 +41,6 @@ export interface SidebarContainerState {
         [annotationUrl: string]: AnnotationSharingInfo
     }
 
-    noteSharingAccess: boolean
     copyPasterAccess: boolean
     showAllNotesCopyPaster: boolean
     activeCopyPasterAnnotationId: string | undefined
@@ -278,7 +277,6 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerEvents
 > {
     private inPageEvents: AnnotationsSidebarInPageEventEmitter
-    _detectedPageSharingStatus: Promise<void>
     _detectedSharedAnnotations = createResolvable()
 
     constructor(private options: SidebarContainerOptions) {
@@ -308,7 +306,6 @@ export class SidebarContainerLogic extends UILogic<
             annotationSharingInfo: {},
             annotationSharingAccess: 'feature-disabled',
 
-            noteSharingAccess: false,
             copyPasterAccess: false,
             showAllNotesCopyPaster: false,
             activeCopyPasterAnnotationId: undefined,
@@ -375,9 +372,7 @@ export class SidebarContainerLogic extends UILogic<
             if (this.options.pageUrl != null) {
                 await this._doSearch(previousState, { overwrite: true })
             }
-            if (this.options.pageUrl) {
-                this._detectPageSharingStatus(this.options.pageUrl)
-            }
+
             await this.loadBeta()
         })
     }
@@ -405,11 +400,15 @@ export class SidebarContainerLogic extends UILogic<
         const { featuresBeta } = this.options
 
         this.emitMutation({
+            annotationSharingAccess: {
+                $set: (await featuresBeta.getFeatureState(
+                    'sharing-collections',
+                ))
+                    ? 'sharing-allowed'
+                    : 'feature-disabled',
+            },
             copyPasterAccess: {
                 $set: await featuresBeta.getFeatureState('copy-paster'),
-            },
-            noteSharingAccess: {
-                $set: await featuresBeta.getFeatureState('sharing-collections'),
             },
         })
     }
@@ -500,7 +499,6 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
 
-        this._detectPageSharingStatus(event.pageUrl)
         return this._doSearch(nextState, { overwrite: true })
     }
 
@@ -1058,37 +1056,6 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ showBetaFeatureNotifModal: { $set: event.shown } })
     }
 
-    _detectPageSharingStatus(pageUrl: string) {
-        this._detectedPageSharingStatus = (async () => {
-            if (!(await this.options.auth.isAuthorizedForFeature('beta'))) {
-                this.emitMutation({
-                    annotationSharingAccess: { $set: 'feature-disabled' },
-                })
-                return
-            }
-
-            const listIds = await this.options.customLists.fetchListIdsByUrl({
-                url: pageUrl,
-            })
-            const areListsShared = await this.options.contentSharing.areListsShared(
-                { localListIds: listIds },
-            )
-
-            const isPageSharedOnSomeList = Object.values(areListsShared).reduce(
-                (val, acc) => acc || val,
-                false,
-            )
-
-            this.emitMutation({
-                annotationSharingAccess: {
-                    $set: isPageSharedOnSomeList
-                        ? 'sharing-allowed'
-                        : 'page-not-shared',
-                },
-            })
-        })()
-    }
-
     async _detectSharedAnnotations(annotationUrls: string[]) {
         const annotationSharingInfo: UIMutation<
             SidebarContainerState['annotationSharingInfo']
@@ -1119,6 +1086,7 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         this.emitMutation({ annotationSharingInfo: { $set: sharingInfo } })
+        console.log('setting: ', sharingInfo)
     }
 
     updateAnnotationShareInfo: EventHandler<'updateAnnotationShareInfo'> = ({

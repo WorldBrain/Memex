@@ -397,7 +397,10 @@ export class AnnotationsSidebarContainer<
                         >
                             <ActionBtn
                                 onClick={this.handleShareAllNotesClick}
-                                disabled={!this.state.noteSharingAccess}
+                                disabled={
+                                    this.state.annotationSharingAccess ===
+                                    'feature-disabled'
+                                }
                             >
                                 <ActionIcon src={icons.shareEmpty} />
                             </ActionBtn>

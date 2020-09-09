@@ -95,28 +95,10 @@ class AnnotationList extends Component<Props, State> {
     }
 
     private async detectPageSharingStatus() {
-        if (!(await this.authBG.isAuthorizedForFeature('beta'))) {
-            this.setState(() => ({ sharingAccess: 'feature-disabled' }))
-            return
-        }
-
-        const listIds = await this.customListsBG.fetchListIdsByUrl({
-            url: this.props.pageUrl,
+        const isAllowed = await this.authBG.isAuthorizedForFeature('beta')
+        this.setState({
+            sharingAccess: isAllowed ? 'sharing-allowed' : 'feature-disabled',
         })
-        const areListsShared = await this.contentShareBG.areListsShared({
-            localListIds: listIds,
-        })
-
-        const isPageSharedOnSomeList = Object.values(areListsShared).reduce(
-            (val, acc) => acc || val,
-            false,
-        )
-
-        this.setState(() => ({
-            sharingAccess: isPageSharedOnSomeList
-                ? 'sharing-allowed'
-                : 'page-not-shared',
-        }))
     }
 
     private async detectSharedAnnotations() {
