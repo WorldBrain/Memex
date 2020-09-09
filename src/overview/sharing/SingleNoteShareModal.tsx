@@ -95,7 +95,8 @@ export default class SingleNoteShareModal extends React.PureComponent<
                 onCopyLinkClick={this.handleLinkCopy}
                 onClickOutside={this.props.closeShareMenu}
                 onShareAllClick={this.handleSetAllShareStatus}
-                shareAllText="Share Note in all collections this page is in"
+                checkboxTitleCopy="Share Note"
+                checkboxCopy="Share Note in all collections this page is in"
             />
         )
     }

@@ -12,7 +12,11 @@ import { ClickAway } from 'src/util/click-away-wrapper'
 const COPY_TIMEOUT = 2000
 
 export interface Props {
-    shareAllText: string
+    checkboxCopy: React.ReactNode
+    linkTitleCopy?: React.ReactNode
+    linkSubtitleCopy?: React.ReactNode
+    checkboxTitleCopy?: React.ReactNode
+    checkboxSubtitleCopy?: React.ReactNode
     shareAllBtn: 'pristine' | 'running' | 'checked' | 'unchecked'
     getCreatedLink: () => Promise<string>
     onClickOutside?: () => void
@@ -106,25 +110,20 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     private renderShareAllContent() {
         const { shareAllBtn } = this.props
 
-        if (shareAllBtn === 'pristine' || shareAllBtn === 'running') {
-            return (
-                <>
-                    <CheckBoxBox>
-                        <LoadingIndicator />
-                    </CheckBoxBox>
-                    <ShareAllText>{this.props.shareAllText}</ShareAllText>
-                </>
-            )
-        }
-
         return (
             <>
                 <CheckBoxBox>
-                    <Checkbox>
-                        <CheckboxInner isChecked={shareAllBtn === 'checked'} />
-                    </Checkbox>
+                    {shareAllBtn === 'pristine' || shareAllBtn === 'running' ? (
+                        <LoadingIndicator />
+                    ) : (
+                        <Checkbox>
+                            <CheckboxInner
+                                isChecked={shareAllBtn === 'checked'}
+                            />
+                        </Checkbox>
+                    )}
                 </CheckBoxBox>
-                <ShareAllText>{this.props.shareAllText}</ShareAllText>
+                <ShareAllText>{this.props.checkboxCopy}</ShareAllText>
             </>
         )
     }
@@ -152,9 +151,9 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         return (
             <ClickAway onClickAway={this.handleClickOutside}>
                 <Menu>
-                    <SectionTitle>Link to Page</SectionTitle>
+                    <SectionTitle>{this.props.linkTitleCopy}</SectionTitle>
                     <SectionDescription>
-                        A link to all shared notes on this page.
+                        {this.props.linkSubtitleCopy}
                     </SectionDescription>
                     <ShareAllBox
                         tooltipText={this.renderShortcutTip({
@@ -173,9 +172,9 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                         </LinkCopierBox>
                     </ShareAllBox>
                     <Spacing />
-                    <SectionTitle>Share all Notes</SectionTitle>
+                    <SectionTitle>{this.props.checkboxTitleCopy}</SectionTitle>
                     <SectionDescription>
-                        Add all notes on page to shared collections
+                        {this.props.checkboxSubtitleCopy}
                     </SectionDescription>
                     <ShareAllBox
                         tooltipText={this.renderShortcutTip({
