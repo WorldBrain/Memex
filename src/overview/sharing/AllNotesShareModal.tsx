@@ -15,6 +15,8 @@ interface State {
 export interface Props {
     normalizedPageUrl: string
     closeShareMenu: () => void
+    postShareAllHook?: () => void
+    postUnshareAllHook?: () => void
 }
 
 export default class AllNotesShareModal extends React.PureComponent<
@@ -35,7 +37,9 @@ export default class AllNotesShareModal extends React.PureComponent<
         })
         this.annotationUrls = annotations.map((a) => a.url)
 
-        this.setState({ shareAllBtn: await this.getAllSharedBtnState() })
+        const shareAllBtn = await this.getAllSharedBtnState()
+
+        this.setState({ shareAllBtn })
     }
 
     private async getAllSharedBtnState(): Promise<'checked' | 'unchecked'> {
@@ -43,8 +47,8 @@ export default class AllNotesShareModal extends React.PureComponent<
             { annotationUrls: this.annotationUrls },
         )
 
-        for (const localId in annotsMetadata) {
-            if (!annotsMetadata[localId]) {
+        for (const url of this.annotationUrls) {
+            if (!annotsMetadata[url]) {
                 return 'unchecked'
             }
         }
@@ -65,10 +69,12 @@ export default class AllNotesShareModal extends React.PureComponent<
             await this.contentSharingBG.shareAnnotations({
                 annotationUrls: this.annotationUrls,
             })
+            this.props.postShareAllHook?.()
             this.setState({ shareAllBtn: 'checked' })
         } else {
             this.setState({ shareAllBtn: 'running' })
             await delay(1000)
+            this.props.postUnshareAllHook?.()
             this.setState({ shareAllBtn: 'unchecked' })
         }
     }

@@ -223,6 +223,10 @@ export type SidebarContainerEvents = UIEvent<{
         annotationUrl: string
         info: Partial<AnnotationSharingInfo>
     }
+    updateAllAnnotationsShareInfo: {
+        info: AnnotationSharingInfo
+    }
+
     setAnnotationShareModalShown: { shown: boolean }
     setBetaFeatureNotifModalShown: { shown: boolean }
 
@@ -1103,6 +1107,18 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             annotationSharingInfo,
         })
+    }
+
+    updateAllAnnotationsShareInfo: EventHandler<
+        'updateAllAnnotationsShareInfo'
+    > = ({ previousState: { annotations }, event }) => {
+        const sharingInfo = {}
+
+        for (const { url } of annotations) {
+            sharingInfo[url] = { ...event.info }
+        }
+
+        this.emitMutation({ annotationSharingInfo: { $set: sharingInfo } })
     }
 
     updateAnnotationShareInfo: EventHandler<'updateAnnotationShareInfo'> = ({

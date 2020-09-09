@@ -305,6 +305,22 @@ export class AnnotationsSidebarContainer<
                 <HoverBox>
                     <AllNotesShareMenu
                         normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
+                        postShareAllHook={() =>
+                            this.processEvent('updateAllAnnotationsShareInfo', {
+                                info: {
+                                    status: 'shared',
+                                    taskState: 'success',
+                                },
+                            })
+                        }
+                        postUnshareAllHook={() =>
+                            this.processEvent('updateAllAnnotationsShareInfo', {
+                                info: {
+                                    status: 'unshared',
+                                    taskState: 'success',
+                                },
+                            })
+                        }
                         closeShareMenu={() =>
                             this.processEvent('setAllNotesShareMenuShown', {
                                 shown: false,
