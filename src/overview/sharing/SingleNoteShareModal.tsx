@@ -47,7 +47,6 @@ export default class SingleNoteShareModal extends React.PureComponent<
 
         if (!this.state.hasAnnotationBeenShared) {
             await this.contentSharingBG.shareAnnotation({ annotationUrl })
-            this.props.postShareHook?.()
         }
 
         return this.contentSharingBG.getRemoteAnnotationLink({ annotationUrl })
@@ -61,12 +60,14 @@ export default class SingleNoteShareModal extends React.PureComponent<
             await this.contentSharingBG.shareAnnotationsToLists({
                 annotationUrls,
             })
+            this.props.postShareHook?.()
             this.setState({ shareAllBtn: 'checked' })
         } else {
             this.setState({ shareAllBtn: 'running' })
             await this.contentSharingBG.unshareAnnotationsFromLists({
                 annotationUrls,
             })
+            this.props.postUnshareHook?.()
             this.setState({ shareAllBtn: 'unchecked' })
         }
     }
@@ -78,7 +79,6 @@ export default class SingleNoteShareModal extends React.PureComponent<
         await this.contentSharingBG.unshareAnnotation({
             annotationUrl: this.props.annotationUrl,
         })
-        this.props.postUnshareHook()
         this.props.closeShareMenu()
     }
 
