@@ -23,11 +23,8 @@ import { initKeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/content
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { HighlightRenderer } from 'src/highlighting/ui/highlight-interactions'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
-import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
 import * as sidebarUtils from 'src/sidebar-overlay/utils'
@@ -37,8 +34,6 @@ import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-si
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { AnalyticsEvent } from 'src/analytics/types'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
-import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 // TODO:(page-indexing)[high] Fix this with a proper restructuring of how pages are indexed
 setupPageContentRPC()
 
@@ -145,9 +140,9 @@ export async function main() {
                 annotations: annotationsBG,
                 annotationsCache,
                 tags: tagsBG,
-                customLists: runInBackground<RemoteCollectionsInterface>(),
-                bookmarks: runInBackground<BookmarksInterface>(),
-                activityLogger: runInBackground<ActivityLoggerInterface>(),
+                customLists: runInBackground(),
+                bookmarks: runInBackground(),
+                activityLogger: runInBackground(),
                 tooltip: {
                     getState: tooltipUtils.getTooltipState,
                     setState: tooltipUtils.setTooltipState,
@@ -180,9 +175,10 @@ export async function main() {
                 highlighter: highlightRenderer,
                 annotations: annotationsBG,
                 tags: tagsBG,
-                auth: runInBackground<AuthRemoteFunctionsInterface>(),
-                customLists: runInBackground<RemoteCollectionsInterface>(),
-                contentSharing: runInBackground<ContentSharingInterface>(),
+                auth: runInBackground(),
+                customLists: runInBackground(),
+                contentSharing: runInBackground(),
+                featuresBeta: runInBackground(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
             })
             components.sidebar?.resolve()

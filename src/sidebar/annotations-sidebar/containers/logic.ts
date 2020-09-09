@@ -8,7 +8,6 @@ import { Anchor } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
 import { SidebarContainerDependencies } from './types'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
-import { featuresBeta } from 'src/util/remote-functions-background'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { DEF_RESULT_LIMIT } from '../constants'
 import { IncomingAnnotationData } from 'src/in-page-ui/shared-state/types'
@@ -399,6 +398,8 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     private async loadBeta() {
+        const { featuresBeta } = this.options
+
         this.emitMutation({
             copyPasterAccess: {
                 $set: await featuresBeta.getFeatureState('copy-paster'),

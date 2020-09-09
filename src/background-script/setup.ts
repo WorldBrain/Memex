@@ -39,6 +39,7 @@ import {
     DevAuthState,
 } from 'src/authentication/background/setup'
 import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
+import { FeaturesBeta } from 'src/features/background/feature-beta'
 import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
 import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
@@ -79,6 +80,7 @@ export interface BackgroundModules {
     contentScripts: ContentScriptsBackground
     inPageUI: InPageUIBackground
     features: FeatureOptIns
+    featuresBeta: FeaturesBeta
     pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
     copyPaster: CopyPasterBackground
@@ -316,6 +318,7 @@ export function createBackgroundModules(options: {
             },
         }),
         features: new FeatureOptIns(),
+        featuresBeta: new FeaturesBeta(),
         pages,
         bgScript,
         pageFetchBacklog,

@@ -36,6 +36,7 @@ import {
 import { show } from 'src/overview/modals/actions'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -64,6 +65,7 @@ class Overview extends PureComponent<Props, State> {
     private contentSharingBG = runInBackground<ContentSharingInterface>()
     private tagsBG = runInBackground<RemoteTagsInterface>()
     private authBG = runInBackground<AuthRemoteFunctionsInterface>()
+    private featuresBetaBG = runInBackground<FeaturesBetaInterface>()
 
     private annotationsSidebarRef = React.createRef<
         AnnotationsSidebarContainer
@@ -263,6 +265,7 @@ class Overview extends PureComponent<Props, State> {
                         auth={this.authBG}
                         annotations={this.annotationsBG}
                         customLists={this.customListsBG}
+                        featuresBeta={this.featuresBetaBG}
                         contentSharing={this.contentSharingBG}
                         refSidebar={this.annotationsSidebarRef}
                         annotationsCache={this.annotationsCache}
