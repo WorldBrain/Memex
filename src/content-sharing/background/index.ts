@@ -352,6 +352,12 @@ export default class ContentSharingBackground {
                         ? JSON.stringify(annotation.selector)
                         : null,
                 }))
+            if (!shareAnnotationsAction.data[pageUrl].length) {
+                delete shareAnnotationsAction.data[pageUrl]
+            }
+        }
+        if (!Object.keys(shareAnnotationsAction.data).length) {
+            return
         }
         await this.scheduleAction(shareAnnotationsAction, {
             queueInteraction: options.queueInteraction ?? 'queue-and-await',
@@ -514,6 +520,7 @@ export default class ContentSharingBackground {
 
         if (options.queueInteraction === 'skip-queue') {
             await this.executeAction(action)
+            return
         }
 
         this._hasPendingActions = true
