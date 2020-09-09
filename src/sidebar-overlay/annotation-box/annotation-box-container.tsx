@@ -104,55 +104,22 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         await setLastSharedAnnotationTimestamp()
     }
 
-    private shareAnnotation = async () => {
-        // const updateState = (taskState: TaskState) =>
-        //     this.props.updateSharingInfo({
-        //         status: 'shared',
-        //         taskState,
-        //     })
-
+    private shareAnnotation: React.MouseEventHandler = async (e) => {
         if (this.props.sharingAccess === 'feature-disabled') {
             this.props.showBetaFeatureNotifModal()
             return
         }
 
         this.props.openShareMenu()
-
-        // updateState('running')
-        // try {
-        //     await this.contentShareBG.shareAnnotation({
-        //         annotationUrl: this.props.url,
-        //     })
-        //     updateState('success')
-        //     this.setLastSharedTimestamp()
-        // } catch (e) {
-        //     updateState('error')
-        //     throw e
-        // }
     }
 
-    private unshareAnnotation = async () => {
-        const updateState = (taskState: TaskState) =>
-            this.props.updateSharingInfo({
-                status: 'unshared',
-                taskState,
-            })
-
+    private unshareAnnotation: React.MouseEventHandler = async (e) => {
         if (this.props.sharingAccess === 'feature-disabled') {
             this.props.showBetaFeatureNotifModal()
             return
         }
 
-        updateState('running')
-        try {
-            await this.contentShareBG.unshareAnnotation({
-                annotationUrl: this.props.url,
-            })
-            updateState('success')
-        } catch (e) {
-            updateState('error')
-            throw e
-        }
+        this.props.openShareMenu()
     }
 
     private get isEdited() {

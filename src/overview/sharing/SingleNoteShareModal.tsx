@@ -13,6 +13,8 @@ interface State {
 export interface Props {
     annotationUrl: string
     closeShareMenu: () => void
+    postShareHook?: () => void
+    postUnshareHook?: () => void
 }
 
 export default class SingleNoteShareModal extends React.PureComponent<
@@ -34,7 +36,7 @@ export default class SingleNoteShareModal extends React.PureComponent<
         const metadata = metadataForAll[this.props.annotationUrl]
 
         this.setState({
-            hasAnnotationBeenShared: !metadata,
+            hasAnnotationBeenShared: !!metadata,
             shareAllBtn: metadata?.excludeFromLists ? 'unchecked' : 'checked',
             readyToRender: true,
         })
@@ -45,6 +47,7 @@ export default class SingleNoteShareModal extends React.PureComponent<
 
         if (!this.state.hasAnnotationBeenShared) {
             await this.contentSharingBG.shareAnnotation({ annotationUrl })
+            this.props.postShareHook?.()
         }
 
         return this.contentSharingBG.getRemoteAnnotationLink({ annotationUrl })
@@ -72,9 +75,10 @@ export default class SingleNoteShareModal extends React.PureComponent<
         navigator.clipboard.writeText(link)
 
     private handleUnshare = async () => {
-        // TODO: Call BG method
-        await delay(1000)
-
+        await this.contentSharingBG.unshareAnnotation({
+            annotationUrl: this.props.annotationUrl,
+        })
+        this.props.postUnshareHook()
         this.props.closeShareMenu()
     }
 

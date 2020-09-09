@@ -220,6 +220,10 @@ export type SidebarContainerEvents = UIEvent<{
     fetchSuggestedTags: null
     fetchSuggestedDomains: null
 
+    updateAnnotationShareInfo: {
+        annotationUrl: string
+        info: AnnotationSharingInfo
+    }
     setAnnotationShareModalShown: { shown: boolean }
     setBetaFeatureNotifModalShown: { shown: boolean }
 
@@ -917,12 +921,6 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const updateAnnotationTaskState = (taskState: TaskState) =>
-            this._updateAnnotationShareState(event.annotationUrl, {
-                status: 'shared',
-                taskState,
-            })
-
         if (previousState.annotationSharingAccess === 'feature-disabled') {
             this.options.showBetaFeatureNotifModal?.()
             return
@@ -931,46 +929,20 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             activeShareMenuNoteId: { $set: event.annotationUrl },
         })
-
-        updateAnnotationTaskState('running')
-        try {
-            await this.options.contentSharing.shareAnnotation({
-                annotationUrl: event.annotationUrl,
-            })
-            updateAnnotationTaskState('success')
-            this.setLastSharedAnnotationTimestamp()
-        } catch (e) {
-            updateAnnotationTaskState('error')
-            throw e
-        }
     }
 
     unshareAnnotation: EventHandler<'unshareAnnotation'> = async ({
         event,
         previousState,
     }) => {
-        const updateAnnotationTaskState = (taskState: TaskState) =>
-            this._updateAnnotationShareState(event.annotationUrl, {
-                status: 'unshared',
-                taskState,
-            })
-
         if (previousState.annotationSharingAccess === 'feature-disabled') {
             this.options.showBetaFeatureNotifModal?.()
             return
         }
 
-        updateAnnotationTaskState('running')
-        try {
-            // await new Promise(resolve => { })
-            await this.options.contentSharing.unshareAnnotation({
-                annotationUrl: event.annotationUrl,
-            })
-            updateAnnotationTaskState('success')
-        } catch (e) {
-            updateAnnotationTaskState('error')
-            throw e
-        }
+        this.emitMutation({
+            activeShareMenuNoteId: { $set: event.annotationUrl },
+        })
     }
 
     toggleAnnotationBookmark: EventHandler<
@@ -1132,15 +1104,15 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    _updateAnnotationShareState = (
-        annotationUrl: string,
-        info: AnnotationSharingInfo,
-    ) =>
+    updateAnnotationShareInfo: EventHandler<'updateAnnotationShareInfo'> = ({
+        event,
+    }) => {
         this.emitMutation({
             annotationSharingInfo: {
-                [annotationUrl]: { $set: info },
+                [event.annotationUrl]: { $set: event.info },
             },
         })
+    }
 
     private async setLastSharedAnnotationTimestamp() {
         const lastShared = await getLastSharedAnnotationTimestamp()

@@ -254,6 +254,18 @@ class AnnotationList extends Component<Props, State> {
             <HoverBox>
                 <SingleNoteShareModal
                     annotationUrl={annot.url}
+                    postShareHook={() =>
+                        this.updateAnnotationShareState(annot.url)({
+                            status: 'shared',
+                            taskState: 'success',
+                        })
+                    }
+                    postUnshareHook={() =>
+                        this.updateAnnotationShareState(annot.url)({
+                            status: 'unshared',
+                            taskState: 'success',
+                        })
+                    }
                     closeShareMenu={() =>
                         this.props.setActiveShareMenuNoteId?.(undefined)
                     }

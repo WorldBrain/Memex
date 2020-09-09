@@ -27,8 +27,8 @@ export interface AnnotationFooterEventProps {
     onEditConfirm: () => void
     onEditCancel: () => void
     onEditIconClick: () => void
-    onShareClick: () => void
-    onUnshareClick: () => void
+    onShareClick: React.MouseEventHandler
+    onUnshareClick: React.MouseEventHandler
     toggleBookmark: () => void
     onGoToAnnotation?: () => void
     onCopyPasterBtnClick?: () => void

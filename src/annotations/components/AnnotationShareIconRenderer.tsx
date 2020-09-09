@@ -9,10 +9,10 @@ import {
 export interface Props {
     sharingAccess: AnnotationSharingAccess
     sharingInfo?: AnnotationSharingInfo
-    onShare: () => void
-    onUnshare: () => void
+    onShare: React.MouseEventHandler
+    onUnshare: React.MouseEventHandler
     renderShareIcon: (props: {
-        onClickAction: () => void
+        onClickAction: React.MouseEventHandler
         isDisabled: boolean
         isLoading: boolean
         tooltipText: string

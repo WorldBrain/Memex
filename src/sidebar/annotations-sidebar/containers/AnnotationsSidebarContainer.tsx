@@ -111,12 +111,12 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
-            onShareClick: () =>
+            onShareClick: (e) =>
                 this.processEvent('shareAnnotation', {
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
-            onUnshareClick: () =>
+            onUnshareClick: (e) =>
                 this.processEvent('unshareAnnotation', {
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
@@ -252,10 +252,10 @@ export class AnnotationsSidebarContainer<
         }
 
         return (
-                <CopyPasterWrapper>
-                    {this.renderCopyPasterManager([currentAnnotationId])}
-                </CopyPasterWrapper>
-                )
+            <CopyPasterWrapper>
+                {this.renderCopyPasterManager([currentAnnotationId])}
+            </CopyPasterWrapper>
+        )
     }
 
     private renderShareMenuForAnnotation = (currentAnnotationId: string) => {
@@ -268,6 +268,24 @@ export class AnnotationsSidebarContainer<
                 <HoverBox>
                     <SingleNoteShareMenu
                         annotationUrl={currentAnnotationId}
+                        postShareHook={() =>
+                            this.processEvent('updateAnnotationShareInfo', {
+                                annotationUrl: currentAnnotationId,
+                                info: {
+                                    status: 'shared',
+                                    taskState: 'success',
+                                },
+                            })
+                        }
+                        postUnshareHook={() =>
+                            this.processEvent('updateAnnotationShareInfo', {
+                                annotationUrl: currentAnnotationId,
+                                info: {
+                                    status: 'unshared',
+                                    taskState: 'success',
+                                },
+                            })
+                        }
                         closeShareMenu={() =>
                             this.processEvent('resetShareMenuNoteId', null)
                         }
@@ -300,18 +318,15 @@ export class AnnotationsSidebarContainer<
 
     private renderCopyPasterManager(annotationUrls: string[]) {
         return (
-                <HoverBox>
-                    <CopyPaster
-                        annotationUrls={annotationUrls}
-                        normalizedPageUrls={[normalizeUrl(this.state.pageUrl)]}
-                        onClickOutside={() =>
-                            this.processEvent(
-                                'resetCopyPasterAnnotationId',
-                                null,
-                            )
-                        }
-                    />
-                </HoverBox>
+            <HoverBox>
+                <CopyPaster
+                    annotationUrls={annotationUrls}
+                    normalizedPageUrls={[normalizeUrl(this.state.pageUrl)]}
+                    onClickOutside={() =>
+                        this.processEvent('resetCopyPasterAnnotationId', null)
+                    }
+                />
+            </HoverBox>
         )
     }
 
@@ -322,10 +337,10 @@ export class AnnotationsSidebarContainer<
 
         const annotUrls = this.state.annotations.map((a) => a.url)
         return (
-                    <CopyPasterWrapperTopBar>
-                        {this.renderCopyPasterManager(annotUrls)}
-                    </CopyPasterWrapperTopBar>
-                )
+            <CopyPasterWrapperTopBar>
+                {this.renderCopyPasterManager(annotUrls)}
+            </CopyPasterWrapperTopBar>
+        )
     }
 
     protected renderModals() {

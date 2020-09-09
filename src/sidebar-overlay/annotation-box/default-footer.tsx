@@ -15,8 +15,8 @@ const styles = require('./default-footer.css')
 export interface ShareAnnotationProps {
     sharingInfo?: AnnotationSharingInfo
     sharingAccess: AnnotationSharingAccess
-    onShare: () => void
-    onUnshare: () => void
+    onShare: React.MouseEventHandler
+    onUnshare: React.MouseEventHandler
 }
 
 interface Props extends ShareAnnotationProps {
