@@ -148,10 +148,10 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
             return (
                 <TypographyTextNormal>Copied to Clipboard</TypographyTextNormal>
             )
-        } else if (loadState === 'pristine') {
+        } else {
             return (
                 <>
-                    <LinkText>{this.state.link}</LinkText>
+                    <TypographyTextNormal>{this.state.link}</TypographyTextNormal>
                     <LinkCopyIcon src={icons.copy} />
                 </>
             )
@@ -166,12 +166,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                     <SectionDescription>
                         {this.props.linkSubtitleCopy}
                     </SectionDescription>
-                    <ShareAllBox
-                        // tooltipText={this.renderShortcutTip({
-                        //     modifier: 'Alt',
-                        // })}
-                        position="bottom"
-                    >
                         <LinkCopierBox>
                             <LinkCopier
                                 state={this.state.loadState}
@@ -181,7 +175,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                             </LinkCopier>
                             {/* {this.renderUnshareIcon()} */}
                         </LinkCopierBox>
-                    </ShareAllBox>
                     <Spacing />
                     {this.props.children}
                     {/* <SectionTitle>{this.props.checkboxTitleCopy}</SectionTitle>
@@ -258,12 +251,20 @@ const LinkCopier = styled.button`
     outline: none;
     cursor: pointer;
     overflow: hidden;
+
+    & > span {
+        overflow: hidden;
+        width: 90%;
+        text-overflow: ellipsis;
+    }
 `
 const LinkText = styled.span`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 90%;
+    font-size: 8px;
+    color: black;
 `
 const LinkCopyIcon = styled.img``
 
