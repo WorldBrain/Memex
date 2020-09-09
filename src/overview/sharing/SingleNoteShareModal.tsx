@@ -37,7 +37,7 @@ export default class SingleNoteShareModal extends React.PureComponent<
 
         this.setState({
             hasAnnotationBeenShared: !!metadata,
-            shareAllBtn: metadata?.excludeFromLists ? 'unchecked' : 'checked',
+            shareAllBtn: metadata?.excludeFromLists ? 'checked' : 'unchecked',
             readyToRender: true,
         })
     }
