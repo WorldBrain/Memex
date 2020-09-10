@@ -48,6 +48,7 @@ export default class SingleNoteShareModal extends React.PureComponent<
     private getLink = async () => {
         const { annotationUrl } = this.props
         await this.contentSharingBG.shareAnnotation({ annotationUrl })
+        this.props.postShareHook?.()
         return this.contentSharingBG.getRemoteAnnotationLink({ annotationUrl })
     }
 
@@ -78,6 +79,7 @@ export default class SingleNoteShareModal extends React.PureComponent<
         await this.contentSharingBG.unshareAnnotation({
             annotationUrl: this.props.annotationUrl,
         })
+        this.props.postUnshareHook?.()
         this.props.closeShareMenu()
     }
 

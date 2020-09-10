@@ -82,6 +82,7 @@ export default class AllNotesShareModal extends React.Component<Props, State> {
                 })
             },
         )
+        this.props.postShareAllHook?.()
 
         // if (this.state.shareAllBtn === 'unchecked') {
         //     this.setState({ shareAllBtn: 'running' })
@@ -117,6 +118,7 @@ export default class AllNotesShareModal extends React.Component<Props, State> {
                 // })
             },
         )
+        this.props.postUnshareAllHook?.()
     }
 
     private handleLinkCopy = (link: string) =>
