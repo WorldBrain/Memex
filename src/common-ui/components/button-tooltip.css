@@ -61,6 +61,18 @@
     }
 }
 
+.tooltipBottomRightEdge {
+    transform: translate(-90px, 30px);
+    justify-content: center;
+    align-items: flex-start;
+
+    z-index: 250000;
+
+    &.tooltipBubble {
+        align-items: flex-start;
+    }
+}
+
 .popupLeft {
     justify-content: flex-end;
     right: 50px;

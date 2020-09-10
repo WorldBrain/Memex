@@ -407,7 +407,7 @@ export class AnnotationsSidebarContainer<
                         </ButtonTooltip>
                         <ButtonTooltip
                             tooltipText="Add notes to page"
-                            position="bottom"
+                            position="bottomRightEdge"
                         >
                             <ActionBtn onClick={this.handleAddCommentBtnClick}>
                                 <ActionIcon src={icons.commentAdd} />
