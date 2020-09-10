@@ -197,3 +197,21 @@ export async function executeUITask<
         return [false]
     }
 }
+
+export async function executeReactStateUITask<State, Key extends keyof State>(
+    component: React.Component<{}, { [K in Key]: UITaskState }>,
+    key: Key,
+    loader: () => Promise<void>,
+) {
+    const emit = (state: UITaskState) =>
+        component.setState({ [key]: state } as any)
+    emit('running')
+
+    try {
+        await loader()
+        emit('success')
+    } catch (e) {
+        emit('error')
+        throw e
+    }
+}

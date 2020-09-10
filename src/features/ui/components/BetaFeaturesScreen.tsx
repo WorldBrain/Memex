@@ -130,10 +130,29 @@ class BetaFeaturesScreen extends React.Component<
                                     .
                                 </TypographyTextNormal>
                             ) : (
-                                <TypographyTextNormal>
-                                    To access beta features by adding the Pioneer Plan Addon to your subscription or request free access via the 
-                                    <TypographyLink onClick={()=> window.open("https://worldbrain.io/beta")}>wait list.</TypographyLink> 
-                                </TypographyTextNormal>
+                                <div>
+                                    <TypographyTextNormal>
+                                        To access beta features you can support
+                                        us by
+                                        <TypographyLink
+                                            onClick={
+                                                this.props.showSubscriptionModal
+                                            }
+                                        >
+                                            upgrading to the Pioneer Plan
+                                        </TypographyLink>
+                                        or
+                                        <TypographyLink
+                                            onClick={() => {
+                                                window.open(
+                                                    'https://worldbrain.io/request-early-access',
+                                                )
+                                            }}
+                                        >
+                                            request free access via a wait list.
+                                        </TypographyLink>
+                                    </TypographyTextNormal>
+                                </div>
                             )}
                         </div>
                         <div className={settingsStyle.buttonBox}>

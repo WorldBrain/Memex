@@ -13,7 +13,7 @@ import {
 } from './AnnotationsSidebarContainer'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { Annotation } from 'src/annotations/types'
-import ShareAnnotationModal from 'src/overview/sharing/components/ShareAnnotationModal'
+import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
 import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 
 export interface Props extends ContainerProps {
@@ -31,7 +31,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             canClickAnnotations: true,
             paddingRight: 40,
         },
-        skipTopBarRender: true,
     }
 
     constructor(props: Props) {
@@ -195,7 +194,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         return (
             <>
                 {this.state.showAnnotationsShareModal && (
-                    <ShareAnnotationModal
+                    <ShareAnnotationOnboardingModal
                         requiresExplicitStyles
                         onClose={() =>
                             this.processEvent('setAnnotationShareModalShown', {

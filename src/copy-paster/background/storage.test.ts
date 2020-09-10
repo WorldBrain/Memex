@@ -1,6 +1,6 @@
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
-import CopyPasterBackground from './'
+import CopyPasterBackground from '.'
 
 async function setupTest() {
     const { backgroundModules } = await setupBackgroundIntegrationTest()
@@ -10,7 +10,7 @@ async function setupTest() {
     return { copyPaster }
 }
 
-describe('Tempaltes', () => {
+describe('Copy-paster template storage tests', () => {
     test('should be able to create and find a template', async () => {
         const { copyPaster } = await setupTest()
 

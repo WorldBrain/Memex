@@ -177,17 +177,22 @@ export async function setupBackgroundIntegrationTest(options?: {
 export function registerBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
 ) {
-    describe(test.description, () => {
-        it(
-            'should work on a single device' + (test.mark ? '!!!' : ''),
-            async () => {
-                await runBackgroundIntegrationTest(test)
-            },
-        )
-        if (process.env.SKIP_SYNC_TESTS !== 'true') {
+    const skipSyncTests = process.env.SKIP_SYNC_TESTS === 'true'
+    if (skipSyncTests) {
+        it(test.description, async () => {
+            await runBackgroundIntegrationTest(test)
+        })
+    } else {
+        describe(test.description, () => {
+            it(
+                'should work on a single device' + (test.mark ? '!!!' : ''),
+                async () => {
+                    await runBackgroundIntegrationTest(test)
+                },
+            )
             registerSyncBackgroundIntegrationTests(test)
-        }
-    })
+        })
+    }
 }
 
 export async function runBackgroundIntegrationTest(

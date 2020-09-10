@@ -40,7 +40,7 @@ class TruncatedTextRenderer extends React.Component<Props, State> {
 
     private _toggleTextTruncation = (e: React.MouseEvent) => {
         e.stopPropagation()
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
             shouldTruncate: !prevState.shouldTruncate,
         }))
     }
@@ -56,34 +56,42 @@ class TruncatedTextRenderer extends React.Component<Props, State> {
         return (
             <React.Fragment>
                 {this.props.isHighlight ? (
-                        <>
-                            <Highlight><HighlightText><TextToBeDisplayed>{textToBeDisplayed}</TextToBeDisplayed></HighlightText>
+                    <>
+                        <Highlight>
+                            <HighlightText>
+                                <TextToBeDisplayed>
+                                    {textToBeDisplayed}
+                                </TextToBeDisplayed>
+                            </HighlightText>
                             <CommentTextBox>
-                            {isTextTooLong && (
-                                <ToggleMoreButtonStyled
-                                        onClick={this._toggleTextTruncation}
-                                    >
-                                        {shouldTruncate ? 'Show More' : 'Show Less'}
-                                </ToggleMoreButtonStyled>
-                            )}
-                            </CommentTextBox>
-                            </Highlight>
-                        </>
-                    ):(
-                        <>
-                            <TextToBeDisplayed>{textToBeDisplayed}</TextToBeDisplayed>
-                                <CommentTextBox>
                                 {isTextTooLong && (
                                     <ToggleMoreButtonStyled
-                                            onClick={this._toggleTextTruncation}
-                                        >
-                                            {shouldTruncate ? 'Show More' : 'Show Less'}
+                                        onClick={this._toggleTextTruncation}
+                                    >
+                                        {shouldTruncate
+                                            ? 'Show More'
+                                            : 'Show Less'}
                                     </ToggleMoreButtonStyled>
                                 )}
                             </CommentTextBox>
-                        </>
+                        </Highlight>
+                    </>
+                ) : (
+                    <>
+                        <TextToBeDisplayed>
+                            {textToBeDisplayed}
+                        </TextToBeDisplayed>
+                        <CommentTextBox>
+                            {isTextTooLong && (
+                                <ToggleMoreButtonStyled
+                                    onClick={this._toggleTextTruncation}
+                                >
+                                    {shouldTruncate ? 'Show More' : 'Show Less'}
+                                </ToggleMoreButtonStyled>
+                            )}
+                        </CommentTextBox>
+                    </>
                 )}
-                
             </React.Fragment>
         )
     }

@@ -4,7 +4,6 @@ import * as acts from './actions'
 import { SearchResult, Result } from '../types'
 import { PageUrlsByDay } from 'src/search/background/types'
 import analytics from 'src/analytics'
-import { Template } from '../copy-paster/types'
 
 export interface State {
     /** Holds the current search results used to render to the UI. */
@@ -27,8 +26,6 @@ export interface State {
     activeSidebarIndex: number
     /** Holds the index of the result which has the copy paster popup open (-1 by default) */
     activeCopyPasterIndex: number
-    /** Holds copy paster templates */
-    copyPasterTemplates: Template[]
     /** Holds the current page of results that the user has scrolled to (0-based). */
     currentPage: number
     /** Holds the total count of matching results to the current search (includes not-shown results). */
@@ -57,7 +54,6 @@ export const defaultState: State = {
     activeListIndex: -1,
     activeSidebarIndex: -1,
     activeCopyPasterIndex: -1,
-    copyPasterTemplates: [],
     currentPage: 0,
     totalCount: null,
     searchCount: 0,
@@ -265,11 +261,6 @@ reducer.on(acts.resetActiveCopyPasterIndex, (state) => ({
 reducer.on(acts.setActiveCopyPasterIndex, (state, payload) => ({
     ...state,
     activeCopyPasterIndex: payload,
-}))
-
-reducer.on(acts.setCopyPasterTemplates, (state, payload) => ({
-    ...state,
-    copyPasterTemplates: payload,
 }))
 
 reducer.on(acts.resetActiveSidebarIndex, (state) => ({

@@ -38,6 +38,8 @@ export interface Props extends Partial<SocialPage> {
     areScreenshotsEnabled?: boolean
     areAnnotationsExpanded?: boolean
     isResponsibleForSidebar?: boolean
+    activeShareMenuNoteId: string | undefined
+    activeCopyPasterAnnotationId: string | undefined
     isOverview?: boolean
     isSocial?: boolean
     annotations?: any[]
@@ -60,6 +62,8 @@ export interface Props extends Partial<SocialPage> {
     setTagButtonRef: (el: HTMLElement) => void
     setListButtonRef: (el: HTMLElement) => void
     setCopyPasterButtonRef: (el: HTMLElement) => void
+    setActiveShareMenuNoteId?: (id: string) => void
+    setActiveCopyPasterAnnotationId?: (id: string) => void
     isBetaEnabled: boolean
 }
 
@@ -102,6 +106,7 @@ class ResultItem extends PureComponent<Props> {
 
         return (
             <AnnotationList
+                {...this.props}
                 isExpandedOverride={this.props.areAnnotationsExpanded}
                 openAnnotationSidebar={this.props.onCommentBtnClick}
                 pageUrl={this.hrefToPage}

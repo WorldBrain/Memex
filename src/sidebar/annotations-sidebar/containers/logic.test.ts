@@ -60,6 +60,7 @@ const setupLogicHelper = async ({
         tags: backgroundModules.tags.remoteFunctions,
         customLists: backgroundModules.customLists.remoteFunctions,
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
+        featuresBeta: backgroundModules.featuresBeta,
         annotations,
         // search: {
         //     ...backgroundModules.search.remoteFunctions.search,
@@ -250,25 +251,21 @@ describe('SidebarContainerLogic', () => {
             const { sidebar } = await setupLogicHelper({ device })
 
             expect(sidebar.state.annotationSharingAccess).toEqual(
-                'feature-disabled',
-            )
-            await sidebar.processEvent('receiveSharingAccessChange', {
-                sharingAccess: 'page-not-shared',
-            })
-            expect(sidebar.state.annotationSharingAccess).toEqual(
-                'page-not-shared',
-            )
-            await sidebar.processEvent('receiveSharingAccessChange', {
-                sharingAccess: 'sharing-allowed',
-            })
-            expect(sidebar.state.annotationSharingAccess).toEqual(
                 'sharing-allowed',
             )
+
             await sidebar.processEvent('receiveSharingAccessChange', {
                 sharingAccess: 'feature-disabled',
             })
             expect(sidebar.state.annotationSharingAccess).toEqual(
                 'feature-disabled',
+            )
+
+            await sidebar.processEvent('receiveSharingAccessChange', {
+                sharingAccess: 'sharing-allowed',
+            })
+            expect(sidebar.state.annotationSharingAccess).toEqual(
+                'sharing-allowed',
             )
         })
     })
@@ -431,6 +428,85 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.commentBox.form.isBookmarked).toBe(false)
             expect(sidebar.state.commentBox.form.commentText).toEqual('')
             expect(sidebar.state.showCommentBox).toBe(false)
+        })
+    })
+
+    it('should be able to set active annotation copy paster', async ({
+        device,
+    }) => {
+        const { sidebar } = await setupLogicHelper({ device })
+        const id1 = 'test1'
+        const id2 = 'test2'
+
+        expect(sidebar.state.activeCopyPasterAnnotationId).toBeUndefined()
+        sidebar.processEvent('setCopyPasterAnnotationId', { id: id1 })
+        expect(sidebar.state.activeCopyPasterAnnotationId).toEqual(id1)
+        sidebar.processEvent('setCopyPasterAnnotationId', { id: id2 })
+        expect(sidebar.state.activeCopyPasterAnnotationId).toEqual(id2)
+        sidebar.processEvent('resetCopyPasterAnnotationId', null)
+        expect(sidebar.state.activeCopyPasterAnnotationId).toBeUndefined()
+    })
+
+    it('should be able to set active annotation share menu', async ({
+        device,
+    }) => {
+        const { sidebar } = await setupLogicHelper({ device })
+        const id1 = 'test1'
+        const id2 = 'test2'
+
+        expect(sidebar.state.activeShareMenuNoteId).toBeUndefined()
+        sidebar.processEvent('setShareMenuNoteId', { id: id1 })
+        expect(sidebar.state.activeShareMenuNoteId).toEqual(id1)
+        sidebar.processEvent('setShareMenuNoteId', { id: id2 })
+        expect(sidebar.state.activeShareMenuNoteId).toEqual(id2)
+        sidebar.processEvent('resetShareMenuNoteId', null)
+        expect(sidebar.state.activeShareMenuNoteId).toBeUndefined()
+    })
+
+    it('should be able to update annotation sharing info', async ({
+        device,
+    }) => {
+        const { sidebar } = await setupLogicHelper({ device })
+        const id1 = 'test1'
+        const id2 = 'test2'
+
+        expect(sidebar.state.annotationSharingInfo).toEqual({})
+        sidebar.processEvent('updateAnnotationShareInfo', {
+            annotationUrl: id1,
+            info: { status: 'not-yet-shared', taskState: 'pristine' },
+        })
+        expect(sidebar.state.annotationSharingInfo).toEqual({
+            [id1]: { status: 'not-yet-shared', taskState: 'pristine' },
+        })
+        sidebar.processEvent('updateAnnotationShareInfo', {
+            annotationUrl: id1,
+            info: { status: 'shared', taskState: 'success' },
+        })
+        expect(sidebar.state.annotationSharingInfo).toEqual({
+            [id1]: { status: 'shared', taskState: 'success' },
+        })
+        sidebar.processEvent('updateAnnotationShareInfo', {
+            annotationUrl: id1,
+            info: { status: 'unshared' },
+        })
+        expect(sidebar.state.annotationSharingInfo).toEqual({
+            [id1]: { status: 'unshared', taskState: 'success' },
+        })
+        sidebar.processEvent('updateAnnotationShareInfo', {
+            annotationUrl: id2,
+            info: { status: 'shared', taskState: 'error' },
+        })
+        expect(sidebar.state.annotationSharingInfo).toEqual({
+            [id1]: { status: 'unshared', taskState: 'success' },
+            [id2]: { status: 'shared', taskState: 'error' },
+        })
+        sidebar.processEvent('updateAnnotationShareInfo', {
+            annotationUrl: id2,
+            info: { taskState: 'success' },
+        })
+        expect(sidebar.state.annotationSharingInfo).toEqual({
+            [id1]: { status: 'unshared', taskState: 'success' },
+            [id2]: { status: 'shared', taskState: 'success' },
         })
     })
 

@@ -39,28 +39,27 @@ const CommentTags = ({
         )}
 
         {/* Tags for the annotation. */}
-        {!!tags &&
-            tags.length !== 0 && (
-                <div
-                    className={cx(styles.tagsContainer, {
-                        [styles.noComment]: !comment,
-                    })}
-                >
-                    {tags.map(tag => (
-                        <span
-                            key={tag}
-                            className={styles.tagPill}
-                            onClick={e => {
-                                e.preventDefault()
-                                e.stopPropagation()
-                                handleTagClick(tag)
-                            }}
-                        >
-                            {tag}
-                        </span>
-                    ))}
-                </div>
-            )}
+        {!!tags && tags.length !== 0 && (
+            <div
+                className={cx(styles.tagsContainer, {
+                    [styles.noComment]: !comment,
+                })}
+            >
+                {tags.map((tag) => (
+                    <span
+                        key={tag}
+                        className={styles.tagPill}
+                        onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            handleTagClick(tag)
+                        }}
+                    >
+                        {tag}
+                    </span>
+                ))}
+            </div>
+        )}
     </div>
 )
 

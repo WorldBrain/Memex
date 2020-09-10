@@ -3,7 +3,6 @@ import { connect, MapStateToProps } from 'react-redux'
 import Waypoint from 'react-waypoint'
 import moment from 'moment'
 import reduce from 'lodash/fp/reduce'
-import omit from 'lodash/omit'
 
 import { selectors as opt } from 'src/options/settings'
 import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
@@ -25,13 +24,21 @@ import niceTime from 'src/util/nice-time'
 import { Annotation } from 'src/annotations/types'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import TagPicker from 'src/tags/ui/TagPicker'
-import { tags, collections } from 'src/util/remote-functions-background'
+import {
+    tags,
+    collections,
+    featuresBeta,
+} from 'src/util/remote-functions-background'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import CopyPaster from 'src/overview/copy-paster'
-import { renderTemplate } from 'src/overview/copy-paster/utils'
-import { Template } from 'src/overview/copy-paster/types'
+import CopyPaster from 'src/copy-paster'
 
 const styles = require('./ResultList.css')
+
+interface LocalState {
+    tagSuggestions: string[]
+    activeShareMenuNoteId: string | undefined
+    activeCopyPasterAnnotationId: string | undefined
+}
 
 export interface StateProps {
     isLoading: boolean
@@ -49,7 +56,6 @@ export interface StateProps {
     annotsByDay: PageUrlsByDay
     isFilterBarActive: boolean
     isSocialPost: boolean
-    copyPasterTemplates: Template[]
     isBetaEnabled: boolean
 }
 
@@ -79,10 +85,7 @@ export interface DispatchProps {
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
     handleTrashBtnClick: (doc: Result, i: number) => MouseEventHandler
     resetActiveCopyPasterIndex: () => void
-    getCopyPasterTemplates: () => void
-    deleteCopyPasterTemplate: (id: number) => void
-    saveNewCopyPasterTemplate: (template: Omit<Template, 'id'>) => void
-    updateCopyPasterTemplate: (template: Template) => void
+    setBetaFeaturesEnabled: (enabled: boolean) => void
 }
 
 export interface OwnProps {
@@ -93,7 +96,7 @@ export interface OwnProps {
 
 export type Props = StateProps & DispatchProps & OwnProps
 
-class ResultListContainer extends PureComponent<Props> {
+class ResultListContainer extends PureComponent<Props, LocalState> {
     private dropdownRefs: HTMLSpanElement[] = []
     private tagBtnRefs: HTMLButtonElement[] = []
     private listBtnRefs: HTMLButtonElement[] = []
@@ -115,10 +118,10 @@ class ResultListContainer extends PureComponent<Props> {
     private setCopyPasterButtonRef = (el: HTMLButtonElement) =>
         this.copyPasterBtnRefs.push(el)
 
-    state = {
+    state: LocalState = {
         tagSuggestions: [],
-        copyPasterTemplates: [],
-        tmpCopyPasterTemplate: undefined,
+        activeShareMenuNoteId: undefined,
+        activeCopyPasterAnnotationId: undefined,
     }
 
     async componentDidMount() {
@@ -127,7 +130,10 @@ class ResultListContainer extends PureComponent<Props> {
 
         document.addEventListener('click', this.handleOutsideClick, false)
 
-        this.props.getCopyPasterTemplates()
+        const copyPasterEnabled = await featuresBeta.getFeatureState(
+            'copy-paster',
+        )
+        this.props.setBetaFeaturesEnabled(copyPasterEnabled)
     }
 
     componentWillUnmount() {
@@ -136,7 +142,7 @@ class ResultListContainer extends PureComponent<Props> {
 
     private handleOutsideClick: EventListener = (event) => {
         // Reduces to `true` if any on input elements were clicked
-        const wereAnyClicked = reduce((res, el) => {
+        const wereAnyClicked = reduce((res, el: any) => {
             const isEqual = el != null ? el.contains(event.target) : false
             return res || isEqual
         }, false)
@@ -204,7 +210,7 @@ class ResultListContainer extends PureComponent<Props> {
         }
 
         return (
-            <HoverBox marginLeftOffset={50}>
+            <HoverBox>
                 <div ref={(ref) => this.setListDivRef(ref)}>
                     <CollectionPicker
                         onUpdateEntrySelection={this.handleListUpdate(index)}
@@ -251,123 +257,16 @@ class ResultListContainer extends PureComponent<Props> {
         )
     }
 
-    private renderCopyPasterManager(
-        {
-            shouldDisplayCopyPasterPopup,
-            fullUrl,
-            title,
-            tags: resultTags,
-        }: Result,
-        index,
-    ) {
-        if (!shouldDisplayCopyPasterPopup) {
+    private renderCopyPasterManager(doc: Result, index) {
+        if (!doc.shouldDisplayCopyPasterPopup) {
             return null
         }
-
-        const doc = {
-            url: fullUrl,
-            title,
-            tags: resultTags,
-        }
-
-        const templates = this.props.copyPasterTemplates
-        const tmpCopyPasterTemplate = this.state.tmpCopyPasterTemplate
 
         return (
             <HoverBox>
                 <div ref={(ref) => this.setCopyPasterDivRef(ref)}>
                     <CopyPaster
-                        copyPasterEditingTemplate={tmpCopyPasterTemplate}
-                        templates={templates}
-                        onClick={(id) => {
-                            const template = templates.find((t) => t.id === id)
-
-                            if (!template) {
-                                console.error(`can't find template for ${id}`)
-                                return
-                            }
-
-                            const rendered = renderTemplate(template, doc)
-
-                            navigator.clipboard
-                                .writeText(rendered)
-                                .catch((e) => {
-                                    console.error(e)
-                                })
-                        }}
-                        onClickEdit={(id) => {
-                            const template = templates.find((t) => t.id === id)
-                            this.setState({ tmpCopyPasterTemplate: template })
-                        }}
-                        onClickCancel={() => {
-                            this.setState({
-                                tmpCopyPasterTemplate: undefined,
-                            })
-                        }}
-                        onClickNew={() => {
-                            this.setState({
-                                tmpCopyPasterTemplate: {
-                                    id: -1,
-                                    title: '',
-                                    code: '',
-                                    isFavourite: false,
-                                },
-                            })
-                        }}
-                        onClickSave={() => {
-                            if (tmpCopyPasterTemplate.id === -1) {
-                                this.props.saveNewCopyPasterTemplate(
-                                    omit(tmpCopyPasterTemplate, ['id']),
-                                )
-                            } else {
-                                this.props.updateCopyPasterTemplate(
-                                    tmpCopyPasterTemplate,
-                                )
-                            }
-
-                            this.setState({ tmpCopyPasterTemplate: undefined })
-                        }}
-                        onClickDelete={() => {
-                            this.props.deleteCopyPasterTemplate(
-                                tmpCopyPasterTemplate.id,
-                            )
-
-                            this.setState({ tmpCopyPasterTemplate: undefined })
-                        }}
-                        onClickHowto={() => {
-                            window.open(
-                                'https://worldbrain.io/tutorials/copy-templates',
-                            )
-                        }}
-                        onTitleChange={(title) => {
-                            this.setState({
-                                tmpCopyPasterTemplate: {
-                                    ...this.state.tmpCopyPasterTemplate,
-                                    title,
-                                },
-                            })
-                        }}
-                        onCodeChange={(code) => {
-                            this.setState({
-                                tmpCopyPasterTemplate: {
-                                    ...this.state.tmpCopyPasterTemplate,
-                                    code,
-                                },
-                            })
-                        }}
-                        onSetIsFavourite={(id, isFavourite) => {
-                            const template = templates.find((t) => t.id === id)
-
-                            if (!template) {
-                                console.error(`can't find template for ${id}`)
-                                return
-                            }
-
-                            this.props.updateCopyPasterTemplate({
-                                ...template,
-                                isFavourite,
-                            })
-                        }}
+                        normalizedPageUrls={[doc.url]}
                         onClickOutside={this.props.resetActiveCopyPasterIndex}
                     />
                 </div>
@@ -431,6 +330,26 @@ class ResultListContainer extends PureComponent<Props> {
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
                 onReaderBtnClick={this.handleReaderBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
+                activeShareMenuNoteId={this.state.activeShareMenuNoteId}
+                setActiveShareMenuNoteId={
+                    this.props.isBetaEnabled
+                        ? (id) =>
+                              this.setState(() => ({
+                                  activeShareMenuNoteId: id,
+                              }))
+                        : undefined
+                }
+                activeCopyPasterAnnotationId={
+                    this.state.activeCopyPasterAnnotationId
+                }
+                setActiveCopyPasterAnnotationId={
+                    this.props.isBetaEnabled
+                        ? (id) =>
+                              this.setState(() => ({
+                                  activeCopyPasterAnnotationId: id,
+                              }))
+                        : undefined
+                }
                 onCommentBtnClick={this.props.handleCommentBtnClick(
                     doc,
                     index,
@@ -567,7 +486,6 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
     isFilterBarActive: filters.showFilterBar(state),
     isSocialPost: selectors.isSocialPost(state),
-    copyPasterTemplates: selectors.copyPasterTemplates(state),
     isBetaEnabled: selectors.isBetaEnabled(state),
 })
 
@@ -631,13 +549,8 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     },
     resetActiveCopyPasterIndex: () =>
         dispatch(acts.resetActiveCopyPasterIndex()),
-    getCopyPasterTemplates: () => dispatch(acts.getCopyPasterTemplates()),
-    deleteCopyPasterTemplate: (id) =>
-        dispatch(acts.deleteCopyPasterTemplate(id)),
-    saveNewCopyPasterTemplate: (template) =>
-        dispatch(acts.saveNewCopyPasterTemplate(template)),
-    updateCopyPasterTemplate: (template) =>
-        dispatch(acts.updateCopyPasterTemplate(template)),
+    setBetaFeaturesEnabled: (enabled) =>
+        dispatch(acts.setBetaFeatures(enabled)),
 })
 
 export default connect(mapState, mapDispatch)(ResultListContainer)

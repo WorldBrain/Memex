@@ -8,7 +8,8 @@ import { FeaturesInterface } from 'src/features/background/feature-opt-ins'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { RemoteReaderInterface } from 'src/reader/types'
-import { RemoteCopyPasterInterface } from 'src/overview/copy-paster/background/types'
+import { AnnotationInterface } from 'src/annotations/background/types'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
@@ -32,18 +33,18 @@ export interface RemoteFunctionImplementations<
 // See `src/background.ts` for the concrete remote function bindings
 // (in setupRemoteFunctionsImplementations and elsewhere)
 export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
-    notifications: runInBackground<NotificationCreator>(),
-    bookmarks: runInBackground<BookmarksInterface>(),
-    auth: runInBackground<AuthRemoteFunctionsInterface>(),
-    subscription: runInBackground<SubscriptionsService>(),
-    sync: runInBackground<PublicSyncInterface>(),
-    features: runInBackground<FeaturesInterface>(),
-    featuresBeta: runInBackground<FeaturesBetaInterface>(),
-    tags: runInBackground<RemoteTagsInterface>(),
-    collections: runInBackground<RemoteCollectionsInterface>(),
-    copyPaster: runInBackground<RemoteCopyPasterInterface>(),
-    readablePageArchives: runInBackground<RemoteReaderInterface>(),
-    contentSharing: runInBackground<ContentSharingInterface>(),
+    notifications: runInBackground(),
+    bookmarks: runInBackground(),
+    auth: runInBackground(),
+    subscription: runInBackground(),
+    sync: runInBackground(),
+    features: runInBackground(),
+    featuresBeta: runInBackground(),
+    tags: runInBackground(),
+    collections: runInBackground(),
+    copyPaster: runInBackground(),
+    readablePageArchives: runInBackground(),
+    contentSharing: runInBackground(),
 }
 
 export const notifications = remoteFunctions.notifications
@@ -58,3 +59,4 @@ export const collections = remoteFunctions.collections
 export const copyPaster = remoteFunctions.copyPaster
 export const readable = remoteFunctions.readablePageArchives
 export const contentSharing = remoteFunctions.contentSharing
+export const annotations = runInBackground<AnnotationInterface<'caller'>>()

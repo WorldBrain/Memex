@@ -3641,6 +3641,11 @@
   version "0.0.29"
   resolved "http://registry.npmjs.org/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
 
+"@types/lodash@^4.14.108":
+  version "4.14.161"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.161.tgz#a21ca0777dabc6e4f44f3d07f37b765f54188b18"
+  integrity sha512-EP6O3Jkr7bXvZZSZYlsgt5DIjiGr0dXP1/jVEwVLTFgg0d+3lWVQkRavYVQszV7dYUwvg0B8R0MBDpcmXg7XIA==
+
 "@types/long@*", "@types/long@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@types/long/-/long-4.0.0.tgz#719551d2352d301ac8b81db732acb6bdc28dbdef"
@@ -3658,6 +3663,11 @@
     "@types/bson" "*"
     "@types/events" "*"
     "@types/node" "*"
+
+"@types/mustache@^4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@types/mustache/-/mustache-4.0.1.tgz#e4d421ed2d06d463b120621774185a5cd1b92d77"
+  integrity sha512-wH6Tu9mbiOt0n5EvdoWy0VGQaJMHfLIxY/6wS0xLC7CV1taM6gESEzcYy0ZlWvxxiiljYvfDIvz4hHbUUDRlhw==
 
 "@types/node@*":
   version "10.5.1"
@@ -16977,14 +16987,14 @@ react-dock@^0.2.4:
     lodash.debounce "^3.1.1"
     prop-types "^15.5.8"
 
-react-dom@^16.4.1:
-  version "16.4.2"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.4.2.tgz#4afed569689f2c561d2b8da0b819669c38a0bda4"
+react-dom@17.0.0-rc.1:
+  version "17.0.0-rc.1"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-17.0.0-rc.1.tgz#529f4e5e8410dbe257e4a82aba460c7f1063b024"
+  integrity sha512-MyWoPLxFUhSfIwFQa94Axm0h5IwzKJ3kzL7dxsW8iV36v881k+Lq7lVUN1+vDtBF0l51lkMe1mEITB3H5rinVg==
   dependencies:
-    fbjs "^0.8.16"
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
-    prop-types "^15.6.0"
+    scheduler "0.20.0-rc.1"
 
 react-dom@^16.8.3:
   version "16.9.0"
@@ -17275,14 +17285,13 @@ react-waypoint@^8.0.3:
     consolidated-events "^1.1.0 || ^2.0.0"
     prop-types "^15.0.0"
 
-react@^16.4.1:
-  version "16.4.2"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.4.2.tgz#2cd90154e3a9d9dd8da2991149fdca3c260e129f"
+react@17.0.0-rc.1:
+  version "17.0.0-rc.1"
+  resolved "https://registry.yarnpkg.com/react/-/react-17.0.0-rc.1.tgz#2f7575465517153dcd0d6a596f75f200c1612e2a"
+  integrity sha512-sQ7X+k3zwf6cFQu9pD6FFJMwHwoKAV+EKLWRW4rD1ruyRiFkmC09cjtqFySLtaZbUdzYEc8iy4uOwisJNlXytg==
   dependencies:
-    fbjs "^0.8.16"
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
-    prop-types "^15.6.0"
 
 react@^16.8.3, react@^16.8.6:
   version "16.9.0"
@@ -18368,6 +18377,14 @@ saxes@^5.0.0:
   integrity sha512-5LBh1Tls8c9xgGjw3QrMwETmTMVk0oFgvrFSvWx62llR2hcEInrKNZ2GZCCuuy2lvWrdl5jhbpeqc5hRYKFOcw==
   dependencies:
     xmlchars "^2.2.0"
+
+scheduler@0.20.0-rc.1:
+  version "0.20.0-rc.1"
+  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.20.0-rc.1.tgz#25df7dd0d52366f112a8ead468d713c5f6d2a2bd"
+  integrity sha512-agEhMxvDawRBHGbx6k+poNuzZ6XD+/XTl67R42sdJ/+yeioNDxaDiwxqTT9MjpvVBBdEzRzvnUvAccueb8Eb2w==
+  dependencies:
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
 
 scheduler@^0.15.0:
   version "0.15.0"
@@ -20120,6 +20137,11 @@ tr46@~0.0.3:
 traverse@0.4.x:
   version "0.4.6"
   resolved "https://registry.yarnpkg.com/traverse/-/traverse-0.4.6.tgz#d04b2280e4c792a5815429ef7b8b60c64c9ccc34"
+
+traverse@^0.6.6:
+  version "0.6.6"
+  resolved "https://registry.yarnpkg.com/traverse/-/traverse-0.6.6.tgz#cbdf560fd7b9af632502fed40f918c157ea97137"
+  integrity sha1-y99WD9e5r2MlAv7UD5GMFX6pcTc=
 
 trim-newlines@^2.0.0:
   version "2.0.0"

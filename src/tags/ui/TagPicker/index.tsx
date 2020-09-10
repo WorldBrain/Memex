@@ -23,6 +23,7 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { TagResultItem } from './components/TagResultItem'
 import { EntrySelectedTag } from './components/EntrySelectedTag'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
+import { ClickAway } from 'src/util/click-away-wrapper'
 
 class TagPicker extends StatefulUIElement<
     TagPickerDependencies,
@@ -177,13 +178,15 @@ class TagPicker extends StatefulUIElement<
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
-                <OuterSearchBox
-                    onKeyPress={this.handleKeyPress}
-                    onClick={this.handleOuterSearchBoxClick}
-                >
-                    {this.renderMainContent()}
-                    {this.props.children}
-                </OuterSearchBox>
+                <ClickAway onClickAway={this.handleClickOutside}>
+                    <OuterSearchBox
+                        onKeyPress={this.handleKeyPress}
+                        onClick={this.handleOuterSearchBoxClick}
+                    >
+                        {this.renderMainContent()}
+                        {this.props.children}
+                    </OuterSearchBox>
+                </ClickAway>
             </ThemeProvider>
         )
     }
@@ -212,4 +215,4 @@ const EmptyTagsView = styled.div`
     text-align: center;
 `
 
-export default onClickOutside(TagPicker)
+export default TagPicker

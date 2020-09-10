@@ -15,6 +15,7 @@ interface Props extends ShareAnnotationProps {
     tags: string[]
     handleCancelOperation: () => void
     handleEditAnnotation: (commentText: string, tagsInput: string[]) => void
+    handleCopyPasterClick?: () => void
 }
 
 interface State {

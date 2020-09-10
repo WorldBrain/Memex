@@ -1,17 +1,13 @@
 import React, { Component } from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 
 import Modal, { Props as ModalProps } from 'src/common-ui/components/Modal'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import { LoadingIndicator } from 'src/common-ui/components'
 import {
-    TypographyHeadingBig,
     TypographyTextNormal,
     TypographyHeadingBigger,
-    TypographySubTextNormal,
     TypographyHeadingNormal,
-    TypographyHeadingSmall,
 } from 'src/common-ui/components/design-library/typography'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
@@ -25,8 +21,8 @@ export interface Props
 }
 
 const ShareIconBox = styled.div`
-	display: flex;
-	justify-content: flex-start
+    display: flex;
+    justify-content: flex-start;
 `
 
 const ShareIconContainer = styled.div`
@@ -37,20 +33,20 @@ const ShareIconContainer = styled.div`
 `
 
 const ShareIconFull = styled.div`
-	background-image: url(${icons.share});
-	background-position: center center;
-	background-repeat: no-repeat;
-	width: 30px;
+    background-image: url(${icons.share});
+    background-position: center center;
+    background-repeat: no-repeat;
+    width: 30px;
     height: 30px;
     background-size: contain;
     margin-right: 5px;
 `
 
 const ShareIconEmpty = styled.div`
-	background-image: url(${icons.shareEmpty});
-	background-position: center center;
-	background-repeat: no-repeat;
-	width: 30px;
+    background-image: url(${icons.shareEmpty});
+    background-position: center center;
+    background-repeat: no-repeat;
+    width: 30px;
     height: 30px;
     background-size: contain;
     margin-right: 5px;
@@ -122,20 +118,7 @@ const Text = styled.div`
     font-family: 'Poppins', sans-serif;
 `
 
-const Button = styled.button`
-    font-family: Poppins;
-    font-style: normal;
-    font-weight: bold;
-    font-size: 14px;
-    line-height: 21px;
-    cursor: pointer;
-
-    outline: none;
-    border: none;
-    background: transparent;
-`
-
-export default class ShareAnnotationModal extends Component<Props> {
+export default class ShareAnnotationOnboardingModal extends Component<Props> {
     render() {
         return (
             <Modal {...this.props} large>
@@ -145,33 +128,31 @@ export default class ShareAnnotationModal extends Component<Props> {
                             NEW: Share highlights and notes in collections
                         </TypographyHeadingBigger>
                         <TypographyTextNormal>
-                            Shared notes are visible in each collection the parent page is part of.
+                            Shared notes are visible in each collection the
+                            parent page is part of.
                         </TypographyTextNormal>
                     </InstructionsBox>
                 </InstructionsContainer>
 
                 <LinkContainer>
                     <LinkBox>
-                    	<ShareIconBox>
-                    		<ShareIconContainer>
-                    			<ShareIconFull/>
-                    			<ShareIconText>
-                    				Shared
-                    			</ShareIconText>
-                    		</ShareIconContainer>
-                    		<ShareIconContainer>
-                    			<ShareIconEmpty/>
-                    			<ShareIconText>
-                    				Private
-                    			</ShareIconText>
-                    		</ShareIconContainer>
-                    	</ShareIconBox>
+                        <ShareIconBox>
+                            <ShareIconContainer>
+                                <ShareIconFull />
+                                <ShareIconText>Shared</ShareIconText>
+                            </ShareIconContainer>
+                            <ShareIconContainer>
+                                <ShareIconEmpty />
+                                <ShareIconText>Private</ShareIconText>
+                            </ShareIconContainer>
+                        </ShareIconBox>
                     </LinkBox>
                 </LinkContainer>
                 <BetaInfoContainer>
                     <BlockHeading>🚀 This is a beta feature</BlockHeading>
                     <Text>
-                        What needs to change so it fits better into your workflow?
+                        What needs to change so it fits better into your
+                        workflow?
                     </Text>
 
                     <ButtonsContainer>

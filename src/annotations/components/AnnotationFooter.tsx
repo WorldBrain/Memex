@@ -27,10 +27,11 @@ export interface AnnotationFooterEventProps {
     onEditConfirm: () => void
     onEditCancel: () => void
     onEditIconClick: () => void
-    onShareClick: () => void
-    onUnshareClick: () => void
+    onShareClick: React.MouseEventHandler
+    onUnshareClick: React.MouseEventHandler
     toggleBookmark: () => void
     onGoToAnnotation?: () => void
+    onCopyPasterBtnClick?: () => void
 }
 
 class AnnotationFooter extends React.Component<Props> {
@@ -64,7 +65,10 @@ class AnnotationFooter extends React.Component<Props> {
                         tooltipText={'Edit Note'}
                     >
                         <IconBox onClick={this.props.onEditIconClick}>
-                            <IconStyled title="Edit note" src={icons.edit} />
+                            <IconStyled
+                                title="Edit note"
+                                src={icons.commentEdit}
+                            />
                         </IconBox>
                     </ButtonTooltip>
                     <ButtonTooltip
@@ -84,18 +88,15 @@ class AnnotationFooter extends React.Component<Props> {
                                 position="bottom"
                                 tooltipText={shareIconProps.tooltipText}
                             >
-                                {shareIconProps.isLoading ? (
-                                    <LoadingIndicator />
-                                ) : (
-                                    <IconBox
-                                        disabled={shareIconProps.isDisabled}
-                                        onClick={shareIconProps.onClickAction}
-                                    >
-                                        <IconStyled
-                                            src={shareIconProps.imgSrc}
-                                        />
-                                    </IconBox>
-                                )}
+                                <IconBox
+                                    disabled={
+                                        shareIconProps.isDisabled ||
+                                        shareIconProps.isLoading
+                                    }
+                                    onClick={shareIconProps.onClickAction}
+                                >
+                                    <IconStyled src={shareIconProps.imgSrc} />
+                                </IconBox>
                             </ButtonTooltip>
                         )}
                     />
@@ -110,6 +111,17 @@ class AnnotationFooter extends React.Component<Props> {
                                     title="Go to annotation"
                                     src={icons.goTo}
                                 />
+                            </IconBox>
+                        </ButtonTooltip>
+                    )}
+
+                    {this.props.onCopyPasterBtnClick && (
+                        <ButtonTooltip
+                            position="bottom"
+                            tooltipText="Copy Note"
+                        >
+                            <IconBox onClick={this.props.onCopyPasterBtnClick}>
+                                <IconStyled src={icons.copy} />
                             </IconBox>
                         </ButtonTooltip>
                     )}

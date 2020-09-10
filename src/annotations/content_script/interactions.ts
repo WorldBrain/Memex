@@ -12,7 +12,7 @@ export const createAndCopyDirectLink = async () => {
         url,
         anchor,
     })
-    copyToClipboard(result.url)
+    await copyToClipboard(result.url)
 
     selection.removeAllRanges()
     selection.addRange(range)

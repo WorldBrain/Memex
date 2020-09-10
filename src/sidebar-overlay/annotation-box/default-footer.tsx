@@ -1,22 +1,22 @@
 import * as React from 'react'
 import cx from 'classnames'
+import styled from 'styled-components'
 
 import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 import { AnnotationShareIconRenderer } from 'src/annotations/components/AnnotationShareIconRenderer'
-import { LoadingIndicator } from 'src/common-ui/components'
-import styled from 'styled-components'
-import { ButtonTooltip } from 'src/common-ui/components'
+import { LoadingIndicator, ButtonTooltip } from 'src/common-ui/components'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 const styles = require('./default-footer.css')
 
 export interface ShareAnnotationProps {
     sharingInfo?: AnnotationSharingInfo
     sharingAccess: AnnotationSharingAccess
-    onShare: () => void
-    onUnshare: () => void
+    onShare: React.MouseEventHandler
+    onUnshare: React.MouseEventHandler
 }
 
 interface Props extends ShareAnnotationProps {
@@ -24,10 +24,11 @@ interface Props extends ShareAnnotationProps {
     isEdited: boolean
     timestamp: string
     hasBookmark: boolean
-    goToAnnotationHandler: (e: React.MouseEvent<HTMLElement>) => void
+    handleBookmarkToggle: () => void
     editIconClickHandler: () => void
     trashIconClickHandler: () => void
-    handleBookmarkToggle: () => void
+    copyIconClickHandler?: () => void
+    goToAnnotationHandler: (e: React.MouseEvent<HTMLElement>) => void
 }
 
 /* tslint:disable-next-line variable-name */
@@ -39,6 +40,7 @@ const DefaultFooter = ({
     goToAnnotationHandler,
     editIconClickHandler,
     trashIconClickHandler,
+    copyIconClickHandler,
     handleBookmarkToggle,
     ...props
 }: Props) => (
@@ -48,6 +50,11 @@ const DefaultFooter = ({
             {timestamp}
         </TimeStamp>
         <ButtonContainer>
+            {copyIconClickHandler && (
+                <IconBox onClick={copyIconClickHandler}>
+                    <IconStyled src={icons.copy} />
+                </IconBox>
+            )}
             <ButtonTooltip position={'bottom'} tooltipText={'Delete'}>
                 <IconBox
                     onClick={(e) => {
@@ -55,7 +62,7 @@ const DefaultFooter = ({
                         trashIconClickHandler()
                     }}
                 >
-                    <IconStyled src={'/img/trash.svg'} />
+                    <IconStyled src={icons.trash} />
                 </IconBox>
             </ButtonTooltip>
             {displayGoToAnnotation && (
@@ -64,10 +71,7 @@ const DefaultFooter = ({
                         title="Go to annotation"
                         onClick={goToAnnotationHandler}
                     >
-                        <IconStyled
-                            title="Go to Highlight"
-                            src={'/img/open.svg'}
-                        />
+                        <IconStyled title="Go to Highlight" src={icons.goTo} />
                     </IconBox>
                 </ButtonTooltip>
             )}
@@ -78,7 +82,7 @@ const DefaultFooter = ({
                         editIconClickHandler()
                     }}
                 >
-                    <IconStyled src={'/img/comment_edit.svg'} />
+                    <IconStyled src={icons.commentEdit} />
                 </IconBox>
             </ButtonTooltip>
             <AnnotationShareIconRenderer
@@ -88,18 +92,21 @@ const DefaultFooter = ({
                         position={'bottom'}
                         tooltipText={shareIconProps.tooltipText}
                     >
-                        <IconBox onClick={shareIconProps.onClickAction}>
-                            {shareIconProps.isLoading ? (
-                                <LoadingIndicator />
-                            ) : (
-                                <IconStyled
-                                    className={cx(styles.shareIcon, {
-                                        [styles.shareIconDisabled]:
-                                            shareIconProps.isDisabled,
-                                    })}
-                                    src={shareIconProps.imgSrc}
-                                />
-                            )}
+                        <IconBox
+                            onClick={shareIconProps.onClickAction}
+                            disabled={
+                                shareIconProps.isDisabled ||
+                                shareIconProps.isLoading
+                            }
+                        >
+                            <IconStyled
+                                src={shareIconProps.imgSrc}
+                                className={cx(styles.shareIcon, {
+                                    [styles.shareIconDisabled]:
+                                        shareIconProps.isDisabled ||
+                                        shareIconProps.isLoading,
+                                })}
+                            />
                         </IconBox>
                     </ButtonTooltip>
                 )}
@@ -112,7 +119,7 @@ const DefaultFooter = ({
                             handleBookmarkToggle()
                         }}
                     >
-                        <IconStyled src={'/img/star_full.svg'} />
+                        <IconStyled src={icons.heartFull} />
                     </IconBoxPermanent>
                 </ButtonTooltip>
             ) : (
@@ -123,7 +130,7 @@ const DefaultFooter = ({
                             handleBookmarkToggle()
                         }}
                     >
-                        <IconStyled src={'/img/star_empty.svg'} />
+                        <IconStyled src={icons.heartEmpty} />
                     </IconBox>
                 </ButtonTooltip>
             )}

@@ -332,20 +332,21 @@
     width: 24px;
     height: 24px;
     padding: 4px;
-    background-repeat: no-repeat;
     cursor: pointer;
     outline: none;
-    background-position: center center;
-    background-size: contain;
     opacity: 0.2;
     border-radius: 3px;
     justify-content: center;
     align-items: center;
     display: flex;
+    background: none;
 
     &:hover {
         opacity: 1;
         background-color: #e0e0e0;
+        background-position: center center;
+        background-size: contain;
+        background-repeat: no-repeat;
     }
 }
 
@@ -356,16 +357,17 @@
     width: 24px;
     padding: 4px;
     opacity: 0.6;
-    background-repeat: no-repeat;
     cursor: pointer;
     outline: none;
-    background-position: center center;
-    background-size: contain;
     border-radius: 3px;
+    background: none;
 
     &:hover {
         opacity: 0.6;
         background-color: #e0e0e0;
+        background-position: center center;
+        background-size: contain;
+        background-repeat: no-repeat;
     }
 }
 

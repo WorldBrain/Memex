@@ -4,7 +4,6 @@ import { maxPossibleTags } from '../utils'
 import { ClickHandler } from '../types'
 import classNames from 'classnames'
 
-
 const styles = require('./tag-holder.css')
 
 interface Props {

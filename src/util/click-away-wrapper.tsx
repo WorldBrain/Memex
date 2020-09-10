@@ -13,27 +13,39 @@ export interface Props {
  * NOTE: Does NOT work in the Shadow DOM :( as `ReactDOM.findDOMNode` doesn't work there
  */
 export class ClickAway extends React.Component<Props> {
-    componentDidMount() {
-        document.addEventListener('mousedown', this.handleClickAway, true)
+    rootNode?: HTMLDocument | ShadowRoot
+    thisNode?: HTMLElement
+
+    handleRef = (element: HTMLElement) => {
+        this.thisNode = element
+        this.rootNode = element?.getRootNode?.() as
+            | HTMLDocument
+            | ShadowRoot
+            | undefined
+        this.rootNode?.addEventListener?.('mousedown', this.handleClick, true)
     }
 
     componentWillUnmount() {
-        document.removeEventListener('mousedown', this.handleClickAway, true)
+        this.rootNode?.removeEventListener?.(
+            'mousedown',
+            this.handleClick,
+            true,
+        )
     }
 
-    private handleClickAway = (event) => {
-        const domNode = ReactDOM.findDOMNode(this)
-
+    private handleClick = (event) => {
+        const domNode = this.thisNode
         if (!domNode) {
             return
         }
 
+        // console.log(domNode, event.target)
         if (!domNode.contains(event.target)) {
             this.props.onClickAway(event)
         }
     }
 
     render() {
-        return this.props.children
+        return <div ref={this.handleRef}>{this.props.children}</div>
     }
 }

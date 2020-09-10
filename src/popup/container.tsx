@@ -228,19 +228,25 @@ class PopupContainer extends PureComponent<Props> {
                 </div>
 
                 <hr />
+
                 <div className={styles.buttonContainer}>
-                    <ButtonIcon
-                        href={`${constants.OPTIONS_URL}#/settings`}
-                        icon="settings"
-                        className={btnStyles.settingsIcon}
-                        btnClass={btnStyles.settings}
-                    />
-                    <ButtonIcon
-                        href="https://worldbrain.io/help"
-                        icon="help"
-                        btnClass={btnStyles.help}
-                    />
+                    <a href="https://worldbrain.io/feedback" target="_blank" className={styles.feedbackButton}>
+                        🐞 Feedback
+                    </a>
+                    <div className={styles.buttonBox}>
+                        <ButtonIcon
+                            href={`${constants.OPTIONS_URL}#/settings`}
+                            icon="settings"
+                            className={btnStyles.settingsIcon}
+                            btnClass={btnStyles.settings}
+                        />
+                        <ButtonIcon
+                            href="https://worldbrain.io/help"
+                            icon="help"
+                            btnClass={btnStyles.help}
+                        />
                     {/*<NotifButton />*/}
+                    </div>
                 </div>
             </React.Fragment>
         )

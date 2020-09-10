@@ -19,6 +19,7 @@ interface Props extends ShareAnnotationProps {
     editIconClickHandler: () => void
     trashIconClickHandler: () => void
     shareIconClickHandler: () => void
+    handleCopyPasterClick?: () => void
     handleTagClick: (tag: string) => void
     handleBookmarkToggle: () => void
     getTruncatedTextObject: (

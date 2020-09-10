@@ -9,45 +9,31 @@ import {
     TypographyActionText,
 } from 'src/common-ui/components/design-library/typography'
 
-const Button = styled.button`
-    /* Reset browser button styles */
-
-    border: none;
-    margin: 0;
-    padding: 0;
-    width: auto;
+const StyledPrimaryAction = styled.div`
+    padding: 8px 20px;
+    border: 1px solid ${colorPrimary};
     height: 35px;
     overflow: visible;
     white-space: nowrap;
+    display: flex;
+    justify-content: center;
+    align-items: center
+    vertical-align: middle;
+    background: ${(props) => (props.disabled ? colorDisabled : colorPrimary)};
 
-    background: transparent;
-
-    /* inherit font & color from ancestor */
-    color: inherit;
-
-    /* Normalize \`line-height\`. Cannot be changed from \`normal\` in Firefox 4+. */
-    line-height: normal;
-
-    /* Corrects font smoothing for webkit */
-    -webkit-font-smoothing: inherit;
-    -moz-osx-font-smoothing: inherit;
-
-    /* Corrects inability to style clickable \`input\` types in iOS */
-    -webkit-appearance: none;
+    box-sizing: border-box;
+    border-radius: 5px;
+    cursor: pointer;
 
     :focus {
         outline: unset;
     }
+
+    &: hover {
+        opacity: 0.8;
+    }
 `
 
-const StyledPrimaryAction = styled(Button)`
-    padding: 8px 20px;
-    background: ${(props) => (props.disabled ? colorDisabled : colorPrimary)};
-    border-radius: 5px;
-    cursor: pointer;
-    display: inline-block;
-    white-space: nowrap;
-`
 const StyledPrimaryActionLinkText = styled(TypographyActionText)`
     font-size: ${fontSizeSmall}px;
     color: #2f2f2f;

@@ -6,16 +6,17 @@ import {
     AnnotationsSidebarInPage,
     Props as AnnotationsSidebarDependencies,
 } from './containers/AnnotationsSidebarInPage'
+import { InPageUIRootMount } from 'src/in-page-ui/types'
 
 export function setupInPageSidebarUI(
-    target: HTMLElement,
+    mount: InPageUIRootMount,
     dependencies: AnnotationsSidebarDependencies,
 ) {
     ReactDOM.render(
-        <StyleSheetManager target={target}>
+        <StyleSheetManager target={mount.shadowRoot}>
             <AnnotationsSidebarInPage {...dependencies} />
         </StyleSheetManager>,
-        target,
+        mount.rootElement,
     )
 }
 

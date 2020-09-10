@@ -9,10 +9,11 @@ import {
 } from 'src/sidebar/annotations-sidebar/index'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { ContentScriptsInterface } from '../background/types'
+import { InPageUIRootMount } from 'src/in-page-ui/types'
 
 export const main: SidebarScriptMain = async (dependencies) => {
     const cssFile = browser.extension.getURL(`/content_script_sidebar.css`)
-    let mount: ReturnType<typeof createInPageUI> | null = null
+    let mount: InPageUIRootMount | null = null
     const createMount = () => {
         if (!mount) {
             mount = createInPageUI('sidebar', cssFile, [
@@ -45,7 +46,7 @@ export const main: SidebarScriptMain = async (dependencies) => {
         >().getCurrentTab()
 
         createMount()
-        setupInPageSidebarUI(mount.rootElement, {
+        setupInPageSidebarUI(mount, {
             ...dependencies,
             pageUrl: currentTab.url,
             initialState: options.showOnLoad ? 'visible' : 'hidden',

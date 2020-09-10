@@ -39,6 +39,7 @@ import {
     DevAuthState,
 } from 'src/authentication/background/setup'
 import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
+import { FeaturesBeta } from 'src/features/background/feature-beta'
 import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
 import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
@@ -53,7 +54,7 @@ import { AnalyticsBackground } from 'src/analytics/background'
 import { Analytics } from 'src/analytics/types'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
 import { PipelineRes } from 'src/search'
-import CopyPasterBackground from 'src/overview/copy-paster/background'
+import CopyPasterBackground from 'src/copy-paster/background'
 import { ReaderBackground } from 'src/reader/background'
 import { ServerStorage } from 'src/storage/types'
 import ContentSharingBackground from 'src/content-sharing/background'
@@ -79,6 +80,7 @@ export interface BackgroundModules {
     contentScripts: ContentScriptsBackground
     inPageUI: InPageUIBackground
     features: FeatureOptIns
+    featuresBeta: FeaturesBeta
     pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
     copyPaster: CopyPasterBackground
@@ -220,6 +222,15 @@ export function createBackgroundModules(options: {
         searchIndex: search.searchIndex,
         pageStorage: pages.storage,
     })
+    const contentSharing = new ContentSharingBackground({
+        storageManager,
+        customLists: customLists.storage,
+        annotationStorage: directLinking.annotationStorage,
+        auth,
+        analytics: options.analyticsManager,
+        getContentSharing: async () =>
+            (await options.getServerStorage()).storageModules.contentSharing,
+    })
     return {
         auth,
         social,
@@ -307,6 +318,7 @@ export function createBackgroundModules(options: {
             },
         }),
         features: new FeatureOptIns(),
+        featuresBeta: new FeaturesBeta(),
         pages,
         bgScript,
         pageFetchBacklog,
@@ -325,17 +337,9 @@ export function createBackgroundModules(options: {
         }),
         copyPaster: new CopyPasterBackground({
             storageManager,
+            contentSharing,
         }),
-        contentSharing: new ContentSharingBackground({
-            storageManager,
-            customLists: customLists.storage,
-            annotationStorage: directLinking.annotationStorage,
-            auth,
-            analytics: options.analyticsManager,
-            getContentSharing: async () =>
-                (await options.getServerStorage()).storageModules
-                    .contentSharing,
-        }),
+        contentSharing,
     }
 }
 

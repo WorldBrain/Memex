@@ -71,10 +71,6 @@ export const activeCopyPasterIndex = createSelector(
     resultsState,
     (state) => state.activeCopyPasterIndex,
 )
-export const copyPasterTemplates = createSelector(
-    resultsState,
-    (state) => state.copyPasterTemplates,
-)
 
 export const isBetaEnabled = createSelector(
     resultsState,

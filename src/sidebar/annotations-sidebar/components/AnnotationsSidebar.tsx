@@ -32,14 +32,15 @@ export interface AnnotationsSidebarProps {
     annotationModes: { [url: string]: AnnotationMode }
     annotationSharingInfo: { [annotationUrl: string]: AnnotationSharingInfo }
 
-    // NOTE: This group of props were all brought over from AnnotationsEditable
     showCongratsMessage?: boolean
     activeAnnotationUrl?: string | null
     hoverAnnotationUrl?: string
     needsWaypoint?: boolean
     appendLoader?: boolean
     handleScrollPagination: () => void
-    // ^ Until here ^
+
+    renderCopyPasterForAnnotation: (id: string) => JSX.Element
+    renderShareMenuForAnnotation: (id: string) => JSX.Element
 
     onClickOutside: React.MouseEventHandler
     bindAnnotationFooterEventProps: (
@@ -57,6 +58,7 @@ export interface AnnotationsSidebarProps {
     sharingAccess: AnnotationSharingAccess
     isSearchLoading: boolean
     isAnnotationCreateShown: boolean
+    activeCopyPasterAnnotationId?: string
     annotations: Annotation[]
     theme: Partial<SidebarTheme>
 }
@@ -155,7 +157,7 @@ class AnnotationsSidebar extends React.Component<
 
         return (
             <NewAnnotationSection>
-                <NewAnnotationStyled>New Annotation</NewAnnotationStyled>
+                <NewAnnotationStyled>New Note</NewAnnotationStyled>
                 <NewAnnotationBoxStyled>
                     <AnnotationCreate
                         {...this.props.annotationCreateProps}
@@ -371,7 +373,7 @@ const NewAnnotationSection = styled.section`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    padding: 30px 5px 0px 5px;
+    padding: 10px 10px 0px 10px;
 `
 
 const NewAnnotationSeparator = styled.div`
@@ -389,7 +391,7 @@ const AnnotationsSectionStyled = styled.section`
     justify-content: flex-start;
     align-items: flex-start;
     margin-bottom: 30px;
-    padding: 15px 5px 100px;
+    padding: 15px 10px 100px;
 `
 
 const NewAnnotationBoxStyled = styled.div`

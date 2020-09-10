@@ -76,7 +76,7 @@ async function main() {
             mapValues(storageModule.operations, (operation) => {
                 operation = { ...operation }
                 if (operation.operation === 'createObject') {
-                    delete operation.args
+                    delete (operation as any).args
                 }
                 return operation
             }),

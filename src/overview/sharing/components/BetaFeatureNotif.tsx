@@ -130,8 +130,10 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
                             🚀 This is a beta feature
                         </TypographyHeadingBigger>
                         <TypographyTextNormal>
-                            Request access to join the Pioneer community to use it. <br/>
-                            Instantly use them by upgrading to the Pioneer Plan via 'Settings > Beta Features'.
+                            Request access to join the Pioneer community to use
+                            it. <br />
+                            Instantly use them by upgrading to the Pioneer Plan
+                            via 'Settings > Beta Features'.
                         </TypographyTextNormal>
                         <Margin />
                         <>
@@ -141,7 +143,11 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
                                     onClick={
                                         this.isUnauthorizedUser
                                             ? this.openPortal
-                                            : ()=>{window.open('https://worldbrain.io/request-early-access')}
+                                            : () => {
+                                                  window.open(
+                                                      'https://worldbrain.io/request-early-access',
+                                                  )
+                                              }
                                     }
                                 />
                                 <SecondaryAction

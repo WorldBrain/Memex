@@ -20,7 +20,7 @@ const ResultItemActionBtn: React.SFC<Props> = (props) => (
         position={props.tooltipPosition || 'bottom'}
         tooltipText={props.tooltipText}
     >
-        <div
+        <button
             className={props.permanent ? styles.permanentButton : styles.button}
             onClick={props.onClick}
             ref={props.refHandler}
@@ -29,7 +29,7 @@ const ResultItemActionBtn: React.SFC<Props> = (props) => (
                 src={props.imgSrc}
                 className={cx(styles.img, props.className)}
             />
-        </div>
+        </button>
     </ButtonTooltip>
 )
 
