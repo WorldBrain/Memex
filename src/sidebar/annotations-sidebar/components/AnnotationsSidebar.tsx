@@ -157,7 +157,7 @@ class AnnotationsSidebar extends React.Component<
 
         return (
             <NewAnnotationSection>
-                <NewAnnotationStyled>New Annotation</NewAnnotationStyled>
+                <NewAnnotationStyled>New Note</NewAnnotationStyled>
                 <NewAnnotationBoxStyled>
                     <AnnotationCreate
                         {...this.props.annotationCreateProps}
@@ -373,7 +373,7 @@ const NewAnnotationSection = styled.section`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    padding: 30px 5px 0px 5px;
+    padding: 10px 10px 0px 10px;
 `
 
 const NewAnnotationSeparator = styled.div`
