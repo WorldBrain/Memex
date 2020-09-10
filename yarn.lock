@@ -16987,14 +16987,14 @@ react-dock@^0.2.4:
     lodash.debounce "^3.1.1"
     prop-types "^15.5.8"
 
-react-dom@17.0.0-rc.0:
-  version "17.0.0-rc.0"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-17.0.0-rc.0.tgz#237b4cca9cf817329373424bde00736f11fd7541"
-  integrity sha512-Ny2SlnMe+SxWRVDX2aLyWsv3ltbJC0gVyWtedfoJnV2265ePcM8BLY9fJjKb4ZXwcQ+pwZFdsURYarJ5qEEMeQ==
+react-dom@17.0.0-rc.1:
+  version "17.0.0-rc.1"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-17.0.0-rc.1.tgz#529f4e5e8410dbe257e4a82aba460c7f1063b024"
+  integrity sha512-MyWoPLxFUhSfIwFQa94Axm0h5IwzKJ3kzL7dxsW8iV36v881k+Lq7lVUN1+vDtBF0l51lkMe1mEITB3H5rinVg==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
-    scheduler "0.20.0-rc.0"
+    scheduler "0.20.0-rc.1"
 
 react-dom@^16.8.3:
   version "16.9.0"
@@ -17285,10 +17285,10 @@ react-waypoint@^8.0.3:
     consolidated-events "^1.1.0 || ^2.0.0"
     prop-types "^15.0.0"
 
-react@17.0.0-rc.0:
-  version "17.0.0-rc.0"
-  resolved "https://registry.yarnpkg.com/react/-/react-17.0.0-rc.0.tgz#91a4d2085f07b501175a2434bd65b35aa0e95686"
-  integrity sha512-GPOdeCEE5HL9jRh7YIXoqBBxQVTqKtMm7tbH0Q//PJZV9EkFyUSDUglvIO/0i42PuUstEBcmOwlodTV2R9iStg==
+react@17.0.0-rc.1:
+  version "17.0.0-rc.1"
+  resolved "https://registry.yarnpkg.com/react/-/react-17.0.0-rc.1.tgz#2f7575465517153dcd0d6a596f75f200c1612e2a"
+  integrity sha512-sQ7X+k3zwf6cFQu9pD6FFJMwHwoKAV+EKLWRW4rD1ruyRiFkmC09cjtqFySLtaZbUdzYEc8iy4uOwisJNlXytg==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
@@ -18378,10 +18378,10 @@ saxes@^5.0.0:
   dependencies:
     xmlchars "^2.2.0"
 
-scheduler@0.20.0-rc.0:
-  version "0.20.0-rc.0"
-  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.20.0-rc.0.tgz#9cb397f88f9decea28d159d3aad068b54a6f35e4"
-  integrity sha512-5CZiVhk9xI9VmqaodZH+eO3aKgqYwjZ8uf9lnfRlYEwaB4lbmIq0mzuNY5w52sbPlZP9pifXQaLGudKHMgQZcw==
+scheduler@0.20.0-rc.1:
+  version "0.20.0-rc.1"
+  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.20.0-rc.1.tgz#25df7dd0d52366f112a8ead468d713c5f6d2a2bd"
+  integrity sha512-agEhMxvDawRBHGbx6k+poNuzZ6XD+/XTl67R42sdJ/+yeioNDxaDiwxqTT9MjpvVBBdEzRzvnUvAccueb8Eb2w==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
