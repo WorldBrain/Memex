@@ -7,10 +7,7 @@ import { contentSharing } from 'src/util/remote-functions-background'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { LoadingIndicator } from 'src/common-ui/components'
-import {
-    TypographyTextNormal,
-} from 'src/common-ui/components/design-library/typography'
-
+import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
 
 interface State {
     // readyToRender: boolean
@@ -52,6 +49,10 @@ export default class SingleNoteShareModal extends React.PureComponent<
     private getLink = async () => {
         const { annotationUrl } = this.props
         await this.contentSharingBG.shareAnnotation({ annotationUrl })
+        await this.contentSharingBG.shareAnnotationsToLists({
+            annotationUrls: [annotationUrl],
+            queueInteraction: 'skip-queue',
+        })
         this.props.postShareHook?.()
         return this.contentSharingBG.getRemoteAnnotationLink({ annotationUrl })
     }
@@ -119,7 +120,11 @@ export default class SingleNoteShareModal extends React.PureComponent<
                     />
                 )}
                 <SharedNoteInfo>
-                    <TypographyTextNormal> Shared notes are available via the page link and collections <strong>the page is part of</strong>.</TypographyTextNormal>
+                    <TypographyTextNormal>
+                        {' '}
+                        Shared notes are available via the page link and
+                        collections <strong>the page is part of</strong>.
+                    </TypographyTextNormal>
                 </SharedNoteInfo>
             </ShareAnnotationMenu>
         )
