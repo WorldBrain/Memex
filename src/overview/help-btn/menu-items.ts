@@ -12,16 +12,12 @@ export const menuItems: MenuOptions = [
     },
     '-',
     {
-        text: 'OpenCollective',
-        link: 'https://opencollective.com/worldbrain',
-    },
-    {
         text: 'GitHub',
         link: 'https://github.com/worldbrain/memex',
     },
     '-',
     {
-        text: 'Contact Support ',
+        text: 'Community Forum',
         link: 'https://worldbrain.io/help',
     },
     '-',

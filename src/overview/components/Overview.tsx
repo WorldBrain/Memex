@@ -280,6 +280,9 @@ class Overview extends PureComponent<Props, State> {
 
                     <Tooltip />
                     <div className={styles.rightCorner}>
+                    <a href="https://worldbrain.io/feedback" target="_blank" className={styles.feedbackButton}>
+                        🐞 Feedback
+                    </a>
                         {this.state.showPioneer && (
                             <div
                                 onClick={() => {

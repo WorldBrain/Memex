@@ -1,3 +1,25 @@
+.feedbackButton {
+    font-size: 10px;
+    cursor: pointer;
+    width: 84px;
+    height: 24px;
+    position: fixed;
+    border: none;
+    bottom: 1.9em;
+    left: 2.2em;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    border-radius: 5px;
+    background-color: #5cd9a6;
+    text-decoration: none;
+    color: #3a2f45;
+
+    @media (max-width: 1100px) {
+        display: none;
+    }
+}
+
 .pioneerBadge {
     font-size: 14px;
     cursor: pointer;

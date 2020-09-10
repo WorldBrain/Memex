@@ -142,6 +142,17 @@
     }
 }
 
+.feedbackRow {
+    background-color: #5cd9a6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30px;
+    margin: 5px 5px 0;
+    cursor: pointer;
+    font-weight: bold;
+}
+
 .logo {
     background-image: url('/img/open.svg');
 }

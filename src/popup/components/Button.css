@@ -91,11 +91,10 @@
 .button {
     composes: nakedSquareButton from '../../common-ui/elements.css';
     cursor: pointer;
-    margin-right: 6px;
-    margin-bottom: 6px;
     outline: 0;
     text-decoration: none;
     opacity: 0.8;
+    margin-right: 10px;
 
     &:hover {
         opacity: 1;
@@ -110,7 +109,6 @@
     width: 25px;
     height: 25px;
     align-self: center;
-    margin-right: 10px;
     outline: 0;
     background-position: center;
 }
@@ -119,7 +117,6 @@
     background-image: url('/img/settings.svg');
     background-repeat: no-repeat;
     background-size: 20px;
-    margin-top: 0px;
 }
 
 .help {
@@ -130,7 +127,6 @@
 
 .buttonIcons {
     background-size: 20px;
-    margin-right: 0px;
 }
 
 .linkIcon {

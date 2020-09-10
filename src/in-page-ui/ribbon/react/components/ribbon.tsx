@@ -280,6 +280,12 @@ export default class Ribbon extends Component<Props, State> {
                     />
                     <div className={styles.extraButtonsText}>Open Settings</div>
                 </div>
+                <div
+                    onClick={() => window.open('https://worldbrain.io/feedback')}
+                    className={styles.feedbackRow}
+                >
+                    <div className={styles.extraButtonsText}>Feedback</div>
+                </div>
             </ExtraButtonsPanel>
         )
     }
