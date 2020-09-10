@@ -94,7 +94,6 @@
     outline: 0;
     text-decoration: none;
     opacity: 0.8;
-    margin-right: 10px;
 
     &:hover {
         opacity: 1;
@@ -110,6 +109,8 @@
     height: 25px;
     align-self: center;
     outline: 0;
+    margin-right: 10px;
+
     background-position: center;
 }
 
