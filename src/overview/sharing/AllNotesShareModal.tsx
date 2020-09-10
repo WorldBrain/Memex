@@ -1,4 +1,5 @@
 import React from 'react'
+import styled from 'styled-components'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import delay from 'src/util/delay'
@@ -134,20 +135,6 @@ export default class AllNotesShareModal extends React.Component<Props, State> {
     //     this.props.closeShareMenu()
     // }
 
-    shouldShowShareAll() {
-        return (
-            this.state.shareAllState === 'pristine' &&
-            this.state.unshareAllState !== 'running'
-        )
-    }
-
-    shouldShowUnshareAll() {
-        return (
-            this.state.unshareAllState === 'pristine' &&
-            this.state.shareAllState !== 'running'
-        )
-    }
-
     render() {
         return (
             <ShareAnnotationMenu
@@ -163,23 +150,20 @@ export default class AllNotesShareModal extends React.Component<Props, State> {
                 linkTitleCopy="Link to Page"
                 linkSubtitleCopy="A link to all shared notes on this page"
             >
-                {this.shouldShowShareAll() && (
-                    <PrimaryAction
-                        label="Share all notes"
-                        onClick={this.handleShareAll}
-                    />
-                )}
-                {this.shouldShowUnshareAll() && (
-                    <SecondaryAction
-                        label="Un-share all notes"
-                        onClick={this.handleUnshareAll}
-                    />
-                )}
-                {(this.state.shareAllState === 'running' ||
-                    this.state.unshareAllState === 'running') && (
-                    <LoadingIndicator />
-                )}
+                <PrimaryAction
+                    label={this.state.shareAllState === 'running' ? <LoadingIndicator /> : 'Share all notes'}
+                    onClick={this.state.shareAllState === 'running' ? undefined : this.handleShareAll}
+                />
+                <Margin/>
+                <SecondaryAction
+                    label={this.state.unshareAllState === 'running' ? <LoadingIndicator /> : 'Un-share all notes'}
+                    onClick={this.state.unshareAllState === 'running' ? undefined : this.handleUnshareAll}
+                />
             </ShareAnnotationMenu>
         )
     }
 }
+
+const Margin = styled.div`
+    height: 5px;
+`
