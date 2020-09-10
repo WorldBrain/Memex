@@ -177,10 +177,11 @@ const SharedNoteInfo = styled.div`
     text-align: center;
     align-items: center;
     font-size: 1
-    margin: 10px 5px 0;
+    margin: 10px 0 0;
 
     & > span {
         text-align: center;
+        font-size: 12px;
     }
 `
 
