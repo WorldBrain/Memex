@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import styled from 'styled-components'
 import {
     colorMidPurple,
@@ -44,14 +44,13 @@ export const SecondaryAction = ({
     onClick,
     disabled,
 }: {
-    label: string
+    label: ReactNode
     disabled?: boolean
     onClick: () => void
 }) => (
     <StyledSecondaryAction
         onClick={disabled === true ? undefined : onClick}
         disabled={disabled}
-        key={`button-${label}`}
     >
         <StyledSecondaryActionLinkText>{label}</StyledSecondaryActionLinkText>
     </StyledSecondaryAction>

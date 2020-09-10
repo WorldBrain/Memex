@@ -2,7 +2,6 @@ import React from 'react'
 import { TaskState } from 'ui-logic-core/lib/types'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
-import delay from 'src/util/delay'
 import { contentSharing } from 'src/util/remote-functions-background'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
@@ -76,14 +75,21 @@ export default class SingleNoteShareModal extends React.PureComponent<
         navigator.clipboard.writeText(link)
 
     private handleUnshare = async () => {
+        if (this.state.unshareState === 'running') {
+            return
+        }
+
+        this.setState({ unshareState: 'running' })
         await this.contentSharingBG.unshareAnnotation({
             annotationUrl: this.props.annotationUrl,
         })
+        this.setState({ unshareState: 'success' })
         this.props.postUnshareHook?.()
         this.props.closeShareMenu()
     }
 
     render() {
+        const { unshareState } = this.state
         return (
             <ShareAnnotationMenu
                 // shareAllState={this.state.shareStatusState}
@@ -93,15 +99,20 @@ export default class SingleNoteShareModal extends React.PureComponent<
                 // checkboxTitleCopy="Share Note"
                 // checkboxCopy="Share Note in all collections this page is in"
             >
-                {this.state.unshareState === 'pristine' && (
+                {unshareState === 'error' ? (
+                    'Error unsharing annotation...'
+                ) : (
                     <SecondaryAction
-                        label="Unshare"
+                        label={
+                            unshareState === 'running' ? (
+                                <LoadingIndicator />
+                            ) : (
+                                'Unshare'
+                            )
+                        }
                         onClick={this.handleUnshare}
                     />
                 )}
-                {this.state.unshareState === 'running' && <LoadingIndicator />}
-                {this.state.unshareState === 'error' &&
-                    'Error unsharing annotation...'}
             </ShareAnnotationMenu>
         )
     }
