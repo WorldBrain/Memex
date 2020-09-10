@@ -367,6 +367,11 @@ export default class ContentSharingBackground {
     shareAnnotationsToLists: ContentSharingInterface['shareAnnotationsToLists'] = async (
         options,
     ) => {
+        const allAnnotationMetadata = await this.storage.getRemoteAnnotationMetadata(
+            {
+                localIds: options.annotationUrls,
+            },
+        )
         await this.storage.setAnnotationsExcludedFromLists({
             localIds: options.annotationUrls,
             excludeFromLists: false,
@@ -390,7 +395,9 @@ export default class ContentSharingBackground {
 
             await this._scheduleAddAnnotationEntries({
                 annotations: allAnnotations.filter(
-                    (annotation) => annotation.pageUrl === pageUrl,
+                    (annotation) =>
+                        annotation.pageUrl === pageUrl &&
+                        allAnnotationMetadata[annotation.url]?.excludeFromLists,
                 ),
                 remoteListIds: Object.values(
                     await this.storage.getRemoteListIds({

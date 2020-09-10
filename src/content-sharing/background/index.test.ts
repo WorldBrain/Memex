@@ -1435,6 +1435,11 @@ function makeShareAnnotationTest(options: {
                     await contentSharing.shareAnnotationsToLists({
                         annotationUrls: [firstAnnotationUrl],
                     })
+                    if (options.testDuplicateSharing) {
+                        await contentSharing.shareAnnotationsToLists({
+                            annotationUrls: [firstAnnotationUrl],
+                        })
+                    }
                     await contentSharing.waitForSync()
 
                     expect(
