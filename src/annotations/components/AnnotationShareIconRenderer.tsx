@@ -93,7 +93,7 @@ export class AnnotationShareIconRenderer extends React.Component<Props> {
         } = {
             'feature-disabled': 'Share note',
             'not-shared-yet': 'Share note',
-            'already-shared': 'Unshare note',
+            'already-shared': 'Get Note Link',
             sharing: 'Sharing note...',
             'sharing-success': 'Note shared',
             'sharing-error': 'Error Sharing Note',
