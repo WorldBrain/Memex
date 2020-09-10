@@ -1,11 +1,16 @@
 import React from 'react'
 import { TaskState } from 'ui-logic-core/lib/types'
+import styled from 'styled-components'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { contentSharing } from 'src/util/remote-functions-background'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { LoadingIndicator } from 'src/common-ui/components'
+import {
+    TypographyTextNormal,
+} from 'src/common-ui/components/design-library/typography'
+
 
 interface State {
     // readyToRender: boolean
@@ -113,7 +118,23 @@ export default class SingleNoteShareModal extends React.PureComponent<
                         onClick={this.handleUnshare}
                     />
                 )}
+                <SharedNoteInfo>
+                    <TypographyTextNormal> Shared notes are available via the page link and collections <strong>the page is part of</strong>.</TypographyTextNormal>
+                </SharedNoteInfo>
             </ShareAnnotationMenu>
         )
     }
 }
+
+const SharedNoteInfo = styled.div`
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    font-size: 1
+    margin: 10px 5px 0;
+
+    & > span {
+        text-align: center;
+    }
+`

@@ -14,6 +14,10 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { LoadingIndicator } from 'src/common-ui/components'
 
+import {
+    TypographyTextNormal,
+} from 'src/common-ui/components/design-library/typography'
+
 interface State {
     shareAllState: TaskState
     unshareAllState: TaskState
@@ -147,7 +151,7 @@ export default class AllNotesShareModal extends React.Component<Props, State> {
                 // checkboxCopy="Share all Notes on this page"
                 // checkboxTitleCopy="Share all Notes"
                 // checkboxSubtitleCopy="Add all notes on page to shared collections"
-                linkTitleCopy="Link to Page"
+                linkTitleCopy="Link to Notes"
                 linkSubtitleCopy="A link to all shared notes on this page"
             >
                 <PrimaryAction
@@ -159,10 +163,26 @@ export default class AllNotesShareModal extends React.Component<Props, State> {
                     label={this.state.unshareAllState === 'running' ? <LoadingIndicator /> : 'Un-share all notes'}
                     onClick={this.state.unshareAllState === 'running' ? undefined : this.handleUnshareAll}
                 />
+                <SharedNoteInfo>
+                    <TypographyTextNormal> Shared notes are available via the page link and collections <strong>the page is part of</strong>.</TypographyTextNormal>
+                </SharedNoteInfo>
             </ShareAnnotationMenu>
         )
     }
 }
+
+const SharedNoteInfo = styled.div`
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    font-size: 1
+    margin: 10px 5px 0;
+
+    & > span {
+        text-align: center;
+    }
+`
 
 const Margin = styled.div`
     height: 5px;
