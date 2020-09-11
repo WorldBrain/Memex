@@ -96,10 +96,7 @@ const DefaultFooter = ({
                     >
                         <IconBox
                             onClick={shareIconProps.onClickAction}
-                            disabled={
-                                shareIconProps.isDisabled ||
-                                shareIconProps.isLoading
-                            }
+                            disabled={shareIconProps.isLoading}
                         >
                             <IconStyled
                                 src={shareIconProps.imgSrc}

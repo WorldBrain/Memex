@@ -60,7 +60,6 @@ const setupLogicHelper = async ({
         tags: backgroundModules.tags.remoteFunctions,
         customLists: backgroundModules.customLists.remoteFunctions,
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
-        featuresBeta: backgroundModules.featuresBeta,
         annotations,
         // search: {
         //     ...backgroundModules.search.remoteFunctions.search,

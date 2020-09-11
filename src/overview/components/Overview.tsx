@@ -265,7 +265,6 @@ class Overview extends PureComponent<Props, State> {
                         auth={this.authBG}
                         annotations={this.annotationsBG}
                         customLists={this.customListsBG}
-                        featuresBeta={this.featuresBetaBG}
                         contentSharing={this.contentSharingBG}
                         refSidebar={this.annotationsSidebarRef}
                         annotationsCache={this.annotationsCache}
@@ -280,9 +279,13 @@ class Overview extends PureComponent<Props, State> {
 
                     <Tooltip />
                     <div className={styles.rightCorner}>
-                    <a href="https://worldbrain.io/feedback" target="_blank" className={styles.feedbackButton}>
-                        🐞 Feedback
-                    </a>
+                        <a
+                            href="https://worldbrain.io/feedback"
+                            target="_blank"
+                            className={styles.feedbackButton}
+                        >
+                            🐞 Feedback
+                        </a>
                         {this.state.showPioneer && (
                             <div
                                 onClick={() => {

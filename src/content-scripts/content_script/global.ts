@@ -178,7 +178,6 @@ export async function main() {
                 auth: runInBackground(),
                 customLists: runInBackground(),
                 contentSharing: runInBackground(),
-                featuresBeta: runInBackground(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
             })
             components.sidebar?.resolve()

@@ -282,8 +282,6 @@ export class SidebarContainerLogic extends UILogic<
     constructor(private options: SidebarContainerOptions) {
         super()
 
-        console.log(this.options)
-
         this.inPageEvents =
             options.events ??
             (new EventEmitter() as AnnotationsSidebarInPageEventEmitter)
@@ -399,19 +397,13 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     private async loadBeta() {
-        const { featuresBeta } = this.options
+        const isAllowed = await this.options.auth.isAuthorizedForFeature('beta')
 
         this.emitMutation({
             annotationSharingAccess: {
-                $set: (await featuresBeta.getFeatureState(
-                    'sharing-collections',
-                ))
-                    ? 'sharing-allowed'
-                    : 'feature-disabled',
+                $set: isAllowed ? 'sharing-allowed' : 'feature-disabled',
             },
-            copyPasterAccess: {
-                $set: await featuresBeta.getFeatureState('copy-paster'),
-            },
+            copyPasterAccess: { $set: isAllowed },
         })
     }
 

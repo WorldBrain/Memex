@@ -89,10 +89,7 @@ class AnnotationFooter extends React.Component<Props> {
                                 tooltipText={shareIconProps.tooltipText}
                             >
                                 <IconBox
-                                    disabled={
-                                        shareIconProps.isDisabled ||
-                                        shareIconProps.isLoading
-                                    }
+                                    disabled={shareIconProps.isLoading}
                                     onClick={shareIconProps.onClickAction}
                                 >
                                     <IconStyled src={shareIconProps.imgSrc} />

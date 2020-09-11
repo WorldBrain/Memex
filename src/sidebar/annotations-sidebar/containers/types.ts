@@ -23,7 +23,6 @@ export interface SidebarContainerDependencies {
     showBetaFeatureNotifModal?: () => void
 
     tags: RemoteTagsInterface
-    featuresBeta: FeaturesBetaInterface
     annotations: AnnotationInterface<'caller'>
     customLists: RemoteCollectionsInterface
     contentSharing: ContentSharingInterface
