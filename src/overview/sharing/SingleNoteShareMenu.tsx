@@ -22,7 +22,7 @@ export interface Props {
     postUnshareHook?: () => void
 }
 
-export default class SingleNoteShareModal extends React.PureComponent<
+export default class SingleNoteShareMenu extends React.PureComponent<
     Props,
     State
 > {

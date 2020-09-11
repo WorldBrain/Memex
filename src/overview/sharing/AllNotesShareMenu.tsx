@@ -14,9 +14,7 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { LoadingIndicator } from 'src/common-ui/components'
 
-import {
-    TypographyTextNormal,
-} from 'src/common-ui/components/design-library/typography'
+import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
 
 interface State {
     shareAllState: TaskState
@@ -30,7 +28,7 @@ export interface Props {
     postUnshareAllHook?: () => void
 }
 
-export default class AllNotesShareModal extends React.Component<Props, State> {
+export default class AllNotesShareMenu extends React.Component<Props, State> {
     private contentSharingBG = contentSharing
     private annotationsBG = annotationsBG
     private annotationUrls: string[]
@@ -155,16 +153,40 @@ export default class AllNotesShareModal extends React.Component<Props, State> {
                 linkSubtitleCopy="A link to all shared notes on this page"
             >
                 <PrimaryAction
-                    label={this.state.shareAllState === 'running' ? <LoadingIndicator /> : 'Share all notes'}
-                    onClick={this.state.shareAllState === 'running' ? undefined : this.handleShareAll}
+                    label={
+                        this.state.shareAllState === 'running' ? (
+                            <LoadingIndicator />
+                        ) : (
+                            'Share all notes'
+                        )
+                    }
+                    onClick={
+                        this.state.shareAllState === 'running'
+                            ? undefined
+                            : this.handleShareAll
+                    }
                 />
-                <Margin/>
+                <Margin />
                 <SecondaryAction
-                    label={this.state.unshareAllState === 'running' ? <LoadingIndicator /> : 'Un-share all notes'}
-                    onClick={this.state.unshareAllState === 'running' ? undefined : this.handleUnshareAll}
+                    label={
+                        this.state.unshareAllState === 'running' ? (
+                            <LoadingIndicator />
+                        ) : (
+                            'Un-share all notes'
+                        )
+                    }
+                    onClick={
+                        this.state.unshareAllState === 'running'
+                            ? undefined
+                            : this.handleUnshareAll
+                    }
                 />
                 <SharedNoteInfo>
-                    <TypographyTextNormal> Shared notes are available via the page link and collections <strong>the page is part of</strong>.</TypographyTextNormal>
+                    <TypographyTextNormal>
+                        {' '}
+                        Shared notes are available via the page link and
+                        collections <strong>the page is part of</strong>.
+                    </TypographyTextNormal>
                 </SharedNoteInfo>
             </ShareAnnotationMenu>
         )

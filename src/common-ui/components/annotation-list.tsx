@@ -10,7 +10,7 @@ import {
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import CopyPaster from 'src/copy-paster'
 import { contentSharing, auth } from 'src/util/remote-functions-background'
-import SingleNoteShareModal from 'src/overview/sharing/SingleNoteShareModal'
+import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 
 const styles = require('./annotation-list.css')
 
@@ -234,7 +234,7 @@ class AnnotationList extends Component<Props, State> {
         return (
             <div className={styles.hoverBoxWrapper}>
                 <HoverBox>
-                    <SingleNoteShareModal
+                    <SingleNoteShareMenu
                         annotationUrl={annot.url}
                         postShareHook={() =>
                             this.updateAnnotationShareState(annot.url)({

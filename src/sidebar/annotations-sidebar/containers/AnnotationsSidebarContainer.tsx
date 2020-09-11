@@ -22,8 +22,8 @@ import {
 } from 'src/annotations/components/AnnotationEdit'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareModal'
-import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareModal'
+import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareMenu'
+import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import CopyPaster from 'src/copy-paster'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
