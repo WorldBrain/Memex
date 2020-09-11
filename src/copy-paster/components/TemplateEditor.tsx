@@ -17,6 +17,10 @@ const TextInputBox = styled.div`
     padding: 0px 10px;
 `
 
+const TextArea = styled.textarea`
+    font-family: monospace;
+`
+
 const HeaderText = styled.div`
     font-family: Poppins;
     font-style: normal;
@@ -116,7 +120,7 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                             this.props.onTitleChange(e.target.value)
                         }
                     />
-                    <textarea
+                    <TextArea
                         placeholder="Code"
                         className={styles.textArea}
                         value={template?.code ?? ''}
