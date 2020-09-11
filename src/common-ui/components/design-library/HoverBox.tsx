@@ -9,6 +9,7 @@ export const HoverBox = styled.div`
     width: 300px;
     background-color: #fff;
     border-radius: 3px;
+    z-index: 3;
 `
 
 export const HoverBoxDashboard = styled.div`

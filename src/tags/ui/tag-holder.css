@@ -38,7 +38,7 @@
 }
 
 .placeholder {
-    display: flex;
+    display: inline-flex;
     color: #888;
     font-family: 'Poppins', sans-serif;
     font-weight: 400;

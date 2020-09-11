@@ -7,7 +7,7 @@ export const ROAM_MD_TEMPLATE: Template = {
     isFavourite: false,
     code: `[[{{{PageTitle}}}]]
 {{#Notes}}
-  ^^{{{NoteHighlight}}}^^ ([Link]({{{NoteLink}}})) {{{NoteTags}}}
+  ^^{{{NoteHighlight}}}^^ {{{NoteTags}}}
     {{{NoteText}}}
 {{/Notes}}
 `,
@@ -19,7 +19,8 @@ export const NOTION_MD_TEMPLATE: Template = {
     isFavourite: false,
     code: `[{{{PageTitle}}}]({{{PageLink}}})
 {{#Notes}}
-- [{{{NoteHighlight}}}]({{{NoteLink}}})^^ {{{NoteTags}}}
+- {{{NoteHighlight}}} 
+  {{{NoteTags}}}
   {{{NoteText}}}
 {{/Notes}}
 `,
@@ -33,11 +34,9 @@ export const HTML_TEMPLATE: Template = {
 <ul>
 {{#Notes}}
 <li>
-<a target="_blank" href="{{{NoteLink}}}">
 <p style="font-style: italic">
 "{{{NoteHighlight}}}"
 </p>
-</a>
 <p>
 {{{NoteText}}}
 </p>
