@@ -25,6 +25,7 @@ export default class CopyPasterBackground {
             contentSharing: Pick<
                 ContentSharingBackground,
                 | 'shareAnnotations'
+                | 'shareAnnotationsToLists'
                 | 'sharePage'
                 | 'storage'
                 | 'ensureRemotePageId'
@@ -95,7 +96,11 @@ export function getTemplateDataFetchers({
     storageManager: Storex
     contentSharing: Pick<
         ContentSharingBackground,
-        'shareAnnotations' | 'sharePage' | 'storage' | 'ensureRemotePageId'
+        | 'shareAnnotations'
+        | 'shareAnnotationsToLists'
+        | 'sharePage'
+        | 'storage'
+        | 'ensureRemotePageId'
     >
 }): TemplateDataFetchers {
     const getTagsForUrls = async (urls: string[]) => {
@@ -161,6 +166,10 @@ export function getTemplateDataFetchers({
                 annotationUrls,
                 queueInteraction: 'skip-queue',
             })
+            await contentSharing.shareAnnotationsToLists({
+                annotationUrls,
+                queueInteraction: 'skip-queue',
+            })
             const remoteIds = await contentSharing.storage.getRemoteAnnotationIds(
                 {
                     localIds: annotationUrls,
@@ -182,6 +191,10 @@ export function getTemplateDataFetchers({
                 Object.values(notes).map((note) => note.annotationUrls),
             )
             await contentSharing.shareAnnotations({
+                annotationUrls,
+                queueInteraction: 'skip-queue',
+            })
+            await contentSharing.shareAnnotationsToLists({
                 annotationUrls,
                 queueInteraction: 'skip-queue',
             })
