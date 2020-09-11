@@ -25,14 +25,12 @@ export interface Props extends AuthContextInterface {
     onListItemClick: () => void
     plans?: UserPlan[]
     contentSharing: ContentSharingInterface
-    sharedAccess: boolean
     customLists: CustomListStorage
 }
 
 interface State {
     isMouseInside: boolean
     isDragInside: boolean
-    sharedAccess: boolean
     isShared: boolean
 }
 
@@ -44,14 +42,12 @@ class ListItem extends Component<Props, State> {
         this.state = {
             isMouseInside: false,
             isDragInside: false,
-            sharedAccess: false,
             isShared: false,
         }
     }
 
     async componentDidMount() {
         this.attachEventListeners()
-        this.getSharedAccess()
         this.getSharedState()
     }
 
@@ -103,14 +99,6 @@ class ListItem extends Component<Props, State> {
         this.setState((state) => ({
             isMouseInside: true,
         }))
-    }
-
-    async getSharedAccess() {
-        if (await featuresBeta.getFeatureState('sharing-collections')) {
-            this.setState({
-                sharedAccess: true,
-            })
-        }
     }
 
     private handleMouseLeave = () => {
@@ -204,17 +192,16 @@ class ListItem extends Component<Props, State> {
                                     onClick={this.handleCrossBtnClick}
                                     title={'Delete'}
                                 />
-                                {this.state.sharedAccess &&
-                                    !this.state.isShared && (
-                                        <button
-                                            className={cx(
-                                                styles.shareButton,
-                                                styles.button,
-                                            )}
-                                            onClick={this.handleShareBtnClick}
-                                            title={'Share'}
-                                        />
-                                    )}
+                                {!this.state.isShared && (
+                                    <button
+                                        className={cx(
+                                            styles.shareButton,
+                                            styles.button,
+                                        )}
+                                        onClick={this.handleShareBtnClick}
+                                        title={'Share'}
+                                    />
+                                )}
                             </React.Fragment>
                         )}
                         {this.state.isShared && (
