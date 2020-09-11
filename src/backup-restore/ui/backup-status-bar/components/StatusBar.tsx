@@ -38,11 +38,15 @@ const StatusBar = (props: Props, state: State) => {
         <div className={styles.TopContainer}>
             <div
                 className={styles.container}
-                onMouseEnter={props.onMouseEnter}
                 onMouseLeave={props.onMouseLeave}
             >
                 <div className={styles.headerBox}>
-                    <div className={styles.header}>Sync Status</div>
+                    <div 
+                        className={styles.header}
+                        onClick={props.onMouseEnter}
+                    >
+                        Sync Status
+                    </div>
                     <div className={styles.IconBox}>
                         {(props.backupUIState.state === 'fail' &&
                             props.isAutomaticBackupEnabled) ||

@@ -80,6 +80,7 @@
 
 .backupOverlay {
     position: relative;
+    z-index: 999999999;
 }
 
 .successIcon {

@@ -128,8 +128,7 @@ export default class ShareAnnotationOnboardingModal extends Component<Props> {
                             NEW: Share highlights and notes in collections
                         </TypographyHeadingBigger>
                         <TypographyTextNormal>
-                            Shared notes are visible in each collection the
-                            parent page is part of.
+                            Shared notes are accessible via a link and are all shared collection the page is part of. 
                         </TypographyTextNormal>
                     </InstructionsBox>
                 </InstructionsContainer>
