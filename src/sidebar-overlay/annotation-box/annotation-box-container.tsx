@@ -224,10 +224,6 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         this._setDisplayCrowdfunding(true, 'clickShareButton')
     }
 
-    private _handleReplyIconClick = () => {
-        this._setDisplayCrowdfunding(true, 'clickReplyButton')
-    }
-
     private _handleCancelOperation = () => {
         this.setState({ mode: 'default' })
     }

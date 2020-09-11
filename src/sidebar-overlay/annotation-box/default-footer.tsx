@@ -51,9 +51,11 @@ const DefaultFooter = ({
         </TimeStamp>
         <ButtonContainer>
             {copyIconClickHandler && (
-                <IconBox onClick={copyIconClickHandler}>
-                    <IconStyled src={icons.copy} />
-                </IconBox>
+                <ButtonTooltip position="bottom" tooltipText="Copy">
+                    <IconBox onClick={copyIconClickHandler}>
+                        <IconStyled src={icons.copy} />
+                    </IconBox>
+                </ButtonTooltip>
             )}
             <ButtonTooltip position={'bottom'} tooltipText={'Delete'}>
                 <IconBox

@@ -95,3 +95,10 @@
         opacity: 1;
     }
 }
+
+.hoverBoxWrapper {
+    /* TODO: come up with sane, consistent z-index values. */
+    z-index: 100;
+    position: relative;
+    right: -60%;
+}

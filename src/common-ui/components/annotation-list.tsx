@@ -9,11 +9,7 @@ import {
 } from 'src/content-sharing/ui/types'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import CopyPaster from 'src/copy-paster'
-import {
-    collections,
-    contentSharing,
-    auth,
-} from 'src/util/remote-functions-background'
+import { contentSharing, auth } from 'src/util/remote-functions-background'
 import SingleNoteShareModal from 'src/overview/sharing/SingleNoteShareModal'
 
 const styles = require('./annotation-list.css')
@@ -60,7 +56,6 @@ interface State {
 
 class AnnotationList extends Component<Props, State> {
     private authBG = auth
-    private customListsBG = collections
     private contentShareBG = contentSharing
 
     state: State = {
@@ -215,15 +210,19 @@ class AnnotationList extends Component<Props, State> {
         }
 
         return (
-            <HoverBox>
-                <CopyPaster
-                    annotationUrls={[annot.url]}
-                    normalizedPageUrls={[annot.pageUrl]}
-                    onClickOutside={() =>
-                        this.props.setActiveCopyPasterAnnotationId?.(undefined)
-                    }
-                />
-            </HoverBox>
+            <div className={styles.hoverBoxWrapper}>
+                <HoverBox>
+                    <CopyPaster
+                        annotationUrls={[annot.url]}
+                        normalizedPageUrls={[annot.pageUrl]}
+                        onClickOutside={() =>
+                            this.props.setActiveCopyPasterAnnotationId?.(
+                                undefined,
+                            )
+                        }
+                    />
+                </HoverBox>
+            </div>
         )
     }
 
@@ -233,26 +232,28 @@ class AnnotationList extends Component<Props, State> {
         }
 
         return (
-            <HoverBox>
-                <SingleNoteShareModal
-                    annotationUrl={annot.url}
-                    postShareHook={() =>
-                        this.updateAnnotationShareState(annot.url)({
-                            status: 'shared',
-                            taskState: 'success',
-                        })
-                    }
-                    postUnshareHook={() =>
-                        this.updateAnnotationShareState(annot.url)({
-                            status: 'unshared',
-                            taskState: 'success',
-                        })
-                    }
-                    closeShareMenu={() =>
-                        this.props.setActiveShareMenuNoteId?.(undefined)
-                    }
-                />
-            </HoverBox>
+            <div className={styles.hoverBoxWrapper}>
+                <HoverBox>
+                    <SingleNoteShareModal
+                        annotationUrl={annot.url}
+                        postShareHook={() =>
+                            this.updateAnnotationShareState(annot.url)({
+                                status: 'shared',
+                                taskState: 'success',
+                            })
+                        }
+                        postUnshareHook={() =>
+                            this.updateAnnotationShareState(annot.url)({
+                                status: 'unshared',
+                                taskState: 'success',
+                            })
+                        }
+                        closeShareMenu={() =>
+                            this.props.setActiveShareMenuNoteId?.(undefined)
+                        }
+                    />
+                </HoverBox>
+            </div>
         )
     }
 

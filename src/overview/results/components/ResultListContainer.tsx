@@ -103,14 +103,11 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
     private copyPasterBtnRefs: HTMLButtonElement[] = []
     private tagDivRef: HTMLDivElement
     private listDivRef: HTMLDivElement
-    private copyPasterDivRef: HTMLDivElement
 
     private trackDropdownRef = (el: HTMLSpanElement) =>
         this.dropdownRefs.push(el)
     private setTagDivRef = (el: HTMLDivElement) => (this.tagDivRef = el)
     private setListDivRef = (el: HTMLDivElement) => (this.listDivRef = el)
-    private setCopyPasterDivRef = (el: HTMLDivElement) =>
-        (this.copyPasterDivRef = el)
     private setTagButtonRef = (el: HTMLButtonElement) =>
         this.tagBtnRefs.push(el)
     private setListButtonRef = (el: HTMLButtonElement) =>
@@ -264,12 +261,10 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
 
         return (
             <HoverBox>
-                <div ref={(ref) => this.setCopyPasterDivRef(ref)}>
-                    <CopyPaster
-                        normalizedPageUrls={[doc.url]}
-                        onClickOutside={this.props.resetActiveCopyPasterIndex}
-                    />
-                </div>
+                <CopyPaster
+                    normalizedPageUrls={[doc.url]}
+                    onClickOutside={this.props.resetActiveCopyPasterIndex}
+                />
             </HoverBox>
         )
     }
