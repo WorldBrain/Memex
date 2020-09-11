@@ -18,6 +18,8 @@ import { migrations } from './quick-and-dirty-migrations'
 import { AlarmsConfig } from './alarms'
 import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
+import CopyPasterBackground from 'src/copy-paster/background'
+import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
 import { INSTALL_TIME_KEY, OVERVIEW_URL } from 'src/constants'
 import { SEARCH_INJECTION_KEY } from 'src/search-injection/constants'
 
@@ -30,6 +32,7 @@ import analytics from 'src/analytics'
 
 class BackgroundScript {
     private utils: typeof utils
+    private copyPasterBackground: CopyPasterBackground
     private notifsBackground: NotifsBackground
     private activityLoggerBackground: ActivityLoggerBackground
     private storageChangesMan: StorageChangesManager
@@ -46,6 +49,7 @@ class BackgroundScript {
         storageManager,
         notifsBackground,
         loggerBackground,
+        copyPasterBackground,
         utilFns = utils,
         storageChangesMan,
         urlNormalizer = normalizeUrl,
@@ -58,6 +62,7 @@ class BackgroundScript {
         storageManager: Storex
         notifsBackground: NotifsBackground
         loggerBackground: ActivityLoggerBackground
+        copyPasterBackground: CopyPasterBackground
         urlNormalizer?: URLNormalizer
         utilFns?: typeof utils
         storageChangesMan: StorageChangesManager
@@ -70,6 +75,7 @@ class BackgroundScript {
         this.storageManager = storageManager
         this.notifsBackground = notifsBackground
         this.activityLoggerBackground = loggerBackground
+        this.copyPasterBackground = copyPasterBackground
         this.utils = utilFns
         this.storageChangesMan = storageChangesMan
         this.storageAPI = storageAPI
@@ -111,6 +117,7 @@ class BackgroundScript {
 
         // Store the timestamp of when the extension was installed
         this.storageAPI.local.set({ [INSTALL_TIME_KEY]: now })
+        await insertDefaultTemplates({ copyPaster: this.copyPasterBackground })
     }
 
     private async handleUpdateLogic() {
@@ -127,6 +134,8 @@ class BackgroundScript {
                 },
             })
         }
+
+        await insertDefaultTemplates({ copyPaster: this.copyPasterBackground })
     }
 
     /**

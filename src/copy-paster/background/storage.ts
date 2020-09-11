@@ -67,6 +67,11 @@ export default class CopyPasterStorage extends StorageModule {
         return Date.now()
     }
 
+    async __createTemplateWithId(template: Template) {
+        const { object } = await this.operation('createTemplate', template)
+        return object.id
+    }
+
     async createTemplate({ title, code, isFavourite }: Omit<Template, 'id'>) {
         const { object } = await this.operation('createTemplate', {
             id: this.getId(),

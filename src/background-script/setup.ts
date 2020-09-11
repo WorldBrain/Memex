@@ -162,11 +162,22 @@ export function createBackgroundModules(options: {
     })
 
     const social = new SocialBackground({ storageManager })
-    const bgScript = new BackgroundScript({
+
+    const customLists = new CustomListBackground({
         storageManager,
-        storageChangesMan: options.localStorageChangesManager,
-        notifsBackground: notifications,
-        loggerBackground: activityLogger,
+        queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
+        windows: options.browserAPIs.windows,
+        searchIndex: search.searchIndex,
+        pageStorage: pages.storage,
+        localBrowserStorage: options.browserAPIs.storage.local,
+    })
+
+    const directLinking = new DirectLinkingBackground({
+        browserAPIs: options.browserAPIs,
+        storageManager,
+        socialBg: social,
+        searchIndex: search.searchIndex,
+        pageStorage: pages.storage,
     })
 
     const auth =
@@ -183,6 +194,29 @@ export function createBackgroundModules(options: {
                 (await options.getServerStorage()).storageModules
                     .userManagement,
         })
+
+    const contentSharing = new ContentSharingBackground({
+        storageManager,
+        customLists: customLists.storage,
+        annotationStorage: directLinking.annotationStorage,
+        auth,
+        analytics: options.analyticsManager,
+        getContentSharing: async () =>
+            (await options.getServerStorage()).storageModules.contentSharing,
+    })
+
+    const copyPaster = new CopyPasterBackground({
+        storageManager,
+        contentSharing,
+    })
+
+    const bgScript = new BackgroundScript({
+        storageManager,
+        storageChangesMan: options.localStorageChangesManager,
+        copyPasterBackground: copyPaster,
+        notifsBackground: notifications,
+        loggerBackground: activityLogger,
+    })
 
     const connectivityChecker = new ConnectivityCheckerBackground({
         xhr: new XMLHttpRequest(),
@@ -206,31 +240,6 @@ export function createBackgroundModules(options: {
           }).processor
         : undefined
 
-    const customLists = new CustomListBackground({
-        storageManager,
-        queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
-        windows: options.browserAPIs.windows,
-        searchIndex: search.searchIndex,
-        pageStorage: pages.storage,
-        localBrowserStorage: options.browserAPIs.storage.local,
-    })
-
-    const directLinking = new DirectLinkingBackground({
-        browserAPIs: options.browserAPIs,
-        storageManager,
-        socialBg: social,
-        searchIndex: search.searchIndex,
-        pageStorage: pages.storage,
-    })
-    const contentSharing = new ContentSharingBackground({
-        storageManager,
-        customLists: customLists.storage,
-        annotationStorage: directLinking.annotationStorage,
-        auth,
-        analytics: options.analyticsManager,
-        getContentSharing: async () =>
-            (await options.getServerStorage()).storageModules.contentSharing,
-    })
     return {
         auth,
         social,
