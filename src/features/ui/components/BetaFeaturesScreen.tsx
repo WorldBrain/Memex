@@ -66,7 +66,6 @@ class BetaFeaturesScreen extends React.Component<
     refreshFeatures = async () => {
         const featureOptions = await featuresBeta.getFeatures()
         const featureEnabled = {
-            'copy-paster': true,
             'sharing-collections': true,
             reader: false,
             'pdf-annotations': false,
@@ -75,8 +74,6 @@ class BetaFeaturesScreen extends React.Component<
             (f) => (featureEnabled[f.id] = f.enabled),
         )
         this.setState({ featureOptions, featureEnabled })
-        this.props.currentUser?.authorizedFeatures?.includes('beta') &&
-            this.props.toggleBetaFeatures(featureEnabled['copy-paster'])
     }
 
     toggleFeature = (feature) => async () => {
@@ -120,10 +117,9 @@ class BetaFeaturesScreen extends React.Component<
                                 'beta',
                             ) ? (
                                 <TypographyTextNormal>
-                                    Thanks so much for your support. Without
-                                    you this would not be possible! <br />
-                                    If you run into issues with Beta
-                                    features,{' '}
+                                    Thanks so much for your support. Without you
+                                    this would not be possible! <br />
+                                    If you run into issues with Beta features,{' '}
                                     <a href="http://worldbrain.io/feedback/betafeatures">
                                         let us know
                                     </a>

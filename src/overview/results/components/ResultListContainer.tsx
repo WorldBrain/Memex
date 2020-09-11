@@ -24,11 +24,7 @@ import niceTime from 'src/util/nice-time'
 import { Annotation } from 'src/annotations/types'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import TagPicker from 'src/tags/ui/TagPicker'
-import {
-    tags,
-    collections,
-    featuresBeta,
-} from 'src/util/remote-functions-background'
+import { auth, tags, collections } from 'src/util/remote-functions-background'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import CopyPaster from 'src/copy-paster'
 
@@ -127,10 +123,8 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
 
         document.addEventListener('click', this.handleOutsideClick, false)
 
-        const copyPasterEnabled = await featuresBeta.getFeatureState(
-            'copy-paster',
-        )
-        this.props.setBetaFeaturesEnabled(copyPasterEnabled)
+        const isBetaAllowed = await auth.isAuthorizedForFeature('beta')
+        this.props.setBetaFeaturesEnabled(isBetaAllowed)
     }
 
     componentWillUnmount() {
@@ -337,13 +331,10 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                 activeCopyPasterAnnotationId={
                     this.state.activeCopyPasterAnnotationId
                 }
-                setActiveCopyPasterAnnotationId={
-                    this.props.isBetaEnabled
-                        ? (id) =>
-                              this.setState(() => ({
-                                  activeCopyPasterAnnotationId: id,
-                              }))
-                        : undefined
+                setActiveCopyPasterAnnotationId={(id) =>
+                    this.setState(() => ({
+                        activeCopyPasterAnnotationId: id,
+                    }))
                 }
                 onCommentBtnClick={this.props.handleCommentBtnClick(
                     doc,
@@ -366,7 +357,6 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                 goToAnnotation={this.props.goToAnnotation}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
-                isBetaEnabled={this.props.isBetaEnabled}
             />
         )
     }

@@ -38,7 +38,6 @@ export interface StateProps {
     isInvalidSearch: boolean
     showInitSearchMsg: boolean
     totalResultCount: number
-    isBetaEnabled: boolean
 }
 
 export interface DispatchProps {
@@ -211,7 +210,6 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     totalResultCount: selectors.totalResultCount(state),
     showInitSearchMsg: selectors.showInitSearchMsg(state),
     showOnboardingMessage: selectors.showOnboardingMessage(state),
-    isBetaEnabled: selectors.isBetaEnabled(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (

@@ -31,7 +31,7 @@ export interface AnnotationFooterEventProps {
     onUnshareClick: React.MouseEventHandler
     toggleBookmark: () => void
     onGoToAnnotation?: () => void
-    onCopyPasterBtnClick?: () => void
+    onCopyPasterBtnClick: () => void
 }
 
 class AnnotationFooter extends React.Component<Props> {
@@ -51,7 +51,6 @@ class AnnotationFooter extends React.Component<Props> {
                     >
                         <IconBox onClick={this.props.toggleBookmark}>
                             <IconStyled
-                                title="Toggle star"
                                 src={
                                     isBookmarked
                                         ? icons.heartFull
@@ -65,10 +64,7 @@ class AnnotationFooter extends React.Component<Props> {
                         tooltipText={'Edit Note'}
                     >
                         <IconBox onClick={this.props.onEditIconClick}>
-                            <IconStyled
-                                title="Edit note"
-                                src={icons.commentEdit}
-                            />
+                            <IconStyled src={icons.commentEdit} />
                         </IconBox>
                     </ButtonTooltip>
                     <ButtonTooltip
@@ -76,7 +72,7 @@ class AnnotationFooter extends React.Component<Props> {
                         tooltipText={'Delete Note'}
                     >
                         <IconBox onClick={this.props.onDeleteIconClick}>
-                            <IconStyled title="Delete note" src={icons.trash} />
+                            <IconStyled src={icons.trash} />
                         </IconBox>
                     </ButtonTooltip>
                     <AnnotationShareIconRenderer
@@ -104,24 +100,16 @@ class AnnotationFooter extends React.Component<Props> {
                             tooltipText={'Open in Page'}
                         >
                             <IconBox onClick={this.props.onGoToAnnotation}>
-                                <IconStyled
-                                    title="Go to annotation"
-                                    src={icons.goTo}
-                                />
+                                <IconStyled src={icons.goTo} />
                             </IconBox>
                         </ButtonTooltip>
                     )}
 
-                    {this.props.onCopyPasterBtnClick && (
-                        <ButtonTooltip
-                            position="bottom"
-                            tooltipText="Copy Note"
-                        >
-                            <IconBox onClick={this.props.onCopyPasterBtnClick}>
-                                <IconStyled src={icons.copy} />
-                            </IconBox>
-                        </ButtonTooltip>
-                    )}
+                    <ButtonTooltip position="bottom" tooltipText="Copy Note">
+                        <IconBox onClick={this.props.onCopyPasterBtnClick}>
+                            <IconStyled src={icons.copy} />
+                        </IconBox>
+                    </ButtonTooltip>
                 </DefaultFooterBtnContainerStyled>
             </DefaultInnerFooterContainerStyled>
         )

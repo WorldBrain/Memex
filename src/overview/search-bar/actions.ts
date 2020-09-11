@@ -169,10 +169,7 @@ export const init = () => (dispatch) => {
     dispatch(search({ overwrite: true, fromOverview: false }))
 
     const getFeatures = async () => {
-        if (
-            (await auth.isAuthorizedForFeature('beta')) &&
-            (await featuresBeta.getFeatureState('copy-paster'))
-        ) {
+        if (await auth.isAuthorizedForFeature('beta')) {
             dispatch(resultsActs.setBetaFeatures(true))
         }
     }

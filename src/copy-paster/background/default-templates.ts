@@ -5,8 +5,7 @@ export const ROAM_MD_TEMPLATE: Template = {
     id: 1,
     title: 'Roam Markdown',
     isFavourite: false,
-    code: `
-[[{{{PageTitle}}}]]
+    code: `[[{{{PageTitle}}}]]
 {{#Notes}}
   ^^{{{NoteHighlight}}}^^ ([Link]({{{NoteLink}}})) {{{NoteTags}}}
     {{{NoteText}}}
@@ -18,8 +17,7 @@ export const NOTION_MD_TEMPLATE: Template = {
     id: 2,
     title: 'Notion Markdown',
     isFavourite: false,
-    code: `
-[{{{PageTitle}}}]({{{PageLink}}})
+    code: `[{{{PageTitle}}}]({{{PageLink}}})
 {{#Notes}}
 - [{{{NoteHighlight}}}]({{{NoteLink}}})^^ {{{NoteTags}}}
   {{{NoteText}}}
@@ -31,8 +29,7 @@ export const HTML_TEMPLATE: Template = {
     id: 3,
     title: 'HTML',
     isFavourite: false,
-    code: `
-<a target="_blank"  href="{{{PageLink}}}">{{{PageTitle}}}</a>
+    code: `<a target="_blank"  href="{{{PageLink}}}">{{{PageTitle}}}</a>
 <ul>
 {{#Notes}}
 <li>

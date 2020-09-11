@@ -98,6 +98,7 @@ async function createDependencies() {
             onEditIconClick: action('clickEditIcon'),
             toggleBookmark: action('toggleBookmark'),
             onGoToAnnotation: action('goToAnnotation'),
+            onCopyPasterBtnClick: action('clickCopyPaster'),
         }),
         bindAnnotationEditProps: (a) => ({
             comment: '',

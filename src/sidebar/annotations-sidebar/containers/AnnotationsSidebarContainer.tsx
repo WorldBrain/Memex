@@ -129,12 +129,10 @@ export class AnnotationsSidebarContainer<
                               ...DEF_CONTEXT,
                           })
                     : undefined,
-            onCopyPasterBtnClick: this.state.copyPasterAccess
-                ? () =>
-                      this.processEvent('setCopyPasterAnnotationId', {
-                          id: annotation.url,
-                      })
-                : undefined,
+            onCopyPasterBtnClick: () =>
+                this.processEvent('setCopyPasterAnnotationId', {
+                    id: annotation.url,
+                }),
         }
     }
 
@@ -384,10 +382,7 @@ export class AnnotationsSidebarContainer<
                             tooltipText="Copy All Notes"
                             position="bottom"
                         >
-                            <ActionBtn
-                                onClick={this.handleCopyAllNotesClick}
-                                disabled={!this.state.copyPasterAccess}
-                            >
+                            <ActionBtn onClick={this.handleCopyAllNotesClick}>
                                 <ActionIcon src={icons.copy} />
                             </ActionBtn>
                         </ButtonTooltip>
@@ -395,13 +390,7 @@ export class AnnotationsSidebarContainer<
                             tooltipText="Share All Notes"
                             position="bottom"
                         >
-                            <ActionBtn
-                                onClick={this.handleShareAllNotesClick}
-                                disabled={
-                                    this.state.annotationSharingAccess ===
-                                    'feature-disabled'
-                                }
-                            >
+                            <ActionBtn onClick={this.handleShareAllNotesClick}>
                                 <ActionIcon src={icons.shareEmpty} />
                             </ActionBtn>
                         </ButtonTooltip>

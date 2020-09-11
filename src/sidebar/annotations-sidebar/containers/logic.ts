@@ -41,7 +41,6 @@ export interface SidebarContainerState {
         [annotationUrl: string]: AnnotationSharingInfo
     }
 
-    copyPasterAccess: boolean
     showAllNotesCopyPaster: boolean
     activeCopyPasterAnnotationId: string | undefined
 
@@ -306,7 +305,6 @@ export class SidebarContainerLogic extends UILogic<
             annotationSharingInfo: {},
             annotationSharingAccess: 'feature-disabled',
 
-            copyPasterAccess: false,
             showAllNotesCopyPaster: false,
             activeCopyPasterAnnotationId: undefined,
 
@@ -403,7 +401,6 @@ export class SidebarContainerLogic extends UILogic<
             annotationSharingAccess: {
                 $set: isAllowed ? 'sharing-allowed' : 'feature-disabled',
             },
-            copyPasterAccess: { $set: isAllowed },
         })
     }
 
@@ -513,8 +510,14 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     setAllNotesShareMenuShown: EventHandler<'setAllNotesShareMenuShown'> = ({
+        previousState,
         event,
     }) => {
+        if (previousState.annotationSharingAccess === 'feature-disabled') {
+            this.options.showBetaFeatureNotifModal?.()
+            return
+        }
+
         this.emitMutation({
             showAllNotesShareMenu: { $set: event.shown },
         })

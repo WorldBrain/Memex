@@ -343,11 +343,7 @@ class Overview extends PureComponent<Props, State> {
 const mapStateToProps = (state) => ({})
 
 const mapDispatchToProps = (dispatch) => ({
-    init: () => {
-        featuresBeta.getFeatureState('copy-paster')
-        featuresBeta.getFeatureState('sharing-collections')
-        return dispatch(searchBarActs.init())
-    },
+    init: () => dispatch(searchBarActs.init()),
     setShowOnboardingMessage: () =>
         dispatch(resultActs.setShowOnboardingMessage(true)),
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),

@@ -64,7 +64,6 @@ export interface Props extends Partial<SocialPage> {
     setCopyPasterButtonRef: (el: HTMLElement) => void
     setActiveShareMenuNoteId?: (id: string) => void
     setActiveCopyPasterAnnotationId?: (id: string) => void
-    isBetaEnabled: boolean
 }
 
 class ResultItem extends PureComponent<Props> {

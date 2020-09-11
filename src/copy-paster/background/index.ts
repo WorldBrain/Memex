@@ -86,72 +86,6 @@ export default class CopyPasterBackground {
         })
         return joinTemplateDocs(templateDocs, template)
     }
-
-    async renderSinglePageTemplate(params: {
-        templateId: number
-        normalizedPageUrl: string
-    }) {
-        const template = await this.storage.findTemplate({
-            id: params.templateId,
-        })
-        const templateDocs = await generateTemplateDocs({
-            templateAnalysis: analyzeTemplate(template),
-            normalizedPageUrls: [params.normalizedPageUrl],
-            annotationUrls: [],
-            dataFetchers: getTemplateDataFetchers(this.options),
-        })
-        return joinTemplateDocs(templateDocs, template)
-    }
-
-    async renderMultiplePagesTemplate(params: {
-        templateId: number
-        normalizedPageUrls: string[]
-    }) {
-        const template = await this.storage.findTemplate({
-            id: params.templateId,
-        })
-        const templateDocs = await generateTemplateDocs({
-            templateAnalysis: analyzeTemplate(template),
-            normalizedPageUrls: params.normalizedPageUrls,
-            annotationUrls: [],
-            dataFetchers: getTemplateDataFetchers(this.options),
-        })
-        return joinTemplateDocs(templateDocs, template)
-    }
-
-    async renderSingleAnnotationTemplate(params: {
-        templateId: number
-        normalizedPageUrl: string
-        annotationUrl: string
-    }) {
-        const template = await this.storage.findTemplate({
-            id: params.templateId,
-        })
-        const templateDocs = await generateTemplateDocs({
-            templateAnalysis: analyzeTemplate(template),
-            normalizedPageUrls: [params.normalizedPageUrl],
-            annotationUrls: [params.annotationUrl],
-            dataFetchers: getTemplateDataFetchers(this.options),
-        })
-        return joinTemplateDocs(templateDocs, template)
-    }
-
-    async renderMultipleAnnotationsTemplate(params: {
-        templateId: number
-        normalizedPageUrl: string
-        annotationUrls: string[]
-    }) {
-        const template = await this.storage.findTemplate({
-            id: params.templateId,
-        })
-        const templateDocs = await generateTemplateDocs({
-            templateAnalysis: analyzeTemplate(template),
-            normalizedPageUrls: [params.normalizedPageUrl],
-            annotationUrls: params.annotationUrls,
-            dataFetchers: getTemplateDataFetchers(this.options),
-        })
-        return joinTemplateDocs(templateDocs, template)
-    }
 }
 
 export function getTemplateDataFetchers({
@@ -174,48 +108,6 @@ export function getTemplateDataFetchers({
             tagsForUrls[tag.url] = [...(tagsForUrls[tag.url] ?? []), tag.name]
         }
         return tagsForUrls
-    }
-
-    const getNoteLinks = async (annotationUrls: string[]) => {
-        await contentSharing.shareAnnotations({
-            annotationUrls,
-            queueInteraction: 'skip-queue',
-        })
-        const remoteIds = await contentSharing.storage.getRemoteAnnotationIds({
-            localIds: annotationUrls,
-        })
-        const noteLinks: { [annotationUrl: string]: string } = {}
-        for (const [annotationUrl, remoteId] of Object.entries(remoteIds)) {
-            noteLinks[annotationUrl] = getNoteShareUrl({
-                remoteAnnotationId:
-                    typeof remoteId === 'string'
-                        ? remoteId
-                        : remoteId.toString(),
-            })
-        }
-        return noteLinks
-    }
-    const getPageLinks = async (notes: {
-        [normalizedPageUrl: string]: { annotationUrls: string[] }
-    }) => {
-        const annotationUrls = flatten(
-            Object.values(notes).map((note) => note.annotationUrls),
-        )
-        await contentSharing.shareAnnotations({
-            annotationUrls,
-            queueInteraction: 'skip-queue',
-        })
-        const pairs = await Promise.all(
-            Object.keys(notes).map(async (normalizedPageUrl) => [
-                normalizedPageUrl,
-                getPageShareUrl({
-                    remotePageInfoId: await contentSharing.ensureRemotePageId(
-                        normalizedPageUrl,
-                    ),
-                }),
-            ]),
-        )
-        return fromPairs(pairs)
     }
 
     return {
@@ -264,9 +156,48 @@ export function getTemplateDataFetchers({
                 {},
             )
         },
+        getNoteLinks: async (annotationUrls) => {
+            await contentSharing.shareAnnotations({
+                annotationUrls,
+                queueInteraction: 'skip-queue',
+            })
+            const remoteIds = await contentSharing.storage.getRemoteAnnotationIds(
+                {
+                    localIds: annotationUrls,
+                },
+            )
+            const noteLinks: { [annotationUrl: string]: string } = {}
+            for (const [annotationUrl, remoteId] of Object.entries(remoteIds)) {
+                noteLinks[annotationUrl] = getNoteShareUrl({
+                    remoteAnnotationId:
+                        typeof remoteId === 'string'
+                            ? remoteId
+                            : remoteId.toString(),
+                })
+            }
+            return noteLinks
+        },
+        getPageLinks: async (notes) => {
+            const annotationUrls = flatten(
+                Object.values(notes).map((note) => note.annotationUrls),
+            )
+            await contentSharing.shareAnnotations({
+                annotationUrls,
+                queueInteraction: 'skip-queue',
+            })
+            const pairs = await Promise.all(
+                Object.keys(notes).map(async (normalizedPageUrl) => [
+                    normalizedPageUrl,
+                    getPageShareUrl({
+                        remotePageInfoId: await contentSharing.ensureRemotePageId(
+                            normalizedPageUrl,
+                        ),
+                    }),
+                ]),
+            )
+            return fromPairs(pairs)
+        },
         getTagsForPages: getTagsForUrls,
         getTagsForNotes: getTagsForUrls,
-        getNoteLinks,
-        getPageLinks,
     }
 }

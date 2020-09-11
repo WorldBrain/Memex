@@ -1,6 +1,5 @@
 export type UserBetaFeatureId =
     | 'reader'
-    | 'copy-paster'
     | 'pdf-annotations'
     | 'sharing-collections'
 
@@ -21,15 +20,6 @@ const allFeatures: UserBetaFeature[] = [
         link: 'https://worldbrain.io/projects/reader',
         enabled: false,
         available: false,
-    },
-    {
-        id: 'copy-paster',
-        name: 'Copy/Paste templates',
-        description:
-            'Create custom templates to copy pages and annotations into your own workflow',
-        link: 'https://worldbrain.io/projects/copy-paster',
-        enabled: true,
-        available: true,
     },
     {
         id: 'sharing-collections',
