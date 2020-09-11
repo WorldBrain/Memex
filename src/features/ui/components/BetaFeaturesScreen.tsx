@@ -132,10 +132,12 @@ class BetaFeaturesScreen extends React.Component<
                                         us by
                                         <TypographyLink
                                             onClick={
-                                                this.props.showSubscriptionModal
+                                                this.props.currentUser?.subscriptionStatus
+                                                ? this.openPortal
+                                                : this.props.showSubscriptionModal
                                             }
                                         >
-                                            upgrading to the Pioneer Plan
+                                            {this.props.currentUser?.subscriptionStatus ? ('adding the Pioneer Addon to your existing subscription'):('upgrading to the Pioneer Plan')}
                                         </TypographyLink>
                                         or
                                         <TypographyLink

@@ -290,7 +290,8 @@ const IconBox = styled.button<{ disabled?: boolean }>`
     outline: none;
     align-items: center;
     justify-content: center;
-    height: fill-available;
+    height: 24px;
+    width: 24px;
 
     ${(props) =>
         !props.disabled
