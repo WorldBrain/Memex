@@ -75,8 +75,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                     🚀 Pioneer Edition
                                 </div>
                                 <div className={styles.pioneerSubtitle}>
-                                    Thank you for your support. You make this
-                                    possible!
+                                    You have beta features enabled.
                                 </div>
                             </div>
                         )}

@@ -118,13 +118,7 @@ class BetaFeaturesScreen extends React.Component<
                                 'beta',
                             ) ? (
                                 <TypographyTextNormal>
-                                    Thanks so much for your support. Without you
-                                    this would not be possible! <br />
-                                    If you run into issues with Beta features,{' '}
-                                    <a href="http://worldbrain.io/feedback/betafeatures">
-                                        let us know
-                                    </a>
-                                    .
+                                    You're signed up for using the beta features.<br/>
                                 </TypographyTextNormal>
                             ) : (
                                 <div>
@@ -144,11 +138,15 @@ class BetaFeaturesScreen extends React.Component<
                             )}
                         </div>
                         <div className={settingsStyle.buttonBox}>
-                            {this.renderUpgradeBtn()}
+                            {!this.props.currentUser?.authorizedFeatures?.includes(
+                                'beta',
+                            ) && (
+                                this.renderUpgradeBtn()
+                            )}
                             <SecondaryAction
                                 onClick={() =>
                                     window.open(
-                                        'https://worldbrain.io/feedback/betafeatures',
+                                        'https://worldbrain.io/feedback',
                                     )
                                 }
                                 label={'Send Feedback'}
@@ -190,6 +188,7 @@ class BetaFeaturesScreen extends React.Component<
                                                     settingsStyle.buttonArea
                                                 }
                                             >
+                                            {feature.link &&
                                                 <div
                                                     className={
                                                         settingsStyle.readMoreButton
@@ -202,6 +201,7 @@ class BetaFeaturesScreen extends React.Component<
                                                 >
                                                     Read More
                                                 </div>
+                                                }
                                                 {this.props.currentUser?.authorizedFeatures?.includes(
                                                     'beta',
                                                 ) ? (
@@ -264,6 +264,7 @@ class BetaFeaturesScreen extends React.Component<
                                                         settingsStyle.buttonArea
                                                     }
                                                 >
+                                                {feature.link &&
                                                     <div
                                                         className={
                                                             settingsStyle.readMoreButton
@@ -276,6 +277,7 @@ class BetaFeaturesScreen extends React.Component<
                                                     >
                                                         Read More
                                                     </div>
+                                                }
                                                 </div>
                                             </div>
                                         </section>

@@ -16,7 +16,7 @@ const allFeatures: UserBetaFeature[] = [
         name: 'PDF Annotations',
         description:
             'Annotate PDFs via the Memex extension (no phone support yet)',
-        link: 'https://worldbrain.io/projects/pdfannotations',
+        link: undefined,
         enabled: false,
         available: false,
     },
@@ -33,7 +33,7 @@ const allFeatures: UserBetaFeature[] = [
         id: 'sharing-collections',
         name: 'Sharing Collections & Annotations',
         description: 'Easily share timeless repositories of quality content, feedback on articles, and create references to important text passages.',
-        link: 'https://worldbrain.io/projects/shared-collections',
+        link: 'https://worldbrain.io/tutorials/share-research',
         enabled: true,
         available: true,
     },

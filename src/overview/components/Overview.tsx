@@ -286,21 +286,6 @@ class Overview extends PureComponent<Props, State> {
                         >
                             🐞 Feedback
                         </a>
-                        {this.state.showPioneer && (
-                            <div
-                                onClick={() => {
-                                    window.open('#/features')
-                                }}
-                                className={styles.pioneerBadge}
-                            >
-                                <ButtonTooltip
-                                    tooltipText="Thank you for supporting this journey 🙏"
-                                    position="top"
-                                >
-                                    🚀 Pioneer Edition
-                                </ButtonTooltip>
-                            </div>
-                        )}
                         {this.state.showUpgrade && (
                             <div
                                 onClick={this.props.showSubscriptionModal}
