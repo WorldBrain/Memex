@@ -51,12 +51,11 @@ class Tooltip extends React.Component {
                 >
                     Show tooltip on every page
                 </Checkbox>
-                <Checkbox
-                    id="position-memex-link"
-                    isChecked={this.state.tooltip}
-                    isDisabled={!this.state.tooltip}
-                    handleChange={() => null}
-                >
+                {/*
+
+                //needs to be fixed. setting removed until then
+
+                <div className={styles.extraSettings}>
                     Position tooltip below
                     <select
                         className={styles.dropdown}
@@ -67,7 +66,8 @@ class Tooltip extends React.Component {
                         <option value="mouse">mouse pointer</option>
                         <option value="text">selected text</option>
                     </select>
-                </Checkbox>
+                </div>
+                */}
             </div>
         )
     }
