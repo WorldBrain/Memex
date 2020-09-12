@@ -30,6 +30,7 @@ import { acts as resultsActs } from 'src/overview/results'
 interface Props {
     showSubscriptionModal: () => void
     toggleBetaFeatures: (val: boolean) => void
+    showBetaFeatureNotifModal: () => void
 }
 
 interface State {
@@ -67,7 +68,6 @@ class BetaFeaturesScreen extends React.Component<
         const featureOptions = await featuresBeta.getFeatures()
         const featureEnabled = {
             'sharing-collections': true,
-            reader: false,
             'pdf-annotations': false,
         }
         Object.values(featureOptions).forEach(
@@ -93,11 +93,12 @@ class BetaFeaturesScreen extends React.Component<
 
         return (
             <PrimaryAction
-                label="Upgrade"
-                onClick={
-                    this.props.currentUser?.subscriptionStatus
-                        ? this.openPortal
-                        : this.props.showSubscriptionModal
+                label="Request Access"
+                onClick={() => {
+                        window.open(
+                            'https://worldbrain.io/beta',
+                        )
+                    }
                 }
             />
         )
@@ -128,26 +129,15 @@ class BetaFeaturesScreen extends React.Component<
                             ) : (
                                 <div>
                                     <TypographyTextNormal>
-                                        To access beta features you can support
-                                        us by
-                                        <TypographyLink
-                                            onClick={
-                                                this.props.currentUser?.subscriptionStatus
-                                                ? this.openPortal
-                                                : this.props.showSubscriptionModal
-                                            }
-                                        >
-                                            {this.props.currentUser?.subscriptionStatus ? ('adding the Pioneer Addon to your existing subscription'):('upgrading to the Pioneer Plan')}
-                                        </TypographyLink>
-                                        or
+                                        Access beta features by
                                         <TypographyLink
                                             onClick={() => {
                                                 window.open(
-                                                    'https://worldbrain.io/request-early-access',
+                                                    'https://worldbrain.io/beta',
                                                 )
                                             }}
                                         >
-                                            request free access via a wait list.
+                                            requesting free access via a wait list.
                                         </TypographyLink>
                                     </TypographyTextNormal>
                                 </div>
@@ -231,7 +221,7 @@ class BetaFeaturesScreen extends React.Component<
                                                         isChecked={false}
                                                         onChange={
                                                             this.props
-                                                                .showSubscriptionModal
+                                                                .showBetaFeatureNotifModal
                                                         }
                                                     />
                                                 )}
@@ -302,4 +292,6 @@ class BetaFeaturesScreen extends React.Component<
 export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
     toggleBetaFeatures: (val) => dispatch(resultsActs.setBetaFeatures(val)),
+    showBetaFeatureNotifModal: () =>
+        dispatch(show({ modalId: 'BetaFeatureNotifModal' })),
 }))(withCurrentUser(BetaFeaturesScreen))

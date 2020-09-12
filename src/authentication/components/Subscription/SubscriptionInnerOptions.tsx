@@ -151,6 +151,7 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     ) : (
                         <PricingGridPlanTitle> Thinker </PricingGridPlanTitle>
                     )}
+                    {/*<ColPioneer>
                     {this.props.currentUser?.authorizedFeatures?.includes(
                         'beta',
                     ) ? (
@@ -163,7 +164,7 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     ) : (
                         <PricingGridPlanTitle> Pioneer </PricingGridPlanTitle>
                     )}
-
+                    */}
                     <PricingGridFeatureDescription>
                         Search, Organise and Annotate
                     </PricingGridFeatureDescription>
@@ -177,12 +178,13 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                             active={this.state.plan === 'pro'}
                         />{' '}
                     </ColThinker>
-                    <ColPioneer>
+                    {/*<ColPioneer>
                         {' '}
                         <PricingGridCheck
                             active={this.state.plan === 'beta'}
                         />{' '}
                     </ColPioneer>
+                    */}
                     <Line />
 
                     <PricingGridFeatureDescription>
@@ -198,12 +200,13 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                             active={this.state.plan === 'pro'}
                         />{' '}
                     </ColThinker>
-                    <ColPioneer>
+                    {/*<ColPioneer>
                         {' '}
                         <PricingGridCheck
                             active={this.state.plan === 'beta'}
                         />{' '}
                     </ColPioneer>
+                    */}
                     <Line />
 
                     <PricingGridFeatureDescription>
@@ -215,12 +218,13 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                             active={this.state.plan === 'pro'}
                         />{' '}
                     </ColThinker>
-                    <ColPioneer>
+                    {/*<ColPioneer>
                         {' '}
                         <PricingGridCheck
                             active={this.state.plan === 'beta'}
                         />{' '}
                     </ColPioneer>
+                    */}
                     <Line />
 
                     <PricingGridFeatureDescription>
@@ -232,7 +236,7 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                             active={this.state.plan === 'pro'}
                         />{' '}
                     </ColThinker>
-                    <ColPioneer>
+                    {/*<ColPioneer>
                         {' '}
                         <PricingGridCheck
                             active={this.state.plan === 'beta'}
@@ -244,15 +248,16 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                         Early access to beta features
                     </PricingGridFeatureDescription>
 
-                    <ColPioneer>
+                    {/*<ColPioneer>
                         {' '}
                         <PricingGridCheck
                             active={this.state.plan === 'beta'}
                         />{' '}
                     </ColPioneer>
+                    */}
                     <Line />
 
-                    <PricingGridFeatureDescription
+                    {/*<PricingGridFeatureDescription
                         onClick={() =>
                             window.open('https://worldbrain.io/vision')
                         }
@@ -260,12 +265,13 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                         Support the development of an ethical business.{' '}
                         <LinkSpan>Learn more</LinkSpan>
                     </PricingGridFeatureDescription>
-                    <ColPioneer>
+                    {/*<ColPioneer>
                         {' '}
                         <PricingGridCheck
                             active={this.state.plan === 'beta'}
                         />{' '}
                     </ColPioneer>
+                    */}
 
                     <ColExplorer>
                         <PriceText> Free</PriceText>
@@ -279,7 +285,7 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                         </PriceBox>
                     </ColThinker>
 
-                    <ColPioneer>
+                    {/*<ColPioneer>
                         <PriceBox>
                             <PriceText>
                                 {this.state.term === 'monthly' ? '3' : '30'} +{' '}
@@ -311,6 +317,7 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                             <PriceText>€</PriceText>
                         </PriceBox>
                     </ColPioneer>
+                    */}
 
                     <ColThinker>
                         {this.props.loadingMonthly ||
@@ -348,7 +355,7 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                             </div>
                         )}
                     </ColThinker>
-                    <ColPioneer>
+                    {/*<ColPioneer>
                         {this.props.loadingMonthly ||
                         this.props.loadingYearly ||
                         this.props.loadingPortal ? (
@@ -388,6 +395,7 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                             </div>
                         )}
                     </ColPioneer>
+                */}
                 </PricingGrid>
             </SubscriptionOptionsContainer>
         )

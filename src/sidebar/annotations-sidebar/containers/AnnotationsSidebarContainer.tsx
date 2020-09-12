@@ -470,13 +470,13 @@ const ShareMenuWrapper = styled.div`
 
 const ShareMenuWrapperTopBar = styled.div`
     position: fixed;
-    right: 375px;
+    right: 345px;
     z-index: 1;
 `
 
 const CopyPasterWrapperTopBar = styled.div`
     position: fixed;
-    right: 405px;
+    right: 375px;
     z-index: 1;
 `
 

@@ -416,7 +416,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                             <PrimaryAction
                                 onClick={() =>
                                     window.open(
-                                        `https://worldbrain.io/request-early-access`,
+                                        `https://worldbrain.io/beta`,
                                     )
                                 }
                                 label={'Get early access'}

@@ -137,7 +137,7 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
                             <PrimaryAction
                                 label="Request Free Access"
                                 onClick={()=> window.open(
-                                                  'https://worldbrain.io/request-early-access',
+                                                  'https://worldbrain.io/beta',
                                           )}
                             />
                             <SecondaryAction

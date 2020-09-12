@@ -314,14 +314,14 @@ const PlanName = styled.div`
 
 const PricingGrid = styled.div`
     display: grid;
-    grid-template-columns: 50% 16% 16% 16%;
+    grid-template-columns: 50% 25% 25%;
     //grid-gap: 10px;
     background-color: #fff;
     margin-top: 20px;
     width: 100%;
 
     @media (max-width: 1300px) {
-        grid-template-columns: 40% 20% 20% 20%;
+        grid-template-columns: 50% 25% 25%;
     }
 `
 
