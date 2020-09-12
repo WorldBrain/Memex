@@ -141,7 +141,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
     update = async (annotation: Annotation) => {
         annotation.lastEdited = new Date()
-        const stateBeforeModifications = this._annotations
+        const stateBeforeModifications = [...this._annotations]
 
         const resultIndex = stateBeforeModifications.findIndex(
             (existingAnnotation) => existingAnnotation.url === annotation.url,
