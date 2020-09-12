@@ -21,7 +21,7 @@ export const NOTION_MD_TEMPLATE: Template = {
     id: 2,
     title: 'Notion Markdown',
     isFavourite: false,
-    code: `[{{{PageTitle}}}]({{{PageLink}}})
+    code: `[{{{PageTitle}}}]({{{PageUrl}}})
 {{#Notes}}
 - {{{NoteHighlight}}}
   {{{NoteTags}}}
@@ -34,7 +34,7 @@ export const HTML_TEMPLATE: Template = {
     id: 3,
     title: 'HTML',
     isFavourite: false,
-    code: `<a target="_blank"  href="{{{PageLink}}}">{{{PageTitle}}}</a>
+    code: `<a target="_blank"  href="{{{PageUrl}}}">{{{PageTitle}}}</a>
 <ul>
 {{#Notes}}
 <li>
