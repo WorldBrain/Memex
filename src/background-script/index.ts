@@ -117,7 +117,10 @@ class BackgroundScript {
 
         // Store the timestamp of when the extension was installed
         this.storageAPI.local.set({ [INSTALL_TIME_KEY]: now })
-        await insertDefaultTemplates({ copyPaster: this.copyPasterBackground })
+        await insertDefaultTemplates({
+            copyPaster: this.copyPasterBackground,
+            localStorage: this.storageAPI.local,
+        })
     }
 
     private async handleUpdateLogic() {
@@ -135,7 +138,10 @@ class BackgroundScript {
             })
         }
 
-        await insertDefaultTemplates({ copyPaster: this.copyPasterBackground })
+        await insertDefaultTemplates({
+            copyPaster: this.copyPasterBackground,
+            localStorage: this.storageAPI.local,
+        })
     }
 
     /**

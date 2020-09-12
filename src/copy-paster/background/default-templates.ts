@@ -1,5 +1,9 @@
+import { Storage } from 'webextension-polyfill-ts'
+
 import { Template } from '../types'
 import CopyPasterBackground from '.'
+
+export const PERFORMED_STORAGE_FLAG = '@TextExport-default_templates_inserted_1'
 
 export const ROAM_MD_TEMPLATE: Template = {
     id: 1,
@@ -19,7 +23,7 @@ export const NOTION_MD_TEMPLATE: Template = {
     isFavourite: false,
     code: `[{{{PageTitle}}}]({{{PageLink}}})
 {{#Notes}}
-- {{{NoteHighlight}}} 
+- {{{NoteHighlight}}}
   {{{NoteTags}}}
   {{{NoteText}}}
 {{/Notes}}
@@ -50,16 +54,24 @@ const DEFAULT_TEMPLATES = [HTML_TEMPLATE, ROAM_MD_TEMPLATE, NOTION_MD_TEMPLATE]
 
 export default async function insertDefaultTemplates({
     copyPaster,
+    localStorage,
     templates = DEFAULT_TEMPLATES,
 }: {
     copyPaster: CopyPasterBackground
+    localStorage: Storage.LocalStorageArea
     templates?: Template[]
 }) {
-    for (const template of templates) {
-        if (await copyPaster.findTemplate(template)) {
-            break
-        }
+    const alreadyPerformed = (await localStorage.get(PERFORMED_STORAGE_FLAG))[
+        PERFORMED_STORAGE_FLAG
+    ]
 
+    if (alreadyPerformed) {
+        return
+    }
+
+    for (const template of templates) {
         await copyPaster.storage.__createTemplateWithId(template)
     }
+
+    await localStorage.set({ [PERFORMED_STORAGE_FLAG]: true })
 }
