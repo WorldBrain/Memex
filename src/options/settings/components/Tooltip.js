@@ -41,7 +41,7 @@ class Tooltip extends React.Component {
                     Highlights & Annotations
                 </div>
                 <div className={styles.infoText}>
-                    Disable the Highlighting tooltip. You can also use keyboard
+                    Show Tooltip when highlighting text. <br/>You can also use keyboard
                     shortcuts.
                 </div>
                 <Checkbox
@@ -49,7 +49,7 @@ class Tooltip extends React.Component {
                     isChecked={this.state.tooltip}
                     handleChange={this.toggleTooltip}
                 >
-                    Show tooltip on every page
+                    Show Tooltip
                 </Checkbox>
                 {/*
 
