@@ -291,6 +291,21 @@
     }
 }
 
+.skipButton {
+    font-weight: bold;
+    color: #3a2f45;
+    padding: 5px 10px;
+    display: flex;
+    border-radius: 3px;
+    margin-top: 5px;
+    font-size: 14px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
+}
+
 @keyframes float {
     0% {
         transform: translateY(0px);

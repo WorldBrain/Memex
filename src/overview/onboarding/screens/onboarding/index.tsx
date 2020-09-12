@@ -311,6 +311,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 />
                             )}
                             renderImage={this.logoImage}
+                            navToOverview={this.props.navToOverview}
                         />
                     </div>
                 )
@@ -319,7 +320,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <OnboardingStep
                         goToStep={this.handleStepClick}
                         titleText="Flexibly & Quickly organise websites"
-                        subtitleText="Tags, bookmark and add pages to collections. Also with keyboard shortcuts"
+                        subtitleText="Tags, bookmark and add pages to collections. Also with keyboard shortcuts."
                         renderButton={() => (
                             <OnboardingAction
                                 onClick={this.handleNextStepClick}
@@ -329,6 +330,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         renderImage={this.sidebarImage}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         currentStep={this.state.currentStep - 1}
+                        navToOverview={this.props.navToOverview}
                     >
                         <SecondaryAction
                             onClick={() =>
@@ -345,7 +347,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <OnboardingStep
                         goToStep={this.handleStepClick}
                         titleText="Make Highlights & Notes"
-                        subtitleText="Highlight and annotate websites. Right-click on selected text or use keyboard shortcuts"
+                        subtitleText="Highlight and annotate websites. Right-click on selected text or use keyboard shortcuts."
                         renderButton={() => (
                             <OnboardingAction
                                 onClick={this.handleNextStepClick}
@@ -355,6 +357,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         renderImage={this.annotationImage}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         currentStep={this.state.currentStep - 1}
+                        navToOverview={this.props.navToOverview}
                     >
                         <SecondaryAction
                             onClick={() =>
@@ -385,6 +388,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         }}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         currentStep={this.state.currentStep - 1}
+                        navToOverview={this.props.navToOverview}
                     >
                     <SecondaryAction
                         onClick={() =>
@@ -411,6 +415,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         renderImage={this.shareImg}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         currentStep={this.state.currentStep - 1}
+                        navToOverview={this.props.navToOverview}
                     >
                         <div className={styles.buttonBar}>
                             <PrimaryAction
@@ -438,6 +443,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         goToStep={this.handleStepClick}
                         titleText="Save and Annotate Websites on the Go"
                         subtitleText="Install Memex Go for iOS and Android"
+                        navToOverview={this.props.navToOverview}
                         renderButton={() => (
                             <OnboardingAction
                                 onClick={this.handleNextStepClick}
@@ -461,6 +467,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         titleText="Your Data & Attention is Yours"
                         subtitleText="All data is stored offline-first and synced with End2End encryption."
                         subtitleText2="Memex is also funded without Venture Capital investments."
+                        navToOverview={this.props.navToOverview}
                         renderButton={() => (
                             <OnboardingAction
                                 onClick={this.handleNextStepClick}
@@ -498,6 +505,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         renderImage={this.privacyImg}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         currentStep={this.state.currentStep - 1}
+                        navToOverview={this.props.navToOverview}
                     >
                         <SecondaryAction
                             onClick={() =>
