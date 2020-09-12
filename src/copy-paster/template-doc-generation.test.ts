@@ -5,7 +5,7 @@ import { setupBackgroundIntegrationTest } from 'src/tests/background-integration
 import generateTemplateDocs, { joinTags } from './template-doc-generation'
 import { analyzeTemplate } from './utils'
 import * as DATA from './template-doc-generation.test.data'
-import { getTemplateDataFetchers } from './background'
+import { getTemplateDataFetchers } from './background/template-data-fetchers'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { isShareUrl } from 'src/content-sharing/utils'
 
