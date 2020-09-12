@@ -16,7 +16,6 @@ import {
     getLastSharedAnnotationTimestamp,
     setLastSharedAnnotationTimestamp,
 } from 'src/annotations/utils'
-import createResolvable from '@josephg/resolvable'
 import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
@@ -64,23 +63,8 @@ export interface SidebarContainerState {
         [annotationUrl: string]: EditForm
     }
 
-    // deletePageConfirm: {
-    //     pageUrlToDelete?: string
-    //     // isDeletePageModalShown: boolean
-    // }
-
-    // searchValue: string
-    // pageType: PageType
-    // searchType: SearchType
-    // resultsSearchType: SearchType
     pageCount: number
     noResults: boolean
-    // isBadTerm: boolean
-    // resultsByUrl: ResultsByUrl
-    // resultsClusteredByDay: boolean
-    // annotsByDay: PageUrlsByDay
-
-    // Everything below here is temporary
 
     showCongratsMessage: boolean
     showClearFiltersBtn: boolean
@@ -89,7 +73,6 @@ export interface SidebarContainerState {
     // Filter sidebar props
     showFiltersSidebar: boolean
     showSocialSearch: boolean
-    // resultsSearchType: 'page' | 'notes' | 'social'
 
     annotCount?: number
 
@@ -137,12 +120,10 @@ export type SidebarContainerEvents = UIEvent<{
         annotationUrl: string
     }
     updateTagsForNewComment: { added?: string; deleted?: string }
-    // updateTagsForResult: { added: string; deleted: string; url: string }
     updateListsForPageResult: { added?: string; deleted?: string; url: string }
     addNewPageCommentTag: { tag: string }
     deleteEditCommentTag: { tag: string; annotationUrl: string }
     deleteNewPageCommentTag: { tag: string }
-    // closeComments: null,
 
     receiveNewAnnotation: {
         annotationUrl: string
@@ -203,14 +184,6 @@ export type SidebarContainerEvents = UIEvent<{
     setPageUrl: { pageUrl: string }
 
     // Search
-    // enterSearchQuery: { searchQuery: string }
-    // changeSearchQuery: { searchQuery: string }
-    // togglePageType: null
-    // switchSearch: { changes: SearchTypeChange }
-    // clearAllFilters: null
-    // resetFilterPopups: null
-    // toggleShowFilters: null
-
     paginateSearch: null
     setAnnotationsExpanded: { value: boolean }
     toggleAllAnnotationsFold: null
@@ -235,13 +208,6 @@ export type SidebarContainerEvents = UIEvent<{
     setAllNotesShareMenuShown: { shown: boolean }
     setShareMenuNoteId: { id: string }
     resetShareMenuNoteId: null
-
-    // Page search result interactions
-    // togglePageBookmark: { pageUrl: string }
-    // togglePageTagPicker: { pageUrl: string }
-    // togglePageListPicker: { pageUrl: string }
-    // togglePageAnnotationsView: { pageUrl: string; pageTitle?: string }
-    // resetPageAnnotationsView: null
 }>
 export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
 
@@ -276,7 +242,6 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerEvents
 > {
     private inPageEvents: AnnotationsSidebarInPageEventEmitter
-    _detectedSharedAnnotations = createResolvable()
 
     constructor(private options: SidebarContainerOptions) {
         super()
@@ -310,16 +275,6 @@ export class SidebarContainerLogic extends UILogic<
 
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
-            // deletePageConfirm: {
-            //     pageUrlToDelete: undefined,
-            //     // isDeletePageModalShown: false,
-            // },
-
-            // pageType: 'all',
-            // pageType: 'page',
-            // searchType: 'notes',
-            // searchType: 'page',
-            // resultsSearchType: 'page',
 
             allAnnotationsExpanded: false,
             isSocialPost: false,
@@ -333,14 +288,8 @@ export class SidebarContainerLogic extends UILogic<
             showFiltersSidebar: false,
             showSocialSearch: false,
 
-            // searchValue: '',
             pageCount: 0,
             noResults: false,
-            // isBadTerm: false,
-            // resultsByUrl: {},
-            // resultsClusteredByDay: false,
-            // annotsByDay: {},
-
             annotCount: 0,
             shouldShowCount: false,
             isInvalidSearch: false,
@@ -421,48 +370,8 @@ export class SidebarContainerLogic extends UILogic<
                 if (opts.overwrite && state.pageUrl != null) {
                     await this.options.annotationsCache.load(state.pageUrl)
                 }
-                // return this.doAnnotationSearch(state, opts)
             },
         )
-    }
-
-    private async doAnnotationSearch(
-        state: SidebarContainerState,
-        opts: { overwrite: boolean },
-    ) {
-        // this.options.annotationsCache.load()
-        // this.emitMutation({
-        //     annotations: { $set:  },
-        // })
-        // const annotations = await this.options.annotations.getAllAnnotationsByUrl(
-        //     {
-        //         base64Img: true,
-        //         url: state.pageUrl,
-        //         skip: state.searchResultSkip,
-        //         limit: this.resultLimit,
-        //     },
-        // )
-        // if (opts.overwrite) {
-        //     this.emitMutation({
-        //         annotations: { $set: annotations },
-        //         editForms: { $set: createEditFormsForAnnotations(annotations) },
-        //         pageCount: { $set: annotations.length },
-        //         noResults: { $set: annotations.length < this.resultLimit },
-        //         searchResultSkip: { $set: 0 },
-        //     })
-        // } else {
-        //     this.emitMutation({
-        //         annotations: { $apply: (prev) => [...prev, ...annotations] },
-        //         editForms: {
-        //             $apply: (prev) => ({
-        //                 ...prev,
-        //                 ...createEditFormsForAnnotations(annotations),
-        //             }),
-        //         },
-        //         pageCount: { $apply: (prev) => prev + annotations.length },
-        //         noResults: { $set: annotations.length < this.resultLimit },
-        //     })
-        // }
     }
 
     paginateSearch: EventHandler<'paginateSearch'> = async ({
@@ -1060,6 +969,7 @@ export class SidebarContainerLogic extends UILogic<
         const remoteIds = await this.options.contentSharing.getRemoteAnnotationIds(
             { annotationUrls },
         )
+
         for (const localId of Object.keys(remoteIds)) {
             annotationSharingInfo[localId] = {
                 $set: {
@@ -1068,9 +978,8 @@ export class SidebarContainerLogic extends UILogic<
                 },
             }
         }
-        this.emitMutation({
-            annotationSharingInfo,
-        })
+
+        this.emitMutation({ annotationSharingInfo })
     }
 
     updateAllAnnotationsShareInfo: EventHandler<
@@ -1083,7 +992,6 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         this.emitMutation({ annotationSharingInfo: { $set: sharingInfo } })
-        console.log('setting: ', sharingInfo)
     }
 
     updateAnnotationShareInfo: EventHandler<'updateAnnotationShareInfo'> = ({

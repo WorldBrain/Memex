@@ -6,7 +6,7 @@ import {
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
 import * as DATA from './logic.test.data'
-import { AnnotationsCache } from 'src/annotations/annotations-cache'
+import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import * as sharingTestData from 'src/content-sharing/background/index.test.data'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
@@ -21,38 +21,24 @@ function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
 const setupLogicHelper = async ({
     device,
     pageUrl = DATA.CURRENT_TAB_URL_1,
-    initSearchType = 'pages',
 }: {
     device: UILogicTestDevice
     pageUrl?: string
-    initSearchType?: 'pageAnnots' | 'allAnnots' | 'pages'
 }) => {
     const { backgroundModules } = device
 
-    const annotations = {
-        // ...insertBackgroundFunctionTab(
-        //     backgroundModules.directLinking.remoteFunctions,
-        //     currentTab,
-        // ),
-        editAnnotation: () => undefined,
-        createAnnotation: () => undefined,
-        addAnnotationTag: () => undefined,
-        deleteAnnotation: () => undefined,
-        toggleAnnotBookmark: () => undefined,
-        updateAnnotationTags: () => undefined,
-        getAllAnnotationsByUrl: () => undefined,
-    } as any
+    const annotationsBG = insertBackgroundFunctionTab(
+        device.backgroundModules.directLinking.remoteFunctions,
+        {},
+    ) as any
 
-    const annotationsCache = new AnnotationsCache({
-        backendOperations: {
-            // TODO: (sidebar-refactor) massage the params from Annotation to the likes of CreateAnnotationParams
-            load: async (url) => [],
-            create: async (annotation) => null,
-            update: async (annotation) => null,
-            delete: async (annotation) => null,
-            updateTags: async (annotation) => null,
+    const annotationsCache = createAnnotationsCache(
+        {
+            tags: device.backgroundModules.tags.remoteFunctions,
+            annotations: annotationsBG,
         },
-    })
+        { skipPageIndexing: true },
+    )
 
     const sidebarLogic = new SidebarContainerLogic({
         pageUrl,
@@ -60,39 +46,13 @@ const setupLogicHelper = async ({
         tags: backgroundModules.tags.remoteFunctions,
         customLists: backgroundModules.customLists.remoteFunctions,
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
-        annotations,
-        // search: {
-        //     ...backgroundModules.search.remoteFunctions.search,
-        // },
-        // bookmarks: backgroundModules.search.remoteFunctions.bookmarks,
-        // inPageUI,
-        // highlighter,
+        annotations: annotationsBG,
         annotationsCache,
         initialState: 'hidden',
         searchResultLimit: 10,
     })
 
-    let initSearchTypeMutation
-    switch (initSearchType) {
-        case 'allAnnots':
-            initSearchTypeMutation = {
-                searchType: { $set: 'notes' },
-                pageType: { $set: 'all' },
-            }
-            break
-        case 'pageAnnots':
-            initSearchTypeMutation = {
-                searchType: { $set: 'notes' },
-                pageType: { $set: 'page' },
-            }
-            break
-        case 'pages':
-        default:
-            initSearchTypeMutation = { searchType: { $set: 'page' } }
-    }
-
     const sidebar = device.createElement(sidebarLogic)
-    sidebar.processMutation(initSearchTypeMutation)
     await sidebar.init()
     return { sidebar, sidebarLogic }
 }
@@ -250,13 +210,6 @@ describe('SidebarContainerLogic', () => {
             const { sidebar } = await setupLogicHelper({ device })
 
             expect(sidebar.state.annotationSharingAccess).toEqual(
-                'sharing-allowed',
-            )
-
-            await sidebar.processEvent('receiveSharingAccessChange', {
-                sharingAccess: 'feature-disabled',
-            })
-            expect(sidebar.state.annotationSharingAccess).toEqual(
                 'feature-disabled',
             )
 
@@ -265,6 +218,13 @@ describe('SidebarContainerLogic', () => {
             })
             expect(sidebar.state.annotationSharingAccess).toEqual(
                 'sharing-allowed',
+            )
+
+            await sidebar.processEvent('receiveSharingAccessChange', {
+                sharingAccess: 'feature-disabled',
+            })
+            expect(sidebar.state.annotationSharingAccess).toEqual(
+                'feature-disabled',
             )
         })
     })
@@ -509,136 +469,151 @@ describe('SidebarContainerLogic', () => {
         })
     })
 
-    // it('should detect if the page in a shared list', async ({ device }) => {
-    //     device.authService.setUser(TEST_USER)
+    it('should share annotations, simulating sidebar share process', async ({
+        device,
+    }) => {
+        const { contentSharing, directLinking } = device.backgroundModules
+        await device.authService.setUser(TEST_USER)
 
-    //     const localListId = await sharingTestData.createContentSharingTestList(
-    //         device,
-    //     )
-    //     await device.backgroundModules.contentSharing.shareList({
-    //         listId: localListId,
-    //     })
-    //     await device.backgroundModules.contentSharing.shareListEntries({
-    //         listId: localListId,
-    //     })
+        const localListId = await sharingTestData.createContentSharingTestList(
+            device,
+        )
+        await contentSharing.shareList({
+            listId: localListId,
+        })
+        await contentSharing.shareListEntries({
+            listId: localListId,
+        })
+        const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
+        const annotationUrl = await directLinking.createAnnotation(
+            {} as any,
+            {
+                pageUrl,
+                title: 'Page title',
+                body: 'Annot body',
+                comment: 'Annot comment',
+                selector: {
+                    descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
+                    quote: 'dawadawd',
+                },
+            },
+            { skipPageIndexing: true },
+        )
 
-    //     const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
-    //     const { sidebar, sidebarLogic } = await setupLogicHelper({
-    //         device,
-    //         pageUrl,
-    //     })
-    //     await sidebarLogic._detectedPageSharingStatus
-    //     expect(sidebar.state.annotationSharingAccess).toEqual('???')
-    // })
+        const { sidebar } = await setupLogicHelper({ device, pageUrl })
 
-    // it('should share annotations', async ({ device }) => {
-    //     device.authService.setUser(TEST_USER)
+        await sidebar.processEvent('receiveSharingAccessChange', {
+            sharingAccess: 'sharing-allowed',
+        })
+        expect(sidebar.state.annotationSharingAccess).toEqual('sharing-allowed')
+        expect(sidebar.state.annotations).toEqual([
+            expect.objectContaining({ url: annotationUrl }),
+        ])
 
-    //     const localListId = await sharingTestData.createContentSharingTestList(
-    //         device,
-    //     )
-    //     await device.backgroundModules.contentSharing.shareList({
-    //         listId: localListId,
-    //     })
-    //     await device.backgroundModules.contentSharing.shareListEntries({
-    //         listId: localListId,
-    //     })
-    //     const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
-    //     const annotationUrl = await device.backgroundModules.directLinking.createAnnotation(
-    //         {} as any,
-    //         {
-    //             pageUrl,
-    //             title: 'Page title',
-    //             body: 'Annot body',
-    //             comment: 'Annot comment',
-    //             selector: {
-    //                 descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
-    //                 quote: 'dawadawd',
-    //             },
-    //         },
-    //         { skipPageIndexing: true },
-    //     )
+        // Triggers share menu opening
+        await sidebar.processEvent('shareAnnotation', {
+            context: 'pageAnnotations',
+            annotationUrl,
+        })
+        expect(sidebar.state.activeShareMenuNoteId).toEqual(annotationUrl)
 
-    //     const { sidebar } = await setupLogicHelper({ device, pageUrl })
-    //     expect(sidebar.state.annotations).toEqual([])
-    //     await sidebar.processEvent('shareAnnotation', {
-    //         context: 'pageAnnotations',
-    //         annotationUrl,
-    //     })
-    //     await device.backgroundModules.contentSharing.waitForSync()
-    //     const serverStorage = await device.getServerStorage()
-    //     expect(
-    //         await serverStorage.storageManager
-    //             .collection('sharedAnnotation')
-    //             .findObjects({}),
-    //     ).toEqual([
-    //         expect.objectContaining({
-    //             body: 'Annot body',
-    //             comment: 'Annot comment',
-    //             selector: JSON.stringify({
-    //                 descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
-    //                 quote: 'dawadawd',
-    //             }),
-    //         }),
-    //     ])
-    // })
+        // BG calls that run automatically upon share menu opening
+        await contentSharing.shareAnnotation({ annotationUrl })
+        await contentSharing.shareAnnotationsToLists({
+            annotationUrls: [annotationUrl],
+            queueInteraction: 'skip-queue',
+        })
 
-    // it('should share annotations', async ({ device }) => {
-    //     device.authService.setUser(TEST_USER)
+        await contentSharing.waitForSync()
+        const serverStorage = await device.getServerStorage()
+        expect(
+            await serverStorage.storageManager
+                .collection('sharedAnnotation')
+                .findObjects({}),
+        ).toEqual([
+            expect.objectContaining({
+                body: 'Annot body',
+                comment: 'Annot comment',
+                selector: JSON.stringify({
+                    descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
+                    quote: 'dawadawd',
+                }),
+            }),
+        ])
+    })
 
-    //     const localListId = await sharingTestData.createContentSharingTestList(
-    //         device,
-    //     )
-    //     await device.backgroundModules.contentSharing.shareList({
-    //         listId: localListId,
-    //     })
-    //     await device.backgroundModules.contentSharing.shareListEntries({
-    //         listId: localListId,
-    //     })
-    //     const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
-    //     const annotationUrl1 = await device.backgroundModules.directLinking.createAnnotation(
-    //         {} as any,
-    //         {
-    //             pageUrl,
-    //             title: 'Page title',
-    //             body: 'Annot body',
-    //             comment: 'Annot comment',
-    //             selector: {
-    //                 descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
-    //                 quote: 'dawadawd',
-    //             },
-    //         },
-    //         { skipPageIndexing: true },
-    //     )
-    //     await device.backgroundModules.directLinking.createAnnotation(
-    //         {} as any,
-    //         {
-    //             pageUrl,
-    //             title: 'Page title',
-    //             body: 'Annot body 2',
-    //             comment: 'Annot comment 2',
-    //             selector: {
-    //                 descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
-    //                 quote: 'dawadawd 2',
-    //             },
-    //         },
-    //         { skipPageIndexing: true },
-    //     )
+    it('should detect shared annotations on initialization', async ({
+        device,
+    }) => {
+        const { contentSharing, directLinking } = device.backgroundModules
+        await device.authService.setUser(TEST_USER)
 
-    //     await device.backgroundModules.contentSharing.shareAnnotation({
-    //         annotationUrl: annotationUrl1,
-    //     })
-    //     await device.backgroundModules.contentSharing.waitForSync()
-    //     const { sidebar, sidebarLogic } = await setupLogicHelper({
-    //         device,
-    //         pageUrl,
-    //     })
-    //     await sidebarLogic._detectedSharedAnnotations
-    //     expect(sidebar.state.annotationSharingInfo).toEqual({
-    //         [annotationUrl1]: {
-    //             status: 'shared',
-    //             taskState: 'pristine',
-    //         },
-    //     })
-    // })
+        // Set up some shared data independent of the sidebar logic
+        const localListId = await sharingTestData.createContentSharingTestList(
+            device,
+        )
+        await contentSharing.shareList({
+            listId: localListId,
+        })
+        await contentSharing.shareListEntries({
+            listId: localListId,
+        })
+        const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
+
+        // This annotation will be shared
+        const annotationUrl1 = await directLinking.createAnnotation(
+            {} as any,
+            {
+                pageUrl,
+                title: 'Page title',
+                body: 'Annot body',
+                comment: 'Annot comment',
+                selector: {
+                    descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
+                    quote: 'dawadawd',
+                },
+            },
+            { skipPageIndexing: true },
+        )
+        // This annotation won't be shared
+        const annotationUrl2 = await directLinking.createAnnotation(
+            {} as any,
+            {
+                pageUrl,
+                title: 'Page title',
+                body: 'Annot body 2',
+                comment: 'Annot comment 2',
+                selector: {
+                    descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
+                    quote: 'dawadawd 2',
+                },
+            },
+            { skipPageIndexing: true },
+        )
+
+        await contentSharing.shareAnnotation({ annotationUrl: annotationUrl1 })
+        await contentSharing.waitForSync()
+
+        const { sidebar, sidebarLogic } = await setupLogicHelper({
+            device,
+            pageUrl,
+        })
+
+        expect(sidebar.state.annotations).toEqual([
+            expect.objectContaining({ url: annotationUrl2 }),
+            expect.objectContaining({ url: annotationUrl1 }),
+        ])
+        await sidebarLogic._detectSharedAnnotations([
+            annotationUrl1,
+            annotationUrl2,
+        ])
+
+        // Only the shared annot should show up in sharing info
+        expect(sidebar.state.annotationSharingInfo).toEqual({
+            [annotationUrl1]: {
+                status: 'shared',
+                taskState: 'pristine',
+            },
+        })
+    })
 })
