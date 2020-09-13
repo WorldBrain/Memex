@@ -161,7 +161,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
             if (
                 haveTagsChanged(
-                    stateBeforeModifications[resultIndex].tags,
+                    stateBeforeModifications[resultIndex]?.tags ?? [],
                     annotation.tags,
                 )
             ) {
