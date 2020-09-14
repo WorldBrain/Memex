@@ -1,7 +1,7 @@
 export const KEYBOARDSHORTCUTS_STORAGE_NAME = 'memex-keyboardshortcuts'
 
 export const KEYBOARDSHORTCUTS_DEFAULT_STATE = {
-    shortcutsEnabled: true,
+    shortcutsEnabled: false,
     linkShortcut: 'shift+l',
     toggleSidebarShortcut: 'alt+q',
     toggleHighlightsShortcut: 'alt+d',
