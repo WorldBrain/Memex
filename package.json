@@ -2,7 +2,7 @@
     "name": "worldbrain-extension",
     "version": "2.6.4",
     "homepage": "https://worldbrain.io",
-    "license": "MIT"
+    "license": "MIT",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
         "build": "npm run build:clean && webpack",
