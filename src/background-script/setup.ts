@@ -344,10 +344,7 @@ export function createBackgroundModules(options: {
                 'create',
             ),
         }),
-        copyPaster: new CopyPasterBackground({
-            storageManager,
-            contentSharing,
-        }),
+        copyPaster,
         contentSharing,
     }
 }
