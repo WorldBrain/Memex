@@ -1,11 +1,8 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 import { TaskState } from 'ui-logic-core/lib/types'
-import {
-    TypographyTextNormal,
-    TypographyTextSmall,
-} from 'src/common-ui/components/design-library/typography'
-import { LoadingIndicator, ButtonTooltip } from 'src/common-ui/components'
+import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
+import { LoadingIndicator } from 'src/common-ui/components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { ClickAway } from 'src/util/click-away-wrapper'
 
@@ -151,8 +148,10 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         } else {
             return (
                 <>
-                    <TypographyTextNormal>{this.state.link}</TypographyTextNormal>
-                    <LinkCopyIcon src={icons.copy} />
+                    <TypographyTextNormal>
+                        {this.state.link}
+                    </TypographyTextNormal>
+                    <img src={icons.copy} />
                 </>
             )
         }
@@ -172,15 +171,15 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                         // })}
                         position="bottom"
                     >*/}
-                        <LinkCopierBox>
-                            <LinkCopier
-                                state={this.state.loadState}
-                                onClick={this.handleLinkClick}
-                            >
-                                {this.renderLinkContent()}
-                            </LinkCopier>
-                            {/* {this.renderUnshareIcon()} */}
-                        </LinkCopierBox>
+                    <LinkCopierBox>
+                        <LinkCopier
+                            state={this.state.loadState}
+                            onClick={this.handleLinkClick}
+                        >
+                            {this.renderLinkContent()}
+                        </LinkCopier>
+                        {/* {this.renderUnshareIcon()} */}
+                    </LinkCopierBox>
                     {/*</ShareAllBox>*/}
                     <Spacing />
                     {this.props.children}
@@ -272,12 +271,6 @@ const LinkText = styled.span`
     width: 90%;
     font-size: 8px;
     color: black;
-`
-const LinkCopyIcon = styled.img``
-
-// TODO Move these somewhere else for re-use
-const ShareAllBox = styled(ButtonTooltip)`
-    width: 100%;
 `
 
 const ShareAllBtn = styled.button`
