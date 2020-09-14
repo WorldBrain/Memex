@@ -171,7 +171,7 @@ export class PageIndexingBackground {
         }
 
         const pageData = await pipeline({
-            pageDoc: { ...analysisRes, url: props.fullUrl},
+            pageDoc: { ...analysisRes, url: props.url},
             rejectNoContent: !props.stubOnly,
         })
 
