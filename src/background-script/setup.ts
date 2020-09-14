@@ -208,6 +208,7 @@ export function createBackgroundModules(options: {
     const copyPaster = new CopyPasterBackground({
         storageManager,
         contentSharing,
+        search,
     })
 
     const bgScript = new BackgroundScript({
