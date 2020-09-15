@@ -26,7 +26,7 @@ import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { auth, tags, collections } from 'src/util/remote-functions-background'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import CopyPaster from 'src/copy-paster'
+import { PageNotesCopyPaster } from 'src/copy-paster'
 
 const styles = require('./ResultList.css')
 
@@ -255,7 +255,7 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
 
         return (
             <HoverBox>
-                <CopyPaster
+                <PageNotesCopyPaster
                     normalizedPageUrls={[doc.url]}
                     onClickOutside={this.props.resetActiveCopyPasterIndex}
                 />
