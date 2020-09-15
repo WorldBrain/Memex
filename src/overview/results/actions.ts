@@ -11,7 +11,6 @@ import { selectors as filters } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { bookmarks, notifications } from 'src/util/remote-functions-background'
-import { Template } from '../../copy-paster/types'
 
 const processEventRPC = remoteFunction('processEvent')
 const createSocialBookmarkRPC = remoteFunction('addSocialBookmark')
@@ -91,6 +90,13 @@ export const incSearchCount = createAction('overview/incSearchCount')
 
 export const updateListName = createAction<[string, string]>(
     'overview/updateListName',
+)
+
+export const toggleResultCopyPaster = createAction(
+    'overview/toggleResultCopyPaster',
+)
+export const setResultCopyPasterShown = createAction<boolean>(
+    'overview/setResultCopyPasterShown',
 )
 
 export const toggleBookmark: (args: {

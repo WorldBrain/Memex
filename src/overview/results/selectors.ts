@@ -6,7 +6,7 @@ import { selectors as deleteConfSelectors } from '../delete-confirm-modal'
 
 import { PAGE_SIZE } from '../search-bar/constants'
 import * as sidebarLeft from '../sidebar-left/selectors'
-import { query } from '../search-bar/selectors'
+import { query, isEmptyQuery } from '../search-bar/selectors'
 import * as constants from './constants'
 import { ResultsByUrl } from '../types'
 
@@ -228,4 +228,14 @@ export const resultsByUrl = createSelector(
 
         return pages
     },
+)
+
+export const showCopyPasterIcon = createSelector(
+    isEmptyQuery,
+    (isEmptyQuery) => !isEmptyQuery,
+)
+
+export const isResultCopyPasterShown = createSelector(
+    resultsState,
+    (state) => state.isResultCopyPasterShown,
 )

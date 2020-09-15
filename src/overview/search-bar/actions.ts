@@ -16,6 +16,7 @@ import { EVENT_NAMES } from '../../analytics/internal/constants'
 import * as Raven from 'src/util/raven'
 import { auth, featuresBeta } from 'src/util/remote-functions-background'
 import { stripTagPattern, splitInputIntoTerms } from './utils'
+import { BackgroundSearchParams } from 'src/search/background/types'
 
 const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
@@ -121,9 +122,8 @@ export const search: (args?: any) => Thunk = (
     }
 
     // Grab needed derived state for search
-
     const state = getState()
-    const searchParams = {
+    const searchParams: BackgroundSearchParams = {
         query,
         startDate,
         endDate,
