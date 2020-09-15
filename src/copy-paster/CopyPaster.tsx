@@ -12,10 +12,9 @@ interface State {
 }
 
 export interface Props {
-    onClickOutside: () => void
-    normalizedPageUrls: string[]
-    annotationUrls?: string[]
     initTemplates?: Template[]
+    onClickOutside: React.MouseEventHandler
+    renderTemplate: (id: number) => Promise<string>
 }
 
 export default class CopyPasterContainer extends React.PureComponent<
@@ -27,10 +26,6 @@ export default class CopyPasterContainer extends React.PureComponent<
         title: '',
         code: '',
         isFavourite: false,
-    }
-
-    static defaultProps: Partial<Props> = {
-        annotationUrls: [],
     }
 
     private copyPasterBG = copyPaster
@@ -90,12 +85,7 @@ export default class CopyPasterContainer extends React.PureComponent<
         this.setState({ isLoading: true })
 
         try {
-            const rendered = await this.copyPasterBG.renderTemplate({
-                id,
-                annotationUrls: this.props.annotationUrls,
-                normalizedPageUrls: this.props.normalizedPageUrls,
-            })
-
+            const rendered = await this.props.renderTemplate(id)
             await copyToClipboard(rendered)
         } catch (err) {
             console.error('Something went really bad copying:', err.message)

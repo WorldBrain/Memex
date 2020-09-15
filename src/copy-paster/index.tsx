@@ -1,3 +1,3 @@
-import CopyPaster from './CopyPasterContainer'
-
-export default CopyPaster
+export { default as PageNotesCopyPaster } from './PageNotesCopyPaster'
+export { default as PageSearchCopyPaster } from './PageSearchCopyPaster'
+export { default as AnnotationSearchCopyPaster } from './AnnotationSearchCopyPaster'

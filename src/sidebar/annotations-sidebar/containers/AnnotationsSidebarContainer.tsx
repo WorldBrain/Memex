@@ -24,7 +24,7 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareMenu'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
-import CopyPaster from 'src/copy-paster'
+import { PageNotesCopyPaster } from 'src/copy-paster'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
@@ -333,7 +333,7 @@ export class AnnotationsSidebarContainer<
     private renderCopyPasterManager(annotationUrls: string[]) {
         return (
             <HoverBox>
-                <CopyPaster
+                <PageNotesCopyPaster
                     annotationUrls={annotationUrls}
                     normalizedPageUrls={[normalizeUrl(this.state.pageUrl)]}
                     onClickOutside={() =>

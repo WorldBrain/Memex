@@ -27,13 +27,13 @@ interface CopyPasterProps {
     onCodeChange: (code: string) => void
     onSetIsFavourite: (id: number, isFavourite: boolean) => void
 
-    onClickOutside?: () => void
+    onClickOutside?: React.MouseEventHandler
 }
 
 class CopyPaster extends PureComponent<CopyPasterProps> {
-    handleClickOutside = () => {
+    handleClickOutside: React.MouseEventHandler = (e) => {
         if (this.props.onClickOutside) {
-            this.props.onClickOutside()
+            this.props.onClickOutside(e)
         }
     }
 

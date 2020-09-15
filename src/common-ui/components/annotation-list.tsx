@@ -8,7 +8,7 @@ import {
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import CopyPaster from 'src/copy-paster'
+import { PageNotesCopyPaster } from 'src/copy-paster'
 import { contentSharing, auth } from 'src/util/remote-functions-background'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 
@@ -212,7 +212,7 @@ class AnnotationList extends Component<Props, State> {
         return (
             <div className={styles.hoverBoxWrapper}>
                 <HoverBox>
-                    <CopyPaster
+                    <PageNotesCopyPaster
                         annotationUrls={[annot.url]}
                         normalizedPageUrls={[annot.pageUrl]}
                         onClickOutside={() =>
