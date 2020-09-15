@@ -23,3 +23,9 @@ export const testAnnotationAText = 'this is a comment on the annotation'
 export const testAnnotationBUrl = 'test.com#2'
 export const testAnnotationBTags = ['a']
 export const testAnnotationBHighlight = 'this is a highlight from the webpage'
+
+// Children of page B
+export const testAnnotationCUrl = 'test.com#3'
+export const testAnnotationCTags = ['z']
+export const testAnnotationCHighlight =
+    'this is another highlight from a webpage'
