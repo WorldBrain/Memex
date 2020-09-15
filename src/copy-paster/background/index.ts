@@ -11,9 +11,8 @@ import ContentSharingBackground from 'src/content-sharing/background'
 import { getTemplateDataFetchers } from './template-data-fetchers'
 import SearchBackground from 'src/search/background'
 import {
-    BackgroundSearchParams,
-    AnnotationsSearchResponse,
     AnnotsByPageUrl,
+    AnnotationsSearchResponse,
 } from 'src/search/background/types'
 
 export default class CopyPasterBackground {
@@ -44,8 +43,11 @@ export default class CopyPasterBackground {
             createTemplate: bindMethod(this, 'createTemplate'),
             updateTemplate: bindMethod(this, 'updateTemplate'),
             deleteTemplate: bindMethod(this, 'deleteTemplate'),
-            renderTemplate: bindMethod(this, 'renderTemplate'),
             findAllTemplates: bindMethod(this, 'findAllTemplates'),
+            renderTemplate: this.renderTemplate,
+            renderTemplateForPageSearch: this.renderTemplateForPageSearch,
+            renderTemplateForAnnotationSearch: this
+                .renderTemplateForAnnotationSearch,
         }
 
         makeRemotelyCallable(this.remoteFunctions)
@@ -71,15 +73,11 @@ export default class CopyPasterBackground {
         return this.storage.findAllTemplates()
     }
 
-    async renderTemplate({
+    renderTemplate: RemoteCopyPasterInterface['renderTemplate'] = async ({
         id,
         annotationUrls,
         normalizedPageUrls,
-    }: {
-        id: number
-        annotationUrls: string[]
-        normalizedPageUrls: string[]
-    }): Promise<string> {
+    }) => {
         const template = await this.storage.findTemplate({ id })
         const templateDocs = await generateTemplateDocs({
             annotationUrls,
@@ -90,13 +88,10 @@ export default class CopyPasterBackground {
         return joinTemplateDocs(templateDocs, template)
     }
 
-    async renderTemplateForPageSearch({
+    renderTemplateForPageSearch: RemoteCopyPasterInterface['renderTemplateForPageSearch'] = async ({
         id,
         searchParams,
-    }: {
-        id: number
-        searchParams: BackgroundSearchParams
-    }): Promise<string> {
+    }) => {
         const template = await this.storage.findTemplate({ id })
         const searchResponse = await this.options.search.searchPages({
             ...searchParams,
@@ -115,13 +110,10 @@ export default class CopyPasterBackground {
         return joinTemplateDocs(templateDocs, template)
     }
 
-    async renderTemplateForAnnotationSearch({
+    renderTemplateForAnnotationSearch: RemoteCopyPasterInterface['renderTemplateForAnnotationSearch'] = async ({
         id,
         searchParams,
-    }: {
-        id: number
-        searchParams: BackgroundSearchParams
-    }): Promise<string> {
+    }) => {
         const template = await this.storage.findTemplate({ id })
         const searchResponse = (await this.options.search.searchAnnotations({
             ...searchParams,
