@@ -187,7 +187,11 @@ const generateForNotes = async ({
 
     // user clicked to copy multiple/all annotations on page
     // but they only want to render page info, so no need to fetch annotations
-    if (!templateAnalysis.noteUsage) {
+    if (
+        !templateAnalysis.requirements.note &&
+        !templateAnalysis.requirements.noteLink &&
+        !templateAnalysis.requirements.noteTags
+    ) {
         return [
             {
                 PageTitle: pageData.fullTitle,
@@ -203,7 +207,7 @@ const generateForNotes = async ({
         ]
     }
 
-    if (templateAnalysis.noteUsage === 'single') {
+    if (templateAnalysis.expectedContext === 'note') {
         // but they are using the top-level data (NoteText, etc.) so return
         // multiple TemplatePageDocs that will later be rendered and joined together
         const templateDocs: TemplateDoc[] = []
@@ -231,7 +235,7 @@ const generateForNotes = async ({
         return templateDocs
     }
 
-    if (templateAnalysis.noteUsage === 'multiple') {
+    if (templateAnalysis.expectedContext === 'page') {
         // they're iterating through the Notes array, so we only need to generate a single TemplatePageDoc
         const noteTemplates = []
         for (const [noteUrl, { body, comment }] of Object.entries(notes)) {

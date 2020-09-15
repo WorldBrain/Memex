@@ -93,24 +93,20 @@ export function joinTemplateDocs(
 export function analyzeTemplate(
     template: Pick<Template, 'code'>,
 ): TemplateAnalysis {
-    const templateDoc: TemplateDoc = {}
+    const templateDoc: TemplateDoc = { Pages: [{}], Notes: [{}] }
     for (const key of Object.keys(KEYS_TO_REQUIREMENTS)) {
-        templateDoc[key] = `@key%${key}.single@endkey%`
+        templateDoc[key] = `@key%${key}.note@endkey%`
+        templateDoc.Pages[0][key] = `@key%${key}.page-list@endkey%`
+        templateDoc.Notes[0][key] = `@key%${key}.page@endkey%`
     }
-
-    const note: TemplateDocNote = {}
-    for (const key of Object.keys(NOTE_KEYS)) {
-        note[key] = `@key%${key}.multiple@endkey%`
-    }
-    templateDoc['Notes'] = [note]
     const rendered = renderTemplate(template, templateDoc)
 
     // We don't keep this as a global because it's stateful  :(
-    const requirementRegex = /@key%([a-zA-Z\.]+)@endkey%/g
+    const requirementRegex = /@key%([a-zA-Z\.\-]+)@endkey%/g
 
     const requirements: TemplateRequirements = {}
     let usesLegacyTags = false
-    let noteUsage: TemplateAnalysis['noteUsage']
+    let expectedContext: TemplateAnalysis['expectedContext']
     while (true) {
         const match = requirementRegex.exec(rendered)
         if (!match) {
@@ -119,11 +115,13 @@ export function analyzeTemplate(
 
         const identifier = match[1].split('.')
         const key = identifier[0] as TemplateDocKey
-        const usage = identifier[1] as TemplateAnalysis['noteUsage']
-        if (NOTE_KEYS[key]) {
-            // If one multiple usage is there, ignore the single usages
-            if (!noteUsage || usage === 'multiple') {
-                noteUsage = usage
+        const usage = identifier[1] as TemplateAnalysis['expectedContext']
+        if (usage === 'page-list') {
+            expectedContext = 'page-list'
+        } else if (expectedContext !== 'page-list' && NOTE_KEYS[key]) {
+            // If one note list usage is there, ignore the single usages
+            if (!expectedContext || usage === 'page') {
+                expectedContext = usage
             }
         }
 
@@ -131,6 +129,9 @@ export function analyzeTemplate(
         requirements[requirement] = true
         usesLegacyTags = usesLegacyTags || LEGACY_KEYS.has(key)
     }
+    if (!expectedContext) {
+        expectedContext = 'page'
+    }
 
-    return { usesLegacyTags, noteUsage, requirements }
+    return { usesLegacyTags, expectedContext, requirements }
 }
