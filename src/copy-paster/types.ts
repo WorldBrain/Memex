@@ -36,7 +36,7 @@ export interface TemplateDocNote {
 
 export interface TemplateAnalysis {
     usesLegacyTags: boolean
-    noteUsage?: 'single' | 'multiple'
+    expectedContext: 'note' | 'page' | 'page-list'
     requirements: TemplateRequirements
 }
 

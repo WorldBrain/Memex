@@ -18,7 +18,7 @@ describe('Content template analysis', () => {
                 requirements: {
                     [requirement]: true,
                 },
-                noteUsage: NOTE_KEYS[key] ? 'single' : undefined,
+                expectedContext: NOTE_KEYS[key] ? 'note' : 'page',
                 usesLegacyTags: LEGACY_KEYS.has(key as TemplateDocKey),
             })
         }
@@ -31,31 +31,32 @@ describe('Content template analysis', () => {
                 requirements: {
                     [requirement]: true,
                 },
-                noteUsage: NOTE_KEYS[key] ? 'multiple' : undefined,
+                expectedContext: NOTE_KEYS[key] ? 'page' : 'page',
                 usesLegacyTags: LEGACY_KEYS.has(key as TemplateDocKey),
             })
         }
     })
 
-    it('should correctly detect note usage in a template', () => {
+    it('should correctly detect expected context in a template', () => {
         testAnalysis(`{{{PageTitle}}}`, {
             requirements: {
                 page: true,
             },
+            expectedContext: 'page',
             usesLegacyTags: false,
         })
         testAnalysis(`{{{NoteText}}}`, {
             requirements: {
                 note: true,
             },
-            noteUsage: 'single',
+            expectedContext: 'note',
             usesLegacyTags: false,
         })
         testAnalysis(`{{#Notes}}{{{NoteText}}}{{/Notes}}`, {
             requirements: {
                 note: true,
             },
-            noteUsage: 'multiple',
+            expectedContext: 'page',
             usesLegacyTags: false,
         })
         testAnalysis(
@@ -64,7 +65,29 @@ describe('Content template analysis', () => {
                 requirements: {
                     note: true,
                 },
-                noteUsage: 'multiple',
+                expectedContext: 'page',
+                usesLegacyTags: false,
+            },
+        )
+        testAnalysis(
+            `{{#Pages}}{{PageTitle}}{{#Notes}}{{NoteText}}{{/Notes}}{{/Pages}}`,
+            {
+                requirements: {
+                    note: true,
+                    page: true,
+                },
+                expectedContext: 'page-list',
+                usesLegacyTags: false,
+            },
+        )
+        testAnalysis(
+            `{{#Pages}}{{PageTitle}}{{#Notes}}{{NoteText}}{{/Notes}}{{/Pages}}{{#Notes}}{{NoteText}}{{/Notes}}`,
+            {
+                requirements: {
+                    note: true,
+                    page: true,
+                },
+                expectedContext: 'page-list',
                 usesLegacyTags: false,
             },
         )
