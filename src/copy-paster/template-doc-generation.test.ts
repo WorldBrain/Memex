@@ -939,6 +939,46 @@ describe('Content template doc generation', () => {
         ])
     })
 
+    it('should correctly generate template docs for multiple pages, with note references but referencing top-level page AND note vars', async () => {
+        const { dataFetchers } = await setupTest()
+
+        const generate = (template: string) =>
+            generateTemplateDocs({
+                templateAnalysis: analyzeTemplate({ code: template }),
+                normalizedPageUrls: [DATA.testPageA.url, DATA.testPageB.url],
+                annotationUrls: [
+                    DATA.testAnnotationAUrl,
+                    DATA.testAnnotationBUrl,
+                    DATA.testAnnotationCUrl,
+                ],
+                dataFetchers,
+            })
+
+        expect(await generate('{{{NoteText}}} {{{PageTitle}}}')).toEqual([
+            {
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+                NoteText: DATA.testAnnotationAText,
+            },
+            {
+                PageTitle: DATA.testPageA.fullTitle,
+                PageUrl: DATA.testPageAUrl,
+                title: DATA.testPageA.fullTitle,
+                url: DATA.testPageAUrl,
+                NoteHighlight: DATA.testAnnotationBHighlight,
+            },
+            {
+                PageTitle: DATA.testPageB.fullTitle,
+                PageUrl: DATA.testPageBUrl,
+                title: DATA.testPageB.fullTitle,
+                url: DATA.testPageBUrl,
+                NoteHighlight: DATA.testAnnotationCHighlight,
+            },
+        ])
+    })
+
     it('should correctly generate template docs for single annotation, but only with page references', async () => {
         const { dataFetchers } = await setupTest()
 
