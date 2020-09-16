@@ -57,7 +57,7 @@ describe('Custom List Integrations', () => {
             const { searchIndex, customLists } = await setupTest()
 
             const newPage = await searchIndex.createTestPage({
-                url: 'http://www.test.com',
+                fullUrl: 'http://www.test.com',
                 save: true,
             })
 

@@ -361,7 +361,7 @@ export default class AnnotationStorage extends StorageModule {
 
         const page = await this.searchIndex.createPageFromTab({
             tabId: id,
-            url,
+            fullUrl: url,
             stubOnly: !indexingPrefs.shouldIndexLinks,
         })
 

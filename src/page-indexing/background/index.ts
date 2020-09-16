@@ -154,7 +154,7 @@ export class PageIndexingBackground {
     async createPageFromTab(props: PageCreationProps) {
         if (!props.tabId) {
             throw new Error(
-                `No tabID provided to extract content: ${props.url}`,
+                `No tabID provided to extract content: ${props.fullUrl}`,
             )
         }
 
@@ -171,7 +171,7 @@ export class PageIndexingBackground {
         }
 
         const pageData = await pipeline({
-            pageDoc: { ...analysisRes, url: props.url},
+            pageDoc: { ...analysisRes, url: props.fullUrl },
             rejectNoContent: !props.stubOnly,
         })
 
@@ -190,9 +190,7 @@ export class PageIndexingBackground {
             )
         }
 
-        const pageData = await this.options.fetchPageData.process(
-            props.fullUrl ?? props.url,
-        )
+        const pageData = await this.options.fetchPageData.process(props.fullUrl)
 
         if (props.stubOnly && pageData.text && pageData.terms?.length) {
             delete pageData.text
@@ -209,7 +207,7 @@ export class PageIndexingBackground {
 
     async createTestPage(props: PageCreationProps) {
         const pageData = await pipeline({
-            pageDoc: { url: props.url, content: {} },
+            pageDoc: { url: props.fullUrl, content: {} },
             rejectNoContent: false,
         })
 

@@ -50,7 +50,7 @@ describe('src/search/bookmarks tests', () => {
         expect(fetchPageData.setUrl).toBeUndefined()
 
         try {
-            await addBookmark({ fullUrl: testFullUrl, url: testUrl })
+            await addBookmark({ url: testFullUrl })
         } catch (err) {
         } finally {
             expect(fetchPageData.setUrl).toEqual(testFullUrl)

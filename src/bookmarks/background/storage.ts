@@ -66,7 +66,7 @@ export default class BookmarksStorage extends StorageModule {
 
     async createBookmarkIfNeeded(url: string, time: number) {
         if (!(await this.pageHasBookmark(url))) {
-            await this.addBookmark({ url, time })
+            await this.addBookmark({ url: normalizeUrl(url), time })
         }
     }
 

@@ -302,7 +302,7 @@ export function createBackgroundModules(options: {
                     params.tags.map(async (tag) => {
                         if (!existingTags.includes(tag)) {
                             await tags.addTagToPage({
-                                url: params.normalizedUrl,
+                                url: params.fullUrl,
                                 tag,
                             })
                         }
