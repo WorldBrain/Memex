@@ -309,7 +309,7 @@ export default class ContentSharingBackground {
         const allPages = await this.storage.getPages({
             normalizedPageUrls: [...allPageUrls],
         })
-        for (const pageUrl of allPageUrls) {
+        for (const pageUrl of pageUrls) {
             await this.scheduleAction(
                 {
                     type: 'ensure-page-info',
