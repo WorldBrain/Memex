@@ -15,6 +15,7 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 import { LoadingIndicator } from 'src/common-ui/components'
 
 import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
+import { copyToClipboard } from 'src/in-page-ui/tooltip/utils'
 
 interface State {
     shareAllState: TaskState
@@ -124,8 +125,9 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
         this.props.postUnshareAllHook?.()
     }
 
-    private handleLinkCopy = (link: string) =>
-        navigator.clipboard.writeText(link)
+    private handleLinkCopy = async (link: string) => {
+        await copyToClipboard(link)
+    }
 
     // TODO: implement in milestone 3.
     //   It should: "remove the link of that page, so it deletes the shared-page object and all the associated annotation entries"
