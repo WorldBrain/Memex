@@ -3,7 +3,6 @@ import styled from 'styled-components'
 
 import { Anchor } from 'src/highlighting/types'
 import { ButtonTooltip } from 'src/common-ui/components'
-import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TextHighlighted from 'src/annotations/components/parts/TextHighlighted'
 import { NewAnnotationOptions } from 'src/annotations/types'
@@ -85,12 +84,14 @@ class AnnotationCreate extends React.Component<
         }
 
         return (
-            <TextInputControlledStyled
-                defaultValue={this.state.text}
+            <StyledTextArea
+                value={this.state.text}
                 onClick={this.hideTagPicker}
                 placeholder="Add a private note... (save with cmd/ctrl+enter)"
-                onChange={(text) => this.setState({ text })}
-                specialHandlers={[onEnterSaveHandler]}
+                onChange={(e) => this.setState({ text: e.target.value })}
+                onKeyDown={(e) =>
+                    onEnterSaveHandler.test(e) && onEnterSaveHandler.handle(e)
+                }
             />
         )
     }
@@ -196,7 +197,7 @@ const TextBoxContainerStyled = styled.div`
     }
 `
 
-const TextInputControlledStyled = styled(TextInputControlled)`
+const StyledTextArea = styled.textarea`
     background-color: #f7f7f7;
     box-sizing: border-box;
     resize: vertical;
