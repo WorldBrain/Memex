@@ -25,6 +25,7 @@ import { JobDefinition } from 'src/job-scheduler/background/types'
 import { isDev } from 'src/analytics/internal/constants'
 import { setupRequestInterceptors } from 'src/authentication/background/redirect'
 import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
+import { User } from '@worldbrain/memex-common/lib/web-interface/types/users'
 
 export class AuthBackground {
     authService: AuthService
@@ -33,6 +34,8 @@ export class AuthBackground {
     scheduleJob: (job: JobDefinition) => void
     remoteEmitter: RemoteEventEmitter<AuthRemoteEvents>
     getUserManagement: () => Promise<UserStorage>
+
+    private _userProfile?: Promise<User>
 
     constructor(options: {
         authService: AuthService
@@ -86,21 +89,28 @@ export class AuthBackground {
                 )
             },
             getUserProfile: async () => {
+                if (this._userProfile) {
+                    return this._userProfile
+                }
+
                 const user = await this.authService.getCurrentUser()
                 if (!user) {
                     return null
                 }
                 const userManagement = await this.getUserManagement()
-                return userManagement.getUser({
+                this._userProfile = userManagement.getUser({
                     type: 'user-reference',
                     id: user.id,
                 })
+                return this._userProfile
             },
             updateUserProfile: async (updates) => {
                 const user = await this.authService.getCurrentUser()
                 if (!user) {
                     return null
                 }
+                delete this._userProfile
+
                 const userManagement = await this.getUserManagement()
                 await userManagement.updateUser(
                     { type: 'user-reference', id: user.id },
