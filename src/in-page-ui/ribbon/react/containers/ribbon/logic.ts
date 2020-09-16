@@ -6,6 +6,7 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import { loadInitial } from 'src/util/ui-logic'
 import { NewAnnotationOptions } from 'src/annotations/types'
 import { generateUrl } from 'src/annotations/utils'
+import { resolvablePromise } from 'src/util/resolvable'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -86,6 +87,8 @@ export class RibbonContainerLogic extends UILogic<
     RibbonContainerState,
     RibbonContainerEvents
 > {
+    private initLogic = resolvablePromise()
+
     commentSavedTimeout = 2000
 
     constructor(private dependencies: RibbonContainerOptions) {
@@ -132,6 +135,7 @@ export class RibbonContainerLogic extends UILogic<
             const { url } = this.dependencies.currentTab
             await this.hydrateStateFromDB({ ...incoming, event: { url } })
         })
+        this.initLogic.resolve()
     }
 
     hydrateStateFromDB: EventHandler<'hydrateStateFromDB'> = async ({
@@ -184,6 +188,27 @@ export class RibbonContainerLogic extends UILogic<
 
     cleanup() {}
 
+    /**
+     * This exists due to a race-condition between bookmark shortcut and init hydration logic.
+     * Having this ensures any event handler can wait until the init logic is taken care and also
+     * receive any state changes that happen during that wait.
+     */
+    private async waitForPostInitState(
+        initState: RibbonContainerState,
+    ): Promise<RibbonContainerState> {
+        let latestState = { ...initState }
+
+        const stateUpdater = (mutation: UIMutation<RibbonContainerState>) => {
+            latestState = this.withMutation(latestState, mutation)
+        }
+
+        this.events.on('mutation', stateUpdater)
+        await this.initLogic
+        this.events.removeListener('mutation', stateUpdater)
+
+        return latestState
+    }
+
     toggleShowExtraButtons: EventHandler<'toggleShowExtraButtons'> = ({
         previousState,
     }) => {
@@ -215,23 +240,25 @@ export class RibbonContainerLogic extends UILogic<
     toggleBookmark: EventHandler<'toggleBookmark'> = async ({
         previousState,
     }) => {
+        const postInitState = await this.waitForPostInitState(previousState)
+
         const updateState = (isBookmarked) =>
             this.emitMutation({
                 bookmark: { isBookmarked: { $set: isBookmarked } },
             })
 
-        const shouldBeBookmarked = !previousState.bookmark.isBookmarked
+        const shouldBeBookmarked = !postInitState.bookmark.isBookmarked
         updateState(shouldBeBookmarked)
 
         try {
             if (shouldBeBookmarked) {
                 await this.dependencies.bookmarks.addPageBookmark({
-                    url: previousState.pageUrl,
+                    url: postInitState.pageUrl,
                     tabId: this.dependencies.currentTab.id,
                 })
             } else {
                 await this.dependencies.bookmarks.delPageBookmark({
-                    url: previousState.pageUrl,
+                    url: postInitState.pageUrl,
                 })
             }
         } catch (err) {
