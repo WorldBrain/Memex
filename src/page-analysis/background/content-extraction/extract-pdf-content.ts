@@ -3,7 +3,7 @@ import PDFJS from 'pdfjs-dist'
 import transformPageText from 'src/util/transform-page-text'
 
 // Run PDF.js to extract text from each page and read document metadata.
-async function extractContent(pdfData) {
+async function extractContent(pdfData: ArrayBuffer) {
     // Point PDF.js to its worker code, a static file in the extension.
     PDFJS.workerSrc = browser.extension.getURL('/lib/pdf.worker.min.js')
 
@@ -16,7 +16,7 @@ async function extractContent(pdfData) {
         const page = await pdf.getPage(i)
         // wait for object containing items array with text pieces
         const pageItems = await page.getTextContent()
-        const pageText = pageItems.items.map(item => item.str).join(' ')
+        const pageText = pageItems.items.map((item) => item.str).join(' ')
         pageTexts.push(pageText)
     }
 
@@ -54,12 +54,12 @@ export default async function extractPdfContent(
         blob = await response.blob()
     }
 
-    const pdfData = new Promise(function(resolve, reject) {
+    const pdfData = await new Promise<ArrayBuffer>(function (resolve, reject) {
         const fileReader = new FileReader()
-        fileReader.onload = async event => {
-            resolve(event.target.result)
+        fileReader.onload = async (event) => {
+            resolve(event.target.result as ArrayBuffer)
         }
-        fileReader.onerror = event => reject(event.target.error)
+        fileReader.onerror = (event) => reject(event.target.error)
         fileReader.readAsArrayBuffer(blob)
     })
 
