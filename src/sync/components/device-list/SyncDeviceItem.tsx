@@ -23,9 +23,7 @@ export default class SyncDeviceItem extends Component<Props> {
         const device = this.props.device
         return (
             <DeviceRow>
-                <ButtonTooltip position="bottom" tooltipText={device.deviceId}>
-                    <Item>{device.devicePlatform}</Item>
-                </ButtonTooltip>
+                <Item>{device.devicePlatform} (Device-ID: {device.deviceId})</Item>
                 <MiddleItem>
                     Time Added: {formatTime(device.createdWhen, true)}
                 </MiddleItem>
@@ -40,6 +38,7 @@ export default class SyncDeviceItem extends Component<Props> {
 const DeviceRow = styled.div`
     display: flex;
     align-items: center;
+    width: auto;
 `
 
 const Item = styled.div`

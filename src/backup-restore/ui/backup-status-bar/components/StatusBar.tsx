@@ -40,10 +40,12 @@ const StatusBar = (props: Props, state: State) => {
                 className={styles.container}
                 onMouseLeave={props.onMouseLeave}
             >
-                <div className={styles.headerBox}>
+                <div 
+                    className={styles.headerBox}
+                    onClick={props.onMouseEnter}
+                >
                     <div 
                         className={styles.header}
-                        onClick={props.onMouseEnter}
                     >
                         Sync Status
                     </div>

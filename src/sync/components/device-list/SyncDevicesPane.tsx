@@ -120,8 +120,9 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
         let pairButton
 
         if (
-            !this.props.isDeviceSyncAllowed &&
-            this.props.devices.length === 0
+            (!this.props.isDeviceSyncAllowed &&
+            this.props.devices.length === 0) || this.props.subscriptionStatus === 'cancelled'
+
         ) {
             pairButton = (
                 <ButtonTooltip
@@ -165,12 +166,26 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
             )
         }
 
-        if (this.props.devices.length === 0 && this.props.isDeviceSyncAllowed) {
+        if (this.props.devices.length === 0 && this.props.isDeviceSyncAllowed && this.props.subscriptionStatus !== 'cancelled') {
             pairButton = (
                 <SecondaryAction
                     onClick={this.handleOpenNewDevice}
                     label="Pair New Device"
                 />
+            )
+        }
+
+        if (this.props.subscriptionStatus === 'cancelled') {
+            pairButton = (
+                <ButtonTooltip
+                    tooltipText="Your subscription expired. Reactivate it to sync devices"
+                    position="bottom"
+                >
+                    <SecondaryAction
+                        onClick={this.openPortal}
+                        label="Pair New Device"
+                    />
+                </ButtonTooltip>
             )
         }
 
@@ -362,8 +377,7 @@ class SyncDevicesPaneContainer extends React.Component<
                                     Download Memex GO
                                 </div>
                                 <div className={settingsStyle.infoText}>
-                                    Our mobile app to save and organise websites
-                                    on the Go
+                                    Our mobile app to annotate and organise websites on the Go
                                 </div>
                             </div>
                             <div className={styles.storeSection}>
