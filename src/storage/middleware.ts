@@ -41,25 +41,9 @@ export async function setStorageMiddleware(
 
     storageManager.setMiddleware(
         modifyMiddleware([
-            {
-                process: async (context) => {
-                    const result = await context.next.process({
-                        operation: context.operation,
-                    })
-                    if (!shouldLogStorageOperations) {
-                        return result
-                    }
-
-                    console.groupCollapsed('operation', context.operation[0])
-                    console['log']({
-                        operation: context.operation,
-                        result,
-                    })
-                    console['trace']()
-                    console.groupEnd()
-                    return result
-                },
-            },
+            createOperationLoggingMiddleware({
+                shouldLog: () => shouldLogStorageOperations,
+            }),
             changeWatchMiddleware,
             await options.syncService.createSyncLoggingMiddleware(),
         ]),
@@ -98,5 +82,38 @@ export async function setStorageMiddleware(
 
     return {
         setStorageLoggingEnabled,
+    }
+}
+
+export function createOperationLoggingMiddleware(options: {
+    shouldLog: () => boolean
+}): StorageMiddleware {
+    return {
+        process: async (context) => {
+            const next = () =>
+                context.next.process({
+                    operation: context.operation,
+                })
+            if (!options.shouldLog()) {
+                return next()
+            }
+            const info: string[] = [context.operation[0]]
+            if (typeof context.operation[1] === 'string') {
+                info.push(context.operation[1])
+            }
+            console.groupCollapsed('operation', ...info)
+            console.time('operation execution time')
+
+            const result = await next()
+
+            console.timeEnd('operation execution time')
+            console['log']({
+                operation: context.operation,
+                result,
+            })
+            console['trace']()
+            console.groupEnd()
+            return result
+        },
     }
 }

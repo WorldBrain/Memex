@@ -6,10 +6,13 @@ import { FirestoreStorageBackend } from '@worldbrain/storex-backend-firestore'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-log/storex'
 import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
-import { ContentSharingStorage } from 'src/content-sharing/background/storage'
-import { ServerStorage } from './types'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
+import { createOperationLoggingMiddleware } from 'src/storage/middleware'
+import { ContentSharingStorage } from 'src/content-sharing/background/storage'
+import { ServerStorage } from './types'
+
+let shouldLogOperations = false
 
 export function createServerStorageManager() {
     const firebase = getFirebase()
@@ -23,7 +26,13 @@ export function createServerStorageManager() {
             ssl: false,
         })
     }
-    return new StorageManager({ backend: serverStorageBackend })
+    const storageManager = new StorageManager({ backend: serverStorageBackend })
+    storageManager.setMiddleware([
+        createOperationLoggingMiddleware({
+            shouldLog: () => shouldLogOperations,
+        }),
+    ])
+    return storageManager
 }
 
 export function createLazyServerStorage(
@@ -34,6 +43,11 @@ export function createLazyServerStorage(
     },
 ) {
     let serverStoragePromise: Promise<ServerStorage>
+
+    try {
+        window['setServerStorageLoggingEnabled'] = (value: boolean) =>
+            (shouldLogOperations = value)
+    } catch (e) {}
 
     return async () => {
         if (serverStoragePromise) {
