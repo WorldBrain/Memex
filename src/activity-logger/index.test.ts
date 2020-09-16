@@ -16,6 +16,8 @@ describe('URL loggability tests', () => {
             { url: 'http://worldbrain.io/test#', shouldPass: true },
             { url: 'http://worldbrain.io/test/test_(test)', shouldPass: true },
             { url: 'http://worldbrain.io/test/test+test', shouldPass: true },
+            { url: 'http://worldbrain.io/test/test:test', shouldPass: true },
+            { url: 'http://worldbrain.io:550505/test/test', shouldPass: true },
             {
                 url:
                     'https://en.wikipedia.org/wiki/Theater_District,_Manhattan',
