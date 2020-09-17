@@ -73,3 +73,26 @@
 .filterBarActive {
     margin-top: 44px;
 }
+
+.copyPasterBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    border-radius: 3px;
+
+    &:hover {
+        background: #e0e0e0;
+    }
+}
+
+.copyPasterImg {
+    width: 100%;
+    height: 100%;
+}
