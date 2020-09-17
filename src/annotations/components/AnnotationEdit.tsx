@@ -45,6 +45,7 @@ class AnnotationEdit extends React.Component<Props> {
     private renderInput() {
         return (
             <StyledTextArea
+                autoFocus
                 value={this.props.comment}
                 onClick={() => this.props.setTagInputActive(false)}
                 placeholder="Add a private note... (save with cmd/ctrl+enter)"

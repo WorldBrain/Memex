@@ -8,6 +8,7 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
+import { copyToClipboard } from 'src/annotations/content_script/utils'
 
 interface State {
     // readyToRender: boolean
@@ -77,8 +78,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     // }
     // }
 
-    private handleLinkCopy = (link: string) =>
-        navigator.clipboard.writeText(link)
+    private handleLinkCopy = async (link: string) => {
+        await copyToClipboard(link)
+    }
 
     private handleUnshare = async () => {
         if (this.state.unshareState === 'running') {

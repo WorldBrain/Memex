@@ -4,7 +4,6 @@ import { TagInput } from '../components'
 import AllModesFooter from './all-modes-footer'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
-import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { ShareAnnotationProps } from './default-footer'
 
 const styles = require('./edit-mode-content.css')
@@ -91,20 +90,24 @@ class EditModeContent extends React.Component<Props, State> {
             ),
     }
 
-    private _handleCommentChange = (commentText) => {
+    private _handleCommentChange = (commentText: string) => {
         this.setState({ commentText })
     }
 
     render() {
         return (
             <React.Fragment>
-                <TextInputControlled
-                    defaultValue={this.state.commentText}
+                <textarea
+                    autoFocus
+                    value={this.state.commentText}
                     onClick={() => this._setTagInputActive(false)}
                     className={styles.textArea}
                     placeholder="Add a private note... (save with cmd/ctrl+enter)"
-                    onChange={this._handleCommentChange}
-                    specialHandlers={[this.onEnterSaveHandler]}
+                    onChange={(e) => this._handleCommentChange(e.target.value)}
+                    onKeyDown={(e) =>
+                        this.onEnterSaveHandler.test(e) &&
+                        this.onEnterSaveHandler.handle(e)
+                    }
                 />
 
                 <div onKeyDown={this._handleTagInputKeydown}>

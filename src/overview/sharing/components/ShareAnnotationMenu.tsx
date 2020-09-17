@@ -262,6 +262,7 @@ const LinkCopier = styled.button`
         overflow: hidden;
         width: 90%;
         text-overflow: ellipsis;
+        white-space: nowrap;
     }
 `
 const LinkText = styled.span`

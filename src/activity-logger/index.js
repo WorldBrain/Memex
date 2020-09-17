@@ -2,12 +2,12 @@ export const PAUSE_STORAGE_KEY = 'is-logging-paused'
 
 export function isLoggable({ url }) {
     // Just remember http(s) pages, ignoring data uris, newtab, ...
-    const loggableUrlPattern = /^https?:\/\/\w+([-/.#=:$^@&%?+(),]\w*\/?)*$/
+    const loggableUrlPattern = /^https?:\/\/\w+([-/.#=$^@&%?+(),]\w*\/?([-/.#=$^@&:%?+(),]\w*\/?)*)*$/
     const urlEndings = ['.svg', '.jpg', '.png', '.jpeg', '.gif']
 
     // Ignore all pages that are image files
-    for (let i = 0; i < urlEndings.length; i++) {
-        if (url.endsWith(urlEndings[i])) {
+    for (const urlEnding of urlEndings) {
+        if (url.endsWith(urlEnding)) {
             return false
         }
     }
