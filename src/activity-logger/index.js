@@ -1,5 +1,3 @@
-import { browser } from 'webextension-polyfill-ts'
-
 export const PAUSE_STORAGE_KEY = 'is-logging-paused'
 
 export function isLoggable({ url }) {
