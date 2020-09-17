@@ -90,7 +90,7 @@ class EditModeContent extends React.Component<Props, State> {
             ),
     }
 
-    private _handleCommentChange = (commentText) => {
+    private _handleCommentChange = (commentText: string) => {
         this.setState({ commentText })
     }
 
@@ -102,7 +102,7 @@ class EditModeContent extends React.Component<Props, State> {
                     onClick={() => this._setTagInputActive(false)}
                     className={styles.textArea}
                     placeholder="Add a private note... (save with cmd/ctrl+enter)"
-                    onChange={this._handleCommentChange}
+                    onChange={(e) => this._handleCommentChange(e.target.value)}
                     onKeyDown={(e) =>
                         this.onEnterSaveHandler.test(e) &&
                         this.onEnterSaveHandler.handle(e)
