@@ -85,7 +85,7 @@ class AnnotationCreate extends React.Component<
 
         return (
             <StyledTextArea
-                autoFocus={true}
+                autoFocus
                 value={this.state.text}
                 onClick={this.hideTagPicker}
                 placeholder="Add a private note... (save with cmd/ctrl+enter)"

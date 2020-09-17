@@ -98,6 +98,7 @@ class EditModeContent extends React.Component<Props, State> {
         return (
             <React.Fragment>
                 <textarea
+                    autoFocus
                     value={this.state.commentText}
                     onClick={() => this._setTagInputActive(false)}
                     className={styles.textArea}
