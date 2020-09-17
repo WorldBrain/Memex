@@ -11,7 +11,8 @@ export type TemplateDoc = {
 } & TemplateDocPage &
     TemplateDocNote
 
-export type TemplateDocKey = keyof (TemplateDocPage & TemplateDocNote)
+export type TemplateDocKey = keyof (Omit<TemplateDocPage, 'Notes'> &
+    TemplateDocNote)
 
 export interface TemplateDocPage {
     PageUrl?: string
