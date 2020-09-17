@@ -2,6 +2,8 @@ import React from 'react'
 import cx from 'classnames'
 import { connect, MapStateToProps, MapDispatchToProps } from 'react-redux'
 
+import styled from 'styled-components'
+
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { RootState } from 'src/options/types'
@@ -70,7 +72,7 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                 : PageSearchCopyPaster
 
         return (
-            <HoverBox withRelativeContainer right="120px" top="5px">
+            <HoverBox withRelativeContainer>
                 <CopyPaster
                     searchParams={this.props.searchParams}
                     onClickOutside={this.props.hideCopyPaster}
@@ -125,16 +127,12 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                     )}
                 </div>
                 <div className={styles.btnsContainer}>
-                    {this.isAnnotSearch && (
-                        <button
-                            className={cx(styles.unfoldAllBtn, styles.btn)}
-                            onClick={this.props.handleUnfoldAllClick}
-                            disabled={this.isPageSearch}
-                        >
-                            {this.unfoldBtnText}
-                        </button>
-                    )}
                     {this.props.showCopyPasterIcon && (
+                        <>
+                         <ButtonTooltip
+                                    tooltipText="Copy-Paste Results"
+                                    position="bottom"
+                                >
                         <button
                             className={styles.copyPasterBtn}
                             onClick={this.props.handleCopyPasterIconClick}
@@ -144,13 +142,33 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                                 src={icons.copy}
                             />
                         </button>
+                        </ButtonTooltip>
+                        <CopyPasterWrapperTopBar>
+                            {this.renderCopyPaster()}
+                        </CopyPasterWrapperTopBar>
+                        </>
                     )}
-                    {this.renderCopyPaster()}
+                    {this.isAnnotSearch && (
+                        <button
+                            className={cx(styles.unfoldAllBtn, styles.btn)}
+                            onClick={this.props.handleUnfoldAllClick}
+                            disabled={this.isPageSearch}
+                        >
+                            {this.unfoldBtnText}
+                        </button>
+                    )}
                 </div>
             </div>
         )
     }
 }
+
+const CopyPasterWrapperTopBar = styled.div`
+    position: fixed;
+    margin-right: 300px;
+    margin-top: 35px;
+    z-index: 1;
+`
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     searchType: selectors.searchType(state),

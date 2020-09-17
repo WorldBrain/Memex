@@ -8,7 +8,7 @@
     max-width: 800px;
     width: 100%;
     align-items: center;
-    padding: 0 20px 5px;
+    padding: 0 0 5px 5px;
     border-bottom: 1px solid color14;
     margin-top: 5px;
     z-index: 2;
@@ -28,15 +28,21 @@
     display: flex;
 }
 
+.btnsContainer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
 /* Nice if we move this type of stuff somewhere for easier re-use, like colors, fonts, etc. */
 .btn {
     composes: nakedButton from 'src/common-ui/elements.css';
     color: color3;
-    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     outline: none;
     margin-right: 5px;
+    padding: 2px 8px 2px 8px;
     display: flex;
     border: none;
     align-items: center;
