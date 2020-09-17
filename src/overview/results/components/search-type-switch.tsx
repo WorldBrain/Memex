@@ -44,7 +44,7 @@ export type Props = StateProps & DispatchProps & OwnProps
 
 export class SearchTypeSwitch extends React.PureComponent<Props> {
     get unfoldBtnText() {
-        return this.props.annotsFolded ? 'Fold All' : 'Unfold All'
+        return this.props.annotsFolded ? 'Collapse All' : 'Expand All'
     }
 
     get isPageSearch() {
