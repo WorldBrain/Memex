@@ -28,12 +28,20 @@ export const joinTags = (tags?: string[]): string | undefined =>
               '',
           )
 
-/**
- * Exists as a helper as often we're dealing with arrays of page data where there will only ever be
- * a single entry. e.g. the single parent page of a note.
- */
-const getFirstPageData = <T>(data: { [url: string]: T }): T | undefined =>
-    Object.values(data)?.[0]
+const groupNotesByPages = (
+    notes: UrlMappedData<NoteTemplateData>,
+): UrlMappedData<NoteTemplateData[]> => {
+    const grouped: UrlMappedData<NoteTemplateData[]> = {}
+
+    for (const { pageUrl, ...noteData } of Object.values(notes)) {
+        grouped[pageUrl] = [
+            ...(grouped[pageUrl] ?? []),
+            { pageUrl, ...noteData },
+        ]
+    }
+
+    return grouped
+}
 
 const omitEmptyFields = (docs: TemplateDoc[]): TemplateDoc[] =>
     docs.map((doc) => {
@@ -41,7 +49,16 @@ const omitEmptyFields = (docs: TemplateDoc[]): TemplateDoc[] =>
             doc.Notes = doc.Notes.map(omitEmpty)
         }
         if (doc.Pages) {
-            doc.Pages = doc.Pages.map(omitEmpty)
+            doc.Pages = doc.Pages.map(({ Notes, ...pageTemplateDoc }) => {
+                if (!Notes?.length) {
+                    return omitEmpty(pageTemplateDoc)
+                }
+
+                return {
+                    ...omitEmpty(pageTemplateDoc),
+                    Notes: Notes.map(omitEmpty),
+                }
+            })
         }
         return omitEmpty(doc)
     })
@@ -56,8 +73,7 @@ const omitEmpty = <T extends any>(obj: T): T => {
     return clone
 }
 
-// Should work for single and multiple pages, but only for top-level page variables
-//   i.e., usage of `Pages` array var not yet supported
+// This function covers all single page cases + multi-page cases when no notes are referenced
 const generateForPages = async ({
     templateAnalysis,
     dataFetchers,
@@ -84,6 +100,7 @@ const generateForPages = async ({
             params.normalizedPageUrls,
         )
     }
+    // At this point, all needed data is fetched and we decide how to shape the template doc
 
     const templateDocs: TemplateDoc[] = []
 
@@ -134,31 +151,32 @@ const generateForPages = async ({
         })
     }
 
-    return templateDocs
+    return templateAnalysis.expectedContext === 'page-list'
+        ? [{ Pages: templateDocs }]
+        : templateDocs
 }
 
+// This function covers all single + multi-note cases + multi-page cases when notes are referenced
 const generateForNotes = async ({
     templateAnalysis,
     dataFetchers,
     ...params
 }: GeneratorInput): Promise<TemplateDoc[]> => {
     const notes = await dataFetchers.getNotes(params.annotationUrls)
+    const notesByPageUrl = groupNotesByPages(notes)
     let noteTags: UrlMappedData<string[]> = {}
     let noteLinks: UrlMappedData<string> = {}
-    let pageData: PageTemplateData = {} as PageTemplateData
-    let pageTagData: string[]
-    let pageLink: string
+
+    let pages: UrlMappedData<PageTemplateData> = {}
+    let pageTags: UrlMappedData<string[]> = {}
+    let pageLinks: UrlMappedData<string> = {}
 
     if (templateAnalysis.requirements.page) {
-        const pages = await dataFetchers.getPages(params.normalizedPageUrls)
-        pageData = getFirstPageData(pages) ?? ({} as PageTemplateData)
+        pages = await dataFetchers.getPages(params.normalizedPageUrls)
     }
 
     if (templateAnalysis.requirements.pageTags) {
-        const pageTags = await dataFetchers.getTagsForPages(
-            params.normalizedPageUrls,
-        )
-        pageTagData = getFirstPageData(pageTags)
+        pageTags = await dataFetchers.getTagsForPages(params.normalizedPageUrls)
     }
 
     if (templateAnalysis.requirements.noteTags) {
@@ -166,7 +184,7 @@ const generateForNotes = async ({
     }
 
     if (templateAnalysis.requirements.pageLink) {
-        const pageLinks = await dataFetchers.getPageLinks(
+        pageLinks = await dataFetchers.getPageLinks(
             fromPairs(
                 params.normalizedPageUrls.map((normalizedPageUrl) => [
                     normalizedPageUrl,
@@ -178,41 +196,47 @@ const generateForNotes = async ({
                 ]),
             ),
         )
-        pageLink = getFirstPageData(pageLinks)
     }
 
     if (templateAnalysis.requirements.noteLink) {
         noteLinks = await dataFetchers.getNoteLinks(params.annotationUrls)
     }
+    // At this point, all needed data is fetched and we decide how to shape the template doc
 
-    // user clicked to copy multiple/all annotations on page
-    // but they only want to render page info, so no need to fetch annotations
+    // User clicked to copy all notes on page but they only want to render page info, so set only page data
     if (
         !templateAnalysis.requirements.note &&
         !templateAnalysis.requirements.noteLink &&
         !templateAnalysis.requirements.noteTags
     ) {
-        return [
-            {
-                PageTitle: pageData.fullTitle,
-                PageTags: joinTags(pageTagData),
-                PageTagList: pageTagData,
-                PageUrl: pageData.fullUrl,
-                PageLink: pageLink,
+        const templateDocs: TemplateDoc[] = []
 
-                title: pageData.fullTitle,
-                tags: pageTagData,
-                url: pageData.fullUrl,
-            },
-        ]
+        for (const [pageUrl, { fullTitle, fullUrl }] of Object.entries(pages)) {
+            templateDocs.push({
+                PageTitle: fullTitle,
+                PageTags: joinTags(pageTags[pageUrl]),
+                PageTagList: pageTags[pageUrl],
+                PageUrl: fullUrl,
+                PageLink: pageLinks[pageUrl],
+
+                title: fullTitle,
+                tags: pageTags[pageUrl],
+                url: fullUrl,
+            })
+        }
+
+        return templateDocs
     }
 
     if (templateAnalysis.expectedContext === 'note') {
         // but they are using the top-level data (NoteText, etc.) so return
-        // multiple TemplatePageDocs that will later be rendered and joined together
         const templateDocs: TemplateDoc[] = []
 
-        for (const [noteUrl, { body, comment }] of Object.entries(notes)) {
+        for (const [noteUrl, { body, comment, pageUrl }] of Object.entries(
+            notes,
+        )) {
+            const pageData = pages[pageUrl] ?? ({} as PageTemplateData)
+
             templateDocs.push({
                 NoteText: comment,
                 NoteHighlight: body,
@@ -222,57 +246,77 @@ const generateForNotes = async ({
 
                 PageTitle: pageData.fullTitle,
                 PageUrl: pageData.fullUrl,
-                PageTags: joinTags(pageTagData),
-                PageTagList: pageTagData,
-                PageLink: pageLink,
+                PageTags: joinTags(pageTags[pageUrl]),
+                PageTagList: pageTags[pageUrl],
+                PageLink: pageLinks[pageUrl],
 
                 title: pageData.fullTitle,
                 url: pageData.fullUrl,
-                tags: pageTagData,
+                tags: pageTags[pageUrl],
             })
         }
 
         return templateDocs
     }
 
-    if (templateAnalysis.expectedContext === 'page') {
-        // they're iterating through the Notes array, so we only need to generate a single TemplatePageDoc
-        const noteTemplates = []
+    // Everything after here is in the context of 'page' or 'page-list'
+
+    // If page is not required, we simply need to set the array of Notes
+    if (!templateAnalysis.requirements.page) {
+        const templateDocs: TemplateDoc[] = []
         for (const [noteUrl, { body, comment }] of Object.entries(notes)) {
-            noteTemplates.push({
+            templateDocs.push({
                 NoteText: comment,
                 NoteHighlight: body,
                 NoteTagList: noteTags[noteUrl],
                 NoteTags: joinTags(noteTags[noteUrl]),
                 NoteLink: noteLinks[noteUrl],
-
-                PageTitle: pageData.fullTitle,
-                PageUrl: pageData.fullUrl,
-                PageTags: joinTags(pageTagData),
-                PageTagList: pageTagData,
-                PageLink: pageLink,
-
-                title: pageData.fullTitle,
-                url: pageData.fullUrl,
-                tags: pageTagData,
             })
         }
 
-        return [
-            {
-                Notes: noteTemplates,
-                PageTitle: pageData.fullTitle,
-                PageUrl: pageData.fullUrl,
-                PageTags: joinTags(pageTagData),
-                PageTagList: pageTagData,
-                PageLink: pageLink,
-
-                title: pageData.fullTitle,
-                url: pageData.fullUrl,
-                tags: pageTagData,
-            },
-        ]
+        return [{ Notes: templateDocs }]
     }
+
+    const docs: TemplateDoc[] = []
+
+    // This covers all other cases where notes are needed
+    for (const [pageUrl, { fullUrl, fullTitle }] of Object.entries(pages)) {
+        docs.push({
+            PageTitle: fullTitle,
+            PageUrl: fullUrl,
+            PageTags: joinTags(pageTags[pageUrl]),
+            PageTagList: pageTags[pageUrl],
+            PageLink: pageLinks[pageUrl],
+
+            title: fullTitle,
+            url: fullUrl,
+            tags: pageTags[pageUrl],
+
+            Notes: notesByPageUrl[pageUrl].map(
+                ({ url: noteUrl, body, comment }) => ({
+                    NoteText: comment,
+                    NoteHighlight: body,
+                    NoteTagList: noteTags[noteUrl],
+                    NoteTags: joinTags(noteTags[noteUrl]),
+                    NoteLink: noteLinks[noteUrl],
+
+                    PageTitle: fullTitle,
+                    PageUrl: fullUrl,
+                    PageTags: joinTags(pageTags[pageUrl]),
+                    PageTagList: pageTags[pageUrl],
+                    PageLink: pageLinks[pageUrl],
+
+                    title: fullTitle,
+                    url: fullUrl,
+                    tags: pageTags[pageUrl],
+                }),
+            ),
+        })
+    }
+
+    return templateAnalysis.expectedContext === 'page-list'
+        ? [{ Pages: docs }]
+        : docs
 }
 
 export default async function generateTemplateDocs(
@@ -280,6 +324,9 @@ export default async function generateTemplateDocs(
 ): Promise<TemplateDoc[]> {
     let docs: TemplateDoc[] = []
 
+    // This condition is needed as under some contexts, notes aren't specified upfront (page copy-paster), but users can still reference a page's notes in their templates
+    //  so we need to get the note URLs by looking them up using the page URLs
+    // TODO: Can we just have one function but fetch the note URLs in this parent scope (if needed) and pass them down?
     if (!params.annotationUrls.length) {
         docs = await generateForPages(params)
     } else if (params.annotationUrls.length >= 1) {

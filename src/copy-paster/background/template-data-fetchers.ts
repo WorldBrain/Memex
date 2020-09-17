@@ -61,8 +61,10 @@ export function getTemplateDataFetchers({
                 (acc, note) => ({
                     ...acc,
                     [note.url]: {
+                        url: note.url,
                         body: note.body,
                         comment: note.comment,
+                        pageUrl: note.pageUrl,
                     },
                 }),
                 {},

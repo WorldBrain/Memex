@@ -19,6 +19,7 @@ export interface TemplateDocPage {
     PageTags?: string
     PageTagList?: string[]
     PageLink?: string
+    Notes?: TemplateDocNote[]
 
     // For backward compatibility
     url?: string
