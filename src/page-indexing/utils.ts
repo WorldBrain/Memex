@@ -33,7 +33,7 @@ export async function maybeIndexTabs(
                 await options
                     .createPage({
                         tabId: tab.tabId,
-                        url: tab.url,
+                        fullUrl: tab.url,
                         allowScreenshot: false,
                         visitTime: options.time,
                         stubOnly: true,

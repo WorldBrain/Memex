@@ -230,7 +230,7 @@ export default class CustomListBackground {
         const exists = await this.options.pageStorage.pageExists(url)
         if (!exists) {
             await this._createPage({
-                url,
+                fullUrl: url,
                 tabId,
                 visitTime: Date.now(),
                 save: true,

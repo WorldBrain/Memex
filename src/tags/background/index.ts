@@ -1,6 +1,5 @@
 import Storex from '@worldbrain/storex'
 import { Windows, Tabs, Storage } from 'webextension-polyfill-ts'
-import { URLNormalizer, normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import TagStorage from './storage'
 import { SearchIndex } from 'src/search'
@@ -39,7 +38,6 @@ export default class TagsBackground {
             windows?: Windows.Static
             searchBackgroundModule: SearchBackground
             localBrowserStorage: Storage.LocalStorageArea
-            normalizeUrl?: URLNormalizer
         },
     ) {
         this.storage = new TagStorage({
@@ -72,16 +70,13 @@ export default class TagsBackground {
         )
     }
 
-    private get normalizeUrl(): URLNormalizer {
-        return this.options.normalizeUrl ?? normalizeUrl
-    }
-
     async searchForTagSuggestions(args: { query: string; limit?: number }) {
         return this.options.searchBackgroundModule.storage.suggest({
             type: 'tag',
             ...args,
         })
     }
+
     async fetchInitialTagSuggestions(
         { limit }: { limit?: number } = { limit: limitSuggestionsReturnLength },
     ) {
@@ -218,9 +213,6 @@ export default class TagsBackground {
     }) {
         let page = await this.options.pageStorage.getPage(url)
 
-        const fullUrl = url
-        const normalizedUrl = this.normalizeUrl(url, {})
-
         const {
             [IDXING_PREF_KEYS.BOOKMARKS]: shouldFullyIndex,
         } = await this.options.localBrowserStorage.get(
@@ -229,8 +221,7 @@ export default class TagsBackground {
 
         if (page == null || (shouldFullyIndex && pageIsStub(page))) {
             page = await this.searchIndex.createPageViaBmTagActs({
-                fullUrl,
-                url: normalizedUrl,
+                fullUrl: url,
                 tabId,
                 stubOnly: !shouldFullyIndex,
             })

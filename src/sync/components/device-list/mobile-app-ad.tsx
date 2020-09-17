@@ -10,7 +10,7 @@ const MobileAppAd: React.StatelessComponent<Props> = props => (
         <div className={styles.contentSection}>
             <div className={settingsStyle.sectionTitle}>Download Memex GO</div>
             <div className={settingsStyle.infoText}>
-                Our mobile app to save and organise websites on the Go
+                Our mobile app to annotate and organise websites on the Go
             </div>
             <div className={settingsStyle.storeSection}>
                 <img 

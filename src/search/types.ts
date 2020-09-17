@@ -156,8 +156,7 @@ export interface SearchIndex {
 }
 
 export interface PageCreationProps {
-    url: string
-    fullUrl?: string
+    fullUrl: string
     tabId?: number
     stubOnly?: boolean
     allowScreenshot?: boolean

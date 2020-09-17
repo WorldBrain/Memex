@@ -41,7 +41,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                             for (const { url } of testTabs) {
                                 await setup.backgroundModules.search.searchIndex.createTestPage(
-                                    { url },
+                                    { fullUrl: url },
                                 )
                             }
 
