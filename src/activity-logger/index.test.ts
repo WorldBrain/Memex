@@ -44,8 +44,10 @@ describe('URL loggability tests', () => {
             { url: 'https://worldbrain.io/test.png', shouldPass: false },
             { url: 'https://worldbrain.io/test.svg', shouldPass: false },
             { url: 'https://worldbrain.io/test.gif', shouldPass: false },
-            { url: 'https://about:config', shouldPass: false },
             { url: 'about:config', shouldPass: false },
+            { url: 'mailto:test@worldbrain.io', shouldPass: false },
+            { url: 'test@worldbrain.io', shouldPass: false },
+            { url: 'chrome://extensions', shouldPass: false },
             { url: 'worldbrain.com', shouldPass: false },
             { url: 'ftp://worldbrain.com', shouldPass: false },
         ]
