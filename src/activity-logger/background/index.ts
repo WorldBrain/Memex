@@ -199,11 +199,11 @@ export default class ActivityLoggerBackground {
         }
 
         if (changeInfo.favIconUrl) {
-            await this.tabChangeListener.handleFavIcon(tabId, changeInfo, tab)
+            // await this.tabChangeListener.handleFavIcon(tabId, changeInfo, tab)
         }
 
         if (changeInfo.url) {
-            await this.tabChangeListener.handleUrl(tabId, changeInfo, tab)
+            // await this.tabChangeListener.handleUrl(tabId, changeInfo, tab)
         }
     }
 }
