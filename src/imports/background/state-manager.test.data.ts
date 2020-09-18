@@ -6,7 +6,7 @@ interface AllowTypes {
     [key: string]: boolean | string
 }
 
-const normalize = url => normalizeUrl(url)
+const normalize = (url) => normalizeUrl(url)
 
 export interface TestData {
     allowTypes: AllowTypes
@@ -17,16 +17,17 @@ export interface TestData {
     fakeCacheCounts: any
 }
 
-export default function(
+export default function (
     histUrls: string[],
     bmUrls: string[],
     allowTypes?: AllowTypes,
 ): TestData {
-    histUrls = [...new Set(histUrls.map(normalize))]
+    // histUrls = [...new Set(histUrls.map(normalize))]
+    histUrls = []
     bmUrls = [...new Set(bmUrls.map(normalize))]
 
     let idIt = 0
-    const createBrowserItem = type => url =>
+    const createBrowserItem = (type) => (url) =>
         ({ id: idIt++, url, type } as BrowserItem)
 
     const fakeCacheCounts = {
@@ -47,5 +48,5 @@ export default function(
 // Gets set diff `a - b`
 export const diff = (a = [], b = []) => {
     const checkSet = new Set(b)
-    return a.filter(val => !checkSet.has(val))
+    return a.filter((val) => !checkSet.has(val))
 }

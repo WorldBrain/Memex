@@ -1,6 +1,6 @@
 import { Tabs } from 'webextension-polyfill-ts'
 
-import Tab, { TabProps } from './tab-state'
+import Tab from './tab-state'
 import { TabState, NavState } from './types'
 
 export class TabManager {
@@ -18,7 +18,7 @@ export class TabManager {
      */
     trackTab = (
         { id, active, url, windowId }: Tabs.Tab,
-        extraProps: Partial<TabProps> = {},
+        extraProps: Partial<TabState> = {},
     ) =>
         this._tabs.set(
             id,
@@ -41,7 +41,7 @@ export class TabManager {
 
     getTabStateByUrl(url: string) {
         const tabs = new Map<string, Tab>()
-        this._tabs.forEach(tab => tabs.set(tab.url, tab))
+        this._tabs.forEach((tab) => tabs.set(tab.url, tab))
         return tabs.get(url)
     }
 
@@ -188,14 +188,5 @@ export class TabManager {
                 tab.isBookmarked = newState
             }
         }
-    }
-
-    getTabUrls(windowId?: number) {
-        return Array.from(this._tabs.values())
-            .filter(tab => {
-                const isInWindow = windowId ? tab.windowId === windowId : true
-                return isInWindow && tab.isLoggable
-            })
-            .map(tab => ({ tabId: tab.id, url: tab.url }))
     }
 }

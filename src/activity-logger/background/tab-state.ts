@@ -1,16 +1,6 @@
-import { browser, Storage } from 'webextension-polyfill-ts'
-
 import PausableTimer from '../../util/pausable-timer'
-import { SIDEBAR_STORAGE_NAME } from '../../sidebar-overlay/constants'
 import ScrollState from './scroll-state'
 import { TabState, NavState } from './types'
-import { remoteFunction, runInTab } from '../../util/webextensionRPC'
-import { isLoggable } from '..'
-import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-
-export interface TabProps extends TabState {
-    storageAPI: Storage.Static
-}
 
 class Tab implements TabState {
     id: number
@@ -18,7 +8,6 @@ class Tab implements TabState {
     isActive: boolean
     isLoaded: boolean
     isBookmarked: boolean
-    isLoggable: boolean
     visitTime: number
     activeTime: number
     lastActivated: number
@@ -26,7 +15,6 @@ class Tab implements TabState {
     scrollState: ScrollState
     navState: NavState
     private _timer: PausableTimer
-    private _storageAPI: Storage.Static
 
     constructor({
         id,
@@ -36,75 +24,20 @@ class Tab implements TabState {
         isLoaded = false,
         visitTime = Date.now(),
         navState = {},
-        storageAPI = browser.storage,
         isBookmarked = false,
-    }: Partial<TabProps>) {
+    }: Partial<TabState>) {
         this.id = id
         this.url = url
         this.windowId = windowId
         this.isActive = isActive
         this.isLoaded = isLoaded
-        this.isLoggable = isLoggable({ url })
         this.isBookmarked = isBookmarked
         this.visitTime = visitTime
         this.navState = navState
         this.scrollState = new ScrollState()
         this.activeTime = 0
         this.lastActivated = Date.now()
-        this._storageAPI = storageAPI
         this._timer = null
-    }
-
-    /**
-     * Decides whether or not to send the remote function call to the content script
-     * to tell it to toggle rendering the iFrame for the sidebar for the current tab.
-     *
-     * Should check whether the tab's loading state, loggability, tooltip enabled state.
-     */
-    private async _toggleRenderSidebarIFrame(shouldRender: boolean) {
-        if (!this.isLoaded || !this.isLoggable) {
-            return
-        }
-
-        const storage = await this._storageAPI.local.get(SIDEBAR_STORAGE_NAME)
-
-        if (!storage[SIDEBAR_STORAGE_NAME]) {
-            return
-        }
-
-        return remoteFunction('toggleIFrameRender', {
-            tabId: this.id,
-        })(shouldRender)
-    }
-
-    private async _toggleRibbon() {
-        if (!this.isLoaded || !this.isLoggable) {
-            return
-        }
-
-        return runInTab<InPageUIContentScriptRemoteInterface>(
-            this.id,
-        ).insertOrRemoveRibbon()
-    }
-
-    private async _toggleTooltip() {
-        if (!this.isLoaded || !this.isLoggable) {
-            return
-        }
-
-        return runInTab<InPageUIContentScriptRemoteInterface>(
-            this.id,
-        ).insertOrRemoveTooltip()
-    }
-
-    private async _updateRibbonState() {
-        if (!this.isLoaded || !this.isLoggable) {
-            return
-        }
-
-        return runInTab<InPageUIContentScriptRemoteInterface>(
-            this.id,
-        ).updateRibbon()
     }
 
     private _pauseLogTimer() {
