@@ -7,14 +7,14 @@ import DataSources from './data-sources'
 import { chunk } from 'src/util/chunk'
 
 // Binds an import type to a function that transforms a history/bookmark doc to an import item.
-const deriveImportItem = type => item => ({
+const deriveImportItem = (type) => (item) => ({
     browserId: item.id,
     url: item.url,
     title: item.title,
     type,
 })
 
-const deriveServicesImportItem = type => item => ({
+const deriveServicesImportItem = (type) => (item) => ({
     ...item,
     type,
 })
@@ -141,8 +141,8 @@ export default class ImportItemCreator {
 
         this._completedServicesKeys = new Set(
             this._servicesData
-                .filter(item => this._histKeys.has(normalizeUrl(item.url)))
-                .map(item => item.url),
+                .filter((item) => this._histKeys.has(normalizeUrl(item.url)))
+                .map((item) => item.url),
         )
     }
 
@@ -154,7 +154,7 @@ export default class ImportItemCreator {
      * @param {(url: string) => bool} [alreadyExists] Opt. checker function to check against existing data.
      * @return {(items: BrowserItem[]) => Map<string, any>} Function that filters array of browser items into a Map of encoded URL strings to import items.
      */
-    _filterItemsByUrl = (transform, existsSet) => items => {
+    _filterItemsByUrl = (transform, existsSet) => (items) => {
         const importItems = new Map()
 
         for (const item of items) {
@@ -231,19 +231,19 @@ export default class ImportItemCreator {
             )
         }
 
-        if (this._histLimit > 0) {
-            const itemsFilter = this._filterItemsByUrl(
-                deriveImportItem(TYPE.HISTORY),
-                this._histKeys,
-            )
+        // if (this._histLimit > 0) {
+        //     const itemsFilter = this._filterItemsByUrl(
+        //         deriveImportItem(TYPE.HISTORY),
+        //         this._histKeys,
+        //     )
 
-            yield* this._iterateItems(
-                this._dataSources.history(),
-                itemsFilter,
-                this._histLimit,
-                TYPE.HISTORY,
-            )
-        }
+        //     yield* this._iterateItems(
+        //         this._dataSources.history(),
+        //         itemsFilter,
+        //         this._histLimit,
+        //         TYPE.HISTORY,
+        //     )
+        // }
 
         if (this._servicesData && this._servicesLimit > 0) {
             const itemsFilter = this._filterItemsByUrl(
