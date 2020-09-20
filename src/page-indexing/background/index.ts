@@ -160,7 +160,7 @@ export class PageIndexingBackground {
 
         const analysisRes = await analysePage({
             tabId: props.tabId,
-            allowFavIcon: false,
+            allowFavIcon: true,
             ...props,
         })
 
@@ -174,6 +174,13 @@ export class PageIndexingBackground {
             pageDoc: { ...analysisRes, url: props.fullUrl },
             rejectNoContent: !props.stubOnly,
         })
+
+        if (analysisRes.favIconURI) {
+            await this.storage.createFavIconIfNeeded(
+                pageData.hostname,
+                analysisRes.favIconURI,
+            )
+        }
 
         await this.storage.createPageIfNotExistsOrIsStub(pageData)
         if (props.visitTime) {
