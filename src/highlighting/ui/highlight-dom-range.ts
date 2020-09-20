@@ -37,7 +37,11 @@ export const highlightDOMRange = (
     // Highlight each node
     const highlights: HTMLElement[] = []
     for (const node of nodes) {
-        highlights.push(highlightNode(node, highlightClass))
+        const highlightedNode = highlightNode(node, highlightClass)
+        if (!highlightedNode) {
+            continue
+        }
+        highlights.push(highlightedNode)
     }
 
     // Reset selection
@@ -208,10 +212,19 @@ const getFirstTextNode = (node: Node) => {
 }
 
 // Replace [node] with <memex-highlight class=[highlightClass]>[node]</memex-highlight>
-const highlightNode = (node: Node, highlightClass: string) => {
+const highlightNode = (
+    node: Node,
+    highlightClass: string,
+    highlightTagName = 'memex-highlight',
+) => {
     // Create a highlight
-    const highlight: HTMLElement = document.createElement('memex-highlight')
+    const highlight: HTMLElement = document.createElement(highlightTagName)
     highlight.classList.add(highlightClass)
+
+    // Ensure this isn't being called multiple times and creating multiple nested highlights
+    if (node.parentNode.nodeName.toLocaleLowerCase() === highlightTagName) {
+        return null
+    }
 
     // Wrap it around the text node
     node.parentNode.replaceChild(highlight, node)

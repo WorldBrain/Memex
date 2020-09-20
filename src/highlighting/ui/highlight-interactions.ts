@@ -83,13 +83,6 @@ export const renderAnnotationCacheChanges = (opts: {
 }) => {
     const { cacheChanges, onClickHighlight, renderer } = opts
 
-    const onLoad = (annotations) => {
-        renderer.renderHighlights(
-            annotations as Highlight[],
-            onClickHighlight,
-            false,
-        )
-    }
     const onRollback = (annotations) => {
         renderer.undoAllHighlights()
         renderer.renderHighlights(
@@ -105,13 +98,11 @@ export const renderAnnotationCacheChanges = (opts: {
         renderer.undoHighlight(annotation.url)
     }
 
-    cacheChanges.on('load', onLoad)
     cacheChanges.on('rollback', onRollback)
     cacheChanges.on('created', onCreated)
     cacheChanges.on('deleted', onDeleted)
 
     return () => {
-        cacheChanges.removeListener('load', onLoad)
         cacheChanges.removeListener('rollback', onRollback)
         cacheChanges.removeListener('created', onCreated)
         cacheChanges.removeListener('deleted', onDeleted)
