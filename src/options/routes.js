@@ -18,10 +18,10 @@ export default [
         hideFromSidebar: true,
     },
     {
-        name: 'Search Dashboard',
+        name: 'Home',
         pathname: '/overview',
         component: DashboardResultsContainer,
-        icon: 'search',
+        icon: 'home',
         useOwnLayout: true,
     },
     {

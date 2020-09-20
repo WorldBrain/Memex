@@ -10,6 +10,7 @@ export const ROAM_MD_TEMPLATE: Template = {
     title: 'Roam Markdown',
     isFavourite: false,
     code: `[[{{{PageTitle}}}]]
+  url:: {{{PageUrl}}}
 {{#Notes}}
   ^^{{{NoteHighlight}}}^^ {{{NoteTags}}}
     {{{NoteText}}}

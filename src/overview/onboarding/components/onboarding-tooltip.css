@@ -13,6 +13,7 @@
     padding: 1rem;
     margin: 40px auto 17px;
     max-width: 95%;
+    min-width: 600px;
 }
 
 .img {
@@ -24,6 +25,7 @@
     flex: 1;
     flex-direction: column;
     justify-content: center;
+    width: 100%;
 }
 
 .ctaButton {

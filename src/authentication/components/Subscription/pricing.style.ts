@@ -438,6 +438,15 @@ const EditBox = styled.div`
     width: 100px;
 `
 
+const TrialInfo = styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: -15px 0px 20px;
+    font-size: 14px;
+    color: ${colorPrimary};
+`
+
 export {
     SubscriptionOptionsContainer,
     PriceInputBox,
@@ -446,6 +455,7 @@ export {
     ColExplorer,
     ColThinker,
     ColPioneer,
+    TrialInfo,
     Line,
     PricingGrid,
     PricingGridCheck,

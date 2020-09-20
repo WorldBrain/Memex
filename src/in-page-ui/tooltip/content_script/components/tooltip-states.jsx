@@ -19,7 +19,7 @@ export const InitialComponent = ({
 }) => (
     <div className={styles.createButtons}>
         <div className={styles.button} onClick={createHighlight}>
-            <ButtonTooltip tooltipText="Highlight (N)" position="bottom">
+            <ButtonTooltip tooltipText="Highlight" position="bottom">
                 <img src={highlighter} className={styles.buttonImg} />
             </ButtonTooltip>
         </div>

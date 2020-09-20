@@ -319,8 +319,8 @@ export default class OnboardingScreen extends StatefulUIElement<
                 return (
                     <OnboardingStep
                         goToStep={this.handleStepClick}
-                        titleText="Flexibly & Quickly organise websites"
-                        subtitleText="Tags, bookmark and add pages to collections. Also with keyboard shortcuts."
+                        titleText="Flexibly & quickly organise websites"
+                        subtitleText="Tag, bookmark and add pages to collections."
                         renderButton={() => (
                             <OnboardingAction
                                 onClick={this.handleNextStepClick}
@@ -346,7 +346,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                 return (
                     <OnboardingStep
                         goToStep={this.handleStepClick}
-                        titleText="Make Highlights & Notes"
+                        titleText="Make highlights & notes"
                         subtitleText="Highlight and annotate websites. Right-click on selected text or use keyboard shortcuts."
                         renderButton={() => (
                             <OnboardingAction
@@ -441,7 +441,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                 return (
                     <OnboardingStep
                         goToStep={this.handleStepClick}
-                        titleText="Save and Annotate Websites on the Go"
+                        titleText="Save and annotate websites on the go"
                         subtitleText="Install Memex Go for iOS and Android"
                         navToOverview={this.props.navToOverview}
                         renderButton={() => (
@@ -464,7 +464,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                 return (
                     <OnboardingStep
                         goToStep={this.handleStepClick}
-                        titleText="Your Data & Attention is Yours"
+                        titleText="Your data & attention is yours"
                         subtitleText="All data is stored offline-first and synced with End2End encryption."
                         subtitleText2="Memex is also funded without Venture Capital investments."
                         navToOverview={this.props.navToOverview}

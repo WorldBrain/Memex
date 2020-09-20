@@ -20,14 +20,14 @@ class CollectionsButton extends PureComponent {
                         onClick={this.props.onShowBtnClick}
                         className={styles.enabled}
                     >
-                        Show History
+                        Show All
                     </div>
                 ) : (
                     <div
                         onClick={this.props.listBtnClick}
                         className={styles.enabled}
                     >
-                        Collections
+                        Show Collections
                     </div>
                 )}
             </div>

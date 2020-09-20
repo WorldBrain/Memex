@@ -71,7 +71,7 @@ export default class DisplayNameSetup extends PureComponent<
                 <InstructionsContainer>
                     <InstructionsBox>
                         <TypographyHeadingBigger>
-                            Setup your display name
+                            What's your name?
                         </TypographyHeadingBigger>
                         <TypographyTextNormal>
                             This is how people know who the shared content is

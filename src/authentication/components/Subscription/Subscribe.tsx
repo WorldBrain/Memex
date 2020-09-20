@@ -6,6 +6,7 @@ import {
     PricingPlanItem,
     PricingPlanTitle,
     WhiteSpacer30,
+    TrialInfo,
 } from 'src/authentication/components/Subscription/pricing.style'
 
 import SubscriptionOptionsChargebee from 'src/authentication/components/Subscription/SubscriptionOptionsChargebee'
@@ -125,6 +126,10 @@ class Subscribe extends React.Component<Props, State> {
             <PricingPlanTitle className={''}>
                 ⭐️ Upgrade your Memex
             </PricingPlanTitle>
+
+            <TrialInfo>
+                14 day free trial
+            </TrialInfo>
 
             {/*<PricingPlanItem className={''}>*/}
             {/*    📲 Encrypted Sync with your iOS or Android phone*/}

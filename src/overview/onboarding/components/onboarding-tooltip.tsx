@@ -5,7 +5,7 @@ const styles = require('./onboarding-tooltip.css')
 export interface Props {
     imgSrc?: string
     CTAText?: string
-    descriptionText: string
+    descriptionText: Object
     onCTAClick?: () => void
 }
 
@@ -39,8 +39,6 @@ export default class OnboardingTooltip extends React.PureComponent<Props> {
                 {this.renderImg()}
                 <div className={styles.textContainer}>
                     <p className={styles.containerTitle}>
-                        <span className={styles.tipIcon} />
-                        <span>Pro tip</span>
                     </p>
                     <p className={styles.descriptionText}>
                         {this.props.descriptionText}

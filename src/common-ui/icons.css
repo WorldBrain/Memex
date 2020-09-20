@@ -169,6 +169,13 @@
     mask-image: url('/img/backup.svg');
 }
 
+.homeIcon {
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/home.svg');
+}
+
 .blockIcon {
     composes: standardIcon;
     mask-position: center;

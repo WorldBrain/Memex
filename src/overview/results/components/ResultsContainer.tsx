@@ -139,7 +139,7 @@ class ResultsContainer extends React.Component<Props, State> {
             return (
                 <ResultsMessage>
                     <NoResultBadTerm>
-                        found for this query. ¯\_(ツ)_/¯
+                        ¯\_(ツ)_/¯
                     </NoResultBadTerm>
                 </ResultsMessage>
             )

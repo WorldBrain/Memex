@@ -21,6 +21,12 @@
     }
 }
 
+.animationContainer { 
+    display: flex;
+    height: 100%;
+    align-items: center;
+ } 
+
 .tooltip::after {
     box-sizing: content-box;
     left: calc(50% - 3px);
@@ -104,6 +110,7 @@
 
 .animationWrapper {
     width: 100%;
+    user-select: none;
 }
 
 .createButtons {
@@ -112,9 +119,11 @@
     top: 0px;
     padding: 0 3px;
     width: fit-content;
+    height: 100%;
     justify-content: space-between;
     align-items: center;
     animation: slideIn 0.05s ease-in-out;
+    user-select: none;
 }
 
 .progressIndicator {

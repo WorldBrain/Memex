@@ -44,15 +44,7 @@ class Import extends React.PureComponent<Props> {
         return (
             <div>
                 <div className={settingsStyle.sectionTitle}>
-                    Import urls from other services
-                </div>
-                <div className={localStyles.stepText}>
-                    <Warning>
-                        Re-downloading urls may slow down your web browsing.
-                        <br />
-                        With more than 10.000 links it is suggested to let this
-                        run overnight.
-                    </Warning>
+                    Import Bookmarks from other services
                 </div>
             </div>
         )
@@ -80,9 +72,6 @@ class Import extends React.PureComponent<Props> {
                             <b>worldbrain.io/import_bug</b>
                         </a>{' '}
                         to fix it.
-                        <br />
-                        It can also happen that virtually all URLs fail. Restart
-                        your extension and start over.
                     </Warning>
                 </div>
             </div>

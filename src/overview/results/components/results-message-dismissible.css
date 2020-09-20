@@ -10,6 +10,8 @@
     padding: 1rem;
     margin: 40px auto 17px;
     max-width: 95%;
+    min-width: 700px;
+    padding-bottom: 30px;
 }
 
 .dismissButton {

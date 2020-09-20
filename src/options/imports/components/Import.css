@@ -12,14 +12,21 @@
 
     & th,
     & td {
-        padding: 15px 10px 10px 10px;
-        width: 21.5%;
+        padding: 15px 0px 10px 0px;
+        width: 15%;
         color: color4;
         font-weight: 300;
     }
 
+    & th:last-child {
+        width: 25%;
+        padding: 15px 10px 10px 10px;
+    }
+
     & th {
         font-weight: 600;
+        padding: 15px 0px 10px 0px;
+        width: 15%;
     }
 
     & td.importTableCellSepar {
@@ -29,7 +36,7 @@
     & td:first-child {
         text-align: initial;
         font-weight: 500;
-        width: 35%;
+        width: 30%;
         padding: 15px 0px 15px 15px;
     }
 

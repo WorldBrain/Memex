@@ -9,10 +9,10 @@ const styles = require('./tooltip.css')
 const searchBarTooltip: React.SFC = () => (
     <div>
 		<p className={styles.title}>		    	
-		Search with any word you remember about websites you've seen.  
+		Search with any word you remember about websites you saved.  
 		</p>
 		<p className={styles.subInfo}>		
-			<span><b>🤓 Pro Tip: </b> Import your existing history and bookmarks.</span>
+			<span><b>🤓 Pro Tip: </b> Import your existing bookmarks.</span>
 			<a target="_blank" href="#import"><span className={styles.start}>Do it!</span></a>
 		</p>
     </div>
