@@ -117,38 +117,50 @@ export default class Ribbon extends Component<Props, State> {
     private hideListPicker = () => this.props.lists.setShowListsPicker(false)
 
     private renderTagsManager() {
+        if (!this.props.tagging.showTagsPicker) {
+            return null
+        }
+
         return (
-            <TagPicker
-                onUpdateEntrySelection={this.props.tagging.updateTags}
-                queryEntries={this.props.tagging.queryTagSuggestions}
-                actOnAllTabs={this.props.tagging.tagAllTabs}
-                initialSelectedEntries={
-                    this.props.tagging.fetchInitialTagSelections
-                }
-                loadDefaultSuggestions={
-                    this.props.tagging.fetchInitialTagSuggestions
-                }
-                onEscapeKeyDown={this.hideTagPicker}
-                onClickOutside={this.hideTagPicker}
-            />
+            <Tooltip position="left">
+                <TagPicker
+                    onUpdateEntrySelection={this.props.tagging.updateTags}
+                    queryEntries={this.props.tagging.queryTagSuggestions}
+                    actOnAllTabs={this.props.tagging.tagAllTabs}
+                    initialSelectedEntries={
+                        this.props.tagging.fetchInitialTagSelections
+                    }
+                    loadDefaultSuggestions={
+                        this.props.tagging.fetchInitialTagSuggestions
+                    }
+                    onEscapeKeyDown={this.hideTagPicker}
+                    onClickOutside={this.hideTagPicker}
+                />
+            </Tooltip>
         )
     }
 
     private renderCollectionsManager() {
+        if (!this.props.lists.showListsPicker) {
+            return null
+        }
+
         return (
-            <CollectionPicker
-                onUpdateEntrySelection={this.props.lists.updateLists}
-                queryEntries={this.props.lists.queryListSuggestions}
-                actOnAllTabs={this.props.lists.listAllTabs}
-                initialSelectedEntries={
-                    this.props.lists.fetchInitialListSelections
-                }
-                loadDefaultSuggestions={
-                    this.props.lists.fetchInitialListSuggestions
-                }
-                onEscapeKeyDown={this.hideListPicker}
-                onClickOutside={this.hideListPicker}
-            />
+            <Tooltip position="left">
+                <CollectionPicker
+                    onUpdateEntrySelection={this.props.lists.updateLists}
+                    queryEntries={this.props.lists.queryListSuggestions}
+                    actOnAllTabs={this.props.lists.listAllTabs}
+                    initialSelectedEntries={
+                        this.props.lists.fetchInitialListSelections
+                    }
+                    loadDefaultSuggestions={
+                        this.props.lists.fetchInitialListSuggestions
+                    }
+                    onEscapeKeyDown={this.hideListPicker}
+                    onClickOutside={this.hideListPicker}
+                />
+            </Tooltip>
         )
     }
 
@@ -281,7 +293,9 @@ export default class Ribbon extends Component<Props, State> {
                     <div className={styles.extraButtonsText}>Open Settings</div>
                 </div>
                 <div
-                    onClick={() => window.open('https://worldbrain.io/feedback')}
+                    onClick={() =>
+                        window.open('https://worldbrain.io/feedback')
+                    }
                     className={styles.feedbackRow}
                 >
                     <div className={styles.extraButtonsText}>Feedback</div>
@@ -488,11 +502,7 @@ export default class Ribbon extends Component<Props, State> {
                                             )
                                         }
                                     />
-                                    {this.props.tagging.showTagsPicker && (
-                                        <Tooltip position="left">
-                                            {this.renderTagsManager()}
-                                        </Tooltip>
-                                    )}
+                                    {this.renderTagsManager()}
                                 </ButtonTooltip>
 
                                 <ButtonTooltip
@@ -515,11 +525,7 @@ export default class Ribbon extends Component<Props, State> {
                                             )
                                         }
                                     />
-                                    {this.props.lists.showListsPicker && (
-                                        <Tooltip position="left">
-                                            {this.renderCollectionsManager()}
-                                        </Tooltip>
-                                    )}
+                                    {this.renderCollectionsManager()}
                                 </ButtonTooltip>
                                 <ButtonTooltip
                                     tooltipText="More Settings"

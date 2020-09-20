@@ -87,7 +87,12 @@ export class RibbonContainerLogic extends UILogic<
     RibbonContainerState,
     RibbonContainerEvents
 > {
-    private initLogic = resolvablePromise()
+    /**
+     * This resolves once the `init` method logic resolves. Useful for stopping race-conditions
+     * between ribbon loading and other state mutation events, particularly those that are triggered
+     * by keyboard shortcuts - can happen before the ribbon is first loaded.
+     */
+    private initLogicResolvable = resolvablePromise()
 
     commentSavedTimeout = 2000
 
@@ -135,7 +140,7 @@ export class RibbonContainerLogic extends UILogic<
             const { url } = this.dependencies.currentTab
             await this.hydrateStateFromDB({ ...incoming, event: { url } })
         })
-        this.initLogic.resolve()
+        this.initLogicResolvable.resolve()
     }
 
     hydrateStateFromDB: EventHandler<'hydrateStateFromDB'> = async ({
@@ -203,7 +208,7 @@ export class RibbonContainerLogic extends UILogic<
         }
 
         this.events.on('mutation', stateUpdater)
-        await this.initLogic
+        await this.initLogicResolvable
         this.events.removeListener('mutation', stateUpdater)
 
         return latestState
@@ -270,7 +275,10 @@ export class RibbonContainerLogic extends UILogic<
     //
     // Comment box
     //
-    setShowCommentBox: EventHandler<'setShowCommentBox'> = ({ event }) => {
+    setShowCommentBox: EventHandler<'setShowCommentBox'> = async ({
+        event,
+    }) => {
+        await this.initLogicResolvable
         this.dependencies.setRibbonShouldAutoHide(!event.value)
         const extra: UIMutation<RibbonContainerState> =
             event.value === true
@@ -340,7 +348,10 @@ export class RibbonContainerLogic extends UILogic<
     //
     // Tagging
     //
-    setShowTagsPicker: EventHandler<'setShowTagsPicker'> = ({ event }) => {
+    setShowTagsPicker: EventHandler<'setShowTagsPicker'> = async ({
+        event,
+    }) => {
+        await this.initLogicResolvable
         this.dependencies.setRibbonShouldAutoHide(!event.value)
         const extra: UIMutation<RibbonContainerState> =
             event.value === true
@@ -430,7 +441,10 @@ export class RibbonContainerLogic extends UILogic<
         })
     }
 
-    setShowListsPicker: EventHandler<'setShowListsPicker'> = ({ event }) => {
+    setShowListsPicker: EventHandler<'setShowListsPicker'> = async ({
+        event,
+    }) => {
+        await this.initLogicResolvable
         this.dependencies.setRibbonShouldAutoHide(!event.value)
         const extra: UIMutation<RibbonContainerState> =
             event.value === true
