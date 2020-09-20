@@ -6,8 +6,7 @@ import TagHolder from './tag-holder'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { LesserLink } from 'src/common-ui/components/design-library/actions/LesserLink'
 import styled from 'styled-components'
-import { Link } from 'src/common-ui/components/design-library/actions/Link'
-import { ButtonTooltip } from 'src/common-ui/components'
+import { ClickAway } from 'src/util/click-away-wrapper'
 
 export interface Props {
     queryTagSuggestions: (query: string) => Promise<string[]>
@@ -16,7 +15,6 @@ export interface Props {
     deleteTag: (tag: string) => void
     updateTags: PickerUpdateHandler
     onKeyDown?: React.KeyboardEventHandler
-    handleClose: React.MouseEventHandler
     isTagInputActive: boolean
     tags: string[]
 }
@@ -29,16 +27,21 @@ class TagInput extends React.Component<Props> {
 
         return (
             <HoverBox>
-                <TagPicker
-                    onUpdateEntrySelection={this.props.updateTags}
-                    queryEntries={this.props.queryTagSuggestions}
-                    loadDefaultSuggestions={
-                        this.props.fetchInitialTagSuggestions
-                    }
-                    initialSelectedEntries={async () => this.props.tags}
-                    onEscapeKeyDown={() => this.props.setTagInputActive(false)}
-                    onClickOutside={(e) => this.props.handleClose(e)}
-                />
+                <ClickAway
+                    onClickAway={() => this.props.setTagInputActive(false)}
+                >
+                    <TagPicker
+                        onUpdateEntrySelection={this.props.updateTags}
+                        queryEntries={this.props.queryTagSuggestions}
+                        loadDefaultSuggestions={
+                            this.props.fetchInitialTagSuggestions
+                        }
+                        initialSelectedEntries={async () => this.props.tags}
+                        onEscapeKeyDown={() =>
+                            this.props.setTagInputActive(false)
+                        }
+                    />
+                </ClickAway>
             </HoverBox>
         )
     }

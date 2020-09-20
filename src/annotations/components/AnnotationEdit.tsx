@@ -71,7 +71,6 @@ class AnnotationEdit extends React.Component<Props> {
                 queryTagSuggestions={queryEntries}
                 fetchInitialTagSuggestions={loadDefaultSuggestions}
                 onKeyDown={this.handleTagInputKeydown}
-                handleClose={() => this.props.setTagInputActive(false)}
                 {...this.props}
             />
         )

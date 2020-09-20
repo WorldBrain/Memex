@@ -107,10 +107,9 @@ class AnnotationCreate extends React.Component<
                 updateTags={async ({ selected: tags }) =>
                     this.setState({ tags })
                 }
-                handleClose={() => this.setState({ isTagPickerShown: false })}
                 isTagInputActive={isTagPickerShown}
-                setTagInputActive={() =>
-                    this.setState({ isTagPickerShown: true })
+                setTagInputActive={(isShown) =>
+                    this.setState({ isTagPickerShown: isShown })
                 }
                 tags={this.state.tags}
                 fetchInitialTagSuggestions={
