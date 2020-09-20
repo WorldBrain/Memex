@@ -42,7 +42,7 @@ const analysePage: PageAnalyzer = async ({
         const rawContent = await retryUntil<RawPageContent>(
             () =>
                 runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),
-            value => !!value,
+            (value) => !!value,
             { intervalMiliseconds: 50, timeoutMiliseconds: 1000 },
         )
 
@@ -58,7 +58,8 @@ const analysePage: PageAnalyzer = async ({
     // Fetch the data
     const dataFetchingPromises = [
         allowContent ? extractPageContent() : Promise.resolve(),
-        allowScreenshot ? makeScreenshot({ tabId }) : Promise.resolve(),
+        // allowScreenshot ? makeScreenshot({ tabId }) : Promise.resolve(),
+        Promise.resolve(),
         allowFavIcon ? getFavIcon({ tabId }) : Promise.resolve(),
     ]
 
@@ -66,7 +67,7 @@ const analysePage: PageAnalyzer = async ({
     const [content, screenshotURI, favIconURI] = await whenAllSettled(
         dataFetchingPromises,
         {
-            onRejection: err => {
+            onRejection: (err) => {
                 // console.log(`Failed to extract page content for tab ${tabId}:`, err)
             },
         },
