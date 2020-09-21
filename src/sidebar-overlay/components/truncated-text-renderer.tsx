@@ -138,7 +138,7 @@ const HighlightText = styled.span`
     background-color: #65ffc8;
     line-height: 28px;
     font-style: normal;
-    color: #3a2f45;
+    color: #000;
     padding: 2px 0px;
     box-decoration-break: clone;
     white-space: normal;

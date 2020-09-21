@@ -21,7 +21,6 @@ class SearchBox extends React.Component<Props> {
             <form>
                 <span className={styles.search} />
                 <TextInputControlled
-                    autoFocus
                     className={styles.searchInput}
                     type="input"
                     name="query"

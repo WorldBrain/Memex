@@ -113,7 +113,6 @@ class AnnotationsSidebar extends React.Component<
                             <SearchIcon />{' '}
                         </ButtonStyled>
                         <SearchInputStyled
-                            autoFocus
                             type="input"
                             name="query"
                             autoComplete="off"
