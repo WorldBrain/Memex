@@ -394,14 +394,6 @@ export class AnnotationsSidebarContainer<
                                 <ActionIcon src={icons.shareEmpty} />
                             </ActionBtn>
                         </ButtonTooltip>
-                        <ButtonTooltip
-                            tooltipText="Add notes to page"
-                            position="bottomRightEdge"
-                        >
-                            <ActionBtn onClick={this.handleAddCommentBtnClick}>
-                                <ActionIcon src={icons.commentAdd} />
-                            </ActionBtn>
-                        </ButtonTooltip>
                     </TopBarActionBtns>
                 </TopBarContainerStyled>
                 {this.renderAllNotesCopyPaster()}
