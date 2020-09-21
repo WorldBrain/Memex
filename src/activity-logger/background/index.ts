@@ -1,5 +1,8 @@
 import { Runtime, WebNavigation, Tabs, Browser } from 'webextension-polyfill-ts'
 
+import * as Raven from 'src/util/raven'
+import { mapChunks } from 'src/util/chunk'
+import { CONCURR_TAB_LOAD } from '../constants'
 import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import initPauser, { getState as getPauseState } from './pause-logging'
 import { updateVisitInteractionData } from './util'
@@ -63,6 +66,7 @@ export default class ActivityLoggerBackground {
             tabManager: this.tabManager,
         })
         this.tabChangeListener = new TabChangeListeners({
+            tabsAPI: this.tabsAPI,
             tabManager: this.tabManager,
             searchIndex: options.searchIndex,
             pageVisitLogger: this.pageVisitLogger,
@@ -86,12 +90,18 @@ export default class ActivityLoggerBackground {
         const tabs = await this.tabsAPI.query({})
         const tabBookmarks = await this.bookmarksBG.findTabBookmarks(tabs)
 
-        for (const tab of tabs) {
+        await mapChunks(tabs, CONCURR_TAB_LOAD, async (tab) => {
             this.tabManager.trackTab(tab, {
                 isLoaded: ActivityLoggerBackground.isTabLoaded(tab),
                 isBookmarked: tabBookmarks.get(tab.url),
             })
-        }
+
+            await this.tabChangeListener
+                .injectContentScripts(tab)
+                .catch((err) => {
+                    Raven.captureException(err)
+                })
+        })
 
         this.trackingExistingTabs.resolve()
     }

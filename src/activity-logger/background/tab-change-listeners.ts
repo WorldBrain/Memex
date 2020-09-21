@@ -1,7 +1,11 @@
 import { Storage, Tabs, Browser } from 'webextension-polyfill-ts'
 import throttle from 'lodash/throttle'
 
-import { TabEventChecker, whenTabActive } from '../../util/tab-events'
+import {
+    TabEventChecker,
+    whenPageDOMLoaded,
+    whenTabActive,
+} from '../../util/tab-events'
 import PageVisitLogger from './log-page-visit'
 import {
     fetchFavIcon,
@@ -31,7 +35,13 @@ export default class TabChangeListeners {
     static FAUX_VISIT_THRESHOLD = 100
     static FAV_ICON_CHANGE_THRESHOLD = 200
     static URL_CHANGE_THRESHOLD = 1000
+    static DEF_CONTENT_SCRIPTS = [
+        '/lib/browser-polyfill.js',
+        '/content_script.js',
+    ]
 
+    private _contentScriptPaths: string[]
+    private _tabsAPI: Tabs.Static
     private _tabManager: TabManager
     private _searchIndex: SearchIndex
     private _storage: Storage.StorageArea
@@ -55,6 +65,7 @@ export default class TabChangeListeners {
     >()
 
     constructor(options: {
+        tabsAPI: Tabs.Static
         tabManager: TabManager
         pageVisitLogger: PageVisitLogger
         browserAPIs: Pick<Browser, 'storage'>
@@ -63,7 +74,9 @@ export default class TabChangeListeners {
         favIconFetch?: FavIconFetcher
         tabActiveCheck?: TabEventChecker
         loggableTabCheck?: LoggableTabChecker
+        contentScriptPaths?: string[]
     }) {
+        this._tabsAPI = options.tabsAPI
         this._tabManager = options.tabManager
         this._pageVisitLogger = options.pageVisitLogger
         this._storage = options.storageArea || options.browserAPIs.storage.local
@@ -72,6 +85,8 @@ export default class TabChangeListeners {
         this._updateTabVisit = updateVisitInteractionData
         this._fetchFavIcon = options.favIconFetch || fetchFavIcon
         this._tabActive = options.tabActiveCheck || whenTabActive
+        this._contentScriptPaths =
+            options.contentScriptPaths || TabChangeListeners.DEF_CONTENT_SCRIPTS
 
         this.checkBookmark = options.searchIndex.pageHasBookmark
     }
@@ -156,6 +171,18 @@ export default class TabChangeListeners {
             oldTab.activeTime > TabChangeListeners.FAUX_VISIT_THRESHOLD
         ) {
             await this._updateTabVisit(oldTab, this._searchIndex)
+        }
+    }
+
+    public async injectContentScripts(tab: Tabs.Tab) {
+        const isLoggable = await this._checkTabLoggable(tab)
+
+        if (!isLoggable) {
+            return
+        }
+
+        for (const file of this._contentScriptPaths) {
+            await this._tabsAPI.executeScript(tab.id, { file })
         }
     }
 
