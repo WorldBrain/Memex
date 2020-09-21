@@ -162,6 +162,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             <HighlightStyled>
                 <HighlightTextStyled>
                     <TextTruncated
+                        isHighlight={true}
                         text={this.props.body}
                         getTruncatedTextObject={getTruncatedTextObject}
                     />
@@ -191,6 +192,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         const {
             mode,
             annotationEditDependencies,
+            annotationFooterDependencies,
             tagPickerDependencies,
         } = this.props
 
@@ -208,6 +210,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         return (
             <AnnotationView
                 {...this.props}
+                {...annotationFooterDependencies}
                 theme={this.theme}
                 getTruncatedTextObject={getTruncatedTextObject}
             />

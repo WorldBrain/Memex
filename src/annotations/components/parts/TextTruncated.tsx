@@ -12,8 +12,11 @@ interface Props {
     isHighlight: boolean
 }
 
+import * as icons from 'src/common-ui/components/design-library/icons'
+
 interface State {
     shouldTruncate: boolean
+
 }
 
 class TextTruncated extends React.Component<Props, State> {
@@ -23,7 +26,6 @@ class TextTruncated extends React.Component<Props, State> {
 
     state = {
         shouldTruncate: true,
-        isHighlight: false,
     }
 
     componentDidMount() {
@@ -57,7 +59,16 @@ class TextTruncated extends React.Component<Props, State> {
 
         return (
             <React.Fragment>
-                <TextToBeDisplayed>{textToBeDisplayed}</TextToBeDisplayed>
+                {this.props.isHighlight && (
+                    <TextToBeDisplayed>{textToBeDisplayed}</TextToBeDisplayed>
+                )}
+
+                {!this.props.isHighlight && (
+                    <TextBox>
+                        <TextToBeDisplayed>{textToBeDisplayed}</TextToBeDisplayed>
+                        <IconStyled/>
+                    </TextBox>
+                )}
                 <CommentTextBox>
                     {isTextTooLong && (
                         <ToggleMoreButtonStyled
@@ -72,13 +83,52 @@ class TextTruncated extends React.Component<Props, State> {
     }
 }
 
+const IconStyled = styled.button`
+    border: none;
+    z-index: 2500;
+    outline: none;
+    border-radius: 3px;
+    width: 20px;
+    height: 20px;
+    opacity: 0.6;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    padding: 3px;
+    display: none;
+    background-color: #3a2f45;
+    mask-image: url(${icons.commentEditFull});
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: 16px;
+`
+
+const TextBox = styled.div`  
+    position: relative;
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+
+    &: hover {
+        background-color: #e0e0e0;
+        border-radius: 3px;
+        cursor: pointer;
+        
+        &:hover ${IconStyled} {
+            display: flex;
+          }
+
+    }
+`
+
+
 const TextToBeDisplayed = styled.span`
     box-decoration-break: clone;
     padding: 0 5px;
 `
 
 const ToggleMoreButtonStyled = styled.div`
-    margin: 2px 0 0 -8px;
+    margin: 2px 0 0 -3px;
     cursor: pointer;
     padding: 2px 8px;
     border-radius: 3px;

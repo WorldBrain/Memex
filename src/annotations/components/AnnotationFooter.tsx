@@ -59,22 +59,6 @@ class AnnotationFooter extends React.Component<Props> {
                             />
                         </IconBox>
                     </ButtonTooltip>
-                    <ButtonTooltip
-                        position={'bottom'}
-                        tooltipText={'Edit Note'}
-                    >
-                        <IconBox onClick={this.props.onEditIconClick}>
-                            <IconStyled src={icons.commentEdit} />
-                        </IconBox>
-                    </ButtonTooltip>
-                    <ButtonTooltip
-                        position={'bottom'}
-                        tooltipText={'Delete Note'}
-                    >
-                        <IconBox onClick={this.props.onDeleteIconClick}>
-                            <IconStyled src={icons.trash} />
-                        </IconBox>
-                    </ButtonTooltip>
                     <AnnotationShareIconRenderer
                         {...this.props}
                         onShare={this.props.onShareClick}
@@ -93,7 +77,11 @@ class AnnotationFooter extends React.Component<Props> {
                             </ButtonTooltip>
                         )}
                     />
-
+                    <ButtonTooltip position="bottom" tooltipText="Copy Note">
+                        <IconBox onClick={this.props.onCopyPasterBtnClick}>
+                            <IconStyled src={icons.copy} />
+                        </IconBox>
+                    </ButtonTooltip>
                     {this.props.onGoToAnnotation && (
                         <ButtonTooltip
                             position={'bottom'}
@@ -104,10 +92,20 @@ class AnnotationFooter extends React.Component<Props> {
                             </IconBox>
                         </ButtonTooltip>
                     )}
-
-                    <ButtonTooltip position="bottom" tooltipText="Copy Note">
-                        <IconBox onClick={this.props.onCopyPasterBtnClick}>
-                            <IconStyled src={icons.copy} />
+                    <ButtonTooltip
+                        position={'bottom'}
+                        tooltipText={'Edit Note'}
+                    >
+                        <IconBox onClick={this.props.onEditIconClick}>
+                            <IconStyled src={icons.commentAdd} />
+                        </IconBox>
+                    </ButtonTooltip>
+                    <ButtonTooltip
+                        position={'bottom'}
+                        tooltipText={'Delete Note'}
+                    >
+                        <IconBox onClick={this.props.onDeleteIconClick}>
+                            <IconStyled src={icons.trash} />
                         </IconBox>
                     </ButtonTooltip>
                 </DefaultFooterBtnContainerStyled>

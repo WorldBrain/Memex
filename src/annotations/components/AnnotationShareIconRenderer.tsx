@@ -105,15 +105,15 @@ export class AnnotationShareIconRenderer extends React.Component<Props> {
         const SHARE_BUTTON_ICONS: {
             [Key in typeof shareButtonState]: string | null
         } = {
-            'feature-disabled': icons.shareEmpty,
-            'not-shared-yet': icons.shareEmpty,
-            'already-shared': icons.share,
-            sharing: icons.share,
-            'sharing-success': icons.share,
-            'sharing-error': icons.shareEmpty,
-            unsharing: icons.shareEmpty,
-            'unsharing-success': icons.shareEmpty,
-            'unsharing-error': icons.share,
+            'feature-disabled': icons.lock,
+            'not-shared-yet': icons.lock,
+            'already-shared': icons.shared,
+            sharing: icons.shared,
+            'sharing-success': icons.shared,
+            'sharing-error': icons.lock,
+            unsharing: icons.lock,
+            'unsharing-success': icons.lock,
+            'unsharing-error': icons.shared,
         }
 
         return this.props.renderShareIcon({

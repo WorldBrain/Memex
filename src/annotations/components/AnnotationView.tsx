@@ -4,7 +4,7 @@ import styled, { ThemeProvider } from 'styled-components'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import { SidebarAnnotationTheme } from '../types'
 
-export interface Props {
+export interface Props extends AnnotationFooterEventProps {
     hasHighlight?: boolean
     comment?: string
     tags: string[]
@@ -16,6 +16,19 @@ export interface Props {
         isTextTooLong: boolean
         text: string
     }
+}
+
+export interface AnnotationFooterEventProps {
+    onDeleteConfirm: () => void
+    onDeleteCancel: () => void
+    onDeleteIconClick: () => void
+    onEditConfirm: () => void
+    onEditCancel: () => void
+    onEditIconClick: () => void
+    onShareClick: React.MouseEventHandler
+    onUnshareClick: React.MouseEventHandler
+    toggleBookmark: () => void
+    onCopyPasterBtnClick: () => void
 }
 
 /* tslint:disable-next-line variable-name */
@@ -52,8 +65,9 @@ class AnnotationView extends React.Component<Props> {
         return (
             <ThemeProvider theme={this.props.theme}>
                 {this.props.comment?.length > 0 && 
-                    <CommentBox hasHighlight={this.props.hasHighlight}>
+                    <CommentBox onClick={this.props.onEditIconClick} hasHighlight={this.props.hasHighlight}>
                         <TextTruncated
+                            isHighlight={false}
                             text={comment}
                             getTruncatedTextObject={
                                 this.props.getTruncatedTextObject

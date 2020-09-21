@@ -257,28 +257,6 @@ export default class Ribbon extends Component<Props, State> {
                         </div>
                     )}
                 </div>
-
-                <div
-                    onClick={() => this.props.pausing.handlePauseToggle()}
-                    className={styles.extraButtonRow}
-                >
-                    <div
-                        className={cx(styles.button, styles.extraButtons, {
-                            [styles.playIcon]: this.props.pausing.isPaused,
-                            [styles.pauseIcon]: !this.props.pausing.isPaused,
-                        })}
-                    />
-                    {this.props.pausing.isPaused ? (
-                        <div className={styles.extraButtonsText}>
-                            Continue indexing
-                        </div>
-                    ) : (
-                        <div className={styles.extraButtonsText}>
-                            Pause Indexing
-                        </div>
-                    )}
-                </div>
-
                 <div
                     onClick={() => this.openOptionsTabRPC('settings')}
                     className={styles.extraButtonRow}
@@ -290,7 +268,7 @@ export default class Ribbon extends Component<Props, State> {
                             styles.extraButtons,
                         )}
                     />
-                    <div className={styles.extraButtonsText}>Open Settings</div>
+                    <div className={styles.extraButtonsText}>Advanced Settings</div>
                 </div>
                 <div
                     onClick={() =>
@@ -329,44 +307,48 @@ export default class Ribbon extends Component<Props, State> {
                         this.props.sidebar.isSidebarOpen) && (
                         <React.Fragment>
                             <div className={styles.generalActions}>
+                                {!this.props.sidebar.isSidebarOpen && (
+                                    <>
+                                        <ButtonTooltip
+                                            tooltipText={'Close Toolbar for session'}
+                                            position="left"
+                                        >
+                                            <button
+                                                className={cx(
+                                                    styles.button,
+                                                    styles.cancel,
+                                                )}
+                                                onClick={() =>
+                                                    this.props.handleRemoveRibbon()
+                                                }
+                                            />
+                                        </ButtonTooltip>
+                                        <ButtonTooltip
+                                            tooltipText={this.getTooltipText(
+                                                'toggleSidebar',
+                                            )}
+                                            position="left"
+                                        >
+                                            <div
+                                                className={cx(styles.button, {
+                                                    [styles.arrow]: !this.props.sidebar
+                                                        .isSidebarOpen,
+                                                    [styles.arrowReverse]: this.props
+                                                        .sidebar.isSidebarOpen,
+                                                })}
+                                                onClick={() =>
+                                                    !this.props.sidebar.isSidebarOpen
+                                                        ? this.props.sidebar.openSidebar(
+                                                              {},
+                                                          )
+                                                        : this.props.sidebar.closeSidebar()
+                                                }
+                                            />
+                                        </ButtonTooltip>
+                                </>
+                                )}
                                 <ButtonTooltip
-                                    tooltipText={'Close Toolbar for session'}
-                                    position="left"
-                                >
-                                    <button
-                                        className={cx(
-                                            styles.button,
-                                            styles.cancel,
-                                        )}
-                                        onClick={() =>
-                                            this.props.handleRemoveRibbon()
-                                        }
-                                    />
-                                </ButtonTooltip>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'toggleSidebar',
-                                    )}
-                                    position="left"
-                                >
-                                    <div
-                                        className={cx(styles.button, {
-                                            [styles.arrow]: !this.props.sidebar
-                                                .isSidebarOpen,
-                                            [styles.arrowReverse]: this.props
-                                                .sidebar.isSidebarOpen,
-                                        })}
-                                        onClick={() =>
-                                            !this.props.sidebar.isSidebarOpen
-                                                ? this.props.sidebar.openSidebar(
-                                                      {},
-                                                  )
-                                                : this.props.sidebar.closeSidebar()
-                                        }
-                                    />
-                                </ButtonTooltip>
-                                <ButtonTooltip
-                                    tooltipText="Open Memex Dashboard"
+                                    tooltipText="Search Dashboard"
                                     position="left"
                                 >
                                     <div
@@ -528,16 +510,14 @@ export default class Ribbon extends Component<Props, State> {
                                     {this.renderCollectionsManager()}
                                 </ButtonTooltip>
                                 <ButtonTooltip
-                                    tooltipText="More Settings"
+                                    tooltipText="Settings"
                                     position="left"
                                 >
                                     <div
-                                        className={cx(styles.button, {
-                                            [styles.playIcon]: this.props
-                                                .pausing.isPaused,
-                                            [styles.showMore]: !this.props
-                                                .pausing.isPaused,
-                                        })}
+                                        className={cx(
+                                            styles.button,
+                                            styles.settings,
+                                        )}
                                         onClick={() =>
                                             this.props.toggleShowExtraButtons()
                                         }

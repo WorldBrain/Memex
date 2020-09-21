@@ -150,13 +150,8 @@ class AnnotationsSidebar extends React.Component<
     }
 
     private renderNewAnnotation() {
-        if (!this.props.isAnnotationCreateShown) {
-            return
-        }
-
         return (
             <NewAnnotationSection>
-                <NewAnnotationStyled>New Note</NewAnnotationStyled>
                 <NewAnnotationBoxStyled>
                     <AnnotationCreate
                         {...this.props.annotationCreateProps}
@@ -378,7 +373,7 @@ const NewAnnotationSection = styled.section`
 const NewAnnotationSeparator = styled.div`
     align-self: center;
     width: 60%;
-    margin-top: 30px;
+    margin-top: 20px;
     border-bottom: 1px solid #e0e0e0;
 `
 
@@ -394,8 +389,6 @@ const AnnotationsSectionStyled = styled.section`
 `
 
 const NewAnnotationBoxStyled = styled.div`
-    ${annotationCardStyle}
-    margin: 10px 0 5px 0;
     position: relative;
     width: 97%;
 

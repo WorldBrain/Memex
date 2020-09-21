@@ -99,7 +99,7 @@ const StyledTextArea = styled.textarea`
     border-radius: 3px;
     border: none;
     padding: 10px 7px;
-    margin: 5px 10px 5px 10px;
+    margin: 10px 10px 5px 10px;
 
     &::placeholder {
         color: #3a2f45;

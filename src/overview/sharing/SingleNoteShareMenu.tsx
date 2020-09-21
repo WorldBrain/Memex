@@ -124,7 +124,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                 <SharedNoteInfo>
                     <TypographyTextNormal>
                         {' '}
-                        Shared notes are available via the page link and
+                        Shared notes are accessible via the page link and shared
                         collections <strong>the page is part of</strong>.
                     </TypographyTextNormal>
                 </SharedNoteInfo>
