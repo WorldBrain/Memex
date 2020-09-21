@@ -128,6 +128,7 @@ export function createBackgroundModules(options: {
         browserAPIs: options.browserAPIs,
         tabManager,
         pageStorage: pages.storage,
+        bookmarksBG: bookmarks,
     })
 
     const search = new SearchBackground({

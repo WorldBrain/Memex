@@ -1,4 +1,5 @@
 import expect from 'expect'
+import { Tabs } from 'webextension-polyfill-ts'
 
 import * as DATA from './index.test.data'
 import {
@@ -8,6 +9,40 @@ import {
 } from 'src/tests/integration-tests'
 import { createPageStep, searchModule } from 'src/tests/common-fixtures'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
+import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
+
+describe('bookmarks background unit tests', () => {
+    const it = makeSingleDeviceUILogicTestFactory()
+
+    it('should be able to create a map of tab URLs to bookmark flags', async ({
+        device,
+    }) => {
+        const { bookmarks: bookmarksBG } = device.backgroundModules
+
+        const bmIndicies = [0, 2, 4]
+        const mockTabs = [
+            { url: 'https://test.com' },
+            { url: 'chrome://extensions' },
+            { url: 'https://test.com/1' },
+            { url: 'https://test.com/2' },
+            { url: 'https://test.com/3' },
+            { url: 'https://worldbrain.io' },
+        ] as Tabs.Tab[]
+
+        for (const index of bmIndicies) {
+            await bookmarksBG.addBookmark({ url: mockTabs[index].url })
+        }
+
+        expect(await bookmarksBG.findTabBookmarks(mockTabs)).toEqual(
+            new Map(
+                mockTabs.map((tab, index) => [
+                    tab.url,
+                    bmIndicies.includes(index),
+                ]),
+            ),
+        )
+    })
+})
 
 const bookmarks = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.bookmarks
