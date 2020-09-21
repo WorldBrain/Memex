@@ -21,11 +21,11 @@
     }
 }
 
-.animationContainer { 
+.animationContainer {
     display: flex;
     height: 100%;
     align-items: center;
- } 
+}
 
 .tooltip::after {
     box-sizing: content-box;
