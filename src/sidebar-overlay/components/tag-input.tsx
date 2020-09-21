@@ -45,6 +45,7 @@ const TagInput = ({
                     }
                     onUpdateEntrySelection={handleTagsUpdate}
                     initialSelectedEntries={async () => initialSelectedEntries}
+                    onClickOutside={() => setTagInputActive(false)}
                 />
             </HoverBox>
         )
