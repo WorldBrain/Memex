@@ -62,7 +62,7 @@
 }
 
 .tooltipBottomRightEdge {
-    transform: translate(-90px, 30px);
+    transform: translate(-60px, 30px);
     justify-content: center;
     align-items: flex-start;
 

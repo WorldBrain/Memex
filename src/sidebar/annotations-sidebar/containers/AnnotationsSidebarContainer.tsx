@@ -388,7 +388,7 @@ export class AnnotationsSidebarContainer<
                         </ButtonTooltip>
                         <ButtonTooltip
                             tooltipText="Share All Notes"
-                            position="bottom"
+                            position="bottomRightEdge"
                         >
                             <ActionBtn onClick={this.handleShareAllNotesClick}>
                                 <ActionIcon src={icons.shareEmpty} />

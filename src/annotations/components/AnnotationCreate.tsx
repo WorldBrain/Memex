@@ -187,9 +187,11 @@ class AnnotationCreate extends React.Component<
             <TextBoxContainerStyled>
                 {this.renderHighlight()}
                 {this.renderInput()}
-                {this.renderTagPicker()}
                 {this.state.text !== '' && (
-                    this.renderActionButtons()
+                    <>
+                    {this.renderTagPicker()}
+                    {this.renderActionButtons()}
+                    </>
                 )}
             </TextBoxContainerStyled>
         )
@@ -230,7 +232,7 @@ const StyledTextArea = styled.textarea`
     border: none;
     padding: 10px 7px;
     margin: 10px 10px 5px 10px;
-    height: ${(props) => props.value === '' ? '40px' : '200px'};
+    height: ${(props) => props.value === '' ? '40px' : '150px'};
 
     width: auto;
 

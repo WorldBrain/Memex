@@ -1,6 +1,8 @@
 @value colors: 'src/common-ui/colors.css';
 @value color1, color 2, color6, color4, color8, color14 from colors;
 
+:host { all: initial; }
+
 .hr {
     border-color: #b0e0d2;
     width: 50px;
