@@ -4,6 +4,8 @@ import {
     UserFeature,
     SubscriptionStatus,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
+import { SettingStore } from 'src/util/settings'
+import { AuthSettings } from './types'
 
 export function hasSubscribedBefore(claims: Claims): boolean {
     return (
@@ -49,12 +51,16 @@ export function getAuthorizedPlans(claims: Claims): UserPlan[] {
     return plans
 }
 
-export function isAuthorizedForFeature(
-    claims: Claims,
-    feature: UserFeature,
-): boolean {
-    if (claims != null && claims.features != null) {
-        const featureObject = claims.features[feature]
+export async function isAuthorizedForFeature(params: {
+    claims: Claims
+    settings: SettingStore<AuthSettings>
+    feature: UserFeature
+}): Promise<boolean> {
+    if (params.feature === 'beta' && (await params.settings.get('beta'))) {
+        return true
+    }
+    if (params.claims != null && params.claims.features != null) {
+        const featureObject = params.claims.features[params.feature]
         if (!featureObject) {
             return false
         }

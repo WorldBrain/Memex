@@ -54,7 +54,7 @@ export async function setupBackgroundIntegrationTest(options?: {
     }
 
     const browserLocalStorage =
-        (options && options.browserLocalStorage) || new MemoryBrowserStorage()
+        options?.browserLocalStorage ?? new MemoryBrowserStorage()
     const storageManager = initStorex()
 
     const getServerStorage =
@@ -71,6 +71,10 @@ export async function setupBackgroundIntegrationTest(options?: {
                 job,
             )
             console['info'](`Ran job ${job.name} returned:`, job.job())
+        },
+        localStorageArea: browserLocalStorage,
+        backendFunctions: {
+            registerBetaUser: async () => {},
         },
         getUserManagement: async () =>
             (await getServerStorage()).storageModules.userManagement,

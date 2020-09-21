@@ -20,15 +20,24 @@ import {
     RemoteEventEmitter,
     remoteEventEmitter,
 } from 'src/util/webextensionRPC'
-import { AuthRemoteEvents, AuthRemoteFunctionsInterface } from './types'
+import {
+    AuthRemoteEvents,
+    AuthRemoteFunctionsInterface,
+    AuthSettings,
+    AuthBackendFunctions,
+} from './types'
 import { JobDefinition } from 'src/job-scheduler/background/types'
 import { isDev } from 'src/analytics/internal/constants'
 import { setupRequestInterceptors } from 'src/authentication/background/redirect'
 import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 import { User } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
+import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 
 export class AuthBackground {
     authService: AuthService
+    backendFunctions: AuthBackendFunctions
+    settings: SettingStore<AuthSettings>
     subscriptionService: SubscriptionsService
     remoteFunctions: AuthRemoteFunctionsInterface
     scheduleJob: (job: JobDefinition) => void
@@ -40,6 +49,8 @@ export class AuthBackground {
     constructor(options: {
         authService: AuthService
         subscriptionService: SubscriptionsService
+        localStorageArea: LimitedBrowserStorage
+        backendFunctions: AuthBackendFunctions
         getUserManagement: () => Promise<UserStorage>
         scheduleJob: (job: JobDefinition) => void
     }) {
@@ -48,6 +59,12 @@ export class AuthBackground {
         this.scheduleJob = options.scheduleJob
         this.remoteEmitter = remoteEventEmitter<AuthRemoteEvents>('auth')
         this.getUserManagement = options.getUserManagement
+        this.settings = new BrowserSettingsStore<AuthSettings>(
+            options.localStorageArea,
+            {
+                prefix: 'auth.',
+            },
+        )
         this.remoteFunctions = {
             getCurrentUser: () => this.authService.getCurrentUser(),
             signOut: () => this.authService.signOut(),
@@ -78,15 +95,31 @@ export class AuthBackground {
                 (await this.subscriptionService.getCurrentUserClaims())
                     ?.subscriptionExpiry,
             isAuthorizedForFeature: async (feature: UserFeature) => {
-                return isAuthorizedForFeature(
-                    await this.subscriptionService.getCurrentUserClaims(),
+                return isAuthorizedForFeature({
+                    claims: await this.subscriptionService.getCurrentUserClaims(),
+                    settings: this.settings,
                     feature,
-                )
+                })
             },
             hasSubscribedBefore: async () => {
                 return hasSubscribedBefore(
                     await this.subscriptionService.getCurrentUserClaims(),
                 )
+            },
+            setBetaEnabled: async (enabled) => {
+                const user = await this.authService.getCurrentUser()
+                if (!user) {
+                    throw new Error(
+                        `User wants to change beta status without being authenticated`,
+                    )
+                }
+
+                if (enabled) {
+                    await this.backendFunctions.registerBetaUser({
+                        emailAddress: user.email,
+                    })
+                }
+                await this.settings.set('beta', enabled)
             },
             getUserProfile: async () => {
                 if (this._userProfile) {

@@ -20,6 +20,7 @@ export interface AuthRemoteFunctionsInterface {
     getSubscriptionStatus(): Promise<SubscriptionStatus>
     getSubscriptionExpiry(): Promise<number | null>
     isAuthorizedForFeature(feature: UserFeature): Promise<boolean>
+    setBetaEnabled(enabled: boolean): Promise<void>
 
     hasSubscribedBefore(): Promise<boolean>
 }
@@ -37,9 +38,17 @@ export interface AuthContextInterface {
     loadingUser: boolean
 }
 
+export interface AuthBackendFunctions {
+    registerBetaUser(params: { emailAddress: string }): Promise<void>
+}
+
 export type MemexUser = {
     authorizedFeatures: UserFeature[]
     authorizedPlans: UserPlan[]
     subscriptionStatus: SubscriptionStatus
     subscriptionExpiry: number | null
 } & AuthenticatedUser
+
+export interface AuthSettings {
+    beta?: boolean
+}

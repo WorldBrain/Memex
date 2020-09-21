@@ -58,6 +58,7 @@ import CopyPasterBackground from 'src/copy-paster/background'
 import { ReaderBackground } from 'src/reader/background'
 import { ServerStorage } from 'src/storage/types'
 import ContentSharingBackground from 'src/content-sharing/background'
+import { getFirebase } from 'src/util/firebase-app-initialized'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -188,9 +189,19 @@ export function createBackgroundModules(options: {
                 ...options.authOptions,
                 redirectUrl: subscriptionRedirect,
             }),
+            localStorageArea: options.browserAPIs.storage.local,
             scheduleJob: jobScheduler.scheduler.scheduleJobOnce.bind(
                 jobScheduler.scheduler,
             ),
+            backendFunctions: {
+                registerBetaUser: async (params) => {
+                    const firebase = getFirebase()
+                    const callable = firebase
+                        .functions()
+                        .httpsCallable('registerBetaUser')
+                    await callable(params)
+                },
+            },
             getUserManagement: async () =>
                 (await options.getServerStorage()).storageModules
                     .userManagement,
