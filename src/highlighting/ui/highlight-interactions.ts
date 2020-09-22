@@ -147,42 +147,9 @@ export const createAnnotationWithSidebar = async (params: {
 export interface SaveAndRenderHighlightDependencies {
     annotationsCache: AnnotationsCacheInterface
     onClickHighlight: AnnotationClickHandler
-    renderer: HighlightRenderInterface
     getSelection: () => Selection
     getUrlAndTitle: () => { pageUrl: string; title: string }
     analyticsEvent?: AnalyticsEvent
-}
-// TODO: (sidebar-refactor) move to somewhere more tooltip related
-export const saveAndRenderHighlight = async (
-    params: SaveAndRenderHighlightDependencies,
-) => {
-    analytics.trackEvent(
-        params.analyticsEvent ?? { category: 'Highlights', action: 'create' },
-    )
-
-    const anchor = await extractAnchorFromSelection(getSelection())
-    const body = anchor ? anchor.quote : ''
-    const comment = ''
-    const tags = []
-    const { pageUrl, title } = params.getUrlAndTitle()
-
-    const annotation = {
-        url: generateUrl({ pageUrl, now: () => Date.now() }),
-        body,
-        comment,
-        pageUrl,
-        pageTitle: title,
-        selector: anchor,
-        tags,
-    } as Annotation
-    params.annotationsCache.create(annotation)
-
-    params.renderer.renderHighlight(annotation as Highlight, () =>
-        params.onClickHighlight({
-            annotationUrl: annotation.url,
-            openSidebar: true,
-        }),
-    )
 }
 
 export type HighlightRendererInterface = HighlightRenderInterface &
@@ -190,7 +157,41 @@ export type HighlightRendererInterface = HighlightRenderInterface &
 
 export class HighlightRenderer implements HighlightRendererInterface {
     createAnnotationWithSidebar = createAnnotationWithSidebar
-    saveAndRenderHighlight = saveAndRenderHighlight
+
+    saveAndRenderHighlight = async (
+        params: SaveAndRenderHighlightDependencies,
+    ) => {
+        analytics.trackEvent(
+            params.analyticsEvent ?? {
+                category: 'Highlights',
+                action: 'create',
+            },
+        )
+
+        const anchor = await extractAnchorFromSelection(getSelection())
+        const body = anchor ? anchor.quote : ''
+        const comment = ''
+        const tags = []
+        const { pageUrl, title } = params.getUrlAndTitle()
+
+        const annotation = {
+            url: generateUrl({ pageUrl, now: () => Date.now() }),
+            body,
+            comment,
+            pageUrl,
+            pageTitle: title,
+            selector: anchor,
+            tags,
+        } as Annotation
+        params.annotationsCache.create(annotation)
+
+        await this.renderHighlight(annotation as Highlight, () => {
+            params.onClickHighlight({
+                annotationUrl: annotation.url,
+                openSidebar: true,
+            })
+        })
+    }
 
     /**
      * Given an array of highlight objects, highlights all of them.

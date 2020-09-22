@@ -136,7 +136,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 })
             }
         } else if (event.action === 'show_annotation') {
+            console.log('show annot!')
             this.activateAnnotation(event.annotationUrl)
+        } else if (event.action === 'edit_annotation') {
+            console.log('edit annot!')
+            this.processEvent('editAnnotation', {
+                annotationUrl: event.annotationUrl,
+                context: 'pageAnnotations',
+            })
         } else if (event.action === 'set_sharing_access') {
             this.processEvent('receiveSharingAccessChange', {
                 sharingAccess: event.annotationSharingAccess,

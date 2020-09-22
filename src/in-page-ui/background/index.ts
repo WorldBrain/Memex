@@ -3,7 +3,9 @@ import { bindMethod } from 'src/util/functions'
 import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from './types'
 import { InPageUIContentScriptRemoteInterface } from '../content_script/types'
-import { CREATE_ANNOTATION, CREATE_HIGHLIGHT } from './context-menu-entries'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+
+export const CONTEXT_MENU_ID_PREFIX = '@memexContextMenu:'
 
 export interface Props {
     queryTabs: Tabs.Static['query']
@@ -18,13 +20,22 @@ export class InPageUIBackground implements InPageUIInterface<'provider'> {
             showSidebar: bindMethod(this, 'showSidebar'),
         }
 
-        options.createContextMenuEntry({
-            ...CREATE_ANNOTATION,
-            onclick: (_, tab) => this.createAnnotationInTab(tab.id),
-        })
+        this.setupContextMenuEntries()
+    }
 
-        options.createContextMenuEntry({
-            ...CREATE_HIGHLIGHT,
+    async setupContextMenuEntries() {
+        const shortcutState = await getKeyboardShortcutsState()
+
+        const shortcutStr =
+            shortcutState.shortcutsEnabled &&
+            shortcutState.createHighlight.enabled
+                ? shortcutState.createHighlight.shortcut
+                : ''
+
+        this.options.createContextMenuEntry({
+            id: CONTEXT_MENU_ID_PREFIX + 'createHighlight',
+            title: `Highlight with Memex (${shortcutStr})`,
+            contexts: ['selection'],
             onclick: (_, tab) => this.createHighlightInTab(tab.id),
         })
     }
@@ -43,7 +54,9 @@ export class InPageUIBackground implements InPageUIInterface<'provider'> {
     }
 
     private createHighlightInTab = (tabId: number) =>
-        runInTab<InPageUIContentScriptRemoteInterface>(tabId).createHighlight()
+        runInTab<InPageUIContentScriptRemoteInterface>(tabId).createHighlight({
+            clickToEdit: true,
+        })
 
     private createAnnotationInTab = (tabId: number) =>
         runInTab<InPageUIContentScriptRemoteInterface>(tabId).createAnnotation()

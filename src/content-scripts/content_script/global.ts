@@ -97,19 +97,20 @@ export async function main() {
     const annotationsFunctions = {
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
-        ) => () =>
+        ) => (options?: { clickToEdit: boolean }) =>
             highlightRenderer.saveAndRenderHighlight({
                 annotationsCache,
                 getUrlAndTitle: () => ({
                     title: getPageTitle(),
                     pageUrl: getPageUrl(),
                 }),
-                renderer: highlightRenderer,
                 getSelection: () => document.getSelection(),
                 onClickHighlight: ({ annotationUrl }) =>
                     inPageUI.showSidebar({
                         annotationUrl,
-                        action: 'show_annotation',
+                        action: options?.clickToEdit
+                            ? 'edit_annotation'
+                            : 'show_annotation',
                     }),
                 analyticsEvent,
             }),
