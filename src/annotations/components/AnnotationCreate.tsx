@@ -59,7 +59,7 @@ class AnnotationCreate extends React.Component<
             isBookmarked: false,
             tags: [],
             isTagPickerShown: false,
-        }) 
+        })
     }
 
     private handleSave = () => {
@@ -106,9 +106,12 @@ class AnnotationCreate extends React.Component<
                 onClick={this.hideTagPicker}
                 placeholder="Add private note (save with cmd/ctrl+enter)"
                 onChange={(e) => this.setState({ text: e.target.value })}
-                onKeyDown={(e) =>
-                    onEnterSaveHandler.test(e) && onEnterSaveHandler.handle(e)
-                }
+                onKeyDown={(e) => {
+                    e.stopPropagation()
+                    if (onEnterSaveHandler.test(e)) {
+                        onEnterSaveHandler.handle(e)
+                    }
+                }}
             />
         )
     }
@@ -165,7 +168,7 @@ class AnnotationCreate extends React.Component<
                     </ButtonTooltip>
                 </InteractionItemsBox>
                 */}
-                
+
                 <Flex>
                     <ButtonTooltip
                         tooltipText="ctrl/cmd + Enter"
@@ -175,22 +178,23 @@ class AnnotationCreate extends React.Component<
                             Add
                         </SaveBtnStyled>
                     </ButtonTooltip>
-                    <CancelBtnStyled onClick={this.handleCancel}>Cancel</CancelBtnStyled>
+                    <CancelBtnStyled onClick={this.handleCancel}>
+                        Cancel
+                    </CancelBtnStyled>
                 </Flex>
             </FooterStyled>
         )
     }
 
     render() {
-        console.log(this.state.text)
         return (
             <TextBoxContainerStyled>
                 {this.renderHighlight()}
                 {this.renderInput()}
                 {this.state.text !== '' && (
                     <>
-                    {this.renderTagPicker()}
-                    {this.renderActionButtons()}
+                        {this.renderTagPicker()}
+                        {this.renderActionButtons()}
                     </>
                 )}
             </TextBoxContainerStyled>
@@ -232,7 +236,7 @@ const StyledTextArea = styled.textarea`
     border: none;
     padding: 10px 7px;
     margin: 10px 10px 5px 10px;
-    height: ${(props) => props.value === '' ? '40px' : '150px'};
+    height: ${(props) => (props.value === '' ? '40px' : '150px')};
 
     width: auto;
 
