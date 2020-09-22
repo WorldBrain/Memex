@@ -7,6 +7,7 @@ import {
     TypographyTextNormal,
     TypographyHeadingBigger,
 } from 'src/common-ui/components/design-library/typography'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SignInScreen } from 'src/authentication/components/SignIn'
@@ -73,6 +74,24 @@ const InfoBox = styled.div`
         margin-right: 5px;
     }
 `
+const IconStyled = styled.img`
+    border: none;
+    z-index: 2500;
+    outline: none;
+    border-radius: 3px;
+    width: 30px;
+    height: 30px;
+    margin-bottom: 20px;
+`
+
+const SuccessBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+`
+
 
 export default class BetaFeatureNotif extends PureComponent<Props, State> {
     state: State = {
@@ -151,9 +170,15 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
         }
         if (this.state.betaActivationState === 'success') {
             return (
-                <TypographyTextNormal>
-                    You're now a beta user
-                </TypographyTextNormal>
+                <SuccessBox>
+                    <IconStyled src={icons.saveIcon}/>
+                        <TypographyHeadingBigger>
+                            You're set.
+                        </TypographyHeadingBigger>
+                        <TypographyTextNormal>
+                            You can now use Memex beta features.
+                    </TypographyTextNormal>
+                </SuccessBox>
             )
         }
 
@@ -172,6 +197,14 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
                             <PrimaryAction
                                 label="Request Access"
                                 onClick={this.onRequestAccess}
+                            />
+                            <SecondaryAction
+                                label="Watch Demo"
+                                onClick={() =>
+                                    window.open(
+                                    'https://worldbrain.io/tutorials/sharing-features',
+                                    )
+                                }
                             />
                         </ButtonBox>
                     </>
