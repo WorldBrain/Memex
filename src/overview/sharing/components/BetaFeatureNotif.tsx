@@ -1,3 +1,4 @@
+import { TaskState } from 'ui-logic-core/lib/types'
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 
@@ -8,16 +9,21 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
+import { SignInScreen } from 'src/authentication/components/SignIn'
+import { LoadingIndicator } from 'src/common-ui/components'
 
 export interface Props {
     showSubscriptionModal: () => void
 }
 
 interface State {
-    isPioneer: boolean
-    hasSubscription: boolean
-    loadingChargebee: boolean
+    loadState: TaskState
+    chargebeeState: TaskState
+    betaActivationState: TaskState
+    isAuthenticated?: boolean
+    isAuthenticating?: boolean
+    isPioneer?: boolean
+    hasSubscription?: boolean
 }
 
 const InstructionsContainer = styled.div`
@@ -70,70 +76,104 @@ const InfoBox = styled.div`
 
 export default class BetaFeatureNotif extends PureComponent<Props, State> {
     state: State = {
-        loadingChargebee: false,
-        hasSubscription: false,
-        isPioneer: false,
+        loadState: 'running',
+        chargebeeState: 'pristine',
+        betaActivationState: 'pristine',
     }
 
     get isUnauthorizedUser(): boolean {
         return this.state.hasSubscription && !this.state.isPioneer
     }
 
-    componentDidMount() {
-        this.upgradeState()
-    }
-
-    private openPortal = async () => {
-        this.setState({ loadingChargebee: true })
-        const portalLink = await subscription.getManageLink()
-        window.open(portalLink['access_url'])
-        this.setState({ loadingChargebee: false })
-    }
-
-    private async upgradeState() {
+    async componentDidMount() {
+        const user = await auth.getCurrentUser()
         const plans = await auth.getAuthorizedPlans()
         const isBetaAuthorized = await auth.isAuthorizedForFeature('beta')
 
         this.setState({
+            loadState: 'success',
+            isAuthenticated: !!user,
             isPioneer: isBetaAuthorized,
             hasSubscription: plans.length > 0,
         })
     }
 
+    private openPortal = async () => {
+        this.setState({ chargebeeState: 'running' })
+        const portalLink = await subscription.getManageLink()
+        window.open(portalLink['access_url'])
+        this.setState({ chargebeeState: 'pristine' })
+    }
+
+    onRequestAccess = () => {
+        if (this.state.isAuthenticated) {
+            this.activateBeta()
+        } else {
+            this.setState({ isAuthenticating: true })
+        }
+    }
+
+    async activateBeta() {
+        this.setState({ betaActivationState: 'running' })
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        const isBetaAuthorized = await auth.isAuthorizedForFeature('beta')
+        if (!isBetaAuthorized) {
+            await auth.setBetaEnabled(true)
+        }
+        this.setState({ betaActivationState: 'success' })
+    }
+
+    onSignInSucces = () => {
+        this.setState({ isAuthenticating: false })
+        this.activateBeta()
+    }
+
+    onSignInFail = () => {
+        this.setState({
+            isAuthenticating: false,
+        })
+    }
+
     render() {
+        if (this.state.loadState === 'running') {
+            return null
+        }
+        if (this.state.isAuthenticating) {
+            return (
+                <SignInScreen
+                    onSuccess={this.onSignInSucces}
+                    onFail={this.onSignInFail}
+                />
+            )
+        }
+        if (this.state.betaActivationState === 'running') {
+            return <LoadingIndicator />
+        }
+        if (this.state.betaActivationState === 'success') {
+            return (
+                <TypographyTextNormal>
+                    You're now a beta user
+                </TypographyTextNormal>
+            )
+        }
+
         return (
             <InstructionsContainer>
                 <InstructionsBox>
                     <TypographyHeadingBigger>
-                        🚀 This is a beta feature
+                        🚀 This is a Beta Feature
                     </TypographyHeadingBigger>
                     <TypographyTextNormal>
-                        Request access to use the beta features.{' '}
+                        Request early access and start using it.{' '}
                     </TypographyTextNormal>
                     <Margin />
                     <>
                         <ButtonBox>
                             <PrimaryAction
-                                label="Request Free Access"
-                                onClick={() =>
-                                    window.open('https://worldbrain.io/beta')
-                                }
-                            />
-                            <SecondaryAction
-                                label="Watch Demo"
-                                onClick={() =>
-                                    window.open(
-                                        'https://worldbrain.io/tutorials/sharing-features',
-                                    )
-                                }
+                                label="Request Access"
+                                onClick={this.onRequestAccess}
                             />
                         </ButtonBox>
-                        {this.isUnauthorizedUser && (
-                            <InfoBox>
-                                To upgrade go to "Edit Subscription" and add the
-                                "Pioneer Support" addon
-                            </InfoBox>
-                        )}
                     </>
                 </InstructionsBox>
             </InstructionsContainer>

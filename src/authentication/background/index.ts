@@ -55,6 +55,7 @@ export class AuthBackground {
         scheduleJob: (job: JobDefinition) => void
     }) {
         this.authService = options.authService
+        this.backendFunctions = options.backendFunctions
         this.subscriptionService = options.subscriptionService
         this.scheduleJob = options.scheduleJob
         this.remoteEmitter = remoteEventEmitter<AuthRemoteEvents>('auth')
@@ -115,9 +116,7 @@ export class AuthBackground {
                 }
 
                 if (enabled) {
-                    await this.backendFunctions.registerBetaUser({
-                        emailAddress: user.email,
-                    })
+                    await this.backendFunctions.registerBetaUser({})
                 }
                 await this.settings.set('beta', enabled)
             },

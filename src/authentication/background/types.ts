@@ -39,7 +39,7 @@ export interface AuthContextInterface {
 }
 
 export interface AuthBackendFunctions {
-    registerBetaUser(params: { emailAddress: string }): Promise<void>
+    registerBetaUser(params: {}): Promise<void>
 }
 
 export type MemexUser = {

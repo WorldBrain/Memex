@@ -56,17 +56,21 @@ export async function isAuthorizedForFeature(params: {
     settings: SettingStore<AuthSettings>
     feature: UserFeature
 }): Promise<boolean> {
+    if (!params.claims) {
+        return false
+    }
     if (params.feature === 'beta' && (await params.settings.get('beta'))) {
         return true
     }
-    if (params.claims != null && params.claims.features != null) {
-        const featureObject = params.claims.features[params.feature]
-        if (!featureObject) {
-            return false
-        }
-        return isExpiryInFuture(featureObject)
+    if (!params.claims.features) {
+        return false
     }
-    return false
+
+    const featureObject = params.claims.features[params.feature]
+    if (!featureObject) {
+        return false
+    }
+    return isExpiryInFuture(featureObject)
 }
 
 const nowInSecs = () => Math.round(new Date().getTime() / 1000)

@@ -9,6 +9,8 @@ import { auth } from 'src/util/remote-functions-background'
 const styles = require('src/authentication/components/styles.css')
 
 interface Props {
+    onSuccess?(): void
+    onFail?(): void
     redirectTo?: string
 }
 
@@ -29,7 +31,11 @@ export class SignInScreen extends React.Component<Props> {
                             if (this.props.redirectTo) {
                                 window.location.href = this.props.redirectTo
                             }
+                            this.props.onSuccess?.()
                             return false
+                        },
+                        signInFailure: () => {
+                            this.props.onFail?.()
                         },
                     },
                 }}
