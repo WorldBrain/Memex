@@ -9,7 +9,6 @@ import {
 
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import { formBackground } from 'src/common-ui/components/design-library/colors'
 
 export interface Props {
     showSubscriptionModal: () => void
@@ -21,16 +20,6 @@ interface State {
     loadingChargebee: boolean
 }
 
-const NameInput = styled.input`
-    background-color: ${formBackground};
-    border-radius: 3px;
-    outline: none;
-    border: none;
-    width: 300px;
-    height: 35px;
-    margin: 0 0 20px 0;
-    text-align: center;
-`
 const InstructionsContainer = styled.div`
     display: flex;
     flex-direction: row;
@@ -59,16 +48,6 @@ const ButtonBox = styled.div`
     justify-content: space-between;
     width: 290px;
     align-items: center;
-`
-
-const InputContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-`
-
-const TypographyTextNormalAlert = styled(TypographyTextNormal)`
-    color: red;
 `
 
 const Margin = styled.div`
@@ -136,9 +115,9 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
                         <ButtonBox>
                             <PrimaryAction
                                 label="Request Free Access"
-                                onClick={()=> window.open(
-                                                  'https://worldbrain.io/beta',
-                                          )}
+                                onClick={() =>
+                                    window.open('https://worldbrain.io/beta')
+                                }
                             />
                             <SecondaryAction
                                 label="Watch Demo"

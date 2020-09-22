@@ -195,7 +195,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             <>
                 {this.state.showAnnotationsShareModal && (
                     <ShareAnnotationOnboardingModal
-                        requiresExplicitStyles
+                        ignoreReactPortal
                         onClose={() =>
                             this.processEvent('setAnnotationShareModalShown', {
                                 shown: false,
@@ -218,7 +218,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 )}
                 {this.state.showBetaFeatureNotifModal && (
                     <BetaFeatureNotifModal
-                        requiresExplicitStyles
+                        ignoreReactPortal
                         onClose={() =>
                             this.processEvent('setBetaFeatureNotifModalShown', {
                                 shown: false,

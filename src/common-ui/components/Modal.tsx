@@ -10,8 +10,6 @@ export interface Props extends Omit<OverlayProps, 'onClick'> {
 }
 
 class Modal extends PureComponent<Props> {
-    static propTypes = {}
-
     render() {
         const { onClose, ignoreClickOutside, ...props } = this.props
 

@@ -9,7 +9,12 @@ export interface Props {
     rootElId?: string
     className?: string
     innerClassName?: string
-    /** If set, renders a wrapping `StyleSheetManager` component. Use if rendering in content-script! */
+    /**
+     * Skips rendering the Overlay within a React portal
+     * NOTE: If using from the in-page shadowDOM UIs, set this flag - else funky stuff happens to styles in prod builds!
+     */
+    ignoreReactPortal?: boolean
+    /** If set, renders a wrapping `StyleSheetManager` component. */
     requiresExplicitStyles?: boolean
     ignoreClickOutsideClassName?: string
     onClick?: MouseEventHandler
@@ -28,15 +33,27 @@ class Overlay extends Component<Props> {
     constructor(props) {
         super(props)
 
+        if (props.ignoreReactPortal) {
+            return
+        }
+
         this.overlayRoot = document.createElement(props.rootEl)
         this.overlayRoot.classList.add(props.ignoreClickOutsideClassName)
     }
 
     componentDidMount() {
+        if (this.props.ignoreReactPortal) {
+            return
+        }
+
         document.body.appendChild(this.overlayRoot)
     }
 
     componentWillUnmount() {
+        if (this.props.ignoreReactPortal) {
+            return
+        }
+
         if (document.body.contains(this.overlayRoot)) {
             document.body.removeChild(this.overlayRoot)
         }
@@ -61,6 +78,10 @@ class Overlay extends Component<Props> {
     }
 
     render() {
+        if (this.props.ignoreReactPortal) {
+            return this.renderMain()
+        }
+
         if (this.props.requiresExplicitStyles) {
             return ReactDOM.createPortal(
                 <StyleSheetManager target={this.overlayRoot}>

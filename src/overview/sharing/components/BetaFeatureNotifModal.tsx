@@ -4,7 +4,10 @@ import Modal, { Props as ModalProps } from 'src/common-ui/components/Modal'
 import BetaFeatureNotif from './BetaFeatureNotif'
 
 export interface Props
-    extends Pick<ModalProps, 'onClose' | 'requiresExplicitStyles'> {
+    extends Pick<
+        ModalProps,
+        'onClose' | 'requiresExplicitStyles' | 'ignoreReactPortal'
+    > {
     showSubscriptionModal: () => void
 }
 

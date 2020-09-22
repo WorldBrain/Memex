@@ -13,7 +13,10 @@ import {
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface Props
-    extends Pick<ModalProps, 'onClose' | 'requiresExplicitStyles'> {
+    extends Pick<
+        ModalProps,
+        'onClose' | 'requiresExplicitStyles' | 'ignoreReactPortal'
+    > {
     onClose: () => void
     onClickLetUsKnow: () => void
     onClickViewRoadmap: () => void
@@ -128,7 +131,8 @@ export default class ShareAnnotationOnboardingModal extends Component<Props> {
                             NEW: Share highlights and notes in collections
                         </TypographyHeadingBigger>
                         <TypographyTextNormal>
-                            Shared notes are accessible via a link and are all shared collection the page is part of. 
+                            Shared notes are accessible via a link and are all
+                            shared collection the page is part of.
                         </TypographyTextNormal>
                     </InstructionsBox>
                 </InstructionsContainer>

@@ -4,8 +4,6 @@ import TagPicker from 'src/tags/ui/TagPicker'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import TagHolder from './tag-holder'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import { LesserLink } from 'src/common-ui/components/design-library/actions/LesserLink'
-import styled from 'styled-components'
 import { ClickAway } from 'src/util/click-away-wrapper'
 
 export interface Props {
@@ -62,23 +60,5 @@ class TagInput extends React.Component<Props> {
         )
     }
 }
-
-const LesserLinkStyled = styled(LesserLink)``
-
-const TopRow = styled.div`
-    display: flex;
-    justify-content: center;
-    flex: 1;
-    margin: 4px 4px 0 4px;
-    cursor: pointer;
-
-    &:hover {
-        background-color: #e0e0e0;
-    }
-
-    & span {
-        font-family: sans-serif;
-    }
-`
 
 export default TagInput
