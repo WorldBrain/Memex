@@ -94,11 +94,9 @@ class BetaFeaturesScreen extends React.Component<
         return (
             <PrimaryAction
                 label="Request Access"
-                onClick={() => {
-                        window.open(
-                            'https://worldbrain.io/beta',
-                        )
-                    }
+                onClick={
+                    this.props
+                        .showBetaFeatureNotifModal
                 }
             />
         )
@@ -125,11 +123,10 @@ class BetaFeaturesScreen extends React.Component<
                                     <TypographyTextNormal>
                                         Access beta features by
                                         <TypographyLink
-                                            onClick={() => {
-                                                window.open(
-                                                    'https://worldbrain.io/beta',
-                                                )
-                                            }}
+                                            onClick={
+                                                    this.props
+                                                        .showBetaFeatureNotifModal
+                                                }
                                         >
                                             requesting free access via a wait list.
                                         </TypographyLink>

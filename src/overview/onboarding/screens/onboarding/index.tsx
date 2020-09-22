@@ -405,7 +405,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <OnboardingStep
                         goToStep={this.handleStepClick}
                         titleText="Easily share your research"
-                        subtitleText="Share collections of pages, highlights & notes. "
+                        subtitleText="Share collections, annotated pages and links to highlights."
                         renderButton={() => (
                             <OnboardingAction
                                 onClick={this.handleNextStepClick}
@@ -417,24 +417,14 @@ export default class OnboardingScreen extends StatefulUIElement<
                         currentStep={this.state.currentStep - 1}
                         navToOverview={this.props.navToOverview}
                     >
-                        <div className={styles.buttonBar}>
-                            <PrimaryAction
-                                onClick={() =>
-                                    window.open(
-                                        `https://worldbrain.io/beta`,
-                                    )
-                                }
-                                label={'Get early access'}
-                            />
-                            <SecondaryAction
-                                onClick={() =>
-                                    window.open(
-                                        `https://worldbrain.io/tutorials/share-research`,
-                                    )
-                                }
-                                label={'View Tutorials'}
-                            />
-                        </div>
+                        <SecondaryAction
+                            onClick={() =>
+                                window.open(
+                                    `https://worldbrain.io/tutorials/share-research`,
+                                )
+                            }
+                            label={'View Tutorials'}
+                        />
                     </OnboardingStep>
                 )
             case 5:

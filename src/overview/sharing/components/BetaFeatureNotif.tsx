@@ -10,6 +10,7 @@ import {
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { SignInScreen } from 'src/authentication/components/SignIn'
 import { LoadingIndicator } from 'src/common-ui/components'
 
@@ -92,7 +93,6 @@ const SuccessBox = styled.div`
     text-align: center;
 `
 
-
 export default class BetaFeatureNotif extends PureComponent<Props, State> {
     state: State = {
         loadState: 'running',
@@ -171,12 +171,12 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
         if (this.state.betaActivationState === 'success') {
             return (
                 <SuccessBox>
-                    <IconStyled src={icons.saveIcon}/>
-                        <TypographyHeadingBigger>
-                            You're set.
-                        </TypographyHeadingBigger>
-                        <TypographyTextNormal>
-                            You can now use Memex beta features.
+                    <IconStyled src={icons.saveIcon} />
+                    <TypographyHeadingBigger>
+                        You're set.
+                    </TypographyHeadingBigger>
+                    <TypographyTextNormal>
+                        You can now use Memex beta features.
                     </TypographyTextNormal>
                 </SuccessBox>
             )
@@ -202,7 +202,7 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
                                 label="Watch Demo"
                                 onClick={() =>
                                     window.open(
-                                    'https://worldbrain.io/tutorials/sharing-features',
+                                        'https://worldbrain.io/tutorials/sharing-features',
                                     )
                                 }
                             />
