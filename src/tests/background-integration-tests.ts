@@ -110,6 +110,9 @@ export async function setupBackgroundIntegrationTest(options?: {
             contextMenus: {
                 create: () => {},
             },
+            runtime: {
+                getURL: () => '',
+            },
         } as any,
         tabManager: options?.tabManager,
         signalTransportFactory: options?.signalTransportFactory,
