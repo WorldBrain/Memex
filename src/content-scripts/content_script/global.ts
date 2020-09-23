@@ -92,7 +92,7 @@ export async function main() {
             delete components[component]
         },
     })
-    annotationsCache.load(getPageUrl())
+    const loadAnnotationsPromise = annotationsCache.load(getPageUrl())
 
     const annotationsFunctions = {
         createHighlight: (
@@ -204,6 +204,7 @@ export async function main() {
 
     // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,
     // so it is included in this global content script where it adds less than 500kb.
+    await loadAnnotationsPromise
     await contentScriptRegistry.registerHighlightingScript(highlightMain)
 
     // 5. Registers remote functions that can be used to interact with components
