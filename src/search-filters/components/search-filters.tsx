@@ -23,7 +23,7 @@ class SearchFilters extends PureComponent<Props, State> {
             <div className={styles.filterBar}>
                 <div className={styles.innerContainer}>
                     <div className={styles.filters}>
-                        {this.props.bookmarkFilter}
+                        {/*{this.props.bookmarkFilter}*/}
                         {this.props.dateFilter}
                         {this.props.tagFilter}
                         {this.props.domainFilter}

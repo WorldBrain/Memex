@@ -249,10 +249,10 @@ export class RibbonContainerLogic extends UILogic<
 
         const updateState = (isBookmarked) =>
             this.emitMutation({
-                bookmark: { isBookmarked: { $set: isBookmarked } },
+                bookmark: { isBookmarked: { $set: true } },
             })
 
-        const shouldBeBookmarked = !postInitState.bookmark.isBookmarked
+        const shouldBeBookmarked = true
         updateState(shouldBeBookmarked)
 
         try {
@@ -260,10 +260,6 @@ export class RibbonContainerLogic extends UILogic<
                 await this.dependencies.bookmarks.addPageBookmark({
                     url: postInitState.pageUrl,
                     tabId: this.dependencies.currentTab.id,
-                })
-            } else {
-                await this.dependencies.bookmarks.delPageBookmark({
-                    url: postInitState.pageUrl,
                 })
             }
         } catch (err) {
