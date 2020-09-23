@@ -76,13 +76,15 @@ export type AnnotationClickHandler = (params: {
 }) => void
 
 // TODO: (sidebar-refactor) move to somewhere more highlight content script related
-export const renderAnnotationCacheChanges = (opts: {
+export const renderAnnotationCacheChanges = ({
+    cacheChanges,
+    onClickHighlight,
+    renderer,
+}: {
     cacheChanges: AnnotationCacheChangeEvents
     onClickHighlight: AnnotationClickHandler
     renderer: HighlightRenderInterface
 }) => {
-    const { cacheChanges, onClickHighlight, renderer } = opts
-
     const onRollback = (annotations) => {
         renderer.undoAllHighlights()
         renderer.renderHighlights(

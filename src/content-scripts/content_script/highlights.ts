@@ -35,7 +35,6 @@ export const main: HighlightsScriptMain = async (options) => {
     })
 }
 
-let highlightChangesDeregister = () => null
 const showHighlights = (options: HighlightDependencies) => {
     const onClickHighlight: AnnotationClickHandler = ({
         annotationUrl,
@@ -59,17 +58,10 @@ const showHighlights = (options: HighlightDependencies) => {
         onClickHighlight,
         false,
     )
-
-    highlightChangesDeregister = renderAnnotationCacheChanges({
-        cacheChanges: options.annotationsCache.annotationChanges,
-        renderer: options.highlightRenderer,
-        onClickHighlight,
-    })
 }
 
 const hideHighlights = (options: HighlightDependencies) => {
     options.highlightRenderer.removeHighlights()
-    highlightChangesDeregister()
 }
 
 // const registry = window['contentScriptRegistry'] as ContentScriptRegistry
