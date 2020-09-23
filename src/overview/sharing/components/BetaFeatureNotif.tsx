@@ -124,6 +124,15 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
             isPioneer: isBetaAuthorized,
             hasSubscription: plans.length > 0,
         })
+
+        if (this.props.initWithAuth) {
+            if (await this.state.isAuthenticated) {
+                this.activateBeta()
+            } else {
+                this.setState({ isAuthenticating: true })
+            }
+        }
+
     }
 
     private openPortal = async () => {
@@ -171,14 +180,6 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
         if (this.state.loadState === 'running') {
             return null
         }
-        if (this.state.isAuthenticating) {
-            return (
-                <SignInScreen
-                    onSuccess={this.onSignInSucces}
-                    onFail={this.onSignInFail}
-                />
-            )
-        }
         if (this.state.betaActivationState === 'running') {
             return <LoadingIndicator />
         }
@@ -193,6 +194,15 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
                         You can now use Memex beta features.
                     </TypographyTextNormal>
                 </SuccessBox>
+            )
+        }
+
+        if (this.state.isAuthenticating) {
+            return (
+                <SignInScreen
+                    onSuccess={this.onSignInSucces}
+                    onFail={this.onSignInFail}
+                />
             )
         }
 

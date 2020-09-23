@@ -20,6 +20,7 @@ const handleAccountClick = () => {
 }
 
 const handleLogOutClick = () => {
+    window.location.reload()
     return auth.signOut()
 }
 

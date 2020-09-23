@@ -1,5 +1,7 @@
 import { featuresBeta } from 'src/util/remote-functions-background'
 import ToggleSwitch from 'src/common-ui/components/ToggleSwitch'
+import { TaskState } from 'ui-logic-core/lib/types'
+
 import React from 'react'
 import {
     TypographyHeadingBig,
@@ -37,6 +39,8 @@ interface State {
     featureOptions: UserBetaFeature[]
     featureEnabled: { [key in UserBetaFeatureId]: boolean }
     loadingChargebee: boolean
+    isPioneer?: boolean
+    loadState: TaskState
 }
 
 class BetaFeaturesScreen extends React.Component<
@@ -44,13 +48,21 @@ class BetaFeaturesScreen extends React.Component<
     State
 > {
     state = {
+        loadState: 'running',
         featureOptions: {},
         featureEnabled: {},
         loadingChargebee: false,
+        isPioneer: false,
     } as State
 
     componentDidMount = async () => {
         await this.refreshFeatures()
+        const isBetaAuthorized = await auth.isAuthorizedForFeature('beta')
+
+        this.setState({
+            loadState: 'success',
+            isPioneer: isBetaAuthorized,
+        })
     }
 
     openPortal = async () => {
@@ -100,11 +112,10 @@ class BetaFeaturesScreen extends React.Component<
                                 Beta Features
                             </TypographyHeadingBigger>
 
-                            {this.props.currentUser?.authorizedFeatures?.includes(
-                                'beta',
+                            {(this.state.isPioneer &&  this.state.loadState === 'success'
                             ) ? (
                                 <TypographyTextNormal>
-                                    You're signed up for using the beta
+                                    👍 You're set up for using the beta
                                     features.
                                     <br />
                                 </TypographyTextNormal>
@@ -126,9 +137,8 @@ class BetaFeaturesScreen extends React.Component<
                             )}
                         </div>
                         <div className={settingsStyle.buttonBox}>
-                            {!this.props.currentUser?.authorizedFeatures?.includes(
-                                'beta',
-                            ) && this.renderUpgradeBtn()}
+                            {(!this.state.isPioneer &&  this.state.loadState === 'success'
+                             ) && this.renderUpgradeBtn()}
                             <SecondaryAction
                                 onClick={() =>
                                     window.open(
@@ -187,29 +197,6 @@ class BetaFeaturesScreen extends React.Component<
                                                     >
                                                         Read More
                                                     </div>
-                                                )}
-                                                {this.props.currentUser?.authorizedFeatures?.includes(
-                                                    'beta',
-                                                ) ? (
-                                                    <ToggleSwitch
-                                                        isChecked={
-                                                            this.state
-                                                                .featureEnabled[
-                                                                feature.id
-                                                            ]
-                                                        }
-                                                        onChange={this.toggleFeature(
-                                                            feature.id,
-                                                        )}
-                                                    />
-                                                ) : (
-                                                    <ToggleSwitch
-                                                        isChecked={false}
-                                                        onChange={
-                                                            this.props
-                                                                .showBetaFeatureNotifModal
-                                                        }
-                                                    />
                                                 )}
                                             </div>
                                         </div>

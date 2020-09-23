@@ -9,6 +9,8 @@ import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
+import { TaskState } from 'ui-logic-core/lib/types'
+
 
 const styles = require('./styles.css')
 
@@ -21,11 +23,18 @@ interface Props {
     refreshUser?: boolean
 }
 
+interface State {
+    isPioneer?: boolean
+    loadState: TaskState
+}
+
 export class AccountInfo extends React.Component<Props & AuthContextInterface> {
     state = {
         loadingChargebee: false,
         plans: [],
         features: [],
+        loadState: 'running',
+        isPioneer: false,
     }
 
     openPortal = async () => {
@@ -53,10 +62,13 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
         const user = await this.props.currentUser
         const plans = await this.props.currentUser.authorizedPlans
         const features = await this.props.currentUser.authorizedFeatures
+        const isBetaAuthorized = await auth.isAuthorizedForFeature('beta')
 
-        await this.setState({
+        this.setState({
             plans: plans,
             features: features,
+            loadState: 'success',
+            isPioneer: isBetaAuthorized,
         })
     }
 
@@ -69,7 +81,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
             <FullPage>
                 {user != null && (
                     <div className={styles.AccountInfoBox}>
-                        {this.state.features.includes('beta') && (
+                        {(this.state.isPioneer &&  this.state.loadState === 'success') && (
                             <div className={styles.pioneerBox}>
                                 <div className={styles.pioneerTitle}>
                                     🚀 Pioneer Edition
