@@ -45,18 +45,27 @@ class AnnotationFooter extends React.Component<Props> {
                     {timestamp}
                 </TimestampStyled>
                 <DefaultFooterBtnContainerStyled>
+                    {/*<ButtonTooltip
+                            position={'bottom'}
+                            tooltipText={isBookmarked ? 'Un-Favorite' : 'Favorite'}
+                        >
+                            <IconBox onClick={this.props.toggleBookmark}>
+                                <IconStyled
+                                    src={
+                                        isBookmarked
+                                            ? icons.heartFull
+                                            : icons.heartEmpty
+                                    }
+                                />
+                            </IconBox>
+                        </ButtonTooltip>
+                    */}
                     <ButtonTooltip
                         position={'bottom'}
-                        tooltipText={isBookmarked ? 'Un-Favorite' : 'Favorite'}
+                        tooltipText={'Edit Note'}
                     >
-                        <IconBox onClick={this.props.toggleBookmark}>
-                            <IconStyled
-                                src={
-                                    isBookmarked
-                                        ? icons.heartFull
-                                        : icons.heartEmpty
-                                }
-                            />
+                        <IconBox onClick={this.props.onEditIconClick}>
+                            <IconStyled src={icons.commentAdd} />
                         </IconBox>
                     </ButtonTooltip>
                     <AnnotationShareIconRenderer
@@ -92,14 +101,6 @@ class AnnotationFooter extends React.Component<Props> {
                             </IconBox>
                         </ButtonTooltip>
                     )}
-                    <ButtonTooltip
-                        position={'bottom'}
-                        tooltipText={'Edit Note'}
-                    >
-                        <IconBox onClick={this.props.onEditIconClick}>
-                            <IconStyled src={icons.commentAdd} />
-                        </IconBox>
-                    </ButtonTooltip>
                     <ButtonTooltip
                         position={'bottom'}
                         tooltipText={'Delete Note'}

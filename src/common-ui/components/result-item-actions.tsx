@@ -99,17 +99,18 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                         tooltipText="Add/View Notes"
                     />
 
-                    <ResultItemActionBtn
-                        permanent={this.props.hasBookmark}
-                        imgSrc={this.props.hasBookmark ? heartFull : heartEmpty}
-                        className={
-                            this.props.hasBookmark
-                                ? styles.bookmark
-                                : styles.notBookmark
-                        }
-                        onClick={this.props.onToggleBookmarkClick}
-                        tooltipText="Bookmark"
-                    />
+                    {/*<ResultItemActionBtn
+                            permanent={this.props.hasBookmark}
+                            imgSrc={this.props.hasBookmark ? heartFull : heartEmpty}
+                            className={
+                                this.props.hasBookmark
+                                    ? styles.bookmark
+                                    : styles.notBookmark
+                            }
+                            onClick={this.props.onToggleBookmarkClick}
+                            tooltipText="Bookmark"
+                        />
+                    */}
                     {this.props.isListFilterActive && (
                         <SemiCircularRibbon
                             onClick={this.props.handleCrossRibbonClick}
