@@ -19,6 +19,7 @@ import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 export interface Props {
     showSubscriptionModal: () => void
     betaRequestStrategy?: 'go-to-options-page' | 'sign-in'
+    initWithAuth?: boolean
 }
 
 interface State {
@@ -105,6 +106,7 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
         loadState: 'running',
         chargebeeState: 'pristine',
         betaActivationState: 'pristine',
+        isAuthenticating: this.props.initWithAuth,
     }
 
     get isUnauthorizedUser(): boolean {

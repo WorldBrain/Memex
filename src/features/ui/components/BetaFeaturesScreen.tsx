@@ -94,10 +94,7 @@ class BetaFeaturesScreen extends React.Component<
         return (
             <PrimaryAction
                 label="Request Access"
-                onClick={
-                    this.props
-                        .showBetaFeatureNotifModal
-                }
+                onClick={this.props.showBetaFeatureNotifModal}
             />
         )
     }
@@ -116,7 +113,9 @@ class BetaFeaturesScreen extends React.Component<
                                 'beta',
                             ) ? (
                                 <TypographyTextNormal>
-                                    You're signed up for using the beta features.<br/>
+                                    You're signed up for using the beta
+                                    features.
+                                    <br />
                                 </TypographyTextNormal>
                             ) : (
                                 <div>
@@ -124,11 +123,12 @@ class BetaFeaturesScreen extends React.Component<
                                         Access beta features by
                                         <TypographyLink
                                             onClick={
-                                                    this.props
-                                                        .showBetaFeatureNotifModal
-                                                }
+                                                this.props
+                                                    .showBetaFeatureNotifModal
+                                            }
                                         >
-                                            requesting free access via a wait list.
+                                            requesting free access via a wait
+                                            list.
                                         </TypographyLink>
                                     </TypographyTextNormal>
                                 </div>
@@ -137,9 +137,7 @@ class BetaFeaturesScreen extends React.Component<
                         <div className={settingsStyle.buttonBox}>
                             {!this.props.currentUser?.authorizedFeatures?.includes(
                                 'beta',
-                            ) && (
-                                this.renderUpgradeBtn()
-                            )}
+                            ) && this.renderUpgradeBtn()}
                             <SecondaryAction
                                 onClick={() =>
                                     window.open(
@@ -185,20 +183,20 @@ class BetaFeaturesScreen extends React.Component<
                                                     settingsStyle.buttonArea
                                                 }
                                             >
-                                            {feature.link &&
-                                                <div
-                                                    className={
-                                                        settingsStyle.readMoreButton
-                                                    }
-                                                    onClick={() => {
-                                                        window.open(
-                                                            feature.link,
-                                                        )
-                                                    }}
-                                                >
-                                                    Read More
-                                                </div>
-                                                }
+                                                {feature.link && (
+                                                    <div
+                                                        className={
+                                                            settingsStyle.readMoreButton
+                                                        }
+                                                        onClick={() => {
+                                                            window.open(
+                                                                feature.link,
+                                                            )
+                                                        }}
+                                                    >
+                                                        Read More
+                                                    </div>
+                                                )}
                                                 {this.props.currentUser?.authorizedFeatures?.includes(
                                                     'beta',
                                                 ) ? (
@@ -261,20 +259,20 @@ class BetaFeaturesScreen extends React.Component<
                                                         settingsStyle.buttonArea
                                                     }
                                                 >
-                                                {feature.link &&
-                                                    <div
-                                                        className={
-                                                            settingsStyle.readMoreButton
-                                                        }
-                                                        onClick={() => {
-                                                            window.open(
-                                                                feature.link,
-                                                            )
-                                                        }}
-                                                    >
-                                                        Read More
-                                                    </div>
-                                                }
+                                                    {feature.link && (
+                                                        <div
+                                                            className={
+                                                                settingsStyle.readMoreButton
+                                                            }
+                                                            onClick={() => {
+                                                                window.open(
+                                                                    feature.link,
+                                                                )
+                                                            }}
+                                                        >
+                                                            Read More
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </section>
@@ -292,5 +290,10 @@ export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
     toggleBetaFeatures: (val) => dispatch(resultsActs.setBetaFeatures(val)),
     showBetaFeatureNotifModal: () =>
-        dispatch(show({ modalId: 'BetaFeatureNotifModal' })),
+        dispatch(
+            show({
+                modalId: 'BetaFeatureNotifModal',
+                options: { initWithAuth: true },
+            }),
+        ),
 }))(withCurrentUser(BetaFeaturesScreen))
