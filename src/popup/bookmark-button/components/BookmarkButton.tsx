@@ -19,7 +19,7 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    toggleBookmark: ClickHandler<HTMLButtonElement>
+    toggleBookmark: ClickHandler<HTMLDivElement>
 }
 
 export type Props = OwnProps & StateProps & DispatchProps
@@ -27,21 +27,28 @@ export type Props = OwnProps & StateProps & DispatchProps
 class BookmarkButton extends PureComponent<Props> {
     render() {
         const text = this.props.isBookmarked
-            ? 'Un-Bookmark this Page'
-            : 'Bookmark this Page'
+            ? 'Page Saved'
+            : 'Save Page'
+
 
         return (
-            <Button
+            <div
                 onClick={this.props.toggleBookmark}
-                title={'Bookmark'}
-                btnClass={cx({
-                    [styles.bookmarkedBtn]: this.props.isBookmarked,
-                    [styles.unbookmarkedBtn]: !this.props.isBookmarked,
-                })}
-                disabled={this.props.isDisabled}
+                className={cx(styles.buttonBox, {
+                        [styles.disabled]: this.props.isDisabled,
+                        [styles.saved]: this.props.isBookmarked,
+                    })
+                }
             >
+                <div
+                    className={cx({
+                        [styles.bookmarkedBtn]: this.props.isBookmarked,
+                        [styles.unbookmarkedBtn]: !this.props.isBookmarked,
+                        [styles.disabled]: !this.props.isDisabled,
+                    })}
+                />
                 {text}
-            </Button>
+            </div>
         )
     }
 }

@@ -2,6 +2,7 @@ import React, { PureComponent, KeyboardEventHandler } from 'react'
 import qs from 'query-string'
 import { connect, MapStateToProps } from 'react-redux'
 import { browser } from 'webextension-polyfill-ts'
+import styled from 'styled-components'
 
 import * as constants from '../constants'
 import analytics from '../analytics'
@@ -13,6 +14,7 @@ import ButtonIcon from './components/ButtonIcon'
 import { TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
 import { HistoryPauser } from './pause-button'
+import { ButtonTooltip } from 'src/common-ui/components'
 import {
     selectors as tagsSelectors,
     acts as tagActs,
@@ -39,6 +41,7 @@ import { tags, collections } from 'src/util/remote-functions-background'
 import { BackContainer } from 'src/popup/components/BackContainer'
 const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface OwnProps {}
 
@@ -183,40 +186,34 @@ class PopupContainer extends PureComponent<Props> {
 
         return (
             <React.Fragment>
-                <Search
-                    searchValue={this.props.searchValue}
-                    onSearchChange={this.props.handleSearchChange}
-                    onSearchEnter={this.onSearchEnter}
-                />
-                <div className={styles.item}>
-                    <LinkButton
-                        btnClass={btnStyles.openIcon}
-                        href={`${constants.OPTIONS_URL}#/overview`}
-                    >
-                        Go to Dashboard
-                    </LinkButton>
-                </div>
-                <hr />
-                <div className={styles.item}>
+                <SaveButtonBox>
                     <BookmarkButton closePopup={this.closePopup} />
-                </div>
-
+                </SaveButtonBox>                
                 <div className={styles.item}>
                     <TagsButton />
                 </div>
-
                 <div className={styles.item}>
                     <CollectionsButton />
                 </div>
                 <hr />
-
-                <div className={styles.item}>
-                    <HistoryPauser />
-                </div>
-
-                <div className={styles.item}>
-                    <BlacklistButton />
-                </div>
+                <BottomBarBox>
+                    <Search
+                        searchValue={this.props.searchValue}
+                        onSearchChange={this.props.handleSearchChange}
+                        onSearchEnter={this.onSearchEnter}
+                    />
+                    <DashboardButtonBox>
+                        <ButtonTooltip
+                            tooltipText="Go to Dashboard"
+                            position="left"
+                        >
+                                <LinkButtonBox
+                                    src={icons.goTo}
+                                    onClick={()=>{window.open(`${constants.OPTIONS_URL}#/overview`)}}
+                                />
+                        </ButtonTooltip> 
+                    </DashboardButtonBox>
+                </BottomBarBox>
                 <hr />
 
                 <div className={styles.item}>
@@ -257,6 +254,56 @@ class PopupContainer extends PureComponent<Props> {
     }
 }
 
+const LinkButtonBox = styled.img`
+    height: 24px;
+    width: 24px;
+`
+
+const SaveButtonBox =styled.div`
+    height: 48px;
+    background-color: #5cd9a6;
+    margin: 2px;
+    display: flex;
+    align-items: center;
+    cursor: default;
+    font-weight: 600;
+    margin-bottom: 5px;
+    border-radius: 3px;
+
+    & > button {
+        display: flex;
+        justify-content: center;
+        padding: 0;
+        font-weight: 600;
+    }
+`
+
+const DashboardButtonBox = styled.div`
+    height: 50px;
+    width: 50px;
+    margin: 0 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    &: hover {
+        background-color: #e0e0e0;
+        border-radius: 3px;
+    }
+`
+
+
+const BottomBarBox = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 46px;
+`
+
+
+
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     tabId: selectors.tabId(state),
     url: selectors.url(state),
@@ -283,6 +330,8 @@ const mapDispatch = (dispatch): DispatchProps => ({
     onCollectionDel: (collection: string) =>
         dispatch(collectionActs.deleteCollection(collection)),
 })
+
+
 
 export default connect<StateProps, DispatchProps, OwnProps>(
     mapState,

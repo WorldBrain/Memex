@@ -42,9 +42,6 @@ class TooltipButton extends PureComponent<Props> {
                         title={'Open Memex annotation sidebar'}
                     >
                         Open Sidebar
-                        <p className={buttonStyles.subTitle}>
-                            only on this page
-                        </p>
                     </Button>
                 </div>
                 <div

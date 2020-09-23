@@ -110,7 +110,7 @@ const DefaultFooter = ({
                     </ButtonTooltip>
                 )}
             />
-            {hasBookmark ? (
+            {/*{hasBookmark ? (
                 <ButtonTooltip position={'bottom'} tooltipText={'Un-Bookmark'}>
                     <IconBoxPermanent
                         onClick={(e) => {
@@ -133,6 +133,7 @@ const DefaultFooter = ({
                     </IconBox>
                 </ButtonTooltip>
             )}
+            */}
         </ButtonContainer>
     </AnnotationBoxDefaultFooter>
 )
