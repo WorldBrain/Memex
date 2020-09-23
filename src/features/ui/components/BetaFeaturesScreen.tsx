@@ -82,18 +82,9 @@ class BetaFeaturesScreen extends React.Component<
     }
 
     private renderUpgradeBtn() {
-        if (this.state.loadingChargebee) {
-            return (
-                <PrimaryAction
-                    label={<LoadingIndicator />}
-                    onClick={undefined}
-                />
-            )
-        }
-
         return (
             <PrimaryAction
-                label="Request Access"
+                label="Activate"
                 onClick={this.props.showBetaFeatureNotifModal}
             />
         )

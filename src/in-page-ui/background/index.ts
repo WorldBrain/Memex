@@ -34,7 +34,7 @@ export class InPageUIBackground implements InPageUIInterface<'provider'> {
 
         this.options.createContextMenuEntry({
             id: CONTEXT_MENU_ID_PREFIX + 'createHighlight',
-            title: `Highlight with Memex (${shortcutStr})`,
+            title: `Highlight with Memex`,
             contexts: ['selection'],
             onclick: (_, tab) => this.createHighlightInTab(tab.id),
         })
