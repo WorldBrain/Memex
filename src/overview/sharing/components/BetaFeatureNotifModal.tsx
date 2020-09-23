@@ -9,16 +9,22 @@ export interface Props
         'onClose' | 'requiresExplicitStyles' | 'ignoreReactPortal'
     > {
     showSubscriptionModal: () => void
+    betaRequestStrategy?: 'go-to-options-page' | 'sign-in'
 }
 
 export default class BetaFeatureNotifModal extends Component<Props> {
     render() {
-        const { showSubscriptionModal, ...props } = this.props
+        const {
+            showSubscriptionModal,
+            betaRequestStrategy,
+            ...props
+        } = this.props
 
         return (
             <Modal large {...props}>
                 <BetaFeatureNotif
                     showSubscriptionModal={showSubscriptionModal}
+                    betaRequestStrategy={betaRequestStrategy}
                 />
             </Modal>
         )

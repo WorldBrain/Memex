@@ -1,7 +1,7 @@
 import { ContentScriptsInterface } from './types'
 import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { Tabs, WebNavigation } from 'webextension-polyfill-ts'
+import { Tabs, WebNavigation, Runtime } from 'webextension-polyfill-ts'
 import { getSidebarState } from 'src/sidebar-overlay/utils'
 
 export class ContentScriptsBackground {
@@ -14,6 +14,7 @@ export class ContentScriptsBackground {
                 options: { file: string },
             ) => void
             getTab: Tabs.Static['get']
+            getURL: Runtime.Static['getURL']
             webNavigation: WebNavigation.Static
         },
     ) {
@@ -23,6 +24,10 @@ export class ContentScriptsBackground {
                 id: tab.id,
                 url: (await options.getTab(tab.id)).url,
             }),
+            openBetaFeatureSettings: async () => {
+                const optionsPageUrl = this.options.getURL('options.html')
+                window.open(optionsPageUrl + '#/features')
+            },
         }
 
         this.options.webNavigation.onHistoryStateUpdated.addListener(

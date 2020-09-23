@@ -226,6 +226,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 {this.state.showBetaFeatureNotifModal && (
                     <BetaFeatureNotifModal
                         ignoreReactPortal
+                        betaRequestStrategy="go-to-options-page"
                         onClose={() =>
                             this.processEvent('setBetaFeatureNotifModalShown', {
                                 shown: false,

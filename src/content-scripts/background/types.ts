@@ -7,4 +7,5 @@ export interface ContentScriptsInterface<Role extends 'provider' | 'caller'> {
         { component: ContentScriptComponent }
     >
     getCurrentTab: RemoteFunction<Role, void, { id: number; url: string }>
+    openBetaFeatureSettings: RemoteFunction<Role, void>
 }

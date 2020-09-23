@@ -13,9 +13,12 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { SignInScreen } from 'src/authentication/components/SignIn'
 import { LoadingIndicator } from 'src/common-ui/components'
+import { runInBackground } from 'src/util/webextensionRPC'
+import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 
 export interface Props {
     showSubscriptionModal: () => void
+    betaRequestStrategy?: 'go-to-options-page' | 'sign-in'
 }
 
 interface State {
@@ -94,6 +97,10 @@ const SuccessBox = styled.div`
 `
 
 export default class BetaFeatureNotif extends PureComponent<Props, State> {
+    static defaultProps: Partial<Props> = {
+        betaRequestStrategy: 'sign-in',
+    }
+
     state: State = {
         loadState: 'running',
         chargebeeState: 'pristine',
@@ -125,6 +132,13 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
     }
 
     onRequestAccess = () => {
+        if (this.props.betaRequestStrategy === 'go-to-options-page') {
+            runInBackground<
+                ContentScriptsInterface<'caller'>
+            >().openBetaFeatureSettings()
+            return
+        }
+
         if (this.state.isAuthenticated) {
             this.activateBeta()
         } else {
@@ -148,9 +162,7 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
     }
 
     onSignInFail = () => {
-        this.setState({
-            isAuthenticating: false,
-        })
+        this.setState({ isAuthenticating: false })
     }
 
     render() {
