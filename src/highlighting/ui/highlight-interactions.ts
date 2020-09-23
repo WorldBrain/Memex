@@ -70,10 +70,7 @@ export interface HighlightRenderInterface {
     undoAllHighlights: () => void
 }
 
-export type AnnotationClickHandler = (params: {
-    annotationUrl: string
-    openSidebar?: boolean
-}) => void
+export type AnnotationClickHandler = (params: { annotationUrl: string }) => void
 
 // TODO: (sidebar-refactor) move to somewhere more highlight content script related
 export const renderAnnotationCacheChanges = ({
@@ -188,10 +185,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         params.annotationsCache.create(annotation)
 
         await this.renderHighlight(annotation as Highlight, () => {
-            params.onClickHighlight({
-                annotationUrl: annotation.url,
-                openSidebar: true,
-            })
+            params.onClickHighlight({ annotationUrl: annotation.url })
         })
     }
 
@@ -316,7 +310,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 if (!e.target.dataset.annotation) {
                     return
                 }
-                openSidebar({ annotationUrl: highlight.url, openSidebar: true })
+                openSidebar({ annotationUrl: highlight.url })
                 this.removeHighlights(true)
                 this.makeHighlightDark(highlight)
             }
