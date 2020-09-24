@@ -80,7 +80,7 @@
     margin-top: 44px;
 }
 
-.copyPasterBtn {
+.searchActionBtn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -98,7 +98,7 @@
     }
 }
 
-.copyPasterImg {
+.searchActionBtnImg {
     width: 100%;
     height: 100%;
 }
