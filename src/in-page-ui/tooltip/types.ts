@@ -17,6 +17,6 @@ export interface TooltipDependencies extends AnnotationFunctions {
 }
 
 export interface AnnotationFunctions {
-    createHighlight(options?: { clickToEdit?: boolean }): Promise<void>
+    createHighlight(): Promise<void>
     createAnnotation(): Promise<void>
 }

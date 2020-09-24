@@ -119,6 +119,7 @@ export async function main() {
             highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
                 ...annotationFunctionsParams,
                 analyticsEvent,
+                options: { clickToEdit: true },
             }),
     }
 
