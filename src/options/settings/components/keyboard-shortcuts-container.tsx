@@ -9,8 +9,17 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 import { shortcuts, ShortcutElData } from '../keyboard-shortcuts'
 import { KeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/types'
 import analytics from 'src/analytics'
+import { runInBackground } from 'src/util/webextensionRPC'
+import { InPageUIInterface } from 'src/in-page-ui/background/types'
 
 const styles = require('./settings.css')
+
+async function writeShortcutState(state: State) {
+    await setKeyboardShortcutsState(state)
+    await runInBackground<
+        InPageUIInterface<'caller'>
+    >().updateContextMenuEntries()
+}
 
 export interface Props {
     shortcutsData?: ShortcutElData[]
@@ -58,9 +67,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
             return { [name]: { ...state[name], enabled } } as any
         }
 
-        this.setState(reducer, () =>
-            setKeyboardShortcutsState({ ...this.state }),
-        )
+        this.setState(reducer, () => writeShortcutState({ ...this.state }))
     }
 
     recordBinding = async (e) => {
@@ -73,7 +80,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
             this.setState(
                 (state) =>
                     ({ [name]: { ...state[name], shortcut: '' } } as any),
-                () => setKeyboardShortcutsState({ ...this.state }),
+                () => writeShortcutState({ ...this.state }),
             )
             return
         }
@@ -86,7 +93,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
 
         this.setState(
             (state) => ({ [name]: { ...state[name], shortcut } } as any),
-            () => setKeyboardShortcutsState({ ...this.state }),
+            () => writeShortcutState({ ...this.state }),
         )
     }
 
