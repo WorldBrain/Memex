@@ -131,15 +131,15 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         }
     }
 
-    hideSidebar() {
-        this._setState('sidebar', false)
+    async hideSidebar() {
+        await this._setState('sidebar', false)
     }
 
-    toggleSidebar(): void {
+    async toggleSidebar() {
         if (this.componentsShown.sidebar) {
-            this.hideSidebar()
+            await this.hideSidebar()
         } else {
-            this.showSidebar()
+            await this.showSidebar()
         }
     }
 
@@ -171,7 +171,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
     }
 
     async hideRibbon() {
-        this._setState('ribbon', false)
+        await this._setState('ribbon', false)
     }
 
     async removeRibbon() {

@@ -53,26 +53,26 @@ export interface SharedInPageUIInterface {
     componentsShown: InPageUIComponentShowState
 
     // Ribbon
-    showRibbon(options?: { action?: InPageUIRibbonAction }): void
-    hideRibbon(): void
-    removeRibbon(): void
-    toggleRibbon(): void
+    showRibbon(options?: { action?: InPageUIRibbonAction }): Promise<void>
+    hideRibbon(): Promise<void>
+    removeRibbon(): Promise<void>
+    toggleRibbon(): Promise<void>
     updateRibbon(): void
 
     // Sidebar
-    showSidebar(options?: SidebarActionOptions): void
-    hideSidebar(): void
-    toggleSidebar(): void
+    showSidebar(options?: SidebarActionOptions): Promise<void>
+    hideSidebar(): Promise<void>
+    toggleSidebar(): Promise<void>
 
     // Tooltip
-    setupTooltip(): void
-    showTooltip(): void
-    hideTooltip(): void
-    removeTooltip(): void
-    toggleTooltip(): void
+    showTooltip(): Promise<void>
+    hideTooltip(): Promise<void>
+    setupTooltip(): Promise<void>
+    removeTooltip(): Promise<void>
+    toggleTooltip(): Promise<void>
 
     // Highlights
-    showHighlights(): void
-    hideHighlights(): void
-    toggleHighlights(): void
+    showHighlights(): Promise<void>
+    hideHighlights(): Promise<void>
+    toggleHighlights(): Promise<void>
 }
