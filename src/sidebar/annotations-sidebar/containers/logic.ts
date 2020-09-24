@@ -20,6 +20,7 @@ import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
+import { areTagsEquivalent } from 'src/tags/utils'
 
 interface EditForm {
     isBookmarked: boolean
@@ -789,17 +790,23 @@ export class SidebarContainerLogic extends UILogic<
             editForms: { [event.annotationUrl]: form },
         } = previousState
 
-        const resultIndex = previousState.annotations.findIndex(
+        const comment = form.commentText.trim()
+        const existing = previousState.annotations.find(
             (annot) => annot.url === event.annotationUrl,
         )
-        const annotation = previousState.annotations[resultIndex]
-        const comment = form.commentText.trim()
 
-        this.options.annotationsCache.update({
-            ...annotation,
-            comment,
-            tags: form.tags,
-        })
+        const somethingChanged = !(
+            existing.comment === comment &&
+            areTagsEquivalent(existing.tags, form.tags)
+        )
+
+        if (somethingChanged) {
+            this.options.annotationsCache.update({
+                ...existing,
+                comment,
+                tags: form.tags,
+            })
+        }
 
         this.emitMutation({
             annotationModes: {

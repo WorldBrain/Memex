@@ -38,3 +38,18 @@ export async function updateSuggestionsCache(args: {
 
     await args.setCache(suggestions)
 }
+
+export function areTagsEquivalent(a: string[], b: string[]): boolean {
+    if (a.length !== b.length) {
+        return false
+    }
+
+    const setB = new Set(b)
+    for (const tag of a) {
+        if (!setB.has(tag)) {
+            return false
+        }
+    }
+
+    return true
+}
