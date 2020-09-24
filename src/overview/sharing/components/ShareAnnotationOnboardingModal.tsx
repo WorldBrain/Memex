@@ -20,7 +20,7 @@ export interface Props
     onClose: () => void
     onClickLetUsKnow: () => void
     onClickViewRoadmap: () => void
-    onClickKnownIssues: () => void
+    onClickSharingTutorial: () => void
 }
 
 const ShareIconBox = styled.div`
@@ -36,7 +36,7 @@ const ShareIconContainer = styled.div`
 `
 
 const ShareIconFull = styled.div`
-    background-image: url(${icons.share});
+    background-image: url(${icons.shared});
     background-position: center center;
     background-repeat: no-repeat;
     width: 30px;
@@ -46,11 +46,11 @@ const ShareIconFull = styled.div`
 `
 
 const ShareIconEmpty = styled.div`
-    background-image: url(${icons.shareEmpty});
+    background-image: url(${icons.lock});
     background-position: center center;
     background-repeat: no-repeat;
     width: 30px;
-    height: 30px;
+    height: 25px;
     background-size: contain;
     margin-right: 5px;
 `
@@ -59,6 +59,7 @@ const ShareIconText = styled.span``
 
 const BetaInfoContainer = styled.div`
     margin-top: 40px;
+    width: 70%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -76,7 +77,9 @@ const BlockHeading = styled(TypographyHeadingNormal)`
 
 const LinkBox = styled.div`
     width: 100%;
-    height: 26px;
+    margin-top: 30px;
+    justify-content: center;
+    display: flex;
 `
 
 const InstructionsContainer = styled.div`
@@ -95,8 +98,6 @@ const InstructionsBox = styled.div`
 `
 
 const LinkContainer = styled.div`
-    margin-bottom: 10px;
-    margin-top: 20px;
     display: flex;
     align-items: center;
 `
@@ -128,29 +129,27 @@ export default class ShareAnnotationOnboardingModal extends Component<Props> {
                 <InstructionsContainer>
                     <InstructionsBox>
                         <TypographyHeadingBigger>
-                            NEW: Share highlights and notes in collections
+                            NEW: Share Annotations
                         </TypographyHeadingBigger>
                         <TypographyTextNormal>
-                            Shared notes are accessible via a link and are all
-                            shared collection the page is part of.
+                            Once shared, anyone with the link can view them.<br/>
+                            They are also added to all shared collection the page is part of.
                         </TypographyTextNormal>
                     </InstructionsBox>
                 </InstructionsContainer>
 
-                <LinkContainer>
-                    <LinkBox>
-                        <ShareIconBox>
-                            <ShareIconContainer>
-                                <ShareIconFull />
-                                <ShareIconText>Shared</ShareIconText>
-                            </ShareIconContainer>
-                            <ShareIconContainer>
-                                <ShareIconEmpty />
-                                <ShareIconText>Private</ShareIconText>
-                            </ShareIconContainer>
-                        </ShareIconBox>
-                    </LinkBox>
-                </LinkContainer>
+                <LinkBox>
+                    <ShareIconBox>
+                        <ShareIconContainer>
+                            <ShareIconFull />
+                            <ShareIconText>Shared</ShareIconText>
+                        </ShareIconContainer>
+                        <ShareIconContainer>
+                            <ShareIconEmpty />
+                            <ShareIconText>Private</ShareIconText>
+                        </ShareIconContainer>
+                    </ShareIconBox>
+                </LinkBox>
                 <BetaInfoContainer>
                     <BlockHeading>🚀 This is a beta feature</BlockHeading>
                     <Text>
@@ -168,8 +167,8 @@ export default class ShareAnnotationOnboardingModal extends Component<Props> {
                             onClick={this.props.onClickViewRoadmap}
                         />
                         <SecondaryAction
-                            label={'Known Issues'}
-                            onClick={this.props.onClickKnownIssues}
+                            label={'Tutorial'}
+                            onClick={this.props.onClickSharingTutorial}
                         />
                     </ButtonsContainer>
                 </BetaInfoContainer>

@@ -216,9 +216,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                         onClickViewRoadmap={() => {
                             window.open('https://worldbrain.io/roadmap')
                         }}
-                        onClickKnownIssues={() => {
+                        onClickSharingTutorial={() => {
                             window.open(
-                                'https://worldbrain.io/feature/sharing-collections/knownissues',
+                                'https://worldbrain.io/tutorials/memex-social',
                             )
                         }}
                     />

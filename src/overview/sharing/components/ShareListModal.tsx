@@ -211,14 +211,14 @@ class ShareListModal extends Component<Props, State> {
                     }
                 }}
                 onClickLetUsKnow={() => {
-                    window.open('https://worldbrain.io/feedback/betafeatures')
+                    window.open('https://worldbrain.io/feedback')
                 }}
                 onClickViewRoadmap={() => {
                     window.open('https://worldbrain.io/roadmap')
                 }}
-                onClickKnownIssues={() => {
+                onClickSharingTutorial={() => {
                     window.open(
-                        'https://worldbrain.io/feature/sharing-collections/knownissues',
+                        'https://worldbrain.io/tutorials/memex-social',
                     )
                 }}
             />

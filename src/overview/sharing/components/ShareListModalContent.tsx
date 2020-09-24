@@ -150,7 +150,7 @@ interface Props {
     onClickToggle: () => void
     onClickLetUsKnow: () => void
     onClickViewRoadmap: () => void
-    onClickKnownIssues: () => void
+    onClickSharingTutorial: () => void
 }
 
 const COPY_TIMEOUT = 2000
@@ -250,8 +250,8 @@ export default class ShareListModalContent extends PureComponent<Props> {
                             onClick={this.props.onClickViewRoadmap}
                         />
                         <SecondaryAction
-                            label={'Known Issues'}
-                            onClick={this.props.onClickKnownIssues}
+                            label={'Tutorial'}
+                            onClick={this.props.onClickSharingTutorial}
                         />
                     </ButtonsContainer>
                 </BetaInfoContainer>

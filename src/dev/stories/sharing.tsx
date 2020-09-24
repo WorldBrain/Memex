@@ -17,7 +17,7 @@ stories.add('Modal content - private', () => (
         onClickToggle={() => {}}
         onClickLetUsKnow={() => {}}
         onClickViewRoadmap={() => {}}
-        onClickKnownIssues={() => {}}
+        onClickSharingTutorial={() => {}}
     />
 ))
 
@@ -31,7 +31,7 @@ stories.add('Modal content - public', () => (
         onClickToggle={() => {}}
         onClickLetUsKnow={() => {}}
         onClickViewRoadmap={() => {}}
-        onClickKnownIssues={() => {}}
+        onClickSharingTutorial={() => {}}
     />
 ))
 
@@ -45,7 +45,7 @@ stories.add('Modal content - public & uploading', () => (
         onClickToggle={() => {}}
         onClickLetUsKnow={() => {}}
         onClickViewRoadmap={() => {}}
-        onClickKnownIssues={() => {}}
+        onClickSharingTutorial={() => {}}
     />
 ))
 
