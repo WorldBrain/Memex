@@ -107,11 +107,11 @@ export async function main() {
     const annotationsFunctions = {
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
-        ) => (options?: { clickToEdit: boolean }) =>
+        ) => () =>
             highlightRenderer.saveAndRenderHighlight({
                 ...annotationFunctionsParams,
                 analyticsEvent,
-                options,
+                options: { clickToEdit: true },
             }),
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
