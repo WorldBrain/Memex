@@ -111,6 +111,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         }
 
         this.props.openShareMenu()
+        await this.setLastSharedTimestamp()
     }
 
     private unshareAnnotation: React.MouseEventHandler = async (e) => {

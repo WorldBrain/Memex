@@ -845,6 +845,7 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             activeShareMenuNoteId: { $set: event.annotationUrl },
         })
+        await this.setLastSharedAnnotationTimestamp()
     }
 
     unshareAnnotation: EventHandler<'unshareAnnotation'> = async ({
