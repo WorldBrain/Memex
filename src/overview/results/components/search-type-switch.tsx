@@ -17,6 +17,9 @@ import {
     PageSearchCopyPaster,
 } from 'src/copy-paster'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import { runInBackground } from 'src/util/webextensionRPC'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
+
 
 const styles = require('./search-type-switch.css')
 
@@ -28,6 +31,11 @@ export interface StateProps {
     showShareListIcon: boolean
     searchParams: BackgroundSearchParams
     searchType: 'page' | 'notes' | 'social'
+    listId: number
+}
+
+export interface State {
+    isShared: boolean
 }
 
 export interface DispatchProps {
@@ -61,6 +69,14 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
 
     get isSocialSearch() {
         return this.props.searchType === 'social'
+    }
+
+    async getSharedState() {
+        const contentSharing = runInBackground<ContentSharingInterface>()
+        const remoteId = await contentSharing.getRemoteListId({
+            localListId: this.props.listId,
+        })
+        this.setState({ isShared: !!remoteId })
     }
 
     private renderCopyPaster() {
@@ -130,20 +146,41 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                 </div>
                 <div className={styles.btnsContainer}>
                     {this.props.showShareListIcon && (
-                        <ButtonTooltip
-                            tooltipText="Share selected list"
-                            position="bottom"
-                        >
-                            <button
-                                className={styles.copyPasterBtn}
-                                onClick={this.props.clickShareListIcon}
+                         <>
+                        {this.state.isShared ? (
+                            <ButtonTooltip
+                                tooltipText="All people with a link can view this collection"
+                                position="bottom"
                             >
-                                <img
-                                    className={styles.copyPasterImg}
-                                    src={icons.shareEmpty}
-                                />
-                            </button>
-                        </ButtonTooltip>
+                                <button
+                                    className={styles.copyPasterBtn}
+                                    onClick={this.props.clickShareListIcon}
+                                >
+                                
+                                    <img
+                                        className={styles.copyPasterImg}
+                                        src={icons.shared}
+                                    />
+                                </button>
+                            </ButtonTooltip>
+                            ):(
+                                <ButtonTooltip
+                                tooltipText="Share selected list via Link"
+                                position="bottom"
+                            >
+                                <button
+                                    className={styles.copyPasterBtn}
+                                    onClick={this.props.clickShareListIcon}
+                                >
+                                
+                                    <img
+                                        className={styles.copyPasterImg}
+                                        src={icons.lock}
+                                    />
+                                </button>
+                            </ButtonTooltip>
+                            )}
+                        </>
                     )}
                     {this.props.showCopyPasterIcon && (
                         <>
