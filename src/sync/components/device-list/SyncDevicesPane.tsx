@@ -369,6 +369,11 @@ class SyncDevicesPaneContainer extends React.Component<
                         }
                     />
                 </div>
+                <div className={styles.warningBox}>
+
+                    <a href="#/import">Import your bookmarks</a> before pairing your devices to prevent sync delays.
+
+                </div>
                 <div className={settingsStyle.section}>
                     <div className={styles.mobileSection}>
                         <div className={styles.contentSection}>
