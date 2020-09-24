@@ -44,7 +44,7 @@ export interface RemoteCollectionsInterface {
         limit?: number
         skipMobileList?: boolean
     }): Promise<PageList[]>
-    __fetchListById(args: { id: number }): Promise<PageList>
+    fetchListById(args: { id: number }): Promise<PageList>
     fetchListPagesByUrl(args: { url: string }): Promise<PageList[]>
     fetchInitialListSuggestions(args?: { limit?: number }): Promise<string[]>
     __fetchListNameSuggestions(args: {

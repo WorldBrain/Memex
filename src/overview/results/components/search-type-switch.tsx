@@ -25,12 +25,14 @@ export interface StateProps {
     showCopyPaster: boolean
     isFilterBarActive: boolean
     showCopyPasterIcon: boolean
+    showShareListIcon: boolean
     searchParams: BackgroundSearchParams
     searchType: 'page' | 'notes' | 'social'
 }
 
 export interface DispatchProps {
     hideCopyPaster: () => void
+    clickShareListIcon: React.MouseEventHandler
     handleCopyPasterIconClick: React.MouseEventHandler
     handleUnfoldAllClick: React.MouseEventHandler<HTMLButtonElement>
     handleSearchTypeClick: (
@@ -127,25 +129,43 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                     )}
                 </div>
                 <div className={styles.btnsContainer}>
+                    {this.props.showShareListIcon && (
+                        <ButtonTooltip
+                            tooltipText="Share selected list"
+                            position="bottom"
+                        >
+                            <button
+                                className={styles.copyPasterBtn}
+                                onClick={this.props.clickShareListIcon}
+                            >
+                                <img
+                                    className={styles.copyPasterImg}
+                                    src={icons.shareEmpty}
+                                />
+                            </button>
+                        </ButtonTooltip>
+                    )}
                     {this.props.showCopyPasterIcon && (
                         <>
-                         <ButtonTooltip
-                                    tooltipText="Copy-Paste Results"
-                                    position="bottom"
+                            <ButtonTooltip
+                                tooltipText="Copy-Paste Results"
+                                position="bottom"
+                            >
+                                <button
+                                    className={styles.copyPasterBtn}
+                                    onClick={
+                                        this.props.handleCopyPasterIconClick
+                                    }
                                 >
-                        <button
-                            className={styles.copyPasterBtn}
-                            onClick={this.props.handleCopyPasterIconClick}
-                        >
-                            <img
-                                className={styles.copyPasterImg}
-                                src={icons.copy}
-                            />
-                        </button>
-                        </ButtonTooltip>
-                        <CopyPasterWrapperTopBar>
-                            {this.renderCopyPaster()}
-                        </CopyPasterWrapperTopBar>
+                                    <img
+                                        className={styles.copyPasterImg}
+                                        src={icons.copy}
+                                    />
+                                </button>
+                            </ButtonTooltip>
+                            <CopyPasterWrapperTopBar>
+                                {this.renderCopyPaster()}
+                            </CopyPasterWrapperTopBar>
                         </>
                     )}
                     {this.isAnnotSearch && (
@@ -172,10 +192,11 @@ const CopyPasterWrapperTopBar = styled.div`
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     searchType: selectors.searchType(state),
-    annotsFolded: selectors.areAnnotationsExpanded(state),
-    showCopyPaster: selectors.isResultCopyPasterShown(state),
     isFilterBarActive: filters.showFilterBar(state),
+    annotsFolded: selectors.areAnnotationsExpanded(state),
     showCopyPasterIcon: selectors.showCopyPasterIcon(state),
+    showCopyPaster: selectors.isResultCopyPasterShown(state),
+    showShareListIcon: selectors.showShareListIcon(state),
     searchParams: {
         query: searchBar.query(state),
         startDate: searchBar.startDate(state),
@@ -201,6 +222,7 @@ const mapDispatch: MapDispatchToProps<DispatchProps, OwnProps> = (
 ) => ({
     handleCopyPasterIconClick: (e) => dispatch(acts.toggleResultCopyPaster()),
     hideCopyPaster: () => dispatch(acts.setResultCopyPasterShown(false)),
+    clickShareListIcon: () => dispatch(acts.clickShareList() as any),
     handleSearchTypeClick: (searchType) => (e) => {
         e.preventDefault()
         dispatch(acts.setLoading(true))

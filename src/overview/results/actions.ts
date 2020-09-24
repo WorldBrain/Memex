@@ -10,7 +10,14 @@ import { selectors as searchBar, acts as searchBarActs } from '../search-bar'
 import { selectors as filters } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { bookmarks, notifications } from 'src/util/remote-functions-background'
+import {
+    auth,
+    bookmarks,
+    collections,
+    notifications,
+    contentSharing,
+} from 'src/util/remote-functions-background'
+import * as modalActions from 'src/overview/modals/actions'
 
 const processEventRPC = remoteFunction('processEvent')
 const createSocialBookmarkRPC = remoteFunction('addSocialBookmark')
@@ -98,6 +105,24 @@ export const toggleResultCopyPaster = createAction(
 export const setResultCopyPasterShown = createAction<boolean>(
     'overview/setResultCopyPasterShown',
 )
+
+export const clickShareList: () => Thunk = () => async (dispatch, getState) => {
+    const listId = filters.listFilter(getState())
+    const list = await collections.fetchListById({ id: +listId })
+
+    dispatch(
+        modalActions.show({
+            modalId: 'ShareListModal',
+            options: {
+                list,
+                auth,
+                contentSharing,
+                isPioneer: true,
+                isShown: true,
+            },
+        }),
+    )
+}
 
 export const toggleBookmark: (args: {
     url: string

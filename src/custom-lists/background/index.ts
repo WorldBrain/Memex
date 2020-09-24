@@ -63,7 +63,7 @@ export default class CustomListBackground {
             removeList: bindMethod(this, 'removeList'),
             removePageFromList: bindMethod(this, 'removePageFromList'),
             fetchAllLists: bindMethod(this, 'fetchAllLists'),
-            __fetchListById: bindMethod(this, 'fetchListById'),
+            fetchListById: bindMethod(this, 'fetchListById'),
             fetchListPagesByUrl: bindMethod(this, 'fetchListPagesByUrl'),
             fetchListIdsByUrl: bindMethod(this, 'fetchListIdsByUrl'),
             fetchInitialListSuggestions: bindMethod(
