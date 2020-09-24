@@ -95,11 +95,6 @@ class ShareListModal extends Component<Props, State> {
         }
     }
 
-    componentWillReceiveProps(nextProps) {
-        // local state copy of display name so we can confirm when setting
-        this.setState({ displayName: nextProps.displayName })
-    }
-
     async shareList() {
         this.setState({
             isShared: true,
