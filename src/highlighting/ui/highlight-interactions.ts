@@ -5,6 +5,7 @@ import {
     Highlight,
     HighlightInteractionsInterface,
 } from 'src/highlighting/types'
+import { AnnotationClickHandler } from 'src/highlighting/ui/types'
 import { retryUntil } from 'src/util/retry-until'
 import { descriptorToRange, markRange } from './anchoring/index'
 import * as Raven from 'src/util/raven'
@@ -19,31 +20,6 @@ import { generateUrl } from 'src/annotations/utils'
 import { AnalyticsEvent } from 'src/analytics/types'
 
 const styles = require('src/highlighting/ui/styles.css')
-
-export async function renderHighlightFromSelection(options: {
-    selection: Selection
-    pageUrl: string
-    title: string
-    temporary: boolean
-}) {
-    const { selection, pageUrl, title, temporary } = options
-
-    const anchor = await extractAnchorFromSelection(selection)
-    const body = anchor ? anchor.quote : ''
-
-    const highlight = {
-        pageUrl,
-        title,
-        comment: '',
-        tags: [],
-        body,
-        selector: anchor,
-    } as Partial<Annotation>
-
-    renderHighlight(highlight as Highlight, () => false, temporary)
-
-    return highlight
-}
 
 export const extractAnchorFromSelection = async (
     selection: Selection,
@@ -69,8 +45,6 @@ export interface HighlightRenderInterface {
     undoHighlight: (uniqueUrl: string) => void
     undoAllHighlights: () => void
 }
-
-export type AnnotationClickHandler = (params: { annotationUrl: string }) => void
 
 // TODO: (sidebar-refactor) move to somewhere more highlight content script related
 export const renderAnnotationCacheChanges = ({
@@ -108,58 +82,42 @@ export const renderAnnotationCacheChanges = ({
     }
 }
 
-// TODO: (sidebar-refactor) move to somewhere more sidebar related
-export const createAnnotationWithSidebar = async (params: {
-    getSelection: () => Selection
+export interface SaveAndRenderHighlightDeps {
     getUrlAndTitle: () => { pageUrl: string; title: string }
-    inPageUI: SharedInPageUIInterface
-    analyticsEvent?: AnalyticsEvent
-}) => {
-    analytics.trackEvent(
-        params.analyticsEvent ?? {
-            category: 'Annotations',
-            action: 'create',
-        },
-    )
-
-    const selection = params.getSelection()
-    const { pageUrl, title } = params.getUrlAndTitle()
-
-    if (!selection || selection.isCollapsed) {
-        params.inPageUI.showSidebar({ action: 'comment' })
-        return
-    }
-
-    const highlight = await renderHighlightFromSelection({
-        selection,
-        pageUrl,
-        title,
-        temporary: true,
-    })
-
-    params.inPageUI.showSidebar({
-        action: 'comment',
-        anchor: highlight.selector,
-    })
-}
-
-export interface SaveAndRenderHighlightDependencies {
+    getSelection: () => Selection
     annotationsCache: AnnotationsCacheInterface
-    onClickHighlight: AnnotationClickHandler
-    getSelection: () => Selection
-    getUrlAndTitle: () => { pageUrl: string; title: string }
     analyticsEvent?: AnalyticsEvent
+    inPageUI: SharedInPageUIInterface
+    options?: { clickToEdit?: boolean }
 }
 
 export type HighlightRendererInterface = HighlightRenderInterface &
     HighlightInteractionsInterface
 
 export class HighlightRenderer implements HighlightRendererInterface {
-    createAnnotationWithSidebar = createAnnotationWithSidebar
-
-    saveAndRenderHighlight = async (
-        params: SaveAndRenderHighlightDependencies,
+    saveAndRenderHighlightAndEditInSidebar = async (
+        params: SaveAndRenderHighlightDeps,
     ) => {
+        analytics.trackEvent(
+            params.analyticsEvent ?? {
+                category: 'Annotations',
+                action: 'create',
+            },
+        )
+
+        const annotation = await this._saveAndRenderHighlight(params)
+
+        if (annotation) {
+            await params.inPageUI.showSidebar({
+                annotationUrl: annotation.url,
+                action: 'edit_annotation',
+            })
+        } else {
+            await params.inPageUI.showSidebar({ action: 'comment' })
+        }
+    }
+
+    saveAndRenderHighlight = async (params: SaveAndRenderHighlightDeps) => {
         analytics.trackEvent(
             params.analyticsEvent ?? {
                 category: 'Highlights',
@@ -167,26 +125,43 @@ export class HighlightRenderer implements HighlightRendererInterface {
             },
         )
 
-        const anchor = await extractAnchorFromSelection(getSelection())
-        const body = anchor ? anchor.quote : ''
-        const comment = ''
-        const tags = []
+        await this._saveAndRenderHighlight(params)
+    }
+
+    private async _saveAndRenderHighlight(
+        params: SaveAndRenderHighlightDeps,
+    ): Promise<Annotation | null> {
+        const selection = params.getSelection()
+
+        if (!selection || selection.isCollapsed) {
+            return null
+        }
+
         const { pageUrl, title } = params.getUrlAndTitle()
+        const anchor = await extractAnchorFromSelection(selection)
+        const body = anchor ? anchor.quote : ''
 
         const annotation = {
             url: generateUrl({ pageUrl, now: () => Date.now() }),
             body,
-            comment,
             pageUrl,
-            pageTitle: title,
+            tags: [],
+            comment: '',
             selector: anchor,
-            tags,
+            pageTitle: title,
         } as Annotation
-        params.annotationsCache.create(annotation)
 
-        await this.renderHighlight(annotation as Highlight, () => {
-            params.onClickHighlight({ annotationUrl: annotation.url })
-        })
+        this.renderHighlight(annotation, () =>
+            params.inPageUI.showSidebar({
+                annotationUrl: annotation.url,
+                action: params.options?.clickToEdit
+                    ? 'edit_annotation'
+                    : 'show_annotation',
+            }),
+        )
+        await params.annotationsCache.create(annotation)
+
+        return annotation
     }
 
     /**

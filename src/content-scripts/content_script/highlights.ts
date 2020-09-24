@@ -1,5 +1,5 @@
 import { HighlightDependencies, HighlightsScriptMain } from './types'
-import { AnnotationClickHandler } from 'src/highlighting/ui/highlight-interactions'
+import { AnnotationClickHandler } from 'src/highlighting/ui/types'
 // import { bodyLoader } from 'src/util/loader'
 
 export const main: HighlightsScriptMain = async (options) => {

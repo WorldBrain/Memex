@@ -1,9 +1,6 @@
-import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
-import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
-import {
-    AnnotationClickHandler,
-    SaveAndRenderHighlightDependencies,
-} from 'src/highlighting/ui/highlight-interactions'
+import { Annotation } from 'src/annotations/types'
+import { SaveAndRenderHighlightDeps } from 'src/highlighting/ui/highlight-interactions'
+import { AnnotationClickHandler } from './ui/types'
 
 export interface Descriptor {
     strategy: string
@@ -44,10 +41,9 @@ export interface HighlightInteractionsInterface {
     _removeHighlight: (highlight: Element) => void
     removeAnnotationHighlights: (url: string) => void
     saveAndRenderHighlight: (
-        params: SaveAndRenderHighlightDependencies,
+        params: SaveAndRenderHighlightDeps,
     ) => Promise<void>
-    createAnnotationWithSidebar: (params: {
-        selection?: Selection
-        inPageUI: SharedInPageUIInterface
-    }) => Promise<void>
+    saveAndRenderHighlightAndEditInSidebar: (
+        params: SaveAndRenderHighlightDeps,
+    ) => Promise<void>
 }

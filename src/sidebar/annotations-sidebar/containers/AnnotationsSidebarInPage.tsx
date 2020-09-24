@@ -140,7 +140,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             this.activateAnnotation(event.annotationUrl)
         } else if (event.action === 'edit_annotation') {
             console.log('edit annot!')
-            this.processEvent('editAnnotation', {
+            this.processEvent('setAnnotationEditMode', {
                 annotationUrl: event.annotationUrl,
                 context: 'pageAnnotations',
             })

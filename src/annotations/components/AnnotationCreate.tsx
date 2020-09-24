@@ -100,7 +100,7 @@ class AnnotationCreate extends React.Component<
         }
 
         return (
-            <StyledTextArea
+            <textarea
                 autoFocus
                 value={this.state.text}
                 onClick={this.hideTagPicker}

@@ -1,4 +1,3 @@
-import { TaskState } from 'ui-logic-core/lib/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
@@ -6,7 +5,6 @@ import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 import { SidebarTheme } from '../types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 
 export interface SidebarContainerDependencies {
     elements?: {
