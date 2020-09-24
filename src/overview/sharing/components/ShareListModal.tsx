@@ -95,11 +95,6 @@ class ShareListModal extends Component<Props, State> {
         }
     }
 
-    componentWillReceiveProps(nextProps) {
-        // local state copy of display name so we can confirm when setting
-        this.setState({ displayName: nextProps.displayName })
-    }
-
     async shareList() {
         this.setState({
             isShared: true,
@@ -143,6 +138,27 @@ class ShareListModal extends Component<Props, State> {
 
     async unshareList() {}
 
+    updateDisplayName = async () => {
+        this.setState({
+            updateProfileState: 'running',
+        })
+        try {
+            await this.props.auth.updateUserProfile({
+                displayName: this.state.newDisplayName,
+            })
+            this.setState({
+                updateProfileState: 'success',
+                displayName: this.state.newDisplayName,
+                newDisplayName: undefined,
+            })
+        } catch (e) {
+            this.setState({
+                updateProfileState: 'error',
+            })
+            throw e
+        }
+    }
+
     renderContent() {
         // if user is not a pioneer - prompt to upgrade
         // if (!this.props.isPioneer) {
@@ -154,8 +170,14 @@ class ShareListModal extends Component<Props, State> {
         //         />
         //     )
         // }
+        if (this.state.loadState === 'error') {
+            return 'Error loading sharing dialog...' // TODO: If we fail to load, display something nicer.
+        }
+        if (this.state.updateProfileState === 'error') {
+            return 'Error updating display name...'
+        }
 
-        // // if display name is not set - prompt to set
+        // if display name is not set - prompt to set
         if (!this.state.displayName && !this.state.showBetaNotif) {
             return (
                 <DisplayNameSetup
@@ -163,26 +185,7 @@ class ShareListModal extends Component<Props, State> {
                     onChange={(newDisplayName) => {
                         this.setState({ newDisplayName })
                     }}
-                    onClickNext={async () => {
-                        this.setState({
-                            updateProfileState: 'running',
-                        })
-                        try {
-                            await this.props.auth.updateUserProfile({
-                                displayName: this.state.newDisplayName,
-                            })
-                            this.setState({
-                                updateProfileState: 'success',
-                                displayName: this.state.newDisplayName,
-                                newDisplayName: undefined,
-                            })
-                        } catch (e) {
-                            this.setState({
-                                updateProfileState: 'error',
-                            })
-                            throw e
-                        }
-                    }}
+                    onClickNext={this.updateDisplayName}
                 />
             )
         }
@@ -235,9 +238,7 @@ class ShareListModal extends Component<Props, State> {
 
         return (
             <Modal large onClose={this.props.onClose}>
-                {this.state.loadState === 'error'
-                    ? 'Error!' // TODO: If we fail to load, display something nicer. Probably a very rare case
-                    : this.renderContent()}
+                {this.renderContent()}
             </Modal>
         )
     }
