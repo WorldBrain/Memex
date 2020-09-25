@@ -136,7 +136,7 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
                     ? await browser.tabs.sendMessage(tabId, message)
                     : await browser.runtime.sendMessage(message)
         } catch (err) {
-            return
+            throw new RpcError(`Extension context has been invalidated`)
         }
 
         // Check if it was *our* listener that responded.
