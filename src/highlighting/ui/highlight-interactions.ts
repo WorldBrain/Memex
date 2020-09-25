@@ -95,6 +95,28 @@ export type HighlightRendererInterface = HighlightRenderInterface &
     HighlightInteractionsInterface
 
 export class HighlightRenderer implements HighlightRendererInterface {
+    constructor() {
+        document.addEventListener('click', this.handleOutsideHighlightClick)
+    }
+
+    private handleOutsideHighlightClick = async (e: MouseEvent) => {
+        if (e.target === document.getElementById('memex-sidebar-container')) {
+            return
+        }
+
+        const allHighlights = document.querySelectorAll(
+            `.${styles['memex-highlight']}`,
+        )
+
+        for (const highlightEl of allHighlights) {
+            if (e.target === highlightEl) {
+                return
+            }
+        }
+
+        this.removeHighlights({ onlyRemoveDarkHighlights: true })
+    }
+
     saveAndRenderHighlightAndEditInSidebar = async (
         params: SaveAndRenderHighlightDeps,
     ) => {
@@ -249,7 +271,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
      * @param {*} annotation Annotation object which has the selector to be highlighted
      */
     highlightAndScroll = (annotation: Annotation) => {
-        this.removeHighlights(true)
+        this.removeHighlights({ onlyRemoveDarkHighlights: true })
         this.makeHighlightDark(annotation)
         return this.scrollToHighlight(annotation)
     }
@@ -290,7 +312,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     annotationUrl: highlight.url,
                     openInEdit: e.getModifierState('Shift'),
                 })
-                this.removeHighlights(true)
+                this.removeHighlights({ onlyRemoveDarkHighlights: true })
                 this.makeHighlightDark(highlight)
             }
 
@@ -373,15 +395,17 @@ export class HighlightRenderer implements HighlightRendererInterface {
      * Removes all highlight elements in the current page.
      * If `onlyRemoveDarkHighlights` is true, only dark highlights will be removed.
      */
-    removeHighlights = (onlyRemoveDarkHighlights = false) => {
+    removeHighlights = (args?: { onlyRemoveDarkHighlights?: boolean }) => {
         this.removeTempHighlights()
 
         const baseClass = '.' + styles['memex-highlight']
-        const darkClass = onlyRemoveDarkHighlights ? '.' + styles['dark'] : ''
+        const darkClass = args?.onlyRemoveDarkHighlights
+            ? '.' + styles['dark']
+            : ''
         const highlightClass = `${baseClass}${darkClass}`
         const highlights = document.querySelectorAll(highlightClass)
 
-        if (onlyRemoveDarkHighlights) {
+        if (args?.onlyRemoveDarkHighlights) {
             highlights.forEach((highlight) =>
                 highlight.classList.remove(styles['dark']),
             )
