@@ -26,6 +26,8 @@ interface State {
 }
 
 class EditModeContent extends React.Component<Props, State> {
+    private textAreaRef = React.createRef<HTMLTextAreaElement>()
+
     state = {
         commentText: this.props.comment ? this.props.comment : '',
         tagsInput: this.props.tags ? this.props.tags : [],
@@ -37,6 +39,10 @@ class EditModeContent extends React.Component<Props, State> {
     async componentDidMount() {
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
         this.setState({ tagSuggestions: tagSuggestions.reverse() })
+
+        const inputLen = this.props.comment?.length ?? 0
+        this.textAreaRef.current.focus()
+        this.textAreaRef.current.setSelectionRange(inputLen, inputLen)
     }
 
     private _handleEditAnnotation = () => {
@@ -98,7 +104,7 @@ class EditModeContent extends React.Component<Props, State> {
         return (
             <React.Fragment>
                 <textarea
-                    autoFocus
+                    ref={this.textAreaRef}
                     value={this.state.commentText}
                     onClick={() => this._setTagInputActive(false)}
                     className={styles.textArea}
