@@ -151,14 +151,15 @@ export class HighlightRenderer implements HighlightRendererInterface {
             pageTitle: title,
         } as Annotation
 
-        this.renderHighlight(annotation, () =>
+        this.renderHighlight(annotation, ({ openInEdit, annotationUrl }) => {
             params.inPageUI.showSidebar({
-                annotationUrl: annotation.url,
-                action: params.options?.clickToEdit
-                    ? 'edit_annotation'
-                    : 'show_annotation',
-            }),
-        )
+                annotationUrl,
+                action:
+                    params.options?.clickToEdit || openInEdit
+                        ? 'edit_annotation'
+                        : 'show_annotation',
+            })
+        })
         await params.annotationsCache.create(annotation)
 
         return annotation
@@ -268,27 +269,31 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const newHighlights = document.querySelectorAll(
             `.${styles['memex-highlight']}:not([data-annotation])`,
         )
-        newHighlights.forEach((highlightEl) => {
-            ;(highlightEl as HTMLElement).dataset.annotation = highlight.url
+        newHighlights.forEach((highlightEl: HTMLElement) => {
+            highlightEl.dataset.annotation = highlight.url
 
-            const clickListener = async (e) => {
+            const clickListener = async (e: MouseEvent) => {
                 // Let anchors behave as normal
-                const parentNode = e.target?.parentNode
+                const parentNode = (e.target as HTMLElement)?.parentNode
                 if (
                     parentNode?.nodeName?.toLowerCase() === 'a' &&
-                    parentNode?.href.length
+                    (parentNode as HTMLAnchorElement)?.href.length
                 ) {
                     return
                 }
 
                 e.preventDefault()
-                if (!e.target.dataset.annotation) {
+                if (!(e.target as HTMLElement).dataset.annotation) {
                     return
                 }
-                openSidebar({ annotationUrl: highlight.url })
+                openSidebar({
+                    annotationUrl: highlight.url,
+                    openInEdit: e.getModifierState('Shift'),
+                })
                 this.removeHighlights(true)
                 this.makeHighlightDark(highlight)
             }
+
             highlightEl.addEventListener('click', clickListener, false)
 
             const mouseenterListener = (e) => {

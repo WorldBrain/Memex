@@ -108,6 +108,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     private activateAnnotation(url: string) {
+        this.processEvent('switchAnnotationMode', {
+            annotationUrl: url,
+            context: 'pageAnnotations',
+            mode: 'default',
+        })
         this.processEvent('setActiveAnnotationUrl', url)
         const annotationBoxNode = this.getDocument()?.getElementById(url)
 
@@ -136,10 +141,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 })
             }
         } else if (event.action === 'show_annotation') {
-            console.log('show annot!')
             this.activateAnnotation(event.annotationUrl)
         } else if (event.action === 'edit_annotation') {
-            console.log('edit annot!')
             this.processEvent('setAnnotationEditMode', {
                 annotationUrl: event.annotationUrl,
                 context: 'pageAnnotations',

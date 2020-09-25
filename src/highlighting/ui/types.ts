@@ -1,1 +1,4 @@
-export type AnnotationClickHandler = (params: { annotationUrl: string }) => void
+export type AnnotationClickHandler = (params: {
+    annotationUrl: string
+    openInEdit?: boolean
+}) => void
