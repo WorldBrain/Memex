@@ -443,12 +443,3 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
     undoHighlight = this.removeAnnotationHighlights
 }
-
-// FIXME: Refactor the parts of the code that need these global function imports
-export const makeHighlightDark = new HighlightRenderer().makeHighlightDark
-export const scrollToHighlight = new HighlightRenderer().scrollToHighlight
-export const renderHighlights = new HighlightRenderer().renderHighlights
-export const renderHighlight = new HighlightRenderer().renderHighlight
-export const removeHighlights = new HighlightRenderer().removeHighlights
-export const removeAnnotationHighlights = new HighlightRenderer()
-    .removeAnnotationHighlights
