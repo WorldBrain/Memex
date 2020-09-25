@@ -173,6 +173,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
             pageTitle: title,
         } as Annotation
 
+        await params.annotationsCache.create(annotation)
         this.renderHighlight(annotation, ({ openInEdit, annotationUrl }) => {
             params.inPageUI.showSidebar({
                 annotationUrl,
@@ -182,7 +183,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
                         : 'show_annotation',
             })
         })
-        await params.annotationsCache.create(annotation)
 
         return annotation
     }
