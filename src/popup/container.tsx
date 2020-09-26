@@ -2,8 +2,13 @@ import React, { PureComponent, KeyboardEventHandler } from 'react'
 import qs from 'query-string'
 import { connect, MapStateToProps } from 'react-redux'
 import { browser } from 'webextension-polyfill-ts'
+import styled from 'styled-components'
+
 
 import * as constants from '../constants'
+import { ButtonTooltip } from 'src/common-ui/components'
+import * as icons from 'src/common-ui/components/design-library/icons'
+
 import analytics from '../analytics'
 import extractQueryFilters from '../util/nlp-time-filter'
 import { remoteFunction } from '../util/webextensionRPC'
@@ -183,23 +188,29 @@ class PopupContainer extends PureComponent<Props> {
 
         return (
             <React.Fragment>
-                <Search
-                    searchValue={this.props.searchValue}
-                    onSearchChange={this.props.handleSearchChange}
-                    onSearchEnter={this.onSearchEnter}
-                />
-                <div className={styles.item}>
-                    <LinkButton
-                        btnClass={btnStyles.openIcon}
-                        href={`${constants.OPTIONS_URL}#/overview`}
-                    >
-                        Go to Dashboard
-                    </LinkButton>
-                </div>
                 <hr />
-                <div className={styles.item}>
+                 <div className={styles.item}>
                     <BookmarkButton closePopup={this.closePopup} />
                 </div>
+                <hr />
+                <BottomBarBox>
+                    <Search
+                        searchValue={this.props.searchValue}
+                        onSearchChange={this.props.handleSearchChange}
+                        onSearchEnter={this.onSearchEnter}
+                    />
+                    <ButtonTooltip
+                            tooltipText="Go to Dashboard"
+                            position="leftBig"
+                    >
+                    <DashboardButtonBox>
+                                <LinkButtonBox
+                                        src={icons.goTo}
+                                        onClick={()=>{window.open(`${constants.OPTIONS_URL}#/overview`)}}
+                                    />
+                        </DashboardButtonBox>
+                    </ButtonTooltip> 
+                </BottomBarBox>
 
                 <div className={styles.item}>
                     <TagsButton />
@@ -209,16 +220,6 @@ class PopupContainer extends PureComponent<Props> {
                     <CollectionsButton />
                 </div>
                 <hr />
-
-                <div className={styles.item}>
-                    <HistoryPauser />
-                </div>
-
-                <div className={styles.item}>
-                    <BlacklistButton />
-                </div>
-                <hr />
-
                 <div className={styles.item}>
                     <SidebarButton closePopup={this.closePopup} />
                 </div>
@@ -256,6 +257,36 @@ class PopupContainer extends PureComponent<Props> {
         return <div className={styles.popup}>{this.renderChildren()}</div>
     }
 }
+
+const DashboardButtonBox = styled.div`
+    height: 45px;
+    width: 45px;
+    margin: 0 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    &: hover {
+        background-color: #e0e0e0;
+        border-radius: 3px;
+    }
+`
+
+
+const BottomBarBox = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 46px;
+`    
+
+const LinkButtonBox = styled.img`
+    height: 24px;
+    width: 24px;
+`
+
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     tabId: selectors.tabId(state),
