@@ -6,8 +6,6 @@ import styled from 'styled-components'
 
 
 import * as constants from '../constants'
-import { ButtonTooltip } from 'src/common-ui/components'
-import * as icons from 'src/common-ui/components/design-library/icons'
 
 import analytics from '../analytics'
 import extractQueryFilters from '../util/nlp-time-filter'
@@ -44,6 +42,9 @@ import { tags, collections } from 'src/util/remote-functions-background'
 import { BackContainer } from 'src/popup/components/BackContainer'
 const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
+
+import * as icons from 'src/common-ui/components/design-library/icons'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 
 export interface OwnProps {}
 
