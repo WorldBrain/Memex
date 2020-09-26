@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import classNames from 'classnames'
-import { OutLink } from '../../common-ui/containers'
+import OutLink from 'src/common-ui/containers/OutLink'
 
 const styles = require('./UpgradeButton.css')
 

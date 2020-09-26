@@ -14,7 +14,6 @@ import ButtonIcon from './components/ButtonIcon'
 import { TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
 import { HistoryPauser } from './pause-button'
-import { ButtonTooltip } from 'src/common-ui/components'
 import {
     selectors as tagsSelectors,
     acts as tagActs,
@@ -42,6 +41,7 @@ import { BackContainer } from 'src/popup/components/BackContainer'
 const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
 import * as icons from 'src/common-ui/components/design-library/icons'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 
 export interface OwnProps {}
 
