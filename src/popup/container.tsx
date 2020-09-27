@@ -106,6 +106,19 @@ class PopupContainer extends PureComponent<Props> {
         }
     }
 
+    onSearchClick = () => {
+        console.log('Test')
+
+            const queryFilters = extractQueryFilters(this.props.searchValue)
+            const queryParams = qs.stringify(queryFilters)
+
+            browser.tabs.create({
+                url: `${constants.OVERVIEW_URL}?${queryParams}`,
+            }) // New tab with query
+
+            this.closePopup()
+    }
+
     handleTagUpdate = async ({ added, deleted }) => {
         const backendResult = tags.updateTagForPage({
             added,
@@ -200,17 +213,18 @@ class PopupContainer extends PureComponent<Props> {
                         onSearchChange={this.props.handleSearchChange}
                         onSearchEnter={this.onSearchEnter}
                     />
-                    <DashboardButtonBox>
-                        <ButtonTooltip
-                                tooltipText="Go to Dashboard"
-                                position="leftBig"
-                        >
-                                <LinkButtonBox
-                                        src={icons.goTo}
-                                        onClick={()=>{window.open(`${constants.OPTIONS_URL}#/overview`)}}
-                                    />
-                        </ButtonTooltip> 
+                    <ButtonTooltip
+                        tooltipText="Go to Dashboard"
+                        position="leftBig"
+                    >
+                    <DashboardButtonBox
+                        onClick={this.onSearchClick}
+                    >
+                            <LinkButtonBox
+                                src={icons.goTo}
+                            />
                         </DashboardButtonBox>
+                    </ButtonTooltip> 
                 </BottomBarBox>
 
                 <div className={styles.item}>
@@ -262,7 +276,6 @@ class PopupContainer extends PureComponent<Props> {
 const DashboardButtonBox = styled.div`
     height: 45px;
     width: 45px;
-    margin: 0 7px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -280,7 +293,12 @@ const BottomBarBox = styled.div`
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    height: 46px;
+    height: 45px;
+    padding: 0px 5px 0 0;
+
+    & > div {
+        width: 45px;
+    }
 `    
 
 const LinkButtonBox = styled.img`
