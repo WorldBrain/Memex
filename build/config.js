@@ -19,8 +19,6 @@ export const entry = {
     options: './src/options/options.jsx',
 }
 
-export const htmlTemplate = path.resolve(__dirname, './template.html')
-
 export const output = {
     path: path.resolve(__dirname, '../extension'),
     filename: '[name].js',
@@ -51,7 +49,10 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
         plugins: initPlugins({
             ...opts,
             mode,
-            template: htmlTemplate,
+            htmlTemplates: {
+                options: path.resolve(__dirname, './template-options.html'),
+                popup: path.resolve(__dirname, './template-popup.html'),
+            },
         }),
         module: {
             rules: initLoaderRules({ ...opts, mode, context }),

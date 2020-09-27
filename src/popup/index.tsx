@@ -10,6 +10,8 @@ import configureStore from './store'
 
 const store = configureStore()
 
+document.getElementById('loader').remove()
+
 ReactDOM.render(
     <Provider store={store}>
         <ErrorBoundary component={RuntimeError}>

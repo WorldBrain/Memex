@@ -30,7 +30,7 @@ const initTsPlugin = (tslint) =>
 export default function ({
     webExtReloadPort = 9090,
     mode = 'development',
-    template,
+    htmlTemplates,
     isCI = false,
     runSentry = false,
     notifsEnabled = false,
@@ -49,13 +49,13 @@ export default function ({
             title: 'Popup',
             chunks: ['popup'],
             filename: 'popup.html',
-            template,
+            template: htmlTemplates.popup,
         }),
         new HtmlPlugin({
             title: 'Memex',
             chunks: ['options'],
             filename: 'options.html',
-            template,
+            template: htmlTemplates.options,
         }),
         new HtmlIncAssetsPlugin({
             append: false,
