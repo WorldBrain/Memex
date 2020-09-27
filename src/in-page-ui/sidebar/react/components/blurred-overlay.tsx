@@ -3,10 +3,15 @@ import styled from 'styled-components'
 
 export interface Props {
     onOutsideClick?: () => void
+    skipRendering?: boolean
 }
 
 export default class BlurredSidebarOverlay extends React.Component<Props> {
     render() {
+        if (this.props.skipRendering) {
+            return this.props.children
+        }
+
         return (
             <>
                 <OutsideDiv onClick={this.props.onOutsideClick} />
