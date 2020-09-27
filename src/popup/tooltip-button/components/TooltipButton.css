@@ -18,11 +18,12 @@
     display: inline-block;
     width: 200px;
     text-align: left;
+    height: 100%;
     border-right: 2px solid #a2a2a2ab;
 }
 
 .switchBlocks {
-    height: 45px;
+    height: 70px;
     display: flex;
 }
 

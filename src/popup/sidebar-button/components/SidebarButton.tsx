@@ -6,6 +6,8 @@ import ToggleSwitch from '../../components/ToggleSwitch'
 import { RootState, ClickHandler } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+
 
 const styles = require('./SidebarButton.css')
 const buttonStyles = require('../../components/Button.css')
@@ -24,11 +26,38 @@ interface DispatchProps {
     initState: () => Promise<void>
 }
 
+interface State {
+    highlightInfo: string
+}
+
 export type Props = OwnProps & StateProps & DispatchProps
 
 class TooltipButton extends PureComponent<Props> {
-    componentDidMount() {
+    async componentDidMount() {
         this.props.initState()
+        await this.getHighlightContextMenuTitle()
+    }
+
+    state = {
+        highlightInfo: undefined
+    }
+
+
+    private async getHighlightContextMenuTitle() {
+        const {
+            shortcutsEnabled,
+            toggleSidebar,
+        } = await getKeyboardShortcutsState()
+
+        if (!shortcutsEnabled || !toggleSidebar.enabled) {
+            this.setState({
+                highlightInfo: `${toggleSidebar.shortcut} (disabled)`
+            }) 
+        } else (
+            this.setState({
+                highlightInfo: `${toggleSidebar.shortcut}`
+            }) 
+        )
     }
 
     render() {
@@ -43,7 +72,7 @@ class TooltipButton extends PureComponent<Props> {
                     >
                         Open Sidebar
                         <p className={buttonStyles.subTitle}>
-                            only on this page
+                            {this.state.highlightInfo}
                         </p>
                     </Button>
                 </div>

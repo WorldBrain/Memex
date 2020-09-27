@@ -183,7 +183,8 @@
 .subTitle {
     margin-left: 30px;
     margin-top: auto;
-    font-size: 10px;
+    font-size: 12px;
     color: #3a2f45;
     margin-bottom: 0px;
+    opacity: 0.7;
 }

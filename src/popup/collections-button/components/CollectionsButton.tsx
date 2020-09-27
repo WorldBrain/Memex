@@ -5,8 +5,10 @@ import Button from '../../components/Button'
 import { ClickHandler, RootState } from '../../types'
 import * as acts from '../actions'
 import * as popup from '../../selectors'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 
 const styles = require('./CollectionsButton.css')
+const buttonStyles = require('../../components/Button.css')
 
 export interface OwnProps {}
 
@@ -22,6 +24,33 @@ interface DispatchProps {
 export type Props = OwnProps & StateProps & DispatchProps
 
 class CollectionsButton extends PureComponent<Props> {
+
+    async componentDidMount() {
+        await this.getKeyboardShortcutText()
+    }
+
+    state = {
+        highlightInfo: undefined
+    }
+
+    private async getKeyboardShortcutText() {
+        const {
+            shortcutsEnabled,
+            addToCollection,
+        } = await getKeyboardShortcutsState()
+
+        if (!shortcutsEnabled || !addToCollection.enabled) {
+            this.setState({
+                highlightInfo: `${addToCollection.shortcut} (disabled)`
+            }) 
+        } else (
+            this.setState({
+                highlightInfo: `${addToCollection.shortcut}`
+            }) 
+        )
+    }
+
+
     render() {
         return (
             <div className={styles.buttonContainer}>
@@ -32,6 +61,9 @@ class CollectionsButton extends PureComponent<Props> {
                     itemClass={styles.button}
                 >
                     Add To Collection(s)
+                    <p className={buttonStyles.subTitle}>
+                            {this.state.highlightInfo}
+                    </p>
                 </Button>
             </div>
         )

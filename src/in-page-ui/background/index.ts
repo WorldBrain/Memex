@@ -43,7 +43,7 @@ export class InPageUIBackground {
         if (!createHighlight.shortcut.length) {
             return baseTitle
         } else if (!shortcutsEnabled || !createHighlight.enabled) {
-            return `${baseTitle} (disabled: ${createHighlight.shortcut})`
+            return `${baseTitle} -- ${createHighlight.shortcut} (disabled)`
         }
 
         return `${baseTitle} (${createHighlight.shortcut})`

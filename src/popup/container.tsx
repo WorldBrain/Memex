@@ -190,8 +190,8 @@ class PopupContainer extends PureComponent<Props> {
         return (
             <React.Fragment>
                 <hr />
-                 <div className={styles.item}>
-                    <BookmarkButton closePopup={this.closePopup} />
+                <div className={styles.item}>
+                    <BookmarkButton closePopup={this.closePopup}/>
                 </div>
                 <hr />
                 <BottomBarBox>

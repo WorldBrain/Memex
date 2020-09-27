@@ -17,12 +17,13 @@
 .button {
     display: inline-block;
     width: 200px;
+    height: 100%;
     text-align: left;
     border-right: 2px solid #a2a2a2ab;
 }
 
 .switchBlocks {
-    height: 45px;
+    height: 70px;
     display: flex;
 }
 
