@@ -10,6 +10,7 @@ import BuildNotifPlugin from 'webpack-build-notifier'
 import CssExtractPlugin from 'mini-css-extract-plugin'
 import SentryPlugin from '@sentry/webpack-plugin'
 import ZipPlugin from 'zip-webpack-plugin'
+import ScriptExtHtmlWebpackPlugin from 'script-ext-html-webpack-plugin'
 import PostCompilePlugin from 'post-compile-webpack-plugin'
 import initEnv from './env'
 import * as staticFiles from './static-files'
@@ -62,6 +63,11 @@ export default function ({
         }),
         new CssExtractPlugin({
             filename: '[name].css',
+        }),
+        new ScriptExtHtmlWebpackPlugin({
+            async: ['popup.js', 'lib/browser-polyfill.js'],
+            preload: /\.(css|js)$/,
+            prefetch: /\.(svg|png)$/,
         }),
     ]
 

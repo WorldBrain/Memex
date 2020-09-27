@@ -233,6 +233,7 @@
         "redux-devtools-log-monitor": "^1.4.0",
         "require-context": "^1.1.0",
         "rimraf": "^2.6.2",
+        "script-ext-html-webpack-plugin": "^2.1.4",
         "selenium-webdriver": "^4.0.0-alpha.7",
         "sign-addon": "^0.3.0",
         "sinon": "^6.1.5",
