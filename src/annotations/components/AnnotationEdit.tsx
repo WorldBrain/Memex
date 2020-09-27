@@ -59,6 +59,7 @@ class AnnotationEdit extends React.Component<Props> {
                 placeholder="Add a private note... (save with cmd/ctrl+enter)"
                 onChange={(e) => this.props.onCommentChange(e.target.value)}
                 onKeyDown={(e) => {
+                    e.stopPropagation()
                     if (this.onEnterSaveHandler.test(e)) {
                         this.onEnterSaveHandler.handle(e)
                     }
