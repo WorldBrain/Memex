@@ -444,7 +444,8 @@ export default class Ribbon extends Component<Props, State> {
                                         )}
                                         onClick={this.handleCommentIconBtnClick}
                                     />
-                                    {this.props.commentBox.showCommentBox && (
+                                </ButtonTooltip>
+                                {this.props.commentBox.showCommentBox && (
                                         <Tooltip position="left">
                                             <AnnotationCreate
                                                 tagPickerDependencies={{
@@ -474,7 +475,6 @@ export default class Ribbon extends Component<Props, State> {
                                             />
                                         </Tooltip>
                                     )}
-                                </ButtonTooltip>
                                 <ButtonTooltip
                                     tooltipText={this.getTooltipText('addTag')}
                                     position="left"
@@ -493,9 +493,8 @@ export default class Ribbon extends Component<Props, State> {
                                             )
                                         }
                                     />
-                                    {this.renderTagsPicker()}
                                 </ButtonTooltip>
-
+                                {this.renderTagsPicker()}
                                 <ButtonTooltip
                                     tooltipText={this.getTooltipText(
                                         'addToCollection',
@@ -516,8 +515,8 @@ export default class Ribbon extends Component<Props, State> {
                                             )
                                         }
                                     />
-                                    {this.renderCollectionsPicker()}
                                 </ButtonTooltip>
+                                {this.renderCollectionsPicker()}
                                 <ButtonTooltip
                                     tooltipText="Settings"
                                     position="left"

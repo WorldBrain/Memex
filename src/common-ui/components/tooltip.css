@@ -64,8 +64,8 @@
 
 .tooltipleft {
     &.tooltipBubble {
-        right: 33px;
-        top: -16px;
+        right: 30px;
+        top: -30px;
         overflow: visible;
     }
 }
