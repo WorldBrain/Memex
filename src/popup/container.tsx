@@ -200,17 +200,17 @@ class PopupContainer extends PureComponent<Props> {
                         onSearchChange={this.props.handleSearchChange}
                         onSearchEnter={this.onSearchEnter}
                     />
-                    <ButtonTooltip
-                            tooltipText="Go to Dashboard"
-                            position="leftBig"
-                    >
                     <DashboardButtonBox>
+                        <ButtonTooltip
+                                tooltipText="Go to Dashboard"
+                                position="leftBig"
+                        >
                                 <LinkButtonBox
                                         src={icons.goTo}
                                         onClick={()=>{window.open(`${constants.OPTIONS_URL}#/overview`)}}
                                     />
+                        </ButtonTooltip> 
                         </DashboardButtonBox>
-                    </ButtonTooltip> 
                 </BottomBarBox>
 
                 <div className={styles.item}>
