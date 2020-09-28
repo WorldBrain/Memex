@@ -30,7 +30,7 @@ export default class ScrollState {
         return this._pixelToPercent(this._maxPixel)
     }
 
-    _pixelToPercent = pixel =>
+    _pixelToPercent = (pixel) =>
         parseFloat(
             Number(pixel / this._lastKnownScrollableHeight).toFixed(2),
         ) || 0

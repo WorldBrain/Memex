@@ -1,6 +1,6 @@
 import { Bookmarks } from 'webextension-polyfill-ts'
 
-import { TabManager } from 'src/activity-logger/background/tab-manager'
+import { TabManager } from 'src/tab-management/background/tab-manager'
 import { pageIsStub } from 'src/page-indexing/utils'
 import PageStorage from 'src/page-indexing/background/storage'
 import BookmarksStorage from 'src/bookmarks/background/storage'

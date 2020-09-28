@@ -23,24 +23,14 @@ async function insertTestData({
 }
 
 async function setupTest() {
-    const {
-        backgroundModules,
-        ...setup
-    } = await setupBackgroundIntegrationTest()
+    const { backgroundModules } = await setupBackgroundIntegrationTest()
     const customLists: CustomListBackground = backgroundModules.customLists
     const searchIndex: SearchIndex = backgroundModules.search.searchIndex
-    const storageManager = setup.storageManager
 
     // NOTE: Each test starts creating lists at ID `1`
     let fakeListCount = 0
     customLists.generateListId = () => ++fakeListCount
 
-    registerModuleMapCollections(storageManager.registry, {
-        customList: customLists.storage,
-        bookmarks: backgroundModules.bookmarks.storage,
-    })
-
-    await storageManager.finishInitialization()
     await insertTestData({ customLists })
 
     return { customLists, searchIndex }

@@ -12,10 +12,9 @@ import {
     FavIconFetchError,
 } from '../../page-analysis/background/get-fav-icon'
 import { shouldLogTab, updateVisitInteractionData } from './util'
-import { TabManager } from './tab-manager'
+import { TabManager } from '../../tab-management/background/tab-manager'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
 import {
-    TabChangeListener,
     LoggableTabChecker,
     VisitInteractionUpdater,
     FavIconFetcher,
@@ -24,8 +23,9 @@ import {
 } from './types'
 import { SearchIndex } from 'src/search'
 import { getDefaultState } from 'src/overview/onboarding/screens/onboarding/default-state'
-import { PageAnalysis } from 'src/page-analysis/background'
+import { PageAnalysis } from 'src/page-analysis/background/analyse-page'
 import * as Raven from 'src/util/raven'
+import { TabChangeListener } from 'src/tab-management/background/types'
 
 export default class TabChangeListeners {
     /**
@@ -115,9 +115,6 @@ export default class TabChangeListeners {
 
         return indexers
     }
-
-    handleFavIcon: TabChangeListener = (tabId, _, tab) =>
-        this.getOrCreateTabIndexers(tabId).favIcon(tab)
 
     handleVisitIndexing: TabChangeListener = (tabId, _, tab) =>
         this.getOrCreateTabIndexers(tabId).page(tab)
@@ -230,35 +227,35 @@ export default class TabChangeListeners {
     ) => {
         const indexingPrefs = await this.fetchIndexingPrefs()
 
-        let preparation: PageAnalysis
-        try {
-            preparation = await this._pageVisitLogger.preparePageLogging({
-                tab,
-                allowScreenshot: indexingPrefs.shouldCaptureScreenshots,
-            })
-        } catch (err) {
-            Raven.captureException(err)
-            return
-        }
+        // let preparation: PageAnalysis
+        // try {
+        //     preparation = await this._pageVisitLogger.preparePageLogging({
+        //         tab,
+        //         allowScreenshot: indexingPrefs.shouldCaptureScreenshots,
+        //     })
+        // } catch (err) {
+        //     Raven.captureException(err)
+        //     return
+        // }
 
         // Run stage 1 of visit indexing immediately (depends on user settings)
-        if (!opts.skipStubLog && indexingPrefs.shouldLogStubs) {
-            try {
-                await this._pageVisitLogger.logPageStub(tab, preparation)
-            } catch (err) {
-                Raven.captureException(err)
-                return
-            }
-        }
+        // if (!opts.skipStubLog && indexingPrefs.shouldLogStubs) {
+        //     try {
+        //         await this._pageVisitLogger.logPageStub(tab, preparation)
+        //     } catch (err) {
+        //         Raven.captureException(err)
+        //         return
+        //     }
+        // }
 
         // Schedule stage 2 of visit indexing soon after - if user stays on page
-        if (indexingPrefs.shouldLogVisits) {
-            await this._tabManager.scheduleTabLog(
-                tabId,
-                () => this.logTabWhenActive(tab, preparation, opts.skipStubLog),
-                opts.skipStubLog ? 0 : indexingPrefs.logDelay,
-            )
-        }
+        // if (indexingPrefs.shouldLogVisits) {
+        //     await this._tabManager.scheduleTabLog(
+        //         tabId,
+        //         () => this.logTabWhenActive(tab, preparation, opts.skipStubLog),
+        //         opts.skipStubLog ? 0 : indexingPrefs.logDelay,
+        //     )
+        // }
     }
 
     private _handleFavIcon: TabChangeListener = async (tabId, _, tab) => {

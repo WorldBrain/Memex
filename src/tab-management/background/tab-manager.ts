@@ -35,11 +35,11 @@ export class TabManager {
      * @param {number} id The ID of the tab as assigned by web ext API.
      * @returns {Tab|undefined} The state for tab stored under given ID, or undefined if no matching tab.
      */
-    getTabState(id: number) {
+    getTabState = (id: number) => {
         return this._tabs.get(id)
     }
 
-    getTabStateByUrl(url: string) {
+    getTabStateByUrl = (url: string) => {
         const tabs = new Map<string, Tab>()
         this._tabs.forEach((tab) => tabs.set(tab.url, tab))
         return tabs.get(url)

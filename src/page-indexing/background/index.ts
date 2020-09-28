@@ -13,9 +13,17 @@ import BookmarksStorage from 'src/bookmarks/background/storage'
 import { Page, PageCreationProps } from 'src/search'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { DexieUtilsPlugin } from 'src/search/plugins'
-import analysePage from 'src/page-analysis/background'
+import analysePage from 'src/page-analysis/background/analyse-page'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from 'src/options/settings/constants'
+import { PageIndexingInterface } from './types'
+import {
+    remoteFunctionWithExtraArgs,
+    registerRemoteFunctions,
+    runInTab,
+} from 'src/util/webextensionRPC'
+import { RawPageContent } from 'src/page-analysis/types'
+import TabManagementBackground from 'src/tab-management/background'
 
 export class PageIndexingBackground {
     storage: PageStorage
@@ -23,6 +31,7 @@ export class PageIndexingBackground {
     constructor(
         private options: {
             bookmarksStorage: BookmarksStorage
+            tabManagement: TabManagementBackground
             storageManager: StorageManager
             fetchPageData?: FetchPageProcessor
         },
@@ -140,9 +149,9 @@ export class PageIndexingBackground {
             .catch(initErrHandler())
     }
 
-    async domainHasFavIcon(url: string) {
+    async domainHasFavIcon(ambiguousUrl: string) {
         const db = this.options.storageManager
-        const { hostname } = transformUrl(url)
+        const { hostname } = transformUrl(ambiguousUrl)
 
         const res = await db
             .collection('favIcons')
@@ -158,17 +167,15 @@ export class PageIndexingBackground {
             )
         }
 
+        const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))
         const analysisRes = await analysePage({
             tabId: props.tabId,
-            allowFavIcon: true,
-            ...props,
+            tabManagement: this.options.tabManagement,
+            includeContent: props.stubOnly
+                ? 'metadata-only'
+                : 'metadata-with-full-text',
+            includeFavIcon,
         })
-
-        if (props.stubOnly && analysisRes.content) {
-            delete analysisRes.content.fullText
-        } else if (analysisRes.content) {
-            analysisRes.content.fullText = await analysisRes.getFullText()
-        }
 
         const pageData = await pipeline({
             pageDoc: { ...analysisRes, url: props.fullUrl },

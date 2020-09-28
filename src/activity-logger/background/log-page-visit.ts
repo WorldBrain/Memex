@@ -2,12 +2,12 @@ import update from 'immutability-helper'
 import { Tabs } from 'webextension-polyfill-ts'
 import moment from 'moment'
 
-import { TabManager } from './tab-manager'
+import { TabManager } from '../../tab-management/background/tab-manager'
 // @ts-ignore
 import analyzePage, {
     PageAnalyzer,
     PageAnalysis,
-} from '../../page-analysis/background'
+} from '../../page-analysis/background/analyse-page'
 
 import { FavIconChecker } from './types'
 import { SearchIndex, PageDoc } from 'src/search'
@@ -50,24 +50,6 @@ export default class PageVisitLogger {
         this._checkFavIcon = searchIndex.domainHasFavIcon
         this._pageStorage = pageStorage
         this._moment = momentLib
-    }
-
-    async preparePageLogging(params: {
-        tab: Tabs.Tab
-        allowScreenshot: boolean
-    }): Promise<PageLoggingPreparation | null> {
-        const internalTabState = this._tabManager.getTabState(params.tab.id)
-        if (internalTabState == null) {
-            return null
-        }
-
-        const allowFavIcon = !(await this._checkFavIcon(params.tab.url))
-        const analysisRes = await this._analyzePage({
-            tabId: params.tab.id,
-            allowFavIcon,
-            allowScreenshot: params.allowScreenshot,
-        })
-        return analysisRes
     }
 
     /**
