@@ -5,6 +5,7 @@ import ItemProcessor from './item-processor'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
+import BookmarksBackground from 'src/bookmarks/background'
 
 export default class ImportProgressManager {
     static CONCURR_LIMIT = 20
@@ -40,6 +41,7 @@ export default class ImportProgressManager {
             pages: PageIndexingBackground
             tagsModule: TagsBackground
             customListsModule: CustomListBackground
+            bookmarks: BookmarksBackground
             concurrency?: any
             observer?: any
             stateManager: any
@@ -95,6 +97,7 @@ export default class ImportProgressManager {
             tagsModule: this.options.tagsModule,
             customListsModule: this.options.customListsModule,
             pages: this.options.pages,
+            bookmarks: this.options.bookmarks,
         })
 
         // Used to build the message to send to observer

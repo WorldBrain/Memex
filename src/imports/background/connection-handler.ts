@@ -5,6 +5,7 @@ import { browser } from 'webextension-polyfill-ts'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
+import BookmarksBackground from 'src/bookmarks/background'
 
 export default class ImportConnectionHandler {
     static IMPORTS_PROGRESS_KEY = 'is-imports-in-progress'
@@ -31,6 +32,7 @@ export default class ImportConnectionHandler {
         quick?: boolean
         tagsModule: TagsBackground
         customListsModule: CustomListBackground
+        bookmarks: BookmarksBackground
         pages: PageIndexingBackground
     }) {
         // Main `runtime.Port` that this class hides away to handle connection with the imports UI script
@@ -46,6 +48,7 @@ export default class ImportConnectionHandler {
             stateManager: getImportStateManager(),
             tagsModule: options.tagsModule,
             customListsModule: options.customListsModule,
+            bookmarks: options.bookmarks,
             pages: options.pages,
         })
 

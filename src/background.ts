@@ -105,7 +105,7 @@ export async function main() {
                 backgroundModules.auth.subscriptionService.getCurrentUserClaims,
         },
         notifications: { create: createNotification } as any,
-        bookmarks: backgroundModules.search.remoteFunctions.bookmarks,
+        bookmarks: backgroundModules.bookmarks.remoteFunctions,
         sync: backgroundModules.sync.remoteFunctions,
         features: backgroundModules.features,
         featuresBeta: backgroundModules.featuresBeta,

@@ -11,7 +11,6 @@ import {
     registerBackgroundModuleCollections,
 } from 'src/background-script/setup'
 import initStorex from '../search/memory-storex'
-import { TabManager } from 'src/activity-logger/background'
 import {
     BackgroundIntegrationTestSetup,
     BackgroundIntegrationTest,
@@ -24,20 +23,14 @@ import { registerSyncBackgroundIntegrationTests } from 'src/sync/index.tests'
 import { AuthBackground } from 'src/authentication/background'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
-import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { FakeAnalytics } from 'src/analytics/mock'
 import AnalyticsManager from 'src/analytics/analytics'
 import { setStorageMiddleware } from 'src/storage/middleware'
 import { JobDefinition } from 'src/job-scheduler/background/types'
-import {
-    createLazyServerStorage,
-    createLazyMemoryServerStorage,
-} from 'src/storage/server'
-import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
-import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
-import StorageManager from '@worldbrain/storex'
+import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { ServerStorage } from 'src/storage/types'
 import { Browser } from 'webextension-polyfill-ts'
+import { TabManager } from 'src/tab-management/background/tab-manager'
 
 export async function setupBackgroundIntegrationTest(options?: {
     customMiddleware?: StorageMiddleware[]

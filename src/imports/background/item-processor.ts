@@ -8,6 +8,7 @@ import { SearchIndex } from 'src/search'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
+import BookmarksBackground from 'src/bookmarks/background'
 
 const fetchPageDataOpts = {
     includePageContent: true,
@@ -95,6 +96,7 @@ export default class ImportItemProcessor {
         private options: {
             tagsModule: TagsBackground
             pages: PageIndexingBackground
+            bookmarks: BookmarksBackground
             customListsModule: CustomListBackground
         },
     ) {}
@@ -121,12 +123,15 @@ export default class ImportItemProcessor {
     }) {
         this._checkCancelled()
 
-        return this.options.pages.addPage({
+        await this.options.pages.addPage({
             pageDoc,
             visits,
-            bookmark,
             rejectNoContent,
         })
+        await this.options.bookmarks.storage.createBookmarkIfNeeded(
+            pageDoc.url,
+            bookmark,
+        )
     }
 
     async _storeOtherData({ url, tags, collections, annotations }) {

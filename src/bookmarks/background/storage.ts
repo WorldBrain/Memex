@@ -76,7 +76,7 @@ export default class BookmarksStorage extends StorageModule {
         }
     }
 
-    async pageHasBookmark(url: string): Promise<boolean> {
+    pageHasBookmark = async (url: string): Promise<boolean> => {
         const normalizedUrl = normalizeUrl(url, {})
         return !!(await this.operation('findBookmarkByUrl', {
             url: normalizedUrl,

@@ -4,9 +4,6 @@ import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import NotificationBackground from 'src/notifications/background'
 import SocialBackground from 'src/social-integration/background'
 import DirectLinkingBackground from 'src/annotations/background'
-import ActivityLoggerBackground, {
-    TabManager,
-} from 'src/activity-logger/background'
 import SearchBackground from 'src/search/background'
 import EventLogBackground from 'src/analytics/internal/background'
 import JobSchedulerBackground from 'src/job-scheduler/background'
@@ -62,6 +59,7 @@ import { getFirebase } from 'src/util/firebase-app-initialized'
 import TabManagementBackground from 'src/tab-management/background'
 import { runInTab } from 'src/util/webextensionRPC'
 import { PageAnalyzerInterface } from 'src/page-analysis/types'
+import { TabManager } from 'src/tab-management/background/tab-manager'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -121,25 +119,25 @@ export function createBackgroundModules(options: {
         localBrowserStorage: options.browserAPIs.storage.local,
     })
 
-    const bookmarks = new BookmarksBackground({ storageManager })
     const pages = new PageIndexingBackground({
         storageManager,
-        bookmarksStorage: bookmarks.storage,
         fetchPageData: options.fetchPageDataProcessor,
         tabManagement,
     })
+    const bookmarks = new BookmarksBackground({
+        storageManager,
+        pages,
+        tabManager,
+        browserAPIs: options.browserAPIs,
+    })
     const searchIndex = combineSearchIndex({
         getDb: async () => storageManager,
-        pages,
-        bookmarksStorage: bookmarks.storage,
-        tabManager,
     })
 
     const search = new SearchBackground({
         storageManager,
         pages,
         idx: searchIndex,
-        tabMan: tabManager,
         browserAPIs: options.browserAPIs,
         bookmarks,
     })
@@ -376,6 +374,7 @@ export async function setupBackgroundModules(
         pages: backgroundModules.pages,
         tagsModule: backgroundModules.tags,
         customListsModule: backgroundModules.customLists,
+        bookmarks: backgroundModules.bookmarks,
     })
 
     backgroundModules.auth.registerRemoteEmitter()
@@ -394,6 +393,7 @@ export async function setupBackgroundModules(
     backgroundModules.inPageUI.setupRemoteFunctions()
     backgroundModules.bgScript.setupAlarms(alarms)
     backgroundModules.pageFetchBacklog.setupBacklogProcessing()
+    backgroundModules.bookmarks.setupBookmarkListeners()
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()

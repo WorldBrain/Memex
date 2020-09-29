@@ -2,11 +2,11 @@ import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import ConnHandler from './connection-handler'
 import getImportStateManager from './state-manager'
 import { IMPORT_CONN_NAME as MAIN_CONN } from 'src/options/imports/constants'
-import { SearchIndex } from 'src/search'
 import { browser } from 'webextension-polyfill-ts'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
+import BookmarksBackground from 'src/bookmarks/background'
 
 // Constants
 export const importStateStorageKey = 'import_items'
@@ -15,6 +15,7 @@ export function setupImportBackgroundModule(options: {
     pages: PageIndexingBackground
     tagsModule: TagsBackground
     customListsModule: CustomListBackground
+    bookmarks: BookmarksBackground
 }) {
     // Allow UI scripts to dirty estimates cache
     makeRemotelyCallable({

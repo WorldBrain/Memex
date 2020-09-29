@@ -1,9 +1,11 @@
+import pick from 'lodash/pick'
 import * as DATA from './index.test.data'
 import { FavIcon } from './models'
 import { SearchIndex } from './types'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import TagsBackground from 'src/tags/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
+import BookmarksBackground from 'src/bookmarks/background'
 
 jest.mock('./models/abstract-model')
 jest.mock('lodash/fp/intersection')
@@ -20,8 +22,7 @@ describe('Search index integration', () => {
 
         if (!options?.excludeTestData) {
             await insertTestData(
-                backgroundModules.pages,
-                backgroundModules.tags,
+                pick(backgroundModules, 'bookmarks', 'tags', 'pages'),
             )
         }
         return {
@@ -29,6 +30,7 @@ describe('Search index integration', () => {
             searchIndex,
             pages: backgroundModules.pages,
             tags: backgroundModules.tags,
+            bookmarks: backgroundModules.bookmarks,
             search: (params = {}) =>
                 searchIndex.search({
                     mapResultsFunc: (db) => (res) => {
@@ -39,29 +41,42 @@ describe('Search index integration', () => {
         }
     }
 
-    async function insertTestData(
-        pages: PageIndexingBackground,
-        tags: TagsBackground,
-    ) {
+    async function insertTestData(params: {
+        bookmarks: BookmarksBackground
+        pages: PageIndexingBackground
+        tags: TagsBackground
+    }) {
         // Insert some test data for all tests to use
-        await pages.addPage({
+        await params.pages.addPage({
             pageDoc: DATA.PAGE_3,
             visits: [DATA.VISIT_3],
         })
-        await pages.addPage({
+        await params.pages.addPage({
             pageDoc: DATA.PAGE_2,
             visits: [DATA.VISIT_2],
-            bookmark: DATA.BOOKMARK_1,
         })
-        await pages.addPage({
+        await params.bookmarks.storage.createBookmarkIfNeeded(
+            DATA.PAGE_2.url,
+            DATA.BOOKMARK_1,
+        )
+        await params.pages.addPage({
             pageDoc: DATA.PAGE_1,
             visits: [DATA.VISIT_1],
         })
 
         // // Add some test tags
-        await tags.addTagToExistingUrl({ url: DATA.PAGE_3.url, tag: 'good' })
-        await tags.addTagToExistingUrl({ url: DATA.PAGE_3.url, tag: 'quality' })
-        await tags.addTagToExistingUrl({ url: DATA.PAGE_2.url, tag: 'quality' })
+        await params.tags.addTagToExistingUrl({
+            url: DATA.PAGE_3.url,
+            tag: 'good',
+        })
+        await params.tags.addTagToExistingUrl({
+            url: DATA.PAGE_3.url,
+            tag: 'quality',
+        })
+        await params.tags.addTagToExistingUrl({
+            url: DATA.PAGE_2.url,
+            tag: 'quality',
+        })
     }
 
     describe('read ops', () => {
@@ -636,7 +651,7 @@ describe('Search index integration', () => {
         })
 
         test('bookmark adding affects search', async () => {
-            const { search, searchIndex } = await setupTest()
+            const { search, bookmarks } = await setupTest()
             const tmpBm = Date.now()
             const { docs: before } = await search({ showOnlyBookmarks: true })
 
@@ -647,7 +662,7 @@ describe('Search index integration', () => {
             ) // Base test data expectation
 
             // Add bm to 3rd test page
-            await searchIndex.addBookmark({
+            await bookmarks.addPageBookmark({
                 url: DATA.PAGE_1.url,
                 timestamp: tmpBm,
             } as any)
@@ -661,7 +676,7 @@ describe('Search index integration', () => {
         })
 
         test('bookmark deleting affects search', async () => {
-            const { search, searchIndex } = await setupTest()
+            const { search, bookmarks, searchIndex } = await setupTest()
             const { docs: before } = await search({ showOnlyBookmarks: true })
 
             // We only have a single bookmark
@@ -669,7 +684,7 @@ describe('Search index integration', () => {
             expect(before[0]).toEqual([DATA.PAGE_ID_2, DATA.BOOKMARK_1])
 
             // Add bm to 3rd test page
-            await searchIndex.delBookmark({ url: DATA.PAGE_2.url })
+            await bookmarks.delPageBookmark({ url: DATA.PAGE_2.url })
 
             const { docs: after } = await search({ showOnlyBookmarks: true })
             expect(after.length).toBe(0) // Bye

@@ -21,10 +21,10 @@ import BookmarksStorage from './bookmarks/background/storage'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 import { PageIndexingBackground } from './page-indexing/background'
 import TabManagementBackground from './tab-management/background'
-import { TabManager } from './activity-logger/background'
 import { browser } from 'webextension-polyfill-ts'
 import { runInTab } from './util/webextensionRPC'
 import { PageAnalyzerInterface } from './page-analysis/types'
+import { TabManager } from './tab-management/background/tab-manager'
 
 export async function main() {
     const tabManagement = new TabManagementBackground({
@@ -37,7 +37,6 @@ export async function main() {
     const bookmarksStorage = new BookmarksStorage({ storageManager })
     const pages = new PageIndexingBackground({
         storageManager,
-        bookmarksStorage,
         tabManagement,
     })
     registerModuleMapCollections(storageManager.registry, {
@@ -47,9 +46,6 @@ export async function main() {
     await storageManager.finishInitialization()
     const searchIndex = combineSearchIndex({
         getDb,
-        pages,
-        bookmarksStorage,
-        tabManager: null,
     })
 
     // Read which browser we are running in.

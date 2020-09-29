@@ -16,13 +16,6 @@ import { DexieUtilsPlugin } from 'src/search/plugins'
 import analysePage from 'src/page-analysis/background/analyse-page'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from 'src/options/settings/constants'
-import { PageIndexingInterface } from './types'
-import {
-    remoteFunctionWithExtraArgs,
-    registerRemoteFunctions,
-    runInTab,
-} from 'src/util/webextensionRPC'
-import { RawPageContent } from 'src/page-analysis/types'
 import TabManagementBackground from 'src/tab-management/background'
 
 export class PageIndexingBackground {
@@ -30,7 +23,6 @@ export class PageIndexingBackground {
 
     constructor(
         private options: {
-            bookmarksStorage: BookmarksStorage
             tabManagement: TabManagementBackground
             storageManager: StorageManager
             fetchPageData?: FetchPageProcessor
@@ -47,7 +39,6 @@ export class PageIndexingBackground {
      */
     async addPage({
         visits = [],
-        bookmark,
         pageDoc,
         rejectNoContent,
     }: Partial<PageAddRequest>): Promise<void> {
@@ -59,15 +50,8 @@ export class PageIndexingBackground {
         await this.storage.createOrUpdatePage(pageData)
 
         // Create Visits for each specified time, or a single Visit for "now" if no assoc event
-        visits = !visits.length && bookmark == null ? [Date.now()] : visits
+        // visits = !visits.length && bookmark == null ? [Date.now()] : visits
         await this.storage.createVisitsIfNeeded(pageData.url, visits)
-
-        if (bookmark != null) {
-            await this.options.bookmarksStorage.createBookmarkIfNeeded(
-                pageData.url,
-                bookmark,
-            )
-        }
 
         if (favIconURI != null) {
             await this.storage.createFavIconIfNeeded(

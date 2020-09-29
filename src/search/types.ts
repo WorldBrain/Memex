@@ -51,7 +51,6 @@ export interface VisitInteraction {
 export interface PageAddRequest {
     pageDoc: PageDoc
     visits: VisitInput[]
-    bookmark: BookmarkInput
     rejectNoContent?: boolean
 }
 
@@ -124,14 +123,6 @@ export interface SearchIndex {
     }>
 
     getPage: (url: string) => Promise<any>
-
-    addBookmark: (params: {
-        url: string
-        fullUrl?: string
-        timestamp?: number
-        tabId?: number
-    }) => Promise<void>
-    delBookmark: (params: Partial<Bookmarks.BookmarkTreeNode>) => Promise<void>
 }
 
 export interface PageCreationProps {

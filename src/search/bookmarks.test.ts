@@ -6,7 +6,7 @@ async function setup() {
         backgroundModules,
         fetchPageDataProcessor,
     } = await setupBackgroundIntegrationTest()
-    const addBookmark = backgroundModules.search.searchIndex.addBookmark
+    const addBookmark = backgroundModules.bookmarks.addPageBookmark
 
     return {
         addBookmark,
