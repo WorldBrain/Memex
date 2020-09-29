@@ -155,7 +155,7 @@ export class RibbonContainerLogic extends UILogic<
             pageUrl: { $set: url },
             pausing: {
                 isPaused: {
-                    $set: await this.dependencies.activityLogger.isLoggingPaused(),
+                    $set: await true,
                 },
             },
             bookmark: {
@@ -495,7 +495,7 @@ export class RibbonContainerLogic extends UILogic<
         toggleState()
 
         try {
-            await this.dependencies.activityLogger.toggleLoggingPause()
+            // await this.dependencies.activityLogger.toggleLoggingPause()
         } catch (err) {
             toggleState()
             throw err

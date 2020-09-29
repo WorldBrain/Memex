@@ -1,6 +1,7 @@
 import { PipelineRes, SearchIndex } from 'src/search'
 import PageStorage from './background/storage'
 import * as Raven from 'src/util/raven'
+import { PageIndexingBackground } from './background'
 
 export function pageIsStub(page: PipelineRes): boolean {
     return (
@@ -13,7 +14,7 @@ export async function maybeIndexTabs(
     tabs: Array<{ url: string; tabId: number }>,
     options: {
         pageStorage: PageStorage
-        createPage: SearchIndex['createPageViaBmTagActs']
+        createPage: PageIndexingBackground['createPageViaBmTagActs']
         time: number
     },
 ) {

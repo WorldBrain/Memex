@@ -8,13 +8,15 @@ import {
     IntegrationTestStep,
     BackgroundIntegrationTestContext,
 } from 'src/tests/integration-tests'
-import { createPageStep, searchModule } from 'src/tests/common-fixtures'
+import { createPageStep } from 'src/tests/common-fixtures'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
 
 const directLinking = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.directLinking
 const customLists = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.customLists
+const searchModule = (setup: BackgroundIntegrationTestSetup) =>
+    setup.backgroundModules.search
 
 let annotUrl!: string
 
@@ -1067,7 +1069,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                await searchModule(setup).searchIndex.addPage({
+                                await setup.backgroundModules.pages.addPage({
                                     pageDoc: {
                                         url: DATA.PAGE_1.fullUrl,
                                         content: {},
@@ -1075,7 +1077,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     visits: [DATA.VISIT_1],
                                     rejectNoContent: false,
                                 })
-                                await searchModule(setup).searchIndex.addPage({
+                                await setup.backgroundModules.pages.addPage({
                                     pageDoc: {
                                         url: DATA.PAGE_2.fullUrl,
                                         content: {},

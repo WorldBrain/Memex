@@ -88,7 +88,7 @@ export default class TabChangeListeners {
         this._contentScriptPaths =
             options.contentScriptPaths || TabChangeListeners.DEF_CONTENT_SCRIPTS
 
-        this.checkBookmark = options.searchIndex.pageHasBookmark
+        // this.checkBookmark = options.searchIndex.pageHasBookmark
     }
 
     private getOrCreateTabIndexers(tabId: number) {
@@ -259,18 +259,18 @@ export default class TabChangeListeners {
     }
 
     private _handleFavIcon: TabChangeListener = async (tabId, _, tab) => {
-        try {
-            if (
-                (await this._checkTabLoggable(tab)) &&
-                !(await this._searchIndex.domainHasFavIcon(tab.url))
-            ) {
-                const favIconDataUrl = await this._fetchFavIcon(tab.favIconUrl)
-                await this._searchIndex.addFavIcon(tab.url, favIconDataUrl)
-            }
-        } catch (err) {
-            if (!(err instanceof FavIconFetchError)) {
-                throw err
-            }
-        }
+        // try {
+        //     if (
+        //         (await this._checkTabLoggable(tab)) &&
+        //         !(await this._searchIndex.domainHasFavIcon(tab.url))
+        //     ) {
+        //         const favIconDataUrl = await this._fetchFavIcon(tab.favIconUrl)
+        //         await this._searchIndex.addFavIcon(tab.url, favIconDataUrl)
+        //     }
+        // } catch (err) {
+        //     if (!(err instanceof FavIconFetchError)) {
+        //         throw err
+        //     }
+        // }
     }
 }

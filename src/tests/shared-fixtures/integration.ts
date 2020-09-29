@@ -26,7 +26,7 @@ export async function insertIntegrationTestData(
     const pages = [{ url: 'http://www.bla.com/' }]
 
     if (includeCollection('pages')) {
-        await backgroundModules.search.searchIndex.addPage({
+        await backgroundModules.pages.addPage({
             pageDoc: {
                 url: pages[0].url,
                 content: {

@@ -6,12 +6,13 @@ import { SearchIndex } from 'src/search'
 import { browser } from 'webextension-polyfill-ts'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
+import { PageIndexingBackground } from 'src/page-indexing/background'
 
 // Constants
 export const importStateStorageKey = 'import_items'
 
 export function setupImportBackgroundModule(options: {
-    searchIndex: SearchIndex
+    pages: PageIndexingBackground
     tagsModule: TagsBackground
     customListsModule: CustomListBackground
 }) {
@@ -21,7 +22,7 @@ export function setupImportBackgroundModule(options: {
     })
 
     // Allow content-script or UI to connect and communicate control of imports
-    browser.runtime.onConnect.addListener(port => {
+    browser.runtime.onConnect.addListener((port) => {
         // Make sure to only handle connection logic for imports (allows other use of runtime.connect)
         if (port.name === MAIN_CONN) {
             return new ConnHandler({ port, ...options })

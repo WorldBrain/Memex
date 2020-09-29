@@ -34,7 +34,6 @@ class BackgroundScript {
     private utils: typeof utils
     private copyPasterBackground: CopyPasterBackground
     private notifsBackground: NotifsBackground
-    private activityLoggerBackground: ActivityLoggerBackground
     private storageChangesMan: StorageChangesManager
     private storageManager: Storex
     private urlNormalizer: URLNormalizer
@@ -48,7 +47,6 @@ class BackgroundScript {
     constructor({
         storageManager,
         notifsBackground,
-        loggerBackground,
         copyPasterBackground,
         utilFns = utils,
         storageChangesMan,
@@ -61,7 +59,6 @@ class BackgroundScript {
     }: {
         storageManager: Storex
         notifsBackground: NotifsBackground
-        loggerBackground: ActivityLoggerBackground
         copyPasterBackground: CopyPasterBackground
         urlNormalizer?: URLNormalizer
         utilFns?: typeof utils
@@ -74,7 +71,6 @@ class BackgroundScript {
     }) {
         this.storageManager = storageManager
         this.notifsBackground = notifsBackground
-        this.activityLoggerBackground = loggerBackground
         this.copyPasterBackground = copyPasterBackground
         this.utils = utilFns
         this.storageChangesMan = storageChangesMan
@@ -151,7 +147,6 @@ class BackgroundScript {
     private setupInstallHooks() {
         this.runtimeAPI.onInstalled.addListener(async (details) => {
             this.notifsBackground.deliverStaticNotifications()
-            this.activityLoggerBackground.trackExistingTabs()
 
             switch (details.reason) {
                 case 'install':

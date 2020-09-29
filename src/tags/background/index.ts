@@ -14,6 +14,7 @@ import { Analytics } from 'src/analytics/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from '../utils'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from 'src/options/settings/constants'
+import { PageIndexingBackground } from 'src/page-indexing/background'
 
 export const limitSuggestionsReturnLength = 20
 export const limitSuggestionsStorageLength = 40
@@ -22,17 +23,13 @@ export default class TagsBackground {
     storage: TagStorage
     remoteFunctions: RemoteTagsInterface
 
-    _createPageFromTab: SearchIndex['createPageFromTab']
-
     private windows: Windows.Static
-    private searchIndex: SearchIndex
     private localStorage: BrowserSettingsStore<TagsSettings>
 
     constructor(
         private options: {
             storageManager: Storex
-            pageStorage: PageStorage
-            searchIndex: SearchIndex
+            pages: PageIndexingBackground
             analytics: Analytics
             queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
@@ -62,8 +59,6 @@ export default class TagsBackground {
             ),
         }
         this.windows = options.windows
-        this.searchIndex = options.searchIndex
-        this._createPageFromTab = options.searchIndex.createPageFromTab
         this.localStorage = new BrowserSettingsStore<TagsSettings>(
             options.localBrowserStorage,
             { prefix: 'tags_' },
@@ -111,8 +106,8 @@ export default class TagsBackground {
             ))
 
         const indexed = await maybeIndexTabs(tabs, {
-            pageStorage: this.options.pageStorage,
-            createPage: this._createPageFromTab,
+            pageStorage: this.options.pages.storage,
+            createPage: this.options.pages.createPageFromTab,
             time: params.time || Date.now(),
         })
 
@@ -211,7 +206,7 @@ export default class TagsBackground {
         tag: string
         tabId?: number
     }) {
-        let page = await this.options.pageStorage.getPage(url)
+        let page = await this.options.pages.storage.getPage(url)
 
         const {
             [IDXING_PREF_KEYS.BOOKMARKS]: shouldFullyIndex,
@@ -220,7 +215,7 @@ export default class TagsBackground {
         )
 
         if (page == null || (shouldFullyIndex && pageIsStub(page))) {
-            page = await this.searchIndex.createPageViaBmTagActs({
+            page = await this.options.pages.createPageViaBmTagActs({
                 fullUrl: url,
                 tabId,
                 stubOnly: !shouldFullyIndex,
@@ -233,7 +228,7 @@ export default class TagsBackground {
         }
 
         // Add new visit if none, else page won't appear in results
-        await this.options.pageStorage.addPageVisitIfHasNone(
+        await this.options.pages.storage.addPageVisitIfHasNone(
             page.url,
             Date.now(),
         )

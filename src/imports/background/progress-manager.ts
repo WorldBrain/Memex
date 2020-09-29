@@ -2,9 +2,9 @@ import promiseLimit from 'promise-limit'
 import noop from 'lodash/fp/noop'
 
 import ItemProcessor from './item-processor'
-import { SearchIndex } from 'src/search'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
+import { PageIndexingBackground } from 'src/page-indexing/background'
 
 export default class ImportProgressManager {
     static CONCURR_LIMIT = 20
@@ -32,38 +32,24 @@ export default class ImportProgressManager {
      */
     stopped = true
 
-    _stateManager
     _Processor: typeof ItemProcessor
     runConcurrent
 
-    _searchIndex: SearchIndex
-    _tagsModule: TagsBackground
-    _customListsModule: CustomListBackground
-
-    constructor({
-        searchIndex,
-        tagsModule,
-        customListsModule,
-        concurrency = ImportProgressManager.DEF_CONCURR,
-        observer = ImportProgressManager.DEF_OBSERVER,
-        stateManager,
-        Processor = ItemProcessor,
-    }: {
-        searchIndex: SearchIndex
-        tagsModule: TagsBackground
-        customListsModule: CustomListBackground
-        concurrency?: any
-        observer?: any
-        stateManager?: any
-        Processor?: typeof ItemProcessor
-    }) {
-        this.concurrency = concurrency
-        this._observer = observer
-        this._stateManager = stateManager
-        this._Processor = Processor
-        this._searchIndex = searchIndex
-        this._tagsModule = tagsModule
-        this._customListsModule = customListsModule
+    constructor(
+        private options: {
+            pages: PageIndexingBackground
+            tagsModule: TagsBackground
+            customListsModule: CustomListBackground
+            concurrency?: any
+            observer?: any
+            stateManager: any
+            Processor?: typeof ItemProcessor
+        },
+    ) {
+        this.concurrency =
+            options.concurrency ?? ImportProgressManager.DEF_CONCURR
+        this._observer = options.observer ?? ImportProgressManager.DEF_OBSERVER
+        this._Processor = options.Processor ?? ItemProcessor
     }
 
     set concurrency(value) {
@@ -97,18 +83,18 @@ export default class ImportProgressManager {
      * @returns {boolean} Flag denoting whether or not chunk where `entry` came from is allowed by type.
      */
     _checkChunkTypeAllowed([key, item]) {
-        return !!this._stateManager.allowTypes[item.type]
+        return !!this.options.stateManager.allowTypes[item.type]
     }
 
     /**
      * @param {string} chunkKey The key of the chunk currently being processed.
      * @returns {(chunkEntry) => Promise<void>} Async function affording processing of single entry in chunk.
      */
-    _processItem = chunkKey => async ([encodedUrl, importItem]) => {
+    _processItem = (chunkKey) => async ([encodedUrl, importItem]) => {
         const processor = new this._Processor({
-            searchIndex: this._searchIndex,
-            tagsModule: this._tagsModule,
-            customListsModule: this._customListsModule,
+            tagsModule: this.options.tagsModule,
+            customListsModule: this.options.customListsModule,
+            pages: this.options.pages,
         })
 
         // Used to build the message to send to observer
@@ -126,7 +112,7 @@ export default class ImportProgressManager {
             this.processors[this._nextProcIndex()] = processor
             const res = await processor.process(
                 importItem,
-                this._stateManager.options,
+                this.options.stateManager.options,
             )
             msg.status = res.status
         } catch (err) {
@@ -144,12 +130,15 @@ export default class ImportProgressManager {
 
                 // Either flag as error or remove from state depending on processing error status
                 if (msg.error) {
-                    await this._stateManager.flagItemAsError(
+                    await this.options.stateManager.flagItemAsError(
                         chunkKey,
                         encodedUrl,
                     )
                 } else {
-                    await this._stateManager.removeItem(chunkKey, encodedUrl)
+                    await this.options.stateManager.removeItem(
+                        chunkKey,
+                        encodedUrl,
+                    )
                 }
             }
         }
@@ -165,7 +154,7 @@ export default class ImportProgressManager {
         for await (const {
             chunk,
             chunkKey,
-        } of this._stateManager.fetchItems()) {
+        } of this.options.stateManager.fetchItems()) {
             const importItemEntries = Object.entries(chunk)
 
             // Skip early if first entry type is not allowed (entire chunk's of same type items)
@@ -205,7 +194,7 @@ export default class ImportProgressManager {
         this.stopped = true
 
         // Run processors' cancal methods to stop running async logic, then wipe references
-        this.processors.forEach(proc => proc != null && proc.cancel())
+        this.processors.forEach((proc) => proc != null && proc.cancel())
         this.processors = []
     }
 }

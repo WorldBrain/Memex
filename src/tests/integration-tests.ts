@@ -13,6 +13,8 @@ import MemoryBrowserStorage from 'src/util/tests/browser-storage'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 import { ServerStorage } from 'src/storage/types'
+import { Browser } from 'webextension-polyfill-ts'
+import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 
 export interface IntegrationTestSuite<StepContext> {
     description: string
@@ -49,6 +51,8 @@ export interface IntegrationTestStep<StepContext> {
 export interface BackgroundIntegrationTestSetup {
     storageManager: StorageManager
     backgroundModules: BackgroundModules
+    browserAPIs: Browser
+    fetchPageDataProcessor: MockFetchPageDataProcessor
     browserLocalStorage: MemoryBrowserStorage
     storageChangeDetector: StorageChangeDetector
     storageOperationLogger: StorageOperationLogger

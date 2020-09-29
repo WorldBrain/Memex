@@ -24,7 +24,6 @@ export interface RibbonContainerDependencies {
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>
     annotationsCache: AnnotationsCacheInterface
-    activityLogger: ActivityLoggerInterface
     tooltip: FlagSetterInterface
     highlights: FlagSetterInterface
 }

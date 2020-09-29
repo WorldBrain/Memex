@@ -121,7 +121,6 @@ export async function main() {
     window['storageMan'] = storageManager
     window['bgModules'] = backgroundModules
     window['analytics'] = analytics
-    window['tabMan'] = backgroundModules.activityLogger.tabManager
     window['dataSeeders'] = setupDataSeeders(storageManager)
     window['setStorageLoggingEnabled'] = setStorageLoggingEnabled
 
@@ -154,7 +153,7 @@ export async function main() {
                     url:
                         'http://highscalability.com/blog/2019/7/19/stuff-the-internet-says-on-scalability-for-july-19th-2019.html',
                 })
-                await backgroundModules.search.searchIndex.addPage({
+                await backgroundModules.pages.addPage({
                     pageDoc: {
                         url:
                             'http://highscalability.com/blog/2019/7/19/stuff-the-internet-says-on-scalability-for-july-19th-2019.html',

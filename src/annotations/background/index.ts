@@ -31,6 +31,7 @@ import { updateSuggestionsCache } from 'src/tags/utils'
 import { TagsSettings } from 'src/tags/background/types'
 import { limitSuggestionsStorageLength } from 'src/tags/background'
 import { generateUrl } from 'src/annotations/utils'
+import { PageIndexingBackground } from 'src/page-indexing/background'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -50,9 +51,8 @@ export default class DirectLinkingBackground {
         private options: {
             browserAPIs: Pick<Browser, 'tabs' | 'storage' | 'webRequest'>
             storageManager: Storex
-            pageStorage: PageStorage
+            pages: PageIndexingBackground
             socialBg: SocialBG
-            searchIndex: SearchIndex
             normalizeUrl?: URLNormalizer
         },
     ) {
@@ -62,8 +62,7 @@ export default class DirectLinkingBackground {
         this.annotationStorage = new AnnotationStorage({
             storageManager: options.storageManager,
             browserStorageArea: options.browserAPIs.storage.local,
-            searchIndex: options.searchIndex,
-            pageStorage: options.pageStorage,
+            pages: options.pages,
         })
 
         this._normalizeUrl = options.normalizeUrl || normalizeUrl

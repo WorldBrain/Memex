@@ -6,7 +6,8 @@ describe('activity logger background tests', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
     it('should be able to track existing tabs', async ({ device }) => {
-        const { activityLogger } = device.backgroundModules
+        const { browserAPIs } = device
+        const { tabManagement } = device.backgroundModules
 
         const mockTabs = [
             { id: 0, url: 'https://test.com', status: 'complete' },
@@ -18,17 +19,13 @@ describe('activity logger background tests', () => {
         ] as Tabs.Tab[]
 
         // Mock out tabs API, so it sets something we can check (TODO: afford this functionality in the setup)
-        activityLogger['tabsAPI'].query = async () => mockTabs
+        browserAPIs.tabs.query = async () => mockTabs
 
         const executeScriptsCalls = []
-        activityLogger['tabChangeListener']['_tabsAPI'].executeScript = (async (
-            id,
-            script,
-        ) => executeScriptsCalls.push({ id, script })) as any
 
-        await activityLogger.trackExistingTabs()
+        await tabManagement.trackExistingTabs()
 
-        expect([...activityLogger.tabManager['_tabs'].entries()]).toEqual(
+        expect([...tabManagement.tabManager._tabs.entries()]).toEqual(
             mockTabs.map((tab) => [
                 tab.id,
                 expect.objectContaining({

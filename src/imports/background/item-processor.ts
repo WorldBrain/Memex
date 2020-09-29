@@ -7,6 +7,7 @@ import { padShortTimestamp } from './utils'
 import { SearchIndex } from 'src/search'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
+import { PageIndexingBackground } from 'src/page-indexing/background'
 
 const fetchPageDataOpts = {
     includePageContent: true,
@@ -92,8 +93,8 @@ export default class ImportItemProcessor {
 
     constructor(
         private options: {
-            searchIndex: SearchIndex
             tagsModule: TagsBackground
+            pages: PageIndexingBackground
             customListsModule: CustomListBackground
         },
     ) {}
@@ -120,7 +121,7 @@ export default class ImportItemProcessor {
     }) {
         this._checkCancelled()
 
-        return this.options.searchIndex.addPage({
+        return this.options.pages.addPage({
             pageDoc,
             visits,
             bookmark,
@@ -165,9 +166,7 @@ export default class ImportItemProcessor {
      * @returns {PageDoc}
      */
     async _createPageDoc({ url }) {
-        const includeFavIcon = !(await this.options.searchIndex.domainHasFavIcon(
-            url,
-        ))
+        const includeFavIcon = !(await this.options.pages.domainHasFavIcon(url))
 
         // Do the page data fetch
         const fetch = fetchPageData({

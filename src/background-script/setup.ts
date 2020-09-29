@@ -59,13 +59,15 @@ import { ReaderBackground } from 'src/reader/background'
 import { ServerStorage } from 'src/storage/types'
 import ContentSharingBackground from 'src/content-sharing/background'
 import { getFirebase } from 'src/util/firebase-app-initialized'
+import TabManagementBackground from 'src/tab-management/background'
+import { runInTab } from 'src/util/webextensionRPC'
+import { PageAnalyzerInterface } from 'src/page-analysis/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
     analytics: AnalyticsBackground
     notifications: NotificationBackground
     social: SocialBackground
-    activityLogger: ActivityLoggerBackground
     connectivityChecker: ConnectivityCheckerBackground
     directLinking: DirectLinkingBackground
     pages: PageIndexingBackground
@@ -87,6 +89,7 @@ export interface BackgroundModules {
     copyPaster: CopyPasterBackground
     readable: ReaderBackground
     contentSharing: ContentSharingBackground
+    tabManagement: TabManagementBackground
 }
 
 export function createBackgroundModules(options: {
@@ -107,6 +110,12 @@ export function createBackgroundModules(options: {
 }): BackgroundModules {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
+    const tabManagement = new TabManagementBackground({
+        tabManager,
+        browserAPIs: options.browserAPIs,
+        extractRawPageContent: (tabId) =>
+            runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),
+    })
 
     const analytics = new AnalyticsBackground(options.analyticsManager, {
         localBrowserStorage: options.browserAPIs.storage.local,
@@ -117,19 +126,13 @@ export function createBackgroundModules(options: {
         storageManager,
         bookmarksStorage: bookmarks.storage,
         fetchPageData: options.fetchPageDataProcessor,
+        tabManagement,
     })
     const searchIndex = combineSearchIndex({
         getDb: async () => storageManager,
         pages,
         bookmarksStorage: bookmarks.storage,
         tabManager,
-    })
-    const activityLogger = new ActivityLoggerBackground({
-        searchIndex,
-        browserAPIs: options.browserAPIs,
-        tabManager,
-        pageStorage: pages.storage,
-        bookmarksBG: bookmarks,
     })
 
     const search = new SearchBackground({
@@ -138,12 +141,12 @@ export function createBackgroundModules(options: {
         idx: searchIndex,
         tabMan: tabManager,
         browserAPIs: options.browserAPIs,
+        bookmarks,
     })
 
     const tags = new TagsBackground({
         storageManager,
-        pageStorage: pages.storage,
-        searchIndex,
+        pages,
         queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
         windows: options.browserAPIs.windows,
         searchBackgroundModule: search,
@@ -170,7 +173,7 @@ export function createBackgroundModules(options: {
         queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
         windows: options.browserAPIs.windows,
         searchIndex: search.searchIndex,
-        pageStorage: pages.storage,
+        pages,
         localBrowserStorage: options.browserAPIs.storage.local,
     })
 
@@ -178,8 +181,7 @@ export function createBackgroundModules(options: {
         browserAPIs: options.browserAPIs,
         storageManager,
         socialBg: social,
-        searchIndex: search.searchIndex,
-        pageStorage: pages.storage,
+        pages,
     })
 
     const auth =
@@ -228,7 +230,6 @@ export function createBackgroundModules(options: {
         storageChangesMan: options.localStorageChangesManager,
         copyPasterBackground: copyPaster,
         notifsBackground: notifications,
-        loggerBackground: activityLogger,
     })
 
     const connectivityChecker = new ConnectivityCheckerBackground({
@@ -259,7 +260,6 @@ export function createBackgroundModules(options: {
         analytics,
         jobScheduler,
         notifications,
-        activityLogger,
         connectivityChecker,
         readable: reader,
         directLinking,
@@ -268,6 +268,7 @@ export function createBackgroundModules(options: {
         customLists,
         tags,
         bookmarks,
+        tabManagement,
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,
@@ -372,7 +373,7 @@ export async function setupBackgroundModules(
         }),
     )
     setupImportBackgroundModule({
-        searchIndex: backgroundModules.search.searchIndex,
+        pages: backgroundModules.pages,
         tagsModule: backgroundModules.tags,
         customListsModule: backgroundModules.customLists,
     })
@@ -383,8 +384,6 @@ export async function setupBackgroundModules(
     backgroundModules.social.setupRemoteFunctions()
     backgroundModules.directLinking.setupRemoteFunctions()
     backgroundModules.directLinking.setupRequestInterceptor()
-    backgroundModules.activityLogger.setupWebExtAPIHandlers()
-    backgroundModules.activityLogger.setupRemoteFunctions()
     backgroundModules.search.setupRemoteFunctions()
     backgroundModules.eventLog.setupRemoteFunctions()
     backgroundModules.backupModule.setBackendFromStorage()

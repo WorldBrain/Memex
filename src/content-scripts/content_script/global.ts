@@ -140,7 +140,6 @@ export async function main() {
                 tags: tagsBG,
                 customLists: runInBackground(),
                 bookmarks: runInBackground(),
-                activityLogger: runInBackground(),
                 tooltip: {
                     getState: tooltipUtils.getTooltipState,
                     setState: tooltipUtils.setTooltipState,

@@ -68,7 +68,6 @@ describe('Ribbon logic', () => {
             bookmarks: backgroundModules.search.remoteFunctions.bookmarks,
             tags: backgroundModules.tags.remoteFunctions,
             customLists: backgroundModules.customLists.remoteFunctions,
-            activityLogger: backgroundModules.activityLogger.remoteFunctions,
             annotations,
             ...(options?.dependencies ?? {}),
             tooltip: {

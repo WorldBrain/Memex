@@ -7,7 +7,7 @@ export class TabManager {
     static DELAY_UNIT = 1000
     static DEF_LOG_DELAY = 2
 
-    private _tabs = new Map<number, Tab>()
+    _tabs = new Map<number, Tab>()
 
     get size() {
         return this._tabs.size

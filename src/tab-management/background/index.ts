@@ -32,10 +32,7 @@ export default class TabManagementBackground {
 
     constructor(
         private options: {
-            bookmarksBG: BookmarksBackground
             tabManager: TabManager
-            pageStorage: PageStorage
-            searchIndex: Pick<SearchIndex, 'pageHasBookmark'>
             browserAPIs: Pick<
                 Browser,
                 'tabs' | 'runtime' | 'webNavigation' | 'storage'
@@ -81,15 +78,15 @@ export default class TabManagementBackground {
 
     async trackExistingTabs() {
         const tabs = await this.options.browserAPIs.tabs.query({})
-        const tabBookmarks = await this.options.bookmarksBG.findTabBookmarks(
-            tabs,
-        )
+        // const tabBookmarks = await this.options.bookmarksBG.findTabBookmarks(
+        //     tabs,
+        // )
 
         await mapChunks(tabs, CONCURR_TAB_LOAD, async (tab) => {
-            this.tabManager.trackTab(tab, {
-                isLoaded: TabManagementBackground.isTabLoaded(tab),
-                isBookmarked: tabBookmarks.get(tab.url),
-            })
+            // this.tabManager.trackTab(tab, {
+            //     isLoaded: TabManagementBackground.isTabLoaded(tab),
+            //     isBookmarked: tabBookmarks.get(tab.url),
+            // })
         })
 
         this.trackingExistingTabs.resolve()
@@ -98,12 +95,12 @@ export default class TabManagementBackground {
     private async trackNewTab(id: number) {
         const browserTab = await this.options.browserAPIs.tabs.get(id)
 
-        this.tabManager.trackTab(browserTab, {
-            isLoaded: TabManagementBackground.isTabLoaded(browserTab),
-            isBookmarked: await this.options.searchIndex.pageHasBookmark(
-                browserTab.url,
-            ),
-        })
+        // this.tabManager.trackTab(browserTab, {
+        //     isLoaded: TabManagementBackground.isTabLoaded(browserTab),
+        //     isBookmarked: await this.options.searchIndex.pageHasBookmark(
+        //         browserTab.url,
+        //     ),
+        // })
     }
 
     /**

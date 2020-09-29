@@ -1,39 +1,18 @@
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
-
-import BookmarksStorage from 'src/bookmarks/background/storage'
-import { addBookmark as initAddBookmark } from './bookmarks'
-import { PageIndexingBackground } from 'src/page-indexing/background'
-import initStorex from 'src/search/memory-storex'
+import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
+import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 
 async function setup() {
-    const storageManager = initStorex()
-    const tabManager = {} as any
-    const bookmarksStorage = new BookmarksStorage({ storageManager })
+    const {
+        backgroundModules,
+        fetchPageDataProcessor,
+    } = await setupBackgroundIntegrationTest()
+    const addBookmark = backgroundModules.search.searchIndex.addBookmark
 
-    const fetchPageData = {
-        setUrl: undefined,
-        process: async (url: string) => {
-            fetchPageData.setUrl = url
-            return {}
-        },
-    } as any
-
-    const pages = new PageIndexingBackground({
-        bookmarksStorage,
-        storageManager,
-        fetchPageData,
-    })
-
-    registerModuleMapCollections(storageManager.registry, {
-        pages: pages.storage,
-        bookmarks: bookmarksStorage,
-    })
-
-    await storageManager.finishInitialization()
-
-    const addBookmark = initAddBookmark(pages, bookmarksStorage, tabManager)
-
-    return { addBookmark, fetchPageData, pages }
+    return {
+        addBookmark,
+        fetchPageData: fetchPageDataProcessor,
+        pages: backgroundModules.pages,
+    }
 }
 
 describe('src/search/bookmarks tests', () => {
@@ -47,13 +26,11 @@ describe('src/search/bookmarks tests', () => {
             rejectNoContent: false,
         })
 
-        expect(fetchPageData.setUrl).toBeUndefined()
-
         try {
             await addBookmark({ url: testFullUrl })
         } catch (err) {
         } finally {
-            expect(fetchPageData.setUrl).toEqual(testFullUrl)
+            expect(fetchPageData.lastProcessedUrl).toEqual(testFullUrl)
         }
     })
 })

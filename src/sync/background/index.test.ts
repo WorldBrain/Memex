@@ -143,9 +143,6 @@ function extensionSyncTests(suiteOptions: {
     function setupTest(options: TestDependencies): TestSetup {
         return async (conf = {}) => {
             const signalTransportFactory = lazyMemorySignalTransportFactory()
-            const fetchPageProcessor = conf.enablePostProcessing
-                ? new MockFetchPageDataProcessor()
-                : undefined
 
             const devices: [
                 BackgroundIntegrationTestSetup,
@@ -155,14 +152,12 @@ function extensionSyncTests(suiteOptions: {
                     signalTransportFactory,
                     getServerStorage: options.getServerStorage,
                     includePostSyncProcessor: conf.enablePostProcessing,
-                    fetchPageProcessor,
                     enableSyncEncyption: conf.enableSyncEncyption,
                 }),
                 await setupBackgroundIntegrationTest({
                     signalTransportFactory,
                     getServerStorage: options.getServerStorage,
                     includePostSyncProcessor: conf.enablePostProcessing,
-                    fetchPageProcessor,
                     enableSyncEncyption: conf.enableSyncEncyption,
                 }),
             ]
@@ -190,7 +185,6 @@ function extensionSyncTests(suiteOptions: {
                 sharedSyncLog: (await options.getServerStorage()).storageModules
                     .sharedSyncLog,
                 userId,
-                fetchPageProcessor,
             }
         }
     }
@@ -244,7 +238,7 @@ function extensionSyncTests(suiteOptions: {
             id: listId,
             url: 'http://bla.com/',
         })
-        await searchModule(devices[0]).searchIndex.addPage({
+        await devices[0].backgroundModules.pages.addPage({
             pageDoc: {
                 url: 'http://www.bla.com/',
                 content: {
@@ -549,7 +543,7 @@ function extensionSyncTests(suiteOptions: {
         await syncModule(devices[0]).setup()
         await syncModule(devices[0]).firstContinuousSyncPromise
 
-        await devices[0].backgroundModules.search.searchIndex.addPage({
+        await devices[0].backgroundModules.pages.addPage({
             rejectNoContent: false,
             pageDoc: {
                 url: mockPage.fullUrl,
@@ -664,7 +658,7 @@ function extensionSyncTests(suiteOptions: {
             })
 
             if (params.insertDefaultPages) {
-                await searchModule(devices[0]).searchIndex.addPage({
+                await devices[0].backgroundModules.pages.addPage({
                     pageDoc: {
                         url: 'http://www.bla.com/',
                         content: {
@@ -674,7 +668,7 @@ function extensionSyncTests(suiteOptions: {
                     },
                     visits: [],
                 })
-                await searchModule(devices[0]).searchIndex.addPage({
+                await devices[0].backgroundModules.pages.addPage({
                     pageDoc: {
                         url: 'http://www.bla2.com/',
                         content: {
@@ -897,7 +891,6 @@ function mobileSyncTests(suiteOptions: {
                 extension: await setupBackgroundIntegrationTest({
                     signalTransportFactory,
                     getServerStorage: dependencies.getServerStorage,
-                    fetchPageProcessor,
                 }),
                 mobile: await setupMobileIntegrationTest({
                     signalTransportFactory,
@@ -1277,7 +1270,7 @@ function mobileSyncTests(suiteOptions: {
                 name: 'My shared list',
             },
         )
-        await extension.backgroundModules.search.searchIndex.addPage({
+        await extension.backgroundModules.pages.addPage({
             pageDoc: {
                 url: 'https://www.spam.com/foo',
                 content: {
@@ -1346,7 +1339,7 @@ function mobileSyncTests(suiteOptions: {
                 name: 'My shared list',
             },
         )
-        await extension.backgroundModules.search.searchIndex.addPage({
+        await extension.backgroundModules.pages.addPage({
             pageDoc: {
                 url: 'https://www.spam.com/foo',
                 content: {
@@ -1360,7 +1353,7 @@ function mobileSyncTests(suiteOptions: {
             id: localListId,
             url: 'https://www.spam.com/foo',
         })
-        await extension.backgroundModules.search.searchIndex.addPage({
+        await extension.backgroundModules.pages.addPage({
             pageDoc: {
                 url: 'https://www.eggs.com/foo',
                 content: {

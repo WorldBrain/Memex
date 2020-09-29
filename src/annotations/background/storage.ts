@@ -17,9 +17,9 @@ import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constan
 import { AnnotationsListPlugin } from 'src/search/background/annots-list'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
-import PageStorage from 'src/page-indexing/background/storage'
 import { Annotation, AnnotListEntry } from 'src/annotations/types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { PageIndexingBackground } from 'src/page-indexing/background'
 
 export default class AnnotationStorage extends StorageModule {
     static PAGES_COLL = PAGE_COLLECTION_NAMES.page
@@ -31,27 +31,21 @@ export default class AnnotationStorage extends StorageModule {
 
     private _browserStorageArea: Storage.StorageArea
 
-    private db: Storex
-    private searchIndex: SearchIndex
-
     constructor(
         private options: {
             storageManager: Storex
             browserStorageArea: Storage.StorageArea
             annotationsColl?: string
-            pageStorage: PageStorage
+            pages: PageIndexingBackground
             pagesColl?: string
             tagsColl?: string
             bookmarksColl?: string
             listsColl?: string
             listEntriesColl?: string
-            searchIndex: SearchIndex
         },
     ) {
         super({ storageManager: options.storageManager })
 
-        this.db = options.storageManager
-        this.searchIndex = options.searchIndex
         this._browserStorageArea = options.browserStorageArea
     }
 
@@ -270,7 +264,7 @@ export default class AnnotationStorage extends StorageModule {
     }
 
     private async getListById({ listId }: { listId: number }) {
-        const list = await this.db
+        const list = await this.options.storageManager
             .collection(AnnotationStorage.LISTS_COLL)
             .findOneObject<{ id: number }>({ id: listId })
 
@@ -359,13 +353,13 @@ export default class AnnotationStorage extends StorageModule {
     async indexPageFromTab({ id, url }: Tabs.Tab) {
         const indexingPrefs = await this.fetchIndexingPrefs()
 
-        const page = await this.searchIndex.createPageFromTab({
+        const page = await this.options.pages.createPageFromTab({
             tabId: id,
             fullUrl: url,
             stubOnly: !indexingPrefs.shouldIndexLinks,
         })
 
-        await this.options.pageStorage.createVisitsIfNeeded(page.url, [
+        await this.options.pages.storage.createVisitsIfNeeded(page.url, [
             Date.now(),
         ])
     }
@@ -425,16 +419,20 @@ export default class AnnotationStorage extends StorageModule {
     }
 
     async getTagsByAnnotationUrl(url: string): Promise<Tag[]> {
-        return this.db
+        return this.options.storageManager
             .collection(AnnotationStorage.TAGS_COLL)
             .findAllObjects<Tag>({ url })
     }
 
     private deleteTags = (query: { name: string; url: string }) =>
-        this.db.collection(AnnotationStorage.TAGS_COLL).deleteObjects(query)
+        this.options.storageManager
+            .collection(AnnotationStorage.TAGS_COLL)
+            .deleteObjects(query)
 
     private createTag = (tag) =>
-        this.db.collection(AnnotationStorage.TAGS_COLL).createObject(tag)
+        this.options.storageManager
+            .collection(AnnotationStorage.TAGS_COLL)
+            .createObject(tag)
 
     editAnnotationTags = async (
         tagsToBeAdded: string[],

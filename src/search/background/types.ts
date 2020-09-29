@@ -2,6 +2,7 @@ import { User } from 'src/social-integration/types'
 import SearchStorage from './storage'
 import { SearchIndex } from '../types'
 import { Annotation } from 'src/annotations/types'
+import { PageIndexingBackground } from 'src/page-indexing/background'
 
 export interface AnnotPage {
     url: string
@@ -175,8 +176,8 @@ export interface SearchInterface {
     suggest: SearchStorage['suggest']
     extendedSuggest: SearchStorage['suggestExtended']
 
-    delPages: SearchIndex['delPages']
-    delPagesByDomain: SearchIndex['delPagesByDomain']
-    delPagesByPattern: SearchIndex['delPagesByPattern']
+    delPages: PageIndexingBackground['delPages']
+    delPagesByDomain: PageIndexingBackground['delPagesByDomain']
+    delPagesByPattern: PageIndexingBackground['delPagesByPattern']
     getMatchingPageCount: SearchIndex['getMatchingPageCount']
 }

@@ -1,10 +1,10 @@
 import { CMDS, DEF_CONCURRENCY } from 'src/options/imports/constants'
 import ProgressManager from './progress-manager'
 import getImportStateManager from './state-manager'
-import { SearchIndex } from 'src/search'
 import { browser } from 'webextension-polyfill-ts'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
+import { PageIndexingBackground } from 'src/page-indexing/background'
 
 export default class ImportConnectionHandler {
     static IMPORTS_PROGRESS_KEY = 'is-imports-in-progress'
@@ -29,9 +29,9 @@ export default class ImportConnectionHandler {
     constructor(options: {
         port: any
         quick?: boolean
-        searchIndex: SearchIndex
         tagsModule: TagsBackground
         customListsModule: CustomListBackground
+        pages: PageIndexingBackground
     }) {
         // Main `runtime.Port` that this class hides away to handle connection with the imports UI script
         this.port = options.port
@@ -44,9 +44,9 @@ export default class ImportConnectionHandler {
             concurrency: DEF_CONCURRENCY,
             observer: this.itemObserver,
             stateManager: getImportStateManager(),
-            searchIndex: options.searchIndex,
             tagsModule: options.tagsModule,
             customListsModule: options.customListsModule,
+            pages: options.pages,
         })
 
         // Handle any incoming UI messages to control the importer
@@ -81,7 +81,7 @@ export default class ImportConnectionHandler {
      * (currently used to send item data for display in the UI).
      */
     itemObserver = {
-        next: msg => this.port.postMessage({ cmd: CMDS.NEXT, ...msg }),
+        next: (msg) => this.port.postMessage({ cmd: CMDS.NEXT, ...msg }),
         complete: () => {
             this.port.postMessage({ cmd: CMDS.COMPLETE })
             this.setImportInProgressFlag(false)

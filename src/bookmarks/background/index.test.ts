@@ -7,7 +7,7 @@ import {
     backgroundIntegrationTest,
     BackgroundIntegrationTestSetup,
 } from 'src/tests/integration-tests'
-import { createPageStep, searchModule } from 'src/tests/common-fixtures'
+import { createPageStep } from 'src/tests/common-fixtures'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 
@@ -74,9 +74,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                         },
                         preCheck: async ({ setup }) => {
                             expect(
-                                await searchModule(setup).searchPages({
-                                    bookmarksOnly: true,
-                                }),
+                                await setup.backgroundModules.search.searchPages(
+                                    {
+                                        bookmarksOnly: true,
+                                    },
+                                ),
                             ).toEqual({
                                 docs: [],
                                 totalCount: null,
@@ -85,9 +87,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                         },
                         postCheck: async ({ setup }) => {
                             expect(
-                                await searchModule(setup).searchPages({
-                                    bookmarksOnly: true,
-                                }),
+                                await setup.backgroundModules.search.searchPages(
+                                    {
+                                        bookmarksOnly: true,
+                                    },
+                                ),
                             ).toEqual({
                                 docs: [
                                     {
@@ -168,9 +172,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                         // debug: true,
                         preCheck: async ({ setup }) => {
                             expect(
-                                await searchModule(setup).searchPages({
-                                    bookmarksOnly: true,
-                                }),
+                                await setup.backgroundModules.search.searchPages(
+                                    {
+                                        bookmarksOnly: true,
+                                    },
+                                ),
                             ).toEqual({
                                 docs: [
                                     {
@@ -210,9 +216,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                         ],
                         postCheck: async ({ setup }) => {
                             expect(
-                                await searchModule(setup).searchPages({
-                                    bookmarksOnly: true,
-                                }),
+                                await setup.backgroundModules.search.searchPages(
+                                    {
+                                        bookmarksOnly: true,
+                                    },
+                                ),
                             ).toEqual({
                                 docs: [],
                                 totalCount: null,

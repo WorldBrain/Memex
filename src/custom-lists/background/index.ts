@@ -19,13 +19,13 @@ import { bindMethod } from 'src/util/functions'
 import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from 'src/tags/utils'
+import { PageIndexingBackground } from 'src/page-indexing/background'
 
 const limitSuggestionsReturnLength = 10
 const limitSuggestionsStorageLength = 20
 
 export default class CustomListBackground {
     storage: CustomListStorage
-    _createPage: SearchIndex['createPageViaBmTagActs'] // public so tests can override as a hack
     remoteFunctions: RemoteCollectionsInterface
 
     private localStorage: BrowserSettingsStore<CollectionsSettings>
@@ -34,10 +34,9 @@ export default class CustomListBackground {
         private options: {
             storageManager: Storex
             searchIndex: SearchIndex
-            pageStorage: PageStorage
+            pages: PageIndexingBackground
             queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
-            createPage?: SearchIndex['createPageViaBmTagActs']
             localBrowserStorage: Storage.LocalStorageArea
         },
     ) {
@@ -45,8 +44,6 @@ export default class CustomListBackground {
         this.storage = new CustomListStorage({
             storageManager: options.storageManager,
         })
-        this._createPage =
-            options.createPage || options.searchIndex.createPageViaBmTagActs
 
         this.remoteFunctions = {
             createCustomList: bindMethod(this, 'createCustomList'),
@@ -227,9 +224,9 @@ export default class CustomListBackground {
         url: string
         tabId?: number
     }) {
-        const exists = await this.options.pageStorage.pageExists(url)
+        const exists = await this.options.pages.storage.pageExists(url)
         if (!exists) {
-            await this._createPage({
+            await this.options.pages.createPageViaBmTagActs({
                 fullUrl: url,
                 tabId,
                 visitTime: Date.now(),
@@ -360,8 +357,8 @@ export default class CustomListBackground {
             ))
 
         const indexed = await maybeIndexTabs(tabs, {
-            pageStorage: this.options.pageStorage,
-            createPage: this._createPage,
+            pageStorage: this.options.pages.storage,
+            createPage: this.options.pages.createPageViaBmTagActs,
             time: args.time ?? Date.now(),
         })
 

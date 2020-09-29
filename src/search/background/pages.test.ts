@@ -21,7 +21,7 @@ const bookmarks = (setup: BackgroundIntegrationTestSetup) =>
 
 const createPagesStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
     execute: async ({ setup }) => {
-        await searchModule(setup).searchIndex.addPage({
+        await setup.backgroundModules.pages.addPage({
             pageDoc: {
                 url: DATA.PAGE_1.fullUrl,
                 content: { fullText: 'just some dummy test text' },
@@ -29,7 +29,7 @@ const createPagesStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
             visits: [DATA.VISIT_1],
             rejectNoContent: false,
         })
-        await searchModule(setup).searchIndex.addPage({
+        await setup.backgroundModules.pages.addPage({
             pageDoc: {
                 url: DATA.PAGE_2.fullUrl,
                 content: {},
@@ -118,7 +118,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                     createPagesStep,
                     {
                         execute: async ({ setup }) => {
-                            await searchModule(setup).searchIndex.addVisit(
+                            await setup.backgroundModules.pages.addVisit(
                                 DATA.PAGE_2.url,
                                 DATA.VISIT_3,
                             )
@@ -205,7 +205,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                             })
                         },
                         execute: async ({ setup }) => {
-                            await searchModule(setup).searchIndex.delPages([
+                            await setup.backgroundModules.pages.delPages([
                                 DATA.PAGE_1.url,
                             ])
                         },
@@ -254,9 +254,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                             })
                         },
                         execute: async ({ setup }) => {
-                            await searchModule(
-                                setup,
-                            ).searchIndex.delPagesByDomain(DATA.PAGE_1.domain)
+                            await setup.backgroundModules.pages.delPagesByDomain(
+                                DATA.PAGE_1.domain,
+                            )
                         },
                         expectedStorageChanges: {
                             pages: (): StorageCollectionDiff => ({
@@ -316,7 +316,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                             }
                         },
                         execute: async ({ setup }) => {
-                            await searchModule(setup).searchIndex.addPageTerms({
+                            await setup.backgroundModules.pages.addPageTerms({
                                 pageDoc: {
                                     url: DATA.PAGE_1.fullUrl,
                                     content: {
@@ -468,7 +468,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                             ).not.toBeNull()
                         },
                         execute: async ({ setup }) => {
-                            await searchModule(setup).searchIndex.delPages([
+                            await setup.backgroundModules.pages.delPages([
                                 DATA.PAGE_1.url,
                             ])
                         },

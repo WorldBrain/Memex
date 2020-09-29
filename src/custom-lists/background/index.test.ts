@@ -36,11 +36,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 steps: [
                     {
                         execute: async ({ setup }) => {
-                            customLists(setup)._createPage =
-                                setup.backgroundModules.search.searchIndex.createTestPage
-
                             for (const { url } of testTabs) {
-                                await setup.backgroundModules.search.searchIndex.createTestPage(
+                                await setup.backgroundModules.pages.createTestPage(
                                     { fullUrl: url },
                                 )
                             }
@@ -151,7 +148,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         },
                         {
                             execute: async ({ setup }) => {
-                                await searchModule(setup).searchIndex.addPage({
+                                await setup.backgroundModules.pages.addPage({
                                     pageDoc: {
                                         url: 'http://www.bla.com/',
                                         content: {
@@ -161,7 +158,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                     visits: [],
                                 })
-                                await searchModule(setup).searchIndex.addPage({
+                                await setup.backgroundModules.pages.addPage({
                                     pageDoc: {
                                         url: 'http://www.bla.com/foo',
                                         content: {
@@ -329,7 +326,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         },
                         {
                             execute: async ({ setup }) => {
-                                await searchModule(setup).searchIndex.addPage({
+                                await setup.backgroundModules.pages.addPage({
                                     pageDoc: {
                                         url: 'http://www.bla.com/',
                                         content: {

@@ -33,9 +33,3 @@ export const delBookmark = (
     await pageStorage.deletePageIfOrphaned(url)
     tabManager.setBookmarkState(url, false)
 }
-
-export const pageHasBookmark = (bookmarksStorage: BookmarksStorage) => async (
-    url: string,
-) => {
-    return bookmarksStorage.pageHasBookmark(url)
-}

@@ -6,7 +6,7 @@ import {
     backgroundIntegrationTest,
     BackgroundIntegrationTestSetup,
 } from 'src/tests/integration-tests'
-import { createPageStep, searchModule } from 'src/tests/common-fixtures'
+import { createPageStep } from 'src/tests/common-fixtures'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
 
 const tags = (setup: BackgroundIntegrationTestSetup) =>
@@ -22,9 +22,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                     {
                         preCheck: async ({ setup }) => {
                             expect(
-                                await searchModule(setup).searchPages({
-                                    tagsInc: [DATA.TAG_1],
-                                }),
+                                await setup.backgroundModules.search.searchPages(
+                                    {
+                                        tagsInc: [DATA.TAG_1],
+                                    },
+                                ),
                             ).toEqual({
                                 docs: [],
                                 totalCount: null,
@@ -52,9 +54,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                         },
                         postCheck: async ({ setup }) => {
                             expect(
-                                await searchModule(setup).searchPages({
-                                    tagsInc: [DATA.TAG_1],
-                                }),
+                                await setup.backgroundModules.search.searchPages(
+                                    {
+                                        tagsInc: [DATA.TAG_1],
+                                    },
+                                ),
                             ).toEqual({
                                 docs: [
                                     {
@@ -111,9 +115,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                     {
                         preCheck: async ({ setup }) => {
                             expect(
-                                await searchModule(setup).searchPages({
-                                    tagsInc: [DATA.TAG_1],
-                                }),
+                                await setup.backgroundModules.search.searchPages(
+                                    {
+                                        tagsInc: [DATA.TAG_1],
+                                    },
+                                ),
                             ).toEqual({
                                 docs: [
                                     {
@@ -149,9 +155,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                         },
                         postCheck: async ({ setup }) => {
                             expect(
-                                await searchModule(setup).searchPages({
-                                    tagsInc: [DATA.TAG_1],
-                                }),
+                                await setup.backgroundModules.search.searchPages(
+                                    {
+                                        tagsInc: [DATA.TAG_1],
+                                    },
+                                ),
                             ).toEqual({
                                 docs: [],
                                 totalCount: null,
@@ -169,8 +177,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
             steps: [
                 {
                     execute: async ({ setup }) => {
-                        tags(setup)._createPageFromTab =
-                            setup.backgroundModules.search.searchIndex.createTestPage
                         await tags(setup).remoteFunctions.addTagsToOpenTabs({
                             name: 'ninja',
                             tabs: [

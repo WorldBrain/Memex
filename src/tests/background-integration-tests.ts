@@ -37,6 +37,7 @@ import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import StorageManager from '@worldbrain/storex'
 import { ServerStorage } from 'src/storage/types'
+import { Browser } from 'webextension-polyfill-ts'
 
 export async function setupBackgroundIntegrationTest(options?: {
     customMiddleware?: StorageMiddleware[]
@@ -45,7 +46,6 @@ export async function setupBackgroundIntegrationTest(options?: {
     getServerStorage?: () => Promise<ServerStorage>
     browserLocalStorage?: MemoryBrowserStorage
     debugStorageOperations?: boolean
-    fetchPageProcessor?: FetchPageProcessor
     includePostSyncProcessor?: boolean
     enableSyncEncyption?: boolean
 }): Promise<BackgroundIntegrationTestSetup> {
@@ -84,48 +84,48 @@ export async function setupBackgroundIntegrationTest(options?: {
         shouldTrack: async () => true,
     })
 
+    const browserAPIs = ({
+        webNavigation: {
+            onHistoryStateUpdated: { addListener: () => {} },
+        },
+        storage: {
+            local: browserLocalStorage,
+        },
+        bookmarks: {
+            onCreated: { addListener: () => {} },
+            onRemoved: { addListener: () => {} },
+        },
+        alarms: {
+            onAlarm: { addListener: () => {} },
+        },
+        tabs: {
+            query: () => {},
+            get: () => {},
+        },
+        contextMenus: {
+            create: () => {},
+        },
+        runtime: {
+            getURL: () => '',
+        },
+    } as any) as Browser
+
+    const fetchPageDataProcessor = new MockFetchPageDataProcessor()
     const backgroundModules = createBackgroundModules({
         storageManager,
         analyticsManager,
         localStorageChangesManager: null,
         getServerStorage,
-        browserAPIs: {
-            webNavigation: {
-                onHistoryStateUpdated: { addListener: () => {} },
-            },
-            storage: {
-                local: browserLocalStorage,
-            },
-            bookmarks: {
-                onCreated: { addListener: () => {} },
-                onRemoved: { addListener: () => {} },
-            },
-            alarms: {
-                onAlarm: { addListener: () => {} },
-            },
-            tabs: {
-                query: () => {},
-                get: () => {},
-            },
-            contextMenus: {
-                create: () => {},
-            },
-            runtime: {
-                getURL: () => '',
-            },
-        } as any,
+        browserAPIs: browserAPIs,
         tabManager: options?.tabManager,
         signalTransportFactory: options?.signalTransportFactory,
         getSharedSyncLog: async () =>
             (await getServerStorage()).storageModules.sharedSyncLog,
         includePostSyncProcessor: options?.includePostSyncProcessor,
-        fetchPageDataProcessor:
-            options?.fetchPageProcessor ?? new MockFetchPageDataProcessor(),
+        fetchPageDataProcessor,
         auth,
         disableSyncEnryption: !options?.enableSyncEncyption,
     })
-    backgroundModules.customLists._createPage =
-        backgroundModules.search.searchIndex.createTestPage
     backgroundModules.sync.initialSync.wrtc = wrtc
     backgroundModules.sync.initialSync.debug = false
 
@@ -178,6 +178,8 @@ export async function setupBackgroundIntegrationTest(options?: {
         authService,
         subscriptionService,
         getServerStorage,
+        browserAPIs,
+        fetchPageDataProcessor,
     }
 }
 

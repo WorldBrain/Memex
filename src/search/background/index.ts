@@ -18,6 +18,7 @@ import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { SearchIndex } from '../types'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import * as Raven from 'src/util/raven'
+import BookmarksBackground from 'src/bookmarks/background'
 
 export default class SearchBackground {
     storage: SearchStorage
@@ -62,6 +63,7 @@ export default class SearchBackground {
             storageManager: Storex
             idx: SearchIndex
             pages: PageIndexingBackground
+            bookmarks: BookmarksBackground
             queryBuilder?: () => QueryBuilder
             tabMan: TabManager
             browserAPIs: Pick<Browser, 'bookmarks'>
@@ -92,16 +94,16 @@ export default class SearchBackground {
             bookmarks: {
                 addPageBookmark: this.searchIndex.addBookmark,
                 delPageBookmark: this.searchIndex.delBookmark,
-                pageHasBookmark: this.searchIndex.pageHasBookmark,
+                pageHasBookmark: this.options.bookmarks.storage.pageHasBookmark,
             },
             search: {
                 search: this.searchIndex.search,
                 suggest: this.storage.suggest,
                 extendedSuggest: this.storage.suggestExtended,
-                delPages: this.searchIndex.delPages,
+                delPages: this.options.pages.delPages,
 
-                delPagesByDomain: this.searchIndex.delPagesByDomain,
-                delPagesByPattern: this.searchIndex.delPagesByPattern,
+                delPagesByDomain: this.options.pages.delPagesByDomain,
+                delPagesByPattern: this.options.pages.delPagesByPattern,
                 getMatchingPageCount: this.searchIndex.getMatchingPageCount,
                 searchAnnotations: this.searchAnnotations.bind(this),
                 searchPages: this.searchPages.bind(this),

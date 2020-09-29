@@ -33,7 +33,7 @@ async function setupTest() {
 
     await insertTestData({ customLists })
 
-    return { customLists, searchIndex }
+    return { customLists, searchIndex, pages: backgroundModules.pages }
 }
 
 describe('Custom List Integrations', () => {
@@ -44,9 +44,9 @@ describe('Custom List Integrations', () => {
 
     describe('create ops', () => {
         test('should be able to create list entry for existing page', async () => {
-            const { searchIndex, customLists } = await setupTest()
+            const { pages, customLists } = await setupTest()
 
-            const newPage = await searchIndex.createTestPage({
+            const newPage = await pages.createTestPage({
                 fullUrl: 'http://www.test.com',
                 save: true,
             })

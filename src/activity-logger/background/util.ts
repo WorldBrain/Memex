@@ -1,14 +1,15 @@
 import { blacklist } from '../../blacklist/background'
 import { isLoggable, getPauseState } from '..'
-import { LoggableTabChecker, VisitInteractionUpdater, TabState } from './types'
+import { LoggableTabChecker, VisitInteractionUpdater } from './types'
 import { SearchIndex } from 'src/search'
 import { browser, Windows, Tabs } from 'webextension-polyfill-ts'
+import { TabState } from 'src/tab-management/background/types'
 
 /**
  * Combines all "loggable" conditions for logging on given tab data to determine
  * whether or not a tab should be logged.
  */
-export const shouldLogTab: LoggableTabChecker = async function({ url }) {
+export const shouldLogTab: LoggableTabChecker = async function ({ url }) {
     // Short-circuit before async logic, if possible
     if (!url || !isLoggable({ url })) {
         return false
@@ -26,20 +27,20 @@ export const shouldLogTab: LoggableTabChecker = async function({ url }) {
  *
  * @param {Tab} tabState The tab state to derive visit meta data from.
  */
-export const updateVisitInteractionData: VisitInteractionUpdater = (
+export const updateVisitInteractionData: VisitInteractionUpdater = async (
     tabState: TabState,
     searchIndex: SearchIndex,
 ) => {
     const { scrollState } = tabState
-    return searchIndex
-        .updateTimestampMeta(tabState.url, +tabState.visitTime, {
-            duration: tabState.activeTime,
-            scrollPx: scrollState.pixel,
-            scrollMaxPx: scrollState.maxPixel,
-            scrollPerc: scrollState.percent,
-            scrollMaxPerc: scrollState.maxPercent,
-        })
-        .catch(f => f)
+    // return searchIndex
+    //     .updateTimestampMeta(tabState.url, +tabState.visitTime, {
+    //         duration: tabState.activeTime,
+    //         scrollPx: scrollState.pixel,
+    //         scrollMaxPx: scrollState.maxPixel,
+    //         scrollPerc: scrollState.percent,
+    //         scrollMaxPerc: scrollState.maxPercent,
+    //     })
+    //     .catch(f => f)
 }
 
 export async function getOpenTabsInCurrentWindow(
@@ -47,6 +48,6 @@ export async function getOpenTabsInCurrentWindow(
     queryTabs: Tabs.Static['query'],
 ): Promise<Array<{ tabId: number; url: string }>> {
     return (await queryTabs({ windowId: windows.WINDOW_ID_CURRENT }))
-        .map(tab => ({ tabId: tab.id, url: tab.url }))
-        .filter(tab => tab.tabId !== browser.tabs.TAB_ID_NONE)
+        .map((tab) => ({ tabId: tab.id, url: tab.url }))
+        .filter((tab) => tab.tabId !== browser.tabs.TAB_ID_NONE)
 }
