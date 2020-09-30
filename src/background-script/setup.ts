@@ -145,6 +145,7 @@ export function createBackgroundModules(options: {
     const tags = new TagsBackground({
         storageManager,
         pages,
+        tabManagement,
         queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
         windows: options.browserAPIs.windows,
         searchBackgroundModule: search,
@@ -168,6 +169,7 @@ export function createBackgroundModules(options: {
 
     const customLists = new CustomListBackground({
         storageManager,
+        tabManagement,
         queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
         windows: options.browserAPIs.windows,
         searchIndex: search.searchIndex,

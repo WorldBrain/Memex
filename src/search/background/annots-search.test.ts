@@ -99,6 +99,7 @@ describe.skip('annots search plugin', () => {
             storageManager,
             searchIndex: {} as any,
             pages: {} as any,
+            tabManagement: {} as any,
             localBrowserStorage: {} as any,
         })
 

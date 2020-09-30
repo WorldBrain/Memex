@@ -1,4 +1,3 @@
-import getFavIcon from './get-fav-icon'
 import extractPageMetadataFromRawContent, {
     getPageFullText,
 } from './content-extraction'
@@ -13,7 +12,10 @@ export interface PageAnalysis {
 
 export type PageAnalyzer = (args: {
     tabId: number
-    tabManagement: Pick<TabManagementBackground, 'extractRawPageContent'>
+    tabManagement: Pick<
+        TabManagementBackground,
+        'extractRawPageContent' | 'getFavIcon'
+    >
     includeContent?: 'metadata-only' | 'metadata-with-full-text'
     includeFavIcon?: boolean
 }) => Promise<PageAnalysis>
@@ -29,7 +31,7 @@ const analysePage: PageAnalyzer = async (options) => {
 
     const content = await extractPageContent(options)
     const favIconURI = options.includeFavIcon
-        ? await getFavIcon({ tabId })
+        ? await options.tabManagement.getFavIcon({ tabId })
         : undefined
 
     return {

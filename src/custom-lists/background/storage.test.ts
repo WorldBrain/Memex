@@ -1,5 +1,3 @@
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
-
 import CustomListBackground from './'
 import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'

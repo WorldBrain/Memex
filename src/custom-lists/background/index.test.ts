@@ -6,6 +6,11 @@ import {
 } from 'src/tests/integration-tests'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
 import { LoggedStorageOperation } from 'src/tests/storage-operation-logger'
+import { Tabs } from 'webextension-polyfill-ts'
+import {
+    FakeTab,
+    injectFakeTabs,
+} from 'src/tab-management/background/index.tests'
 
 const customLists = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.customLists
@@ -19,14 +24,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     [
         backgroundIntegrationTest('should add open tabs to list', () => {
             const testList = 'ninja'
-            const testTabs = [
+            const testTabs: Array<FakeTab & { normalized: string }> = [
                 {
-                    tabId: 1,
+                    id: 1,
                     url: 'http://www.bar.com/eggs',
                     normalized: 'bar.com/eggs',
                 },
                 {
-                    tabId: 2,
+                    id: 2,
                     url: 'http://www.foo.com/spam',
                     normalized: 'foo.com/spam',
                 },
@@ -36,6 +41,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 steps: [
                     {
                         execute: async ({ setup }) => {
+                            injectFakeTabs({
+                                tabManagement:
+                                    setup.backgroundModules.tabManagement,
+                                tabsAPI: setup.browserAPIs.tabs,
+                                tabs: testTabs,
+                            })
+
                             for (const { url } of testTabs) {
                                 await setup.backgroundModules.pages.createTestPage(
                                     { fullUrl: url },
@@ -52,7 +64,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 setup,
                             ).remoteFunctions.addOpenTabsToList({
                                 name: testList,
-                                tabs: testTabs,
                                 time: 555,
                             })
                         },

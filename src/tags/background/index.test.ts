@@ -8,6 +8,10 @@ import {
 } from 'src/tests/integration-tests'
 import { createPageStep } from 'src/tests/common-fixtures'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
+import {
+    injectFakeTabs,
+    FakeTab,
+} from 'src/tab-management/background/index.tests'
 
 const tags = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.tags
@@ -177,12 +181,29 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
             steps: [
                 {
                     execute: async ({ setup }) => {
+                        const testTabs: Array<
+                            FakeTab & { normalized: string }
+                        > = [
+                            {
+                                id: 1,
+                                url: 'http://www.bar.com/eggs',
+                                normalized: 'bar.com/eggs',
+                            },
+                            {
+                                id: 2,
+                                url: 'http://www.foo.com/spam',
+                                normalized: 'foo.com/spam',
+                            },
+                        ]
+                        injectFakeTabs({
+                            tabManagement:
+                                setup.backgroundModules.tabManagement,
+                            tabsAPI: setup.browserAPIs.tabs,
+                            tabs: testTabs,
+                        })
+
                         await tags(setup).remoteFunctions.addTagsToOpenTabs({
                             name: 'ninja',
-                            tabs: [
-                                { tabId: 1, url: 'http://www.bar.com/eggs' },
-                                { tabId: 2, url: 'http://www.foo.com/spam' },
-                            ],
                             time: 555,
                         })
                     },

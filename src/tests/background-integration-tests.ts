@@ -101,6 +101,10 @@ export async function setupBackgroundIntegrationTest(options?: {
         runtime: {
             getURL: () => '',
         },
+        windows: {
+            WINDOW_ID_CURRENT: 'currentWindow:testValue',
+            TAB_ID_NONE: 'noneTab:testValue',
+        },
     } as any) as Browser
 
     const fetchPageDataProcessor = new MockFetchPageDataProcessor()

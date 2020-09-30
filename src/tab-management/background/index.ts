@@ -1,6 +1,5 @@
-import { Runtime, WebNavigation, Tabs, Browser } from 'webextension-polyfill-ts'
+import { Tabs, Browser } from 'webextension-polyfill-ts'
 
-import * as Raven from 'src/util/raven'
 import { mapChunks } from 'src/util/chunk'
 import { CONCURR_TAB_LOAD } from '../constants'
 import {
@@ -10,12 +9,9 @@ import {
 } from 'src/util/webextensionRPC'
 import { TabManager } from './tab-manager'
 import { TabChangeListener, TabManagementInterface } from './types'
-import { bindMethod } from 'src/util/functions'
 import { resolvablePromise } from 'src/util/resolvable'
-import PageStorage from 'src/page-indexing/background/storage'
-import BookmarksBackground from 'src/bookmarks/background'
-import { SearchIndex } from 'src/search'
 import { RawPageContent } from 'src/page-analysis/types'
+import { fetchFavIcon } from 'src/page-analysis/background/get-fav-icon'
 
 export default class TabManagementBackground {
     static SCROLL_UPDATE_FN = 'updateScrollState'
@@ -35,7 +31,7 @@ export default class TabManagementBackground {
             tabManager: TabManager
             browserAPIs: Pick<
                 Browser,
-                'tabs' | 'runtime' | 'webNavigation' | 'storage'
+                'tabs' | 'runtime' | 'webNavigation' | 'storage' | 'windows'
             >
             extractRawPageContent(tabId: number): Promise<RawPageContent>
         },
@@ -74,6 +70,30 @@ export default class TabManagementBackground {
 
     async extractRawPageContent(tabId: number): Promise<RawPageContent> {
         return this.options.extractRawPageContent(tabId)
+    }
+
+    async getOpenTabsInCurrentWindow(): Promise<
+        Array<{ id: number; url: string }>
+    > {
+        const windowId = this.options.browserAPIs.windows.WINDOW_ID_CURRENT
+        return (await this.options.browserAPIs.tabs.query({ windowId }))
+            .map((tab) => ({ id: tab.id!, url: tab.url }))
+            .filter(
+                (tab) =>
+                    tab.id &&
+                    tab.url &&
+                    tab.id !== this.options.browserAPIs.tabs.TAB_ID_NONE,
+            )
+    }
+
+    async getFavIcon({ tabId }: { tabId: number }) {
+        const tab = await this.options.browserAPIs.tabs.get(tabId)
+
+        if (tab?.favIconUrl == null) {
+            return undefined
+        }
+
+        return fetchFavIcon(tab.favIconUrl)
     }
 
     async trackExistingTabs() {

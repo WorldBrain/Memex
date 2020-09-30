@@ -50,7 +50,7 @@ export class PageIndexingBackground {
         await this.storage.createOrUpdatePage(pageData)
 
         // Create Visits for each specified time, or a single Visit for "now" if no assoc event
-        // visits = !visits.length && bookmark == null ? [Date.now()] : visits
+        visits = !visits.length ? [Date.now()] : visits
         await this.storage.createVisitsIfNeeded(pageData.url, visits)
 
         if (favIconURI != null) {
@@ -144,7 +144,7 @@ export class PageIndexingBackground {
         return res != null
     }
 
-    async createPageFromTab(props: PageCreationProps) {
+    createPageFromTab = async (props: PageCreationProps) => {
         if (!props.tabId) {
             throw new Error(
                 `No tabID provided to extract content: ${props.fullUrl}`,
@@ -221,7 +221,7 @@ export class PageIndexingBackground {
      * Also sets the `stubOnly` option based on user bookmark/tag indexing pref.
      * TODO: Better name?
      */
-    async createPageViaBmTagActs(props: PageCreationProps) {
+    createPageViaBmTagActs = async (props: PageCreationProps) => {
         if (props.stubOnly == null) {
             const {
                 [IDXING_PREF_KEYS.BOOKMARKS]: fullyIndex,

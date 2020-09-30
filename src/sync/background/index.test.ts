@@ -122,7 +122,6 @@ function extensionSyncTests(suiteOptions: {
         ) => BackgroundIntegrationTestSetup['backgroundModules']['customLists']
         sharedSyncLog: SharedSyncLogStorage
         userId: number | string
-        fetchPageProcessor?: MockFetchPageDataProcessor
     }>
 
     const expectedDeviceInfo = [
@@ -144,6 +143,7 @@ function extensionSyncTests(suiteOptions: {
         return async (conf = {}) => {
             const signalTransportFactory = lazyMemorySignalTransportFactory()
 
+            const fet = new MockFetchPageDataProcessor()
             const devices: [
                 BackgroundIntegrationTestSetup,
                 BackgroundIntegrationTestSetup,
@@ -500,13 +500,9 @@ function extensionSyncTests(suiteOptions: {
     })
 
     it('should fetch missing data on post-sync if enabled', async (setup: TestSetup) => {
-        const {
-            devices,
-            syncModule,
-            sharedSyncLog,
-            userId,
-            fetchPageProcessor,
-        } = await setup({ enablePostProcessing: true })
+        const { devices, syncModule, sharedSyncLog, userId } = await setup({
+            enablePostProcessing: true,
+        })
 
         const mockPage = {
             url: 'test.com',
@@ -521,7 +517,7 @@ function extensionSyncTests(suiteOptions: {
             urlTerms: [],
         }
 
-        fetchPageProcessor.mockPage = mockPage
+        devices[1].fetchPageDataProcessor.mockPage = mockPage
 
         devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
         devices[1].authService.setUser({ ...TEST_USER, id: userId as string })

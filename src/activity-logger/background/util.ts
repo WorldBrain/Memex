@@ -21,33 +21,3 @@ export const shouldLogTab: LoggableTabChecker = async function ({ url }) {
 
     return !isPaused && !isBlacklisted({ url })
 }
-
-/**
- * Handles update of assoc. visit with derived tab state data, using the tab state.
- *
- * @param {Tab} tabState The tab state to derive visit meta data from.
- */
-export const updateVisitInteractionData: VisitInteractionUpdater = async (
-    tabState: TabState,
-    searchIndex: SearchIndex,
-) => {
-    const { scrollState } = tabState
-    // return searchIndex
-    //     .updateTimestampMeta(tabState.url, +tabState.visitTime, {
-    //         duration: tabState.activeTime,
-    //         scrollPx: scrollState.pixel,
-    //         scrollMaxPx: scrollState.maxPixel,
-    //         scrollPerc: scrollState.percent,
-    //         scrollMaxPerc: scrollState.maxPercent,
-    //     })
-    //     .catch(f => f)
-}
-
-export async function getOpenTabsInCurrentWindow(
-    windows: Windows.Static,
-    queryTabs: Tabs.Static['query'],
-): Promise<Array<{ tabId: number; url: string }>> {
-    return (await queryTabs({ windowId: windows.WINDOW_ID_CURRENT }))
-        .map((tab) => ({ tabId: tab.id, url: tab.url }))
-        .filter((tab) => tab.tabId !== browser.tabs.TAB_ID_NONE)
-}

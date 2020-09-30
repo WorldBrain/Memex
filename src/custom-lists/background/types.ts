@@ -62,13 +62,9 @@ export interface RemoteCollectionsInterface {
     addOpenTabsToList(args: {
         name: string
         listId?: number
-        tabs?: Tab[]
         time?: number
     }): Promise<void>
-    removeOpenTabsFromList(args: {
-        listId: number
-        tabs?: Tab[]
-    }): Promise<void>
+    removeOpenTabsFromList(args: { listId: number }): Promise<void>
     updateListForPage(args: {
         added?: string
         deleted?: string

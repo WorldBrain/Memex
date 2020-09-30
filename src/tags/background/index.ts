@@ -8,13 +8,13 @@ import PageStorage from 'src/page-indexing/background/storage'
 import { TagTab, RemoteTagsInterface, TagsSettings } from './types'
 import { bindMethod } from 'src/util/functions'
 import { initErrHandler } from 'src/search/storage'
-import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
 import SearchBackground from 'src/search/background'
 import { Analytics } from 'src/analytics/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from '../utils'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from 'src/options/settings/constants'
 import { PageIndexingBackground } from 'src/page-indexing/background'
+import TabManagementBackground from 'src/tab-management/background'
 
 export const limitSuggestionsReturnLength = 20
 export const limitSuggestionsStorageLength = 40
@@ -31,6 +31,7 @@ export default class TagsBackground {
             storageManager: Storex
             pages: PageIndexingBackground
             analytics: Analytics
+            tabManagement: TabManagementBackground
             queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
             searchBackgroundModule: SearchBackground
@@ -93,17 +94,8 @@ export default class TagsBackground {
         return suggestions.slice(0, limit)
     }
 
-    async addTagsToOpenTabs(params: {
-        name: string
-        tabs?: TagTab[]
-        time?: number
-    }) {
-        const tabs =
-            params.tabs ??
-            (await getOpenTabsInCurrentWindow(
-                this.windows,
-                this.options.queryTabs,
-            ))
+    async addTagsToOpenTabs(params: { name: string; time?: number }) {
+        const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
 
         const indexed = await maybeIndexTabs(tabs, {
             pageStorage: this.options.pages.storage,
@@ -119,19 +111,8 @@ export default class TagsBackground {
         this._updateTagSuggestionsCache({ added: params.name })
     }
 
-    async delTagsFromOpenTabs({
-        name,
-        tabs,
-    }: {
-        name: string
-        tabs?: TagTab[]
-    }) {
-        if (!tabs) {
-            tabs = await getOpenTabsInCurrentWindow(
-                this.windows,
-                this.options.queryTabs,
-            )
-        }
+    async delTagsFromOpenTabs({ name }: { name: string }) {
+        const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
 
         return this.storage.delTags({
             name,

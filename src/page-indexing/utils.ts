@@ -11,7 +11,7 @@ export function pageIsStub(page: PipelineRes): boolean {
 }
 
 export async function maybeIndexTabs(
-    tabs: Array<{ url: string; tabId: number }>,
+    tabs: Array<{ url: string; id: number }>,
     options: {
         pageStorage: PageStorage
         createPage: PageIndexingBackground['createPageViaBmTagActs']
@@ -33,7 +33,7 @@ export async function maybeIndexTabs(
             if (!page || pageIsStub(page)) {
                 await options
                     .createPage({
-                        tabId: tab.tabId,
+                        tabId: tab.id,
                         fullUrl: tab.url,
                         allowScreenshot: false,
                         visitTime: options.time,
