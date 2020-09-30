@@ -254,4 +254,80 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
             ],
         }
     }),
+    backgroundIntegrationTest('should remove tags to open tabs', () => {
+        return {
+            steps: [
+                {
+                    execute: async ({ setup }) => {
+                        const testTabs: Array<
+                            FakeTab & { normalized: string }
+                        > = [
+                            {
+                                id: 1,
+                                url: 'http://www.bar.com/eggs',
+                                normalized: 'bar.com/eggs',
+                            },
+                            {
+                                id: 2,
+                                url: 'http://www.foo.com/spam',
+                                normalized: 'foo.com/spam',
+                            },
+                        ]
+                        injectFakeTabs({
+                            tabManagement:
+                                setup.backgroundModules.tabManagement,
+                            tabsAPI: setup.browserAPIs.tabs,
+                            tabs: testTabs,
+                        })
+
+                        await tags(setup).remoteFunctions.addTagsToOpenTabs({
+                            name: 'ninja',
+                            time: 555,
+                        })
+                        await tags(setup).remoteFunctions.delTag({
+                            url: testTabs[1].url,
+                            tag: 'ninja',
+                        })
+                        await tags(setup).remoteFunctions.delTagsFromOpenTabs({
+                            name: 'ninja',
+                        })
+                    },
+                    postCheck: async ({ setup }) => {
+                        const stored = {
+                            pages: await setup.storageManager
+                                .collection('pages')
+                                .findObjects({}, { order: [['url', 'asc']] }),
+                            tags: await setup.storageManager
+                                .collection('tags')
+                                .findObjects({}, { order: [['url', 'asc']] }),
+                            visits: await setup.storageManager
+                                .collection('visits')
+                                .findObjects({}, { order: [['url', 'asc']] }),
+                        }
+                        expect(stored).toEqual({
+                            pages: [
+                                expect.objectContaining({
+                                    url: 'bar.com/eggs',
+                                }),
+                                expect.objectContaining({
+                                    url: 'foo.com/spam',
+                                }),
+                            ],
+                            tags: [],
+                            visits: [
+                                expect.objectContaining({
+                                    url: 'bar.com/eggs',
+                                    time: 555,
+                                }),
+                                expect.objectContaining({
+                                    url: 'foo.com/spam',
+                                    time: 555,
+                                }),
+                            ],
+                        })
+                    },
+                },
+            ],
+        }
+    }),
 ])

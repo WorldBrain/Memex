@@ -42,22 +42,16 @@ export default class TagsBackground {
             storageManager: options.storageManager,
         })
         this.remoteFunctions = {
-            addTagToExistingUrl: bindMethod(this, 'addTagToExistingUrl'),
-            delTag: bindMethod(this, 'delTag'),
-            addTagToPage: bindMethod(this, 'addTagToPage'),
-            updateTagForPage: bindMethod(this, 'updateTagForPage'),
-            setTagsForAnnotation: bindMethod(this, 'setTagsForAnnotation'),
-            fetchPageTags: bindMethod(this, 'fetchPageTags'),
-            addTagsToOpenTabs: bindMethod(this, 'addTagsToOpenTabs'),
-            delTagsFromOpenTabs: bindMethod(this, 'delTagsFromOpenTabs'),
-            searchForTagSuggestions: bindMethod(
-                this,
-                'searchForTagSuggestions',
-            ),
-            fetchInitialTagSuggestions: bindMethod(
-                this,
-                'fetchInitialTagSuggestions',
-            ),
+            addTagToExistingUrl: this.addTagToExistingUrl,
+            delTag: this.delTag,
+            addTagToPage: this.addTagToPage,
+            updateTagForPage: this.updateTagForPage,
+            setTagsForAnnotation: this.setTagsForAnnotation,
+            fetchPageTags: this.fetchPageTags,
+            addTagsToOpenTabs: this.addTagsToOpenTabs,
+            delTagsFromOpenTabs: this.delTagsFromOpenTabs,
+            searchForTagSuggestions: this.searchForTagSuggestions,
+            fetchInitialTagSuggestions: this.fetchInitialTagSuggestions,
         }
         this.windows = options.windows
         this.localStorage = new BrowserSettingsStore<TagsSettings>(
@@ -66,16 +60,19 @@ export default class TagsBackground {
         )
     }
 
-    async searchForTagSuggestions(args: { query: string; limit?: number }) {
+    searchForTagSuggestions = async (args: {
+        query: string
+        limit?: number
+    }) => {
         return this.options.searchBackgroundModule.storage.suggest({
             type: 'tag',
             ...args,
         })
     }
 
-    async fetchInitialTagSuggestions(
+    fetchInitialTagSuggestions = async (
         { limit }: { limit?: number } = { limit: limitSuggestionsReturnLength },
-    ) {
+    ) => {
         let suggestions = await this.localStorage.get('suggestions')
 
         if (!suggestions) {
@@ -94,7 +91,7 @@ export default class TagsBackground {
         return suggestions.slice(0, limit)
     }
 
-    async addTagsToOpenTabs(params: { name: string; time?: number }) {
+    addTagsToOpenTabs = async (params: { name: string; time?: number }) => {
         const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
 
         const indexed = await maybeIndexTabs(tabs, {
@@ -111,7 +108,7 @@ export default class TagsBackground {
         this._updateTagSuggestionsCache({ added: params.name })
     }
 
-    async delTagsFromOpenTabs({ name }: { name: string }) {
+    delTagsFromOpenTabs = async ({ name }: { name: string }) => {
         const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
 
         return this.storage.delTags({
@@ -120,15 +117,21 @@ export default class TagsBackground {
         })
     }
 
-    async fetchPageTags({ url }: { url: string }) {
+    fetchPageTags = async ({ url }: { url: string }) => {
         return this.storage.fetchPageTags({ url })
     }
 
-    async fetchAnnotationTags({ url }: { url: string }) {
+    fetchAnnotationTags = async ({ url }: { url: string }) => {
         return this.storage.fetchAnnotationTags({ url })
     }
 
-    async addTagToExistingUrl({ tag, url }: { tag: string; url: string }) {
+    addTagToExistingUrl = async ({
+        tag,
+        url,
+    }: {
+        tag: string
+        url: string
+    }) => {
         this.options.analytics.trackEvent({
             category: 'Tags',
             action: 'createForPageViaOverview',
@@ -137,30 +140,36 @@ export default class TagsBackground {
         return this.storage.addTag({ name: tag, url })
     }
 
-    async addTagsToExistingAnnotationUrl({
+    addTagsToExistingAnnotationUrl = async ({
         tags,
         url,
     }: {
         tags: string[]
         url: string
-    }) {
+    }) => {
         for (const tag of tags) {
             await this._updateTagSuggestionsCache({ added: tag })
             await this.storage.addAnnotationTag({ name: tag, url })
         }
     }
 
-    async addTagsToExistingUrl({ tags, url }: { tags: string[]; url: string }) {
+    addTagsToExistingUrl = async ({
+        tags,
+        url,
+    }: {
+        tags: string[]
+        url: string
+    }) => {
         for (const tag of tags) {
             await this._updateTagSuggestionsCache({ added: tag })
             await this.storage.addTag({ name: tag, url })
         }
     }
 
-    async _updateTagSuggestionsCache(args: {
+    _updateTagSuggestionsCache = async (args: {
         added?: string
         removed?: string
-    }) {
+    }) => {
         return updateSuggestionsCache({
             ...args,
             suggestionLimit: limitSuggestionsStorageLength,
@@ -173,12 +182,12 @@ export default class TagsBackground {
         })
     }
 
-    async delTag({ tag, url }: { tag: string; url: string }) {
+    delTag = async ({ tag, url }: { tag: string; url: string }) => {
         return this.storage.delTag({ name: tag, url })
     }
 
     // Makes sure the page exists first, creating it if it doesn't, before tagging.
-    async addTagToPage({
+    addTagToPage = async ({
         url,
         tag,
         tabId,
@@ -186,7 +195,7 @@ export default class TagsBackground {
         url: string
         tag: string
         tabId?: number
-    }) {
+    }) => {
         let page = await this.options.pages.storage.getPage(url)
 
         const {
@@ -218,7 +227,7 @@ export default class TagsBackground {
     }
 
     // Sugar for the Tag picking UI component
-    async updateTagForPage({
+    updateTagForPage = async ({
         added,
         deleted,
         url,
@@ -228,7 +237,7 @@ export default class TagsBackground {
         deleted: string
         url: string
         tabId?: number
-    }) {
+    }) => {
         if (added) {
             await this.addTagToPage({ url, tag: added, tabId })
         }
@@ -237,21 +246,27 @@ export default class TagsBackground {
         }
     }
 
-    async deleteAllTagsForPage({ url }: { url: string }) {
+    deleteAllTagsForPage = async ({ url }: { url: string }) => {
         return this.storage.deleteAllTagsForPage({ url })
     }
 
-    async deleteTagsForPage({ url, tags }: { url: string; tags: string[] }) {
+    deleteTagsForPage = async ({
+        url,
+        tags,
+    }: {
+        url: string
+        tags: string[]
+    }) => {
         return this.storage.deleteTagsForPage({ url, tags })
     }
 
-    async setTagsForAnnotation({
+    setTagsForAnnotation = async ({
         url,
         tags: newTags,
     }: {
         url: string
         tags: string[]
-    }) {
+    }) => {
         const existingTags = await this.fetchAnnotationTags({ url })
         const existingTagsSet = new Set(existingTags)
         const newTagsSet = new Set(newTags)
