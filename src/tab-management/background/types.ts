@@ -33,7 +33,6 @@ export interface TabState {
     url: string
     isActive: boolean
     isLoaded: boolean
-    isBookmarked: boolean
     visitTime: number
     activeTime: number
     lastActivated: number

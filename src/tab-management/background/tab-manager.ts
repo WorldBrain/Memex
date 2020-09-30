@@ -86,10 +86,7 @@ export class TabManager {
      * @param {number} id The ID of the tab to stop reset tracking of.
      * @returns {Tab} The state of the previously tracked tab assoc. with `id`.
      */
-    resetTab(
-        id: number,
-        { isActive, url, isBookmarked, isLoaded }: Partial<TabState>,
-    ) {
+    resetTab(id: number, { isActive, url, isLoaded }: Partial<TabState>) {
         const oldTab = this.removeTab(id)
 
         if (oldTab != null) {
@@ -99,7 +96,6 @@ export class TabManager {
                     id,
                     url,
                     isLoaded,
-                    isBookmarked,
                     isActive,
                     windowId: oldTab.windowId,
                     navState: oldTab.navState,
@@ -179,14 +175,6 @@ export class TabManager {
 
         if (tab != null) {
             tab.navState = navState
-        }
-    }
-
-    setBookmarkState(url: string, newState: boolean) {
-        for (const [, tab] of this._tabs) {
-            if (tab.url === url) {
-                tab.isBookmarked = newState
-            }
         }
     }
 }

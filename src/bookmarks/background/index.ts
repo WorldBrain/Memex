@@ -58,13 +58,13 @@ export default class BookmarksBackground {
         }
 
         await this.storage.createBookmarkIfNeeded(page.url, params.timestamp)
-        this.options.tabManager.setBookmarkState(params.url, true)
+        // this.options.tabManager.setBookmarkState(params.url, true)
     }
 
     delPageBookmark = async ({ url }: Partial<Bookmarks.BookmarkTreeNode>) => {
         await this.storage.delBookmark({ url })
         await this.options.pages.storage.deletePageIfOrphaned(url)
-        this.options.tabManager.setBookmarkState(url, false)
+        // this.options.tabManager.setBookmarkState(url, false)
     }
 
     async addBookmark({ url, time }: { url: string; time?: number }) {

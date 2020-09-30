@@ -18,11 +18,17 @@ describe('activity logger background tests', () => {
             { id: 5, url: 'https://worldbrain.io', status: 'complete' },
         ] as Tabs.Tab[]
 
-        // Mock out tabs API, so it sets something we can check (TODO: afford this functionality in the setup)
+        // Mock out tabs API, so it sets something we can check
         browserAPIs.tabs.query = async () => mockTabs
 
-        const executeScriptsCalls = []
-
+        const executeScriptsCalls: Array<{
+            id: number
+            script: { file: string }
+        }> = []
+        browserAPIs.tabs.executeScript = (async (tabId, script) => {
+            executeScriptsCalls.push({ id: tabId!, script })
+            return []
+        }) as any
         await tabManagement.trackExistingTabs()
 
         expect([...tabManagement.tabManager._tabs.entries()]).toEqual(
@@ -32,7 +38,6 @@ describe('activity logger background tests', () => {
                     id: tab.id,
                     url: tab.url,
                     isLoaded: tab.status === 'complete',
-                    isBookmarked: false,
                 }),
             ]),
         )

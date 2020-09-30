@@ -12,10 +12,14 @@ import { TabChangeListener, TabManagementInterface } from './types'
 import { resolvablePromise } from 'src/util/resolvable'
 import { RawPageContent } from 'src/page-analysis/types'
 import { fetchFavIcon } from 'src/page-analysis/background/get-fav-icon'
+import { LoggableTabChecker } from 'src/activity-logger/background/types'
+import { isLoggable, getPauseState } from 'src/activity-logger'
+import { blacklist } from 'src/blacklist/background'
+
+const SCROLL_UPDATE_FN = 'updateScrollState'
+const CONTENT_SCRIPTS = ['/lib/browser-polyfill.js', '/content_script.js']
 
 export default class TabManagementBackground {
-    static SCROLL_UPDATE_FN = 'updateScrollState'
-
     tabManager: TabManager
     remoteFunctions: TabManagementInterface<'provider'>
     _indexableTabs: { [tabId: number]: true } = {}
@@ -98,15 +102,13 @@ export default class TabManagementBackground {
 
     async trackExistingTabs() {
         const tabs = await this.options.browserAPIs.tabs.query({})
-        // const tabBookmarks = await this.options.bookmarksBG.findTabBookmarks(
-        //     tabs,
-        // )
 
         await mapChunks(tabs, CONCURR_TAB_LOAD, async (tab) => {
-            // this.tabManager.trackTab(tab, {
-            //     isLoaded: TabManagementBackground.isTabLoaded(tab),
-            //     isBookmarked: tabBookmarks.get(tab.url),
-            // })
+            this.tabManager.trackTab(tab, {
+                isLoaded: TabManagementBackground.isTabLoaded(tab),
+            })
+
+            await this.injectContentScripts(tab)
         })
 
         this.trackingExistingTabs.resolve()
@@ -115,12 +117,38 @@ export default class TabManagementBackground {
     private async trackNewTab(id: number) {
         const browserTab = await this.options.browserAPIs.tabs.get(id)
 
-        // this.tabManager.trackTab(browserTab, {
-        //     isLoaded: TabManagementBackground.isTabLoaded(browserTab),
-        //     isBookmarked: await this.options.searchIndex.pageHasBookmark(
-        //         browserTab.url,
-        //     ),
-        // })
+        this.tabManager.trackTab(browserTab, {
+            isLoaded: TabManagementBackground.isTabLoaded(browserTab),
+        })
+    }
+
+    async injectContentScripts(tab: Tabs.Tab) {
+        const isLoggable = await this.shouldLogTab(tab)
+
+        if (!isLoggable) {
+            return
+        }
+
+        for (const file of CONTENT_SCRIPTS) {
+            await this.options.browserAPIs.tabs.executeScript(tab.id, { file })
+        }
+    }
+
+    /**
+     * Combines all "loggable" conditions for logging on given tab data to determine
+     * whether or not a tab should be logged.
+     */
+    shouldLogTab: LoggableTabChecker = async function ({ url }) {
+        // Short-circuit before async logic, if possible
+        if (!url || !isLoggable({ url })) {
+            return false
+        }
+
+        // First check if we want to log this page (hence the 'maybe' in the name).
+        const isBlacklisted = await blacklist.checkWithBlacklist() // tslint:disable-line
+        const isPaused = await getPauseState()
+
+        return !isPaused && !isBlacklisted({ url })
     }
 
     /**
@@ -129,10 +157,7 @@ export default class TabManagementBackground {
     private setupScrollStateHandling() {
         this.options.browserAPIs.runtime.onMessage.addListener(
             ({ funcName, ...scrollState }, { tab }) => {
-                if (
-                    funcName !== TabManagementBackground.SCROLL_UPDATE_FN ||
-                    tab == null
-                ) {
+                if (funcName !== SCROLL_UPDATE_FN || tab == null) {
                     return
                 }
                 this.tabManager.updateTabScrollState(tab.id, scrollState)
