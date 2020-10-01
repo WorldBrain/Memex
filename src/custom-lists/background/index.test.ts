@@ -107,6 +107,91 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 ],
             }
         }),
+        backgroundIntegrationTest('should add open tabs to list', () => {
+            const testList = 'ninja'
+            const testTabs: Array<FakeTab & { normalized: string }> = [
+                {
+                    id: 1,
+                    url: 'http://www.bar.com/eggs',
+                    normalized: 'bar.com/eggs',
+                },
+                {
+                    id: 2,
+                    url: 'http://www.foo.com/spam',
+                    normalized: 'foo.com/spam',
+                },
+            ]
+
+            return {
+                steps: [
+                    {
+                        execute: async ({ setup }) => {
+                            injectFakeTabs({
+                                tabManagement:
+                                    setup.backgroundModules.tabManagement,
+                                tabsAPI: setup.browserAPIs.tabs,
+                                tabs: testTabs,
+                            })
+
+                            for (const { url } of testTabs) {
+                                await setup.backgroundModules.pages.createTestPage(
+                                    { fullUrl: url },
+                                )
+                            }
+
+                            listId = await customLists(
+                                setup,
+                            ).remoteFunctions.createCustomList({
+                                name: testList,
+                            })
+
+                            await customLists(
+                                setup,
+                            ).remoteFunctions.addOpenTabsToList({
+                                name: testList,
+                                time: 555,
+                            })
+                            await customLists(
+                                setup,
+                            ).remoteFunctions.removePageFromList({
+                                id: listId,
+                                url: testTabs[1].url,
+                            })
+                            await customLists(
+                                setup,
+                            ).remoteFunctions.removeOpenTabsFromList({
+                                listId,
+                            })
+                        },
+                        postCheck: async ({
+                            setup: { storageManager: db },
+                        }) => {
+                            const stored = {
+                                customLists: await db
+                                    .collection('customLists')
+                                    .findObjects({}),
+                                pageListEntries: await db
+                                    .collection('pageListEntries')
+                                    .findObjects({}),
+                            }
+
+                            expect(stored).toEqual({
+                                customLists: [
+                                    {
+                                        id: listId,
+                                        createdAt: expect.any(Date),
+                                        name: testList,
+                                        isDeletable: true,
+                                        isNestable: true,
+                                    },
+                                ],
+                                pageListEntries: [],
+                            })
+                        },
+                    },
+                ],
+            }
+        }),
         backgroundIntegrationTest(
             'should create a list, edit its title, add an entry to it and retrieve the list and its pages',
             () => {
