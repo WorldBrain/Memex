@@ -185,8 +185,6 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
     private async mapUrlsToAnnots(urls: string[]): Promise<Annotation[]> {
         const annotUrlMap = new Map<string, Annotation>()
 
-        console.log('mapUrlsToAnnots', { urls })
-
         await this.backend.dexieInstance
             .table(AnnotsStorage.ANNOTS_COLL)
             .where('url')

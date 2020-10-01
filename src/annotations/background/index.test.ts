@@ -15,6 +15,10 @@ import {
     injectFakeTabs,
 } from 'src/tab-management/background/index.tests'
 import { object } from '@storybook/addon-knobs'
+import {
+    PAGE_1_CREATION,
+    PAGE_2_CREATION,
+} from 'src/tests/common-fixtures.data'
 
 const directLinking = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.directLinking
@@ -60,6 +64,7 @@ const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext
                 },
             },
         }),
+        pages: (): StorageCollectionDiff => PAGE_1_CREATION,
         visits: (): StorageCollectionDiff => expect.anything(),
     },
 }
@@ -71,7 +76,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createPageStep,
                     {
                         execute: async ({ setup }) => {
                             annotUrl = await directLinking(
@@ -99,6 +103,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     },
                                 },
                             }),
+                            pages: (): StorageCollectionDiff => PAGE_1_CREATION,
                             visits: (): StorageCollectionDiff =>
                                 expect.anything(),
                         },
@@ -154,7 +159,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createPageStep,
                     createAnnotationStep,
                     {
                         execute: async ({ setup }) => {
@@ -236,7 +240,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createPageStep,
                     createAnnotationStep,
                     {
                         preCheck: async ({ setup }) => {
@@ -326,7 +329,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createPageStep,
                     createAnnotationStep,
                     {
                         execute: async ({ setup }) => {
@@ -438,7 +440,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createPageStep,
                     createAnnotationStep,
                     {
                         execute: async ({ setup }) => {
@@ -530,7 +531,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createPageStep,
                     createAnnotationStep,
                     {
                         execute: async ({ setup }) => {
@@ -657,7 +657,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createPageStep,
                     {
                         execute: async ({ setup }) => {
                             annotAUrl = await directLinking(
@@ -706,6 +705,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     },
                                 },
                             }),
+                            pages: (): StorageCollectionDiff => PAGE_1_CREATION,
                             visits: (): StorageCollectionDiff =>
                                 expect.anything(),
                         },
@@ -757,7 +757,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createPageStep,
                     createAnnotationStep,
                     {
                         execute: async ({ setup }) => {
@@ -849,7 +848,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createPageStep,
                     {
                         execute: async ({ setup }) => {
                             annotUrlA = await directLinking(
@@ -897,6 +895,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         lastEdited: expect.any(Date),
                                     },
                                 },
+                            }),
+                            pages: (): StorageCollectionDiff => ({
+                                ...PAGE_1_CREATION,
+                                ...PAGE_2_CREATION,
                             }),
                             visits: (): StorageCollectionDiff =>
                                 expect.anything(),
@@ -1040,66 +1042,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                 steps: [
                     {
                         execute: async ({ setup }) => {
-                            await setup.backgroundModules.pages.addPage({
-                                pageDoc: {
-                                    url: DATA.PAGE_1.fullUrl,
-                                    content: {},
-                                },
-                                visits: [DATA.VISIT_1],
-                                rejectNoContent: false,
-                            })
-                            await setup.backgroundModules.pages.addPage({
-                                pageDoc: {
-                                    url: DATA.PAGE_2.fullUrl,
-                                    content: {},
-                                },
-                                visits: [DATA.VISIT_1],
-                                rejectNoContent: false,
-                            })
-                        },
-                        expectedStorageChanges: {
-                            pages: (): StorageCollectionDiff => ({
-                                [DATA.PAGE_1.url]: {
-                                    type: 'create',
-                                    object: {
-                                        url: DATA.PAGE_1.url,
-                                        fullUrl: DATA.PAGE_1.fullUrl,
-                                        domain: DATA.PAGE_1.domain,
-                                        hostname: DATA.PAGE_1.hostname,
-                                        urlTerms: [],
-                                    },
-                                },
-                                [DATA.PAGE_2.url]: {
-                                    type: 'create',
-                                    object: {
-                                        url: DATA.PAGE_2.url,
-                                        fullUrl: DATA.PAGE_2.fullUrl,
-                                        domain: DATA.PAGE_2.domain,
-                                        hostname: DATA.PAGE_2.hostname,
-                                        urlTerms: [],
-                                    },
-                                },
-                            }),
-                            visits: (): StorageCollectionDiff => ({
-                                [`[${DATA.VISIT_1},"${DATA.PAGE_1.url}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        time: DATA.VISIT_1,
-                                        url: DATA.PAGE_1.url,
-                                    },
-                                },
-                                [`[${DATA.VISIT_1},"${DATA.PAGE_2.url}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        time: DATA.VISIT_1,
-                                        url: DATA.PAGE_2.url,
-                                    },
-                                },
-                            }),
-                        },
-                    },
-                    {
-                        execute: async ({ setup }) => {
                             annotUrlA = await directLinking(
                                 setup,
                             ).createAnnotation(
@@ -1145,6 +1087,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         lastEdited: expect.any(Date),
                                     },
                                 },
+                            }),
+                            pages: (): StorageCollectionDiff => ({
+                                ...PAGE_1_CREATION,
+                                ...PAGE_2_CREATION,
                             }),
                             visits: (): StorageCollectionDiff =>
                                 expect.anything(),
