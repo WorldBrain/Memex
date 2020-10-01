@@ -339,7 +339,7 @@ export default class DirectLinkingBackground {
     }
 
     async createAnnotation(
-        { tab }: TabArg,
+        { tab }: { tab: Pick<Tabs.Tab, 'id' | 'url' | 'title'> },
         toCreate: CreateAnnotationParams,
         { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
@@ -355,6 +355,9 @@ export default class DirectLinkingBackground {
         const url =
             toCreate.url ?? generateUrl({ pageUrl, now: () => Date.now() })
 
+        if (!skipPageIndexing) {
+            await this.annotationStorage.indexPageFromTab(tab)
+        }
         await this.annotationStorage.createAnnotation({
             pageUrl,
             url,
@@ -365,11 +368,6 @@ export default class DirectLinkingBackground {
             createdWhen: new Date(toCreate.createdWhen ?? Date.now()),
         })
 
-        // Attempt to (re-)index, if user preference set, but don't wait for it
-        if (!skipPageIndexing) {
-            this.annotationStorage.indexPageFromTab(tab)
-        }
-
         if (toCreate.isBookmarked) {
             await this.toggleAnnotBookmark({ tab }, { url })
         }
@@ -377,26 +375,22 @@ export default class DirectLinkingBackground {
         return url
     }
 
-    async insertAnnotToList({ tab }: TabArg, params: AnnotListEntry) {
-        params.url = params.url == null ? tab.url : params.url
-
+    async insertAnnotToList(_, params: AnnotListEntry) {
         return this.annotationStorage.insertAnnotToList(params)
     }
 
-    async removeAnnotFromList({ tab }: TabArg, params: AnnotListEntry) {
-        params.url = params.url == null ? tab.url : params.url
-
+    async removeAnnotFromList(_, params: AnnotListEntry) {
         return this.annotationStorage.removeAnnotFromList(params)
     }
 
-    async toggleAnnotBookmark({ tab }: TabArg, { url }: { url: string }) {
+    async toggleAnnotBookmark(_, { url }: { url: string }) {
         return this.annotationStorage.toggleAnnotBookmark({ url })
     }
-    async getAnnotBookmark({ tab }: TabArg, { url }: { url: string }) {
+    async getAnnotBookmark(_, { url }: { url: string }) {
         return this.annotationStorage.annotHasBookmark({ url })
     }
     async updateAnnotationBookmark(
-        { tab }: TabArg,
+        _,
         { url, isBookmarked }: { url: string; isBookmarked: boolean },
     ) {
         return this.annotationStorage.updateAnnotationBookmark({

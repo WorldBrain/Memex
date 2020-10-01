@@ -350,7 +350,7 @@ export default class AnnotationStorage extends StorageModule {
         }
     }
 
-    async indexPageFromTab({ id, url }: Tabs.Tab) {
+    async indexPageFromTab({ id, url }: Pick<Tabs.Tab, 'id' | 'url'>) {
         const indexingPrefs = await this.fetchIndexingPrefs()
 
         const page = await this.options.pages.createPageFromTab({

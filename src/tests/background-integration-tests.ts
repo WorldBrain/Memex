@@ -208,6 +208,7 @@ export async function runBackgroundIntegrationTest(
         customMiddleware: [],
     })
     const testOptions = await test.instantiate({ isSyncTest: false })
+    testOptions.setup?.({ setup })
 
     let changeDetectorUsed = false
 
