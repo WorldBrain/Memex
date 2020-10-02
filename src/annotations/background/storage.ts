@@ -353,15 +353,12 @@ export default class AnnotationStorage extends StorageModule {
     async indexPageFromTab({ id, url }: Pick<Tabs.Tab, 'id' | 'url'>) {
         const indexingPrefs = await this.fetchIndexingPrefs()
 
-        const page = await this.options.pages.createPageFromTab({
+        await this.options.pages.createPageFromTab({
             tabId: id,
             fullUrl: url,
             stubOnly: !indexingPrefs.shouldIndexLinks,
+            visitTime: Date.now(),
         })
-
-        await this.options.pages.storage.createVisitsIfNeeded(page.url, [
-            Date.now(),
-        ])
     }
 
     async getAnnotationByPk(url: string): Promise<Annotation> {

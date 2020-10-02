@@ -7,7 +7,6 @@ import TabManagementBackground from 'src/tab-management/background'
 export interface PageAnalysis {
     content: PageContent
     favIconURI?: string
-    fullText?: string
 }
 
 export type PageAnalyzer = (args: {
@@ -35,18 +34,16 @@ const analysePage: PageAnalyzer = async (options) => {
         : undefined
 
     return {
-        content: content?.metadata,
-        fullText: content?.fullText,
+        content: content,
         favIconURI,
     }
 }
 
-type Extraction = { metadata: PageContent; fullText?: string }
 async function extractPageContent(options: {
     tabId: number
     tabManagement: Pick<TabManagementBackground, 'extractRawPageContent'>
     includeContent?: 'metadata-only' | 'metadata-with-full-text'
-}): Promise<Extraction | undefined> {
+}): Promise<PageContent | undefined> {
     if (!options.includeContent) {
         return
     }
@@ -58,12 +55,11 @@ async function extractPageContent(options: {
         throw new Error(`Could extract raw page content`)
     }
 
-    const metadata = await extractPageMetadataFromRawContent(rawContent)
-    let fullText: string
+    const content = await extractPageMetadataFromRawContent(rawContent)
     if (options.includeContent === 'metadata-with-full-text') {
-        fullText = await getPageFullText(rawContent, metadata)
+        content.fullText = await getPageFullText(rawContent, content)
     }
-    return { metadata, fullText }
+    return content
 }
 
 export default analysePage

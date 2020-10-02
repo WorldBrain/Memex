@@ -15,11 +15,18 @@ import { fetchFavIcon } from 'src/page-analysis/background/get-fav-icon'
 import { LoggableTabChecker } from 'src/activity-logger/background/types'
 import { isLoggable, getPauseState } from 'src/activity-logger'
 import { blacklist } from 'src/blacklist/background'
+import TypedEventEmitter from 'typed-emitter'
+import { EventEmitter } from 'events'
 
 const SCROLL_UPDATE_FN = 'updateScrollState'
 const CONTENT_SCRIPTS = ['/lib/browser-polyfill.js', '/content_script.js']
 
+export interface TabManagementEvents {
+    tabRemoved(event: { tabId: number }): void
+}
+
 export default class TabManagementBackground {
+    events = new EventEmitter() as TypedEventEmitter<TabManagementEvents>
     tabManager: TabManager
     remoteFunctions: TabManagementInterface<'provider'>
     _indexableTabs: { [tabId: number]: true } = {}
@@ -100,6 +107,11 @@ export default class TabManagementBackground {
         return fetchFavIcon(tab.favIconUrl)
     }
 
+    async findTabIdByFullUrl(fullUrl: string) {
+        const tabs = await this.options.browserAPIs.tabs.query({ url: fullUrl })
+        return tabs.length ? tabs[0].id : null
+    }
+
     async trackExistingTabs() {
         const tabs = await this.options.browserAPIs.tabs.query({})
 
@@ -166,9 +178,12 @@ export default class TabManagementBackground {
     }
 
     private setupTabLifecycleHandling() {
-        this.options.browserAPIs.tabs.onCreated.addListener(
-            this.tabManager.trackTab,
-        )
+        this.options.browserAPIs.tabs.onCreated.addListener((tab) => {
+            if (!tab.id) {
+                return
+            }
+            this.tabManager.trackTab(tab)
+        })
 
         this.options.browserAPIs.tabs.onActivated.addListener(
             async ({ tabId }) => {
@@ -185,12 +200,9 @@ export default class TabManagementBackground {
             delete this._indexableTabs[tabId]
 
             if (tab != null) {
-                // TODO: Call something when tab is closed
+                this.events.emit('tabRemoved', { tabId })
             }
         })
-        this.options.browserAPIs.tabs.onUpdated.addListener(
-            this.tabUpdatedListener,
-        )
     }
 
     /**

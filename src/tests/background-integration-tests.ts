@@ -92,8 +92,8 @@ export async function setupBackgroundIntegrationTest(options?: {
             onAlarm: { addListener: () => {} },
         },
         tabs: {
-            query: () => {},
-            get: () => {},
+            query: () => [],
+            get: () => null,
         },
         contextMenus: {
             create: () => {},

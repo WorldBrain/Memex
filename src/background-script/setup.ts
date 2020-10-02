@@ -124,6 +124,9 @@ export function createBackgroundModules(options: {
         fetchPageData: options.fetchPageDataProcessor,
         tabManagement,
     })
+    tabManagement.events.on('tabRemoved', (event) => {
+        pages.handleTabClose(event)
+    })
     const bookmarks = new BookmarksBackground({
         storageManager,
         pages,
@@ -304,7 +307,7 @@ export function createBackgroundModules(options: {
                 ) {
                     await bookmarks.addBookmark({
                         url: bookmark.normalizedUrl,
-                        time: bookmark.time,
+                        timestamp: bookmark.time,
                     })
                 }
             },
@@ -396,6 +399,7 @@ export async function setupBackgroundModules(
     backgroundModules.bgScript.setupAlarms(alarms)
     backgroundModules.pageFetchBacklog.setupBacklogProcessing()
     backgroundModules.bookmarks.setupBookmarkListeners()
+    backgroundModules.tabManagement.setupRemoteFunctions()
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()

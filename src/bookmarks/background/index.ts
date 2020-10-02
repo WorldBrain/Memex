@@ -48,32 +48,24 @@ export default class BookmarksBackground {
         timestamp?: number
         tabId?: number
     }) => {
-        let page = await this.options.pages.storage.getPage(params.url)
+        await this.options.pages.createPageViaBmTagActs({
+            fullUrl: params.url,
+            tabId: params.tabId,
+            visitTime: params.timestamp || Date.now(),
+        })
 
-        if (page == null || pageIsStub(page)) {
-            page = await this.options.pages.createPageViaBmTagActs({
-                fullUrl: params.url,
-                tabId: params.tabId,
-            })
-        }
-
-        await this.storage.createBookmarkIfNeeded(page.url, params.timestamp)
+        await this.storage.createBookmarkIfNeeded(params.url, params.timestamp)
         // this.options.tabManager.setBookmarkState(params.url, true)
     }
 
-    delPageBookmark = async ({ url }: Partial<Bookmarks.BookmarkTreeNode>) => {
+    delPageBookmark = async ({ url }: { url: string }) => {
         await this.storage.delBookmark({ url })
         await this.options.pages.storage.deletePageIfOrphaned(url)
         // this.options.tabManager.setBookmarkState(url, false)
     }
 
-    async addBookmark({ url, time }: { url: string; time?: number }) {
-        return this.storage.addBookmark({ url: normalizeUrl(url), time })
-    }
-
-    async delBookmark({ url }: { url: string }) {
-        return this.storage.delBookmark({ url: normalizeUrl(url) })
-    }
+    addBookmark = this.addPageBookmark
+    delBookmark = this.delPageBookmark
 
     async findTabBookmarks(tabs: Tabs.Tab[]): Promise<Map<string, boolean>> {
         const normalizedUrlsMap = new Map<string, string>()
@@ -109,7 +101,7 @@ export default class BookmarksBackground {
         }
 
         try {
-            await this.delPageBookmark(node)
+            await this.delPageBookmark({ url: node.url })
         } catch (err) {
             Raven.captureException(err)
         }

@@ -21,6 +21,9 @@ import TabManagementBackground from 'src/tab-management/background'
 export class PageIndexingBackground {
     storage: PageStorage
 
+    // Remember which pages are already indexed in which tab, so we only add one visit per page + tab
+    indexedTabPages: { [tabId: number]: { [fullPageUrl: string]: true } } = {}
+
     constructor(
         private options: {
             tabManagement: TabManagementBackground
@@ -151,6 +154,8 @@ export class PageIndexingBackground {
             )
         }
 
+        console.log('page from tab')
+
         const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))
         const analysisRes = await analysePage({
             tabId: props.tabId,
@@ -174,8 +179,18 @@ export class PageIndexingBackground {
         }
 
         await this.storage.createPageIfNotExistsOrIsStub(pageData)
-        if (props.visitTime) {
+        if (
+            props.visitTime &&
+            !this.isTabPageIndexed({
+                tabId: props.tabId,
+                fullPageUrl: pageData.fullUrl,
+            })
+        ) {
             await this.storage.addPageVisit(pageData.url, props.visitTime)
+            await this.markTabPageAsIndexed({
+                tabId: props.tabId,
+                fullPageUrl: pageData.fullUrl,
+            })
         }
 
         return pageData
@@ -187,7 +202,6 @@ export class PageIndexingBackground {
                 'Instantiation error: fetch-page-data implementation was not given to constructor',
             )
         }
-
         const pageData = await this.options.fetchPageData.process(props.fullUrl)
 
         if (props.stubOnly && pageData.text && pageData.terms?.length) {
@@ -230,10 +244,27 @@ export class PageIndexingBackground {
             props.stubOnly = !fullyIndex
         }
 
+        props.tabId =
+            props.tabId ??
+            (await this.options.tabManagement.findTabIdByFullUrl(props.fullUrl))
         if (props.tabId) {
             return this.createPageFromTab(props)
         }
 
         return this.createPageFromUrl(props)
+    }
+
+    isTabPageIndexed(params: { tabId: number; fullPageUrl: string }) {
+        return this.indexedTabPages[params.tabId]?.[params.fullPageUrl] ?? false
+    }
+
+    markTabPageAsIndexed(params: { tabId: number; fullPageUrl: string }) {
+        const { tabId } = params
+        this.indexedTabPages[tabId] = this.indexedTabPages[tabId] || {}
+        this.indexedTabPages[tabId][params.fullPageUrl] = true
+    }
+
+    handleTabClose(event: { tabId: number }) {
+        delete this.indexedTabPages[event.tabId]
     }
 }

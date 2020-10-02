@@ -1214,7 +1214,7 @@ function mobileSyncTests(suiteOptions: {
                     await devices.extension.backgroundModules.bookmarks.addBookmark(
                         {
                             url: 'http://toolate.com/',
-                            time: new Date('2019-10-11').getTime(),
+                            timestamp: new Date('2019-10-11').getTime(),
                         },
                     )
                 }

@@ -193,32 +193,19 @@ export default class TagsBackground {
         tag: string
         tabId?: number
     }) => {
-        let page = await this.options.pages.storage.getPage(url)
-
         const {
             [IDXING_PREF_KEYS.BOOKMARKS]: shouldFullyIndex,
         } = await this.options.localBrowserStorage.get(
             IDXING_PREF_KEYS.BOOKMARKS,
         )
 
-        if (page == null || (shouldFullyIndex && pageIsStub(page))) {
-            page = await this.options.pages.createPageViaBmTagActs({
-                fullUrl: url,
-                tabId,
-                stubOnly: !shouldFullyIndex,
-            })
-            if (page == null) {
-                throw new Error(
-                    'Tried to addTagToPage, but could not create the page.',
-                )
-            }
-        }
+        await this.options.pages.createPageViaBmTagActs({
+            fullUrl: url,
+            tabId,
+            stubOnly: !shouldFullyIndex,
+            visitTime: Date.now(),
+        })
 
-        // Add new visit if none, else page won't appear in results
-        await this.options.pages.storage.addPageVisitIfHasNone(
-            page.url,
-            Date.now(),
-        )
         await this.storage.addTag({ url, name: tag }).catch(initErrHandler())
         await this._updateTagSuggestionsCache({ added: tag })
     }

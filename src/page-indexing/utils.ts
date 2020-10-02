@@ -21,8 +21,6 @@ export async function maybeIndexTabs(
     const indexed: { fullUrl: string }[] = []
     await Promise.all(
         tabs.map(async (tab) => {
-            const page = await options.pageStorage.getPage(tab.url)
-
             let error = false
             const handleErrors = (err) => {
                 Raven.captureException(err)
@@ -30,23 +28,17 @@ export async function maybeIndexTabs(
                 console.error(err)
             }
 
-            if (!page || pageIsStub(page)) {
-                await options
-                    .createPage({
-                        tabId: tab.id,
-                        fullUrl: tab.url,
-                        allowScreenshot: false,
-                        visitTime: options.time,
-                        stubOnly: true,
-                        save: true,
-                    })
-                    .catch(handleErrors)
-            } else {
-                // Add new visit if none, else page won't appear in results
-                await options.pageStorage
-                    .addPageVisitIfHasNone(tab.url, options.time)
-                    .catch(handleErrors)
-            }
+            await options
+                .createPage({
+                    tabId: tab.id,
+                    fullUrl: tab.url,
+                    allowScreenshot: false,
+                    visitTime: options.time,
+                    stubOnly: true,
+                    save: true,
+                })
+                .catch(handleErrors)
+
             if (!error) {
                 indexed.push({ fullUrl: tab.url })
             }

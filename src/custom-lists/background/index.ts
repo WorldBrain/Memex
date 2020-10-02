@@ -207,24 +207,6 @@ export default class CustomListBackground {
         })
     }
 
-    private async createPageIfNeeded({
-        url,
-        tabId,
-    }: {
-        url: string
-        tabId?: number
-    }) {
-        const exists = await this.options.pages.storage.pageExists(url)
-        if (!exists) {
-            await this.options.pages.createPageViaBmTagActs({
-                fullUrl: url,
-                tabId,
-                visitTime: Date.now(),
-                save: true,
-            })
-        }
-    }
-
     insertPageToList = async ({
         id,
         url,
@@ -238,7 +220,12 @@ export default class CustomListBackground {
             type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
         })
 
-        await this.createPageIfNeeded({ url, tabId })
+        console.log('cre pa va')
+        await this.options.pages.createPageViaBmTagActs({
+            tabId,
+            fullUrl: url,
+            visitTime: Date.now(),
+        })
 
         const retVal = await this.storage.insertPageToList({
             listId: id,
