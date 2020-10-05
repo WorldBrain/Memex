@@ -211,20 +211,21 @@ export default class CustomListBackground {
         id,
         url,
         tabId,
+        suppressVisitCreation,
     }: {
         id: number
         url: string
         tabId?: number
+        suppressVisitCreation?: boolean
     }): Promise<{ object: PageListEntry }> => {
         internalAnalytics.processEvent({
             type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
         })
 
-        console.log('cre pa va')
         await this.options.pages.createPageViaBmTagActs({
             tabId,
             fullUrl: url,
-            visitTime: Date.now(),
+            visitTime: !suppressVisitCreation ? Date.now() : undefined,
         })
 
         const retVal = await this.storage.insertPageToList({

@@ -147,6 +147,7 @@ export default class ImportItemProcessor {
                     await this.options.customListsModule.insertPageToList({
                         id: listId,
                         url,
+                        suppressVisitCreation: true,
                     })
                 }),
                 ...tags.map(async (tag) => {
