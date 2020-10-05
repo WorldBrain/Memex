@@ -357,7 +357,7 @@ export default class AnnotationStorage extends StorageModule {
             tabId: id,
             fullUrl: url,
             stubOnly: !indexingPrefs.shouldIndexLinks,
-            visitTime: Date.now(),
+            visitTime: '$now',
         })
     }
 

@@ -29,6 +29,7 @@ export class PageIndexingBackground {
             tabManagement: TabManagementBackground
             storageManager: StorageManager
             fetchPageData?: FetchPageProcessor
+            getNow: () => number
         },
     ) {
         this.storage = new PageStorage({
@@ -154,8 +155,6 @@ export class PageIndexingBackground {
             )
         }
 
-        console.log('page from tab')
-
         const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))
         const analysisRes = await analysePage({
             tabId: props.tabId,
@@ -186,7 +185,10 @@ export class PageIndexingBackground {
                 fullPageUrl: pageData.fullUrl,
             })
         ) {
-            await this.storage.addPageVisit(pageData.url, props.visitTime)
+            await this.storage.addPageVisit(
+                pageData.url,
+                this._getTime(props.visitTime),
+            )
             await this.markTabPageAsIndexed({
                 tabId: props.tabId,
                 fullPageUrl: pageData.fullUrl,
@@ -211,7 +213,10 @@ export class PageIndexingBackground {
 
         await this.storage.createPageIfNotExists(pageData)
         if (props.visitTime) {
-            await this.storage.addPageVisit(pageData.url, props.visitTime)
+            await this.storage.addPageVisit(
+                pageData.url,
+                this._getTime(props.visitTime),
+            )
         }
 
         return pageData
@@ -225,7 +230,10 @@ export class PageIndexingBackground {
 
         await this.storage.createPageIfNotExists(pageData)
         if (props.visitTime) {
-            await this.storage.addPageVisit(pageData.url, props.visitTime)
+            await this.storage.addPageVisit(
+                pageData.url,
+                this._getTime(props.visitTime),
+            )
         }
         return pageData
     }
@@ -266,5 +274,12 @@ export class PageIndexingBackground {
 
     handleTabClose(event: { tabId: number }) {
         delete this.indexedTabPages[event.tabId]
+    }
+
+    _getTime(time?: number | '$now') {
+        if (!time && time !== 0) {
+            return
+        }
+        return time !== '$now' ? time : this.options.getNow()
     }
 }

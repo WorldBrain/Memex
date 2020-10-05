@@ -225,7 +225,7 @@ export default class CustomListBackground {
         await this.options.pages.createPageViaBmTagActs({
             tabId,
             fullUrl: url,
-            visitTime: !suppressVisitCreation ? Date.now() : undefined,
+            visitTime: !suppressVisitCreation ? '$now' : undefined,
         })
 
         const retVal = await this.storage.insertPageToList({
@@ -331,7 +331,7 @@ export default class CustomListBackground {
         const indexed = await maybeIndexTabs(tabs, {
             pageStorage: this.options.pages.storage,
             createPage: this.options.pages.createPageViaBmTagActs,
-            time: args.time ?? Date.now(),
+            time: args.time ?? '$now',
         })
 
         await Promise.all(

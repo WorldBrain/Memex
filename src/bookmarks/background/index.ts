@@ -51,7 +51,7 @@ export default class BookmarksBackground {
         await this.options.pages.createPageViaBmTagActs({
             fullUrl: params.url,
             tabId: params.tabId,
-            visitTime: params.timestamp || Date.now(),
+            visitTime: params.timestamp || '$now',
         })
 
         await this.storage.createBookmarkIfNeeded(params.url, params.timestamp)

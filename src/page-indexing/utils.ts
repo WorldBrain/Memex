@@ -15,7 +15,7 @@ export async function maybeIndexTabs(
     options: {
         pageStorage: PageStorage
         createPage: PageIndexingBackground['createPageViaBmTagActs']
-        time: number
+        time: number | '$now'
     },
 ) {
     const indexed: { fullUrl: string }[] = []

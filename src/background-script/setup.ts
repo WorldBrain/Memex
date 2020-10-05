@@ -105,7 +105,9 @@ export function createBackgroundModules(options: {
     includePostSyncProcessor?: boolean
     disableSyncEnryption?: boolean
     getIceServers?: () => Promise<string[]>
+    getNow?: () => number
 }): BackgroundModules {
+    const getNow = options.getNow ?? (() => Date.now())
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
     const tabManagement = new TabManagementBackground({
@@ -123,6 +125,7 @@ export function createBackgroundModules(options: {
         storageManager,
         fetchPageData: options.fetchPageDataProcessor,
         tabManagement,
+        getNow,
     })
     tabManagement.events.on('tabRemoved', (event) => {
         pages.handleTabClose(event)

@@ -131,5 +131,5 @@ export interface PageCreationProps {
     stubOnly?: boolean
     allowScreenshot?: boolean
     save?: boolean
-    visitTime?: number
+    visitTime?: number | '$now'
 }

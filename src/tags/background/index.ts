@@ -94,7 +94,7 @@ export default class TagsBackground {
         const indexed = await maybeIndexTabs(tabs, {
             pageStorage: this.options.pages.storage,
             createPage: this.options.pages.createPageFromTab,
-            time: params.time || Date.now(),
+            time: params.time || '$now',
         })
 
         await this.storage.addTags({
@@ -203,7 +203,7 @@ export default class TagsBackground {
             fullUrl: url,
             tabId,
             stubOnly: !shouldFullyIndex,
-            visitTime: Date.now(),
+            visitTime: '$now',
         })
 
         await this.storage.addTag({ url, name: tag }).catch(initErrHandler())

@@ -226,7 +226,6 @@ export default class PageStorage extends StorageModule {
 
     async addPageVisit(url: string, time: number) {
         const normalizedUrl = normalizeUrl(url, {})
-        console.log({ url, normalizedUrl })
         await this.operation('createVisit', { url: normalizedUrl, time })
     }
 

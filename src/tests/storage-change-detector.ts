@@ -15,7 +15,7 @@ export type StorageDiffEntry =
     | StorageDiffModificationEntry
     | StorageDiffDeletionEntry
 
-export interface StorageDiffEntryBase { }
+export interface StorageDiffEntryBase {}
 
 export interface StorageDiffCreationEntry extends StorageDiffEntryBase {
     type: 'create'
@@ -38,7 +38,7 @@ export class StorageChangeDetector {
 
     constructor(
         private options: { storageManager: StorageManager; toTrack: string[] },
-    ) { }
+    ) {}
 
     async capture() {
         this.storageState = await this._getState()
@@ -140,5 +140,17 @@ export class StorageChangeDetector {
             state[collectionName] = collectiobObjects
         }
         return state
+    }
+}
+
+export function createdVisit(time: number, url: string) {
+    return {
+        [`[${time},"${url}"]`]: {
+            type: 'create',
+            object: {
+                time,
+                url,
+            },
+        },
     }
 }
