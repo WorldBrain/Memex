@@ -1,6 +1,6 @@
 import expect from 'expect'
 
-import * as DATA from './pages.test.data'
+import * as DATA from 'src/tests/common-fixtures.data'
 import {
     backgroundIntegrationTestSuite,
     backgroundIntegrationTest,
@@ -8,7 +8,12 @@ import {
     IntegrationTestStep,
     BackgroundIntegrationTestContext,
 } from 'src/tests/integration-tests'
-import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
+import {
+    StorageCollectionDiff,
+    createdVisit,
+    deletedVisit,
+} from 'src/tests/storage-change-detector'
+import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 
 const searchModule = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.search
@@ -19,7 +24,9 @@ const tags = (setup: BackgroundIntegrationTestSetup) =>
 const bookmarks = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.bookmarks
 
-const createPagesStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
+const createPagesStep = (): IntegrationTestStep<
+    BackgroundIntegrationTestContext
+> => ({
     execute: async ({ setup }) => {
         await setup.backgroundModules.pages.addPage({
             pageDoc: {
@@ -80,7 +87,7 @@ const createPagesStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
             },
         }),
     },
-}
+})
 
 const expectedPage1Result = {
     annotations: [],
@@ -109,13 +116,24 @@ const expectedPage2Result = {
     fullUrl: DATA.PAGE_2.fullUrl,
 }
 
+function testSetupFactory() {
+    return async ({ setup }: { setup: BackgroundIntegrationTestSetup }) => {
+        await injectFakeTabs({
+            tabManagement: setup.backgroundModules.tabManagement,
+            tabsAPI: setup.browserAPIs.tabs,
+            tabs: [DATA.TEST_TAB_1],
+        })
+    }
+}
+
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
     backgroundIntegrationTest(
         'should create + visit two pages, visit one of them again, then retrieve them via time filtered searches',
         () => {
             return {
+                setup: testSetupFactory(),
                 steps: [
-                    createPagesStep,
+                    createPagesStep(),
                     {
                         execute: async ({ setup }) => {
                             await setup.backgroundModules.pages.addVisit(
@@ -189,8 +207,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
         'should create + visit two pages, delete one of them, then not be able to retrieve it via search anymore',
         () => {
             return {
+                setup: testSetupFactory(),
                 steps: [
-                    createPagesStep,
+                    createPagesStep(),
                     {
                         preCheck: async ({ setup }) => {
                             expect(
@@ -239,8 +258,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
         'should create + visit two pages, delete one of them by domain, then not be able to retrieve it via search anymore',
         () => {
             return {
+                setup: testSetupFactory(),
                 steps: [
-                    createPagesStep,
+                    createPagesStep(),
                     {
                         preCheck: async ({ setup }) => {
                             expect(
@@ -296,8 +316,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
         "should create + visit two pages, update the text of one of them, then confirm the indexed terms still contain the old text's terms",
         ({ isSyncTest }) => {
             return {
+                setup: testSetupFactory(),
                 steps: [
-                    createPagesStep,
+                    createPagesStep(),
                     {
                         preCheck: async ({ setup }) => {
                             const page = await setup.storageManager
@@ -370,19 +391,24 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
             let listId: number
 
             return {
+                setup: testSetupFactory(),
                 steps: [
-                    createPagesStep,
+                    createPagesStep(),
                     {
                         execute: async ({ setup }) => {
                             listId = await customLists(setup).createCustomList({
                                 name: 'test',
                             })
+                            setup.injectTime(() => DATA.VISIT_3)
                             await customLists(setup).insertPageToList({
                                 url: DATA.PAGE_1.url,
                                 id: listId,
+                                tabId: DATA.TEST_TAB_1.id,
                             })
                             await bookmarks(setup).addBookmark({
                                 url: DATA.PAGE_1.url,
+                                tabId: DATA.TEST_TAB_1.id,
+                                timestamp: DATA.VISIT_4,
                             })
                             await tags(setup).addTagToExistingUrl({
                                 url: DATA.PAGE_1.fullUrl,
@@ -427,9 +453,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                     type: 'create',
                                     object: {
                                         url: DATA.PAGE_1.url,
-                                        time: expect.any(Number),
+                                        time: DATA.VISIT_4,
                                     },
                                 },
+                            }),
+                            visits: (): StorageCollectionDiff => ({
+                                ...createdVisit(DATA.VISIT_3, DATA.PAGE_1.url),
                             }),
                         },
                     },
@@ -479,9 +508,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                 },
                             }),
                             visits: (): StorageCollectionDiff => ({
-                                [`[${DATA.VISIT_1},"${DATA.PAGE_1.url}"]`]: {
-                                    type: 'delete',
-                                },
+                                ...deletedVisit(DATA.VISIT_1, DATA.PAGE_1.url),
+                                ...deletedVisit(DATA.VISIT_3, DATA.PAGE_1.url),
                             }),
                             pageListEntries: (): StorageCollectionDiff => ({
                                 [`[${listId},"${DATA.PAGE_1.url}"]`]: {

@@ -413,6 +413,7 @@ describe('Annotations search', () => {
             const { docs: results } = await searchBg.searchPages({
                 contentTypes: { highlights: true, notes: true, pages: true },
             })
+            console.log(results)
             expect(results.length).toBe(3)
 
             // Ensure order is by latest visit

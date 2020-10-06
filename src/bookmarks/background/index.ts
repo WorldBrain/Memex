@@ -48,7 +48,7 @@ export default class BookmarksBackground {
         timestamp?: number
         tabId?: number
     }) => {
-        await this.options.pages.createPageViaBmTagActs({
+        await this.options.pages.createPage({
             fullUrl: params.url,
             tabId: params.tabId,
             visitTime: params.timestamp || '$now',

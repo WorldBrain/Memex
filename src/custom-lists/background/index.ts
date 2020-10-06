@@ -222,7 +222,7 @@ export default class CustomListBackground {
             type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
         })
 
-        await this.options.pages.createPageViaBmTagActs({
+        await this.options.pages.createPage({
             tabId,
             fullUrl: url,
             visitTime: !suppressVisitCreation ? '$now' : undefined,
@@ -330,7 +330,7 @@ export default class CustomListBackground {
 
         const indexed = await maybeIndexTabs(tabs, {
             pageStorage: this.options.pages.storage,
-            createPage: this.options.pages.createPageViaBmTagActs,
+            createPage: this.options.pages.createPage,
             time: args.time ?? '$now',
         })
 

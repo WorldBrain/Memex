@@ -1,6 +1,10 @@
 import Storex from '@worldbrain/storex'
 import { Tabs, Browser } from 'webextension-polyfill-ts'
-import { normalizeUrl, URLNormalizer } from '@worldbrain/memex-url-utils'
+import {
+    normalizeUrl,
+    isFullUrl,
+    URLNormalizer,
+} from '@worldbrain/memex-url-utils'
 
 import {
     makeRemotelyCallable,
@@ -61,8 +65,6 @@ export default class DirectLinkingBackground {
 
         this.annotationStorage = new AnnotationStorage({
             storageManager: options.storageManager,
-            browserStorageArea: options.browserAPIs.storage.local,
-            pages: options.pages,
         })
 
         this._normalizeUrl = options.normalizeUrl || normalizeUrl
@@ -256,9 +258,6 @@ export default class DirectLinkingBackground {
             comment: '',
         })
 
-        // Attempt to (re-)index, if user preference set, but don't wait for it
-        this.annotationStorage.indexPageFromTab(tab)
-
         return result
     }
 
@@ -343,24 +342,31 @@ export default class DirectLinkingBackground {
         toCreate: CreateAnnotationParams,
         { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
-        let pageUrl = this._normalizeUrl(
-            toCreate.pageUrl == null ? tab.url : toCreate.pageUrl,
-        )
+        const fullPageUrl = tab?.url ?? toCreate.pageUrl
+        if (!isFullUrl(fullPageUrl)) {
+            throw new Error('Could not get full URL while creating annotation')
+        }
 
+        let normalizedPageUrl = this._normalizeUrl(fullPageUrl)
         if (toCreate.isSocialPost) {
-            pageUrl = await this.lookupSocialId(pageUrl)
+            normalizedPageUrl = await this.lookupSocialId(normalizedPageUrl)
         }
 
         const pageTitle = toCreate.title == null ? tab.title : toCreate.title
-        const url =
-            toCreate.url ?? generateUrl({ pageUrl, now: () => Date.now() })
+        const annotationUrl =
+            toCreate.url ??
+            generateUrl({ pageUrl: normalizedPageUrl, now: () => Date.now() })
 
         if (!skipPageIndexing) {
-            await this.annotationStorage.indexPageFromTab(tab)
+            await this.options.pages.createPage({
+                fullUrl: fullPageUrl,
+                visitTime: '$now',
+                tabId: tab?.id,
+            })
         }
         await this.annotationStorage.createAnnotation({
-            pageUrl,
-            url,
+            pageUrl: normalizedPageUrl,
+            url: annotationUrl,
             pageTitle,
             comment: toCreate.comment,
             body: toCreate.body,
@@ -369,10 +375,10 @@ export default class DirectLinkingBackground {
         })
 
         if (toCreate.isBookmarked) {
-            await this.toggleAnnotBookmark({ tab }, { url })
+            await this.toggleAnnotBookmark({ tab }, { url: annotationUrl })
         }
 
-        return url
+        return annotationUrl
     }
 
     async insertAnnotToList(_, params: AnnotListEntry) {

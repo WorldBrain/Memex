@@ -766,6 +766,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                             await customLists(setup).insertPageToList({
                                 id: listId,
                                 url: DATA.ANNOT_1.url,
+                                tabId: DATA.TEST_TAB_1.id,
                             })
                         },
                         expectedStorageChanges: {
@@ -792,6 +793,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     },
                                 },
                             }),
+                            visits: (): StorageCollectionDiff =>
+                                expect.anything(),
                         },
                         postCheck: async ({ setup }) => {
                             const searchResults = await searchModule(

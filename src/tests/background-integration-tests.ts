@@ -46,6 +46,10 @@ export async function setupBackgroundIntegrationTest(options?: {
         global['URL'] = URL
     }
 
+    // We want to allow tests to be able to override time
+    let getTime = () => Date.now()
+    const getNow = () => getTime()
+
     const browserLocalStorage =
         options?.browserLocalStorage ?? new MemoryBrowserStorage()
     const storageManager = initStorex()
@@ -109,6 +113,7 @@ export async function setupBackgroundIntegrationTest(options?: {
 
     const fetchPageDataProcessor = new MockFetchPageDataProcessor()
     const backgroundModules = createBackgroundModules({
+        getNow,
         storageManager,
         analyticsManager,
         localStorageChangesManager: null,
@@ -177,6 +182,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         getServerStorage,
         browserAPIs,
         fetchPageDataProcessor,
+        injectTime: (injected) => (getTime = injected),
     }
 }
 
@@ -237,9 +243,15 @@ export async function runBackgroundIntegrationTest(
             const executedOperations = setup.storageOperationLogger.popOperations()
             expect(executedOperations).toEqual(step.expectedStorageOperations())
         }
+        const changes = changeDetectorUsed
+            ? await setup.storageChangeDetector.compare()
+            : undefined
+        if (step.validateStorageChanges) {
+            step.validateStorageChanges({ changes })
+        }
         if (step.expectedStorageChanges) {
             try {
-                expect(await setup.storageChangeDetector.compare()).toEqual(
+                expect(changes).toEqual(
                     mapValues(step.expectedStorageChanges, (getChanges) =>
                         getChanges(),
                     ),

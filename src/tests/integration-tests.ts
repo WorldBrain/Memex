@@ -41,6 +41,11 @@ export interface IntegrationTestStep<StepContext> {
     execute: (context: StepContext) => Promise<void>
     postCheck?: (context: StepContext) => Promise<void>
 
+    validateStorageChanges?: (context: {
+        changes: {
+            [collection: string]: StorageCollectionDiff
+        }
+    }) => void
     expectedStorageChanges?: {
         [collection: string]: () => StorageCollectionDiff
     }
@@ -59,6 +64,7 @@ export interface BackgroundIntegrationTestSetup {
     authService: MemoryAuthService
     subscriptionService: MemorySubscriptionsService
     getServerStorage(): Promise<ServerStorage>
+    injectTime: (getNow: () => number) => void
 }
 export interface BackgroundIntegrationTestContext {
     setup: BackgroundIntegrationTestSetup

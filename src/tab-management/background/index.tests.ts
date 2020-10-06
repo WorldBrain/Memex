@@ -1,6 +1,5 @@
 import TabManagementBackground from '.'
 import { Tabs } from 'webextension-polyfill-ts'
-import { RawPageContent } from 'src/page-analysis/types'
 
 export interface FakeTab {
     id: number

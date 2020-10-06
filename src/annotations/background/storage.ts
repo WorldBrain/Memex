@@ -1,4 +1,3 @@
-import { Tabs, Storage } from 'webextension-polyfill-ts'
 import Storex from '@worldbrain/storex'
 import {
     StorageModule,
@@ -12,14 +11,12 @@ import { COLLECTION_NAMES as PAGE_COLLECTION_NAMES } from '@worldbrain/memex-sto
 import { COLLECTION_NAMES as TAG_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/tags/constants'
 import { COLLECTION_NAMES as LIST_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
 
-import { Tag, SearchIndex } from 'src/search'
-import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
+import { Tag } from 'src/search'
 import { AnnotationsListPlugin } from 'src/search/background/annots-list'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { Annotation, AnnotListEntry } from 'src/annotations/types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
-import { PageIndexingBackground } from 'src/page-indexing/background'
 
 export default class AnnotationStorage extends StorageModule {
     static PAGES_COLL = PAGE_COLLECTION_NAMES.page
@@ -29,24 +26,8 @@ export default class AnnotationStorage extends StorageModule {
     static LISTS_COLL = LIST_COLLECTION_NAMES.list
     static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
 
-    private _browserStorageArea: Storage.StorageArea
-
-    constructor(
-        private options: {
-            storageManager: Storex
-            browserStorageArea: Storage.StorageArea
-            annotationsColl?: string
-            pages: PageIndexingBackground
-            pagesColl?: string
-            tagsColl?: string
-            bookmarksColl?: string
-            listsColl?: string
-            listEntriesColl?: string
-        },
-    ) {
+    constructor(private options: { storageManager: Storex }) {
         super({ storageManager: options.storageManager })
-
-        this._browserStorageArea = options.browserStorageArea
     }
 
     getConfig = (): StorageModuleConfig => ({
@@ -338,27 +319,6 @@ export default class AnnotationStorage extends StorageModule {
                   })
                 : this.operation('deleteBookmarkByUrl', { url })
         }
-    }
-
-    private async fetchIndexingPrefs(): Promise<{ shouldIndexLinks: boolean }> {
-        const storage = await this._browserStorageArea.get(
-            IDXING_PREF_KEYS.LINKS,
-        )
-
-        return {
-            shouldIndexLinks: !!storage[IDXING_PREF_KEYS.LINKS],
-        }
-    }
-
-    async indexPageFromTab({ id, url }: Pick<Tabs.Tab, 'id' | 'url'>) {
-        const indexingPrefs = await this.fetchIndexingPrefs()
-
-        await this.options.pages.createPageFromTab({
-            tabId: id,
-            fullUrl: url,
-            stubOnly: !indexingPrefs.shouldIndexLinks,
-            visitTime: '$now',
-        })
     }
 
     async getAnnotationByPk(url: string): Promise<Annotation> {

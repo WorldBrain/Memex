@@ -146,11 +146,19 @@ export class StorageChangeDetector {
 export function createdVisit(time: number, url: string) {
     return {
         [`[${time},"${url}"]`]: {
-            type: 'create',
+            type: 'create' as 'create',
             object: {
                 time,
                 url,
             },
+        },
+    }
+}
+
+export function deletedVisit(time: number, url: string) {
+    return {
+        [`[${time},"${url}"]`]: {
+            type: 'delete' as 'delete',
         },
     }
 }

@@ -1,14 +1,17 @@
 import expect from 'expect'
 import { Tabs } from 'webextension-polyfill-ts'
 
-import * as DATA from './index.test.data'
+import * as DATA from 'src/tests/common-fixtures.data'
 import {
     backgroundIntegrationTestSuite,
     backgroundIntegrationTest,
     BackgroundIntegrationTestSetup,
 } from 'src/tests/integration-tests'
 import { createPageStep } from 'src/tests/common-fixtures'
-import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
+import {
+    StorageCollectionDiff,
+    createdVisit,
+} from 'src/tests/storage-change-detector'
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 import { PAGE_1_CREATION } from 'src/tests/common-fixtures.data'
@@ -91,6 +94,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                 {
                                     url: DATA.PAGE_1.fullUrl,
                                     timestamp: DATA.BOOKMARK_1,
+                                    tabId: DATA.TEST_TAB_1.id,
                                 },
                             )
                         },
@@ -107,6 +111,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                             pages: (): StorageCollectionDiff => ({
                                 ...PAGE_1_CREATION,
                             }),
+                            visits: () =>
+                                createdVisit(DATA.BOOKMARK_1, DATA.PAGE_1.url),
                         },
                         preCheck: async ({ setup }) => {
                             expect(
@@ -165,6 +171,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                 {
                                     url: DATA.PAGE_1.fullUrl,
                                     timestamp: DATA.BOOKMARK_1,
+                                    tabId: DATA.TEST_TAB_1.id,
                                 },
                             )
                         },
@@ -177,6 +184,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                         time: DATA.BOOKMARK_1,
                                     },
                                 },
+                            }),
+                            visits: () =>
+                                createdVisit(DATA.BOOKMARK_1, DATA.PAGE_1.url),
+                            pages: (): StorageCollectionDiff => ({
+                                ...PAGE_1_CREATION,
                             }),
                         },
                         expectedSyncLogEntries: () => [
@@ -191,7 +203,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                         ],
                     },
                     {
-                        // debug: true,
                         preCheck: async ({ setup }) => {
                             expect(
                                 await setup.backgroundModules.search.searchPages(

@@ -238,20 +238,7 @@ export class PageIndexingBackground {
         return pageData
     }
 
-    /**
-     * Decides which type of on-demand page indexing logic to run based on given props.
-     * Also sets the `stubOnly` option based on user bookmark/tag indexing pref.
-     * TODO: Better name?
-     */
-    createPageViaBmTagActs = async (props: PageCreationProps) => {
-        if (props.stubOnly == null) {
-            const {
-                [IDXING_PREF_KEYS.BOOKMARKS]: fullyIndex,
-            } = await browser.storage.local.get(IDXING_PREF_KEYS.BOOKMARKS)
-
-            props.stubOnly = !fullyIndex
-        }
-
+    createPage = async (props: PageCreationProps) => {
         props.tabId =
             props.tabId ??
             (await this.options.tabManagement.findTabIdByFullUrl(props.fullUrl))

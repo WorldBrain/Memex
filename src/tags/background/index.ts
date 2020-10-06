@@ -199,7 +199,7 @@ export default class TagsBackground {
             IDXING_PREF_KEYS.BOOKMARKS,
         )
 
-        await this.options.pages.createPageViaBmTagActs({
+        await this.options.pages.createPage({
             fullUrl: url,
             tabId,
             stubOnly: !shouldFullyIndex,
