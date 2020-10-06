@@ -36,6 +36,7 @@ export async function main() {
     const storageManager = initStorex()
     const bookmarksStorage = new BookmarksStorage({ storageManager })
     const pages = new PageIndexingBackground({
+        getNow: () => Date.now(),
         storageManager,
         tabManagement,
     })

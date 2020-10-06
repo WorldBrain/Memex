@@ -1,4 +1,3 @@
-import { browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
 import PageStorage from './storage'
 import {
@@ -9,13 +8,11 @@ import {
 } from 'src/search/types'
 import pipeline, { transformUrl } from 'src/search/pipeline'
 import { initErrHandler } from 'src/search/storage'
-import BookmarksStorage from 'src/bookmarks/background/storage'
 import { Page, PageCreationProps } from 'src/search'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { DexieUtilsPlugin } from 'src/search/plugins'
 import analysePage from 'src/page-analysis/background/analyse-page'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
-import { STORAGE_KEYS as IDXING_PREF_KEYS } from 'src/options/settings/constants'
 import TabManagementBackground from 'src/tab-management/background'
 
 export class PageIndexingBackground {

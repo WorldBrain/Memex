@@ -61,12 +61,12 @@ export default class BookmarksStorage extends StorageModule {
         url: string
         time?: number
     }) {
-        const normalizedUrl = normalizeUrl(url, {})
+        const normalizedUrl = normalizeUrl(url)
         return this.operation('createBookmark', { url: normalizedUrl, time })
     }
 
     async delBookmark({ url }: { url: string }) {
-        const normalizedUrl = normalizeUrl(url, {})
+        const normalizedUrl = normalizeUrl(url)
         return this.operation('deleteBookmark', { url: normalizedUrl })
     }
 
@@ -77,7 +77,7 @@ export default class BookmarksStorage extends StorageModule {
     }
 
     pageHasBookmark = async (url: string): Promise<boolean> => {
-        const normalizedUrl = normalizeUrl(url, {})
+        const normalizedUrl = normalizeUrl(url)
         return !!(await this.operation('findBookmarkByUrl', {
             url: normalizedUrl,
         }))

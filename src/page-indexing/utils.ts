@@ -14,7 +14,7 @@ export async function maybeIndexTabs(
     tabs: Array<{ url: string; id: number }>,
     options: {
         pageStorage: PageStorage
-        createPage: PageIndexingBackground['createPageViaBmTagActs']
+        createPage: PageIndexingBackground['createPage']
         time: number | '$now'
     },
 ) {
