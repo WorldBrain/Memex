@@ -11,15 +11,21 @@ export function injectFakeTabs(params: {
     tabManagement: TabManagementBackground
     tabsAPI: Tabs.Static
     tabs: Array<FakeTab>
+    excludeBody?: boolean
+    includeTitle?: boolean
 }) {
     params.tabManagement.getOpenTabsInCurrentWindow = async () => params.tabs
     params.tabManagement.extractRawPageContent = async (tabId) => {
         return {
             type: 'html',
             url: params.tabs[tabId - 1].url,
-            body: `Body ${tabId}`,
+            body: !params.excludeBody ? `Body ${tabId}` : undefined,
             lang: 'en',
-            metadata: {},
+            metadata: params.includeTitle
+                ? {
+                      title: `Title ${tabId}`,
+                  }
+                : {},
         }
     }
     // For favIcon extraction

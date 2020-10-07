@@ -152,19 +152,25 @@ export class PageIndexingBackground {
             )
         }
 
+        const needsIndexing = !this.isTabPageIndexed({
+            tabId: props.tabId,
+            fullPageUrl: props.fullUrl,
+        })
+
         const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))
         const analysisRes = await analysePage({
             tabId: props.tabId,
             tabManagement: this.options.tabManagement,
-            includeContent: props.stubOnly
-                ? 'metadata-only'
-                : 'metadata-with-full-text',
+            includeContent:
+                props.stubOnly || !needsIndexing
+                    ? 'metadata-only'
+                    : 'metadata-with-full-text',
             includeFavIcon,
         })
 
         const pageData = await pipeline({
             pageDoc: { ...analysisRes, url: props.fullUrl },
-            rejectNoContent: !props.stubOnly,
+            rejectNoContent: !(props.stubOnly || !needsIndexing),
         })
 
         if (analysisRes.favIconURI) {
@@ -173,15 +179,12 @@ export class PageIndexingBackground {
                 analysisRes.favIconURI,
             )
         }
+        if (!needsIndexing) {
+            return pageData
+        }
 
         await this.storage.createPageIfNotExistsOrIsStub(pageData)
-        if (
-            props.visitTime &&
-            !this.isTabPageIndexed({
-                tabId: props.tabId,
-                fullPageUrl: pageData.fullUrl,
-            })
-        ) {
+        if (props.visitTime) {
             await this.storage.addPageVisit(
                 pageData.url,
                 this._getTime(props.visitTime),

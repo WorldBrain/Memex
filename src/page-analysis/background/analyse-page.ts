@@ -34,7 +34,7 @@ const analysePage: PageAnalyzer = async (options) => {
         : undefined
 
     return {
-        content: content,
+        content,
         favIconURI,
     }
 }

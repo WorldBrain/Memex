@@ -116,12 +116,13 @@ const expectedPage2Result = {
     fullUrl: DATA.PAGE_2.fullUrl,
 }
 
-function testSetupFactory() {
+function testSetupFactory(options?: { includeTitle?: boolean }) {
     return async ({ setup }: { setup: BackgroundIntegrationTestSetup }) => {
         await injectFakeTabs({
             tabManagement: setup.backgroundModules.tabManagement,
             tabsAPI: setup.browserAPIs.tabs,
             tabs: [DATA.TEST_TAB_1],
+            ...options,
         })
     }
 }
