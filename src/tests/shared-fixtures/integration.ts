@@ -53,7 +53,7 @@ export async function insertIntegrationTestData(
     }
     if (includeCollection('bookmarks')) {
         await backgroundModules.bookmarks.addBookmark({
-            url: pages[0].url,
+            fullUrl: pages[0].url,
             timestamp: new Date('2019-10-10').getTime(),
         })
     }

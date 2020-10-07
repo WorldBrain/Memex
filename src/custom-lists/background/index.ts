@@ -1,11 +1,11 @@
 import Storex from '@worldbrain/storex'
 import { Windows, Tabs, Storage } from 'webextension-polyfill-ts'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
 
 import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
-import { SearchIndex } from 'src/search'
+import { SearchIndex, Page } from 'src/search'
 import {
     Tab,
     RemoteCollectionsInterface,
@@ -218,6 +218,12 @@ export default class CustomListBackground {
         tabId?: number
         suppressVisitCreation?: boolean
     }): Promise<{ object: PageListEntry }> => {
+        if (!isFullUrl(url)) {
+            throw new Error(
+                'Tried to insert page to list with a normalized, instead of a full URL',
+            )
+        }
+
         internalAnalytics.processEvent({
             type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
         })

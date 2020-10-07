@@ -781,7 +781,7 @@ function extensionSyncTests(suiteOptions: {
                 insertDefaultPages: true,
                 insertData: async ({ device }) => {
                     await device.backgroundModules.bookmarks.addBookmark({
-                        url: 'bla.com',
+                        fullUrl: 'bla.com',
                     })
                 },
                 checkData: async ({ expectData }) => {
@@ -1213,7 +1213,7 @@ function mobileSyncTests(suiteOptions: {
                 ) {
                     await devices.extension.backgroundModules.bookmarks.addBookmark(
                         {
-                            url: 'http://toolate.com/',
+                            fullUrl: 'http://toolate.com/',
                             timestamp: new Date('2019-10-11').getTime(),
                         },
                     )

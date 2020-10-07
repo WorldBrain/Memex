@@ -2,6 +2,10 @@ import CustomListBackground from './'
 import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { SearchIndex } from 'src/search'
+import { injectFakeTabs } from 'src/tab-management/background/index.tests'
+import { TEST_TAB_1 } from 'src/tests/common-fixtures.data'
+import { page } from 'src/sidebar-overlay/sidebar/selectors'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 async function insertTestData({
     customLists,
@@ -21,7 +25,10 @@ async function insertTestData({
 }
 
 async function setupTest() {
-    const { backgroundModules } = await setupBackgroundIntegrationTest()
+    const {
+        backgroundModules,
+        browserAPIs,
+    } = await setupBackgroundIntegrationTest()
     const customLists: CustomListBackground = backgroundModules.customLists
     const searchIndex: SearchIndex = backgroundModules.search.searchIndex
 
@@ -44,18 +51,20 @@ describe('Custom List Integrations', () => {
         test('should be able to create list entry for existing page', async () => {
             const { pages, customLists } = await setupTest()
 
-            const newPage = await pages.createTestPage({
-                fullUrl: 'http://www.test.com',
+            const fullUrl = 'http://www.test.com'
+            const normalizedUrl = normalizeUrl(fullUrl)
+            await pages.createTestPage({
+                fullUrl,
                 save: true,
             })
 
-            await customLists.insertPageToList({ id: 1, url: newPage.url })
+            await customLists.insertPageToList({ id: 1, url: fullUrl })
             const lists = await customLists.fetchListPagesByUrl({
-                url: newPage.url,
+                url: normalizedUrl,
             })
             expect(lists.length).toBe(1)
             expect(lists[0].pages.length).toBe(1)
-            expect(lists[0].pages[0]).toBe(newPage.url)
+            expect(lists[0].pages[0]).toBe(fullUrl)
         })
 
         test('list entry creates for non-existing pages should create page', async () => {

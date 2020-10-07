@@ -78,7 +78,7 @@ describe('Social storage', () => {
             listId,
         })
 
-        const results = await search({ collections: [listId.toString()] })
+        const results = await search({ collections: [listId] })
         const firstRes = [...results.values()][0]
         assertTweetsEqual(firstRes, DATA.tweetA)
         return { socialStorage, search, listId }
@@ -165,7 +165,7 @@ describe('Social storage', () => {
         const { socialStorage, listId, search } = await addListEntryTest()
         await socialStorage.delListEntry({ postId: DATA.tweetA.id, listId })
 
-        const results = await search({ collections: [listId.toString()] })
+        const results = await search({ collections: [listId] })
         expect([...results.values()].length).toBe(0)
     })
 

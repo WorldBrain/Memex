@@ -26,7 +26,7 @@ export interface AnnotSearchParams {
     termsInc?: string[]
     termsExc?: string[]
     /** Collections to include (all results must be of pages in this collection). */
-    collections?: string[]
+    collections?: number[]
     /** Tags to include (all results must have these tags). */
     tagsInc?: string[]
     /** Tags to exclude (no results can have these tags). */

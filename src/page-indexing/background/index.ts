@@ -156,21 +156,23 @@ export class PageIndexingBackground {
             tabId: props.tabId,
             fullPageUrl: props.fullUrl,
         })
+        if (!needsIndexing) {
+            return
+        }
 
         const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))
         const analysisRes = await analysePage({
             tabId: props.tabId,
             tabManagement: this.options.tabManagement,
-            includeContent:
-                props.stubOnly || !needsIndexing
-                    ? 'metadata-only'
-                    : 'metadata-with-full-text',
+            includeContent: props.stubOnly
+                ? 'metadata-only'
+                : 'metadata-with-full-text',
             includeFavIcon,
         })
 
         const pageData = await pipeline({
             pageDoc: { ...analysisRes, url: props.fullUrl },
-            rejectNoContent: !(props.stubOnly || !needsIndexing),
+            rejectNoContent: !props.stubOnly,
         })
 
         if (analysisRes.favIconURI) {
@@ -179,11 +181,8 @@ export class PageIndexingBackground {
                 analysisRes.favIconURI,
             )
         }
-        if (!needsIndexing) {
-            return pageData
-        }
 
-        await this.storage.createPageIfNotExistsOrIsStub(pageData)
+        await this.storage.createOrUpdatePage(pageData)
         if (props.visitTime) {
             await this.storage.addPageVisit(
                 pageData.url,
@@ -194,8 +193,6 @@ export class PageIndexingBackground {
                 fullPageUrl: pageData.fullUrl,
             })
         }
-
-        return pageData
     }
 
     async createPageFromUrl(props: PageCreationProps) {
@@ -211,15 +208,13 @@ export class PageIndexingBackground {
             delete pageData.terms
         }
 
-        await this.storage.createPageIfNotExists(pageData)
+        await this.storage.createOrUpdatePage(pageData)
         if (props.visitTime) {
             await this.storage.addPageVisit(
                 pageData.url,
                 this._getTime(props.visitTime),
             )
         }
-
-        return pageData
     }
 
     async createTestPage(props: PageCreationProps) {
@@ -235,18 +230,18 @@ export class PageIndexingBackground {
                 this._getTime(props.visitTime),
             )
         }
-        return pageData
     }
 
     createPage = async (props: PageCreationProps) => {
         props.tabId =
             props.tabId ??
             (await this.options.tabManagement.findTabIdByFullUrl(props.fullUrl))
-        if (props.tabId) {
-            return this.createPageFromTab(props)
-        }
 
-        return this.createPageFromUrl(props)
+        if (props.tabId) {
+            await this.createPageFromTab(props)
+        } else {
+            await this.createPageFromUrl(props)
+        }
     }
 
     isTabPageIndexed(params: { tabId: number; fullPageUrl: string }) {

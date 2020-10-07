@@ -402,12 +402,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                             })
                             setup.injectTime(() => DATA.VISIT_3)
                             await customLists(setup).insertPageToList({
-                                url: DATA.PAGE_1.url,
+                                url: DATA.PAGE_1.fullUrl,
                                 id: listId,
                                 tabId: DATA.TEST_TAB_1.id,
                             })
                             await bookmarks(setup).addBookmark({
-                                url: DATA.PAGE_1.url,
+                                fullUrl: DATA.PAGE_1.fullUrl,
                                 tabId: DATA.TEST_TAB_1.id,
                                 timestamp: DATA.VISIT_4,
                             })
@@ -434,7 +434,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                     type: 'create',
                                     object: {
                                         listId,
-                                        fullUrl: DATA.PAGE_1.url,
+                                        fullUrl: DATA.PAGE_1.fullUrl,
                                         pageUrl: DATA.PAGE_1.url,
                                         createdAt: expect.any(Date),
                                     },
@@ -460,6 +460,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                             }),
                             visits: (): StorageCollectionDiff => ({
                                 ...createdVisit(DATA.VISIT_3, DATA.PAGE_1.url),
+                            }),
+                            pages: (): StorageCollectionDiff => ({
+                                [DATA.PAGE_1.url]: {
+                                    type: 'modify',
+                                    updates: {
+                                        terms: expect.anything(),
+                                        text: 'Body 1',
+                                    },
+                                },
                             }),
                         },
                     },

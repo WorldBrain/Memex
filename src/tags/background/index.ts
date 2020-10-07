@@ -193,16 +193,9 @@ export default class TagsBackground {
         tag: string
         tabId?: number
     }) => {
-        const {
-            [IDXING_PREF_KEYS.BOOKMARKS]: shouldFullyIndex,
-        } = await this.options.localBrowserStorage.get(
-            IDXING_PREF_KEYS.BOOKMARKS,
-        )
-
         await this.options.pages.createPage({
             fullUrl: url,
             tabId,
-            stubOnly: !shouldFullyIndex,
             visitTime: '$now',
         })
 

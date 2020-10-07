@@ -254,7 +254,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
             ],
         }
     }),
-    backgroundIntegrationTest('should remove tags to open tabs', () => {
+    backgroundIntegrationTest('should remove tags from open tabs', () => {
         return {
             steps: [
                 {

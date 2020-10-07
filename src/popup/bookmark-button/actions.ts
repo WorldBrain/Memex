@@ -24,13 +24,13 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
             dispatch(setIsBookmarked(false))
         } else {
             dispatch(setIsBookmarked(true))
-            await bookmarks.addPageBookmark({ url, tabId })
+            await bookmarks.addPageBookmark({ fullUrl: url, tabId })
             dispatch(setIsBookmarked(true))
         }
     } catch (err) {
         dispatch(setIsBookmarked(hasBookmark))
         handleDBQuotaErrors(
-            error =>
+            (error) =>
                 notifications.create({
                     requireInteraction: false,
                     title: 'Memex error: starring page',

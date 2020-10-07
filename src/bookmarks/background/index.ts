@@ -1,6 +1,6 @@
 import { Tabs, Browser, Bookmarks } from 'webextension-polyfill-ts'
 import Storex from '@worldbrain/storex'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
 
 import { TabManager } from 'src/tab-management/background/tab-manager'
 import BookmarksStorage from './storage'
@@ -44,17 +44,25 @@ export default class BookmarksBackground {
     }
 
     addPageBookmark = async (params: {
-        url: string
+        url?: string
+        fullUrl: string
         timestamp?: number
         tabId?: number
     }) => {
+        const fullUrl = params.fullUrl ?? params.url
+        if (!isFullUrl(fullUrl)) {
+            throw new Error(
+                'Tried to create a bookmark with a normalized, instead of a full URL',
+            )
+        }
+
         await this.options.pages.createPage({
-            fullUrl: params.url,
+            fullUrl,
             tabId: params.tabId,
             visitTime: params.timestamp || '$now',
         })
 
-        await this.storage.createBookmarkIfNeeded(params.url, params.timestamp)
+        await this.storage.createBookmarkIfNeeded(fullUrl, params.timestamp)
         // this.options.tabManager.setBookmarkState(params.url, true)
     }
 
@@ -120,6 +128,6 @@ export default class BookmarksBackground {
             tabId = activeTab.id
         }
 
-        return this.addPageBookmark({ url: node.url, tabId })
+        return this.addPageBookmark({ fullUrl: node.url, tabId })
     }
 }

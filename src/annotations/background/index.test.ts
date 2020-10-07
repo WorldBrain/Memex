@@ -765,7 +765,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                             })
                             await customLists(setup).insertPageToList({
                                 id: listId,
-                                url: DATA.ANNOT_1.url,
+                                url: DATA.PAGE_1.fullUrl,
                                 tabId: DATA.TEST_TAB_1.id,
                             })
                         },
@@ -775,7 +775,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     type: 'create',
                                     object: {
                                         listId,
-                                        fullUrl: DATA.ANNOT_1.url,
+                                        fullUrl: DATA.PAGE_1.fullUrl,
                                         pageUrl: DATA.ANNOT_1.pageUrl,
                                         createdAt: expect.any(Date),
                                     },
@@ -793,8 +793,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     },
                                 },
                             }),
-                            visits: (): StorageCollectionDiff =>
-                                expect.anything(),
                         },
                         postCheck: async ({ setup }) => {
                             const searchResults = await searchModule(

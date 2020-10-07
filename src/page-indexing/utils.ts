@@ -34,8 +34,6 @@ export async function maybeIndexTabs(
                     fullUrl: tab.url,
                     allowScreenshot: false,
                     visitTime: options.time,
-                    stubOnly: true,
-                    save: true,
                 })
                 .catch(handleErrors)
 

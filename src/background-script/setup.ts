@@ -309,7 +309,7 @@ export function createBackgroundModules(options: {
                     ))
                 ) {
                     await bookmarks.addBookmark({
-                        url: bookmark.normalizedUrl,
+                        fullUrl: bookmark.normalizedUrl,
                         timestamp: bookmark.time,
                     })
                 }
