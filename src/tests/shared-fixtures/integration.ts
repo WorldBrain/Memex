@@ -55,6 +55,7 @@ export async function insertIntegrationTestData(
         await backgroundModules.bookmarks.addBookmark({
             fullUrl: pages[0].url,
             timestamp: new Date('2019-10-10').getTime(),
+            skipIndexing: true,
         })
     }
     if (includeCollection('tags')) {

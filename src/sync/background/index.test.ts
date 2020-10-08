@@ -781,7 +781,8 @@ function extensionSyncTests(suiteOptions: {
                 insertDefaultPages: true,
                 insertData: async ({ device }) => {
                     await device.backgroundModules.bookmarks.addBookmark({
-                        fullUrl: 'bla.com',
+                        fullUrl: 'https://www.bla.com/',
+                        skipIndexing: true,
                     })
                 },
                 checkData: async ({ expectData }) => {
@@ -1212,6 +1213,7 @@ function mobileSyncTests(suiteOptions: {
                         {
                             fullUrl: 'http://toolate.com/',
                             timestamp: new Date('2019-10-11').getTime(),
+                            skipIndexing: true,
                         },
                     )
                 }

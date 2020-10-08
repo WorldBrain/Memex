@@ -199,6 +199,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                         },
                         expectedSyncLogEntries: () => [
                             expect.objectContaining({
+                                collection: 'pages',
+                                operation: 'create',
+                            }),
+                            expect.objectContaining({
+                                collection: 'visits',
+                                operation: 'create',
+                            }),
+                            expect.objectContaining({
                                 collection: 'bookmarks',
                                 operation: 'create',
                                 pk: 'lorem.com',

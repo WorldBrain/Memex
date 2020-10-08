@@ -145,7 +145,7 @@ export class PageIndexingBackground {
         return res != null
     }
 
-    createPageFromTab = async (props: PageCreationProps) => {
+    indexPageFromTab = async (props: PageCreationProps) => {
         if (!props.tabId) {
             throw new Error(
                 `No tabID provided to extract content: ${props.fullUrl}`,
@@ -195,7 +195,7 @@ export class PageIndexingBackground {
         }
     }
 
-    async createPageFromUrl(props: PageCreationProps) {
+    async indexPageFromUrl(props: PageCreationProps) {
         if (!this.options.fetchPageData) {
             throw new Error(
                 'Instantiation error: fetch-page-data implementation was not given to constructor',
@@ -217,7 +217,7 @@ export class PageIndexingBackground {
         }
     }
 
-    async createTestPage(props: PageCreationProps) {
+    async indexTestPage(props: PageCreationProps) {
         const pageData = await pipeline({
             pageDoc: { url: props.fullUrl, content: {} },
             rejectNoContent: false,
@@ -232,15 +232,15 @@ export class PageIndexingBackground {
         }
     }
 
-    createPage = async (props: PageCreationProps) => {
+    indexPage = async (props: PageCreationProps) => {
         props.tabId =
             props.tabId ??
             (await this.options.tabManagement.findTabIdByFullUrl(props.fullUrl))
 
         if (props.tabId) {
-            await this.createPageFromTab(props)
+            await this.indexPageFromTab(props)
         } else {
-            await this.createPageFromUrl(props)
+            await this.indexPageFromUrl(props)
         }
     }
 

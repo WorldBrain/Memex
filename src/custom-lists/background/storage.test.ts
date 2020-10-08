@@ -52,7 +52,7 @@ describe('Custom List Integrations', () => {
 
             const fullUrl = 'http://www.test.com'
             const normalizedUrl = normalizeUrl(fullUrl)
-            await pages.createTestPage({
+            await pages.indexTestPage({
                 fullUrl,
                 save: true,
             })

@@ -228,7 +228,7 @@ export default class CustomListBackground {
             type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
         })
 
-        await this.options.pages.createPage({
+        await this.options.pages.indexPage({
             tabId,
             fullUrl: url,
             visitTime: !suppressVisitCreation ? '$now' : undefined,
@@ -336,7 +336,7 @@ export default class CustomListBackground {
 
         const indexed = await maybeIndexTabs(tabs, {
             pageStorage: this.options.pages.storage,
-            createPage: this.options.pages.createPage,
+            createPage: this.options.pages.indexPage,
             time: args.time ?? '$now',
         })
 

@@ -48,6 +48,7 @@ export default class BookmarksBackground {
         fullUrl: string
         timestamp?: number
         tabId?: number
+        skipIndexing?: boolean
     }) => {
         const fullUrl = params.fullUrl ?? params.url
         if (!isFullUrl(fullUrl)) {
@@ -56,11 +57,13 @@ export default class BookmarksBackground {
             )
         }
 
-        await this.options.pages.createPage({
-            fullUrl,
-            tabId: params.tabId,
-            visitTime: params.timestamp || '$now',
-        })
+        if (!params.skipIndexing) {
+            await this.options.pages.indexPage({
+                fullUrl,
+                tabId: params.tabId,
+                visitTime: params.timestamp || '$now',
+            })
+        }
 
         await this.storage.createBookmarkIfNeeded(fullUrl, params.timestamp)
         // this.options.tabManager.setBookmarkState(params.url, true)

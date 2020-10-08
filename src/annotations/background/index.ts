@@ -358,7 +358,7 @@ export default class DirectLinkingBackground {
             generateUrl({ pageUrl: normalizedPageUrl, now: () => Date.now() })
 
         if (!skipPageIndexing) {
-            await this.options.pages.createPage({
+            await this.options.pages.indexPage({
                 fullUrl: fullPageUrl,
                 visitTime: '$now',
                 tabId: tab?.id,

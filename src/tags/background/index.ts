@@ -93,7 +93,7 @@ export default class TagsBackground {
 
         const indexed = await maybeIndexTabs(tabs, {
             pageStorage: this.options.pages.storage,
-            createPage: this.options.pages.createPageFromTab,
+            createPage: this.options.pages.indexPageFromTab,
             time: params.time || '$now',
         })
 
@@ -193,7 +193,7 @@ export default class TagsBackground {
         tag: string
         tabId?: number
     }) => {
-        await this.options.pages.createPage({
+        await this.options.pages.indexPage({
             fullUrl: url,
             tabId,
             visitTime: '$now',
