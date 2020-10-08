@@ -8,7 +8,10 @@ import {
 import StorageOperationLogger, {
     LoggedStorageOperation,
 } from './storage-operation-logger'
-import { registerBackgroundIntegrationTest } from './background-integration-tests'
+import {
+    registerBackgroundIntegrationTest,
+    BackgroundIntegrationTestSetupOpts,
+} from './background-integration-tests'
 import MemoryBrowserStorage from 'src/util/tests/browser-storage'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
@@ -57,7 +60,7 @@ export interface BackgroundIntegrationTestSetup {
     storageManager: StorageManager
     backgroundModules: BackgroundModules
     browserAPIs: Browser
-    fetchPageDataProcessor: MockFetchPageDataProcessor
+    fetchPageDataProcessor: MockFetchPageDataProcessor | null
     browserLocalStorage: MemoryBrowserStorage
     storageChangeDetector: StorageChangeDetector
     storageOperationLogger: StorageOperationLogger
@@ -82,10 +85,11 @@ export type BackgroundIntegrationTestSuite = IntegrationTestSuite<
 export function backgroundIntegrationTestSuite(
     description: string,
     tests: Array<IntegrationTest<BackgroundIntegrationTestContext>>,
+    options?: BackgroundIntegrationTestSetupOpts,
 ): IntegrationTestSuite<BackgroundIntegrationTestContext> {
     describe(description, () => {
         for (const integrationTest of tests) {
-            registerBackgroundIntegrationTest(integrationTest)
+            registerBackgroundIntegrationTest(integrationTest, options)
         }
     })
     return { description, tests }

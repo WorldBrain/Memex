@@ -3,7 +3,6 @@ import { URL } from 'whatwg-url'
 import expect from 'expect'
 const wrtc = require('wrtc')
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
-import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import {
@@ -32,7 +31,7 @@ import { ServerStorage } from 'src/storage/types'
 import { Browser } from 'webextension-polyfill-ts'
 import { TabManager } from 'src/tab-management/background/tab-manager'
 
-export async function setupBackgroundIntegrationTest(options?: {
+export interface BackgroundIntegrationTestSetupOpts {
     customMiddleware?: StorageMiddleware[]
     tabManager?: TabManager
     signalTransportFactory?: SignalTransportFactory
@@ -41,7 +40,11 @@ export async function setupBackgroundIntegrationTest(options?: {
     debugStorageOperations?: boolean
     includePostSyncProcessor?: boolean
     enableSyncEncyption?: boolean
-}): Promise<BackgroundIntegrationTestSetup> {
+}
+
+export async function setupBackgroundIntegrationTest(
+    options?: BackgroundIntegrationTestSetupOpts,
+): Promise<BackgroundIntegrationTestSetup> {
     if (typeof window === 'undefined') {
         global['URL'] = URL
     }
@@ -111,19 +114,21 @@ export async function setupBackgroundIntegrationTest(options?: {
         },
     } as any) as Browser
 
-    const fetchPageDataProcessor = new MockFetchPageDataProcessor()
+    const fetchPageDataProcessor = options?.includePostSyncProcessor
+        ? new MockFetchPageDataProcessor()
+        : null
+
     const backgroundModules = createBackgroundModules({
         getNow,
         storageManager,
         analyticsManager,
         localStorageChangesManager: null,
         getServerStorage,
-        browserAPIs: browserAPIs,
+        browserAPIs,
         tabManager: options?.tabManager,
         signalTransportFactory: options?.signalTransportFactory,
         getSharedSyncLog: async () =>
             (await getServerStorage()).storageModules.sharedSyncLog,
-        includePostSyncProcessor: options?.includePostSyncProcessor,
         fetchPageDataProcessor,
         auth,
         disableSyncEnryption: !options?.enableSyncEncyption,
@@ -188,30 +193,33 @@ export async function setupBackgroundIntegrationTest(options?: {
 
 export function registerBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
+    options: BackgroundIntegrationTestSetupOpts = {},
 ) {
     const skipSyncTests = process.env.SKIP_SYNC_TESTS === 'true'
     if (skipSyncTests) {
         it(test.description, async () => {
-            await runBackgroundIntegrationTest(test)
+            await runBackgroundIntegrationTest(test, options)
         })
     } else {
         describe(test.description, () => {
             it(
                 'should work on a single device' + (test.mark ? '!!!' : ''),
                 async () => {
-                    await runBackgroundIntegrationTest(test)
+                    await runBackgroundIntegrationTest(test, options)
                 },
             )
-            registerSyncBackgroundIntegrationTests(test)
+            registerSyncBackgroundIntegrationTests(test, options)
         })
     }
 }
 
 export async function runBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
+    options: BackgroundIntegrationTestSetupOpts = {},
 ) {
     const setup = await setupBackgroundIntegrationTest({
         customMiddleware: [],
+        ...options,
     })
     const testOptions = await test.instantiate({ isSyncTest: false })
     testOptions.setup?.({ setup })

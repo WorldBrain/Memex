@@ -24,13 +24,9 @@ import {
     setupMobileIntegrationTest,
 } from 'src/tests/mobile-intergration-tests'
 
-import {
-    lazyMemorySignalTransportFactory,
-    createMemorySharedSyncLog,
-} from './index.tests'
+import { lazyMemorySignalTransportFactory } from './index.tests'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import SyncBackground from '.'
-import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 import { ServerStorage } from 'src/storage/types'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
 
@@ -143,7 +139,6 @@ function extensionSyncTests(suiteOptions: {
         return async (conf = {}) => {
             const signalTransportFactory = lazyMemorySignalTransportFactory()
 
-            const fet = new MockFetchPageDataProcessor()
             const devices: [
                 BackgroundIntegrationTestSetup,
                 BackgroundIntegrationTestSetup,
@@ -221,7 +216,7 @@ function extensionSyncTests(suiteOptions: {
             searchModule,
             forEachDevice: forEachSetup,
             userId,
-        } = await setup()
+        } = await setup({ enablePostProcessing: true })
 
         devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
 
@@ -577,7 +572,7 @@ function extensionSyncTests(suiteOptions: {
             forEachDevice: forEachSetup,
             devices,
             userId,
-        } = await setup()
+        } = await setup({ enablePostProcessing: true })
         await forEachSetup((s) => syncModule(s).setup())
 
         devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
@@ -626,6 +621,7 @@ function extensionSyncTests(suiteOptions: {
     describe('passive data filtering in initial Sync', () => {
         async function runPassiveDataTest(params: {
             setup: TestSetup
+            enablePostProcessing?: boolean
             insertDefaultPages: boolean
             insertData: (params: {
                 device: BackgroundIntegrationTestSetup
@@ -645,7 +641,9 @@ function extensionSyncTests(suiteOptions: {
                 searchModule,
                 forEachDevice: forEachSetup,
                 userId,
-            } = await params.setup()
+            } = await params.setup({
+                enablePostProcessing: params.enablePostProcessing,
+            })
 
             await forEachSetup((s) => syncModule(s).setup())
             devices[0].authService.setUser({
@@ -697,11 +695,12 @@ function extensionSyncTests(suiteOptions: {
         }
 
         it('should consider pages included in custom lists as active data', async (setup: TestSetup) => {
-            const { customLists } = await setup()
+            const { customLists } = await setup({ enablePostProcessing: true })
 
             await runPassiveDataTest({
                 setup,
                 insertDefaultPages: true,
+                enablePostProcessing: true,
                 insertData: async ({ device }) => {
                     const listId = await customLists(device).createCustomList({
                         name: 'My list',
@@ -741,11 +740,12 @@ function extensionSyncTests(suiteOptions: {
         })
 
         it('should consider tagged pages as active data', async (setup: TestSetup) => {
-            const { customLists } = await setup()
+            await setup({ enablePostProcessing: true })
 
             await runPassiveDataTest({
                 setup,
                 insertDefaultPages: true,
+                enablePostProcessing: true,
                 insertData: async ({ device }) => {
                     await device.backgroundModules.tags.addTagToPage({
                         url: 'bla.com',
@@ -774,7 +774,7 @@ function extensionSyncTests(suiteOptions: {
         })
 
         it('should consider bookmarked pages as active data', async (setup: TestSetup) => {
-            const { customLists } = await setup()
+            await setup({ enablePostProcessing: true })
 
             await runPassiveDataTest({
                 setup,
@@ -854,7 +854,6 @@ function mobileSyncTests(suiteOptions: {
     type TestSetup = (
         conf?: TestSetupConfig,
     ) => Promise<{
-        fetchPageProcessor?: MockFetchPageDataProcessor
         devices: {
             extension: BackgroundIntegrationTestSetup
             mobile: MobileIntegrationTestSetup
@@ -879,14 +878,12 @@ function mobileSyncTests(suiteOptions: {
     function setupTest(dependencies: TestDependencies): TestSetup {
         return async (conf: TestSetupConfig = {}) => {
             const signalTransportFactory = lazyMemorySignalTransportFactory()
-            const fetchPageProcessor = conf.enablePostProcessing
-                ? new MockFetchPageDataProcessor()
-                : undefined
 
             const devices = {
                 extension: await setupBackgroundIntegrationTest({
                     signalTransportFactory,
                     getServerStorage: dependencies.getServerStorage,
+                    includePostSyncProcessor: true,
                 }),
                 mobile: await setupMobileIntegrationTest({
                     signalTransportFactory,
@@ -906,7 +903,7 @@ function mobileSyncTests(suiteOptions: {
                 id: userId as string,
             })
 
-            return { devices, fetchPageProcessor }
+            return { devices }
         }
     }
 

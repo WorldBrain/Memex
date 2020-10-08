@@ -1,6 +1,9 @@
 import { UILogic } from 'ui-logic-core'
 import { TestLogicContainer } from 'ui-logic-core/lib/testing'
-import { setupBackgroundIntegrationTest } from './background-integration-tests'
+import {
+    setupBackgroundIntegrationTest,
+    BackgroundIntegrationTestSetupOpts,
+} from './background-integration-tests'
 import { BackgroundIntegrationTestSetup } from './integration-tests'
 
 export type UILogicTest<Context> = (context: Context) => Promise<void>
@@ -21,12 +24,12 @@ export interface MultiDeviceUILogicTestContext {
     createDevice: () => Promise<UILogicTestDevice>
 }
 
-export function makeSingleDeviceUILogicTestFactory(): UILogicTestFactory<
-    SingleDeviceUILogicTestContext
-> {
+export function makeSingleDeviceUILogicTestFactory(
+    options?: BackgroundIntegrationTestSetupOpts,
+): UILogicTestFactory<SingleDeviceUILogicTestContext> {
     return (description, test) => {
         it(description, async () => {
-            const setup = await setupBackgroundIntegrationTest()
+            const setup = await setupBackgroundIntegrationTest(options)
             await test({
                 device: {
                     ...setup,
@@ -37,14 +40,14 @@ export function makeSingleDeviceUILogicTestFactory(): UILogicTestFactory<
     }
 }
 
-export function makeMultiDeviceUILogicTestFactory(): UILogicTestFactory<
-    MultiDeviceUILogicTestContext
-> {
+export function makeMultiDeviceUILogicTestFactory(
+    options?: BackgroundIntegrationTestSetupOpts,
+): UILogicTestFactory<MultiDeviceUILogicTestContext> {
     return (description, test) => {
         it(description, async () => {
             await test({
                 createDevice: async () => {
-                    const setup = await setupBackgroundIntegrationTest()
+                    const setup = await setupBackgroundIntegrationTest(options)
                     return {
                         ...setup,
                         createElement: (logic) => new TestLogicContainer(logic),

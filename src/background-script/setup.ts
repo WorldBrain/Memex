@@ -97,12 +97,11 @@ export function createBackgroundModules(options: {
     signalTransportFactory: SignalTransportFactory
     getSharedSyncLog: () => Promise<SharedSyncLog>
     localStorageChangesManager: StorageChangesManager
-    fetchPageDataProcessor: FetchPageProcessor
+    fetchPageDataProcessor?: FetchPageProcessor
     tabManager?: TabManager
     auth?: AuthBackground
     analyticsManager: Analytics
     authOptions?: { devAuthState: DevAuthState }
-    includePostSyncProcessor?: boolean
     disableSyncEnryption?: boolean
     getIceServers?: () => Promise<string[]>
     getNow?: () => number
@@ -252,13 +251,14 @@ export function createBackgroundModules(options: {
         storePageContent,
     })
 
-    const postReceiveProcessor = options.includePostSyncProcessor
-        ? new PostReceiveProcessor({
-              pages,
-              pageFetchBacklog,
-              fetchPageData: options.fetchPageDataProcessor,
-          }).processor
-        : undefined
+    const postReceiveProcessor =
+        options.fetchPageDataProcessor != null
+            ? new PostReceiveProcessor({
+                  pages,
+                  pageFetchBacklog,
+                  fetchPageData: options.fetchPageDataProcessor,
+              }).processor
+            : undefined
 
     return {
         auth,
