@@ -232,6 +232,7 @@ export function createBackgroundModules(options: {
 
     const bgScript = new BackgroundScript({
         storageManager,
+        tabManagement,
         storageChangesMan: options.localStorageChangesManager,
         copyPasterBackground: copyPaster,
         notifsBackground: notifications,

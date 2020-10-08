@@ -29,9 +29,11 @@ import {
     blacklist,
 } from 'src/blacklist/background'
 import analytics from 'src/analytics'
+import TabManagementBackground from 'src/tab-management/background'
 
 class BackgroundScript {
     private utils: typeof utils
+    private tabManagement: TabManagementBackground
     private copyPasterBackground: CopyPasterBackground
     private notifsBackground: NotifsBackground
     private storageChangesMan: StorageChangesManager
@@ -48,6 +50,7 @@ class BackgroundScript {
         storageManager,
         notifsBackground,
         copyPasterBackground,
+        tabManagement,
         utilFns = utils,
         storageChangesMan,
         urlNormalizer = normalizeUrl,
@@ -58,6 +61,7 @@ class BackgroundScript {
         tabsAPI = browser.tabs,
     }: {
         storageManager: Storex
+        tabManagement: TabManagementBackground
         notifsBackground: NotifsBackground
         copyPasterBackground: CopyPasterBackground
         urlNormalizer?: URLNormalizer
@@ -70,6 +74,7 @@ class BackgroundScript {
         tabsAPI?: Tabs.Static
     }) {
         this.storageManager = storageManager
+        this.tabManagement = tabManagement
         this.notifsBackground = notifsBackground
         this.copyPasterBackground = copyPasterBackground
         this.utils = utilFns
@@ -147,6 +152,7 @@ class BackgroundScript {
     private setupInstallHooks() {
         this.runtimeAPI.onInstalled.addListener(async (details) => {
             this.notifsBackground.deliverStaticNotifications()
+            this.tabManagement.trackExistingTabs()
 
             switch (details.reason) {
                 case 'install':
