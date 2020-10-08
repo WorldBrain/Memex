@@ -212,7 +212,7 @@ export default class ImportItemProcessor {
                   },
               }
 
-        const visits = await getVisitTimes(importItem)
+        const visits = []
 
         let bookmark
         if (importItem.type === IMPORT_TYPE.BOOKMARK) {
@@ -248,7 +248,7 @@ export default class ImportItemProcessor {
                   },
               }
 
-        const visits = await getVisitTimes({ url })
+        const visits = []
 
         if (timeAdded) {
             visits.push(timeAdded)

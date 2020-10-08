@@ -55,7 +55,6 @@ export async function main() {
     const backgroundModules = createBackgroundModules({
         getServerStorage,
         signalTransportFactory: createFirebaseSignalTransport,
-        includePostSyncProcessor: true,
         analyticsManager: analytics,
         localStorageChangesManager,
         fetchPageDataProcessor,
