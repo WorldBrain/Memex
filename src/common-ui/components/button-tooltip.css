@@ -87,7 +87,7 @@
 
 .tooltipLeftBig {
     justify-content: flex-end;
-    right: 50px;
+    right: 60px;
 
     & .toolTipBubble {
         flex-wrap: wrap;

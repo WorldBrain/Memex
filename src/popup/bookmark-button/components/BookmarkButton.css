@@ -1,19 +1,30 @@
+.button {
+    flex: 7;
+    text-align: left;
+    display: inline-block;
+    padding: 10px 20px;
+    height: 100%;
+}
+
+.buttonContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 5px;
+}
+
 .bookmarkedBtn {
     background-image: url('/img/star_full.svg');
     background-repeat: no-repeat;
     background-size: 23px;
-    margin-left: -2px;
-    padding-right: 2px;
-    margin-top: -2px;
     opacity: 0.8;
+    float: left;
 }
 
 .unbookmarkedBtn {
     background-image: url('/img/star_empty.svg');
     background-repeat: no-repeat;
     background-size: 23px;
-    margin-left: -2px;
-    padding-right: 2px;
     opacity: 0.8;
-    margin-top: -2px;
+    float: left;
 }

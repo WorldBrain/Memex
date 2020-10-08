@@ -95,6 +95,28 @@ export type HighlightRendererInterface = HighlightRenderInterface &
     HighlightInteractionsInterface
 
 export class HighlightRenderer implements HighlightRendererInterface {
+    constructor() {
+        document.addEventListener('click', this.handleOutsideHighlightClick)
+    }
+
+    private handleOutsideHighlightClick = async (e: MouseEvent) => {
+        if (e.target === document.getElementById('memex-sidebar-container')) {
+            return
+        }
+
+        const allHighlights = document.querySelectorAll(
+            `.${styles['memex-highlight']}`,
+        )
+
+        for (const highlightEl of allHighlights) {
+            if (e.target === highlightEl) {
+                return
+            }
+        }
+
+        this.removeHighlights({ onlyRemoveDarkHighlights: true })
+    }
+
     saveAndRenderHighlightAndEditInSidebar = async (
         params: SaveAndRenderHighlightDeps,
     ) => {
@@ -151,15 +173,16 @@ export class HighlightRenderer implements HighlightRendererInterface {
             pageTitle: title,
         } as Annotation
 
-        this.renderHighlight(annotation, () =>
-            params.inPageUI.showSidebar({
-                annotationUrl: annotation.url,
-                action: params.options?.clickToEdit
-                    ? 'edit_annotation'
-                    : 'show_annotation',
-            }),
-        )
         await params.annotationsCache.create(annotation)
+        this.renderHighlight(annotation, ({ openInEdit, annotationUrl }) => {
+            params.inPageUI.showSidebar({
+                annotationUrl,
+                action:
+                    params.options?.clickToEdit || openInEdit
+                        ? 'edit_annotation'
+                        : 'show_annotation',
+            })
+        })
 
         return annotation
     }
@@ -248,7 +271,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
      * @param {*} annotation Annotation object which has the selector to be highlighted
      */
     highlightAndScroll = (annotation: Annotation) => {
-        this.removeHighlights(true)
+        this.removeHighlights({ onlyRemoveDarkHighlights: true })
         this.makeHighlightDark(annotation)
         return this.scrollToHighlight(annotation)
     }
@@ -268,27 +291,31 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const newHighlights = document.querySelectorAll(
             `.${styles['memex-highlight']}:not([data-annotation])`,
         )
-        newHighlights.forEach((highlightEl) => {
-            ;(highlightEl as HTMLElement).dataset.annotation = highlight.url
+        newHighlights.forEach((highlightEl: HTMLElement) => {
+            highlightEl.dataset.annotation = highlight.url
 
-            const clickListener = async (e) => {
+            const clickListener = async (e: MouseEvent) => {
                 // Let anchors behave as normal
-                const parentNode = e.target?.parentNode
+                const parentNode = (e.target as HTMLElement)?.parentNode
                 if (
                     parentNode?.nodeName?.toLowerCase() === 'a' &&
-                    parentNode?.href.length
+                    (parentNode as HTMLAnchorElement)?.href.length
                 ) {
                     return
                 }
 
                 e.preventDefault()
-                if (!e.target.dataset.annotation) {
+                if (!(e.target as HTMLElement).dataset.annotation) {
                     return
                 }
-                openSidebar({ annotationUrl: highlight.url })
-                this.removeHighlights(true)
+                openSidebar({
+                    annotationUrl: highlight.url,
+                    openInEdit: e.getModifierState('Shift'),
+                })
+                this.removeHighlights({ onlyRemoveDarkHighlights: true })
                 this.makeHighlightDark(highlight)
             }
+
             highlightEl.addEventListener('click', clickListener, false)
 
             const mouseenterListener = (e) => {
@@ -368,15 +395,17 @@ export class HighlightRenderer implements HighlightRendererInterface {
      * Removes all highlight elements in the current page.
      * If `onlyRemoveDarkHighlights` is true, only dark highlights will be removed.
      */
-    removeHighlights = (onlyRemoveDarkHighlights = false) => {
+    removeHighlights = (args?: { onlyRemoveDarkHighlights?: boolean }) => {
         this.removeTempHighlights()
 
         const baseClass = '.' + styles['memex-highlight']
-        const darkClass = onlyRemoveDarkHighlights ? '.' + styles['dark'] : ''
+        const darkClass = args?.onlyRemoveDarkHighlights
+            ? '.' + styles['dark']
+            : ''
         const highlightClass = `${baseClass}${darkClass}`
         const highlights = document.querySelectorAll(highlightClass)
 
-        if (onlyRemoveDarkHighlights) {
+        if (args?.onlyRemoveDarkHighlights) {
             highlights.forEach((highlight) =>
                 highlight.classList.remove(styles['dark']),
             )
@@ -438,12 +467,3 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
     undoHighlight = this.removeAnnotationHighlights
 }
-
-// FIXME: Refactor the parts of the code that need these global function imports
-export const makeHighlightDark = new HighlightRenderer().makeHighlightDark
-export const scrollToHighlight = new HighlightRenderer().scrollToHighlight
-export const renderHighlights = new HighlightRenderer().renderHighlights
-export const renderHighlight = new HighlightRenderer().renderHighlight
-export const removeHighlights = new HighlightRenderer().removeHighlights
-export const removeAnnotationHighlights = new HighlightRenderer()
-    .removeAnnotationHighlights

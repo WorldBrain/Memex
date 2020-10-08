@@ -19,6 +19,7 @@ import { RibbonSubcomponentProps } from './types'
 import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import AnnotationCreate from 'src/annotations/components/AnnotationCreate'
+import BlurredSidebarOverlay from 'src/in-page-ui/sidebar/react/components/blurred-overlay'
 
 const styles = require('./ribbon.css')
 
@@ -116,50 +117,60 @@ export default class Ribbon extends Component<Props, State> {
     private hideTagPicker = () => this.props.tagging.setShowTagsPicker(false)
     private hideListPicker = () => this.props.lists.setShowListsPicker(false)
 
-    private renderTagsManager() {
+    private renderTagsPicker() {
         if (!this.props.tagging.showTagsPicker) {
             return null
         }
 
         return (
             <Tooltip position="left">
-                <TagPicker
-                    onUpdateEntrySelection={this.props.tagging.updateTags}
-                    queryEntries={this.props.tagging.queryTagSuggestions}
-                    actOnAllTabs={this.props.tagging.tagAllTabs}
-                    initialSelectedEntries={
-                        this.props.tagging.fetchInitialTagSelections
-                    }
-                    loadDefaultSuggestions={
-                        this.props.tagging.fetchInitialTagSuggestions
-                    }
-                    onEscapeKeyDown={this.hideTagPicker}
-                    onClickOutside={this.hideTagPicker}
-                />
+                <BlurredSidebarOverlay
+                    onOutsideClick={this.hideTagPicker}
+                    skipRendering={!this.props.sidebar.isSidebarOpen}
+                >
+                    <TagPicker
+                        onUpdateEntrySelection={this.props.tagging.updateTags}
+                        queryEntries={this.props.tagging.queryTagSuggestions}
+                        actOnAllTabs={this.props.tagging.tagAllTabs}
+                        initialSelectedEntries={
+                            this.props.tagging.fetchInitialTagSelections
+                        }
+                        loadDefaultSuggestions={
+                            this.props.tagging.fetchInitialTagSuggestions
+                        }
+                        onEscapeKeyDown={this.hideTagPicker}
+                        handleClickOutside={this.hideTagPicker}
+                    />
+                </BlurredSidebarOverlay>
             </Tooltip>
         )
     }
 
-    private renderCollectionsManager() {
+    private renderCollectionsPicker() {
         if (!this.props.lists.showListsPicker) {
             return null
         }
 
         return (
             <Tooltip position="left">
-                <CollectionPicker
-                    onUpdateEntrySelection={this.props.lists.updateLists}
-                    queryEntries={this.props.lists.queryListSuggestions}
-                    actOnAllTabs={this.props.lists.listAllTabs}
-                    initialSelectedEntries={
-                        this.props.lists.fetchInitialListSelections
-                    }
-                    loadDefaultSuggestions={
-                        this.props.lists.fetchInitialListSuggestions
-                    }
-                    onEscapeKeyDown={this.hideListPicker}
-                    onClickOutside={this.hideListPicker}
-                />
+                <BlurredSidebarOverlay
+                    onOutsideClick={this.hideListPicker}
+                    skipRendering={!this.props.sidebar.isSidebarOpen}
+                >
+                    <CollectionPicker
+                        onUpdateEntrySelection={this.props.lists.updateLists}
+                        queryEntries={this.props.lists.queryListSuggestions}
+                        actOnAllTabs={this.props.lists.listAllTabs}
+                        initialSelectedEntries={
+                            this.props.lists.fetchInitialListSelections
+                        }
+                        loadDefaultSuggestions={
+                            this.props.lists.fetchInitialListSuggestions
+                        }
+                        onEscapeKeyDown={this.hideListPicker}
+                        handleClickOutside={this.hideListPicker}
+                    />
+                </BlurredSidebarOverlay>
             </Tooltip>
         )
     }
@@ -268,7 +279,9 @@ export default class Ribbon extends Component<Props, State> {
                             styles.extraButtons,
                         )}
                     />
-                    <div className={styles.extraButtonsText}>Advanced Settings</div>
+                    <div className={styles.extraButtonsText}>
+                        Advanced Settings
+                    </div>
                 </div>
                 <div
                     onClick={() =>
@@ -310,7 +323,9 @@ export default class Ribbon extends Component<Props, State> {
                                 {!this.props.sidebar.isSidebarOpen && (
                                     <>
                                         <ButtonTooltip
-                                            tooltipText={'Close Toolbar for session'}
+                                            tooltipText={
+                                                'Close Toolbar for session'
+                                            }
                                             position="left"
                                         >
                                             <button
@@ -331,13 +346,15 @@ export default class Ribbon extends Component<Props, State> {
                                         >
                                             <div
                                                 className={cx(styles.button, {
-                                                    [styles.arrow]: !this.props.sidebar
-                                                        .isSidebarOpen,
-                                                    [styles.arrowReverse]: this.props
+                                                    [styles.arrow]: !this.props
                                                         .sidebar.isSidebarOpen,
+                                                    [styles.arrowReverse]: this
+                                                        .props.sidebar
+                                                        .isSidebarOpen,
                                                 })}
                                                 onClick={() =>
-                                                    !this.props.sidebar.isSidebarOpen
+                                                    !this.props.sidebar
+                                                        .isSidebarOpen
                                                         ? this.props.sidebar.openSidebar(
                                                               {},
                                                           )
@@ -345,7 +362,7 @@ export default class Ribbon extends Component<Props, State> {
                                                 }
                                             />
                                         </ButtonTooltip>
-                                </>
+                                    </>
                                 )}
                                 <ButtonTooltip
                                     tooltipText="Search Dashboard"
@@ -435,37 +452,35 @@ export default class Ribbon extends Component<Props, State> {
                                         )}
                                         onClick={this.handleCommentIconBtnClick}
                                     />
-                                    {this.props.commentBox.showCommentBox && (
-                                        <Tooltip position="left">
-                                            <AnnotationCreate
-                                                tagPickerDependencies={{
-                                                    initialSelectedEntries: () =>
-                                                        this.props.commentBox
-                                                            .tags,
-                                                    queryEntries: this.props
-                                                        .tagging
-                                                        .queryTagSuggestions,
-                                                    loadDefaultSuggestions: this
-                                                        .props.tagging
-                                                        .fetchInitialTagSuggestions,
-                                                }}
-                                                onSave={
-                                                    this.props.commentBox
-                                                        .saveComment
-                                                }
-                                                onCancel={
-                                                    this.props.commentBox
-                                                        .cancelComment
-                                                }
-                                                handleClickOutside={() =>
-                                                    this.props.commentBox.setShowCommentBox(
-                                                        false,
-                                                    )
-                                                }
-                                            />
-                                        </Tooltip>
-                                    )}
                                 </ButtonTooltip>
+                                {this.props.commentBox.showCommentBox && (
+                                    <Tooltip position="left">
+                                        <AnnotationCreate
+                                            tagPickerDependencies={{
+                                                initialSelectedEntries: () =>
+                                                    this.props.commentBox.tags,
+                                                queryEntries: this.props.tagging
+                                                    .queryTagSuggestions,
+                                                loadDefaultSuggestions: this
+                                                    .props.tagging
+                                                    .fetchInitialTagSuggestions,
+                                            }}
+                                            onSave={
+                                                this.props.commentBox
+                                                    .saveComment
+                                            }
+                                            onCancel={
+                                                this.props.commentBox
+                                                    .cancelComment
+                                            }
+                                            handleClickOutside={() =>
+                                                this.props.commentBox.setShowCommentBox(
+                                                    false,
+                                                )
+                                            }
+                                        />
+                                    </Tooltip>
+                                )}
                                 <ButtonTooltip
                                     tooltipText={this.getTooltipText('addTag')}
                                     position="left"
@@ -484,9 +499,8 @@ export default class Ribbon extends Component<Props, State> {
                                             )
                                         }
                                     />
-                                    {this.renderTagsManager()}
                                 </ButtonTooltip>
-
+                                {this.renderTagsPicker()}
                                 <ButtonTooltip
                                     tooltipText={this.getTooltipText(
                                         'addToCollection',
@@ -507,8 +521,8 @@ export default class Ribbon extends Component<Props, State> {
                                             )
                                         }
                                     />
-                                    {this.renderCollectionsManager()}
                                 </ButtonTooltip>
+                                {this.renderCollectionsPicker()}
                                 <ButtonTooltip
                                     tooltipText="Settings"
                                     position="left"

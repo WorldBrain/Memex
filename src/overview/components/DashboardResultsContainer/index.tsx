@@ -14,7 +14,6 @@ import { RemoteTagsInterface } from 'src/tags/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { SearchInterface } from 'src/search/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import { renderHighlights } from 'src/highlighting/ui/highlight-interactions'
 import AnnotationsSidebar from 'src/sidebar/annotations-sidebar/components/AnnotationsSidebar'
 import { TaskState } from 'ui-logic-react/lib/types'
 import { AnnotationCreateGeneralProps } from 'src/annotations/components/AnnotationCreate'
@@ -100,21 +99,21 @@ export default class DashboardResultsContainer extends StatefulUIElement<
         // })
     }
 
-    // TODO: (sidebar-refactor, priority 1) -
-    loadAndRenderAnnotations = async (
-        fullUrl: string,
-        onAnnotationClick: (args: { activeUrl?: string }) => void,
-    ) => {
-        const annots = await remoteFunction('getAllAnnotationsByUrl')({
-            url: fullUrl,
-        })
-        // console.log(`Found ${annots?.length} annots for url`)
-        // console.dir(annots)
-        const highlightables = annots.filter(
-            (annotation) => annotation.selector,
-        )
-        await renderHighlights(highlightables, onAnnotationClick)
-    }
+    // // TODO: (sidebar-refactor, priority 1) -
+    // loadAndRenderAnnotations = async (
+    //     fullUrl: string,
+    //     onAnnotationClick: (args: { activeUrl?: string }) => void,
+    // ) => {
+    //     const annots = await remoteFunction('getAllAnnotationsByUrl')({
+    //         url: fullUrl,
+    //     })
+    //     // console.log(`Found ${annots?.length} annots for url`)
+    //     // console.dir(annots)
+    //     const highlightables = annots.filter(
+    //         (annotation) => annotation.selector,
+    //     )
+    //     await renderHighlights(highlightables, onAnnotationClick)
+    // }
 
     render() {
         return (

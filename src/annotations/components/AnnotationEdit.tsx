@@ -28,6 +28,14 @@ export interface Props
 }
 
 class AnnotationEdit extends React.Component<Props> {
+    private textAreaRef = React.createRef<HTMLTextAreaElement>()
+
+    componentDidMount() {
+        const inputLen = this.props.comment.length
+        this.textAreaRef.current.focus()
+        this.textAreaRef.current.setSelectionRange(inputLen, inputLen)
+    }
+
     private handleTagInputKeydown: React.KeyboardEventHandler = (e) => {
         // Only check for `Tab` and `Shift + Tab`, handle rest of the events normally.
         if (e.key === 'Tab') {
@@ -45,12 +53,13 @@ class AnnotationEdit extends React.Component<Props> {
     private renderInput() {
         return (
             <StyledTextArea
-                autoFocus
+                ref={this.textAreaRef}
                 value={this.props.comment}
                 onClick={() => this.props.setTagInputActive(false)}
                 placeholder="Add a private note... (save with cmd/ctrl+enter)"
                 onChange={(e) => this.props.onCommentChange(e.target.value)}
                 onKeyDown={(e) => {
+                    e.stopPropagation()
                     if (this.onEnterSaveHandler.test(e)) {
                         this.onEnterSaveHandler.handle(e)
                     }

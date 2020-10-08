@@ -36,7 +36,7 @@ export interface HighlightInteractionsInterface {
     removeTempHighlights: () => void
     makeHighlightMedium: ({ url }: Highlight) => void
     makeHighlightDark: ({ url }: Highlight) => void
-    removeHighlights: (onlyRemoveDarkHighlights?: boolean) => void
+    removeHighlights: (args?: { onlyRemoveDarkHighlights?: boolean }) => void
     sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
     _removeHighlight: (highlight: Element) => void
     removeAnnotationHighlights: (url: string) => void

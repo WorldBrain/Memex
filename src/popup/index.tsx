@@ -3,11 +3,14 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 
-import { ErrorBoundary, RuntimeError } from '../common-ui/components'
+import ErrorBoundary from 'src/common-ui/components/ErrorBoundary'
+import RuntimeError from 'src/common-ui/components/RuntimeError'
 import Popup from './container'
 import configureStore from './store'
 
 const store = configureStore()
+
+document.getElementById('loader').remove()
 
 ReactDOM.render(
     <Provider store={store}>

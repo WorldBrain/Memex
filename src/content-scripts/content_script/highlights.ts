@@ -30,9 +30,12 @@ export const main: HighlightsScriptMain = async (options) => {
 }
 
 const showHighlights = (options: HighlightDependencies) => {
-    const onClickHighlight: AnnotationClickHandler = ({ annotationUrl }) => {
+    const onClickHighlight: AnnotationClickHandler = ({
+        annotationUrl,
+        openInEdit,
+    }) => {
         options.inPageUI.showSidebar({
-            action: 'edit_annotation',
+            action: openInEdit ? 'edit_annotation' : 'show_annotation',
             annotationUrl,
         })
     }

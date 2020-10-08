@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import cx from 'classnames'
 
-import { OutLink } from '../../common-ui/containers'
+import OutLink from 'src/common-ui/containers/OutLink'
 
 const styles = require('./Button.css')
 

@@ -38,6 +38,7 @@ const getCurrentTab = async () => {
 
     return currentTab
 }
+
 const setTabAndUrl: (id: number, url: string) => Thunk = (id, url) => async (
     dispatch,
 ) => {
@@ -49,7 +50,6 @@ const setTabIsBookmarked: (pageUrl: string) => Thunk = (pageUrl) => async (
     dispatch,
 ) => {
     const hasBoomark = await bookmarks.pageHasBookmark(pageUrl)
-    console.log({ hasBoomark })
     await dispatch(bookmarkActs.setIsBookmarked(hasBoomark))
 }
 

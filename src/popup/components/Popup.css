@@ -57,6 +57,7 @@ hr {
     padding: 2px 10px 2px 10px;
     border-radius: 3px;
     margin: 5px 5px 5px 5px;
+    width: 100%;
 }
 
 .search {
@@ -98,4 +99,3 @@ hr {
     text-decoration: none;
     color: #3a2f45;
 }
-

@@ -10,6 +10,7 @@ import BuildNotifPlugin from 'webpack-build-notifier'
 import CssExtractPlugin from 'mini-css-extract-plugin'
 import SentryPlugin from '@sentry/webpack-plugin'
 import ZipPlugin from 'zip-webpack-plugin'
+import ScriptExtHtmlWebpackPlugin from 'script-ext-html-webpack-plugin'
 import PostCompilePlugin from 'post-compile-webpack-plugin'
 import initEnv from './env'
 import * as staticFiles from './static-files'
@@ -29,7 +30,7 @@ const initTsPlugin = (tslint) =>
 export default function ({
     webExtReloadPort = 9090,
     mode = 'development',
-    template,
+    htmlTemplates,
     isCI = false,
     runSentry = false,
     notifsEnabled = false,
@@ -48,13 +49,13 @@ export default function ({
             title: 'Popup',
             chunks: ['popup'],
             filename: 'popup.html',
-            template,
+            template: htmlTemplates.popup,
         }),
         new HtmlPlugin({
             title: 'Memex',
             chunks: ['options'],
             filename: 'options.html',
-            template,
+            template: htmlTemplates.options,
         }),
         new HtmlIncAssetsPlugin({
             append: false,
@@ -62,6 +63,11 @@ export default function ({
         }),
         new CssExtractPlugin({
             filename: '[name].css',
+        }),
+        new ScriptExtHtmlWebpackPlugin({
+            async: ['popup.js', 'lib/browser-polyfill.js'],
+            preload: /\.(css|js)$/,
+            prefetch: /\.(svg|png)$/,
         }),
     ]
 
