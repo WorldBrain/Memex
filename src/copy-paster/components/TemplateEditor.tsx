@@ -115,6 +115,7 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                         placeholder="Title"
                         className={styles.titleInput}
                         value={template?.title}
+                        onKeyDown={(e) => e.stopPropagation()}
                         onChange={(e) =>
                             this.props.onTitleChange(e.target.value)
                         }
@@ -123,6 +124,7 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                         placeholder="Code"
                         className={styles.textArea}
                         value={template?.code ?? ''}
+                        onKeyDown={(e) => e.stopPropagation()}
                         onChange={(e) =>
                             this.props.onCodeChange(e.target.value)
                         }
