@@ -6,8 +6,7 @@ import { PageUrlsByDay } from './types'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { BackgroundModules } from 'src/background-script/setup'
 import { Annotation } from 'src/annotations/types'
-
-const mockEvent = { addListener: () => undefined }
+import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 
 const countAnnots = (res) => {
     return res.docs.reduce(
@@ -41,12 +40,22 @@ describe('Annotations search', () => {
     async function insertTestData({
         storageManager,
         backgroundModules,
-    }: {
-        storageManager: StorageManager
-        backgroundModules: BackgroundModules
-    }) {
+        fetchPageDataProcessor,
+    }: BackgroundIntegrationTestSetup) {
         const annotsStorage = backgroundModules.directLinking.annotationStorage
         const customListsBg = backgroundModules.customLists
+        fetchPageDataProcessor.mockPage = {
+            url: DATA.highlight.object.pageUrl,
+            hostname: normalizeUrl(DATA.highlight.object.pageUrl),
+            domain: normalizeUrl(DATA.highlight.object.pageUrl),
+            fullTitle: DATA.highlight.object.pageTitle,
+            text: DATA.highlight.object.body,
+            fullUrl: DATA.highlight.object.url,
+            tags: [],
+            terms: [],
+            titleTerms: [],
+            urlTerms: [],
+        }
 
         for (const annot of [
             DATA.highlight,
@@ -72,9 +81,7 @@ describe('Annotations search', () => {
                 ).getTime(),
             })
 
-            await annotsStorage.createAnnotation({
-                ...annot.object,
-            })
+            await annotsStorage.createAnnotation({ ...annot.object })
         }
 
         // Insert bookmarks
@@ -90,9 +97,14 @@ describe('Annotations search', () => {
         coll2Id = await customListsBg.createCustomList({
             name: DATA.coll2,
         })
+
         await customListsBg.insertPageToList({
             id: coll2Id,
-            url: DATA.highlight.fullPageUrl,
+            url: DATA.fullPageUrl1,
+        })
+        await customListsBg.insertPageToList({
+            id: coll1Id,
+            url: DATA.fullPageUrl2,
         })
         await annotsStorage.insertAnnotToList({
             listId: coll1Id,
@@ -124,6 +136,7 @@ describe('Annotations search', () => {
 
     async function setupTest() {
         const setup = await setupBackgroundIntegrationTest({
+            includePostSyncProcessor: true,
             tabManager: {
                 getActiveTab: () => ({ id: 1, url: 'test' }),
                 getTabState: () => undefined,
@@ -275,14 +288,14 @@ describe('Annotations search', () => {
                 query: 'term',
                 limit: 2,
             })
-            const triple = await searchBg.searchAnnotations({
+            const stillDouble = await searchBg.searchAnnotations({
                 query: 'term',
                 limit: 3,
             })
 
             expect(single.docs.length).toBe(1)
             expect(double.docs.length).toBe(2)
-            expect(triple.docs.length).toBe(3)
+            expect(stillDouble.docs.length).toBe(2)
         })
 
         test('comment-terms only terms search', async () => {
@@ -300,7 +313,7 @@ describe('Annotations search', () => {
             const resAllFields = await searchBg.searchAnnotations({
                 query: 'term',
             })
-            expect(countAnnots(resAllFields)).toBe(3)
+            expect(countAnnots(resAllFields)).toBe(2)
             expect(flattenAnnotUrls(resAllFields)).toEqual(
                 expect.arrayContaining([
                     DATA.hybrid.object.url,
@@ -316,7 +329,7 @@ describe('Annotations search', () => {
                 query: 'term',
                 contentTypes: { highlights: true, notes: false, pages: false },
             })
-            expect(countAnnots(resBodyOnly)).toBe(2)
+            expect(countAnnots(resBodyOnly)).toBe(1)
             expect(flattenAnnotUrls(resBodyOnly)).toEqual(
                 expect.arrayContaining([DATA.comment.object.url]),
             )
@@ -324,7 +337,7 @@ describe('Annotations search', () => {
             const resAllFields = await searchBg.searchAnnotations({
                 query: 'term',
             })
-            expect(countAnnots(resAllFields)).toBe(3)
+            expect(countAnnots(resAllFields)).toBe(2)
             expect(flattenAnnotUrls(resAllFields)).toEqual(
                 expect.arrayContaining([
                     DATA.hybrid.object.url,
@@ -416,13 +429,13 @@ describe('Annotations search', () => {
             const resB = await annotsBg.getAllAnnotationsByUrl(
                 { tab: null },
                 {
-                    url: DATA.highlight.object.pageUrl,
+                    url: DATA.normalizedPageUrl2,
                     collections: [coll1Id],
                 },
             )
             expect(resB.length).toBe(1)
             expect(resB.map((a) => a.url)).toEqual(
-                expect.arrayContaining([DATA.highlight.object.url]),
+                expect.arrayContaining([DATA.hybrid.object.url]),
             )
         })
     })
@@ -436,9 +449,13 @@ describe('Annotations search', () => {
             })
 
             // Ensure order is by latest visit
-            expect(results.map((res) => res.url)).toEqual([
-                DATA.hybrid.object.pageUrl,
-                DATA.highlight.object.pageUrl,
+            expect(results).toEqual([
+                expect.objectContaining({
+                    url: DATA.highlight.object.pageUrl,
+                }),
+                expect.objectContaining({
+                    url: DATA.hybrid.object.pageUrl,
+                }),
             ])
         })
 

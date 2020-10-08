@@ -48,7 +48,7 @@ export const annotation = {
         pageTitle: 'Annotation title',
         pageUrl: normalizedPageUrl1,
         body: 'Whooo this is an annotation ',
-        url: '${fullPageUrl1}/#12124124134',
+        url: `${fullPageUrl1}/#12124124134`,
         comment: 'Hmm this is the annotation comment bla',
         selector: {},
         createdWhen: new Date('2019-01-29T18:42Z'),
