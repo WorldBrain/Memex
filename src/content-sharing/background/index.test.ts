@@ -1288,6 +1288,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
     ],
+    { includePostSyncProcessor: true },
 )
 
 function makeShareAnnotationTest(options: {

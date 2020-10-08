@@ -8,7 +8,6 @@ import {
     IntegrationTestStep,
     BackgroundIntegrationTestContext,
 } from 'src/tests/integration-tests'
-import { createPageStep } from 'src/tests/common-fixtures'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
 import {
     FakeTab,

@@ -25,10 +25,9 @@ async function insertTestData({
 }
 
 async function setupTest() {
-    const {
-        backgroundModules,
-        browserAPIs,
-    } = await setupBackgroundIntegrationTest()
+    const { backgroundModules } = await setupBackgroundIntegrationTest({
+        includePostSyncProcessor: true,
+    })
     const customLists: CustomListBackground = backgroundModules.customLists
     const searchIndex: SearchIndex = backgroundModules.search.searchIndex
 
@@ -241,7 +240,9 @@ describe('Custom List Integrations', () => {
 
 describe('Collection Cache', () => {
     async function setupCacheTest() {
-        const setup = await setupBackgroundIntegrationTest()
+        const setup = await setupBackgroundIntegrationTest({
+            includePostSyncProcessor: true,
+        })
         const listsModule = setup.backgroundModules.customLists
         return { listsModule }
     }

@@ -1,7 +1,6 @@
 import {
     IntegrationTestStep,
     BackgroundIntegrationTestContext,
-    BackgroundIntegrationTestSetup,
 } from './integration-tests'
 import { StorageCollectionDiff } from './storage-change-detector'
 import * as DATA from './common-fixtures.data'

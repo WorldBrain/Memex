@@ -17,7 +17,9 @@ describe('Search index integration', () => {
         const {
             storageManager,
             backgroundModules,
-        } = await setupBackgroundIntegrationTest()
+        } = await setupBackgroundIntegrationTest({
+            includePostSyncProcessor: true,
+        })
         const { searchIndex } = backgroundModules.search
 
         if (!options?.excludeTestData) {

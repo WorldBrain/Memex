@@ -7,7 +7,6 @@ import {
     backgroundIntegrationTest,
     BackgroundIntegrationTestSetup,
 } from 'src/tests/integration-tests'
-import { createPageStep } from 'src/tests/common-fixtures'
 import {
     StorageCollectionDiff,
     createdVisit,
@@ -17,7 +16,9 @@ import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 import { PAGE_1_CREATION } from 'src/tests/common-fixtures.data'
 
 describe('bookmarks background unit tests', () => {
-    const it = makeSingleDeviceUILogicTestFactory()
+    const it = makeSingleDeviceUILogicTestFactory({
+        includePostSyncProcessor: true,
+    })
 
     it('should be able to create a map of tab URLs to bookmark flags', async ({
         device,
