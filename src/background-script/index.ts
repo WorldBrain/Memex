@@ -165,6 +165,12 @@ class BackgroundScript {
         })
     }
 
+    private setupStartupHooks() {
+        this.runtimeAPI.onStartup.addListener(async () => {
+            this.tabManagement.trackExistingTabs()
+        })
+    }
+
     /**
      * Run all the quick and dirty migrations we have set up to run directly on Dexie.
      */
@@ -222,6 +228,7 @@ class BackgroundScript {
 
     setupWebExtAPIHandlers() {
         this.setupInstallHooks()
+        this.setupStartupHooks()
         this.setupCommands()
         this.setupUninstallURL()
     }

@@ -116,6 +116,10 @@ export default class TabManagementBackground {
         const tabs = await this.options.browserAPIs.tabs.query({})
 
         await mapChunks(tabs, CONCURR_TAB_LOAD, async (tab) => {
+            if (this.tabManager.isTracked(tab.id)) {
+                return
+            }
+
             this.tabManager.trackTab(tab, {
                 isLoaded: TabManagementBackground.isTabLoaded(tab),
             })
