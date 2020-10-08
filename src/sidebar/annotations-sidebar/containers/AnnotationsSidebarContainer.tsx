@@ -173,6 +173,12 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
+            onEditCancel: () =>
+                this.processEvent('switchAnnotationMode', {
+                    annotationUrl: annotation.url,
+                    mode: 'default',
+                    ...DEF_CONTEXT,
+                }),
         }
     }
 

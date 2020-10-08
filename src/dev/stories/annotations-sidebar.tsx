@@ -105,6 +105,7 @@ async function createDependencies() {
             tags: [],
             isTagInputActive: false,
             onEditConfirm: action('confirmEdit'),
+            onEditCancel: action('cancelEdit'),
             onCommentChange: action('changeComment'),
             deleteSingleTag: action('deleteSingleTag'),
             setTagInputActive: action('activateTagInput'),

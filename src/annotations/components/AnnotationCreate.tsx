@@ -79,6 +79,20 @@ class AnnotationCreate extends React.Component<
 
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
 
+    private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
+        // Allow escape keydown to bubble up to close the sidebar if note text entered
+        if (e.key === 'Escape' && !this.state.text.length) {
+            return
+        }
+
+        e.stopPropagation()
+
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            this.handleSave()
+            return
+        }
+    }
+
     private renderHighlight() {
         if (!this.props.anchor) {
             return
@@ -94,11 +108,6 @@ class AnnotationCreate extends React.Component<
     }
 
     private renderInput() {
-        const onEnterSaveHandler = {
-            test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-            handle: (e) => this.handleSave(),
-        }
-
         return (
             <StyledTextArea
                 autoFocus
@@ -106,12 +115,7 @@ class AnnotationCreate extends React.Component<
                 onClick={this.hideTagPicker}
                 placeholder="Add private note (save with cmd/ctrl+enter)"
                 onChange={(e) => this.setState({ text: e.target.value })}
-                onKeyDown={(e) => {
-                    e.stopPropagation()
-                    if (onEnterSaveHandler.test(e)) {
-                        onEnterSaveHandler.handle(e)
-                    }
-                }}
+                onKeyDown={this.handleInputKeyDown}
             />
         )
     }
