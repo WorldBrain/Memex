@@ -25,11 +25,6 @@ import {
     acts as collectionActs,
     CollectionsButton,
 } from './collections-button'
-import {
-    selectors as blacklist,
-    BlacklistButton,
-    BlacklistConfirm,
-} from './blacklist-button'
 import { BookmarkButton } from './bookmark-button'
 import * as selectors from './selectors'
 import * as acts from './actions'
@@ -48,7 +43,6 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 export interface OwnProps {}
 
 interface StateProps {
-    blacklistConfirm: boolean
     showTagsPicker: boolean
     showCollectionsPicker: boolean
     tabId: number
@@ -163,9 +157,6 @@ class PopupContainer extends PureComponent<Props> {
         collections.fetchPageLists({ url: this.props.url })
 
     renderChildren() {
-        if (this.props.blacklistConfirm) {
-            return <BlacklistConfirm />
-        }
 
         if (this.props.showTagsPicker) {
             return (
@@ -207,21 +198,17 @@ class PopupContainer extends PureComponent<Props> {
                 </div>
                 <hr />
                 <BottomBarBox>
-                    <Search
-                        searchValue={this.props.searchValue}
-                        onSearchChange={this.props.handleSearchChange}
-                        onSearchEnter={this.onSearchEnter}
-                    />
-                    <ButtonTooltip
-                        tooltipText="Go to Dashboard"
-                        position="leftBig"
-                    >
-                        <DashboardButtonBox onClick={this.onSearchClick}>
-                            <LinkButtonBox src={icons.goTo} />
-                        </DashboardButtonBox>
-                    </ButtonTooltip>
+                <Search
+                    searchValue={this.props.searchValue}
+                    onSearchChange={this.props.handleSearchChange}
+                    onSearchEnter={this.onSearchEnter}
+                />
                 </BottomBarBox>
-
+                <div className={styles.item}>
+                    <LinkButton
+                        goToDashboard={this.onSearchClick}
+                    />
+                </div>
                 <div className={styles.item}>
                     <TagsButton />
                 </div>
@@ -308,7 +295,6 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     tabId: selectors.tabId(state),
     url: selectors.url(state),
     searchValue: selectors.searchValue(state),
-    blacklistConfirm: blacklist.showDeleteConfirm(state),
     showCollectionsPicker: collectionsSelectors.showCollectionsPicker(state),
     showTagsPicker: tagsSelectors.showTagsPicker(state),
 })

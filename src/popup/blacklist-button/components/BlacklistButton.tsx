@@ -31,21 +31,6 @@ interface DispatchProps {
 export type Props = OwnProps & StateProps & DispatchProps
 
 class BookmarkButton extends PureComponent<Props> {
-    private renderBlacklisted() {
-        return (
-            <LinkButton
-                href={`${OPTIONS_URL}#/blocklist`}
-                itemClass={styles.itemBlacklisted}
-                btnClass={styles.itemBtnBlacklisted}
-            >
-                Page on your ignore list. 
-
-                <span className={styles.undo}>
-                Undo
-                </span>
-            </LinkButton>
-        )
-    }
 
     private renderUnblacklisted() {
         return (
@@ -82,13 +67,13 @@ class BookmarkButton extends PureComponent<Props> {
     }
 
     render() {
-        if (this.props.shouldShowChoice) {
-            return this.renderBlacklistChoice()
-        }
+        // if (this.props.shouldShowChoice) {
+        //     return this.renderBlacklistChoice()
+        // }
 
-        if (this.props.isBlacklisted) {
-            return this.renderBlacklisted()
-        }
+        // if (this.props.isBlacklisted) {
+        //     return this.renderBlacklisted()
+        // }
 
         return this.renderUnblacklisted()
     }

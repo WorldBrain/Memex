@@ -167,6 +167,7 @@
     background-repeat: no-repeat;
     background-size: 20px;
     opacity: 0.8;
+    float: left;
 }
 
 .badge {

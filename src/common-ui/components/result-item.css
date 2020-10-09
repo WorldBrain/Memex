@@ -10,7 +10,7 @@
 }
 
 .resultBox {
-    display: flex
+    display: flex;
 }
 
 .resultBoxItem {
@@ -42,7 +42,6 @@
     text-decoration: none;
     z-index: 0;
     margin-bottom: 5px;
-    
     background-color: white;
     height: fit-content;
     min-height: var(--height);
