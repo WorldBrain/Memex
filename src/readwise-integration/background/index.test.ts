@@ -9,13 +9,13 @@ import {
     BackgroundIntegrationTestContext,
 } from 'src/tests/integration-tests'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
+import { ReadwiseHighlight } from './types'
 
 const readwiseIntegration = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.readwise
 const directLinking = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.directLinking
 
-let annotUrl!: string
 let API_KEY: string = 'DUMMYVALUE'
 
 const createAPIKeyStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
@@ -74,42 +74,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should instantiate ReadwiseBackground, run ReadwiseBackground.setup, and find key',
             () => {
                 return {
-                    steps: [createAPIKeyStep],
-                }
-            },
-        ),
-        backgroundIntegrationTest(
-            'should validate the api key, save it in local storage, then test it exists on object',
-            () => {
-                return {
-                    steps: [createAPIKeyStep],
-                }
-            },
-        ),
-        backgroundIntegrationTest(
-            'should validate the api key, save it in local storage, create an annotation, and post it to readwise',
-            () => {
-                return {
                     steps: [
-                        createAPIKeyStep,
                         {
                             execute: async ({ setup }) => {
-                                annotUrl = await directLinking(
-                                    setup,
-                                ).createAnnotation(
-                                    { tab: {} as any },
-                                    DATA.ANNOT_1 as any,
-                                    { skipPageIndexing: true },
-                                )
-                            },
-                            postCheck: async ({ setup }) => {
-                                const mostRecentResponse = readwiseIntegration(
-                                    setup,
-                                ).mostRecentResponse
-                                expect(mostRecentResponse).toEqual({
-                                    title: DATA.ANNOT_1.title,
-                                    highlights_url: DATA.ANNOT_1.url,
+                                await setup.browserLocalStorage.set({
+                                    'readwise.apiKey': 'my key',
                                 })
+                                expect(
+                                    await setup.backgroundModules.readwise.getAPIKey(),
+                                ).toEqual('my key')
                             },
                         },
                     ],
@@ -117,70 +90,181 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should validate the api key, save it in local storage, modify an annotation, and post it to readwise',
+            'should store and retrieve the api key',
             () => {
                 return {
                     steps: [
-                        createAPIKeyStep,
                         {
                             execute: async ({ setup }) => {
-                                annotUrl = await directLinking(
-                                    setup,
-                                ).editAnnotation(
-                                    { tab: {} as any },
-                                    DATA.ANNOT_1 as any,
-                                    { skipPageIndexing: true },
+                                await setup.backgroundModules.readwise.setAPIKey(
+                                    'my key',
                                 )
-                            },
-                            postCheck: async ({ setup }) => {
-                                const mostRecentResponse = readwiseIntegration(
-                                    setup,
-                                ).mostRecentResponse
-                                expect(mostRecentResponse).toEqual({
-                                    title: DATA.ANNOT_1.title,
-                                    highlights_url: DATA.ANNOT_1.url,
+                                expect(
+                                    await setup.browserLocalStorage.get(
+                                        'readwise.apiKey',
+                                    ),
+                                ).toEqual({
+                                    'readwise.apiKey': 'my key',
                                 })
+                                expect(
+                                    await setup.backgroundModules.readwise.getAPIKey(),
+                                ).toEqual('my key')
                             },
                         },
                     ],
                 }
             },
         ),
+        backgroundIntegrationTest(
+            'should store and retrieve the api key',
+            () => {
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                let validatedKey: string
+                                setup.backgroundModules.readwise.validateAPIKey = async (
+                                    key,
+                                ) => {
+                                    validatedKey = key
+                                    return { success: true }
+                                }
+                                expect(
+                                    await setup.backgroundModules.readwise.validateAPIKey(
+                                        'good key',
+                                    ),
+                                ).toEqual({ success: true })
+                                expect(validatedKey).toEqual('good key')
 
-        backgroundIntegrationTest(
-            'should validate the api key, save it in local storage, modify an annotation, post it to readwise, and receive an error',
-            () => {
-                return {
-                    steps: [
-                        createAPIKeyStep,
-                        {
-                            execute: async ({ setup }) => {
-                                annotUrl = await directLinking(
-                                    setup,
-                                ).createAnnotation(
-                                    { tab: {} as any },
-                                    DATA.ANNOT_1 as any,
-                                    { skipPageIndexing: true },
-                                )
-                            },
-                            postCheck: async ({ setup }) => {
-                                const mostRecentResponse = readwiseIntegration(
-                                    setup,
-                                ).mostRecentResponse
-                                expect(mostRecentResponse).toEqual({
-                                    status: expect.any(Number),
-                                    body: {
-                                        message: expect.any(String),
-                                    },
-                                })
-                                expect(mostRecentResponse.status).not.toEqual(
-                                    200,
-                                )
+                                setup.backgroundModules.readwise.validateAPIKey = async (
+                                    key,
+                                ) => {
+                                    validatedKey = key
+                                    return { success: false }
+                                }
+                                expect(
+                                    await setup.backgroundModules.readwise.validateAPIKey(
+                                        'bad key',
+                                    ),
+                                ).toEqual({ success: false })
+                                expect(validatedKey).toEqual('bad key')
                             },
                         },
                     ],
                 }
             },
         ),
+        backgroundIntegrationTest(
+            'should upload highlights to readwise when creating annotations',
+            { skipConflictTests: true },
+            () => {
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setup.backgroundModules.readwise.setAPIKey(
+                                    'my key',
+                                )
+
+                                const createdHighlights: Array<ReadwiseHighlight> = []
+                                setup.backgroundModules.readwise.readwiseAPI.putHighlight = async (
+                                    params,
+                                ) => {
+                                    expect(params.key).toEqual('my key')
+                                    createdHighlights.push(params.highlight)
+                                    return { success: true }
+                                }
+
+                                await setup.backgroundModules.directLinking.createAnnotation(
+                                    {
+                                        tab: {
+                                            url: DATA.PAGE_1.fullUrl,
+                                        } as any,
+                                    },
+                                    DATA.ANNOT_1 as any,
+                                    { skipPageIndexing: true },
+                                )
+                                await setup.backgroundModules.directLinking.createAnnotation(
+                                    {
+                                        tab: {
+                                            url: DATA.PAGE_2.fullUrl,
+                                        } as any,
+                                    },
+                                    DATA.ANNOT_2 as any,
+                                    { skipPageIndexing: true },
+                                )
+                                expect(createdHighlights).toEqual([{}, {}])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        // backgroundIntegrationTest(
+        //     'should validate the api key, save it in local storage, modify an annotation, and post it to readwise',
+        //     () => {
+        //         return {
+        //             steps: [
+        //                 createAPIKeyStep,
+        //                 {
+        //                     execute: async ({ setup }) => {
+        //                         annotUrl = await directLinking(
+        //                             setup,
+        //                         ).editAnnotation(
+        //                             { tab: {} as any },
+        //                             DATA.ANNOT_1 as any,
+        //                             { skipPageIndexing: true },
+        //                         )
+        //                     },
+        //                     postCheck: async ({ setup }) => {
+        //                         const mostRecentResponse = readwiseIntegration(
+        //                             setup,
+        //                         ).mostRecentResponse
+        //                         expect(mostRecentResponse).toEqual({
+        //                             title: DATA.ANNOT_1.title,
+        //                             highlights_url: DATA.ANNOT_1.url,
+        //                         })
+        //                     },
+        //                 },
+        //             ],
+        //         }
+        //     },
+        // ),
+
+        // backgroundIntegrationTest(
+        //     'should validate the api key, save it in local storage, modify an annotation, post it to readwise, and receive an error',
+        //     () => {
+        //         return {
+        //             steps: [
+        //                 createAPIKeyStep,
+        //                 {
+        //                     execute: async ({ setup }) => {
+        //                         annotUrl = await directLinking(
+        //                             setup,
+        //                         ).createAnnotation(
+        //                             { tab: {} as any },
+        //                             DATA.ANNOT_1 as any,
+        //                             { skipPageIndexing: true },
+        //                         )
+        //                     },
+        //                     postCheck: async ({ setup }) => {
+        //                         const mostRecentResponse = readwiseIntegration(
+        //                             setup,
+        //                         ).mostRecentResponse
+        //                         expect(mostRecentResponse).toEqual({
+        //                             status: expect.any(Number),
+        //                             body: {
+        //                                 message: expect.any(String),
+        //                             },
+        //                         })
+        //                         expect(mostRecentResponse.status).not.toEqual(
+        //                             200,
+        //                         )
+        //                     },
+        //                 },
+        //             ],
+        //         }
+        //     },
+        // ),
     ],
 )
