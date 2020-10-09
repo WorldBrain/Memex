@@ -7,6 +7,7 @@
     flex-direction: column;
     max-width: 783px;
     width: 98%;
+    margin-top: -5px;
 }
 
 .parentExpandedSidebar {
@@ -15,7 +16,7 @@
 
 .resultCount {
     color: #3a2f45;
-    margin: 0px 0 15px 0;
+    margin: -5px 0 15px 0;
     text-align: start;
     font-size: 13px;
     justify-content: center;

@@ -44,25 +44,24 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                     }}
                 >
                     <ResultItemActionBtn
+                        imgSrc={deleteItem}
+                        onClick={this.props.onTrashBtnClick}
+                        tooltipText="Delete this page & all related content"
+                        className={styles.trash}
+                    />
+                    <ResultItemActionBtn
                         imgSrc={copy}
                         onClick={this.props.onCopyPasterBtnClick}
                         tooltipText="Copy"
                         className={styles.copy}
                         refHandler={this.props.setCopyPasterButtonRef}
                     />
-
                     {/*<ResultItemActionBtn*/}
                     {/*    imgSrc={readerIcon}*/}
                     {/*    onClick={this.props.onReaderBtnClick}*/}
                     {/*    tooltipText="Open in reader view"*/}
                     {/*    className={styles.reader}*/}
                     {/*/>*/}
-                    <ResultItemActionBtn
-                        imgSrc={deleteItem}
-                        onClick={this.props.onTrashBtnClick}
-                        tooltipText="Delete this page & all related content"
-                        className={styles.trash}
-                    />
                     <ResultItemActionBtn
                         permanent={tagsLength > 0}
                         imgSrc={tagsLength > 0 ? tagFull : tagEmpty}

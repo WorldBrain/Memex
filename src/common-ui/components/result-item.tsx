@@ -130,12 +130,12 @@ class ResultItem extends PureComponent<Props> {
     render() {
         return (
             <li
-                className={cx(styles.listItem, {
+                className={cx(styles.listItem, styles.resultBox, {
                     [styles.isDeleting]: this.props.isDeleting,
                 })}
             >
                 <div
-                className={styles.resultBox}
+                    className={styles.resultBoxItem}
                 >
                     {this.props.isDeleting && (
                         <LoadingIndicator className={styles.deletingSpinner} />
@@ -171,13 +171,13 @@ class ResultItem extends PureComponent<Props> {
                             )}
                         </a>
                     </div>
-                    {this.props.isListFilterActive && (
+                    {this.renderAnnotsList()}
+                </div>
+                {this.props.isListFilterActive && (
                         <SemiCircularRibbon
                             onClick={this.props.handleCrossRibbonClick}
                         />
-                    )}
-                    {this.renderAnnotsList()}
-                </div>
+                )}
             </li>
         )
     }

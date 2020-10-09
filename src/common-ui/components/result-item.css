@@ -13,6 +13,10 @@
     display: flex
 }
 
+.resultBoxItem {
+    width: 100%;
+}
+
 /* List entries shown as context around a search result */
 .rootContainer.compact {
     opacity: 0.7;
@@ -38,7 +42,7 @@
     text-decoration: none;
     z-index: 0;
     margin-bottom: 5px;
-    animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+    
     background-color: white;
     height: fit-content;
     min-height: var(--height);
