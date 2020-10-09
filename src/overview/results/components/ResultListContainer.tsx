@@ -177,7 +177,7 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
     }
 
     handleListUpdate = (index: number) => async ({ added, deleted }) => {
-        const url = this.props.searchResults[index].url
+        const url = this.props.searchResults[index].fullUrl
         const backendResult = collections.updateListForPage({
             added,
             deleted,
