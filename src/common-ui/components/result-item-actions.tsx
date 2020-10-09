@@ -3,7 +3,6 @@ import { browser } from 'webextension-polyfill-ts'
 import cx from 'classnames'
 
 import { Props } from './result-item'
-import SemiCircularRibbon from './semi-circular-ribbon'
 import ResultItemActionBtn from './result-item-action-btn'
 
 const styles = require('./result-item.css')
@@ -110,11 +109,6 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                         onClick={this.props.onToggleBookmarkClick}
                         tooltipText="Bookmark"
                     />
-                    {this.props.isListFilterActive && (
-                        <SemiCircularRibbon
-                            onClick={this.props.handleCrossRibbonClick}
-                        />
-                    )}
                 </div>
             </div>
         )
