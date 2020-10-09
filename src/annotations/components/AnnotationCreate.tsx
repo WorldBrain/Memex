@@ -50,12 +50,16 @@ class AnnotationCreate extends React.Component<Props, State> {
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
-        // Allow escape keydown to bubble up to close the sidebar
+        // Allow escape keydown to bubble up to close the sidebar only if no input state
         if (e.key === 'Escape') {
+            if (this.props.comment.length) {
+                e.stopPropagation()
+            }
             this.props.onCancel()
             return
         }
 
+        // If we don't have this, events will bubble up into the page!
         e.stopPropagation()
 
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
