@@ -6,10 +6,6 @@ import { ButtonTooltip } from 'src/common-ui/components'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TextHighlighted from 'src/annotations/components/parts/TextHighlighted'
 import { NewAnnotationOptions } from 'src/annotations/types'
-import {
-    heartEmpty,
-    heartFull,
-} from 'src/common-ui/components/design-library/icons'
 import onClickOutside from 'react-onclickoutside'
 import TagInput from 'src/tags/ui/tag-input'
 
@@ -80,8 +76,9 @@ class AnnotationCreate extends React.Component<
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
-        // Allow escape keydown to bubble up to close the sidebar if note text entered
-        if (e.key === 'Escape' && !this.state.text.length) {
+        // Allow escape keydown to bubble up to close the sidebar
+        if (e.key === 'Escape') {
+            this.props.onCancel()
             return
         }
 
