@@ -95,7 +95,7 @@ export type SidebarContainerEvents = UIEvent<{
     hide: null
 
     // Adding a new page comment
-    addNewPageComment: null
+    addNewPageComment: { comment?: string; tags?: string[] }
     setNewPageCommentAnchor: { anchor: Anchor }
     changeNewPageCommentText: { comment: string }
     changeEditCommentText: { annotationUrl: string; comment: string }
@@ -457,8 +457,28 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    addNewPageComment: EventHandler<'addNewPageComment'> = async () => {
-        this.emitMutation({ showCommentBox: { $set: true } })
+    addNewPageComment: EventHandler<'addNewPageComment'> = async ({
+        event,
+    }) => {
+        const mutation: UIMutation<SidebarContainerState> = {
+            showCommentBox: { $set: true },
+        }
+
+        if (event.comment?.length) {
+            mutation.commentBox = {
+                ...mutation.commentBox,
+                commentText: { $set: event.comment },
+            }
+        }
+
+        if (event.tags?.length) {
+            mutation.commentBox = {
+                ...mutation.commentBox,
+                tags: { $set: event.tags },
+            }
+        }
+
+        this.emitMutation(mutation)
     }
 
     // Unused since insta-saving new highlights

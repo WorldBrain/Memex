@@ -13,8 +13,6 @@ import { AnnotationsSidebarProps } from 'src/sidebar/annotations-sidebar/compone
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
     isSidebarOpen: boolean
-    openSidebar: () => void
-    closeSidebar: () => void
     setRef?: (el: HTMLElement) => void
 }
 
@@ -46,6 +44,20 @@ export default class RibbonContainer extends StatefulUIElement<
         if (currentTab.url !== prevProps.currentTab.url) {
             this.processEvent('hydrateStateFromDB', { url: currentTab.url })
         }
+    }
+
+    private handleSidebarOpen = () => {
+        if (this.state.commentBox.showCommentBox) {
+            this.processEvent('cancelComment', null)
+        }
+
+        this.props.inPageUI.showSidebar({
+            action: 'comment',
+            annotationData: {
+                commentText: this.state.commentBox.commentText,
+                tags: this.state.commentBox.tags,
+            },
+        })
     }
 
     protected getTagProps(): AnnotationsSidebarProps['annotationTagProps'] {
@@ -103,10 +115,8 @@ export default class RibbonContainer extends StatefulUIElement<
                     isSidebarOpen: this.props.isSidebarOpen,
                     setShowSidebarCommentBox: () =>
                         this.props.inPageUI.showSidebar({ action: 'comment' }),
-                    openSidebar: () => {
-                        this.props.openSidebar()
-                    },
-                    closeSidebar: this.props.closeSidebar,
+                    openSidebar: this.handleSidebarOpen,
+                    closeSidebar: () => this.props.inPageUI.hideSidebar(),
                 }}
                 commentBox={{
                     ...this.state.commentBox,

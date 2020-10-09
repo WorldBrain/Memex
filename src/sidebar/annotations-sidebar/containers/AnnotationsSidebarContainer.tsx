@@ -222,16 +222,6 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    private handleAddCommentBtnClick: React.MouseEventHandler = (e) => {
-        e.preventDefault()
-
-        if (this.state.showCommentBox) {
-            this.processEvent('cancelNewPageComment', null)
-        } else {
-            this.processEvent('addNewPageComment', null)
-        }
-    }
-
     private handleCopyAllNotesClick: React.MouseEventHandler = (e) => {
         e.preventDefault()
 

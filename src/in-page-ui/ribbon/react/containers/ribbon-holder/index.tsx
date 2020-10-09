@@ -168,8 +168,6 @@ export default class RibbonHolder extends StatefulUIElement<
                     state={this.state.state}
                     inPageUI={this.props.inPageUI}
                     isSidebarOpen={this.state.isSidebarOpen}
-                    openSidebar={() => this.props.inPageUI.showSidebar()}
-                    closeSidebar={() => this.props.inPageUI.hideSidebar()}
                     setRibbonShouldAutoHide={this.setAutoHide}
                 />
             </div>
