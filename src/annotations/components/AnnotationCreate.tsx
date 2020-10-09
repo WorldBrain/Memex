@@ -1,9 +1,9 @@
 import * as React from 'react'
 import styled from 'styled-components'
+import onClickOutside from 'react-onclickoutside'
 
 import { ButtonTooltip } from 'src/common-ui/components'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
-import onClickOutside from 'react-onclickoutside'
 import TagInput from 'src/tags/ui/tag-input'
 
 interface State {
@@ -18,7 +18,7 @@ export interface AnnotationCreateEventProps {
 }
 
 export interface AnnotationCreateGeneralProps {
-    handleClickOutside?: () => void
+    hide?: () => void
     comment: string
     tags: string[]
 }
@@ -40,8 +40,8 @@ class AnnotationCreate extends React.Component<Props, State> {
     }
 
     handleClickOutside() {
-        if (this.props.handleClickOutside) {
-            this.props?.handleClickOutside()
+        if (this.props.hide && !this.props.comment.length) {
+            this.props.hide()
         }
     }
 
