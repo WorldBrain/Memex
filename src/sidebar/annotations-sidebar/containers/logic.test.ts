@@ -238,10 +238,6 @@ describe('SidebarContainerLogic', () => {
         }) => {
             const { sidebar } = await setupLogicHelper({ device })
 
-            expect(sidebar.state.showCommentBox).toBe(false)
-            await sidebar.processEvent('addNewPageComment', null)
-            expect(sidebar.state.showCommentBox).toBe(true)
-
             expect(sidebar.state.commentBox.commentText).toEqual('')
             await sidebar.processEvent('changeNewPageCommentText', {
                 comment: DATA.COMMENT_1,
@@ -250,15 +246,10 @@ describe('SidebarContainerLogic', () => {
 
             await sidebar.processEvent('cancelNewPageComment', null)
             expect(sidebar.state.commentBox.commentText).toEqual('')
-            expect(sidebar.state.showCommentBox).toBe(false)
         })
 
         it('should be able to save a new comment', async ({ device }) => {
             const { sidebar } = await setupLogicHelper({ device })
-
-            expect(sidebar.state.showCommentBox).toBe(false)
-            await sidebar.processEvent('addNewPageComment', null)
-            expect(sidebar.state.showCommentBox).toBe(true)
 
             expect(sidebar.state.commentBox.commentText).toEqual('')
             await sidebar.processEvent('changeNewPageCommentText', {
@@ -275,17 +266,12 @@ describe('SidebarContainerLogic', () => {
                 }),
             ])
             expect(sidebar.state.commentBox.commentText).toEqual('')
-            expect(sidebar.state.showCommentBox).toBe(false)
         })
 
         it('should be able to save a new comment with tags', async ({
             device,
         }) => {
             const { sidebar } = await setupLogicHelper({ device })
-
-            expect(sidebar.state.showCommentBox).toBe(false)
-            await sidebar.processEvent('addNewPageComment', null)
-            expect(sidebar.state.showCommentBox).toBe(true)
 
             expect(sidebar.state.commentBox.commentText).toEqual('')
             await sidebar.processEvent('changeNewPageCommentText', {
@@ -316,7 +302,51 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.commentBox.tags).toEqual([])
             expect(sidebar.state.commentBox.isBookmarked).toBe(false)
             expect(sidebar.state.commentBox.commentText).toEqual('')
+        })
+
+        it('should be able to hydrate new comment box with state', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({ device })
+
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+            expect(sidebar.state.commentBox.tags).toEqual([])
             expect(sidebar.state.showCommentBox).toBe(false)
+
+            await sidebar.processEvent('addNewPageComment', {
+                comment: DATA.COMMENT_1,
+            })
+            expect(sidebar.state.showCommentBox).toBe(true)
+            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
+            expect(sidebar.state.commentBox.tags).toEqual([])
+
+            await sidebar.processEvent('cancelNewPageComment', null)
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+            expect(sidebar.state.commentBox.tags).toEqual([])
+            expect(sidebar.state.showCommentBox).toBe(false)
+
+            await sidebar.processEvent('addNewPageComment', {
+                tags: [DATA.TAG_1, DATA.TAG_2],
+            })
+            expect(sidebar.state.showCommentBox).toBe(true)
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+            expect(sidebar.state.commentBox.tags).toEqual([
+                DATA.TAG_1,
+                DATA.TAG_2,
+            ])
+
+            await sidebar.processEvent('cancelNewPageComment', null)
+
+            await sidebar.processEvent('addNewPageComment', {
+                comment: DATA.COMMENT_1,
+                tags: [DATA.TAG_1, DATA.TAG_2],
+            })
+            expect(sidebar.state.showCommentBox).toBe(true)
+            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
+            expect(sidebar.state.commentBox.tags).toEqual([
+                DATA.TAG_1,
+                DATA.TAG_2,
+            ])
         })
     })
 
