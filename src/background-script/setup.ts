@@ -60,6 +60,7 @@ import TabManagementBackground from 'src/tab-management/background'
 import { runInTab } from 'src/util/webextensionRPC'
 import { PageAnalyzerInterface } from 'src/page-analysis/types'
 import { TabManager } from 'src/tab-management/background/tab-manager'
+import { ReadwiseBackground } from 'src/readwise-integration/background'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -88,6 +89,7 @@ export interface BackgroundModules {
     readable: ReaderBackground
     contentSharing: ContentSharingBackground
     tabManagement: TabManagementBackground
+    readwise: ReadwiseBackground
 }
 
 export function createBackgroundModules(options: {
@@ -137,6 +139,9 @@ export function createBackgroundModules(options: {
     })
     const searchIndex = combineSearchIndex({
         getDb: async () => storageManager,
+    })
+    const readwise = new ReadwiseBackground({
+        browserStorage: options.browserAPIs.storage.local,
     })
 
     const search = new SearchBackground({
@@ -255,10 +260,10 @@ export function createBackgroundModules(options: {
     const postReceiveProcessor =
         options.fetchPageDataProcessor != null
             ? new PostReceiveProcessor({
-                  pages,
-                  pageFetchBacklog,
-                  fetchPageData: options.fetchPageDataProcessor,
-              }).processor
+                pages,
+                pageFetchBacklog,
+                fetchPageData: options.fetchPageDataProcessor,
+            }).processor
             : undefined
 
     return {
@@ -276,6 +281,7 @@ export function createBackgroundModules(options: {
         tags,
         bookmarks,
         tabManagement,
+        readwise,
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,

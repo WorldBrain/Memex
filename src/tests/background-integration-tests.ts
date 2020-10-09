@@ -46,7 +46,7 @@ export async function setupBackgroundIntegrationTest(
     options?: BackgroundIntegrationTestSetupOpts,
 ): Promise<BackgroundIntegrationTestSetup> {
     if (typeof window === 'undefined') {
-        global['URL'] = URL
+        ;(global as any)['URL'] = URL
     }
 
     // We want to allow tests to be able to override time
