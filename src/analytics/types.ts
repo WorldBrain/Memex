@@ -30,12 +30,19 @@ export interface AnalyticsEvents {
         | 'createFromTooltip'
         | 'createFromShortcut'
         | 'createFromContextMenu'
+        | 'createAnnotationGlobally'
     Highlights:
         | 'create'
         | 'createFromTooltip'
         | 'createFromShortcut'
         | 'createFromContextMenu'
-    Bookmarks: 'createForPage' | 'deleteForPage'
+        | 'createHighlightGlobally'
+    Notes: 
+        | 'createNoteGlobally'
+    Bookmarks: 
+        | 'createBookmarkForPage' 
+        | 'deleteForPage'
+        | 'createBookmarkViaPopup'
     Pages:
         | 'deleteViaRegexBlacklist'
         | 'deleteViaSiteBlacklist'
@@ -46,6 +53,7 @@ export interface AnalyticsEvents {
         | 'visitExternalLink'
         | 'openPopup'
     Tags:
+        | 'createTagForPage'
         | 'createForPageViaPopup'
         | 'createForPageViaRibbon'
         | 'createForPageViaOverview'
@@ -57,8 +65,8 @@ export interface AnalyticsEvents {
         | 'failInitSync'
         | 'clickPairNewDevice'
         | 'generateQRPairingCode'
-    Collections: 'create' | 'addPageViaPopup' | 'addPageViaDragAndDrop'
-    ContentSharing: 'shareList' | 'shareListEntryBatch' | 'unshareListEntry' | 'shareAnnotation'
+    Collections: 'addPageToList' | 'create' | 'addPageViaPopup' | 'addPageViaDragAndDrop'
+    ContentSharing: 'shareList' | 'shareListEntryBatch' | 'unshareListEntry' | 'shareAnnotation' | 'CopyNoteLink' | 'CopyPageLink' | 'CopyCollectionLink'
     InPageTooltip:
         | 'highlightText'
         | 'annotateText'

@@ -61,6 +61,10 @@ export const ANALYTICS_EVENTS: {
             description:
                 'The creation of an annotation without a specific initiator',
         },
+        createAnnotationGlobally: {
+            description:
+                'The creation of an annotation without a specific initiator',
+        },
     },
     Highlights: {
         createFromContextMenu: {
@@ -77,6 +81,16 @@ export const ANALYTICS_EVENTS: {
             description:
                 'The creation of a highlight without a specific initiator',
         },
+        createHighlightGlobally: {
+            description:
+                'The creation of a highlight without a specific initiator',
+        },
+    },
+    Notes: {
+        createNoteGlobally: {
+            description:
+                'Highlight, Note or Annotation created',
+        },
     },
     ContentSharing: {
         shareList: {
@@ -90,6 +104,15 @@ export const ANALYTICS_EVENTS: {
         },
         shareAnnotation: {
             description: 'An annotation is shared',
+        },
+        CopyNoteLink: {
+            description: 'Copied NoteLink to clipboard',
+        },
+        CopyPageLink: {
+            description: 'Copied PageLink to clipboard',
+        },
+        CopyCollectionLink: {
+            description: 'Copied CollectionLink to clipboard',
         },
     },
     Pages: {
@@ -131,11 +154,14 @@ export const ANALYTICS_EVENTS: {
         },
     },
     Bookmarks: {
-        createForPage: {
+        createBookmarkForPage: {
             description: 'The creation of a page bookmark',
         },
         deleteForPage: {
             description: 'The deletion of a page bookmark',
+        },
+        createBookmarkViaPopup: {
+            description: 'Bookmark is created via Popup',
         },
     },
     Global: {
@@ -153,6 +179,9 @@ export const ANALYTICS_EVENTS: {
         },
     },
     Tags: {
+        createTagForPage: {
+            description: 'Tag for page created. Extensionwide.',
+        },
         createForPageViaPopup: {
             description: 'The creation of a tag for a page via the popup menu',
         },
@@ -188,6 +217,9 @@ export const ANALYTICS_EVENTS: {
         },
     },
     Collections: {
+        addPageToList: {
+            description: 'A page is added to a collection',
+        },
         create: {
             description: 'The creation of a new page collection',
         },

@@ -9,6 +9,7 @@ import Raven from 'raven-js'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import pick from 'lodash/pick'
 import { pageIsStub } from 'src/page-indexing/utils'
+import { Analytics } from 'src/analytics/types'
 
 export default class BookmarksBackground {
     storage: BookmarksStorage
@@ -20,6 +21,7 @@ export default class BookmarksBackground {
             pages: PageIndexingBackground
             browserAPIs: Pick<Browser, 'bookmarks'>
             tabManager: TabManager
+            analytics: Analytics
         },
     ) {
         this.storage = new BookmarksStorage(pick(options, 'storageManager'))
@@ -66,6 +68,11 @@ export default class BookmarksBackground {
         }
 
         await this.storage.createBookmarkIfNeeded(fullUrl, params.timestamp)
+
+        this.options.analytics.trackEvent({
+            category: 'Bookmarks',
+            action: 'createBookmarkForPage',
+        })
         // this.options.tabManager.setBookmarkState(params.url, true)
     }
 

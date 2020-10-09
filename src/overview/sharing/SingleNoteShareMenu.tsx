@@ -9,6 +9,8 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 import { LoadingIndicator } from 'src/common-ui/components'
 import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
+import analytics from 'src/analytics'
+
 
 interface State {
     // readyToRender: boolean
@@ -79,6 +81,11 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     // }
 
     private handleLinkCopy = async (link: string) => {
+        // analytics.trackEvent({
+        //     category: 'ContentSharing',
+        //     action: 'CopyNoteLink',
+        // })
+
         await copyToClipboard(link)
     }
 

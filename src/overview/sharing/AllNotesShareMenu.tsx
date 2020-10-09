@@ -16,6 +16,8 @@ import { LoadingIndicator } from 'src/common-ui/components'
 
 import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
 import { copyToClipboard } from 'src/in-page-ui/tooltip/utils'
+import analytics from 'src/analytics'
+
 
 interface State {
     shareAllState: TaskState
@@ -126,6 +128,10 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
     }
 
     private handleLinkCopy = async (link: string) => {
+        // analytics.trackEvent({
+        //     category: 'ContentSharing',
+        //     action: 'CopyPageLink',
+        // })
         await copyToClipboard(link)
     }
 

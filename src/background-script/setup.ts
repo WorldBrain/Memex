@@ -133,6 +133,7 @@ export function createBackgroundModules(options: {
         storageManager,
         pages,
         tabManager,
+        analytics,
         browserAPIs: options.browserAPIs,
     })
     const searchIndex = combineSearchIndex({
@@ -173,6 +174,7 @@ export function createBackgroundModules(options: {
     const social = new SocialBackground({ storageManager })
 
     const customLists = new CustomListBackground({
+        analytics,
         storageManager,
         tabManagement,
         queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
@@ -187,6 +189,7 @@ export function createBackgroundModules(options: {
         storageManager,
         socialBg: social,
         pages,
+        analytics,
     })
 
     const auth =

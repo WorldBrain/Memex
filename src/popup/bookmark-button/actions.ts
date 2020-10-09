@@ -5,6 +5,7 @@ import * as selectors from './selectors'
 import * as popup from '../selectors'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications, bookmarks } from 'src/util/remote-functions-background'
+import analytics from 'src/analytics'
 
 export const setIsBookmarked = createAction<boolean>('bookmark/setIsBookmarked')
 
@@ -26,6 +27,11 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
             dispatch(setIsBookmarked(true))
             await bookmarks.addPageBookmark({ fullUrl: url, tabId })
             dispatch(setIsBookmarked(true))
+
+            analytics.trackEvent({
+                category: 'Bookmarks',
+                action: 'createBookmarkViaPopup',
+            })
         }
     } catch (err) {
         dispatch(setIsBookmarked(hasBookmark))
