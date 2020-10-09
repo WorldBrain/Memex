@@ -142,7 +142,7 @@ export class AnnotationsSidebarContainer<
         const { editForms } = this.state
         // Should only ever be undefined for a moment, between creating a new annot state and
         //  the time it takes for the BG method to return the generated PK
-        const form = editForms[annotation.url] ?? { ...INIT_FORM_STATE.form }
+        const form = editForms[annotation.url] ?? { ...INIT_FORM_STATE }
 
         return {
             isTagInputActive: form.isTagInputActive,
@@ -202,14 +202,14 @@ export class AnnotationsSidebarContainer<
 
     protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
         return {
-            anchor: this.state.commentBox.anchor,
+            onCommentChange: (comment) =>
+                this.processEvent('changeNewPageCommentText', { comment }),
+            onTagsUpdate: (tags) =>
+                this.processEvent('updateNewPageCommentTags', { tags }),
             onCancel: () => this.processEvent('cancelNewPageComment', null),
-            onSave: ({ text, isBookmarked, ...args }) =>
-                this.processEvent('saveNewPageComment', {
-                    commentText: text,
-                    isBookmarked,
-                    ...args,
-                }),
+            onSave: () => this.processEvent('saveNewPageComment', null),
+            comment: this.state.commentBox.commentText,
+            tags: this.state.commentBox.tags,
         }
     }
 

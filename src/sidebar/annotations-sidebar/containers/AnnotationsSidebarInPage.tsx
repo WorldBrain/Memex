@@ -135,11 +135,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
         } else if (event.action === 'comment') {
             this.processEvent('addNewPageComment', null)
-            if (event.anchor) {
-                this.processEvent('setNewPageCommentAnchor', {
-                    anchor: event.anchor,
-                })
-            }
         } else if (event.action === 'show_annotation') {
             this.activateAnnotation(event.annotationUrl)
         } else if (event.action === 'edit_annotation') {

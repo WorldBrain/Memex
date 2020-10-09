@@ -473,11 +473,19 @@ export default class Ribbon extends Component<Props, State> {
                                                 this.props.commentBox
                                                     .cancelComment
                                             }
-                                            handleClickOutside={() =>
-                                                this.props.commentBox.setShowCommentBox(
-                                                    false,
-                                                )
+                                            onTagsUpdate={
+                                                this.props.commentBox
+                                                    .updateCommentBoxTags
                                             }
+                                            onCommentChange={
+                                                this.props.commentBox
+                                                    .changeComment
+                                            }
+                                            comment={
+                                                this.props.commentBox
+                                                    .commentText
+                                            }
+                                            tags={this.props.commentBox.tags}
                                         />
                                     </Tooltip>
                                 )}

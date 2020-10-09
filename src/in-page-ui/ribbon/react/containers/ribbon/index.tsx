@@ -48,15 +48,6 @@ export default class RibbonContainer extends StatefulUIElement<
         }
     }
 
-    protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
-        return {
-            anchor: null,
-            onCancel: () => this.processEvent('cancelComment', null),
-            onSave: (annotation) =>
-                this.processEvent('saveComment', { value: annotation }),
-        }
-    }
-
     protected getTagProps(): AnnotationsSidebarProps['annotationTagProps'] {
         return {
             loadDefaultSuggestions: () =>
@@ -119,12 +110,15 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 commentBox={{
                     ...this.state.commentBox,
-                    saveComment: (value) =>
-                        this.processEvent('saveComment', { value }),
+                    saveComment: () => this.processEvent('saveComment', null),
                     cancelComment: () =>
                         this.processEvent('cancelComment', null),
                     setShowCommentBox: (value) =>
                         this.processEvent('setShowCommentBox', { value }),
+                    changeComment: (value) =>
+                        this.processEvent('changeComment', { value }),
+                    updateCommentBoxTags: (value) =>
+                        this.processEvent('updateCommentBoxTags', { value }),
                 }}
                 bookmark={{
                     ...this.state.bookmark,

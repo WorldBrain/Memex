@@ -74,9 +74,12 @@ async function createDependencies() {
         isSearchLoading: false,
         // displayCrowdfunding: false,
         annotationCreateProps: {
-            anchor: null,
             onCancel: action('cancelAnnotationCreate'),
-            onSave: action('confirmAnnotationCreate'),
+            onSave: async () => action('confirmAnnotationCreate')(),
+            onCommentChange: () => action('changeComment'),
+            onTagsUpdate: () => action('updateTags'),
+            comment: '',
+            tags: [],
         },
         annotationModes: {
             [annotations[0].url]: 'default',

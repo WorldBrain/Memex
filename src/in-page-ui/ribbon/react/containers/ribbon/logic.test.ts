@@ -216,8 +216,9 @@ describe('Ribbon logic', () => {
         expect(arePopupsOpen).toBe(false)
     })
 
-    it('should save a comment that is bookmarked', async ({ device }) => {
+    it('should save a comment', async ({ device }) => {
         const { ribbon, ribbonLogic } = await setupTest(device)
+        const COMMENT_TEXT = 'comment'
 
         await ribbon.init()
         expect(ribbon.state.commentBox).toEqual(
@@ -229,37 +230,81 @@ describe('Ribbon logic', () => {
             ...INITIAL_RIBBON_COMMENT_BOX_STATE,
             showCommentBox: true,
         })
+        await ribbon.processEvent('changeComment', { value: COMMENT_TEXT })
+        expect(ribbon.state.commentBox.commentText).toEqual(COMMENT_TEXT)
 
         ribbonLogic.commentSavedTimeout = 1
-        await ribbon.processEvent('saveComment', {
-            value: {
-                isBookmarked: true,
-                text: 'comment',
-                tags: [],
-            },
-        })
+        await ribbon.processEvent('saveComment', null)
+
         expect(ribbon.state.commentBox).toEqual({
             ...INITIAL_RIBBON_COMMENT_BOX_STATE,
         })
-        const annotations: Annotation[] = await device.storageManager
-            .collection('annotations')
-            .findObjects({})
-        expect(annotations).toEqual([
+
+        expect(
+            await device.storageManager
+                .collection('annotations')
+                .findObjects({}),
+        ).toEqual([
             expect.objectContaining({
+                comment: COMMENT_TEXT,
                 pageTitle: 'Foo.com: Home',
                 pageUrl: 'foo.com',
             }),
         ])
 
         expect(
-            await device.storageManager
-                .collection('annotBookmarks')
-                .findObjects({}),
-        ).toEqual([
+            await device.storageManager.collection('tags').findObjects({}),
+        ).toEqual([])
+    })
+
+    it('should save a comment with tags', async ({ device }) => {
+        const { ribbon, ribbonLogic } = await setupTest(device)
+        const COMMENT_TEXT = 'comment'
+        const TAGS = ['a', 'b', 'c']
+
+        await ribbon.init()
+        expect(ribbon.state.commentBox).toEqual(
+            INITIAL_RIBBON_COMMENT_BOX_STATE,
+        )
+
+        await ribbon.processEvent('setShowCommentBox', { value: true })
+        expect(ribbon.state.commentBox).toEqual({
+            ...INITIAL_RIBBON_COMMENT_BOX_STATE,
+            showCommentBox: true,
+        })
+        await ribbon.processEvent('changeComment', { value: COMMENT_TEXT })
+        expect(ribbon.state.commentBox.commentText).toEqual(COMMENT_TEXT)
+        await ribbon.processEvent('updateCommentBoxTags', { value: TAGS })
+        expect(ribbon.state.commentBox.tags).toEqual(TAGS)
+
+        ribbonLogic.commentSavedTimeout = 1
+        await ribbon.processEvent('saveComment', null)
+
+        expect(ribbon.state.commentBox).toEqual({
+            ...INITIAL_RIBBON_COMMENT_BOX_STATE,
+        })
+
+        const annotations: Annotation[] = await device.storageManager
+            .collection('annotations')
+            .findObjects({})
+
+        expect(annotations).toEqual([
             expect.objectContaining({
-                url: annotations[0].url,
+                comment: COMMENT_TEXT,
+                pageTitle: 'Foo.com: Home',
+                pageUrl: 'foo.com',
             }),
         ])
+
+        expect(
+            await device.storageManager.collection('tags').findObjects({}),
+        ).toEqual(
+            expect.arrayContaining([
+                { url: annotations[0].url, name: TAGS[0] },
+                { url: annotations[0].url, name: TAGS[1] },
+                { url: annotations[0].url, name: TAGS[2] },
+            ]),
+        )
     })
 
     it('should rehydrate state on URL change', async ({ device }) => {
