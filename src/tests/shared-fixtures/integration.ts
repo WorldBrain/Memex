@@ -26,7 +26,7 @@ export async function insertIntegrationTestData(
     const pages = [{ url: 'http://www.bla.com/' }]
 
     if (includeCollection('pages')) {
-        await backgroundModules.search.searchIndex.addPage({
+        await backgroundModules.pages.addPage({
             pageDoc: {
                 url: pages[0].url,
                 content: {
@@ -53,8 +53,9 @@ export async function insertIntegrationTestData(
     }
     if (includeCollection('bookmarks')) {
         await backgroundModules.bookmarks.addBookmark({
-            url: pages[0].url,
-            time: new Date('2019-10-10').getTime(),
+            fullUrl: pages[0].url,
+            timestamp: new Date('2019-10-10').getTime(),
+            skipIndexing: true,
         })
     }
     if (includeCollection('tags')) {

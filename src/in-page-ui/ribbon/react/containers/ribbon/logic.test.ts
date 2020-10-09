@@ -65,10 +65,9 @@ describe('Ribbon logic', () => {
             highlighter,
             annotationsManager,
             getRemoteFunction: () => async () => {},
-            bookmarks: backgroundModules.search.remoteFunctions.bookmarks,
+            bookmarks: backgroundModules.bookmarks.remoteFunctions,
             tags: backgroundModules.tags.remoteFunctions,
             customLists: backgroundModules.customLists.remoteFunctions,
-            activityLogger: backgroundModules.activityLogger.remoteFunctions,
             annotations,
             ...(options?.dependencies ?? {}),
             tooltip: {
@@ -147,10 +146,10 @@ describe('Ribbon logic', () => {
 
         // TODO: Once we make page indexing more testable, fully test down to the DB level
         let hasBookmark = false
-        device.backgroundModules.search.remoteFunctions.bookmarks.addPageBookmark = async () => {
+        device.backgroundModules.bookmarks.remoteFunctions.addPageBookmark = async () => {
             hasBookmark = true
         }
-        device.backgroundModules.search.remoteFunctions.bookmarks.delPageBookmark = async () => {
+        device.backgroundModules.bookmarks.remoteFunctions.delPageBookmark = async () => {
             hasBookmark = false
         }
         await ribbon.init()
@@ -266,7 +265,7 @@ describe('Ribbon logic', () => {
     it('should rehydrate state on URL change', async ({ device }) => {
         const pageBookmarksMockDB: { [url: string]: boolean } = {}
 
-        device.backgroundModules.search.remoteFunctions.bookmarks = {
+        device.backgroundModules.bookmarks.remoteFunctions = {
             pageHasBookmark: async (url) => pageBookmarksMockDB[url] ?? false,
             addPageBookmark: async (args) => {
                 pageBookmarksMockDB[args.url] = true

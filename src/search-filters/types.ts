@@ -15,7 +15,7 @@ export interface RootState {
     tagsExc: string[]
     domainsInc: string[]
     domainsExc: string[]
-    lists: string
+    lists: number
     suggestedTags: string[]
     suggestedDomains: string[]
     contentTypes: ContentTypes

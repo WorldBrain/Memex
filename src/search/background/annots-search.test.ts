@@ -1,117 +1,545 @@
-import Storex from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
-import initStorageManager from '../memory-storex'
-import { setStorex } from '../get-db'
-import { AnnotationsListPlugin } from './annots-list'
-import * as DATA from './annots-search.test.data'
-import CustomListBg from 'src/custom-lists/background'
-import AnnotsBg from 'src/annotations/background'
-import { AnnotSearchParams } from './types'
+import * as DATA from './index.test.data'
+import { PageUrlsByDay } from './types'
+import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
+import { BackgroundModules } from 'src/background-script/setup'
 import { Annotation } from 'src/annotations/types'
+import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 
-const countAnnots = (res: Map<number, Map<string, Annotation[]>>) => {
-    let count = 0
-    for (const [, pageMap] of res) {
-        for (const [, annots] of pageMap) {
-            count += annots.length
-        }
-    }
-    return count
+const countAnnots = (res) => {
+    return res.docs.reduce(
+        (count, { annotations }) => count + annotations.length,
+        0,
+    )
 }
 
-// TODO: Make this work somehow...
-describe.skip('annots search plugin', () => {
-    let annotsBg: AnnotsBg
-    let customListsBg: CustomListBg
-    let storageManager: Storex
+const flattenAnnotUrls = (res) => {
+    return res.docs.reduce(
+        (urls, { annotations }) => [...urls, ...annotations.map((a) => a.url)],
+        [],
+    )
+}
 
-    const search = (
-        params: AnnotSearchParams,
-    ): Promise<Map<number, Map<string, Annotation[]>>> =>
-        storageManager.operation(
-            AnnotationsListPlugin.LIST_BY_DAY_OP_ID,
-            params,
-        )
+const flattenAnnotUrlsFromDayMap = (res: PageUrlsByDay) => {
+    const urls: string[] = []
 
-    async function insertTestData() {
-        for (const name of [DATA.LIST1, DATA.LIST2]) {
-            await customListsBg.createCustomList({ name })
+    for (const annotsByPageUrl of Object.values(res)) {
+        const annots = Object.values(annotsByPageUrl) as Annotation[][]
+        urls.push(...[].concat(...annots).map((a) => a.url))
+    }
+
+    return urls
+}
+
+describe('Annotations search', () => {
+    let coll1Id: number
+    let coll2Id: number
+
+    async function insertTestData({
+        storageManager,
+        backgroundModules,
+        fetchPageDataProcessor,
+    }: BackgroundIntegrationTestSetup) {
+        const annotsStorage = backgroundModules.directLinking.annotationStorage
+        const customListsBg = backgroundModules.customLists
+        fetchPageDataProcessor.mockPage = {
+            url: DATA.highlight.object.pageUrl,
+            hostname: normalizeUrl(DATA.highlight.object.pageUrl),
+            domain: normalizeUrl(DATA.highlight.object.pageUrl),
+            fullTitle: DATA.highlight.object.pageTitle,
+            text: DATA.highlight.object.body,
+            fullUrl: DATA.highlight.object.url,
+            tags: [],
+            terms: [],
+            titleTerms: [],
+            urlTerms: [],
         }
 
-        for (const { hasBookmark, lists, tags, ...annot } of DATA.ANNOTS) {
+        for (const annot of [
+            DATA.highlight,
+            DATA.annotation,
+            DATA.comment,
+            DATA.hybrid,
+        ]) {
             // Pages also need to be seeded to match domains filters against
             await storageManager.collection('pages').createObject({
-                url: annot.pageUrl,
-                hostname: normalizeUrl(annot.pageUrl),
-                domain: normalizeUrl(annot.pageUrl),
-                title: annot.pageTitle,
-                text: annot.body,
-                canonicalUrl: annot.url,
+                url: annot.object.pageUrl,
+                hostname: normalizeUrl(annot.object.pageUrl),
+                domain: normalizeUrl(annot.object.pageUrl),
+                title: annot.object.pageTitle,
+                text: annot.object.body,
+                canonicalUrl: annot.object.url,
             })
 
             // Create a dummy visit 30 secs before annot creation time
             await storageManager.collection('visits').createObject({
-                url: annot.pageUrl,
-                time: new Date(annot.createdWhen.getTime() - 300000).getTime(),
+                url: annot.object.pageUrl,
+                time: new Date(
+                    annot.object.createdWhen.getTime() - 300000,
+                ).getTime(),
             })
 
-            await annotsBg.createAnnotation({ tab: null }, annot as any) // storageManager.collection('annotations').createObject(annot)
+            await annotsStorage.createAnnotation({ ...annot.object })
+        }
 
-            if (hasBookmark) {
-                await annotsBg.toggleAnnotBookmark(
-                    { tab: null },
-                    { url: annot.url },
-                )
-            }
+        // Insert bookmarks
+        await annotsStorage.toggleAnnotBookmark({ url: DATA.hybrid.object.url })
+        await annotsStorage.toggleAnnotBookmark({
+            url: DATA.highlight.object.url,
+        })
 
-            if (lists) {
-                for (const listId of lists) {
-                    await storageManager
-                        .collection('annotListEntries')
-                        .createObject({
-                            url: annot.url,
-                            listId,
-                        })
-                }
-            }
+        // Insert collections + collection entries
+        coll1Id = await customListsBg.createCustomList({
+            name: DATA.coll1,
+        })
+        coll2Id = await customListsBg.createCustomList({
+            name: DATA.coll2,
+        })
 
-            if (tags) {
-                for (const name of tags) {
-                    await storageManager.collection('tags').createObject({
-                        url: annot.url,
-                        name,
-                    })
-                }
-            }
+        await customListsBg.insertPageToList({
+            id: coll2Id,
+            url: DATA.fullPageUrl1,
+        })
+        await customListsBg.insertPageToList({
+            id: coll1Id,
+            url: DATA.fullPageUrl2,
+        })
+        await annotsStorage.insertAnnotToList({
+            listId: coll1Id,
+            url: DATA.hybrid.object.url,
+        })
+        await annotsStorage.insertAnnotToList({
+            listId: coll2Id,
+            url: DATA.highlight.object.url,
+        })
+
+        // Insert tags
+        await annotsStorage.modifyTags(true)(
+            DATA.tag1,
+            DATA.annotation.object.url,
+        )
+        await annotsStorage.modifyTags(true)(
+            DATA.tag2,
+            DATA.annotation.object.url,
+        )
+
+        // I don't know why this happens: seemingly only in jest,
+        //  `getTagsByAnnotationUrl` returns one less result than it's meant to.
+        //  The best fix I can find for now is adding a dummy tag...
+        await annotsStorage.modifyTags(true)(
+            'dummy',
+            DATA.annotation.object.url,
+        )
+    }
+
+    async function setupTest() {
+        const setup = await setupBackgroundIntegrationTest({
+            includePostSyncProcessor: true,
+            tabManager: {
+                getActiveTab: () => ({ id: 1, url: 'test' }),
+                getTabState: () => undefined,
+                getTabStateByUrl: () => undefined,
+            } as any,
+        })
+        await insertTestData(setup)
+
+        return {
+            storageMan: setup.storageManager,
+            searchBg: setup.backgroundModules.search,
+            annotsBg: setup.backgroundModules.directLinking,
         }
     }
 
-    beforeEach(async () => {
-        storageManager = initStorageManager()
-        annotsBg = new AnnotsBg({
-            storageManager,
-            socialBg: {} as any,
-            browserAPIs: {} as any,
-            pageStorage: {} as any,
-            searchIndex: {} as any,
-        })
-        customListsBg = new CustomListBg({
-            storageManager,
-            searchIndex: {} as any,
-            pageStorage: {} as any,
-            localBrowserStorage: {} as any,
+    describe('terms-based searches', () => {
+        test('plain terms search', async () => {
+            const { searchBg } = await setupTest()
+
+            const resA = await searchBg.searchAnnotations({
+                query: 'comment',
+            })
+            expect(countAnnots(resA)).toBe(2)
+            expect(flattenAnnotUrls(resA)).toEqual(
+                expect.arrayContaining([
+                    DATA.comment.object.url,
+                    DATA.annotation.object.url,
+                ]),
+            )
+
+            const resB = await searchBg.searchAnnotations({
+                query: 'bla',
+            })
+            expect(countAnnots(resB)).toBe(2)
+            expect(flattenAnnotUrls(resB)).toEqual(
+                expect.arrayContaining([
+                    DATA.hybrid.object.url,
+                    DATA.annotation.object.url,
+                ]),
+            )
         })
 
-        await storageManager.finishInitialization()
-        setStorex(storageManager)
-        await insertTestData()
+        test('bookmarks filter', async () => {
+            const { searchBg } = await setupTest()
+
+            const resFiltered = await searchBg.searchAnnotations({
+                query: 'bla',
+                bookmarksOnly: true,
+            })
+            expect(countAnnots(resFiltered)).toBe(1)
+            expect(flattenAnnotUrls(resFiltered)).toEqual(
+                expect.arrayContaining([DATA.hybrid.object.url]),
+            )
+
+            const resUnfiltered = await searchBg.searchAnnotations({
+                query: 'bla',
+                bookmarksOnly: false,
+            })
+            expect(countAnnots(resUnfiltered)).toBe(2)
+            expect(flattenAnnotUrls(resUnfiltered)).toEqual(
+                expect.arrayContaining([
+                    DATA.hybrid.object.url,
+                    DATA.annotation.object.url,
+                ]),
+            )
+        })
+
+        test('collections filter', async () => {
+            const { searchBg } = await setupTest()
+
+            const resA = await searchBg.searchAnnotations({
+                query: 'highlight',
+                lists: [coll1Id],
+            })
+            expect(countAnnots(resA)).toBe(1)
+
+            const resB = await searchBg.searchAnnotations({
+                query: 'highlight',
+                lists: [9999999], // Not a real collection ID
+            })
+            expect(countAnnots(resB)).toBe(0)
+        })
+
+        test('tags filter', async () => {
+            const { searchBg } = await setupTest()
+
+            const resFiltered = await searchBg.searchAnnotations({
+                query: 'comment',
+                tagsInc: [DATA.tag1],
+            })
+            expect(countAnnots(resFiltered)).toBe(1)
+            expect(flattenAnnotUrls(resFiltered)).toEqual(
+                expect.arrayContaining([DATA.annotation.object.url]),
+            )
+
+            const resUnfiltered = await searchBg.searchAnnotations({
+                query: 'comment',
+            })
+            expect(countAnnots(resUnfiltered)).toBe(2)
+            expect(flattenAnnotUrls(resUnfiltered)).toEqual(
+                expect.arrayContaining([
+                    DATA.annotation.object.url,
+                    DATA.comment.object.url,
+                ]),
+            )
+        })
+
+        test('domains filter', async () => {
+            const { searchBg } = await setupTest()
+
+            const resUnfiltered = await searchBg.searchAnnotations({
+                query: 'highlight',
+            })
+            expect(countAnnots(resUnfiltered)).toBe(2)
+            expect(flattenAnnotUrls(resUnfiltered)).toEqual(
+                expect.arrayContaining([
+                    DATA.hybrid.object.url,
+                    DATA.highlight.object.url,
+                ]),
+            )
+
+            const resExc = await searchBg.searchAnnotations({
+                query: 'highlight',
+                domainsExclude: ['annotation.url'],
+            })
+            expect(countAnnots(resExc)).toBe(1)
+            expect(flattenAnnotUrls(resExc)).toEqual(
+                expect.arrayContaining([DATA.hybrid.object.url]),
+            )
+
+            const resInc = await searchBg.searchAnnotations({
+                query: 'highlight',
+                domains: ['annotation.url'],
+            })
+            expect(countAnnots(resInc)).toBe(1)
+            expect(flattenAnnotUrls(resInc)).toEqual(
+                expect.arrayContaining([DATA.highlight.object.url]),
+            )
+        })
+
+        test('page result limit parameter', async () => {
+            const { searchBg } = await setupTest()
+
+            const single = await searchBg.searchAnnotations({
+                query: 'term',
+                limit: 1,
+            })
+            const double = await searchBg.searchAnnotations({
+                query: 'term',
+                limit: 2,
+            })
+            const stillDouble = await searchBg.searchAnnotations({
+                query: 'term',
+                limit: 3,
+            })
+
+            expect(single.docs.length).toBe(1)
+            expect(double.docs.length).toBe(2)
+            expect(stillDouble.docs.length).toBe(2)
+        })
+
+        test('comment-terms only terms search', async () => {
+            const { searchBg } = await setupTest()
+
+            const resCommentsOnly = await searchBg.searchAnnotations({
+                query: 'term',
+                contentTypes: { highlights: false, notes: true, pages: false },
+            })
+            expect(countAnnots(resCommentsOnly)).toBe(1)
+            expect(flattenAnnotUrls(resCommentsOnly)).toEqual(
+                expect.arrayContaining([DATA.hybrid.object.url]),
+            )
+
+            const resAllFields = await searchBg.searchAnnotations({
+                query: 'term',
+            })
+            expect(countAnnots(resAllFields)).toBe(2)
+            expect(flattenAnnotUrls(resAllFields)).toEqual(
+                expect.arrayContaining([
+                    DATA.hybrid.object.url,
+                    DATA.comment.object.url,
+                ]),
+            )
+        })
+
+        test('highlighted-text-terms only terms search', async () => {
+            const { searchBg } = await setupTest()
+
+            const resBodyOnly = await searchBg.searchAnnotations({
+                query: 'term',
+                contentTypes: { highlights: true, notes: false, pages: false },
+            })
+            expect(countAnnots(resBodyOnly)).toBe(1)
+            expect(flattenAnnotUrls(resBodyOnly)).toEqual(
+                expect.arrayContaining([DATA.comment.object.url]),
+            )
+
+            const resAllFields = await searchBg.searchAnnotations({
+                query: 'term',
+            })
+            expect(countAnnots(resAllFields)).toBe(2)
+            expect(flattenAnnotUrls(resAllFields)).toEqual(
+                expect.arrayContaining([
+                    DATA.hybrid.object.url,
+                    DATA.comment.object.url,
+                ]),
+            )
+        })
     })
 
-    describe('terms search', () => {
-        test('test terms', async () => {
-            const results = await search({ termsInc: ['english'] })
-            expect(countAnnots(results)).toBe(3)
+    describe('URL-based searches', () => {
+        test('blank', async () => {
+            const { annotsBg } = await setupTest()
+
+            const results = await annotsBg.getAllAnnotationsByUrl(
+                { tab: null },
+                { url: DATA.normalizedPageUrl1 },
+            )
+            expect(results.length).toBe(3)
+            expect(results.map((a) => a.url)).toEqual(
+                expect.arrayContaining([
+                    DATA.highlight.object.url,
+                    DATA.annotation.object.url,
+                    DATA.comment.object.url,
+                ]),
+            )
+        })
+
+        test('bookmarks filter', async () => {
+            const { annotsBg } = await setupTest()
+
+            const results = await annotsBg.getAllAnnotationsByUrl(
+                { tab: null },
+                { url: DATA.normalizedPageUrl1, bookmarksOnly: true },
+            )
+            expect(results.length).toBe(1)
+            expect(results.map((a) => a.url)).toEqual(
+                expect.arrayContaining([DATA.highlight.object.url]),
+            )
+        })
+
+        test('tags included filter', async () => {
+            const { annotsBg } = await setupTest()
+
+            const results = await annotsBg.getAllAnnotationsByUrl(
+                { tab: null },
+                {
+                    url: DATA.normalizedPageUrl1,
+                    tagsInc: [DATA.tag1],
+                },
+            )
+            expect(results.length).toBe(1)
+            expect(results.map((a) => a.url)).toEqual(
+                expect.arrayContaining([DATA.annotation.object.url]),
+            )
+        })
+
+        test('tags excluded filter', async () => {
+            const { annotsBg } = await setupTest()
+
+            const results = await annotsBg.getAllAnnotationsByUrl(
+                { tab: null },
+                {
+                    url: DATA.normalizedPageUrl1,
+                    tagsExc: [DATA.tag1, DATA.tag2, 'dummy'],
+                },
+            )
+            expect(results.length).toBe(0)
+        })
+
+        test('collections filter', async () => {
+            const { annotsBg } = await setupTest()
+
+            const resA = await annotsBg.getAllAnnotationsByUrl(
+                { tab: null },
+                {
+                    url: DATA.normalizedPageUrl1,
+                    collections: [coll2Id],
+                },
+            )
+            expect(resA.length).toBe(3)
+            expect(resA.map((a) => a.url)).toEqual(
+                expect.arrayContaining([
+                    DATA.highlight.object.url,
+                    DATA.annotation.object.url,
+                    DATA.comment.object.url,
+                ]),
+            )
+
+            const resB = await annotsBg.getAllAnnotationsByUrl(
+                { tab: null },
+                {
+                    url: DATA.normalizedPageUrl2,
+                    collections: [coll1Id],
+                },
+            )
+            expect(resB.length).toBe(1)
+            expect(resB.map((a) => a.url)).toEqual(
+                expect.arrayContaining([DATA.hybrid.object.url]),
+            )
+        })
+    })
+
+    describe('blank searches', () => {
+        test('all content types search', async () => {
+            const { searchBg } = await setupTest()
+
+            const { docs: results } = await searchBg.searchPages({
+                contentTypes: { highlights: true, notes: true, pages: true },
+            })
+
+            // Ensure order is by latest visit
+            expect(results).toEqual([
+                expect.objectContaining({
+                    url: DATA.highlight.object.pageUrl,
+                }),
+                expect.objectContaining({
+                    url: DATA.hybrid.object.pageUrl,
+                }),
+            ])
+        })
+
+        test('annots-only search', async () => {
+            const { searchBg } = await setupTest()
+
+            const {
+                annotsByDay: results,
+                resultsExhausted,
+            }: any = await searchBg.searchAnnotations({})
+
+            const resUrls = flattenAnnotUrlsFromDayMap(results)
+            expect(resultsExhausted).toBe(true)
+            // Ensure order of pages is by latest annot
+            expect(resUrls).toEqual(
+                expect.arrayContaining([
+                    DATA.hybrid.object.url,
+                    DATA.comment.object.url,
+                    DATA.highlight.object.url,
+                    DATA.annotation.object.url,
+                ]),
+            )
+        })
+
+        test('time filters', async () => {
+            const { searchBg } = await setupTest()
+
+            // Should result in only the newest annot
+            const { annotsByDay: resA }: any = await searchBg.searchAnnotations(
+                {
+                    startDate: new Date('2019-01-30'),
+                },
+            )
+
+            const resAUrls = flattenAnnotUrlsFromDayMap(resA)
+            expect(resAUrls.length).toBe(1)
+            expect(resAUrls).toEqual(
+                expect.arrayContaining([DATA.hybrid.object.url]),
+            )
+
+            // Should result in only the oldest annot
+            const { annotsByDay: resB }: any = await searchBg.searchAnnotations(
+                {
+                    endDate: new Date('2019-01-26'),
+                },
+            )
+
+            const resBUrls = flattenAnnotUrlsFromDayMap(resB)
+            expect(resBUrls.length).toBe(1)
+            expect(resBUrls).toEqual(
+                expect.arrayContaining([DATA.highlight.object.url]),
+            )
+
+            // Should result in only the oldest annot
+            const { annotsByDay: resC }: any = await searchBg.searchAnnotations(
+                {
+                    startDate: new Date('2019-01-25'),
+                    endDate: new Date('2019-01-28T23:00Z'),
+                },
+            )
+
+            const resCUrls = flattenAnnotUrlsFromDayMap(resC)
+            expect(resCUrls.length).toBe(2)
+            expect(resCUrls).toEqual(
+                expect.arrayContaining([
+                    DATA.comment.object.url,
+                    DATA.highlight.object.url,
+                ]),
+            )
+        })
+
+        test('tags filter', async () => {
+            const { searchBg } = await setupTest()
+
+            const {
+                annotsByDay: results,
+                resultsExhausted,
+            }: any = await searchBg.searchAnnotations({
+                tagsInc: [DATA.tag1],
+            })
+
+            const resUrls = flattenAnnotUrlsFromDayMap(results)
+            expect(resultsExhausted).toBe(true)
+            expect(resUrls).toEqual([DATA.annotation.object.url])
         })
     })
 })

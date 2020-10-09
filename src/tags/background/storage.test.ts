@@ -84,7 +84,9 @@ describe('Tags background interface', () => {
 
 describe('Tag Cache', () => {
     async function setupTest() {
-        const setup = await setupBackgroundIntegrationTest()
+        const setup = await setupBackgroundIntegrationTest({
+            includePostSyncProcessor: true,
+        })
         const tagsModule = setup.backgroundModules.tags
         return { tagsModule }
     }

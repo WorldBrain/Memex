@@ -1,4 +1,3 @@
-import { browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
 import PageStorage from './storage'
 import {
@@ -9,22 +8,25 @@ import {
 } from 'src/search/types'
 import pipeline, { transformUrl } from 'src/search/pipeline'
 import { initErrHandler } from 'src/search/storage'
-import BookmarksStorage from 'src/bookmarks/background/storage'
 import { Page, PageCreationProps } from 'src/search'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { DexieUtilsPlugin } from 'src/search/plugins'
-import analysePage from 'src/page-analysis/background'
+import analysePage from 'src/page-analysis/background/analyse-page'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
-import { STORAGE_KEYS as IDXING_PREF_KEYS } from 'src/options/settings/constants'
+import TabManagementBackground from 'src/tab-management/background'
 
 export class PageIndexingBackground {
     storage: PageStorage
 
+    // Remember which pages are already indexed in which tab, so we only add one visit per page + tab
+    indexedTabPages: { [tabId: number]: { [fullPageUrl: string]: true } } = {}
+
     constructor(
         private options: {
-            bookmarksStorage: BookmarksStorage
+            tabManagement: TabManagementBackground
             storageManager: StorageManager
             fetchPageData?: FetchPageProcessor
+            getNow: () => number
         },
     ) {
         this.storage = new PageStorage({
@@ -38,7 +40,6 @@ export class PageIndexingBackground {
      */
     async addPage({
         visits = [],
-        bookmark,
         pageDoc,
         rejectNoContent,
     }: Partial<PageAddRequest>): Promise<void> {
@@ -50,15 +51,8 @@ export class PageIndexingBackground {
         await this.storage.createOrUpdatePage(pageData)
 
         // Create Visits for each specified time, or a single Visit for "now" if no assoc event
-        visits = !visits.length && bookmark == null ? [Date.now()] : visits
+        visits = !visits.length ? [Date.now()] : visits
         await this.storage.createVisitsIfNeeded(pageData.url, visits)
-
-        if (bookmark != null) {
-            await this.options.bookmarksStorage.createBookmarkIfNeeded(
-                pageData.url,
-                bookmark,
-            )
-        }
 
         if (favIconURI != null) {
             await this.storage.createFavIconIfNeeded(
@@ -140,9 +134,9 @@ export class PageIndexingBackground {
             .catch(initErrHandler())
     }
 
-    async domainHasFavIcon(url: string) {
+    async domainHasFavIcon(ambiguousUrl: string) {
         const db = this.options.storageManager
-        const { hostname } = transformUrl(url)
+        const { hostname } = transformUrl(ambiguousUrl)
 
         const res = await db
             .collection('favIcons')
@@ -151,24 +145,30 @@ export class PageIndexingBackground {
         return res != null
     }
 
-    async createPageFromTab(props: PageCreationProps) {
+    indexPageFromTab = async (props: PageCreationProps) => {
         if (!props.tabId) {
             throw new Error(
                 `No tabID provided to extract content: ${props.fullUrl}`,
             )
         }
 
+        const needsIndexing = !this.isTabPageIndexed({
+            tabId: props.tabId,
+            fullPageUrl: props.fullUrl,
+        })
+        if (!needsIndexing) {
+            return
+        }
+
+        const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))
         const analysisRes = await analysePage({
             tabId: props.tabId,
-            allowFavIcon: true,
-            ...props,
+            tabManagement: this.options.tabManagement,
+            includeContent: props.stubOnly
+                ? 'metadata-only'
+                : 'metadata-with-full-text',
+            includeFavIcon,
         })
-
-        if (props.stubOnly && analysisRes.content) {
-            delete analysisRes.content.fullText
-        } else if (analysisRes.content) {
-            analysisRes.content.fullText = await analysisRes.getFullText()
-        }
 
         const pageData = await pipeline({
             pageDoc: { ...analysisRes, url: props.fullUrl },
@@ -182,21 +182,25 @@ export class PageIndexingBackground {
             )
         }
 
-        await this.storage.createPageIfNotExistsOrIsStub(pageData)
+        await this.storage.createOrUpdatePage(pageData)
         if (props.visitTime) {
-            await this.storage.addPageVisit(pageData.url, props.visitTime)
+            await this.storage.addPageVisit(
+                pageData.url,
+                this._getTime(props.visitTime),
+            )
+            await this.markTabPageAsIndexed({
+                tabId: props.tabId,
+                fullPageUrl: pageData.fullUrl,
+            })
         }
-
-        return pageData
     }
 
-    async createPageFromUrl(props: PageCreationProps) {
+    async indexPageFromUrl(props: PageCreationProps) {
         if (!this.options.fetchPageData) {
             throw new Error(
                 'Instantiation error: fetch-page-data implementation was not given to constructor',
             )
         }
-
         const pageData = await this.options.fetchPageData.process(props.fullUrl)
 
         if (props.stubOnly && pageData.text && pageData.terms?.length) {
@@ -204,15 +208,16 @@ export class PageIndexingBackground {
             delete pageData.terms
         }
 
-        await this.storage.createPageIfNotExists(pageData)
+        await this.storage.createOrUpdatePage(pageData)
         if (props.visitTime) {
-            await this.storage.addPageVisit(pageData.url, props.visitTime)
+            await this.storage.addPageVisit(
+                pageData.url,
+                this._getTime(props.visitTime),
+            )
         }
-
-        return pageData
     }
 
-    async createTestPage(props: PageCreationProps) {
+    async indexTestPage(props: PageCreationProps) {
         const pageData = await pipeline({
             pageDoc: { url: props.fullUrl, content: {} },
             rejectNoContent: false,
@@ -220,29 +225,43 @@ export class PageIndexingBackground {
 
         await this.storage.createPageIfNotExists(pageData)
         if (props.visitTime) {
-            await this.storage.addPageVisit(pageData.url, props.visitTime)
+            await this.storage.addPageVisit(
+                pageData.url,
+                this._getTime(props.visitTime),
+            )
         }
-        return pageData
     }
 
-    /**
-     * Decides which type of on-demand page indexing logic to run based on given props.
-     * Also sets the `stubOnly` option based on user bookmark/tag indexing pref.
-     * TODO: Better name?
-     */
-    async createPageViaBmTagActs(props: PageCreationProps) {
-        if (props.stubOnly == null) {
-            const {
-                [IDXING_PREF_KEYS.BOOKMARKS]: fullyIndex,
-            } = await browser.storage.local.get(IDXING_PREF_KEYS.BOOKMARKS)
-
-            props.stubOnly = !fullyIndex
-        }
+    indexPage = async (props: PageCreationProps) => {
+        props.tabId =
+            props.tabId ??
+            (await this.options.tabManagement.findTabIdByFullUrl(props.fullUrl))
 
         if (props.tabId) {
-            return this.createPageFromTab(props)
+            await this.indexPageFromTab(props)
+        } else {
+            await this.indexPageFromUrl(props)
         }
+    }
 
-        return this.createPageFromUrl(props)
+    isTabPageIndexed(params: { tabId: number; fullPageUrl: string }) {
+        return this.indexedTabPages[params.tabId]?.[params.fullPageUrl] ?? false
+    }
+
+    markTabPageAsIndexed(params: { tabId: number; fullPageUrl: string }) {
+        const { tabId } = params
+        this.indexedTabPages[tabId] = this.indexedTabPages[tabId] || {}
+        this.indexedTabPages[tabId][params.fullPageUrl] = true
+    }
+
+    handleTabClose(event: { tabId: number }) {
+        delete this.indexedTabPages[event.tabId]
+    }
+
+    _getTime(time?: number | '$now') {
+        if (!time && time !== 0) {
+            return
+        }
+        return time !== '$now' ? time : this.options.getNow()
     }
 }

@@ -60,6 +60,53 @@ export type RemotePositionalFunction<
 > = Role extends 'provider'
     ? (info: { tab: { id: number } }, ...params: Params) => Promise<Returns>
     : (...params: Params) => Promise<Returns>
+export type RemoteFunctionWithExtraArgs<
+    Role extends RemoteFunctionRole,
+    Params,
+    Returns = void
+> = Role extends 'provider'
+    ? {
+          withExtraArgs: true
+          function: RemoteFunction<Role, Params, Returns>
+      }
+    : RemoteFunction<Role, Params, Returns>
+export type RemoteFunctionWithoutExtraArgs<
+    Role extends RemoteFunctionRole,
+    Params,
+    Returns = void
+> = Role extends 'provider'
+    ? {
+          withExtraArgs: false
+          function: (params: Params) => Promise<Returns> | Returns
+      }
+    : (params: Params) => Promise<Returns>
+export function remoteFunctionWithExtraArgs<Params, Returns = void>(
+    f: RemoteFunction<'provider', Params, Returns>,
+): RemoteFunctionWithExtraArgs<'provider', Params, Returns> {
+    return { withExtraArgs: true, function: f }
+}
+export function remoteFunctionWithoutExtraArgs<Params, Returns = void>(
+    f: (params: Params) => Promise<Returns> | Returns,
+): RemoteFunctionWithoutExtraArgs<'provider', Params, Returns> {
+    return { withExtraArgs: false, function: f }
+}
+export function registerRemoteFunctions<Functions>(
+    functions: {
+        [Name in keyof Functions]:
+            | RemoteFunctionWithExtraArgs<'provider', any, any>
+            | RemoteFunctionWithoutExtraArgs<'provider', any, any>
+    },
+) {
+    for (const [name, metadata] of Object.entries(functions)) {
+        const typedMetadata = metadata as
+            | RemoteFunctionWithExtraArgs<'provider', any, any>
+            | RemoteFunctionWithoutExtraArgs<'provider', any, any>
+        makeRemotelyCallable(
+            { [name]: typedMetadata.function },
+            { insertExtraArg: typedMetadata.withExtraArgs },
+        )
+    }
+}
 
 // === Initiating side ===
 

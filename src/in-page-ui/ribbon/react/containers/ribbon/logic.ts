@@ -155,7 +155,7 @@ export class RibbonContainerLogic extends UILogic<
             pageUrl: { $set: url },
             pausing: {
                 isPaused: {
-                    $set: await this.dependencies.activityLogger.isLoggingPaused(),
+                    $set: await true,
                 },
             },
             bookmark: {
@@ -258,7 +258,7 @@ export class RibbonContainerLogic extends UILogic<
         try {
             if (shouldBeBookmarked) {
                 await this.dependencies.bookmarks.addPageBookmark({
-                    url: postInitState.pageUrl,
+                    fullUrl: postInitState.pageUrl,
                     tabId: this.dependencies.currentTab.id,
                 })
             } else {
@@ -495,7 +495,7 @@ export class RibbonContainerLogic extends UILogic<
         toggleState()
 
         try {
-            await this.dependencies.activityLogger.toggleLoggingPause()
+            // await this.dependencies.activityLogger.toggleLoggingPause()
         } catch (err) {
             toggleState()
             throw err

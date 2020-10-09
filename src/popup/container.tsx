@@ -4,7 +4,6 @@ import { connect, MapStateToProps } from 'react-redux'
 import { browser } from 'webextension-polyfill-ts'
 import styled from 'styled-components'
 
-
 import * as constants from '../constants'
 
 import analytics from '../analytics'
@@ -109,14 +108,14 @@ class PopupContainer extends PureComponent<Props> {
     onSearchClick = () => {
         console.log('Test')
 
-            const queryFilters = extractQueryFilters(this.props.searchValue)
-            const queryParams = qs.stringify(queryFilters)
+        const queryFilters = extractQueryFilters(this.props.searchValue)
+        const queryParams = qs.stringify(queryFilters)
 
-            browser.tabs.create({
-                url: `${constants.OVERVIEW_URL}?${queryParams}`,
-            }) // New tab with query
+        browser.tabs.create({
+            url: `${constants.OVERVIEW_URL}?${queryParams}`,
+        }) // New tab with query
 
-            this.closePopup()
+        this.closePopup()
     }
 
     handleTagUpdate = async ({ added, deleted }) => {
@@ -204,7 +203,7 @@ class PopupContainer extends PureComponent<Props> {
             <React.Fragment>
                 <hr />
                 <div className={styles.item}>
-                    <BookmarkButton closePopup={this.closePopup}/>
+                    <BookmarkButton closePopup={this.closePopup} />
                 </div>
                 <hr />
                 <BottomBarBox>
@@ -217,14 +216,10 @@ class PopupContainer extends PureComponent<Props> {
                         tooltipText="Go to Dashboard"
                         position="leftBig"
                     >
-                    <DashboardButtonBox
-                        onClick={this.onSearchClick}
-                    >
-                            <LinkButtonBox
-                                src={icons.goTo}
-                            />
+                        <DashboardButtonBox onClick={this.onSearchClick}>
+                            <LinkButtonBox src={icons.goTo} />
                         </DashboardButtonBox>
-                    </ButtonTooltip> 
+                    </ButtonTooltip>
                 </BottomBarBox>
 
                 <div className={styles.item}>
@@ -246,7 +241,11 @@ class PopupContainer extends PureComponent<Props> {
                 <hr />
 
                 <div className={styles.buttonContainer}>
-                    <a href="https://worldbrain.io/feedback" target="_blank" className={styles.feedbackButton}>
+                    <a
+                        href="https://worldbrain.io/feedback"
+                        target="_blank"
+                        className={styles.feedbackButton}
+                    >
                         🐞 Feedback
                     </a>
                     <div className={styles.buttonBox}>
@@ -261,7 +260,7 @@ class PopupContainer extends PureComponent<Props> {
                             icon="help"
                             btnClass={btnStyles.help}
                         />
-                    {/*<NotifButton />*/}
+                        {/*<NotifButton />*/}
                     </div>
                 </div>
             </React.Fragment>
@@ -287,7 +286,6 @@ const DashboardButtonBox = styled.div`
     }
 `
 
-
 const BottomBarBox = styled.div`
     display: flex;
     flex-direction: row;
@@ -299,13 +297,12 @@ const BottomBarBox = styled.div`
     & > div {
         width: 45px;
     }
-`    
+`
 
 const LinkButtonBox = styled.img`
     height: 24px;
     width: 24px;
 `
-
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     tabId: selectors.tabId(state),

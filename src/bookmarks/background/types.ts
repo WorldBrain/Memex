@@ -1,7 +1,7 @@
 export interface BookmarksInterface {
     addPageBookmark(args: {
-        url: string
-        fullUrl?: string
+        url?: string
+        fullUrl: string
         timestamp?: number
         tabId?: number
     }): Promise<any>

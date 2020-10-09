@@ -33,8 +33,8 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         )
     }
 
-    private async listSearch(lists: string[]): Promise<Set<number>> {
-        if (!lists || !lists.length || !lists[0].length) {
+    private async listSearch(lists: number[]): Promise<Set<number>> {
+        if (!lists || !lists.length) {
             return undefined
         }
 
@@ -59,7 +59,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             .table('tags')
             .where('name')
             .anyOf(tags)
-            .eachPrimaryKey(pk => {
+            .eachPrimaryKey((pk) => {
                 const [, url] = pk as [void, string]
                 const { postId } = derivePostUrlIdProps({ url })
 
@@ -91,7 +91,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             return undefined
         }
 
-        const userIds = users.map(user => user.id)
+        const userIds = users.map((user) => user.id)
 
         const postIds = (await this.backend.dexieInstance
             .table(POSTS_COLL)
@@ -143,9 +143,9 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             .table<Tweet>(POSTS_COLL)
             .where('id')
             .anyOf(postIds)
-            .each(post => socialPosts.set(post.id, post))
+            .each((post) => socialPosts.set(post.id, post))
 
-        postIds.map(id => {
+        postIds.map((id) => {
             const post = socialPosts.get(id)
             if (post !== undefined) {
                 results.set(id, post)
@@ -169,7 +169,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
         if (startDate || endDate) {
             coll = coll.filter(
-                tweet =>
+                (tweet) =>
                     tweet.createdAt >= new Date(startDate || 0) &&
                     tweet.createdAt <= new Date(endDate || Date.now()),
             )
@@ -194,7 +194,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         // Get intersection of results for all terms (all terms must match)
         const intersected = [...results.values()].reduce((a, b) => {
             const bSet = new Set(b)
-            return a.filter(res => bSet.has(res))
+            return a.filter((res) => bSet.has(res))
         })
 
         return intersected
@@ -329,7 +329,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
         const latestVisits = new Map<number, number>()
         const idsToCheck = bookmarksOnly ? [...latestBookmarks.keys()] : postIds
-        const doneFlags = idsToCheck.map(url => false)
+        const doneFlags = idsToCheck.map((url) => false)
 
         const visitsPerPage = new Map<number, number[]>()
 
@@ -346,7 +346,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         idsToCheck.forEach((postId, i) => {
             const currVisits = visitsPerPage.get(postId) || []
             // `currVisits` array assumed sorted latest first
-            currVisits.forEach(visit => {
+            currVisits.forEach((visit) => {
                 if (doneFlags[i]) {
                     return
                 }
@@ -383,7 +383,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         ) {
             postScoresMap = await this.mapUrlsToLatestEvents(
                 params,
-                [...filteredPosts.include].map(id => Number(id)),
+                [...filteredPosts.include].map((id) => Number(id)),
             )
         } else if (!params.termsInc || !params.termsInc.length) {
             postScoresMap = await this.groupLatestEventsByUrl(
@@ -392,7 +392,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             )
         } else {
             const termsSearchResults = await this.lookupTerms(params)
-            const filteredResults = termsSearchResults.filter(id =>
+            const filteredResults = termsSearchResults.filter((id) =>
                 filteredPosts.isAllowed(id),
             )
             postScoresMap = await this.mapUrlsToLatestEvents(

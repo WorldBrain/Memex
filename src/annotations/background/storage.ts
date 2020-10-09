@@ -1,4 +1,3 @@
-import { Tabs, Storage } from 'webextension-polyfill-ts'
 import Storex from '@worldbrain/storex'
 import {
     StorageModule,
@@ -12,12 +11,10 @@ import { COLLECTION_NAMES as PAGE_COLLECTION_NAMES } from '@worldbrain/memex-sto
 import { COLLECTION_NAMES as TAG_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/tags/constants'
 import { COLLECTION_NAMES as LIST_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
 
-import { Tag, SearchIndex } from 'src/search'
-import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
+import { Tag } from 'src/search'
 import { AnnotationsListPlugin } from 'src/search/background/annots-list'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
-import PageStorage from 'src/page-indexing/background/storage'
 import { Annotation, AnnotListEntry } from 'src/annotations/types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
@@ -29,30 +26,8 @@ export default class AnnotationStorage extends StorageModule {
     static LISTS_COLL = LIST_COLLECTION_NAMES.list
     static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
 
-    private _browserStorageArea: Storage.StorageArea
-
-    private db: Storex
-    private searchIndex: SearchIndex
-
-    constructor(
-        private options: {
-            storageManager: Storex
-            browserStorageArea: Storage.StorageArea
-            annotationsColl?: string
-            pageStorage: PageStorage
-            pagesColl?: string
-            tagsColl?: string
-            bookmarksColl?: string
-            listsColl?: string
-            listEntriesColl?: string
-            searchIndex: SearchIndex
-        },
-    ) {
+    constructor(private options: { storageManager: Storex }) {
         super({ storageManager: options.storageManager })
-
-        this.db = options.storageManager
-        this.searchIndex = options.searchIndex
-        this._browserStorageArea = options.browserStorageArea
     }
 
     getConfig = (): StorageModuleConfig => ({
@@ -270,7 +245,7 @@ export default class AnnotationStorage extends StorageModule {
     }
 
     private async getListById({ listId }: { listId: number }) {
-        const list = await this.db
+        const list = await this.options.storageManager
             .collection(AnnotationStorage.LISTS_COLL)
             .findOneObject<{ id: number }>({ id: listId })
 
@@ -346,30 +321,6 @@ export default class AnnotationStorage extends StorageModule {
         }
     }
 
-    private async fetchIndexingPrefs(): Promise<{ shouldIndexLinks: boolean }> {
-        const storage = await this._browserStorageArea.get(
-            IDXING_PREF_KEYS.LINKS,
-        )
-
-        return {
-            shouldIndexLinks: !!storage[IDXING_PREF_KEYS.LINKS],
-        }
-    }
-
-    async indexPageFromTab({ id, url }: Tabs.Tab) {
-        const indexingPrefs = await this.fetchIndexingPrefs()
-
-        const page = await this.searchIndex.createPageFromTab({
-            tabId: id,
-            fullUrl: url,
-            stubOnly: !indexingPrefs.shouldIndexLinks,
-        })
-
-        await this.options.pageStorage.createVisitsIfNeeded(page.url, [
-            Date.now(),
-        ])
-    }
-
     async getAnnotationByPk(url: string): Promise<Annotation> {
         return this.operation('findAnnotationByUrl', { url })
     }
@@ -425,16 +376,20 @@ export default class AnnotationStorage extends StorageModule {
     }
 
     async getTagsByAnnotationUrl(url: string): Promise<Tag[]> {
-        return this.db
+        return this.options.storageManager
             .collection(AnnotationStorage.TAGS_COLL)
             .findAllObjects<Tag>({ url })
     }
 
     private deleteTags = (query: { name: string; url: string }) =>
-        this.db.collection(AnnotationStorage.TAGS_COLL).deleteObjects(query)
+        this.options.storageManager
+            .collection(AnnotationStorage.TAGS_COLL)
+            .deleteObjects(query)
 
     private createTag = (tag) =>
-        this.db.collection(AnnotationStorage.TAGS_COLL).createObject(tag)
+        this.options.storageManager
+            .collection(AnnotationStorage.TAGS_COLL)
+            .createObject(tag)
 
     editAnnotationTags = async (
         tagsToBeAdded: string[],

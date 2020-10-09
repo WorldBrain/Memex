@@ -7,10 +7,8 @@ import * as acts from '../actions'
 import * as popup from '../../selectors'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 
-
 const styles = require('./TagsButton.css')
 const buttonStyles = require('../../components/Button.css')
-
 
 export interface OwnProps {}
 
@@ -26,33 +24,26 @@ interface DispatchProps {
 export type Props = OwnProps & StateProps & DispatchProps
 
 class TagsButton extends PureComponent<Props> {
-
     async componentDidMount() {
         await this.getKeyboardShortcutText()
     }
 
     state = {
-        highlightInfo: undefined
+        highlightInfo: undefined,
     }
 
-
     private async getKeyboardShortcutText() {
-        const {
-            shortcutsEnabled,
-            addTag,
-        } = await getKeyboardShortcutsState()
+        const { shortcutsEnabled, addTag } = await getKeyboardShortcutsState()
 
         if (!shortcutsEnabled || !addTag.enabled) {
             this.setState({
-                highlightInfo: `${addTag.shortcut} (disabled)`
-            }) 
-        } else (
+                highlightInfo: `${addTag.shortcut} (disabled)`,
+            })
+        } else
             this.setState({
-                highlightInfo: `${addTag.shortcut}`
-            }) 
-        )
+                highlightInfo: `${addTag.shortcut}`,
+            })
     }
-
 
     render() {
         return (
@@ -65,7 +56,7 @@ class TagsButton extends PureComponent<Props> {
                 >
                     Add Tag(s)
                     <p className={buttonStyles.subTitle}>
-                            {this.state.highlightInfo}
+                        {this.state.highlightInfo}
                     </p>
                 </Button>
             </div>

@@ -58,7 +58,9 @@ const setupLogicHelper = async ({
 }
 
 describe('SidebarContainerLogic', () => {
-    const it = makeSingleDeviceUILogicTestFactory()
+    const it = makeSingleDeviceUILogicTestFactory({
+        includePostSyncProcessor: true,
+    })
 
     describe('page annotation results', () => {
         const context = 'pageAnnotations'

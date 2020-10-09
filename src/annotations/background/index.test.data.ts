@@ -1,3 +1,5 @@
+export { TEST_TAB_1, TEST_TAB_2 } from 'src/tests/common-fixtures.data'
+
 export const VISIT_1 = 1569987718848
 
 export const TAG_1 = 'test'

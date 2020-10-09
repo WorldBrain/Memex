@@ -29,12 +29,13 @@ import {
     blacklist,
 } from 'src/blacklist/background'
 import analytics from 'src/analytics'
+import TabManagementBackground from 'src/tab-management/background'
 
 class BackgroundScript {
     private utils: typeof utils
+    private tabManagement: TabManagementBackground
     private copyPasterBackground: CopyPasterBackground
     private notifsBackground: NotifsBackground
-    private activityLoggerBackground: ActivityLoggerBackground
     private storageChangesMan: StorageChangesManager
     private storageManager: Storex
     private urlNormalizer: URLNormalizer
@@ -48,8 +49,8 @@ class BackgroundScript {
     constructor({
         storageManager,
         notifsBackground,
-        loggerBackground,
         copyPasterBackground,
+        tabManagement,
         utilFns = utils,
         storageChangesMan,
         urlNormalizer = normalizeUrl,
@@ -60,8 +61,8 @@ class BackgroundScript {
         tabsAPI = browser.tabs,
     }: {
         storageManager: Storex
+        tabManagement: TabManagementBackground
         notifsBackground: NotifsBackground
-        loggerBackground: ActivityLoggerBackground
         copyPasterBackground: CopyPasterBackground
         urlNormalizer?: URLNormalizer
         utilFns?: typeof utils
@@ -73,8 +74,8 @@ class BackgroundScript {
         tabsAPI?: Tabs.Static
     }) {
         this.storageManager = storageManager
+        this.tabManagement = tabManagement
         this.notifsBackground = notifsBackground
-        this.activityLoggerBackground = loggerBackground
         this.copyPasterBackground = copyPasterBackground
         this.utils = utilFns
         this.storageChangesMan = storageChangesMan
@@ -151,7 +152,7 @@ class BackgroundScript {
     private setupInstallHooks() {
         this.runtimeAPI.onInstalled.addListener(async (details) => {
             this.notifsBackground.deliverStaticNotifications()
-            this.activityLoggerBackground.trackExistingTabs()
+            this.tabManagement.trackExistingTabs()
 
             switch (details.reason) {
                 case 'install':
@@ -161,6 +162,12 @@ class BackgroundScript {
                     return this.handleUpdateLogic()
                 default:
             }
+        })
+    }
+
+    private setupStartupHooks() {
+        this.runtimeAPI.onStartup.addListener(async () => {
+            this.tabManagement.trackExistingTabs()
         })
     }
 
@@ -221,6 +228,7 @@ class BackgroundScript {
 
     setupWebExtAPIHandlers() {
         this.setupInstallHooks()
+        this.setupStartupHooks()
         this.setupCommands()
         this.setupUninstallURL()
     }

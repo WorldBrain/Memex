@@ -1,8 +1,11 @@
+import pick from 'lodash/pick'
 import * as DATA from './index.test.data'
 import { FavIcon } from './models'
 import { SearchIndex } from './types'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import TagsBackground from 'src/tags/background'
+import { PageIndexingBackground } from 'src/page-indexing/background'
+import BookmarksBackground from 'src/bookmarks/background'
 
 jest.mock('./models/abstract-model')
 jest.mock('lodash/fp/intersection')
@@ -14,17 +17,22 @@ describe('Search index integration', () => {
         const {
             storageManager,
             backgroundModules,
-        } = await setupBackgroundIntegrationTest()
+        } = await setupBackgroundIntegrationTest({
+            includePostSyncProcessor: true,
+        })
         const { searchIndex } = backgroundModules.search
 
         if (!options?.excludeTestData) {
-            await insertTestData(searchIndex, backgroundModules.tags)
+            await insertTestData(
+                pick(backgroundModules, 'bookmarks', 'tags', 'pages'),
+            )
         }
         return {
             storageManager,
             searchIndex,
             pages: backgroundModules.pages,
             tags: backgroundModules.tags,
+            bookmarks: backgroundModules.bookmarks,
             search: (params = {}) =>
                 searchIndex.search({
                     mapResultsFunc: (db) => (res) => {
@@ -35,29 +43,42 @@ describe('Search index integration', () => {
         }
     }
 
-    async function insertTestData(
-        searchIndex: SearchIndex,
-        tags: TagsBackground,
-    ) {
+    async function insertTestData(params: {
+        bookmarks: BookmarksBackground
+        pages: PageIndexingBackground
+        tags: TagsBackground
+    }) {
         // Insert some test data for all tests to use
-        await searchIndex.addPage({
+        await params.pages.addPage({
             pageDoc: DATA.PAGE_3,
             visits: [DATA.VISIT_3],
         })
-        await searchIndex.addPage({
+        await params.pages.addPage({
             pageDoc: DATA.PAGE_2,
             visits: [DATA.VISIT_2],
-            bookmark: DATA.BOOKMARK_1,
         })
-        await searchIndex.addPage({
+        await params.bookmarks.storage.createBookmarkIfNeeded(
+            DATA.PAGE_2.url,
+            DATA.BOOKMARK_1,
+        )
+        await params.pages.addPage({
             pageDoc: DATA.PAGE_1,
             visits: [DATA.VISIT_1],
         })
 
         // // Add some test tags
-        await tags.addTagToExistingUrl({ url: DATA.PAGE_3.url, tag: 'good' })
-        await tags.addTagToExistingUrl({ url: DATA.PAGE_3.url, tag: 'quality' })
-        await tags.addTagToExistingUrl({ url: DATA.PAGE_2.url, tag: 'quality' })
+        await params.tags.addTagToExistingUrl({
+            url: DATA.PAGE_3.url,
+            tag: 'good',
+        })
+        await params.tags.addTagToExistingUrl({
+            url: DATA.PAGE_3.url,
+            tag: 'quality',
+        })
+        await params.tags.addTagToExistingUrl({
+            url: DATA.PAGE_2.url,
+            tag: 'quality',
+        })
     }
 
     describe('read ops', () => {
@@ -451,7 +472,7 @@ describe('Search index integration', () => {
             const { searchIndex, storageManager, pages } = await setupTest()
             pages.storage.disableBlobProcessing = true
 
-            await searchIndex.addPage({
+            await pages.addPage({
                 pageDoc: {
                     ...DATA.PAGE_1,
                     favIconURI: 'bla bla bla',
@@ -481,14 +502,14 @@ describe('Search index integration', () => {
             const { searchIndex, storageManager, pages } = await setupTest()
             pages.storage.disableBlobProcessing = true
 
-            await searchIndex.addPage({
+            await pages.addPage({
                 pageDoc: {
                     ...DATA.PAGE_1,
                 },
                 visits: [DATA.VISIT_1],
             })
 
-            await searchIndex.addPageTerms({
+            await pages.addPageTerms({
                 pageDoc: {
                     ...DATA.PAGE_1,
                     favIconURI: 'bla bla bla',
@@ -519,8 +540,8 @@ describe('Search index integration', () => {
             const hostname1 = 'lorem.com'
             const hostname2 = 'sub.lorem.com'
 
-            await searchIndex.addFavIcon(DATA.PAGE_1.url, DATA.FAV_1)
-            await searchIndex.addFavIcon(DATA.PAGE_2.url, DATA.FAV_1)
+            await pages.addFavIcon(DATA.PAGE_1.url, DATA.FAV_1)
+            await pages.addFavIcon(DATA.PAGE_2.url, DATA.FAV_1)
 
             const favIcons = await storageManager
                 .collection('favIcons')
@@ -532,10 +553,10 @@ describe('Search index integration', () => {
         })
 
         test('page adding affects search', async () => {
-            const { search, searchIndex } = await setupTest()
+            const { search, pages } = await setupTest()
             const tmpVisit = Date.now()
             // Insert a tmp page
-            await searchIndex.addPage({
+            await pages.addPage({
                 pageDoc: DATA.PAGE_4,
                 visits: [tmpVisit],
             })
@@ -555,14 +576,14 @@ describe('Search index integration', () => {
         })
 
         test('visit adding affects search', async () => {
-            const { search, searchIndex } = await setupTest()
+            const { search, pages } = await setupTest()
             const { docs: before } = await search()
 
             expect(before.length).toBe(3)
             expect(before[0]).toEqual([DATA.PAGE_ID_3, DATA.VISIT_3])
 
             const newVisit = Date.now()
-            await searchIndex.addVisit(DATA.PAGE_2.url, newVisit)
+            await pages.addVisit(DATA.PAGE_2.url, newVisit)
 
             const { docs: after } = await search()
 
@@ -572,7 +593,7 @@ describe('Search index integration', () => {
         })
 
         test('page deletion affects search', async () => {
-            const { search, searchIndex } = await setupTest()
+            const { search, pages } = await setupTest()
             const { docs: before } = await search()
 
             // Page 2 should be the second most recent
@@ -582,7 +603,7 @@ describe('Search index integration', () => {
             )
 
             // so delete it
-            await searchIndex.delPages([DATA.PAGE_2.url])
+            await pages.delPages([DATA.PAGE_2.url])
 
             const { docs: after } = await search()
 
@@ -632,7 +653,7 @@ describe('Search index integration', () => {
         })
 
         test('bookmark adding affects search', async () => {
-            const { search, searchIndex } = await setupTest()
+            const { search, bookmarks } = await setupTest()
             const tmpBm = Date.now()
             const { docs: before } = await search({ showOnlyBookmarks: true })
 
@@ -643,7 +664,7 @@ describe('Search index integration', () => {
             ) // Base test data expectation
 
             // Add bm to 3rd test page
-            await searchIndex.addBookmark({
+            await bookmarks.addPageBookmark({
                 url: DATA.PAGE_1.url,
                 timestamp: tmpBm,
             } as any)
@@ -657,7 +678,7 @@ describe('Search index integration', () => {
         })
 
         test('bookmark deleting affects search', async () => {
-            const { search, searchIndex } = await setupTest()
+            const { search, bookmarks, searchIndex } = await setupTest()
             const { docs: before } = await search({ showOnlyBookmarks: true })
 
             // We only have a single bookmark
@@ -665,19 +686,19 @@ describe('Search index integration', () => {
             expect(before[0]).toEqual([DATA.PAGE_ID_2, DATA.BOOKMARK_1])
 
             // Add bm to 3rd test page
-            await searchIndex.delBookmark({ url: DATA.PAGE_2.url })
+            await bookmarks.delPageBookmark({ url: DATA.PAGE_2.url })
 
             const { docs: after } = await search({ showOnlyBookmarks: true })
             expect(after.length).toBe(0) // Bye
         })
 
         test('page terms adding affects search', async () => {
-            const { search, searchIndex } = await setupTest()
+            const { search, pages } = await setupTest()
             const query = 'rerun tests changed files'
             const { docs: before } = await search({ query })
             expect(before.length).toBe(0)
 
-            await searchIndex.addPageTerms({
+            await pages.addPageTerms({
                 pageDoc: {
                     ...DATA.PAGE_3,
                     content: {
@@ -693,11 +714,11 @@ describe('Search index integration', () => {
         })
 
         test('page does not duplicate text fields on updates', async () => {
-            const { searchIndex } = await setupTest()
+            const { searchIndex, pages } = await setupTest()
             const pageBefore = await searchIndex.getPage(DATA.PAGE_3.url)
 
             // Try a standard update without any changes
-            await searchIndex.addPage({ pageDoc: DATA.PAGE_3 })
+            await pages.addPage({ pageDoc: DATA.PAGE_3 })
 
             const pageAfter1 = await searchIndex.getPage(DATA.PAGE_3.url)
 
@@ -720,12 +741,12 @@ describe('Search index integration', () => {
         })
 
         test('page re-add appends new terms on updates', async () => {
-            const { search, searchIndex } = await setupTest()
+            const { search, searchIndex, pages } = await setupTest()
             const { docs: before } = await search({ query: 'fox' })
             expect(before.length).toBe(1)
 
             // Re-add page 3, but with new data (in-ext use case is page re-visit)
-            await searchIndex.addPage({
+            await pages.addPage({
                 pageDoc: {
                     ...DATA.PAGE_3,
                     content: {

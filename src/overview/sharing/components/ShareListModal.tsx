@@ -220,9 +220,7 @@ class ShareListModal extends Component<Props, State> {
                     window.open('https://worldbrain.io/roadmap')
                 }}
                 onClickSharingTutorial={() => {
-                    window.open(
-                        'https://worldbrain.io/tutorials/memex-social',
-                    )
+                    window.open('https://worldbrain.io/tutorials/memex-social')
                 }}
             />
         )

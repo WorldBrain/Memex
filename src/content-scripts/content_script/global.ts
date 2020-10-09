@@ -34,14 +34,16 @@ import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-si
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { AnalyticsEvent } from 'src/analytics/types'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
-// TODO:(page-indexing)[high] Fix this with a proper restructuring of how pages are indexed
-setupPageContentRPC()
+import { PageIndexingInterface } from 'src/page-indexing/background/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
 // and dependencies of content scripts.
 
 export async function main() {
+    setupPageContentRPC()
+    runInBackground<PageIndexingInterface<'caller'>>().setTabAsIndexable()
+
     const getPageUrl = () => window.location.href
     const getPageTitle = () => document.title
     const getNormalizedPageUrl = () => normalizeUrl(getPageUrl())
@@ -136,7 +138,6 @@ export async function main() {
                 tags: tagsBG,
                 customLists: runInBackground(),
                 bookmarks: runInBackground(),
-                activityLogger: runInBackground(),
                 tooltip: {
                     getState: tooltipUtils.getTooltipState,
                     setState: tooltipUtils.setTooltipState,

@@ -51,7 +51,6 @@ export interface VisitInteraction {
 export interface PageAddRequest {
     pageDoc: PageDoc
     visits: VisitInput[]
-    bookmark: BookmarkInput
     rejectNoContent?: boolean
 }
 
@@ -124,35 +123,6 @@ export interface SearchIndex {
     }>
 
     getPage: (url: string) => Promise<any>
-    addPage: (params: Partial<PageAddRequest>) => Promise<void>
-    addPageTerms: (pipelineReq: PipelineReq) => Promise<void>
-    delPages: (urls: string[]) => Promise<{ info: any }[]>
-    delPagesByDomain: (url: string) => Promise<any>
-    delPagesByPattern: (pattern: string | RegExp) => Promise<any>
-
-    addBookmark: (params: {
-        url: string
-        fullUrl?: string
-        timestamp?: number
-        tabId?: number
-    }) => Promise<void>
-    delBookmark: (params: Partial<Bookmarks.BookmarkTreeNode>) => Promise<void>
-    pageHasBookmark: (url: string) => Promise<boolean>
-
-    updateTimestampMeta: (
-        url: string,
-        time: number,
-        data: Partial<VisitInteraction>,
-    ) => Promise<any>
-    addVisit: (url: string, time?: number) => Promise<any>
-
-    addFavIcon: (url: string, favIconURI: string) => Promise<any>
-    domainHasFavIcon: (url: string) => Promise<boolean>
-
-    createPageFromTab: (params: PageCreationProps) => Promise<PipelineRes>
-    createPageFromUrl: (params: PageCreationProps) => Promise<PipelineRes>
-    createPageViaBmTagActs: (params: PageCreationProps) => Promise<PipelineRes>
-    createTestPage: (params: PageCreationProps) => Promise<PipelineRes>
 }
 
 export interface PageCreationProps {
@@ -161,5 +131,5 @@ export interface PageCreationProps {
     stubOnly?: boolean
     allowScreenshot?: boolean
     save?: boolean
-    visitTime?: number
+    visitTime?: number | '$now'
 }

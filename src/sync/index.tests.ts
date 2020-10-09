@@ -3,9 +3,12 @@ import {
     BackgroundIntegrationTest,
     BackgroundIntegrationTestSetup,
     BackgroundIntegrationTestInstance,
+    BackgroundIntegrationTestOptions,
 } from 'src/tests/integration-tests'
-import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { createMemorySharedSyncLog } from './background/index.tests'
+import {
+    setupBackgroundIntegrationTest,
+    BackgroundIntegrationTestSetupOpts,
+} from 'src/tests/background-integration-tests'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
@@ -22,14 +25,15 @@ interface SyncTestStep {
 
 export function registerSyncBackgroundIntegrationTests(
     test: BackgroundIntegrationTest,
+    options?: BackgroundIntegrationTestSetupOpts,
 ) {
     describe('Sync tests', () => {
         describe('should work when synced in various patterns across 2 devices', () => {
-            registerSyncBackAndForthTests(test)
+            registerSyncBackAndForthTests(test, options)
         })
         if (!test.skipConflictTests) {
             describe('should work when doing the same action on two devices, then syncing', () => {
-                registerConflictGenerationTests(test)
+                registerConflictGenerationTests(test, options)
             })
         }
     })
@@ -39,7 +43,10 @@ function maybeMark(s: string, mark: false | null | undefined | string): string {
     return mark ? s + mark : s
 }
 
-function registerSyncBackAndForthTests(test: BackgroundIntegrationTest) {
+function registerSyncBackAndForthTests(
+    test: BackgroundIntegrationTest,
+    options?: BackgroundIntegrationTestSetupOpts,
+) {
     const testOptions = test.instantiate({ isSyncTest: true })
     const syncPatterns = generateSyncPatterns([0, 1], testOptions.steps.length)
     for (const pattern of syncPatterns) {
@@ -52,6 +59,7 @@ function registerSyncBackAndForthTests(test: BackgroundIntegrationTest) {
                 test,
                 sequence,
                 deviceCount: 2,
+                ...options,
             })
         })
     }
@@ -116,7 +124,10 @@ function generateBackAndForthSyncTestSequence(
     return sequence
 }
 
-function registerConflictGenerationTests(test: BackgroundIntegrationTest) {
+function registerConflictGenerationTests(
+    test: BackgroundIntegrationTest,
+    options?: BackgroundIntegrationTestSetupOpts,
+) {
     const description =
         'should work when device A syncs an action, device B does the same action, then syncs'
     it(maybeMark(description, test.mark && '!!!'), async () => {
@@ -126,6 +137,7 @@ function registerConflictGenerationTests(test: BackgroundIntegrationTest) {
             sequence,
             test,
             deviceCount: 2,
+            ...options,
         })
     })
 }
@@ -188,21 +200,21 @@ function generateConfictingActionsTestSequence(options: {
     return sequence
 }
 
-async function runSyncBackgroundTest(options: {
-    sequence: SyncTestSequence
-    test: BackgroundIntegrationTest
-    deviceCount: number
+async function runSyncBackgroundTest(
+    options: {
+        sequence: SyncTestSequence
+        test: BackgroundIntegrationTest
+        deviceCount: number
 
-    // setups: BackgroundIntegrationTestSetup[]
-    // deviceIds: Array<number | string>
-    // sync: (
-    //     deviceIndex: number | string,
-    //     syncOptions: { debug: boolean },
-    // ) => Promise<void>
-}) {
-    const { setups, sync } = await setupSyncBackgroundTest({
-        deviceCount: options.deviceCount,
-    })
+        // setups: BackgroundIntegrationTestSetup[]
+        // deviceIds: Array<number | string>
+        // sync: (
+        //     deviceIndex: number | string,
+        //     syncOptions: { debug: boolean },
+        // ) => Promise<void>
+    } & BackgroundIntegrationTestOptions,
+) {
+    const { setups, sync } = await setupSyncBackgroundTest(options)
 
     const testInstance = await options.test.instantiate({ isSyncTest: true })
     for (const setup of setups) {
@@ -265,16 +277,23 @@ async function runSyncBackgroundTest(options: {
     }
 }
 
-async function setupSyncBackgroundTest(options: {
-    deviceCount: number
-    debugStorageOperations?: boolean
-}) {
+async function setupSyncBackgroundTest(
+    options: {
+        deviceCount: number
+        debugStorageOperations?: boolean
+    } & BackgroundIntegrationTestOptions,
+) {
     const userId = TEST_USER.id
 
     const getServerStorage = await createLazyMemoryServerStorage()
     const setups: BackgroundIntegrationTestSetup[] = []
     for (let i = 0; i < options.deviceCount; ++i) {
-        setups.push(await setupBackgroundIntegrationTest({ getServerStorage }))
+        setups.push(
+            await setupBackgroundIntegrationTest({
+                ...options,
+                getServerStorage,
+            }),
+        )
     }
 
     // const deviceIds: Array<number | string> = []

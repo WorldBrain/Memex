@@ -4,8 +4,17 @@ import {
     backgroundIntegrationTest,
     BackgroundIntegrationTestSetup,
 } from 'src/tests/integration-tests'
-import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
+import {
+    StorageCollectionDiff,
+    createdVisit,
+} from 'src/tests/storage-change-detector'
 import { LoggedStorageOperation } from 'src/tests/storage-operation-logger'
+import * as DATA from 'src/tests/common-fixtures.data'
+import {
+    FakeTab,
+    injectFakeTabs,
+} from 'src/tab-management/background/index.tests'
+import { PAGE_1 } from 'src/annotations/background/index.test.data'
 
 const customLists = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.customLists
@@ -14,37 +23,32 @@ const searchModule = (setup: BackgroundIntegrationTestSetup) =>
 let listId!: any
 let listEntry!: any
 
+const TEST_TABS: Array<FakeTab & { normalized: string }> = [
+    DATA.TEST_TAB_1,
+    DATA.TEST_TAB_2,
+]
+
+function testSetupFactory() {
+    return async ({ setup }: { setup: BackgroundIntegrationTestSetup }) => {
+        await injectFakeTabs({
+            tabManagement: setup.backgroundModules.tabManagement,
+            tabsAPI: setup.browserAPIs.tabs,
+            tabs: TEST_TABS,
+        })
+    }
+}
+
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     'Custom lists',
     [
         backgroundIntegrationTest('should add open tabs to list', () => {
             const testList = 'ninja'
-            const testTabs = [
-                {
-                    tabId: 1,
-                    url: 'http://www.bar.com/eggs',
-                    normalized: 'bar.com/eggs',
-                },
-                {
-                    tabId: 2,
-                    url: 'http://www.foo.com/spam',
-                    normalized: 'foo.com/spam',
-                },
-            ]
 
             return {
+                setup: testSetupFactory(),
                 steps: [
                     {
                         execute: async ({ setup }) => {
-                            customLists(setup)._createPage =
-                                setup.backgroundModules.search.searchIndex.createTestPage
-
-                            for (const { url } of testTabs) {
-                                await setup.backgroundModules.search.searchIndex.createTestPage(
-                                    { fullUrl: url },
-                                )
-                            }
-
                             listId = await customLists(
                                 setup,
                             ).remoteFunctions.createCustomList({
@@ -55,7 +59,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 setup,
                             ).remoteFunctions.addOpenTabsToList({
                                 name: testList,
-                                tabs: testTabs,
                                 time: 555,
                             })
                         },
@@ -73,7 +76,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                             const expectedEntries = []
 
-                            for (const { url, normalized } of testTabs) {
+                            for (const { url, normalized } of TEST_TABS) {
                                 expectedEntries.push({
                                     listId,
                                     createdAt: expect.any(Date),
@@ -99,12 +102,74 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 ],
             }
         }),
+        backgroundIntegrationTest('should remove open tabs to list', () => {
+            const testList = 'ninja'
+
+            return {
+                setup: testSetupFactory(),
+                steps: [
+                    {
+                        execute: async ({ setup }) => {
+                            listId = await customLists(
+                                setup,
+                            ).remoteFunctions.createCustomList({
+                                name: testList,
+                            })
+
+                            await customLists(
+                                setup,
+                            ).remoteFunctions.addOpenTabsToList({
+                                name: testList,
+                                time: 555,
+                            })
+                            await customLists(
+                                setup,
+                            ).remoteFunctions.removePageFromList({
+                                id: listId,
+                                url: TEST_TABS[1].url,
+                            })
+                            await customLists(
+                                setup,
+                            ).remoteFunctions.removeOpenTabsFromList({
+                                listId,
+                            })
+                        },
+                        postCheck: async ({
+                            setup: { storageManager: db },
+                        }) => {
+                            const stored = {
+                                customLists: await db
+                                    .collection('customLists')
+                                    .findObjects({}),
+                                pageListEntries: await db
+                                    .collection('pageListEntries')
+                                    .findObjects({}),
+                            }
+
+                            expect(stored).toEqual({
+                                customLists: [
+                                    {
+                                        id: listId,
+                                        createdAt: expect.any(Date),
+                                        name: testList,
+                                        isDeletable: true,
+                                        isNestable: true,
+                                    },
+                                ],
+                                pageListEntries: [],
+                            })
+                        },
+                    },
+                ],
+            }
+        }),
         backgroundIntegrationTest(
             'should create a list, edit its title, add an entry to it and retrieve the list and its pages',
             () => {
                 const TEST_LIST_1 = 'My Custom List'
                 const TEST_LIST_2 = 'Updated List Title'
                 return {
+                    setup: testSetupFactory(),
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -151,65 +216,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         },
                         {
                             execute: async ({ setup }) => {
-                                await searchModule(setup).searchIndex.addPage({
-                                    pageDoc: {
-                                        url: 'http://www.bla.com/',
-                                        content: {
-                                            fullText: 'home page content',
-                                            title: 'bla.com title',
-                                        },
-                                    },
-                                    visits: [],
-                                })
-                                await searchModule(setup).searchIndex.addPage({
-                                    pageDoc: {
-                                        url: 'http://www.bla.com/foo',
-                                        content: {
-                                            fullText: 'foo page content',
-                                            title: 'bla.com foo title',
-                                        },
-                                    },
-                                    visits: [],
-                                })
-                            },
-                            expectedStorageChanges: {
-                                pages: (): StorageCollectionDiff => ({
-                                    'bla.com': {
-                                        type: 'create',
-                                        object: expect.objectContaining({
-                                            domain: 'bla.com',
-                                            fullTitle: 'bla.com title',
-                                            titleTerms: ['bla', 'title'],
-                                            fullUrl: 'http://www.bla.com/',
-                                            hostname: 'bla.com',
-                                            text: 'home page content',
-                                            terms: ['home', 'page', 'content'],
-                                            url: 'bla.com',
-                                            urlTerms: [],
-                                        }),
-                                    },
-                                    'bla.com/foo': {
-                                        type: 'create',
-                                        object: expect.objectContaining({
-                                            domain: 'bla.com',
-                                            fullTitle: 'bla.com foo title',
-                                            fullUrl: 'http://www.bla.com/foo',
-                                            hostname: 'bla.com',
-                                            text: 'foo page content',
-                                            url: 'bla.com/foo',
-                                        }),
-                                    },
-                                }),
-                                visits: (): StorageCollectionDiff =>
-                                    expect.any(Object),
-                            },
-                        },
-                        {
-                            execute: async ({ setup }) => {
+                                setup.injectTime(() => DATA.VISIT_1)
                                 listEntry = (
                                     await customLists(setup).insertPageToList({
                                         id: listId,
-                                        url: 'http://www.bla.com/',
+                                        url: TEST_TABS[0].url,
+                                        tabId: TEST_TABS[0].id,
                                     })
                                 ).object
                             },
@@ -221,11 +233,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         object: {
                                             listId,
                                             createdAt: expect.any(Date),
-                                            fullUrl: 'http://www.bla.com/',
-                                            pageUrl: 'bla.com',
+                                            fullUrl: TEST_TABS[0].url,
+                                            pageUrl: TEST_TABS[0].normalized,
                                         },
                                     },
                                 }),
+                                pages: (): StorageCollectionDiff =>
+                                    DATA.PAGE_1_CREATION,
+                                visits: (): StorageCollectionDiff =>
+                                    createdVisit(DATA.VISIT_1, DATA.PAGE_1.url),
                             },
                         },
                         {
@@ -256,7 +272,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     isDeletable: true,
                                     isNestable: true,
                                     createdAt: expect.any(Date),
-                                    pages: ['http://www.bla.com/'],
+                                    pages: [TEST_TABS[0].url],
                                     active: true,
                                 })
 
@@ -269,8 +285,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual([
                                     {
                                         listId,
-                                        pageUrl: 'bla.com',
-                                        fullUrl: 'http://www.bla.com/',
+                                        pageUrl: TEST_TABS[0].normalized,
+                                        fullUrl: TEST_TABS[0].url,
                                         createdAt: expect.any(Date),
                                     },
                                 ])
@@ -290,9 +306,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             screenshot: undefined,
                                             lists: [TEST_LIST_2],
                                             tags: [],
-                                            title: 'bla.com title',
-                                            url: 'bla.com',
-                                            fullUrl: 'http://www.bla.com/',
+                                            url: TEST_TABS[0].normalized,
+                                            fullUrl: TEST_TABS[0].url,
                                         },
                                     ],
                                     resultsExhausted: true,
@@ -309,6 +324,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             () => {
                 const TEST_LIST_1 = 'My Custom List'
                 return {
+                    setup: testSetupFactory(),
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -323,18 +339,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 await customLists(setup).insertPageToList({
                                     id: listId,
-                                    url: 'http://www.bla.com/',
+                                    url: TEST_TABS[0].url,
+                                    tabId: TEST_TABS[0].id,
                                 })
                             },
                         },
                         {
                             execute: async ({ setup }) => {
-                                await searchModule(setup).searchIndex.addPage({
+                                await setup.backgroundModules.pages.addPage({
                                     pageDoc: {
-                                        url: 'http://www.bla.com/',
+                                        url: TEST_TABS[0].url,
                                         content: {
                                             fullText: 'home page content',
-                                            title: 'bla.com title',
+                                            title: 'first page title',
                                         },
                                     },
                                     visits: [],
@@ -351,7 +368,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     isDeletable: true,
                                     isNestable: true,
                                     createdAt: expect.any(Date),
-                                    pages: ['http://www.bla.com/'],
+                                    pages: [TEST_TABS[0].url],
                                     active: true,
                                 })
 
@@ -364,8 +381,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual([
                                     {
                                         listId,
-                                        pageUrl: 'bla.com',
-                                        fullUrl: 'http://www.bla.com/',
+                                        pageUrl: TEST_TABS[0].normalized,
+                                        fullUrl: TEST_TABS[0].url,
                                         createdAt: expect.any(Date),
                                     },
                                 ])
@@ -385,9 +402,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             screenshot: undefined,
                                             lists: [TEST_LIST_1],
                                             tags: [],
-                                            title: 'bla.com title',
-                                            url: 'bla.com',
-                                            fullUrl: 'http://www.bla.com/',
+                                            title: 'first page title',
+                                            url: TEST_TABS[0].normalized,
+                                            fullUrl: TEST_TABS[0].url,
                                         },
                                     ],
                                     resultsExhausted: true,
@@ -404,6 +421,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should create a list, add an entry to it, then remove the list and its entries',
             () => {
                 return {
+                    setup: testSetupFactory(),
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -418,7 +436,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 await customLists(setup).insertPageToList({
                                     id: listId,
-                                    url: 'http://www.bla.com/',
+                                    url: TEST_TABS[0].url,
+                                    tabId: TEST_TABS[0].id,
                                 })
                             },
                         },
@@ -434,7 +453,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     isDeletable: true,
                                     isNestable: true,
                                     createdAt: expect.any(Date),
-                                    pages: ['http://www.bla.com/'],
+                                    pages: [TEST_TABS[0].url],
                                     active: true,
                                 })
 
@@ -447,8 +466,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual([
                                     {
                                         listId,
-                                        pageUrl: 'bla.com',
-                                        fullUrl: 'http://www.bla.com/',
+                                        pageUrl: TEST_TABS[0].normalized,
+                                        fullUrl: TEST_TABS[0].url,
                                         createdAt: expect.any(Date),
                                     },
                                 ])
@@ -481,6 +500,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should create a list, add two entries to it, then remove one of the entries',
             () => {
                 return {
+                    setup: testSetupFactory(),
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -495,11 +515,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 await customLists(setup).insertPageToList({
                                     id: listId,
-                                    url: 'http://www.bla.com/',
+                                    url: TEST_TABS[0].url,
+                                    tabId: TEST_TABS[0].id,
                                 })
                                 await customLists(setup).insertPageToList({
                                     id: listId,
-                                    url: 'http://www.test.com/',
+                                    url: TEST_TABS[1].url,
+                                    tabId: TEST_TABS[1].id,
                                 })
                             },
                         },
@@ -514,14 +536,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual([
                                     {
                                         listId,
-                                        pageUrl: 'bla.com',
-                                        fullUrl: 'http://www.bla.com/',
+                                        pageUrl: TEST_TABS[0].normalized,
+                                        fullUrl: TEST_TABS[0].url,
                                         createdAt: expect.any(Date),
                                     },
                                     {
                                         listId,
-                                        pageUrl: 'test.com',
-                                        fullUrl: 'http://www.test.com/',
+                                        pageUrl: TEST_TABS[1].normalized,
+                                        fullUrl: TEST_TABS[1].url,
                                         createdAt: expect.any(Date),
                                     },
                                 ])
@@ -529,7 +551,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 await customLists(setup).removePageFromList({
                                     id: listId,
-                                    url: 'test.com',
+                                    url: TEST_TABS[0].normalized,
                                 })
                             },
                             postCheck: async ({ setup }) => {
@@ -542,8 +564,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual([
                                     {
                                         listId,
-                                        pageUrl: 'bla.com',
-                                        fullUrl: 'http://www.bla.com/',
+                                        pageUrl: TEST_TABS[1].normalized,
+                                        fullUrl: TEST_TABS[1].url,
                                         createdAt: expect.any(Date),
                                     },
                                 ])

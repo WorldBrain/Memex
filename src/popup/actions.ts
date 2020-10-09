@@ -6,6 +6,7 @@ import { acts as bookmarkActs } from './bookmark-button'
 import { acts as tagActs } from './tags-button'
 import { acts as collectionActs } from './collections-button'
 import { acts as blacklistActs } from './blacklist-button'
+import { TabManagementInterface } from 'src/tab-management/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 
 const fetchPageTagsRPC = remoteFunction('fetchPageTags')
@@ -13,7 +14,9 @@ const fetchListsRPC = remoteFunction('fetchListPagesByUrl')
 const fetchAllListsRPC = remoteFunction('fetchAllLists')
 const fetchInitTagSuggRPC = remoteFunction('extendedSuggest')
 const isURLBlacklistedRPC = remoteFunction('isURLBlacklisted')
-const fetchTabByUrlRPC = remoteFunction('fetchTabByUrl')
+
+const tabs = runInBackground<TabManagementInterface<'caller'>>()
+const bookmarks = runInBackground<BookmarksInterface>()
 
 export const setTabId = createAction<number>('popup/setTabId')
 export const setUrl = createAction<string>('popup/setUrl')
@@ -29,7 +32,7 @@ const getCurrentTab = async () => {
     } else {
         const url = window.location.href
         if (url) {
-            currentTab = await fetchTabByUrlRPC(url)
+            currentTab = await tabs.fetchTabByUrl(url)
         }
     }
 
@@ -41,6 +44,26 @@ const setTabAndUrl: (id: number, url: string) => Thunk = (id, url) => async (
 ) => {
     await dispatch(setTabId(id))
     await dispatch(setUrl(url))
+}
+
+const setTabIsBookmarked: (pageUrl: string) => Thunk = (pageUrl) => async (
+    dispatch,
+) => {
+    const hasBoomark = await bookmarks.pageHasBookmark(pageUrl)
+    await dispatch(bookmarkActs.setIsBookmarked(hasBoomark))
+}
+
+// N.B. This is also setup for all injections of the content script. Mainly so that keyboard shortcuts (bookmark) has the data when needed.
+export const initBasicStore: () => Thunk = () => async (dispatch) => {
+    const currentTab = await getCurrentTab()
+
+    // If we can't get the tab data, then can't init action button states
+    if (!currentTab || !currentTab.url) {
+        console.warn("initBasicStore - Couldn't get a currentTab url")
+        return false
+    }
+    await dispatch(setTabAndUrl(currentTab.id, currentTab.url))
+    await dispatch(setTabIsBookmarked(currentTab.url))
 }
 
 export const initState: () => Thunk = () => async (dispatch) => {
@@ -58,10 +81,7 @@ export const initState: () => Thunk = () => async (dispatch) => {
     dispatch(blacklistActs.setIsBlacklisted(isBlacklisted))
 
     try {
-        const hasBookmark = await runInBackground<
-            BookmarksInterface
-        >().pageHasBookmark(currentTab.url)
-        dispatch(bookmarkActs.setIsBookmarked(hasBookmark))
+        await dispatch(setTabIsBookmarked(currentTab.url))
 
         const listsAssocWithPage = await fetchListsRPC({ url: currentTab.url })
         const lists = await fetchAllListsRPC({

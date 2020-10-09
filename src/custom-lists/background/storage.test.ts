@@ -1,9 +1,11 @@
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
-
 import CustomListBackground from './'
 import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { SearchIndex } from 'src/search'
+import { injectFakeTabs } from 'src/tab-management/background/index.tests'
+import { TEST_TAB_1 } from 'src/tests/common-fixtures.data'
+import { page } from 'src/sidebar-overlay/sidebar/selectors'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 async function insertTestData({
     customLists,
@@ -23,27 +25,19 @@ async function insertTestData({
 }
 
 async function setupTest() {
-    const {
-        backgroundModules,
-        ...setup
-    } = await setupBackgroundIntegrationTest()
+    const { backgroundModules } = await setupBackgroundIntegrationTest({
+        includePostSyncProcessor: true,
+    })
     const customLists: CustomListBackground = backgroundModules.customLists
     const searchIndex: SearchIndex = backgroundModules.search.searchIndex
-    const storageManager = setup.storageManager
 
     // NOTE: Each test starts creating lists at ID `1`
     let fakeListCount = 0
     customLists.generateListId = () => ++fakeListCount
 
-    registerModuleMapCollections(storageManager.registry, {
-        customList: customLists.storage,
-        bookmarks: backgroundModules.bookmarks.storage,
-    })
-
-    await storageManager.finishInitialization()
     await insertTestData({ customLists })
 
-    return { customLists, searchIndex }
+    return { customLists, searchIndex, pages: backgroundModules.pages }
 }
 
 describe('Custom List Integrations', () => {
@@ -54,20 +48,22 @@ describe('Custom List Integrations', () => {
 
     describe('create ops', () => {
         test('should be able to create list entry for existing page', async () => {
-            const { searchIndex, customLists } = await setupTest()
+            const { pages, customLists } = await setupTest()
 
-            const newPage = await searchIndex.createTestPage({
-                fullUrl: 'http://www.test.com',
+            const fullUrl = 'http://www.test.com'
+            const normalizedUrl = normalizeUrl(fullUrl)
+            await pages.indexTestPage({
+                fullUrl,
                 save: true,
             })
 
-            await customLists.insertPageToList({ id: 1, url: newPage.url })
+            await customLists.insertPageToList({ id: 1, url: fullUrl })
             const lists = await customLists.fetchListPagesByUrl({
-                url: newPage.url,
+                url: normalizedUrl,
             })
             expect(lists.length).toBe(1)
             expect(lists[0].pages.length).toBe(1)
-            expect(lists[0].pages[0]).toBe(newPage.url)
+            expect(lists[0].pages[0]).toBe(fullUrl)
         })
 
         test('list entry creates for non-existing pages should create page', async () => {
@@ -244,7 +240,9 @@ describe('Custom List Integrations', () => {
 
 describe('Collection Cache', () => {
     async function setupCacheTest() {
-        const setup = await setupBackgroundIntegrationTest()
+        const setup = await setupBackgroundIntegrationTest({
+            includePostSyncProcessor: true,
+        })
         const listsModule = setup.backgroundModules.customLists
         return { listsModule }
     }

@@ -7,6 +7,8 @@ import { padShortTimestamp } from './utils'
 import { SearchIndex } from 'src/search'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
+import { PageIndexingBackground } from 'src/page-indexing/background'
+import BookmarksBackground from 'src/bookmarks/background'
 
 const fetchPageDataOpts = {
     includePageContent: true,
@@ -92,8 +94,9 @@ export default class ImportItemProcessor {
 
     constructor(
         private options: {
-            searchIndex: SearchIndex
             tagsModule: TagsBackground
+            pages: PageIndexingBackground
+            bookmarks: BookmarksBackground
             customListsModule: CustomListBackground
         },
     ) {}
@@ -120,12 +123,15 @@ export default class ImportItemProcessor {
     }) {
         this._checkCancelled()
 
-        return this.options.searchIndex.addPage({
+        await this.options.pages.addPage({
             pageDoc,
             visits,
-            bookmark,
             rejectNoContent,
         })
+        await this.options.bookmarks.storage.createBookmarkIfNeeded(
+            pageDoc.url,
+            bookmark,
+        )
     }
 
     async _storeOtherData({ url, tags, collections, annotations }) {
@@ -141,6 +147,7 @@ export default class ImportItemProcessor {
                     await this.options.customListsModule.insertPageToList({
                         id: listId,
                         url,
+                        suppressVisitCreation: true,
                     })
                 }),
                 ...tags.map(async (tag) => {
@@ -165,9 +172,7 @@ export default class ImportItemProcessor {
      * @returns {PageDoc}
      */
     async _createPageDoc({ url }) {
-        const includeFavIcon = !(await this.options.searchIndex.domainHasFavIcon(
-            url,
-        ))
+        const includeFavIcon = !(await this.options.pages.domainHasFavIcon(url))
 
         // Do the page data fetch
         const fetch = fetchPageData({
@@ -207,7 +212,7 @@ export default class ImportItemProcessor {
                   },
               }
 
-        const visits = await getVisitTimes(importItem)
+        const visits = []
 
         let bookmark
         if (importItem.type === IMPORT_TYPE.BOOKMARK) {
@@ -243,7 +248,7 @@ export default class ImportItemProcessor {
                   },
               }
 
-        const visits = await getVisitTimes({ url })
+        const visits = []
 
         if (timeAdded) {
             visits.push(timeAdded)

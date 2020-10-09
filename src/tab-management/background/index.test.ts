@@ -6,7 +6,8 @@ describe('activity logger background tests', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
     it('should be able to track existing tabs', async ({ device }) => {
-        const { activityLogger } = device.backgroundModules
+        const { browserAPIs } = device
+        const { tabManagement } = device.backgroundModules
 
         const mockTabs = [
             { id: 0, url: 'https://test.com', status: 'complete' },
@@ -17,25 +18,26 @@ describe('activity logger background tests', () => {
             { id: 5, url: 'https://worldbrain.io', status: 'complete' },
         ] as Tabs.Tab[]
 
-        // Mock out tabs API, so it sets something we can check (TODO: afford this functionality in the setup)
-        activityLogger['tabsAPI'].query = async () => mockTabs
+        // Mock out tabs API, so it sets something we can check
+        browserAPIs.tabs.query = async () => mockTabs
 
-        const executeScriptsCalls = []
-        activityLogger['tabChangeListener']['_tabsAPI'].executeScript = (async (
-            id,
-            script,
-        ) => executeScriptsCalls.push({ id, script })) as any
+        const executeScriptsCalls: Array<{
+            id: number
+            script: { file: string }
+        }> = []
+        browserAPIs.tabs.executeScript = (async (tabId, script) => {
+            executeScriptsCalls.push({ id: tabId!, script })
+            return []
+        }) as any
+        await tabManagement.trackExistingTabs()
 
-        await activityLogger.trackExistingTabs()
-
-        expect([...activityLogger.tabManager['_tabs'].entries()]).toEqual(
+        expect([...tabManagement.tabManager._tabs.entries()]).toEqual(
             mockTabs.map((tab) => [
                 tab.id,
                 expect.objectContaining({
                     id: tab.id,
                     url: tab.url,
                     isLoaded: tab.status === 'complete',
-                    isBookmarked: false,
                 }),
             ]),
         )

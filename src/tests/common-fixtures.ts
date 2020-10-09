@@ -1,17 +1,13 @@
 import {
     IntegrationTestStep,
     BackgroundIntegrationTestContext,
-    BackgroundIntegrationTestSetup,
 } from './integration-tests'
 import { StorageCollectionDiff } from './storage-change-detector'
 import * as DATA from './common-fixtures.data'
 
-export const searchModule = (setup: BackgroundIntegrationTestSetup) =>
-    setup.backgroundModules.search
-
 export const createPageStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
     execute: async ({ setup }) => {
-        await searchModule(setup).searchIndex.addPage({
+        await setup.backgroundModules.pages.addPage({
             pageDoc: {
                 url: DATA.PAGE_1.fullUrl,
                 content: {},
@@ -19,7 +15,7 @@ export const createPageStep: IntegrationTestStep<BackgroundIntegrationTestContex
             visits: [DATA.VISIT_1],
             rejectNoContent: false,
         })
-        await searchModule(setup).searchIndex.addPage({
+        await setup.backgroundModules.pages.addPage({
             pageDoc: {
                 url: DATA.PAGE_2.fullUrl,
                 content: {},

@@ -8,11 +8,16 @@ import {
 import StorageOperationLogger, {
     LoggedStorageOperation,
 } from './storage-operation-logger'
-import { registerBackgroundIntegrationTest } from './background-integration-tests'
+import {
+    registerBackgroundIntegrationTest,
+    BackgroundIntegrationTestSetupOpts,
+} from './background-integration-tests'
 import MemoryBrowserStorage from 'src/util/tests/browser-storage'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 import { ServerStorage } from 'src/storage/types'
+import { Browser } from 'webextension-polyfill-ts'
+import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 
 export interface IntegrationTestSuite<StepContext> {
     description: string
@@ -39,6 +44,11 @@ export interface IntegrationTestStep<StepContext> {
     execute: (context: StepContext) => Promise<void>
     postCheck?: (context: StepContext) => Promise<void>
 
+    validateStorageChanges?: (context: {
+        changes: {
+            [collection: string]: StorageCollectionDiff
+        }
+    }) => void
     expectedStorageChanges?: {
         [collection: string]: () => StorageCollectionDiff
     }
@@ -49,12 +59,15 @@ export interface IntegrationTestStep<StepContext> {
 export interface BackgroundIntegrationTestSetup {
     storageManager: StorageManager
     backgroundModules: BackgroundModules
+    browserAPIs: Browser
+    fetchPageDataProcessor: MockFetchPageDataProcessor | null
     browserLocalStorage: MemoryBrowserStorage
     storageChangeDetector: StorageChangeDetector
     storageOperationLogger: StorageOperationLogger
     authService: MemoryAuthService
     subscriptionService: MemorySubscriptionsService
     getServerStorage(): Promise<ServerStorage>
+    injectTime: (getNow: () => number) => void
 }
 export interface BackgroundIntegrationTestContext {
     setup: BackgroundIntegrationTestSetup
@@ -72,10 +85,11 @@ export type BackgroundIntegrationTestSuite = IntegrationTestSuite<
 export function backgroundIntegrationTestSuite(
     description: string,
     tests: Array<IntegrationTest<BackgroundIntegrationTestContext>>,
+    options?: BackgroundIntegrationTestSetupOpts,
 ): IntegrationTestSuite<BackgroundIntegrationTestContext> {
     describe(description, () => {
         for (const integrationTest of tests) {
-            registerBackgroundIntegrationTest(integrationTest)
+            registerBackgroundIntegrationTest(integrationTest, options)
         }
     })
     return { description, tests }

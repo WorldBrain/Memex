@@ -8,7 +8,6 @@ import * as selectors from '../selectors'
 import * as acts from '../actions'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 
-
 const styles = require('./SidebarButton.css')
 const buttonStyles = require('../../components/Button.css')
 
@@ -39,9 +38,8 @@ class TooltipButton extends PureComponent<Props> {
     }
 
     state = {
-        highlightInfo: undefined
+        highlightInfo: undefined,
     }
-
 
     private async getHighlightContextMenuTitle() {
         const {
@@ -51,13 +49,12 @@ class TooltipButton extends PureComponent<Props> {
 
         if (!shortcutsEnabled || !toggleSidebar.enabled) {
             this.setState({
-                highlightInfo: `${toggleSidebar.shortcut} (disabled)`
-            }) 
-        } else (
+                highlightInfo: `${toggleSidebar.shortcut} (disabled)`,
+            })
+        } else
             this.setState({
-                highlightInfo: `${toggleSidebar.shortcut}`
-            }) 
-        )
+                highlightInfo: `${toggleSidebar.shortcut}`,
+            })
     }
 
     render() {
@@ -92,7 +89,7 @@ class TooltipButton extends PureComponent<Props> {
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     isEnabled: selectors.isSidebarEnabled(state),
 })
 
@@ -100,12 +97,12 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
     props,
 ) => ({
-    openSidebar: async e => {
+    openSidebar: async (e) => {
         e.preventDefault()
         await dispatch(acts.openSideBar())
         setTimeout(props.closePopup, 200)
     },
-    handleChange: async e => {
+    handleChange: async (e) => {
         e.stopPropagation()
         e.preventDefault()
         await dispatch(acts.toggleSidebarFlag())

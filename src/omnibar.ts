@@ -20,13 +20,25 @@ import initStorex from './search/memex-storex'
 import BookmarksStorage from './bookmarks/background/storage'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 import { PageIndexingBackground } from './page-indexing/background'
+import TabManagementBackground from './tab-management/background'
+import { browser } from 'webextension-polyfill-ts'
+import { runInTab } from './util/webextensionRPC'
+import { PageAnalyzerInterface } from './page-analysis/types'
+import { TabManager } from './tab-management/background/tab-manager'
 
 export async function main() {
+    const tabManagement = new TabManagementBackground({
+        tabManager: new TabManager(),
+        browserAPIs: browser,
+        extractRawPageContent: (tabId) =>
+            runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),
+    })
     const storageManager = initStorex()
     const bookmarksStorage = new BookmarksStorage({ storageManager })
     const pages = new PageIndexingBackground({
+        getNow: () => Date.now(),
         storageManager,
-        bookmarksStorage,
+        tabManagement,
     })
     registerModuleMapCollections(storageManager.registry, {
         pages: pages.storage,
@@ -35,9 +47,6 @@ export async function main() {
     await storageManager.finishInitialization()
     const searchIndex = combineSearchIndex({
         getDb,
-        pages,
-        bookmarksStorage,
-        tabManager: null,
     })
 
     // Read which browser we are running in.

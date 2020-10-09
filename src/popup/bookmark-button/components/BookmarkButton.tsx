@@ -8,10 +8,8 @@ import * as selectors from '../selectors'
 import * as acts from '../actions'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 
-
 const styles = require('./BookmarkButton.css')
 const buttonStyles = require('../../components/Button.css')
-
 
 export interface OwnProps {
     closePopup: () => void
@@ -29,15 +27,13 @@ interface DispatchProps {
 export type Props = OwnProps & StateProps & DispatchProps
 
 class BookmarkButton extends PureComponent<Props> {
-
     async componentDidMount() {
         await this.getKeyboardShortcutText()
     }
 
     state = {
-        highlightInfo: undefined
+        highlightInfo: undefined,
     }
-
 
     private async getKeyboardShortcutText() {
         const {
@@ -47,13 +43,12 @@ class BookmarkButton extends PureComponent<Props> {
 
         if (!shortcutsEnabled || !createBookmark.enabled) {
             this.setState({
-                highlightInfo: `${createBookmark.shortcut} (disabled)`
-            }) 
-        } else (
+                highlightInfo: `${createBookmark.shortcut} (disabled)`,
+            })
+        } else
             this.setState({
-                highlightInfo: `${createBookmark.shortcut}`
-            }) 
-        )
+                highlightInfo: `${createBookmark.shortcut}`,
+            })
     }
 
     render() {
@@ -83,7 +78,7 @@ class BookmarkButton extends PureComponent<Props> {
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     isBookmarked: selectors.isBookmarked(state),
     isDisabled: selectors.isDisabled(state),
 })
@@ -92,7 +87,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
     props,
 ) => ({
-    toggleBookmark: async e => {
+    toggleBookmark: async (e) => {
         e.preventDefault()
         await dispatch(acts.toggleBookmark())
     },

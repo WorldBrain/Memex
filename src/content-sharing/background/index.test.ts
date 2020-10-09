@@ -153,18 +153,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
 
                                 // Add new entry
-                                await setup.backgroundModules.search.searchIndex.addPage(
-                                    {
-                                        pageDoc: {
-                                            url: 'https://www.fish.com/cheese',
-                                            content: {
-                                                title: 'Fish.com title',
-                                            },
+                                await setup.backgroundModules.pages.addPage({
+                                    pageDoc: {
+                                        url: 'https://www.fish.com/cheese',
+                                        content: {
+                                            title: 'Fish.com title',
                                         },
-                                        visits: [],
-                                        rejectNoContent: false,
                                     },
-                                )
+                                    visits: [],
+                                    rejectNoContent: false,
+                                })
                                 await setup.backgroundModules.customLists.insertPageToList(
                                     {
                                         id: localListId,
@@ -1290,6 +1288,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
     ],
+    { includePostSyncProcessor: true },
 )
 
 function makeShareAnnotationTest(options: {

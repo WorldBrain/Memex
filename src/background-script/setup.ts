@@ -4,9 +4,6 @@ import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import NotificationBackground from 'src/notifications/background'
 import SocialBackground from 'src/social-integration/background'
 import DirectLinkingBackground from 'src/annotations/background'
-import ActivityLoggerBackground, {
-    TabManager,
-} from 'src/activity-logger/background'
 import SearchBackground from 'src/search/background'
 import EventLogBackground from 'src/analytics/internal/background'
 import JobSchedulerBackground from 'src/job-scheduler/background'
@@ -59,13 +56,16 @@ import { ReaderBackground } from 'src/reader/background'
 import { ServerStorage } from 'src/storage/types'
 import ContentSharingBackground from 'src/content-sharing/background'
 import { getFirebase } from 'src/util/firebase-app-initialized'
+import TabManagementBackground from 'src/tab-management/background'
+import { runInTab } from 'src/util/webextensionRPC'
+import { PageAnalyzerInterface } from 'src/page-analysis/types'
+import { TabManager } from 'src/tab-management/background/tab-manager'
 
 export interface BackgroundModules {
     auth: AuthBackground
     analytics: AnalyticsBackground
     notifications: NotificationBackground
     social: SocialBackground
-    activityLogger: ActivityLoggerBackground
     connectivityChecker: ConnectivityCheckerBackground
     directLinking: DirectLinkingBackground
     pages: PageIndexingBackground
@@ -87,6 +87,7 @@ export interface BackgroundModules {
     copyPaster: CopyPasterBackground
     readable: ReaderBackground
     contentSharing: ContentSharingBackground
+    tabManagement: TabManagementBackground
 }
 
 export function createBackgroundModules(options: {
@@ -96,54 +97,60 @@ export function createBackgroundModules(options: {
     signalTransportFactory: SignalTransportFactory
     getSharedSyncLog: () => Promise<SharedSyncLog>
     localStorageChangesManager: StorageChangesManager
-    fetchPageDataProcessor: FetchPageProcessor
+    fetchPageDataProcessor?: FetchPageProcessor
     tabManager?: TabManager
     auth?: AuthBackground
     analyticsManager: Analytics
     authOptions?: { devAuthState: DevAuthState }
-    includePostSyncProcessor?: boolean
     disableSyncEnryption?: boolean
     getIceServers?: () => Promise<string[]>
+    getNow?: () => number
 }): BackgroundModules {
+    const getNow = options.getNow ?? (() => Date.now())
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
+    const tabManagement = new TabManagementBackground({
+        tabManager,
+        browserAPIs: options.browserAPIs,
+        extractRawPageContent: (tabId) =>
+            runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),
+    })
 
     const analytics = new AnalyticsBackground(options.analyticsManager, {
         localBrowserStorage: options.browserAPIs.storage.local,
     })
 
-    const bookmarks = new BookmarksBackground({ storageManager })
     const pages = new PageIndexingBackground({
         storageManager,
-        bookmarksStorage: bookmarks.storage,
         fetchPageData: options.fetchPageDataProcessor,
+        tabManagement,
+        getNow,
+    })
+    tabManagement.events.on('tabRemoved', (event) => {
+        pages.handleTabClose(event)
+    })
+    const bookmarks = new BookmarksBackground({
+        storageManager,
+        pages,
+        tabManager,
+        browserAPIs: options.browserAPIs,
     })
     const searchIndex = combineSearchIndex({
         getDb: async () => storageManager,
-        pages,
-        bookmarksStorage: bookmarks.storage,
-        tabManager,
-    })
-    const activityLogger = new ActivityLoggerBackground({
-        searchIndex,
-        browserAPIs: options.browserAPIs,
-        tabManager,
-        pageStorage: pages.storage,
-        bookmarksBG: bookmarks,
     })
 
     const search = new SearchBackground({
         storageManager,
         pages,
         idx: searchIndex,
-        tabMan: tabManager,
         browserAPIs: options.browserAPIs,
+        bookmarks,
     })
 
     const tags = new TagsBackground({
         storageManager,
-        pageStorage: pages.storage,
-        searchIndex,
+        pages,
+        tabManagement,
         queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
         windows: options.browserAPIs.windows,
         searchBackgroundModule: search,
@@ -167,10 +174,11 @@ export function createBackgroundModules(options: {
 
     const customLists = new CustomListBackground({
         storageManager,
+        tabManagement,
         queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
         windows: options.browserAPIs.windows,
         searchIndex: search.searchIndex,
-        pageStorage: pages.storage,
+        pages,
         localBrowserStorage: options.browserAPIs.storage.local,
     })
 
@@ -178,8 +186,7 @@ export function createBackgroundModules(options: {
         browserAPIs: options.browserAPIs,
         storageManager,
         socialBg: social,
-        searchIndex: search.searchIndex,
-        pageStorage: pages.storage,
+        pages,
     })
 
     const auth =
@@ -225,10 +232,10 @@ export function createBackgroundModules(options: {
 
     const bgScript = new BackgroundScript({
         storageManager,
+        tabManagement,
         storageChangesMan: options.localStorageChangesManager,
         copyPasterBackground: copyPaster,
         notifsBackground: notifications,
-        loggerBackground: activityLogger,
     })
 
     const connectivityChecker = new ConnectivityCheckerBackground({
@@ -245,13 +252,14 @@ export function createBackgroundModules(options: {
         storePageContent,
     })
 
-    const postReceiveProcessor = options.includePostSyncProcessor
-        ? new PostReceiveProcessor({
-              pages,
-              pageFetchBacklog,
-              fetchPageData: options.fetchPageDataProcessor,
-          }).processor
-        : undefined
+    const postReceiveProcessor =
+        options.fetchPageDataProcessor != null
+            ? new PostReceiveProcessor({
+                  pages,
+                  pageFetchBacklog,
+                  fetchPageData: options.fetchPageDataProcessor,
+              }).processor
+            : undefined
 
     return {
         auth,
@@ -259,7 +267,6 @@ export function createBackgroundModules(options: {
         analytics,
         jobScheduler,
         notifications,
-        activityLogger,
         connectivityChecker,
         readable: reader,
         directLinking,
@@ -268,6 +275,7 @@ export function createBackgroundModules(options: {
         customLists,
         tags,
         bookmarks,
+        tabManagement,
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,
@@ -302,8 +310,8 @@ export function createBackgroundModules(options: {
                     ))
                 ) {
                     await bookmarks.addBookmark({
-                        url: bookmark.normalizedUrl,
-                        time: bookmark.time,
+                        fullUrl: bookmark.normalizedUrl,
+                        timestamp: bookmark.time,
                     })
                 }
             },
@@ -372,9 +380,10 @@ export async function setupBackgroundModules(
         }),
     )
     setupImportBackgroundModule({
-        searchIndex: backgroundModules.search.searchIndex,
+        pages: backgroundModules.pages,
         tagsModule: backgroundModules.tags,
         customListsModule: backgroundModules.customLists,
+        bookmarks: backgroundModules.bookmarks,
     })
 
     backgroundModules.auth.registerRemoteEmitter()
@@ -383,8 +392,6 @@ export async function setupBackgroundModules(
     backgroundModules.social.setupRemoteFunctions()
     backgroundModules.directLinking.setupRemoteFunctions()
     backgroundModules.directLinking.setupRequestInterceptor()
-    backgroundModules.activityLogger.setupWebExtAPIHandlers()
-    backgroundModules.activityLogger.setupRemoteFunctions()
     backgroundModules.search.setupRemoteFunctions()
     backgroundModules.eventLog.setupRemoteFunctions()
     backgroundModules.backupModule.setBackendFromStorage()
@@ -395,6 +402,8 @@ export async function setupBackgroundModules(
     backgroundModules.inPageUI.setupRemoteFunctions()
     backgroundModules.bgScript.setupAlarms(alarms)
     backgroundModules.pageFetchBacklog.setupBacklogProcessing()
+    backgroundModules.bookmarks.setupBookmarkListeners()
+    backgroundModules.tabManagement.setupRemoteFunctions()
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()

@@ -7,7 +7,7 @@ export class TabManager {
     static DELAY_UNIT = 1000
     static DEF_LOG_DELAY = 2
 
-    private _tabs = new Map<number, Tab>()
+    _tabs = new Map<number, Tab>()
 
     get size() {
         return this._tabs.size
@@ -35,11 +35,11 @@ export class TabManager {
      * @param {number} id The ID of the tab as assigned by web ext API.
      * @returns {Tab|undefined} The state for tab stored under given ID, or undefined if no matching tab.
      */
-    getTabState(id: number) {
+    getTabState = (id: number) => {
         return this._tabs.get(id)
     }
 
-    getTabStateByUrl(url: string) {
+    getTabStateByUrl = (url: string) => {
         const tabs = new Map<string, Tab>()
         this._tabs.forEach((tab) => tabs.set(tab.url, tab))
         return tabs.get(url)
@@ -86,10 +86,7 @@ export class TabManager {
      * @param {number} id The ID of the tab to stop reset tracking of.
      * @returns {Tab} The state of the previously tracked tab assoc. with `id`.
      */
-    resetTab(
-        id: number,
-        { isActive, url, isBookmarked, isLoaded }: Partial<TabState>,
-    ) {
+    resetTab(id: number, { isActive, url, isLoaded }: Partial<TabState>) {
         const oldTab = this.removeTab(id)
 
         if (oldTab != null) {
@@ -99,7 +96,6 @@ export class TabManager {
                     id,
                     url,
                     isLoaded,
-                    isBookmarked,
                     isActive,
                     windowId: oldTab.windowId,
                     navState: oldTab.navState,
@@ -179,14 +175,6 @@ export class TabManager {
 
         if (tab != null) {
             tab.navState = navState
-        }
-    }
-
-    setBookmarkState(url: string, newState: boolean) {
-        for (const [, tab] of this._tabs) {
-            if (tab.url === url) {
-                tab.isBookmarked = newState
-            }
         }
     }
 }

@@ -102,7 +102,13 @@
             "simple-signalling/lib/*": ["external/simple-signalling/ts/*"],
             "src/*": ["src/*"]
         },
-        "lib": ["es2019", "dom", "dom.iterable", "esnext.asynciterable"]
+        "lib": [
+            "ES2019",
+            "ES2020",
+            "dom",
+            "dom.iterable",
+            "esnext.asynciterable"
+        ]
     },
     "include": ["./src/**/*"],
     "exclude": ["node_modules", "./src/**/*.js", "./src/**/*.jsx"]

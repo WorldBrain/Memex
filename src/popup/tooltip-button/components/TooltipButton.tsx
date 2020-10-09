@@ -60,7 +60,7 @@ class InPageSwitches extends PureComponent<Props> {
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     isEnabled: selectors.isTooltipEnabled(state),
 })
 
@@ -68,12 +68,12 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
     props,
 ) => ({
-    showTooltip: async e => {
+    showTooltip: async (e) => {
         e.preventDefault()
         await dispatch(acts.showTooltip())
         setTimeout(props.closePopup, 200)
     },
-    handleChange: async e => {
+    handleChange: async (e) => {
         e.preventDefault()
         await dispatch(acts.toggleTooltipFlag())
         // setTimeout(props.closePopup, 200)

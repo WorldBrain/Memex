@@ -1,18 +1,24 @@
 import expect from 'expect'
 import { Tabs } from 'webextension-polyfill-ts'
 
-import * as DATA from './index.test.data'
+import * as DATA from 'src/tests/common-fixtures.data'
 import {
     backgroundIntegrationTestSuite,
     backgroundIntegrationTest,
     BackgroundIntegrationTestSetup,
 } from 'src/tests/integration-tests'
-import { createPageStep, searchModule } from 'src/tests/common-fixtures'
-import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
+import {
+    StorageCollectionDiff,
+    createdVisit,
+} from 'src/tests/storage-change-detector'
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
+import { injectFakeTabs } from 'src/tab-management/background/index.tests'
+import { PAGE_1_CREATION } from 'src/tests/common-fixtures.data'
 
 describe('bookmarks background unit tests', () => {
-    const it = makeSingleDeviceUILogicTestFactory()
+    const it = makeSingleDeviceUILogicTestFactory({
+        includePostSyncProcessor: true,
+    })
 
     it('should be able to create a map of tab URLs to bookmark flags', async ({
         device,
@@ -30,7 +36,7 @@ describe('bookmarks background unit tests', () => {
         ] as Tabs.Tab[]
 
         for (const index of bmIndicies) {
-            await bookmarksBG.addBookmark({ url: mockTabs[index].url })
+            await bookmarksBG.addBookmark({ fullUrl: mockTabs[index].url })
         }
 
         expect(await bookmarksBG.findTabBookmarks(mockTabs)).toEqual(
@@ -42,24 +48,56 @@ describe('bookmarks background unit tests', () => {
             ),
         )
     })
+
+    it('bookmark add should attempt to create a page via XHR if missing and no tab ID provided', async ({
+        device: { backgroundModules, fetchPageDataProcessor },
+    }) => {
+        // const { addBookmark, fetchPageData, pages } = await setup()
+        const testUrl = 'test.com'
+        const testFullUrl = 'http://test.com'
+
+        await backgroundModules.pages.addPage({
+            pageDoc: { url: testUrl, content: {} },
+            rejectNoContent: false,
+        })
+
+        try {
+            await backgroundModules.bookmarks.addPageBookmark({
+                fullUrl: testFullUrl,
+            })
+        } catch (err) {
+        } finally {
+            expect(fetchPageDataProcessor.lastProcessedUrl).toEqual(testFullUrl)
+        }
+    })
 })
 
-const bookmarks = (setup: BackgroundIntegrationTestSetup) =>
-    setup.backgroundModules.bookmarks
+function testSetupFactory() {
+    return async ({ setup }: { setup: BackgroundIntegrationTestSetup }) => {
+        await injectFakeTabs({
+            tabManagement: setup.backgroundModules.tabManagement,
+            tabsAPI: setup.browserAPIs.tabs,
+            tabs: [DATA.TEST_TAB_1],
+        })
+    }
+}
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
     backgroundIntegrationTest(
         'should create a page, bookmark it, then retrieve it via a filtered search',
         () => {
             return {
+                setup: testSetupFactory(),
                 steps: [
-                    createPageStep,
                     {
                         execute: async ({ setup }) => {
-                            await bookmarks(setup).addBookmark({
-                                url: DATA.PAGE_1.fullUrl,
-                                time: DATA.BOOKMARK_1,
-                            })
+                            await setup.backgroundModules.bookmarks.addBookmark(
+                                {
+                                    fullUrl: DATA.PAGE_1.fullUrl,
+                                    timestamp: DATA.BOOKMARK_1,
+                                    tabId: DATA.TEST_TAB_1.id,
+                                },
+                            )
                         },
                         expectedStorageChanges: {
                             bookmarks: (): StorageCollectionDiff => ({
@@ -71,12 +109,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                     },
                                 },
                             }),
+                            pages: (): StorageCollectionDiff => ({
+                                ...PAGE_1_CREATION,
+                            }),
+                            visits: () =>
+                                createdVisit(DATA.BOOKMARK_1, DATA.PAGE_1.url),
                         },
                         preCheck: async ({ setup }) => {
                             expect(
-                                await searchModule(setup).searchPages({
-                                    bookmarksOnly: true,
-                                }),
+                                await setup.backgroundModules.search.searchPages(
+                                    {
+                                        bookmarksOnly: true,
+                                    },
+                                ),
                             ).toEqual({
                                 docs: [],
                                 totalCount: null,
@@ -85,9 +130,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                         },
                         postCheck: async ({ setup }) => {
                             expect(
-                                await searchModule(setup).searchPages({
-                                    bookmarksOnly: true,
-                                }),
+                                await setup.backgroundModules.bookmarks.storage.pageHasBookmark(
+                                    DATA.PAGE_1.fullUrl,
+                                ),
+                            ).toBe(true)
+                            expect(
+                                await setup.backgroundModules.search.searchPages(
+                                    {
+                                        bookmarksOnly: true,
+                                    },
+                                ),
                             ).toEqual({
                                 docs: [
                                     {
@@ -114,21 +166,20 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
         },
     ),
     backgroundIntegrationTest(
-        'should create a page, bookmark it, retrieve it via a filtered search, then unbookmark it, losing searchability',
+        'should bookmark a page, retrieve it via a filtered search, then unbookmark it, losing searchability',
         () => {
             return {
+                setup: testSetupFactory(),
                 steps: [
                     {
-                        ...createPageStep,
-                        // debug: true,
-                    },
-                    {
-                        // debug: true,
                         execute: async ({ setup }) => {
-                            await bookmarks(setup).addBookmark({
-                                url: DATA.PAGE_1.fullUrl,
-                                time: DATA.BOOKMARK_1,
-                            })
+                            await setup.backgroundModules.bookmarks.addBookmark(
+                                {
+                                    fullUrl: DATA.PAGE_1.fullUrl,
+                                    timestamp: DATA.BOOKMARK_1,
+                                    tabId: DATA.TEST_TAB_1.id,
+                                },
+                            )
                         },
                         expectedStorageChanges: {
                             bookmarks: (): StorageCollectionDiff => ({
@@ -140,20 +191,21 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                     },
                                 },
                             }),
-                        },
-                        expectedStorageOperations: () => [
-                            (expect as any).objectContaining({
-                                operation: [
-                                    'createObject',
-                                    'bookmarks',
-                                    {
-                                        url: DATA.PAGE_1.url,
-                                        time: DATA.BOOKMARK_1,
-                                    },
-                                ],
+                            visits: () =>
+                                createdVisit(DATA.BOOKMARK_1, DATA.PAGE_1.url),
+                            pages: (): StorageCollectionDiff => ({
+                                ...PAGE_1_CREATION,
                             }),
-                        ],
+                        },
                         expectedSyncLogEntries: () => [
+                            expect.objectContaining({
+                                collection: 'pages',
+                                operation: 'create',
+                            }),
+                            expect.objectContaining({
+                                collection: 'visits',
+                                operation: 'create',
+                            }),
                             expect.objectContaining({
                                 collection: 'bookmarks',
                                 operation: 'create',
@@ -165,12 +217,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                         ],
                     },
                     {
-                        // debug: true,
                         preCheck: async ({ setup }) => {
                             expect(
-                                await searchModule(setup).searchPages({
-                                    bookmarksOnly: true,
-                                }),
+                                await setup.backgroundModules.search.searchPages(
+                                    {
+                                        bookmarksOnly: true,
+                                    },
+                                ),
                             ).toEqual({
                                 docs: [
                                     {
@@ -192,9 +245,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                             })
                         },
                         execute: async ({ setup }) => {
-                            await bookmarks(setup).delBookmark({
-                                url: DATA.PAGE_1.fullUrl,
-                            })
+                            await setup.backgroundModules.bookmarks.delBookmark(
+                                {
+                                    url: DATA.PAGE_1.fullUrl,
+                                },
+                            )
                         },
                         expectedStorageChanges: {
                             bookmarks: (): StorageCollectionDiff => ({
@@ -210,9 +265,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                         ],
                         postCheck: async ({ setup }) => {
                             expect(
-                                await searchModule(setup).searchPages({
-                                    bookmarksOnly: true,
-                                }),
+                                await setup.backgroundModules.search.searchPages(
+                                    {
+                                        bookmarksOnly: true,
+                                    },
+                                ),
                             ).toEqual({
                                 docs: [],
                                 totalCount: null,

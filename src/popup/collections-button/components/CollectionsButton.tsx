@@ -24,13 +24,12 @@ interface DispatchProps {
 export type Props = OwnProps & StateProps & DispatchProps
 
 class CollectionsButton extends PureComponent<Props> {
-
     async componentDidMount() {
         await this.getKeyboardShortcutText()
     }
 
     state = {
-        highlightInfo: undefined
+        highlightInfo: undefined,
     }
 
     private async getKeyboardShortcutText() {
@@ -41,15 +40,13 @@ class CollectionsButton extends PureComponent<Props> {
 
         if (!shortcutsEnabled || !addToCollection.enabled) {
             this.setState({
-                highlightInfo: `${addToCollection.shortcut} (disabled)`
-            }) 
-        } else (
+                highlightInfo: `${addToCollection.shortcut} (disabled)`,
+            })
+        } else
             this.setState({
-                highlightInfo: `${addToCollection.shortcut}`
-            }) 
-        )
+                highlightInfo: `${addToCollection.shortcut}`,
+            })
     }
-
 
     render() {
         return (
@@ -62,7 +59,7 @@ class CollectionsButton extends PureComponent<Props> {
                 >
                     Add To Collection(s)
                     <p className={buttonStyles.subTitle}>
-                            {this.state.highlightInfo}
+                        {this.state.highlightInfo}
                     </p>
                 </Button>
             </div>
