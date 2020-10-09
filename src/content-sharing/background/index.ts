@@ -285,6 +285,11 @@ export default class ContentSharingBackground {
         await this.scheduleAction(shareAnnotationsAction, {
             queueInteraction: options.queueInteraction ?? 'queue-and-await',
         })
+
+         this.options.analytics.trackEvent({
+            category: 'ContentSharing',
+            action: 'shareAnnotation',
+        })
     }
 
     shareAnnotations: ContentSharingInterface['shareAnnotations'] = async (

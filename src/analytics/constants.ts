@@ -88,6 +88,9 @@ export const ANALYTICS_EVENTS: {
         unshareListEntry: {
             description: 'A page is removed from a shared list',
         },
+        shareAnnotation: {
+            description: 'An annotation is shared',
+        },
     },
     Pages: {
         deleteViaRegexBlacklist: {

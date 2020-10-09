@@ -279,7 +279,6 @@ const BottomBarBox = styled.div`
     justify-content: space-between;
     align-items: center;
     height: 45px;
-    padding: 0px 5px 0 0;
 
     & > div {
         width: 45px;
