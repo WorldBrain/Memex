@@ -115,12 +115,6 @@ export type SidebarContainerEvents = UIEvent<{
     updateListsForPageResult: { added?: string; deleted?: string; url: string }
     deleteEditCommentTag: { tag: string; annotationUrl: string }
 
-    receiveNewAnnotation: {
-        annotationUrl: string
-        annotationData: IncomingAnnotationData
-        anchor?: Anchor
-    }
-
     receiveSharingAccessChange: {
         sharingAccess: AnnotationSharingAccess
     }
@@ -514,35 +508,6 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({
             commentBox: { commentText: { $set: event.comment } },
-        })
-    }
-
-    receiveNewAnnotation: EventHandler<'receiveNewAnnotation'> = async ({
-        event: { annotationUrl, anchor, annotationData },
-    }) => {
-        const createdWhen = new Date()
-
-        const highlight: Annotation = {
-            url: annotationUrl,
-            isBookmarked: annotationData.isBookmarked,
-            comment: annotationData.commentText,
-            body: annotationData.highlightText,
-            pageUrl: this.options.pageUrl,
-            pageTitle: this.options.pageTitle,
-            tags: annotationData.tags ?? [],
-            lastEdited: createdWhen,
-            selector: anchor,
-            createdWhen,
-        }
-
-        this.emitMutation({
-            annotations: { $apply: (prev) => [highlight, ...prev] },
-            editForms: {
-                $apply: (prev) => ({
-                    [annotationUrl]: { ...INIT_FORM_STATE },
-                    ...prev,
-                }),
-            },
         })
     }
 

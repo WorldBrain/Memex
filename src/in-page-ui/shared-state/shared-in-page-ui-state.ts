@@ -139,7 +139,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         if (this.componentsShown.sidebar) {
             await this.hideSidebar()
         } else {
-            await this.showSidebar()
+            await this.showSidebar({ action: 'comment' })
         }
     }
 

@@ -21,6 +21,8 @@ export default class RibbonContainer extends StatefulUIElement<
     RibbonContainerState,
     RibbonContainerEvents
 > {
+    private ribbonRef = React.createRef<Ribbon>()
+
     constructor(props) {
         super(props, new RibbonContainerLogic(props))
     }
@@ -69,9 +71,10 @@ export default class RibbonContainer extends StatefulUIElement<
         }
     }
 
-    handleExternalAction = (event: { action: InPageUIRibbonAction }) => {
+    handleExternalAction = async (event: { action: InPageUIRibbonAction }) => {
         if (event.action === 'comment') {
-            this.processEvent('setShowCommentBox', { value: true })
+            await this.processEvent('setShowCommentBox', { value: true })
+            this.ribbonRef?.current.focusCreateForm()
         } else if (event.action === 'bookmark') {
             this.processEvent('toggleBookmark', null)
             this.props.setRibbonShouldAutoHide(true)
@@ -85,6 +88,7 @@ export default class RibbonContainer extends StatefulUIElement<
     render() {
         return (
             <Ribbon
+                ref={this.ribbonRef}
                 setRef={this.props.setRef}
                 toggleShowExtraButtons={() => {
                     this.processEvent('toggleShowExtraButtons', null)
@@ -123,8 +127,10 @@ export default class RibbonContainer extends StatefulUIElement<
                     saveComment: () => this.processEvent('saveComment', null),
                     cancelComment: () =>
                         this.processEvent('cancelComment', null),
-                    setShowCommentBox: (value) =>
-                        this.processEvent('setShowCommentBox', { value }),
+                    setShowCommentBox: async (value) => {
+                        await this.processEvent('setShowCommentBox', { value })
+                        this.ribbonRef?.current.focusCreateForm()
+                    },
                     changeComment: (value) =>
                         this.processEvent('changeComment', { value }),
                     updateCommentBoxTags: (value) =>

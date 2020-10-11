@@ -126,25 +126,21 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         })
     }
 
-    private handleExternalAction = (event: SidebarActionOptions) => {
-        if (event.action === 'annotate') {
-            this.processEvent('receiveNewAnnotation', {
-                annotationData: event.annotationData,
-                annotationUrl: event.annotationUrl,
-                anchor: event.anchor,
-            })
-        } else if (event.action === 'comment') {
-            this.processEvent('addNewPageComment', {
+    private handleExternalAction = async (event: SidebarActionOptions) => {
+        if (event.action === 'comment') {
+            await this.processEvent('addNewPageComment', {
                 comment: event.annotationData?.commentText,
                 tags: event.annotationData?.tags,
             })
+            this.focusCreateForm()
         } else if (event.action === 'show_annotation') {
             this.activateAnnotation(event.annotationUrl)
         } else if (event.action === 'edit_annotation') {
-            this.processEvent('setAnnotationEditMode', {
+            await this.processEvent('setAnnotationEditMode', {
                 annotationUrl: event.annotationUrl,
                 context: 'pageAnnotations',
             })
+            this.focusEditForm(event.annotationUrl)
         } else if (event.action === 'set_sharing_access') {
             this.processEvent('receiveSharingAccessChange', {
                 sharingAccess: event.annotationSharingAccess,

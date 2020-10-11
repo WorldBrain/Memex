@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TagInput from 'src/tags/ui/tag-input'
+import { FocusableComponent } from './types'
 
 export interface AnnotationEditEventProps {
     onEditConfirm: (url: string) => void
@@ -28,10 +29,11 @@ export interface Props
     rows: number
 }
 
-class AnnotationEdit extends React.Component<Props> {
+class AnnotationEdit extends React.Component<Props>
+    implements FocusableComponent {
     private textAreaRef = React.createRef<HTMLTextAreaElement>()
 
-    componentDidMount() {
+    focus() {
         const inputLen = this.props.comment.length
         this.textAreaRef.current.focus()
         this.textAreaRef.current.setSelectionRange(inputLen, inputLen)

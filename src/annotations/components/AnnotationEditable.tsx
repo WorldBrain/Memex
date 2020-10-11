@@ -87,6 +87,7 @@ export type Props = AnnotationEditableGeneralProps &
     AnnotationEditableEventProps
 
 export default class AnnotationEditable extends React.Component<Props> {
+    private annotEditRef = React.createRef<AnnotationEdit>()
     private boxRef: HTMLDivElement = null
     private removeEventListeners?: () => void
 
@@ -102,6 +103,10 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (this.boxRef && this.removeEventListeners) {
             this.removeEventListeners()
         }
+    }
+
+    focus() {
+        this.annotEditRef?.current?.focus()
     }
 
     private get isEdited(): boolean {
@@ -199,6 +204,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (mode === 'edit') {
             return (
                 <AnnotationEdit
+                    ref={this.annotEditRef}
                     {...this.props}
                     {...annotationEditDependencies}
                     tagPickerDependencies={tagPickerDependencies}

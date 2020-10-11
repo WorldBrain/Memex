@@ -5,6 +5,7 @@ import onClickOutside from 'react-onclickoutside'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TagInput from 'src/tags/ui/tag-input'
+import { FocusableComponent } from './types'
 
 interface State {
     isTagPickerShown: boolean
@@ -29,11 +30,12 @@ export interface Props
     tagPickerDependencies: GenericPickerDependenciesMinusSave
 }
 
-class AnnotationCreate extends React.Component<Props, State> {
+export class AnnotationCreate extends React.Component<Props, State>
+    implements FocusableComponent {
     private textAreaRef = React.createRef<HTMLTextAreaElement>()
     state = { isTagPickerShown: false }
 
-    componentDidMount() {
+    focus() {
         const inputLen = this.props.comment.length
         this.textAreaRef.current.focus()
         this.textAreaRef.current.setSelectionRange(inputLen, inputLen)

@@ -38,9 +38,17 @@ export interface Props extends SidebarContainerOptions {
 export class AnnotationsSidebarContainer<
     P extends Props = Props
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
+    private sidebarRef
+
     constructor(props: P) {
         super(props, new SidebarContainerLogic(props))
     }
+
+    protected focusCreateForm = () =>
+        this.sidebarRef?.getInstance()?.focusCreateForm()
+
+    protected focusEditForm = (annotationUrl: string) =>
+        this.sidebarRef?.getInstance()?.focusEditForm(annotationUrl)
 
     showSidebar() {
         this.processEvent('show', null)
@@ -73,11 +81,13 @@ export class AnnotationsSidebarContainer<
         annotation: Annotation,
     ): AnnotationFooterEventProps {
         return {
-            onEditIconClick: () =>
-                this.processEvent('setAnnotationEditMode', {
+            onEditIconClick: async () => {
+                await this.processEvent('setAnnotationEditMode', {
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
-                }),
+                })
+                this.focusEditForm(annotation.url)
+            },
             toggleBookmark: () =>
                 this.processEvent('toggleAnnotationBookmark', {
                     annotationUrl: annotation.url,
@@ -409,6 +419,7 @@ export class AnnotationsSidebarContainer<
                     {this.renderTopBar()}
                     <AnnotationsSidebar
                         {...this.state}
+                        ref={(ref) => (this.sidebarRef = ref)}
                         sharingAccess={this.state.annotationSharingAccess}
                         needsWaypoint={!this.state.noResults}
                         appendLoader={
