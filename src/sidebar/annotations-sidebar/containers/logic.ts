@@ -29,6 +29,10 @@ interface EditForm {
     tags: string[]
 }
 
+interface EditForms {
+    [annotationUrl: string]: EditForm
+}
+
 export interface SidebarContainerState {
     loadState: TaskState
     primarySearchState: TaskState
@@ -57,9 +61,7 @@ export interface SidebarContainerState {
     showCommentBox: boolean
     commentBox: EditForm
 
-    editForms: {
-        [annotationUrl: string]: EditForm
-    }
+    editForms: EditForms
 
     pageCount: number
     noResults: boolean
@@ -320,7 +322,14 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             annotations: { $set: annotations },
             editForms: {
-                $set: createEditFormsForAnnotations(annotations),
+                $apply: (editForms: EditForms) => {
+                    for (const { url } of annotations) {
+                        if (editForms[url] == null) {
+                            editForms[url] = { ...INIT_FORM_STATE }
+                        }
+                    }
+                    return editForms
+                },
             },
         })
         this._detectSharedAnnotations(
@@ -805,41 +814,38 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        const previousForm = previousState.editForms[event.annotationUrl]
         const annotation = previousState.annotations.find(
             (annot) => annot.url === event.annotationUrl,
         )
 
-        this.emitMutation({
-            editForms: {
-                [event.annotationUrl]: {
-                    commentText: { $set: annotation.comment ?? '' },
-                    tags: { $set: annotation.tags ?? [] },
-                    isBookmarked: { $set: !!annotation.isBookmarked },
-                },
-            },
+        const mutation: UIMutation<SidebarContainerState> = {
             annotationModes: {
                 [event.context]: {
                     [event.annotationUrl]: { $set: 'edit' },
                 },
             },
-        })
+        }
+
+        // If there was existing form state, we want to keep that, else use the stored annot data or defaults
+        if (
+            !previousForm ||
+            (!previousForm.commentText?.length && !previousForm.tags?.length)
+        ) {
+            mutation.editForms = {
+                [event.annotationUrl]: {
+                    commentText: { $set: annotation.comment ?? '' },
+                    tags: { $set: annotation.tags ?? [] },
+                },
+            }
+        }
+
+        this.emitMutation(mutation)
     }
 
     switchAnnotationMode: EventHandler<'switchAnnotationMode'> = ({
         event,
     }) => {
-        let extraMutation: UIMutation<SidebarContainerState> = {}
-
-        if (event.mode === 'default') {
-            extraMutation = {
-                editForms: {
-                    [event.annotationUrl]: {
-                        $set: { ...INIT_FORM_STATE },
-                    },
-                },
-            }
-        }
-
         this.emitMutation({
             annotationModes: {
                 [event.context]: {
@@ -848,7 +854,6 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 },
             },
-            ...extraMutation,
         })
     }
 

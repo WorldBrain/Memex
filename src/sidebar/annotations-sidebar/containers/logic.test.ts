@@ -81,10 +81,9 @@ describe('SidebarContainerLogic', () => {
             const annotation = sidebar.state.annotations[0]
             expect(annotation.comment).toEqual(DATA.ANNOT_1.comment)
 
-            await sidebar.processEvent('switchAnnotationMode', {
+            await sidebar.processEvent('setAnnotationEditMode', {
                 context,
                 annotationUrl: DATA.ANNOT_1.url,
-                mode: 'edit',
             })
             expect(
                 sidebar.state.annotationModes[context][DATA.ANNOT_1.url],
@@ -124,10 +123,9 @@ describe('SidebarContainerLogic', () => {
             const annotation = sidebar.state.annotations[0]
             expect(annotation.comment).toEqual(DATA.ANNOT_1.comment)
 
-            await sidebar.processEvent('switchAnnotationMode', {
+            await sidebar.processEvent('setAnnotationEditMode', {
                 context,
                 annotationUrl: DATA.ANNOT_1.url,
-                mode: 'edit',
             })
             expect(
                 sidebar.state.annotationModes[context][DATA.ANNOT_1.url],
@@ -160,6 +158,62 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.annotations[0].lastEdited).not.toEqual(
                 annotation.lastEdited,
             )
+        })
+
+        it('should be able to interrupt an edit, preserving comment and tag inputs', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({ device })
+            const editedComment = DATA.ANNOT_1.comment + ' new stuff'
+
+            sidebar.processMutation({
+                annotations: { $set: [DATA.ANNOT_1] },
+                editForms: {
+                    $set: createEditFormsForAnnotations([DATA.ANNOT_1]),
+                },
+            })
+
+            const annotation = sidebar.state.annotations[0]
+            expect(annotation.comment).toEqual(DATA.ANNOT_1.comment)
+
+            await sidebar.processEvent('setAnnotationEditMode', {
+                context,
+                annotationUrl: DATA.ANNOT_1.url,
+            })
+            expect(
+                sidebar.state.annotationModes[context][DATA.ANNOT_1.url],
+            ).toEqual('edit')
+
+            await sidebar.processEvent('changeEditCommentText', {
+                annotationUrl: DATA.ANNOT_1.url,
+                comment: editedComment,
+            })
+            await sidebar.processEvent('updateTagsForEdit', {
+                annotationUrl: DATA.ANNOT_1.url,
+                added: DATA.TAG_1,
+            })
+            await sidebar.processEvent('updateTagsForEdit', {
+                annotationUrl: DATA.ANNOT_1.url,
+                added: DATA.TAG_2,
+            })
+
+            expect(sidebar.state.editForms[annotation.url]).toEqual({
+                tags: [DATA.TAG_1, DATA.TAG_2],
+                commentText: editedComment,
+                isTagInputActive: false,
+                isBookmarked: false,
+            })
+            await sidebar.processEvent('switchAnnotationMode', {
+                context,
+                annotationUrl: DATA.ANNOT_1.url,
+                mode: 'default',
+            })
+            expect(sidebar.state.editForms[annotation.url]).toEqual({
+                tags: [DATA.TAG_1, DATA.TAG_2],
+                commentText: editedComment,
+                isTagInputActive: false,
+                isBookmarked: false,
+            })
         })
 
         it('should be able to delete an annotation', async ({ device }) => {
