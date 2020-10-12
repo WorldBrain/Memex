@@ -175,6 +175,17 @@ export default class CustomListBackground {
         })
     }
 
+    createInboxListIfAbsent({
+        createdAt = new Date(),
+    }: {
+        createdAt?: Date
+    } = {}): Promise<number> {
+        return this.storage.createInboxListIfAbsent({
+            id: this.generateListId(),
+            createdAt,
+        })
+    }
+
     createCustomList = async ({ name }: { name: string }): Promise<number> => {
         internalAnalytics.processEvent({
             type: EVENT_NAMES.CREATE_COLLECTION,

@@ -30,11 +30,13 @@ import {
 } from 'src/blacklist/background'
 import analytics from 'src/analytics'
 import TabManagementBackground from 'src/tab-management/background'
+import CustomListBackground from 'src/custom-lists/background'
 
 class BackgroundScript {
     private utils: typeof utils
     private tabManagement: TabManagementBackground
     private copyPasterBackground: CopyPasterBackground
+    private customListsBackground: CustomListBackground
     private notifsBackground: NotifsBackground
     private storageChangesMan: StorageChangesManager
     private storageManager: Storex
@@ -50,6 +52,7 @@ class BackgroundScript {
         storageManager,
         notifsBackground,
         copyPasterBackground,
+        customListsBackground,
         tabManagement,
         utilFns = utils,
         storageChangesMan,
@@ -64,6 +67,7 @@ class BackgroundScript {
         tabManagement: TabManagementBackground
         notifsBackground: NotifsBackground
         copyPasterBackground: CopyPasterBackground
+        customListsBackground: CustomListBackground
         urlNormalizer?: URLNormalizer
         utilFns?: typeof utils
         storageChangesMan: StorageChangesManager
@@ -77,6 +81,7 @@ class BackgroundScript {
         this.tabManagement = tabManagement
         this.notifsBackground = notifsBackground
         this.copyPasterBackground = copyPasterBackground
+        this.customListsBackground = customListsBackground
         this.utils = utilFns
         this.storageChangesMan = storageChangesMan
         this.storageAPI = storageAPI
@@ -145,20 +150,25 @@ class BackgroundScript {
         })
     }
 
+    private async handleUnifiedLogic() {
+        await this.customListsBackground.createInboxListIfAbsent()
+        await this.notifsBackground.deliverStaticNotifications()
+        await this.tabManagement.trackExistingTabs()
+    }
+
     /**
      * Set up logic that will get run on ext install, update, browser update.
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onInstalled
      */
     private setupInstallHooks() {
         this.runtimeAPI.onInstalled.addListener(async (details) => {
-            this.notifsBackground.deliverStaticNotifications()
-            this.tabManagement.trackExistingTabs()
-
             switch (details.reason) {
                 case 'install':
+                    await this.handleUnifiedLogic()
                     return this.handleInstallLogic()
                 case 'update':
                     await this.runQuickAndDirtyMigrations()
+                    await this.handleUnifiedLogic()
                     return this.handleUpdateLogic()
                 default:
             }
