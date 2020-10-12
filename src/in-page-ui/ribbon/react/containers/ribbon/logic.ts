@@ -296,7 +296,10 @@ export class RibbonContainerLogic extends UILogic<
             commentBox: { showCommentBox: { $set: event.value } },
             ...extra,
         })
-        this.dependencies.focusCreateForm()
+
+        if (event.value) {
+            this.dependencies.focusCreateForm()
+        }
     }
 
     saveComment: EventHandler<'saveComment'> = async ({

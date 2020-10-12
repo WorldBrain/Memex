@@ -1,3 +1,4 @@
+// tslint:disable:forin
 import mapValues from 'lodash/mapValues'
 
 import { SidebarContainerLogic, createEditFormsForAnnotations } from './logic'
@@ -407,6 +408,92 @@ describe('SidebarContainerLogic', () => {
                 DATA.TAG_1,
                 DATA.TAG_2,
             ])
+        })
+
+        it('should be able to set focus on comment box or annot edit forms', async ({
+            device,
+        }) => {
+            const formFocusStates = {
+                create: false,
+                a: false,
+                b: false,
+                c: false,
+            }
+
+            const focusForm = (nameToChange = 'create') => {
+                for (const name in formFocusStates) {
+                    formFocusStates[name] = name === nameToChange
+                }
+            }
+
+            const { sidebar } = await setupLogicHelper({
+                device,
+                focusCreateForm: focusForm,
+                focusEditForm: focusForm,
+            })
+
+            expect(formFocusStates).toEqual({
+                create: false,
+                a: false,
+                b: false,
+                c: false,
+            })
+
+            await sidebar.processEvent('addNewPageComment', {
+                comment: DATA.COMMENT_1,
+            })
+            expect(formFocusStates).toEqual({
+                create: true,
+                a: false,
+                b: false,
+                c: false,
+            })
+
+            sidebar.logic.emitMutation({
+                annotations: {
+                    $set: [{ url: 'a' }, { url: 'b' }, { url: 'c' }] as any,
+                },
+                editForms: {
+                    $set: {
+                        a: { commentText: '', tags: [] },
+                        b: { commentText: '', tags: [] },
+                        c: { commentText: '', tags: [] },
+                    } as any,
+                },
+            })
+
+            await sidebar.processEvent('setAnnotationEditMode', {
+                annotationUrl: 'a',
+                context: 'pageAnnotations',
+            })
+            expect(formFocusStates).toEqual({
+                create: false,
+                a: true,
+                b: false,
+                c: false,
+            })
+
+            await sidebar.processEvent('setAnnotationEditMode', {
+                annotationUrl: 'b',
+                context: 'pageAnnotations',
+            })
+            expect(formFocusStates).toEqual({
+                create: false,
+                a: false,
+                b: true,
+                c: false,
+            })
+
+            await sidebar.processEvent('setAnnotationEditMode', {
+                annotationUrl: 'c',
+                context: 'pageAnnotations',
+            })
+            expect(formFocusStates).toEqual({
+                create: false,
+                a: false,
+                b: false,
+                c: true,
+            })
         })
     })
 

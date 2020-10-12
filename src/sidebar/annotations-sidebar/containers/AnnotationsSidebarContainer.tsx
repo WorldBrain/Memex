@@ -84,13 +84,11 @@ export class AnnotationsSidebarContainer<
         annotation: Annotation,
     ): AnnotationFooterEventProps {
         return {
-            onEditIconClick: async () => {
-                await this.processEvent('setAnnotationEditMode', {
+            onEditIconClick: () =>
+                this.processEvent('setAnnotationEditMode', {
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
-                })
-                this.focusEditForm(annotation.url)
-            },
+                }),
             toggleBookmark: () =>
                 this.processEvent('toggleAnnotationBookmark', {
                     annotationUrl: annotation.url,

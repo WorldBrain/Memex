@@ -27,9 +27,9 @@ describe('Ribbon logic', () => {
 
     async function setupTest(
         device: UILogicTestDevice,
-        options?: {
+        options: {
             dependencies?: Partial<RibbonLogicOptions>
-        },
+        } = {},
     ) {
         const { backgroundModules } = device
         const currentTab = {
@@ -309,6 +309,26 @@ describe('Ribbon logic', () => {
                 { url: annotations[0].url, name: TAGS[2] },
             ]),
         )
+    })
+
+    it('should be able to set focus on comment box', async ({ device }) => {
+        let isCreateFormFocused = false
+
+        const { ribbon } = await setupTest(device, {
+            dependencies: {
+                focusCreateForm: () => {
+                    isCreateFormFocused = true
+                },
+            },
+        })
+
+        await ribbon.init()
+
+        expect(isCreateFormFocused).toBe(false)
+        await ribbon.processEvent('setShowCommentBox', { value: false })
+        expect(isCreateFormFocused).toBe(false)
+        await ribbon.processEvent('setShowCommentBox', { value: true })
+        expect(isCreateFormFocused).toBe(true)
     })
 
     it('should rehydrate state on URL change', async ({ device }) => {

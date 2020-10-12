@@ -802,7 +802,7 @@ export class SidebarContainerLogic extends UILogic<
         // If there was existing form state, we want to keep that, else use the stored annot data or defaults
         if (
             !previousForm ||
-            (!previousForm.commentText?.length && !previousForm.tags?.length)
+            (!previousForm?.commentText?.length && !previousForm?.tags?.length)
         ) {
             mutation.editForms = {
                 [event.annotationUrl]: {
