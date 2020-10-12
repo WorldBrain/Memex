@@ -24,7 +24,7 @@ class CollectionsButton extends PureComponent {
                     </div>
                 ) : (
                     <div
-                        onClick={this.props.listBtnClick}
+                        onMouseEnter={this.props.listBtnClick}
                         className={styles.enabled}
                     >
                         Show Collections
