@@ -78,7 +78,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                 onClick={this.hideTagPicker}
                 onKeyDown={this.handleInputKeyDown}
                 onChange={(e) => this.props.onCommentChange(e.target.value)}
-                placeholder="Add a private note... (save with cmd/ctrl+enter)"
+                placeholder="Add private note (save with cmd/ctrl+enter)"
             />
         )
     }

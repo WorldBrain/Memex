@@ -33,6 +33,10 @@ class AnnotationEdit extends React.Component<Props>
     implements FocusableComponent {
     private textAreaRef = React.createRef<HTMLTextAreaElement>()
 
+    componentDidMount() {
+        this.focus()
+    }
+
     focus() {
         const inputLen = this.props.comment.length
         this.textAreaRef.current.focus()
@@ -66,7 +70,7 @@ class AnnotationEdit extends React.Component<Props>
                 ref={this.textAreaRef}
                 value={this.props.comment}
                 onClick={() => this.props.setTagInputActive(false)}
-                placeholder="Add a private note... (save with cmd/ctrl+enter)"
+                placeholder="Add private note (save with cmd/ctrl+enter)"
                 onChange={(e) => this.props.onCommentChange(e.target.value)}
                 onKeyDown={this.handleInputKeyDown}
             />

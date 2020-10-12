@@ -125,6 +125,7 @@ const TextBox = styled.div`
 const TextToBeDisplayed = styled.span`
     box-decoration-break: clone;
     padding: 0 5px;
+    overflow: hidden;
 `
 
 const ToggleMoreButtonStyled = styled.div`
