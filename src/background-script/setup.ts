@@ -61,6 +61,7 @@ import { runInTab } from 'src/util/webextensionRPC'
 import { PageAnalyzerInterface } from 'src/page-analysis/types'
 import { TabManager } from 'src/tab-management/background/tab-manager'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
+import { type } from 'openpgp'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -92,6 +93,9 @@ export interface BackgroundModules {
     readwise: ReadwiseBackground
 }
 
+const globalFetch: typeof fetch =
+    typeof fetch !== 'undefined' ? fetch.bind(globalThis) : null
+
 export function createBackgroundModules(options: {
     storageManager: StorageManager
     browserAPIs: Browser
@@ -107,8 +111,11 @@ export function createBackgroundModules(options: {
     disableSyncEnryption?: boolean
     getIceServers?: () => Promise<string[]>
     getNow?: () => number
+    fetch?: typeof fetch
 }): BackgroundModules {
     const getNow = options.getNow ?? (() => Date.now())
+    const fetch = options.fetch ?? globalFetch
+
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
     const tabManagement = new TabManagementBackground({
@@ -142,6 +149,9 @@ export function createBackgroundModules(options: {
     })
     const readwise = new ReadwiseBackground({
         browserStorage: options.browserAPIs.storage.local,
+        fetch,
+        getFullPageUrl: async (normalizedUrl) =>
+            (await pages.storage.getPage(normalizedUrl))?.fullUrl,
     })
 
     const search = new SearchBackground({
@@ -260,10 +270,10 @@ export function createBackgroundModules(options: {
     const postReceiveProcessor =
         options.fetchPageDataProcessor != null
             ? new PostReceiveProcessor({
-                pages,
-                pageFetchBacklog,
-                fetchPageData: options.fetchPageDataProcessor,
-            }).processor
+                  pages,
+                  pageFetchBacklog,
+                  fetchPageData: options.fetchPageDataProcessor,
+              }).processor
             : undefined
 
     return {

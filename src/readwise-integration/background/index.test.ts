@@ -1,4 +1,5 @@
 import expect from 'expect'
+import update from 'immutability-helper'
 
 import * as DATA from 'src/readwise-integration/background/index.test.data'
 import {
@@ -10,6 +11,9 @@ import {
 } from 'src/tests/integration-tests'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
 import { ReadwiseHighlight } from './types'
+import { injectFakeTabs } from 'src/tab-management/background/index.tests'
+import { READWISE_API_URL } from './constants'
+import { string } from 'prop-types'
 
 const readwiseIntegration = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.readwise
@@ -166,34 +170,101 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     'my key',
                                 )
 
-                                const createdHighlights: Array<ReadwiseHighlight> = []
-                                setup.backgroundModules.readwise.readwiseAPI.putHighlight = async (
-                                    params,
-                                ) => {
-                                    expect(params.key).toEqual('my key')
-                                    createdHighlights.push(params.highlight)
-                                    return { success: true }
-                                }
-
-                                await setup.backgroundModules.directLinking.createAnnotation(
-                                    {
-                                        tab: {
-                                            url: DATA.PAGE_1.fullUrl,
-                                        } as any,
-                                    },
-                                    DATA.ANNOT_1 as any,
-                                    { skipPageIndexing: true },
+                                injectFakeTabs({
+                                    tabManagement:
+                                        setup.backgroundModules.tabManagement,
+                                    tabsAPI: setup.browserAPIs.tabs,
+                                    tabs: [DATA.TEST_TAB_1, DATA.TEST_TAB_2],
+                                    includeTitle: true,
+                                })
+                                setup.fetch.post(READWISE_API_URL, {
+                                    status: 200,
+                                })
+                                const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: DATA.TEST_TAB_1 },
+                                    DATA.ANNOT_1,
                                 )
-                                await setup.backgroundModules.directLinking.createAnnotation(
-                                    {
-                                        tab: {
-                                            url: DATA.PAGE_2.fullUrl,
-                                        } as any,
-                                    },
-                                    DATA.ANNOT_2 as any,
-                                    { skipPageIndexing: true },
+                                const secondAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: DATA.TEST_TAB_2 },
+                                    DATA.ANNOT_2,
                                 )
-                                expect(createdHighlights).toEqual([{}, {}])
+                                expect(
+                                    setup.fetch.calls().map((call) =>
+                                        update(call, {
+                                            1: {
+                                                body: {
+                                                    $apply: (body) =>
+                                                        JSON.parse(
+                                                            body as string,
+                                                        ),
+                                                },
+                                            },
+                                        }),
+                                    ),
+                                ).toEqual([
+                                    [
+                                        READWISE_API_URL,
+                                        {
+                                            method: 'POST',
+                                            headers: {
+                                                Authorization: 'Token my key',
+                                                'Content-Type':
+                                                    'application/json',
+                                            },
+                                            body: {
+                                                highlights: [
+                                                    {
+                                                        text: DATA.ANNOT_1.body,
+                                                        title:
+                                                            DATA.TEST_TAB_1
+                                                                .title,
+                                                        source_url:
+                                                            DATA.PAGE_1.fullUrl,
+                                                        source_type: 'article',
+                                                        note:
+                                                            DATA.ANNOT_1
+                                                                .comment,
+                                                        location_type:
+                                                            'time_offset',
+                                                        highlighted_at: DATA.ANNOT_1.createdWhen.toISOString(),
+                                                        highlight_url: firstAnnotationUrl,
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                    ],
+                                    [
+                                        READWISE_API_URL,
+                                        {
+                                            method: 'POST',
+                                            headers: {
+                                                Authorization: 'Token my key',
+                                                'Content-Type':
+                                                    'application/json',
+                                            },
+                                            body: {
+                                                highlights: [
+                                                    {
+                                                        text: DATA.ANNOT_2.body,
+                                                        title:
+                                                            DATA.TEST_TAB_2
+                                                                .title,
+                                                        source_url:
+                                                            DATA.PAGE_2.fullUrl,
+                                                        source_type: 'article',
+                                                        note:
+                                                            DATA.ANNOT_2
+                                                                .comment,
+                                                        location_type:
+                                                            'time_offset',
+                                                        highlighted_at: DATA.ANNOT_1.createdWhen.toISOString(),
+                                                        highlight_url: secondAnnotationUrl,
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                    ],
+                                ])
                             },
                         },
                     ],

@@ -15,8 +15,8 @@ export interface ReadwiseSettings {
 }
 export interface ReadwiseAPI {
     validateKey(key: string): Promise<{ success: boolean }>
-    putHighlight(params: {
-        highlight: ReadwiseHighlight
+    postHighlights(params: {
+        highlights: ReadwiseHighlight[]
         key: string
     }): Promise<{ success: boolean }>
 }
@@ -31,4 +31,8 @@ export interface ReadwiseHighlight {
     text: string // annotation body
 }
 
-// https://readwise.io/api/v2/highlights/()
+export type ReadwiseAction = ReadwisePostHighlightsAction
+export interface ReadwisePostHighlightsAction {
+    type: 'post-highlights'
+    highlights: ReadwiseHighlight[]
+}
