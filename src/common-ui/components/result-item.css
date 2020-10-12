@@ -219,7 +219,7 @@
 }
 
 .infoContainerOverview {
-    padding: 20px 13px 20px;
+    padding: 15px 13px 15px;
 }
 
 .infoContainerScreenshot {
@@ -315,10 +315,11 @@
 .buttonsContainer {
     display: grid;
     flex-direction: row;
-    margin: 0 7px 3px;
     z-index: 0;
     grid-auto-flow: column;
     grid-gap: 3px;
+    padding: 10px;
+    margin: -10px -10px 0 0;
 }
 
 .detailsContainer {
@@ -350,6 +351,7 @@
     align-items: center;
     display: flex;
     background: none;
+    align-self: flex-start;
 
     &:hover {
         opacity: 1;
