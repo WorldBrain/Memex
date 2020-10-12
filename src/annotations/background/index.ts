@@ -344,9 +344,14 @@ export default class DirectLinkingBackground {
         toCreate: CreateAnnotationParams,
         { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
-        const fullPageUrl = tab?.url ?? toCreate.pageUrl
+        let fullPageUrl = tab?.url ?? toCreate.pageUrl
         if (!isFullUrl(fullPageUrl)) {
-            throw new Error('Could not get full URL while creating annotation')
+            fullPageUrl = toCreate.pageUrl
+            if (!isFullUrl(fullPageUrl)) {
+                throw new Error(
+                    'Could not get full URL while creating annotation',
+                )
+            }
         }
 
         let normalizedPageUrl = this._normalizeUrl(fullPageUrl)
@@ -430,9 +435,7 @@ export default class DirectLinkingBackground {
             pk = await this.lookupSocialId(pk)
         }
 
-        const oldComment = await this.getAnnotationByPk(
-                    pk
-        )
+        const oldComment = await this.getAnnotationByPk(pk)
 
         if (!oldComment.comment) {
             console.log('works')

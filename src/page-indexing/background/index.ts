@@ -233,9 +233,14 @@ export class PageIndexingBackground {
     }
 
     indexPage = async (props: PageCreationProps) => {
-        props.tabId =
-            props.tabId ??
-            (await this.options.tabManagement.findTabIdByFullUrl(props.fullUrl))
+        const foundTabId = await this.options.tabManagement.findTabIdByFullUrl(
+            props.fullUrl,
+        )
+        if (foundTabId) {
+            props.tabId = foundTabId
+        } else {
+            delete props.tabId
+        }
 
         if (props.tabId) {
             await this.indexPageFromTab(props)
