@@ -218,6 +218,15 @@
     padding: 15px 0px;
 }
 
+.removeCollectionItemBox {
+    display: flex;
+    align-items: flex-start;
+
+    & > div {
+        height: fit-content;
+    }
+}
+
 .infoContainerOverview {
     padding: 15px 13px 15px;
 }

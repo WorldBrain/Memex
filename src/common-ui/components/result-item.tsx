@@ -173,10 +173,13 @@ class ResultItem extends PureComponent<Props> {
                     </div>
                     {this.renderAnnotsList()}
                 </div>
+                
                 {this.props.isListFilterActive && (
+                <div className={styles.removeCollectionItemBox}>
                         <SemiCircularRibbon
                             onClick={this.props.handleCrossRibbonClick}
                         />
+                </div>
                 )}
             </li>
         )
