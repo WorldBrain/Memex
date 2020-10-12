@@ -435,10 +435,9 @@ export default class DirectLinkingBackground {
             pk = await this.lookupSocialId(pk)
         }
 
-        const oldComment = await this.getAnnotationByPk(pk)
+        const existingAnnotation = await this.getAnnotationByPk(pk)
 
-        if (!oldComment.comment) {
-            console.log('works')
+        if (!existingAnnotation?.comment?.length) {
             this.options.analytics.trackEvent({
                 category: 'Annotations',
                 action: 'createAnnotationGlobally',
