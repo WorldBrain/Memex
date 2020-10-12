@@ -6,8 +6,8 @@ import {
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
+    SPECIAL_LISTS,
 } from '@worldbrain/memex-storage/lib/lists/constants'
-import { MOBILE_LIST_NAME } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/constants'
 
 import { SuggestPlugin } from 'src/search/plugins'
 import { SuggestResult } from 'src/search/types'
@@ -147,7 +147,7 @@ export default class CustomListStorage extends StorageModule {
 
     async createMobileListIfAbsent({ id }: { id: number }): Promise<string> {
         const foundMobileLists = await this.operation('findListsByNames', {
-            name: [MOBILE_LIST_NAME],
+            name: [SPECIAL_LISTS.MOBILE],
         })
         if (foundMobileLists.length) {
             return foundMobileLists[0].id
@@ -156,7 +156,7 @@ export default class CustomListStorage extends StorageModule {
         return (
             await this.operation('createList', {
                 id,
-                name: MOBILE_LIST_NAME,
+                name: SPECIAL_LISTS.MOBILE,
                 isDeletable: false,
                 isNestable: false,
                 createdAt: new Date(),
@@ -165,7 +165,7 @@ export default class CustomListStorage extends StorageModule {
     }
 
     private filterMobileList = (lists: any[]): any[] =>
-        lists.filter((list) => list.name !== MOBILE_LIST_NAME)
+        lists.filter((list) => list.name !== SPECIAL_LISTS.MOBILE)
 
     async fetchAllLists({
         excludedIds = [],

@@ -1,4 +1,4 @@
-import { MOBILE_LIST_NAME } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/constants'
+import { SPECIAL_LISTS } from '@worldbrain/memex-storage/lib/lists/constants'
 
 export const LIST_1 = {
     name: 'SoMe ipsum',
@@ -15,7 +15,7 @@ export const LIST_3 = {
 }
 export const MOBILE_LIST = {
     ...LIST_1,
-    name: MOBILE_LIST_NAME,
+    name: SPECIAL_LISTS.MOBILE,
 }
 
 // export const LIST_4 = { ...LIST_3 }

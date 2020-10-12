@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect'
-import { MOBILE_LIST_NAME } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/constants'
+import { SPECIAL_LISTS } from '@worldbrain/memex-storage/lib/lists/constants'
 
 import * as selectors from '../search-filters/selectors'
 
@@ -18,11 +18,11 @@ export const listFilterIndex = createSelector(
 
 export const getSortedLists = createSelector(allLists, (lists) => {
     const mobileListIndex = lists.findIndex(
-        ({ name }) => name === MOBILE_LIST_NAME,
+        ({ name }) => name === SPECIAL_LISTS.MOBILE,
     )
 
     if (mobileListIndex === -1) {
-        return [{ name: MOBILE_LIST_NAME, id: -1 }, ...lists]
+        return [{ name: SPECIAL_LISTS.MOBILE, id: -1 }, ...lists]
     }
 
     return lists
@@ -42,7 +42,7 @@ export const results = createSelector(
             ...pageDoc,
             isEditing: i === listIndex,
             isFilterIndex: Number(listFilter) === pageDoc.id,
-            isMobileList: pageDoc.name === MOBILE_LIST_NAME,
+            isMobileList: pageDoc.name === SPECIAL_LISTS.MOBILE,
         }))
     },
 )
