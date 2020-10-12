@@ -21,9 +21,13 @@ function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
 const setupLogicHelper = async ({
     device,
     pageUrl = DATA.CURRENT_TAB_URL_1,
+    focusCreateForm = () => undefined,
+    focusEditForm = () => undefined,
 }: {
     device: UILogicTestDevice
     pageUrl?: string
+    focusEditForm?: (url: string) => void
+    focusCreateForm?: () => void
 }) => {
     const { backgroundModules } = device
 
@@ -50,6 +54,8 @@ const setupLogicHelper = async ({
         annotationsCache,
         initialState: 'hidden',
         searchResultLimit: 10,
+        focusCreateForm,
+        focusEditForm,
     })
 
     const sidebar = device.createElement(sidebarLogic)

@@ -24,7 +24,14 @@ export default class RibbonContainer extends StatefulUIElement<
     private ribbonRef = React.createRef<Ribbon>()
 
     constructor(props) {
-        super(props, new RibbonContainerLogic(props))
+        super(
+            props,
+            new RibbonContainerLogic({
+                ...props,
+                focusCreateForm: () =>
+                    this.ribbonRef?.current?.focusCreateForm(),
+            }),
+        )
     }
 
     componentDidMount() {
@@ -71,10 +78,9 @@ export default class RibbonContainer extends StatefulUIElement<
         }
     }
 
-    handleExternalAction = async (event: { action: InPageUIRibbonAction }) => {
+    handleExternalAction = (event: { action: InPageUIRibbonAction }) => {
         if (event.action === 'comment') {
-            await this.processEvent('setShowCommentBox', { value: true })
-            this.ribbonRef?.current.focusCreateForm()
+            this.processEvent('setShowCommentBox', { value: true })
         } else if (event.action === 'bookmark') {
             this.processEvent('toggleBookmark', null)
             this.props.setRibbonShouldAutoHide(true)
@@ -127,10 +133,8 @@ export default class RibbonContainer extends StatefulUIElement<
                     saveComment: () => this.processEvent('saveComment', null),
                     cancelComment: () =>
                         this.processEvent('cancelComment', null),
-                    setShowCommentBox: async (value) => {
-                        await this.processEvent('setShowCommentBox', { value })
-                        this.ribbonRef?.current.focusCreateForm()
-                    },
+                    setShowCommentBox: (value) =>
+                        this.processEvent('setShowCommentBox', { value }),
                     changeComment: (value) =>
                         this.processEvent('changeComment', { value }),
                     updateCommentBoxTags: (value) =>

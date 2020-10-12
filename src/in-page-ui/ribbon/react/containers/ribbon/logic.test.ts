@@ -7,10 +7,12 @@ import {
     RibbonContainerLogic,
     INITIAL_RIBBON_COMMENT_BOX_STATE,
     RibbonContainerOptions,
+    RibbonLogicOptions,
 } from './logic'
 import { Annotation } from 'src/annotations/types'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
+import { FocusableComponent } from 'src/annotations/components/types'
 
 function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
     return mapValues(remoteFunctions, (f) => {
@@ -26,7 +28,7 @@ describe('Ribbon logic', () => {
     async function setupTest(
         device: UILogicTestDevice,
         options?: {
-            dependencies?: Partial<RibbonContainerOptions>
+            dependencies?: Partial<RibbonLogicOptions>
         },
     ) {
         const { backgroundModules } = device
@@ -60,6 +62,8 @@ describe('Ribbon logic', () => {
             setRibbonShouldAutoHide: () => undefined,
             getSidebarEnabled: async () => true,
             setSidebarEnabled: async () => {},
+            focusCreateForm:
+                options.dependencies?.focusCreateForm ?? (() => undefined),
             inPageUI,
             currentTab,
             highlighter,

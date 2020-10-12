@@ -41,14 +41,17 @@ export class AnnotationsSidebarContainer<
     private sidebarRef
 
     constructor(props: P) {
-        super(props, new SidebarContainerLogic(props))
+        super(
+            props,
+            new SidebarContainerLogic({
+                ...props,
+                focusCreateForm: () =>
+                    this.sidebarRef?.getInstance()?.focusCreateForm(),
+                focusEditForm: (url) =>
+                    this.sidebarRef?.getInstance()?.focusEditForm(url),
+            }),
+        )
     }
-
-    protected focusCreateForm = () =>
-        this.sidebarRef?.getInstance()?.focusCreateForm()
-
-    protected focusEditForm = (annotationUrl: string) =>
-        this.sidebarRef?.getInstance()?.focusEditForm(annotationUrl)
 
     showSidebar() {
         this.processEvent('show', null)

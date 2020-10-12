@@ -7,6 +7,7 @@ import { loadInitial } from 'src/util/ui-logic'
 import { NewAnnotationOptions } from 'src/annotations/types'
 import { generateUrl } from 'src/annotations/utils'
 import { resolvablePromise } from 'src/util/resolvable'
+import { FocusableComponent } from 'src/annotations/components/types'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -69,6 +70,10 @@ export interface RibbonContainerOptions extends RibbonContainerDependencies {
     setRibbonShouldAutoHide: (value: boolean) => void
 }
 
+export interface RibbonLogicOptions extends RibbonContainerOptions {
+    focusCreateForm: FocusableComponent['focus']
+}
+
 type EventHandler<
     EventName extends keyof RibbonContainerEvents
 > = UIEventHandler<RibbonContainerState, RibbonContainerEvents, EventName>
@@ -93,7 +98,7 @@ export class RibbonContainerLogic extends UILogic<
 
     commentSavedTimeout = 2000
 
-    constructor(private dependencies: RibbonContainerOptions) {
+    constructor(private dependencies: RibbonLogicOptions) {
         super()
     }
 
@@ -287,10 +292,11 @@ export class RibbonContainerLogic extends UILogic<
                   }
                 : {}
 
-        return {
+        this.emitMutation({
             commentBox: { showCommentBox: { $set: event.value } },
             ...extra,
-        }
+        })
+        this.dependencies.focusCreateForm()
     }
 
     saveComment: EventHandler<'saveComment'> = async ({

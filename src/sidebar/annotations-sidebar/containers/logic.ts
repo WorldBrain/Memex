@@ -21,6 +21,7 @@ import {
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 import { areTagsEquivalent } from 'src/tags/utils'
+import { FocusableComponent } from 'src/annotations/components/types'
 
 interface EditForm {
     isBookmarked: boolean
@@ -199,6 +200,11 @@ export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
 }
 
+export type SidebarLogicOptions = SidebarContainerOptions & {
+    focusCreateForm: FocusableComponent['focus']
+    focusEditForm: (annotationUrl: string) => void
+}
+
 type EventHandler<
     EventName extends keyof SidebarContainerEvents
 > = UIEventHandler<SidebarContainerState, SidebarContainerEvents, EventName>
@@ -224,7 +230,7 @@ export class SidebarContainerLogic extends UILogic<
 > {
     private inPageEvents: AnnotationsSidebarInPageEventEmitter
 
-    constructor(private options: SidebarContainerOptions) {
+    constructor(private options: SidebarLogicOptions) {
         super()
 
         this.inPageEvents =
@@ -482,6 +488,7 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         this.emitMutation(mutation)
+        this.options.focusCreateForm()
     }
 
     // Unused since insta-saving new highlights
@@ -806,6 +813,7 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         this.emitMutation(mutation)
+        this.options.focusEditForm(event.annotationUrl)
     }
 
     switchAnnotationMode: EventHandler<'switchAnnotationMode'> = ({
