@@ -236,16 +236,13 @@ class PopupContainer extends PureComponent<Props> {
                         🐞 Feedback
                     </a>
                     <div className={styles.buttonBox}>
-                        <ButtonIcon
-                            href={`${constants.OPTIONS_URL}#/settings`}
-                            icon="settings"
-                            className={btnStyles.settingsIcon}
-                            btnClass={btnStyles.settings}
+                        <div
+                            onClick={()=>window.open(`${constants.OPTIONS_URL}#/settings`)}
+                            className={btnStyles.settings}
                         />
-                        <ButtonIcon
-                            href="https://worldbrain.io/help"
-                            icon="help"
-                            btnClass={btnStyles.help}
+                        <div
+                            onClick={()=>window.open("https://worldbrain.io/help")}
+                            className={btnStyles.help}
                         />
                         {/*<NotifButton />*/}
                     </div>
