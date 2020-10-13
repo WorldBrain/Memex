@@ -147,13 +147,6 @@ export function createBackgroundModules(options: {
     const searchIndex = combineSearchIndex({
         getDb: async () => storageManager,
     })
-    const readwise = new ReadwiseBackground({
-        storageManager,
-        browserStorage: options.browserAPIs.storage.local,
-        fetch,
-        getFullPageUrl: async (normalizedUrl) =>
-            (await pages.storage.getPage(normalizedUrl))?.fullUrl,
-    })
 
     const search = new SearchBackground({
         storageManager,
@@ -238,6 +231,17 @@ export function createBackgroundModules(options: {
         analytics: options.analyticsManager,
         getContentSharing: async () =>
             (await options.getServerStorage()).storageModules.contentSharing,
+    })
+
+    const readwise = new ReadwiseBackground({
+        storageManager,
+        browserStorage: options.browserAPIs.storage.local,
+        fetch,
+        getFullPageUrl: async (normalizedUrl) =>
+            (await pages.storage.getPage(normalizedUrl))?.fullUrl,
+        getAnnotationsByPks: async (pks) => {
+            return directLinking.annotationStorage.getAnnotations(pks)
+        },
     })
 
     const copyPaster = new CopyPasterBackground({

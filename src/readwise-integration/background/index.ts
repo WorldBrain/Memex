@@ -1,6 +1,4 @@
-import MemoryBrowserStorage, {
-    LimitedBrowserStorage,
-} from 'src/util/tests/browser-storage'
+import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
 import {
     ActionExecutor,
@@ -35,6 +33,9 @@ export class ReadwiseBackground {
             browserStorage: LimitedBrowserStorage
             fetch: typeof fetch
             getFullPageUrl: (normalizedUrl: string) => Promise<string>
+            getAnnotationsByPks: (
+                annotationUrls: string[],
+            ) => Promise<Annotation[]>
         },
     ) {
         this.settingsStore = new BrowserSettingsStore<ReadwiseSettings>(
@@ -143,6 +144,24 @@ export class ReadwiseBackground {
                             }),
                         ],
                     },
+                    { queueInteraction: 'queue-and-return' },
+                )
+            } else if (change.type === 'modify') {
+                const annotations = await this.options.getAnnotationsByPks(
+                    change.pks as string[],
+                )
+                const highlights: ReadwiseHighlight[] = await Promise.all(
+                    annotations.map(async (annotation) => {
+                        const fullPageUrl = await getFullPageUrl(
+                            annotation.pageUrl,
+                        )
+                        return annotationToReadwise(annotation, {
+                            fullPageUrl: fullPageUrl,
+                        })
+                    }),
+                )
+                await this.actionQueue.scheduleAction(
+                    { type: 'post-highlights', highlights },
                     { queueInteraction: 'queue-and-return' },
                 )
             }

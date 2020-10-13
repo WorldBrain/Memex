@@ -119,45 +119,60 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }
             },
         ),
-        backgroundIntegrationTest(
-            'should store and retrieve the api key',
-            () => {
-                return {
-                    steps: [
-                        {
-                            execute: async ({ setup }) => {
-                                let validatedKey: string
-                                setup.backgroundModules.readwise.validateAPIKey = async (
-                                    key,
-                                ) => {
-                                    validatedKey = key
-                                    return { success: true }
-                                }
-                                expect(
-                                    await setup.backgroundModules.readwise.validateAPIKey(
-                                        'good key',
-                                    ),
-                                ).toEqual({ success: true })
-                                expect(validatedKey).toEqual('good key')
+        backgroundIntegrationTest('should validate the api key', () => {
+            return {
+                steps: [
+                    {
+                        execute: async ({ setup }) => {
+                            setup.fetch.getOnce(READWISE_API_URL, {
+                                status: 204,
+                            })
+                            expect(
+                                await setup.backgroundModules.readwise.validateAPIKey(
+                                    'good key',
+                                ),
+                            ).toEqual({ success: true })
 
-                                setup.backgroundModules.readwise.validateAPIKey = async (
-                                    key,
-                                ) => {
-                                    validatedKey = key
-                                    return { success: false }
-                                }
-                                expect(
-                                    await setup.backgroundModules.readwise.validateAPIKey(
-                                        'bad key',
-                                    ),
-                                ).toEqual({ success: false })
-                                expect(validatedKey).toEqual('bad key')
-                            },
+                            setup.fetch.getOnce(
+                                READWISE_API_URL,
+                                {
+                                    status: 403,
+                                },
+                                { overwriteRoutes: true },
+                            )
+                            expect(
+                                await setup.backgroundModules.readwise.validateAPIKey(
+                                    'bad key',
+                                ),
+                            ).toEqual({ success: false })
+
+                            expect(setup.fetch.calls()).toEqual([
+                                [
+                                    READWISE_API_URL,
+                                    {
+                                        headers: {
+                                            Authorization: 'Token good key',
+                                            'Content-Type': 'application/json',
+                                        },
+                                        method: 'GET',
+                                    },
+                                ],
+                                [
+                                    READWISE_API_URL,
+                                    {
+                                        headers: {
+                                            Authorization: 'Token bad key',
+                                            'Content-Type': 'application/json',
+                                        },
+                                        method: 'GET',
+                                    },
+                                ],
+                            ])
                         },
-                    ],
-                }
-            },
-        ),
+                    },
+                ],
+            }
+        }),
         backgroundIntegrationTest(
             'should upload highlights to readwise when creating annotations',
             { skipConflictTests: true },
@@ -206,65 +221,25 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual([
                                     [
                                         READWISE_API_URL,
-                                        {
-                                            method: 'POST',
-                                            headers: {
-                                                Authorization: 'Token my key',
-                                                'Content-Type':
-                                                    'application/json',
-                                            },
-                                            body: {
-                                                highlights: [
-                                                    {
-                                                        text: DATA.ANNOT_1.body,
-                                                        title:
-                                                            DATA.TEST_TAB_1
-                                                                .title,
-                                                        source_url:
-                                                            DATA.PAGE_1.fullUrl,
-                                                        source_type: 'article',
-                                                        note:
-                                                            DATA.ANNOT_1
-                                                                .comment,
-                                                        location_type:
-                                                            'time_offset',
-                                                        highlighted_at: DATA.ANNOT_1.createdWhen.toISOString(),
-                                                        highlight_url: firstAnnotationUrl,
-                                                    },
-                                                ],
-                                            },
-                                        },
+                                        DATA.UPLOAD_REQUEST({
+                                            token: 'my key',
+                                            highlights: [
+                                                DATA.UPLOADED_HIGHLIGHT_1(
+                                                    firstAnnotationUrl,
+                                                ),
+                                            ],
+                                        }),
                                     ],
                                     [
                                         READWISE_API_URL,
-                                        {
-                                            method: 'POST',
-                                            headers: {
-                                                Authorization: 'Token my key',
-                                                'Content-Type':
-                                                    'application/json',
-                                            },
-                                            body: {
-                                                highlights: [
-                                                    {
-                                                        text: DATA.ANNOT_2.body,
-                                                        title:
-                                                            DATA.TEST_TAB_2
-                                                                .title,
-                                                        source_url:
-                                                            DATA.PAGE_2.fullUrl,
-                                                        source_type: 'article',
-                                                        note:
-                                                            DATA.ANNOT_2
-                                                                .comment,
-                                                        location_type:
-                                                            'time_offset',
-                                                        highlighted_at: DATA.ANNOT_1.createdWhen.toISOString(),
-                                                        highlight_url: secondAnnotationUrl,
-                                                    },
-                                                ],
-                                            },
-                                        },
+                                        DATA.UPLOAD_REQUEST({
+                                            token: 'my key',
+                                            highlights: [
+                                                DATA.UPLOADED_HIGHLIGHT_2(
+                                                    secondAnnotationUrl,
+                                                ),
+                                            ],
+                                        }),
                                     ],
                                 ])
                             },
@@ -273,71 +248,75 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }
             },
         ),
-        // backgroundIntegrationTest(
-        //     'should validate the api key, save it in local storage, modify an annotation, and post it to readwise',
-        //     () => {
-        //         return {
-        //             steps: [
-        //                 createAPIKeyStep,
-        //                 {
-        //                     execute: async ({ setup }) => {
-        //                         annotUrl = await directLinking(
-        //                             setup,
-        //                         ).editAnnotation(
-        //                             { tab: {} as any },
-        //                             DATA.ANNOT_1 as any,
-        //                             { skipPageIndexing: true },
-        //                         )
-        //                     },
-        //                     postCheck: async ({ setup }) => {
-        //                         const mostRecentResponse = readwiseIntegration(
-        //                             setup,
-        //                         ).mostRecentResponse
-        //                         expect(mostRecentResponse).toEqual({
-        //                             title: DATA.ANNOT_1.title,
-        //                             highlights_url: DATA.ANNOT_1.url,
-        //                         })
-        //                     },
-        //                 },
-        //             ],
-        //         }
-        //     },
-        // ),
+        backgroundIntegrationTest(
+            'should sync annotation updates to Readwise',
+            () => {
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setup.backgroundModules.readwise.setAPIKey(
+                                    'my key',
+                                )
 
-        // backgroundIntegrationTest(
-        //     'should validate the api key, save it in local storage, modify an annotation, post it to readwise, and receive an error',
-        //     () => {
-        //         return {
-        //             steps: [
-        //                 createAPIKeyStep,
-        //                 {
-        //                     execute: async ({ setup }) => {
-        //                         annotUrl = await directLinking(
-        //                             setup,
-        //                         ).createAnnotation(
-        //                             { tab: {} as any },
-        //                             DATA.ANNOT_1 as any,
-        //                             { skipPageIndexing: true },
-        //                         )
-        //                     },
-        //                     postCheck: async ({ setup }) => {
-        //                         const mostRecentResponse = readwiseIntegration(
-        //                             setup,
-        //                         ).mostRecentResponse
-        //                         expect(mostRecentResponse).toEqual({
-        //                             status: expect.any(Number),
-        //                             body: {
-        //                                 message: expect.any(String),
-        //                             },
-        //                         })
-        //                         expect(mostRecentResponse.status).not.toEqual(
-        //                             200,
-        //                         )
-        //                     },
-        //                 },
-        //             ],
-        //         }
-        //     },
-        // ),
+                                injectFakeTabs({
+                                    tabManagement:
+                                        setup.backgroundModules.tabManagement,
+                                    tabsAPI: setup.browserAPIs.tabs,
+                                    tabs: [DATA.TEST_TAB_1, DATA.TEST_TAB_2],
+                                    includeTitle: true,
+                                })
+                                setup.fetch.post(READWISE_API_URL, {
+                                    status: 200,
+                                })
+                                const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: DATA.TEST_TAB_1 },
+                                    DATA.ANNOT_1,
+                                )
+                                await setup.backgroundModules.readwise.actionQueue.waitForSync()
+                                setup.fetch.resetHistory()
+
+                                await setup.backgroundModules.directLinking.editAnnotation(
+                                    null,
+                                    annotationUrl,
+                                    'updated comment',
+                                )
+                                await setup.backgroundModules.readwise.actionQueue.waitForSync()
+
+                                expect(
+                                    setup.fetch.calls().map((call) =>
+                                        update(call, {
+                                            1: {
+                                                body: {
+                                                    $apply: (body) =>
+                                                        JSON.parse(
+                                                            body as string,
+                                                        ),
+                                                },
+                                            },
+                                        }),
+                                    ),
+                                ).toEqual([
+                                    [
+                                        READWISE_API_URL,
+                                        DATA.UPLOAD_REQUEST({
+                                            token: 'my key',
+                                            highlights: [
+                                                {
+                                                    ...DATA.UPLOADED_HIGHLIGHT_1(
+                                                        annotationUrl,
+                                                    ),
+                                                    note: 'updated comment',
+                                                },
+                                            ],
+                                        }),
+                                    ],
+                                ])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
     ],
 )
