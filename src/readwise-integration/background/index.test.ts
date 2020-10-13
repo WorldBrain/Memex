@@ -188,6 +188,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     { tab: DATA.TEST_TAB_2 },
                                     DATA.ANNOT_2,
                                 )
+                                await setup.backgroundModules.readwise.actionQueue.waitForSync()
+
                                 expect(
                                     setup.fetch.calls().map((call) =>
                                         update(call, {

@@ -1,6 +1,11 @@
 import MemoryBrowserStorage, {
     LimitedBrowserStorage,
 } from 'src/util/tests/browser-storage'
+import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
+import {
+    ActionExecutor,
+    ActionValidator,
+} from '@worldbrain/memex-common/lib/action-queue/types'
 import {
     ReadwiseResponse,
     ReadwiseSettings,
@@ -12,17 +17,21 @@ import { HTTPReadwiseAPI } from './readwise-api'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { Annotation } from 'src/annotations/types'
-import { string } from 'prop-types'
+import StorageManager from '@worldbrain/storex'
+import { STORAGE_VERSIONS } from '@worldbrain/memex-common/lib/browser-extension/storage/versions'
+import { READWISE_ACTION_RETRY_INTERVAL } from './constants'
 
 export class ReadwiseBackground {
     mostRecentResponse?: ReadwiseResponse
     settingsStore: SettingStore<ReadwiseSettings>
     readwiseAPI: ReadwiseAPI
+    actionQueue: ActionQueue<ReadwiseAction>
     _apiKeyLoaded = false
     _apiKey?: string
 
     constructor(
         private options: {
+            storageManager: StorageManager
             browserStorage: LimitedBrowserStorage
             fetch: typeof fetch
             getFullPageUrl: (normalizedUrl: string) => Promise<string>
@@ -36,6 +45,14 @@ export class ReadwiseBackground {
         )
         this.readwiseAPI = new HTTPReadwiseAPI({
             fetch: options.fetch,
+        })
+        this.actionQueue = new ActionQueue({
+            storageManager: options.storageManager,
+            collectionName: 'readwiseAction',
+            versions: { initial: STORAGE_VERSIONS[22].version },
+            retryIntervalInMs: READWISE_ACTION_RETRY_INTERVAL,
+            executeAction: this.executeAction,
+            validateAction: this.validateAction,
         })
     }
 
@@ -60,11 +77,7 @@ export class ReadwiseBackground {
         this._apiKeyLoaded = true
     }
 
-    async scheduleAction(action: ReadwiseAction) {
-        await this.executeAction(action)
-    }
-
-    async executeAction(action: ReadwiseAction) {
+    executeAction: ActionExecutor<ReadwiseAction> = async ({ action }) => {
         const key = await this.getAPIKey()
         if (!key) {
             throw new Error(
@@ -78,6 +91,10 @@ export class ReadwiseBackground {
                 highlights: action.highlights,
             })
         }
+    }
+
+    validateAction: ActionValidator<ReadwiseAction> = () => {
+        return { valid: true }
     }
 
     async handlePostStorageChange(
@@ -117,14 +134,17 @@ export class ReadwiseBackground {
                 } as Annotation
 
                 const fullPageUrl = await getFullPageUrl(annotation.pageUrl)
-                await this.scheduleAction({
-                    type: 'post-highlights',
-                    highlights: [
-                        annotationToReadwise(annotation, {
-                            fullPageUrl: fullPageUrl,
-                        }),
-                    ],
-                })
+                await this.actionQueue.scheduleAction(
+                    {
+                        type: 'post-highlights',
+                        highlights: [
+                            annotationToReadwise(annotation, {
+                                fullPageUrl: fullPageUrl,
+                            }),
+                        ],
+                    },
+                    { queueInteraction: 'queue-and-return' },
+                )
             }
         }
     }

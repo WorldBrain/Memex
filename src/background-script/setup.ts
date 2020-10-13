@@ -148,6 +148,7 @@ export function createBackgroundModules(options: {
         getDb: async () => storageManager,
     })
     const readwise = new ReadwiseBackground({
+        storageManager,
         browserStorage: options.browserAPIs.storage.local,
         fetch,
         getFullPageUrl: async (normalizedUrl) =>
@@ -450,6 +451,7 @@ export function getBackgroundStorageModules(
         copyPaster: backgroundModules.copyPaster.storage,
         reader: backgroundModules.readable.storage,
         contentSharing: backgroundModules.contentSharing.storage,
+        readwiseActionQueue: backgroundModules.readwise.actionQueue.storage,
     }
 }
 
