@@ -2,10 +2,8 @@ import CustomListBackground from './'
 import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { SearchIndex } from 'src/search'
-import { injectFakeTabs } from 'src/tab-management/background/index.tests'
-import { TEST_TAB_1 } from 'src/tests/common-fixtures.data'
-import { page } from 'src/sidebar-overlay/sidebar/selectors'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { SPECIAL_LISTS } from '@worldbrain/memex-storage/lib/lists/constants'
 
 async function insertTestData({
     customLists,
@@ -25,7 +23,10 @@ async function insertTestData({
 }
 
 async function setupTest() {
-    const { backgroundModules } = await setupBackgroundIntegrationTest({
+    const {
+        backgroundModules,
+        storageManager,
+    } = await setupBackgroundIntegrationTest({
         includePostSyncProcessor: true,
     })
     const customLists: CustomListBackground = backgroundModules.customLists
@@ -37,7 +38,12 @@ async function setupTest() {
 
     await insertTestData({ customLists })
 
-    return { customLists, searchIndex, pages: backgroundModules.pages }
+    return {
+        customLists,
+        searchIndex,
+        pages: backgroundModules.pages,
+        storageManager,
+    }
 }
 
 describe('Custom List Integrations', () => {
@@ -80,6 +86,69 @@ describe('Custom List Integrations', () => {
 
             const newPage = await searchIndex.getPage(url)
             expect(newPage.url).toBe(url.substring(11))
+        })
+
+        test('should be able to create inbox list if absent', async () => {
+            const { customLists, storageManager } = await setupTest()
+
+            const createdAt = new Date()
+            expect(
+                await customLists.fetchListByName({
+                    name: SPECIAL_LISTS.INBOX,
+                }),
+            ).toEqual(null)
+            await customLists.createInboxListIfAbsent({ createdAt })
+            expect(
+                await customLists.fetchListByName({
+                    name: SPECIAL_LISTS.INBOX,
+                }),
+            ).toEqual(
+                expect.objectContaining({
+                    name: SPECIAL_LISTS.INBOX,
+                    createdAt,
+                    isDeletable: false,
+                    isNestable: false,
+                }),
+            )
+        })
+
+        test('should not recreate inbox list if already exists', async () => {
+            const { customLists } = await setupTest()
+
+            const createdAt = new Date()
+            const firstId = await customLists.createInboxListIfAbsent({
+                createdAt,
+            })
+            expect(
+                await customLists.fetchListByName({
+                    name: SPECIAL_LISTS.INBOX,
+                }),
+            ).toEqual(
+                expect.objectContaining({
+                    name: SPECIAL_LISTS.INBOX,
+                    createdAt,
+                    isDeletable: false,
+                    isNestable: false,
+                    id: firstId,
+                }),
+            )
+            const secondId = await customLists.createInboxListIfAbsent({
+                createdAt,
+            })
+            expect(firstId).toEqual(secondId)
+            expect(
+                await customLists.fetchListByName({
+                    name: SPECIAL_LISTS.INBOX,
+                }),
+            ).toEqual(
+                expect.objectContaining({
+                    name: SPECIAL_LISTS.INBOX,
+                    createdAt,
+                    isDeletable: false,
+                    isNestable: false,
+                    id: firstId,
+                }),
+            )
         })
     })
 

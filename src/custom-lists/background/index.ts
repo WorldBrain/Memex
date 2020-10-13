@@ -7,7 +7,6 @@ import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { SearchIndex, Page } from 'src/search'
 import {
-    Tab,
     RemoteCollectionsInterface,
     CollectionsSettings,
     PageList,

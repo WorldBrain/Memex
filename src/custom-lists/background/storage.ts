@@ -152,39 +152,21 @@ export default class CustomListStorage extends StorageModule {
         id: number
         createdAt?: Date
     }): Promise<number> {
-        const foundInboxLists = await this.operation('findListsByNames', {
-            name: [SPECIAL_LISTS.INBOX],
-        })
-        if (foundInboxLists.length) {
-            return foundInboxLists[0].id
+        const foundInboxList = await this.operation(
+            'findListByNameIgnoreCase',
+            { name: SPECIAL_LISTS.INBOX },
+        )
+        if (foundInboxList) {
+            return foundInboxList.id
         }
 
         return (
             await this.operation('createList', {
                 id,
                 createdAt,
-                name: SPECIAL_LISTS.MOBILE,
+                name: SPECIAL_LISTS.INBOX,
                 isDeletable: false,
                 isNestable: false,
-            })
-        ).object.id
-    }
-
-    async createMobileListIfAbsent({ id }: { id: number }): Promise<number> {
-        const foundMobileLists = await this.operation('findListsByNames', {
-            name: [SPECIAL_LISTS.MOBILE],
-        })
-        if (foundMobileLists.length) {
-            return foundMobileLists[0].id
-        }
-
-        return (
-            await this.operation('createList', {
-                id,
-                name: SPECIAL_LISTS.MOBILE,
-                isDeletable: false,
-                isNestable: false,
-                createdAt: new Date(),
             })
         ).object.id
     }

@@ -234,6 +234,7 @@ export function createBackgroundModules(options: {
         storageManager,
         tabManagement,
         storageChangesMan: options.localStorageChangesManager,
+        customListsBackground: customLists,
         copyPasterBackground: copyPaster,
         notifsBackground: notifications,
     })
