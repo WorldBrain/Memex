@@ -3,6 +3,7 @@ import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
 import {
     ActionExecutor,
     ActionValidator,
+    ActionQueueInteraction,
 } from '@worldbrain/memex-common/lib/action-queue/types'
 import {
     ReadwiseResponse,
@@ -24,6 +25,7 @@ export class ReadwiseBackground {
     settingsStore: SettingStore<ReadwiseSettings>
     readwiseAPI: ReadwiseAPI
     actionQueue: ActionQueue<ReadwiseAction>
+    uploadBatchSize = 10
     _apiKeyLoaded = false
     _apiKey?: string
 
@@ -36,6 +38,7 @@ export class ReadwiseBackground {
             getAnnotationsByPks: (
                 annotationUrls: string[],
             ) => Promise<Annotation[]>
+            streamAnnotations(): AsyncIterableIterator<Annotation>
         },
     ) {
         this.settingsStore = new BrowserSettingsStore<ReadwiseSettings>(
@@ -78,6 +81,56 @@ export class ReadwiseBackground {
         this._apiKeyLoaded = true
     }
 
+    async uploadAllAnnotations(params: {
+        queueInteraction: ActionQueueInteraction
+    }) {
+        const getFullPageUrl = makeFullPageUrlCache({
+            getFullPageUrl: this.options.getFullPageUrl,
+        })
+
+        let annotationBatch: Annotation[] = []
+        const scheduleBatch = async () => {
+            await this._scheduleAnnotationBatchUpload(annotationBatch, {
+                queueInteraction: params.queueInteraction,
+                getFullPageUrl,
+            })
+        }
+
+        for await (const annotation of this.options.streamAnnotations()) {
+            annotationBatch.push(annotation)
+            if (annotationBatch.length === this.uploadBatchSize) {
+                await scheduleBatch()
+                annotationBatch = []
+            }
+        }
+        if (annotationBatch.length) {
+            await scheduleBatch()
+        }
+    }
+
+    async _scheduleAnnotationBatchUpload(
+        annotations: Annotation[],
+        options: {
+            getFullPageUrl: (normalizedUrl: string) => Promise<string>
+            queueInteraction: ActionQueueInteraction
+        },
+    ) {
+        await this.actionQueue.scheduleAction(
+            {
+                type: 'post-highlights',
+                highlights: await Promise.all(
+                    annotations.map(async (annotation) => {
+                        const fullPageUrl = await options.getFullPageUrl(
+                            annotation.pageUrl,
+                        )
+                        return annotationToReadwise(annotation, { fullPageUrl })
+                    }),
+                ),
+            },
+            { queueInteraction: options.queueInteraction },
+        )
+    }
+
     executeAction: ActionExecutor<ReadwiseAction> = async ({ action }) => {
         const key = await this.getAPIKey()
         if (!key) {
@@ -108,20 +161,9 @@ export class ReadwiseBackground {
             return
         }
 
-        const fullPageUrls: { [normalizedUrl: string]: string } = {}
-        const getFullPageUrl = async (normalizedUrl: string) => {
-            if (fullPageUrls[normalizedUrl]) {
-                return fullPageUrls[normalizedUrl]
-            }
-            const fullUrl = await this.options.getFullPageUrl(normalizedUrl)
-            if (!fullUrl) {
-                throw new Error(
-                    `Can't get full URL for annotation to upload to Readwise`,
-                )
-            }
-            fullPageUrls[normalizedUrl] = fullUrl
-            return fullUrl
-        }
+        const getFullPageUrl = makeFullPageUrlCache({
+            getFullPageUrl: this.options.getFullPageUrl,
+        })
 
         for (const change of event.info.changes) {
             if (change.collection !== 'annotations') {
@@ -182,7 +224,27 @@ function annotationToReadwise(
         note: annotation.comment.length ? annotation.comment : undefined,
         location_type: 'time_offset',
         highlighted_at: annotation.createdWhen,
-        highlight_url: annotation.url,
+        // highlight_url: annotation.url,
         text: annotation.body,
     }
+}
+
+function makeFullPageUrlCache(options: {
+    getFullPageUrl: (normalizedUrl: string) => Promise<string>
+}) {
+    const fullPageUrls: { [normalizedUrl: string]: string } = {}
+    const getFullPageUrl = async (normalizedUrl: string) => {
+        if (fullPageUrls[normalizedUrl]) {
+            return fullPageUrls[normalizedUrl]
+        }
+        const fullUrl = await options.getFullPageUrl(normalizedUrl)
+        if (!fullUrl) {
+            throw new Error(
+                `Can't get full URL for annotation to upload to Readwise`,
+            )
+        }
+        fullPageUrls[normalizedUrl] = fullUrl
+        return fullUrl
+    }
+    return getFullPageUrl
 }

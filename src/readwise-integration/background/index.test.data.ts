@@ -51,7 +51,7 @@ export const UPLOADED_HIGHLIGHT_1 = (
     note: ANNOT_1.comment,
     location_type: 'time_offset',
     highlighted_at: ANNOT_1.createdWhen.toISOString(),
-    highlight_url: annotationUrl,
+    // highlight_url: annotationUrl,
 })
 
 export const UPLOADED_HIGHLIGHT_2 = (
@@ -64,7 +64,7 @@ export const UPLOADED_HIGHLIGHT_2 = (
     note: ANNOT_2.comment,
     location_type: 'time_offset',
     highlighted_at: ANNOT_2.createdWhen.toISOString(),
-    highlight_url: annotationUrl,
+    // highlight_url: annotationUrl,
 })
 
 export const UPLOAD_REQUEST = (params: {

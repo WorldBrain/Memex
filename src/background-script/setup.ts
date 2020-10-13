@@ -242,6 +242,12 @@ export function createBackgroundModules(options: {
         getAnnotationsByPks: async (pks) => {
             return directLinking.annotationStorage.getAnnotations(pks)
         },
+        streamAnnotations: async function* () {
+            yield* await storageManager.operation(
+                'streamObjects',
+                'annotations',
+            )
+        },
     })
 
     const copyPaster = new CopyPasterBackground({

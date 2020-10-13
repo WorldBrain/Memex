@@ -14,6 +14,7 @@ import { ReadwiseHighlight } from './types'
 import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 import { READWISE_API_URL } from './constants'
 import { string } from 'prop-types'
+import fetchMock from 'fetch-mock'
 
 const readwiseIntegration = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.readwise
@@ -146,27 +147,23 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ),
                             ).toEqual({ success: false })
 
-                            expect(setup.fetch.calls()).toEqual([
-                                [
-                                    READWISE_API_URL,
-                                    {
-                                        headers: {
-                                            Authorization: 'Token good key',
-                                            'Content-Type': 'application/json',
-                                        },
-                                        method: 'GET',
+                            expectFetchCalls(setup.fetch.calls(), [
+                                {
+                                    url: READWISE_API_URL,
+                                    headers: {
+                                        Authorization: 'Token good key',
+                                        'Content-Type': 'application/json',
                                     },
-                                ],
-                                [
-                                    READWISE_API_URL,
-                                    {
-                                        headers: {
-                                            Authorization: 'Token bad key',
-                                            'Content-Type': 'application/json',
-                                        },
-                                        method: 'GET',
+                                    method: 'GET',
+                                },
+                                {
+                                    url: READWISE_API_URL,
+                                    headers: {
+                                        Authorization: 'Token bad key',
+                                        'Content-Type': 'application/json',
                                     },
-                                ],
+                                    method: 'GET',
+                                },
                             ])
                         },
                     },
@@ -205,43 +202,33 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 await setup.backgroundModules.readwise.actionQueue.waitForSync()
 
-                                expect(
-                                    setup.fetch.calls().map((call) =>
-                                        update(call, {
-                                            1: {
-                                                body: {
-                                                    $apply: (body) =>
-                                                        JSON.parse(
-                                                            body as string,
-                                                        ),
-                                                },
-                                            },
-                                        }),
-                                    ),
-                                ).toEqual([
+                                expectFetchCalls(
+                                    parseJsonFetchCalls(setup.fetch.calls()),
                                     [
-                                        READWISE_API_URL,
-                                        DATA.UPLOAD_REQUEST({
-                                            token: 'my key',
-                                            highlights: [
-                                                DATA.UPLOADED_HIGHLIGHT_1(
-                                                    firstAnnotationUrl,
-                                                ),
-                                            ],
-                                        }),
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    DATA.UPLOADED_HIGHLIGHT_1(
+                                                        firstAnnotationUrl,
+                                                    ),
+                                                ],
+                                            }),
+                                        },
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    DATA.UPLOADED_HIGHLIGHT_2(
+                                                        secondAnnotationUrl,
+                                                    ),
+                                                ],
+                                            }),
+                                        },
                                     ],
-                                    [
-                                        READWISE_API_URL,
-                                        DATA.UPLOAD_REQUEST({
-                                            token: 'my key',
-                                            highlights: [
-                                                DATA.UPLOADED_HIGHLIGHT_2(
-                                                    secondAnnotationUrl,
-                                                ),
-                                            ],
-                                        }),
-                                    ],
-                                ])
+                                )
                             },
                         },
                     ],
@@ -283,35 +270,95 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 await setup.backgroundModules.readwise.actionQueue.waitForSync()
 
-                                expect(
-                                    setup.fetch.calls().map((call) =>
-                                        update(call, {
-                                            1: {
-                                                body: {
-                                                    $apply: (body) =>
-                                                        JSON.parse(
-                                                            body as string,
-                                                        ),
-                                                },
-                                            },
-                                        }),
-                                    ),
-                                ).toEqual([
+                                expectFetchCalls(
+                                    parseJsonFetchCalls(setup.fetch.calls()),
                                     [
-                                        READWISE_API_URL,
-                                        DATA.UPLOAD_REQUEST({
-                                            token: 'my key',
-                                            highlights: [
-                                                {
-                                                    ...DATA.UPLOADED_HIGHLIGHT_1(
-                                                        annotationUrl,
-                                                    ),
-                                                    note: 'updated comment',
-                                                },
-                                            ],
-                                        }),
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    {
+                                                        ...DATA.UPLOADED_HIGHLIGHT_1(
+                                                            annotationUrl,
+                                                        ),
+                                                        note: 'updated comment',
+                                                    },
+                                                ],
+                                            }),
+                                        },
                                     ],
-                                ])
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should sync existing annotations to Readwise',
+            () => {
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                injectFakeTabs({
+                                    tabManagement:
+                                        setup.backgroundModules.tabManagement,
+                                    tabsAPI: setup.browserAPIs.tabs,
+                                    tabs: [DATA.TEST_TAB_1, DATA.TEST_TAB_2],
+                                    includeTitle: true,
+                                })
+                                setup.fetch.post(READWISE_API_URL, {
+                                    status: 200,
+                                })
+                                const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: DATA.TEST_TAB_1 },
+                                    DATA.ANNOT_1,
+                                )
+                                const secondAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: DATA.TEST_TAB_2 },
+                                    DATA.ANNOT_2,
+                                )
+                                await setup.backgroundModules.readwise.setAPIKey(
+                                    'my key',
+                                )
+                                setup.backgroundModules.readwise.uploadBatchSize = 1
+                                await setup.backgroundModules.readwise.uploadAllAnnotations(
+                                    {
+                                        queueInteraction: 'queue-and-return',
+                                    },
+                                )
+                                await setup.backgroundModules.readwise.actionQueue.waitForSync()
+                                await setup.backgroundModules.readwise.actionQueue.waitForSync()
+
+                                expectFetchCalls(
+                                    parseJsonFetchCalls(setup.fetch.calls()),
+                                    [
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    DATA.UPLOADED_HIGHLIGHT_1(
+                                                        firstAnnotationUrl,
+                                                    ),
+                                                ],
+                                            }),
+                                        },
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    DATA.UPLOADED_HIGHLIGHT_2(
+                                                        secondAnnotationUrl,
+                                                    ),
+                                                ],
+                                            }),
+                                        },
+                                    ],
+                                )
                             },
                         },
                     ],
@@ -320,3 +367,35 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
     ],
 )
+
+function parseJsonFetchCalls(calls: fetchMock.MockCall[]) {
+    return calls.map((call) =>
+        update(call, {
+            1: {
+                body: {
+                    $apply: (body) => JSON.parse(body as string),
+                },
+            },
+        }),
+    )
+}
+
+// Needed because these calls are not plain objects
+function expectFetchCalls(
+    calls: fetchMock.MockCall[],
+    expected: Array<{
+        url: string
+        method: string
+        headers: { [key: string]: string }
+        body?: any
+    }>,
+) {
+    expect(
+        calls.map(([url, data]) => ({
+            url,
+            method: data.method,
+            headers: data.headers,
+            body: data.body,
+        })),
+    ).toEqual(expected)
+}
