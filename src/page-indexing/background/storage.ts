@@ -7,10 +7,7 @@ import { COLLECTION_DEFINITIONS as PAGE_COLLECTION_DEFINITIONS } from '@worldbra
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { PipelineRes, VisitInteraction } from 'src/search'
 import { initErrHandler } from 'src/search/storage'
-import {
-    getTermsField,
-    isTermsField,
-} from '@worldbrain/memex-common/lib/storage/utils'
+import { getTermsField } from '@worldbrain/memex-common/lib/storage/utils'
 import { mergeTermFields } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import decodeBlob from 'src/util/decode-blob'
 import { pageIsStub } from 'src/page-indexing/utils'
@@ -112,10 +109,7 @@ export default class PageStorage extends StorageModule {
         })
 
         if (!existingPage || pageIsStub(existingPage)) {
-            await this.operation('createPage', {
-                ...pageData,
-                url: normalizedUrl,
-            })
+            return this.createPage(pageData)
         }
     }
 
@@ -124,69 +118,56 @@ export default class PageStorage extends StorageModule {
         const exists = await this.pageExists(normalizedUrl)
 
         if (!exists) {
-            await this.operation('createPage', {
-                ...pageData,
-                url: normalizedUrl,
-            })
+            return this.createPage(pageData)
         }
     }
 
-    async createOrUpdatePage(pageData: PipelineRes) {
-        pageData = { ...pageData }
-        for (const field of Object.keys(pageData)) {
-            if (
-                !this.collections['pages'].fields[field] &&
-                !isTermsField({ collection: 'pages', field })
-            ) {
-                delete pageData[field]
-            }
-        }
-
+    async createPage(pageData: PipelineRes) {
         const normalizedUrl = normalizeUrl(pageData.url, {})
 
-        const existingPage = await this.getPage(pageData.url)
-        if (!existingPage) {
-            await this.operation('createPage', {
-                ...pageData,
-                url: normalizedUrl,
-            })
-            return
-        }
+        await this.operation('createPage', {
+            ...pageData,
+            url: normalizedUrl,
+        })
+    }
 
+    async updatePage(newPageData: PipelineRes, existingPage: PipelineRes) {
         const updates = {}
-        for (const fieldName of Object.keys(pageData)) {
+
+        for (const fieldName of Object.keys(newPageData)) {
             const termsField = getTermsField('pages', fieldName)
+
             if (termsField) {
                 if (
-                    !pageData[fieldName] ||
-                    existingPage[fieldName] === pageData[fieldName]
+                    !newPageData[fieldName] ||
+                    existingPage[fieldName] === newPageData[fieldName]
                 ) {
-                    delete pageData[fieldName]
+                    delete newPageData[fieldName]
                     continue
                 }
 
                 const mergedTerms = mergeTermFields(
                     termsField,
-                    pageData,
+                    newPageData,
                     existingPage,
                 )
-                updates[fieldName] = pageData[fieldName]
+                updates[fieldName] = newPageData[fieldName]
                 updates[termsField] = mergedTerms
             } else if (
                 typeof existingPage[fieldName] === 'string' ||
-                typeof pageData[fieldName] === 'string'
+                typeof newPageData[fieldName] === 'string'
             ) {
-                if (pageData[fieldName] !== existingPage[fieldName]) {
-                    updates[fieldName] = pageData[fieldName]
+                if (newPageData[fieldName] !== existingPage[fieldName]) {
+                    updates[fieldName] = newPageData[fieldName]
                 }
             } else if (fieldName in PAGE_COLLECTION_DEFINITIONS.pages.fields) {
-                updates[fieldName] = pageData[fieldName]
+                updates[fieldName] = newPageData[fieldName]
             }
         }
 
         if (Object.keys(updates).length) {
             await this.operation('updatePage', {
-                url: normalizedUrl,
+                url: normalizeUrl(newPageData.url, {}),
                 updates,
             })
         }

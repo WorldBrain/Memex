@@ -133,3 +133,7 @@ export interface PageCreationProps {
     save?: boolean
     visitTime?: number | '$now'
 }
+
+export interface PageCreationOpts {
+    addInboxEntryOnCreate?: boolean
+}

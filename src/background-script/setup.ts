@@ -244,7 +244,7 @@ export function createBackgroundModules(options: {
     })
 
     const storePageContent = async (content: PipelineRes): Promise<void> => {
-        await pages.storage.createOrUpdatePage(content)
+        await pages.createOrUpdatePage(content)
     }
     const pageFetchBacklog = new PageFetchBacklogBackground({
         storageManager,

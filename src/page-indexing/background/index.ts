@@ -1,4 +1,7 @@
 import StorageManager from '@worldbrain/storex'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { isTermsField } from '@worldbrain/memex-common/lib/storage/utils'
+
 import PageStorage from './storage'
 import {
     PageAddRequest,
@@ -8,8 +11,7 @@ import {
 } from 'src/search/types'
 import pipeline, { transformUrl } from 'src/search/pipeline'
 import { initErrHandler } from 'src/search/storage'
-import { Page, PageCreationProps } from 'src/search'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { Page, PageCreationProps, PageCreationOpts } from 'src/search'
 import { DexieUtilsPlugin } from 'src/search/plugins'
 import analysePage from 'src/page-analysis/background/analyse-page'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
@@ -48,7 +50,7 @@ export class PageIndexingBackground {
             rejectNoContent,
         })
 
-        await this.storage.createOrUpdatePage(pageData)
+        await this.createOrUpdatePage(pageData)
 
         // Create Visits for each specified time, or a single Visit for "now" if no assoc event
         visits = !visits.length ? [Date.now()] : visits
@@ -70,7 +72,7 @@ export class PageIndexingBackground {
 
     async addPageTerms(pipelineReq: PipelineReq): Promise<void> {
         const pageData = await pipeline(pipelineReq)
-        await this.storage.createOrUpdatePage(pageData)
+        await this.createOrUpdatePage(pageData)
     }
 
     async _deletePages(query: object) {
@@ -145,7 +147,42 @@ export class PageIndexingBackground {
         return res != null
     }
 
-    indexPageFromTab = async (props: PageCreationProps) => {
+    private removeAnyUnregisteredFields(pageData: PipelineRes): PipelineRes {
+        const clonedData = { ...pageData }
+
+        for (const field in clonedData) {
+            if (
+                !this.storage.collections['pages'].fields[field] &&
+                !isTermsField({ collection: 'pages', field })
+            ) {
+                delete clonedData[field]
+            }
+        }
+
+        return clonedData
+    }
+
+    async createOrUpdatePage(
+        pageData: PipelineRes,
+        opts: PageCreationOpts = {},
+    ) {
+        pageData = this.removeAnyUnregisteredFields(pageData)
+
+        const existingPage = await this.storage.getPage(pageData.url)
+        if (existingPage) {
+            return this.storage.updatePage(pageData, existingPage)
+        }
+
+        await this.storage.createPage(pageData)
+
+        if (opts.addInboxEntryOnCreate) {
+            // TODO: Call inbox create
+        }
+    }
+
+    private async processPageDataFromTab(
+        props: PageCreationProps,
+    ): Promise<PipelineRes | null> {
         if (!props.tabId) {
             throw new Error(
                 `No tabID provided to extract content: ${props.fullUrl}`,
@@ -157,7 +194,7 @@ export class PageIndexingBackground {
             fullPageUrl: props.fullUrl,
         })
         if (!needsIndexing) {
-            return
+            return null
         }
 
         const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))
@@ -182,7 +219,46 @@ export class PageIndexingBackground {
             )
         }
 
-        await this.storage.createOrUpdatePage(pageData)
+        return pageData
+    }
+
+    private async processPageDataFromUrl(
+        props: PageCreationProps,
+    ): Promise<PipelineRes | null> {
+        if (!this.options.fetchPageData) {
+            throw new Error(
+                'Instantiation error: fetch-page-data implementation was not given to constructor',
+            )
+        }
+
+        const pageData = await this.options.fetchPageData.process(props.fullUrl)
+
+        if (props.stubOnly && pageData.text && pageData.terms?.length) {
+            delete pageData.text
+            delete pageData.terms
+        }
+
+        return pageData
+    }
+
+    indexPage = async (
+        props: PageCreationProps,
+        opts: PageCreationOpts = {},
+    ) => {
+        props.tabId =
+            props.tabId ??
+            (await this.options.tabManagement.findTabIdByFullUrl(props.fullUrl))
+
+        const pageData = props.tabId
+            ? await this.processPageDataFromTab(props)
+            : await this.processPageDataFromUrl(props)
+
+        if (pageData === null) {
+            return
+        }
+
+        await this.createOrUpdatePage(pageData, opts)
+
         if (props.visitTime) {
             await this.storage.addPageVisit(
                 pageData.url,
@@ -195,28 +271,6 @@ export class PageIndexingBackground {
         }
     }
 
-    async indexPageFromUrl(props: PageCreationProps) {
-        if (!this.options.fetchPageData) {
-            throw new Error(
-                'Instantiation error: fetch-page-data implementation was not given to constructor',
-            )
-        }
-        const pageData = await this.options.fetchPageData.process(props.fullUrl)
-
-        if (props.stubOnly && pageData.text && pageData.terms?.length) {
-            delete pageData.text
-            delete pageData.terms
-        }
-
-        await this.storage.createOrUpdatePage(pageData)
-        if (props.visitTime) {
-            await this.storage.addPageVisit(
-                pageData.url,
-                this._getTime(props.visitTime),
-            )
-        }
-    }
-
     async indexTestPage(props: PageCreationProps) {
         const pageData = await pipeline({
             pageDoc: { url: props.fullUrl, content: {} },
@@ -224,6 +278,7 @@ export class PageIndexingBackground {
         })
 
         await this.storage.createPageIfNotExists(pageData)
+
         if (props.visitTime) {
             await this.storage.addPageVisit(
                 pageData.url,
@@ -232,26 +287,23 @@ export class PageIndexingBackground {
         }
     }
 
-    indexPage = async (props: PageCreationProps) => {
-        props.tabId =
-            props.tabId ??
-            (await this.options.tabManagement.findTabIdByFullUrl(props.fullUrl))
-
-        if (props.tabId) {
-            await this.indexPageFromTab(props)
-        } else {
-            await this.indexPageFromUrl(props)
-        }
-    }
-
-    isTabPageIndexed(params: { tabId: number; fullPageUrl: string }) {
+    private isTabPageIndexed(params: { tabId: number; fullPageUrl: string }) {
         return this.indexedTabPages[params.tabId]?.[params.fullPageUrl] ?? false
     }
 
-    markTabPageAsIndexed(params: { tabId: number; fullPageUrl: string }) {
-        const { tabId } = params
+    private markTabPageAsIndexed({
+        tabId,
+        fullPageUrl,
+    }: {
+        tabId?: number
+        fullPageUrl: string
+    }) {
+        if (!tabId) {
+            return
+        }
+
         this.indexedTabPages[tabId] = this.indexedTabPages[tabId] || {}
-        this.indexedTabPages[tabId][params.fullPageUrl] = true
+        this.indexedTabPages[tabId][fullPageUrl] = true
     }
 
     handleTabClose(event: { tabId: number }) {
