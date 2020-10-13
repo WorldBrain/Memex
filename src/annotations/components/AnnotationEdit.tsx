@@ -64,41 +64,29 @@ class AnnotationEdit extends React.Component<Props>
         }
     }
 
-    private renderInput() {
-        return (
-            <StyledTextArea
-                ref={this.textAreaRef}
-                value={this.props.comment}
-                onClick={() => this.props.setTagInputActive(false)}
-                placeholder="Add private note (save with cmd/ctrl+enter)"
-                onChange={(e) => this.props.onCommentChange(e.target.value)}
-                onKeyDown={this.handleInputKeyDown}
-            />
-        )
-    }
-
-    private renderTagInput() {
+    render() {
         const {
             loadDefaultSuggestions,
             queryEntries,
         } = this.props.tagPickerDependencies
 
         return (
-            <TagInput
-                deleteTag={this.props.deleteSingleTag}
-                queryTagSuggestions={queryEntries}
-                fetchInitialTagSuggestions={loadDefaultSuggestions}
-                onKeyDown={this.handleTagInputKeyDown}
-                {...this.props}
-            />
-        )
-    }
-
-    render() {
-        return (
             <>
-                {this.renderInput()}
-                {this.renderTagInput()}
+                <StyledTextArea
+                    ref={this.textAreaRef}
+                    value={this.props.comment}
+                    onClick={() => this.props.setTagInputActive(false)}
+                    placeholder="Add private note (save with cmd/ctrl+enter)"
+                    onChange={(e) => this.props.onCommentChange(e.target.value)}
+                    onKeyDown={this.handleInputKeyDown}
+                />
+                <TagInput
+                    deleteTag={this.props.deleteSingleTag}
+                    queryTagSuggestions={queryEntries}
+                    fetchInitialTagSuggestions={loadDefaultSuggestions}
+                    onKeyDown={this.handleTagInputKeyDown}
+                    {...this.props}
+                />
             </>
         )
     }

@@ -63,39 +63,9 @@ export interface AnnotationsSidebarProps {
     theme: Partial<SidebarTheme>
 }
 
-interface EditCompRefs {
-    [annotUrl: string]: React.RefObject<AnnotationEditable>
-}
-
 interface AnnotationsSidebarState {
     searchText?: string
-    /** These are used to keep track of refs to currently rendered AnnotationEdit comps, for on-demand focusing. */
-    editCompRefs: EditCompRefs
 }
-
-const didAnnotationsChange = (a: Annotation[], b: Annotation[]): boolean => {
-    const urlSetA = new Set(a.map((annot) => annot.url))
-
-    for (const { url } of b) {
-        if (!urlSetA.has(url)) {
-            return true
-        }
-    }
-
-    return false
-}
-
-const annotationsToEditRefs = (
-    annotations: Annotation[],
-    prevState: EditCompRefs = {},
-): EditCompRefs =>
-    annotations.reduce(
-        (acc, { url }) => ({
-            ...acc,
-            [url]: prevState[url] ?? React.createRef(),
-        }),
-        {},
-    )
 
 class AnnotationsSidebar extends React.Component<
     AnnotationsSidebarProps,
@@ -103,10 +73,7 @@ class AnnotationsSidebar extends React.Component<
 > {
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
 
-    state = {
-        searchText: '',
-        editCompRefs: annotationsToEditRefs(this.props.annotations),
-    }
+    state = { searchText: '' }
 
     componentDidMount() {
         document.addEventListener('keydown', this.onKeydown, false)
@@ -116,23 +83,7 @@ class AnnotationsSidebar extends React.Component<
         document.removeEventListener('keydown', this.onKeydown, false)
     }
 
-    componentWillReceiveProps(nextProps: AnnotationsSidebarProps) {
-        if (
-            didAnnotationsChange(this.props.annotations, nextProps.annotations)
-        ) {
-            this.setState((state) => ({
-                editCompRefs: annotationsToEditRefs(
-                    nextProps.annotations,
-                    state.editCompRefs,
-                ),
-            }))
-        }
-    }
-
     focusCreateForm = () => this.annotationCreateRef?.getInstance()?.focus()
-
-    focusEditForm = (annotationUrl: string) =>
-        this.state.editCompRefs[annotationUrl]?.current?.focus()
 
     private onKeydown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
@@ -239,7 +190,6 @@ class AnnotationsSidebar extends React.Component<
         const annots = this.props.annotations.map((annot, i) => (
             <AnnotationEditable
                 key={i}
-                ref={this.state.editCompRefs[annot.url]}
                 {...annot}
                 {...this.props}
                 {...this.props.annotationEditableProps}

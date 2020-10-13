@@ -202,7 +202,6 @@ export type SidebarContainerOptions = SidebarContainerDependencies & {
 
 export type SidebarLogicOptions = SidebarContainerOptions & {
     focusCreateForm: FocusableComponent['focus']
-    focusEditForm: (annotationUrl: string) => void
 }
 
 type EventHandler<
@@ -813,7 +812,6 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         this.emitMutation(mutation)
-        this.options.focusEditForm(event.annotationUrl)
     }
 
     switchAnnotationMode: EventHandler<'switchAnnotationMode'> = ({

@@ -23,11 +23,9 @@ const setupLogicHelper = async ({
     device,
     pageUrl = DATA.CURRENT_TAB_URL_1,
     focusCreateForm = () => undefined,
-    focusEditForm = () => undefined,
 }: {
     device: UILogicTestDevice
     pageUrl?: string
-    focusEditForm?: (url: string) => void
     focusCreateForm?: () => void
 }) => {
     const { backgroundModules } = device
@@ -56,7 +54,6 @@ const setupLogicHelper = async ({
         initialState: 'hidden',
         searchResultLimit: 10,
         focusCreateForm,
-        focusEditForm,
     })
 
     const sidebar = device.createElement(sidebarLogic)
@@ -410,90 +407,20 @@ describe('SidebarContainerLogic', () => {
             ])
         })
 
-        it('should be able to set focus on comment box or annot edit forms', async ({
-            device,
-        }) => {
-            const formFocusStates = {
-                create: false,
-                a: false,
-                b: false,
-                c: false,
-            }
-
-            const focusForm = (nameToChange = 'create') => {
-                for (const name in formFocusStates) {
-                    formFocusStates[name] = name === nameToChange
-                }
-            }
-
+        it('should be able to set focus on comment box', async ({ device }) => {
+            let isCreateFormFocused = false
             const { sidebar } = await setupLogicHelper({
                 device,
-                focusCreateForm: focusForm,
-                focusEditForm: focusForm,
+                focusCreateForm: () => {
+                    isCreateFormFocused = true
+                },
             })
 
-            expect(formFocusStates).toEqual({
-                create: false,
-                a: false,
-                b: false,
-                c: false,
-            })
-
+            expect(isCreateFormFocused).toBe(false)
             await sidebar.processEvent('addNewPageComment', {
                 comment: DATA.COMMENT_1,
             })
-            expect(formFocusStates).toEqual({
-                create: true,
-                a: false,
-                b: false,
-                c: false,
-            })
-
-            sidebar.logic.emitMutation({
-                annotations: {
-                    $set: [{ url: 'a' }, { url: 'b' }, { url: 'c' }] as any,
-                },
-                editForms: {
-                    $set: {
-                        a: { commentText: '', tags: [] },
-                        b: { commentText: '', tags: [] },
-                        c: { commentText: '', tags: [] },
-                    } as any,
-                },
-            })
-
-            await sidebar.processEvent('setAnnotationEditMode', {
-                annotationUrl: 'a',
-                context: 'pageAnnotations',
-            })
-            expect(formFocusStates).toEqual({
-                create: false,
-                a: true,
-                b: false,
-                c: false,
-            })
-
-            await sidebar.processEvent('setAnnotationEditMode', {
-                annotationUrl: 'b',
-                context: 'pageAnnotations',
-            })
-            expect(formFocusStates).toEqual({
-                create: false,
-                a: false,
-                b: true,
-                c: false,
-            })
-
-            await sidebar.processEvent('setAnnotationEditMode', {
-                annotationUrl: 'c',
-                context: 'pageAnnotations',
-            })
-            expect(formFocusStates).toEqual({
-                create: false,
-                a: false,
-                b: false,
-                c: true,
-            })
+            expect(isCreateFormFocused).toBe(true)
         })
     })
 

@@ -47,8 +47,6 @@ export class AnnotationsSidebarContainer<
                 ...props,
                 focusCreateForm: () =>
                     this.sidebarRef?.getInstance()?.focusCreateForm(),
-                focusEditForm: (url) =>
-                    this.sidebarRef?.getInstance()?.focusEditForm(url),
             }),
         )
     }
