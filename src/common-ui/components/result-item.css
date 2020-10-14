@@ -68,6 +68,10 @@
         display: flex;
     }
 
+    &:hover .secondaryActionButton {
+        display: flex;
+    }
+
     & .button {
         display: none;
     }
@@ -369,6 +373,10 @@
         background-size: contain;
         background-repeat: no-repeat;
     }
+}
+
+.secondaryActionButton {
+    display: none;
 }
 
 .permanentButton {
