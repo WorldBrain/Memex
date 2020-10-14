@@ -179,10 +179,7 @@ export default class CustomListBackground {
     }: {
         createdAt?: Date
     } = {}): Promise<number> {
-        return this.storage.createInboxListIfAbsent({
-            id: this.generateListId(),
-            createdAt,
-        })
+        return this.storage.createInboxListIfAbsent({ createdAt })
     }
 
     async createInboxListEntry({

@@ -6,7 +6,8 @@ import {
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-    SPECIAL_LISTS,
+    SPECIAL_LIST_NAMES,
+    SPECIAL_LIST_IDS,
 } from '@worldbrain/memex-storage/lib/lists/constants'
 
 import { SuggestPlugin } from 'src/search/plugins'
@@ -146,15 +147,13 @@ export default class CustomListStorage extends StorageModule {
     }
 
     async createInboxListIfAbsent({
-        id,
         createdAt = new Date(),
     }: {
-        id: number
         createdAt?: Date
     }): Promise<number> {
         const foundInboxList = await this.operation(
             'findListByNameIgnoreCase',
-            { name: SPECIAL_LISTS.INBOX },
+            { name: SPECIAL_LIST_NAMES.INBOX },
         )
         if (foundInboxList) {
             return foundInboxList.id
@@ -162,17 +161,17 @@ export default class CustomListStorage extends StorageModule {
 
         return (
             await this.operation('createList', {
-                id,
-                createdAt,
-                name: SPECIAL_LISTS.INBOX,
+                name: SPECIAL_LIST_NAMES.INBOX,
+                id: SPECIAL_LIST_IDS.INBOX,
                 isDeletable: false,
                 isNestable: false,
+                createdAt,
             })
         ).object.id
     }
 
     private filterMobileList = (lists: any[]): any[] =>
-        lists.filter((list) => list.name !== SPECIAL_LISTS.MOBILE)
+        lists.filter((list) => list.name !== SPECIAL_LIST_NAMES.MOBILE)
 
     async fetchAllLists({
         excludedIds = [],

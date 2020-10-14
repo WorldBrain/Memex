@@ -1,7 +1,7 @@
 import Dexie from 'dexie'
 import { Storage } from 'webextension-polyfill-ts'
 import { URLNormalizer } from '@worldbrain/memex-url-utils'
-import { SPECIAL_LISTS } from '@worldbrain/memex-storage/lib/lists/constants'
+import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
 
 import { STORAGE_KEYS as IDXING_STORAGE_KEYS } from 'src/options/settings/constants'
 
@@ -89,7 +89,7 @@ export const migrations: Migrations = {
         const lists = await db
             .table('customLists')
             .where('name')
-            .equals(SPECIAL_LISTS.MOBILE)
+            .equals(SPECIAL_LIST_NAMES.MOBILE)
             .toArray()
 
         if (lists.length < 2) {

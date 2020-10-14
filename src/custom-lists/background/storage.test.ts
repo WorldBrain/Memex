@@ -3,7 +3,10 @@ import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { SearchIndex } from 'src/search'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
-import { SPECIAL_LISTS } from '@worldbrain/memex-storage/lib/lists/constants'
+import {
+    SPECIAL_LIST_NAMES,
+    SPECIAL_LIST_IDS,
+} from '@worldbrain/memex-storage/lib/lists/constants'
 
 async function insertTestData({
     customLists,
@@ -98,61 +101,54 @@ describe('Custom List Integrations', () => {
             const createdAt = new Date()
             expect(
                 await customLists.fetchListByName({
-                    name: SPECIAL_LISTS.INBOX,
+                    name: SPECIAL_LIST_NAMES.INBOX,
                 }),
             ).toEqual(null)
             await customLists.createInboxListIfAbsent({ createdAt })
             expect(
                 await customLists.fetchListByName({
-                    name: SPECIAL_LISTS.INBOX,
+                    name: SPECIAL_LIST_NAMES.INBOX,
                 }),
-            ).toEqual(
-                expect.objectContaining({
-                    name: SPECIAL_LISTS.INBOX,
-                    isDeletable: false,
-                    isNestable: false,
-                    createdAt,
-                }),
-            )
+            ).toEqual({
+                name: SPECIAL_LIST_NAMES.INBOX,
+                id: SPECIAL_LIST_IDS.INBOX,
+                isDeletable: false,
+                isNestable: false,
+                createdAt,
+            })
         })
 
         test('should not recreate inbox list if already exists', async () => {
             const { customLists } = await setupTest({ skipTestData: true })
 
             const createdAt = new Date()
-            const firstId = await customLists.createInboxListIfAbsent({
+            await customLists.createInboxListIfAbsent({ createdAt })
+            expect(
+                await customLists.fetchListByName({
+                    name: SPECIAL_LIST_NAMES.INBOX,
+                }),
+            ).toEqual(
+                expect.objectContaining({
+                    name: SPECIAL_LIST_NAMES.INBOX,
+                    id: SPECIAL_LIST_IDS.INBOX,
+                    isDeletable: false,
+                    isNestable: false,
+                }),
+            )
+            await customLists.createInboxListIfAbsent({
                 createdAt,
             })
             expect(
                 await customLists.fetchListByName({
-                    name: SPECIAL_LISTS.INBOX,
+                    name: SPECIAL_LIST_NAMES.INBOX,
                 }),
-            ).toEqual(
-                expect.objectContaining({
-                    name: SPECIAL_LISTS.INBOX,
-                    createdAt,
-                    isDeletable: false,
-                    isNestable: false,
-                    id: firstId,
-                }),
-            )
-            const secondId = await customLists.createInboxListIfAbsent({
+            ).toEqual({
+                name: SPECIAL_LIST_NAMES.INBOX,
+                id: SPECIAL_LIST_IDS.INBOX,
+                isDeletable: false,
+                isNestable: false,
                 createdAt,
             })
-            expect(firstId).toEqual(secondId)
-            expect(
-                await customLists.fetchListByName({
-                    name: SPECIAL_LISTS.INBOX,
-                }),
-            ).toEqual(
-                expect.objectContaining({
-                    name: SPECIAL_LISTS.INBOX,
-                    createdAt,
-                    isDeletable: false,
-                    isNestable: false,
-                    id: firstId,
-                }),
-            )
         })
 
         test('should be able to create inbox list entries', async () => {
@@ -164,7 +160,7 @@ describe('Custom List Integrations', () => {
 
             expect(
                 await customLists.fetchListByName({
-                    name: SPECIAL_LISTS.INBOX,
+                    name: SPECIAL_LIST_NAMES.INBOX,
                 }),
             ).toEqual(null)
 
@@ -173,25 +169,27 @@ describe('Custom List Integrations', () => {
                 createdAt,
             })
 
-            const inboxList = await customLists.fetchListByName({
-                name: SPECIAL_LISTS.INBOX,
-            })
-            expect(inboxList).toEqual(
-                expect.objectContaining({
-                    name: SPECIAL_LISTS.INBOX,
-                    isDeletable: false,
-                    isNestable: false,
-                    createdAt,
+            expect(
+                await customLists.fetchListByName({
+                    name: SPECIAL_LIST_NAMES.INBOX,
                 }),
-            )
+            ).toEqual({
+                name: SPECIAL_LIST_NAMES.INBOX,
+                id: SPECIAL_LIST_IDS.INBOX,
+                isDeletable: false,
+                isNestable: false,
+                createdAt,
+            })
 
             expect(
-                await customLists.fetchListPagesById({ id: inboxList.id }),
+                await customLists.fetchListPagesById({
+                    id: SPECIAL_LIST_IDS.INBOX,
+                }),
             ).toEqual([
                 {
                     pageUrl: normalizeUrl(DATA.PAGE_ENTRY_1.url),
+                    listId: SPECIAL_LIST_IDS.INBOX,
                     fullUrl: DATA.PAGE_ENTRY_1.url,
-                    listId: inboxList.id,
                     createdAt,
                 },
             ])
@@ -213,9 +211,7 @@ describe('Custom List Integrations', () => {
             const url4 = 'https://internet.com/sub'
             const createdAt = new Date()
 
-            const inboxId = await customLists.createInboxListIfAbsent({
-                createdAt,
-            })
+            await customLists.createInboxListIfAbsent({ createdAt })
 
             let checkInboxEntryCalls = 0
             const checkInboxEntry = async (
@@ -224,7 +220,7 @@ describe('Custom List Integrations', () => {
             ) => {
                 checkInboxEntryCalls++
                 const listEntries = await customLists.fetchListPagesById({
-                    id: inboxId,
+                    id: SPECIAL_LIST_IDS.INBOX,
                 })
                 const entry = listEntries.find((e) => e.fullUrl === url)
 
@@ -236,7 +232,7 @@ describe('Custom List Integrations', () => {
                     entry: args.shouldExist
                         ? expect.objectContaining({
                               pageUrl: normalizeUrl(url),
-                              listId: inboxId,
+                              listId: SPECIAL_LIST_IDS.INBOX,
                               fullUrl: url,
                           })
                         : undefined,
@@ -255,7 +251,7 @@ describe('Custom List Integrations', () => {
             await tags.addTagToPage({ url: url1, tag: 'test' })
             await checkInboxEntry(url1, { shouldExist: true })
             await customLists.removePageFromList({
-                id: inboxId,
+                id: SPECIAL_LIST_IDS.INBOX,
                 url: url1,
             })
             await checkInboxEntry(url1, { shouldExist: false })
@@ -268,7 +264,7 @@ describe('Custom List Integrations', () => {
             await bookmarks.addBookmark({ fullUrl: url2 })
             await checkInboxEntry(url2, { shouldExist: true })
             await customLists.removePageFromList({
-                id: inboxId,
+                id: SPECIAL_LIST_IDS.INBOX,
                 url: url2,
             })
             await checkInboxEntry(url2, { shouldExist: false })
@@ -285,7 +281,7 @@ describe('Custom List Integrations', () => {
             )
             await checkInboxEntry(url3, { shouldExist: true })
             await customLists.removePageFromList({
-                id: inboxId,
+                id: SPECIAL_LIST_IDS.INBOX,
                 url: url3,
             })
             await checkInboxEntry(url3, { shouldExist: false })
@@ -303,7 +299,7 @@ describe('Custom List Integrations', () => {
             await customLists.insertPageToList({ id: testListId, url: url4 })
             await checkInboxEntry(url4, { shouldExist: true })
             await customLists.removePageFromList({
-                id: inboxId,
+                id: SPECIAL_LIST_IDS.INBOX,
                 url: url4,
             })
             await customLists.removePageFromList({ id: testListId, url: url4 })
