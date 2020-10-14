@@ -18,6 +18,10 @@ import {
     PAGE_1_CREATION,
     PAGE_2_CREATION,
 } from 'src/tests/common-fixtures.data'
+import {
+    SPECIAL_LIST_IDS,
+    SPECIAL_LIST_NAMES,
+} from '@worldbrain/memex-storage/lib/lists/constants'
 
 const directLinking = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.directLinking
@@ -65,6 +69,29 @@ const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext
         }),
         pages: (): StorageCollectionDiff => PAGE_1_CREATION,
         visits: (): StorageCollectionDiff => expect.anything(),
+        customLists: (): StorageCollectionDiff => ({
+            [SPECIAL_LIST_IDS.INBOX]: {
+                type: 'create',
+                object: {
+                    createdAt: expect.any(Date),
+                    name: SPECIAL_LIST_NAMES.INBOX,
+                    id: SPECIAL_LIST_IDS.INBOX,
+                    isDeletable: false,
+                    isNestable: false,
+                },
+            },
+        }),
+        pageListEntries: (): StorageCollectionDiff => ({
+            [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
+                type: 'create',
+                object: {
+                    createdAt: expect.any(Date),
+                    fullUrl: DATA.PAGE_1.fullUrl,
+                    listId: SPECIAL_LIST_IDS.INBOX,
+                    pageUrl: DATA.PAGE_1.url,
+                },
+            },
+        }),
     },
 }
 
@@ -99,6 +126,29 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
                                         lastEdited: expect.any(Date),
+                                    },
+                                },
+                            }),
+                            customLists: (): StorageCollectionDiff => ({
+                                [SPECIAL_LIST_IDS.INBOX]: {
+                                    type: 'create',
+                                    object: {
+                                        createdAt: expect.any(Date),
+                                        name: SPECIAL_LIST_NAMES.INBOX,
+                                        id: SPECIAL_LIST_IDS.INBOX,
+                                        isDeletable: false,
+                                        isNestable: false,
+                                    },
+                                },
+                            }),
+                            pageListEntries: (): StorageCollectionDiff => ({
+                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
+                                    type: 'create',
+                                    object: {
+                                        createdAt: expect.any(Date),
+                                        fullUrl: DATA.PAGE_1.fullUrl,
+                                        listId: SPECIAL_LIST_IDS.INBOX,
+                                        pageUrl: DATA.PAGE_1.url,
                                     },
                                 },
                             }),
@@ -137,7 +187,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageId: 'lorem.com',
                                         screenshot: undefined,
                                         tags: [],
-                                        lists: [],
+                                        lists: [SPECIAL_LIST_NAMES.INBOX],
                                         title: undefined,
                                         url: 'lorem.com',
                                         fullUrl: DATA.PAGE_1.fullUrl,
@@ -213,7 +263,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageId: 'lorem.com',
                                         screenshot: undefined,
                                         tags: [],
-                                        lists: [],
+                                        lists: [SPECIAL_LIST_NAMES.INBOX],
                                         title: undefined,
                                         url: 'lorem.com',
                                         fullUrl: DATA.PAGE_1.fullUrl,
@@ -389,7 +439,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageId: 'lorem.com',
                                         screenshot: undefined,
                                         tags: [],
-                                        lists: [],
+                                        lists: [SPECIAL_LIST_NAMES.INBOX],
                                         title: undefined,
                                         url: 'lorem.com',
                                         fullUrl: DATA.PAGE_1.fullUrl,
@@ -504,7 +554,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageId: 'lorem.com',
                                         screenshot: undefined,
                                         tags: [],
-                                        lists: [],
+                                        lists: [SPECIAL_LIST_NAMES.INBOX],
                                         title: undefined,
                                         url: 'lorem.com',
                                         fullUrl: 'https://www.lorem.com',
@@ -704,6 +754,29 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     },
                                 },
                             }),
+                            customLists: (): StorageCollectionDiff => ({
+                                [SPECIAL_LIST_IDS.INBOX]: {
+                                    type: 'create',
+                                    object: {
+                                        createdAt: expect.any(Date),
+                                        name: SPECIAL_LIST_NAMES.INBOX,
+                                        id: SPECIAL_LIST_IDS.INBOX,
+                                        isDeletable: false,
+                                        isNestable: false,
+                                    },
+                                },
+                            }),
+                            pageListEntries: (): StorageCollectionDiff => ({
+                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
+                                    type: 'create',
+                                    object: {
+                                        createdAt: expect.any(Date),
+                                        fullUrl: DATA.PAGE_1.fullUrl,
+                                        listId: SPECIAL_LIST_IDS.INBOX,
+                                        pageUrl: DATA.PAGE_1.url,
+                                    },
+                                },
+                            }),
                             pages: (): StorageCollectionDiff => PAGE_1_CREATION,
                             visits: (): StorageCollectionDiff =>
                                 expect.anything(),
@@ -896,6 +969,38 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     },
                                 },
                             }),
+                            customLists: (): StorageCollectionDiff => ({
+                                [SPECIAL_LIST_IDS.INBOX]: {
+                                    type: 'create',
+                                    object: {
+                                        createdAt: expect.any(Date),
+                                        name: SPECIAL_LIST_NAMES.INBOX,
+                                        id: SPECIAL_LIST_IDS.INBOX,
+                                        isDeletable: false,
+                                        isNestable: false,
+                                    },
+                                },
+                            }),
+                            pageListEntries: (): StorageCollectionDiff => ({
+                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
+                                    type: 'create',
+                                    object: {
+                                        createdAt: expect.any(Date),
+                                        fullUrl: DATA.PAGE_1.fullUrl,
+                                        listId: SPECIAL_LIST_IDS.INBOX,
+                                        pageUrl: DATA.PAGE_1.url,
+                                    },
+                                },
+                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_2.url}"]`]: {
+                                    type: 'create',
+                                    object: {
+                                        createdAt: expect.any(Date),
+                                        fullUrl: DATA.PAGE_2.fullUrl,
+                                        listId: SPECIAL_LIST_IDS.INBOX,
+                                        pageUrl: DATA.PAGE_2.url,
+                                    },
+                                },
+                            }),
                             pages: (): StorageCollectionDiff => ({
                                 ...PAGE_1_CREATION,
                                 ...PAGE_2_CREATION,
@@ -1085,6 +1190,38 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
                                         lastEdited: expect.any(Date),
+                                    },
+                                },
+                            }),
+                            customLists: (): StorageCollectionDiff => ({
+                                [SPECIAL_LIST_IDS.INBOX]: {
+                                    type: 'create',
+                                    object: {
+                                        createdAt: expect.any(Date),
+                                        name: SPECIAL_LIST_NAMES.INBOX,
+                                        id: SPECIAL_LIST_IDS.INBOX,
+                                        isDeletable: false,
+                                        isNestable: false,
+                                    },
+                                },
+                            }),
+                            pageListEntries: (): StorageCollectionDiff => ({
+                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
+                                    type: 'create',
+                                    object: {
+                                        createdAt: expect.any(Date),
+                                        fullUrl: DATA.PAGE_1.fullUrl,
+                                        listId: SPECIAL_LIST_IDS.INBOX,
+                                        pageUrl: DATA.PAGE_1.url,
+                                    },
+                                },
+                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_2.url}"]`]: {
+                                    type: 'create',
+                                    object: {
+                                        createdAt: expect.any(Date),
+                                        fullUrl: DATA.PAGE_2.fullUrl,
+                                        listId: SPECIAL_LIST_IDS.INBOX,
+                                        pageUrl: DATA.PAGE_2.url,
                                     },
                                 },
                             }),
