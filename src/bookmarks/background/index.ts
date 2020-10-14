@@ -58,11 +58,14 @@ export default class BookmarksBackground {
         }
 
         if (!params.skipIndexing) {
-            await this.options.pages.indexPage({
-                fullUrl,
-                tabId: params.tabId,
-                visitTime: params.timestamp || '$now',
-            })
+            await this.options.pages.indexPage(
+                {
+                    fullUrl,
+                    tabId: params.tabId,
+                    visitTime: params.timestamp || '$now',
+                },
+                { addInboxEntryOnCreate: true },
+            )
         }
 
         await this.storage.createBookmarkIfNeeded(fullUrl, params.timestamp)

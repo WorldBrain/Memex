@@ -123,6 +123,7 @@ export function createBackgroundModules(options: {
     const pages = new PageIndexingBackground({
         storageManager,
         fetchPageData: options.fetchPageDataProcessor,
+        createInboxEntry,
         tabManagement,
         getNow,
     })
@@ -152,7 +153,6 @@ export function createBackgroundModules(options: {
         pages,
         tabManagement,
         queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
-        windows: options.browserAPIs.windows,
         searchBackgroundModule: search,
         analytics,
         localBrowserStorage: options.browserAPIs.storage.local,
@@ -252,6 +252,10 @@ export function createBackgroundModules(options: {
         fetchPageData: options.fetchPageDataProcessor,
         storePageContent,
     })
+
+    async function createInboxEntry(fullPageUrl: string) {
+        await customLists.createInboxListEntry({ fullUrl: fullPageUrl })
+    }
 
     const postReceiveProcessor =
         options.fetchPageDataProcessor != null

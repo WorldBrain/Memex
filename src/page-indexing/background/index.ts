@@ -28,6 +28,7 @@ export class PageIndexingBackground {
             tabManagement: TabManagementBackground
             storageManager: StorageManager
             fetchPageData?: FetchPageProcessor
+            createInboxEntry: (normalizedPageUrl: string) => Promise<void>
             getNow: () => number
         },
     ) {
@@ -176,7 +177,7 @@ export class PageIndexingBackground {
         await this.storage.createPage(pageData)
 
         if (opts.addInboxEntryOnCreate) {
-            // TODO: Call inbox create
+            await this.options.createInboxEntry(pageData.url)
         }
     }
 

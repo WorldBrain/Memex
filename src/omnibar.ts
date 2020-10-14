@@ -36,9 +36,10 @@ export async function main() {
     const storageManager = initStorex()
     const bookmarksStorage = new BookmarksStorage({ storageManager })
     const pages = new PageIndexingBackground({
-        getNow: () => Date.now(),
-        storageManager,
         tabManagement,
+        storageManager,
+        getNow: () => Date.now(),
+        createInboxEntry: () => undefined,
     })
     registerModuleMapCollections(storageManager.registry, {
         pages: pages.storage,

@@ -1,15 +1,14 @@
 import Storex from '@worldbrain/storex'
-import { Windows, Tabs, Storage } from 'webextension-polyfill-ts'
+import { Tabs, Storage } from 'webextension-polyfill-ts'
 
 import TagStorage from './storage'
-import { pageIsStub, maybeIndexTabs } from 'src/page-indexing/utils'
+import { maybeIndexTabs } from 'src/page-indexing/utils'
 import { RemoteTagsInterface, TagsSettings } from './types'
 import { initErrHandler } from 'src/search/storage'
 import SearchBackground from 'src/search/background'
 import { Analytics } from 'src/analytics/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from '../utils'
-import { STORAGE_KEYS as IDXING_PREF_KEYS } from 'src/options/settings/constants'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import TabManagementBackground from 'src/tab-management/background'
 
@@ -20,7 +19,6 @@ export default class TagsBackground {
     storage: TagStorage
     remoteFunctions: RemoteTagsInterface
 
-    private windows: Windows.Static
     private localStorage: BrowserSettingsStore<TagsSettings>
 
     constructor(
@@ -30,7 +28,6 @@ export default class TagsBackground {
             analytics: Analytics
             tabManagement: TabManagementBackground
             queryTabs?: Tabs.Static['query']
-            windows?: Windows.Static
             searchBackgroundModule: SearchBackground
             localBrowserStorage: Storage.LocalStorageArea
         },
@@ -50,7 +47,6 @@ export default class TagsBackground {
             searchForTagSuggestions: this.searchForTagSuggestions,
             fetchInitialTagSuggestions: this.fetchInitialTagSuggestions,
         }
-        this.windows = options.windows
         this.localStorage = new BrowserSettingsStore<TagsSettings>(
             options.localBrowserStorage,
             { prefix: 'tags_' },
@@ -92,7 +88,6 @@ export default class TagsBackground {
         const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
 
         const indexed = await maybeIndexTabs(tabs, {
-            pageStorage: this.options.pages.storage,
             createPage: this.options.pages.indexPage,
             time: params.time || '$now',
         })
@@ -193,11 +188,14 @@ export default class TagsBackground {
         tag: string
         tabId?: number
     }) => {
-        await this.options.pages.indexPage({
-            fullUrl: url,
-            tabId,
-            visitTime: '$now',
-        })
+        await this.options.pages.indexPage(
+            {
+                fullUrl: url,
+                tabId,
+                visitTime: '$now',
+            },
+            { addInboxEntryOnCreate: true },
+        )
 
         await this.storage.addTag({ url, name: tag }).catch(initErrHandler())
         await this._updateTagSuggestionsCache({ added: tag })

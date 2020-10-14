@@ -307,10 +307,12 @@ export default class CustomListStorage extends StorageModule {
         listId,
         pageUrl,
         fullUrl,
+        createdAt = new Date(),
     }: {
         listId: number
         pageUrl: string
         fullUrl: string
+        createdAt?: Date
     }) {
         const idExists = Boolean(await this.fetchListById(listId))
 
@@ -319,7 +321,7 @@ export default class CustomListStorage extends StorageModule {
                 listId,
                 pageUrl,
                 fullUrl,
-                createdAt: new Date(),
+                createdAt,
             })
         }
     }

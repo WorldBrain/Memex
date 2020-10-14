@@ -5,7 +5,7 @@ import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
 import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
-import { SearchIndex, Page } from 'src/search'
+import { SearchIndex } from 'src/search'
 import {
     RemoteCollectionsInterface,
     CollectionsSettings,
@@ -185,6 +185,23 @@ export default class CustomListBackground {
         })
     }
 
+    async createInboxListEntry({
+        fullUrl,
+        createdAt = new Date(),
+    }: {
+        fullUrl: string
+        createdAt?: Date
+    }): Promise<void> {
+        const listId = await this.createInboxListIfAbsent({ createdAt })
+
+        return this.storage.insertPageToList({
+            listId,
+            fullUrl,
+            createdAt,
+            pageUrl: normalizeUrl(fullUrl),
+        })
+    }
+
     createCustomList = async ({ name }: { name: string }): Promise<number> => {
         internalAnalytics.processEvent({
             type: EVENT_NAMES.CREATE_COLLECTION,
@@ -238,11 +255,14 @@ export default class CustomListBackground {
             type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
         })
 
-        await this.options.pages.indexPage({
-            tabId,
-            fullUrl: url,
-            visitTime: !suppressVisitCreation ? '$now' : undefined,
-        })
+        await this.options.pages.indexPage(
+            {
+                tabId,
+                fullUrl: url,
+                visitTime: !suppressVisitCreation ? '$now' : undefined,
+            },
+            { addInboxEntryOnCreate: true },
+        )
 
         const retVal = await this.storage.insertPageToList({
             listId: id,
@@ -345,7 +365,6 @@ export default class CustomListBackground {
         const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
 
         const indexed = await maybeIndexTabs(tabs, {
-            pageStorage: this.options.pages.storage,
             createPage: this.options.pages.indexPage,
             time: args.time ?? '$now',
         })

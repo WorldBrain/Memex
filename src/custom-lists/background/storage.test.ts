@@ -22,7 +22,7 @@ async function insertTestData({
     await customLists.insertPageToList(DATA.PAGE_ENTRY_4)
 }
 
-async function setupTest() {
+async function setupTest({ skipTestData }: { skipTestData?: boolean } = {}) {
     const {
         backgroundModules,
         storageManager,
@@ -36,7 +36,9 @@ async function setupTest() {
     let fakeListCount = 0
     customLists.generateListId = () => ++fakeListCount
 
-    await insertTestData({ customLists })
+    if (!skipTestData) {
+        await insertTestData({ customLists })
+    }
 
     return {
         customLists,
@@ -67,7 +69,7 @@ describe('Custom List Integrations', () => {
             const lists = await customLists.fetchListPagesByUrl({
                 url: normalizedUrl,
             })
-            expect(lists.length).toBe(1)
+            expect(lists.length).toBe(2)
             expect(lists[0].pages.length).toBe(1)
             expect(lists[0].pages[0]).toBe(fullUrl)
         })
@@ -80,7 +82,7 @@ describe('Custom List Integrations', () => {
             await customLists.insertPageToList({ id: 1, url })
 
             const lists = await customLists.fetchListPagesByUrl({ url })
-            expect(lists.length).toBe(1)
+            expect(lists.length).toBe(2)
             expect(lists[0].pages.length).toBe(1)
             expect(lists[0].pages[0]).toBe(url)
 
@@ -89,7 +91,7 @@ describe('Custom List Integrations', () => {
         })
 
         test('should be able to create inbox list if absent', async () => {
-            const { customLists, storageManager } = await setupTest()
+            const { customLists } = await setupTest({ skipTestData: true })
 
             const createdAt = new Date()
             expect(
@@ -105,15 +107,15 @@ describe('Custom List Integrations', () => {
             ).toEqual(
                 expect.objectContaining({
                     name: SPECIAL_LISTS.INBOX,
-                    createdAt,
                     isDeletable: false,
                     isNestable: false,
+                    createdAt,
                 }),
             )
         })
 
         test('should not recreate inbox list if already exists', async () => {
-            const { customLists } = await setupTest()
+            const { customLists } = await setupTest({ skipTestData: true })
 
             const createdAt = new Date()
             const firstId = await customLists.createInboxListIfAbsent({
@@ -150,6 +152,48 @@ describe('Custom List Integrations', () => {
                 }),
             )
         })
+
+        test('should be able to create inbox list entries', async () => {
+            const { customLists, pages } = await setupTest({
+                skipTestData: true,
+            })
+
+            const createdAt = new Date()
+
+            expect(
+                await customLists.fetchListByName({
+                    name: SPECIAL_LISTS.INBOX,
+                }),
+            ).toEqual(null)
+
+            await customLists.createInboxListEntry({
+                fullUrl: DATA.PAGE_ENTRY_1.url,
+                createdAt,
+            })
+
+            const inboxList = await customLists.fetchListByName({
+                name: SPECIAL_LISTS.INBOX,
+            })
+            expect(inboxList).toEqual(
+                expect.objectContaining({
+                    name: SPECIAL_LISTS.INBOX,
+                    isDeletable: false,
+                    isNestable: false,
+                    createdAt,
+                }),
+            )
+
+            expect(
+                await customLists.fetchListPagesById({ id: inboxList.id }),
+            ).toEqual([
+                {
+                    pageUrl: normalizeUrl(DATA.PAGE_ENTRY_1.url),
+                    fullUrl: DATA.PAGE_ENTRY_1.url,
+                    listId: inboxList.id,
+                    createdAt,
+                },
+            ])
+        })
     })
 
     describe('read ops', () => {
@@ -161,7 +205,7 @@ describe('Custom List Integrations', () => {
             })
 
             checkDefined(lists)
-            expect(lists.length).toBe(3)
+            expect(lists.length).toBe(4)
         })
 
         test('fetch all lists, skipping mobile list', async () => {
@@ -172,7 +216,7 @@ describe('Custom List Integrations', () => {
             })
 
             checkDefined(lists)
-            expect(lists.length).toBe(3)
+            expect(lists.length).toBe(4)
         })
 
         test('fetch pages associated with list', async () => {
@@ -241,7 +285,7 @@ describe('Custom List Integrations', () => {
             })
 
             checkDefined(lists)
-            expect(lists.length).toBe(1)
+            expect(lists.length).toBe(2)
             expect(lists[0].id).not.toBe(1)
             expect(lists[0].id).not.toBe(2)
         })

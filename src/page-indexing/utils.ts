@@ -13,7 +13,6 @@ export function pageIsStub(page: PipelineRes): boolean {
 export async function maybeIndexTabs(
     tabs: Array<{ url: string; id: number }>,
     options: {
-        pageStorage: PageStorage
         createPage: PageIndexingBackground['indexPage']
         time: number | '$now'
     },
@@ -29,12 +28,15 @@ export async function maybeIndexTabs(
             }
 
             await options
-                .createPage({
-                    tabId: tab.id,
-                    fullUrl: tab.url,
-                    allowScreenshot: false,
-                    visitTime: options.time,
-                })
+                .createPage(
+                    {
+                        tabId: tab.id,
+                        fullUrl: tab.url,
+                        allowScreenshot: false,
+                        visitTime: options.time,
+                    },
+                    { addInboxEntryOnCreate: true },
+                )
                 .catch(handleErrors)
 
             if (!error) {
