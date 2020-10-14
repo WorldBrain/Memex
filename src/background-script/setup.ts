@@ -431,6 +431,7 @@ export async function setupBackgroundModules(
     backgroundModules.pageFetchBacklog.setupBacklogProcessing()
     backgroundModules.bookmarks.setupBookmarkListeners()
     backgroundModules.tabManagement.setupRemoteFunctions()
+    backgroundModules.readwise.setupRemoteFunctions()
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()

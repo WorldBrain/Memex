@@ -5,56 +5,10 @@ import * as DATA from 'src/readwise-integration/background/index.test.data'
 import {
     backgroundIntegrationTestSuite,
     backgroundIntegrationTest,
-    BackgroundIntegrationTestSetup,
-    IntegrationTestStep,
-    BackgroundIntegrationTestContext,
 } from 'src/tests/integration-tests'
-import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
-import { ReadwiseHighlight } from './types'
 import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 import { READWISE_API_URL } from './constants'
-import { string } from 'prop-types'
 import fetchMock from 'fetch-mock'
-
-const readwiseIntegration = (setup: BackgroundIntegrationTestSetup) =>
-    setup.backgroundModules.readwise
-const directLinking = (setup: BackgroundIntegrationTestSetup) =>
-    setup.backgroundModules.directLinking
-
-let API_KEY: string = 'DUMMYVALUE'
-
-const createAPIKeyStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
-    execute: async ({ setup }) => {
-        await readwiseIntegration(setup).setAPIKey(API_KEY)
-    },
-    expectedStorageChanges: {
-        readwiseAPIKey: (): StorageCollectionDiff => ({
-            [API_KEY]: {
-                type: 'create',
-                object: {
-                    key: API_KEY,
-                },
-            },
-        }),
-    },
-    postCheck: async ({ setup }) => {
-        expect(await readwiseIntegration(setup).getAPIKey()).toEqual(API_KEY)
-    },
-}
-
-// const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
-//     ,
-//   expectedStorageChanges: {
-//       readwiseAnnotation: (): StorageCollectionDiff => ({
-//           [annotUrl]: {
-//               type: 'create',
-//               object: {
-//                   localId: DATA.READWISE_ANNOT_1.localId
-//               },
-//           },
-//       }),
-//   },
-// }
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     'Readwise Annotations',
@@ -75,25 +29,22 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }
             },
         ),
-        backgroundIntegrationTest(
-            'should instantiate ReadwiseBackground, run ReadwiseBackground.setup, and find key',
-            () => {
-                return {
-                    steps: [
-                        {
-                            execute: async ({ setup }) => {
-                                await setup.browserLocalStorage.set({
-                                    'readwise.apiKey': 'my key',
-                                })
-                                expect(
-                                    await setup.backgroundModules.readwise.getAPIKey(),
-                                ).toEqual('my key')
-                            },
+        backgroundIntegrationTest('should retrieve a saved API key', () => {
+            return {
+                steps: [
+                    {
+                        execute: async ({ setup }) => {
+                            await setup.browserLocalStorage.set({
+                                'readwise.apiKey': 'my key',
+                            })
+                            expect(
+                                await setup.backgroundModules.readwise.getAPIKey(),
+                            ).toEqual('my key')
                         },
-                    ],
-                }
-            },
-        ),
+                    },
+                ],
+            }
+        }),
         backgroundIntegrationTest(
             'should store and retrieve the api key',
             () => {
@@ -102,7 +53,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         {
                             execute: async ({ setup }) => {
                                 await setup.backgroundModules.readwise.setAPIKey(
-                                    'my key',
+                                    {
+                                        validatedKey: 'my key',
+                                    },
                                 )
                                 expect(
                                     await setup.browserLocalStorage.get(
@@ -130,7 +83,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             })
                             expect(
                                 await setup.backgroundModules.readwise.validateAPIKey(
-                                    'good key',
+                                    {
+                                        key: 'good key',
+                                    },
                                 ),
                             ).toEqual({ success: true })
 
@@ -143,7 +98,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             )
                             expect(
                                 await setup.backgroundModules.readwise.validateAPIKey(
-                                    'bad key',
+                                    {
+                                        key: 'bad key',
+                                    },
                                 ),
                             ).toEqual({ success: false })
 
@@ -179,7 +136,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         {
                             execute: async ({ setup }) => {
                                 await setup.backgroundModules.readwise.setAPIKey(
-                                    'my key',
+                                    {
+                                        validatedKey: 'my key',
+                                    },
                                 )
 
                                 injectFakeTabs({
@@ -243,7 +202,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         {
                             execute: async ({ setup }) => {
                                 await setup.backgroundModules.readwise.setAPIKey(
-                                    'my key',
+                                    {
+                                        validatedKey: 'my key',
+                                    },
                                 )
 
                                 injectFakeTabs({
@@ -321,7 +282,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     DATA.ANNOT_2,
                                 )
                                 await setup.backgroundModules.readwise.setAPIKey(
-                                    'my key',
+                                    {
+                                        validatedKey: 'my key',
+                                    },
                                 )
                                 setup.backgroundModules.readwise.uploadBatchSize = 1
                                 await setup.backgroundModules.readwise.uploadAllAnnotations(

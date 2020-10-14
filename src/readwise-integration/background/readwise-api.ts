@@ -1,4 +1,4 @@
-import { ReadwiseAPI, ReadwiseHighlight } from './types'
+import { ReadwiseAPI, ReadwiseHighlight } from './types/api'
 import { READWISE_API_URL } from './constants'
 
 export class HTTPReadwiseAPI implements ReadwiseAPI {
@@ -36,6 +36,6 @@ export class HTTPReadwiseAPI implements ReadwiseAPI {
                 'Content-Type': 'application/json',
             },
         })
-        return { success: response.status === 204 }
+        return { success: response.status === 200 || response.status === 204 }
     }
 }

@@ -2,7 +2,7 @@ import * as DATA from 'src/tests/common-fixtures.data'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { Annotation } from 'src/annotations/types'
 import moment from 'moment'
-import { ReadwiseHighlight } from './types'
+import { ReadwiseHighlight } from './types/api'
 export * from 'src/tests/common-fixtures.data'
 
 export const ANNOT_1: Annotation = {

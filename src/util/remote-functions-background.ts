@@ -12,6 +12,7 @@ import { AnnotationInterface } from 'src/annotations/background/types'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { ReadwiseInterface } from 'src/readwise-integration/background/types/remote-interface'
 
 export interface RemoteFunctionImplementations<
     Role extends 'provider' | 'caller'

@@ -5,13 +5,9 @@ import {
     ActionValidator,
     ActionQueueInteraction,
 } from '@worldbrain/memex-common/lib/action-queue/types'
-import {
-    ReadwiseResponse,
-    ReadwiseSettings,
-    ReadwiseAPI,
-    ReadwiseAction,
-    ReadwiseHighlight,
-} from './types'
+import { ReadwiseResponse, ReadwiseAPI, ReadwiseHighlight } from './types/api'
+import { ReadwiseSettings } from './types/settings'
+import { ReadwiseAction } from './types/actions'
 import { HTTPReadwiseAPI } from './readwise-api'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
@@ -19,9 +15,18 @@ import { Annotation } from 'src/annotations/types'
 import StorageManager from '@worldbrain/storex'
 import { STORAGE_VERSIONS } from '@worldbrain/memex-common/lib/browser-extension/storage/versions'
 import { READWISE_ACTION_RETRY_INTERVAL } from './constants'
+import { ReadwiseInterface } from './types/remote-interface'
+import {
+    remoteFunctionWithoutExtraArgs,
+    registerRemoteFunctions,
+} from 'src/util/webextensionRPC'
+
+type ReadwiseInterfaceMethod<
+    Method extends keyof ReadwiseInterface<'provider'>
+> = ReadwiseInterface<'provider'>[Method]['function']
 
 export class ReadwiseBackground {
-    mostRecentResponse?: ReadwiseResponse
+    remoteFunctions: ReadwiseInterface<'provider'>
     settingsStore: SettingStore<ReadwiseSettings>
     readwiseAPI: ReadwiseAPI
     actionQueue: ActionQueue<ReadwiseAction>
@@ -58,14 +63,28 @@ export class ReadwiseBackground {
             executeAction: this.executeAction,
             validateAction: this.validateAction,
         })
+        this.remoteFunctions = {
+            validateAPIKey: remoteFunctionWithoutExtraArgs(this.validateAPIKey),
+            getAPIKey: remoteFunctionWithoutExtraArgs(this.getAPIKey),
+            setAPIKey: remoteFunctionWithoutExtraArgs(this.setAPIKey),
+            uploadAllAnnotations: remoteFunctionWithoutExtraArgs(
+                this.uploadAllAnnotations,
+            ),
+        }
     }
 
-    async validateAPIKey(key: string) {
+    setupRemoteFunctions() {
+        registerRemoteFunctions(this.remoteFunctions)
+    }
+
+    validateAPIKey: ReadwiseInterfaceMethod<'validateAPIKey'> = async ({
+        key,
+    }) => {
         const result = await this.readwiseAPI.validateKey(key)
         return result
     }
 
-    async getAPIKey() {
+    getAPIKey: ReadwiseInterfaceMethod<'getAPIKey'> = async () => {
         if (this._apiKeyLoaded) {
             return this._apiKey
         }
@@ -75,15 +94,22 @@ export class ReadwiseBackground {
         return this._apiKey
     }
 
-    async setAPIKey(validatedKey: string) {
+    setAPIKey: ReadwiseInterfaceMethod<'setAPIKey'> = async ({
+        validatedKey,
+    }) => {
         await this.settingsStore.set('apiKey', validatedKey)
         this._apiKey = validatedKey
         this._apiKeyLoaded = true
     }
 
-    async uploadAllAnnotations(params: {
-        queueInteraction: ActionQueueInteraction
-    }) {
+    uploadAllAnnotations: ReadwiseInterfaceMethod<
+        'uploadAllAnnotations'
+    > = async ({ queueInteraction }) => {
+        // await new Promise((resolve) => setTimeout(resolve, 1000 * 3))
+        // if (1) {
+        //     return
+        // }
+
         const getFullPageUrl = makeFullPageUrlCache({
             getFullPageUrl: this.options.getFullPageUrl,
         })
@@ -91,7 +117,7 @@ export class ReadwiseBackground {
         let annotationBatch: Annotation[] = []
         const scheduleBatch = async () => {
             await this._scheduleAnnotationBatchUpload(annotationBatch, {
-                queueInteraction: params.queueInteraction,
+                queueInteraction,
                 getFullPageUrl,
             })
         }
