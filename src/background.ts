@@ -84,6 +84,7 @@ export async function main() {
             syncService: backgroundModules.sync,
             storexHub: backgroundModules.storexHub,
             contentSharing: backgroundModules.contentSharing,
+            readwise: backgroundModules.readwise,
         },
     )
     await setupBackgroundModules(backgroundModules, storageManager)

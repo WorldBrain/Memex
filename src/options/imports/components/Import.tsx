@@ -3,6 +3,10 @@ import React from 'react'
 import AdvSettings from './AdvSettingsContainer'
 import { IMPORT_TYPE } from '../constants'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import ReadwiseSettings from 'src/readwise-integration/ui/containers/readwise-settings'
+import { remoteFunctions } from 'src/util/remote-functions-background'
+import { runInBackground } from 'src/util/webextensionRPC'
+import { ReadwiseInterface } from 'src/readwise-integration/background/types/remote-interface'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./Import.css')
@@ -29,11 +33,7 @@ class Import extends React.PureComponent<Props> {
             return
         }
 
-        return (
-            <div className={settingsStyle.section}>
-                <AdvSettings />
-            </div>
-        )
+        return <AdvSettings />
     }
 
     private renderEstimates() {
@@ -45,6 +45,23 @@ class Import extends React.PureComponent<Props> {
             <div>
                 <div className={settingsStyle.sectionTitle}>
                     Import Bookmarks from other services
+                </div>
+            </div>
+        )
+    }
+
+    private renderReadwise() {
+        if (!this.props.shouldRenderEsts) {
+            return
+        }
+
+        return (
+            <div>
+                <div className={settingsStyle.section}>
+                    <div className={settingsStyle.sectionTitle}>
+                        ReadWise.io integration
+                    </div>
+                    <ReadwiseSettings />
                 </div>
             </div>
         )
@@ -100,6 +117,7 @@ class Import extends React.PureComponent<Props> {
                     <div className={localStyles.mainContainer}>
                         <div className={localStyles.importTableContainer}>
                             {children}
+                            {this.renderSettings()}
                         </div>
                         {isLoading && !allowTypes[IMPORT_TYPE.OTHERS].length && (
                             <div className={localStyles.loadingBlocker}>
@@ -111,7 +129,7 @@ class Import extends React.PureComponent<Props> {
                         )}
                     </div>
                 </div>
-                {this.renderSettings()}
+                {this.renderReadwise()}
             </div>
         )
     }

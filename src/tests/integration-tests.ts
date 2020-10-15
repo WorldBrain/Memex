@@ -18,6 +18,7 @@ import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscri
 import { ServerStorage } from 'src/storage/types'
 import { Browser } from 'webextension-polyfill-ts'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
+import fetchMock from 'fetch-mock'
 
 export interface IntegrationTestSuite<StepContext> {
     description: string
@@ -68,6 +69,7 @@ export interface BackgroundIntegrationTestSetup {
     subscriptionService: MemorySubscriptionsService
     getServerStorage(): Promise<ServerStorage>
     injectTime: (getNow: () => number) => void
+    fetch: fetchMock.FetchMockSandbox
 }
 export interface BackgroundIntegrationTestContext {
     setup: BackgroundIntegrationTestSetup
