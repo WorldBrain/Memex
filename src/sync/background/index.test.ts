@@ -29,6 +29,10 @@ import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import SyncBackground from '.'
 import { ServerStorage } from 'src/storage/types'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
+import {
+    SPECIAL_LIST_NAMES,
+    SPECIAL_LIST_IDS,
+} from '@worldbrain/memex-storage/lib/lists/constants'
 
 const registerTest = it
 
@@ -722,13 +726,26 @@ function extensionSyncTests(suiteOptions: {
                                 expect.objectContaining({
                                     fullUrl: 'http://www.bla.com/',
                                 }),
+                                expect.objectContaining({
+                                    fullUrl: 'http://test.com',
+                                }),
                             ],
                             customLists: [
+                                expect.objectContaining({
+                                    id: SPECIAL_LIST_IDS.INBOX,
+                                    name: SPECIAL_LIST_NAMES.INBOX,
+                                    isDeletable: false,
+                                    isNestable: false,
+                                }),
                                 expect.objectContaining({
                                     name: 'My list',
                                 }),
                             ],
                             pageListEntries: [
+                                expect.objectContaining({
+                                    fullUrl: 'http://test.com',
+                                    listId: SPECIAL_LIST_IDS.INBOX,
+                                }),
                                 expect.objectContaining({
                                     pageUrl: 'bla.com',
                                 }),
@@ -759,6 +776,9 @@ function extensionSyncTests(suiteOptions: {
                             pages: [
                                 expect.objectContaining({
                                     fullUrl: 'http://www.bla.com/',
+                                }),
+                                expect.objectContaining({
+                                    fullUrl: 'http://test.com',
                                 }),
                             ],
                             tags: [

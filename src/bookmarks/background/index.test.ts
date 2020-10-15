@@ -1,5 +1,9 @@
 import expect from 'expect'
 import { Tabs } from 'webextension-polyfill-ts'
+import {
+    SPECIAL_LIST_NAMES,
+    SPECIAL_LIST_IDS,
+} from '@worldbrain/memex-storage/lib/lists/constants'
 
 import * as DATA from 'src/tests/common-fixtures.data'
 import {
@@ -13,7 +17,6 @@ import {
 } from 'src/tests/storage-change-detector'
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { injectFakeTabs } from 'src/tab-management/background/index.tests'
-import { PAGE_1_CREATION } from 'src/tests/common-fixtures.data'
 
 describe('bookmarks background unit tests', () => {
     const it = makeSingleDeviceUILogicTestFactory({
@@ -110,10 +113,33 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                 },
                             }),
                             pages: (): StorageCollectionDiff => ({
-                                ...PAGE_1_CREATION,
+                                ...DATA.PAGE_1_CREATION,
                             }),
                             visits: () =>
                                 createdVisit(DATA.BOOKMARK_1, DATA.PAGE_1.url),
+                            customLists: (): StorageCollectionDiff => ({
+                                [SPECIAL_LIST_IDS.INBOX]: {
+                                    type: 'create',
+                                    object: {
+                                        createdAt: expect.any(Date),
+                                        name: SPECIAL_LIST_NAMES.INBOX,
+                                        id: SPECIAL_LIST_IDS.INBOX,
+                                        isDeletable: false,
+                                        isNestable: false,
+                                    },
+                                },
+                            }),
+                            pageListEntries: (): StorageCollectionDiff => ({
+                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
+                                    type: 'create',
+                                    object: {
+                                        createdAt: expect.any(Date),
+                                        fullUrl: DATA.PAGE_1.fullUrl,
+                                        listId: SPECIAL_LIST_IDS.INBOX,
+                                        pageUrl: DATA.PAGE_1.url,
+                                    },
+                                },
+                            }),
                         },
                         preCheck: async ({ setup }) => {
                             expect(
@@ -150,7 +176,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                         hasBookmark: true,
                                         screenshot: undefined,
                                         tags: [],
-                                        lists: [],
+                                        lists: [SPECIAL_LIST_NAMES.INBOX],
                                         title: undefined,
                                         url: DATA.PAGE_1.url,
                                         fullUrl: DATA.PAGE_1.fullUrl,
@@ -194,13 +220,55 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                             visits: () =>
                                 createdVisit(DATA.BOOKMARK_1, DATA.PAGE_1.url),
                             pages: (): StorageCollectionDiff => ({
-                                ...PAGE_1_CREATION,
+                                ...DATA.PAGE_1_CREATION,
+                            }),
+                            customLists: (): StorageCollectionDiff => ({
+                                [SPECIAL_LIST_IDS.INBOX]: {
+                                    type: 'create',
+                                    object: {
+                                        createdAt: expect.any(Date),
+                                        name: SPECIAL_LIST_NAMES.INBOX,
+                                        id: SPECIAL_LIST_IDS.INBOX,
+                                        isDeletable: false,
+                                        isNestable: false,
+                                    },
+                                },
+                            }),
+                            pageListEntries: (): StorageCollectionDiff => ({
+                                [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
+                                    type: 'create',
+                                    object: {
+                                        createdAt: expect.any(Date),
+                                        fullUrl: DATA.PAGE_1.fullUrl,
+                                        listId: SPECIAL_LIST_IDS.INBOX,
+                                        pageUrl: DATA.PAGE_1.url,
+                                    },
+                                },
                             }),
                         },
                         expectedSyncLogEntries: () => [
                             expect.objectContaining({
                                 collection: 'pages',
                                 operation: 'create',
+                            }),
+                            expect.objectContaining({
+                                collection: 'customLists',
+                                operation: 'create',
+                                pk: SPECIAL_LIST_IDS.INBOX,
+                                value: {
+                                    name: SPECIAL_LIST_NAMES.INBOX,
+                                    isDeletable: false,
+                                    isNestable: false,
+                                    createdAt: expect.any(Date),
+                                },
+                            }),
+                            expect.objectContaining({
+                                collection: 'pageListEntries',
+                                operation: 'create',
+                                value: {
+                                    fullUrl: DATA.PAGE_1.fullUrl,
+                                    createdAt: expect.any(Date),
+                                },
                             }),
                             expect.objectContaining({
                                 collection: 'visits',
@@ -234,7 +302,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                         hasBookmark: true,
                                         screenshot: undefined,
                                         tags: [],
-                                        lists: [],
+                                        lists: [SPECIAL_LIST_NAMES.INBOX],
                                         title: undefined,
                                         url: DATA.PAGE_1.url,
                                         fullUrl: DATA.PAGE_1.fullUrl,

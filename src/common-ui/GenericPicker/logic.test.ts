@@ -5,6 +5,10 @@ import {
 } from 'src/tests/ui-logic-tests'
 import 'jest-extended'
 import { PickerUpdateHandler } from './types'
+import {
+    SPECIAL_LIST_IDS,
+    SPECIAL_LIST_NAMES,
+} from '@worldbrain/memex-storage/lib/lists/constants'
 
 // see https://github.com/WorldBrain/Memex-Mobile/blob/develop/app/src/features/overview/ui/screens/dashboard/logic.test.ts
 // see https://github.com/WorldBrain/Memex-Mobile/blob/7b74b83d3f3ebec793317c84222939d3fcba67b7/app/src/ui/index.tests.ts#L3
@@ -375,7 +379,7 @@ describe('GenericPickerLogic', () => {
         )
 
         expect(entriesBefore).toEqual([])
-        expect(entriesAfter).toEqual(['sugg1'])
+        expect(entriesAfter).toEqual([SPECIAL_LIST_NAMES.INBOX, 'sugg1'])
     })
 
     it('should correctly add entry to all tabs', async ({ device }) => {
@@ -396,6 +400,7 @@ describe('GenericPickerLogic', () => {
         await entryPickerLogic.processingUpstreamOperation
 
         expect(await customLists.fetchPageLists({ url: TESTURL })).toEqual([
+            SPECIAL_LIST_NAMES.INBOX,
             'sugg1',
         ])
         expect(testLogic.state.selectedEntries).toEqual(['sugg1'])
@@ -417,6 +422,7 @@ describe('GenericPickerLogic', () => {
         await entryPickerLogic.processingUpstreamOperation
 
         expect(await customLists.fetchPageLists({ url: TESTURL })).toEqual([
+            SPECIAL_LIST_NAMES.INBOX,
             'sugg1',
         ])
         expect(testLogic.state.selectedEntries).toEqual(['sugg1'])

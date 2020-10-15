@@ -15,6 +15,10 @@ import {
     injectFakeTabs,
 } from 'src/tab-management/background/index.tests'
 import { PAGE_1 } from 'src/annotations/background/index.test.data'
+import {
+    SPECIAL_LIST_NAMES,
+    SPECIAL_LIST_IDS,
+} from '@worldbrain/memex-storage/lib/lists/constants'
 
 const customLists = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.customLists
@@ -74,7 +78,20 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     .findObjects({}),
                             }
 
-                            const expectedEntries = []
+                            const expectedEntries = [
+                                {
+                                    createdAt: expect.any(Date),
+                                    fullUrl: DATA.PAGE_1.fullUrl,
+                                    listId: SPECIAL_LIST_IDS.INBOX,
+                                    pageUrl: DATA.PAGE_1.url,
+                                },
+                                {
+                                    createdAt: expect.any(Date),
+                                    fullUrl: DATA.PAGE_2.fullUrl,
+                                    listId: SPECIAL_LIST_IDS.INBOX,
+                                    pageUrl: DATA.PAGE_2.url,
+                                },
+                            ]
 
                             for (const { url, normalized } of TEST_TABS) {
                                 expectedEntries.push({
@@ -87,6 +104,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                             expect(stored).toEqual({
                                 customLists: [
+                                    {
+                                        createdAt: expect.any(Date),
+                                        name: SPECIAL_LIST_NAMES.INBOX,
+                                        id: SPECIAL_LIST_IDS.INBOX,
+                                        isDeletable: false,
+                                        isNestable: false,
+                                    },
                                     {
                                         id: listId,
                                         createdAt: expect.any(Date),
@@ -149,6 +173,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             expect(stored).toEqual({
                                 customLists: [
                                     {
+                                        createdAt: expect.any(Date),
+                                        name: SPECIAL_LIST_NAMES.INBOX,
+                                        id: SPECIAL_LIST_IDS.INBOX,
+                                        isDeletable: false,
+                                        isNestable: false,
+                                    },
+                                    {
                                         id: listId,
                                         createdAt: expect.any(Date),
                                         name: testList,
@@ -156,7 +187,20 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         isNestable: true,
                                     },
                                 ],
-                                pageListEntries: [],
+                                pageListEntries: [
+                                    {
+                                        createdAt: expect.any(Date),
+                                        fullUrl: DATA.PAGE_1.fullUrl,
+                                        listId: SPECIAL_LIST_IDS.INBOX,
+                                        pageUrl: DATA.PAGE_1.url,
+                                    },
+                                    {
+                                        createdAt: expect.any(Date),
+                                        fullUrl: DATA.PAGE_2.fullUrl,
+                                        listId: SPECIAL_LIST_IDS.INBOX,
+                                        pageUrl: DATA.PAGE_2.url,
+                                    },
+                                ],
                             })
                         },
                     },
@@ -226,6 +270,18 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).object
                             },
                             expectedStorageChanges: {
+                                customLists: (): StorageCollectionDiff => ({
+                                    [SPECIAL_LIST_IDS.INBOX]: {
+                                        type: 'create',
+                                        object: {
+                                            createdAt: expect.any(Date),
+                                            name: SPECIAL_LIST_NAMES.INBOX,
+                                            id: SPECIAL_LIST_IDS.INBOX,
+                                            isDeletable: false,
+                                            isNestable: false,
+                                        },
+                                    },
+                                }),
                                 pageListEntries: (): StorageCollectionDiff => ({
                                     [listEntry &&
                                     `[${listId},"${listEntry.pageUrl}"]`]: {
@@ -235,6 +291,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             createdAt: expect.any(Date),
                                             fullUrl: TEST_TABS[0].url,
                                             pageUrl: TEST_TABS[0].normalized,
+                                        },
+                                    },
+                                    [`[${SPECIAL_LIST_IDS.INBOX},"${DATA.PAGE_1.url}"]`]: {
+                                        type: 'create',
+                                        object: {
+                                            createdAt: expect.any(Date),
+                                            fullUrl: DATA.PAGE_1.fullUrl,
+                                            listId: SPECIAL_LIST_IDS.INBOX,
+                                            pageUrl: DATA.PAGE_1.url,
                                         },
                                     },
                                 }),
@@ -304,7 +369,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             favIcon: undefined,
                                             hasBookmark: false,
                                             screenshot: undefined,
-                                            lists: [TEST_LIST_2],
+                                            lists: [
+                                                SPECIAL_LIST_NAMES.INBOX,
+                                                TEST_LIST_2,
+                                            ],
                                             tags: [],
                                             url: TEST_TABS[0].normalized,
                                             fullUrl: TEST_TABS[0].url,
@@ -400,7 +468,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             favIcon: undefined,
                                             hasBookmark: false,
                                             screenshot: undefined,
-                                            lists: [TEST_LIST_1],
+                                            lists: [
+                                                SPECIAL_LIST_NAMES.INBOX,
+                                                TEST_LIST_1,
+                                            ],
                                             tags: [],
                                             title: 'first page title',
                                             url: TEST_TABS[0].normalized,
