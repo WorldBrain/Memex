@@ -49,11 +49,11 @@ export default class TabManagementBackground {
     ) {
         this.tabManager = options.tabManager
         this.remoteFunctions = {
-            fetchTab: remoteFunctionWithoutExtraArgs(
-                this.tabManager.getTabState,
+            fetchTab: remoteFunctionWithoutExtraArgs(async (id) =>
+                this.tabManager.getTabState(id),
             ),
-            fetchTabByUrl: remoteFunctionWithoutExtraArgs(
-                this.tabManager.getTabStateByUrl,
+            fetchTabByUrl: remoteFunctionWithoutExtraArgs(async (url) =>
+                this.tabManager.getTabStateByUrl(url),
             ),
             setTabAsIndexable: remoteFunctionWithExtraArgs(
                 this.setTabAsIndexable,

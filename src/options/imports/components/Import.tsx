@@ -33,9 +33,7 @@ class Import extends React.PureComponent<Props> {
             return
         }
 
-        return (
-                <AdvSettings />
-        )
+        return <AdvSettings />
     }
 
     private renderEstimates() {
@@ -63,11 +61,7 @@ class Import extends React.PureComponent<Props> {
                     <div className={settingsStyle.sectionTitle}>
                         ReadWise.io integration
                     </div>
-                    <ReadwiseSettings
-                        readwise={runInBackground<
-                            ReadwiseInterface<'caller'>
-                        >()}
-                    />
+                    <ReadwiseSettings />
                 </div>
             </div>
         )
@@ -134,7 +128,6 @@ class Import extends React.PureComponent<Props> {
                             </div>
                         )}
                     </div>
-
                 </div>
                 {this.renderReadwise()}
             </div>

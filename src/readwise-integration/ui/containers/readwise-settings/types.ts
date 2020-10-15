@@ -10,10 +10,13 @@ export interface ReadwiseSettingsState {
     apiKey?: string
     apiKeyEditable: boolean
     syncExistingNotes?: boolean
+    isFeatureAuthorized?: boolean
 }
 
 export interface ReadwiseSettingsDependencies {
     readwise: ReadwiseInterface<'caller'>
+    checkFeatureAuthorized(): Promise<boolean>
+    showSubscriptionModal: () => void
 }
 
 export type ReadwiseSettingsEvent = UIEvent<{
@@ -21,4 +24,5 @@ export type ReadwiseSettingsEvent = UIEvent<{
     setAPIKey: { key: string }
     saveAPIKey: null
     removeAPIKey: null
+    showSubscriptionModal: null
 }>

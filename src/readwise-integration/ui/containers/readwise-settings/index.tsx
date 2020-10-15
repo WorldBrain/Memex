@@ -11,12 +11,33 @@ import {
 import * as selectors from './selectors'
 import { Checkbox } from 'src/common-ui/components'
 
-
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { connect } from 'react-redux'
+import { show } from 'src/overview/modals/actions'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { runInBackground } from 'src/util/webextensionRPC'
+import { ReadwiseInterface } from 'src/readwise-integration/background/types/remote-interface'
+import { AuthContextInterface } from 'src/authentication/background/types'
+import { userAuthorizedForReadwise } from './utils'
 
+class ReadwiseSettingsContainer extends React.Component<
+    AuthContextInterface & { showSubscriptionModal: () => void }
+> {
+    render() {
+        return (
+            <ReadwiseSettings
+                readwise={runInBackground<ReadwiseInterface<'caller'>>()}
+                checkFeatureAuthorized={async () =>
+                    userAuthorizedForReadwise(this.props.currentUser)
+                }
+                showSubscriptionModal={this.props.showSubscriptionModal}
+            />
+        )
+    }
+}
 
-export default class ReadwiseSettings extends StatefulUIElement<
+class ReadwiseSettings extends StatefulUIElement<
     ReadwiseSettingsDependencies,
     ReadwiseSettingsState,
     ReadwiseSettingsEvent
@@ -25,7 +46,24 @@ export default class ReadwiseSettings extends StatefulUIElement<
         super(props, new ReadwiseSettingsLogic(props))
     }
 
-    renderSyncing() {
+    renderUnauthorized() {
+        return (
+            <div>
+                <p>
+                    Subscribe to a paid plan to automatically sync all your
+                    highlights to ReadWise.io
+                </p>
+                <PrimaryAction
+                    label="Subscribe"
+                    onClick={() =>
+                        this.processEvent('showSubscriptionModal', null)
+                    }
+                />
+            </div>
+        )
+    }
+
+    renderSyncScreen() {
         return (
             <div>
                 {selectors.showSyncError(this.state) && (
@@ -46,23 +84,38 @@ export default class ReadwiseSettings extends StatefulUIElement<
             <div>
                 {!selectors.showKeyRemoveButton(this.state) && (
                     <SuccessMessage>
-                        <span>Automatically push all your highlights to Readwise.</span>
-                        <div>Here you can get the <a target="_blank" href='https://readwise.io/access_token'>API key</a>.</div>
+                        <span>
+                            Automatically push all your highlights to Readwise.
+                        </span>
+                        <div>
+                            Here you can get the{' '}
+                            <a
+                                target="_blank"
+                                href="https://readwise.io/access_token"
+                            >
+                                API key
+                            </a>
+                            .
+                        </div>
                     </SuccessMessage>
                 )}
                 {selectors.showKeySaveError(this.state) && (
-                    <ErrorMessage>{selectors.keySaveErrorMessage(this.state)}</ErrorMessage>
+                    <ErrorMessage>
+                        {selectors.keySaveErrorMessage(this.state)}
+                    </ErrorMessage>
                 )}
                 {selectors.showKeySuccessMessage(this.state) && (
                     <SuccessMessage>
-                        Your ReadWise integration is now active! <br/>
-                        Any annotation you make from now on is immediately uploaded.
+                        Your ReadWise integration is now active! <br />
+                        Any annotation you make from now on is immediately
+                        uploaded.
                     </SuccessMessage>
                 )}
                 {selectors.showSyncSuccessMessage(this.state) && (
                     <SuccessMessage>
-                        Your ReadWise integration is now active! <br/>
-                        Existing annotations are uploaded and every new one you make too.
+                        Your ReadWise integration is now active! <br />
+                        Existing annotations are uploaded and every new one you
+                        make too.
                     </SuccessMessage>
                 )}
                 <MainBox>
@@ -70,7 +123,11 @@ export default class ReadwiseSettings extends StatefulUIElement<
                         type="text"
                         placeholder="ReadWise API key"
                         disabled={selectors.apiKeyDisabled(this.state)}
-                        value={selectors.showKeySaving(this.state) ? ("Saving API key..."):(this.state.apiKey || '')} 
+                        value={
+                            selectors.showKeySaving(this.state)
+                                ? 'Saving API key...'
+                                : this.state.apiKey || ''
+                        }
                         onChange={(e) =>
                             this.processEvent('setAPIKey', {
                                 key: e.target.value,
@@ -99,7 +156,7 @@ export default class ReadwiseSettings extends StatefulUIElement<
                 {selectors.formEditable(this.state) && (
                     <ExistingHighlightBox>
                         <Checkbox
-                            id='Existing Highlight Settings'
+                            id="Existing Highlight Settings"
                             isChecked={this.state.syncExistingNotes ?? false}
                             handleChange={(e) =>
                                 this.processEvent(
@@ -116,17 +173,23 @@ export default class ReadwiseSettings extends StatefulUIElement<
     }
 
     render() {
-        if (selectors.showForm(this.state)) {
-            return this.renderForm()
-        }
-        if (selectors.showSyncScreen(this.state)) {
-            return this.renderSyncing()
-        }
-        if (selectors.showLoadingError(this.state)) {
-            return 'Something went wrong loading your ReadWise.io settings'
-        }
+        return (
+            <>
+                {selectors.showUnauthorized(this.state) &&
+                    this.renderUnauthorized()}
+                {selectors.showForm(this.state) && this.renderForm()}
+                {selectors.showSyncScreen(this.state) &&
+                    this.renderSyncScreen()}
+                {selectors.showLoadingError(this.state) &&
+                    'Something went wrong loading your ReadWise.io settings'}
+            </>
+        )
     }
 }
+
+export default connect(null, (dispatch) => ({
+    showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
+}))(withCurrentUser(ReadwiseSettingsContainer))
 
 const KeyBox = styled.input`
     background: #e0e0e0;

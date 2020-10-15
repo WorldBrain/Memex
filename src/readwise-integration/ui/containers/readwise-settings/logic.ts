@@ -1,5 +1,4 @@
-import mapValues from 'lodash/mapValues'
-import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
+import { UILogic, UIEventHandler } from 'ui-logic-core'
 import {
     ReadwiseSettingsState,
     ReadwiseSettingsEvent,
@@ -36,9 +35,11 @@ export default class ReadwiseSettingsLogic extends UILogic<
     init = async () => {
         await loadInitial<ReadwiseSettingsState>(this, async () => {
             const apiKey = await this.dependencies.readwise.getAPIKey()
+            const isFeatureAuthorized = await this.dependencies.checkFeatureAuthorized()
             this.emitMutation({
                 apiKey: { $set: apiKey },
                 apiKeyEditable: { $set: !apiKey },
+                isFeatureAuthorized: { $set: isFeatureAuthorized },
             })
         })
     }
@@ -101,11 +102,13 @@ export default class ReadwiseSettingsLogic extends UILogic<
         this.emitMutation({
             $set: {
                 ...INITIAL_STATE,
-                loadState: 'success',
-                apiKeyEditable: true,
-                apiKey: null,
             },
         })
         await this.dependencies.readwise.setAPIKey({ validatedKey: null })
+        await this.init()
+    }
+
+    showSubscriptionModal: EventHandler<'showSubscriptionModal'> = () => {
+        this.dependencies.showSubscriptionModal()
     }
 }
