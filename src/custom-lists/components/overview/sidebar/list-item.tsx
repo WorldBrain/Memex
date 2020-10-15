@@ -1,10 +1,8 @@
 import React, { Component, DragEventHandler } from 'react'
 import cx from 'classnames'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
-import { PageList } from 'src/custom-lists/background/types'
 import { AuthContextInterface } from 'src/authentication/background/types'
 import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
-import { featuresBeta } from 'src/util/remote-functions-background'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import CustomListStorage from 'src/custom-lists/background/storage'
 
@@ -17,7 +15,6 @@ export interface Props extends AuthContextInterface {
     listName: string
     listId: number
     isFiltered?: boolean
-    isMobileList?: boolean
     onShareButtonClick?: React.MouseEventHandler<HTMLButtonElement>
     onEditButtonClick: React.MouseEventHandler<HTMLButtonElement>
     onCrossButtonClick: React.MouseEventHandler<HTMLButtonElement>
@@ -172,58 +169,53 @@ class ListItem extends Component<Props, State> {
                 onDragLeave={this.handleDragLeave}
             >
                 <div className={styles.listName}>{this.props.listName}</div>
-                {!this.props.isMobileList && (
-                    <div className={styles.buttonContainer}>
-                        {this.state.isMouseInside && (
-                            <React.Fragment>
-                                <button
-                                    className={cx(
-                                        styles.editButton,
-                                        styles.button,
-                                    )}
-                                    onClick={this.handleEditBtnClick}
-                                    title={'Edit'}
-                                />
-                                <button
-                                    className={cx(
-                                        styles.deleteButton,
-                                        styles.button,
-                                    )}
-                                    onClick={this.handleCrossBtnClick}
-                                    title={'Delete'}
-                                />
-                                {!this.state.isShared && (
-                                    <button
-                                        className={cx(
-                                            styles.shareButton,
-                                            styles.button,
-                                        )}
-                                        onClick={this.handleShareBtnClick}
-                                        title={'Share'}
-                                    />
-                                )}
-                            </React.Fragment>
-                        )}
-                        {this.state.isShared && (
+                <div className={styles.buttonContainer}>
+                    {this.state.isMouseInside && (
+                        <React.Fragment>
+                            <button
+                                className={cx(styles.editButton, styles.button)}
+                                onClick={this.handleEditBtnClick}
+                                title={'Edit'}
+                            />
                             <button
                                 className={cx(
-                                    styles.shareButton,
+                                    styles.deleteButton,
                                     styles.button,
-                                    {
-                                        [styles.shareButtonPermanent]: this
-                                            .state.isShared,
-                                    },
-                                    {
-                                        [styles.shareButtonPermanentHover]: this
-                                            .state.isMouseInside,
-                                    },
                                 )}
-                                onClick={this.handleShareBtnClick}
-                                title={'Shared'}
+                                onClick={this.handleCrossBtnClick}
+                                title={'Delete'}
                             />
-                        )}
-                    </div>
-                )}
+                            {!this.state.isShared && (
+                                <button
+                                    className={cx(
+                                        styles.shareButton,
+                                        styles.button,
+                                    )}
+                                    onClick={this.handleShareBtnClick}
+                                    title={'Share'}
+                                />
+                            )}
+                        </React.Fragment>
+                    )}
+                    {this.state.isShared && (
+                        <button
+                            className={cx(
+                                styles.shareButton,
+                                styles.button,
+                                {
+                                    [styles.shareButtonPermanent]: this.state
+                                        .isShared,
+                                },
+                                {
+                                    [styles.shareButtonPermanentHover]: this
+                                        .state.isMouseInside,
+                                },
+                            )}
+                            onClick={this.handleShareBtnClick}
+                            title={'Shared'}
+                        />
+                    )}
+                </div>
             </div>
         )
     }

@@ -12,6 +12,7 @@ import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/Del
 import { actions as filterActs, selectors as filters } from 'src/search-filters'
 import { selectors as sidebar } from 'src/overview/sidebar-left'
 import { auth, contentSharing } from 'src/util/remote-functions-background'
+import { StaticListItem } from './static-list-item'
 import { show } from 'src/overview/modals/actions'
 
 const styles = require('./Index.css')
@@ -145,7 +146,6 @@ class ListContainer extends Component {
                     key={i}
                     listId={list.id}
                     listName={list.name}
-                    isMobileList={list.isMobileList}
                     isFiltered={list.isFilterIndex}
                     onShareButtonClick={this.handleShareButtonClick(i)}
                     onEditButtonClick={this.props.handleEditBtnClick(i)}
@@ -159,19 +159,16 @@ class ListContainer extends Component {
     }
 
     renderSpecialLists = () => [
-        <ListItem
+        <StaticListItem
             key={0}
-            listId={-1}
             listName="All Saved"
             isFiltered={!this.props.isListFilterActive}
             onListItemClick={this.props.handleAllSavedClick}
         />,
         ...this.props.specialLists.map((list, i) => (
-            <ListItem
+            <StaticListItem
                 key={i + 1}
-                listId={list.id}
                 listName={list.name}
-                isMobileList={list.isMobileList}
                 isFiltered={list.isFilterIndex}
                 onListItemClick={this.props.handleListItemClick(list)}
             />
