@@ -71,6 +71,7 @@ export interface RemoteCollectionsInterface {
         url: string
         tabId?: number
     }): Promise<void>
+    getInboxUnreadCount(): Promise<number>
 }
 
 export interface CollectionsSettings {

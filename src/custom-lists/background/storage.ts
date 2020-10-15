@@ -39,6 +39,11 @@ export default class CustomListStorage extends StorageModule {
                     collection: CustomListStorage.LIST_ENTRIES_COLL,
                     operation: 'createObject',
                 },
+                countListEntries: {
+                    collection: CustomListStorage.LIST_ENTRIES_COLL,
+                    operation: 'countObjects',
+                    args: { listId: '$listId:int' },
+                },
                 findListsIncluding: {
                     collection: CustomListStorage.CUSTOM_LISTS_COLL,
                     operation: 'findObjects',
@@ -168,6 +173,14 @@ export default class CustomListStorage extends StorageModule {
                 createdAt,
             })
         ).object.id
+    }
+
+    countListEntries(listId: number): Promise<number> {
+        return this.operation('countListEntries', { listId })
+    }
+
+    countInboxUnread(): Promise<number> {
+        return this.countListEntries(SPECIAL_LIST_IDS.INBOX)
     }
 
     private filterMobileList = (lists: any[]): any[] =>

@@ -70,6 +70,7 @@ export default class CustomListBackground {
             addOpenTabsToList: this.addOpenTabsToList,
             removeOpenTabsFromList: this.removeOpenTabsFromList,
             updateListForPage: this.updateListForPage,
+            getInboxUnreadCount: this.getInboxUnreadCount,
         }
 
         this.localStorage = new BrowserSettingsStore<CollectionsSettings>(
@@ -197,6 +198,10 @@ export default class CustomListBackground {
             createdAt,
             pageUrl: normalizeUrl(fullUrl),
         })
+    }
+
+    getInboxUnreadCount = () => {
+        return this.storage.countInboxUnread()
     }
 
     createCustomList = async ({ name }: { name: string }): Promise<number> => {

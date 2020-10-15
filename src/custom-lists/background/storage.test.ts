@@ -193,9 +193,10 @@ describe('Custom List Integrations', () => {
                     createdAt,
                 },
             ])
+            expect(await customLists.getInboxUnreadCount()).toBe(1)
         })
 
-        test('should be not able to create inbox list entries for pages once already read', async () => {
+        test('should not be able to create inbox list entries for pages once already read', async () => {
             const {
                 tags,
                 bookmarks,

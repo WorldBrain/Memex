@@ -13,7 +13,9 @@ import { actions as filterActs, selectors as filters } from 'src/search-filters'
 import { selectors as sidebar } from 'src/overview/sidebar-left'
 import { auth, contentSharing } from 'src/util/remote-functions-background'
 import { StaticListItem } from './static-list-item'
+import { InboxListItem } from './inbox-list-item'
 import { show } from 'src/overview/modals/actions'
+import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
 
 const styles = require('./Index.css')
 
@@ -165,14 +167,23 @@ class ListContainer extends Component {
             isFiltered={!this.props.isListFilterActive}
             onListItemClick={this.props.handleAllSavedClick}
         />,
-        ...this.props.specialLists.map((list, i) => (
-            <StaticListItem
-                key={i + 1}
-                listName={list.name}
-                isFiltered={list.isFilterIndex}
-                onListItemClick={this.props.handleListItemClick(list)}
-            />
-        )),
+        ...this.props.specialLists.map((list, i) =>
+            list.name === SPECIAL_LIST_NAMES.INBOX ? (
+                <InboxListItem
+                    key={i + 1}
+                    listName={list.name}
+                    isFiltered={list.isFilterIndex}
+                    onListItemClick={this.props.handleListItemClick(list)}
+                />
+            ) : (
+                <StaticListItem
+                    key={i + 1}
+                    listName={list.name}
+                    isFiltered={list.isFilterIndex}
+                    onListItemClick={this.props.handleListItemClick(list)}
+                />
+            ),
+        ),
     ]
 
     renderCreateList = (shouldDisplayForm, value = null) =>
