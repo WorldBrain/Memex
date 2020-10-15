@@ -89,6 +89,15 @@
     align-items: center;
 }
 
+.unreadCount {
+    background: #e0e0e0;
+    padding: 2px 16px;
+    border-radius: 10px;
+    margin: 0 20px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
 @keyframes appear {
     0% {
         transform: translateX(5px);

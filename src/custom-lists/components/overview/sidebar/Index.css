@@ -23,6 +23,7 @@
 .myCollection {
     font-size: 13px;
     font-weight: bold;
+    padding-left: 5px;
 }
 
 .myCollectionSidebar {

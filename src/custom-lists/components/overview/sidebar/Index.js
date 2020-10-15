@@ -211,7 +211,7 @@ class ListContainer extends Component {
                             [styles.addNewHover]: this.props.isSidebarLocked,
                         })}
                     >
-                        <span className={styles.myCollection}>Add New </span>
+                        <span className={styles.myCollection}>My Collections </span>
                         <span className={styles.plus} />
                     </div>
                 </div>
@@ -231,7 +231,7 @@ class ListContainer extends Component {
                                 .isSidebarLocked,
                         })}
                     >
-                        {this.props.lists.length === 1 ? (
+                        {this.props.lists.length === 0 ? (
                             <div>
                                 {this.renderAllLists()}
                                 <div className={extStyles.noLists}>

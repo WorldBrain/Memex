@@ -21,7 +21,7 @@ export class StaticListItem extends Component<Props> {
                 title={this.props.listName}
             >
                 <div className={styles.listName}>{this.props.listName}</div>
-                {this.props.unreadCount && (
+                {this.props.listName === 'Inbox' && (
                     <span className={styles.unreadCount}>
                         {this.props.unreadCount}
                     </span>
