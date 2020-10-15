@@ -44,6 +44,12 @@ export default class ReadwiseSettings extends StatefulUIElement<
     renderForm() {
         return (
             <div>
+                {!selectors.showKeyRemoveButton(this.state) && (
+                    <SuccessMessage>
+                        <span>Automatically push all your highlights to Readwise.</span>
+                        <div>Here you can get the <a target="_blank" href='https://readwise.io/access_token'>API key</a>.</div>
+                    </SuccessMessage>
+                )}
                 {selectors.showKeySaveError(this.state) && (
                     <ErrorMessage>{selectors.keySaveErrorMessage(this.state)}</ErrorMessage>
                 )}
@@ -170,7 +176,8 @@ const SuccessMessage = styled.div`
     border-radius: 3px;
     border: none;
     justify-content: flex-start;
-    color: 3a2f45;
+    color: #3a2f45;
+    flex-direction: column;
 `
 
 const Container = styled.div`
