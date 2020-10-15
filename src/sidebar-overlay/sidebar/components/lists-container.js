@@ -144,7 +144,7 @@ class ListContainer extends Component {
                     isFiltered={list.isFilterIndex}
                     onShareButtonClick={() => {}}
                     onEditButtonClick={this.props.handleEditBtnClick(i)}
-                    onListItemClick={this.props.handleListItemClick(list, i)}
+                    onListItemClick={this.props.handleListItemClick(list)}
                     onAddPageToList={this.props.handleAddPageList(list, i)}
                     onCrossButtonClick={this.props.handleCrossBtnClick(list, i)}
                     resetUrlDragged={this.props.resetUrlDragged}
@@ -205,7 +205,7 @@ class ListContainer extends Component {
 }
 
 const mapStateToProps = (state) => ({
-    lists: selectors.results(state),
+    lists: selectors.createdDisplayLists(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
     showCrowdFundingModal: selectors.showCrowdFundingModal(state),
     showCreateList: selectors.showCreateListForm(state),
@@ -238,9 +238,8 @@ const mapDispatchToProps = (dispatch, getState) => ({
         event.preventDefault()
         dispatch(actions.showListDeleteModal(id, index))
     },
-    handleListItemClick: ({ id }, index) => () => {
+    handleListItemClick: ({ id }) => () => {
         dispatch(sidebarActs.setSearchType('page'))
-        dispatch(actions.toggleListFilterIndex(index.toString()))
         dispatch(filterActs.toggleListFilter(id.toString()))
     },
     handleAddPageList: ({ id }, index) => (url, isSocialPost) => {

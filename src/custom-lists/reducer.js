@@ -109,21 +109,6 @@ const payloadReducer = (key) => (state, payload) => ({
     [key]: payload,
 })
 
-const toggleListFilterIndex = (state, index) => {
-    const { listFilterIndex } = state
-    if (listFilterIndex === null || listFilterIndex !== index) {
-        return {
-            ...state,
-            listFilterIndex: index,
-        }
-    }
-
-    return {
-        ...state,
-        listFilterIndex: null,
-    }
-}
-
 const setUrlDragged = (state, url) => {
     return {
         ...state,
@@ -183,7 +168,6 @@ export default createReducer(
         [actions.deleteList]: deleteList,
         [actions.addPagetoList]: addPageToList,
         [actions.showListDeleteModal]: showDeleteConfirm,
-        [actions.toggleListFilterIndex]: toggleListFilterIndex,
         [actions.resetListDeleteModal]: (state) => ({
             ...state,
             deleteConfirmProps: { ...defaultState.deleteConfirmProps },

@@ -31,7 +31,6 @@ export const addPagetoList = createAction(
         index,
     }),
 )
-export const hidePageFromList = createAction('custom-lists/hidePageFromList')
 export const showListDeleteModal = createAction(
     'custom-lists/showListDeleteModal',
     (id, index) => ({
@@ -51,10 +50,6 @@ export const setActiveListIndex = createAction(
 
 export const setShowCrowdFundingModal = createAction(
     'custom-lists/setShowCrowdFundingModal',
-)
-
-export const toggleListFilterIndex = createAction(
-    'custom-lists/toggleListFilterIndex',
 )
 
 export const setUrlDragged = createAction(
@@ -93,7 +88,6 @@ export const delPageFromList = (url, isSocialPost) => async (
 ) => {
     try {
         const state = getState()
-        const index = selectors.listFilterIndex(state)
         const listId = filters.listFilter(state)
         const delPageFromListRPC = isSocialPost
             ? 'delPostFromList'
@@ -103,8 +97,6 @@ export const delPageFromList = (url, isSocialPost) => async (
             id: Number(listId),
             url,
         })
-
-        dispatch(hidePageFromList(url, index))
     } catch (err) {
         Raven.captureException(err)
     }

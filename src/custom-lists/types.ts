@@ -2,7 +2,6 @@ import { PageList } from 'src/custom-lists/background/types'
 
 export interface State {
     activeListIndex: number
-    listFilterIndex: string
     lists: PageList[]
     deleteConfirmProps: {
         isShown: boolean

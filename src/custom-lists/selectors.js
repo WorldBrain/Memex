@@ -11,11 +11,6 @@ export const activeListIndex = createSelector(
     (state) => state.activeListIndex,
 )
 
-export const listFilterIndex = createSelector(
-    customLists,
-    (state) => state.listFilterIndex,
-)
-
 export const getSortedLists = createSelector(allLists, (lists) => {
     const mobileListIndex = lists.findIndex(
         ({ name }) => name === SPECIAL_LIST_NAMES.MOBILE,
