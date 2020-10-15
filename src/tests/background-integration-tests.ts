@@ -1,6 +1,7 @@
 import mapValues from 'lodash/mapValues'
 import { URL } from 'whatwg-url'
 import expect from 'expect'
+import fetchMock from 'fetch-mock'
 const wrtc = require('wrtc')
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
@@ -31,6 +32,8 @@ import { ServerStorage } from 'src/storage/types'
 import { Browser } from 'webextension-polyfill-ts'
 import { TabManager } from 'src/tab-management/background/tab-manager'
 
+fetchMock.restore()
+
 export interface BackgroundIntegrationTestSetupOpts {
     customMiddleware?: StorageMiddleware[]
     tabManager?: TabManager
@@ -46,12 +49,15 @@ export async function setupBackgroundIntegrationTest(
     options?: BackgroundIntegrationTestSetupOpts,
 ): Promise<BackgroundIntegrationTestSetup> {
     if (typeof window === 'undefined') {
-        global['URL'] = URL
+        ;(global as any)['URL'] = URL
     }
 
     // We want to allow tests to be able to override time
     let getTime = () => Date.now()
     const getNow = () => getTime()
+
+    // We allow tests to control HTTP requests
+    const fetch = fetchMock.sandbox()
 
     const browserLocalStorage =
         options?.browserLocalStorage ?? new MemoryBrowserStorage()
@@ -132,6 +138,7 @@ export async function setupBackgroundIntegrationTest(
         fetchPageDataProcessor,
         auth,
         disableSyncEnryption: !options?.enableSyncEncyption,
+        fetch,
     })
     backgroundModules.sync.initialSync.wrtc = wrtc
     backgroundModules.sync.initialSync.debug = false
@@ -164,6 +171,7 @@ export async function setupBackgroundIntegrationTest(
         syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
         contentSharing: backgroundModules.contentSharing,
+        readwise: backgroundModules.readwise,
         modifyMiddleware: (originalMiddleware) => [
             ...((options && options.customMiddleware) || []),
             ...(options && options.debugStorageOperations
@@ -188,6 +196,7 @@ export async function setupBackgroundIntegrationTest(
         browserAPIs,
         fetchPageDataProcessor,
         injectTime: (injected) => (getTime = injected),
+        fetch,
     }
 }
 

@@ -53,14 +53,16 @@ export const PAGE_2_CREATION: StorageCollectionDiff = {
     },
 }
 
-export const TEST_TAB_1: FakeTab & { normalized: string } = {
+export const TEST_TAB_1: FakeTab & { normalized: string; title: string } = {
     id: 1,
     url: PAGE_1.fullUrl,
     normalized: PAGE_1.url,
+    title: 'Title 1',
 }
 
-export const TEST_TAB_2: FakeTab & { normalized: string } = {
+export const TEST_TAB_2: FakeTab & { normalized: string; title: string } = {
     id: 2,
     url: PAGE_2.fullUrl,
     normalized: PAGE_2.url,
+    title: 'Title 2',
 }

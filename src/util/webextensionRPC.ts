@@ -77,7 +77,7 @@ export type RemoteFunctionWithoutExtraArgs<
 > = Role extends 'provider'
     ? {
           withExtraArgs: false
-          function: (params: Params) => Promise<Returns> | Returns
+          function: (params: Params) => Promise<Returns>
       }
     : (params: Params) => Promise<Returns>
 export function remoteFunctionWithExtraArgs<Params, Returns = void>(
@@ -86,7 +86,7 @@ export function remoteFunctionWithExtraArgs<Params, Returns = void>(
     return { withExtraArgs: true, function: f }
 }
 export function remoteFunctionWithoutExtraArgs<Params, Returns = void>(
-    f: (params: Params) => Promise<Returns> | Returns,
+    f: (params: Params) => Promise<Returns>,
 ): RemoteFunctionWithoutExtraArgs<'provider', Params, Returns> {
     return { withExtraArgs: false, function: f }
 }

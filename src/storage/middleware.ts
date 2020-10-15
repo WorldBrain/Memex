@@ -5,6 +5,7 @@ import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
 import SyncService from '@worldbrain/memex-common/lib/sync'
 import { StorexHubBackground } from 'src/storex-hub/background'
 import ContentSharingBackground from 'src/content-sharing/background'
+import { ReadwiseBackground } from 'src/readwise-integration/background'
 
 export async function setStorageMiddleware(
     storageManager: StorageManager,
@@ -12,6 +13,7 @@ export async function setStorageMiddleware(
         syncService: SyncService
         storexHub?: StorexHubBackground
         contentSharing?: ContentSharingBackground
+        readwise?: ReadwiseBackground
         modifyMiddleware?: (
             middleware: StorageMiddleware[],
         ) => StorageMiddleware[]
@@ -29,6 +31,9 @@ export async function setStorageMiddleware(
             await Promise.all([
                 options.storexHub?.handlePostStorageChange(event),
                 options.contentSharing?.handlePostStorageChange(event, {
+                    source: 'local',
+                }),
+                options.readwise?.handlePostStorageChange(event, {
                     source: 'local',
                 }),
             ])
@@ -57,6 +62,9 @@ export async function setStorageMiddleware(
             await Promise.all([
                 options.storexHub?.handlePostStorageChange(event),
                 options.contentSharing?.handlePostStorageChange(event, {
+                    source: 'sync',
+                }),
+                options.readwise?.handlePostStorageChange(event, {
                     source: 'sync',
                 }),
             ])
