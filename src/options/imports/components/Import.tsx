@@ -34,9 +34,7 @@ class Import extends React.PureComponent<Props> {
         }
 
         return (
-            <div className={settingsStyle.section}>
                 <AdvSettings />
-            </div>
         )
     }
 
@@ -125,6 +123,7 @@ class Import extends React.PureComponent<Props> {
                     <div className={localStyles.mainContainer}>
                         <div className={localStyles.importTableContainer}>
                             {children}
+                            {this.renderSettings()}
                         </div>
                         {isLoading && !allowTypes[IMPORT_TYPE.OTHERS].length && (
                             <div className={localStyles.loadingBlocker}>
@@ -135,9 +134,9 @@ class Import extends React.PureComponent<Props> {
                             </div>
                         )}
                     </div>
+
                 </div>
                 {this.renderReadwise()}
-                {this.renderSettings()}
             </div>
         )
     }

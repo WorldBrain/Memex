@@ -1,4 +1,5 @@
 import React from 'react'
+import styled from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import ReadwiseSettingsLogic from './logic'
@@ -8,6 +9,12 @@ import {
     ReadwiseSettingsState,
 } from './types'
 import * as selectors from './selectors'
+import { Checkbox } from 'src/common-ui/components'
+
+
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+
 
 export default class ReadwiseSettings extends StatefulUIElement<
     ReadwiseSettingsDependencies,
@@ -37,8 +44,23 @@ export default class ReadwiseSettings extends StatefulUIElement<
     renderForm() {
         return (
             <div>
-                <div>
-                    <input
+                {selectors.showKeySaveError(this.state) && (
+                    <ErrorMessage>{selectors.keySaveErrorMessage(this.state)}</ErrorMessage>
+                )}
+                {selectors.showKeySuccessMessage(this.state) && (
+                    <SuccessMessage>
+                        Your ReadWise integration is now active! <br/>
+                        Any annotation you make from now on is immediately uploaded.
+                    </SuccessMessage>
+                )}
+                {selectors.showSyncSuccessMessage(this.state) && (
+                    <SuccessMessage>
+                        Your ReadWise integration is now active! <br/>
+                        Existing annotations are uploaded and every new one you make too.
+                    </SuccessMessage>
+                )}
+                <MainBox>
+                    <KeyBox
                         type="text"
                         placeholder="ReadWise API key"
                         disabled={selectors.apiKeyDisabled(this.state)}
@@ -49,40 +71,31 @@ export default class ReadwiseSettings extends StatefulUIElement<
                             })
                         }
                     />
+                    {selectors.showKeySaveButton(this.state) && (
+                        <div>
+                            <PrimaryAction
+                                onClick={() =>
+                                    this.processEvent('saveAPIKey', null)
+                                }
+                                label={'Confirm'}
+                            />
+                        </div>
+                    )}
                     {selectors.showKeyRemoveButton(this.state) && (
-                        <span
+                        <SecondaryAction
                             onClick={() =>
                                 this.processEvent('removeAPIKey', null)
                             }
-                        >
-                            Remove
-                        </span>
+                            label={'Remove'}
+                        />
                     )}
-                </div>
-                {selectors.showKeySaveError(this.state) && (
-                    <div>{selectors.keySaveErrorMessage(this.state)}</div>
-                )}
-                {selectors.showKeySuccessMessage(this.state) && (
-                    <div>
-                        Your ReadWise integration is now active! Any annotations
-                        you make from here are immediately sent to your ReadWise
-                        account.
-                    </div>
-                )}
-                {selectors.showSyncSuccessMessage(this.state) && (
-                    <div>
-                        Your ReadWise integration is now active! Your existing
-                        notes are being uploaded to Readwise, and any
-                        annotations you make from here are will be sent to your
-                        ReadWise account.
-                    </div>
-                )}
+                </MainBox>
                 {selectors.formEditable(this.state) && (
-                    <div>
-                        <input
-                            type="checkbox"
-                            checked={this.state.syncExistingNotes ?? false}
-                            onChange={(e) =>
+                    <ExistingHighlightBox>
+                        <Checkbox
+                            id='Existing Highlight Settings'
+                            isChecked={this.state.syncExistingNotes ?? false}
+                            handleChange={(e) =>
                                 this.processEvent(
                                     'toggleSyncExistingNotes',
                                     null,
@@ -90,18 +103,7 @@ export default class ReadwiseSettings extends StatefulUIElement<
                             }
                         />{' '}
                         Sync existing higlights
-                    </div>
-                )}
-                {selectors.showKeySaveButton(this.state) && (
-                    <div>
-                        <button
-                            onClick={() =>
-                                this.processEvent('saveAPIKey', null)
-                            }
-                        >
-                            Confirm
-                        </button>
-                    </div>
+                    </ExistingHighlightBox>
                 )}
                 {selectors.showKeySaving(this.state) && (
                     <div>Saving API key...</div>
@@ -122,3 +124,65 @@ export default class ReadwiseSettings extends StatefulUIElement<
         }
     }
 }
+
+const KeyBox = styled.input`
+    background: #e0e0e0;
+    border-radius: 3px;
+    padding: 5px 10px;
+    border: none
+    width: 100%;
+    outline: none;
+    height: 36px;
+    margin-left: 0;
+`
+
+const MainBox = styled.div`
+    display: flex;
+    margin-top: 10px;
+    justify-content: space-between;
+`
+
+const ExistingHighlightBox = styled.div`
+    display: flex;
+    margin: 10px 0px;
+    font-size: 14px;
+    color: 3a2f45;
+    align-items: center;
+`
+
+const ErrorMessage = styled.div`
+    display: flex;
+    margin-top: 10px;
+    background: #f29d9d;
+    font-size: 14px;
+    border-radius: 3px;
+    border: none;
+    justify-content: center;
+    height: 30px;
+    color: 3a2f45;
+    align-items: center;
+`
+
+const SuccessMessage = styled.div`
+    display: flex;
+    margin: 10px 0px;
+    font-size: 14px;
+    border-radius: 3px;
+    border: none;
+    justify-content: flex-start;
+    color: 3a2f45;
+`
+
+const Container = styled.div`
+    position: absolute;
+    z-index: 2500;
+    background: #f29d9d;
+    top: 70px;
+    border-radius: 5px;
+    padding: 10px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    max-width: 800px;
+`
