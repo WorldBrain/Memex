@@ -48,18 +48,18 @@ class ReadwiseSettings extends StatefulUIElement<
 
     renderUnauthorized() {
         return (
-            <div>
-                <p>
+            <MainBox>
+                <SuccessMessage>
                     Subscribe to a paid plan to automatically sync all your
                     highlights to ReadWise.io
-                </p>
+                </SuccessMessage>
                 <PrimaryAction
                     label="Subscribe"
                     onClick={() =>
                         this.processEvent('showSubscriptionModal', null)
                     }
                 />
-            </div>
+            </MainBox>
         )
     }
 

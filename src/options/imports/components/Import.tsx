@@ -58,8 +58,15 @@ class Import extends React.PureComponent<Props> {
         return (
             <div>
                 <div className={settingsStyle.section}>
-                    <div className={settingsStyle.sectionTitle}>
-                        ReadWise.io integration
+                    <div className={localStyles.titleBox}>
+                        <div className={settingsStyle.sectionTitle}>
+                            ReadWise.io integration
+                        </div>
+                        <span 
+                            className={localStyles.proFeature}
+                        >
+                            ⭐️ Pro Feature
+                        </span>
                     </div>
                     <ReadwiseSettings />
                 </div>

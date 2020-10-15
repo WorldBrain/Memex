@@ -152,6 +152,16 @@
     margin-bottom: 0px;
 }
 
+.proFeature {
+    color: #3a2f45;
+    font-size: 14px;
+    vertical-align: middle;
+    font-weight: bold;
+    float: right;
+    cursor: pointer;
+    margin-left: 15px;
+}
+
 .warning {
     display: flex;
     margin: 1em 0;
@@ -177,6 +187,12 @@
 
 .warningCode {
     font-size: 0.8em;
+}
+
+.titleBox {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 .icon {
