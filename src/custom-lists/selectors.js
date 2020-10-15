@@ -23,23 +23,43 @@ export const getSortedLists = createSelector(allLists, (lists) => {
     return lists
 })
 
+const isSpecialList = (list) =>
+    [SPECIAL_LIST_NAMES.INBOX, SPECIAL_LIST_NAMES.MOBILE].includes(list.name)
+
+export const createdLists = createSelector(getSortedLists, (lists) =>
+    lists.filter((list) => !isSpecialList(list)),
+)
+export const specialLists = createSelector(getSortedLists, (lists) =>
+    lists.filter((list) => isSpecialList(list)),
+)
+
 export const getUrlsToEdit = createSelector(
     customLists,
     (state) => state.urlsToEdit,
 )
 
-export const results = createSelector(
-    getSortedLists,
+export const createdDisplayLists = createSelector(
+    createdLists,
     activeListIndex,
     selectors.listFilter,
-    (lists, listIndex, listFilter) => {
-        return lists.map((pageDoc, i) => ({
+    (lists, listIndex, listFilter) =>
+        lists.map((pageDoc, i) => ({
             ...pageDoc,
             isEditing: i === listIndex,
             isFilterIndex: Number(listFilter) === pageDoc.id,
+            isMobileList: false,
+        })),
+)
+
+export const specialDisplayLists = createSelector(
+    specialLists,
+    selectors.listFilter,
+    (lists, listFilter) =>
+        lists.map((pageDoc) => ({
+            ...pageDoc,
+            isFilterIndex: Number(listFilter) === pageDoc.id,
             isMobileList: pageDoc.name === SPECIAL_LIST_NAMES.MOBILE,
-        }))
-    },
+        })),
 )
 
 export const deleteConfirmProps = createSelector(

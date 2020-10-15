@@ -1,7 +1,9 @@
 @value colors: 'src/common-ui/colors.css';
 @value color1, color 2, color6, color4, color8, color14 from colors;
 
-:host { all: initial; }
+:host {
+    all: initial;
+}
 
 .hr {
     border-color: #b0e0d2;
@@ -14,14 +16,13 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    padding: 5px 10px 5px 15px;
-    margin-top: -31px;
-    margin-right: 30px;
+    padding: 5px 0;
+    margin-top: 26px;
 }
 
 .myCollection {
     font-size: 13px;
-    font-weight: 500;
+    font-weight: bold;
 }
 
 .myCollectionSidebar {
@@ -42,10 +43,11 @@
 .addNew {
     composes: nakedSquareButton from 'src/common-ui/elements.css';
     composes: color8 from 'src/common-ui/colors.css';
+    width: 100%;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    padding: 2px 8px 2px 4px;
-    margin-left: -10px;
+    padding: 2px 8px;
     height: 26px;
 }
 

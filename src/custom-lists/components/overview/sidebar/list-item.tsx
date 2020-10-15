@@ -16,8 +16,8 @@ const styles = require('./list-item.css')
 export interface Props extends AuthContextInterface {
     listName: string
     listId: number
-    isMobileList: boolean
-    isFiltered: boolean
+    isFiltered?: boolean
+    isMobileList?: boolean
     onShareButtonClick?: React.MouseEventHandler<HTMLButtonElement>
     onEditButtonClick: React.MouseEventHandler<HTMLButtonElement>
     onCrossButtonClick: React.MouseEventHandler<HTMLButtonElement>
