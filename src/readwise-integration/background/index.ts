@@ -268,11 +268,11 @@ function annotationToReadwise(
         title: annotation.pageTitle,
         source_url: options.fullPageUrl,
         source_type: 'article',
-        note: annotation.comment.length ? annotation.comment : undefined,
+        note: annotation.comment?.length ? annotation.comment : undefined,
         location_type: 'time_offset',
         highlighted_at: annotation.createdWhen,
         // highlight_url: annotation.url,
-        text: annotation.body,
+        text: annotation?.body.length ? annotation.body : 'Memex comment',
     }
 }
 

@@ -36,6 +36,17 @@ export const ANNOT_2: Annotation = {
     tags: [],
 }
 
+export const HIGHLIGHT_1 = (annotationUrl: string): ReadwiseHighlight => ({
+    text: ANNOT_1.body,
+    title: DATA.TEST_TAB_1.title,
+    source_url: DATA.PAGE_1.fullUrl,
+    source_type: 'article',
+    note: ANNOT_1.comment,
+    location_type: 'time_offset',
+    highlighted_at: ANNOT_1.createdWhen,
+    // highlight_url: annotationUrl,
+})
+
 export type UploadedReadwiseHighlight = Omit<
     ReadwiseHighlight,
     'highlighted_at'
@@ -44,12 +55,7 @@ export type UploadedReadwiseHighlight = Omit<
 export const UPLOADED_HIGHLIGHT_1 = (
     annotationUrl: string,
 ): UploadedReadwiseHighlight => ({
-    text: ANNOT_1.body,
-    title: DATA.TEST_TAB_1.title,
-    source_url: DATA.PAGE_1.fullUrl,
-    source_type: 'article',
-    note: ANNOT_1.comment,
-    location_type: 'time_offset',
+    ...HIGHLIGHT_1(annotationUrl),
     highlighted_at: ANNOT_1.createdWhen.toISOString(),
     // highlight_url: annotationUrl,
 })
