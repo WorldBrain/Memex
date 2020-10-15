@@ -20,6 +20,7 @@ import {
     remoteFunctionWithoutExtraArgs,
     registerRemoteFunctions,
 } from 'src/util/webextensionRPC'
+import Raven from 'raven-js'
 
 type ReadwiseInterfaceMethod<
     Method extends keyof ReadwiseInterface<'provider'>
@@ -144,14 +145,23 @@ export class ReadwiseBackground {
         await this.actionQueue.scheduleAction(
             {
                 type: 'post-highlights',
-                highlights: await Promise.all(
-                    annotations.map(async (annotation) => {
-                        const fullPageUrl = await options.getFullPageUrl(
-                            annotation.pageUrl,
-                        )
-                        return annotationToReadwise(annotation, { fullPageUrl })
-                    }),
-                ),
+                highlights: (
+                    await Promise.all(
+                        annotations.map(async (annotation) => {
+                            try {
+                                const fullPageUrl = await options.getFullPageUrl(
+                                    annotation.pageUrl,
+                                )
+                                return annotationToReadwise(annotation, {
+                                    fullPageUrl,
+                                })
+                            } catch (e) {
+                                Raven.captureException(e)
+                                return null
+                            }
+                        }),
+                    )
+                ).filter((highlight) => !!highlight),
             },
             { queueInteraction: options.queueInteraction },
         )
