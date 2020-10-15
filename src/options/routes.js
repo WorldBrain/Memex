@@ -31,7 +31,7 @@ export default [
         icon: 'settings',
     },
     {
-        name: 'Import',
+        name: 'Import & Integrations',
         pathname: '/import',
         component: ImportContainer,
         icon: 'import',
