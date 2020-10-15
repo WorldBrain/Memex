@@ -1,3 +1,4 @@
+import StorageManager from '@worldbrain/storex'
 import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
 import {
@@ -5,22 +6,21 @@ import {
     ActionValidator,
     ActionQueueInteraction,
 } from '@worldbrain/memex-common/lib/action-queue/types'
-import { ReadwiseResponse, ReadwiseAPI, ReadwiseHighlight } from './types/api'
+import { STORAGE_VERSIONS } from '@worldbrain/memex-common/lib/browser-extension/storage/versions'
+import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import * as Raven from 'src/util/raven'
+import { ReadwiseAPI, ReadwiseHighlight } from './types/api'
 import { ReadwiseSettings } from './types/settings'
 import { ReadwiseAction } from './types/actions'
 import { HTTPReadwiseAPI } from './readwise-api'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
-import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { Annotation } from 'src/annotations/types'
-import StorageManager from '@worldbrain/storex'
-import { STORAGE_VERSIONS } from '@worldbrain/memex-common/lib/browser-extension/storage/versions'
 import { READWISE_ACTION_RETRY_INTERVAL } from './constants'
 import { ReadwiseInterface } from './types/remote-interface'
 import {
     remoteFunctionWithoutExtraArgs,
     registerRemoteFunctions,
 } from 'src/util/webextensionRPC'
-import Raven from 'raven-js'
 
 type ReadwiseInterfaceMethod<
     Method extends keyof ReadwiseInterface<'provider'>
@@ -156,6 +156,7 @@ export class ReadwiseBackground {
                                     fullPageUrl,
                                 })
                             } catch (e) {
+                                console.error(e)
                                 Raven.captureException(e)
                                 return null
                             }
@@ -207,41 +208,51 @@ export class ReadwiseBackground {
             }
 
             if (change.type === 'create') {
-                const annotation = {
-                    url: change.pk as string,
-                    ...change.values,
-                } as Annotation
+                try {
+                    const annotation = {
+                        url: change.pk as string,
+                        ...change.values,
+                    } as Annotation
 
-                const fullPageUrl = await getFullPageUrl(annotation.pageUrl)
-                await this.actionQueue.scheduleAction(
-                    {
-                        type: 'post-highlights',
-                        highlights: [
-                            annotationToReadwise(annotation, {
-                                fullPageUrl: fullPageUrl,
-                            }),
-                        ],
-                    },
-                    { queueInteraction: 'queue-and-return' },
-                )
+                    const fullPageUrl = await getFullPageUrl(annotation.pageUrl)
+                    await this.actionQueue.scheduleAction(
+                        {
+                            type: 'post-highlights',
+                            highlights: [
+                                annotationToReadwise(annotation, {
+                                    fullPageUrl: fullPageUrl,
+                                }),
+                            ],
+                        },
+                        { queueInteraction: 'queue-and-return' },
+                    )
+                } catch (e) {
+                    console.error(e)
+                    Raven.captureException(e)
+                }
             } else if (change.type === 'modify') {
-                const annotations = await this.options.getAnnotationsByPks(
-                    change.pks as string[],
-                )
-                const highlights: ReadwiseHighlight[] = await Promise.all(
-                    annotations.map(async (annotation) => {
-                        const fullPageUrl = await getFullPageUrl(
-                            annotation.pageUrl,
-                        )
-                        return annotationToReadwise(annotation, {
-                            fullPageUrl: fullPageUrl,
-                        })
-                    }),
-                )
-                await this.actionQueue.scheduleAction(
-                    { type: 'post-highlights', highlights },
-                    { queueInteraction: 'queue-and-return' },
-                )
+                try {
+                    const annotations = await this.options.getAnnotationsByPks(
+                        change.pks as string[],
+                    )
+                    const highlights: ReadwiseHighlight[] = await Promise.all(
+                        annotations.map(async (annotation) => {
+                            const fullPageUrl = await getFullPageUrl(
+                                annotation.pageUrl,
+                            )
+                            return annotationToReadwise(annotation, {
+                                fullPageUrl: fullPageUrl,
+                            })
+                        }),
+                    )
+                    await this.actionQueue.scheduleAction(
+                        { type: 'post-highlights', highlights },
+                        { queueInteraction: 'queue-and-return' },
+                    )
+                } catch (e) {
+                    console.error(e)
+                    Raven.captureException(e)
+                }
             }
         }
     }
