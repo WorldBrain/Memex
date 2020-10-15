@@ -70,7 +70,7 @@ export default class ReadwiseSettings extends StatefulUIElement<
                         type="text"
                         placeholder="ReadWise API key"
                         disabled={selectors.apiKeyDisabled(this.state)}
-                        value={this.state.apiKey || ''}
+                        value={selectors.showKeySaving(this.state) ? ("Saving API key..."):(this.state.apiKey || '')} 
                         onChange={(e) =>
                             this.processEvent('setAPIKey', {
                                 key: e.target.value,
@@ -110,9 +110,6 @@ export default class ReadwiseSettings extends StatefulUIElement<
                         />{' '}
                         Sync existing higlights
                     </ExistingHighlightBox>
-                )}
-                {selectors.showKeySaving(this.state) && (
-                    <div>Saving API key...</div>
                 )}
             </div>
         )
