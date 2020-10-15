@@ -272,7 +272,7 @@ function annotationToReadwise(
         location_type: 'time_offset',
         highlighted_at: annotation.createdWhen,
         // highlight_url: annotation.url,
-        text: annotation?.body.length ? annotation.body : 'Memex comment',
+        text: annotation?.body?.length ? annotation.body : 'Memex comment',
     }
 }
 
