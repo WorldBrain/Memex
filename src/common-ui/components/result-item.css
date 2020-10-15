@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color4, color1, color2, color3, color5, color6 from colors;
+@value color4, color1, color2, color3, color5, color6, boxShadow from colors;
 
 :root {
     --height: 90px;
@@ -7,6 +7,14 @@
     --resultWidth: 800px;
     --vertical-spacing: 30px;
     --compact-scale: 0.6;
+}
+
+.resultBox {
+    display: flex;
+}
+
+.resultBoxItem {
+    width: 100%;
 }
 
 /* List entries shown as context around a search result */
@@ -25,20 +33,23 @@
 }
 
 .rootContainer {
-    border-top: 0.75px solid #e1e1e1;
+    border: 0.75px solid #e1e1e1;
+    border-radius: 5px;
     display: flex;
     flex-direction: row;
     position: relative;
     color: inherit;
     text-decoration: none;
     z-index: 0;
-    animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+    margin-bottom: 5px;
     background-color: white;
     height: fit-content;
     min-height: var(--height);
     width: 100%;
     max-width: 800px;
-    border-bottom: 0.75px solid #e1e1e1;
+    box-shadow: rgb(143 143 143 / 0.05) 0px 4px 6px 4px,
+        rgba(143, 143, 143, 0.05) 0px 2px 4px;
+    transition: background 120ms ease-in 0s;
 
     &:hover {
         cursor: pointer;
@@ -208,8 +219,17 @@
     padding: 15px 0px;
 }
 
+.removeCollectionItemBox {
+    display: flex;
+    align-items: flex-start;
+
+    & > div {
+        height: fit-content;
+    }
+}
+
 .infoContainerOverview {
-    padding: 20px 13px 20px;
+    padding: 15px 13px 15px;
 }
 
 .infoContainerScreenshot {
@@ -305,10 +325,11 @@
 .buttonsContainer {
     display: grid;
     flex-direction: row;
-    margin: 0 7px 3px;
     z-index: 0;
     grid-auto-flow: column;
     grid-gap: 3px;
+    padding: 10px;
+    margin: -10px -10px 0 0;
 }
 
 .detailsContainer {
@@ -340,6 +361,7 @@
     align-items: center;
     display: flex;
     background: none;
+    align-self: flex-start;
 
     &:hover {
         opacity: 1;

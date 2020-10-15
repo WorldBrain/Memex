@@ -21,12 +21,17 @@ import {
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 import { areTagsEquivalent } from 'src/tags/utils'
+import { FocusableComponent } from 'src/annotations/components/types'
 
 interface EditForm {
     isBookmarked: boolean
     isTagInputActive: boolean
     commentText: string
     tags: string[]
+}
+
+interface EditForms {
+    [annotationUrl: string]: EditForm
 }
 
 export interface SidebarContainerState {
@@ -55,14 +60,9 @@ export interface SidebarContainerState {
     hoverAnnotationUrl: string | null
 
     showCommentBox: boolean
-    commentBox: {
-        anchor: Anchor | null
-        form: EditForm
-    }
+    commentBox: EditForm
 
-    editForms: {
-        [annotationUrl: string]: EditForm
-    }
+    editForms: EditForms
 
     pageCount: number
     noResults: boolean
@@ -98,21 +98,14 @@ export type SidebarContainerEvents = UIEvent<{
     hide: null
 
     // Adding a new page comment
-    addNewPageComment: null
+    addNewPageComment: { comment?: string; tags?: string[] }
     setNewPageCommentAnchor: { anchor: Anchor }
-    changePageCommentText: { comment: string }
+    changeNewPageCommentText: { comment: string }
     changeEditCommentText: { annotationUrl: string; comment: string }
-    saveNewPageComment: {
-        anchor?: Anchor
-        commentText: string
-        isBookmarked: boolean
-        tags: string[]
-    }
+    saveNewPageComment: null
     cancelNewPageComment: null
-    toggleNewPageCommentBookmark: null
-    togglePageCommentTags: null
-    toggleNewPageCommentTagPicker: null
-    setNewPageCommentTagPicker: { active: boolean }
+    updateNewPageCommentTags: { tags: string[] }
+
     setEditCommentTagPicker: { annotationUrl: string; active: boolean }
 
     updateTagsForEdit: {
@@ -120,17 +113,8 @@ export type SidebarContainerEvents = UIEvent<{
         deleted?: string
         annotationUrl: string
     }
-    updateTagsForNewComment: { added?: string; deleted?: string }
     updateListsForPageResult: { added?: string; deleted?: string; url: string }
-    addNewPageCommentTag: { tag: string }
     deleteEditCommentTag: { tag: string; annotationUrl: string }
-    deleteNewPageCommentTag: { tag: string }
-
-    receiveNewAnnotation: {
-        annotationUrl: string
-        annotationData: IncomingAnnotationData
-        anchor?: Anchor
-    }
 
     receiveSharingAccessChange: {
         sharingAccess: AnnotationSharingAccess
@@ -216,24 +200,25 @@ export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
 }
 
+export type SidebarLogicOptions = SidebarContainerOptions & {
+    focusCreateForm: FocusableComponent['focus']
+}
+
 type EventHandler<
     EventName extends keyof SidebarContainerEvents
 > = UIEventHandler<SidebarContainerState, SidebarContainerEvents, EventName>
 
-export const INIT_FORM_STATE: SidebarContainerState['commentBox'] = {
-    anchor: null,
-    form: {
-        isBookmarked: false,
-        isTagInputActive: false,
-        commentText: '',
-        tags: [],
-    },
+export const INIT_FORM_STATE: EditForm = {
+    isBookmarked: false,
+    isTagInputActive: false,
+    commentText: '',
+    tags: [],
 }
 
 export const createEditFormsForAnnotations = (annots: Annotation[]) => {
     const state: { [annotationUrl: string]: EditForm } = {}
     for (const annot of annots) {
-        state[annot.url] = { ...INIT_FORM_STATE.form }
+        state[annot.url] = { ...INIT_FORM_STATE }
     }
     return state
 }
@@ -244,7 +229,7 @@ export class SidebarContainerLogic extends UILogic<
 > {
     private inPageEvents: AnnotationsSidebarInPageEventEmitter
 
-    constructor(private options: SidebarContainerOptions) {
+    constructor(private options: SidebarLogicOptions) {
         super()
 
         this.inPageEvents =
@@ -336,7 +321,14 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             annotations: { $set: annotations },
             editForms: {
-                $set: createEditFormsForAnnotations(annotations),
+                $apply: (editForms: EditForms) => {
+                    for (const { url } of annotations) {
+                        if (editForms[url] == null) {
+                            editForms[url] = { ...INIT_FORM_STATE }
+                        }
+                    }
+                    return editForms
+                },
             },
         })
         this._detectSharedAnnotations(
@@ -473,15 +465,37 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    addNewPageComment: EventHandler<'addNewPageComment'> = async () => {
-        this.emitMutation({ showCommentBox: { $set: true } })
+    addNewPageComment: EventHandler<'addNewPageComment'> = async ({
+        event,
+    }) => {
+        const mutation: UIMutation<SidebarContainerState> = {
+            showCommentBox: { $set: true },
+        }
+
+        if (event.comment?.length) {
+            mutation.commentBox = {
+                ...mutation.commentBox,
+                commentText: { $set: event.comment },
+            }
+        }
+
+        if (event.tags?.length) {
+            mutation.commentBox = {
+                ...mutation.commentBox,
+                tags: { $set: event.tags },
+            }
+        }
+
+        this.emitMutation(mutation)
+        this.options.focusCreateForm()
     }
 
+    // Unused since insta-saving new highlights
     setNewPageCommentAnchor: EventHandler<'setNewPageCommentAnchor'> = (
         incoming,
     ) => {
         this.emitMutation({
-            commentBox: { anchor: { $set: incoming.event.anchor } },
+            // commentBox: { anchor: { $set: incoming.event.anchor } },
         })
     }
 
@@ -494,42 +508,12 @@ export class SidebarContainerLogic extends UILogic<
             },
         })
     }
-    changePageCommentText: EventHandler<'changePageCommentText'> = ({
+
+    changeNewPageCommentText: EventHandler<'changeNewPageCommentText'> = ({
         event,
     }) => {
         this.emitMutation({
-            commentBox: {
-                form: { commentText: { $set: event.comment } },
-            },
-        })
-    }
-
-    receiveNewAnnotation: EventHandler<'receiveNewAnnotation'> = async ({
-        event: { annotationUrl, anchor, annotationData },
-    }) => {
-        const createdWhen = new Date()
-
-        const highlight: Annotation = {
-            url: annotationUrl,
-            isBookmarked: annotationData.isBookmarked,
-            comment: annotationData.commentText,
-            body: annotationData.highlightText,
-            pageUrl: this.options.pageUrl,
-            pageTitle: this.options.pageTitle,
-            tags: annotationData.tags ?? [],
-            lastEdited: createdWhen,
-            selector: anchor,
-            createdWhen,
-        }
-
-        this.emitMutation({
-            annotations: { $apply: (prev) => [highlight, ...prev] },
-            editForms: {
-                $apply: (prev) => ({
-                    [annotationUrl]: { ...INIT_FORM_STATE.form },
-                    ...prev,
-                }),
-            },
+            commentBox: { commentText: { $set: event.comment } },
         })
     }
 
@@ -541,30 +525,20 @@ export class SidebarContainerLogic extends UILogic<
 
     // TODO (sidebar-refactor) reconcile this duplicate code with ribbon notes save
     saveNewPageComment: EventHandler<'saveNewPageComment'> = async ({
-        event,
-        previousState,
+        previousState: { commentBox, pageUrl },
     }) => {
-        const comment = event.commentText.trim()
-        const body = event.anchor?.quote
-
-        if (comment.length === 0 && !body?.length) {
+        const comment = commentBox.commentText.trim()
+        if (comment.length === 0) {
             return
         }
 
-        const pageUrl = previousState.pageUrl
-        const url = generateUrl({
-            pageUrl,
-            now: () => Date.now(),
-        })
+        const annotationUrl = generateUrl({ pageUrl, now: () => Date.now() })
 
         this.options.annotationsCache.create({
-            url,
+            url: annotationUrl,
             pageUrl,
             comment,
-            body,
-            tags: event.tags,
-            isBookmarked: event.isBookmarked,
-            selector: event.anchor,
+            tags: commentBox.tags,
         })
 
         this.emitMutation({
@@ -574,24 +548,9 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
-        this.inPageEvents.emit('removeTemporaryHighlights')
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },
             showCommentBox: { $set: false },
-        })
-    }
-
-    toggleNewPageCommentBookmark: EventHandler<
-        'toggleNewPageCommentBookmark'
-    > = () => {
-        this.emitMutation({
-            commentBox: {
-                form: {
-                    isBookmarked: {
-                        $apply: (bookmarked) => !bookmarked,
-                    },
-                },
-            },
         })
     }
 
@@ -628,16 +587,6 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    updateTagsForNewComment: EventHandler<'updateTagsForNewComment'> = async ({
-        event,
-    }) => {
-        const tagsStateUpdater = this.createTagsStateUpdater(event)
-
-        this.emitMutation({
-            commentBox: { form: { tags: { $apply: tagsStateUpdater } } },
-        })
-    }
-
     updateListsForPageResult: EventHandler<
         'updateListsForPageResult'
     > = async ({ event }) => {
@@ -645,18 +594,6 @@ export class SidebarContainerLogic extends UILogic<
             added: event.added,
             deleted: event.deleted,
             url: event.url,
-        })
-    }
-
-    toggleNewPageCommentTagPicker: EventHandler<
-        'toggleNewPageCommentTagPicker'
-    > = () => {
-        this.emitMutation({
-            commentBox: {
-                form: {
-                    isTagInputActive: { $apply: (active) => !active },
-                },
-            },
         })
     }
 
@@ -672,30 +609,11 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    setNewPageCommentTagPicker: EventHandler<'setNewPageCommentTagPicker'> = ({
+    updateNewPageCommentTags: EventHandler<'updateNewPageCommentTags'> = ({
         event,
     }) => {
         this.emitMutation({
-            commentBox: {
-                form: {
-                    isTagInputActive: { $set: event.active },
-                },
-            },
-        })
-    }
-
-    addNewPageCommentTag: EventHandler<'addNewPageCommentTag'> = (incoming) => {
-        this.emitMutation({
-            commentBox: {
-                form: {
-                    tags: {
-                        $apply: (tags: string[]) => {
-                            const tag = incoming.event.tag
-                            return tags.includes(tag) ? tags : [...tags, tag]
-                        },
-                    },
-                },
-            },
+            commentBox: { tags: { $set: event.tags } },
         })
     }
 
@@ -718,20 +636,6 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             editForms: {
                 [event.annotationUrl]: {
-                    tags: {
-                        $apply: this.createTagStateDeleteUpdater(event),
-                    },
-                },
-            },
-        })
-    }
-
-    deleteNewPageCommentTag: EventHandler<'deleteNewPageCommentTag'> = ({
-        event,
-    }) => {
-        this.emitMutation({
-            commentBox: {
-                form: {
                     tags: {
                         $apply: this.createTagStateDeleteUpdater(event),
                     },
@@ -816,7 +720,7 @@ export class SidebarContainerLogic extends UILogic<
             },
             editForms: {
                 [event.annotationUrl]: {
-                    $set: { ...INIT_FORM_STATE.form },
+                    $set: { ...INIT_FORM_STATE },
                 },
             },
         })
@@ -881,41 +785,38 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        const previousForm = previousState.editForms[event.annotationUrl]
         const annotation = previousState.annotations.find(
             (annot) => annot.url === event.annotationUrl,
         )
 
-        this.emitMutation({
-            editForms: {
-                [event.annotationUrl]: {
-                    commentText: { $set: annotation.comment ?? '' },
-                    tags: { $set: annotation.tags ?? [] },
-                    isBookmarked: { $set: !!annotation.isBookmarked },
-                },
-            },
+        const mutation: UIMutation<SidebarContainerState> = {
             annotationModes: {
                 [event.context]: {
                     [event.annotationUrl]: { $set: 'edit' },
                 },
             },
-        })
+        }
+
+        // If there was existing form state, we want to keep that, else use the stored annot data or defaults
+        if (
+            !previousForm ||
+            (!previousForm?.commentText?.length && !previousForm?.tags?.length)
+        ) {
+            mutation.editForms = {
+                [event.annotationUrl]: {
+                    commentText: { $set: annotation.comment ?? '' },
+                    tags: { $set: annotation.tags ?? [] },
+                },
+            }
+        }
+
+        this.emitMutation(mutation)
     }
 
     switchAnnotationMode: EventHandler<'switchAnnotationMode'> = ({
         event,
     }) => {
-        let extraMutation: UIMutation<SidebarContainerState> = {}
-
-        if (event.mode === 'default') {
-            extraMutation = {
-                editForms: {
-                    [event.annotationUrl]: {
-                        $set: { ...INIT_FORM_STATE.form },
-                    },
-                },
-            }
-        }
-
         this.emitMutation({
             annotationModes: {
                 [event.context]: {
@@ -924,7 +825,6 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 },
             },
-            ...extraMutation,
         })
     }
 

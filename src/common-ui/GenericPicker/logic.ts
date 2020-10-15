@@ -1,6 +1,5 @@
 import { UILogic, UIEvent } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
-import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 
 import { KeyEvent, DisplayEntry, PickerUpdateHandler } from './types'
 
@@ -255,7 +254,7 @@ export default abstract class GenericPickerLogic extends UILogic<
         } else {
             let entry
             try {
-                entry = this._validateEntry(term)
+                entry = this.validateEntry(term)
             } catch (e) {
                 return
             }
@@ -354,7 +353,7 @@ export default abstract class GenericPickerLogic extends UILogic<
     }: GenericPickerUIEvent<'resultEntryPress'>) => {
         // TODO: present feedback to the user?
 
-        const name = this._validateEntry(entry.name)
+        const name = this.validateEntry(entry.name)
         this._processingUpstreamOperation = this.dependencies.actOnAllTabs(name)
 
         // Note `newEntryPres` is used below to ensure when validating that this entry pressed is not
@@ -367,7 +366,7 @@ export default abstract class GenericPickerLogic extends UILogic<
         event: { entry },
         previousState,
     }: GenericPickerUIEvent<'newEntryAllPress'>) => {
-        const name = this._validateEntry(entry)
+        const name = this.validateEntry(entry)
         await this.newEntryPress({ event: { entry: name }, previousState })
         this._processingUpstreamOperation = this.dependencies.actOnAllTabs(name)
     }
@@ -383,7 +382,7 @@ export default abstract class GenericPickerLogic extends UILogic<
         event: { entry },
         previousState,
     }: GenericPickerUIEvent<'newEntryPress'>) => {
-        entry = this._validateEntry(entry)
+        entry = this.validateEntry(entry)
 
         if (previousState.selectedEntries.includes(entry)) {
             return
@@ -400,16 +399,14 @@ export default abstract class GenericPickerLogic extends UILogic<
         })
     }
 
-    _validateEntry = (entry: string) => {
+    abstract validateEntry(entry: string): string
+
+    protected _validateEntry = (entry: string) => {
         entry = entry.trim()
 
         if (entry === '') {
             throw Error(
                 `${this.pickerName} Validation: Can't add entry with only whitespace`,
-            )
-        } else if (!VALID_TAG_PATTERN.test(entry)) {
-            throw Error(
-                `${this.pickerName} Validation: Can't add invalid entry`,
             )
         }
 

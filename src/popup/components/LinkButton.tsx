@@ -1,22 +1,30 @@
 import React, { PureComponent } from 'react'
 
 import OutLink from 'src/common-ui/containers/OutLink'
-import Button, { Props as BtnProps } from './Button'
+import Button from './Button'
 
 const styles = require('./Button.css')
+const LinkButtonStyles = require('src/popup/collections-button/components/CollectionsButton.css')
 
-export interface Props extends BtnProps {
-    href: string
+interface Props {
+    goToDashboard: () => void
 }
 
 class LinkButton extends PureComponent<Props> {
     render() {
-        const { href, ref, ...btnProps } = this.props
-
         return (
-            <OutLink className={styles.link} to={href} tabIndex="-1">
-                <Button {...btnProps} />
-            </OutLink>
+            <div className={LinkButtonStyles.buttonContainer}>
+                <Button
+                    onClick={this.props.goToDashboard}
+                    btnClass={styles.openIcon}
+                    itemClass={LinkButtonStyles.button}
+                >
+                    Go to Dashboard
+                    <p className={styles.subTitle}>
+                        or press 'Enter' in search box
+                    </p>
+                </Button>
+            </div>
         )
     }
 }

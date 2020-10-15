@@ -16,7 +16,6 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 
 interface State {
     shouldTruncate: boolean
-
 }
 
 class TextTruncated extends React.Component<Props, State> {
@@ -65,8 +64,10 @@ class TextTruncated extends React.Component<Props, State> {
 
                 {!this.props.isHighlight && (
                     <TextBox>
-                        <TextToBeDisplayed>{textToBeDisplayed}</TextToBeDisplayed>
-                        <IconStyled/>
+                        <TextToBeDisplayed>
+                            {textToBeDisplayed}
+                        </TextToBeDisplayed>
+                        <IconStyled />
                     </TextBox>
                 )}
                 <CommentTextBox>
@@ -103,7 +104,7 @@ const IconStyled = styled.button`
     mask-size: 16px;
 `
 
-const TextBox = styled.div`  
+const TextBox = styled.div`
     position: relative;
     min-height: 30px;
     display: flex;
@@ -113,18 +114,17 @@ const TextBox = styled.div`
         background-color: #e0e0e0;
         border-radius: 3px;
         cursor: pointer;
-        
+
         &:hover ${IconStyled} {
             display: flex;
-          }
-
+        }
     }
 `
-
 
 const TextToBeDisplayed = styled.span`
     box-decoration-break: clone;
     padding: 0 5px;
+    overflow: hidden;
 `
 
 const ToggleMoreButtonStyled = styled.div`

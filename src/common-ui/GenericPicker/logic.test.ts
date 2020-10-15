@@ -15,6 +15,8 @@ import {
 
 class TestPickerLogic extends GenericPickerLogic {
     pickerName = 'Test'
+
+    validateEntry = this._validateEntry
 }
 
 const TESTURL = 'http://test.com'
@@ -353,6 +355,26 @@ describe('GenericPickerLogic', () => {
         //         newEntryButton: false,
         //     }),
         // )
+    })
+
+    it('should correctly validate entries', async ({ device }) => {
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+            device,
+        })
+
+        expect(() => entryPickerLogic.validateEntry('test')).not.toThrowError()
+        expect(() =>
+            entryPickerLogic.validateEntry('test test'),
+        ).not.toThrowError()
+        expect(() =>
+            entryPickerLogic.validateEntry('test test $test %'),
+        ).not.toThrowError()
+        expect(() =>
+            entryPickerLogic.validateEntry('test test $test %🤣😁 😅😁'),
+        ).not.toThrowError()
+        expect(() => entryPickerLogic.validateEntry('   ')).toThrowError(
+            `Test Validation: Can't add entry with only whitespace`,
+        )
     })
 
     it('should correctly add entry ', async ({ device }) => {

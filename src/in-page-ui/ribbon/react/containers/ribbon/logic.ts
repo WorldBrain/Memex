@@ -7,6 +7,7 @@ import { loadInitial } from 'src/util/ui-logic'
 import { NewAnnotationOptions } from 'src/annotations/types'
 import { generateUrl } from 'src/annotations/utils'
 import { resolvablePromise } from 'src/util/resolvable'
+import { FocusableComponent } from 'src/annotations/components/types'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -69,6 +70,10 @@ export interface RibbonContainerOptions extends RibbonContainerDependencies {
     setRibbonShouldAutoHide: (value: boolean) => void
 }
 
+export interface RibbonLogicOptions extends RibbonContainerOptions {
+    focusCreateForm: FocusableComponent['focus']
+}
+
 type EventHandler<
     EventName extends keyof RibbonContainerEvents
 > = UIEventHandler<RibbonContainerState, RibbonContainerEvents, EventName>
@@ -77,9 +82,6 @@ export const INITIAL_RIBBON_COMMENT_BOX_STATE = {
     commentText: '',
     showCommentBox: false,
     isCommentSaved: false,
-    isCommentBookmarked: false,
-    isTagInputActive: false,
-    showTagsPicker: false,
     tags: [],
 }
 
@@ -96,7 +98,7 @@ export class RibbonContainerLogic extends UILogic<
 
     commentSavedTimeout = 2000
 
-    constructor(private dependencies: RibbonContainerOptions) {
+    constructor(private dependencies: RibbonLogicOptions) {
         super()
     }
 
@@ -290,36 +292,33 @@ export class RibbonContainerLogic extends UILogic<
                   }
                 : {}
 
-        return {
+        this.emitMutation({
             commentBox: { showCommentBox: { $set: event.value } },
             ...extra,
+        })
+
+        if (event.value) {
+            this.dependencies.focusCreateForm()
         }
     }
 
     saveComment: EventHandler<'saveComment'> = async ({
-        previousState,
-        event,
+        previousState: { pageUrl, commentBox },
     }) => {
-        const { annotationsCache } = this.dependencies
-        const comment = event.value.text.trim()
-        const { isBookmarked, tags } = event.value
+        const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
             return
         }
 
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
-        const annotationUrl = generateUrl({
-            pageUrl: previousState.pageUrl,
-            now: () => Date.now(),
-        })
+        const annotationUrl = generateUrl({ pageUrl, now: () => Date.now() })
 
-        await annotationsCache.create({
+        await this.dependencies.annotationsCache.create({
             url: annotationUrl,
-            pageUrl: previousState.pageUrl,
+            pageUrl,
             comment,
-            isBookmarked,
-            tags,
+            tags: commentBox.tags,
         })
 
         this.emitMutation({
@@ -338,11 +337,22 @@ export class RibbonContainerLogic extends UILogic<
         this.emitMutation({ commentBox: { isCommentSaved: { $set: false } } })
     }
 
-    cancelComment: EventHandler<'cancelComment'> = ({
+    cancelComment: EventHandler<'cancelComment'> = () => {
+        this.emitMutation({
+            commentBox: { $set: INITIAL_RIBBON_COMMENT_BOX_STATE },
+        })
+    }
+
+    changeComment: EventHandler<'changeComment'> = ({ event }) => {
+        this.emitMutation({
+            commentBox: { commentText: { $set: event.value } },
+        })
+    }
+
+    updateCommentBoxTags: EventHandler<'updateCommentBoxTags'> = ({
         event,
-        previousState,
     }) => {
-        return { commentBox: { showCommentBox: { $set: false } } }
+        this.emitMutation({ commentBox: { tags: { $set: event.value } } })
     }
 
     //

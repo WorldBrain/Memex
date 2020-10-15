@@ -1,3 +1,4 @@
+// tslint:disable:forin
 import mapValues from 'lodash/mapValues'
 
 import { SidebarContainerLogic, createEditFormsForAnnotations } from './logic'
@@ -21,9 +22,11 @@ function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
 const setupLogicHelper = async ({
     device,
     pageUrl = DATA.CURRENT_TAB_URL_1,
+    focusCreateForm = () => undefined,
 }: {
     device: UILogicTestDevice
     pageUrl?: string
+    focusCreateForm?: () => void
 }) => {
     const { backgroundModules } = device
 
@@ -50,6 +53,7 @@ const setupLogicHelper = async ({
         annotationsCache,
         initialState: 'hidden',
         searchResultLimit: 10,
+        focusCreateForm,
     })
 
     const sidebar = device.createElement(sidebarLogic)
@@ -81,10 +85,9 @@ describe('SidebarContainerLogic', () => {
             const annotation = sidebar.state.annotations[0]
             expect(annotation.comment).toEqual(DATA.ANNOT_1.comment)
 
-            await sidebar.processEvent('switchAnnotationMode', {
+            await sidebar.processEvent('setAnnotationEditMode', {
                 context,
                 annotationUrl: DATA.ANNOT_1.url,
-                mode: 'edit',
             })
             expect(
                 sidebar.state.annotationModes[context][DATA.ANNOT_1.url],
@@ -124,10 +127,9 @@ describe('SidebarContainerLogic', () => {
             const annotation = sidebar.state.annotations[0]
             expect(annotation.comment).toEqual(DATA.ANNOT_1.comment)
 
-            await sidebar.processEvent('switchAnnotationMode', {
+            await sidebar.processEvent('setAnnotationEditMode', {
                 context,
                 annotationUrl: DATA.ANNOT_1.url,
-                mode: 'edit',
             })
             expect(
                 sidebar.state.annotationModes[context][DATA.ANNOT_1.url],
@@ -160,6 +162,62 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.annotations[0].lastEdited).not.toEqual(
                 annotation.lastEdited,
             )
+        })
+
+        it('should be able to interrupt an edit, preserving comment and tag inputs', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({ device })
+            const editedComment = DATA.ANNOT_1.comment + ' new stuff'
+
+            sidebar.processMutation({
+                annotations: { $set: [DATA.ANNOT_1] },
+                editForms: {
+                    $set: createEditFormsForAnnotations([DATA.ANNOT_1]),
+                },
+            })
+
+            const annotation = sidebar.state.annotations[0]
+            expect(annotation.comment).toEqual(DATA.ANNOT_1.comment)
+
+            await sidebar.processEvent('setAnnotationEditMode', {
+                context,
+                annotationUrl: DATA.ANNOT_1.url,
+            })
+            expect(
+                sidebar.state.annotationModes[context][DATA.ANNOT_1.url],
+            ).toEqual('edit')
+
+            await sidebar.processEvent('changeEditCommentText', {
+                annotationUrl: DATA.ANNOT_1.url,
+                comment: editedComment,
+            })
+            await sidebar.processEvent('updateTagsForEdit', {
+                annotationUrl: DATA.ANNOT_1.url,
+                added: DATA.TAG_1,
+            })
+            await sidebar.processEvent('updateTagsForEdit', {
+                annotationUrl: DATA.ANNOT_1.url,
+                added: DATA.TAG_2,
+            })
+
+            expect(sidebar.state.editForms[annotation.url]).toEqual({
+                tags: [DATA.TAG_1, DATA.TAG_2],
+                commentText: editedComment,
+                isTagInputActive: false,
+                isBookmarked: false,
+            })
+            await sidebar.processEvent('switchAnnotationMode', {
+                context,
+                annotationUrl: DATA.ANNOT_1.url,
+                mode: 'default',
+            })
+            expect(sidebar.state.editForms[annotation.url]).toEqual({
+                tags: [DATA.TAG_1, DATA.TAG_2],
+                commentText: editedComment,
+                isTagInputActive: false,
+                isBookmarked: false,
+            })
         })
 
         it('should be able to delete an annotation', async ({ device }) => {
@@ -238,58 +296,26 @@ describe('SidebarContainerLogic', () => {
         }) => {
             const { sidebar } = await setupLogicHelper({ device })
 
-            expect(sidebar.state.showCommentBox).toBe(false)
-            await sidebar.processEvent('addNewPageComment', null)
-            expect(sidebar.state.showCommentBox).toBe(true)
-
-            expect(sidebar.state.commentBox.form.commentText).toEqual('')
-            await sidebar.processEvent('changePageCommentText', {
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+            await sidebar.processEvent('changeNewPageCommentText', {
                 comment: DATA.COMMENT_1,
             })
-            expect(sidebar.state.commentBox.form.commentText).toEqual(
-                DATA.COMMENT_1,
-            )
+            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
 
             await sidebar.processEvent('cancelNewPageComment', null)
-            expect(sidebar.state.commentBox.form.commentText).toEqual('')
-            expect(sidebar.state.showCommentBox).toBe(false)
-        })
-
-        it('should be able to open tag picker when writing a new comment', async ({
-            device,
-        }) => {
-            const { sidebar } = await setupLogicHelper({ device })
-
-            expect(sidebar.state.showCommentBox).toBe(false)
-            await sidebar.processEvent('addNewPageComment', null)
-            expect(sidebar.state.showCommentBox).toBe(true)
-
-            expect(sidebar.state.commentBox.form.isTagInputActive).toBe(false)
-            await sidebar.processEvent('toggleNewPageCommentTagPicker', null)
-            expect(sidebar.state.commentBox.form.isTagInputActive).toBe(true)
+            expect(sidebar.state.commentBox.commentText).toEqual('')
         })
 
         it('should be able to save a new comment', async ({ device }) => {
             const { sidebar } = await setupLogicHelper({ device })
 
-            expect(sidebar.state.showCommentBox).toBe(false)
-            await sidebar.processEvent('addNewPageComment', null)
-            expect(sidebar.state.showCommentBox).toBe(true)
-
-            expect(sidebar.state.commentBox.form.commentText).toEqual('')
-            await sidebar.processEvent('changePageCommentText', {
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+            await sidebar.processEvent('changeNewPageCommentText', {
                 comment: DATA.COMMENT_1,
             })
-            expect(sidebar.state.commentBox.form.commentText).toEqual(
-                DATA.COMMENT_1,
-            )
+            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
 
-            await sidebar.processEvent('saveNewPageComment', {
-                commentText: DATA.COMMENT_1,
-                tags: [],
-                isBookmarked: false,
-                anchor: {} as any,
-            })
+            await sidebar.processEvent('saveNewPageComment', null)
             expect(sidebar.state.annotations.length).toBe(1)
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining({
@@ -297,46 +323,7 @@ describe('SidebarContainerLogic', () => {
                     tags: [],
                 }),
             ])
-            expect(sidebar.state.commentBox.form.commentText).toEqual('')
-            expect(sidebar.state.showCommentBox).toBe(false)
-        })
-
-        it('should be able to save a new comment with a bookmark', async ({
-            device,
-        }) => {
-            const { sidebar } = await setupLogicHelper({ device })
-
-            expect(sidebar.state.showCommentBox).toBe(false)
-            await sidebar.processEvent('addNewPageComment', null)
-            expect(sidebar.state.showCommentBox).toBe(true)
-
-            expect(sidebar.state.commentBox.form.commentText).toEqual('')
-            await sidebar.processEvent('changePageCommentText', {
-                comment: DATA.COMMENT_1,
-            })
-            expect(sidebar.state.commentBox.form.commentText).toEqual(
-                DATA.COMMENT_1,
-            )
-
-            expect(sidebar.state.commentBox.form.isBookmarked).toBe(false)
-            await sidebar.processEvent('toggleNewPageCommentBookmark', null)
-            expect(sidebar.state.commentBox.form.isBookmarked).toBe(true)
-
-            await sidebar.processEvent('saveNewPageComment', {
-                commentText: DATA.COMMENT_1,
-                tags: [],
-                isBookmarked: true,
-                anchor: {} as any,
-            })
-            expect(sidebar.state.annotations).toEqual([
-                expect.objectContaining({
-                    comment: DATA.COMMENT_1,
-                    tags: [],
-                }),
-            ])
-            expect(sidebar.state.commentBox.form.isBookmarked).toBe(false)
-            expect(sidebar.state.commentBox.form.commentText).toEqual('')
-            expect(sidebar.state.showCommentBox).toBe(false)
+            expect(sidebar.state.commentBox.commentText).toEqual('')
         })
 
         it('should be able to save a new comment with tags', async ({
@@ -344,51 +331,96 @@ describe('SidebarContainerLogic', () => {
         }) => {
             const { sidebar } = await setupLogicHelper({ device })
 
-            expect(sidebar.state.showCommentBox).toBe(false)
-            await sidebar.processEvent('addNewPageComment', null)
-            expect(sidebar.state.showCommentBox).toBe(true)
-
-            expect(sidebar.state.commentBox.form.commentText).toEqual('')
-            await sidebar.processEvent('changePageCommentText', {
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+            await sidebar.processEvent('changeNewPageCommentText', {
                 comment: DATA.COMMENT_1,
             })
-            expect(sidebar.state.commentBox.form.commentText).toEqual(
-                DATA.COMMENT_1,
-            )
+            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
 
-            expect(sidebar.state.commentBox.form.tags).toEqual([])
-            await sidebar.processEvent('addNewPageCommentTag', {
-                tag: DATA.TAG_1,
+            expect(sidebar.state.commentBox.tags).toEqual([])
+            await sidebar.processEvent('updateNewPageCommentTags', {
+                tags: [DATA.TAG_1, DATA.TAG_2],
             })
-            expect(sidebar.state.commentBox.form.tags).toEqual([DATA.TAG_1])
-            await sidebar.processEvent('addNewPageCommentTag', {
-                tag: DATA.TAG_2,
-            })
-            expect(sidebar.state.commentBox.form.tags).toEqual([
+            expect(sidebar.state.commentBox.tags).toEqual([
                 DATA.TAG_1,
                 DATA.TAG_2,
             ])
-            await sidebar.processEvent('deleteNewPageCommentTag', {
-                tag: DATA.TAG_2,
+            await sidebar.processEvent('updateNewPageCommentTags', {
+                tags: [DATA.TAG_2],
             })
-            expect(sidebar.state.commentBox.form.tags).toEqual([DATA.TAG_1])
+            expect(sidebar.state.commentBox.tags).toEqual([DATA.TAG_2])
 
-            await sidebar.processEvent('saveNewPageComment', {
-                commentText: DATA.COMMENT_1,
-                tags: [DATA.TAG_1],
-                isBookmarked: false,
-                anchor: {} as any,
-            })
+            await sidebar.processEvent('saveNewPageComment', null)
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining({
                     comment: DATA.COMMENT_1,
-                    tags: [DATA.TAG_1],
+                    tags: [DATA.TAG_2],
                 }),
             ])
-            expect(sidebar.state.commentBox.form.tags).toEqual([])
-            expect(sidebar.state.commentBox.form.isBookmarked).toBe(false)
-            expect(sidebar.state.commentBox.form.commentText).toEqual('')
+            expect(sidebar.state.commentBox.tags).toEqual([])
+            expect(sidebar.state.commentBox.isBookmarked).toBe(false)
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+        })
+
+        it('should be able to hydrate new comment box with state', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({ device })
+
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+            expect(sidebar.state.commentBox.tags).toEqual([])
             expect(sidebar.state.showCommentBox).toBe(false)
+
+            await sidebar.processEvent('addNewPageComment', {
+                comment: DATA.COMMENT_1,
+            })
+            expect(sidebar.state.showCommentBox).toBe(true)
+            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
+            expect(sidebar.state.commentBox.tags).toEqual([])
+
+            await sidebar.processEvent('cancelNewPageComment', null)
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+            expect(sidebar.state.commentBox.tags).toEqual([])
+            expect(sidebar.state.showCommentBox).toBe(false)
+
+            await sidebar.processEvent('addNewPageComment', {
+                tags: [DATA.TAG_1, DATA.TAG_2],
+            })
+            expect(sidebar.state.showCommentBox).toBe(true)
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+            expect(sidebar.state.commentBox.tags).toEqual([
+                DATA.TAG_1,
+                DATA.TAG_2,
+            ])
+
+            await sidebar.processEvent('cancelNewPageComment', null)
+
+            await sidebar.processEvent('addNewPageComment', {
+                comment: DATA.COMMENT_1,
+                tags: [DATA.TAG_1, DATA.TAG_2],
+            })
+            expect(sidebar.state.showCommentBox).toBe(true)
+            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
+            expect(sidebar.state.commentBox.tags).toEqual([
+                DATA.TAG_1,
+                DATA.TAG_2,
+            ])
+        })
+
+        it('should be able to set focus on comment box', async ({ device }) => {
+            let isCreateFormFocused = false
+            const { sidebar } = await setupLogicHelper({
+                device,
+                focusCreateForm: () => {
+                    isCreateFormFocused = true
+                },
+            })
+
+            expect(isCreateFormFocused).toBe(false)
+            await sidebar.processEvent('addNewPageComment', {
+                comment: DATA.COMMENT_1,
+            })
+            expect(isCreateFormFocused).toBe(true)
         })
     })
 

@@ -124,10 +124,6 @@ export default class TagsBackground {
         tag: string
         url: string
     }) => {
-        this.options.analytics.trackEvent({
-            category: 'Tags',
-            action: 'createForPageViaOverview',
-        })
         await this._updateTagSuggestionsCache({ added: tag })
         return this.storage.addTag({ name: tag, url })
     }
@@ -196,6 +192,10 @@ export default class TagsBackground {
             },
             { addInboxEntryOnCreate: true },
         )
+        this.options.analytics.trackEvent({
+            category: 'Tags',
+            action: 'createTagForPage',
+        })
 
         await this.storage.addTag({ url, name: tag }).catch(initErrHandler())
         await this._updateTagSuggestionsCache({ added: tag })

@@ -25,11 +25,6 @@ import {
     acts as collectionActs,
     CollectionsButton,
 } from './collections-button'
-import {
-    selectors as blacklist,
-    BlacklistButton,
-    BlacklistConfirm,
-} from './blacklist-button'
 import { BookmarkButton } from './bookmark-button'
 import * as selectors from './selectors'
 import * as acts from './actions'
@@ -48,7 +43,6 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 export interface OwnProps {}
 
 interface StateProps {
-    blacklistConfirm: boolean
     showTagsPicker: boolean
     showCollectionsPicker: boolean
     tabId: number
@@ -163,10 +157,6 @@ class PopupContainer extends PureComponent<Props> {
         collections.fetchPageLists({ url: this.props.url })
 
     renderChildren() {
-        if (this.props.blacklistConfirm) {
-            return <BlacklistConfirm />
-        }
-
         if (this.props.showTagsPicker) {
             return (
                 <TagPicker
@@ -212,16 +202,10 @@ class PopupContainer extends PureComponent<Props> {
                         onSearchChange={this.props.handleSearchChange}
                         onSearchEnter={this.onSearchEnter}
                     />
-                    <ButtonTooltip
-                        tooltipText="Go to Dashboard"
-                        position="leftBig"
-                    >
-                        <DashboardButtonBox onClick={this.onSearchClick}>
-                            <LinkButtonBox src={icons.goTo} />
-                        </DashboardButtonBox>
-                    </ButtonTooltip>
                 </BottomBarBox>
-
+                <div className={styles.item}>
+                    <LinkButton goToDashboard={this.onSearchClick} />
+                </div>
                 <div className={styles.item}>
                     <TagsButton />
                 </div>
@@ -249,16 +233,19 @@ class PopupContainer extends PureComponent<Props> {
                         🐞 Feedback
                     </a>
                     <div className={styles.buttonBox}>
-                        <ButtonIcon
-                            href={`${constants.OPTIONS_URL}#/settings`}
-                            icon="settings"
-                            className={btnStyles.settingsIcon}
-                            btnClass={btnStyles.settings}
+                        <div
+                            onClick={() =>
+                                window.open(
+                                    `${constants.OPTIONS_URL}#/settings`,
+                                )
+                            }
+                            className={btnStyles.settings}
                         />
-                        <ButtonIcon
-                            href="https://worldbrain.io/help"
-                            icon="help"
-                            btnClass={btnStyles.help}
+                        <div
+                            onClick={() =>
+                                window.open('https://worldbrain.io/help')
+                            }
+                            className={btnStyles.help}
                         />
                         {/*<NotifButton />*/}
                     </div>
@@ -292,7 +279,6 @@ const BottomBarBox = styled.div`
     justify-content: space-between;
     align-items: center;
     height: 45px;
-    padding: 0px 5px 0 0;
 
     & > div {
         width: 45px;
@@ -308,7 +294,6 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     tabId: selectors.tabId(state),
     url: selectors.url(state),
     searchValue: selectors.searchValue(state),
-    blacklistConfirm: blacklist.showDeleteConfirm(state),
     showCollectionsPicker: collectionsSelectors.showCollectionsPicker(state),
     showTagsPicker: tagsSelectors.showTagsPicker(state),
 })

@@ -13,6 +13,7 @@ import {
     PageListEntry,
 } from './types'
 import { maybeIndexTabs } from 'src/page-indexing/utils'
+import { Analytics } from 'src/analytics/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from 'src/tags/utils'
 import { PageIndexingBackground } from 'src/page-indexing/background'
@@ -33,6 +34,7 @@ export default class CustomListBackground {
             searchIndex: SearchIndex
             pages: PageIndexingBackground
             tabManagement: TabManagementBackground
+            analytics: Analytics
             queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
             localBrowserStorage: Storage.LocalStorageArea
@@ -270,6 +272,11 @@ export default class CustomListBackground {
             listId: id,
             pageUrl: normalizeUrl(url),
             fullUrl: url,
+        })
+
+        this.options.analytics.trackEvent({
+            category: 'Collections',
+            action: 'addPageToList',
         })
 
         const list = await this.fetchListById({ id })

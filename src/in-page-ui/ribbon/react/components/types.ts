@@ -36,12 +36,11 @@ export interface RibbonCommentBoxProps
     commentText: string
     showCommentBox: boolean
     isCommentSaved: boolean
-    isCommentBookmarked: boolean
-    isTagInputActive: boolean
-    showTagsPicker: boolean
-    saveComment: (annotation: NewAnnotationOptions) => void
+    saveComment: () => Promise<void>
     cancelComment: () => void
     setShowCommentBox: (value: boolean) => void
+    updateCommentBoxTags: (tags: string[]) => void
+    changeComment: (text: string) => void
 }
 
 export interface RibbonBookmarkProps {

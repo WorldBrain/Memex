@@ -1,174 +1,117 @@
 import * as React from 'react'
 import styled from 'styled-components'
+import onClickOutside from 'react-onclickoutside'
 
-import { Anchor } from 'src/highlighting/types'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
-import TextHighlighted from 'src/annotations/components/parts/TextHighlighted'
-import { NewAnnotationOptions } from 'src/annotations/types'
-import {
-    heartEmpty,
-    heartFull,
-} from 'src/common-ui/components/design-library/icons'
-import onClickOutside from 'react-onclickoutside'
 import TagInput from 'src/tags/ui/tag-input'
+import { FocusableComponent } from './types'
 
-interface AnnotationCreateState {
+interface State {
     isTagPickerShown: boolean
-    isBookmarked: boolean
-    text: string
-    tags: string[]
 }
 
 export interface AnnotationCreateEventProps {
-    onSave: (newAnnotation: NewAnnotationOptions) => void
+    onSave: () => Promise<void>
     onCancel: () => void
+    onTagsUpdate: (tags: string[]) => void
+    onCommentChange: (text: string) => void
 }
 
 export interface AnnotationCreateGeneralProps {
-    anchor?: Anchor
-    handleClickOutside?: () => void
+    hide?: () => void
+    comment: string
+    tags: string[]
 }
 
-export interface AnnotationCreateProps
+export interface Props
     extends AnnotationCreateGeneralProps,
         AnnotationCreateEventProps {
     tagPickerDependencies: GenericPickerDependenciesMinusSave
 }
 
-class AnnotationCreate extends React.Component<
-    AnnotationCreateProps,
-    AnnotationCreateState
-> {
-    state = {
-        isBookmarked: false,
-        isTagPickerShown: false,
-        text: '',
-        tags: [],
+export class AnnotationCreate extends React.Component<Props, State>
+    implements FocusableComponent {
+    private textAreaRef = React.createRef<HTMLTextAreaElement>()
+    state = { isTagPickerShown: false }
+
+    focus() {
+        const inputLen = this.props.comment.length
+        this.textAreaRef.current.focus()
+        this.textAreaRef.current.setSelectionRange(inputLen, inputLen)
     }
 
     handleClickOutside() {
-        if (this.props.handleClickOutside) {
-            this.props?.handleClickOutside()
+        if (this.props.hide && !this.props.comment.length) {
+            this.props.hide()
         }
     }
 
-    private handleCancel = () => {
-        this.setState({
-            text: '',
-            isBookmarked: false,
-            tags: [],
-            isTagPickerShown: false,
-        })
-    }
-
-    private handleSave = () => {
-        this.props.onSave({
-            anchor: this.props.anchor,
-            isBookmarked: this.state.isBookmarked,
-            tags: this.state.tags,
-            text: this.state.text,
-        })
-        this.setState({
-            text: '',
-            isBookmarked: false,
-            tags: [],
-            isTagPickerShown: false,
-        })
-    }
-
+    private handleCancel = () => this.props.onCancel()
+    private handleSave = () => this.props.onSave()
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
 
-    private renderHighlight() {
-        if (!this.props.anchor) {
+    private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
+        // Allow escape keydown to bubble up to close the sidebar only if no input state
+        if (e.key === 'Escape') {
+            if (this.props.comment.length) {
+                e.stopPropagation()
+            }
+            this.props.onCancel()
             return
         }
 
-        return (
-            <TextHighlighted
-                anchor={this.props.anchor}
-                truncateHighlight={false}
-                setTruncateHighlight={() => {}}
-            />
-        )
+        // If we don't have this, events will bubble up into the page!
+        e.stopPropagation()
+
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            this.handleSave()
+            return
+        }
     }
 
     private renderInput() {
-        const onEnterSaveHandler = {
-            test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-            handle: (e) => this.handleSave(),
-        }
-
         return (
             <StyledTextArea
-                autoFocus
-                value={this.state.text}
+                ref={this.textAreaRef}
+                value={this.props.comment}
                 onClick={this.hideTagPicker}
+                onKeyDown={this.handleInputKeyDown}
+                onChange={(e) => this.props.onCommentChange(e.target.value)}
                 placeholder="Add private note (save with cmd/ctrl+enter)"
-                onChange={(e) => this.setState({ text: e.target.value })}
-                onKeyDown={(e) => {
-                    e.stopPropagation()
-                    if (onEnterSaveHandler.test(e)) {
-                        onEnterSaveHandler.handle(e)
-                    }
-                }}
             />
         )
     }
 
     private renderTagPicker() {
         const { tagPickerDependencies } = this.props
-        const { isTagPickerShown } = this.state
 
         return (
             <TagInput
                 queryTagSuggestions={tagPickerDependencies.queryEntries}
-                updateTags={async ({ selected: tags }) =>
-                    this.setState({ tags })
+                updateTags={async ({ selected }) =>
+                    this.props.onTagsUpdate(selected)
                 }
-                isTagInputActive={isTagPickerShown}
-                setTagInputActive={(isShown) =>
-                    this.setState({ isTagPickerShown: isShown })
+                isTagInputActive={this.state.isTagPickerShown}
+                setTagInputActive={(isTagPickerShown) =>
+                    this.setState({ isTagPickerShown })
                 }
-                tags={this.state.tags}
+                tags={this.props.tags}
                 fetchInitialTagSuggestions={
                     tagPickerDependencies.loadDefaultSuggestions
                 }
-                deleteTag={async (tag) =>
-                    this.setState({
-                        tags: this.state.tags.filter((_tag) => _tag !== tag),
-                    })
+                deleteTag={(tag) =>
+                    this.props.onTagsUpdate(
+                        this.props.tags.filter((_tag) => _tag !== tag),
+                    )
                 }
             />
         )
     }
 
     private renderActionButtons() {
-        const { onCancel } = this.props
-
         return (
             <FooterStyled>
-                {/*<InteractionItemsBox>
-                    <ButtonTooltip tooltipText="Favorite" position="bottom">
-                        <InteractionsImgContainerStyled
-                            onClick={() =>
-                                this.setState((state) => ({
-                                    isBookmarked: !state.isBookmarked,
-                                }))
-                            }
-                        >
-                            <ImgButtonStyled
-                                src={
-                                    this.state.isBookmarked
-                                        ? heartFull
-                                        : heartEmpty
-                                }
-                            />
-                        </InteractionsImgContainerStyled>
-                    </ButtonTooltip>
-                </InteractionItemsBox>
-                */}
-
                 <Flex>
                     <ButtonTooltip
                         tooltipText="ctrl/cmd + Enter"
@@ -189,9 +132,8 @@ class AnnotationCreate extends React.Component<
     render() {
         return (
             <TextBoxContainerStyled>
-                {this.renderHighlight()}
                 {this.renderInput()}
-                {this.state.text !== '' && (
+                {this.props.comment !== '' && (
                     <>
                         {this.renderTagPicker()}
                         {this.renderActionButtons()}

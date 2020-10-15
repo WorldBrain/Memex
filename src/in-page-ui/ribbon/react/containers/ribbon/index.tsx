@@ -13,8 +13,6 @@ import { AnnotationsSidebarProps } from 'src/sidebar/annotations-sidebar/compone
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
     isSidebarOpen: boolean
-    openSidebar: () => void
-    closeSidebar: () => void
     setRef?: (el: HTMLElement) => void
 }
 
@@ -23,8 +21,17 @@ export default class RibbonContainer extends StatefulUIElement<
     RibbonContainerState,
     RibbonContainerEvents
 > {
+    private ribbonRef = React.createRef<Ribbon>()
+
     constructor(props) {
-        super(props, new RibbonContainerLogic(props))
+        super(
+            props,
+            new RibbonContainerLogic({
+                ...props,
+                focusCreateForm: () =>
+                    this.ribbonRef?.current?.focusCreateForm(),
+            }),
+        )
     }
 
     componentDidMount() {
@@ -48,13 +55,18 @@ export default class RibbonContainer extends StatefulUIElement<
         }
     }
 
-    protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
-        return {
-            anchor: null,
-            onCancel: () => this.processEvent('cancelComment', null),
-            onSave: (annotation) =>
-                this.processEvent('saveComment', { value: annotation }),
+    private handleSidebarOpen = () => {
+        if (this.state.commentBox.showCommentBox) {
+            this.processEvent('cancelComment', null)
         }
+
+        this.props.inPageUI.showSidebar({
+            action: 'comment',
+            annotationData: {
+                commentText: this.state.commentBox.commentText,
+                tags: this.state.commentBox.tags,
+            },
+        })
     }
 
     protected getTagProps(): AnnotationsSidebarProps['annotationTagProps'] {
@@ -82,6 +94,7 @@ export default class RibbonContainer extends StatefulUIElement<
     render() {
         return (
             <Ribbon
+                ref={this.ribbonRef}
                 setRef={this.props.setRef}
                 toggleShowExtraButtons={() => {
                     this.processEvent('toggleShowExtraButtons', null)
@@ -112,19 +125,20 @@ export default class RibbonContainer extends StatefulUIElement<
                     isSidebarOpen: this.props.isSidebarOpen,
                     setShowSidebarCommentBox: () =>
                         this.props.inPageUI.showSidebar({ action: 'comment' }),
-                    openSidebar: () => {
-                        this.props.openSidebar()
-                    },
-                    closeSidebar: this.props.closeSidebar,
+                    openSidebar: this.handleSidebarOpen,
+                    closeSidebar: () => this.props.inPageUI.hideSidebar(),
                 }}
                 commentBox={{
                     ...this.state.commentBox,
-                    saveComment: (value) =>
-                        this.processEvent('saveComment', { value }),
+                    saveComment: () => this.processEvent('saveComment', null),
                     cancelComment: () =>
                         this.processEvent('cancelComment', null),
                     setShowCommentBox: (value) =>
                         this.processEvent('setShowCommentBox', { value }),
+                    changeComment: (value) =>
+                        this.processEvent('changeComment', { value }),
+                    updateCommentBoxTags: (value) =>
+                        this.processEvent('updateCommentBoxTags', { value }),
                 }}
                 bookmark={{
                     ...this.state.bookmark,

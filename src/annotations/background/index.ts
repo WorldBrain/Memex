@@ -36,6 +36,7 @@ import { TagsSettings } from 'src/tags/background/types'
 import { limitSuggestionsStorageLength } from 'src/tags/background'
 import { generateUrl } from 'src/annotations/utils'
 import { PageIndexingBackground } from 'src/page-indexing/background'
+import { Analytics } from 'src/analytics/types'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -58,6 +59,7 @@ export default class DirectLinkingBackground {
             pages: PageIndexingBackground
             socialBg: SocialBG
             normalizeUrl?: URLNormalizer
+            analytics: Analytics
         },
     ) {
         this.socialBg = options.socialBg
@@ -342,9 +344,14 @@ export default class DirectLinkingBackground {
         toCreate: CreateAnnotationParams,
         { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
-        const fullPageUrl = tab?.url ?? toCreate.pageUrl
+        let fullPageUrl = tab?.url ?? toCreate.pageUrl
         if (!isFullUrl(fullPageUrl)) {
-            throw new Error('Could not get full URL while creating annotation')
+            fullPageUrl = toCreate.pageUrl
+            if (!isFullUrl(fullPageUrl)) {
+                throw new Error(
+                    'Could not get full URL while creating annotation',
+                )
+            }
         }
 
         let normalizedPageUrl = this._normalizeUrl(fullPageUrl)
@@ -381,11 +388,29 @@ export default class DirectLinkingBackground {
             await this.toggleAnnotBookmark({ tab }, { url: annotationUrl })
         }
 
+        if (toCreate.comment && !toCreate.body) {
+            this.options.analytics.trackEvent({
+                category: 'Notes',
+                action: 'createNoteGlobally',
+            })
+        }
+
+        if (!toCreate.comment && toCreate.body) {
+            this.options.analytics.trackEvent({
+                category: 'Highlights',
+                action: 'createHighlightGlobally',
+            })
+        }
+
         return annotationUrl
     }
 
     async insertAnnotToList(_, params: AnnotListEntry) {
         return this.annotationStorage.insertAnnotToList(params)
+    }
+
+    async getAnnotationByPk(pk) {
+        return this.annotationStorage.getAnnotationByPk(pk)
     }
 
     async removeAnnotFromList(_, params: AnnotListEntry) {
@@ -413,6 +438,14 @@ export default class DirectLinkingBackground {
             pk = await this.lookupSocialId(pk)
         }
 
+        const existingAnnotation = await this.getAnnotationByPk(pk)
+
+        if (!existingAnnotation?.comment?.length) {
+            this.options.analytics.trackEvent({
+                category: 'Annotations',
+                action: 'createAnnotationGlobally',
+            })
+        }
         return this.annotationStorage.editAnnotation(pk, comment)
     }
 

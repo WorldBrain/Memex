@@ -490,10 +490,12 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
         }
         dispatch(acts.toggleShowListsPicker(index))
     },
-    handleCommentBtnClick: ({ url, title }, index, isSocialPost) => (event) => {
+    handleCommentBtnClick: ({ fullUrl, title }, index, isSocialPost) => (
+        event,
+    ) => {
         event.preventDefault()
         dispatch(acts.setActiveSidebarIndex(index))
-        props.toggleAnnotationsSidebar({ pageUrl: url, pageTitle: title })
+        props.toggleAnnotationsSidebar({ pageUrl: fullUrl, pageTitle: title })
     },
     handleCopyPasterBtnClick: (index) => (event) => {
         if (event) {

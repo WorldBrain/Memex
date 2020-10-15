@@ -38,8 +38,17 @@ export interface Props extends SidebarContainerOptions {
 export class AnnotationsSidebarContainer<
     P extends Props = Props
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
+    private sidebarRef
+
     constructor(props: P) {
-        super(props, new SidebarContainerLogic(props))
+        super(
+            props,
+            new SidebarContainerLogic({
+                ...props,
+                focusCreateForm: () =>
+                    this.sidebarRef?.getInstance()?.focusCreateForm(),
+            }),
+        )
     }
 
     showSidebar() {
@@ -142,7 +151,7 @@ export class AnnotationsSidebarContainer<
         const { editForms } = this.state
         // Should only ever be undefined for a moment, between creating a new annot state and
         //  the time it takes for the BG method to return the generated PK
-        const form = editForms[annotation.url] ?? { ...INIT_FORM_STATE.form }
+        const form = editForms[annotation.url] ?? { ...INIT_FORM_STATE }
 
         return {
             isTagInputActive: form.isTagInputActive,
@@ -173,6 +182,12 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
+            onEditCancel: () =>
+                this.processEvent('switchAnnotationMode', {
+                    annotationUrl: annotation.url,
+                    mode: 'default',
+                    ...DEF_CONTEXT,
+                }),
         }
     }
 
@@ -196,14 +211,14 @@ export class AnnotationsSidebarContainer<
 
     protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
         return {
-            anchor: this.state.commentBox.anchor,
+            onCommentChange: (comment) =>
+                this.processEvent('changeNewPageCommentText', { comment }),
+            onTagsUpdate: (tags) =>
+                this.processEvent('updateNewPageCommentTags', { tags }),
             onCancel: () => this.processEvent('cancelNewPageComment', null),
-            onSave: ({ text, isBookmarked, ...args }) =>
-                this.processEvent('saveNewPageComment', {
-                    commentText: text,
-                    isBookmarked,
-                    ...args,
-                }),
+            onSave: () => this.processEvent('saveNewPageComment', null),
+            comment: this.state.commentBox.commentText,
+            tags: this.state.commentBox.tags,
         }
     }
 
@@ -213,16 +228,6 @@ export class AnnotationsSidebarContainer<
                 this.props.tags.fetchInitialTagSuggestions(),
             queryEntries: (query) =>
                 this.props.tags.searchForTagSuggestions({ query }),
-        }
-    }
-
-    private handleAddCommentBtnClick: React.MouseEventHandler = (e) => {
-        e.preventDefault()
-
-        if (this.state.showCommentBox) {
-            this.processEvent('cancelNewPageComment', null)
-        } else {
-            this.processEvent('addNewPageComment', null)
         }
     }
 
@@ -413,6 +418,7 @@ export class AnnotationsSidebarContainer<
                     {this.renderTopBar()}
                     <AnnotationsSidebar
                         {...this.state}
+                        ref={(ref) => (this.sidebarRef = ref)}
                         sharingAccess={this.state.annotationSharingAccess}
                         needsWaypoint={!this.state.noResults}
                         appendLoader={

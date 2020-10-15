@@ -28,6 +28,8 @@ export function injectFakeTabs(params: {
                 : {},
         }
     }
+    params.tabManagement.findTabIdByFullUrl = async (fullUrl) =>
+        params.tabs.find((tab) => tab.url === fullUrl)?.id
     // For favIcon extraction
     params.tabsAPI.get = async () => null
 }

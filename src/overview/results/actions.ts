@@ -133,11 +133,6 @@ export const toggleBookmark: (args: {
     const { hasBookmark, user } = results[index]
     dispatch(changeHasBookmark(index))
 
-    analytics.trackEvent({
-        category: 'Bookmarks',
-        action: hasBookmark ? 'deleteForPage' : 'createForPage',
-    })
-
     processEventRPC({
         type: hasBookmark
             ? EVENT_NAMES.REMOVE_RESULT_BOOKMARK

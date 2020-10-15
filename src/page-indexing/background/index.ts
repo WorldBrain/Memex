@@ -246,9 +246,14 @@ export class PageIndexingBackground {
         props: PageCreationProps,
         opts: PageCreationOpts = {},
     ) => {
-        props.tabId =
-            props.tabId ??
-            (await this.options.tabManagement.findTabIdByFullUrl(props.fullUrl))
+        const foundTabId = await this.options.tabManagement.findTabIdByFullUrl(
+            props.fullUrl,
+        )
+        if (foundTabId) {
+            props.tabId = foundTabId
+        } else {
+            delete props.tabId
+        }
 
         const pageData = props.tabId
             ? await this.processPageDataFromTab(props)
@@ -288,7 +293,7 @@ export class PageIndexingBackground {
         }
     }
 
-    private isTabPageIndexed(params: { tabId: number; fullPageUrl: string }) {
+    isTabPageIndexed(params: { tabId: number; fullPageUrl: string }) {
         return this.indexedTabPages[params.tabId]?.[params.fullPageUrl] ?? false
     }
 

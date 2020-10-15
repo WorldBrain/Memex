@@ -71,9 +71,9 @@ class AnnotationsSidebar extends React.Component<
     AnnotationsSidebarProps,
     AnnotationsSidebarState
 > {
-    state = {
-        searchText: '',
-    }
+    private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
+
+    state = { searchText: '' }
 
     componentDidMount() {
         document.addEventListener('keydown', this.onKeydown, false)
@@ -82,6 +82,8 @@ class AnnotationsSidebar extends React.Component<
     componentWillUnmount() {
         document.removeEventListener('keydown', this.onKeydown, false)
     }
+
+    focusCreateForm = () => this.annotationCreateRef?.getInstance()?.focus()
 
     private onKeydown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
@@ -155,6 +157,7 @@ class AnnotationsSidebar extends React.Component<
                 <NewAnnotationBoxStyled>
                     <AnnotationCreate
                         {...this.props.annotationCreateProps}
+                        ref={(ref) => (this.annotationCreateRef = ref)}
                         tagPickerDependencies={this.props.annotationTagProps}
                     />
                 </NewAnnotationBoxStyled>

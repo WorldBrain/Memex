@@ -116,15 +116,31 @@
 }
 
 .settings {
+    composes: nakedSquareButton from '../../common-ui/elements.css';
     background-image: url('/img/settings.svg');
     background-repeat: no-repeat;
     background-size: 20px;
+    width: 25px;
+    height: 25px;
+    align-self: center;
+    outline: 0;
+    background-position: center;
+    margin-right: 5px;
+    cursor: pointer;
 }
 
 .help {
+    composes: nakedSquareButton from '../../common-ui/elements.css';
     background-image: url('/img/help.svg');
     background-repeat: no-repeat;
     background-size: 20px;
+    width: 25px;
+    height: 25px;
+    align-self: center;
+    outline: 0;
+    background-position: center;
+    margin-right: 10px;
+    cursor: pointer;
 }
 
 .buttonIcons {
@@ -167,6 +183,7 @@
     background-repeat: no-repeat;
     background-size: 20px;
     opacity: 0.8;
+    float: left;
 }
 
 .badge {

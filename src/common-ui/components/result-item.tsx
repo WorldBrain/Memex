@@ -13,6 +13,7 @@ import { LoadingIndicator } from 'src/common-ui/components'
 import { SocialPage } from 'src/social-integration/types'
 import PageResultItem from './page-result-item'
 import SocialResultItem from './social-result-item'
+import SemiCircularRibbon from './semi-circular-ribbon'
 
 const styles = require('./result-item.css')
 
@@ -128,11 +129,11 @@ class ResultItem extends PureComponent<Props> {
     render() {
         return (
             <li
-                className={cx(styles.listItem, {
+                className={cx(styles.listItem, styles.resultBox, {
                     [styles.isDeleting]: this.props.isDeleting,
                 })}
             >
-                <div>
+                <div className={styles.resultBoxItem}>
                     {this.props.isDeleting && (
                         <LoadingIndicator className={styles.deletingSpinner} />
                     )}
@@ -169,6 +170,14 @@ class ResultItem extends PureComponent<Props> {
                     </div>
                     {this.renderAnnotsList()}
                 </div>
+
+                {this.props.isListFilterActive && (
+                    <div className={styles.removeCollectionItemBox}>
+                        <SemiCircularRibbon
+                            onClick={this.props.handleCrossRibbonClick}
+                        />
+                    </div>
+                )}
             </li>
         )
     }

@@ -50,6 +50,7 @@ export default class Ribbon extends Component<Props, State> {
     private shortcutsData: Map<string, ShortcutElData>
     private openOverviewTabRPC
     private openOptionsTabRPC
+    private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
 
     state: State = { shortcutsReady: false }
 
@@ -71,6 +72,8 @@ export default class Ribbon extends Component<Props, State> {
         this.keyboardShortcuts = await getKeyboardShortcutsState.getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
     }
+
+    focusCreateForm = () => this.annotationCreateRef?.getInstance()?.focus()
 
     private handleSearchEnterPress: KeyboardEventHandler<HTMLInputElement> = (
         event,
@@ -456,6 +459,14 @@ export default class Ribbon extends Component<Props, State> {
                                 {this.props.commentBox.showCommentBox && (
                                     <Tooltip position="left">
                                         <AnnotationCreate
+                                            ref={(ref) =>
+                                                (this.annotationCreateRef = ref)
+                                            }
+                                            hide={() =>
+                                                this.props.commentBox.setShowCommentBox(
+                                                    false,
+                                                )
+                                            }
                                             tagPickerDependencies={{
                                                 initialSelectedEntries: () =>
                                                     this.props.commentBox.tags,
@@ -473,11 +484,19 @@ export default class Ribbon extends Component<Props, State> {
                                                 this.props.commentBox
                                                     .cancelComment
                                             }
-                                            handleClickOutside={() =>
-                                                this.props.commentBox.setShowCommentBox(
-                                                    false,
-                                                )
+                                            onTagsUpdate={
+                                                this.props.commentBox
+                                                    .updateCommentBoxTags
                                             }
+                                            onCommentChange={
+                                                this.props.commentBox
+                                                    .changeComment
+                                            }
+                                            comment={
+                                                this.props.commentBox
+                                                    .commentText
+                                            }
+                                            tags={this.props.commentBox.tags}
                                         />
                                     </Tooltip>
                                 )}

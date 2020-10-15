@@ -13,4 +13,6 @@ export type ListPickerState = GenericPickerState
 
 export default class CollectionPickerLogic extends GenericPickerLogic {
     protected pickerName = 'Collection'
+
+    validateEntry = this._validateEntry
 }

@@ -127,19 +127,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     private handleExternalAction = (event: SidebarActionOptions) => {
-        if (event.action === 'annotate') {
-            this.processEvent('receiveNewAnnotation', {
-                annotationData: event.annotationData,
-                annotationUrl: event.annotationUrl,
-                anchor: event.anchor,
+        if (event.action === 'comment') {
+            this.processEvent('addNewPageComment', {
+                comment: event.annotationData?.commentText,
+                tags: event.annotationData?.tags,
             })
-        } else if (event.action === 'comment') {
-            this.processEvent('addNewPageComment', null)
-            if (event.anchor) {
-                this.processEvent('setNewPageCommentAnchor', {
-                    anchor: event.anchor,
-                })
-            }
         } else if (event.action === 'show_annotation') {
             this.activateAnnotation(event.annotationUrl)
         } else if (event.action === 'edit_annotation') {
