@@ -9,13 +9,9 @@ import * as Raven from 'src/util/raven' // eslint-disable-line
 
 export const fetchAllLists = createAction('custom-lists/listData')
 export const createList = createAction('custom-lists/addList')
-export const deleteList = createAction(
-    'custom-lists/deleteList',
-    (id, index) => ({
-        id,
-        index,
-    }),
-)
+export const deleteList = createAction('custom-lists/deleteList', (id) => ({
+    id,
+}))
 export const updateListName = createAction(
     'custom-lists/updateListName',
     (value, index) => ({
@@ -173,7 +169,7 @@ export const updateList = ([oldName, newName], id) => async (
 }
 
 export const deletePageList = () => async (dispatch, getState) => {
-    const { id, deleting } = selectors.deleteConfirmProps(getState())
+    const { id } = selectors.deleteConfirmProps(getState())
 
     try {
         // DB call to remove List by ID.
@@ -181,7 +177,7 @@ export const deletePageList = () => async (dispatch, getState) => {
     } catch (err) {
         Raven.captureException(err)
     } finally {
-        dispatch(deleteList(id, deleting))
+        dispatch(deleteList(id))
         dispatch(resetListDeleteModal())
     }
 }

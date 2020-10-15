@@ -68,9 +68,9 @@ const updateList = (state, { value, index }) => ({
     ],
 })
 
-const deleteList = (state, { id, index }) => ({
+const deleteList = (state, { id }) => ({
     ...state,
-    lists: [...state.lists.slice(0, index), ...state.lists.slice(index + 1)],
+    lists: [...state.lists.filter((list) => list.id !== id)],
 })
 
 const addPageToList = (state, { url, index }) => {
