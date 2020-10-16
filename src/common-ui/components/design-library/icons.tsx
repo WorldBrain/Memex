@@ -27,6 +27,8 @@ export const saveIcon = browser.extension.getURL('/img/saveIcon.svg')
 
 export const longArrow = browser.extension.getURL('/img/longarrow.svg')
 
+export const hamburger = browser.extension.getURL('/img/lock.svg')
+
 // import tagFull from '/img/tag_full.svg'
 // import tagEmpty from '/img/tag_empty.svg'
 // import heartFull from '/img/heart_full.svg'
