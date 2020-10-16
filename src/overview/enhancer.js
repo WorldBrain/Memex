@@ -18,9 +18,9 @@ import {
     defaultState as defOptState,
 } from 'src/options/settings'
 
-const parseBool = str => str === 'true'
-const parseNumber = str => Number(str)
-const stringifyArr = arr => arr.join(',')
+const parseBool = (str) => str === 'true'
+const parseNumber = (str) => Number(str)
+const stringifyArr = (arr) => arr.join(',')
 
 // Keep search query in sync with the query parameter in the window location.
 const locationSync = ReduxQuerySync.enhancer({
@@ -86,10 +86,13 @@ const locationSync = ReduxQuerySync.enhancer({
             valueToString: stringifyArr,
             defaultValue: [],
         },
-        lists: {
-            selector: filters.listFilter,
-            action: filterActs.setListFilters,
-            defaultValue: '',
+        listId: {
+            selector: filters.listIdFilter,
+            action: filterActs.setListIdFilter,
+        },
+        listName: {
+            selector: filters.listNameFilter,
+            action: filterActs.setListNameFilter,
         },
         query: {
             selector: searchBar.query,
@@ -123,9 +126,9 @@ const locationSync = ReduxQuerySync.enhancer({
     },
 })
 
-const hydrateStateFromStorage = store => {
+const hydrateStateFromStorage = (store) => {
     const hydrate = (key, action, defaultValue) =>
-        browser.storage.local.get(key).then(data => {
+        browser.storage.local.get(key).then((data) => {
             if (data[key] == null && defaultValue == null) {
                 return
             }
@@ -152,7 +155,7 @@ const hydrateStateFromStorage = store => {
     )
 }
 
-const syncStateToStorage = store =>
+const syncStateToStorage = (store) =>
     store.subscribe(() => {
         const dump = (key, data) => browser.storage.local.set({ [key]: data })
 
@@ -166,7 +169,7 @@ const syncStateToStorage = store =>
         dump(constants.SIDEBAR_LOCKED_KEY, sidebarLeft.sidebarLocked(state))
     })
 
-const storageSync = storeCreator => (reducer, initState, enhancer) => {
+const storageSync = (storeCreator) => (reducer, initState, enhancer) => {
     const store = storeCreator(reducer, initState, enhancer)
 
     // Subscribe to changes and update local storage

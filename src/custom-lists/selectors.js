@@ -41,7 +41,7 @@ export const getUrlsToEdit = createSelector(
 export const createdDisplayLists = createSelector(
     createdLists,
     activeListIndex,
-    selectors.listFilter,
+    selectors.listIdFilter,
     (lists, listIndex, listFilter) =>
         lists.map((pageDoc, i) => ({
             ...pageDoc,
@@ -53,7 +53,7 @@ export const createdDisplayLists = createSelector(
 
 export const specialDisplayLists = createSelector(
     specialLists,
-    selectors.listFilter,
+    selectors.listIdFilter,
     (lists, listFilter) =>
         lists.map((pageDoc) => ({
             ...pageDoc,
@@ -118,7 +118,7 @@ export const showCrowdFundingModal = createSelector(
 )
 
 export const activeCollectionName = createSelector(
-    selectors.listFilter,
+    selectors.listIdFilter,
     allLists,
     (listFilterId, lists) =>
         listFilterId

@@ -107,7 +107,7 @@ export const setResultCopyPasterShown = createAction<boolean>(
 )
 
 export const clickShareList: () => Thunk = () => async (dispatch, getState) => {
-    const listId = filters.listFilter(getState())
+    const listId = filters.listIdFilter(getState())
     const list = await collections.fetchListById({ id: +listId })
 
     dispatch(

@@ -7,7 +7,7 @@ import { selectors as deleteConfSelectors } from '../delete-confirm-modal'
 import { PAGE_SIZE } from '../search-bar/constants'
 import * as sidebarLeft from '../sidebar-left/selectors'
 import { query, isEmptyQuery } from '../search-bar/selectors'
-import { listFilterActive, listFilter } from 'src/search-filters/selectors'
+import { listFilterActive, listIdFilter } from 'src/search-filters/selectors'
 import * as constants from './constants'
 import { ResultsByUrl } from '../types'
 
@@ -243,7 +243,7 @@ export const isResultCopyPasterShown = createSelector(
 )
 
 export const showShareListIcon = createSelector(
-    listFilter,
+    listIdFilter,
     (listFilter) =>
         listFilter != null && listFilter.length > 0 && +listFilter !== -1,
 )

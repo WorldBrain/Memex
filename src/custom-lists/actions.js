@@ -84,7 +84,7 @@ export const delPageFromList = (url, isSocialPost) => async (
 ) => {
     try {
         const state = getState()
-        const listId = filters.listFilter(state)
+        const listId = filters.listIdFilter(state)
         const delPageFromListRPC = isSocialPost
             ? 'delPostFromList'
             : 'removePageFromList'

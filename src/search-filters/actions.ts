@@ -35,11 +35,11 @@ export const delExcTagFilter = createAction<string>(
 )
 export const toggleTagFilter = createAction(
     'search-filters/toggleTagFilter',
-    a => a,
+    (a) => a,
 )
 export const toggleExcTagFilter = createAction(
     'search-filters/toggleExcTagFilter',
-    a => a,
+    (a) => a,
 )
 export const addIncDomainFilter = createAction<string>(
     'search-filters/addIncDomainFilter',
@@ -55,11 +55,11 @@ export const delExcDomainFilter = createAction<string>(
 )
 export const toggleIncDomainFilter = createAction(
     'search-filters/toggleIncDomainFilter',
-    a => a,
+    (a) => a,
 )
 export const toggleExcDomainFilter = createAction(
     'search-filters/toggleExcDomainFilter',
-    a => a,
+    (a) => a,
 )
 export const setTagFilters = createAction<string[]>(
     'search-filters/setTagFilters',
@@ -67,7 +67,12 @@ export const setTagFilters = createAction<string[]>(
 export const setExcTagFilters = createAction<string[]>(
     'search-filters/setExcTagFilters',
 )
-export const setListFilters = createAction('search-filters/setListFilters')
+
+export const setListIdFilter = createAction('search-filters/setListIdFilter')
+export const setListNameFilter = createAction(
+    'search-filters/setListNameFilter',
+)
+
 export const setIncDomainFilters = createAction<string[]>(
     'search-filters/setIncDomainFilters',
 )
@@ -84,7 +89,6 @@ export const toggleBookmarkFilter = createAction(
     'search-filters/toggleBookmarkFilter',
 )
 
-export const addListFilter = createAction('search-filters/addListFilter')
 export const delListFilter = createAction('search-filters/delListFilter')
 export const toggleListFilter = createAction('search-filters/toggleListFilter')
 
@@ -206,7 +210,7 @@ export const fetchSuggestedDomains = () => async (dispatch, getState) => {
     dispatch(
         setSuggestedDomains([
             ...(filteredDomains || []),
-            ...(suggestedDomains || []).map(domain => ({
+            ...(suggestedDomains || []).map((domain) => ({
                 value: domain,
                 isExclusive: false,
             })),
@@ -240,12 +244,12 @@ export const removeTagFromFilter = () => (dispatch, getState) => {
     }
     const pages = results(getState())
     const isOnPage = {}
-    filterTags.forEach(tag => {
+    filterTags.forEach((tag) => {
         isOnPage[tag] = false
     })
 
-    pages.forEach(page => {
-        filterTags.forEach(tag => {
+    pages.forEach((page) => {
+        filterTags.forEach((tag) => {
             if (!isOnPage[tag]) {
                 if (page.tags.indexOf(tag) > -1) {
                     isOnPage[tag] = true

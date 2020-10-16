@@ -1,125 +1,132 @@
 import { createSelector } from 'reselect'
 
-export const searchFilters = state => state.searchFilters
+export const searchFilters = (state) => state.searchFilters
 
 export const tagFilter = createSelector(
     searchFilters,
-    state => state.showTagFilter,
+    (state) => state.showTagFilter,
 )
 
 export const hashtagFilter = createSelector(
     searchFilters,
-    state => state.showHashtagFilter,
+    (state) => state.showHashtagFilter,
 )
 
 export const domainFilter = createSelector(
     searchFilters,
-    state => state.showDomainFilter,
+    (state) => state.showDomainFilter,
 )
 
 export const datesFilter = createSelector(
     searchFilters,
-    state => state.showDatesFilter,
+    (state) => state.showDatesFilter,
 )
 
 export const isMobileListFiltered = createSelector(
     searchFilters,
-    state => state.isMobileListFiltered,
+    (state) => state.isMobileListFiltered,
 )
 
 export const filterTypes = createSelector(
     searchFilters,
-    state => state.showFilterTypes,
+    (state) => state.showFilterTypes,
 )
 
 export const userFilter = createSelector(
     searchFilters,
-    state => state.showUserFilter,
+    (state) => state.showUserFilter,
 )
 
-export const tags = createSelector(searchFilters, state => state.tags)
+export const tags = createSelector(searchFilters, (state) => state.tags)
 
-export const tagsExc = createSelector(searchFilters, state => state.tagsExc)
+export const tagsExc = createSelector(searchFilters, (state) => state.tagsExc)
 
 export const hashtagsInc = createSelector(
     searchFilters,
-    state => state.hashtagsInc,
+    (state) => state.hashtagsInc,
 )
 
 export const hashtagsExc = createSelector(
     searchFilters,
-    state => state.hashtagsExc,
+    (state) => state.hashtagsExc,
 )
 
 export const suggestedTags = createSelector(
     searchFilters,
-    state => state.suggestedTags,
+    (state) => state.suggestedTags,
 )
 export const suggestedHashtags = createSelector(
     searchFilters,
-    state => state.suggestedHashtags,
+    (state) => state.suggestedHashtags,
 )
 export const suggestedDomains = createSelector(
     searchFilters,
-    state => state.suggestedDomains,
+    (state) => state.suggestedDomains,
 )
 export const suggestedUsers = createSelector(
     searchFilters,
-    state => state.suggestedUsers,
+    (state) => state.suggestedUsers,
 )
 export const domainsInc = createSelector(
     searchFilters,
-    state => state.domainsInc,
+    (state) => state.domainsInc,
 )
 export const domainsExc = createSelector(
     searchFilters,
-    state => state.domainsExc,
+    (state) => state.domainsExc,
 )
-export const usersInc = createSelector(searchFilters, state => state.usersInc)
-export const usersExc = createSelector(searchFilters, state => state.usersExc)
+export const usersInc = createSelector(searchFilters, (state) => state.usersInc)
+export const usersExc = createSelector(searchFilters, (state) => state.usersExc)
 
-export const listFilter = createSelector(searchFilters, state => state.lists)
+export const listIdFilter = createSelector(
+    searchFilters,
+    (state) => state.filteredListId,
+)
+export const listNameFilter = createSelector(
+    searchFilters,
+    (state) => state.filteredListName,
+)
 
 // Lists for now is just id of one list
-export const listFilterParam = createSelector(listFilter, state =>
-    state === '' ? [] : [state],
+export const listFilterParam = createSelector(listIdFilter, (state) =>
+    state == null ? [] : [state],
 )
 export const displayDomains = createSelector(
     domainsInc,
     domainsExc,
     (inc, exc) => [
-        ...inc.map(value => ({ value, isExclusive: false })),
-        ...exc.map(value => ({ value, isExclusive: true })),
+        ...inc.map((value) => ({ value, isExclusive: false })),
+        ...exc.map((value) => ({ value, isExclusive: true })),
     ],
 )
 
 export const displayUsers = createSelector(usersInc, usersExc, (inc, exc) => [
-    ...inc.map(value => ({ value, isExclusive: false })),
-    ...exc.map(value => ({ value, isExclusive: true })),
+    ...inc.map((value) => ({ value, isExclusive: false })),
+    ...exc.map((value) => ({ value, isExclusive: true })),
 ])
 
 export const displayTags = createSelector(tags, tagsExc, (inc, exc) => [
-    ...inc.map(value => ({ value, isExclusive: false })),
-    ...exc.map(value => ({ value, isExclusive: true })),
+    ...inc.map((value) => ({ value, isExclusive: false })),
+    ...exc.map((value) => ({ value, isExclusive: true })),
 ])
 
 export const displayHashtags = createSelector(
     hashtagsInc,
     hashtagsExc,
     (inc, exc) => [
-        ...inc.map(value => ({ value, isExclusive: false })),
-        ...exc.map(value => ({ value, isExclusive: true })),
+        ...inc.map((value) => ({ value, isExclusive: false })),
+        ...exc.map((value) => ({ value, isExclusive: true })),
     ],
 )
 
 export const onlyBookmarks = createSelector(
     searchFilters,
-    state => state.onlyBookmarks,
+    (state) => state.onlyBookmarks,
 )
 
 export const showFilterBar = createSelector(
     searchFilters,
-    state => state.showFilterBar,
+    (state) => state.showFilterBar,
 )
 
 /**
@@ -159,21 +166,24 @@ export const showClearFiltersBtn = createSelector(
 )
 
 export const listFilterActive = createSelector(
-    listFilter,
-    lists => lists !== '',
+    listIdFilter,
+    (lists) => lists !== '',
 )
 
 export const contentType = createSelector(
     searchFilters,
-    state => state.contentTypes,
+    (state) => state.contentTypes,
 )
 
-export const websitesFilter = createSelector(contentType, state => state.pages)
+export const websitesFilter = createSelector(
+    contentType,
+    (state) => state.pages,
+)
 export const highlightsFilter = createSelector(
     contentType,
-    state => state.highlights,
+    (state) => state.highlights,
 )
-export const notesFilter = createSelector(contentType, state => state.notes)
+export const notesFilter = createSelector(contentType, (state) => state.notes)
 
 /**
  * Selector for the annotation content type filter.

@@ -211,7 +211,9 @@ class ListContainer extends Component {
                             [styles.addNewHover]: this.props.isSidebarLocked,
                         })}
                     >
-                        <span className={styles.myCollection}>My Collections </span>
+                        <span className={styles.myCollection}>
+                            My Collections{' '}
+                        </span>
                         <span className={styles.plus} />
                     </div>
                 </div>
@@ -269,6 +271,7 @@ const mapStateToProps = (state) => ({
     isSidebarOpen: sidebar.isSidebarOpen(state),
     isSidebarLocked: sidebar.sidebarLocked(state),
     isListFilterActive: filters.listFilterActive(state),
+    lstFilter: filters.listIdFilter(state),
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
@@ -292,10 +295,11 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
         event.preventDefault()
         dispatch(actions.showListDeleteModal(id, index))
     },
-    handleListItemClick: ({ id, isMobileList }) => () => {
+    handleListItemClick: ({ id, name, isMobileList }) => () => {
         dispatch(
             filterActs.toggleListFilter({
                 id,
+                name,
                 isMobileListFiltered: isMobileList,
             }),
         )
