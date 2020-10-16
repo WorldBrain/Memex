@@ -116,6 +116,9 @@ export interface AnalyticsEvents {
         | 'changeIndexingSetting'
         | 'enableKeyboardShortcuts'
         | 'disableKeyboardShortcuts'
+    Readwise:
+        | 'setupReadwise'
+        | 'removeReadwise'
 }
 
 export interface AnalyticsEventInfo {

@@ -363,4 +363,12 @@ export const ANALYTICS_EVENTS: {
             description: 'The finishing of an import process',
         },
     },
+    Readwise: {
+        setupReadwise: {
+            description: 'Readwise Key is saved and set up',
+        },
+        removeReadwise: {
+            description: 'Removing the Readwise Sync Key',
+        },
+    },
 }

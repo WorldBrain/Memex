@@ -20,6 +20,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { ReadwiseInterface } from 'src/readwise-integration/background/types/remote-interface'
 import { AuthContextInterface } from 'src/authentication/background/types'
 import { userAuthorizedForReadwise } from './utils'
+import analytics from 'src/analytics'
 
 class ReadwiseSettingsContainer extends React.Component<
     AuthContextInterface & { showSubscriptionModal: () => void }
@@ -77,6 +78,26 @@ class ReadwiseSettings extends StatefulUIElement<
                 )}
             </div>
         )
+    }
+
+    confirmSyncKey() {
+
+        this.processEvent('saveAPIKey', null)
+
+        analytics.trackEvent({
+            category: 'Readwise',
+            action: 'setupReadwise',
+        })
+    }
+
+    removeSyncKey() {
+
+        this.processEvent('removeAPIKey', null)
+
+        analytics.trackEvent({
+            category: 'Readwise',
+            action: 'removeReadwise',
+        })
     }
 
     renderForm() {
@@ -138,7 +159,7 @@ class ReadwiseSettings extends StatefulUIElement<
                         <div>
                             <PrimaryAction
                                 onClick={() =>
-                                    this.processEvent('saveAPIKey', null)
+                                    this.confirmSyncKey()
                                 }
                                 label={'Confirm'}
                             />
@@ -147,7 +168,7 @@ class ReadwiseSettings extends StatefulUIElement<
                     {selectors.showKeyRemoveButton(this.state) && (
                         <SecondaryAction
                             onClick={() =>
-                                this.processEvent('removeAPIKey', null)
+                                this.removeSyncKey()
                             }
                             label={'Remove'}
                         />
