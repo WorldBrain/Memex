@@ -67,13 +67,13 @@ class ReadwiseSettings extends StatefulUIElement<
         return (
             <div>
                 {selectors.showSyncError(this.state) && (
-                    <div>
+                    <ErrorMessage>
                         Something went wrong syncing your existing
                         annotations...
-                    </div>
+                    </ErrorMessage>
                 )}
                 {selectors.showSyncRunning(this.state) && (
-                    <div>Syncing your existing annotations...</div>
+                    <SuccessMessage>Syncing your existing annotations...</SuccessMessage>
                 )}
             </div>
         )
@@ -175,11 +175,11 @@ class ReadwiseSettings extends StatefulUIElement<
     render() {
         return (
             <>
-                {selectors.showUnauthorized(this.state) &&
-                    this.renderUnauthorized()}
-                {selectors.showForm(this.state) && this.renderForm()}
                 {selectors.showSyncScreen(this.state) &&
                     this.renderSyncScreen()}
+                {selectors.showUnauthorized(this.state) && 
+                    this.renderUnauthorized()}
+                {selectors.showForm(this.state) && this.renderForm()}
                 {selectors.showLoadingError(this.state) &&
                     'Something went wrong loading your ReadWise.io settings'}
             </>
