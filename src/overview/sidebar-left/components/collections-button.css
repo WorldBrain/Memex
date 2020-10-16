@@ -5,16 +5,20 @@
     align-items: center;
     z-index: 1200;
     font-size: 15px;
-    margin-top: 5px;
+    width: 14vw;
+    margin: 12px 12px 12px 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .showListBtn {
-    margin: 0 20px;
-    width: 50px;
-    height: 50px;
+    padding: 3px;
+    width: 30px;
+    height: 30px;
     border: none;
     cursor: pointer;
-    background-size: 38px;
+    background-size: 24px;
     background-repeat: no-repeat;
     background-color: transparent;
     background-position: center center;
@@ -25,12 +29,15 @@
 }
 
 .filteredListName {
-    display: flex;
+    display: inline-block;
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
     outline: none;
-    margin-left: -6px;
+    margin-left: 10px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-weight: 500;
 }
 
 .arrowIcon {
@@ -46,7 +53,7 @@
 }
 
 .hamburgerIcon {
-    background-image: url('/img/lock.svg');
+    background-image: url('/img/hamburger.svg');
 }
 
 @keyframes appear {

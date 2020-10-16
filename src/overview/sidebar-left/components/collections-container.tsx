@@ -39,7 +39,16 @@ class CollectionsButton extends PureComponent<Props, State> {
 
     render() {
         return (
-            <div className={styles.listBtnContainer}>
+            <div 
+                className={styles.listBtnContainer}
+                onMouseEnter={this.handleMouseEnterIcon}
+                        onMouseLeave={this.handleMouseLeaveIcon}
+                        onClick={() =>
+                            this.props.lockOpenSidebar(
+                                !this.props.isSidebarLocked,
+                            )
+                        }
+            >
                 <ButtonTooltip
                     tooltipText={
                         this.props.isSidebarLocked
@@ -48,7 +57,7 @@ class CollectionsButton extends PureComponent<Props, State> {
                     }
                     position="bottom"
                 >
-                    <button
+                    <div
                         className={cx(styles.showListBtn, {
                             [styles.arrowIcon]:
                                 this.state.isIconHovered &&
@@ -59,13 +68,6 @@ class CollectionsButton extends PureComponent<Props, State> {
                         })}
                         onDragEnter={this.handleMouseEnterIcon}
                         onDragLeave={this.handleMouseLeaveIcon}
-                        onMouseEnter={this.handleMouseEnterIcon}
-                        onMouseLeave={this.handleMouseLeaveIcon}
-                        onClick={() =>
-                            this.props.lockOpenSidebar(
-                                !this.props.isSidebarLocked,
-                            )
-                        }
                     />
                 </ButtonTooltip>
                 {this.props.filteredListName && (

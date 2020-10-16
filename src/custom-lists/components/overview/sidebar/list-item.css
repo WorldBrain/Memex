@@ -8,6 +8,7 @@
     position: relative;
     width: 100%;
     cursor: pointer;
+    margin: 2px 0px;
 
     &:hover {
         background-color: color8;

@@ -121,6 +121,7 @@
     flex-direction: row;
     align-items: center;
     background: white;
+    padding-top: 10px;
 }
 
 .sidebarExpanded {
