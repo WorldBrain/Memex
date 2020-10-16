@@ -10,6 +10,14 @@
 
 .showListBtn {
     margin: 0 20px;
+    width: 50px;
+    height: 50px;
+    border: none;
+    cursor: pointer;
+    background-size: 38px;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    background-position: center center;
 }
 
 .showListIcon {
@@ -21,10 +29,24 @@
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
-    cursor: pointer;
     outline: none;
     margin-left: -6px;
-    composes: nakedButton from 'src/common-ui/elements.css';
+}
+
+.arrowIcon {
+    background-image: url('/img/doubleArrow.svg');
+    transform: rotate(180deg);
+    animation: 0.2s cubic-bezier(0.65, 0.05, 0.36, 1);
+    composes: hoversidebaropen from 'src/common-ui/colors.css';
+}
+
+.arrowReverseIcon {
+    background-image: url('/img/doubleArrow.svg');
+    background-position-x: 3px;
+}
+
+.hamburgerIcon {
+    background-image: url('/img/lock.svg');
 }
 
 @keyframes appear {
