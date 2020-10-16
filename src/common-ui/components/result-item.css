@@ -69,6 +69,10 @@
         display: flex;
     }
 
+    &:hover .secondaryActionButton {
+        display: flex;
+    }
+
     & .button {
         display: none;
     }
@@ -253,12 +257,12 @@
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
-    width: 100%;
     min-height: 26px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     align-items: flex-start;
+    width: 800px;
 }
 
 .title {
@@ -370,6 +374,10 @@
         background-size: contain;
         background-repeat: no-repeat;
     }
+}
+
+.secondaryActionButton {
+    display: none;
 }
 
 .permanentButton {

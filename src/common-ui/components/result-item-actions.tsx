@@ -47,13 +47,19 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                         imgSrc={deleteItem}
                         onClick={this.props.onTrashBtnClick}
                         tooltipText="Delete this page & all related content"
-                        className={styles.trash}
+                        className={cx(
+                            styles.trash,
+                            styles.secondaryActionButton,
+                        )}
                     />
                     <ResultItemActionBtn
                         imgSrc={copy}
                         onClick={this.props.onCopyPasterBtnClick}
                         tooltipText="Copy"
-                        className={styles.copy}
+                        className={cx(
+                            styles.copy,
+                            styles.secondaryActionButton,
+                        )}
                         refHandler={this.props.setCopyPasterButtonRef}
                     />
                     {/*<ResultItemActionBtn*/}

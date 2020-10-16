@@ -60,6 +60,8 @@ import TabManagementBackground from 'src/tab-management/background'
 import { runInTab } from 'src/util/webextensionRPC'
 import { PageAnalyzerInterface } from 'src/page-analysis/types'
 import { TabManager } from 'src/tab-management/background/tab-manager'
+import { ReadwiseBackground } from 'src/readwise-integration/background'
+import { type } from 'openpgp'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -88,7 +90,11 @@ export interface BackgroundModules {
     readable: ReaderBackground
     contentSharing: ContentSharingBackground
     tabManagement: TabManagementBackground
+    readwise: ReadwiseBackground
 }
+
+const globalFetch: typeof fetch =
+    typeof fetch !== 'undefined' ? fetch.bind(globalThis) : null
 
 export function createBackgroundModules(options: {
     storageManager: StorageManager
@@ -105,8 +111,11 @@ export function createBackgroundModules(options: {
     disableSyncEnryption?: boolean
     getIceServers?: () => Promise<string[]>
     getNow?: () => number
+    fetch?: typeof fetch
 }): BackgroundModules {
     const getNow = options.getNow ?? (() => Date.now())
+    const fetch = options.fetch ?? globalFetch
+
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
     const tabManagement = new TabManagementBackground({
@@ -227,6 +236,23 @@ export function createBackgroundModules(options: {
             (await options.getServerStorage()).storageModules.contentSharing,
     })
 
+    const readwise = new ReadwiseBackground({
+        storageManager,
+        browserStorage: options.browserAPIs.storage.local,
+        fetch,
+        getFullPageUrl: async (normalizedUrl) =>
+            (await pages.storage.getPage(normalizedUrl))?.fullUrl,
+        getAnnotationsByPks: async (pks) => {
+            return directLinking.annotationStorage.getAnnotations(pks)
+        },
+        streamAnnotations: async function* () {
+            yield* await storageManager.operation(
+                'streamObjects',
+                'annotations',
+            )
+        },
+    })
+
     const copyPaster = new CopyPasterBackground({
         storageManager,
         contentSharing,
@@ -284,6 +310,7 @@ export function createBackgroundModules(options: {
         tags,
         bookmarks,
         tabManagement,
+        readwise,
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,
@@ -412,6 +439,7 @@ export async function setupBackgroundModules(
     backgroundModules.pageFetchBacklog.setupBacklogProcessing()
     backgroundModules.bookmarks.setupBookmarkListeners()
     backgroundModules.tabManagement.setupRemoteFunctions()
+    backgroundModules.readwise.setupRemoteFunctions()
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()
@@ -442,6 +470,7 @@ export function getBackgroundStorageModules(
         copyPaster: backgroundModules.copyPaster.storage,
         reader: backgroundModules.readable.storage,
         contentSharing: backgroundModules.contentSharing.storage,
+        readwiseActionQueue: backgroundModules.readwise.actionQueue.storage,
     }
 }
 

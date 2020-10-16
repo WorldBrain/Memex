@@ -181,16 +181,26 @@ export async function executeUITask<
 >(
     logic: UILogic<State, any>,
     key: Key,
-    loader: () => Promise<ReturnValue>,
+    loader: (context: { emitError: () => void }) => Promise<ReturnValue>,
 ): Promise<[false] | [true, ReturnValue]> {
     const emit = (state: UITaskState) =>
         logic.emitMutation({ [key]: { $set: state } } as any)
     emit('running')
 
     try {
-        const returned = await loader()
-        emit('success')
-        return [true, returned]
+        let errored = false
+        const returned = await loader({
+            emitError: () => {
+                errored = true
+            },
+        })
+        if (!errored) {
+            emit('success')
+            return [true, returned]
+        } else {
+            emit('error')
+            return [false]
+        }
     } catch (e) {
         emit('error')
         console.error(e)

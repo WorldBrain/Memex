@@ -583,6 +583,48 @@ describe('Storage initialization', () => {
                     dexieSchemaVersion: 22,
                     storexSchemaVersion: STORAGE_VERSIONS[21].version,
                 },
+                {
+                    schema: {
+                        annotBookmarks: 'url, createdAt',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
+                        backupChanges: 'timestamp, collection',
+                        bookmarks: 'url, time',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], [createdOn+sharedOn], createdOn, needsIntegration, sharedOn',
+                        contentSharingAction: '++id, createdWhen',
+                        customListDescriptions: 'listId',
+                        customLists:
+                            'id, createdAt, isDeletable, isNestable, name',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        favIcons: 'hostname',
+                        notifications: 'id',
+                        pageFetchBacklog: '++id, createdAt',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        pageListEntryDescriptions: '[listId+pageUrl]',
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        readablePageArchives: 'url, createdWhen, lastEdited',
+                        readwiseAction: '++id, createdWhen',
+                        sharedAnnotationMetadata: 'localId, remoteId',
+                        sharedListMetadata: 'localId',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialTags: '++id, name, postId',
+                        socialUsers: '++id, name, serviceId, username',
+                        syncDeviceInfo: 'deviceId',
+                        tags: '[name+url], name, url',
+                        templates: 'id, code, isFavourite, title',
+                        visits: '[time+url], url',
+                    },
+                    dexieSchemaVersion: 23,
+                    storexSchemaVersion: STORAGE_VERSIONS[22].version,
+                },
             ]),
         )
     })
