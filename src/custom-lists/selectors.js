@@ -5,6 +5,10 @@ import * as selectors from '../search-filters/selectors'
 
 export const customLists = (state) => state.customLists
 
+export const inboxUnreadCount = createSelector(
+    customLists,
+    (state) => state.inboxUnreadCount,
+)
 export const allLists = createSelector(customLists, (state) => state.lists)
 export const activeListIndex = createSelector(
     customLists,

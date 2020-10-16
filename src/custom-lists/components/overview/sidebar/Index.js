@@ -13,7 +13,6 @@ import { actions as filterActs, selectors as filters } from 'src/search-filters'
 import { selectors as sidebar } from 'src/overview/sidebar-left'
 import { auth, contentSharing } from 'src/util/remote-functions-background'
 import { StaticListItem } from './static-list-item'
-import { InboxListItem } from './inbox-list-item'
 import { show } from 'src/overview/modals/actions'
 import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
 
@@ -22,6 +21,8 @@ const styles = require('./Index.css')
 class ListContainer extends Component {
     static propTypes = {
         getListFromDB: PropTypes.func.isRequired,
+        inboxUnreadCount: PropTypes.number.isRequired,
+        getInboxUnreadCount: PropTypes.func.isRequired,
         lists: PropTypes.array.isRequired,
         specialLists: PropTypes.array.isRequired,
         handleEditBtnClick: PropTypes.func.isRequired,
@@ -59,6 +60,8 @@ class ListContainer extends Component {
     }
 
     async componentDidMount() {
+        this.props.getInboxUnreadCount()
+
         // Gets all the list from the DB to populate the sidebar.
         this.props.getListFromDB()
 
@@ -167,23 +170,19 @@ class ListContainer extends Component {
             isFiltered={!this.props.isListFilterActive}
             onListItemClick={this.props.handleAllSavedClick}
         />,
-        ...this.props.specialLists.map((list, i) =>
-            list.name === SPECIAL_LIST_NAMES.INBOX ? (
-                <InboxListItem
-                    key={i + 1}
-                    listName={list.name}
-                    isFiltered={list.isFilterIndex}
-                    onListItemClick={this.props.handleListItemClick(list)}
-                />
-            ) : (
-                <StaticListItem
-                    key={i + 1}
-                    listName={list.name}
-                    isFiltered={list.isFilterIndex}
-                    onListItemClick={this.props.handleListItemClick(list)}
-                />
-            ),
-        ),
+        ...this.props.specialLists.map((list, i) => (
+            <StaticListItem
+                key={i + 1}
+                listName={list.name}
+                isFiltered={list.isFilterIndex}
+                onListItemClick={this.props.handleListItemClick(list)}
+                unreadCount={
+                    list.name === SPECIAL_LIST_NAMES.INBOX
+                        ? this.props.inboxUnreadCount
+                        : undefined
+                }
+            />
+        )),
     ]
 
     renderCreateList = (shouldDisplayForm, value = null) =>
@@ -272,6 +271,7 @@ const mapStateToProps = (state) => ({
     isSidebarLocked: sidebar.sidebarLocked(state),
     isListFilterActive: filters.listFilterActive(state),
     lstFilter: filters.listIdFilter(state),
+    inboxUnreadCount: selectors.inboxUnreadCount(state),
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
@@ -287,6 +287,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
         },
         dispatch,
     ),
+    getInboxUnreadCount: () => dispatch(actions.getInboxUnreadCount()),
     handleEditBtnClick: (index) => (event) => {
         event.preventDefault()
         dispatch(actions.showEditBox(index))

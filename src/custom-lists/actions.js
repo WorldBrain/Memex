@@ -6,7 +6,15 @@ import * as resultActs from 'src/overview/results/actions'
 import { selectors as filters } from 'src/search-filters'
 import analytics from 'src/analytics'
 import * as Raven from 'src/util/raven' // eslint-disable-line
+import { collections } from 'src/util/remote-functions-background'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 
+export const setInboxUnreadCount = createAction(
+    'custom-lists/setInboxUnreadCount',
+)
+export const decInboxUnreadCount = createAction(
+    'custom-lists/decInboxUnreadCount',
+)
 export const fetchAllLists = createAction('custom-lists/listData')
 export const createList = createAction('custom-lists/addList')
 export const deleteList = createAction('custom-lists/deleteList', (id) => ({
@@ -69,6 +77,11 @@ export const removeCommonNameWarning = createAction(
     'custom-lists/removeCommonNameWarning',
 )
 
+export const getInboxUnreadCount = () => async (dispatch) => {
+    const unreadCount = await collections.getInboxUnreadCount()
+    dispatch(setInboxUnreadCount(unreadCount))
+}
+
 export const showEditBox = (index) => (dispatch, getState) => {
     const activeListIndex = selectors.activeListIndex(getState())
     if (activeListIndex === index) {
@@ -88,6 +101,10 @@ export const delPageFromList = (url, isSocialPost) => async (
         const delPageFromListRPC = isSocialPost
             ? 'delPostFromList'
             : 'removePageFromList'
+
+        if (listId === SPECIAL_LIST_IDS.INBOX) {
+            dispatch(decInboxUnreadCount())
+        }
 
         await remoteFunction(delPageFromListRPC)({
             id: Number(listId),

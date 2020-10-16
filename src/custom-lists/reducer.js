@@ -39,6 +39,7 @@ const defaultState = {
     showCreateListForm: false,
     showCommonNameWarning: false,
     showCrowdFundingModal: false,
+    inboxUnreadCount: 0,
     shareModalProps: {
         isShown: false,
         index: undefined,
@@ -180,6 +181,14 @@ export default createReducer(
         [actions.showCommonNameWarning]: showCommonNameWarning,
         [actions.removeCommonNameWarning]: removeCommonNameWarning,
         [actions.setShowCrowdFundingModal]: setShowCrowdFundingModal,
+        [actions.setInboxUnreadCount]: (state, inboxUnreadCount) => ({
+            ...state,
+            inboxUnreadCount,
+        }),
+        [actions.decInboxUnreadCount]: (state) => ({
+            ...state,
+            inboxUnreadCount: state.inboxUnreadCount - 1,
+        }),
     },
     defaultState,
 )
