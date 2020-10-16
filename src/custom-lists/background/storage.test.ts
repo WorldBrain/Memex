@@ -74,7 +74,7 @@ describe('Custom List Integrations', () => {
             const lists = await customLists.fetchListPagesByUrl({
                 url: normalizedUrl,
             })
-            expect(lists.length).toBe(2)
+            expect(lists.length).toBe(1)
             expect(lists[0].pages.length).toBe(1)
             expect(lists[0].pages[0]).toBe(fullUrl)
         })
@@ -87,7 +87,7 @@ describe('Custom List Integrations', () => {
             await customLists.insertPageToList({ id: 1, url })
 
             const lists = await customLists.fetchListPagesByUrl({ url })
-            expect(lists.length).toBe(2)
+            expect(lists.length).toBe(1)
             expect(lists[0].pages.length).toBe(1)
             expect(lists[0].pages[0]).toBe(url)
 

@@ -19,6 +19,11 @@ export default class CustomListStorage extends StorageModule {
     static CUSTOM_LISTS_COLL = COLLECTION_NAMES.list
     static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
 
+    static filterOutSpecialListEntries = (entry: { listId: number }) =>
+        !Object.values<number>(SPECIAL_LIST_IDS).includes(entry.listId)
+    static filterOutSpecialLists = (list: { name: string }) =>
+        !Object.values<string>(SPECIAL_LIST_NAMES).includes(list.name)
+
     getConfig(): StorageModuleConfig {
         const collections = cloneDeep(
             COLLECTION_DEFINITIONS,
@@ -246,16 +251,20 @@ export default class CustomListStorage extends StorageModule {
     }
 
     async fetchListPagesByUrl({ url }: { url: string }) {
-        const pages = await this.operation('findListEntriesByUrl', { url })
+        const pageEntries = await this.operation('findListEntriesByUrl', {
+            url,
+        })
 
         const entriesByListId = new Map<number, any[]>()
         const listIds = new Set<string>()
 
-        pages.forEach((page) => {
-            listIds.add(page.listId)
-            const current = entriesByListId.get(page.listId) || []
-            entriesByListId.set(page.listId, [...current, page.fullUrl])
-        })
+        pageEntries
+            .filter(CustomListStorage.filterOutSpecialListEntries)
+            .forEach((entry) => {
+                listIds.add(entry.listId)
+                const current = entriesByListId.get(entry.listId) || []
+                entriesByListId.set(entry.listId, [...current, entry.fullUrl])
+            })
 
         const lists: PageList[] = this.filterMobileList(
             await this.operation('findListsIncluding', {
@@ -355,7 +364,7 @@ export default class CustomListStorage extends StorageModule {
         query: string
         limit?: number
     }): Promise<SuggestResult<string, number>> {
-        const suggestions = await this.operation(
+        const suggestions: SuggestResult<string, number> = await this.operation(
             SuggestPlugin.SUGGEST_OBJS_OP_ID,
             {
                 collection: CustomListStorage.CUSTOM_LISTS_COLL,
@@ -368,7 +377,9 @@ export default class CustomListStorage extends StorageModule {
             },
         )
 
-        return suggestions
+        return suggestions.filter(({ suggestion }) =>
+            CustomListStorage.filterOutSpecialLists({ name: suggestion }),
+        )
     }
 
     async fetchListNameSuggestions({
