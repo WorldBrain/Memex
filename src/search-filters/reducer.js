@@ -232,7 +232,7 @@ const toggleListFilter = (state, { id, name, isMobileListFiltered }) => {
     return {
         ...state,
         isMobileListFiltered,
-        filteredListId: id,
+        filteredListId: +id,
         filteredListName: name,
     }
 }
@@ -276,7 +276,7 @@ export default createReducer(
         [actions.setExcHashtagFilters]: setFilters('hashtagsExc'),
         [actions.setListIdFilter]: (state, filteredListId) => ({
             ...state,
-            filteredListId,
+            filteredListId: +filteredListId,
         }),
         [actions.setListNameFilter]: (state, filteredListName) => ({
             ...state,

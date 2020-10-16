@@ -167,7 +167,7 @@ export const showClearFiltersBtn = createSelector(
 
 export const listFilterActive = createSelector(
     listIdFilter,
-    (lists) => lists !== '',
+    (filteredListId) => filteredListId != null,
 )
 
 export const contentType = createSelector(
