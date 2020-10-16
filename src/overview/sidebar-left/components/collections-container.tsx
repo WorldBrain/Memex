@@ -17,6 +17,7 @@ interface StateProps {
 interface DispatchProps {
     peekOpenSidebar: () => void
     lockOpenSidebar: (shouldLock: boolean) => void
+    closeSidebar: () => void
 }
 
 export type Props = StateProps & DispatchProps
@@ -37,16 +38,24 @@ class CollectionsButton extends PureComponent<Props, State> {
     private handleMouseLeaveIcon = (e) =>
         this.setState({ isIconHovered: false })
 
+    private handleOpenCloseLockSidebar = () => {
+        this.props.lockOpenSidebar(
+            !this.props.isSidebarLocked,
+        )
+
+        if (this.props.isSidebarLocked) {
+            this.props.closeSidebar()
+        }
+
+    }
+
     render() {
         return (
             <div 
                 className={styles.listBtnContainer}
                 onMouseEnter={this.handleMouseEnterIcon}
                         onMouseLeave={this.handleMouseLeaveIcon}
-                        onClick={() =>
-                            this.props.lockOpenSidebar(
-                                !this.props.isSidebarLocked,
-                            )
+                        onClick={() => this.handleOpenCloseLockSidebar()
                         }
             >
                 <ButtonTooltip
@@ -87,6 +96,7 @@ const mapState: MapStateToProps<StateProps, {}, RootState> = (state) => ({
 
 const mapDispatch: MapDispatchToProps<DispatchProps, {}> = (dispatch) => ({
     peekOpenSidebar: () => dispatch(acts.openSidebar()),
+    closeSidebar: () => dispatch(acts.closeSidebar()),
     lockOpenSidebar: (shouldLock: boolean) =>
         dispatch((acts.setSidebarLocked as any)(shouldLock)),
 })

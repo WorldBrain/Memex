@@ -53,5 +53,5 @@ export const HoverBoxDashboard = styled.div`
     background-color: #fff;
     border-radius: 3px;
     right: 20px;
-    top: 50px;
+    top: 40px;
 `
