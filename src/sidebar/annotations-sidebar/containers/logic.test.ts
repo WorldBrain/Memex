@@ -287,6 +287,16 @@ describe('SidebarContainerLogic', () => {
                 'feature-disabled',
             )
         })
+
+        it('should be able to toggle sidebar lock', async ({ device }) => {
+            const { sidebar } = await setupLogicHelper({ device })
+
+            expect(sidebar.state.isLocked).toBe(false)
+            await sidebar.processEvent('lock', null)
+            expect(sidebar.state.isLocked).toBe(true)
+            await sidebar.processEvent('unlock', null)
+            expect(sidebar.state.isLocked).toBe(false)
+        })
     })
 
     // TODO: Figure out why we're passing in all the comment data that's already available in state

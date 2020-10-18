@@ -40,6 +40,7 @@ export interface SidebarContainerState {
     secondarySearchState: TaskState
 
     showState: 'visible' | 'hidden'
+    isLocked: boolean
 
     annotationSharingAccess: AnnotationSharingAccess
     annotationSharingInfo: {
@@ -96,6 +97,8 @@ export interface SidebarContainerState {
 export type SidebarContainerEvents = UIEvent<{
     show: null
     hide: null
+    lock: null
+    unlock: null
 
     // Adding a new page comment
     addNewPageComment: { comment?: string; tags?: string[] }
@@ -247,6 +250,7 @@ export class SidebarContainerLogic extends UILogic<
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',
 
+            isLocked: false,
             pageUrl: this.options.pageUrl,
             showState: this.options.initialState ?? 'hidden',
             annotationModes: {
@@ -349,6 +353,11 @@ export class SidebarContainerLogic extends UILogic<
     show: EventHandler<'show'> = async () => {
         this.emitMutation({ showState: { $set: 'visible' } })
     }
+
+    lock: EventHandler<'lock'> = () =>
+        this.emitMutation({ isLocked: { $set: true } })
+    unlock: EventHandler<'unlock'> = () =>
+        this.emitMutation({ isLocked: { $set: false } })
 
     private doSearch = debounce(this._doSearch, 300)
 

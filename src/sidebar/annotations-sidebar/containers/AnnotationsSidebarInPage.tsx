@@ -26,6 +26,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     Props
 > {
     static defaultProps: Partial<Props> = {
+        isLockable: true,
         theme: {
             rightOffsetPx: 0,
             canClickAnnotations: true,
