@@ -3,8 +3,8 @@ import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
 import {
     ActionExecutor,
-    ActionValidator,
     ActionQueueInteraction,
+    ActionPreprocessor,
 } from '@worldbrain/memex-common/lib/action-queue/types'
 import { STORAGE_VERSIONS } from '@worldbrain/memex-common/lib/browser-extension/storage/versions'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
@@ -62,7 +62,7 @@ export class ReadwiseBackground {
             versions: { initial: STORAGE_VERSIONS[22].version },
             retryIntervalInMs: READWISE_ACTION_RETRY_INTERVAL,
             executeAction: this.executeAction,
-            validateAction: this.validateAction,
+            preprocessAction: this.preprocessAction,
         })
         this.remoteFunctions = {
             validateAPIKey: remoteFunctionWithoutExtraArgs(this.validateAPIKey),
@@ -184,7 +184,7 @@ export class ReadwiseBackground {
         }
     }
 
-    validateAction: ActionValidator<ReadwiseAction> = () => {
+    preprocessAction: ActionPreprocessor<ReadwiseAction> = () => {
         return { valid: true }
     }
 
