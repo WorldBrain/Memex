@@ -10,7 +10,6 @@ import {
 import { URLNormalizer, normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import * as utils from './utils'
-import ActivityLoggerBackground from 'src/activity-logger/background'
 import NotifsBackground from '../notifications/background'
 import { makeRemotelyCallable } from '../util/webextensionRPC'
 import { StorageChangesManager } from '../util/storage-changes'
@@ -193,6 +192,7 @@ class BackgroundScript {
             }
 
             await migration({
+                storex: this.storageManager,
                 db: this.storageManager.backend['dexieInstance'],
                 localStorage: this.storageAPI.local,
                 normalizeUrl: this.urlNormalizer,

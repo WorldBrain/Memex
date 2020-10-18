@@ -1,4 +1,5 @@
 import Dexie from 'dexie'
+import Storex from '@worldbrain/storex'
 import { Storage } from 'webextension-polyfill-ts'
 import { URLNormalizer } from '@worldbrain/memex-url-utils'
 import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
@@ -7,6 +8,7 @@ import { STORAGE_KEYS as IDXING_STORAGE_KEYS } from 'src/options/settings/consta
 
 export interface MigrationProps {
     db: Dexie
+    storex: Storex
     normalizeUrl: URLNormalizer
     localStorage: Storage.LocalStorageArea
 }
@@ -16,6 +18,21 @@ export interface Migrations {
 }
 
 export const migrations: Migrations = {
+    /*
+     * We wanted to add the ability to search for individual terms that can appear
+     * in a list's name. So we've added a 'text' field and this migration populates it
+     * with the existing name data.
+     */
+    'searchable-list-name': async ({ storex }) => {
+        const lists = storex.collection('customLists')
+        const data = (await lists.findAllObjects<any>({})).filter(
+            ({ name }) => !Object.values(SPECIAL_LIST_NAMES).includes(name),
+        )
+
+        for (const { id, name } of data) {
+            await lists.updateObjects({ id }, { searchableName: name })
+        }
+    },
     /*
      * Ensure local storage indexing flags are set to disable auto-indexing on visit and
      * enable on-demand indexing on pages that get bookmarked or have annotations created.
