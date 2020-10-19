@@ -111,6 +111,7 @@ export default class CustomListStorage extends StorageModule {
                         },
                         {
                             name: '$name:string',
+                            searchableName: '$name:string',
                             // updatedAt: '$updatedAt:any',
                         },
                     ],
@@ -292,8 +293,9 @@ export default class CustomListStorage extends StorageModule {
         const { object } = await this.operation('createList', {
             id,
             name,
-            isDeletable,
             isNestable,
+            isDeletable,
+            searchableName: name,
             createdAt: new Date(),
         })
 

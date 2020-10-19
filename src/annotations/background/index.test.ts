@@ -639,6 +639,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     object: {
                                         id: listId,
                                         name: 'test',
+                                        searchableName: 'test',
                                         isDeletable: true,
                                         isNestable: true,
                                         createdAt: expect.any(Date),
@@ -859,6 +860,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     object: {
                                         id: listId,
                                         name: 'test',
+                                        searchableName: 'test',
                                         isDeletable: true,
                                         isNestable: true,
                                         createdAt: expect.any(Date),

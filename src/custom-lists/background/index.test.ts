@@ -115,6 +115,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         id: listId,
                                         createdAt: expect.any(Date),
                                         name: testList,
+                                        searchableName: testList,
                                         isDeletable: true,
                                         isNestable: true,
                                     },
@@ -183,6 +184,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         id: listId,
                                         createdAt: expect.any(Date),
                                         name: testList,
+                                        searchableName: testList,
                                         isDeletable: true,
                                         isNestable: true,
                                     },
@@ -231,6 +233,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             id: listId,
                                             createdAt: expect.any(Date),
                                             name: TEST_LIST_1,
+                                            searchableName: TEST_LIST_1,
                                             isDeletable: true,
                                             isNestable: true,
                                         },
@@ -248,6 +251,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             isDeletable: true,
                                             isNestable: true,
                                             name: TEST_LIST_1,
+                                            searchableName: TEST_LIST_1,
                                         },
                                     ],
                                     result: {
@@ -322,6 +326,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         type: 'modify',
                                         updates: {
                                             name: TEST_LIST_2,
+                                            searchableName: TEST_LIST_2,
                                         },
                                     },
                                 }),
@@ -334,6 +339,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual({
                                     id: expect.any(Number),
                                     name: TEST_LIST_2,
+                                    searchableName: TEST_LIST_2,
                                     isDeletable: true,
                                     isNestable: true,
                                     createdAt: expect.any(Date),
@@ -433,6 +439,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual({
                                     id: expect.any(Number),
                                     name: TEST_LIST_1,
+                                    searchableName: TEST_LIST_1,
                                     isDeletable: true,
                                     isNestable: true,
                                     createdAt: expect.any(Date),
@@ -521,6 +528,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual({
                                     id: listId,
                                     name: 'My Custom List',
+                                    searchableName: 'My Custom List',
                                     isDeletable: true,
                                     isNestable: true,
                                     createdAt: expect.any(Date),

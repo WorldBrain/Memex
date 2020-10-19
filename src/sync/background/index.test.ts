@@ -261,6 +261,7 @@ function extensionSyncTests(suiteOptions: {
         ).toEqual({
             id: listId,
             name: 'My list',
+            searchableName: 'My list',
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -310,6 +311,7 @@ function extensionSyncTests(suiteOptions: {
         ).toEqual({
             id: listId,
             name: 'Updated List Title',
+            searchableName: 'Updated List Title',
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -335,6 +337,7 @@ function extensionSyncTests(suiteOptions: {
         ).toEqual({
             id: listId,
             name: 'Another Updated List Title',
+            searchableName: 'Another Updated List Title',
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -434,6 +437,7 @@ function extensionSyncTests(suiteOptions: {
         ).toEqual({
             id: listId,
             name: 'My list',
+            searchableName: 'My list',
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -490,6 +494,7 @@ function extensionSyncTests(suiteOptions: {
         ).toEqual({
             id: listId,
             name: 'My list',
+            searchableName: 'My list',
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
