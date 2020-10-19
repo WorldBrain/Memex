@@ -385,36 +385,6 @@ export default class CustomListStorage extends StorageModule {
         return suggestedLists.filter(CustomListStorage.filterOutSpecialLists)
     }
 
-    async fetchListNameSuggestions({
-        name,
-        url,
-    }: {
-        name: string
-        url: string
-    }) {
-        const suggestedLists = await this.suggestLists({ query: name })
-        const listIds = suggestedLists.map(({ id }) => id)
-
-        const pageEntries = await this.operation('findListEntriesByLists', {
-            listIds,
-            url,
-        })
-
-        const entriesByListId = new Map<number, any[]>()
-
-        pageEntries.forEach((page) => {
-            const current = entriesByListId.get(page.listId) || []
-            entriesByListId.set(page.listId, [...current, page.fullUrl])
-        })
-
-        return this.filterMobileList(
-            suggestedLists.map((list) => {
-                const entries = entriesByListId.get(list.id)
-                return this.prepareList(list, entries, entries != null)
-            }),
-        )
-    }
-
     async fetchListIgnoreCase({ name }: { name: string }) {
         return this.operation('findListByNameIgnoreCase', { name })
     }

@@ -344,23 +344,21 @@ describe('Custom List Integrations', () => {
         test('fetch suggestions based on list names', async () => {
             const { customLists } = await setupTest()
 
-            const lists = await customLists.__fetchListNameSuggestions({
-                name: 'Go',
-                url: 'https://www.ipsum.com/test',
-            })
-
-            checkDefined(lists)
-
-            expect(lists.length).toBe(1)
-            expect(lists[0].active).toBe(true)
-
             expect(
-                await customLists.searchForListSuggestions({ query: 'Go' }),
+                await customLists.searchForListSuggestions({ query: 'go' }),
             ).toEqual([DATA.LIST_2.name])
 
             expect(
                 await customLists.searchForListSuggestions({ query: 'some' }),
             ).toEqual([DATA.LIST_1.name, DATA.LIST_3.name])
+
+            expect(
+                await customLists.searchForListSuggestions({ query: 'ip' }),
+            ).toEqual([DATA.LIST_1.name])
+
+            expect(
+                await customLists.searchForListSuggestions({ query: 'ipsum' }),
+            ).toEqual([DATA.LIST_1.name])
         })
 
         test('Case insensitive name search', async () => {

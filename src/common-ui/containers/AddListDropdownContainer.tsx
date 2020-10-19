@@ -79,6 +79,7 @@ class AddListDropdownContainer extends Component<Props, State> {
             'removeOpenTabsFromList',
         )
         this.fetchListByIdRPC = remoteFunction('fetchListById')
+        // NO LONGER EXISTS
         this.fetchListNameSuggestionsRPC = remoteFunction(
             '__fetchListNameSuggestions',
         )
