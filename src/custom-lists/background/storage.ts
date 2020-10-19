@@ -189,9 +189,6 @@ export default class CustomListStorage extends StorageModule {
         return this.countListEntries(SPECIAL_LIST_IDS.INBOX)
     }
 
-    private filterMobileList = (lists: any[]): any[] =>
-        lists.filter((list) => list.name !== SPECIAL_LIST_NAMES.MOBILE)
-
     async fetchAllLists({
         excludedIds = [],
         limit,
@@ -212,7 +209,7 @@ export default class CustomListStorage extends StorageModule {
         const prepared = lists.map((list) => this.prepareList(list))
 
         if (skipMobileList) {
-            return this.filterMobileList(prepared)
+            return prepared.filter(CustomListStorage.filterOutSpecialLists)
         }
 
         return prepared
@@ -267,11 +264,11 @@ export default class CustomListStorage extends StorageModule {
                 entriesByListId.set(entry.listId, [...current, entry.fullUrl])
             })
 
-        const lists: PageList[] = this.filterMobileList(
+        const lists: PageList[] = (
             await this.operation('findListsIncluding', {
                 includedIds: [...listIds],
-            }),
-        )
+            })
+        ).filter(CustomListStorage.filterOutSpecialLists)
 
         return lists.map((list) => {
             const entries = entriesByListId.get(list.id)

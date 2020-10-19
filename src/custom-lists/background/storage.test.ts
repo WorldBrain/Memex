@@ -329,7 +329,7 @@ describe('Custom List Integrations', () => {
             })
 
             checkDefined(lists)
-            expect(lists.length).toBe(4)
+            expect(lists.length).toBe(3)
         })
 
         test('fetch pages associated with list', async () => {
@@ -396,7 +396,7 @@ describe('Custom List Integrations', () => {
             })
 
             checkDefined(lists)
-            expect(lists.length).toBe(2)
+            expect(lists.length).toBe(1)
             expect(lists[0].id).not.toBe(1)
             expect(lists[0].id).not.toBe(2)
         })
