@@ -363,23 +363,24 @@ export default class CustomListStorage extends StorageModule {
     }: {
         query: string
         limit?: number
-    }): Promise<SuggestResult<string, number>> {
+    }): Promise<PageList[]> {
         const suggestions: SuggestResult<string, number> = await this.operation(
             SuggestPlugin.SUGGEST_OBJS_OP_ID,
             {
                 collection: CustomListStorage.CUSTOM_LISTS_COLL,
-                query: { name: query },
+                query: { nameTerms: query },
                 options: {
                     includePks: true,
-                    ignoreCase: ['name'],
                     limit,
                 },
             },
         )
 
-        return suggestions.filter(({ suggestion }) =>
-            CustomListStorage.filterOutSpecialLists({ name: suggestion }),
-        )
+        const suggestedLists = await this.operation('findListsIncluding', {
+            includedIds: suggestions.map(({ pk }) => pk),
+        })
+
+        return suggestedLists.filter(CustomListStorage.filterOutSpecialLists)
     }
 
     async fetchListNameSuggestions({
@@ -389,13 +390,8 @@ export default class CustomListStorage extends StorageModule {
         name: string
         url: string
     }) {
-        const suggestions = await this.suggestLists({ query: name })
-        const listIds = suggestions.map(({ pk }) => pk)
-
-        const lists: PageList[] = suggestions.map(({ pk, suggestion }) => ({
-            id: pk,
-            name: suggestion,
-        }))
+        const suggestedLists = await this.suggestLists({ query: name })
+        const listIds = suggestedLists.map(({ id }) => id)
 
         const pageEntries = await this.operation('findListEntriesByLists', {
             listIds,
@@ -410,7 +406,7 @@ export default class CustomListStorage extends StorageModule {
         })
 
         return this.filterMobileList(
-            lists.map((list) => {
+            suggestedLists.map((list) => {
                 const entries = entriesByListId.get(list.id)
                 return this.prepareList(list, entries, entries != null)
             }),

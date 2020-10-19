@@ -353,7 +353,7 @@ export default class CustomListBackground {
     }): Promise<string[]> => {
         const suggestions = await this.storage.suggestLists(args)
 
-        return suggestions.map(({ suggestion }) => suggestion)
+        return suggestions.map(({ name }) => name)
     }
 
     addOpenTabsToList = async (args: {
