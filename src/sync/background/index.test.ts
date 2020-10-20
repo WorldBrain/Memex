@@ -1503,6 +1503,9 @@ function removeTermFieldsFromStorageContents(storageContents: StorageContents) {
             if (collectionName === 'pages') {
                 delete object.text
             }
+            if (collectionName === 'customLists') {
+                delete object.searchableName
+            }
             removeTermFieldsFromObject(object, { collectionName })
         }
     }
