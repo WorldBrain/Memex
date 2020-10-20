@@ -2,6 +2,7 @@ import CustomListBackground from './'
 import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { SearchIndex } from 'src/search'
+import Storex from '@worldbrain/storex'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import {
     SPECIAL_LIST_NAMES,
@@ -10,14 +11,30 @@ import {
 
 async function insertTestData({
     customLists,
+    storageManager,
 }: {
     customLists: CustomListBackground
+    storageManager: Storex
 }) {
     // Insert some test data for all tests to use
     await customLists.createCustomList(DATA.LIST_1)
     await customLists.createCustomList(DATA.LIST_2)
     await customLists.createCustomList(DATA.LIST_3)
     // await customLists.createCustomList(DATA.MOBILE_LIST)
+
+    const lists = storageManager.collection('customLists')
+    await lists.updateOneObject(
+        { name: DATA.LIST_1.name },
+        { nameTerms: DATA.LIST_1_TERMS },
+    )
+    await lists.updateOneObject(
+        { name: DATA.LIST_2.name },
+        { nameTerms: DATA.LIST_2_TERMS },
+    )
+    await lists.updateOneObject(
+        { name: DATA.LIST_3.name },
+        { nameTerms: DATA.LIST_3_TERMS },
+    )
 
     await customLists.insertPageToList(DATA.PAGE_ENTRY_1)
     await customLists.insertPageToList(DATA.PAGE_ENTRY_2)
@@ -41,7 +58,7 @@ async function setupTest({ skipTestData }: { skipTestData?: boolean } = {}) {
     customLists.generateListId = () => ++fakeListCount
 
     if (!skipTestData) {
-        await insertTestData({ customLists })
+        await insertTestData({ customLists, storageManager })
     }
 
     return {
@@ -342,11 +359,11 @@ describe('Custom List Integrations', () => {
         })
 
         test('fetch suggestions based on list names', async () => {
-            const { customLists } = await setupTest()
+            const { customLists, storageManager } = await setupTest()
 
             expect(
                 await customLists.searchForListSuggestions({ query: 'go' }),
-            ).toEqual([DATA.LIST_2.name])
+            ).toEqual([DATA.LIST_2.name, DATA.LIST_3.name])
 
             expect(
                 await customLists.searchForListSuggestions({ query: 'some' }),

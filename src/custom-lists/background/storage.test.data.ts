@@ -13,6 +13,11 @@ export const LIST_3 = {
     ...LIST_1,
     name: 'some good things',
 }
+
+export const LIST_1_TERMS = ['some', 'ipsum']
+export const LIST_2_TERMS = ['good', 'lorem']
+export const LIST_3_TERMS = ['some', 'good', 'things']
+
 export const MOBILE_LIST = {
     ...LIST_1,
     name: SPECIAL_LIST_NAMES.MOBILE,
