@@ -392,20 +392,29 @@ export class AnnotationsSidebarContainer<
                             </CloseBtn>
                         </ButtonTooltip>
                         {this.props.isLockable && (
-                            <ButtonTooltip
-                                tooltipText="Lock sidebar open"
-                                position="rightCentered"
-                            >
-                                <CloseBtn onClick={this.toggleSidebarLock}>
-                                    <ActionIcon
-                                        src={
-                                            this.state.isLocked
-                                                ? icons.heartFull
-                                                : icons.lock
-                                        }
-                                    />
-                                </CloseBtn>
-                            </ButtonTooltip>
+                            this.state.isLocked ? (
+                                <ButtonTooltip
+                                    tooltipText="Unlock sidebar"
+                                    position="rightCentered"
+                                >
+                                    <CloseBtn onClick={this.toggleSidebarLock}>
+                                        <SidebarLockIconReverse
+                                            src={icons.doubleArrow}
+                                        />
+                                    </CloseBtn>
+                                </ButtonTooltip>
+                            ):(
+                                <ButtonTooltip
+                                    tooltipText="Lock sidebar open"
+                                    position="rightCentered"
+                                >
+                                    <CloseBtn onClick={this.toggleSidebarLock}>
+                                        <SidebarLockIcon
+                                            src={icons.doubleArrow}
+                                        />
+                                    </CloseBtn>
+                                </ButtonTooltip>
+                            )
                         )}
                     </TopBarActionBtns>
                     <TopBarActionBtns>
@@ -576,6 +585,18 @@ const CloseBtn = styled.button`
 const ActionIcon = styled.img`
     height: 90%;
     width: auto;
+`
+
+const SidebarLockIcon = styled.img`
+    height: 100%;
+    width: auto;
+`
+
+const SidebarLockIconReverse = styled.img`
+    width: auto;
+    height: 100%;
+    transform: rotate(180deg);
+    animation: 0.2s cubic-bezier(0.65, 0.05, 0.36, 1);
 `
 
 // TODO: inheirits from .nakedSquareButton
