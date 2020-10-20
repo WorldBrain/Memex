@@ -369,6 +369,7 @@ export default class CustomListStorage extends StorageModule {
                 collection: CustomListStorage.CUSTOM_LISTS_COLL,
                 query: { nameTerms: query },
                 options: {
+                    multiEntryAssocField: 'name',
                     includePks: true,
                     limit,
                 },

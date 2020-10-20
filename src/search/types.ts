@@ -3,7 +3,11 @@ import { Bookmarks } from 'webextension-polyfill-ts'
 
 export type DBGet = () => Promise<Storex>
 
-export type SuggestOptions = FindManyOptions & { includePks?: boolean }
+export type SuggestOptions = FindManyOptions & {
+    includePks?: boolean
+    /** Define the name of a field to return in case suggest is being performed on a Dexie multi-entry index. */
+    multiEntryAssocField?: string
+}
 export type SuggestResult<S, P> = Array<{
     collection: string
     suggestion: S
