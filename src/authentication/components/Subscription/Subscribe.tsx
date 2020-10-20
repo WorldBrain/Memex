@@ -128,7 +128,7 @@ class Subscribe extends React.Component<Props, State> {
             </PricingPlanTitle>
 
             <TrialInfo>
-                14 day free trial
+                30 days free trial
             </TrialInfo>
 
             {/*<PricingPlanItem className={''}>*/}
