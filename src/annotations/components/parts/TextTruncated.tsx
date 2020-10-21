@@ -145,6 +145,11 @@ const TextBox = styled.div`
         margin-bottom: -5px;
     }
 
+    & h4 {
+        margin-block-end: 0em;
+        margin-bottom: -5px;
+    }
+
     & blockquote {
         border-left: 4px solid #5cd9a6
         margin: 0px;
@@ -161,6 +166,16 @@ const TextBox = styled.div`
         margin-top: 10px;
         
         & ul {
+            margin-top: 5px;
+        }
+
+    }
+
+    & ol {
+        padding-inline-start: 20px;  
+        margin-top: 10px;
+        
+        & ol {
             margin-top: 5px;
         }
 
