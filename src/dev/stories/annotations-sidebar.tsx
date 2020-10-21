@@ -106,7 +106,9 @@ async function createDependencies() {
         bindAnnotationEditProps: (a) => ({
             comment: '',
             tags: [],
+            showPreview: false,
             isTagInputActive: false,
+            setEditPreview: action('setEditPreview'),
             onEditConfirm: action('confirmEdit'),
             onEditCancel: action('cancelEdit'),
             onCommentChange: action('changeComment'),

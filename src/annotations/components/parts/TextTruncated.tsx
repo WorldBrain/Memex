@@ -9,6 +9,7 @@ import { truncateText } from 'src/annotations/utils'
 export interface Props {
     text: string
     isHighlight: boolean
+    skipTruncation: boolean
     truncateText?: TextTruncator
     onCommentEditClick?: React.MouseEventHandler
 }
@@ -19,6 +20,8 @@ interface State {
     needsTruncation: boolean
 }
 
+// TODO: This comp needs rethinking - doing too many things.
+//   A more general truncating comp would be nice that doesn't assume what it should render apart from text length
 class TextTruncated extends React.Component<Props, State> {
     static defaultProps: Partial<Props> = { text: '', truncateText }
 
@@ -50,9 +53,10 @@ class TextTruncated extends React.Component<Props, State> {
     }
 
     render() {
-        const textToBeDisplayed = this.state.isTruncated
-            ? this.state.truncatedText
-            : this.props.text
+        const textToBeDisplayed =
+            !this.props.skipTruncation && this.state.isTruncated
+                ? this.state.truncatedText
+                : this.props.text
 
         return (
             <>
@@ -65,13 +69,16 @@ class TextTruncated extends React.Component<Props, State> {
                     </TextBox>
                 )}
                 <ToggleMoreBox>
-                    {this.state.needsTruncation && (
-                        <ToggleMoreButtonStyled
-                            onClick={this._toggleTextTruncation}
-                        >
-                            {this.state.isTruncated ? 'Show More' : 'Show Less'}
-                        </ToggleMoreButtonStyled>
-                    )}
+                    {!this.props.skipTruncation &&
+                        this.state.needsTruncation && (
+                            <ToggleMoreButtonStyled
+                                onClick={this._toggleTextTruncation}
+                            >
+                                {this.state.isTruncated
+                                    ? 'Show More'
+                                    : 'Show Less'}
+                            </ToggleMoreButtonStyled>
+                        )}
                 </ToggleMoreBox>
             </>
         )

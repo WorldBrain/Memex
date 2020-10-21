@@ -165,6 +165,12 @@ export class AnnotationsSidebarContainer<
             isTagInputActive: form.isTagInputActive,
             comment: form.commentText,
             tags: form.tags,
+            showPreview: form.showPreview,
+            setEditPreview: (showPreview: boolean) =>
+                this.processEvent('setEditPreview', {
+                    annotationUrl: annotation.url,
+                    showPreview,
+                }),
             updateTags: (args) =>
                 this.processEvent('updateTagsForEdit', {
                     annotationUrl: annotation.url,
@@ -191,10 +197,8 @@ export class AnnotationsSidebarContainer<
                     ...DEF_CONTEXT,
                 }),
             onEditCancel: () =>
-                this.processEvent('switchAnnotationMode', {
+                this.processEvent('cancelEdit', {
                     annotationUrl: annotation.url,
-                    mode: 'default',
-                    ...DEF_CONTEXT,
                 }),
         }
     }
@@ -391,8 +395,8 @@ export class AnnotationsSidebarContainer<
                                 <ActionIcon src={icons.close} />
                             </CloseBtn>
                         </ButtonTooltip>
-                        {this.props.isLockable && (
-                            this.state.isLocked ? (
+                        {this.props.isLockable &&
+                            (this.state.isLocked ? (
                                 <ButtonTooltip
                                     tooltipText="Unlock sidebar"
                                     position="rightCentered"
@@ -403,7 +407,7 @@ export class AnnotationsSidebarContainer<
                                         />
                                     </CloseBtn>
                                 </ButtonTooltip>
-                            ):(
+                            ) : (
                                 <ButtonTooltip
                                     tooltipText="Lock sidebar open"
                                     position="rightCentered"
@@ -414,8 +418,7 @@ export class AnnotationsSidebarContainer<
                                         />
                                     </CloseBtn>
                                 </ButtonTooltip>
-                            )
-                        )}
+                            ))}
                     </TopBarActionBtns>
                     <TopBarActionBtns>
                         <ButtonTooltip

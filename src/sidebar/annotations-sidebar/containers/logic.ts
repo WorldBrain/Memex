@@ -24,6 +24,7 @@ import { areTagsEquivalent } from 'src/tags/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 
 interface EditForm {
+    showPreview: boolean
     isBookmarked: boolean
     isTagInputActive: boolean
     commentText: string
@@ -104,6 +105,8 @@ export type SidebarContainerEvents = UIEvent<{
     addNewPageComment: { comment?: string; tags?: string[] }
     setNewPageCommentAnchor: { anchor: Anchor }
     changeNewPageCommentText: { comment: string }
+    setEditPreview: { annotationUrl: string; showPreview: boolean }
+    cancelEdit: { annotationUrl: string }
     changeEditCommentText: { annotationUrl: string; comment: string }
     saveNewPageComment: null
     cancelNewPageComment: null
@@ -212,6 +215,7 @@ type EventHandler<
 > = UIEventHandler<SidebarContainerState, SidebarContainerEvents, EventName>
 
 export const INIT_FORM_STATE: EditForm = {
+    showPreview: false,
     isBookmarked: false,
     isTagInputActive: false,
     commentText: '',
@@ -505,6 +509,33 @@ export class SidebarContainerLogic extends UILogic<
     ) => {
         this.emitMutation({
             // commentBox: { anchor: { $set: incoming.event.anchor } },
+        })
+    }
+
+    cancelEdit: EventHandler<'cancelEdit'> = ({ event }) => {
+        this.emitMutation({
+            annotationModes: {
+                pageAnnotations: {
+                    [event.annotationUrl]: {
+                        $set: 'default',
+                    },
+                },
+            },
+            editForms: {
+                [event.annotationUrl]: {
+                    showPreview: { $set: false },
+                },
+            },
+        })
+    }
+
+    setEditPreview: EventHandler<'setEditPreview'> = ({ event }) => {
+        this.emitMutation({
+            editForms: {
+                [event.annotationUrl]: {
+                    showPreview: { $set: event.showPreview },
+                },
+            },
         })
     }
 

@@ -4,25 +4,13 @@ import styled, { ThemeProvider } from 'styled-components'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import { SidebarAnnotationTheme } from '../types'
 
-export interface Props extends AnnotationFooterEventProps {
-    hasHighlight?: boolean
-    comment?: string
+export interface Props {
     tags: string[]
+    comment?: string
+    previewMode?: boolean
     theme: SidebarAnnotationTheme
     onTagClick?: (tag: string) => void
-}
-
-export interface AnnotationFooterEventProps {
-    onDeleteConfirm: () => void
-    onDeleteCancel: () => void
-    onDeleteIconClick: () => void
-    onEditConfirm: () => void
-    onEditCancel: () => void
     onEditIconClick: () => void
-    onShareClick: React.MouseEventHandler
-    onUnshareClick: React.MouseEventHandler
-    toggleBookmark: () => void
-    onCopyPasterBtnClick: () => void
 }
 
 /* tslint:disable-next-line variable-name */
@@ -54,22 +42,21 @@ class AnnotationView extends React.Component<Props> {
     }
 
     render() {
-        const { comment, tags } = this.props
+        const { comment, tags, theme, onEditIconClick } = this.props
 
         return (
-            <ThemeProvider theme={this.props.theme}>
-                {this.props.comment?.length > 0 && (
-                    <CommentBox hasHighlight={this.props.hasHighlight}>
+            <ThemeProvider theme={theme}>
+                {comment?.length > 0 && (
+                    <CommentBox>
                         <TextTruncated
                             isHighlight={false}
                             text={comment}
-                            onCommentEditClick={this.props.onEditIconClick}
+                            onCommentEditClick={onEditIconClick}
+                            skipTruncation={this.props.previewMode}
                         />
                     </CommentBox>
                 )}
-                {this.props.tags?.length > 0 && (
-                    <TagBox>{this.renderTags()}</TagBox>
-                )}
+                {tags?.length > 0 && <TagBox>{this.renderTags()}</TagBox>}
             </ThemeProvider>
         )
     }

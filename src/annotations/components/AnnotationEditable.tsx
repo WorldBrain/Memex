@@ -143,6 +143,7 @@ export default class AnnotationEditable extends React.Component<Props> {
     private renderFooter() {
         const {
             annotationFooterDependencies,
+            annotationEditDependencies,
             onGoToAnnotation,
             ...props
         } = this.props
@@ -153,6 +154,11 @@ export default class AnnotationEditable extends React.Component<Props> {
                 {...annotationFooterDependencies}
                 isEdited={this.isEdited}
                 timestamp={this.getFormattedTimestamp()}
+                togglePreview={() =>
+                    annotationEditDependencies.setEditPreview(
+                        !annotationEditDependencies.showPreview,
+                    )
+                }
             />
         )
     }
@@ -164,6 +170,20 @@ export default class AnnotationEditable extends React.Component<Props> {
             annotationFooterDependencies,
             tagPickerDependencies,
         } = this.props
+
+        if (annotationEditDependencies.showPreview) {
+            return (
+                <AnnotationView
+                    previewMode
+                    theme={this.theme}
+                    tags={annotationEditDependencies.tags}
+                    comment={annotationEditDependencies.comment}
+                    onEditIconClick={
+                        annotationFooterDependencies.onEditIconClick
+                    }
+                />
+            )
+        }
 
         if (mode === 'edit') {
             return (
@@ -180,8 +200,8 @@ export default class AnnotationEditable extends React.Component<Props> {
         return (
             <AnnotationView
                 {...this.props}
-                {...annotationFooterDependencies}
                 theme={this.theme}
+                onEditIconClick={annotationFooterDependencies.onEditIconClick}
             />
         )
     }

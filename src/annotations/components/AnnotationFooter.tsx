@@ -34,7 +34,9 @@ export interface AnnotationFooterEventProps {
     onCopyPasterBtnClick: () => void
 }
 
-class AnnotationFooter extends React.Component<Props> {
+class AnnotationFooter extends React.Component<
+    Props & { togglePreview: () => void }
+> {
     private renderDefaultFooter() {
         const { isEdited, timestamp, isBookmarked } = this.props
 
@@ -138,6 +140,11 @@ class AnnotationFooter extends React.Component<Props> {
                     <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
                 )}
                 <BtnContainerStyled>
+                    {mode === 'edit' && (
+                        <ActionBtnStyled onClick={this.props.togglePreview}>
+                            Preview
+                        </ActionBtnStyled>
+                    )}
                     <CancelBtnStyled onClick={cancelBtnHandler}>
                         Cancel
                     </CancelBtnStyled>

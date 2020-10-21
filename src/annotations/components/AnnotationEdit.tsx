@@ -9,6 +9,7 @@ import { FocusableComponent } from './types'
 export interface AnnotationEditEventProps {
     onEditConfirm: (url: string) => void
     onEditCancel: () => void
+    setEditPreview: (showPreview: boolean) => void
     onCommentChange: (comment: string) => void
     setTagInputActive: (active: boolean) => void
     updateTags: PickerUpdateHandler
@@ -17,6 +18,7 @@ export interface AnnotationEditEventProps {
 
 export interface AnnotationEditGeneralProps {
     isTagInputActive: boolean
+    showPreview: boolean
     comment: string
     tags: string[]
 }
