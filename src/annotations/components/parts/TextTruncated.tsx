@@ -1,47 +1,39 @@
 import * as React from 'react'
+import ReactMarkdown from 'react-markdown'
 import styled from 'styled-components'
 
-interface Props {
-    text: string
-    getTruncatedTextObject: (
-        text: string,
-    ) => {
-        isTextTooLong: boolean
-        text: string
-    }
-    isHighlight: boolean
-}
-
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { TextTruncator } from 'src/annotations/types'
+import { truncateText } from 'src/annotations/utils'
+
+export interface Props {
+    text: string
+    isHighlight: boolean
+    truncateText?: TextTruncator
+}
 
 interface State {
     shouldTruncate: boolean
 }
 
 class TextTruncated extends React.Component<Props, State> {
-    static defaultProps: Partial<Props> = {
-        text: '',
-    }
+    static defaultProps: Partial<Props> = { text: '', truncateText }
 
-    state = {
-        shouldTruncate: true,
-    }
+    state: State = { shouldTruncate: true }
 
     componentDidMount() {
-        const { text, getTruncatedTextObject } = this.props
-        const { isTextTooLong } = getTruncatedTextObject(text)
-        this.setState({ shouldTruncate: isTextTooLong })
+        const { isTooLong } = this.props.truncateText(this.props.text)
+        this.setState({ shouldTruncate: isTooLong })
     }
 
     componentDidUpdate(prevProps: Props) {
-        const { text, getTruncatedTextObject } = this.props
-        if (text !== prevProps.text) {
-            const { isTextTooLong } = getTruncatedTextObject(text)
-            this.setState({ shouldTruncate: isTextTooLong })
+        if (this.props.text !== prevProps.text) {
+            const { isTooLong } = this.props.truncateText(this.props.text)
+            this.setState({ shouldTruncate: isTooLong })
         }
     }
 
-    private _toggleTextTruncation = (e: React.MouseEvent) => {
+    private _toggleTextTruncation: React.MouseEventHandler = (e) => {
         e.stopPropagation()
         this.setState((prevState) => ({
             shouldTruncate: !prevState.shouldTruncate,
@@ -49,37 +41,35 @@ class TextTruncated extends React.Component<Props, State> {
     }
 
     render() {
-        const { text, getTruncatedTextObject } = this.props
-        const { isTextTooLong, text: truncatedText } = getTruncatedTextObject(
-            text,
+        const { isTooLong, text: truncatedText } = this.props.truncateText(
+            this.props.text,
         )
-        const { shouldTruncate } = this.state
-        const textToBeDisplayed = shouldTruncate ? truncatedText : text
+        const textToBeDisplayed = this.state.shouldTruncate
+            ? truncatedText
+            : this.props.text
 
         return (
-            <React.Fragment>
-                {this.props.isHighlight && (
-                    <TextToBeDisplayed>{textToBeDisplayed}</TextToBeDisplayed>
-                )}
-
-                {!this.props.isHighlight && (
+            <>
+                {this.props.isHighlight ? (
+                    <HighlightText>{textToBeDisplayed}</HighlightText>
+                ) : (
                     <TextBox>
-                        <TextToBeDisplayed>
-                            {textToBeDisplayed}
-                        </TextToBeDisplayed>
+                        <CommentText>{textToBeDisplayed}</CommentText>
                         <IconStyled />
                     </TextBox>
                 )}
-                <CommentTextBox>
-                    {isTextTooLong && (
+                <ToggleMoreBox>
+                    {isTooLong && (
                         <ToggleMoreButtonStyled
                             onClick={this._toggleTextTruncation}
                         >
-                            {shouldTruncate ? 'Show More' : 'Show Less'}
+                            {this.state.shouldTruncate
+                                ? 'Show More'
+                                : 'Show Less'}
                         </ToggleMoreButtonStyled>
                     )}
-                </CommentTextBox>
-            </React.Fragment>
+                </ToggleMoreBox>
+            </>
         )
     }
 }
@@ -121,10 +111,18 @@ const TextBox = styled.div`
     }
 `
 
-const TextToBeDisplayed = styled.span`
+const CommentText = styled(ReactMarkdown)`
+    display: block;
+`
+
+const HighlightText = styled.span`
     box-decoration-break: clone;
-    padding: 0 5px;
     overflow: hidden;
+    line-height: 25px;
+    font-style: normal;
+    background-color: #65ffc8;
+    color: #3a2f45;
+    padding: 2px 5px;
 `
 
 const ToggleMoreButtonStyled = styled.div`
@@ -142,7 +140,7 @@ const ToggleMoreButtonStyled = styled.div`
     }
 `
 
-const CommentTextBox = styled.div`
+const ToggleMoreBox = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: flex-start;

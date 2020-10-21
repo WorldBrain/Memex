@@ -6,7 +6,8 @@ import { connect } from 'react-redux'
 import { MapDispatchToProps } from '../types'
 import DefaultDeleteModeContent from './default-delete-mode-content'
 import EditModeContent from './edit-mode-content'
-import { TruncatedTextRenderer } from '../components'
+// import { TruncatedTextRenderer } from '../components'
+import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import niceTime from '../../util/nice-time'
 import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
@@ -170,36 +171,6 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     private _getFormattedTimestamp = (timestamp: number) => niceTime(timestamp)
 
-    private _getTruncatedTextObject: (
-        text: string,
-    ) => { isTextTooLong: boolean; text: string } = (text) => {
-        if (text.length > 280) {
-            const truncatedText = text.slice(0, 280)
-            return {
-                isTextTooLong: true,
-                text: truncatedText,
-            }
-        }
-
-        for (let i = 0, newlineCount = 0; i < text.length; ++i) {
-            if (text[i] === '\n') {
-                newlineCount++
-                if (newlineCount > 4) {
-                    const truncatedText = text.slice(0, i)
-                    return {
-                        isTextTooLong: true,
-                        text: truncatedText,
-                    }
-                }
-            }
-        }
-
-        return {
-            isTextTooLong: false,
-            text,
-        }
-    }
-
     private _handleEditAnnotation = (
         commentText: string,
         tagsInput: string[],
@@ -277,11 +248,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                 {/* Highlighted text for the annotation. If available, shown in
                 every mode. */}
                 {this.props.body && (
-                    <TruncatedTextRenderer
-                        text={this.props.body}
-                        getTruncatedTextObject={this._getTruncatedTextObject}
-                        isHighlight={true}
-                    />
+                    <TextTruncated text={this.props.body} isHighlight={true} />
                 )}
 
                 {mode !== 'edit' ? (
@@ -301,7 +268,6 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         editIconClickHandler={this._handleEditIconClick}
                         trashIconClickHandler={this._handleTrashIconClick}
                         shareIconClickHandler={this._handleShareIconClick}
-                        getTruncatedTextObject={this._getTruncatedTextObject}
                         handleBookmarkToggle={this.handleBookmarkToggle}
                         handleCopyPasterClick={this.props.handleCopyPasterClick}
                         {...shareAnnotationProps}

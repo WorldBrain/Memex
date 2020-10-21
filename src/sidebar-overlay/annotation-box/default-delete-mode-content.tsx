@@ -22,12 +22,6 @@ interface Props extends ShareAnnotationProps {
     handleCopyPasterClick?: () => void
     handleTagClick: (tag: string) => void
     handleBookmarkToggle: () => void
-    getTruncatedTextObject: (
-        text: string,
-    ) => {
-        isTextTooLong: boolean
-        text: string
-    }
 }
 
 /* tslint:disable-next-line variable-name */
@@ -40,7 +34,6 @@ const DefaultDeleteModeContent = (props: Props) => (
                 tags={props.tags}
                 isJustComment={!props.body}
                 handleTagClick={props.handleTagClick}
-                getTruncatedTextObject={props.getTruncatedTextObject}
             />
         )}
 

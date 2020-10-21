@@ -1,7 +1,8 @@
 import * as React from 'react'
 import cx from 'classnames'
 
-import { TruncatedTextRenderer } from '../components'
+// import { TruncatedTextRenderer } from '../components'
+import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 
 const styles = require('./comment-tags.css')
 
@@ -10,9 +11,6 @@ interface Props {
     tags?: string[]
     isJustComment: boolean
     handleTagClick: (tag: string) => void
-    getTruncatedTextObject: (
-        text: string,
-    ) => { isTextTooLong: boolean; text: string }
 }
 
 /* tslint:disable-next-line variable-name */
@@ -21,7 +19,6 @@ const CommentTags = ({
     tags,
     isJustComment,
     handleTagClick,
-    getTruncatedTextObject,
 }: Props) => (
     <div
         className={cx({
@@ -30,13 +27,7 @@ const CommentTags = ({
         })}
     >
         {/* Comment for the annotation. */}
-        {!!comment && (
-            <TruncatedTextRenderer
-                text={comment}
-                getTruncatedTextObject={getTruncatedTextObject}
-                isHighlight={false}
-            />
-        )}
+        {!!comment && <TextTruncated text={comment} isHighlight={false} />}
 
         {/* Tags for the annotation. */}
         {!!tags && tags.length !== 0 && (

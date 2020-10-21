@@ -10,12 +10,6 @@ export interface Props extends AnnotationFooterEventProps {
     tags: string[]
     theme: SidebarAnnotationTheme
     onTagClick?: (tag: string) => void
-    getTruncatedTextObject: (
-        text: string,
-    ) => {
-        isTextTooLong: boolean
-        text: string
-    }
 }
 
 export interface AnnotationFooterEventProps {
@@ -64,22 +58,17 @@ class AnnotationView extends React.Component<Props> {
 
         return (
             <ThemeProvider theme={this.props.theme}>
-                {this.props.comment?.length > 0 && 
-                    <CommentBox onClick={this.props.onEditIconClick} hasHighlight={this.props.hasHighlight}>
-                        <TextTruncated
-                            isHighlight={false}
-                            text={comment}
-                            getTruncatedTextObject={
-                                this.props.getTruncatedTextObject
-                            }
-                        />
+                {this.props.comment?.length > 0 && (
+                    <CommentBox
+                        onClick={this.props.onEditIconClick}
+                        hasHighlight={this.props.hasHighlight}
+                    >
+                        <TextTruncated isHighlight={false} text={comment} />
                     </CommentBox>
-                }
-                {this.props.tags?.length > 0 && 
-                    <TagBox>
-                        {this.renderTags()}
-                    </TagBox>
-                }
+                )}
+                {this.props.tags?.length > 0 && (
+                    <TagBox>{this.renderTags()}</TagBox>
+                )}
             </ThemeProvider>
         )
     }
@@ -134,5 +123,4 @@ const CommentBox = styled.div`
     `}
 `
 
-const TagBox = styled.div `
-`
+const TagBox = styled.div``

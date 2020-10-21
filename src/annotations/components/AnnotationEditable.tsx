@@ -20,36 +20,6 @@ import {
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 
-const getTruncatedTextObject: (
-    text: string,
-) => { isTextTooLong: boolean; text: string } = (text) => {
-    if (text.length > 280) {
-        const truncatedText = text.slice(0, 280) + '...'
-        return {
-            isTextTooLong: true,
-            text: truncatedText,
-        }
-    }
-
-    for (let i = 0, newlineCount = 0; i < text.length; ++i) {
-        if (text[i] === '\n') {
-            newlineCount++
-            if (newlineCount > 4) {
-                const truncatedText = text.slice(0, i)
-                return {
-                    isTextTooLong: true,
-                    text: truncatedText,
-                }
-            }
-        }
-    }
-
-    return {
-        isTextTooLong: false,
-        text,
-    }
-}
-
 export interface AnnotationEditableGeneralProps {}
 
 export interface AnnotationEditableProps {
@@ -165,13 +135,7 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <HighlightStyled>
-                <HighlightTextStyled>
-                    <TextTruncated
-                        isHighlight={true}
-                        text={this.props.body}
-                        getTruncatedTextObject={getTruncatedTextObject}
-                    />
-                </HighlightTextStyled>
+                <TextTruncated isHighlight={true} text={this.props.body} />
             </HighlightStyled>
         )
     }
@@ -218,7 +182,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                 {...this.props}
                 {...annotationFooterDependencies}
                 theme={this.theme}
-                getTruncatedTextObject={getTruncatedTextObject}
             />
         )
     }
@@ -266,17 +229,7 @@ const CopyPasterWrapper = styled.div`
     left: 70px;
 `
 
-const HighlightTextStyled = styled.span`
-    line-height: 25px;
-    font-style: normal;
-    background-color: #65ffc8;
-    color: #3a2f45;
-    padding: 2px 0;
-
-    & div {
-        background-color: none;
-    }
-`
+const HighlightTextStyled = styled.span``
 
 const HighlightStyled = styled.div`
     font-weight: 400;
