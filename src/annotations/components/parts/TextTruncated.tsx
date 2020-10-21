@@ -13,39 +13,44 @@ export interface Props {
 }
 
 interface State {
-    shouldTruncate: boolean
+    isTruncated: boolean
+    truncatedText: string
+    needsTruncation: boolean
 }
 
 class TextTruncated extends React.Component<Props, State> {
     static defaultProps: Partial<Props> = { text: '', truncateText }
 
-    state: State = { shouldTruncate: true }
+    constructor(props: Props) {
+        super(props)
 
-    componentDidMount() {
-        const { isTooLong } = this.props.truncateText(this.props.text)
-        this.setState({ shouldTruncate: isTooLong })
+        const { isTooLong, text } = this.props.truncateText(this.props.text)
+        this.state = {
+            isTruncated: isTooLong,
+            needsTruncation: isTooLong,
+            truncatedText: text,
+        }
     }
 
     componentDidUpdate(prevProps: Props) {
         if (this.props.text !== prevProps.text) {
-            const { isTooLong } = this.props.truncateText(this.props.text)
-            this.setState({ shouldTruncate: isTooLong })
+            const { isTooLong, text } = this.props.truncateText(this.props.text)
+            this.setState({
+                isTruncated: isTooLong,
+                needsTruncation: isTooLong,
+                truncatedText: text,
+            })
         }
     }
 
     private _toggleTextTruncation: React.MouseEventHandler = (e) => {
         e.stopPropagation()
-        this.setState((prevState) => ({
-            shouldTruncate: !prevState.shouldTruncate,
-        }))
+        this.setState((prevState) => ({ isTruncated: !prevState.isTruncated }))
     }
 
     render() {
-        const { isTooLong, text: truncatedText } = this.props.truncateText(
-            this.props.text,
-        )
-        const textToBeDisplayed = this.state.shouldTruncate
-            ? truncatedText
+        const textToBeDisplayed = this.state.isTruncated
+            ? this.state.truncatedText
             : this.props.text
 
         return (
@@ -59,13 +64,11 @@ class TextTruncated extends React.Component<Props, State> {
                     </TextBox>
                 )}
                 <ToggleMoreBox>
-                    {isTooLong && (
+                    {this.state.needsTruncation && (
                         <ToggleMoreButtonStyled
                             onClick={this._toggleTextTruncation}
                         >
-                            {this.state.shouldTruncate
-                                ? 'Show More'
-                                : 'Show Less'}
+                            {this.state.isTruncated ? 'Show More' : 'Show Less'}
                         </ToggleMoreButtonStyled>
                     )}
                 </ToggleMoreBox>
