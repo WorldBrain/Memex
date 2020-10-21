@@ -142,7 +142,8 @@ const AnnotationBoxDefaultFooter = styled.div`
     align-items: center;
     justify-content: flex-end;
     width: 100%;
-    height: 30px;
+    height: 24px;
+    margin-top: 10px;
 `
 
 const ButtonContainer = styled.div`
