@@ -63,9 +63,9 @@ class TextTruncated extends React.Component<Props, State> {
                 {this.props.isHighlight ? (
                     <HighlightText>{textToBeDisplayed}</HighlightText>
                 ) : (
-                    <TextBox onClick={this.props.onCommentEditClick}>
+                    <TextBox>
                         <CommentText>{textToBeDisplayed}</CommentText>
-                        <IconStyled />
+                        <IconStyledBox onClick={this.props.onCommentEditClick}><IconStyled/></IconStyledBox>
                     </TextBox>
                 )}
                 <ToggleMoreBox>
@@ -85,24 +85,33 @@ class TextTruncated extends React.Component<Props, State> {
     }
 }
 
+const IconStyledBox = styled.div`
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    border-radius: 3px;
+    padding: 3px;
+    display: none;
+`
+
 const IconStyled = styled.button`
     border: none;
     z-index: 2500;
     outline: none;
-    border-radius: 3px;
     width: 20px;
     height: 20px;
     opacity: 0.6;
-    position: absolute;
-    right: 5px;
-    top: 5px;
-    padding: 3px;
-    display: none;
     background-color: #3a2f45;
     mask-image: url(${icons.commentEditFull});
     mask-position: center;
     mask-repeat: no-repeat;
     mask-size: 16px;
+    cursor: pointer;
 `
 
 const TextBox = styled.div`
@@ -110,20 +119,88 @@ const TextBox = styled.div`
     min-height: 30px;
     display: flex;
     align-items: center;
+    line-break: auto;
+    overflow-x: scroll;
+    line-height: 22px;
 
-    &: hover {
-        background-color: #e0e0e0;
-        border-radius: 3px;
-        cursor: pointer;
+    &: hover ${IconStyledBox} {
+        display: flex;
+    }
 
-        &:hover ${IconStyled} {
-            display: flex;
+    & h1 {
+        font-size: 1.5em
+        margin-block-end: 0em;
+        margin-bottom: -5px;
+    }
+
+    & h2 {
+        font-size: 1.3em
+        margin-block-end: 0em;
+        margin-bottom: -5px;
+    }
+
+    & h3 {
+        font-size: 1.1em
+        margin-block-end: 0em;
+        margin-bottom: -5px;
+    }
+
+    & blockquote {
+        border-left: 4px solid #5cd9a6
+        margin: 0px;
+        padding: 5px 5px 5px 15px;
+        font-style: italic;
+
+        & p {
+            margin: 0px;
         }
+    }
+
+    & ul {
+        padding-inline-start: 20px;  
+        margin-top: 10px;
+        
+        & ul {
+            margin-top: 5px;
+        }
+
+    }
+
+    & code {
+        padding: 0px 4px;
+        border: 1px solid #1d1c1d21;
+        border-radius: 3px;
+        color: #e01e5a;
+        background-color: #1d1c1d04
+    }
+
+    & pre {
+        padding: 10px;
+        color: #3a2f45;
+        border: 1px solid #1d1c1d21;
+        background-color: #1d1c1d04;
+        border-radius: 3px
+
+        & code {
+            background-color: transparent;
+            color: #3a2f45;
+            border: none;
+            padding: 0px;
+        }
+    }
+
+    & hr {
+        margin: 20px 0px;
+    }
+
+    & img {
+        height:  
     }
 `
 
 const CommentText = styled(ReactMarkdown)`
     display: block;
+    width: 100%;
 `
 
 const HighlightText = styled.span`
@@ -156,6 +233,7 @@ const ToggleMoreBox = styled.div`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
+    cursor: pointer;
 `
 
 export default TextTruncated

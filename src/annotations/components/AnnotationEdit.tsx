@@ -119,5 +119,5 @@ const StyledTextArea = styled.textarea`
         border: none;
     }
 
-    min-height: 100px;
+    min-height: 300px;
 `

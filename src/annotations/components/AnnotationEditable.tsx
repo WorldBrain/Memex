@@ -256,9 +256,10 @@ const HighlightStyled = styled.div`
     font-size: 14px;
     letter-spacing: 0.5px;
     margin: 0 0 5px 0;
-    padding: 15px 15px 7px 15px;
+    padding: 10px 15px 7px 10px;
     line-height: 20px;
     text-align: left;
+    line-break: normal;
 `
 
 const AnnotationStyled = styled.div`
