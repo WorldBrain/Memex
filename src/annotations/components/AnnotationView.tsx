@@ -59,11 +59,12 @@ class AnnotationView extends React.Component<Props> {
         return (
             <ThemeProvider theme={this.props.theme}>
                 {this.props.comment?.length > 0 && (
-                    <CommentBox
-                        onClick={this.props.onEditIconClick}
-                        hasHighlight={this.props.hasHighlight}
-                    >
-                        <TextTruncated isHighlight={false} text={comment} />
+                    <CommentBox hasHighlight={this.props.hasHighlight}>
+                        <TextTruncated
+                            isHighlight={false}
+                            text={comment}
+                            onCommentEditClick={this.props.onEditIconClick}
+                        />
                     </CommentBox>
                 )}
                 {this.props.tags?.length > 0 && (

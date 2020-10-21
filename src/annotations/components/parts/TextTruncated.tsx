@@ -10,6 +10,7 @@ export interface Props {
     text: string
     isHighlight: boolean
     truncateText?: TextTruncator
+    onCommentEditClick?: React.MouseEventHandler
 }
 
 interface State {
@@ -58,7 +59,7 @@ class TextTruncated extends React.Component<Props, State> {
                 {this.props.isHighlight ? (
                     <HighlightText>{textToBeDisplayed}</HighlightText>
                 ) : (
-                    <TextBox>
+                    <TextBox onClick={this.props.onCommentEditClick}>
                         <CommentText>{textToBeDisplayed}</CommentText>
                         <IconStyled />
                     </TextBox>

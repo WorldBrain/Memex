@@ -11,6 +11,7 @@ interface Props {
     tags?: string[]
     isJustComment: boolean
     handleTagClick: (tag: string) => void
+    onCommentEditClick?: React.MouseEventHandler
 }
 
 /* tslint:disable-next-line variable-name */
@@ -19,6 +20,7 @@ const CommentTags = ({
     tags,
     isJustComment,
     handleTagClick,
+    onCommentEditClick,
 }: Props) => (
     <div
         className={cx({
@@ -27,7 +29,13 @@ const CommentTags = ({
         })}
     >
         {/* Comment for the annotation. */}
-        {!!comment && <TextTruncated text={comment} isHighlight={false} />}
+        {!!comment && (
+            <TextTruncated
+                text={comment}
+                isHighlight={false}
+                onCommentEditClick={onCommentEditClick}
+            />
+        )}
 
         {/* Tags for the annotation. */}
         {!!tags && tags.length !== 0 && (

@@ -34,6 +34,7 @@ const DefaultDeleteModeContent = (props: Props) => (
                 tags={props.tags}
                 isJustComment={!props.body}
                 handleTagClick={props.handleTagClick}
+                onCommentEditClick={props.editIconClickHandler}
             />
         )}
 
