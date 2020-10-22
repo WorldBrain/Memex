@@ -118,10 +118,8 @@ export class AnnotationsSidebarContainer<
                     ...DEF_CONTEXT,
                 }),
             onEditCancel: () =>
-                this.processEvent('switchAnnotationMode', {
+                this.processEvent('cancelEdit', {
                     annotationUrl: annotation.url,
-                    mode: 'default',
-                    ...DEF_CONTEXT,
                 }),
             onEditConfirm: () =>
                 this.processEvent('editAnnotation', {
