@@ -264,6 +264,13 @@ function annotationToReadwise(
         fullPageUrl: string
     },
 ): ReadwiseHighlight {
+
+    const today = new Date();
+    const date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    const dateTime = date+' '+time;
+
+
     return {
         title: annotation.pageTitle,
         source_url: options.fullPageUrl,
@@ -272,7 +279,7 @@ function annotationToReadwise(
         location_type: 'time_offset',
         highlighted_at: annotation.createdWhen,
         // highlight_url: annotation.url,
-        text: annotation?.body?.length ? annotation.body : 'Memex comment',
+        text: annotation?.body?.length ? annotation.body : 'Memex note from: '+ dateTime,
     }
 }
 
