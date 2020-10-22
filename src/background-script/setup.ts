@@ -62,6 +62,7 @@ import { PageAnalyzerInterface } from 'src/page-analysis/types'
 import { TabManager } from 'src/tab-management/background/tab-manager'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
 import { type } from 'openpgp'
+import pick from 'lodash/pick'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -240,8 +241,12 @@ export function createBackgroundModules(options: {
         storageManager,
         browserStorage: options.browserAPIs.storage.local,
         fetch,
-        getFullPageUrl: async (normalizedUrl) =>
-            (await pages.storage.getPage(normalizedUrl))?.fullUrl,
+        getPageData: async (normalizedUrl) =>
+            pick(
+                await pages.storage.getPage(normalizedUrl),
+                'fullUrl',
+                'fullTitle',
+            ),
         getAnnotationsByPks: async (pks) => {
             return directLinking.annotationStorage.getAnnotations(pks)
         },
