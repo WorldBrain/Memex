@@ -1,10 +1,10 @@
 import * as React from 'react'
-import ReactMarkdown from 'react-markdown'
 import styled from 'styled-components'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { TextTruncator } from 'src/annotations/types'
 import { truncateText } from 'src/annotations/utils'
+import Markdown from 'src/common-ui/components/markdown-renderer'
 
 export interface Props {
     text: string
@@ -52,9 +52,6 @@ class TextTruncated extends React.Component<Props, State> {
         this.setState((prevState) => ({ isTruncated: !prevState.isTruncated }))
     }
 
-    // TODO: add proper support for images
-    private imageRenderer = ({ src, alt }) => <span>{`![${alt}](${src})`}</span>
-
     render() {
         const textToBeDisplayed =
             !this.props.skipTruncation && this.state.isTruncated
@@ -67,13 +64,7 @@ class TextTruncated extends React.Component<Props, State> {
                     <HighlightText>{textToBeDisplayed}</HighlightText>
                 ) : (
                     <TextBox>
-                        <CommentText
-                            renderers={{
-                                image: this.imageRenderer,
-                            }}
-                        >
-                            {textToBeDisplayed}
-                        </CommentText>
+                        <CommentText>{textToBeDisplayed}</CommentText>
                         <IconStyledBox onClick={this.props.onCommentEditClick}>
                             <IconStyled />
                         </IconStyledBox>
@@ -224,7 +215,7 @@ const TextBox = styled.div`
     }
 `
 
-const CommentText = styled(ReactMarkdown)`
+const CommentText = styled(Markdown)`
     display: block;
     width: 100%;
 `
