@@ -24,24 +24,36 @@ export const truncateText: TextTruncator = (
         maxLineBreaks: 4,
     },
 ) => {
-    if (text.length > maxLength) {
-        return {
-            isTooLong: true,
-            text: text.slice(0, maxLength) + '…',
-        }
-    }
 
-    for (let i = 0, newlineCount = 0; i < text.length; ++i) {
+    if (text.length > maxLength) {
+        for (let i = maxLength, checkedLength = maxLength; i = checkedLength; i++) {
+            if (text.charAt(checkedLength) === " ") {
+                return {
+                    isTooLong: true,
+                    text: text.slice(0, checkedLength) + '…',
+                }
+            } else {
+                checkedLength++
+            }
+        }
+    } else {
+
+        for (let i = 0, newlineCount = 0; i < text.length; ++i) {
         if (text[i] === '\n') {
             newlineCount++
             if (newlineCount > maxLineBreaks) {
-                return {
-                    isTooLong: true,
-                    text: text.slice(0, i) + '…',
+                    return {
+                        isTooLong: true,
+                        text: text.slice(0, i) + '…',
+                    }
                 }
             }
-        }
     }
+        
+    }
+    
+
+    
 
     return { isTooLong: false, text }
 }
