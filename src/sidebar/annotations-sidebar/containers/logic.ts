@@ -31,7 +31,7 @@ interface EditForm {
     tags: string[]
 }
 
-interface EditForms {
+export interface EditForms {
     [annotationUrl: string]: EditForm
 }
 

@@ -1,16 +1,25 @@
 import React, { Component, MouseEventHandler } from 'react'
 import cx from 'classnames'
 
-import AnnotationBox from 'src/sidebar-overlay/annotation-box'
 import { Annotation as AnnotationFlawed } from 'src/annotations/types'
 import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
+import AnnotationEditable from 'src/annotations/components/AnnotationEditable'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
-import { contentSharing, auth } from 'src/util/remote-functions-background'
+import {
+    contentSharing,
+    auth,
+    tags,
+} from 'src/util/remote-functions-background'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
+import {
+    EditForms,
+    INIT_FORM_STATE,
+} from 'src/sidebar/annotations-sidebar/containers/logic'
+import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 
 const styles = require('./annotation-list.css')
 
@@ -50,12 +59,17 @@ interface State {
     prevIsExpandedOverride: boolean
     /** Received annotations are stored and manipulated through edit/delete */
     annotations: Annotation[]
+    editForms: EditForms
+    annotationModes: {
+        [annotationUrl: string]: AnnotationMode
+    }
     annotationsSharingInfo: SharingInfo
     sharingAccess: AnnotationSharingAccess
 }
 
 class AnnotationList extends Component<Props, State> {
     private authBG = auth
+    private tagsBG = tags
     private contentShareBG = contentSharing
 
     state: State = {
@@ -65,6 +79,21 @@ class AnnotationList extends Component<Props, State> {
         prevIsExpandedOverride: this.props.isExpandedOverride,
         // TODO: This shouldn't be in state - get it out and ensure wherever it gets passed down as props from properly handles state mutations
         annotations: this.props.annotations,
+        editForms: this.props.annotations.reduce(
+            (acc, curr) => ({
+                ...acc,
+                [curr.url]: {
+                    ...INIT_FORM_STATE,
+                    commentText: curr.comment,
+                    tags: curr.tags,
+                },
+            }),
+            {},
+        ),
+        annotationModes: this.props.annotations.reduce(
+            (acc, curr) => ({ ...acc, [curr.url]: 'default' }),
+            {},
+        ),
         sharingAccess: 'feature-disabled',
         annotationsSharingInfo: {},
     }
@@ -132,38 +161,43 @@ class AnnotationList extends Component<Props, State> {
         )
     }
 
-    private handleEditAnnotation = (
-        url: string,
-        comment: string,
-        tags: string[],
-    ) => {
-        // Find the annotation in state and update it
-        const { annotations } = this.state
+    private handleEditAnnotation = (url: string) => () => {
+        const { annotations, editForms } = this.state
 
         const index = annotations.findIndex((annot) => annot.url === url)
+        const form = editForms[url]
         const annotation: Annotation = annotations[index]
 
         if (
             !annotation ||
-            (!annotation.body && !comment.length && !tags.length)
+            (!annotation.body &&
+                !form.commentText?.length &&
+                !form.tags?.length)
         ) {
             return
         }
 
         const newAnnotations: Annotation[] = [
             ...annotations.slice(0, index),
-            { ...annotation, comment, tags, lastEdited: new Date() },
+            {
+                ...annotation,
+                comment: form.commentText,
+                tags: form.tags,
+                lastEdited: new Date(),
+            },
             ...annotations.slice(index + 1),
         ]
 
-        this.props.handleEditAnnotation(url, comment, tags)
+        this.props.handleEditAnnotation(url, form.commentText, form.tags)
 
         this.setState({
             annotations: newAnnotations,
+            annotationModes: { [url]: 'default' },
+            editForms: { [url]: { ...INIT_FORM_STATE } },
         })
     }
 
-    private handleDeleteAnnotation = (url: string) => {
+    private handleDeleteAnnotation = (url: string) => () => {
         this.props.handleDeleteAnnotation(url)
 
         // Delete the annotation in the state too
@@ -180,7 +214,7 @@ class AnnotationList extends Component<Props, State> {
         })
     }
 
-    private handleBookmarkToggle = (url: string) => {
+    private handleBookmarkToggle = (url: string) => () => {
         this.props.handleBookmarkToggle(url)
 
         const { annotations } = this.state
@@ -196,12 +230,26 @@ class AnnotationList extends Component<Props, State> {
         this.setState({ annotations: newAnnotations })
     }
 
-    private handleGoToAnnotation = (annotation: Annotation) => (
-        e: React.MouseEvent<HTMLElement>,
-    ) => {
-        e.preventDefault()
-        e.stopPropagation()
+    private handleGoToAnnotation = (annotation: Annotation) => () => {
         this.props.goToAnnotation(annotation)
+    }
+
+    private handleEditCancel = (url: string, commentText: string) => () =>
+        this.setState((state) => ({
+            annotationModes: { [url]: 'default' },
+            editForms: {
+                [url]: {
+                    ...state.editForms[url],
+                    showPreview: false,
+                    commentText,
+                },
+            },
+        }))
+
+    private handleShareClick = (url: string) => () => {
+        if (this.props.setActiveShareMenuNoteId != null) {
+            this.props.setActiveShareMenuNoteId(url)
+        }
     }
 
     private renderCopyPasterManager(annot: Annotation) {
@@ -259,37 +307,117 @@ class AnnotationList extends Component<Props, State> {
 
     private renderAnnotations() {
         return this.state.annotations.map((annot) => (
-            <AnnotationBox
-                env="overview"
+            <AnnotationEditable
                 key={annot.url}
-                pageUrl={this.props.pageUrl}
-                className={styles.annotation}
-                handleGoToAnnotation={this.handleGoToAnnotation(annot)}
-                handleDeleteAnnotation={this.handleDeleteAnnotation}
-                handleEditAnnotation={this.handleEditAnnotation}
-                handleBookmarkToggle={this.handleBookmarkToggle}
                 {...annot}
-                hasBookmark={annot.hasBookmark}
-                lastEdited={annot.lastEdited?.valueOf()}
-                createdWhen={annot.createdWhen?.valueOf()}
+                className={styles.annotation}
+                isBookmarked={annot.hasBookmark}
+                mode={this.state.annotationModes[annot.url]}
                 sharingAccess={this.state.sharingAccess}
                 sharingInfo={this.state.annotationsSharingInfo[annot.url]}
-                updateSharingInfo={this.updateAnnotationShareState(annot.url)}
-                shareMenu={this.renderShareMenu(annot)}
-                copyPasterManager={this.renderCopyPasterManager(annot)}
-                openShareMenu={
-                    this.props.setActiveShareMenuNoteId != null
-                        ? () => this.props.setActiveShareMenuNoteId(annot.url)
-                        : undefined
+                renderShareMenuForAnnotation={() => this.renderShareMenu(annot)}
+                renderCopyPasterForAnnotation={() =>
+                    this.renderCopyPasterManager(annot)
                 }
-                handleCopyPasterClick={
-                    this.props.setActiveCopyPasterAnnotationId != null
-                        ? () =>
-                              this.props.setActiveCopyPasterAnnotationId(
-                                  annot.url,
-                              )
-                        : undefined
-                }
+                annotationEditDependencies={{
+                    comment: this.state.editForms[annot.url].commentText,
+                    tags: this.state.editForms[annot.url].tags,
+                    showPreview: this.state.editForms[annot.url].showPreview,
+                    isTagInputActive: this.state.editForms[annot.url]
+                        .isTagInputActive,
+                    toggleEditPreview: () =>
+                        this.setState((state) => ({
+                            editForms: {
+                                [annot.url]: {
+                                    ...state.editForms[annot.url],
+                                    showPreview: !state.editForms[annot.url]
+                                        .showPreview,
+                                },
+                            },
+                        })),
+                    onCommentChange: (commentText) =>
+                        this.setState((state) => ({
+                            editForms: {
+                                [annot.url]: {
+                                    ...state.editForms[annot.url],
+                                    commentText,
+                                },
+                            },
+                        })),
+                    updateTags: async ({ selected }) =>
+                        this.setState((state) => ({
+                            editForms: {
+                                [annot.url]: {
+                                    ...state.editForms[annot.url],
+                                    tags: selected,
+                                },
+                            },
+                        })),
+                    deleteSingleTag: (tagName) =>
+                        this.setState((state) => ({
+                            editForms: {
+                                [annot.url]: {
+                                    ...state.editForms[annot.url],
+                                    tags: state.editForms[
+                                        annot.url
+                                    ].tags.filter((tag) => tag === tagName),
+                                },
+                            },
+                        })),
+                    setTagInputActive: (isTagInputActive) =>
+                        this.setState((state) => ({
+                            editForms: {
+                                [annot.url]: {
+                                    ...state.editForms[annot.url],
+                                    isTagInputActive,
+                                },
+                            },
+                        })),
+                    onEditCancel: this.handleEditCancel(
+                        annot.url,
+                        annot.comment,
+                    ),
+                    onEditConfirm: this.handleEditAnnotation(annot.url),
+                }}
+                annotationFooterDependencies={{
+                    onEditIconClick: () =>
+                        this.setState({
+                            annotationModes: {
+                                [annot.url]: 'edit',
+                            },
+                        }),
+                    onEditCancel: this.handleEditCancel(
+                        annot.url,
+                        annot.comment,
+                    ),
+                    onEditConfirm: this.handleEditAnnotation(annot.url),
+                    onDeleteCancel: this.handleEditCancel(
+                        annot.url,
+                        annot.comment,
+                    ),
+                    onDeleteConfirm: this.handleDeleteAnnotation(annot.url),
+                    onDeleteIconClick: () =>
+                        this.setState({
+                            annotationModes: { [annot.url]: 'delete' },
+                        }),
+                    toggleBookmark: this.handleBookmarkToggle(annot.url),
+                    onShareClick: this.handleShareClick(annot.url),
+                    onUnshareClick: this.handleShareClick(annot.url),
+                    onGoToAnnotation: this.handleGoToAnnotation(annot),
+                    onCopyPasterBtnClick:
+                        this.props.setActiveCopyPasterAnnotationId != null
+                            ? () =>
+                                  this.props.setActiveCopyPasterAnnotationId(
+                                      annot.url,
+                                  )
+                            : undefined,
+                }}
+                tagPickerDependencies={{
+                    loadDefaultSuggestions: () =>
+                        this.tagsBG.fetchInitialTagSuggestions(),
+                    queryEntries: (query) =>
+                        this.tagsBG.searchForTagSuggestions({ query }),
+                }}
             />
         ))
     }

@@ -36,7 +36,7 @@ export interface AnnotationEditableProps {
     body?: string
     comment?: string
     tags: string[]
-    hasBookmark?: boolean
+    isBookmarked?: boolean
     mode: AnnotationMode
     tagPickerDependencies: GenericPickerDependenciesMinusSave
     annotationFooterDependencies: AnnotationFooterEventProps
@@ -99,9 +99,9 @@ export default class AnnotationEditable extends React.Component<Props> {
     private setupEventListeners = () => {
         if (this.boxRef) {
             const handleMouseEnter = () =>
-                this.props.onMouseEnter(this.props.url)
+                this.props.onMouseEnter?.(this.props.url)
             const handleMouseLeave = () =>
-                this.props.onMouseLeave(this.props.url)
+                this.props.onMouseLeave?.(this.props.url)
 
             this.boxRef.addEventListener('mouseenter', handleMouseEnter)
             this.boxRef.addEventListener('mouseleave', handleMouseLeave)
