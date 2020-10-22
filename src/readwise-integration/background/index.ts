@@ -21,10 +21,14 @@ import {
     remoteFunctionWithoutExtraArgs,
     registerRemoteFunctions,
 } from 'src/util/webextensionRPC'
+import { Page } from 'src/search'
 
 type ReadwiseInterfaceMethod<
     Method extends keyof ReadwiseInterface<'provider'>
 > = ReadwiseInterface<'provider'>[Method]['function']
+
+type PageData = Pick<Page, 'fullTitle' | 'fullUrl'>
+type GetPageData = (normalizedUrl: string) => Promise<PageData>
 
 export class ReadwiseBackground {
     remoteFunctions: ReadwiseInterface<'provider'>
@@ -40,7 +44,7 @@ export class ReadwiseBackground {
             storageManager: StorageManager
             browserStorage: LimitedBrowserStorage
             fetch: typeof fetch
-            getFullPageUrl: (normalizedUrl: string) => Promise<string>
+            getPageData: GetPageData
             getAnnotationsByPks: (
                 annotationUrls: string[],
             ) => Promise<Annotation[]>
@@ -111,15 +115,15 @@ export class ReadwiseBackground {
         //     return
         // }
 
-        const getFullPageUrl = makeFullPageUrlCache({
-            getFullPageUrl: this.options.getFullPageUrl,
+        const getFullPageUrl = makePageDataCache({
+            getPageData: this.options.getPageData,
         })
 
         let annotationBatch: Annotation[] = []
         const scheduleBatch = async () => {
             await this._scheduleAnnotationBatchUpload(annotationBatch, {
                 queueInteraction,
-                getFullPageUrl,
+                getPageData: getFullPageUrl,
             })
         }
 
@@ -138,7 +142,7 @@ export class ReadwiseBackground {
     async _scheduleAnnotationBatchUpload(
         annotations: Annotation[],
         options: {
-            getFullPageUrl: (normalizedUrl: string) => Promise<string>
+            getPageData: GetPageData
             queueInteraction: ActionQueueInteraction
         },
     ) {
@@ -149,11 +153,11 @@ export class ReadwiseBackground {
                     await Promise.all(
                         annotations.map(async (annotation) => {
                             try {
-                                const fullPageUrl = await options.getFullPageUrl(
+                                const pageData = await options.getPageData(
                                     annotation.pageUrl,
                                 )
                                 return annotationToReadwise(annotation, {
-                                    fullPageUrl,
+                                    pageData,
                                 })
                             } catch (e) {
                                 console.error(e)
@@ -198,8 +202,8 @@ export class ReadwiseBackground {
             return
         }
 
-        const getFullPageUrl = makeFullPageUrlCache({
-            getFullPageUrl: this.options.getFullPageUrl,
+        const getPageData = makePageDataCache({
+            getPageData: this.options.getPageData,
         })
 
         for (const change of event.info.changes) {
@@ -214,13 +218,13 @@ export class ReadwiseBackground {
                         ...change.values,
                     } as Annotation
 
-                    const fullPageUrl = await getFullPageUrl(annotation.pageUrl)
+                    const pageData = await getPageData(annotation.pageUrl)
                     await this.actionQueue.scheduleAction(
                         {
                             type: 'post-highlights',
                             highlights: [
                                 annotationToReadwise(annotation, {
-                                    fullPageUrl: fullPageUrl,
+                                    pageData,
                                 }),
                             ],
                         },
@@ -237,11 +241,11 @@ export class ReadwiseBackground {
                     )
                     const highlights: ReadwiseHighlight[] = await Promise.all(
                         annotations.map(async (annotation) => {
-                            const fullPageUrl = await getFullPageUrl(
+                            const pageData = await getPageData(
                                 annotation.pageUrl,
                             )
                             return annotationToReadwise(annotation, {
-                                fullPageUrl: fullPageUrl,
+                                pageData,
                             })
                         }),
                     )
@@ -259,14 +263,12 @@ export class ReadwiseBackground {
 }
 
 function annotationToReadwise(
-    annotation: Annotation,
-    options: {
-        fullPageUrl: string
-    },
+    annotation: Omit<Annotation, 'pageTitle'>,
+    options: { pageData: PageData },
 ): ReadwiseHighlight {
     return {
-        title: annotation.pageTitle,
-        source_url: options.fullPageUrl,
+        title: options.pageData.fullTitle,
+        source_url: options.pageData.fullUrl,
         source_type: 'article',
         note: annotation.comment?.length ? annotation.comment : undefined,
         location_type: 'time_offset',
@@ -276,22 +278,20 @@ function annotationToReadwise(
     }
 }
 
-function makeFullPageUrlCache(options: {
-    getFullPageUrl: (normalizedUrl: string) => Promise<string>
-}) {
-    const fullPageUrls: { [normalizedUrl: string]: string } = {}
-    const getFullPageUrl = async (normalizedUrl: string) => {
-        if (fullPageUrls[normalizedUrl]) {
-            return fullPageUrls[normalizedUrl]
+function makePageDataCache(options: { getPageData: GetPageData }) {
+    const pageDataCache: { [normalizedUrl: string]: PageData } = {}
+    const getPageData = async (normalizedUrl: string) => {
+        if (pageDataCache[normalizedUrl]) {
+            return pageDataCache[normalizedUrl]
         }
-        const fullUrl = await options.getFullPageUrl(normalizedUrl)
+        const fullUrl = await options.getPageData(normalizedUrl)
         if (!fullUrl) {
             throw new Error(
                 `Can't get full URL for annotation to upload to Readwise`,
             )
         }
-        fullPageUrls[normalizedUrl] = fullUrl
+        pageDataCache[normalizedUrl] = fullUrl
         return fullUrl
     }
-    return getFullPageUrl
+    return getPageData
 }
