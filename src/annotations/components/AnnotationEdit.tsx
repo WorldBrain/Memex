@@ -9,7 +9,7 @@ import { FocusableComponent } from './types'
 export interface AnnotationEditEventProps {
     onEditConfirm: (url: string) => void
     onEditCancel: () => void
-    setEditPreview: (showPreview: boolean) => void
+    toggleEditPreview: () => void
     onCommentChange: (comment: string) => void
     setTagInputActive: (active: boolean) => void
     updateTags: PickerUpdateHandler
@@ -55,9 +55,16 @@ class AnnotationEdit extends React.Component<Props>
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         e.stopPropagation()
 
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            this.props.onEditConfirm(this.props.url)
-            return
+        if (e.key === 'Enter') {
+            if (e.altKey) {
+                this.props.toggleEditPreview()
+                return
+            }
+
+            if (e.ctrlKey || e.metaKey) {
+                this.props.onEditConfirm(this.props.url)
+                return
+            }
         }
 
         if (e.key === 'Escape') {

@@ -108,7 +108,7 @@ async function createDependencies() {
             tags: [],
             showPreview: false,
             isTagInputActive: false,
-            setEditPreview: action('setEditPreview'),
+            toggleEditPreview: action('toggleEditPreview'),
             onEditConfirm: action('confirmEdit'),
             onEditCancel: action('cancelEdit'),
             onCommentChange: action('changeComment'),

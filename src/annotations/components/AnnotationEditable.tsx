@@ -155,9 +155,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                 isEdited={this.isEdited}
                 timestamp={this.getFormattedTimestamp()}
                 togglePreview={() =>
-                    annotationEditDependencies.setEditPreview(
-                        !annotationEditDependencies.showPreview,
-                    )
+                    annotationEditDependencies.toggleEditPreview()
                 }
             />
         )
@@ -173,15 +171,20 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         if (annotationEditDependencies.showPreview) {
             return (
-                <AnnotationView
-                    previewMode
-                    theme={this.theme}
-                    tags={annotationEditDependencies.tags}
-                    comment={annotationEditDependencies.comment}
-                    onEditIconClick={
-                        annotationFooterDependencies.onEditIconClick
-                    }
-                />
+                <>
+                    <AnnotationView
+                        toggleEditPreview={
+                            annotationEditDependencies.toggleEditPreview
+                        }
+                        previewMode
+                        theme={this.theme}
+                        tags={annotationEditDependencies.tags}
+                        comment={annotationEditDependencies.comment}
+                        onEditIconClick={
+                            annotationEditDependencies.toggleEditPreview
+                        }
+                    />
+                </>
             )
         }
 
@@ -201,6 +204,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             <AnnotationView
                 {...this.props}
                 theme={this.theme}
+                toggleEditPreview={annotationEditDependencies.toggleEditPreview}
                 onEditIconClick={annotationFooterDependencies.onEditIconClick}
             />
         )
@@ -240,6 +244,8 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 }
+
+const SecretInput = styled.input``
 
 const ShareMenuWrapper = styled.div`
     position: relative;
