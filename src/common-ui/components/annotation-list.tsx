@@ -16,6 +16,7 @@ import {
 } from 'src/util/remote-functions-background'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import {
+    EditForm,
     EditForms,
     INIT_FORM_STATE,
 } from 'src/sidebar/annotations-sidebar/containers/logic'
@@ -190,11 +191,11 @@ class AnnotationList extends Component<Props, State> {
 
         this.props.handleEditAnnotation(url, form.commentText, form.tags)
 
-        this.setState({
+        this.setState((state) => ({
             annotations: newAnnotations,
-            annotationModes: { [url]: 'default' },
-            editForms: { [url]: { ...INIT_FORM_STATE } },
-        })
+            annotationModes: { ...state.annotationModes, [url]: 'default' },
+            editForms: { ...state.editForms, [url]: { ...INIT_FORM_STATE } },
+        }))
     }
 
     private handleDeleteAnnotation = (url: string) => () => {
@@ -238,6 +239,7 @@ class AnnotationList extends Component<Props, State> {
         this.setState((state) => ({
             annotationModes: { [url]: 'default' },
             editForms: {
+                ...state.editForms,
                 [url]: {
                     ...state.editForms[url],
                     showPreview: false,
@@ -305,6 +307,21 @@ class AnnotationList extends Component<Props, State> {
         )
     }
 
+    private handleEditFormUpdate = (
+        url: string,
+        deriveState: (state: State) => Partial<EditForm>,
+    ) => {
+        this.setState((state) => ({
+            editForms: {
+                ...state.editForms,
+                [url]: {
+                    ...state.editForms[url],
+                    ...deriveState(state),
+                },
+            },
+        }))
+    }
+
     private renderAnnotations() {
         return this.state.annotations.map((annot) => (
             <AnnotationEditable
@@ -326,52 +343,27 @@ class AnnotationList extends Component<Props, State> {
                     isTagInputActive: this.state.editForms[annot.url]
                         .isTagInputActive,
                     toggleEditPreview: () =>
-                        this.setState((state) => ({
-                            editForms: {
-                                [annot.url]: {
-                                    ...state.editForms[annot.url],
-                                    showPreview: !state.editForms[annot.url]
-                                        .showPreview,
-                                },
-                            },
+                        this.handleEditFormUpdate(annot.url, (state) => ({
+                            showPreview: !state.editForms[annot.url]
+                                .showPreview,
                         })),
                     onCommentChange: (commentText) =>
-                        this.setState((state) => ({
-                            editForms: {
-                                [annot.url]: {
-                                    ...state.editForms[annot.url],
-                                    commentText,
-                                },
-                            },
+                        this.handleEditFormUpdate(annot.url, () => ({
+                            commentText,
                         })),
                     updateTags: async ({ selected }) =>
-                        this.setState((state) => ({
-                            editForms: {
-                                [annot.url]: {
-                                    ...state.editForms[annot.url],
-                                    tags: selected,
-                                },
-                            },
+                        this.handleEditFormUpdate(annot.url, () => ({
+                            tags: selected,
                         })),
                     deleteSingleTag: (tagName) =>
-                        this.setState((state) => ({
-                            editForms: {
-                                [annot.url]: {
-                                    ...state.editForms[annot.url],
-                                    tags: state.editForms[
-                                        annot.url
-                                    ].tags.filter((tag) => tag === tagName),
-                                },
-                            },
+                        this.handleEditFormUpdate(annot.url, (state) => ({
+                            tags: state.editForms[annot.url].tags.filter(
+                                (tag) => tag !== tagName,
+                            ),
                         })),
                     setTagInputActive: (isTagInputActive) =>
-                        this.setState((state) => ({
-                            editForms: {
-                                [annot.url]: {
-                                    ...state.editForms[annot.url],
-                                    isTagInputActive,
-                                },
-                            },
+                        this.handleEditFormUpdate(annot.url, () => ({
+                            isTagInputActive,
                         })),
                     onEditCancel: this.handleEditCancel(
                         annot.url,

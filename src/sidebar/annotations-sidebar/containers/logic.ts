@@ -23,7 +23,7 @@ import {
 import { areTagsEquivalent } from 'src/tags/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 
-interface EditForm {
+export interface EditForm {
     showPreview: boolean
     isBookmarked: boolean
     isTagInputActive: boolean
