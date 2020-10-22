@@ -52,6 +52,9 @@ class TextTruncated extends React.Component<Props, State> {
         this.setState((prevState) => ({ isTruncated: !prevState.isTruncated }))
     }
 
+    // TODO: add proper support for images
+    private imageRenderer = ({ src, alt }) => <span>{`![${alt}](${src})`}</span>
+
     render() {
         const textToBeDisplayed =
             !this.props.skipTruncation && this.state.isTruncated
@@ -64,8 +67,16 @@ class TextTruncated extends React.Component<Props, State> {
                     <HighlightText>{textToBeDisplayed}</HighlightText>
                 ) : (
                     <TextBox>
-                        <CommentText>{textToBeDisplayed}</CommentText>
-                        <IconStyledBox onClick={this.props.onCommentEditClick}><IconStyled/></IconStyledBox>
+                        <CommentText
+                            renderers={{
+                                image: this.imageRenderer,
+                            }}
+                        >
+                            {textToBeDisplayed}
+                        </CommentText>
+                        <IconStyledBox onClick={this.props.onCommentEditClick}>
+                            <IconStyled />
+                        </IconStyledBox>
                     </TextBox>
                 )}
                 <ToggleMoreBox>
@@ -162,9 +173,9 @@ const TextBox = styled.div`
     }
 
     & ul {
-        padding-inline-start: 20px;  
+        padding-inline-start: 20px;
         margin-top: 10px;
-        
+
         & ul {
             margin-top: 5px;
         }
@@ -172,9 +183,9 @@ const TextBox = styled.div`
     }
 
     & ol {
-        padding-inline-start: 20px;  
+        padding-inline-start: 20px;
         margin-top: 10px;
-        
+
         & ol {
             margin-top: 5px;
         }
@@ -209,7 +220,7 @@ const TextBox = styled.div`
     }
 
     & img {
-        height:  
+        height:
     }
 `
 
