@@ -206,6 +206,7 @@ describe('SidebarContainerLogic', () => {
                 commentText: editedComment,
                 isTagInputActive: false,
                 isBookmarked: false,
+                showPreview: false,
             })
             await sidebar.processEvent('switchAnnotationMode', {
                 context,
@@ -217,6 +218,7 @@ describe('SidebarContainerLogic', () => {
                 commentText: editedComment,
                 isTagInputActive: false,
                 isBookmarked: false,
+                showPreview: false,
             })
         })
 
