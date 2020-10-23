@@ -389,7 +389,7 @@ export class AnnotationsSidebarContainer<
                             tooltipText="Close (ESC)"
                             position="rightCentered"
                         >
-                            <CloseBtn onClick={this.hideSidebar}>
+                            <CloseBtn onClick={() => this.hideSidebar()}>
                                 <ActionIcon src={icons.close} />
                             </CloseBtn>
                         </ButtonTooltip>
