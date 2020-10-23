@@ -10,6 +10,8 @@ export interface Props {
     previewMode?: boolean
     theme: SidebarAnnotationTheme
     onTagClick?: (tag: string) => void
+    confirmEdit?: () => void
+    cancelEdit?: () => void
     toggleEditPreview: () => void
     onEditIconClick: () => void
 }
@@ -36,14 +38,26 @@ class AnnotationView extends React.Component<Props> {
     }
 
     /**
-     * NOTE: This is used as a bit of a hack to afford using the same kb shortcut
-     *  used in the note edit view to toggle markdown preview to untoggle it.
+     * NOTE: This is used as a bit of a hack to afford using the same kb shortcuts
+     *  used in the note edit view to toggle markdown preview to untoggle it, and to save the edit.
      */
     private handleSecretInputKeyDown: React.KeyboardEventHandler = (e) => {
         e.stopPropagation()
 
-        if (e.key === 'Enter' && e.altKey) {
-            this.props.toggleEditPreview()
+        if (e.key === 'Enter') {
+            if (e.altKey) {
+                this.props.toggleEditPreview()
+                return
+            }
+
+            if (e.ctrlKey || e.metaKey) {
+                this.props.confirmEdit?.()
+                return
+            }
+        }
+
+        if (e.key === 'Escape') {
+            this.props.cancelEdit()
             return
         }
     }

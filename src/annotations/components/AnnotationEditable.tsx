@@ -180,6 +180,14 @@ export default class AnnotationEditable extends React.Component<Props> {
                         theme={this.theme}
                         tags={annotationEditDependencies.tags}
                         comment={annotationEditDependencies.comment}
+                        confirmEdit={() =>
+                            annotationEditDependencies.onEditConfirm(
+                                this.props.url,
+                            )
+                        }
+                        cancelEdit={() =>
+                            annotationEditDependencies.onEditCancel()
+                        }
                         onEditIconClick={
                             annotationEditDependencies.toggleEditPreview
                         }
@@ -244,8 +252,6 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 }
-
-const SecretInput = styled.input``
 
 const ShareMenuWrapper = styled.div`
     position: relative;
