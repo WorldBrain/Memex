@@ -194,7 +194,14 @@ class AnnotationList extends Component<Props, State> {
         this.setState((state) => ({
             annotations: newAnnotations,
             annotationModes: { ...state.annotationModes, [url]: 'default' },
-            editForms: { ...state.editForms, [url]: { ...INIT_FORM_STATE } },
+            editForms: {
+                ...state.editForms,
+                [url]: {
+                    ...INIT_FORM_STATE,
+                    commentText: state.editForms[url].commentText,
+                    tags: state.editForms[url].tags,
+                },
+            },
         }))
     }
 

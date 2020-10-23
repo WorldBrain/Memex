@@ -24,36 +24,34 @@ export const truncateText: TextTruncator = (
         maxLineBreaks: 4,
     },
 ) => {
-
     if (text.length > maxLength) {
-        for (let i = maxLength, checkedLength = maxLength; i = checkedLength; i++) {
-            if (text.charAt(checkedLength) === " ") {
-                return {
-                    isTooLong: true,
-                    text: text.slice(0, checkedLength) + '…',
-                }
-            } else {
-                checkedLength++
-            }
-        }
-    } else {
+        let checkedLength = maxLength
 
-        for (let i = 0, newlineCount = 0; i < text.length; ++i) {
+        // Find the next space to cut off at
+        while (
+            text.charAt(checkedLength) !== ' ' &&
+            checkedLength < text.length
+        ) {
+            checkedLength++
+        }
+
+        return {
+            isTooLong: true,
+            text: text.slice(0, checkedLength) + '…',
+        }
+    }
+
+    for (let i = 0, newlineCount = 0; i < text.length; ++i) {
         if (text[i] === '\n') {
             newlineCount++
             if (newlineCount > maxLineBreaks) {
-                    return {
-                        isTooLong: true,
-                        text: text.slice(0, i) + '…',
-                    }
+                return {
+                    isTooLong: true,
+                    text: text.slice(0, i) + '…',
                 }
             }
+        }
     }
-        
-    }
-    
-
-    
 
     return { isTooLong: false, text }
 }

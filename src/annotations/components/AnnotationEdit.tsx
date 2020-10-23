@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TagInput from 'src/tags/ui/tag-input'
-import { FocusableComponent } from './types'
+import { SelectionIndices } from '../types'
 
 export interface AnnotationEditEventProps {
     onEditConfirm: (url: string) => void
@@ -31,18 +31,32 @@ export interface Props
     rows: number
 }
 
-class AnnotationEdit extends React.Component<Props>
-    implements FocusableComponent {
+class AnnotationEdit extends React.Component<Props> {
     private textAreaRef = React.createRef<HTMLTextAreaElement>()
 
     componentDidMount() {
-        this.focus()
+        this.focusOnInputEnd()
     }
 
-    focus() {
-        const inputLen = this.props.comment.length
+    get cursorIndex(): SelectionIndices {
+        return [
+            this.textAreaRef.current.selectionStart,
+            this.textAreaRef.current.selectionEnd,
+        ]
+    }
+
+    set cursorIndex(indices: SelectionIndices) {
+        this.focus(...indices)
+    }
+
+    focus(selectionStart: number, selectionEnd: number) {
         this.textAreaRef.current.focus()
-        this.textAreaRef.current.setSelectionRange(inputLen, inputLen)
+        this.textAreaRef.current.setSelectionRange(selectionStart, selectionEnd)
+    }
+
+    focusOnInputEnd() {
+        const inputLen = this.props.comment.length
+        this.focus(inputLen, inputLen)
     }
 
     private handleTagInputKeyDown: React.KeyboardEventHandler = (e) => {
@@ -73,48 +87,52 @@ class AnnotationEdit extends React.Component<Props>
         }
 
         if (e.key === 'Tab' && !e.shiftKey) {
-            e.preventDefault();
-            const value = this.textAreaRef.current!.value;
-            const selectionStart = this.textAreaRef.current!.selectionStart;
-            const selectionEnd = this.textAreaRef.current!.selectionEnd;
+            e.preventDefault()
+            const value = this.textAreaRef.current!.value
+            const selectionStart = this.textAreaRef.current!.selectionStart
+            const selectionEnd = this.textAreaRef.current!.selectionEnd
             this.textAreaRef.current!.value =
-              value.substring(0, selectionStart) + '  ' + value.substring(selectionEnd);
-            this.textAreaRef.current!.selectionStart = selectionEnd + 2 - (selectionEnd - selectionStart);
-            this.textAreaRef.current!.selectionEnd = selectionEnd + 2 - (selectionEnd - selectionStart);
-          }
+                value.substring(0, selectionStart) +
+                '  ' +
+                value.substring(selectionEnd)
+            this.textAreaRef.current!.selectionStart =
+                selectionEnd + 2 - (selectionEnd - selectionStart)
+            this.textAreaRef.current!.selectionEnd =
+                selectionEnd + 2 - (selectionEnd - selectionStart)
+        }
 
         if (e.key === 'Tab' && e.shiftKey) {
-            e.preventDefault();
-            const value = this.textAreaRef.current!.value;
-            const selectionStart = this.textAreaRef.current!.selectionStart;
-            const selectionEnd = this.textAreaRef.current!.selectionEnd;
+            e.preventDefault()
+            const value = this.textAreaRef.current!.value
+            const selectionStart = this.textAreaRef.current!.selectionStart
+            const selectionEnd = this.textAreaRef.current!.selectionEnd
 
             const beforeStart = value
-              .substring(0, selectionStart)
-              .split('')
-              .reverse()
-              .join('');
-            const indexOfTab = beforeStart.indexOf('  ');
-            const indexOfNewline = beforeStart.indexOf('\n');
+                .substring(0, selectionStart)
+                .split('')
+                .reverse()
+                .join('')
+            const indexOfTab = beforeStart.indexOf('  ')
+            const indexOfNewline = beforeStart.indexOf('\n')
 
             if (indexOfTab !== -1 && indexOfTab < indexOfNewline) {
-              this.textAreaRef.current!.value =
-                beforeStart
-                  .substring(indexOfTab + 2)
-                  .split('')
-                  .reverse()
-                  .join('') +
-                beforeStart
-                  .substring(0, indexOfTab)
-                  .split('')
-                  .reverse()
-                  .join('') +
-                value.substring(selectionEnd);
+                this.textAreaRef.current!.value =
+                    beforeStart
+                        .substring(indexOfTab + 2)
+                        .split('')
+                        .reverse()
+                        .join('') +
+                    beforeStart
+                        .substring(0, indexOfTab)
+                        .split('')
+                        .reverse()
+                        .join('') +
+                    value.substring(selectionEnd)
 
-              this.textAreaRef.current!.selectionStart = selectionStart - 2;
-              this.textAreaRef.current!.selectionEnd = selectionEnd - 2;
+                this.textAreaRef.current!.selectionStart = selectionStart - 2
+                this.textAreaRef.current!.selectionEnd = selectionEnd - 2
             }
-          }
+        }
     }
 
     render() {
