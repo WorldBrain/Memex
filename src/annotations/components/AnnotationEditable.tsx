@@ -14,7 +14,7 @@ import AnnotationEdit, {
 } from 'src/annotations/components/AnnotationEdit'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
-import { SidebarAnnotationTheme } from '../types'
+import { SidebarAnnotationTheme, SelectionIndices } from '../types'
 import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
@@ -60,6 +60,7 @@ export default class AnnotationEditable extends React.Component<Props> {
     private annotEditRef = React.createRef<AnnotationEdit>()
     private boxRef: HTMLDivElement = null
     private removeEventListeners?: () => void
+    private cursorIndices: SelectionIndices
 
     static defaultProps: Partial<Props> = {
         mode: 'default',
@@ -76,7 +77,7 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     focus() {
-        this.annotEditRef?.current?.focus()
+        this.annotEditRef?.current?.focusOnInputEnd()
     }
 
     private get isEdited(): boolean {
@@ -110,6 +111,23 @@ export default class AnnotationEditable extends React.Component<Props> {
                 this.boxRef.removeEventListener('mouseenter', handleMouseEnter)
                 this.boxRef.removeEventListener('mouseleave', handleMouseLeave)
             }
+        }
+    }
+
+    private handlePreviewToggle = () => {
+        const { annotationEditDependencies } = this.props
+
+        this.props.annotationEditDependencies.toggleEditPreview()
+
+        if (annotationEditDependencies.showPreview) {
+            // Allow some time to pass for render to occur - there's gotta be a better way
+            setTimeout(
+                () =>
+                    (this.annotEditRef.current.cursorIndex = this.cursorIndices),
+                250,
+            )
+        } else {
+            this.cursorIndices = this.annotEditRef.current.cursorIndex
         }
     }
 
@@ -154,9 +172,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                 {...annotationFooterDependencies}
                 isEdited={this.isEdited}
                 timestamp={this.getFormattedTimestamp()}
-                togglePreview={() =>
-                    annotationEditDependencies.toggleEditPreview()
-                }
+                togglePreview={this.handlePreviewToggle}
             />
         )
     }
@@ -173,9 +189,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             return (
                 <>
                     <AnnotationView
-                        toggleEditPreview={
-                            annotationEditDependencies.toggleEditPreview
-                        }
+                        toggleEditPreview={this.handlePreviewToggle}
                         previewMode
                         theme={this.theme}
                         tags={annotationEditDependencies.tags}
@@ -188,9 +202,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                         cancelEdit={() =>
                             annotationEditDependencies.onEditCancel()
                         }
-                        onEditIconClick={
-                            annotationEditDependencies.toggleEditPreview
-                        }
+                        onEditIconClick={this.handlePreviewToggle}
                     />
                 </>
             )
@@ -202,6 +214,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                     ref={this.annotEditRef}
                     {...this.props}
                     {...annotationEditDependencies}
+                    toggleEditPreview={this.handlePreviewToggle}
                     tagPickerDependencies={tagPickerDependencies}
                     rows={2}
                 />
@@ -212,7 +225,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             <AnnotationView
                 {...this.props}
                 theme={this.theme}
-                toggleEditPreview={annotationEditDependencies.toggleEditPreview}
+                toggleEditPreview={this.handlePreviewToggle}
                 onEditIconClick={annotationFooterDependencies.onEditIconClick}
             />
         )
