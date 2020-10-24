@@ -125,6 +125,14 @@ const TextBox = styled.div`
     overflow-x: scroll;
     line-height: 22px;
 
+    & *:first-child {
+        margin-top: 0px;
+    }
+
+     & *:last-child {
+        margin-bottom: 0px;
+    }
+
     &: hover ${IconStyledBox} {
         display: flex;
     }
