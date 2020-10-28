@@ -18,9 +18,9 @@ A browser extension to eliminate time spent bookmarking, retracing steps to reca
 Its name and functionalities are heavily inspired by [Vannevar Bush's vision of a Memex](http://memex.link/S1zVMgKzX/en.wikipedia.org/wiki/Memex).
 <img width="1025" alt="main_screen_new" src="https://user-images.githubusercontent.com/7870039/75159434-0bf63700-5710-11ea-9179-2d49b8810400.png">
 
-## Full-Text Search in Web History & Bookmarks:
+## Full-Text Search in Bookmarks:
 
-Search with every word of all websites & PDFs you visited & filter by time, domain, tags or bookmarks.
+Search with every word of all websites & PDFs you bookmarked, filter by time, domain and tags.
 ![](https://user-images.githubusercontent.com/7870039/75158724-a8b7d500-570e-11ea-9d35-0255cb9ea2da.gif)
 
 ## Highlights, Notes & Annotations:
