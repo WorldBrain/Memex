@@ -163,12 +163,6 @@ export class AnnotationsSidebarContainer<
             isTagInputActive: form.isTagInputActive,
             comment: form.commentText,
             tags: form.tags,
-            showPreview: form.showPreview,
-            toggleEditPreview: () =>
-                this.processEvent('setEditPreview', {
-                    annotationUrl: annotation.url,
-                    showPreview: !form.showPreview,
-                }),
             updateTags: (args) =>
                 this.processEvent('updateTagsForEdit', {
                     annotationUrl: annotation.url,

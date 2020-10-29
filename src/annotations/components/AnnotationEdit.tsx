@@ -5,11 +5,11 @@ import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TagInput from 'src/tags/ui/tag-input'
 import { SelectionIndices } from '../types'
+import { MarkdownPreview } from 'src/common-ui/components/markdown-preview'
 
 export interface AnnotationEditEventProps {
     onEditConfirm: (url: string) => void
     onEditCancel: () => void
-    toggleEditPreview: () => void
     onCommentChange: (comment: string) => void
     setTagInputActive: (active: boolean) => void
     updateTags: PickerUpdateHandler
@@ -18,7 +18,6 @@ export interface AnnotationEditEventProps {
 
 export interface AnnotationEditGeneralProps {
     isTagInputActive: boolean
-    showPreview: boolean
     comment: string
     tags: string[]
 }
@@ -69,16 +68,9 @@ class AnnotationEdit extends React.Component<Props> {
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         e.stopPropagation()
 
-        if (e.key === 'Enter') {
-            if (e.altKey) {
-                this.props.toggleEditPreview()
-                return
-            }
-
-            if (e.ctrlKey || e.metaKey) {
-                this.props.onEditConfirm(this.props.url)
-                return
-            }
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            this.props.onEditConfirm(this.props.url)
+            return
         }
 
         if (e.key === 'Escape') {
@@ -143,13 +135,21 @@ class AnnotationEdit extends React.Component<Props> {
 
         return (
             <>
-                <StyledTextArea
-                    ref={this.textAreaRef}
-                    value={this.props.comment}
-                    onClick={() => this.props.setTagInputActive(false)}
-                    placeholder="Add private note (save with cmd/ctrl+enter)"
-                    onChange={(e) => this.props.onCommentChange(e.target.value)}
+                <MarkdownPreview
+                    customRef={this.textAreaRef}
                     onKeyDown={this.handleInputKeyDown}
+                    value={this.props.comment}
+                    renderInput={(inputProps) => (
+                        <StyledTextArea
+                            {...inputProps}
+                            value={this.props.comment}
+                            onClick={() => this.props.setTagInputActive(false)}
+                            placeholder="Add private note (save with cmd/ctrl+enter)"
+                            onChange={(e) =>
+                                this.props.onCommentChange(e.target.value)
+                            }
+                        />
+                    )}
                 />
                 <TagInput
                     deleteTag={this.props.deleteSingleTag}

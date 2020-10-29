@@ -114,23 +114,6 @@ export default class AnnotationEditable extends React.Component<Props> {
         }
     }
 
-    private handlePreviewToggle = () => {
-        const { annotationEditDependencies } = this.props
-
-        this.props.annotationEditDependencies.toggleEditPreview()
-
-        if (annotationEditDependencies.showPreview) {
-            // Allow some time to pass for render to occur - there's gotta be a better way
-            setTimeout(
-                () =>
-                    (this.annotEditRef.current.cursorIndex = this.cursorIndices),
-                250,
-            )
-        } else {
-            this.cursorIndices = this.annotEditRef.current.cursorIndex
-        }
-    }
-
     private setBoxRef = (ref: HTMLDivElement) => {
         this.boxRef = ref
     }
@@ -172,7 +155,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                 {...annotationFooterDependencies}
                 isEdited={this.isEdited}
                 timestamp={this.getFormattedTimestamp()}
-                togglePreview={this.handlePreviewToggle}
             />
         )
     }
@@ -185,36 +167,12 @@ export default class AnnotationEditable extends React.Component<Props> {
             tagPickerDependencies,
         } = this.props
 
-        if (annotationEditDependencies.showPreview) {
-            return (
-                <>
-                    <AnnotationView
-                        toggleEditPreview={this.handlePreviewToggle}
-                        previewMode
-                        theme={this.theme}
-                        tags={annotationEditDependencies.tags}
-                        comment={annotationEditDependencies.comment}
-                        confirmEdit={() =>
-                            annotationEditDependencies.onEditConfirm(
-                                this.props.url,
-                            )
-                        }
-                        cancelEdit={() =>
-                            annotationEditDependencies.onEditCancel()
-                        }
-                        onEditIconClick={this.handlePreviewToggle}
-                    />
-                </>
-            )
-        }
-
         if (mode === 'edit') {
             return (
                 <AnnotationEdit
                     ref={this.annotEditRef}
                     {...this.props}
                     {...annotationEditDependencies}
-                    toggleEditPreview={this.handlePreviewToggle}
                     tagPickerDependencies={tagPickerDependencies}
                     rows={2}
                 />
@@ -225,7 +183,6 @@ export default class AnnotationEditable extends React.Component<Props> {
             <AnnotationView
                 {...this.props}
                 theme={this.theme}
-                toggleEditPreview={this.handlePreviewToggle}
                 onEditIconClick={annotationFooterDependencies.onEditIconClick}
             />
         )
