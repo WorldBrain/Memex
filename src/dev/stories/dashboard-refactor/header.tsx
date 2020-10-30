@@ -1,17 +1,18 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 
-import SidebarToggle from '../../../dashboard-refactor/header/SidebarToggle'
+import SidebarHeader from 'src/dashboard-refactor/header/SidebarHeader/SidebarHeader'
+import SidebarToggle from 'src/dashboard-refactor/header/SidebarHeader/SidebarToggle/SidebarToggle'
 
-const stories = storiesOf('Dashboard Refactor|Header/SidebarToggle', module)
+const stories = storiesOf('Dashboard Refactor|Header', module)
 
-const props = {
+const sidebarToggleProps = {
     noHover: {
         sidebarLockedState: {
-            onSidebarToggleClick: function () {},
+            toggleSidebarLockedState: function () {},
             isSidebarLocked: false,
         },
-        hoverState: {
+        sidebarToggleHoverState: {
             onHoverEnter: function () {},
             onHoverLeave: function () {},
             isHovered: false,
@@ -19,10 +20,10 @@ const props = {
     },
     unlockedHover: {
         sidebarLockedState: {
-            onSidebarToggleClick: function () {},
+            toggleSidebarLockedState: function () {},
             isSidebarLocked: false,
         },
-        hoverState: {
+        sidebarToggleHoverState: {
             onHoverEnter: function () {},
             onHoverLeave: function () {},
             isHovered: true,
@@ -30,10 +31,10 @@ const props = {
     },
     lockedHover: {
         sidebarLockedState: {
-            onSidebarToggleClick: function () {},
+            toggleSidebarLockedState: function () {},
             isSidebarLocked: true,
         },
-        hoverState: {
+        sidebarToggleHoverState: {
             onHoverEnter: function () {},
             onHoverLeave: function () {},
             isHovered: true,
@@ -41,6 +42,37 @@ const props = {
     },
 }
 
-stories.add('No hover', () => <SidebarToggle {...props.noHover} />)
-stories.add('Unlocked hover', () => <SidebarToggle {...props.unlockedHover} />)
-stories.add('Locked hover', () => <SidebarToggle {...props.lockedHover} />)
+stories.add('Sidebar Toggle/No hover', () => (
+    <SidebarToggle {...sidebarToggleProps.noHover} />
+))
+stories.add('Sidebar Toggle/Unlocked hover', () => (
+    <SidebarToggle {...sidebarToggleProps.unlockedHover} />
+))
+stories.add('Sidebar Toggle/Locked hover', () => (
+    <SidebarToggle {...sidebarToggleProps.lockedHover} />
+))
+
+const collectionsHeaderProps = {
+    open: {
+        sidebarPeekState: {
+            toggleSidebarPeekState: function () {},
+            isSidebarPeeking: false,
+        },
+        selectedCollectionHeader: 'Inbox',
+        ...sidebarToggleProps.lockedHover,
+    },
+    closed: {
+        sidebarPeekState: {
+            toggleSidebarPeekState: function () {},
+            isSidebarPeeking: false,
+        },
+        ...sidebarToggleProps.unlockedHover,
+    },
+}
+
+stories.add('Sidebar Header/Open', () => (
+    <SidebarHeader {...collectionsHeaderProps.open} />
+))
+stories.add('Sidebar Header/Closed', () => (
+    <SidebarHeader {...collectionsHeaderProps.closed} />
+))
