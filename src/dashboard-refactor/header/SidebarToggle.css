@@ -1,0 +1,31 @@
+.SidebarToggle {
+    position: absolute;
+    width: 29px;
+    height: 29px;
+}
+
+.hamburger {
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    width: 26px;
+    height: 26px;
+    border-radius: 3px;
+    opacity: 0.8;
+    background-size: 16px;
+    background-repeat: no-repeat;
+    background-position: center center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+    }
+
+    &:active {
+        opacity: 1;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
