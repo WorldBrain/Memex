@@ -21,6 +21,17 @@ export default class Markdown extends React.PureComponent<Props> {
 }
 
 const Container = styled.div`
+
+    padding: 0px 5px;
+
+    & *:first-child {
+        margin-top: 0px;
+    }
+
+    & *:last-child {
+        margin-bottom: 0px;
+    }
+
     & h1 {
         font-size: 1.5em
         margin-block-end: 0em;

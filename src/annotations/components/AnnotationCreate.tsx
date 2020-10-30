@@ -166,6 +166,7 @@ const TextBoxContainerStyled = styled.div`
     background: white;
     width: 100%;
     border-radius: 5px;
+    box-shadow: rgba(15,15,15,0.1) 0px 0px 0px 1px, rgba(15,15,15,0.1) 0px 2px 4px;
 
     &:hover {
         background: white;
@@ -188,7 +189,7 @@ const StyledTextArea = styled.textarea`
     border: none;
     padding: 10px 7px;
     height: ${(props) => (props.value === '' ? '40px' : '150px')};
-
+    margin-bottom: -3px;
     width: auto;
 
     &::placeholder {

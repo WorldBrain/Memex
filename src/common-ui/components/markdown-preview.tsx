@@ -2,7 +2,6 @@ import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 import { ButtonTooltip } from 'src/common-ui/components'
 
-
 import Markdown from 'src/common-ui/components/markdown-renderer'
 
 export interface MainInputProps<T = HTMLInputElement | HTMLTextAreaElement> {
@@ -100,6 +99,7 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
                 />
                 <Container>
                     {this.showPreviewBtn && (
+                        <PreviewButtonContainer>
                         <ButtonTooltip
                             tooltipText="alt/option + Enter"
                             position="bottom"
@@ -108,6 +108,7 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
                             Preview
                         </PreviewBtn>
                         </ButtonTooltip>
+                        </PreviewButtonContainer>
                     )}
                     <EditorContainer>{this.renderEditor()}</EditorContainer>
                 </Container>
@@ -115,6 +116,15 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
         )
     }
 }
+
+const PreviewButtonContainer = styled.div`
+    background-color: #f7f7f7;
+    width: -webkit-fill-available;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 7px;
+    display: flex;
+    justify-content: flex-end;
+`
 
 const PreviewBtn = styled.button`
     font-weight: ${({ theme }) => (theme.showPreview ? 'bold' : 'normal')};
@@ -124,7 +134,7 @@ const PreviewBtn = styled.button`
     border: none;
     outline: none;
     padding: 3px 5px;
-    margin-right: 5px;
+    margin: 5px 5px -5px 0;
     background: transparent;
     border-radius: 3px;
 
@@ -145,11 +155,17 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    border: solid 1px #e0e0e0;
+    border-radius: 3px;
+    margin: 5px;
 `
 
 const EditorContainer = styled.div`
     width: fill-available;
-    padding: 10px;
+
+    & > div {
+        padding: 10px 7px;
+    }
 
     & textarea,
     input {
