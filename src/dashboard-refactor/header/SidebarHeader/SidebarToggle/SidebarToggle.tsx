@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { HoverState, SidebarLockedState } from './types'
+import { SidebarToggleHoverState, SidebarLockedState } from '../types'
 import {
     Container,
     HamburgerButton,
@@ -9,8 +9,7 @@ import {
 
 export interface SidebarToggleProps {
     sidebarLockedState: SidebarLockedState
-    className?: string
-    hoverState: HoverState
+    sidebarToggleHoverState: SidebarToggleHoverState
 }
 
 export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
@@ -21,21 +20,21 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
         return <RightArrow />
     }
     private renderButton() {
-        const { isHovered } = this.props.hoverState
+        const { isHovered } = this.props.sidebarToggleHoverState
         if (!isHovered) return <HamburgerButton />
         return this.renderHoveredState()
     }
     render() {
         const {
-            hoverState: { onHoverEnter, onHoverLeave, isHovered },
-            sidebarLockedState: { onSidebarToggleClick },
+            sidebarToggleHoverState: { onHoverEnter, onHoverLeave, isHovered },
+            sidebarLockedState: { toggleSidebarLockedState },
         } = this.props
         return (
             <Container
                 isHovered={isHovered}
                 onMouseEnter={onHoverEnter}
                 onMouseLeave={onHoverLeave}
-                onClick={onSidebarToggleClick}
+                onClick={toggleSidebarLockedState}
             >
                 {this.renderButton()}
             </Container>
