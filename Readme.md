@@ -20,7 +20,7 @@ Its name and functionalities are heavily inspired by [Vannevar Bush's vision of 
 
 ## Full-Text Search in Bookmarks:
 
-Search with every word of all websites & PDFs you bookmarked, filter by time, domain and tags.
+Search with every word of all websites & PDFs you bookmarked, tagged, listed, or annotated. Filter by time, domain, list, or tags.
 ![](https://user-images.githubusercontent.com/7870039/75158724-a8b7d500-570e-11ea-9d35-0255cb9ea2da.gif)
 
 ## Highlights, Notes & Annotations:
