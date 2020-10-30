@@ -11,6 +11,7 @@ export interface MainInputProps<T = HTMLInputElement | HTMLTextAreaElement> {
 export interface Props {
     customRef?: React.RefObject<any>
     value: string
+    showPreviewBtnOnEmptyInput?: boolean
     onKeyDown?: React.KeyboardEventHandler
     renderInput: (props: MainInputProps) => JSX.Element
     isToggleKBShortcutKeyed?: (e: React.KeyboardEvent) => boolean
@@ -41,6 +42,12 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
         return this.props.customRef ?? this._mainInputRef
     }
 
+    private get showPreviewBtn(): boolean {
+        return (
+            this.props.showPreviewBtnOnEmptyInput || this.props.value.length > 0
+        )
+    }
+
     private get styleTheme() {
         return { showPreview: this.state.showPreview }
     }
@@ -58,13 +65,13 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
     }
 
     private handleToggleKBShortcut: React.KeyboardEventHandler = (e) => {
-        if (this.props.isToggleKBShortcutKeyed(e)) {
+        if (this.showPreviewBtn && this.props.isToggleKBShortcutKeyed(e)) {
             this.togglePreview()
             return
         }
     }
 
-    private togglePreview = () =>
+    togglePreview = () =>
         this.setState((state) => ({
             showPreview: !state.showPreview,
         }))
@@ -89,9 +96,11 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
                     onKeyDown={this.handleSecretInputKeyDown}
                 />
                 <Container>
-                    <PreviewBtn onClick={this.togglePreview}>
-                        Preview
-                    </PreviewBtn>
+                    {this.showPreviewBtn && (
+                        <PreviewBtn onClick={this.togglePreview}>
+                            Preview
+                        </PreviewBtn>
+                    )}
                     <EditorContainer>{this.renderEditor()}</EditorContainer>
                 </Container>
             </ThemeProvider>

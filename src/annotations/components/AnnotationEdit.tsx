@@ -136,6 +136,7 @@ class AnnotationEdit extends React.Component<Props> {
         return (
             <>
                 <MarkdownPreview
+                    showPreviewBtnOnEmptyInput
                     customRef={this.textAreaRef}
                     onKeyDown={this.handleInputKeyDown}
                     value={this.props.comment}
