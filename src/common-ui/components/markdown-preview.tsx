@@ -101,10 +101,44 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
 
 const PreviewBtn = styled.button`
     font-weight: ${({ theme }) => (theme.showPreview ? 'bold' : 'normal')};
+    box-sizing: border-box;
+    cursor: pointer;
+    font-size: 14px;
+    border: none;
+    outline: none;
+    padding: 3px 5px;
+    margin-right: 5px;
+    background: transparent;
+    border-radius: 3px;
+
+    &:focus {
+        background-color: grey;
+    }
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
+
+    &:focus {
+        background-color: #79797945;
+    }
 `
 
-const Container = styled.div``
-const EditorContainer = styled.div``
+const Container = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+`
+
+const EditorContainer = styled.div`
+    width: 100%;
+    padding: 10px;
+
+    & textarea,
+    input {
+        width: 100%;
+    }
+`
 
 const SecretInput = styled.input`
     width: 0;
