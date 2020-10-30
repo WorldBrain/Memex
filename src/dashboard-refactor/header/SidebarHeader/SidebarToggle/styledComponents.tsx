@@ -5,9 +5,9 @@ import colors from '../../../colors'
 const buttonStyles = `
     height: 26px;
     width: 26px;
+    color: ${colors.iconDefault};
     padding: 2px;
     border: none;
-    color: ${colors.iconDefault};
     cursor: pointer;
     background-repeat: no-repeat;
     background-position: center center;
@@ -31,17 +31,22 @@ const arrowStyles = `
 export const Container = styled.div`
     height: 30px;
     width: 30px;
-    border-radius: 3px
     border: none;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+`
+
+export const BtnBackground = styled.div`
+    height: 100%;
+    width: 100%;
+    background-color: ${colors.highlightGrey};
     background-size: 24px;
     background-repeat: no-repeat;
-    background-color: ${colors.highlightGrey};
     background-position: center center;
+    border-radius: 3px;
 `
 
 export const HamburgerButton = styled.div`

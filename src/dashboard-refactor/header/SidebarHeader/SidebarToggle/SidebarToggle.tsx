@@ -5,6 +5,7 @@ import {
     HamburgerButton,
     LeftArrow,
     RightArrow,
+    BtnBackground,
 } from './styledComponents'
 
 export interface SidebarToggleProps {
@@ -22,7 +23,7 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
     private renderButton() {
         const { isHovered } = this.props.sidebarToggleHoverState
         if (!isHovered) return <HamburgerButton />
-        return this.renderHoveredState()
+        return <BtnBackground>{this.renderHoveredState()}</BtnBackground>
     }
     render() {
         const {
