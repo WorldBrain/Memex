@@ -1,12 +1,11 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
-import colors from '../colors'
+import colors from '../../../colors'
 
 const buttonStyles = `
     height: 26px;
     width: 26px;
     padding: 2px;
-    border-radius: 3px;
     border: none;
     color: ${colors.iconDefault};
     cursor: pointer;
@@ -23,22 +22,25 @@ const buttonStyles = `
 `
 
 const arrowStyles = `
+    position: absolute;
+    left: 2px;
     opacity: 1;
-    background-color: ${colors.highlightGrey};
     background-size: 18px;
 `
 
 export const Container = styled.div`
     height: 30px;
     width: 30px;
+    border-radius: 3px
     border: none;
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     background-size: 24px;
     background-repeat: no-repeat;
-    background-color: transparent;
+    background-color: ${colors.highlightGrey};
     background-position: center center;
 `
 
