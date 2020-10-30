@@ -138,9 +138,14 @@ class AnnotationFooter extends React.Component<Props> {
                     <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
                 )}
                 <BtnContainerStyled>
-                    <CancelBtnStyled onClick={cancelBtnHandler}>
-                        Cancel
-                    </CancelBtnStyled>
+                    <ButtonTooltip
+                        tooltipText="esc"
+                        position="bottom"
+                    >
+                        <CancelBtnStyled onClick={cancelBtnHandler}>
+                            Cancel
+                        </CancelBtnStyled>
+                    </ButtonTooltip>
                     <ButtonTooltip
                         tooltipText="ctrl/cmd + Enter"
                         position="bottom"

@@ -115,9 +115,14 @@ export class AnnotationCreate extends React.Component<Props, State>
                             Add
                         </SaveBtnStyled>
                     </ButtonTooltip>
+                    <ButtonTooltip
+                        tooltipText="esc"
+                        position="bottom"
+                    >
                     <CancelBtnStyled onClick={this.handleCancel}>
                         Cancel
                     </CancelBtnStyled>
+                    </ButtonTooltip>
                 </Flex>
             </FooterStyled>
         )
