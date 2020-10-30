@@ -1,5 +1,7 @@
 import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
+import { ButtonTooltip } from 'src/common-ui/components'
+
 
 import Markdown from 'src/common-ui/components/markdown-renderer'
 
@@ -77,6 +79,7 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
         }))
 
     private renderEditor() {
+
         if (this.state.showPreview) {
             return <Markdown>{this.props.value}</Markdown>
         }
@@ -97,9 +100,14 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
                 />
                 <Container>
                     {this.showPreviewBtn && (
+                        <ButtonTooltip
+                            tooltipText="alt/option + Enter"
+                            position="bottom"
+                        >
                         <PreviewBtn onClick={this.togglePreview}>
                             Preview
                         </PreviewBtn>
+                        </ButtonTooltip>
                     )}
                     <EditorContainer>{this.renderEditor()}</EditorContainer>
                 </Container>
@@ -140,7 +148,7 @@ const Container = styled.div`
 `
 
 const EditorContainer = styled.div`
-    width: 100%;
+    width: fill-available;
     padding: 10px;
 
     & textarea,
