@@ -162,6 +162,8 @@ const Container = styled.div`
 
 const EditorContainer = styled.div`
     width: fill-available;
+    margin-bottom: -3px;
+    border-radius: 3px;
 
     & > div {
         padding: 10px 7px;
