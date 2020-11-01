@@ -14,6 +14,9 @@ export interface Props {
     value: string
     showPreviewBtnOnEmptyInput?: boolean
     onKeyDown?: React.KeyboardEventHandler
+    /**
+     * Please ensure all `renderInput` method props are passed down into the underlying <input> or <textarea> el you render.
+     */
     renderInput: (props: MainInputProps) => JSX.Element
     isToggleKBShortcutKeyed?: (e: React.KeyboardEvent) => boolean
 }
@@ -27,6 +30,7 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
         isToggleKBShortcutKeyed: (e) => e.key === 'Enter' && e.altKey,
     }
 
+    private selectionRange: [number, number] = [-1, -1]
     private secretInputRef = React.createRef<HTMLInputElement>()
     private _mainInputRef = React.createRef<HTMLInputElement>()
     state: State = { showPreview: false }
@@ -35,6 +39,7 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
         if (this.state.showPreview) {
             this.secretInputRef.current.focus()
         } else {
+            this.mainInputRef.current.setSelectionRange(...this.selectionRange)
             this.mainInputRef.current.focus()
         }
     }
@@ -73,12 +78,20 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
     }
 
     togglePreview = () =>
-        this.setState((state) => ({
-            showPreview: !state.showPreview,
-        }))
+        this.setState((state) => {
+            // If setting to show preview, save the selection state
+            if (!state.showPreview) {
+                this.selectionRange = [
+                    this.mainInputRef.current.selectionStart,
+                    this.mainInputRef.current.selectionEnd,
+                ]
+            }
+            return {
+                showPreview: !state.showPreview,
+            }
+        })
 
     private renderEditor() {
-
         if (this.state.showPreview) {
             return <Markdown>{this.props.value}</Markdown>
         }
@@ -100,14 +113,14 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
                 <Container>
                     {this.showPreviewBtn && (
                         <PreviewButtonContainer>
-                        <ButtonTooltip
-                            tooltipText="alt/option + Enter"
-                            position="bottom"
-                        >
-                        <PreviewBtn onClick={this.togglePreview}>
-                            Preview
-                        </PreviewBtn>
-                        </ButtonTooltip>
+                            <ButtonTooltip
+                                tooltipText="alt/option + Enter"
+                                position="bottom"
+                            >
+                                <PreviewBtn onClick={this.togglePreview}>
+                                    Preview
+                                </PreviewBtn>
+                            </ButtonTooltip>
                         </PreviewButtonContainer>
                     )}
                     <EditorContainer>{this.renderEditor()}</EditorContainer>

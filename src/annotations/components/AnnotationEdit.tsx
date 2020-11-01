@@ -6,6 +6,7 @@ import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/
 import TagInput from 'src/tags/ui/tag-input'
 import { SelectionIndices } from '../types'
 import { MarkdownPreview } from 'src/common-ui/components/markdown-preview'
+import { FocusableComponent } from './types'
 
 export interface AnnotationEditEventProps {
     onEditConfirm: (url: string) => void
@@ -30,32 +31,22 @@ export interface Props
     rows: number
 }
 
-class AnnotationEdit extends React.Component<Props> {
+class AnnotationEdit extends React.Component<Props>
+    implements FocusableComponent {
     private textAreaRef = React.createRef<HTMLTextAreaElement>()
 
     componentDidMount() {
         this.focusOnInputEnd()
     }
 
-    get cursorIndex(): SelectionIndices {
-        return [
-            this.textAreaRef.current.selectionStart,
-            this.textAreaRef.current.selectionEnd,
-        ]
-    }
-
-    set cursorIndex(indices: SelectionIndices) {
-        this.focus(...indices)
-    }
-
-    focus(selectionStart: number, selectionEnd: number) {
+    focus() {
         this.textAreaRef.current.focus()
-        this.textAreaRef.current.setSelectionRange(selectionStart, selectionEnd)
     }
 
     focusOnInputEnd() {
         const inputLen = this.props.comment.length
-        this.focus(inputLen, inputLen)
+        this.textAreaRef.current.setSelectionRange(inputLen, inputLen)
+        this.focus()
     }
 
     private handleTagInputKeyDown: React.KeyboardEventHandler = (e) => {
