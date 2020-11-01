@@ -7,6 +7,7 @@ import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/
 import { MarkdownPreview } from 'src/common-ui/components/markdown-preview'
 import TagInput from 'src/tags/ui/tag-input'
 import { FocusableComponent } from './types'
+import { insertTab, uninsertTab } from 'src/common-ui/utils'
 
 interface State {
     isTagPickerShown: boolean
@@ -79,50 +80,12 @@ export class AnnotationCreate extends React.Component<Props, State>
 
         if (e.key === 'Tab' && !e.shiftKey) {
             e.preventDefault()
-            const value = this.textAreaRef.current!.value
-            const selectionStart = this.textAreaRef.current!.selectionStart
-            const selectionEnd = this.textAreaRef.current!.selectionEnd
-            this.textAreaRef.current!.value =
-                value.substring(0, selectionStart) +
-                '  ' +
-                value.substring(selectionEnd)
-            this.textAreaRef.current!.selectionStart =
-                selectionEnd + 2 - (selectionEnd - selectionStart)
-            this.textAreaRef.current!.selectionEnd =
-                selectionEnd + 2 - (selectionEnd - selectionStart)
+            insertTab({ el: this.textAreaRef.current })
         }
 
         if (e.key === 'Tab' && e.shiftKey) {
             e.preventDefault()
-            const value = this.textAreaRef.current!.value
-            const selectionStart = this.textAreaRef.current!.selectionStart
-            const selectionEnd = this.textAreaRef.current!.selectionEnd
-
-            const beforeStart = value
-                .substring(0, selectionStart)
-                .split('')
-                .reverse()
-                .join('')
-            const indexOfTab = beforeStart.indexOf('  ')
-            const indexOfNewline = beforeStart.indexOf('\n')
-
-            if (indexOfTab !== -1 && indexOfTab < indexOfNewline) {
-                this.textAreaRef.current!.value =
-                    beforeStart
-                        .substring(indexOfTab + 2)
-                        .split('')
-                        .reverse()
-                        .join('') +
-                    beforeStart
-                        .substring(0, indexOfTab)
-                        .split('')
-                        .reverse()
-                        .join('') +
-                    value.substring(selectionEnd)
-
-                this.textAreaRef.current!.selectionStart = selectionStart - 2
-                this.textAreaRef.current!.selectionEnd = selectionEnd - 2
-            }
+            uninsertTab({ el: this.textAreaRef.current })
         }
     }
     private renderTagPicker() {
