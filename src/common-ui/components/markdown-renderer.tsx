@@ -23,6 +23,7 @@ export default class Markdown extends React.PureComponent<Props> {
 const Container = styled.div`
 
     padding: 0px 5px;
+    white-space: break-spaces;
 
     & p {
         margin: 5px 0px;

@@ -78,11 +78,6 @@ export class AnnotationCreate extends React.Component<Props, State>
             return
         }
 
-        if (e.key === 'Enter') {
-            e.preventDefault()
-            insertIndentedNewLine({ el: this.textAreaRef.current})
-        }
-
         if (e.key === 'Tab' && !e.shiftKey) {
             e.preventDefault()
             insertTab({ el: this.textAreaRef.current })
