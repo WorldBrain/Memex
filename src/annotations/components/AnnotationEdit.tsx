@@ -6,7 +6,7 @@ import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/
 import TagInput from 'src/tags/ui/tag-input'
 import { MarkdownPreview } from 'src/common-ui/components/markdown-preview'
 import { FocusableComponent } from './types'
-import { uninsertTab, insertTab } from 'src/common-ui/utils'
+import { uninsertTab, insertTab, insertIndentedNewLine } from 'src/common-ui/utils'
 
 export interface AnnotationEditEventProps {
     onEditConfirm: (url: string) => void
@@ -67,6 +67,11 @@ class AnnotationEdit extends React.Component<Props>
         if (e.key === 'Escape') {
             this.props.onEditCancel()
             return
+        }
+
+        if (e.key === 'Enter') {
+            e.preventDefault()
+            insertIndentedNewLine({ el: this.textAreaRef.current})
         }
 
         if (e.key === 'Tab' && !e.shiftKey) {

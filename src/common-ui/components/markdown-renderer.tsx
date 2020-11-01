@@ -24,6 +24,10 @@ const Container = styled.div`
 
     padding: 0px 5px;
 
+    & p {
+        margin: 5px 0px;
+    }
+
     & *:first-child {
         margin-top: 0px;
     }
@@ -68,22 +72,43 @@ const Container = styled.div`
 
     & ul {
         padding-inline-start: 20px;
-        margin-top: 10px;
+        margin-top: 5px;
+
+        list-style: disc outside none;
+
+        & p {
+            margin: 0px;
+        }
 
         & ul {
-            margin-top: 5px;
+            margin-top: 0px;
+            list-style: disc outside none;
         }
 
     }
 
     & ol {
         padding-inline-start: 20px;
-        margin-top: 10px;
+        margin-top: 5px;
 
         & ol {
-            margin-top: 5px;
+            margin-top: 0px;
+            list-style: lower-latin;
+        }
+        
+        & ul {
+            margin-top: 0px;
+            list-style: disc outside none;
         }
 
+        & p {
+            margin: 0px;
+        }
+
+    }
+
+     & li {
+        white-space: break-spaces;
     }
 
     & code {
