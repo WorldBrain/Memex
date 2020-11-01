@@ -5,11 +5,12 @@ import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TagInput from 'src/tags/ui/tag-input'
 import { SelectionIndices } from '../types'
+import { MarkdownPreview } from 'src/common-ui/components/markdown-preview'
+import { FocusableComponent } from './types'
 
 export interface AnnotationEditEventProps {
     onEditConfirm: (url: string) => void
     onEditCancel: () => void
-    toggleEditPreview: () => void
     onCommentChange: (comment: string) => void
     setTagInputActive: (active: boolean) => void
     updateTags: PickerUpdateHandler
@@ -18,7 +19,6 @@ export interface AnnotationEditEventProps {
 
 export interface AnnotationEditGeneralProps {
     isTagInputActive: boolean
-    showPreview: boolean
     comment: string
     tags: string[]
 }
@@ -31,32 +31,22 @@ export interface Props
     rows: number
 }
 
-class AnnotationEdit extends React.Component<Props> {
+class AnnotationEdit extends React.Component<Props>
+    implements FocusableComponent {
     private textAreaRef = React.createRef<HTMLTextAreaElement>()
 
     componentDidMount() {
         this.focusOnInputEnd()
     }
 
-    get cursorIndex(): SelectionIndices {
-        return [
-            this.textAreaRef.current.selectionStart,
-            this.textAreaRef.current.selectionEnd,
-        ]
-    }
-
-    set cursorIndex(indices: SelectionIndices) {
-        this.focus(...indices)
-    }
-
-    focus(selectionStart: number, selectionEnd: number) {
+    focus() {
         this.textAreaRef.current.focus()
-        this.textAreaRef.current.setSelectionRange(selectionStart, selectionEnd)
     }
 
     focusOnInputEnd() {
         const inputLen = this.props.comment.length
-        this.focus(inputLen, inputLen)
+        this.textAreaRef.current.setSelectionRange(inputLen, inputLen)
+        this.focus()
     }
 
     private handleTagInputKeyDown: React.KeyboardEventHandler = (e) => {
@@ -69,16 +59,9 @@ class AnnotationEdit extends React.Component<Props> {
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         e.stopPropagation()
 
-        if (e.key === 'Enter') {
-            if (e.altKey) {
-                this.props.toggleEditPreview()
-                return
-            }
-
-            if (e.ctrlKey || e.metaKey) {
-                this.props.onEditConfirm(this.props.url)
-                return
-            }
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            this.props.onEditConfirm(this.props.url)
+            return
         }
 
         if (e.key === 'Escape') {
@@ -143,13 +126,22 @@ class AnnotationEdit extends React.Component<Props> {
 
         return (
             <>
-                <StyledTextArea
-                    ref={this.textAreaRef}
-                    value={this.props.comment}
-                    onClick={() => this.props.setTagInputActive(false)}
-                    placeholder="Add private note (save with cmd/ctrl+enter)"
-                    onChange={(e) => this.props.onCommentChange(e.target.value)}
+                <MarkdownPreview
+                    showPreviewBtnOnEmptyInput
+                    customRef={this.textAreaRef}
                     onKeyDown={this.handleInputKeyDown}
+                    value={this.props.comment}
+                    renderInput={(inputProps) => (
+                        <StyledTextArea
+                            {...inputProps}
+                            value={this.props.comment}
+                            onClick={() => this.props.setTagInputActive(false)}
+                            placeholder="Add private note (save with cmd/ctrl+enter)"
+                            onChange={(e) =>
+                                this.props.onCommentChange(e.target.value)
+                            }
+                        />
+                    )}
                 />
                 <TagInput
                     deleteTag={this.props.deleteSingleTag}
@@ -176,7 +168,6 @@ const StyledTextArea = styled.textarea`
     border-radius: 3px;
     border: none;
     padding: 10px 7px;
-    margin: 10px 10px 5px 10px;
 
     &::placeholder {
         color: #3a2f45;

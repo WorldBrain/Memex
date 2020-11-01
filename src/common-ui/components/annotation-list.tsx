@@ -249,7 +249,6 @@ class AnnotationList extends Component<Props, State> {
                 ...state.editForms,
                 [url]: {
                     ...state.editForms[url],
-                    showPreview: false,
                     commentText,
                 },
             },
@@ -346,14 +345,8 @@ class AnnotationList extends Component<Props, State> {
                 annotationEditDependencies={{
                     comment: this.state.editForms[annot.url].commentText,
                     tags: this.state.editForms[annot.url].tags,
-                    showPreview: this.state.editForms[annot.url].showPreview,
                     isTagInputActive: this.state.editForms[annot.url]
                         .isTagInputActive,
-                    toggleEditPreview: () =>
-                        this.handleEditFormUpdate(annot.url, (state) => ({
-                            showPreview: !state.editForms[annot.url]
-                                .showPreview,
-                        })),
                     onCommentChange: (commentText) =>
                         this.handleEditFormUpdate(annot.url, () => ({
                             commentText,
