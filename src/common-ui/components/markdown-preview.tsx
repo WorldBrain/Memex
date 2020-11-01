@@ -35,7 +35,11 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
     private _mainInputRef = React.createRef<HTMLInputElement>()
     state: State = { showPreview: false }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps: Props, prevState: State) {
+        if (prevState.showPreview === this.state.showPreview) {
+            return
+        }
+
         if (this.state.showPreview) {
             this.secretInputRef.current.focus()
         } else {
