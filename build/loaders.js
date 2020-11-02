@@ -74,6 +74,18 @@ export const svgLoader = {
     loader: 'svg-inline-loader',
 }
 
+// The firebaseui package includes an import of a remote font, which we don't really want
+export const stringReplaceLoader = {
+    test: /firebaseui\.css$/,
+    loader: 'string-replace-loader',
+    include: path.resolve('node_modules/firebaseui/dist/'),
+    query: {
+        search:
+            '@import url(https://fonts.googleapis.com/css?family=Roboto:400,500,700);',
+        replace: '',
+    },
+}
+
 export default ({ mode, context, isCI = false, injectStyles = false }) => {
     // style-loader's general method of inserting <style> tags into the `document` doesn't
     //  seem to play nicely with the content_script. It would be nice to find a work-around
@@ -139,5 +151,13 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
         return [main, coffee, imgLoader, cssModules, cssVanilla]
     }
 
-    return [main, coffee, imgLoader, lint, cssModules, cssVanilla]
+    return [
+        main,
+        coffee,
+        imgLoader,
+        lint,
+        cssModules,
+        cssVanilla,
+        stringReplaceLoader,
+    ]
 }

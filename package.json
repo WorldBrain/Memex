@@ -241,6 +241,7 @@
         "sign-addon": "^0.3.0",
         "sinon": "^6.1.5",
         "sqlite3": "^4.1.0",
+        "string-replace-loader": "^2.3.0",
         "style-loader": "^0.21.0",
         "stylelint": "^9.2.1",
         "stylelint-config-standard": "^18.2.0",
