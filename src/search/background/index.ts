@@ -83,10 +83,15 @@ export default class SearchBackground {
                 search: this.searchIndex.search,
                 suggest: this.storage.suggest,
                 extendedSuggest: this.storage.suggestExtended,
-                delPages: this.options.pages.delPages,
 
-                delPagesByDomain: this.options.pages.delPagesByDomain,
-                delPagesByPattern: this.options.pages.delPagesByPattern,
+                delPages: this.options.pages.delPages.bind(this.options.pages),
+                delPagesByDomain: this.options.pages.delPagesByDomain.bind(
+                    this.options.pages,
+                ),
+                delPagesByPattern: this.options.pages.delPagesByPattern.bind(
+                    this.options.pages,
+                ),
+
                 getMatchingPageCount: this.searchIndex.getMatchingPageCount,
                 searchAnnotations: this.searchAnnotations.bind(this),
                 searchPages: this.searchPages.bind(this),
