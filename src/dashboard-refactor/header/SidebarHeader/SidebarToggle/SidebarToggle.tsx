@@ -1,8 +1,10 @@
 import React, { PureComponent } from 'react'
+
 import styled, { css } from 'styled-components'
 import colors from '../../../colors'
 
-import { SidebarToggleProps } from '../types'
+import { SidebarLockedState } from '../types'
+import { HoverState } from '../../../types'
 
 const buttonStyles = `
     height: 26px;
@@ -72,6 +74,11 @@ export const RightArrow = styled.div`
     transform: rotate(180deg);
     animation: 0.2s cubic-bezier(0.65, 0.05, 0.36, 1);
 `
+
+export interface SidebarToggleProps {
+    sidebarLockedState: SidebarLockedState
+    sidebarToggleHoverState: HoverState
+}
 
 export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
     private renderHoveredState() {

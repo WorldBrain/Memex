@@ -3,6 +3,9 @@ import styled from 'styled-components'
 
 import styleConstants from '../../styleConstants'
 
+import { SidebarLockedState, SidebarPeekState } from './types'
+import { HoverState } from '../../types'
+
 import Margin from 'src/dashboard-refactor/components/Margin'
 import SidebarToggle from './SidebarToggle/SidebarToggle'
 
@@ -22,16 +25,10 @@ export const CollectionTitle = styled.p`
     line-height: 21px;
 `
 
-import {
-    SidebarLockedState,
-    SidebarPeekState,
-    SidebarToggleHoverState,
-} from './types'
-
 export interface SidebarHeaderProps {
     sidebarLockedState: SidebarLockedState
     sidebarPeekState: SidebarPeekState
-    sidebarToggleHoverState: SidebarToggleHoverState
+    sidebarToggleHoverState: HoverState
     selectedCollectionHeader?: string
 }
 
