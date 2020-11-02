@@ -37,7 +37,7 @@ export const HoverBoxDiv = styled.div`
     overflow: visible;
     position: absolute;
     border-radius: 3px;
-    width: 300px;
+    min-width: 300px;
     background-color: #fff;
     border-radius: 3px;
     z-index: 3;
@@ -48,7 +48,7 @@ export const HoverBoxDashboard = styled.div`
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
     overflow: visible;
     position: absolute;
-    width: 300px;
+    min-width: 300px;
     z-index: 1;
     background-color: #fff;
     border-radius: 3px;
