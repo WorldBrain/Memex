@@ -1,3 +1,8 @@
+export interface SidebarToggleProps {
+    sidebarLockedState: SidebarLockedState
+    sidebarToggleHoverState: SidebarToggleHoverState
+}
+
 export interface SidebarToggleHoverState {
     onHoverEnter(): void
     onHoverLeave(): void
