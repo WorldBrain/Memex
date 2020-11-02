@@ -1,18 +1,34 @@
 import React, { PureComponent } from 'react'
+import styled from 'styled-components'
+
+import styleConstants from '../../styleConstants'
+
+import { SidebarLockedState, SidebarPeekState } from './types'
+import { HoverState } from '../../types'
+
 import Margin from 'src/dashboard-refactor/components/Margin'
 import SidebarToggle from './SidebarToggle/SidebarToggle'
-import { CollectionTitle, SidebarHeaderContainer } from './styledComponents'
 
-import {
-    SidebarLockedState,
-    SidebarPeekState,
-    SidebarToggleHoverState,
-} from './types'
+const { fonts } = styleConstants
+
+export const SidebarHeaderContainer = styled.div`
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+`
+
+export const CollectionTitle = styled.p`
+    margin: 0;
+    font-family: ${fonts.primary.name};
+    font-weight: ${fonts.primary.bold};
+    line-height: 21px;
+`
 
 export interface SidebarHeaderProps {
     sidebarLockedState: SidebarLockedState
     sidebarPeekState: SidebarPeekState
-    sidebarToggleHoverState: SidebarToggleHoverState
+    sidebarToggleHoverState: HoverState
     selectedCollectionHeader?: string
 }
 
