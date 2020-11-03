@@ -1,7 +1,10 @@
 export const fonts = {
     primary: {
         name: 'Poppins',
-        bold: 700,
+        weight: {
+            normal: 'normal',
+            bold: 700,
+        },
     },
 }
 
