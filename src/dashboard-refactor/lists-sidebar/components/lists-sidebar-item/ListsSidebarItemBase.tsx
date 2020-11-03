@@ -52,7 +52,7 @@ const MoreIcon = styled.div`
     font-size: 12px;
 `
 
-interface ListItemBaseProps {
+interface ListsSidebarItemBaseProps {
     onMoreActionClick(): void
     listName: string
     isEditing: boolean
@@ -61,7 +61,9 @@ interface ListItemBaseProps {
     receivesDraggableItemsState: ReceivesDraggableItemsState
 }
 
-export default class ListItemBase extends PureComponent<ListItemBaseProps> {
+export default class ListsSidebarItemBase extends PureComponent<
+    ListsSidebarItemBaseProps
+> {
     private renderDefault() {
         const {
             onMoreActionClick,
