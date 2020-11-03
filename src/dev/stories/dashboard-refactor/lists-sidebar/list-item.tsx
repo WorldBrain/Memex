@@ -1,6 +1,6 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
-import ListItemBase from 'src/dashboard-refactor/lists-sidebar/components/list-item/ListItemBase'
+import ListsSidebarItemBase from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/ListsSidebarItemBase'
 
 const receivesDraggableItemsState = {
     isDroppable: true, // this defines whether items can be dropped (not whether there is a state change on drag-over)
@@ -9,7 +9,7 @@ const receivesDraggableItemsState = {
     onDrop: () => {},
 }
 
-const listItemProps = {
+const listsSidebarItemProps = {
     default: {
         isEditing: false,
         onMoreActionClick: function () {},
@@ -89,10 +89,18 @@ const listItemProps = {
 
 const stories = storiesOf('Dashboard Refactor|Lists Sidebar/ListItem', module)
 
-stories.add('Default', () => <ListItemBase {...listItemProps.default} />)
-stories.add('Hovered', () => <ListItemBase {...listItemProps.hovered} />)
-stories.add('Selected', () => <ListItemBase {...listItemProps.selected} />)
-stories.add('Hovered and Selected', () => (
-    <ListItemBase {...listItemProps.hoveredAndSelected} />
+stories.add('Default', () => (
+    <ListsSidebarItemBase {...listsSidebarItemProps.default} />
 ))
-stories.add('Editing', () => <ListItemBase {...listItemProps.isEditing} />)
+stories.add('Hovered', () => (
+    <ListsSidebarItemBase {...listsSidebarItemProps.hovered} />
+))
+stories.add('Selected', () => (
+    <ListsSidebarItemBase {...listsSidebarItemProps.selected} />
+))
+stories.add('Hovered and Selected', () => (
+    <ListsSidebarItemBase {...listsSidebarItemProps.hoveredAndSelected} />
+))
+stories.add('Editing', () => (
+    <ListsSidebarItemBase {...listsSidebarItemProps.isEditing} />
+))
