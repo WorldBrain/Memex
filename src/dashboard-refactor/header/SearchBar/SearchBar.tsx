@@ -27,7 +27,7 @@ const SearchBarContainer = styled.div`
 const fontStyles = `
     font-family: ${fonts.primary.name};
     font-style: normal;
-    font-weight: ${fonts.primary.bold};
+    font-weight: ${fonts.primary.weight.bold};
 `
 
 const SearchHeader = styled.p`
