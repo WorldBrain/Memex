@@ -2,8 +2,16 @@ import React from 'react'
 import { storiesOf } from '@storybook/react'
 import ListItemBase from 'src/dashboard-refactor/lists-sidebar/components/list-item/ListItemBase'
 
+const receivesDraggableItemsState = {
+    isDroppable: true, // this defines whether items can be dropped (not whether there is a state change on drag-over)
+    onDragOver: () => {},
+    onDragLeave: () => {},
+    onDrop: () => {},
+}
+
 const listItemProps = {
     default: {
+        isEditing: false,
         onMoreActionClick: function () {},
         listName: 'Let it be known that',
         selectedState: {
@@ -15,8 +23,10 @@ const listItemProps = {
             onHoverLeave: () => {},
             isHovered: false,
         },
+        receivesDraggableItemsState,
     },
     hovered: {
+        isEditing: false,
         onMoreActionClick: function () {},
         listName: 'Existence',
         selectedState: {
@@ -28,8 +38,10 @@ const listItemProps = {
             onHoverLeave: () => {},
             isHovered: true,
         },
+        receivesDraggableItemsState,
     },
     selected: {
+        isEditing: false,
         onMoreActionClick: function () {},
         listName: 'Is',
         selectedState: {
@@ -41,8 +53,10 @@ const listItemProps = {
             onHoverLeave: () => {},
             isHovered: false,
         },
+        receivesDraggableItemsState,
     },
     hoveredAndSelected: {
+        isEditing: false,
         onMoreActionClick: function () {},
         listName: 'Suffering',
         selectedState: {
@@ -54,6 +68,22 @@ const listItemProps = {
             onHoverLeave: () => {},
             isHovered: true,
         },
+        receivesDraggableItemsState,
+    },
+    isEditing: {
+        isEditing: true,
+        onMoreActionClick: function () {},
+        listName: 'Editable List Name',
+        selectedState: {
+            onSelection: function () {},
+            isSelected: true,
+        },
+        hoverState: {
+            onHoverEnter: () => {},
+            onHoverLeave: () => {},
+            isHovered: false,
+        },
+        receivesDraggableItemsState,
     },
 }
 
@@ -65,3 +95,4 @@ stories.add('Selected', () => <ListItemBase {...listItemProps.selected} />)
 stories.add('Hovered and Selected', () => (
     <ListItemBase {...listItemProps.hoveredAndSelected} />
 ))
+stories.add('Editing', () => <ListItemBase {...listItemProps.isEditing} />)

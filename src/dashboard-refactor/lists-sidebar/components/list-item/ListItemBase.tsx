@@ -4,7 +4,11 @@ import styled, { css } from 'styled-components'
 import colors from '../../../colors'
 import { fonts } from '../../../styleConstants'
 
-import { HoverState, SelectedState } from 'src/dashboard-refactor/types'
+import {
+    HoverState,
+    ReceivesDraggableItemsState,
+    SelectedState,
+} from 'src/dashboard-refactor/types'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 
@@ -51,23 +55,30 @@ const MoreIcon = styled.div`
 interface ListItemBaseProps {
     onMoreActionClick(): void
     listName: string
+    isEditing: boolean
     selectedState: SelectedState
     hoverState: HoverState
+    receivesDraggableItemsState: ReceivesDraggableItemsState
 }
 
 export default class ListItemBase extends PureComponent<ListItemBaseProps> {
-    render() {
+    private renderDefault() {
         const {
+            onMoreActionClick,
             listName,
             hoverState: { onHoverEnter, onHoverLeave, isHovered },
             selectedState: { onSelection, isSelected },
-            onMoreActionClick,
+            receivesDraggableItemsState: { onDragOver, onDragLeave, onDrop },
         } = this.props
         return (
             <Container
                 onClick={onSelection}
                 onMouseEnter={onHoverEnter}
                 onMouseLeave={onHoverLeave}
+                onDragOver={onDragOver}
+                onDragEnter={onDragOver}
+                onDragLeave={onDragLeave}
+                onDrop={onDrop}
                 isHovered={isHovered}
                 isSelected={isSelected}
             >
@@ -79,5 +90,22 @@ export default class ListItemBase extends PureComponent<ListItemBaseProps> {
                 </Margin>
             </Container>
         )
+    }
+    private renderEditing() {
+        const {
+            listName,
+            selectedState: { isSelected },
+        } = this.props
+        return (
+            <Container isSelected={isSelected}>
+                <Margin left="19px">
+                    <ListTitle>{listName}</ListTitle>
+                </Margin>
+            </Container>
+        )
+    }
+    render() {
+        if (this.props.isEditing) return this.renderEditing()
+        return this.renderDefault()
     }
 }
