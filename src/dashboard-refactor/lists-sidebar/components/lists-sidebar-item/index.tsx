@@ -101,6 +101,24 @@ export interface ListsSidebarItemProps {
 export default class ListsSidebarItem extends PureComponent<
     ListsSidebarItemProps
 > {
+    private handleDragOver() {
+        this.props.droppableState.onDragOver()
+    }
+    private handleDragLeave() {
+        this.props.droppableState.onDragLeave()
+    }
+    private handleDrop() {
+        this.props.droppableState.onDrop()
+    }
+    private handleHoverEnter() {
+        this.props.hoverState.onHoverEnter()
+    }
+    private handleHoverLeave() {
+        this.props.hoverState.onHoverLeave()
+    }
+    private handleItemSelect() {
+        this.props.selectedState.onSelection()
+    }
     private renderIcon() {
         const {
             droppableState: { isDroppable, isDraggedOver },
@@ -124,20 +142,20 @@ export default class ListsSidebarItem extends PureComponent<
     private renderDefault() {
         const {
             listName,
-            hoverState: { onHoverEnter, onHoverLeave, isHovered },
-            selectedState: { onSelection, isSelected },
-            droppableState: { isBlinking, onDragOver, onDragLeave, onDrop },
+            hoverState: { isHovered },
+            selectedState: { isSelected },
+            droppableState: { isBlinking },
             newItemsCountState: { displayNewItemsCount },
         } = this.props
         return (
             <Container
-                onClick={onSelection}
-                onMouseEnter={onHoverEnter}
-                onMouseLeave={onHoverLeave}
-                onDragOver={onDragOver}
-                onDragEnter={onDragOver}
-                onDragLeave={onDragLeave}
-                onDrop={onDrop}
+                onClick={this.handleItemSelect}
+                onMouseEnter={this.handleHoverEnter}
+                onMouseLeave={this.handleHoverLeave}
+                onDragOver={this.handleDragOver}
+                onDragEnter={this.handleDragOver}
+                onDragLeave={this.handleDragLeave}
+                onDrop={this.handleDrop}
                 isHovered={isHovered}
                 isSelected={isSelected}
                 isBlinking={isBlinking}
