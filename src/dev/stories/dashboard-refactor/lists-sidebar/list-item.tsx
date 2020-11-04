@@ -2,8 +2,15 @@ import React from 'react'
 import { storiesOf } from '@storybook/react'
 import ListsSidebarItemBase from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/ListsSidebarItemBase'
 
-const receivesDraggableItemsState = {
+const newItemsCountState = {
+    displayNewItemsCount: false,
+    newItemsCount: 0,
+}
+
+const droppableState = {
     isDroppable: true, // this defines whether items can be dropped (not whether there is a state change on drag-over)
+    isDraggedOver: false,
+    isBlinking: false,
     onDragOver: () => {},
     onDragLeave: () => {},
     onDrop: () => {},
@@ -23,7 +30,8 @@ const listsSidebarItemProps = {
             onHoverLeave: () => {},
             isHovered: false,
         },
-        receivesDraggableItemsState,
+        droppableState,
+        newItemsCountState,
     },
     hovered: {
         isEditing: false,
@@ -38,7 +46,8 @@ const listsSidebarItemProps = {
             onHoverLeave: () => {},
             isHovered: true,
         },
-        receivesDraggableItemsState,
+        droppableState,
+        newItemsCountState,
     },
     selected: {
         isEditing: false,
@@ -53,7 +62,8 @@ const listsSidebarItemProps = {
             onHoverLeave: () => {},
             isHovered: false,
         },
-        receivesDraggableItemsState,
+        droppableState,
+        newItemsCountState,
     },
     hoveredAndSelected: {
         isEditing: false,
@@ -68,7 +78,8 @@ const listsSidebarItemProps = {
             onHoverLeave: () => {},
             isHovered: true,
         },
-        receivesDraggableItemsState,
+        droppableState,
+        newItemsCountState,
     },
     isEditing: {
         isEditing: true,
@@ -83,7 +94,65 @@ const listsSidebarItemProps = {
             onHoverLeave: () => {},
             isHovered: false,
         },
-        receivesDraggableItemsState,
+        droppableState,
+        newItemsCountState,
+    },
+    isDroppableAndDraggedOver: {
+        isEditing: false,
+        onMoreActionClick: function () {},
+        listName: 'Drop on me :)',
+        selectedState: {
+            onSelection: function () {},
+            isSelected: false,
+        },
+        hoverState: {
+            onHoverEnter: () => {},
+            onHoverLeave: () => {},
+            isHovered: true,
+        },
+        droppableState: {
+            ...droppableState,
+            isDraggedOver: true,
+        },
+        newItemsCountState,
+    },
+    onDrop: {
+        isEditing: false,
+        onMoreActionClick: function () {},
+        listName: 'Drop on me :)',
+        selectedState: {
+            onSelection: function () {},
+            isSelected: false,
+        },
+        hoverState: {
+            onHoverEnter: () => {},
+            onHoverLeave: () => {},
+            isHovered: true,
+        },
+        droppableState: {
+            ...droppableState,
+            isBlinking: true,
+        },
+        newItemsCountState,
+    },
+    displayNewItemsCount: {
+        isEditing: false,
+        onMoreActionClick: function () {},
+        listName: 'Drop on me :)',
+        selectedState: {
+            onSelection: function () {},
+            isSelected: false,
+        },
+        hoverState: {
+            onHoverEnter: () => {},
+            onHoverLeave: () => {},
+            isHovered: false,
+        },
+        droppableState,
+        newItemsCountState: {
+            displayNewItemsCount: true,
+            newItemsCount: Math.floor(Math.random() * 10),
+        },
     },
 }
 
@@ -103,4 +172,15 @@ stories.add('Hovered and Selected', () => (
 ))
 stories.add('Editing', () => (
     <ListsSidebarItemBase {...listsSidebarItemProps.isEditing} />
+))
+stories.add('Droppable and Dragged Over', () => (
+    <ListsSidebarItemBase
+        {...listsSidebarItemProps.isDroppableAndDraggedOver}
+    />
+))
+stories.add('On Drop', () => (
+    <ListsSidebarItemBase {...listsSidebarItemProps.onDrop} />
+))
+stories.add('Display New Items Count', () => (
+    <ListsSidebarItemBase {...listsSidebarItemProps.displayNewItemsCount} />
 ))
