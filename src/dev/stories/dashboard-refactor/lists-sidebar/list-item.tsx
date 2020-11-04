@@ -1,10 +1,15 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
-import ListsSidebarItemBase from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/ListsSidebarItemBase'
+import ListsSidebarItemBase from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/'
 
 const newItemsCountState = {
     displayNewItemsCount: false,
     newItemsCount: 0,
+}
+
+const moreActionButtonState = {
+    onMoreActionClick: () => {},
+    displayMoreActionButton: true,
 }
 
 const droppableState = {
@@ -19,10 +24,10 @@ const droppableState = {
 const listsSidebarItemProps = {
     default: {
         isEditing: false,
-        onMoreActionClick: function () {},
-        listName: 'Let it be known that',
+        moreActionButtonState,
+        listName: 'Cool stuff',
         selectedState: {
-            onSelection: function () {},
+            onSelection: () => {},
             isSelected: false,
         },
         hoverState: {
@@ -35,10 +40,10 @@ const listsSidebarItemProps = {
     },
     hovered: {
         isEditing: false,
-        onMoreActionClick: function () {},
-        listName: 'Existence',
+        moreActionButtonState,
+        listName: 'Other cool stuff',
         selectedState: {
-            onSelection: function () {},
+            onSelection: () => {},
             isSelected: false,
         },
         hoverState: {
@@ -51,10 +56,10 @@ const listsSidebarItemProps = {
     },
     selected: {
         isEditing: false,
-        onMoreActionClick: function () {},
-        listName: 'Is',
+        moreActionButtonState,
+        listName: 'Fast cars',
         selectedState: {
-            onSelection: function () {},
+            onSelection: () => {},
             isSelected: true,
         },
         hoverState: {
@@ -67,10 +72,10 @@ const listsSidebarItemProps = {
     },
     hoveredAndSelected: {
         isEditing: false,
-        onMoreActionClick: function () {},
-        listName: 'Suffering',
+        moreActionButtonState,
+        listName: 'Existential philosophy',
         selectedState: {
-            onSelection: function () {},
+            onSelection: () => {},
             isSelected: true,
         },
         hoverState: {
@@ -83,10 +88,10 @@ const listsSidebarItemProps = {
     },
     isEditing: {
         isEditing: true,
-        onMoreActionClick: function () {},
-        listName: 'Editable List Name',
+        moreActionButtonState,
+        listName: 'Self-organising',
         selectedState: {
-            onSelection: function () {},
+            onSelection: () => {},
             isSelected: true,
         },
         hoverState: {
@@ -99,10 +104,10 @@ const listsSidebarItemProps = {
     },
     isDroppableAndDraggedOver: {
         isEditing: false,
-        onMoreActionClick: function () {},
-        listName: 'Drop on me :)',
+        moreActionButtonState,
+        listName: `Bit of a drag`,
         selectedState: {
-            onSelection: function () {},
+            onSelection: () => {},
             isSelected: false,
         },
         hoverState: {
@@ -118,10 +123,10 @@ const listsSidebarItemProps = {
     },
     onDrop: {
         isEditing: false,
-        onMoreActionClick: function () {},
-        listName: 'Drop on me :)',
+        moreActionButtonState,
+        listName: `Drop it like it's hot`,
         selectedState: {
-            onSelection: function () {},
+            onSelection: () => {},
             isSelected: false,
         },
         hoverState: {
@@ -137,10 +142,10 @@ const listsSidebarItemProps = {
     },
     displayNewItemsCount: {
         isEditing: false,
-        onMoreActionClick: function () {},
-        listName: 'Drop on me :)',
+        moreActionButtonState,
+        listName: 'How high',
         selectedState: {
-            onSelection: function () {},
+            onSelection: () => {},
             isSelected: false,
         },
         hoverState: {
@@ -156,7 +161,10 @@ const listsSidebarItemProps = {
     },
 }
 
-const stories = storiesOf('Dashboard Refactor|Lists Sidebar/ListItem', module)
+const stories = storiesOf(
+    'Dashboard Refactor|Lists Sidebar/Item Variations',
+    module,
+)
 
 stories.add('Default', () => (
     <ListsSidebarItemBase {...listsSidebarItemProps.default} />

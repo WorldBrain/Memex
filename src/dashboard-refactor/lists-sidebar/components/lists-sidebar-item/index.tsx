@@ -10,6 +10,7 @@ import {
     SelectedState,
     NewItemsCountState,
 } from 'src/dashboard-refactor/types'
+import { MoreActionButtonState } from './types'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 
@@ -87,25 +88,28 @@ const NewItemsCount = styled.div`
     }
 `
 
-interface ListsSidebarItemBaseProps {
-    onMoreActionClick(): void
+export interface ListsSidebarItemProps {
     listName: string
     isEditing: boolean
     selectedState: SelectedState
     hoverState: HoverState
     droppableState: DroppableState
     newItemsCountState: NewItemsCountState
+    moreActionButtonState: MoreActionButtonState
 }
 
-export default class ListsSidebarItemBase extends PureComponent<
-    ListsSidebarItemBaseProps
+export default class ListsSidebarItem extends PureComponent<
+    ListsSidebarItemProps
 > {
     private renderIcon() {
         const {
             droppableState: { isDroppable, isDraggedOver },
             hoverState: { isHovered },
             newItemsCountState: { displayNewItemsCount, newItemsCount },
-            onMoreActionClick,
+            moreActionButtonState: {
+                onMoreActionClick,
+                displayMoreActionButton,
+            },
         } = this.props
         if (displayNewItemsCount)
             return (
@@ -114,7 +118,8 @@ export default class ListsSidebarItemBase extends PureComponent<
                 </NewItemsCount>
             )
         if (isDroppable && isDraggedOver) return <Icon>+</Icon>
-        if (isHovered) return <Icon onClick={onMoreActionClick}>M</Icon>
+        if (isHovered && displayMoreActionButton)
+            return <Icon onClick={onMoreActionClick}>M</Icon>
     }
     private renderDefault() {
         const {
