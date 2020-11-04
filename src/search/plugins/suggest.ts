@@ -42,7 +42,7 @@ export class SuggestPlugin extends StorageBackendPlugin<DexieStorageBackend> {
         const db = this.backend.dexieInstance
         const applyQuery = <T, Key>(where) =>
             where
-                .startsWith(query)
+                .startsWithIgnoreCase(query)
                 .limit(limit)
                 .uniqueKeys()
                 .catch(initErrHandler([] as T[]))
