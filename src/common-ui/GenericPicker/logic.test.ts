@@ -87,12 +87,15 @@ const setupLogicHelper = async ({
             url: url ?? TESTURL,
         })
 
+    if (!queryEntries) {
+        queryEntries = queryEntryResults
+            ? async (query: string) => queryEntryResults
+            : async (query: string) => []
+    }
+
     const entryPickerLogic = new TestPickerLogic({
+        queryEntries,
         onUpdateEntrySelection: onUpdateEntrySelection ?? backendEntryUpdate,
-        queryEntries:
-            queryEntries ?? queryEntryResults
-                ? async (query: string) => queryEntryResults
-                : async (query: string) => [],
         loadDefaultSuggestions: () => initialSuggestions ?? [],
         initialSelectedEntries: async () => initialSelectedEntries ?? [],
         actOnAllTabs: async (entry) => null,
@@ -219,6 +222,36 @@ describe('GenericPickerLogic', () => {
                 entryResultEntryNotSelected: ['test1'],
                 selectedEntries: initialSelectedEntries,
                 query: 'test',
+                newEntryButton: true,
+            }),
+        )
+    })
+
+    it('should correctly search for a entry regardless of case', async ({
+        device,
+    }) => {
+        const initialSuggestions = ['sugg1', 'sugg2']
+        const initialSelectedEntries = ['something']
+        let lastQuery: string
+
+        const { testLogic } = await setupLogicHelper({
+            device,
+            initialSuggestions,
+            initialSelectedEntries,
+            queryEntries: async (query: string) => {
+                lastQuery = query
+                return ['test1']
+            },
+        })
+        expect(lastQuery).toEqual(undefined)
+        await testLogic.processEvent('searchInputChanged', { query: 'Test' })
+        expect(lastQuery).toEqual('test')
+
+        expect(testLogic.state).toEqual(
+            stateHelper({
+                entryResultEntryNotSelected: ['test1'],
+                selectedEntries: initialSelectedEntries,
+                query: 'Test',
                 newEntryButton: true,
             }),
         )
