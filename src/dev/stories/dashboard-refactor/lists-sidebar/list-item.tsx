@@ -1,6 +1,10 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
-import ListsSidebarItemBase from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/'
+
+import ListsSidebarItem from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/'
+import ListsSidebarItemWithMenu, {
+    ListsSidebarItemWithMenuProps,
+} from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item-with-menu'
 
 const newItemsCountState = {
     displayNewItemsCount: false,
@@ -21,11 +25,11 @@ const droppableState = {
     onDrop: () => {},
 }
 
-const listsSidebarItemProps = {
+export const listsSidebarItemProps = {
     default: {
         isEditing: false,
         moreActionButtonState,
-        listName: 'Cool stuff',
+        listName: 'This is a very long collection name',
         selectedState: {
             onSelection: () => {},
             isSelected: false,
@@ -41,7 +45,7 @@ const listsSidebarItemProps = {
     hovered: {
         isEditing: false,
         moreActionButtonState,
-        listName: 'Other cool stuff',
+        listName: 'This is a very long collection name',
         selectedState: {
             onSelection: () => {},
             isSelected: false,
@@ -57,7 +61,7 @@ const listsSidebarItemProps = {
     selected: {
         isEditing: false,
         moreActionButtonState,
-        listName: 'Fast cars',
+        listName: 'This is a very long collection name',
         selectedState: {
             onSelection: () => {},
             isSelected: true,
@@ -73,7 +77,7 @@ const listsSidebarItemProps = {
     hoveredAndSelected: {
         isEditing: false,
         moreActionButtonState,
-        listName: 'Existential philosophy',
+        listName: 'This is a very long collection name',
         selectedState: {
             onSelection: () => {},
             isSelected: true,
@@ -89,7 +93,7 @@ const listsSidebarItemProps = {
     isEditing: {
         isEditing: true,
         moreActionButtonState,
-        listName: 'Self-organising',
+        listName: 'This is a very long collection name',
         selectedState: {
             onSelection: () => {},
             isSelected: true,
@@ -105,7 +109,7 @@ const listsSidebarItemProps = {
     isDroppableAndDraggedOver: {
         isEditing: false,
         moreActionButtonState,
-        listName: `Bit of a drag`,
+        listName: `This is a very long collection name`,
         selectedState: {
             onSelection: () => {},
             isSelected: false,
@@ -124,7 +128,7 @@ const listsSidebarItemProps = {
     onDrop: {
         isEditing: false,
         moreActionButtonState,
-        listName: `Drop it like it's hot`,
+        listName: `This is a very long collection name`,
         selectedState: {
             onSelection: () => {},
             isSelected: false,
@@ -143,7 +147,7 @@ const listsSidebarItemProps = {
     displayNewItemsCount: {
         isEditing: false,
         moreActionButtonState,
-        listName: 'How high',
+        listName: 'This is a very long collection name',
         selectedState: {
             onSelection: () => {},
             isSelected: false,
@@ -167,28 +171,52 @@ const stories = storiesOf(
 )
 
 stories.add('Default', () => (
-    <ListsSidebarItemBase {...listsSidebarItemProps.default} />
+    <ListsSidebarItem {...listsSidebarItemProps.default} />
 ))
 stories.add('Hovered', () => (
-    <ListsSidebarItemBase {...listsSidebarItemProps.hovered} />
+    <ListsSidebarItem {...listsSidebarItemProps.hovered} />
 ))
 stories.add('Selected', () => (
-    <ListsSidebarItemBase {...listsSidebarItemProps.selected} />
+    <ListsSidebarItem {...listsSidebarItemProps.selected} />
 ))
 stories.add('Hovered and Selected', () => (
-    <ListsSidebarItemBase {...listsSidebarItemProps.hoveredAndSelected} />
+    <ListsSidebarItem {...listsSidebarItemProps.hoveredAndSelected} />
 ))
 stories.add('Editing', () => (
-    <ListsSidebarItemBase {...listsSidebarItemProps.isEditing} />
+    <ListsSidebarItem {...listsSidebarItemProps.isEditing} />
 ))
 stories.add('Droppable and Dragged Over', () => (
-    <ListsSidebarItemBase
-        {...listsSidebarItemProps.isDroppableAndDraggedOver}
-    />
+    <ListsSidebarItem {...listsSidebarItemProps.isDroppableAndDraggedOver} />
 ))
 stories.add('On Drop', () => (
-    <ListsSidebarItemBase {...listsSidebarItemProps.onDrop} />
+    <ListsSidebarItem {...listsSidebarItemProps.onDrop} />
 ))
 stories.add('Display New Items Count', () => (
-    <ListsSidebarItemBase {...listsSidebarItemProps.displayNewItemsCount} />
+    <ListsSidebarItem {...listsSidebarItemProps.displayNewItemsCount} />
+))
+
+const listItemWithMenuProps: ListsSidebarItemWithMenuProps = {
+    isDisplayed: true,
+    listsSidebarItemProps: listsSidebarItemProps.hoveredAndSelected,
+    listsSidebarItemActionsArray: [
+        {
+            label: 'Share',
+            iconPath: 'img/share.svg',
+            onClick: () => {},
+        },
+        {
+            label: 'Delete',
+            iconPath: 'img/trash.svg',
+            onClick: () => {},
+        },
+        {
+            label: 'Rename',
+            iconPath: 'img/edit.svg',
+            onClick: () => {},
+        },
+    ],
+}
+
+stories.add('Menu Extended', () => (
+    <ListsSidebarItemWithMenu {...listItemWithMenuProps} />
 ))
