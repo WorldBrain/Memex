@@ -26,6 +26,8 @@ import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareMenu'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { copyToClipboard } from 'src/annotations/content_script/utils'
+import analytics from 'src/analytics'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -46,6 +48,8 @@ export class AnnotationsSidebarContainer<
             props,
             new SidebarContainerLogic({
                 ...props,
+                analytics,
+                copyToClipboard,
                 focusCreateForm: () =>
                     this.sidebarRef?.getInstance()?.focusCreateForm(),
             }),
@@ -274,6 +278,9 @@ export class AnnotationsSidebarContainer<
             <ShareMenuWrapper>
                 <HoverBox>
                     <SingleNoteShareMenu
+                        copyLink={(link) =>
+                            this.processEvent('copyNoteLink', { link })
+                        }
                         annotationUrl={currentAnnotationId}
                         postShareHook={() =>
                             this.processEvent('updateAnnotationShareInfo', {

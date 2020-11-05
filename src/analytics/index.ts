@@ -31,3 +31,5 @@ if (
 }
 
 export default analytics
+
+export { Analytics }

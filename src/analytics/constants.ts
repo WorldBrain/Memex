@@ -104,13 +104,13 @@ export const ANALYTICS_EVENTS: {
         shareAnnotation: {
             description: 'An annotation is shared',
         },
-        CopyNoteLink: {
+        copyNoteLink: {
             description: 'Copied NoteLink to clipboard',
         },
-        CopyPageLink: {
+        copyPageLink: {
             description: 'Copied PageLink to clipboard',
         },
-        CopyCollectionLink: {
+        copyCollectionLink: {
             description: 'Copied CollectionLink to clipboard',
         },
     },

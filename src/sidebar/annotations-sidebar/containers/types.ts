@@ -5,6 +5,7 @@ import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 import { SidebarTheme } from '../types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { Analytics } from 'src/analytics'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -28,6 +29,8 @@ export interface SidebarContainerDependencies {
     theme?: Partial<SidebarTheme>
     // search: SearchInterface
     // bookmarks: BookmarksInterface
+    analytics: Analytics
+    copyToClipboard: (text: string) => Promise<void>
 }
 
 export type SearchType = 'notes' | 'page' | 'social'

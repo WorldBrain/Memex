@@ -129,7 +129,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
     private handleLinkCopy = async (link: string) => {
         // analytics.trackEvent({
         //     category: 'ContentSharing',
-        //     action: 'CopyPageLink',
+        //     action: 'copyPageLink',
         // })
         await copyToClipboard(link)
     }
