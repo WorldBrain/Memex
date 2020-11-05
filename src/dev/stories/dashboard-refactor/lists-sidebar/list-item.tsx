@@ -195,28 +195,28 @@ stories.add('Display New Items Count', () => (
     <ListsSidebarItem {...listsSidebarItemProps.displayNewItemsCount} />
 ))
 
-const listItemWithMenuProps: ListsSidebarItemWithMenuProps = {
+export const listsSidebarItemWithMenuProps: ListsSidebarItemWithMenuProps = {
     isDisplayed: true,
     listsSidebarItemProps: listsSidebarItemProps.hoveredAndSelected,
     listsSidebarItemActionsArray: [
         {
             label: 'Share',
-            iconPath: 'img/share.svg',
+            iconPath: '/img/share.svg',
             onClick: () => {},
         },
         {
             label: 'Delete',
-            iconPath: 'img/trash.svg',
+            iconPath: '/img/trash.svg',
             onClick: () => {},
         },
         {
             label: 'Rename',
-            iconPath: 'img/edit.svg',
+            iconPath: '/img/edit.svg',
             onClick: () => {},
         },
     ],
 }
 
 stories.add('Menu Extended', () => (
-    <ListsSidebarItemWithMenu {...listItemWithMenuProps} />
+    <ListsSidebarItemWithMenu {...listsSidebarItemWithMenuProps} />
 ))
