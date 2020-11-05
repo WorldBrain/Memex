@@ -28,32 +28,30 @@ export const CollectionTitle = styled.p`
 export interface SidebarHeaderProps {
     sidebarLockedState: SidebarLockedState
     sidebarPeekState: SidebarPeekState
-    sidebarToggleHoverState: HoverState
-    selectedCollectionHeader?: string
+    hoverState: HoverState
+    selectedList?: string
 }
 
 export default class SidebarHeader extends PureComponent<SidebarHeaderProps> {
     render() {
         const {
             sidebarLockedState,
-            sidebarToggleHoverState,
+            hoverState,
             sidebarPeekState,
-            selectedCollectionHeader,
+            selectedList,
         } = this.props
         return (
             <SidebarHeaderContainer>
                 <Margin x="12px">
                     <SidebarToggle
                         sidebarLockedState={sidebarLockedState}
-                        sidebarToggleHoverState={sidebarToggleHoverState}
+                        sidebarToggleHoverState={hoverState}
                     />
                 </Margin>
                 {(sidebarLockedState.isSidebarLocked ||
                     sidebarPeekState.isSidebarPeeking) &&
-                    selectedCollectionHeader && (
-                        <CollectionTitle>
-                            {selectedCollectionHeader}
-                        </CollectionTitle>
+                    selectedList && (
+                        <CollectionTitle>{selectedList}</CollectionTitle>
                     )}
             </SidebarHeaderContainer>
         )
