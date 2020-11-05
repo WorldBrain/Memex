@@ -1,4 +1,4 @@
 export interface MoreActionButtonState {
-    onMoreActionClick(): void
+    onMoreActionClick(normalizedPageUrl: string): void
     displayMoreActionButton: boolean
 }

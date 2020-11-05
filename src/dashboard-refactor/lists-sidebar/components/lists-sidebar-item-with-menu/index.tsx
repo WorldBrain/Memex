@@ -53,6 +53,7 @@ const MenuButton = styled.div`
 `
 
 export interface ListsSidebarItemWithMenuProps {
+    listId: string
     listsSidebarItemProps: ListsSidebarItemProps
     listsSidebarItemActionsArray: Array<ListsSidebarItemActionItem>
     isDisplayed: boolean
@@ -61,7 +62,7 @@ export interface ListsSidebarItemWithMenuProps {
 export interface ListsSidebarItemActionItem {
     label: string
     iconPath: string
-    onClick(): void
+    onClick(normalizedPageUrl: string): void
 }
 
 export default class ListsSidebarItemWithMenu extends PureComponent<
@@ -69,13 +70,48 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
 > {
     render() {
         const {
-            listsSidebarItemProps,
+            listsSidebarItemProps: {
+                className,
+                listName,
+                isEditing,
+                selectedState,
+                hoverState,
+                droppableState,
+                newItemsCountState,
+                moreActionButtonState,
+            },
             listsSidebarItemActionsArray,
             isDisplayed,
+            listId,
         } = this.props
         return (
             <Container>
-                <ListsSidebarItem {...listsSidebarItemProps} />
+                <ListsSidebarItem
+                    className={className}
+                    listName={listName}
+                    isEditing={isEditing}
+                    newItemsCountState={newItemsCountState}
+                    selectedState={{
+                        onSelected: selectedState.onSelection(listId),
+                        ...selectedState,
+                    }}
+                    hoverState={{
+                        onHoverEnter: hoverState.onHoverEnter(listId),
+                        onHoverLeave: hoverState.onHoverLeave(listId),
+                        ...hoverState,
+                    }}
+                    droppableState={{
+                        onDragOver: droppableState.onDragOver(listId),
+                        onDragLeave: droppableState.onDragLeave(listId),
+                        ...droppableState,
+                    }}
+                    moreActionButtonState={{
+                        onMoreActionClick: moreActionButtonState.onMoreActionClick(
+                            listId,
+                        ),
+                        ...moreActionButtonState,
+                    }}
+                />
                 <MenuContainer isDisplayed={isDisplayed}>
                     {listsSidebarItemActionsArray.map((item, idx) => {
                         const { label, iconPath, onClick } = item

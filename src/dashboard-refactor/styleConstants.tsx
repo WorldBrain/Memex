@@ -1,6 +1,12 @@
+import colors from './colors'
+
 export const fonts = {
     primary: {
         name: 'Poppins',
+        colors: {
+            primary: colors.fonts.primary,
+            secondary: colors.fonts.secondary,
+        },
         weight: {
             normal: 'normal',
             bold: 700,
