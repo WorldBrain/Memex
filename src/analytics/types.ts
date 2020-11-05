@@ -118,6 +118,7 @@ export interface AnalyticsEvents {
         | 'disableKeyboardShortcuts'
     Readwise: 'setupReadwise' | 'removeReadwise'
     Inbox: 'filterByInbox' | 'removeFromInbox'
+    TextExporter: 'copyToClipboard'
 }
 
 export interface AnalyticsEventInfo {
