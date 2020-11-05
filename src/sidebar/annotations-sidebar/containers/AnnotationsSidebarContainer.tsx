@@ -318,6 +318,9 @@ export class AnnotationsSidebarContainer<
             <ShareMenuWrapperTopBar>
                 <HoverBox>
                     <AllNotesShareMenu
+                        copyLink={(link) =>
+                            this.processEvent('copyPageLink', { link })
+                        }
                         normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
                         postShareAllHook={() =>
                             this.processEvent('updateAllAnnotationsShareInfo', {

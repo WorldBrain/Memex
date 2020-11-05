@@ -16,7 +16,7 @@ interface State {
 
 export interface Props {
     annotationUrl: string
-    copyLink: (link: string) => void
+    copyLink: (link: string) => Promise<void>
     closeShareMenu: () => void
     postShareHook?: () => void
     postUnshareHook?: () => void
@@ -97,7 +97,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             <ShareAnnotationMenu
                 // shareAllState={this.state.shareStatusState}
                 getLink={this.getLink}
-                onCopyLinkClick={async (link) => this.props.copyLink(link)}
+                onCopyLinkClick={this.props.copyLink}
                 onClickOutside={this.props.closeShareMenu}
                 // checkboxTitleCopy="Share Note"
                 // checkboxCopy="Share Note in all collections this page is in"

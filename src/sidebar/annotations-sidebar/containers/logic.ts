@@ -169,7 +169,9 @@ export type SidebarContainerEvents = UIEvent<{
     annotationMouseLeave: {
         annotationUrl: string
     }
+
     copyNoteLink: { link: string }
+    copyPageLink: { link: string }
 
     setPageUrl: { pageUrl: string }
 
@@ -367,6 +369,17 @@ export class SidebarContainerLogic extends UILogic<
         this.options.analytics.trackEvent({
             category: 'ContentSharing',
             action: 'copyNoteLink',
+        })
+
+        await this.options.copyToClipboard(link)
+    }
+
+    copyPageLink: EventHandler<'copyPageLink'> = async ({
+        event: { link },
+    }) => {
+        this.options.analytics.trackEvent({
+            category: 'ContentSharing',
+            action: 'copyPageLink',
         })
 
         await this.options.copyToClipboard(link)

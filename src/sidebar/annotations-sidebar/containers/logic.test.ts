@@ -326,6 +326,31 @@ describe('SidebarContainerLogic', () => {
                 },
             ])
         })
+
+        it('should be able to copy page link', async ({ device }) => {
+            let clipboard = ''
+            const { sidebar, analytics } = await setupLogicHelper({
+                device,
+                copyToClipboard: async (text) => {
+                    clipboard = text
+                },
+            })
+
+            expect(clipboard).toEqual('')
+            expect(analytics.popNew()).toEqual([])
+
+            await sidebar.processEvent('copyPageLink', { link: 'test' })
+
+            expect(clipboard).toEqual('test')
+            expect(analytics.popNew()).toEqual([
+                {
+                    eventArgs: {
+                        category: 'ContentSharing',
+                        action: 'copyPageLink',
+                    },
+                },
+            ])
+        })
     })
 
     // TODO: Figure out why we're passing in all the comment data that's already available in state
