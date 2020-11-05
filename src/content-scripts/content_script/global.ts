@@ -33,8 +33,10 @@ import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { AnalyticsEvent } from 'src/analytics/types'
+import analytics from 'src/analytics'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
 import { PageIndexingInterface } from 'src/page-indexing/background/types'
+import { copyToClipboard } from 'src/annotations/content_script/utils'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -174,6 +176,8 @@ export async function main() {
                 customLists: runInBackground(),
                 contentSharing: runInBackground(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
+                analytics,
+                copyToClipboard,
             })
             components.sidebar?.resolve()
         },

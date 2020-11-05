@@ -29,7 +29,7 @@ const setupLogicHelper = async ({
     device: UILogicTestDevice
     pageUrl?: string
     focusCreateForm?: () => void
-    copyToClipboard?: (text: string) => Promise<void>
+    copyToClipboard?: (text: string) => Promise<boolean>
 }) => {
     const { backgroundModules } = device
 
@@ -308,6 +308,7 @@ describe('SidebarContainerLogic', () => {
                 device,
                 copyToClipboard: async (text) => {
                     clipboard = text
+                    return true
                 },
             })
 
@@ -333,6 +334,7 @@ describe('SidebarContainerLogic', () => {
                 device,
                 copyToClipboard: async (text) => {
                     clipboard = text
+                    return true
                 },
             })
 

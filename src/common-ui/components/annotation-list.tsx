@@ -1,6 +1,7 @@
 import React, { Component, MouseEventHandler } from 'react'
 import cx from 'classnames'
 
+import analytics from 'src/analytics'
 import { Annotation as AnnotationFlawed } from 'src/annotations/types'
 import {
     AnnotationSharingInfo,
@@ -21,6 +22,7 @@ import {
     INIT_FORM_STATE,
 } from 'src/sidebar/annotations-sidebar/containers/logic'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
+import { copyToClipboard } from 'src/annotations/content_script/utils'
 
 const styles = require('./annotation-list.css')
 
@@ -291,6 +293,14 @@ class AnnotationList extends Component<Props, State> {
             <div className={styles.hoverBoxWrapper}>
                 <HoverBox>
                     <SingleNoteShareMenu
+                        copyLink={async (link) => {
+                            analytics.trackEvent({
+                                category: 'ContentSharing',
+                                action: 'copyNoteLink',
+                            })
+
+                            await copyToClipboard(link)
+                        }}
                         annotationUrl={annot.url}
                         postShareHook={() =>
                             this.updateAnnotationShareState(annot.url)({

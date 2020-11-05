@@ -30,7 +30,7 @@ export interface SidebarContainerDependencies {
     // search: SearchInterface
     // bookmarks: BookmarksInterface
     analytics: Analytics
-    copyToClipboard: (text: string) => Promise<void>
+    copyToClipboard: (text: string) => Promise<boolean>
 }
 
 export type SearchType = 'notes' | 'page' | 'social'

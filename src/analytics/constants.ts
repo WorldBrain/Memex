@@ -379,4 +379,10 @@ export const ANALYTICS_EVENTS: {
             description: 'Inbox entry has been explicitly removed',
         },
     },
+    TextExporter: {
+        copyToClipboard: {
+            description:
+                'The choice of copying a TextExporter template to the clipboard',
+        },
+    },
 }
