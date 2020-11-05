@@ -167,8 +167,10 @@ export const updateSearchResult: (a: any) => Thunk = ({
     searchResult,
     overwrite = false,
 }) => (dispatch, getState) => {
-    trackSearch(searchResult, overwrite, getState())
-    storeSearch(searchResult, overwrite, getState())
+    if (!searchBar.isEmptyQuery(getState())) {
+        trackSearch(searchResult, overwrite, getState())
+        storeSearch(searchResult, overwrite, getState())
+    }
 
     const searchAction = overwrite ? setSearchResult : appendSearchResult
 
