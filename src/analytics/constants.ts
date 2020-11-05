@@ -371,4 +371,12 @@ export const ANALYTICS_EVENTS: {
             description: 'Removing the Readwise Sync Key',
         },
     },
+    Inbox: {
+        filterByInbox: {
+            description: 'Dashboard has been filtered by Inbox',
+        },
+        removeFromInbox: {
+            description: 'Inbox entry has been explicitly removed',
+        },
+    },
 }

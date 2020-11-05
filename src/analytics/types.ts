@@ -117,6 +117,7 @@ export interface AnalyticsEvents {
         | 'enableKeyboardShortcuts'
         | 'disableKeyboardShortcuts'
     Readwise: 'setupReadwise' | 'removeReadwise'
+    Inbox: 'filterByInbox' | 'removeFromInbox'
 }
 
 export interface AnalyticsEventInfo {
