@@ -135,7 +135,7 @@ class ListContainer extends Component {
             })
         }
 
-        this.props.handleListItemClick(list)
+        this.props.handleListItemClick(list)()
     }
 
     renderAllLists = () => {
