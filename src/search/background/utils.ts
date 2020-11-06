@@ -41,11 +41,11 @@ export const reshapeAnnotForDisplay = ({
     body,
     comment,
     createdWhen,
-    tags: tags.map(tag => tag.name),
+    tags: tags.map((tag) => tag.name),
     hasBookmark,
 })
 
-export const reshapePageForDisplay = page => ({
+export const reshapePageForDisplay = (page) => ({
     url: page.url,
     fullUrl: page.fullUrl,
     title: page.fullTitle,
@@ -54,6 +54,7 @@ export const reshapePageForDisplay = page => ({
     favIcon: page.favIcon,
     annotations: [],
     tags: page.tags,
+    lists: page.lists,
     displayTime: page.displayTime,
     annotsCount: page.annotsCount,
 })

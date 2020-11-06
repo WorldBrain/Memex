@@ -11,11 +11,20 @@ export default class OnboardingMessage extends React.PureComponent<Props> {
     }
 
     render() {
+        const descriptionText = (
+            <span>
+                <strong>
+                    Import your bookmarks to make them full-text searchable
+                </strong>{' '}
+                <br /> From Pocket, Diigo, Raindrop.io and many more.
+            </span>
+        )
+
         return (
             <ResultsMessage onDismiss={this.handleDismiss}>
                 <OnboardingTooltip
-                    descriptionText="Import your existing bookmarks &amp; web history from Pocket, Diigo, Raindrop.io and many more."
-                    CTAText="Import"
+                    descriptionText={descriptionText}
+                    CTAText="Get Started"
                     onCTAClick={() => (window.location.hash = '#/import')}
                 />
             </ResultsMessage>

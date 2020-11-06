@@ -1,4 +1,3 @@
-import { Thunk, Tweet } from './types'
 import { acts as tagActs } from 'src/popup/tags-button'
 import { acts as collectionActs } from 'src/popup/collections-button'
 import { remoteFunction } from 'src/util/webextensionRPC'
@@ -12,7 +11,9 @@ const addBookmarkRPC = remoteFunction('addSocialBookmark')
 const delBookmarkRPC = remoteFunction('delSocialBookmark')
 const addTweetRPC = remoteFunction('addTweet')
 
-export const initState: (url: string) => Thunk = url => async dispatch => {
+type Thunk = any
+
+export const initState: (url: string) => Thunk = (url) => async (dispatch) => {
     try {
         const listsAssocWithPage = await fetchSocialPostLists({ url })
         const lists = await fetchAllListsRPC({
@@ -36,16 +37,16 @@ export const initState: (url: string) => Thunk = url => async dispatch => {
 export const toggleBookmark: (url: string, isBookmarked: boolean) => Thunk = (
     url,
     isBookmarked,
-) => async dispatch => {
+) => async (dispatch) => {
     const bookmarkRPC = isBookmarked ? delBookmarkRPC : addBookmarkRPC
     try {
         await bookmarkRPC({ url })
     } catch (err) {}
 }
 
-export const saveTweet: (
-    element: HTMLElement,
-) => Thunk = element => async dispatch => {
+export const saveTweet: (element: HTMLElement) => Thunk = (element) => async (
+    dispatch,
+) => {
     try {
         const tweet = getTweetInfo(element)
         const id = await addTweetRPC(tweet)

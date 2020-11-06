@@ -6,7 +6,7 @@
     align-items: center;
     justify-content: space-between;
     height: 55px;
-    position: fixed;
+    position: sticky;
     top: 0;
     left: 0;
     right: 0;
@@ -105,15 +105,24 @@
     }
 }
 
+.settingsBox {
+    width: 24px;
+    height: 24px;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
+}
+
 .settingsIcon {
     composes: settingsIcon from 'src/common-ui/icons.css';
-    composes: nakedSquareButton from 'src/common-ui/elements.css';
-    height: 25px;
-    width: 25px;
-    padding: 5px;
-    display: flex;
-    margin-left: 15px;
-    background-size: 21px;
+    height: 24px;
+    width: 24px;
 }
 
 .button {
@@ -143,18 +152,16 @@
     composes: removeIcon from 'src/common-ui/icons.css';
     composes: onHoverDark from 'src/common-ui/colors.css';
     border-radius: 3px;
-    background-size: 10px;
+    mask-size: 10px;
     display: inline-block;
     cursor: pointer;
     width: 18px;
     height: 18px;
     margin-left: 5px;
-    background-repeat: no-repeat;
-    background-position: center;
 }
 
 .collectionsBtn {
-    width: 250px;
+    width: 180px;
     height: 55px;
     align-items: center;
     display: flex;

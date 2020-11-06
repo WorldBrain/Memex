@@ -23,15 +23,13 @@ type Props = StateProps & DispatchProps & OwnProps
 class BookmarkFilter extends PureComponent<Props> {
     render() {
         return (
-            <div className={styles.container}>
-                <button
-                    className={cx(styles.button, {
-                        [styles.bookmark]: this.props.bookmarkFilter,
-                        [styles.notBookmark]: !this.props.bookmarkFilter,
-                    })}
-                    onClick={this.props.onShowOnlyBookmarksChange}
-                />
-            </div>
+            <div
+                className={cx(styles.button, {
+                    [styles.bookmark]: this.props.bookmarkFilter,
+                    [styles.notBookmark]: !this.props.bookmarkFilter,
+                })}
+                onClick={this.props.onShowOnlyBookmarksChange}
+            />
         )
     }
 }
@@ -46,11 +44,8 @@ const mapDispatchToProps: MapDispatchToProps<
     DispatchProps,
     OwnProps,
     RootState
-> = dispatch => ({
+> = (dispatch) => ({
     onShowOnlyBookmarksChange: () => dispatch(actions.toggleBookmarkFilter()),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(BookmarkFilter)
+export default connect(mapStateToProps, mapDispatchToProps)(BookmarkFilter)

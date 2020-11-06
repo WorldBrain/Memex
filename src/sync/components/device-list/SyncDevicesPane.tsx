@@ -3,11 +3,8 @@ import ToggleSwitch from 'src/common-ui/components/ToggleSwitch'
 import { SyncDevicesList } from 'src/sync/components/device-list/SyncDevicesList'
 import { SyncDevice } from 'src/sync/components/types'
 import { LOGIN_URL } from 'src/constants'
-import {
-    UserProps,
-    withCurrentUser,
-} from 'src/authentication/components/AuthConnector'
-import { sync } from 'src/util/remote-functions-background'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { sync, auth, subscription } from 'src/util/remote-functions-background'
 import InitialSyncSetup from 'src/sync/components/initial-sync/initial-sync-setup'
 import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
@@ -15,9 +12,17 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import analytics from 'src/analytics'
+import { AuthContextInterface } from 'src/authentication/background/types'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const styles = require('../styles.css')
+
+export const subscriptionConfig = {
+    site:
+        process.env.NODE_ENV !== 'production'
+            ? 'worldbrain-test'
+            : 'worldbrain',
+}
 
 interface Props {
     devices: SyncDevice[]
@@ -30,6 +35,8 @@ interface Props {
     refreshDevices: () => Promise<void>
     handleUpgradeNeeded: () => void
     abortInitialSync: () => Promise<void>
+    removeAllDevices: () => Promise<void>
+    subscriptionStatus: string
 }
 
 interface State {
@@ -37,7 +44,11 @@ interface State {
     isAddingNewDevice: boolean
 }
 
-export class SyncDevicesPane extends Component<Props, State> {
+interface ContainerProps {
+    onClose?: () => void
+}
+
+export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
     state = { isTogglingSync: false, isAddingNewDevice: false }
 
     enableSync = () => {
@@ -100,12 +111,18 @@ export class SyncDevicesPane extends Component<Props, State> {
         )
     }
 
+    openPortal = async () => {
+        const portalLink = await subscription.getManageLink()
+        window.open(portalLink['access_url'])
+    }
+
     renderDeviceList() {
         let pairButton
 
         if (
-            !this.props.isDeviceSyncAllowed &&
-            this.props.devices.length === 0
+            (!this.props.isDeviceSyncAllowed &&
+                this.props.devices.length === 0) ||
+            this.props.subscriptionStatus === 'cancelled'
         ) {
             pairButton = (
                 <ButtonTooltip
@@ -114,14 +131,25 @@ export class SyncDevicesPane extends Component<Props, State> {
                 >
                     <SecondaryAction
                         onClick={this.props.handleUpgradeNeeded}
-                        label={` Pair New Device`}
+                        label="Pair New Device"
                     />
                 </ButtonTooltip>
             )
         }
 
         if (this.props.devices.length > 0 && this.props.isDeviceSyncAllowed) {
-            pairButton = null
+            pairButton = (
+                <ButtonTooltip
+                    tooltipText="You currently can only sync one computer and one phone"
+                    position="bottom"
+                >
+                    <SecondaryAction
+                        onClick={null}
+                        disabled
+                        label="All devices paired"
+                    />
+                </ButtonTooltip>
+            )
         }
 
         if (this.props.devices.length > 0 && !this.props.isDeviceSyncAllowed) {
@@ -132,39 +160,68 @@ export class SyncDevicesPane extends Component<Props, State> {
                 >
                     <SecondaryAction
                         onClick={this.handleLoginNeeded}
-                        label={`Login to Sync`}
+                        label="Login to Sync"
                     />
                 </ButtonTooltip>
             )
         }
 
-        if (this.props.devices.length === 0 && this.props.isDeviceSyncAllowed) {
+        if (
+            this.props.devices.length === 0 &&
+            this.props.isDeviceSyncAllowed &&
+            this.props.subscriptionStatus !== 'cancelled'
+        ) {
             pairButton = (
                 <SecondaryAction
                     onClick={this.handleOpenNewDevice}
-                    label={`Pair New Device`}
+                    label="Pair New Device"
                 />
+            )
+        }
+
+        if (this.props.subscriptionStatus === 'cancelled') {
+            pairButton = (
+                <ButtonTooltip
+                    tooltipText="Your subscription expired. Reactivate it to sync devices"
+                    position="bottom"
+                >
+                    <SecondaryAction
+                        onClick={this.openPortal}
+                        label="Pair New Device"
+                    />
+                </ButtonTooltip>
             )
         }
 
         return (
             <div>
+                {this.props.subscriptionStatus === 'in_trial' && (
+                    <div>
+                        <div
+                            onClick={this.openPortal}
+                            className={settingsStyle.trialNotif}
+                        >
+                            <div className={settingsStyle.trialHeader}>
+                                <strong>Trial Period active</strong>
+                            </div>
+                            <div>
+                                Add payment details to prevent interruptions
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <div className={styles.container}>
                     <div className={styles.syncLeftCol}>
-                        <ButtonTooltip
-                            tooltipText="Until now only one extension and one app can be synced. Soon more."
-                            position="bottom"
-                        >
-                            {this.props.devices.length > 0 ? (
+                        {this.props.devices.length > 0 && (
+                            <ButtonTooltip
+                                tooltipText="Until now only one extension and one app can be synced. Soon more."
+                                position="bottom"
+                            >
                                 <p className={styles.syncTitle}>
-                                    2 of 2 Paired Devices
+                                    Paired Devices
                                 </p>
-                            ) : (
-                                <p className={styles.syncTitle}>
-                                    No Paired Devices
-                                </p>
-                            )}
-                        </ButtonTooltip>
+                            </ButtonTooltip>
+                        )}
                     </div>
                     {pairButton}
                 </div>
@@ -185,6 +242,7 @@ export class SyncDevicesPane extends Component<Props, State> {
                 }
                 waitForInitialSync={this.props.waitForInitialSync}
                 abortInitialSync={this.props.abortInitialSync}
+                removeAllDevices={this.props.removeAllDevices}
                 getSyncEventEmitter={() => getRemoteEventEmitter('sync')}
                 open={this.state.isAddingNewDevice}
                 onClose={this.handleCloseNewDevice}
@@ -203,7 +261,7 @@ export class SyncDevicesPane extends Component<Props, State> {
 }
 
 class SyncDevicesPaneContainer extends React.Component<
-    UserProps & { showSubscriptionModal: () => void },
+    AuthContextInterface & { showSubscriptionModal: () => void },
     {
         devices: SyncDevice[]
         featureSyncEnabled: boolean
@@ -239,6 +297,8 @@ class SyncDevicesPaneContainer extends React.Component<
 
     abortInitialSync = async () => sync.abortInitialSync()
 
+    removeAllDevices = async () => sync.removeAllDevices()
+
     refreshDevices = async () => {
         const devices = (await sync.listDevices()) as SyncDevice[]
         this.setState({ devices })
@@ -257,22 +317,44 @@ class SyncDevicesPaneContainer extends React.Component<
             <div>
                 <div className={settingsStyle.section}>
                     <div className={settingsStyle.sectionTitle}>
-                        Sync your mobile phone
-                        <span
-                            className={styles.labelFree}
-                            onClick={this.handleUpgradeNeeded}
-                        >
-                            ⭐️ Pro Feature
-                        </span>
+                        <div className={settingsStyle.sectionTitleText}>
+                            <span>Sync your mobile phone</span>
+                            <span className={settingsStyle.betaPill}>
+                                {' '}
+                                Beta
+                            </span>
+                        </div>
+                        {!this.props.currentUser?.authorizedFeatures?.includes(
+                            'sync',
+                        ) && (
+                            <span
+                                className={styles.labelFree}
+                                onClick={this.handleUpgradeNeeded}
+                            >
+                                ⭐️ Pro Feature
+                            </span>
+                        )}
                     </div>
                     <div className={settingsStyle.infoText}>
                         Use an end2end encrypted connection to keep your devices
                         in sync.
                     </div>
+                    <div className={settingsStyle.infoTextSmall}>
+                        <strong>
+                            This feature is in beta status. You may experience
+                            bugs.{' '}
+                            <a
+                                href="https://community.worldbrain.io/c/bug-reports"
+                                target="_blank"
+                            >
+                                Let us know if you do!
+                            </a>
+                        </strong>
+                    </div>
                     <SyncDevicesPane
                         devices={this.state.devices}
                         isDeviceSyncEnabled
-                        isDeviceSyncAllowed={this.props.authorizedFeatures.includes(
+                        isDeviceSyncAllowed={this.props.currentUser?.authorizedFeatures?.includes(
                             'sync',
                         )}
                         handleRemoveDevice={this.handleRemoveDevice}
@@ -284,7 +366,15 @@ class SyncDevicesPaneContainer extends React.Component<
                         }
                         refreshDevices={this.refreshDevices}
                         abortInitialSync={this.abortInitialSync}
+                        removeAllDevices={this.removeAllDevices}
+                        subscriptionStatus={
+                            this.props.currentUser?.subscriptionStatus
+                        }
                     />
+                </div>
+                <div className={styles.warningBox}>
+                    <a href="#/import">Import your bookmarks</a> before pairing
+                    your devices to prevent sync delays.
                 </div>
                 <div className={settingsStyle.section}>
                     <div className={styles.mobileSection}>
@@ -294,8 +384,8 @@ class SyncDevicesPaneContainer extends React.Component<
                                     Download Memex GO
                                 </div>
                                 <div className={settingsStyle.infoText}>
-                                    Our mobile app to save and organise websites
-                                    on the Go
+                                    Our mobile app to annotate and organise
+                                    websites on the Go
                                 </div>
                             </div>
                             <div className={styles.storeSection}>

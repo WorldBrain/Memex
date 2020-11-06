@@ -1,22 +1,26 @@
 import {
     IntegrationTestStep,
     BackgroundIntegrationTestContext,
-    BackgroundIntegrationTestSetup,
 } from './integration-tests'
 import { StorageCollectionDiff } from './storage-change-detector'
 import * as DATA from './common-fixtures.data'
 
-export const searchModule = (setup: BackgroundIntegrationTestSetup) =>
-    setup.backgroundModules.search
-
 export const createPageStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
     execute: async ({ setup }) => {
-        await searchModule(setup).searchIndex.addPage({
+        await setup.backgroundModules.pages.addPage({
             pageDoc: {
                 url: DATA.PAGE_1.fullUrl,
                 content: {},
             },
             visits: [DATA.VISIT_1],
+            rejectNoContent: false,
+        })
+        await setup.backgroundModules.pages.addPage({
+            pageDoc: {
+                url: DATA.PAGE_2.fullUrl,
+                content: {},
+            },
+            visits: [DATA.VISIT_2],
             rejectNoContent: false,
         })
     },
@@ -32,6 +36,16 @@ export const createPageStep: IntegrationTestStep<BackgroundIntegrationTestContex
                     urlTerms: [],
                 },
             },
+            [DATA.PAGE_2.url]: {
+                type: 'create',
+                object: {
+                    url: DATA.PAGE_2.url,
+                    fullUrl: DATA.PAGE_2.fullUrl,
+                    domain: DATA.PAGE_2.domain,
+                    hostname: DATA.PAGE_2.hostname,
+                    urlTerms: [],
+                },
+            },
         }),
         visits: (): StorageCollectionDiff => ({
             [`[${DATA.VISIT_1},"${DATA.PAGE_1.url}"]`]: {
@@ -39,6 +53,13 @@ export const createPageStep: IntegrationTestStep<BackgroundIntegrationTestContex
                 object: {
                     time: DATA.VISIT_1,
                     url: DATA.PAGE_1.url,
+                },
+            },
+            [`[${DATA.VISIT_2},"${DATA.PAGE_2.url}"]`]: {
+                type: 'create',
+                object: {
+                    time: DATA.VISIT_2,
+                    url: DATA.PAGE_2.url,
                 },
             },
         }),

@@ -26,7 +26,7 @@ export async function insertIntegrationTestData(
     const pages = [{ url: 'http://www.bla.com/' }]
 
     if (includeCollection('pages')) {
-        await backgroundModules.search.searchIndex.addPage({
+        await backgroundModules.pages.addPage({
             pageDoc: {
                 url: pages[0].url,
                 content: {
@@ -53,12 +53,13 @@ export async function insertIntegrationTestData(
     }
     if (includeCollection('bookmarks')) {
         await backgroundModules.bookmarks.addBookmark({
-            url: pages[0].url,
-            time: new Date('2019-10-10').getTime(),
+            fullUrl: pages[0].url,
+            timestamp: new Date('2019-10-10').getTime(),
+            skipIndexing: true,
         })
     }
     if (includeCollection('tags')) {
-        await backgroundModules.tags.addTag({
+        await backgroundModules.tags.addTagToExistingUrl({
             tag: 'my-tag',
             url: pages[0].url,
         })
@@ -70,13 +71,13 @@ export async function insertIntegrationTestData(
         annotUrl = await backgroundModules.directLinking.createAnnotation(
             { tab: {} as any },
             {
-                url: pages[0].url,
+                pageUrl: pages[0].url,
                 title: 'test',
                 comment: 'test comment',
                 createdWhen: new Date('2019-10-11'),
                 body: 'test body',
-                selector: 'test selector',
-                bookmarked: false,
+                selector: 'test selector' as any,
+                isBookmarked: false,
                 isSocialPost: false,
             },
             { skipPageIndexing: true },

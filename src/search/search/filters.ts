@@ -47,15 +47,17 @@ export class FilteredIDsManager<T> implements FilteredIDs<T> {
             listUrls ? [...listUrls] : listUrls,
             incUserUrls ? [...incUserUrls] : incUserUrls,
             incHashtagUrls ? [...incHashtagUrls] : incHashtagUrls,
-        ].filter(urls => urls != null)
+        ].filter((urls) => urls != null)
 
         // Depends on no. of applied filters whether to take intersection or just flatten.
         const initInclude =
-            allUrls.length > 1 ? intersection(...allUrls) : flatten(allUrls)
+            allUrls.length > 1
+                ? (intersection as any)(...allUrls)
+                : (flatten as any)(allUrls)
 
         // Ensure no excluded URLs in included sets
         this.include = new Set(
-            difference(initInclude, [
+            (difference as any)(initInclude, [
                 ...(excUserUrls || []),
                 ...(excDomainUrls || []),
                 ...(excTagUrls || []),

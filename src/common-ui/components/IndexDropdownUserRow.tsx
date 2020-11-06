@@ -1,5 +1,4 @@
 import * as React from 'react'
-import cx from 'classnames'
 
 const styles = require('./IndexDropdown.css')
 

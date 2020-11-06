@@ -9,6 +9,7 @@ import { Success } from 'src/sync/components/initial-sync/initial-sync-setup/ste
 import { Introduction } from 'src/sync/components/initial-sync/initial-sync-setup/steps/Introduction'
 import { PairDeviceScreen } from 'src/sync/components/initial-sync/initial-sync-setup/steps/PairDeviceScreen'
 import { SyncDeviceScreen } from 'src/sync/components/initial-sync/initial-sync-setup/steps/SyncDeviceScreen'
+import { NoConnectionScreen } from 'src/sync/components/initial-sync/initial-sync-setup/steps/NoConnectionScreen'
 import Modal from 'src/common-ui/components/Modal'
 
 export default class InitialSyncSetup extends StatefulUIElement<
@@ -23,6 +24,7 @@ export default class InitialSyncSetup extends StatefulUIElement<
     renderInner = () => {
         switch (this.state.status) {
             case 'introduction':
+                this.removeFirebaseFlag()
                 return (
                     <Introduction
                         handleStart={() => this.processEvent('start', {})}
@@ -45,13 +47,32 @@ export default class InitialSyncSetup extends StatefulUIElement<
                         progressPct={this.state.progressPct}
                         stage={this.state.stage}
                         handleCancel={() => this.processEvent('cancel', {})}
+                        handleRetry={() => this.processEvent('retry', {})}
+                        onClose={this.close}
                     />
                 )
             case 'done':
                 return <Success onClose={this.close} />
+            case 'noConnection':
+                return <NoConnectionScreen onClose={this.close} />
+            case 'error':
+                return (
+                    <SyncDeviceScreen
+                        error={this.state.error}
+                        progressPct={this.state.progressPct}
+                        stage={this.state.stage}
+                        handleCancel={() => this.processEvent('cancel', {})}
+                        handleRetry={() => this.processEvent('retry', {})}
+                        onClose={this.close}
+                    />
+                )
             default:
                 throw Error(`Unknown Sync Setup state ${this.state.status}`)
         }
+    }
+
+    async removeFirebaseFlag() {
+        await localStorage.removeItem('firebase:previous_websocket_failure')
     }
 
     close = () => (this.state.status === 'sync' ? false : this.props.onClose())

@@ -2,9 +2,16 @@ import { UILogic, UIEvent } from 'ui-logic-core'
 import TypedEventEmitter from 'typed-emitter'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 import { FastSyncEvents } from '@worldbrain/storex-sync/lib/fast-sync'
-import * as Raven from 'src/util/raven'
+import analytics from 'src/analytics'
+import { now } from 'moment'
 
-type SyncSetupState = 'introduction' | 'pair' | 'sync' | 'done'
+type SyncSetupState =
+    | 'introduction'
+    | 'pair'
+    | 'sync'
+    | 'done'
+    | 'noConnection'
+    | 'error'
 
 export interface InitialSyncSetupState {
     status: SyncSetupState
@@ -18,6 +25,7 @@ export type InitialSyncSetupEvent = UIEvent<{
     start: {}
     backToIntroduction: {}
     cancel: {}
+    retry: {}
 }>
 
 export interface InitialSyncSetupDependencies {
@@ -28,6 +36,7 @@ export interface InitialSyncSetupDependencies {
     getSyncEventEmitter: () => TypedEventEmitter<InitialSyncEvents>
     open: boolean
     abortInitialSync: () => Promise<void>
+    removeAllDevices: () => Promise<void>
 }
 
 export default class InitialSyncSetupLogic extends UILogic<
@@ -35,6 +44,11 @@ export default class InitialSyncSetupLogic extends UILogic<
     InitialSyncSetupEvent
 > {
     eventEmitter: TypedEventEmitter<InitialSyncEvents> = null
+    private _started: number
+
+    private get runningTime() {
+        return this._started ? now() - this._started : 0
+    }
 
     constructor(private dependencies: InitialSyncSetupDependencies) {
         super()
@@ -72,7 +86,6 @@ export default class InitialSyncSetupLogic extends UILogic<
 
     updateError = (event: Parameters<FastSyncEvents['error']>[0]) => {
         // console.log('UI Logic received event [roleSwitch]:', event)
-
         this.emitMutation({
             status: { $set: 'sync' },
             error: { $set: event.error },
@@ -83,6 +96,14 @@ export default class InitialSyncSetupLogic extends UILogic<
         this.eventEmitter.on('progress', this.updateProgress)
         this.eventEmitter.on('roleSwitch', this.updateRole)
         this.eventEmitter.on('error', this.updateError)
+        // this.eventEmitter.on(
+        //     'packageStalled',
+        //     this.handleTimeout(new Error('Package send/receive timed out')),
+        // )
+        this.eventEmitter.on(
+            'channelTimeout',
+            this.handleChannelTimeout(new Error(`Fast sync channel timed out`)),
+        )
         this.eventEmitter.on('finished', this.done)
     }
 
@@ -92,21 +113,47 @@ export default class InitialSyncSetupLogic extends UILogic<
             this.eventEmitter.removeAllListeners('roleSwitch')
             this.eventEmitter.removeAllListeners('error')
             this.eventEmitter.removeAllListeners('finished')
+            // this.eventEmitter.removeAllListeners('packageStalled')
+            this.eventEmitter.removeAllListeners('channelTimeout')
+        }
+    }
+
+    async detectFirebaseFlag() {
+        if (await localStorage.getItem('firebase:previous_websocket_failure')) {
+            this.emitMutation({
+                status: { $set: 'noConnection' },
+            })
         }
     }
 
     start = async () => {
-        this.eventEmitter = this.dependencies.getSyncEventEmitter()
-        this.registerListeners()
-
         this.emitMutation({
             status: { $set: 'pair' },
         })
+        this.detectFirebaseFlag()
+
+        setTimeout(() => {
+            this.detectFirebaseFlag()
+        }, 2000)
+        setTimeout(() => {
+            this.detectFirebaseFlag()
+        }, 10000)
+        setTimeout(() => {
+            this.detectFirebaseFlag()
+        }, 15000)
+
+        this.eventEmitter = this.dependencies.getSyncEventEmitter()
+        this._started = now()
+        this.registerListeners()
+
+        const initSyncMessage = await this.dependencies.getInitialSyncMessage()
+        console.log('Sync message:', initSyncMessage)
+
         this.emitMutation({
-            initialSyncMessage: {
-                $set: await this.dependencies.getInitialSyncMessage(),
-            },
+            initialSyncMessage: { $set: initSyncMessage },
         })
+
+        analytics.trackEvent({ category: 'Sync', action: 'startInitSync' })
 
         try {
             await this.dependencies.waitForInitialSyncConnected()
@@ -122,6 +169,11 @@ export default class InitialSyncSetupLogic extends UILogic<
             this.emitMutation({
                 status: { $set: 'done' },
             })
+            analytics.trackEvent({
+                category: 'Sync',
+                action: 'finishInitSync',
+                duration: this.runningTime,
+            })
         } catch (e) {
             this.error(e)
         }
@@ -131,9 +183,15 @@ export default class InitialSyncSetupLogic extends UILogic<
         return this.dependencies.abortInitialSync()
     }
 
+    retry = () => {
+        // N.B. For retries, existing devices need to be deleted
+        return this.dependencies.onClose()
+    }
+
     backToIntroduction = () => {
         this.emitMutation({
             status: { $set: 'introduction' },
+            stage: { $set: '1/2' },
         })
     }
 
@@ -143,10 +201,22 @@ export default class InitialSyncSetupLogic extends UILogic<
         })
     }
 
-    error(e) {
-        Raven.captureException(e)
+    private error(e: Error) {
+        analytics.trackEvent({
+            category: 'Sync',
+            action: 'failInitSync',
+            duration: this.runningTime,
+        })
+
         this.emitMutation({
+            status: { $set: 'error' },
             error: { $set: `${e}` },
         })
+    }
+
+    private handleChannelTimeout = (e: Error) => async () => {
+        this.error(e)
+        await this.dependencies.abortInitialSync()
+        await this.dependencies.removeAllDevices()
     }
 }

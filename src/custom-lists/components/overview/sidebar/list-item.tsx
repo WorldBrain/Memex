@@ -1,23 +1,34 @@
 import React, { Component, DragEventHandler } from 'react'
 import cx from 'classnames'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { AuthContextInterface } from 'src/authentication/background/types'
+import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import CustomListStorage from 'src/custom-lists/background/storage'
 
 import analytics from 'src/analytics'
+import { runInBackground } from 'src/util/webextensionRPC'
 
 const styles = require('./list-item.css')
 
-export interface Props {
+export interface Props extends AuthContextInterface {
     listName: string
-    isMobileList: boolean
-    isFiltered: boolean
+    listId: number
+    isFiltered?: boolean
+    onShareButtonClick?: React.MouseEventHandler<HTMLButtonElement>
     onEditButtonClick: React.MouseEventHandler<HTMLButtonElement>
     onCrossButtonClick: React.MouseEventHandler<HTMLButtonElement>
     onAddPageToList: (url: string, isSocialPost: boolean) => void
     onListItemClick: () => void
+    plans?: UserPlan[]
+    contentSharing: ContentSharingInterface
+    customLists: CustomListStorage
 }
 
 interface State {
     isMouseInside: boolean
     isDragInside: boolean
+    isShared: boolean
 }
 
 class ListItem extends Component<Props, State> {
@@ -28,15 +39,25 @@ class ListItem extends Component<Props, State> {
         this.state = {
             isMouseInside: false,
             isDragInside: false,
+            isShared: false,
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         this.attachEventListeners()
+        this.getSharedState()
     }
 
     componentWillUnmount() {
         this.removeEventListeners()
+    }
+
+    async getSharedState() {
+        const contentSharing = runInBackground<ContentSharingInterface>()
+        const remoteId = await contentSharing.getRemoteListId({
+            localListId: this.props.listId,
+        })
+        this.setState({ isShared: !!remoteId })
     }
 
     private attachEventListeners() {
@@ -114,6 +135,13 @@ class ListItem extends Component<Props, State> {
         this.props.onAddPageToList(url, isSocialPost)
     }
 
+    private handleShareBtnClick: React.MouseEventHandler<HTMLButtonElement> = (
+        e,
+    ) => {
+        e.stopPropagation()
+        this.props.onShareButtonClick?.(e)
+    }
+
     private handleEditBtnClick: React.MouseEventHandler<HTMLButtonElement> = (
         e,
     ) => {
@@ -142,7 +170,7 @@ class ListItem extends Component<Props, State> {
             >
                 <div className={styles.listName}>{this.props.listName}</div>
                 <div className={styles.buttonContainer}>
-                    {!this.props.isMobileList && this.state.isMouseInside && (
+                    {this.state.isMouseInside && (
                         <React.Fragment>
                             <button
                                 className={cx(styles.editButton, styles.button)}
@@ -157,7 +185,35 @@ class ListItem extends Component<Props, State> {
                                 onClick={this.handleCrossBtnClick}
                                 title={'Delete'}
                             />
+                            {!this.state.isShared && (
+                                <button
+                                    className={cx(
+                                        styles.shareButton,
+                                        styles.button,
+                                    )}
+                                    onClick={this.handleShareBtnClick}
+                                    title={'Share'}
+                                />
+                            )}
                         </React.Fragment>
+                    )}
+                    {this.state.isShared && (
+                        <button
+                            className={cx(
+                                styles.shareButton,
+                                styles.button,
+                                {
+                                    [styles.shareButtonPermanent]: this.state
+                                        .isShared,
+                                },
+                                {
+                                    [styles.shareButtonPermanentHover]: this
+                                        .state.isMouseInside,
+                                },
+                            )}
+                            onClick={this.handleShareBtnClick}
+                            title={'Shared'}
+                        />
                     )}
                 </div>
             </div>
@@ -165,4 +221,4 @@ class ListItem extends Component<Props, State> {
     }
 }
 
-export default ListItem
+export default withCurrentUser(ListItem)

@@ -35,7 +35,7 @@ class SidebarContainer extends PureComponent {
         this.props.setSidebarState(isOpen)
     }
 
-    handleClickOutside = e => {
+    handleClickOutside = (e) => {
         const { id } = e.target
 
         // Don't attempt close of sidebar if click occurred within crowdfunding modal (see `sidebar-overlay` feature)
@@ -43,7 +43,7 @@ class SidebarContainer extends PureComponent {
             `.${crowdfundingModalStyles.background}`,
         )
         const $collectionsContainer = document.querySelector(
-            `.${collectionsButtonStyles.buttonContainer}`,
+            `.${collectionsButtonStyles.showListBtn}`,
         )
 
         if (
@@ -72,9 +72,9 @@ class SidebarContainer extends PureComponent {
         this.props.closeSidebar()
     }
 
-    onMouseLeave = e => {
+    onMouseLeave = (e) => {
         const $hoverOvercollections = document.querySelector(
-            `.${collectionsButtonStyles.buttonContainer}:hover`,
+            `.${collectionsButtonStyles.showListBtn}:hover`,
         )
         if ($hoverOvercollections) {
             return
@@ -107,13 +107,13 @@ class SidebarContainer extends PureComponent {
     }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     isSidebarOpen: selectors.isSidebarOpen(state),
     isSidebarLocked: selectors.sidebarLocked(state),
     urlDragged: customLists.urlDragged(state),
 })
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
     ...bindActionCreators(
         {
             closeSidebar: actions.closeSidebar,

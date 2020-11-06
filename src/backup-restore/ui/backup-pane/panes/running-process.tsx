@@ -4,7 +4,6 @@ import { setLocalStorageTyped } from 'src/util/storage'
 const localStyles = require('./running-process.css')
 import { ProgressBar } from 'src/common-ui/components'
 import MovingDotsLabel from '../../../../common-ui/components/moving-dots-label'
-import { PrimaryButton } from '../../../../common-ui/components/primary-button'
 import LoadingBlocker from '../../../../common-ui/components/loading-blocker'
 import { FailedOverlay } from '../components/overlays'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
@@ -87,7 +86,7 @@ export default class RunningProcess extends React.Component<Props> {
         await remoteFunction(this.props.functionNames.start)()
     }
 
-    messageListener = message => {
+    messageListener = (message) => {
         if (message.type === this.props.eventMessageName) {
             this.handleProcessEvent(message.event)
         }
@@ -147,6 +146,7 @@ export default class RunningProcess extends React.Component<Props> {
 
     async handleCancel() {
         this.setState({ canceling: true })
+        await localStorage.removeItem('backup.restore.restore-running')
         await remoteFunction(this.props.functionNames.cancel)()
         this.props.onFinish()
     }
@@ -161,13 +161,16 @@ export default class RunningProcess extends React.Component<Props> {
             <div>
                 {this.props.renderHeader()}
                 <WhiteSpacer10 />
-                <div className={overviewStyles.showWarning}>
-                    <span className={overviewStyles.WarningIcon} />
-                    <span className={overviewStyles.showWarningText}>
-                        With a lot of data (> 25.000 pages) it is recommended
-                        running this over night.
-                    </span>
-                </div>
+                {localStorage.getItem('backup.restore.restore-running') ===
+                    'false' && (
+                    <div className={overviewStyles.showWarning}>
+                        <span className={overviewStyles.WarningIcon} />
+                        <span className={overviewStyles.showWarningText}>
+                            With a lot of data (> 25.000 pages) it is
+                            recommended running this over night.
+                        </span>
+                    </div>
+                )}
                 <WhiteSpacer30 />
                 <div className={localStyles.steps}>
                     {this.renderSteps(info)}
@@ -299,7 +302,7 @@ export default class RunningProcess extends React.Component<Props> {
                     {status === 'fail' && this.renderFail()}
                     <FailedOverlay
                         disabled={!overlay}
-                        onClick={async action => {
+                        onClick={async (action) => {
                             if (action === 'continue') {
                                 await this.startRestore()
                             }

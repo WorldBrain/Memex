@@ -1,9 +1,9 @@
 /* Positioning */
 
 .iconPosition {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 80%;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: 80%;
     display: flex;
 }
 
@@ -12,9 +12,19 @@
     height: 22px;
     padding-left: 35px;
     margin-right: 15px;
-    background-size: 20px;
-    background-position: center;
-    background-repeat: no-repeat;
+    mask-size: 18px;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    background-color: #3a2f45;
+}
+
+.standardIcon {
+    mask-position: center;
+    mask-repeat: no-repeat;
+    height: 20px;
+    width: 20px;
+    mask-size: 16px;
+    background-color: #3a2f45;
 }
 
 /* LOGOS */
@@ -32,184 +42,220 @@
 /* OTHER */
 
 .removeIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/close.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/close.svg');
 }
 
 .removeMinusIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/remove.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/remove.svg');
 }
 
 .searchIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/search.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/search.svg');
 }
 
 .checkMark {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/check.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/check.svg');
 }
 
 .checkRound {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/checkRound.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/checkRound.svg');
 }
 
 .starMark {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/star_blue_full.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/star_blue_full.svg');
     opacity: 0.7;
-    background-size: 100%;
+    mask-size: 100%;
 }
 
 .inboxIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/notification.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/notification.svg');
 }
 
 .inboxIconFull {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/notificationFull.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/notificationFull.svg');
 }
 
 .settingsIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/settings.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/settings.svg');
 }
 
 .syncIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/sync.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/sync.svg');
 }
 
 .upgradeIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/star_yellow.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/star_yellow.svg');
 }
 
 .collectionsIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/collections.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/collections.svg');
 }
 
 .filtersIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/filter.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/filter.svg');
 }
 
 .collectionsIconFull {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/collectionsIconFull.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/collectionsIconFull.svg');
 }
 
 .filtersIconFull {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/filtersIconFull.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/filtersIconFull.svg');
 }
 
 .arrowTriangle {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/arrow.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/arrow.svg');
 }
 
 .importIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/import.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/import.svg');
 }
 
 .backupIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/backup.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/backup.svg');
+}
+
+.homeIcon {
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/home.svg');
 }
 
 .blockIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/block.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/block.svg');
 }
 
 .privacyIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/shield.svg');
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/shield.svg');
 }
 
 .teamIcon {
-    composes: iconPosition;
-    background-image: url('/img/arrow.svg');
+    composes: iconPosition standardIcon;
+    mask-image: url('/img/arrow.svg');
 }
 
 .helpIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/help.svg');
+    composes: iconPosition standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/help.svg');
 }
 
 .tutorialIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/book.svg');
+    composes: iconPosition standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/book.svg');
 }
 
 .searchGreyIcon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/searchGrey.svg');
+    composes: iconPosition standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/searchGrey.svg');
 }
 
 .WarningIconWhite {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/img/warning_white.svg');
+    composes: iconPosition standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/warning_white.svg');
 }
 
 .addIcon {
-    composes: iconPosition;
-    background-image: url('/img/plus.svg');
+    composes: iconPosition standardIcon;
+    mask-image: url('/img/plus.svg');
 }
 
 .arrowUpRight {
-    composes: iconPosition;
-    background-image: url('/img/arrowUp.svg');
+    composes: iconPosition standardIcon;
+    mask-image: url('/img/arrowUp.svg');
 }
 
 .closeIcon {
-    composes: iconPosition;
-    background-image: url('/img/close.svg');
+    composes: iconPosition standardIcon;
+    mask-image: url('/img/close.svg');
+}
+
+.closeIconThin {
+    composes: iconPosition standardIcon;
+    mask-image: url('/img/closeThin.svg');
 }
 
 .reload {
-    composes: iconPosition;
-    background-image: url('/img/reload.svg');
+    composes: iconPosition standardIcon;
+    mask-image: url('/img/reload.svg');
 }
 
 .excluded {
-    composes: iconPosition;
-    background-image: url('/img/exclusion.svg');
+    composes: iconPosition standardIcon;
+    mask-image: url('/img/exclusion.svg');
 }
 
 .tipIcon {
-    composes: iconPosition;
-    background-image: url('/img/icon_tooltip.svg');
+    composes: iconPosition standardIcon;
+    mask-image: url('/img/icon_tooltip.svg');
     height: 21px;
     width: 16px;
 }

@@ -3,19 +3,22 @@ import { browser } from 'webextension-polyfill-ts'
 import cx from 'classnames'
 
 import { Props } from './result-item'
-import SemiCircularRibbon from './semi-circular-ribbon'
 import ResultItemActionBtn from './result-item-action-btn'
 
 const styles = require('./result-item.css')
 const tagEmpty = browser.extension.getURL('/img/tag_empty.svg')
 const tagFull = browser.extension.getURL('/img/tag_full.svg')
+const listAdd = browser.extension.getURL('/img/collections_add.svg')
+const listFull = browser.extension.getURL('/img/collections_full.svg')
 const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
 const heartFull = browser.extension.getURL('/img/star_full.svg')
 const commentEmpty = browser.extension.getURL('/img/comment_empty.svg')
 const commentFull = browser.extension.getURL('/img/comment_full.svg')
 const deleteItem = browser.extension.getURL('/img/trash.svg')
+const copy = browser.extension.getURL('/img/copy.svg')
+const readerIcon = browser.extension.getURL('/img/reader.svg')
 
-class ResultItemActions extends PureComponent<Props> {
+class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
     get bookmarkClass() {
         return cx(styles.button, {
             [styles.bookmark]: this.props.hasBookmark,
@@ -24,6 +27,9 @@ class ResultItemActions extends PureComponent<Props> {
     }
 
     render() {
+        const listLength = this.props.lists?.length ?? 0
+        const tagsLength = this.props.tags?.length ?? 0
+
         return (
             <div
                 className={cx(styles.detailsContainer, {
@@ -41,19 +47,46 @@ class ResultItemActions extends PureComponent<Props> {
                         imgSrc={deleteItem}
                         onClick={this.props.onTrashBtnClick}
                         tooltipText="Delete this page & all related content"
-                        className={styles.trash}
+                        className={cx(
+                            styles.trash,
+                            styles.secondaryActionButton,
+                        )}
                     />
                     <ResultItemActionBtn
-                        permanent={this.props.tags.length > 0}
-                        imgSrc={this.props.tags.length > 0 ? tagFull : tagEmpty}
+                        imgSrc={copy}
+                        onClick={this.props.onCopyPasterBtnClick}
+                        tooltipText="Copy"
+                        className={cx(
+                            styles.copy,
+                            styles.secondaryActionButton,
+                        )}
+                        refHandler={this.props.setCopyPasterButtonRef}
+                    />
+                    {/*<ResultItemActionBtn*/}
+                    {/*    imgSrc={readerIcon}*/}
+                    {/*    onClick={this.props.onReaderBtnClick}*/}
+                    {/*    tooltipText="Open in reader view"*/}
+                    {/*    className={styles.reader}*/}
+                    {/*/>*/}
+                    <ResultItemActionBtn
+                        permanent={tagsLength > 0}
+                        imgSrc={tagsLength > 0 ? tagFull : tagEmpty}
                         className={
-                            this.props.tags.length > 0
-                                ? styles.commentActive
-                                : styles.tag
+                            tagsLength > 0 ? styles.commentActive : styles.tag
                         }
                         onClick={this.props.onTagBtnClick}
                         tooltipText="Edit Tags"
                         refHandler={this.props.setTagButtonRef}
+                    />
+                    <ResultItemActionBtn
+                        permanent={listLength > 0}
+                        imgSrc={listLength > 0 ? listFull : listAdd}
+                        className={
+                            listLength > 0 ? styles.commentActive : styles.tag
+                        }
+                        onClick={this.props.onListBtnClick}
+                        tooltipText="Edit Collections"
+                        refHandler={this.props.setListButtonRef}
                     />
                     <ResultItemActionBtn
                         permanent={this.props.annotsCount > 0}
@@ -62,11 +95,10 @@ class ResultItemActions extends PureComponent<Props> {
                                 ? commentFull
                                 : commentEmpty
                         }
-                        className={
-                            this.props.annotsCount > 0
-                                ? styles.commentActive
-                                : styles.comment
-                        }
+                        className={cx(styles.commentBtn, {
+                            [styles.comment]: this.props.annotsCount === 0,
+                            [styles.commentActive]: this.props.annotsCount > 0,
+                        })}
                         onClick={this.props.onCommentBtnClick}
                         tooltipText="Add/View Notes"
                     />
@@ -82,11 +114,6 @@ class ResultItemActions extends PureComponent<Props> {
                         onClick={this.props.onToggleBookmarkClick}
                         tooltipText="Bookmark"
                     />
-                    {this.props.isListFilterActive && (
-                        <SemiCircularRibbon
-                            onClick={this.props.handleCrossRibbonClick}
-                        />
-                    )}
                 </div>
             </div>
         )

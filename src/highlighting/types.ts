@@ -1,4 +1,6 @@
 import { Annotation } from 'src/annotations/types'
+import { SaveAndRenderHighlightDeps } from 'src/highlighting/ui/highlight-interactions'
+import { AnnotationClickHandler } from './ui/types'
 
 export interface Descriptor {
     strategy: string
@@ -10,45 +12,38 @@ export interface Anchor {
     descriptor: Descriptor
 }
 
-// TODO this seems to be a polymorphic type coming from the coffeescript anchoring, fill it in
-export interface DOMSelector {
-    descriptor: Descriptor
+export type Highlight = Pick<Annotation, 'url' | 'selector'> & {
+    temporary?: boolean
 }
 
-export interface Highlight {
-    url: string
-    anchors?: Anchor[]
-    selector?: DOMSelector
-}
-
-export interface HighlightInteractionInterface {
+export interface HighlightInteractionsInterface {
     renderHighlights: (
         highlights: Highlight[],
-        openSidebar: (args: { activeUrl?: string }) => void,
-        focusOnHighlight?: (url: string) => void,
-        hoverHighlightContainer?: (url: string) => void,
+        openSidebar: AnnotationClickHandler,
     ) => Promise<void>
     renderHighlight: (
         highlight: Highlight,
-        focusOnAnnotation,
-        hoverAnnotationContainer,
-        openSidebar,
+        openSidebar: AnnotationClickHandler,
         temporary?: boolean,
     ) => Promise<boolean>
     scrollToHighlight: ({ url }: Highlight) => number
     highlightAndScroll: (annotation: Annotation) => number
     attachEventListenersToNewHighlights: (
         highlight: Highlight,
-        focusOnAnnotation: (url: string) => void,
-        hoverAnnotationContainer: (url: string) => void,
-        openSidebar: (args: { activeUrl?: string }) => void,
+        openSidebar: AnnotationClickHandler,
     ) => void
     removeMediumHighlights: () => void
     removeTempHighlights: () => void
     makeHighlightMedium: ({ url }: Highlight) => void
     makeHighlightDark: ({ url }: Highlight) => void
-    removeHighlights: (onlyRemoveDarkHighlights?: boolean) => void
+    removeHighlights: (args?: { onlyRemoveDarkHighlights?: boolean }) => void
     sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
     _removeHighlight: (highlight: Element) => void
     removeAnnotationHighlights: (url: string) => void
+    saveAndRenderHighlight: (
+        params: SaveAndRenderHighlightDeps,
+    ) => Promise<void>
+    saveAndRenderHighlightAndEditInSidebar: (
+        params: SaveAndRenderHighlightDeps,
+    ) => Promise<void>
 }

@@ -9,7 +9,6 @@ import * as privacy from './privacy'
 import * as settings from './settings'
 import * as overviewPage from '../overview'
 import { reducer as onboarding } from '../overview/onboarding'
-import { reducer as sidebar } from 'src/sidebar-overlay/sidebar'
 import { reducer as deleteConfModal } from '../overview/delete-confirm-modal'
 import { reducer as results } from '../overview/results'
 import { reducer as searchBar } from '../overview/search-bar'
@@ -19,6 +18,7 @@ import { reducer as modals } from '../overview/modals/reducer'
 // Search filters in the sidebar
 import { reducer as searchFilters } from 'src/search-filters'
 import { reducer as sidebarLeft } from 'src/overview/sidebar-left'
+import { reducer as sidebar } from 'src/sidebar-overlay/sidebar'
 
 import * as notifications from '../notifications'
 import { authReducer } from '../authentication/redux'
@@ -30,10 +30,10 @@ const rootReducer = combineReducers({
     privacy: privacy.reducer,
     settings: settings.reducer,
     onboarding,
-    sidebar,
     customLists,
     searchFilters,
     sidebarLeft,
+    sidebar,
     notifications: notifications.reducer,
     deleteConfModal,
     modals,

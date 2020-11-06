@@ -5,10 +5,16 @@ import styled from 'styled-components'
 import { colorPrimary } from 'src/common-ui/components/design-library/colors'
 import { fontSizeBigger } from 'src/common-ui/components/design-library/typography'
 import { auth } from 'src/util/remote-functions-background'
-import { SYNC_URL } from 'src/constants'
+
 const styles = require('src/authentication/components/styles.css')
 
-export class SignInScreen extends React.Component {
+interface Props {
+    onSuccess?(): void
+    onFail?(): void
+    redirectTo?: string
+}
+
+export class SignInScreen extends React.Component<Props> {
     render = () => {
         return (
             <StyledFirebaseAuth
@@ -22,8 +28,14 @@ export class SignInScreen extends React.Component {
                         signInSuccessWithAuthResult: () => {
                             auth.refreshUserInfo()
                             // Avoid redirects after sign-in.
-                            window.location.href = SYNC_URL
+                            if (this.props.redirectTo) {
+                                window.location.href = this.props.redirectTo
+                            }
+                            this.props.onSuccess?.()
                             return false
+                        },
+                        signInFailure: () => {
+                            this.props.onFail?.()
                         },
                     },
                 }}

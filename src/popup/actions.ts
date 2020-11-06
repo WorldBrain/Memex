@@ -1,19 +1,22 @@
 import { browser } from 'webextension-polyfill-ts'
 import { createAction } from 'redux-act'
-import { remoteFunction } from '../util/webextensionRPC'
+import { remoteFunction, runInBackground } from '../util/webextensionRPC'
 import { Thunk } from './types'
 import { acts as bookmarkActs } from './bookmark-button'
 import { acts as tagActs } from './tags-button'
 import { acts as collectionActs } from './collections-button'
 import { acts as blacklistActs } from './blacklist-button'
+import { TabManagementInterface } from 'src/tab-management/background/types'
+import { BookmarksInterface } from 'src/bookmarks/background/types'
 
 const fetchPageTagsRPC = remoteFunction('fetchPageTags')
 const fetchListsRPC = remoteFunction('fetchListPagesByUrl')
 const fetchAllListsRPC = remoteFunction('fetchAllLists')
 const fetchInitTagSuggRPC = remoteFunction('extendedSuggest')
 const isURLBlacklistedRPC = remoteFunction('isURLBlacklisted')
-const fetchInternalTabRPC = remoteFunction('fetchTab')
-const fetchTabByUrlRPC = remoteFunction('fetchTabByUrl')
+
+const tabs = runInBackground<TabManagementInterface<'caller'>>()
+const bookmarks = runInBackground<BookmarksInterface>()
 
 export const setTabId = createAction<number>('popup/setTabId')
 export const setUrl = createAction<string>('popup/setUrl')
@@ -29,29 +32,29 @@ const getCurrentTab = async () => {
     } else {
         const url = window.location.href
         if (url) {
-            currentTab = await fetchTabByUrlRPC(url)
+            currentTab = await tabs.fetchTabByUrl(url)
         }
     }
 
     return currentTab
 }
-const setTabAndUrl: (id: number, url: string) => Thunk = (
-    id,
-    url,
-) => async dispatch => {
+
+const setTabAndUrl: (id: number, url: string) => Thunk = (id, url) => async (
+    dispatch,
+) => {
     await dispatch(setTabId(id))
     await dispatch(setUrl(url))
 }
 
-const setTabIsBookmarked: (
-    tabId: number,
-) => Thunk = tabId => async dispatch => {
-    const internalTab = await fetchInternalTabRPC(tabId)
-    await dispatch(bookmarkActs.setIsBookmarked(internalTab.isBookmarked))
+const setTabIsBookmarked: (pageUrl: string) => Thunk = (pageUrl) => async (
+    dispatch,
+) => {
+    const hasBoomark = await bookmarks.pageHasBookmark(pageUrl)
+    await dispatch(bookmarkActs.setIsBookmarked(hasBoomark))
 }
 
 // N.B. This is also setup for all injections of the content script. Mainly so that keyboard shortcuts (bookmark) has the data when needed.
-export const initBasicStore: () => Thunk = () => async dispatch => {
+export const initBasicStore: () => Thunk = () => async (dispatch) => {
     const currentTab = await getCurrentTab()
 
     // If we can't get the tab data, then can't init action button states
@@ -60,10 +63,10 @@ export const initBasicStore: () => Thunk = () => async dispatch => {
         return false
     }
     await dispatch(setTabAndUrl(currentTab.id, currentTab.url))
-    await dispatch(setTabIsBookmarked(currentTab.id))
+    await dispatch(setTabIsBookmarked(currentTab.url))
 }
 
-export const initState: () => Thunk = () => async dispatch => {
+export const initState: () => Thunk = () => async (dispatch) => {
     const currentTab = await getCurrentTab()
 
     // If we can't get the tab data, then can't init action button states
@@ -78,7 +81,7 @@ export const initState: () => Thunk = () => async dispatch => {
     dispatch(blacklistActs.setIsBlacklisted(isBlacklisted))
 
     try {
-        await dispatch(setTabIsBookmarked(currentTab.id))
+        await dispatch(setTabIsBookmarked(currentTab.url))
 
         const listsAssocWithPage = await fetchListsRPC({ url: currentTab.url })
         const lists = await fetchAllListsRPC({
@@ -90,7 +93,7 @@ export const initState: () => Thunk = () => async dispatch => {
         dispatch(collectionActs.setCollections(listsAssocWithPage))
 
         // Get 20 more tags that are not related related to the list.
-        const pageTags = await fetchPageTagsRPC(currentTab.url)
+        const pageTags = await fetchPageTagsRPC({ url: currentTab.url })
         const tags = await fetchInitTagSuggRPC({
             notInclude: pageTags,
             type: 'tag',

@@ -1,6 +1,3 @@
-import { UIElement } from 'ui-logic-react'
-import { UILogic } from 'ui-logic-core'
-
 import { PageUrlsByDay } from 'src/search/background/types'
 import { SocialPage } from 'src/social-integration/types'
 import { Annotation } from 'src/annotations/types'
@@ -10,10 +7,13 @@ export interface Result extends SocialPage {
     fullUrl: string
     title: string
     tags: string[]
+    lists: string[]
     hasBookmark: boolean
     isDeleting: boolean
     tagPillsData: string[]
     shouldDisplayTagPopup: boolean
+    shouldDisplayListPopup: boolean
+    shouldDisplayCopyPasterPopup: boolean
     displayTime: number
     screenshot: string
     favIcon: string
@@ -41,14 +41,4 @@ export interface SearchResult {
 export interface Tooltip {
     title: string
     description: string
-}
-
-export abstract class StatefulUIElement<Props, State, Event> extends UIElement<
-    Props,
-    State,
-    Event
-> {
-    constructor(props: Props, logic: UILogic<State, Event>) {
-        super(props, { logic })
-    }
 }

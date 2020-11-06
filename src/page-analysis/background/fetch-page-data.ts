@@ -12,6 +12,7 @@ import { FetchPageDataError } from './fetch-page-data-error'
 export type FetchPageData = (args: {
     url: string
     timeout?: number
+    domParser?: (html: string) => Document
     opts?: FetchPageDataOpts
 }) => FetchPageDataReturnValue
 export type RunXHR = () => Promise<PageDataResult>
@@ -41,14 +42,17 @@ export const defaultOpts: FetchPageDataOpts = {
 const fetchPageData: FetchPageData = ({
     url,
     timeout = 10000,
+    domParser,
     opts = defaultOpts,
 }) => {
     let normalizedUrl
 
     try {
-        normalizedUrl = normalizeUrl(url, {
-            removeQueryParameters: [/.*/i],
-        })
+        normalizedUrl = JSON.stringify(
+            normalizeUrl(url, {
+                removeQueryParameters: [/.*/i],
+            }),
+        )
     } catch (err) {
         normalizedUrl = url
     }
@@ -65,7 +69,7 @@ const fetchPageData: FetchPageData = ({
         })
         cancel = () => undefined
     } else {
-        const req = fetchDOMFromUrl(url, timeout)
+        const req = fetchDOMFromUrl(url, timeout, domParser)
         cancel = req.cancel
 
         /**
@@ -123,57 +127,63 @@ const fetchTimeout = (
  * Uses native XMLHttpRequest API, as newer Fetch API doesn't seem to support fetching of
  * the DOM; the Response object must be parsed.
  */
-function fetchDOMFromUrl(
+export function fetchDOMFromUrl(
     url: string,
     timeout: number,
+    domParser?: (html: string) => Document,
 ): { run: () => Promise<Document>; cancel: CancelXHR } {
     const controller = new AbortController()
 
     return {
         cancel: () => controller.abort(),
-        run: () =>
-            new Promise((resolve, reject) => {
-                fetchTimeout(url, timeout, { signal: controller.signal })
-                    .then((response) => {
-                        switch (response.status) {
-                            case 200:
-                                return response.text()
-                            case 429:
-                                throw new FetchPageDataError(
-                                    'Too many requests',
-                                    'temporary',
-                                )
-                            case 500:
-                            case 503:
-                            case 504:
-                                throw new FetchPageDataError(
-                                    'Server currently unavailable',
-                                    'temporary',
-                                )
-                            default:
-                                throw new FetchPageDataError(
-                                    'Data fetch failed',
-                                    'permanent',
-                                )
-                        }
-                    })
-                    .then((text) =>
-                        resolve(
-                            new DOMParser().parseFromString(text, 'text/html'),
-                        ),
+        run: async () => {
+            try {
+                const response = await fetchTimeout(url, timeout, {
+                    signal: controller.signal,
+                })
+
+                if (response.status !== 200) {
+                    switchOnResponseErrorStatus(response.status)
+                }
+                const text = await response.text()
+
+                const doc = domParser
+                    ? domParser(text)
+                    : new DOMParser().parseFromString(text, 'text/html')
+
+                return doc
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new FetchPageDataError(
+                        'Data fetch timeout',
+                        'temporary',
                     )
-                    .catch((error) => {
-                        if (error.name === 'AbortError') {
-                            reject(
-                                new FetchPageDataError(
-                                    'Data fetch timeout',
-                                    'temporary',
-                                ),
-                            )
-                        } else {
-                            reject(error)
-                        }
-                    })
-            }),
+                } else {
+                    throw error
+                }
+            }
+        },
+    }
+}
+
+function switchOnResponseErrorStatus(status: number) {
+    switch (status) {
+        case 429:
+            throw new FetchPageDataError(
+                'Too many requests to server',
+                'temporary',
+            )
+        case 500:
+        case 503:
+        case 504:
+            throw new FetchPageDataError(
+                status + ' ' + 'Server currently unavailable',
+                'temporary',
+            )
+        default:
+            throw new FetchPageDataError(
+                status + ' ' + 'Data fetch failed',
+                'permanent',
+            )
     }
 }

@@ -2,15 +2,15 @@ import {
     UserPlan,
     Claims,
     UserFeature,
-    FeatureMap,
+    SubscriptionStatus,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
-
-export const SUBSCRIPTION_GRACE_MS = 1000 * 60 * 60
+import { SettingStore } from 'src/util/settings'
+import { AuthSettings } from './types'
 
 export function hasSubscribedBefore(claims: Claims): boolean {
     return (
-        claims.lastSubscribed != null ||
-        (claims.subscriptions != null &&
+        claims?.lastSubscribed != null ||
+        (claims?.subscriptions != null &&
             Object.keys(claims.subscriptions).length > 0)
     )
 }
@@ -27,7 +27,7 @@ export function getAuthorizedFeatures(claims: Claims): UserFeature[] {
     }
 
     Object.keys(claims.features).forEach((feature: UserFeature) => {
-        if (isFeatureInDate(claims.features[feature])) {
+        if (isExpiryInFuture(claims.features[feature])) {
             features.push(feature)
         }
     })
@@ -35,26 +35,48 @@ export function getAuthorizedFeatures(claims: Claims): UserFeature[] {
     return features
 }
 
-export function isAuthorizedForFeature(
-    claims: Claims,
-    feature: UserFeature,
-): boolean {
-    if (claims != null && claims.features != null) {
-        const featureObject = claims.features[feature]
-        return isFeatureInDate(featureObject)
+export function getAuthorizedPlans(claims: Claims): UserPlan[] {
+    const plans = [] as UserPlan[]
+
+    if (claims == null || claims.subscriptions == null) {
+        return plans
     }
-    return false
+
+    for (const [planName, plan] of Object.entries(claims.subscriptions)) {
+        if (isExpiryInFuture(plan)) {
+            plans.push(planName as UserPlan)
+        }
+    }
+
+    return plans
 }
 
-function isFeatureInDate(
-    featureObject?: FeatureMap[keyof FeatureMap],
-): boolean {
-    return (
-        featureObject != null &&
-        featureObject.expiry != null &&
-        featureObject.expiry + SUBSCRIPTION_GRACE_MS >
-            new Date().getUTCMilliseconds()
-    )
+export async function isAuthorizedForFeature(params: {
+    claims: Claims
+    settings: SettingStore<AuthSettings>
+    feature: UserFeature
+}): Promise<boolean> {
+    if (!params.claims) {
+        return false
+    }
+    if (params.feature === 'beta' && (await params.settings.get('beta'))) {
+        return true
+    }
+    if (!params.claims.features) {
+        return false
+    }
+
+    const featureObject = params.claims.features[params.feature]
+    if (!featureObject) {
+        return false
+    }
+    return isExpiryInFuture(featureObject)
+}
+
+const nowInSecs = () => Math.round(new Date().getTime() / 1000)
+
+function isExpiryInFuture(object?: { expiry?: number }): boolean {
+    return object.expiry != null && object.expiry > nowInSecs()
 }
 
 export function checkValidPlan(
@@ -67,7 +89,7 @@ export function checkValidPlan(
         return { valid: false, reason: 'not-present' }
     }
 
-    if (Date.now() >= subscriptionExpiry + SUBSCRIPTION_GRACE_MS) {
+    if (nowInSecs() >= subscriptionExpiry) {
         return { valid: false, reason: 'expired' }
     }
 
@@ -80,7 +102,11 @@ export function getSubscriptionExpirationTimestamp(
 ): number | null {
     const isPresent =
         claims != null &&
-        claims.subscriptions != null &&
-        claims.subscriptions[plan] != null
-    return isPresent ? claims.subscriptions[plan].expiry : null
+        claims?.subscriptions != null &&
+        claims?.subscriptions[plan] != null
+    return isPresent ? claims?.subscriptions[plan]?.expiry : null
+}
+
+export function getSubscriptionStatus(claims: Claims): SubscriptionStatus {
+    return claims?.subscriptionStatus
 }

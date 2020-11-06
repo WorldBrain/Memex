@@ -10,11 +10,14 @@ export const extensions = ['.ts', '.tsx', '.js', '.jsx', '.coffee']
 export const entry = {
     background: './src/background.ts',
     popup: './src/popup/index.tsx',
-    content_script: './src/content_script.ts',
+    content_script: './src/content-scripts/content_script/global.ts',
+    content_script_search_injection:
+        './src/content-scripts/content_script/search-injection.ts',
+    content_script_ribbon: './src/content-scripts/content_script/ribbon.ts',
+    content_script_tooltip: './src/content-scripts/content_script/tooltip.ts',
+    content_script_sidebar: './src/content-scripts/content_script/sidebar.ts',
     options: './src/options/options.jsx',
 }
-
-export const htmlTemplate = path.resolve(__dirname, './template.html')
 
 export const output = {
     path: path.resolve(__dirname, '../extension'),
@@ -26,14 +29,11 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
         src: path.resolve(context, './src'),
     }
 
-    for (const externalTsModule of externalTsModules) {
-        const extPath = path.resolve(
-            context,
-            `./external/${externalTsModule}/ts`,
-        )
+    for (const [moduleAlias, modulePath] of Object.entries(externalTsModules)) {
+        const extPath = path.resolve(context, `./external/${modulePath}/ts`)
         Object.assign(aliases, {
-            [`${externalTsModule}$`]: extPath,
-            [`${externalTsModule}/lib`]: extPath,
+            [`${moduleAlias}$`]: extPath,
+            [`${moduleAlias}/lib`]: extPath,
         })
     }
 
@@ -49,7 +49,10 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
         plugins: initPlugins({
             ...opts,
             mode,
-            template: htmlTemplate,
+            htmlTemplates: {
+                options: path.resolve(__dirname, './template-options.html'),
+                popup: path.resolve(__dirname, './template-popup.html'),
+            },
         }),
         module: {
             rules: initLoaderRules({ ...opts, mode, context }),
@@ -78,11 +81,6 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
         conf.optimization = {
             minimizer: initMinimizers(),
         }
-    }
-
-    // CI doesn't need source-maps
-    if (opts.isCI) {
-        delete conf.devtool
     }
 
     return conf

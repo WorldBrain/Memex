@@ -2,7 +2,6 @@ import { PageList } from 'src/custom-lists/background/types'
 
 export interface State {
     activeListIndex: number
-    listFilterIndex: string
     lists: PageList[]
     deleteConfirmProps: {
         isShown: boolean
@@ -14,4 +13,8 @@ export interface State {
     showCreateListForm: boolean
     showCommonNameWarning: boolean
     showCrowdFundingModal: boolean
+    shareModalProps: {
+        isShown: boolean
+        index: number
+    }
 }

@@ -4,10 +4,7 @@ import classNames from 'classnames'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import LoadingBlocker from '../../../../common-ui/components/loading-blocker'
 import RestoreConfirmation from '../components/restore-confirmation'
-import {
-    UserProps,
-    withCurrentUser,
-} from 'src/authentication/components/AuthConnector'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { WhiteSpacer10 } from 'src/common-ui/components/design-library/typography'
 import { UserFeature } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { fetchBackupPath, checkServerStatus } from '../../utils'
@@ -15,6 +12,9 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
+import { AuthContextInterface } from 'src/authentication/background/types'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import { auth, subscription } from 'src/util/remote-functions-background'
 
 const styles = require('../../styles.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
@@ -31,7 +31,7 @@ interface Props {
     showSubscriptionModal: () => void
 }
 
-export class OverviewContainer extends Component<Props & UserProps> {
+export class OverviewContainer extends Component<Props & AuthContextInterface> {
     state = {
         automaticBackupEnabled: null,
         backupTimes: null,
@@ -47,6 +47,7 @@ export class OverviewContainer extends Component<Props & UserProps> {
         billingPeriod: null,
         subscribeModal: false,
         backupPath: null,
+        loadingChargebee: false,
     }
 
     async componentDidMount() {
@@ -75,6 +76,17 @@ export class OverviewContainer extends Component<Props & UserProps> {
         })
     }
 
+    openPortal = async () => {
+        this.setState({
+            loadingChargebee: true,
+        })
+        const portalLink = await subscription.getManageLink()
+        window.open(portalLink['access_url'])
+        this.setState({
+            loadingChargebee: false,
+        })
+    }
+
     handleToggle = () => {
         const blobPreference = !this.state.blobPreference
         this.props.onBlobPreferenceChange(blobPreference)
@@ -99,8 +111,30 @@ export class OverviewContainer extends Component<Props & UserProps> {
         this.setState({ automaticBackupEnabled: false })
     }
 
+    private renderUpgradeBtn() {
+        if (this.state.loadingChargebee) {
+            return (
+                <SecondaryAction
+                    label={<LoadingIndicator />}
+                    onClick={undefined}
+                />
+            )
+        }
+
+        return (
+            <SecondaryAction
+                label="⭐️ Upgrade"
+                onClick={
+                    this.props.currentUser?.subscriptionStatus
+                        ? this.openPortal
+                        : this.props.showSubscriptionModal
+                }
+            />
+        )
+    }
+
     render() {
-        const automaticBackupsAllowed = this.props.authorizedFeatures.includes(
+        const automaticBackupsAllowed = this.props.currentUser?.authorizedFeatures?.includes(
             'backup',
         )
 
@@ -235,10 +269,9 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                         data every 15 minutes.
                                     </span>
                                 </div>
-                                <SecondaryAction
-                                    onClick={this.openSubscriptionModal}
-                                    label={'⭐️ Upgrade'}
-                                />
+                                <div className={settingsStyle.buttonBox}>
+                                    {this.renderUpgradeBtn()}
+                                </div>
                             </div>
                         )}
 
@@ -256,7 +289,7 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                             )}
                                         >
                                             {
-                                                "You successfully upgraded but haven't enable automatic backups"
+                                                "You successfully upgraded but haven't enabled automatic backups"
                                             }
                                         </span>
                                     </div>
@@ -366,6 +399,6 @@ export class OverviewContainer extends Component<Props & UserProps> {
     }
 }
 
-export default connect(null, dispatch => ({
+export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
 }))(withCurrentUser(OverviewContainer))

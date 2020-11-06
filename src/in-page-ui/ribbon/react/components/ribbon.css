@@ -1,0 +1,351 @@
+@import url('/fonts/Poppins/poppins.css');
+
+:host * {
+    font-family: 'Poppins', sans-serif;
+}
+
+.horizontalLine {
+    width: 18px;
+    border: solid 0.5px #d8d8d8;
+    border-radius: 5px;
+    margin: 10px 0px;
+}
+
+.ribbon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: center;
+
+    /* z-index: 2147483647;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border: 1px solid #7777775c;
+    border-right: none; */
+    width: 8px;
+    height: 40vh;
+
+    /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
+    line-height: normal;
+    text-align: start;
+    align-items: center;
+}
+
+.ribbonExpanded {
+    transition: all 0.1s ease-in-out;
+    align-items: flex-end;
+}
+
+.ribbonSidebarOpen {
+    box-shadow: none;
+    background: white;
+    display: flex;
+    justify-content: flex-end;
+    height: 105vh;
+    width: 40px;
+
+    & .removeSidebar {
+        visibility: hidden;
+        display: none;
+    }
+}
+
+.removeSidebar {
+    display: flex;
+}
+
+.innerRibbon {
+    position: absolute;
+    right: 10px;
+    top: 40px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 0;
+    display: none;
+    width: 30px;
+}
+
+.innerRibbonExpanded {
+    border-radius: 20px;
+    box-shadow: -1px 1px 7px 2px #13131321;
+    background: white;
+    display: flex;
+}
+
+.innerRibbonSidebarOpen {
+    box-shadow: none;
+    right: 0px;
+    height: 100%;
+    top: 0px;
+    justify-content: flex-start;
+    padding-right: 16px;
+    padding-top: 45px;
+    width: 20px;
+    align-items: flex-end;
+    display: flex;
+}
+
+/* SECTIONS */
+
+.generalActions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: fit-content;
+    justify-content: space-between;
+}
+
+.pageActions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: fit-content;
+    justify-content: space-between;
+}
+
+.settingsActions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: fit-content;
+    justify-content: space-between;
+}
+
+/* ICONS */
+
+.buttons {
+    align-items: center;
+    display: block;
+}
+
+.button {
+    width: 18px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    cursor: pointer;
+    margin: 5px 0;
+
+    &:hover {
+        opacity: 0.7;
+    }
+
+    &:active {
+        opacity: 1;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.feedbackRow {
+    background-color: #5cd9a6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30px;
+    margin: 5px 5px 0;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.logo {
+    background-image: url('/img/open.svg');
+}
+
+.dashboard {
+    background-image: url('/img/open.svg');
+}
+
+.arrow {
+    background-image: url('/img/openSidebar.svg');
+    transition: 0.2s cubic-bezier(0.55, 0.09, 0.68, 0.53);
+}
+
+.arrowReverse {
+    background-image: url('/img/openSidebar.svg');
+    transform: rotate(180deg);
+    transition: 0.2s cubic-bezier(0.55, 0.09, 0.68, 0.53);
+}
+
+.search {
+    background-image: url('/img/search.svg');
+}
+
+.tag {
+    background-image: url('/img/tag_empty.svg');
+}
+
+.tagFull {
+    background-image: url('/img/tag_full.svg');
+}
+
+.collections {
+    background-image: url('/img/collections_add.svg');
+}
+
+.collectionsFull {
+    background-image: url('/img/collections_full.svg');
+}
+
+.showMore {
+    background-image: url('/img/show-more.svg');
+}
+
+.comments {
+    background-image: url('/img/comment_add.svg');
+}
+
+.bookmark {
+    background-image: url('/img/star_full.svg');
+}
+
+.notBookmark {
+    background-image: url('/img/star_empty.svg');
+}
+
+.settings {
+    background-image: url('/img/settings.svg');
+}
+
+.highlightsOn {
+    background-image: url('/img/highlightOn.svg');
+}
+
+.highlightsOff {
+    background-image: url('/img/highlightOff.svg');
+}
+
+.tooltipOn {
+    background-image: url('/img/tooltip_full.svg');
+}
+
+.tooltipOff {
+    background-image: url('/img/tooltip_empty.svg');
+}
+
+.ribbonOn {
+    background-image: url('/img/ribbonOn.svg');
+}
+
+.ribbonOff {
+    background-image: url('/img/ribbonOff.svg');
+}
+
+.pauseIcon {
+    background-image: url('/img/pause.svg');
+}
+
+.playIcon {
+    background-image: url('/img/pause_active.svg');
+
+    &:hover {
+        background-image: url('/img/play.svg');
+    }
+}
+
+.saveIcon {
+    background-image: url('/img/saveIcon.svg');
+}
+
+/* Interaction Modals */
+
+.collectionDiv {
+    border-radius: 3px;
+}
+
+.searchInput {
+    composes: searchField from 'src/common-ui/elements.css';
+    border-radius: 3px;
+    border: none;
+    padding: 0 15px;
+    height: 35px;
+    font-size: 13px;
+    overflow: hidden;
+    width: calc(100% - 37px);
+    display: flex;
+    flex-wrap: nowrap;
+    text-overflow: ellipsis;
+    margin: 4px;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.commentBox {
+    width: 300px;
+    height: 150px;
+    border: 2px solid #5cd9a6;
+    top: 50px;
+    background: white;
+}
+
+.commentSaved {
+    border-radius: 50px;
+    border: 1px solid #5cd9a6;
+    height: 28px;
+    width: 28px;
+}
+
+.commentText {
+    font-size: 15px;
+    margin-left: 50px;
+}
+
+.saveBox {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.toggler,
+.cancel {
+    mask-repeat: no-repeat;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.cancel {
+    composes: removeIcon from 'src/common-ui/icons.css';
+    mask-size: 14px;
+    background-color: #3a2f45;
+    display: flex;
+    justify-content: center;
+}
+
+.extraButtonsPanel {
+    padding: 5px 0;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    right: 0px;
+    border: solid 1px #d8d8d8;
+    border-radius: 5px;
+    width: 180px;
+    height: fit-content;
+    background-color: #ffff;
+}
+
+.extraButtonRow {
+    display: flex;
+    flex-direction: row;
+    font-weight: bold;
+    color: #3a245f;
+    padding: 5px 15px;
+    align-items: center;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #efefef;
+        cursor: pointer;
+    }
+}
+
+.extraButtons {
+    margin-right: 10px;
+}

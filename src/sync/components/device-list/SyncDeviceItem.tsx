@@ -1,8 +1,5 @@
 import React, { Component } from 'react'
-import ReactDOM from 'react-dom'
 import { SyncDevice } from 'src/sync/components/types'
-import Button from 'src/popup/components/Button'
-import moment from 'moment'
 import styled from 'styled-components'
 import { formatTime } from 'src/util/time'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
@@ -26,9 +23,9 @@ export default class SyncDeviceItem extends Component<Props> {
         const device = this.props.device
         return (
             <DeviceRow>
-                <ButtonTooltip position="bottom" tooltipText={device.deviceId}>
-                    <Item>{device.devicePlatform}</Item>
-                </ButtonTooltip>
+                <Item>
+                    {device.devicePlatform} (Device-ID: {device.deviceId})
+                </Item>
                 <MiddleItem>
                     Time Added: {formatTime(device.createdWhen, true)}
                 </MiddleItem>
@@ -43,6 +40,7 @@ export default class SyncDeviceItem extends Component<Props> {
 const DeviceRow = styled.div`
     display: flex;
     align-items: center;
+    width: auto;
 `
 
 const Item = styled.div`
@@ -60,7 +58,7 @@ const MiddleItem = styled.div`
 const RemoveButton = styled.div`
     cursor: pointer;
     padding: 5px 10px;
-    background: ${props => (props.disabled ? colorDisabled : colorError)};
+    background: ${(props) => (props.disabled ? colorDisabled : colorError)};
     border-radius: 5px;
     cursor: pointer;
     display: inline-block;

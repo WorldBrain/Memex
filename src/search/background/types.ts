@@ -1,7 +1,8 @@
-import { Annotation } from 'src/direct-linking/types'
 import { User } from 'src/social-integration/types'
 import SearchStorage from './storage'
 import { SearchIndex } from '../types'
+import { Annotation } from 'src/annotations/types'
+import { PageIndexingBackground } from 'src/page-indexing/background'
 
 export interface AnnotPage {
     url: string
@@ -25,7 +26,7 @@ export interface AnnotSearchParams {
     termsInc?: string[]
     termsExc?: string[]
     /** Collections to include (all results must be of pages in this collection). */
-    collections?: string[]
+    collections?: number[]
     /** Tags to include (all results must have these tags). */
     tagsInc?: string[]
     /** Tags to exclude (no results can have these tags). */
@@ -126,6 +127,17 @@ export interface SocialSearchParams extends AnnotSearchParams {
     hashtagsExc?: string[]
 }
 
+export interface StandardSearchResponse {
+    resultsExhausted: boolean
+    totalCount?: number
+    docs: AnnotPage[]
+}
+
+export interface AnnotationsSearchResponse extends StandardSearchResponse {
+    isAnnotsSearch: true
+    annotsByDay: PageUrlsByDay
+}
+
 // Todo: add proper types and refactor RPC usage in-line with 'refactoring.md'
 export interface SearchBackend {
     addPage: any
@@ -153,15 +165,19 @@ export interface SearchBackend {
 
 export interface SearchInterface {
     search: SearchIndex['search']
-    searchAnnotations: (params: AnnotSearchParams) => any
-    searchPages: (params: PageSearchParams) => any
-    searchSocial: (params: SocialSearchParams) => any
+    searchAnnotations: (
+        params: AnnotSearchParams,
+    ) => Promise<StandardSearchResponse | AnnotationsSearchResponse>
+    searchPages: (params: PageSearchParams) => Promise<StandardSearchResponse>
+    searchSocial: (
+        params: SocialSearchParams,
+    ) => Promise<StandardSearchResponse>
 
     suggest: SearchStorage['suggest']
     extendedSuggest: SearchStorage['suggestExtended']
 
-    delPages: SearchIndex['delPages']
-    delPagesByDomain: SearchIndex['delPagesByDomain']
-    delPagesByPattern: SearchIndex['delPagesByPattern']
+    delPages: PageIndexingBackground['delPages']
+    delPagesByDomain: PageIndexingBackground['delPagesByDomain']
+    delPagesByPattern: PageIndexingBackground['delPagesByPattern']
     getMatchingPageCount: SearchIndex['getMatchingPageCount']
 }

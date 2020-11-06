@@ -1,124 +1,133 @@
 import { createSelector } from 'reselect'
-import { MOBILE_LIST_NAME } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/constants'
+import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
 
-// import { selectors } from '../search-filters'
-// TODO: check why not working the other way around.
 import * as selectors from '../search-filters/selectors'
-// import { selectors as filters } from '../overview/filters'
 
-// TODO: Needs some work.
-const sortAlphabetically = (a, b) => {
-    if (a.name === MOBILE_LIST_NAME) {
-        return -100
-    }
+export const customLists = (state) => state.customLists
 
-    if (b.name === MOBILE_LIST_NAME) {
-        return 100
-    }
-
-    if (a.name.toLowerCase() < b.name.toLowerCase()) {
-        return -1
-    }
-    if (a.name.toLowerCase() > b.name.toLowerCase()) {
-        return 1
-    }
-    return 0
-}
-
-export const customLists = state => state.customLists
-
-export const allLists = createSelector(customLists, state => state.lists)
+export const inboxUnreadCount = createSelector(
+    customLists,
+    (state) => state.inboxUnreadCount,
+)
+export const allLists = createSelector(customLists, (state) => state.lists)
 export const activeListIndex = createSelector(
     customLists,
-    state => state.activeListIndex,
+    (state) => state.activeListIndex,
 )
 
-export const listFilterIndex = createSelector(
-    customLists,
-    state => state.listFilterIndex,
-)
-
-export const getSortedLists = createSelector(allLists, lists => {
+export const getSortedLists = createSelector(allLists, (lists) => {
     const mobileListIndex = lists.findIndex(
-        ({ name }) => name === MOBILE_LIST_NAME,
+        ({ name }) => name === SPECIAL_LIST_NAMES.MOBILE,
     )
 
     if (mobileListIndex === -1) {
-        lists = [...lists, { name: MOBILE_LIST_NAME, id: -1 }]
+        return [{ name: SPECIAL_LIST_NAMES.MOBILE, id: -1 }, ...lists]
     }
 
-    return lists.sort(sortAlphabetically)
+    return lists
 })
+
+const isSpecialList = (list) =>
+    [SPECIAL_LIST_NAMES.INBOX, SPECIAL_LIST_NAMES.MOBILE].includes(list.name)
+
+export const createdLists = createSelector(getSortedLists, (lists) =>
+    lists.filter((list) => !isSpecialList(list)),
+)
+export const specialLists = createSelector(getSortedLists, (lists) =>
+    lists.filter((list) => isSpecialList(list)),
+)
 
 export const getUrlsToEdit = createSelector(
     customLists,
-    state => state.urlsToEdit,
+    (state) => state.urlsToEdit,
 )
 
-export const results = createSelector(
-    getSortedLists,
+export const createdDisplayLists = createSelector(
+    createdLists,
     activeListIndex,
-    selectors.listFilter,
-    (lists, listIndex, listFilter) => {
-        return lists.map((pageDoc, i) => ({
+    selectors.listIdFilter,
+    (lists, listIndex, listFilter) =>
+        lists.map((pageDoc, i) => ({
             ...pageDoc,
             isEditing: i === listIndex,
             isFilterIndex: Number(listFilter) === pageDoc.id,
-            isMobileList: pageDoc.name === MOBILE_LIST_NAME,
-        }))
-    },
+            isMobileList: false,
+        })),
+)
+
+export const specialDisplayLists = createSelector(
+    specialLists,
+    selectors.listIdFilter,
+    (lists, listFilter) =>
+        lists.map((pageDoc) => ({
+            ...pageDoc,
+            isFilterIndex: Number(listFilter) === pageDoc.id,
+            isMobileList: pageDoc.name === SPECIAL_LIST_NAMES.MOBILE,
+        })),
 )
 
 export const deleteConfirmProps = createSelector(
     customLists,
-    state => state.deleteConfirmProps,
+    (state) => state.deleteConfirmProps,
 )
+
 export const isDeleteConfShown = createSelector(
     deleteConfirmProps,
-    state => state.isShown,
+    (state) => state.isShown,
+)
+
+export const shareModalProps = createSelector(
+    customLists,
+    (state) => state.shareModalProps,
 )
 
 export const deletingIndex = createSelector(
     deleteConfirmProps,
-    state => state.deleting,
+    (state) => state.deleting,
 )
 
-export const deletingID = createSelector(deleteConfirmProps, state => state.id)
+export const deletingID = createSelector(
+    deleteConfirmProps,
+    (state) => state.id,
+)
 
 export const listEditDropdown = createSelector(
     customLists,
-    state => state.listEditDropdown,
+    (state) => state.listEditDropdown,
 )
 
 export const showAddToList = createSelector(
     customLists,
-    state => state.showAddToList,
+    (state) => state.showAddToList,
 )
 
-export const urlDragged = createSelector(customLists, state => state.urlDragged)
+export const urlDragged = createSelector(
+    customLists,
+    (state) => state.urlDragged,
+)
 
 export const showCreateListForm = createSelector(
     customLists,
-    state => state.showCreateListForm,
+    (state) => state.showCreateListForm,
 )
 
 export const showCommonNameWarning = createSelector(
     customLists,
-    state => state.showCommonNameWarning,
+    (state) => state.showCommonNameWarning,
 )
 
 export const showCrowdFundingModal = createSelector(
     customLists,
-    state => state.showCrowdFundingModal,
+    (state) => state.showCrowdFundingModal,
 )
 
 export const activeCollectionName = createSelector(
-    selectors.listFilter,
+    selectors.listIdFilter,
     allLists,
     (listFilterId, lists) =>
         listFilterId
             ? lists
-                  .filter(list => list.id === Number(listFilterId))
-                  .map(list => list.name)[0]
+                  .filter((list) => list.id === Number(listFilterId))
+                  .map((list) => list.name)[0]
             : undefined,
 )

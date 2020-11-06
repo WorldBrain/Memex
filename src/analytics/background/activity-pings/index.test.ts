@@ -25,13 +25,13 @@ describe('Analytics activity pings', () => {
         activityPings._getNow = () => firstPing
         expect(
             activityPings.isActivityPing({
-                category: 'Annotations',
-                action: 'createWithTags',
+                category: 'ActivityPings',
+                action: 'daily',
             }),
         ).toBe(true)
         await activityPings.storeActivity({
-            category: 'Annotations',
-            action: 'createWithTags',
+            category: 'ActivityPings',
+            action: 'daily',
         })
 
         await activityPings.maybePing()
@@ -40,7 +40,7 @@ describe('Analytics activity pings', () => {
                 eventArgs: {
                     category: 'ActivityPings',
                     action: 'daily',
-                    value: { usedFeatures: ['Annotations'] },
+                    value: { usedFeatures: ['ActivityPings'] },
                 },
             },
         ])
@@ -48,8 +48,8 @@ describe('Analytics activity pings', () => {
             lastPingTimestamps: { daily: firstPing, weekly: 1, monthly: 1 },
             pendingActivityPings: {
                 daily: [],
-                weekly: ['Annotations'],
-                monthly: ['Annotations'],
+                weekly: ['ActivityPings'],
+                monthly: ['ActivityPings'],
             },
         })
 
@@ -68,7 +68,7 @@ describe('Analytics activity pings', () => {
                 eventArgs: {
                     category: 'ActivityPings',
                     action: 'weekly',
-                    value: { usedFeatures: ['Annotations'] },
+                    value: { usedFeatures: ['ActivityPings'] },
                 },
             },
         ])
@@ -81,7 +81,7 @@ describe('Analytics activity pings', () => {
             pendingActivityPings: {
                 daily: [],
                 weekly: [],
-                monthly: ['Annotations'],
+                monthly: ['ActivityPings'],
             },
         })
 
@@ -107,7 +107,7 @@ describe('Analytics activity pings', () => {
                 eventArgs: {
                     category: 'ActivityPings',
                     action: 'monthly',
-                    value: { usedFeatures: ['Annotations'] },
+                    value: { usedFeatures: ['ActivityPings'] },
                 },
             },
         ])
@@ -141,13 +141,13 @@ describe('Analytics activity pings', () => {
         const firstPing = 1000 * 60 * 60 * 24 + 2
         expect(
             activityPings.isActivityPing({
-                category: 'Annotations',
-                action: 'createWithTags',
+                category: 'ActivityPings',
+                action: 'daily',
             }),
         ).toBe(true)
         await activityPings.storeActivity({
-            category: 'Annotations',
-            action: 'createWithTags',
+            category: 'ActivityPings',
+            action: 'daily',
         })
 
         activityPings._getNow = () => firstPing
@@ -157,8 +157,8 @@ describe('Analytics activity pings', () => {
             lastPingTimestamps: { daily: firstPing, weekly: 1, monthly: 1 },
             pendingActivityPings: {
                 daily: [],
-                weekly: ['Annotations'],
-                monthly: ['Annotations'],
+                weekly: ['ActivityPings'],
+                monthly: ['ActivityPings'],
             },
         })
 
@@ -168,8 +168,8 @@ describe('Analytics activity pings', () => {
             lastPingTimestamps: { daily: firstPing, weekly: 1, monthly: 1 },
             pendingActivityPings: {
                 daily: [],
-                weekly: ['Annotations'],
-                monthly: ['Annotations'],
+                weekly: ['ActivityPings'],
+                monthly: ['ActivityPings'],
             },
         })
     })

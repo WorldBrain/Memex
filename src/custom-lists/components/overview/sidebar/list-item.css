@@ -8,13 +8,10 @@
     position: relative;
     width: 100%;
     cursor: pointer;
+    margin: 2px 0px;
 
     &:hover {
         background-color: color8;
-
-        & .buttonContainer {
-            display: flex;
-        }
     }
 }
 
@@ -42,6 +39,21 @@
     outline: none;
 }
 
+.shareButton {
+    background-image: url('/img/share.svg');
+    width: 24px;
+    height: 24px;
+    background-position: center;
+}
+
+.shareButtonPermanent {
+    opacity: 0.6;
+}
+
+.shareButtonPermanentHover {
+    opacity: 1;
+}
+
 .editButton {
     background-image: url('/img/edit.svg');
     width: 24px;
@@ -50,7 +62,7 @@
 }
 
 .deleteButton {
-    background-image: url('/img/trash.svg');
+    background-image: url('/img/remove.svg');
     width: 24px;
     height: 24px;
     background-position: center;
@@ -71,11 +83,20 @@
 }
 
 .buttonContainer {
+    display: flex;
     margin-right: 5px;
     justify-content: flex-end;
     width: fit-content;
     align-items: center;
-    display: none;
+}
+
+.unreadCount {
+    background: #e0e0e0;
+    padding: 2px 16px;
+    border-radius: 10px;
+    margin: 0 20px;
+    font-weight: 600;
+    font-size: 12px;
 }
 
 @keyframes appear {

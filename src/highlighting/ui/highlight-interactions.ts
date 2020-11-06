@@ -1,51 +1,218 @@
+import analytics from 'src/analytics'
 import { getOffsetTop } from 'src/sidebar-overlay/utils'
 import {
+    Anchor,
     Highlight,
-    HighlightInteractionInterface,
+    HighlightInteractionsInterface,
 } from 'src/highlighting/types'
+import { AnnotationClickHandler } from 'src/highlighting/ui/types'
 import { retryUntil } from 'src/util/retry-until'
 import { descriptorToRange, markRange } from './anchoring/index'
 import * as Raven from 'src/util/raven'
 import { Annotation } from 'src/annotations/types'
+import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import * as anchoring from 'src/highlighting/ui/anchoring'
+import {
+    AnnotationCacheChangeEvents,
+    AnnotationsCacheInterface,
+} from 'src/annotations/annotations-cache'
+import { generateUrl } from 'src/annotations/utils'
+import { AnalyticsEvent } from 'src/analytics/types'
 
 const styles = require('src/highlighting/ui/styles.css')
 
-export class HighlightInteraction implements HighlightInteractionInterface {
+export const extractAnchorFromSelection = async (
+    selection: Selection,
+): Promise<Anchor> => {
+    const quote = selection.toString()
+    const descriptor = await anchoring.selectionToDescriptor({ selection })
+    return {
+        quote,
+        descriptor,
+    }
+}
+
+export interface HighlightRenderInterface {
+    renderHighlights: (
+        highlights: Highlight[],
+        onClick: AnnotationClickHandler,
+        temp?: boolean,
+    ) => void
+    renderHighlight: (
+        highlight: Highlight,
+        onClick: AnnotationClickHandler,
+    ) => void
+    undoHighlight: (uniqueUrl: string) => void
+    undoAllHighlights: () => void
+}
+
+// TODO: (sidebar-refactor) move to somewhere more highlight content script related
+export const renderAnnotationCacheChanges = ({
+    cacheChanges,
+    onClickHighlight,
+    renderer,
+}: {
+    cacheChanges: AnnotationCacheChangeEvents
+    onClickHighlight: AnnotationClickHandler
+    renderer: HighlightRenderInterface
+}) => {
+    const onRollback = (annotations) => {
+        renderer.undoAllHighlights()
+        renderer.renderHighlights(
+            annotations as Highlight[],
+            onClickHighlight,
+            false,
+        )
+    }
+    const onCreated = (annotation) => {
+        renderer.renderHighlight(annotation as Highlight, onClickHighlight)
+    }
+    const onDeleted = (annotation) => {
+        renderer.undoHighlight(annotation.url)
+    }
+
+    cacheChanges.on('rollback', onRollback)
+    cacheChanges.on('created', onCreated)
+    cacheChanges.on('deleted', onDeleted)
+
+    return () => {
+        cacheChanges.removeListener('rollback', onRollback)
+        cacheChanges.removeListener('created', onCreated)
+        cacheChanges.removeListener('deleted', onDeleted)
+    }
+}
+
+export interface SaveAndRenderHighlightDeps {
+    getUrlAndTitle: () => { pageUrl: string; title: string }
+    getSelection: () => Selection
+    annotationsCache: AnnotationsCacheInterface
+    analyticsEvent?: AnalyticsEvent
+    inPageUI: SharedInPageUIInterface
+    options?: { clickToEdit?: boolean }
+}
+
+export type HighlightRendererInterface = HighlightRenderInterface &
+    HighlightInteractionsInterface
+
+export class HighlightRenderer implements HighlightRendererInterface {
+    constructor() {
+        document.addEventListener('click', this.handleOutsideHighlightClick)
+    }
+
+    private handleOutsideHighlightClick = async (e: MouseEvent) => {
+        if (e.target === document.getElementById('memex-sidebar-container')) {
+            return
+        }
+
+        const allHighlights = document.querySelectorAll(
+            `.${styles['memex-highlight']}`,
+        )
+
+        for (const highlightEl of allHighlights) {
+            if (e.target === highlightEl) {
+                return
+            }
+        }
+
+        this.removeHighlights({ onlyRemoveDarkHighlights: true })
+    }
+
+    saveAndRenderHighlightAndEditInSidebar = async (
+        params: SaveAndRenderHighlightDeps,
+    ) => {
+        analytics.trackEvent(
+            params.analyticsEvent ?? {
+                category: 'Annotations',
+                action: 'create',
+            },
+        )
+
+        const annotation = await this._saveAndRenderHighlight(params)
+
+        if (annotation) {
+            await params.inPageUI.showSidebar({
+                annotationUrl: annotation.url,
+                action: 'edit_annotation',
+            })
+        } else {
+            await params.inPageUI.showSidebar({ action: 'comment' })
+        }
+    }
+
+    saveAndRenderHighlight = async (params: SaveAndRenderHighlightDeps) => {
+        analytics.trackEvent(
+            params.analyticsEvent ?? {
+                category: 'Highlights',
+                action: 'create',
+            },
+        )
+
+        await this._saveAndRenderHighlight(params)
+    }
+
+    private async _saveAndRenderHighlight(
+        params: SaveAndRenderHighlightDeps,
+    ): Promise<Annotation | null> {
+        const selection = params.getSelection()
+
+        if (!selection || selection.isCollapsed) {
+            return null
+        }
+
+        const { pageUrl, title } = params.getUrlAndTitle()
+        const anchor = await extractAnchorFromSelection(selection)
+        const body = anchor ? anchor.quote : ''
+
+        const annotation = {
+            url: generateUrl({ pageUrl, now: () => Date.now() }),
+            body,
+            pageUrl,
+            tags: [],
+            comment: '',
+            selector: anchor,
+            pageTitle: title,
+        } as Annotation
+
+        await params.annotationsCache.create(annotation)
+        this.renderHighlight(annotation, ({ openInEdit, annotationUrl }) => {
+            params.inPageUI.showSidebar({
+                annotationUrl,
+                action:
+                    params.options?.clickToEdit || openInEdit
+                        ? 'edit_annotation'
+                        : 'show_annotation',
+            })
+        })
+
+        return annotation
+    }
+
     /**
      * Given an array of highlight objects, highlights all of them.
      */
-    renderHighlights = async (
-        highlights: Highlight[],
-        openSidebar: (args: { activeUrl?: string }) => void,
-        focusOnHighlight?: (url: string) => void,
-        hoverHighlightContainer?: (url: string) => void,
-    ) => {
+    renderHighlights = async (highlights: Highlight[], onClick) => {
         await Promise.all(
             highlights.map(async (highlight) =>
-                this.renderHighlight(
-                    highlight,
-                    focusOnHighlight,
-                    hoverHighlightContainer,
-                    openSidebar,
-                ),
+                this.renderHighlight(highlight, onClick),
             ),
         )
     }
 
     renderHighlight = async (
         highlight: Highlight,
-        focusOnAnnotation,
-        hoverAnnotationContainer,
-        openSidebar,
+        onClick: AnnotationClickHandler,
         temporary = false,
     ) => {
+        if (!highlight?.selector?.descriptor?.content) {
+            return
+        }
+
         const baseClass =
             styles[temporary ? 'memex-highlight-tmp' : 'memex-highlight']
+
         try {
             await Raven.context(async () => {
-                const descriptor = highlight.anchors
-                    ? highlight.anchors[0].descriptor
-                    : highlight.selector.descriptor
+                const descriptor = highlight.selector.descriptor
 
                 Raven.captureBreadcrumb({
                     message: 'annotation-selector-received',
@@ -64,12 +231,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
 
                 markRange({ range, cssClass: baseClass })
 
-                this.attachEventListenersToNewHighlights(
-                    highlight,
-                    focusOnAnnotation,
-                    hoverAnnotationContainer,
-                    openSidebar,
-                )
+                this.attachEventListenersToNewHighlights(highlight, onClick)
             })
         } catch (e) {
             Raven.captureException(e)
@@ -109,7 +271,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
      * @param {*} annotation Annotation object which has the selector to be highlighted
      */
     highlightAndScroll = (annotation: Annotation) => {
-        this.removeHighlights(true)
+        this.removeHighlights({ onlyRemoveDarkHighlights: true })
         this.makeHighlightDark(annotation)
         return this.scrollToHighlight(annotation)
     }
@@ -124,29 +286,36 @@ export class HighlightInteraction implements HighlightInteractionInterface {
      */
     attachEventListenersToNewHighlights = (
         highlight: Highlight,
-        focusOnAnnotation: (url: string) => void = (_) => undefined,
-        hoverAnnotationContainer: (url: string) => void = (_) => undefined,
-        openSidebar: (args: {
-            activeUrl?: string
-            openSidebar?: boolean
-        }) => void,
+        openSidebar: AnnotationClickHandler,
     ) => {
         const newHighlights = document.querySelectorAll(
             `.${styles['memex-highlight']}:not([data-annotation])`,
         )
-        newHighlights.forEach((highlightEl) => {
-            ;(highlightEl as HTMLElement).dataset.annotation = highlight.url
+        newHighlights.forEach((highlightEl: HTMLElement) => {
+            highlightEl.dataset.annotation = highlight.url
 
-            const clickListener = async (e) => {
-                e.preventDefault()
-                if (!e.target.dataset.annotation) {
+            const clickListener = async (e: MouseEvent) => {
+                // Let anchors behave as normal
+                const parentNode = (e.target as HTMLElement)?.parentNode
+                if (
+                    parentNode?.nodeName?.toLowerCase() === 'a' &&
+                    (parentNode as HTMLAnchorElement)?.href.length
+                ) {
                     return
                 }
-                openSidebar({ activeUrl: highlight.url, openSidebar: true })
-                this.removeHighlights(true)
+
+                e.preventDefault()
+                if (!(e.target as HTMLElement).dataset.annotation) {
+                    return
+                }
+                openSidebar({
+                    annotationUrl: highlight.url,
+                    openInEdit: e.getModifierState('Shift'),
+                })
+                this.removeHighlights({ onlyRemoveDarkHighlights: true })
                 this.makeHighlightDark(highlight)
-                focusOnAnnotation(highlight.url)
             }
+
             highlightEl.addEventListener('click', clickListener, false)
 
             const mouseenterListener = (e) => {
@@ -155,7 +324,6 @@ export class HighlightInteraction implements HighlightInteractionInterface {
                 }
                 this.removeMediumHighlights()
                 this.makeHighlightMedium(highlight)
-                hoverAnnotationContainer(highlight.url)
             }
             highlightEl.addEventListener(
                 'mouseenter',
@@ -168,7 +336,6 @@ export class HighlightInteraction implements HighlightInteractionInterface {
                     return
                 }
                 this.removeMediumHighlights()
-                hoverAnnotationContainer(null)
             }
             highlightEl.addEventListener(
                 'mouseleave',
@@ -223,19 +390,22 @@ export class HighlightInteraction implements HighlightInteractionInterface {
             highlight.classList.add(styles['dark'])
         })
     }
+
     /**
      * Removes all highlight elements in the current page.
      * If `onlyRemoveDarkHighlights` is true, only dark highlights will be removed.
      */
-    removeHighlights = (onlyRemoveDarkHighlights = false) => {
+    removeHighlights = (args?: { onlyRemoveDarkHighlights?: boolean }) => {
         this.removeTempHighlights()
 
         const baseClass = '.' + styles['memex-highlight']
-        const darkClass = onlyRemoveDarkHighlights ? '.' + styles['dark'] : ''
+        const darkClass = args?.onlyRemoveDarkHighlights
+            ? '.' + styles['dark']
+            : ''
         const highlightClass = `${baseClass}${darkClass}`
         const highlights = document.querySelectorAll(highlightClass)
 
-        if (onlyRemoveDarkHighlights) {
+        if (args?.onlyRemoveDarkHighlights) {
             highlights.forEach((highlight) =>
                 highlight.classList.remove(styles['dark']),
             )
@@ -243,6 +413,8 @@ export class HighlightInteraction implements HighlightInteractionInterface {
             highlights.forEach((highlight) => this._removeHighlight(highlight))
         }
     }
+    undoAllHighlights = this.removeHighlights
+
     /**
      * Finds each annotation's position in page, sorts it by the position and
      * returns the sorted annotations.
@@ -292,11 +464,6 @@ export class HighlightInteraction implements HighlightInteractionInterface {
         )
         highlights.forEach((highlight) => this._removeHighlight(highlight))
     }
-}
 
-// FIXME: Refactor the parts of the code that need these global function imports
-export const makeHighlightDark = new HighlightInteraction().makeHighlightDark
-export const scrollToHighlight = new HighlightInteraction().scrollToHighlight
-export const renderHighlights = new HighlightInteraction().renderHighlights
-export const renderHighlight = new HighlightInteraction().renderHighlight
-export const removeHighlights = new HighlightInteraction().removeHighlights
+    undoHighlight = this.removeAnnotationHighlights
+}

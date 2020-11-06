@@ -7,12 +7,10 @@ import { COLLECTION_DEFINITIONS as PAGE_COLLECTION_DEFINITIONS } from '@worldbra
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { PipelineRes, VisitInteraction } from 'src/search'
 import { initErrHandler } from 'src/search/storage'
-import {
-    getTermsField,
-    isTermsField,
-} from '@worldbrain/memex-common/lib/storage/utils'
+import { getTermsField } from '@worldbrain/memex-common/lib/storage/utils'
 import { mergeTermFields } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import decodeBlob from 'src/util/decode-blob'
+import { pageIsStub } from 'src/page-indexing/utils'
 
 export default class PageStorage extends StorageModule {
     disableBlobProcessing = false
@@ -43,7 +41,7 @@ export default class PageStorage extends StorageModule {
                 },
             },
             deletePage: {
-                operation: 'deletePage',
+                operation: 'deleteObject',
                 collection: 'pages',
                 args: {
                     url: '$url:string',
@@ -52,6 +50,21 @@ export default class PageStorage extends StorageModule {
             createVisit: {
                 operation: 'createObject',
                 collection: 'visits',
+            },
+            countVisits: {
+                operation: 'countObjects',
+                collection: 'visits',
+                args: {
+                    url: '$url:string',
+                },
+            },
+            findLatestVisitByUrl: {
+                operation: 'findObjects',
+                collection: 'visits',
+                args: [
+                    { url: '$url:string' },
+                    { sort: [['time', 'desc']], limit: 1 },
+                ],
             },
             findVisitsByUrl: {
                 operation: 'findObjects',
@@ -89,73 +102,72 @@ export default class PageStorage extends StorageModule {
         },
     })
 
-    async createPageIfNotExists(pageData: PipelineRes): Promise<void> {
+    async createPageIfNotExistsOrIsStub(pageData: PipelineRes): Promise<void> {
         const normalizedUrl = normalizeUrl(pageData.url, {})
-        const exists = await this.pageExists(normalizedUrl)
-        if (!exists) {
-            await this.operation('createPage', {
-                ...pageData,
-                url: normalizedUrl,
-            })
+        const existingPage = await this.operation('findPageByUrl', {
+            url: normalizedUrl,
+        })
+
+        if (!existingPage || pageIsStub(existingPage)) {
+            return this.createPage(pageData)
         }
     }
 
-    async createOrUpdatePage(pageData: PipelineRes) {
-        pageData = { ...pageData }
-        for (const field of Object.keys(pageData)) {
-            if (
-                !this.collections['pages'].fields[field] &&
-                !isTermsField({ collection: 'pages', field })
-            ) {
-                delete pageData[field]
-            }
-        }
+    async createPageIfNotExists(pageData: PipelineRes): Promise<void> {
+        const normalizedUrl = normalizeUrl(pageData.url, {})
+        const exists = await this.pageExists(normalizedUrl)
 
+        if (!exists) {
+            return this.createPage(pageData)
+        }
+    }
+
+    async createPage(pageData: PipelineRes) {
         const normalizedUrl = normalizeUrl(pageData.url, {})
 
-        const existingPage = await this.getPage(pageData.url)
-        if (!existingPage) {
-            await this.operation('createPage', {
-                ...pageData,
-                url: normalizedUrl,
-            })
-            return
-        }
+        await this.operation('createPage', {
+            ...pageData,
+            url: normalizedUrl,
+        })
+    }
 
+    async updatePage(newPageData: PipelineRes, existingPage: PipelineRes) {
         const updates = {}
-        for (const fieldName of Object.keys(pageData)) {
+
+        for (const fieldName of Object.keys(newPageData)) {
             const termsField = getTermsField('pages', fieldName)
+
             if (termsField) {
                 if (
-                    !pageData[fieldName] ||
-                    existingPage[fieldName] === pageData[fieldName]
+                    !newPageData[fieldName] ||
+                    existingPage[fieldName] === newPageData[fieldName]
                 ) {
-                    delete pageData[fieldName]
+                    delete newPageData[fieldName]
                     continue
                 }
 
                 const mergedTerms = mergeTermFields(
                     termsField,
-                    pageData,
+                    newPageData,
                     existingPage,
                 )
-                updates[fieldName] = pageData[fieldName]
+                updates[fieldName] = newPageData[fieldName]
                 updates[termsField] = mergedTerms
             } else if (
                 typeof existingPage[fieldName] === 'string' ||
-                typeof pageData[fieldName] === 'string'
+                typeof newPageData[fieldName] === 'string'
             ) {
-                if (pageData[fieldName] !== existingPage[fieldName]) {
-                    updates[fieldName] = pageData[fieldName]
+                if (newPageData[fieldName] !== existingPage[fieldName]) {
+                    updates[fieldName] = newPageData[fieldName]
                 }
             } else if (fieldName in PAGE_COLLECTION_DEFINITIONS.pages.fields) {
-                updates[fieldName] = pageData[fieldName]
+                updates[fieldName] = newPageData[fieldName]
             }
         }
 
         if (Object.keys(updates).length) {
             await this.operation('updatePage', {
-                url: normalizedUrl,
+                url: normalizeUrl(newPageData.url, {}),
                 updates,
             })
         }
@@ -167,18 +179,9 @@ export default class PageStorage extends StorageModule {
             time: number
         }
         const normalizedUrl = normalizeUrl(url, {})
-        const existingVisits: Visit[] = await this.operation(
-            'findVisitsByUrl',
-            { url: normalizedUrl },
-        )
-        const existingVisitTimes = new Set(
-            existingVisits.map(visit => visit.time),
-        )
         const newVisits: Visit[] = []
         for (const visitTime of visitTimes) {
-            if (!existingVisitTimes.has(visitTime)) {
-                newVisits.push({ url: normalizedUrl, time: visitTime })
-            }
+            newVisits.push({ url: normalizedUrl, time: visitTime })
         }
         for (const visit of newVisits) {
             await this.operation('createVisit', visit)
@@ -190,15 +193,16 @@ export default class PageStorage extends StorageModule {
         const existingPage = await this.operation('findPageByUrl', {
             url: normalizedUrl,
         })
+
         return !!existingPage
     }
 
     async pageHasVisits(url: string): Promise<boolean> {
         const normalizedUrl = normalizeUrl(url, {})
-        const visits = await this.operation('findVisitsByUrl', {
+        const visitCount = await this.operation('countVisits', {
             url: normalizedUrl,
         })
-        return !!visits.length
+        return visitCount > 0
     }
 
     async addPageVisit(url: string, time: number) {
@@ -257,10 +261,10 @@ export default class PageStorage extends StorageModule {
 
     async deletePageIfOrphaned(url: string) {
         const normalizedUrl = normalizeUrl(url, {})
-        if (
-            (await this.operation('findVisitsByUrl', { url: normalizeUrl }))
-                .length
-        ) {
+        const visitCount = await this.operation('countVisits', {
+            url: normalizeUrl,
+        })
+        if (visitCount > 0) {
             return
         }
         if (
@@ -272,6 +276,16 @@ export default class PageStorage extends StorageModule {
         await this.operation('deletePage', {
             url: normalizedUrl,
         })
+    }
+
+    async getLatestVisit(
+        url: string,
+    ): Promise<{ url: string; time: number } | null> {
+        const normalizedUrl = normalizeUrl(url, {})
+        const result = await this.operation('findLatestVisitByUrl', {
+            url: normalizedUrl,
+        })
+        return result.length ? result[0] : null
     }
 
     async _maybeDecodeBlob(

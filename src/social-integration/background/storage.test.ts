@@ -1,10 +1,4 @@
-import Storex from '@worldbrain/storex'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
-
-import initStorageManager from 'src/search/memory-storex'
 import CustomListBg from 'src/custom-lists/background'
-import AnnotsBg from 'src/direct-linking/background'
-import SocialBackground from './'
 import SocialStorage from './storage'
 import * as DATA from './storage.test.data'
 import { Tweet, SocialPage } from '../types'
@@ -84,7 +78,7 @@ describe('Social storage', () => {
             listId,
         })
 
-        const results = await search({ collections: [listId.toString()] })
+        const results = await search({ collections: [listId] })
         const firstRes = [...results.values()][0]
         assertTweetsEqual(firstRes, DATA.tweetA)
         return { socialStorage, search, listId }
@@ -171,7 +165,7 @@ describe('Social storage', () => {
         const { socialStorage, listId, search } = await addListEntryTest()
         await socialStorage.delListEntry({ postId: DATA.tweetA.id, listId })
 
-        const results = await search({ collections: [listId.toString()] })
+        const results = await search({ collections: [listId] })
         expect([...results.values()].length).toBe(0)
     })
 

@@ -14,5 +14,5 @@ export const ACTIVITY_PINGS: {
         [Action in AnalyticsEvents[Category]]?: true
     }
 } = {
-    Annotations: { createWithTags: true },
+    ActivityPings: { daily: true, monthly: true, weekly: true },
 }

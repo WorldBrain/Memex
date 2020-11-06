@@ -3,7 +3,7 @@ import { Item, ServiceParser } from '../types'
 const POCKET_PRE = 'Pocket-'
 const readingTimePattern = /^[0-9]+\s+\bmin\b/
 
-const parsePocket: ServiceParser = doc => {
+const parsePocket: ServiceParser = (doc) => {
     const collections = []
     const items: Item[] = []
     const collectionElements = doc.getElementsByTagName('h1')
@@ -30,19 +30,16 @@ const parsePocket: ServiceParser = doc => {
                 url: link.getAttribute('href'),
                 title: link.textContent || link.getAttribute('href'),
                 tags: tags
-                    .map(tag =>
-                        tag
-                            .trim()
-                            .replace(/\s\s+/g, ' ')
-                            .toLowerCase(),
+                    .map((tag) =>
+                        tag.trim().replace(/\s\s+/g, ' ').toLowerCase(),
                     )
-                    .filter(tag => !tag.match(readingTimePattern)),
+                    .filter((tag) => !tag.match(readingTimePattern)),
                 collections: collections[index]
                     ? [POCKET_PRE + collections[index]]
                     : [],
                 timeAdded: link.hasAttribute('time_added')
                     ? Number(link.getAttribute('time_added'))
-                    : null,
+                    : Date.now(),
             }
             items.push(item)
         }

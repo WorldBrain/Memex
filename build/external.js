@@ -2,17 +2,24 @@ const fs = require('fs')
 const path = require('path')
 
 function collectModules(basePath, namespaceDir = null) {
-    const paths = []
+    let paths = {}
     for (const dirName of fs.readdirSync(
         path.join(basePath, namespaceDir || ''),
     )) {
         if (dirName.startsWith('@')) {
-            paths.push(...collectModules(basePath, dirName))
+            paths = { ...collectModules(basePath, dirName), ...paths }
+        } else if (dirName === 'ui-logic') {
+            continue
         } else if (namespaceDir) {
-            paths.push([namespaceDir, dirName].join('/'))
+            const namespacedDir = [namespaceDir, dirName].join('/')
+            paths[namespacedDir] = namespacedDir
         } else {
-            paths.push(dirName)
+            paths[dirName] = dirName
         }
+    }
+    if (!namespaceDir) {
+        paths['ui-logic-core'] = 'ui-logic/packages/ui-logic-core'
+        paths['ui-logic-react'] = 'ui-logic/packages/ui-logic-react'
     }
     return paths
 }

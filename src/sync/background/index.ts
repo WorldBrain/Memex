@@ -17,14 +17,14 @@ import {
     MemexExtSyncInfoStorage,
 } from './storage'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
-import { filterSyncLog } from './sync-logging'
+import { filterSyncLog } from '@worldbrain/memex-common/lib/sync//sync-logging'
 import { MemexExtSyncSettingStore } from './setting-store'
 import { resolvablePromise } from 'src/util/promises'
 import { remoteEventEmitter } from 'src/util/webextensionRPC'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 import { bindMethod } from 'src/util/functions'
 import { Analytics } from 'src/analytics/types'
-
+import { captureException } from 'src/util/raven'
 export default class SyncBackground extends SyncService {
     private analytics: Analytics
     initialSync: MemexInitialSync
@@ -94,6 +94,10 @@ export default class SyncBackground extends SyncService {
             ) as () => Promise<void>,
             listDevices: bindMethod(this.syncInfoStorage, 'listDevices'),
             removeDevice: bindMethod(this.syncInfoStorage, 'removeDevice'),
+            removeAllDevices: bindMethod(
+                this.syncInfoStorage,
+                'removeAllDevices',
+            ),
         }
 
         this.initialSync.debug = true
@@ -170,10 +174,19 @@ export default class SyncBackground extends SyncService {
             return remoteEmitter.emit('roleSwitch', args)
         })
         this.initialSync.events.on('error', (args) => {
+            captureException(`InitialSyncError - ${args.error}`)
             return remoteEmitter.emit('error', args)
         })
         this.initialSync.events.on('finished', (args) => {
             return remoteEmitter.emit('finished', args)
+        })
+        this.initialSync.events.on('channelTimeout', () => {
+            captureException(`InitialSyncError - channelTimeout`)
+            return remoteEmitter.emit('channelTimeout', {})
+        })
+        this.initialSync.events.on('packageStalled', () => {
+            captureException(`InitialSyncError - packageStalled`)
+            return remoteEmitter.emit('packageStalled', {})
         })
     }
 }

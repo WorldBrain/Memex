@@ -3,10 +3,11 @@
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    margin-left: 11px;
+    margin-left: -5px;
 }
 
 .savecancel {
-	display: flex;
+    display: flex;
     flex-direction: row-reverse;
+    margin-top: 5px;
 }

@@ -20,7 +20,7 @@ const styles = require('src/highlighting/ui/styles.css')
 export const highlightDOMRange = (
     rangeObject: Range,
     highlightClass: string,
-) => {
+): HTMLElement[] => {
     // Ignore range if empty.
     if (rangeObject.collapsed) {
         return
@@ -37,8 +37,14 @@ export const highlightDOMRange = (
     const { startContainer, startOffset, endContainer, endOffset } = rangeObject
 
     // Highlight each node
-    // const highlights: HTMLElement[] =
-    nodes.forEach((node) => highlightNode(node, highlightClass))
+    const highlights: HTMLElement[] = []
+    for (const node of nodes) {
+        const highlightedNode = highlightNode(node, highlightClass)
+        if (!highlightedNode) {
+            continue
+        }
+        highlights.push(highlightedNode)
+    }
 
     // Reset selection
     clearBrowserSelection()
@@ -46,6 +52,8 @@ export const highlightDOMRange = (
     // The rangeObject gets messed up by our DOM changes. Be kind and restore.
     rangeObject.setStart(startContainer, startOffset)
     rangeObject.setEnd(endContainer, endOffset)
+
+    return highlights
 }
 
 // Resets any selected content in the window, useful to stop content script popping up again inconsistently.
@@ -206,13 +214,23 @@ const getFirstTextNode = (node: Node) => {
 }
 
 // Replace [node] with <memex-highlight class=[highlightClass]>[node]</memex-highlight>
-const highlightNode = (node: Node, highlightClass: string) => {
+const highlightNode = (
+    node: Node,
+    highlightClass: string,
+    highlightTagName = 'memex-highlight',
+) => {
     const isDark = calculateBG(node.parentElement.parentElement)
+
     // Create a highlight
-    const highlight: HTMLElement = document.createElement('memex-highlight')
+    const highlight: HTMLElement = document.createElement(highlightTagName)
     highlight.classList.add(highlightClass)
     if (isDark) {
         highlight.classList.add(styles['dark-mode'])
+    }
+
+    // Ensure this isn't being called multiple times and creating multiple nested highlights
+    if (node.parentNode.nodeName.toLocaleLowerCase() === highlightTagName) {
+        return null
     }
 
     // Wrap it around the text node

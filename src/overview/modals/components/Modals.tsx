@@ -1,6 +1,9 @@
 import React, { PureComponent } from 'react'
 import { ModalIds } from 'src/overview/modals/reducer'
 import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
+import ShareListModal from 'src/overview/sharing/components/ShareListModal'
+import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
+import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 
 export interface Props {
     modalId?: ModalIds
@@ -8,9 +11,23 @@ export interface Props {
     onClose: () => any
 }
 
-const modalsMap = {
+const modalsMap: { [key in ModalIds]: (props: Props) => JSX.Element } = {
     Subscription: ({ modalOptions, onClose }) => (
         <SubscribeModal onClose={onClose} {...modalOptions} />
+    ),
+    ShareListModal: ({ modalOptions, onClose }) => (
+        <ShareListModal onClose={onClose} {...modalOptions} />
+    ),
+    ShareAnnotationOnboardingModal: ({ modalOptions, onClose }) => (
+        <ShareAnnotationOnboardingModal onClose={onClose} {...modalOptions} />
+    ),
+    BetaFeatureNotifModal: ({ modalOptions, onClose }) => (
+        <BetaFeatureNotifModal
+            onClose={() => {
+                window.location.reload()
+            }}
+            {...modalOptions}
+        />
     ),
 }
 

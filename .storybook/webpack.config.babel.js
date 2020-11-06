@@ -29,5 +29,11 @@ export default merge(
                 },
             ),
         ],
+        resolve: {
+            alias: {
+                fs: path.resolve(__dirname, 'mocks', 'null.js'),
+                module: path.resolve(__dirname, 'mocks', 'null.js'),
+            },
+        },
     },
 )

@@ -51,9 +51,10 @@ const runSuite = (DATA: TestData, skip = false) => () => {
         const observer = { complete: jest.fn(), next: jest.fn() }
         const progress = new Progress({
             stateManager,
-            searchIndex: null,
+            pages: null,
             tagsModule: {} as any,
             customListsModule: {} as any,
+            bookmarks: {} as any,
             observer,
             concurrency,
             Processor,
@@ -86,9 +87,10 @@ const runSuite = (DATA: TestData, skip = false) => () => {
         const observer = { complete: jest.fn(), next: jest.fn() }
         const progress = new Progress({
             stateManager,
-            searchIndex: null,
+            pages: null,
             tagsModule: {} as any,
             customListsModule: {} as any,
+            bookmarks: {} as any,
             observer,
             concurrency,
             Processor,
@@ -113,9 +115,10 @@ const runSuite = (DATA: TestData, skip = false) => () => {
         const observer = { complete: jest.fn(), next: jest.fn() }
         const progress = new Progress({
             stateManager,
-            searchIndex: null,
+            pages: null,
             tagsModule: {} as any,
             customListsModule: {} as any,
+            bookmarks: {} as any,
             observer,
             concurrency,
             Processor,

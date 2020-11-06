@@ -2,7 +2,6 @@ import React from 'react'
 const mapValues = require('lodash/mapValues')
 import { redirectToGDriveLogin } from 'src/backup-restore/ui/utils'
 import { Analytics } from 'src/analytics/types'
-import { OPTIONS_URL } from 'src/constants'
 
 export async function getInitialState({
     analytics,
@@ -387,7 +386,7 @@ export const getScreenHandlers = ({
     onRedirect: (redirect: any) => void
 }) =>
     mapValues(screenConfig.events, (eventConfig, eventName) => {
-        return async event => {
+        return async (event) => {
             const handlerEvent = { type: eventName }
             if (eventConfig.argument) {
                 handlerEvent[eventConfig.argument] = event

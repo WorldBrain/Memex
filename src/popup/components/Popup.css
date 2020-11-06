@@ -6,7 +6,6 @@ body {
     padding: 8px;
     width: 280px;
     font-size: 12px;
-    font-weight: 600;
     background: #fff !important; /* stylelint-disable-line declaration-no-important */
     color: color4;
 
@@ -58,6 +57,7 @@ hr {
     padding: 2px 10px 2px 10px;
     border-radius: 3px;
     margin: 5px 5px 5px 5px;
+    width: 100%;
 }
 
 .search {
@@ -76,6 +76,26 @@ hr {
 
 .buttonContainer {
     display: flex;
-    justify-content: flex-end;
-    padding: 0 7px 0px 0;
+    justify-content: space-between;
+    padding: 0 0 10px 10px;
+    align-items: center;
+}
+
+.buttonBox {
+    display: flex;
+}
+
+.feedbackButton {
+    font-size: 10px;
+    cursor: pointer;
+    width: 84px;
+    height: 24px;
+    border: none;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    border-radius: 5px;
+    background-color: #5cd9a6;
+    text-decoration: none;
+    color: #3a2f45;
 }

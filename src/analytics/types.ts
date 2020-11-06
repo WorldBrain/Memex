@@ -11,7 +11,10 @@ export interface AnalyticsEvent<
     action: AnalyticsEvents[Category] // ('Add Entry', etc.).
     category: Category // ('Search', 'Blacklist', etc.).
     name?: string // (user input - other custom info)
-    value?: any
+    segmentation?: {}
+    duration?: number
+    // @depreciated no longer works in Countly
+    value?: {}
 }
 
 export interface AnalyticsTrackEventOptions {
@@ -20,8 +23,25 @@ export interface AnalyticsTrackEventOptions {
 
 export interface AnalyticsEvents {
     ActivityPings: 'daily' | 'weekly' | 'monthly'
-    Annotations: 'createWithTags' | 'createWithoutTags'
-    Bookmarks: 'createForPage' | 'deleteForPage'
+    Annotations:
+        | 'saveWithTags'
+        | 'saveWithoutTags'
+        | 'create'
+        | 'createFromTooltip'
+        | 'createFromShortcut'
+        | 'createFromContextMenu'
+        | 'createAnnotationGlobally'
+    Highlights:
+        | 'create'
+        | 'createFromTooltip'
+        | 'createFromShortcut'
+        | 'createFromContextMenu'
+        | 'createHighlightGlobally'
+    Notes: 'createNoteGlobally'
+    Bookmarks:
+        | 'createBookmarkForPage'
+        | 'deleteForPage'
+        | 'createBookmarkViaPopup'
     Pages:
         | 'deleteViaRegexBlacklist'
         | 'deleteViaSiteBlacklist'
@@ -32,6 +52,7 @@ export interface AnalyticsEvents {
         | 'visitExternalLink'
         | 'openPopup'
     Tags:
+        | 'createTagForPage'
         | 'createForPageViaPopup'
         | 'createForPageViaRibbon'
         | 'createForPageViaOverview'
@@ -43,7 +64,19 @@ export interface AnalyticsEvents {
         | 'failInitSync'
         | 'clickPairNewDevice'
         | 'generateQRPairingCode'
-    Collections: 'create' | 'addPageViaPopup' | 'addPageViaDragAndDrop'
+    Collections:
+        | 'addPageToList'
+        | 'create'
+        | 'addPageViaPopup'
+        | 'addPageViaDragAndDrop'
+    ContentSharing:
+        | 'shareList'
+        | 'shareListEntryBatch'
+        | 'unshareListEntry'
+        | 'shareAnnotation'
+        | 'CopyNoteLink'
+        | 'CopyPageLink'
+        | 'CopyCollectionLink'
     InPageTooltip:
         | 'highlightText'
         | 'annotateText'
@@ -83,6 +116,7 @@ export interface AnalyticsEvents {
         | 'changeIndexingSetting'
         | 'enableKeyboardShortcuts'
         | 'disableKeyboardShortcuts'
+    Readwise: 'setupReadwise' | 'removeReadwise'
 }
 
 export interface AnalyticsEventInfo {

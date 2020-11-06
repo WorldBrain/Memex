@@ -16,7 +16,7 @@ import ButtonBar from './components/ButtonBar'
 import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
 import StatusReport from './components/StatusReport'
-// import ShowDownloadDetails from './components/ShowDownloadDetails'
+import ShowDownloadDetails from './components/ShowDownloadDetails'
 import { acts as searchBarActs } from 'src/overview/search-bar'
 import styles from './components/ActionButton.css'
 import { OPTIONS_URL } from 'src/constants'
@@ -46,8 +46,8 @@ class ImportContainer extends Component {
         super(props)
         props.boundActions.init()
 
-        this.flipCancelState = waitingOnCancelConfirm =>
-            this.setState(state => ({ ...state, waitingOnCancelConfirm }))
+        this.flipCancelState = (waitingOnCancelConfirm) =>
+            this.setState((state) => ({ ...state, waitingOnCancelConfirm }))
     }
 
     state = {
@@ -64,23 +64,23 @@ class ImportContainer extends Component {
         this.props.search()
     }
 
-    setCancelState = waitingOnCancelConfirm =>
-        this.setState(state => ({ ...state, waitingOnCancelConfirm }))
+    setCancelState = (waitingOnCancelConfirm) =>
+        this.setState((state) => ({ ...state, waitingOnCancelConfirm }))
 
-    handleDetailsRowClick = rowId => () =>
-        this.setState(state => ({
+    handleDetailsRowClick = (rowId) => () =>
+        this.setState((state) => ({
             ...state,
             activeRow: rowId,
             waitingOnCancelConfirm: false,
         }))
 
-    handleBtnClick = action => e => {
+    handleBtnClick = (action) => (e) => {
         e.preventDefault()
         this.setCancelState(false)
         action()
     }
 
-    handleCancelBtnClick = e => {
+    handleCancelBtnClick = (e) => {
         e.preventDefault()
 
         // Only cancel running import after second confirmation
@@ -92,15 +92,15 @@ class ImportContainer extends Component {
         }
     }
 
-    handleEstTableCheck = type => () =>
+    handleEstTableCheck = (type) => () =>
         this.props.boundActions.toggleAllowType(type)
 
-    setAllowType = type => () => this.props.boundActions.setAllowType(type)
+    setAllowType = (type) => () => this.props.boundActions.setAllowType(type)
 
     renderHelpText = () =>
         this.state.waitingOnCancelConfirm ? 'Press cancel again to confirm' : ''
 
-    handleInputFile = event => {
+    handleInputFile = (event) => {
         const input = event.target
         if (!input.files[0]) {
             return
@@ -229,7 +229,7 @@ class ImportContainer extends Component {
     }
 
     onDetailsRowClick(rowId) {
-        this.setState(state => ({
+        this.setState((state) => ({
             ...state,
             activeRow: rowId,
             waitingOnCancelConfirm: false,
@@ -239,20 +239,20 @@ class ImportContainer extends Component {
     getDetailFilterHandlers() {
         const { boundActions } = this.props
 
-        const updateFilterState = filter => () => {
+        const updateFilterState = (filter) => () => {
             this.onDetailsRowClick(-1) // Simulate anti-click to reset state of active details row
             boundActions.filterDownloadDetails(filter)
         }
 
         return {
-            all: e =>
+            all: (e) =>
                 this.onButtonClick(e, updateFilterState(constants.FILTERS.ALL)),
-            succ: e =>
+            succ: (e) =>
                 this.onButtonClick(
                     e,
                     updateFilterState(constants.FILTERS.SUCC),
                 ),
-            fail: e =>
+            fail: (e) =>
                 this.onButtonClick(
                     e,
                     updateFilterState(constants.FILTERS.FAIL),
@@ -264,10 +264,10 @@ class ImportContainer extends Component {
         <React.Fragment>
             <ProgressBar progress={this.props.progressPercent} />
             <ProgressTable {...this.props} />
-            {/* <ShowDownloadDetails
+            <ShowDownloadDetails
                 changeShowDetails={this.props.boundActions.showDownloadDetails}
                 showDownloadDetails={this.props.showDownloadDetails}
-            /> */}
+            />
             {this.props.showDownloadDetails && (
                 <DownloadDetails
                     filterHandlers={this.getDetailFilterHandlers()}
@@ -285,9 +285,9 @@ class ImportContainer extends Component {
                 {...this.props}
                 changeShowDetails={this.props.boundActions.showDownloadDetails}
             >
-                {/* {this.props.showDownloadDetails
-                    ? 'Hide Details'
-                    : 'Show Details'} */}
+                {this.props.showDownloadDetails
+                    ? 'Hide Error Details'
+                    : 'Show Error Details'}
             </StatusReport>
             {this.props.showDownloadDetails && (
                 <DownloadDetails
@@ -344,7 +344,7 @@ class ImportContainer extends Component {
     }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     isRunning: selectors.isRunning(state),
     isPaused: selectors.isPaused(state),
     isStopped: selectors.isStopped(state),
@@ -365,7 +365,7 @@ const mapStateToProps = state => ({
     downloadDataFilter: selectors.downloadDataFilter(state),
 })
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
     boundActions: bindActionCreators(actions, dispatch),
     recalcEsts: () => dispatch(actions.recalcEsts()),
     search: () => dispatch(searchBarActs.search({ overwrite: true })),

@@ -5,7 +5,6 @@ import {
     ModalColRight,
 } from 'src/common-ui/components/design-library/ModalBox'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import {
     TypographyBodyBlock,
     TypographyHeadingPage,
@@ -27,7 +26,7 @@ export const Introduction = ({
             actions={[
                 <PrimaryAction
                     key={`step1-ok`}
-                    label={'Ok, Got it'}
+                    label={'Ok, got it'}
                     onClick={handleStart}
                 />,
             ]}
@@ -36,12 +35,23 @@ export const Introduction = ({
             <ModalColLeft>
                 <TypographyHeadingPage>STEP 1</TypographyHeadingPage>
                 <TypographyBodyBlock>
-                    Download Memex Go app and then make
-                    sure the devices you want to pair are on the same wifi
-                    connection.
+                    Download Memex Go app and then make sure the devices you
+                    want to pair are on the same wifi connection.
                 </TypographyBodyBlock>
                 <TypographyBodyBlock>
-                    You can download Memex Go for <ExternalLink label={'Android'} href={'https://play.google.com/store/apps/details?id=io.worldbrain'}/> and <ExternalLink label={'iOS'} href={'https://apps.apple.com/app/id1471860331'}/>.
+                    You can download Memex Go for{' '}
+                    <ExternalLink
+                        label={'Android'}
+                        href={
+                            'https://play.google.com/store/apps/details?id=io.worldbrain'
+                        }
+                    />{' '}
+                    and{' '}
+                    <ExternalLink
+                        label={'iOS'}
+                        href={'https://apps.apple.com/app/id1471860331'}
+                    />
+                    .
                 </TypographyBodyBlock>
             </ModalColLeft>
             <ModalColRight>

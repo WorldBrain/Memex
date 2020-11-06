@@ -18,16 +18,15 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                         />
                         <div className={Styles.textBlock}>
                             <div className={Styles.providerTitle}>
-                                Any cloud provider via local hard drive
+                                To your local hard drive
                             </div>
                             <p className={settingsStyle.infoText}>
-                                Use cloud providers that have a syncing folder
-                                on your computer (e.g. Dropbox, Spideroak,
-                                GDrive){' '}
+                                Also use any cloud provider with sync folders
+                                (e.g. Dropbox, Spideroak, GDrive){' '}
                                 <a
                                     className={Styles.link}
                                     target="_blank"
-                                    href="https://www.notion.so/worldbrain/7dacad9e95b44c5db681033fc264fb59"
+                                    href="https://worldbrain.io/tutorials/backups"
                                 >
                                     Learn More ▸
                                 </a>
@@ -35,7 +34,7 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                             {backupPath !== null ? (
                                 <button
                                     className={Styles.destination}
-                                    onClick={e => {
+                                    onClick={(e) => {
                                         e.preventDefault()
                                         handleChangeBackupPath()
                                     }}
@@ -77,14 +76,15 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                                 </span>
                             </div>
                             <p className={settingsStyle.infoText}>
-                                Make sure you are trying to backup your data to
-                                the same Google Account as the one logged into
-                                your browser profile.
+                                Use the same Google Account as the one logged
+                                into your browser profile. (creates a hidden
+                                folder)
                                 <a
                                     className={Styles.link}
                                     target="_blank"
-                                    href="https://www.notion.so/worldbrain/7dacad9e95b44c5db681033fc264fb59"
+                                    href="https://worldbrain.io/tutorials/backups"
                                 >
+                                    {' '}
                                     Learn More ▸
                                 </a>
                             </p>

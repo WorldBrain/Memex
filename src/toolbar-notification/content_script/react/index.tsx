@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import retargetEvents from 'react-shadow-dom-retarget-events'
+// import retargetEvents from 'react-shadow-dom-retarget-events'
 import ToolbarNotification from './container'
 
 export function setupUIContainer(
@@ -17,8 +17,8 @@ export function setupUIContainer(
         extraProps: any
     },
 ) {
-    retargetEvents(shadow)
-    return new Promise(async resolve => {
+    // retargetEvents(shadow)
+    return new Promise(async (resolve) => {
         ReactDOM.render(
             <ToolbarNotification
                 type={type}

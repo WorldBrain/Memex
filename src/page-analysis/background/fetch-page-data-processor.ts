@@ -8,12 +8,14 @@ export class FetchPageDataProcessor implements FetchPageProcessor {
         private props: {
             fetchPageData: FetchPageData
             pagePipeline: PagePipeline
+            domParser?: (html: string) => Document
         },
     ) {}
 
     async process(url: string): Promise<PageContent> {
         const fetch = this.props.fetchPageData({
             url,
+            domParser: this.props.domParser,
             opts: { includePageContent: true, includeFavIcon: true },
         })
 

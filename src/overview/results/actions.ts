@@ -10,11 +10,20 @@ import { selectors as searchBar, acts as searchBarActs } from '../search-bar'
 import { selectors as filters } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { bookmarks, notifications } from 'src/util/remote-functions-background'
+import {
+    auth,
+    bookmarks,
+    collections,
+    notifications,
+    contentSharing,
+} from 'src/util/remote-functions-background'
+import * as modalActions from 'src/overview/modals/actions'
 
 const processEventRPC = remoteFunction('processEvent')
 const createSocialBookmarkRPC = remoteFunction('addSocialBookmark')
 const deleteSocialBookmarkRPC = remoteFunction('delSocialBookmark')
+
+export const setBetaFeatures = createAction<boolean>('beta/setBeta')
 
 export const addTag = createAction('results/localAddTag', (tag, index) => ({
     tag,
@@ -23,6 +32,16 @@ export const addTag = createAction('results/localAddTag', (tag, index) => ({
 
 export const delTag = createAction('results/localDelTag', (tag, index) => ({
     tag,
+    index,
+}))
+
+export const addList = createAction('results/localAddList', (list, index) => ({
+    list,
+    index,
+}))
+
+export const delList = createAction('results/localDelList', (list, index) => ({
+    list,
     index,
 }))
 
@@ -48,6 +67,10 @@ export const setAreAnnotationsExpanded = createAction<boolean>(
 export const toggleAreAnnotationsExpanded = createAction(
     'results/toggleAreAnnotationsExpanded',
 )
+export const resetActiveListIndex = createAction('results/resetActiveListIndex')
+export const setActiveListIndex = createAction<number>(
+    'results/setActiveListIndex',
+)
 export const resetActiveTagIndex = createAction('results/resetActiveTagIndex')
 export const setActiveTagIndex = createAction<number>(
     'results/setActiveTagIndex',
@@ -58,6 +81,12 @@ export const resetActiveSidebarIndex = createAction(
 export const setActiveSidebarIndex = createAction<number>(
     'results/setActiveSidebarIndex',
 )
+export const resetActiveCopyPasterIndex = createAction(
+    'results/resetActiveCopyPasterIndex',
+)
+export const setActiveCopyPasterIndex = createAction<number>(
+    'results/setActiveCopyPasterIndex',
+)
 export const nextPage = createAction('results/nextPage')
 export const resetPage = createAction('results/resetPage')
 export const setSearchType = createAction<'page' | 'notes' | 'social'>(
@@ -65,6 +94,35 @@ export const setSearchType = createAction<'page' | 'notes' | 'social'>(
 )
 export const initSearchCount = createAction('overview/initSearchCount')
 export const incSearchCount = createAction('overview/incSearchCount')
+
+export const updateListName = createAction<[string, string]>(
+    'overview/updateListName',
+)
+
+export const toggleResultCopyPaster = createAction(
+    'overview/toggleResultCopyPaster',
+)
+export const setResultCopyPasterShown = createAction<boolean>(
+    'overview/setResultCopyPasterShown',
+)
+
+export const clickShareList: () => Thunk = () => async (dispatch, getState) => {
+    const listId = filters.listIdFilter(getState())
+    const list = await collections.fetchListById({ id: +listId })
+
+    dispatch(
+        modalActions.show({
+            modalId: 'ShareListModal',
+            options: {
+                list,
+                auth,
+                contentSharing,
+                isPioneer: true,
+                isShown: true,
+            },
+        }),
+    )
+}
 
 export const toggleBookmark: (args: {
     url: string
@@ -74,11 +132,6 @@ export const toggleBookmark: (args: {
     const results = selectors.results(getState())
     const { hasBookmark, user } = results[index]
     dispatch(changeHasBookmark(index))
-
-    analytics.trackEvent({
-        category: 'Bookmarks',
-        action: hasBookmark ? 'deleteForPage' : 'createForPage',
-    })
 
     processEventRPC({
         type: hasBookmark
@@ -145,7 +198,7 @@ export const easter: () => Thunk = () => (dispatch) =>
         }),
     )
 
-export const showTags: (i: number) => Thunk = (index) => (
+export const toggleShowTagsPicker: (i: number) => Thunk = (index) => (
     dispatch,
     getState,
 ) => {
@@ -154,7 +207,42 @@ export const showTags: (i: number) => Thunk = (index) => (
     if (activeTagIndex === index) {
         dispatch(resetActiveTagIndex())
     } else {
+        dispatch(resetActiveListIndex())
+        dispatch(resetActiveCopyPasterIndex())
+
         dispatch(setActiveTagIndex(index))
+    }
+}
+
+export const toggleShowListsPicker: (i: number) => Thunk = (index) => (
+    dispatch,
+    getState,
+) => {
+    const activeListIndex = selectors.activeListIndex(getState())
+
+    if (activeListIndex === index) {
+        dispatch(resetActiveListIndex())
+    } else {
+        dispatch(resetActiveTagIndex())
+        dispatch(resetActiveCopyPasterIndex())
+
+        dispatch(setActiveListIndex(index))
+    }
+}
+
+export const toggleShowCopyPaster: (i: number) => Thunk = (index) => (
+    dispatch,
+    getState,
+) => {
+    const activeCopyPasterIndex = selectors.activeCopyPasterIndex(getState())
+
+    if (activeCopyPasterIndex === index) {
+        dispatch(resetActiveCopyPasterIndex())
+    } else {
+        dispatch(resetActiveTagIndex())
+        dispatch(resetActiveListIndex())
+
+        dispatch(setActiveCopyPasterIndex(index))
     }
 }
 

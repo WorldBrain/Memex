@@ -20,10 +20,10 @@ export async function initSearchInjection() {
     if (matched && searchInjection[matched]) {
         try {
             const query = utils.fetchQuery(url)
-            const searchRes = await requestSearch({ query, limit: 5 })
+            const searchRes = await requestSearch({ query, limit: 21 })
 
             if (searchRes.docs.length || searchRes.requiresMigration) {
-                handleRender(searchRes, matched)
+                await handleRender(searchRes, matched)
             }
         } catch (err) {
             // Let it fail

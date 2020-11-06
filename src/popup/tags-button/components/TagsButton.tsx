@@ -2,12 +2,13 @@ import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
 import Button from '../../components/Button'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { ClickHandler, RootState } from '../../types'
 import * as acts from '../actions'
 import * as popup from '../../selectors'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 
 const styles = require('./TagsButton.css')
+const buttonStyles = require('../../components/Button.css')
 
 export interface OwnProps {}
 
@@ -23,6 +24,27 @@ interface DispatchProps {
 export type Props = OwnProps & StateProps & DispatchProps
 
 class TagsButton extends PureComponent<Props> {
+    async componentDidMount() {
+        await this.getKeyboardShortcutText()
+    }
+
+    state = {
+        highlightInfo: undefined,
+    }
+
+    private async getKeyboardShortcutText() {
+        const { shortcutsEnabled, addTag } = await getKeyboardShortcutsState()
+
+        if (!shortcutsEnabled || !addTag.enabled) {
+            this.setState({
+                highlightInfo: `${addTag.shortcut} (disabled)`,
+            })
+        } else
+            this.setState({
+                highlightInfo: `${addTag.shortcut}`,
+            })
+    }
+
     render() {
         return (
             <div className={styles.buttonContainer}>
@@ -33,34 +55,26 @@ class TagsButton extends PureComponent<Props> {
                     itemClass={styles.button}
                 >
                     Add Tag(s)
+                    <p className={buttonStyles.subTitle}>
+                        {this.state.highlightInfo}
+                    </p>
                 </Button>
-                <ButtonTooltip
-                    tooltipText="Tag all tabs in window"
-                    position="popupLeft"
-                >
-                    <Button
-                        onClick={this.props.toggleAllTabsPopup}
-                        disabled={this.props.isDisabled}
-                        btnClass={styles.allTabs}
-                        itemClass={styles.buttonBulk}
-                    />
-                </ButtonTooltip>
             </div>
         )
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     isDisabled: !popup.isLoggable(state),
 })
 
 const mapDispatch = (dispatch): DispatchProps => ({
-    toggleTagPopup: event => {
+    toggleTagPopup: (event) => {
         event.preventDefault()
         dispatch(acts.setAllTabs(false))
         dispatch(acts.toggleShowTagsPicker())
     },
-    toggleAllTabsPopup: event => {
+    toggleAllTabsPopup: (event) => {
         event.preventDefault()
         dispatch(acts.setAllTabs(true))
         dispatch(acts.toggleShowTagsPicker())

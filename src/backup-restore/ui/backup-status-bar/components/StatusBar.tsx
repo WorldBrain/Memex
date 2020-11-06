@@ -1,5 +1,4 @@
 import React from 'react'
-import ActionButton from '../../../../notifications/components/ActionButton'
 import classNames from 'classnames'
 import { BackupUIState } from 'src/backup-restore/ui/backup-status-bar/BackupStatusBarContainer'
 import StatusOverlay from 'src/backup-restore/ui/backup-status-bar/components/StatusOverlay'
@@ -20,7 +19,11 @@ interface Props {
     paymentUrl: string
 }
 
-const StatusBar = (props: Props) => {
+interface State {
+    syncError: any
+}
+
+const StatusBar = (props: Props, state: State) => {
     const backupProps = {
         isAutomaticBackupAllowed: props.isAutomaticBackupAllowed,
         isAutomaticBackupEnabled: props.isAutomaticBackupEnabled,
@@ -31,28 +34,25 @@ const StatusBar = (props: Props) => {
         lastBackup: props.backupTimes.lastBackup as BackupTimes['lastBackup'],
         nextBackup: props.backupTimes.nextBackup as BackupTimes['nextBackup'],
     }
-
     return (
         <div className={styles.TopContainer}>
-            <div
-                className={styles.container}
-                onMouseEnter={props.onMouseEnter}
-                onMouseLeave={props.onMouseLeave}
-            >
-                <div className={styles.headerBox}>
+            <div className={styles.container} onMouseLeave={props.onMouseLeave}>
+                <div className={styles.headerBox} onClick={props.onMouseEnter}>
                     <div className={styles.header}>Sync Status</div>
                     <div className={styles.IconBox}>
-                        {props.backupUIState.state === 'success' ? (
+                        {(props.backupUIState.state === 'fail' &&
+                            props.isAutomaticBackupEnabled) ||
+                        state.syncError ? (
                             <span
                                 className={classNames(
-                                    styles.successIcon,
+                                    styles.failIcon,
                                     styles.icon,
                                 )}
                             />
                         ) : (
                             <span
                                 className={classNames(
-                                    styles.failIcon,
+                                    styles.syncIcon,
                                     styles.icon,
                                 )}
                             />
@@ -60,7 +60,7 @@ const StatusBar = (props: Props) => {
                     </div>
                 </div>
                 <div className={styles.backupOverlay}>
-                    {props.hover && props.backupTimes && (
+                    {props.hover && (
                         <div>
                             {props.backupUIState.state === 'success' && (
                                 <StatusOverlay

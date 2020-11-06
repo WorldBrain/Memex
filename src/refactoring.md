@@ -221,7 +221,6 @@ makeRemotelyCallable(
     fetchAllLists,
     fetchListById,
     fetchListPagesByUrl,
-    fetchListNameSuggestions,
     fetchListPagesById,
     fetchListIgnoreCase,
     addOpenTabsToList,

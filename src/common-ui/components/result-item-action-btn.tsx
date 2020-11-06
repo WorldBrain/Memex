@@ -7,6 +7,7 @@ const styles = require('./result-item.css')
 
 export interface Props {
     tooltipText: string
+    tooltipPosition?: string
     onClick: MouseEventHandler
     imgSrc: string
     className?: string
@@ -14,18 +15,21 @@ export interface Props {
     permanent?: boolean
 }
 
-const ResultItemActionBtn: React.SFC<Props> = props => (
-    <ButtonTooltip position="bottom" tooltipText={props.tooltipText}>
-        <div
+const ResultItemActionBtn: React.SFC<Props> = (props) => (
+    <ButtonTooltip
+        position={props.tooltipPosition || 'bottom'}
+        tooltipText={props.tooltipText}
+    >
+        <button
             className={props.permanent ? styles.permanentButton : styles.button}
+            onClick={props.onClick}
+            ref={props.refHandler}
         >
             <img
-                ref={props.refHandler}
                 src={props.imgSrc}
-                onClick={props.onClick}
                 className={cx(styles.img, props.className)}
             />
-        </div>
+        </button>
     </ButtonTooltip>
 )
 

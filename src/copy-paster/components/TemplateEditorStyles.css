@@ -1,0 +1,14 @@
+.titleInput {
+    composes: TextArea from 'src/common-ui/elements.css';
+
+    width: 100%;
+    margin: 0;
+    margin-bottom: 8px;
+}
+
+.textArea {
+    composes: TextArea from 'src/common-ui/elements.css';
+
+    width: 100%;
+    margin: 0;
+}

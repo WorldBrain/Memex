@@ -12,6 +12,9 @@
 .button {
     flex: 7;
     text-align: left;
+    display: inline-block;
+    padding: 10px 20px;
+    height: 100%;
 }
 
 .buttonBulk {
@@ -21,7 +24,8 @@
 .buttonContainer {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    margin-top: 5px;
 }
 
 .allTabs {

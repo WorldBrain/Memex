@@ -5,7 +5,6 @@ import React from 'react'
 import { PairDeviceScreen } from 'src/sync/components/initial-sync/initial-sync-setup/steps/PairDeviceScreen'
 import { SyncDeviceScreen } from 'src/sync/components/initial-sync/initial-sync-setup/steps/SyncDeviceScreen'
 import InitialSyncSetup from 'src/sync/components/initial-sync/initial-sync-setup'
-import _ from 'lodash'
 import TypedEventEmitter from 'typed-emitter'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 import {
@@ -17,7 +16,7 @@ import { Introduction } from 'src/sync/components/initial-sync/initial-sync-setu
 import { EventEmitter } from 'events'
 import Modal from 'src/common-ui/components/Modal'
 
-const devices = [
+let devices = [
     {
         deviceId: '123',
         productType: "Tom's Iphone",
@@ -29,6 +28,10 @@ const devices = [
         createdWhen: new Date(),
     },
 ] as SyncDevice[]
+
+const removeAllDevices = async () => {
+    devices = []
+}
 
 storiesOf('Sync', module)
     .add('DevicePane - Subscribed', () => (
@@ -43,6 +46,8 @@ storiesOf('Sync', module)
             refreshDevices={async () => {}}
             handleUpgradeNeeded={() => {}}
             abortInitialSync={async () => {}}
+            subscriptionStatus={this.props.subscriptionStatus}
+            removeAllDevices={removeAllDevices}
         />
     ))
     .add('DevicePane - Not Subscribed', () => (
@@ -57,6 +62,8 @@ storiesOf('Sync', module)
             refreshDevices={async () => {}}
             handleUpgradeNeeded={() => {}}
             abortInitialSync={async () => {}}
+            subscriptionStatus={this.props.subscriptionStatus}
+            removeAllDevices={removeAllDevices}
         />
     ))
     .add('Initial Sync - Modal', () => (
@@ -64,26 +71,27 @@ storiesOf('Sync', module)
             <InitialSyncSetup
                 open={true}
                 getInitialSyncMessage={() =>
-                    new Promise(r => setTimeout(r, 1000, 'hello '.repeat(5)))
+                    new Promise((r) => setTimeout(r, 1000, 'hello '.repeat(5)))
                 }
                 waitForInitialSyncConnected={() =>
-                    new Promise(r => setTimeout(r, 3000, 1))
+                    new Promise((r) => setTimeout(r, 3000, 1))
                 }
                 waitForInitialSync={() =>
-                    new Promise(r =>
+                    new Promise((r) =>
                         setTimeout(r, 500 * progressStoryData.length, 1),
                     )
                 }
                 abortInitialSync={async () => {}}
+                removeAllDevices={removeAllDevices}
                 getSyncEventEmitter={() => {
                     const eventEmitter = new EventEmitter() as TypedEventEmitter<
                         InitialSyncEvents
                     >
 
                     const testEventSender = async () => {
-                        await new Promise(r => setTimeout(r, 3000 + 100, 1))
+                        await new Promise((r) => setTimeout(r, 3000 + 100, 1))
                         for (const e of progressStoryData) {
-                            await new Promise(r =>
+                            await new Promise((r) =>
                                 setTimeout(
                                     r,
                                     500,
@@ -115,8 +123,12 @@ storiesOf('Sync', module)
     ))
     .add('Initial Sync - Sync Device', () => (
         <div>
-            <SyncDeviceScreen stage={'1/2'} />
-            <SyncDeviceScreen stage={'1/2'} progressPct={0.5} />
+            <SyncDeviceScreen onClose={() => false} stage={'1/2'} />
+            <SyncDeviceScreen
+                onClose={() => false}
+                stage={'1/2'}
+                progressPct={0.5}
+            />
         </div>
     ))
 
@@ -126,6 +138,7 @@ storiesOf('Sync', module)
                 stage={'1/2'}
                 progressPct={0.5}
                 error={'An error with the flux capacitor occurred.'}
+                onClose={() => false}
             />
         </div>
     ))

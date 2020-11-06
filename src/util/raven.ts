@@ -10,7 +10,7 @@ const raven = AllRaven['default']
 let sentryEnabled = false
 
 // Init the enabled state based on stored flag
-browser.storage.local // tslint:disable-line
+browser.storage.local
     .get(SHOULD_TRACK)
     .then((storage) => (sentryEnabled = !!storage[SHOULD_TRACK]))
 
@@ -53,6 +53,7 @@ export default function initSentry({
 }
 
 export const context = (cb: () => Promise<void> | void) => raven.context(cb)
-export const captureException = (error: Error) => raven.captureException(error)
+export const captureException = (error: Error | ErrorEvent | string) =>
+    raven.captureException(error)
 export const captureBreadcrumb = (details: any) =>
     raven.captureBreadcrumb(details)

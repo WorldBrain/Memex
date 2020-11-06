@@ -27,17 +27,17 @@
 
 .tagPill {
     composes: lightBlueBackground from './colors.css';
-    padding: 2px 9px;
-    border-radius: 3px;
+    padding: 2px 8px;
+    border-radius: 4px;
     font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
+    font-weight: 400;
     height: auto;
-    color: #3a2f45;
-    margin: 2px 3px 2px 0;
+    color: #284150;
+    margin: 2px 4px 2px 0;
     display: flex;
     align-items: center;
     white-space: nowrap;
+    font-family: 'Poppins', sans-serif;
 }
 
 .tagPillSuggestions {
@@ -57,6 +57,7 @@
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
     background: white;
     overflow: hidden;
+    overflow-y: scroll;
 }
 
 .miniTooltip {

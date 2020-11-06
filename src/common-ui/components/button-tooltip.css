@@ -1,12 +1,15 @@
 @import url('/fonts/Poppins/poppins.css');
 
+@value colors: '../../common-ui/colors.css';
+@value grey9 from colors;
+
 .tooltipTrigger {
     display: inline-flex;
 }
 
 .tooltipBubble {
     position: absolute;
-    height: 20px;
+    height: 18px;
     border-radius: 5px;
     display: flex;
     flex-wrap: nowrap;
@@ -16,7 +19,19 @@
 }
 
 .tooltipTop {
-    transform: translateY(-28px);
+    transform: translateY(-40px);
+    justify-content: center;
+    align-items: center;
+    z-index: 250000;
+
+    &.tooltipBubble {
+        align-items: center;
+        justify-content: center;
+    }
+
+    &.tooltipContainer {
+        align-items: center;
+    }
 }
 
 .tooltipRight {
@@ -46,23 +61,33 @@
     }
 }
 
+.tooltipBottomRightEdge {
+    transform: translate(-60px, 30px);
+    justify-content: center;
+    align-items: flex-start;
+
+    z-index: 250000;
+
+    &.tooltipBubble {
+        align-items: flex-start;
+    }
+}
+
 .popupLeft {
     justify-content: flex-end;
     right: 50px;
     align-items: center;
-    top: 9px;
 }
 
 .tooltipLeft {
     justify-content: flex-end;
-    right: 30px;
+    right: 40px;
     align-items: center;
-    top: 3px;
 }
 
 .tooltipLeftBig {
     justify-content: flex-end;
-    right: 50px;
+    right: 60px;
 
     & .toolTipBubble {
         flex-wrap: wrap;
@@ -76,7 +101,7 @@
 }
 
 .tooltipMessage {
-    composes: h2ColorBackground from '../colors.css';
+    background: grey9;
     border-radius: 3px;
     color: white;
     font-size: 11px;
@@ -92,12 +117,15 @@
 .tooltipContainer {
     position: relative;
     display: inline-flex;
+    align-items: center;
     z-index: 2;
 }
 
 .tooltipContainerBottom {
     justify-content: center;
     align-items: center;
+    height: 100%;
+    width: auto;
 }
 
 .tooltipContainerCenterCenter {

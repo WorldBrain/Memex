@@ -8,9 +8,11 @@
     max-width: 800px;
     width: 100%;
     align-items: center;
-    padding-top: 60px;
-    padding-bottom: 5px;
+    padding: 0 0 5px 5px;
     border-bottom: 1px solid color14;
+    margin-top: 5px;
+    z-index: 2;
+    background: white;
 }
 
 .unfoldAllBtn {
@@ -26,15 +28,21 @@
     display: flex;
 }
 
+.btnsContainer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
 /* Nice if we move this type of stuff somewhere for easier re-use, like colors, fonts, etc. */
 .btn {
     composes: nakedButton from 'src/common-ui/elements.css';
     color: color3;
-    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     outline: none;
     margin-right: 5px;
+    padding: 2px 8px 2px 8px;
     display: flex;
     border: none;
     align-items: center;
@@ -69,5 +77,29 @@
 }
 
 .filterBarActive {
-    padding-top: 100px;
+    margin-top: 44px;
+}
+
+.searchActionBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-left: 10px;
+
+    &:hover {
+        background: #e0e0e0;
+    }
+}
+
+.searchActionBtnImg {
+    width: 100%;
+    height: 100%;
 }

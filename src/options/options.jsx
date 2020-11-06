@@ -8,21 +8,26 @@ import configureStore from './store'
 import Router from './router'
 import routes from './routes'
 import { ModalsContainer } from '../overview/modals/components/ModalsContainer'
+import { AuthContextProvider } from 'src/authentication/components/AuthContextProvider'
 
 // Include development tools if we are not building for production
-const ReduxDevTools =
-    process.env.NODE_ENV !== 'production'
-        ? require('src/dev/redux-devtools-component').default
-        : undefined
+const ReduxDevTools = undefined
+// process.env.NODE_ENV !== 'production'
+//     ? require('src/dev/redux-devtools-component').default
+//     : undefined
 
 const store = configureStore({ ReduxDevTools })
+
+window.store = store
 
 ReactDOM.render(
     <Provider store={store}>
         <ErrorBoundary component={RuntimeError}>
-            <Router routes={routes} />
-            {ReduxDevTools && <ReduxDevTools />}
-            <ModalsContainer />
+            <AuthContextProvider>
+                <Router routes={routes} />
+                {ReduxDevTools && <ReduxDevTools />}
+                <ModalsContainer />
+            </AuthContextProvider>
         </ErrorBoundary>
     </Provider>,
     document.getElementById('app'),

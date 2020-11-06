@@ -10,14 +10,17 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 
 const StyledSecondaryAction = styled.div`
-    padding: 6px 18px;
+    padding: 8px 20px;
     border: 1px solid ${colorMidPurple};
     box-sizing: border-box;
     border-radius: 5px;
     cursor: pointer;
-    display: inline-block;
+    display: flex;
+    height: 35px;
     white-space: nowrap;
     vertical-align: middle;
+    align-items: center;
+    justify-content: center;
 
     &: hover {
         background-color: ${colorMidPurple};
@@ -41,14 +44,13 @@ export const SecondaryAction = ({
     onClick,
     disabled,
 }: {
-    label: string
+    label: React.ReactNode
     disabled?: boolean
     onClick: () => void
 }) => (
     <StyledSecondaryAction
         onClick={disabled === true ? undefined : onClick}
         disabled={disabled}
-        key={`button-${label}`}
     >
         <StyledSecondaryActionLinkText>{label}</StyledSecondaryActionLinkText>
     </StyledSecondaryAction>

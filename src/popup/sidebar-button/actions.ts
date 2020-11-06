@@ -5,11 +5,11 @@ import { remoteFunction, runInTab } from 'src/util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
-import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
+import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 
 export const setSidebarFlag = createAction<boolean>('tooltip/setSidebarFlag')
 
-export const init: () => Thunk = () => async dispatch => {
+export const init: () => Thunk = () => async (dispatch) => {
     const sidebar = await getSidebarState()
     dispatch(setSidebarFlag(sidebar))
 }
@@ -30,7 +30,7 @@ export const toggleSidebarFlag: () => Thunk = () => async (
     }
 
     const tabId = popup.tabId(state)
-    const ribbon = runInTab<RibbonInteractionsInterface>(tabId)
+    const ribbon = runInTab<InPageUIContentScriptRemoteInterface>(tabId)
 
     if (wasEnabled) {
         await ribbon.removeRibbon()
@@ -46,5 +46,7 @@ export const openSideBar: () => Thunk = () => async (dispatch, getState) => {
         return
     }
 
-    await remoteFunction('toggleSidebarOverlay')({ override: true })
+    const tabId = popup.tabId(state)
+
+    await runInTab<InPageUIContentScriptRemoteInterface>(tabId).showSidebar()
 }

@@ -1,6 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { TypographyHeadingSmall } from 'src/common-ui/components/design-library/typography'
+
 import localStyles from './Import.css'
 
 const StatusReport = ({
@@ -15,24 +17,16 @@ const StatusReport = ({
             <p>{`Succeeded (${successCount})`}</p>
             <p>
                 {`Failed (${failCount})`} (
-                <a
-                    target="_blank"
-                    href="https://worldbrain.helprace.com/i117-why-do-so-many-of-my-imports-fail"
-                >
+                <a target="_blank" href="https://worldbrain.io/import_bug">
                     ?
                 </a>
                 )
             </p>
             <p>{`Total (${successCount + failCount})`}</p>
             {children && (
-                <p>
-                    <a
-                        className={localStyles.showDetails}
-                        onClick={changeShowDetails}
-                    >
-                        {children}
-                    </a>
-                </p>
+                <TypographyHeadingSmall className={localStyles.showDetails}>
+                    <a onClick={changeShowDetails}>{children}</a>
+                </TypographyHeadingSmall>
             )}
         </div>
     </div>

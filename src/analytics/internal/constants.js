@@ -3,6 +3,8 @@ export const API_HOST =
         ? 'https://203bqy2f93.execute-api.eu-central-1.amazonaws.com/production'
         : 'https://a8495szyaa.execute-api.eu-central-1.amazonaws.com/staging'
 
+export const isDev = process.env.NODE_ENV !== 'production'
+
 // This is used to change the event type into integer to optimize the space
 
 /**

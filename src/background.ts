@@ -21,17 +21,18 @@ import {
     setupBackgroundModules,
     registerBackgroundModuleCollections,
 } from './background-script/setup'
-import { createLazySharedSyncLog } from './sync/background/shared-sync-log'
 import { createFirebaseSignalTransport } from './sync/background/signalling'
 import { DevAuthState } from 'src/authentication/background/setup'
-import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { FeatureOptIns } from 'src/feature-opt-in/background/feature-opt-ins'
 import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import pipeline from 'src/search/pipeline'
 import { setStorageMiddleware } from './storage/middleware'
 import { getFirebase } from './util/firebase-app-initialized'
+import setupDataSeeders from 'src/util/tests/seed-data'
+import {
+    createLazyServerStorage,
+    createServerStorageManager,
+} from './storage/server'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -39,7 +40,12 @@ export async function main() {
     })
     initSentry({ storageChangesManager: localStorageChangesManager })
 
-    const getSharedSyncLog = createLazySharedSyncLog()
+    const getServerStorage = createLazyServerStorage(
+        createServerStorageManager,
+        {
+            autoPkType: 'string',
+        },
+    )
     const fetchPageDataProcessor = new FetchPageDataProcessor({
         fetchPageData,
         pagePipeline: pipeline,
@@ -47,13 +53,14 @@ export async function main() {
 
     const storageManager = initStorex()
     const backgroundModules = createBackgroundModules({
+        getServerStorage,
         signalTransportFactory: createFirebaseSignalTransport,
-        includePostSyncProcessor: true,
         analyticsManager: analytics,
         localStorageChangesManager,
         fetchPageDataProcessor,
         browserAPIs: browser,
-        getSharedSyncLog,
+        getSharedSyncLog: async () =>
+            (await getServerStorage()).storageModules.sharedSyncLog,
         storageManager,
         authOptions: {
             devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,
@@ -68,16 +75,23 @@ export async function main() {
         },
     })
     registerBackgroundModuleCollections(storageManager, backgroundModules)
+
     await storageManager.finishInitialization()
 
-    await setStorageMiddleware(storageManager, {
-        syncService: backgroundModules.sync,
-        storexHub: backgroundModules.storexHub,
-    })
+    const { setStorageLoggingEnabled } = await setStorageMiddleware(
+        storageManager,
+        {
+            syncService: backgroundModules.sync,
+            storexHub: backgroundModules.storexHub,
+            contentSharing: backgroundModules.contentSharing,
+            readwise: backgroundModules.readwise,
+        },
+    )
+    await setupBackgroundModules(backgroundModules, storageManager)
+
+    navigator?.storage?.persist?.()
 
     setStorex(storageManager)
-
-    await setupBackgroundModules(backgroundModules, storageManager)
 
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({
@@ -91,16 +105,15 @@ export async function main() {
                 backgroundModules.auth.subscriptionService.getCurrentUserClaims,
         },
         notifications: { create: createNotification } as any,
-        bookmarks: {
-            addPageBookmark:
-                backgroundModules.search.remoteFunctions.bookmarks
-                    .addPageBookmark,
-            delPageBookmark:
-                backgroundModules.search.remoteFunctions.bookmarks
-                    .delPageBookmark,
-        },
+        bookmarks: backgroundModules.bookmarks.remoteFunctions,
         sync: backgroundModules.sync.remoteFunctions,
-        features: new FeatureOptIns(),
+        features: backgroundModules.features,
+        featuresBeta: backgroundModules.featuresBeta,
+        tags: backgroundModules.tags.remoteFunctions,
+        collections: backgroundModules.customLists.remoteFunctions,
+        readablePageArchives: backgroundModules.readable.remoteFunctions,
+        copyPaster: backgroundModules.copyPaster.remoteFunctions,
+        contentSharing: backgroundModules.contentSharing.remoteFunctions,
     })
 
     // Attach interesting features onto global window scope for interested users
@@ -108,7 +121,8 @@ export async function main() {
     window['storageMan'] = storageManager
     window['bgModules'] = backgroundModules
     window['analytics'] = analytics
-    window['tabMan'] = backgroundModules.activityLogger.tabManager
+    window['dataSeeders'] = setupDataSeeders(storageManager)
+    window['setStorageLoggingEnabled'] = setStorageLoggingEnabled
 
     window['selfTests'] = await createSelfTests({
         storage: {
@@ -139,7 +153,7 @@ export async function main() {
                     url:
                         'http://highscalability.com/blog/2019/7/19/stuff-the-internet-says-on-scalability-for-july-19th-2019.html',
                 })
-                await backgroundModules.search.searchIndex.addPage({
+                await backgroundModules.pages.addPage({
                     pageDoc: {
                         url:
                             'http://highscalability.com/blog/2019/7/19/stuff-the-internet-says-on-scalability-for-july-19th-2019.html',

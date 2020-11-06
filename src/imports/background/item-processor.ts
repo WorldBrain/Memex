@@ -7,6 +7,8 @@ import { padShortTimestamp } from './utils'
 import { SearchIndex } from 'src/search'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
+import { PageIndexingBackground } from 'src/page-indexing/background'
+import BookmarksBackground from 'src/bookmarks/background'
 
 const fetchPageDataOpts = {
     includePageContent: true,
@@ -32,7 +34,7 @@ const wantedTransitionTypes = new Set([
  * @param {history.VisitItem} item VisitItem object received from the WebExt History API.
  * @returns {boolean}
  */
-const filterVisitItemByTransType = item =>
+const filterVisitItemByTransType = (item) =>
     wantedTransitionTypes.has(item.transition)
 
 /**
@@ -47,7 +49,7 @@ async function checkVisitItemTransitionTypes({ url }) {
     const filteredVisitItems = visitItems.filter(filterVisitItemByTransType)
 
     // Throw if no VisitItems left post-filtering (only if there was items to begin with)
-    if (visitItems.length > 0 && filteredVisitItems.length === 0) {
+    if (visitItems.length < 0 && filteredVisitItems.length === 0) {
         throw new Error('Unused TransitionType')
     }
 }
@@ -55,7 +57,7 @@ async function checkVisitItemTransitionTypes({ url }) {
 const getVisitTimes = ({ url }) =>
     browser.history
         .getVisits({ url })
-        .then(visits => visits.map(visit => Math.trunc(visit.visitTime)))
+        .then((visits) => visits.map((visit) => Math.trunc(visit.visitTime)))
 
 async function getBookmarkTime({ browserId }) {
     // Web Ext. API should return array of BookmarkItems; grab first one
@@ -92,11 +94,12 @@ export default class ImportItemProcessor {
 
     constructor(
         private options: {
-            searchIndex: SearchIndex
             tagsModule: TagsBackground
+            pages: PageIndexingBackground
+            bookmarks: BookmarksBackground
             customListsModule: CustomListBackground
         },
-    ) { }
+    ) {}
 
     /**
      * Hacky way of enabling cancellation. Checks state and throws an Error if detected change.
@@ -120,12 +123,15 @@ export default class ImportItemProcessor {
     }) {
         this._checkCancelled()
 
-        return this.options.searchIndex.addPage({
+        await this.options.pages.addPage({
             pageDoc,
             visits,
-            bookmark,
             rejectNoContent,
         })
+        await this.options.bookmarks.storage.createBookmarkIfNeeded(
+            pageDoc.url,
+            bookmark,
+        )
     }
 
     async _storeOtherData({ url, tags, collections, annotations }) {
@@ -137,14 +143,20 @@ export default class ImportItemProcessor {
                 },
             )
             await Promise.all([
-                ...listIds.map(async listId => {
+                ...listIds.map(async (listId) => {
                     await this.options.customListsModule.insertPageToList({
                         id: listId,
                         url,
+                        suppressVisitCreation: true,
                     })
                 }),
-                ...tags.map(async tag => {
-                    await this.options.tagsModule.addTag({ url, tag })
+                ...tags.map(async (tag) => {
+                    await this.options.tagsModule
+                        .addTagToExistingUrl({
+                            url,
+                            tag,
+                        })
+                        .catch((e) => {}) // Lots of outside tags may violate our tag validity pattern; catch them and try others
                 }),
             ])
         } catch (e) {
@@ -160,9 +172,7 @@ export default class ImportItemProcessor {
      * @returns {PageDoc}
      */
     async _createPageDoc({ url }) {
-        const includeFavIcon = !(await this.options.searchIndex.domainHasFavIcon(
-            url,
-        ))
+        const includeFavIcon = !(await this.options.pages.domainHasFavIcon(url))
 
         // Do the page data fetch
         const fetch = fetchPageData({
@@ -196,13 +206,13 @@ export default class ImportItemProcessor {
         const pageDoc = !options.indexTitle
             ? await this._createPageDoc(importItem)
             : {
-                url: importItem.url,
-                content: {
-                    title: importItem.title,
-                },
-            }
+                  url: importItem.url,
+                  content: {
+                      title: importItem.title,
+                  },
+              }
 
-        const visits = await getVisitTimes(importItem)
+        const visits = []
 
         let bookmark
         if (importItem.type === IMPORT_TYPE.BOOKMARK) {
@@ -225,26 +235,20 @@ export default class ImportItemProcessor {
         importItem,
         options: { indexTitle?: any; bookmarkImports?: any } = {},
     ) {
-        const {
-            url,
-            title,
-            tags,
-            collections,
-            annotations,
-        } = importItem
+        const { url, title, tags, collections, annotations } = importItem
 
         const timeAdded = padShortTimestamp(importItem.timeAdded)
 
         const pageDoc = !options.indexTitle
             ? await this._createPageDoc({ url })
             : {
-                url,
-                content: {
-                    title,
-                },
-            }
+                  url,
+                  content: {
+                      title,
+                  },
+              }
 
-        const visits = await getVisitTimes({ url })
+        const visits = []
 
         if (timeAdded) {
             visits.push(timeAdded)

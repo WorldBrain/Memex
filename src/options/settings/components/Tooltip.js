@@ -2,14 +2,15 @@ import React from 'react'
 
 // import Checkbox from './Checkbox'
 import { Checkbox } from 'src/common-ui/components'
-import * as utils from 'src/content-tooltip/utils'
+import * as utils from 'src/in-page-ui/tooltip/utils'
+import * as tooltipConstants from 'src/in-page-ui/tooltip/constants'
 
 import styles from './settings.css'
 
 class Tooltip extends React.Component {
     state = {
-        tooltip: true,
-        position: 'mouse',
+        tooltip: tooltipConstants.TOOLTIP_DEFAULT_OPTION,
+        position: tooltipConstants.POSITION_DEFAULT_OPTION,
     }
 
     async componentDidMount() {
@@ -27,7 +28,7 @@ class Tooltip extends React.Component {
         this.setState({ tooltip })
     }
 
-    togglePosition = async e => {
+    togglePosition = async (e) => {
         const position = e.target.value
         await utils.setPositionState(position)
         this.setState({ position })
@@ -40,22 +41,21 @@ class Tooltip extends React.Component {
                     Highlights & Annotations
                 </div>
                 <div className={styles.infoText}>
-                    Disable the Highlighting tooltip. You can use keyboard
-                    shortcuts instead (see below).
+                    Show Tooltip when highlighting text. <br />
+                    You can also use keyboard shortcuts.
                 </div>
                 <Checkbox
                     id="show-memex-link"
                     isChecked={this.state.tooltip}
                     handleChange={this.toggleTooltip}
                 >
-                    Show tooltip on every page
+                    Show Tooltip
                 </Checkbox>
-                <Checkbox
-                    id="position-memex-link"
-                    isChecked={this.state.tooltip}
-                    isDisabled={!this.state.tooltip}
-                    handleChange={() => null}
-                >
+                {/*
+
+                //needs to be fixed. setting removed until then
+
+                <div className={styles.extraSettings}>
                     Position tooltip below
                     <select
                         className={styles.dropdown}
@@ -66,7 +66,8 @@ class Tooltip extends React.Component {
                         <option value="mouse">mouse pointer</option>
                         <option value="text">selected text</option>
                     </select>
-                </Checkbox>
+                </div>
+                */}
             </div>
         )
     }

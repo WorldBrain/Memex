@@ -25,8 +25,7 @@ import TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
 import { AuthRemoteEvents } from 'src/authentication/background/types'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
-import { Claims } from '@worldbrain/memex-common/lib/subscriptions/types'
+import { ContentSharingEvents } from 'src/content-sharing/background/types'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -46,6 +45,69 @@ export class RemoteError extends Error {
     }
 }
 
+export type RemoteFunctionRole = 'provider' | 'caller'
+export type RemoteFunction<
+    Role extends RemoteFunctionRole,
+    Params,
+    Returns = void
+> = Role extends 'provider'
+    ? (info: { tab: { id: number } }, params: Params) => Promise<Returns>
+    : (params: Params) => Promise<Returns>
+export type RemotePositionalFunction<
+    Role extends RemoteFunctionRole,
+    Params extends Array<any>,
+    Returns = void
+> = Role extends 'provider'
+    ? (info: { tab: { id: number } }, ...params: Params) => Promise<Returns>
+    : (...params: Params) => Promise<Returns>
+export type RemoteFunctionWithExtraArgs<
+    Role extends RemoteFunctionRole,
+    Params,
+    Returns = void
+> = Role extends 'provider'
+    ? {
+          withExtraArgs: true
+          function: RemoteFunction<Role, Params, Returns>
+      }
+    : RemoteFunction<Role, Params, Returns>
+export type RemoteFunctionWithoutExtraArgs<
+    Role extends RemoteFunctionRole,
+    Params,
+    Returns = void
+> = Role extends 'provider'
+    ? {
+          withExtraArgs: false
+          function: (params: Params) => Promise<Returns>
+      }
+    : (params: Params) => Promise<Returns>
+export function remoteFunctionWithExtraArgs<Params, Returns = void>(
+    f: RemoteFunction<'provider', Params, Returns>,
+): RemoteFunctionWithExtraArgs<'provider', Params, Returns> {
+    return { withExtraArgs: true, function: f }
+}
+export function remoteFunctionWithoutExtraArgs<Params, Returns = void>(
+    f: (params: Params) => Promise<Returns>,
+): RemoteFunctionWithoutExtraArgs<'provider', Params, Returns> {
+    return { withExtraArgs: false, function: f }
+}
+export function registerRemoteFunctions<Functions>(
+    functions: {
+        [Name in keyof Functions]:
+            | RemoteFunctionWithExtraArgs<'provider', any, any>
+            | RemoteFunctionWithoutExtraArgs<'provider', any, any>
+    },
+) {
+    for (const [name, metadata] of Object.entries(functions)) {
+        const typedMetadata = metadata as
+            | RemoteFunctionWithExtraArgs<'provider', any, any>
+            | RemoteFunctionWithoutExtraArgs<'provider', any, any>
+        makeRemotelyCallable(
+            { [name]: typedMetadata.function },
+            { insertExtraArg: typedMetadata.withExtraArgs },
+        )
+    }
+}
+
 // === Initiating side ===
 
 // The extra options available when calling a remote function
@@ -53,7 +115,7 @@ interface RPCOpts {
     tabId?: number
 }
 
-// runInBackground and runInTab create a Proxy object that looks like the real interface but actually calls remote functions
+// runInBackground and runInTab create a Proxy object that look like the real interface but actually call remote functions
 //
 // When the Proxy is asked for a property (such as a method)
 // return a function that executes the requested method over the RPC interface
@@ -106,7 +168,7 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
             ? "the tab's content script"
             : 'the background script'
 
-    const f = async function(...args) {
+    const f = async function (...args) {
         const message = {
             [RPC_CALL]: RPC_CALL,
             funcName,
@@ -121,13 +183,13 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
                     ? await browser.tabs.sendMessage(tabId, message)
                     : await browser.runtime.sendMessage(message)
         } catch (err) {
-            return
+            throw new RpcError(`Extension context has been invalidated`)
         }
 
         // Check if it was *our* listener that responded.
         if (!response || response[RPC_RESPONSE] !== RPC_RESPONSE) {
             throw new RpcError(
-                `RPC got a response from an interfering listener. Wanted ${RPC_RESPONSE} but got ${response[RPC_RESPONSE]}. Response:${response}`,
+                `RPC got a response from an interfering listener. Wanted ${RPC_RESPONSE} but got ${response?.[RPC_RESPONSE]}. Response:${response}`,
             )
         }
 
@@ -154,7 +216,11 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
 
 // === Executing side ===
 
-const remotelyCallableFunctions = {}
+const remotelyCallableFunctions =
+    typeof window !== 'undefined' ? window['remoteFunctions'] || {} : {}
+if (typeof window !== 'undefined') {
+    window['remoteFunctions'] = remotelyCallableFunctions
+}
 
 async function incomingRPCListener(message, sender) {
     if (!message || message[RPC_CALL] !== RPC_CALL) {
@@ -164,6 +230,7 @@ async function incomingRPCListener(message, sender) {
     const funcName = message.funcName
     const args = message.hasOwnProperty('args') ? message.args : []
     const func = remotelyCallableFunctions[funcName]
+
     if (func === undefined) {
         console.error(`Received RPC for unknown function: ${funcName}`)
         return {
@@ -206,7 +273,7 @@ async function incomingRPCListener(message, sender) {
 let enabled = false
 
 export function setupRemoteFunctionsImplementations<T>(
-    implementations: RemoteFunctionImplementations,
+    implementations: RemoteFunctionImplementations<'provider'>,
 ): void {
     for (const [group, functions] of Object.entries(implementations)) {
         makeRemotelyCallableType<typeof functions>(functions)
@@ -240,7 +307,7 @@ export function makeRemotelyCallable<T>(
     if (!insertExtraArg) {
         // Replace each func with...
         // @ts-ignore
-        const wrapFunctions = mapValues(func =>
+        const wrapFunctions = mapValues((func) =>
             // ...a function that calls func, but hides the inserted argument.
             // @ts-ignore
             (extraArg, ...args) => func(...args),
@@ -275,7 +342,7 @@ export class RemoteFunctionRegistry {
 export function fakeRemoteFunctions(functions: {
     [name: string]: (...args) => any
 }) {
-    return name => {
+    return (name) => {
         if (!functions[name]) {
             throw new Error(
                 `Tried to call fake remote function '${name}' for which no implementation was provided`,
@@ -297,11 +364,28 @@ const __REMOTE_EVENT_NAME__ = '__REMOTE_EVENT_NAME__'
 // Sending Side, (e.g. background script)
 export function remoteEventEmitter<T>(
     eventType: string,
+    { broadcastToTabs = false } = {},
 ): RemoteEventEmitter<T> {
     const message = {
         __REMOTE_EVENT__,
         __REMOTE_EVENT_TYPE__: eventType,
     }
+
+    if (broadcastToTabs) {
+        return {
+            emit: async (eventName, data) => {
+                const tabs = (await browser.tabs.query({})) ?? []
+                for (const { id: tabId } of tabs) {
+                    browser.tabs.sendMessage(tabId, {
+                        ...message,
+                        __REMOTE_EVENT_NAME__: eventName,
+                        data,
+                    })
+                }
+            },
+        }
+    }
+
     return {
         emit: async (eventName, data) =>
             browser.runtime.sendMessage({
@@ -325,6 +409,7 @@ export type TypedRemoteEventEmitter<
 interface RemoteEvents {
     auth: AuthRemoteEvents
     sync: InitialSyncEvents
+    contentSharing: ContentSharingEvents
 }
 
 function registerRemoteEventForwarder() {
@@ -333,6 +418,7 @@ function registerRemoteEventForwarder() {
     }
     browser.runtime.onMessage.addListener(remoteEventForwarder)
 }
+
 const remoteEventForwarder = (message, _) => {
     if (message == null || message[__REMOTE_EVENT__] !== __REMOTE_EVENT__) {
         return

@@ -4,23 +4,27 @@ import { Browser } from 'webextension-polyfill-ts'
 // import * as index from '..'
 import SearchStorage from './storage'
 import QueryBuilder from '../query-builder'
-import { TabManager } from 'src/activity-logger/background'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { SearchInterface, BackgroundSearchParams } from './types'
+import {
+    SearchInterface,
+    StandardSearchResponse,
+    AnnotationsSearchResponse,
+    BackgroundSearchParams,
+    AnnotPage,
+} from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { SearchIndex } from '../types'
-import TagsBackground from 'src/tags/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import * as Raven from 'src/util/raven'
+import BookmarksBackground from 'src/bookmarks/background'
+import { TabManager } from 'src/tab-management/background/tab-manager'
 
 export default class SearchBackground {
     storage: SearchStorage
     searchIndex: SearchIndex
-    private tabMan: TabManager
     private queryBuilderFactory: () => QueryBuilder
     public remoteFunctions: {
-        bookmarks: BookmarksInterface
         search: SearchInterface
     }
 
@@ -43,7 +47,7 @@ export default class SearchBackground {
         }
     }
 
-    static shapePageResult(results, limit: number, extra = {}) {
+    static shapePageResult(results: AnnotPage[], limit: number, extra = {}) {
         return {
             resultsExhausted: results.length < limit,
             totalCount: null, // TODO: try to get this implemented
@@ -56,14 +60,12 @@ export default class SearchBackground {
         private options: {
             storageManager: Storex
             idx: SearchIndex
-            tags: TagsBackground
             pages: PageIndexingBackground
+            bookmarks: BookmarksBackground
             queryBuilder?: () => QueryBuilder
-            tabMan: TabManager
             browserAPIs: Pick<Browser, 'bookmarks'>
         },
     ) {
-        this.tabMan = options.tabMan
         this.searchIndex = options.idx
         this.queryBuilderFactory =
             options.queryBuilder || (() => new QueryBuilder())
@@ -72,31 +74,24 @@ export default class SearchBackground {
             legacySearch: this.searchIndex.fullSearch,
         })
 
-        // Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
-        options.browserAPIs.bookmarks.onCreated.addListener(
-            this.handleBookmarkCreation.bind(this),
-        )
-        options.browserAPIs.bookmarks.onRemoved.addListener(
-            this.handleBookmarkRemoval.bind(this),
-        )
-
         this.initRemoteFunctions()
     }
 
     private initRemoteFunctions() {
         this.remoteFunctions = {
-            bookmarks: {
-                addPageBookmark: this.searchIndex.addBookmark,
-                delPageBookmark: this.searchIndex.delBookmark,
-            },
             search: {
                 search: this.searchIndex.search,
                 suggest: this.storage.suggest,
                 extendedSuggest: this.storage.suggestExtended,
-                delPages: this.searchIndex.delPages,
 
-                delPagesByDomain: this.searchIndex.delPagesByDomain,
-                delPagesByPattern: this.searchIndex.delPagesByPattern,
+                delPages: this.options.pages.delPages.bind(this.options.pages),
+                delPagesByDomain: this.options.pages.delPagesByDomain.bind(
+                    this.options.pages,
+                ),
+                delPagesByPattern: this.options.pages.delPagesByPattern.bind(
+                    this.options.pages,
+                ),
+
                 getMatchingPageCount: this.searchIndex.getMatchingPageCount,
                 searchAnnotations: this.searchAnnotations.bind(this),
                 searchPages: this.searchPages.bind(this),
@@ -157,7 +152,9 @@ export default class SearchBackground {
         }
     }
 
-    async searchAnnotations(params: BackgroundSearchParams) {
+    async searchAnnotations(
+        params: BackgroundSearchParams,
+    ): Promise<StandardSearchResponse | AnnotationsSearchResponse> {
         let searchParams
 
         try {
@@ -166,7 +163,7 @@ export default class SearchBackground {
             return SearchBackground.handleSearchError(e)
         }
 
-        const { docs, annotsByDay }: any = await this.storage.searchAnnots(
+        const { docs, annotsByDay } = await this.storage.searchAnnots(
             searchParams,
         )
 
@@ -182,7 +179,9 @@ export default class SearchBackground {
         return SearchBackground.shapePageResult(docs, searchParams.limit, extra)
     }
 
-    async searchPages(params: BackgroundSearchParams) {
+    async searchPages(
+        params: BackgroundSearchParams,
+    ): Promise<StandardSearchResponse> {
         let searchParams
 
         try {
@@ -196,7 +195,9 @@ export default class SearchBackground {
         return SearchBackground.shapePageResult(docs, searchParams.limit)
     }
 
-    async searchSocial(params: BackgroundSearchParams) {
+    async searchSocial(
+        params: BackgroundSearchParams,
+    ): Promise<StandardSearchResponse> {
         let searchParams
         try {
             searchParams = this.processSearchParams(params)
@@ -206,34 +207,5 @@ export default class SearchBackground {
 
         const docs = await this.storage.searchSocial(searchParams)
         return SearchBackground.shapePageResult(docs, searchParams.limit)
-    }
-
-    async handleBookmarkRemoval(id, { node }) {
-        // Created folders won't have `url`; ignore these
-        if (!node.url) {
-            return
-        }
-
-        try {
-            await this.searchIndex.delBookmark(node)
-        } catch (err) {
-            Raven.captureException(err)
-        }
-    }
-
-    async handleBookmarkCreation(id, node) {
-        // Created folders won't have `url`; ignore these
-        if (!node.url) {
-            return
-        }
-
-        let tabId
-        const activeTab = this.tabMan.getActiveTab()
-
-        if (activeTab != null && activeTab.url === node.url) {
-            tabId = activeTab.id
-        }
-
-        return this.searchIndex.addBookmark({ url: node.url, tabId })
     }
 }

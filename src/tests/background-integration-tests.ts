@@ -1,9 +1,9 @@
 import mapValues from 'lodash/mapValues'
 import { URL } from 'whatwg-url'
 import expect from 'expect'
+import fetchMock from 'fetch-mock'
 const wrtc = require('wrtc')
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
-import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import {
@@ -11,7 +11,6 @@ import {
     registerBackgroundModuleCollections,
 } from 'src/background-script/setup'
 import initStorex from '../search/memory-storex'
-import { TabManager } from 'src/activity-logger/background'
 import {
     BackgroundIntegrationTestSetup,
     BackgroundIntegrationTest,
@@ -24,72 +23,125 @@ import { registerSyncBackgroundIntegrationTests } from 'src/sync/index.tests'
 import { AuthBackground } from 'src/authentication/background'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
-import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { FakeAnalytics } from 'src/analytics/mock'
 import AnalyticsManager from 'src/analytics/analytics'
 import { setStorageMiddleware } from 'src/storage/middleware'
+import { JobDefinition } from 'src/job-scheduler/background/types'
+import { createLazyMemoryServerStorage } from 'src/storage/server'
+import { ServerStorage } from 'src/storage/types'
+import { Browser } from 'webextension-polyfill-ts'
+import { TabManager } from 'src/tab-management/background/tab-manager'
 
-export async function setupBackgroundIntegrationTest(options?: {
+fetchMock.restore()
+
+export interface BackgroundIntegrationTestSetupOpts {
     customMiddleware?: StorageMiddleware[]
     tabManager?: TabManager
     signalTransportFactory?: SignalTransportFactory
-    sharedSyncLog?: SharedSyncLog
+    getServerStorage?: () => Promise<ServerStorage>
     browserLocalStorage?: MemoryBrowserStorage
     debugStorageOperations?: boolean
-    fetchPageProcessor?: FetchPageProcessor
     includePostSyncProcessor?: boolean
     enableSyncEncyption?: boolean
-}): Promise<BackgroundIntegrationTestSetup> {
+}
+
+export async function setupBackgroundIntegrationTest(
+    options?: BackgroundIntegrationTestSetupOpts,
+): Promise<BackgroundIntegrationTestSetup> {
     if (typeof window === 'undefined') {
-        global['URL'] = URL
+        ;(global as any)['URL'] = URL
     }
 
-    const needsSync = !!(options && options.sharedSyncLog)
+    // We want to allow tests to be able to override time
+    let getTime = () => Date.now()
+    const getNow = () => getTime()
+
+    // We allow tests to control HTTP requests
+    const fetch = fetchMock.sandbox()
 
     const browserLocalStorage =
-        (options && options.browserLocalStorage) || new MemoryBrowserStorage()
+        options?.browserLocalStorage ?? new MemoryBrowserStorage()
     const storageManager = initStorex()
+
+    const getServerStorage =
+        options?.getServerStorage ?? createLazyMemoryServerStorage()
 
     const authService = new MemoryAuthService()
     const subscriptionService = new MemorySubscriptionsService()
     const auth: AuthBackground = new AuthBackground({
         authService,
         subscriptionService,
+        scheduleJob: (job: JobDefinition) => {
+            console['info'](
+                'Running job immediately while in testing, job:',
+                job,
+            )
+            console['info'](`Ran job ${job.name} returned:`, job.job())
+        },
+        localStorageArea: browserLocalStorage,
+        backendFunctions: {
+            registerBetaUser: async () => {},
+        },
+        getUserManagement: async () =>
+            (await getServerStorage()).storageModules.userManagement,
     })
     const analyticsManager = new AnalyticsManager({
         backend: new FakeAnalytics(),
         shouldTrack: async () => true,
     })
 
+    const browserAPIs = ({
+        webNavigation: {
+            onHistoryStateUpdated: { addListener: () => {} },
+        },
+        storage: {
+            local: browserLocalStorage,
+        },
+        bookmarks: {
+            onCreated: { addListener: () => {} },
+            onRemoved: { addListener: () => {} },
+        },
+        alarms: {
+            onAlarm: { addListener: () => {} },
+        },
+        tabs: {
+            query: () => [],
+            get: () => null,
+        },
+        contextMenus: {
+            create: () => {},
+        },
+        runtime: {
+            getURL: () => '',
+        },
+        windows: {
+            WINDOW_ID_CURRENT: 'currentWindow:testValue',
+            TAB_ID_NONE: 'noneTab:testValue',
+        },
+    } as any) as Browser
+
+    const fetchPageDataProcessor = options?.includePostSyncProcessor
+        ? new MockFetchPageDataProcessor()
+        : null
+
     const backgroundModules = createBackgroundModules({
+        getNow,
         storageManager,
         analyticsManager,
         localStorageChangesManager: null,
-        browserAPIs: {
-            storage: {
-                local: browserLocalStorage,
-            },
-            bookmarks: {
-                onCreated: { addListener: () => {} },
-                onRemoved: { addListener: () => {} },
-            },
-            alarms: {
-                onAlarm: { addListener: () => {} },
-            },
-        } as any,
+        getServerStorage,
+        browserAPIs,
         tabManager: options?.tabManager,
         signalTransportFactory: options?.signalTransportFactory,
-        getSharedSyncLog: async () => options?.sharedSyncLog,
-        includePostSyncProcessor: options?.includePostSyncProcessor,
-        fetchPageDataProcessor:
-            options &&
-            (options.fetchPageProcessor || new MockFetchPageDataProcessor()),
+        getSharedSyncLog: async () =>
+            (await getServerStorage()).storageModules.sharedSyncLog,
+        fetchPageDataProcessor,
         auth,
         disableSyncEnryption: !options?.enableSyncEncyption,
+        fetch,
     })
-    backgroundModules.customLists._createPage =
-        backgroundModules.search.searchIndex.createTestPage
     backgroundModules.sync.initialSync.wrtc = wrtc
+    backgroundModules.sync.initialSync.debug = false
 
     registerBackgroundModuleCollections(storageManager, backgroundModules)
 
@@ -118,6 +170,8 @@ export async function setupBackgroundIntegrationTest(options?: {
     await setStorageMiddleware(storageManager, {
         syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
+        contentSharing: backgroundModules.contentSharing,
+        readwise: backgroundModules.readwise,
         modifyMiddleware: (originalMiddleware) => [
             ...((options && options.customMiddleware) || []),
             ...(options && options.debugStorageOperations
@@ -138,30 +192,46 @@ export async function setupBackgroundIntegrationTest(options?: {
         storageChangeDetector,
         authService,
         subscriptionService,
+        getServerStorage,
+        browserAPIs,
+        fetchPageDataProcessor,
+        injectTime: (injected) => (getTime = injected),
+        fetch,
     }
 }
 
 export function registerBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
+    options: BackgroundIntegrationTestSetupOpts = {},
 ) {
-    describe(test.description, () => {
-        it(
-            'should work on a single device' + (test.mark ? '!!!' : ''),
-            async () => {
-                await runBackgroundIntegrationTest(test)
-            },
-        )
-        registerSyncBackgroundIntegrationTests(test)
-    })
+    const skipSyncTests = process.env.SKIP_SYNC_TESTS === 'true'
+    if (skipSyncTests) {
+        it(test.description, async () => {
+            await runBackgroundIntegrationTest(test, options)
+        })
+    } else {
+        describe(test.description, () => {
+            it(
+                'should work on a single device' + (test.mark ? '!!!' : ''),
+                async () => {
+                    await runBackgroundIntegrationTest(test, options)
+                },
+            )
+            registerSyncBackgroundIntegrationTests(test, options)
+        })
+    }
 }
 
 export async function runBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
+    options: BackgroundIntegrationTestSetupOpts = {},
 ) {
     const setup = await setupBackgroundIntegrationTest({
         customMiddleware: [],
+        ...options,
     })
-    const testOptions = await test.instantiate()
+    const testOptions = await test.instantiate({ isSyncTest: false })
+    testOptions.setup?.({ setup })
 
     let changeDetectorUsed = false
 
@@ -190,9 +260,15 @@ export async function runBackgroundIntegrationTest(
             const executedOperations = setup.storageOperationLogger.popOperations()
             expect(executedOperations).toEqual(step.expectedStorageOperations())
         }
+        const changes = changeDetectorUsed
+            ? await setup.storageChangeDetector.compare()
+            : undefined
+        if (step.validateStorageChanges) {
+            step.validateStorageChanges({ changes })
+        }
         if (step.expectedStorageChanges) {
             try {
-                expect(await setup.storageChangeDetector.compare()).toEqual(
+                expect(changes).toEqual(
                     mapValues(step.expectedStorageChanges, (getChanges) =>
                         getChanges(),
                     ),

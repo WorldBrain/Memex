@@ -8,7 +8,7 @@ const baseStyles = {
         transition: 'all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1)',
     },
     bmMenu: {
-        position: 'fixed',
+        position: 'relative',
         right: '30px',
         top: '0px',
         zIndex: 2147483646,
@@ -31,7 +31,7 @@ const baseStyles = {
         overflowY: 'scroll',
         flex: '1',
         overflowX: 'hidden',
-        width: '101%,'
+        width: '101%,',
     },
     bmItemList: {
         height: '100%',
@@ -50,16 +50,13 @@ const menuStyles = (env, isOpen) => {
         ;((baseStyles.bmMenuWrap.zIndex as unknown) as string) = '999'
     }
 
-     if (isOpen) {
+    if (isOpen) {
         ;((baseStyles.bmMenu.opacity as unknown) as string) = '1'
-        ;((baseStyles.bmMenu
-            .background as unknown) as string) = '#fff'
+        ;((baseStyles.bmMenu.background as unknown) as string) = '#fff'
     } else {
         ;((baseStyles.bmMenu.opacity as unknown) as string) = '0'
-        ;((baseStyles.bmMenu
-            .background as unknown) as string) = 'transparent'
+        ;((baseStyles.bmMenu.background as unknown) as string) = 'transparent'
     }
-
 
     return baseStyles
 }

@@ -115,8 +115,6 @@
 
 .button {
     border: 1px solid color9;
-    width: 24px;
-    height: 24px;
     border-radius: 3px;
     background-size: 16px;
     background-repeat: no-repeat;
@@ -124,6 +122,8 @@
     background-color: transparent;
     cursor: pointer;
     outline: none;
+    height: 100%;
+    width: 30px;
 
     &:hover {
         background-color: color1;
@@ -140,10 +140,8 @@
 
 .bookmark {
     background-image: url('/img/star_full.svg');
-    margin-top: 1px;
 }
 
 .notBookmark {
     background-image: url('/img/star_empty.svg');
-    margin-top: 1px;
 }

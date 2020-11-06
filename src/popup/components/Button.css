@@ -91,8 +91,6 @@
 .button {
     composes: nakedSquareButton from '../../common-ui/elements.css';
     cursor: pointer;
-    margin-right: 6px;
-    margin-bottom: 6px;
     outline: 0;
     text-decoration: none;
     opacity: 0.8;
@@ -110,27 +108,43 @@
     width: 25px;
     height: 25px;
     align-self: center;
-    margin-right: 10px;
     outline: 0;
+    margin-top: 7px;
+    margin-right: 15px;
+
     background-position: center;
 }
 
 .settings {
+    composes: nakedSquareButton from '../../common-ui/elements.css';
     background-image: url('/img/settings.svg');
     background-repeat: no-repeat;
     background-size: 20px;
-    margin-top: 0px;
+    width: 25px;
+    height: 25px;
+    align-self: center;
+    outline: 0;
+    background-position: center;
+    margin-right: 5px;
+    cursor: pointer;
 }
 
 .help {
+    composes: nakedSquareButton from '../../common-ui/elements.css';
     background-image: url('/img/help.svg');
     background-repeat: no-repeat;
     background-size: 20px;
+    width: 25px;
+    height: 25px;
+    align-self: center;
+    outline: 0;
+    background-position: center;
+    margin-right: 10px;
+    cursor: pointer;
 }
 
 .buttonIcons {
     background-size: 20px;
-    margin-right: 0px;
 }
 
 .linkIcon {
@@ -169,6 +183,7 @@
     background-repeat: no-repeat;
     background-size: 20px;
     opacity: 0.8;
+    float: left;
 }
 
 .badge {
@@ -186,7 +201,8 @@
 .subTitle {
     margin-left: 30px;
     margin-top: auto;
-    font-size: 10px;
+    font-size: 12px;
     color: #3a2f45;
     margin-bottom: 0px;
+    opacity: 0.7;
 }

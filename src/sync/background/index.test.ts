@@ -24,18 +24,20 @@ import {
     setupMobileIntegrationTest,
 } from 'src/tests/mobile-intergration-tests'
 
-import {
-    lazyMemorySignalTransportFactory,
-    createMemorySharedSyncLog,
-} from './index.tests'
+import { lazyMemorySignalTransportFactory } from './index.tests'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import SyncBackground from '.'
-import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
+import { ServerStorage } from 'src/storage/types'
+import { createLazyMemoryServerStorage } from 'src/storage/server'
+import {
+    SPECIAL_LIST_NAMES,
+    SPECIAL_LIST_IDS,
+} from '@worldbrain/memex-storage/lib/lists/constants'
 
 const registerTest = it
 
 interface TestDependencies {
-    sharedSyncLog: SharedSyncLogStorage
+    getServerStorage: () => Promise<ServerStorage>
     userId?: string
 }
 type WithTestDependencies = (
@@ -120,7 +122,6 @@ function extensionSyncTests(suiteOptions: {
         ) => BackgroundIntegrationTestSetup['backgroundModules']['customLists']
         sharedSyncLog: SharedSyncLogStorage
         userId: number | string
-        fetchPageProcessor?: MockFetchPageDataProcessor
     }>
 
     const expectedDeviceInfo = [
@@ -141,9 +142,6 @@ function extensionSyncTests(suiteOptions: {
     function setupTest(options: TestDependencies): TestSetup {
         return async (conf = {}) => {
             const signalTransportFactory = lazyMemorySignalTransportFactory()
-            const fetchPageProcessor = conf.enablePostProcessing
-                ? new MockFetchPageDataProcessor()
-                : undefined
 
             const devices: [
                 BackgroundIntegrationTestSetup,
@@ -151,16 +149,14 @@ function extensionSyncTests(suiteOptions: {
             ] = [
                 await setupBackgroundIntegrationTest({
                     signalTransportFactory,
-                    sharedSyncLog: options.sharedSyncLog,
+                    getServerStorage: options.getServerStorage,
                     includePostSyncProcessor: conf.enablePostProcessing,
-                    fetchPageProcessor,
                     enableSyncEncyption: conf.enableSyncEncyption,
                 }),
                 await setupBackgroundIntegrationTest({
                     signalTransportFactory,
-                    sharedSyncLog: options.sharedSyncLog,
+                    getServerStorage: options.getServerStorage,
                     includePostSyncProcessor: conf.enablePostProcessing,
-                    fetchPageProcessor,
                     enableSyncEncyption: conf.enableSyncEncyption,
                 }),
             ]
@@ -185,9 +181,9 @@ function extensionSyncTests(suiteOptions: {
                 syncModule,
                 searchModule,
                 customLists,
-                sharedSyncLog: options.sharedSyncLog,
+                sharedSyncLog: (await options.getServerStorage()).storageModules
+                    .sharedSyncLog,
                 userId,
-                fetchPageProcessor,
             }
         }
     }
@@ -224,7 +220,7 @@ function extensionSyncTests(suiteOptions: {
             searchModule,
             forEachDevice: forEachSetup,
             userId,
-        } = await setup()
+        } = await setup({ enablePostProcessing: true })
 
         devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
 
@@ -241,7 +237,7 @@ function extensionSyncTests(suiteOptions: {
             id: listId,
             url: 'http://bla.com/',
         })
-        await searchModule(devices[0]).searchIndex.addPage({
+        await devices[0].backgroundModules.pages.addPage({
             pageDoc: {
                 url: 'http://www.bla.com/',
                 content: {
@@ -265,6 +261,7 @@ function extensionSyncTests(suiteOptions: {
         ).toEqual({
             id: listId,
             name: 'My list',
+            searchableName: 'My list',
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -300,7 +297,8 @@ function extensionSyncTests(suiteOptions: {
 
         await customLists(devices[1]).updateList({
             id: listId,
-            name: 'Updated List Title',
+            newName: 'Updated List Title',
+            oldName: 'My list',
         })
 
         await syncModule(devices[1]).remoteFunctions.forceIncrementalSync()
@@ -313,6 +311,7 @@ function extensionSyncTests(suiteOptions: {
         ).toEqual({
             id: listId,
             name: 'Updated List Title',
+            searchableName: 'Updated List Title',
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -324,7 +323,8 @@ function extensionSyncTests(suiteOptions: {
 
         await customLists(devices[0]).updateList({
             id: listId,
-            name: 'Another Updated List Title',
+            newName: 'Another Updated List Title',
+            oldName: 'Updated List Title',
         })
 
         await syncModule(devices[0]).remoteFunctions.forceIncrementalSync()
@@ -337,6 +337,7 @@ function extensionSyncTests(suiteOptions: {
         ).toEqual({
             id: listId,
             name: 'Another Updated List Title',
+            searchableName: 'Another Updated List Title',
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -436,6 +437,7 @@ function extensionSyncTests(suiteOptions: {
         ).toEqual({
             id: listId,
             name: 'My list',
+            searchableName: 'My list',
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -492,6 +494,7 @@ function extensionSyncTests(suiteOptions: {
         ).toEqual({
             id: listId,
             name: 'My list',
+            searchableName: 'My list',
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -501,13 +504,9 @@ function extensionSyncTests(suiteOptions: {
     })
 
     it('should fetch missing data on post-sync if enabled', async (setup: TestSetup) => {
-        const {
-            devices,
-            syncModule,
-            sharedSyncLog,
-            userId,
-            fetchPageProcessor,
-        } = await setup({ enablePostProcessing: true })
+        const { devices, syncModule, sharedSyncLog, userId } = await setup({
+            enablePostProcessing: true,
+        })
 
         const mockPage = {
             url: 'test.com',
@@ -522,7 +521,7 @@ function extensionSyncTests(suiteOptions: {
             urlTerms: [],
         }
 
-        fetchPageProcessor.mockPage = mockPage
+        devices[1].fetchPageDataProcessor.mockPage = mockPage
 
         devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
         devices[1].authService.setUser({ ...TEST_USER, id: userId as string })
@@ -544,7 +543,7 @@ function extensionSyncTests(suiteOptions: {
         await syncModule(devices[0]).setup()
         await syncModule(devices[0]).firstContinuousSyncPromise
 
-        await devices[0].backgroundModules.search.searchIndex.addPage({
+        await devices[0].backgroundModules.pages.addPage({
             rejectNoContent: false,
             pageDoc: {
                 url: mockPage.fullUrl,
@@ -582,7 +581,7 @@ function extensionSyncTests(suiteOptions: {
             forEachDevice: forEachSetup,
             devices,
             userId,
-        } = await setup()
+        } = await setup({ enablePostProcessing: true })
         await forEachSetup((s) => syncModule(s).setup())
 
         devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
@@ -591,6 +590,7 @@ function extensionSyncTests(suiteOptions: {
         const storageContents = await getStorageContents(
             devices[0].storageManager,
         )
+        await removeTermFieldsFromStorageContents(storageContents)
         delete storageContents['clientSyncLogEntry']
 
         const getTargetStorageContents = async () => {
@@ -608,7 +608,9 @@ function extensionSyncTests(suiteOptions: {
             source: devices[0].backgroundModules.sync,
             target: devices[1].backgroundModules.sync,
         })
-        expect(await getTargetStorageContents()).toEqual({
+        const targetStorageContentsBefore = await getTargetStorageContents()
+        await removeTermFieldsFromStorageContents(targetStorageContentsBefore)
+        expect(targetStorageContentsBefore).toEqual({
             ...storageContents,
             syncDeviceInfo: expectedDeviceInfo,
         })
@@ -617,7 +619,9 @@ function extensionSyncTests(suiteOptions: {
             source: devices[0].backgroundModules.sync,
             target: devices[1].backgroundModules.sync,
         })
-        expect(await getTargetStorageContents()).toEqual({
+        const targetStorageContentsAfter = await getTargetStorageContents()
+        await removeTermFieldsFromStorageContents(targetStorageContentsAfter)
+        expect(targetStorageContentsAfter).toEqual({
             ...storageContents,
             syncDeviceInfo: expectedDeviceInfo,
         })
@@ -626,16 +630,17 @@ function extensionSyncTests(suiteOptions: {
     describe('passive data filtering in initial Sync', () => {
         async function runPassiveDataTest(params: {
             setup: TestSetup
+            enablePostProcessing?: boolean
             insertDefaultPages: boolean
             insertData: (params: {
                 device: BackgroundIntegrationTestSetup
             }) => Promise<void>
             checkData: (params: {
                 device: BackgroundIntegrationTestSetup
-                expectData: (
-                    collections: string[],
-                    expacted: object,
-                ) => Promise<void>
+                expectData: (params: {
+                    collections: string[]
+                    expected: object
+                }) => Promise<void>
             }) => Promise<void>
         }) {
             const {
@@ -645,7 +650,9 @@ function extensionSyncTests(suiteOptions: {
                 searchModule,
                 forEachDevice: forEachSetup,
                 userId,
-            } = await params.setup()
+            } = await params.setup({
+                enablePostProcessing: params.enablePostProcessing,
+            })
 
             await forEachSetup((s) => syncModule(s).setup())
             devices[0].authService.setUser({
@@ -654,7 +661,7 @@ function extensionSyncTests(suiteOptions: {
             })
 
             if (params.insertDefaultPages) {
-                await searchModule(devices[0]).searchIndex.addPage({
+                await devices[0].backgroundModules.pages.addPage({
                     pageDoc: {
                         url: 'http://www.bla.com/',
                         content: {
@@ -664,7 +671,7 @@ function extensionSyncTests(suiteOptions: {
                     },
                     visits: [],
                 })
-                await searchModule(devices[0]).searchIndex.addPage({
+                await devices[0].backgroundModules.pages.addPage({
                     pageDoc: {
                         url: 'http://www.bla2.com/',
                         content: {
@@ -686,7 +693,7 @@ function extensionSyncTests(suiteOptions: {
 
             await params.checkData({
                 device: devices[1],
-                expectData: async (collections, expected) => {
+                expectData: async ({ collections, expected }) => {
                     const contents = await getStorageContents(
                         devices[1].storageManager,
                         { include: new Set(collections) },
@@ -696,12 +703,13 @@ function extensionSyncTests(suiteOptions: {
             })
         }
 
-        it('should not include pages in filtered initial Sync unless included in a custom list', async (setup: TestSetup) => {
-            const { customLists } = await setup()
+        it('should consider pages included in custom lists as active data', async (setup: TestSetup) => {
+            const { customLists } = await setup({ enablePostProcessing: true })
 
             await runPassiveDataTest({
                 setup,
                 insertDefaultPages: true,
+                enablePostProcessing: true,
                 insertData: async ({ device }) => {
                     const listId = await customLists(device).createCustomList({
                         name: 'My list',
@@ -712,26 +720,149 @@ function extensionSyncTests(suiteOptions: {
                     })
                 },
                 checkData: async ({ expectData }) => {
-                    await expectData(
-                        ['pages', 'customLists', 'pageListEntries'],
-                        {
+                    await expectData({
+                        collections: [
+                            'pages',
+                            'customLists',
+                            'pageListEntries',
+                        ],
+                        expected: {
                             pages: [
                                 expect.objectContaining({
                                     fullUrl: 'http://www.bla.com/',
                                 }),
+                                expect.objectContaining({
+                                    fullUrl: 'http://test.com',
+                                }),
                             ],
                             customLists: [
+                                expect.objectContaining({
+                                    id: SPECIAL_LIST_IDS.INBOX,
+                                    name: SPECIAL_LIST_NAMES.INBOX,
+                                    isDeletable: false,
+                                    isNestable: false,
+                                }),
                                 expect.objectContaining({
                                     name: 'My list',
                                 }),
                             ],
                             pageListEntries: [
                                 expect.objectContaining({
+                                    fullUrl: 'http://test.com',
+                                    listId: SPECIAL_LIST_IDS.INBOX,
+                                }),
+                                expect.objectContaining({
                                     pageUrl: 'bla.com',
                                 }),
                             ],
                         },
+                    })
+                },
+            })
+        })
+
+        it('should consider tagged pages as active data', async (setup: TestSetup) => {
+            await setup({ enablePostProcessing: true })
+
+            await runPassiveDataTest({
+                setup,
+                insertDefaultPages: true,
+                enablePostProcessing: true,
+                insertData: async ({ device }) => {
+                    await device.backgroundModules.tags.addTagToPage({
+                        url: 'bla.com',
+                        tag: 'bla',
+                    })
+                },
+                checkData: async ({ expectData }) => {
+                    await expectData({
+                        collections: ['pages', 'tags'],
+                        expected: {
+                            pages: [
+                                expect.objectContaining({
+                                    fullUrl: 'http://www.bla.com/',
+                                }),
+                                expect.objectContaining({
+                                    fullUrl: 'http://test.com',
+                                }),
+                            ],
+                            tags: [
+                                expect.objectContaining({
+                                    url: 'bla.com',
+                                    name: 'bla',
+                                }),
+                            ],
+                        },
+                    })
+                },
+            })
+        })
+
+        it('should consider bookmarked pages as active data', async (setup: TestSetup) => {
+            await setup({ enablePostProcessing: true })
+
+            await runPassiveDataTest({
+                setup,
+                insertDefaultPages: true,
+                insertData: async ({ device }) => {
+                    await device.backgroundModules.bookmarks.addBookmark({
+                        fullUrl: 'https://www.bla.com/',
+                        skipIndexing: true,
+                    })
+                },
+                checkData: async ({ expectData }) => {
+                    await expectData({
+                        collections: ['pages', 'bookmarks'],
+                        expected: {
+                            pages: [
+                                expect.objectContaining({
+                                    fullUrl: 'http://www.bla.com/',
+                                }),
+                            ],
+                            bookmarks: [
+                                expect.objectContaining({
+                                    url: 'bla.com',
+                                }),
+                            ],
+                        },
+                    })
+                },
+            })
+        })
+
+        it('should consider annotated pages as active data', async (setup: TestSetup) => {
+            const { customLists } = await setup()
+
+            await runPassiveDataTest({
+                setup,
+                insertDefaultPages: true,
+                insertData: async ({ device }) => {
+                    await device.backgroundModules.directLinking.annotationStorage.createAnnotation(
+                        {
+                            url: 'bla.com#12345',
+                            pageUrl: 'bla.com',
+                            pageTitle: 'bla title',
+                            comment: 'rgreggre',
+                        },
                     )
+                },
+                checkData: async ({ expectData }) => {
+                    await expectData({
+                        collections: ['pages', 'annotations'],
+                        expected: {
+                            pages: [
+                                expect.objectContaining({
+                                    fullUrl: 'http://www.bla.com/',
+                                }),
+                            ],
+                            annotations: [
+                                expect.objectContaining({
+                                    url: 'bla.com#12345',
+                                    pageUrl: 'bla.com',
+                                }),
+                            ],
+                        },
+                    })
                 },
             })
         })
@@ -749,7 +880,6 @@ function mobileSyncTests(suiteOptions: {
     type TestSetup = (
         conf?: TestSetupConfig,
     ) => Promise<{
-        fetchPageProcessor?: MockFetchPageDataProcessor
         devices: {
             extension: BackgroundIntegrationTestSetup
             mobile: MobileIntegrationTestSetup
@@ -774,19 +904,17 @@ function mobileSyncTests(suiteOptions: {
     function setupTest(dependencies: TestDependencies): TestSetup {
         return async (conf: TestSetupConfig = {}) => {
             const signalTransportFactory = lazyMemorySignalTransportFactory()
-            const fetchPageProcessor = conf.enablePostProcessing
-                ? new MockFetchPageDataProcessor()
-                : undefined
 
             const devices = {
                 extension: await setupBackgroundIntegrationTest({
                     signalTransportFactory,
-                    sharedSyncLog: dependencies.sharedSyncLog,
-                    fetchPageProcessor,
+                    getServerStorage: dependencies.getServerStorage,
+                    includePostSyncProcessor: true,
                 }),
                 mobile: await setupMobileIntegrationTest({
                     signalTransportFactory,
-                    sharedSyncLog: dependencies.sharedSyncLog,
+                    sharedSyncLog: (await dependencies.getServerStorage())
+                        .storageModules.sharedSyncLog,
                 }),
             }
 
@@ -801,7 +929,7 @@ function mobileSyncTests(suiteOptions: {
                 id: userId as string,
             })
 
-            return { devices, fetchPageProcessor }
+            return { devices }
         }
     }
 
@@ -813,18 +941,6 @@ function mobileSyncTests(suiteOptions: {
         )) {
             if (SYNCED_COLLECTIONS.indexOf(collectionName) === -1) {
                 delete storageContents[collectionName]
-            }
-        }
-    }
-
-    function removeTermFieldsFromStorageContents(
-        storageContents: StorageContents,
-    ) {
-        for (const [collectionName, objects] of Object.entries(
-            storageContents,
-        )) {
-            for (const object of objects) {
-                removeTermFieldsFromObject(object, { collectionName })
             }
         }
     }
@@ -843,6 +959,7 @@ function mobileSyncTests(suiteOptions: {
     async function getMobileStorageContents(storageManager: StorageManager) {
         const mobileStorageContents = await getStorageContents(storageManager)
         await removeUnsyncedCollectionFromStorageContents(mobileStorageContents)
+        await removeTermFieldsFromStorageContents(mobileStorageContents)
         return mobileStorageContents
     }
 
@@ -924,6 +1041,7 @@ function mobileSyncTests(suiteOptions: {
             pageUrl: 'test.com',
             pageTitle: 'This is a test page',
             body: 'this is some highlighted text from the page',
+            comment: null,
         })
 
         const beforeSync = {
@@ -1011,6 +1129,7 @@ function mobileSyncTests(suiteOptions: {
             pageUrl: testPage.fullUrl,
             body: 'Test note',
             selector: 'sel.ect',
+            comment: null,
         })
 
         await devices.mobile.services.sync.continuousSync.forceIncrementalSync()
@@ -1029,9 +1148,10 @@ function mobileSyncTests(suiteOptions: {
                     annotsCount: 1,
                     displayTime: expect.any(Number),
                     favIcon: undefined,
-                    hasBookmark: false,
+                    hasBookmark: true,
                     screenshot: undefined,
                     tags: ['eggs', 'spam'],
+                    lists: ['widgets'],
                     title: 'This is a test page',
                     url: 'test.com/foo',
                     fullUrl: testPage.fullUrl,
@@ -1116,8 +1236,9 @@ function mobileSyncTests(suiteOptions: {
                 ) {
                     await devices.extension.backgroundModules.bookmarks.addBookmark(
                         {
-                            url: 'http://toolate.com/',
-                            time: new Date('2019-10-11').getTime(),
+                            fullUrl: 'http://toolate.com/',
+                            timestamp: new Date('2019-10-11').getTime(),
+                            skipIndexing: true,
                         },
                     )
                 }
@@ -1159,6 +1280,148 @@ function mobileSyncTests(suiteOptions: {
             syncDeviceInfo: expectedDeviceInfo,
         })
     })
+
+    it('should share list entries added to a shared list on mobile and synced to the extension', async (setup: TestSetup) => {
+        const {
+            devices: { extension, mobile },
+        } = await setup()
+        const localListId = await extension.backgroundModules.customLists.createCustomList(
+            {
+                name: 'My shared list',
+            },
+        )
+        await extension.backgroundModules.pages.addPage({
+            pageDoc: {
+                url: 'https://www.spam.com/foo',
+                content: {
+                    title: 'Spam.com title',
+                },
+            },
+            visits: [],
+            rejectNoContent: false,
+        })
+        await extension.backgroundModules.customLists.insertPageToList({
+            id: localListId,
+            url: 'https://www.spam.com/foo',
+        })
+        await extension.backgroundModules.contentSharing.shareList({
+            listId: localListId,
+        })
+        await extension.backgroundModules.contentSharing.shareListEntries({
+            listId: localListId,
+        })
+        await doInitialSync({
+            source: extension.backgroundModules.sync,
+            target: mobile.services.sync,
+        })
+
+        await mobile.storage.modules.overview.createPage({
+            url: 'eggs.com/foo',
+            fullUrl: 'https://www.eggs.com/foo',
+            fullTitle: 'Eggs.com title',
+            text: '',
+        })
+        await mobile.storage.modules.metaPicker.createPageListEntry({
+            listId: localListId,
+            pageUrl: 'https://www.eggs.com/foo',
+        })
+
+        await mobile.services.sync.continuousSync.forceIncrementalSync()
+        await extension.backgroundModules.sync.continuousSync.forceIncrementalSync()
+        await extension.backgroundModules.contentSharing.waitForSync()
+        await new Promise((resolve) => setTimeout(resolve, 200))
+
+        const serverStorage = await extension.getServerStorage()
+        expect(
+            await serverStorage.storageManager.operation(
+                'findObjects',
+                'sharedListEntry',
+                {},
+            ),
+        ).toEqual([
+            expect.objectContaining({
+                normalizedUrl: 'spam.com/foo',
+                entryTitle: 'Spam.com title',
+            }),
+            expect.objectContaining({
+                normalizedUrl: 'eggs.com/foo',
+                entryTitle: 'Eggs.com title',
+            }),
+        ])
+    })
+
+    it('should unshare list entries removed from a shared list on mobile and synced to the extension', async (setup: TestSetup) => {
+        const {
+            devices: { extension, mobile },
+        } = await setup()
+        const localListId = await extension.backgroundModules.customLists.createCustomList(
+            {
+                name: 'My shared list',
+            },
+        )
+        await extension.backgroundModules.pages.addPage({
+            pageDoc: {
+                url: 'https://www.spam.com/foo',
+                content: {
+                    title: 'Spam.com title',
+                },
+            },
+            visits: [],
+            rejectNoContent: false,
+        })
+        await extension.backgroundModules.customLists.insertPageToList({
+            id: localListId,
+            url: 'https://www.spam.com/foo',
+        })
+        await extension.backgroundModules.pages.addPage({
+            pageDoc: {
+                url: 'https://www.eggs.com/foo',
+                content: {
+                    title: 'Eggs.com title',
+                },
+            },
+            visits: [],
+            rejectNoContent: false,
+        })
+        await extension.backgroundModules.customLists.insertPageToList({
+            id: localListId,
+            url: 'https://www.eggs.com/foo',
+        })
+        await extension.backgroundModules.contentSharing.shareList({
+            listId: localListId,
+        })
+        await extension.backgroundModules.contentSharing.shareListEntries({
+            listId: localListId,
+        })
+        await extension.backgroundModules.contentSharing.waitForSync()
+        await doInitialSync({
+            source: extension.backgroundModules.sync,
+            target: mobile.services.sync,
+        })
+
+        await mobile.storage.modules.metaPicker.deletePageEntryFromList({
+            listId: localListId,
+            url: 'eggs.com/foo',
+        })
+        await mobile.services.sync.continuousSync.forceIncrementalSync()
+        await extension.backgroundModules.sync.continuousSync.forceIncrementalSync()
+        await extension.backgroundModules.contentSharing.waitForSync()
+        await new Promise((resolve) => setTimeout(resolve, 200))
+
+        const serverStorage = await extension.getServerStorage()
+        expect(
+            await serverStorage.storageManager.operation(
+                'findObjects',
+                'sharedListEntry',
+                {},
+            ),
+        ).toEqual([
+            expect.objectContaining({
+                normalizedUrl: 'spam.com/foo',
+                entryTitle: 'Spam.com title',
+            }),
+        ])
+    })
 }
 
 describe('SyncBackground', () => {
@@ -1178,7 +1441,7 @@ describe('SyncBackground', () => {
         syncTests({
             withDependencies: async (body) => {
                 await body({
-                    sharedSyncLog: await createMemorySharedSyncLog(),
+                    getServerStorage: await createLazyMemoryServerStorage(),
                 })
             },
         })
@@ -1206,7 +1469,14 @@ describe('SyncBackground', () => {
                     async ({ storageManager, modules }) => {
                         const sharedSyncLog = modules.sharedSyncLog as SharedSyncLogStorage
                         await body({
-                            sharedSyncLog,
+                            getServerStorage: async () => ({
+                                storageManager,
+                                storageModules: {
+                                    sharedSyncLog,
+                                    contentSharing: null,
+                                    userManagement: null,
+                                },
+                            }),
                             userId,
                         })
                     },
@@ -1225,4 +1495,18 @@ function expectIncrementalSyncScheduled(
     expect(recurringTask.aproximateNextRun).toBeTruthy()
     const difference = recurringTask.aproximateNextRun - options.when
     expect(difference).toBeLessThan(options.margin)
+}
+
+function removeTermFieldsFromStorageContents(storageContents: StorageContents) {
+    for (const [collectionName, objects] of Object.entries(storageContents)) {
+        for (const object of objects) {
+            if (collectionName === 'pages') {
+                delete object.text
+            }
+            if (collectionName === 'customLists') {
+                delete object.searchableName
+            }
+            removeTermFieldsFromObject(object, { collectionName })
+        }
+    }
 }

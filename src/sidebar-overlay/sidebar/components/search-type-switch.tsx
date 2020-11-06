@@ -10,7 +10,6 @@ import cx from 'classnames'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
 import { browser } from 'webextension-polyfill-ts'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 
 const commentAdd = browser.extension.getURL('/img/comment_add.svg')
 
@@ -128,7 +127,9 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                                         styles.pages,
                                     )}
                                     onClick={this.handleSocialBtnClick}
-                                    disabled={this.props.searchType === 'social'}
+                                    disabled={
+                                        this.props.searchType === 'social'
+                                    }
                                     id="social"
                                 >
                                     Social
@@ -147,15 +148,17 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                             </button>
                         </div>
                         <div
-                            onClick={e => {
+                            onClick={(e) => {
                                 e.stopPropagation()
                                 this.props.handleAddCommentBtnClick()
-                            }}    
-                            className={
-                                styles.imgContainer
-                            }
-                            > 
-                            <img src={commentAdd} className={styles.img}/>        
+                            }}
+                            className={styles.imgContainer}
+                        >
+                            <img
+                                style={{ maxWidth: '25px', maxHeight: '25px' }}
+                                src={commentAdd}
+                                className={styles.img}
+                            />
                         </div>
                     </div>
                     <div className={styles.notesBox}>
@@ -220,26 +223,28 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (
     resultsSearchType: resultsSelectors.searchType(state),
 })
 
-const mapDispatch: MapDispatchToProps<DispatchProps, OwnProps> = dispatch => ({
-    handlePageTypeClick: e => {
+const mapDispatch: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+) => ({
+    handlePageTypeClick: (e) => {
         e.preventDefault()
         dispatch(actions.togglePageType() as any)
     },
-    setSearchType: value => {
+    setSearchType: (value) => {
         dispatch(actions.setSearchType(value))
     },
-    setPageType: value => {
+    setPageType: (value) => {
         dispatch(actions.setPageType(value))
     },
-    handleUnfoldAllClick: e => {
+    handleUnfoldAllClick: (e) => {
         e.preventDefault()
         dispatch(resultsActs.toggleAreAnnotationsExpanded())
     },
-    setResultsSearchType: value => {
+    setResultsSearchType: (value) => {
         dispatch(resultsActs.setLoading(true))
         dispatch(resultsActs.setSearchType(value))
     },
-    setAnnotationsExpanded: value =>
+    setAnnotationsExpanded: (value) =>
         dispatch(resultsActs.setAreAnnotationsExpanded(value)),
 })
 

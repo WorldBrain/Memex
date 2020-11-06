@@ -4,11 +4,11 @@ import BackupSettingsContainer from '../backup-restore/ui/backup-pane'
 import Privacy from './privacy'
 import Statistics from './statistics'
 import Settings from './settings'
-import Overview from '../overview'
 import UserScreen from '../authentication/components/UserScreen'
-import { FeaturesOptInScreen } from '../feature-opt-in/ui/components/FeaturesOptInScreen'
 import React from 'react'
 import SyncDevicesPaneContainer from '../sync/components/device-list/SyncDevicesPane'
+import DashboardResultsContainer from 'src/overview/components/DashboardResultsContainer'
+import BetaFeaturesScreen from 'src/features/ui/components/BetaFeaturesScreen'
 
 export default [
     {
@@ -18,10 +18,10 @@ export default [
         hideFromSidebar: true,
     },
     {
-        name: 'Search Dashboard',
+        name: 'Home',
         pathname: '/overview',
-        component: Overview,
-        icon: 'search',
+        component: DashboardResultsContainer,
+        icon: 'home',
         useOwnLayout: true,
     },
     {
@@ -31,7 +31,7 @@ export default [
         icon: 'settings',
     },
     {
-        name: 'Import',
+        name: 'Import & Integrations',
         pathname: '/import',
         component: ImportContainer,
         icon: 'import',
@@ -47,6 +47,12 @@ export default [
         pathname: '/sync',
         component: SyncDevicesPaneContainer,
         icon: 'sync',
+    },
+    {
+        name: 'Beta Features',
+        pathname: '/features',
+        icon: 'settings',
+        component: BetaFeaturesScreen,
     },
     {
         name: 'Blocklist',
@@ -74,8 +80,7 @@ export default [
     },
     {
         name: 'Tutorial',
-        pathname:
-            'https://www.notion.so/worldbrain/Tutorials-fa44dcbf41654ceb910c5952b6097f8d',
+        pathname: 'https://worldbrain.io/tutorials',
         isExternal: true,
         icon: 'info',
     },
@@ -87,19 +92,12 @@ export default [
         hideFromSidebar: true,
     },
     {
-        name: 'User Account Subscriptions',
+        name: 'User Account',
         pathname: '/account-subscriptions',
         icon: 'settings',
-        component: props => (
-            <UserScreen initiallyShowSubscriptionModal {...props} />
+        component: (props) => (
+            <UserScreen {...props} initiallyShowSubscriptionModal refreshUser />
         ),
-        hideFromSidebar: true,
-    },
-    {
-        name: 'Opt In Features',
-        pathname: '/features',
-        icon: 'settings',
-        component: FeaturesOptInScreen,
         hideFromSidebar: true,
     },
 ]

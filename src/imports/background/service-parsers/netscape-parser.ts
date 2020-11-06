@@ -1,8 +1,8 @@
 import { Item, ServiceParser } from '../types'
 
-const parseNetscape: ServiceParser = doc => {
+const parseNetscape: ServiceParser = (doc) => {
     const links = doc.getElementsByTagName('a')
-    const collectionName = 'Bookmarks Bar'
+    const collectionName = 'Imported Bookmarks'
     const items: Item[] = []
     for (const link of links) {
         if (!link.hasAttribute('href')) {
@@ -18,16 +18,13 @@ const parseNetscape: ServiceParser = doc => {
         const item: Item = {
             url: link.getAttribute('href'),
             title: link.textContent || link.getAttribute('href'),
-            tags: tags.map(tag =>
-                tag
-                    .trim()
-                    .replace(/\s\s+/g, ' ')
-                    .toLowerCase(),
+            tags: tags.map((tag) =>
+                tag.trim().replace(/\s\s+/g, ' ').toLowerCase(),
             ),
             collections: [collectionName],
             timeAdded: link.hasAttribute('add_date')
                 ? Number(link.getAttribute('add_date'))
-                : null,
+                : Date.now(),
         }
         items.push(item)
     }

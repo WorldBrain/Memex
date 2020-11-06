@@ -1,4 +1,37 @@
+import process from 'process'
+import dotenv from 'dotenv'
+import path from 'path'
+
+import { doesFileExist } from './util'
+
+export const envPaths = {
+    development: path.resolve(__dirname, '../private/.env.development'),
+    production: path.resolve(__dirname, '../private/.env.production'),
+    fallback: path.resolve(__dirname, '../private/.env.example'),
+}
+
+export function determineEnvPath({ mode }) {
+    if (mode === 'development') {
+        return doesFileExist(envPaths.development)
+            ? envPaths.development
+            : envPaths.fallback
+    }
+
+    if (doesFileExist(envPaths.production)) {
+        return envPaths.production
+    }
+
+    console.error(
+        `FATAL ERROR: production env file does not exist:\n${envPaths.production}\n`,
+    )
+    process.exit(1)
+}
+
 export default ({ mode }) => {
+    const envPath = determineEnvPath({ mode })
+    console.log('USING ENV FILE:', envPath)
+    dotenv.config({ path: envPath })
+
     const env = {
         VERSION: process.env.npm_package_version,
         PIWIK_SITE_ID: '1',
@@ -13,6 +46,7 @@ export default ({ mode }) => {
         BACKUP_START_SCREEN: '',
         BACKUP_TEST_SIZE_ESTIMATION: '',
         DEV_AUTH_STATE: '',
+        USE_FIREBASE_EMULATOR: process.env.USE_FIREBASE_EMULATOR || 'false',
     }
 
     if (mode === 'development') {
@@ -35,7 +69,7 @@ export default ({ mode }) => {
     // Analytics
     if (mode === 'development' && process.env.DEV_ANALYTICS !== 'true') {
         console.warn(
-            `Turing off analytics for extension development, set DEV_ANALYTICS=true if you're hacking on analytics`,
+            `Turning off analytics for extension development, set DEV_ANALYTICS=true if you're hacking on analytics`,
         )
         env.SENTRY_DSN = ''
     } else if (mode === 'production' || process.env.DEV_ANALYTICS === 'true') {
@@ -49,5 +83,8 @@ export default ({ mode }) => {
         // env.COUNTLY_APP_KEY = '47678cda223ca2570cb933959c9037613a751283'
     }
 
-    return env
+    return {
+        defaultEnv: env,
+        envPath,
+    }
 }

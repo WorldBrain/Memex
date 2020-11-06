@@ -13,12 +13,24 @@ const settingsStyle = require('src/options/settings/components/settings.css')
 class SetupManualOrAutomatic extends React.Component {
     state = {
         mode: null,
+        automatic: false,
+    }
+
+    async componentDidMount() {
+        await this.fetchAuthorizedFeatures()
+    }
+
+    async fetchAuthorizedFeatures() {
+        if (
+            await this.props.currentUser?.authorizedFeatures.includes('backup')
+        ) {
+            this.setState({
+                automatic: true,
+            })
+        }
     }
 
     render() {
-        const isAuthorizedForAutomaticBackup = this.props.authorizedFeatures.includes(
-            'backup',
-        )
         return (
             <div>
                 <div className={settingsStyle.section}>
@@ -28,11 +40,9 @@ class SetupManualOrAutomatic extends React.Component {
                     </div>
                     <OnboardingBackupMode
                         className={Styles.selectionlist}
-                        onModeChange={mode => this.setState({ mode })}
+                        onModeChange={(mode) => this.setState({ mode })}
                         showSubscriptionModal={this.props.showSubscriptionModal}
-                        isAuthorizedForAutomaticBackup={
-                            isAuthorizedForAutomaticBackup
-                        }
+                        isAuthorizedForAutomaticBackup={this.state.automatic}
                     />
                     <div className={settingsStyle.buttonArea}>
                         <SecondaryAction
@@ -49,11 +59,11 @@ class SetupManualOrAutomatic extends React.Component {
                                 />
                             )}
                             {this.state.mode === 'automatic' &&
-                                isAuthorizedForAutomaticBackup && (
+                                this.state.automatic && (
                                     <PrimaryAction
                                         disabled={false}
                                         onClick={
-                                            isAuthorizedForAutomaticBackup
+                                            this.state.automatic
                                                 ? () =>
                                                       this.props.onChoice({
                                                           type: 'automatic',
@@ -63,7 +73,7 @@ class SetupManualOrAutomatic extends React.Component {
                                         label={'Next'}
                                     />
                                 )}
-                            {isAuthorizedForAutomaticBackup === false &&
+                            {this.state.automatic === false &&
                                 this.state.mode === 'automatic' && (
                                     <PrimaryAction
                                         disabled={false}
@@ -81,7 +91,7 @@ class SetupManualOrAutomatic extends React.Component {
     }
 }
 
-export default connect(null, dispatch => ({
+export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
 }))(withCurrentUser(SetupManualOrAutomatic))
 
@@ -89,5 +99,5 @@ SetupManualOrAutomatic.propTypes = {
     onChoice: PropTypes.func.isRequired,
     onBackRequested: PropTypes.func.isRequired,
     showSubscriptionModal: PropTypes.func.isRequired,
-    authorizedFeatures: PropTypes.array.isRequired,
+    currentUser: PropTypes.object.isRequired,
 }

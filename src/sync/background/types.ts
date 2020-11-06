@@ -14,5 +14,6 @@ export interface PublicSyncInterface {
 
     listDevices(): Promise<any>
     removeDevice(deviceId: string): Promise<any>
+    removeAllDevices(): Promise<void>
     abortInitialSync(): Promise<void>
 }

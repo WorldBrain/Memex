@@ -2,7 +2,7 @@
 @value color7 from colors;
 
 .tag {
-    background-image: url('/img/tag.svg');
+    background-image: url('/img/tag_empty.svg');
     background-repeat: no-repeat;
     background-size: 20px;
     opacity: 0.8;
@@ -12,6 +12,9 @@
 .button {
     flex: 7;
     text-align: left;
+    display: inline-block;
+    padding: 10px 20px;
+    height: 100%;
 }
 
 .buttonBulk {
@@ -22,6 +25,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 5px;
 }
 
 .allTabs {

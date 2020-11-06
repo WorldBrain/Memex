@@ -1,0 +1,82 @@
+.tagHolder {
+    position: relative;
+    display: inline-block;
+    justify-content: flex-start;
+    align-items: center;
+    box-sizing: border-box;
+    cursor: pointer;
+    padding: 5px 10px 5px 15px;
+}
+
+.tag {
+    composes: tagPillRemove from 'src/common-ui/elements.css';
+    display: inline-block;
+    align-items: center;
+    padding: 3px 4px 3px 9px;
+}
+
+.tagContent {
+    display: flex;
+    align-items: center;
+}
+
+.tagIcon {
+    mask-image: url('/img/tag_empty.svg');
+    mask-size: 15px;
+    width: 20px;
+    height: 20px;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    background-color: #3a2f45;
+    opacity: 0.6;
+    display: flex;
+    margin-right: 5px;
+}
+
+.tagText {
+    vertical-align: center;
+}
+
+.placeholder {
+    display: inline-flex;
+    color: #888;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    align-items: center;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-left: -10px;
+
+    &:hover {
+        color: #3a2f45;
+        background-color: #e0e0e0;
+    }
+}
+
+.placeholder_alt {
+    margin-left: 0px;
+}
+
+.plus {
+    font-size: 21px;
+    position: absolute;
+    right: 15px;
+    top: 6px;
+    font-weight: bold;
+    color: #555;
+}
+
+.tagsLeft {
+    font-weight: 800;
+    color: #888;
+}
+
+.remove {
+    composes: closeIconThin from 'src/common-ui/icons.css';
+    padding: 2px;
+    width: 4px;
+    height: 4px;
+    margin-left: 6px;
+    margin-right: 3px;
+    opacity: 0.7;
+}

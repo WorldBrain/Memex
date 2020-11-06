@@ -5,7 +5,9 @@
     margin-bottom: 35px;
     display: flex;
     flex-direction: column;
-    width: 783px;
+    max-width: 783px;
+    width: 98%;
+    margin-top: -5px;
 }
 
 .parentExpandedSidebar {
@@ -14,7 +16,7 @@
 
 .resultCount {
     color: #3a2f45;
-    margin: 0px 0 15px 0;
+    margin: -5px 0 15px 0;
     text-align: start;
     font-size: 13px;
     justify-content: center;
@@ -62,6 +64,8 @@
 
 .annotation {
     animation: annotationLoad 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+    padding: 10px;
+    display: block;
 }
 
 .annotationBoxInpage {
@@ -93,4 +97,11 @@
     100% {
         opacity: 1;
     }
+}
+
+.hoverBoxWrapper {
+    /* TODO: come up with sane, consistent z-index values. */
+    z-index: 100;
+    position: relative;
+    right: -60%;
 }

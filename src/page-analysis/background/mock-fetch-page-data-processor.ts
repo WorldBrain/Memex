@@ -13,6 +13,7 @@ export class MockFetchPageDataProcessor implements FetchPageProcessor {
         titleTerms: [],
         text: 'test',
     }
+    lastProcessedUrl?: string
 
     constructor(
         private pageToProcess: PageContent = MockFetchPageDataProcessor.DEF_PAGE,
@@ -23,6 +24,7 @@ export class MockFetchPageDataProcessor implements FetchPageProcessor {
     }
 
     async process(url: string): Promise<PageContent> {
+        this.lastProcessedUrl = url
         return this.pageToProcess
     }
 }

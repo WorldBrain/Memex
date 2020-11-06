@@ -8,9 +8,6 @@ const styles = require('./IndexDropdown.css')
 
 const searchImg = browser.extension.getURL('/img/search.svg')
 
-import { PageList } from 'src/custom-lists/background/types'
-import { ClickHandler } from 'src/popup/types'
-
 export interface Props {
     children?: any[]
     onTagSearchChange?: (s: string) => void
@@ -121,10 +118,9 @@ class IndexDropdown extends PureComponent<Props> {
                     className={cx(styles.searchContainer, {
                         [styles.commentBox]: this.props.allowAdd,
                     })}
-                >    
-
+                >
                     <span className={styles.searchIcon}>
-                        <img src={searchImg} className={styles.searchImg}/>
+                        <img src={searchImg} className={styles.searchImg} />
                     </span>
                     <TextInputControlled
                         className={styles.search}

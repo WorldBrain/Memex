@@ -39,10 +39,7 @@ const ProgressTable = ({ progress, allowTypes }) => (
                 <th>Successful</th>
                 <th>
                     Failed (
-                    <a
-                        target="_blank"
-                        href="https://worldbrain.helprace.com/i117-why-do-so-many-of-my-imports-fail"
-                    >
+                    <a target="_blank" href="https://worldbrain.io/import_bug">
                         ?
                     </a>
                     )

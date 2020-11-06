@@ -1,14 +1,19 @@
 import React, { Component } from 'react'
-import { features, sync } from 'src/util/remote-functions-background'
+import { sync, auth, subscription } from 'src/util/remote-functions-background'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import {
-    UserProps,
-    withCurrentUser,
-} from 'src/authentication/components/AuthConnector'
-import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { SyncDevice } from 'src/sync/components/types'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
+import { AuthContextInterface } from 'src/authentication/background/types'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+
+export const subscriptionConfig = {
+    site:
+        process.env.NODE_ENV !== 'production'
+            ? 'worldbrain-test'
+            : 'worldbrain',
+}
 
 interface Props {
     onClickSync: () => void
@@ -37,6 +42,13 @@ export class SyncNowOverlayPane extends Component<Props> {
         }
     }
 
+    async componentDidMount() {
+        this.setState({
+            subscribed: await auth.hasSubscribedBefore(),
+            showSubscriptionOptions: true,
+        })
+    }
+
     renderSyncResults() {}
 
     render() {
@@ -51,6 +63,8 @@ export class SyncNowOverlayPane extends Component<Props> {
 
 interface ContainerProps {
     showSubscriptionModal: () => void
+    onClose?: () => void
+    subscriptionChanged?: () => void
 }
 interface ContainerState {
     showSync: boolean
@@ -58,9 +72,10 @@ interface ContainerState {
     syncError: any
     isSyncing: boolean
     devices: SyncDevice[]
+    loadingPortal: boolean
 }
 export class SyncNowOverlayPaneContainer extends Component<
-    ContainerProps & UserProps,
+    ContainerProps & AuthContextInterface,
     ContainerState
 > {
     state = {
@@ -69,6 +84,9 @@ export class SyncNowOverlayPaneContainer extends Component<
         syncError: null,
         isSyncing: false,
         devices: [],
+        subscribed: null,
+        showSubscriptionOptions: true,
+        loadingPortal: false,
     }
 
     refreshDevices = async () => {
@@ -79,6 +97,8 @@ export class SyncNowOverlayPaneContainer extends Component<
     componentDidMount() {
         this.refreshDevices()
     }
+
+    // TODO: investigate if a race condition is here
 
     handleOnClickSync = async () => {
         this.setState({ isSyncing: true })
@@ -100,15 +120,45 @@ export class SyncNowOverlayPaneContainer extends Component<
         window.location.href = '#/sync'
     }
 
+    openPortal = async () => {
+        this.setState({
+            loadingPortal: true,
+        })
+        const portalLink = await subscription.getManageLink()
+        window.open(portalLink['access_url'])
+    }
+
     render() {
-        const syncFeatureAllowed = this.props.authorizedFeatures.includes(
+        const syncFeatureAllowed = this.props.currentUser?.authorizedFeatures?.includes(
             'sync',
         )
 
         return (
             <div>
+                {this.props.currentUser?.subscriptionStatus === 'in_trial' && (
+                    <div>
+                        <div
+                            onClick={this.openPortal}
+                            className={settingsStyle.trialNotif}
+                        >
+                            {this.state.loadingPortal ? (
+                                <LoadingIndicator />
+                            ) : (
+                                <>
+                                    <div className={settingsStyle.trialHeader}>
+                                        <strong>Trial Period active</strong>
+                                    </div>
+                                    <div>
+                                        Add payment details to prevent
+                                        interruptions
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                )}
                 {this.state.devices.length === 0 && syncFeatureAllowed && (
-                    <div className={settingsStyle.buttonArea}>
+                    <div className={settingsStyle.buttonAreaSyncOverlay}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
                                 Sync Status
@@ -126,7 +176,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                 )}
 
                 {this.props.currentUser === null && (
-                    <div className={settingsStyle.buttonArea}>
+                    <div className={settingsStyle.buttonAreaSyncOverlay}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
                                 Sync Status
@@ -143,7 +193,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                     </div>
                 )}
                 {!syncFeatureAllowed && this.props.currentUser && (
-                    <div className={settingsStyle.buttonArea}>
+                    <div className={settingsStyle.buttonAreaSyncOverlay}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
                                 Sync Status
@@ -163,7 +213,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                 {syncFeatureAllowed &&
                     this.state.devices.length > 0 &&
                     !this.state.isSyncing && (
-                        <div className={settingsStyle.buttonArea}>
+                        <div className={settingsStyle.buttonAreaSyncOverlay}>
                             <div>
                                 <div className={settingsStyle.sectionTitle}>
                                     Sync Enabled
@@ -181,7 +231,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                     )}
 
                 {this.state.isSyncing && (
-                    <div className={settingsStyle.buttonArea}>
+                    <div className={settingsStyle.buttonAreaSyncOverlay}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
                                 Sync Status
@@ -198,7 +248,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                     </div>
                 )}
                 {this.state.syncError && (
-                    <div className={settingsStyle.buttonArea}>
+                    <div className={settingsStyle.buttonAreaSyncOverlay}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
                                 Sync Failed
@@ -219,6 +269,6 @@ export class SyncNowOverlayPaneContainer extends Component<
     }
 }
 
-export default connect(null, dispatch => ({
+export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
 }))(withCurrentUser(SyncNowOverlayPaneContainer))

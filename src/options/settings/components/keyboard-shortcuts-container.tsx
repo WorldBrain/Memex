@@ -3,14 +3,23 @@ import * as React from 'react'
 import { Checkbox } from '../../../common-ui/components'
 import {
     convertKeyboardEventToKeyString,
-    getKeyboardShortcutsState,
     setKeyboardShortcutsState,
-} from 'src/content-tooltip/utils'
-import { KeyboardShortcuts } from 'src/content-tooltip/types'
+} from 'src/in-page-ui/keyboard-shortcuts/utils'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { shortcuts, ShortcutElData } from '../keyboard-shortcuts'
+import { KeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/types'
 import analytics from 'src/analytics'
+import { runInBackground } from 'src/util/webextensionRPC'
+import { InPageUIInterface } from 'src/in-page-ui/background/types'
 
 const styles = require('./settings.css')
+
+async function writeShortcutState(state: State) {
+    await setKeyboardShortcutsState(state)
+    await runInBackground<
+        InPageUIInterface<'caller'>
+    >().updateContextMenuEntries()
+}
 
 export interface Props {
     shortcutsData?: ShortcutElData[]
@@ -58,22 +67,20 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
             return { [name]: { ...state[name], enabled } } as any
         }
 
-        this.setState(reducer, () =>
-            setKeyboardShortcutsState({ ...this.state }),
-        )
+        this.setState(reducer, () => writeShortcutState({ ...this.state }))
     }
 
-    recordBinding = async (e) => {
+    recordBinding: React.KeyboardEventHandler = async (e) => {
         e.preventDefault()
 
-        const name = e.target.name as string
+        const name = (e.target as HTMLInputElement).name as string
 
         // Afford way of clearing shortcut
         if (['Escape', 'Backspace'].includes(e.key)) {
             this.setState(
                 (state) =>
                     ({ [name]: { ...state[name], shortcut: '' } } as any),
-                () => setKeyboardShortcutsState({ ...this.state }),
+                () => writeShortcutState({ ...this.state }),
             )
             return
         }
@@ -86,7 +93,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
 
         this.setState(
             (state) => ({ [name]: { ...state[name], shortcut } } as any),
-            () => setKeyboardShortcutsState({ ...this.state }),
+            () => writeShortcutState({ ...this.state }),
         )
     }
 

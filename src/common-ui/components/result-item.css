@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color4, color1, color2, color3, color5, color6 from colors;
+@value color4, color1, color2, color3, color5, color6, boxShadow from colors;
 
 :root {
     --height: 90px;
@@ -7,6 +7,14 @@
     --resultWidth: 800px;
     --vertical-spacing: 30px;
     --compact-scale: 0.6;
+}
+
+.resultBox {
+    display: flex;
+}
+
+.resultBoxItem {
+    width: 100%;
 }
 
 /* List entries shown as context around a search result */
@@ -25,19 +33,23 @@
 }
 
 .rootContainer {
-    border-top: 0.75px solid #e1e1e1;
+    border: 0.75px solid #e1e1e1;
+    border-radius: 5px;
     display: flex;
     flex-direction: row;
     position: relative;
     color: inherit;
     text-decoration: none;
     z-index: 0;
-    animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+    margin-bottom: 5px;
     background-color: white;
     height: fit-content;
     min-height: var(--height);
     width: 100%;
-    border-bottom: 0.75px solid #e1e1e1;
+    max-width: 800px;
+    box-shadow: rgb(143 143 143 / 0.05) 0px 4px 6px 4px,
+        rgba(143, 143, 143, 0.05) 0px 2px 4px;
+    transition: background 120ms ease-in 0s;
 
     &:hover {
         cursor: pointer;
@@ -49,7 +61,7 @@
     }
 
     &:hover .button {
-        opacity: 0.4;
+        opacity: 0.6;
         display: flex;
     }
 
@@ -57,19 +69,21 @@
         display: flex;
     }
 
+    &:hover .secondaryActionButton {
+        display: flex;
+    }
+
     & .button {
         display: none;
-        padding: 0;
     }
 }
 
 .rootContainerOverview {
-    width: var(--resultWidth);
+    max-width: var(--resultWidth);
+    width: 100%;
     height: fit-content;
 
     & .button {
-        height: 16px;
-        padding: 0.2;
         display: flex;
     }
 
@@ -88,10 +102,7 @@
         letter-spacing: 0.1px;
         font-size: 16px;
         margin-left: 12px;
-    }
-
-    & .permanentButton {
-        height: 16px;
+        overflow-y: hidden;
     }
 }
 
@@ -109,7 +120,8 @@
 
 .rootOverview {
     padding: 0;
-    width: var(--resultWidth);
+    max-width: var(--resultWidth);
+    width: 100%;
 }
 
 .crossRibbon {
@@ -189,6 +201,12 @@
     }
 }
 
+.listItem {
+    width: 98%;
+    max-width: 800px;
+    position: relative;
+}
+
 .tagContainer {
     width: 100%;
     display: flex;
@@ -205,8 +223,17 @@
     padding: 15px 0px;
 }
 
+.removeCollectionItemBox {
+    display: flex;
+    align-items: flex-start;
+
+    & > div {
+        height: fit-content;
+    }
+}
+
 .infoContainerOverview {
-    padding: 20px 13px 20px;
+    padding: 15px 13px 15px;
 }
 
 .infoContainerScreenshot {
@@ -230,12 +257,12 @@
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
-    width: 100%;
-    height: 26px;
+    min-height: 26px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     align-items: flex-start;
+    width: 800px;
 }
 
 .title {
@@ -264,6 +291,7 @@
 
 .favIcon {
     width: 100%;
+    border-radius: 50px;
 }
 
 .noFavicon {
@@ -300,13 +328,13 @@
 }
 
 .buttonsContainer {
-    display: flex;
+    display: grid;
     flex-direction: row;
-    float: right;
-    align-items: flex-start;
-    justify-content: flex-end;
-    margin-left: 20px;
-    height: 20px;
+    z-index: 0;
+    grid-auto-flow: column;
+    grid-gap: 3px;
+    padding: 10px;
+    margin: -10px -10px 0 0;
 }
 
 .detailsContainer {
@@ -315,6 +343,7 @@
     justify-content: flex-end;
     align-items: flex-start;
     height: 20px;
+    margin-top: -3px;
 }
 
 .displayTime {
@@ -326,81 +355,65 @@
 .button {
     border: none;
     z-index: 2500;
-    width: auto;
-    display: flex;
-    opacity: 0.2;
-    height: 14px;
-    background-repeat: no-repeat;
+    width: 24px;
+    height: 24px;
+    padding: 4px;
     cursor: pointer;
     outline: none;
-    background-position: center center;
-    background-size: contain;
-    margin-left: 8px;
+    opacity: 0.2;
+    border-radius: 3px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    background: none;
+    align-self: flex-start;
 
     &:hover {
         opacity: 1;
-        cursor: pointer;
+        background-color: #e0e0e0;
+        background-position: center center;
+        background-size: contain;
+        background-repeat: no-repeat;
     }
+}
+
+.secondaryActionButton {
+    display: none;
 }
 
 .permanentButton {
     border: none;
     z-index: 2500;
-    height: 14px;
-    background-repeat: no-repeat;
+    height: 24px;
+    width: 24px;
+    padding: 4px;
+    opacity: 0.6;
     cursor: pointer;
     outline: none;
-    background-position: center center;
-    background-size: contain;
-    margin-left: 8px;
-    display: flex;
-    opacity: 0.8;
+    border-radius: 3px;
+    background: none;
 
     &:hover {
         opacity: 0.6;
+        background-color: #e0e0e0;
+        background-position: center center;
+        background-size: contain;
+        background-repeat: no-repeat;
     }
 }
 
 .img {
     height: 100%;
+    max-width: 100%;
 }
 
 .actionItems {
     display: flex;
     align-items: center;
-    height: 20px;
 }
 
-.commentActive {
-    opacity: 0.8;
-}
-
-.bookmark {
-    opacity: 0.8;
-}
-
-.notBookmark {
-    &:hover {
-        opacity: 0.6;
-    }
-}
-
-.tag {
-    &:hover {
-        opacity: 0.6;
-    }
-}
-
-.trash {
-    &:hover {
-        opacity: 0.6;
-    }
-}
-
-.comment {
-    &:hover {
-        opacity: 0.6;
-    }
+.commentBtn {
+    /* only used to ID if button is clicked - multiple buttons so cannot use a real `id` att */
 }
 
 .tagList {

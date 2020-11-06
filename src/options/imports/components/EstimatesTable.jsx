@@ -29,45 +29,20 @@ const EstimatesTable = ({
             <tr>
                 <th />
                 <th>
-                    Saved <br />
-                    pages
-                </th>
-                <th>
                     Not
-                    <br /> downloaded
+                    <br /> Imported
                 </th>
                 <th>
-                    Download <br />
+                    Import <br />
                     time
+                </th>
+                <th>
+                    Already saved <br />
+                    in Memex
                 </th>
             </tr>
         </thead>
         <tbody>
-            <tr className={localStyles.importTableRow}>
-                <td>
-                    <Checkbox
-                        id="history"
-                        name="history"
-                        isChecked={allowTypes[TYPE.HISTORY]}
-                        handleChange={onAllowHistoryClick}
-                    >
-                        <div className={localStyles.labelContainer}>
-                            <span className={localStyles.checkboxText}>
-                                Browser History
-                            </span>
-                            <span className={localStyles.checkboxSubText}>
-                                from last 90 days
-                            </span>
-                        </div>
-                    </Checkbox>
-                </td>
-                <td>{estimates[TYPE.HISTORY].complete}</td>
-                <td>{estimates[TYPE.HISTORY].remaining}</td>
-                <td>
-                    {'~'}
-                    {estimates[TYPE.HISTORY].timeRemaining}
-                </td>
-            </tr>
             <tr className={localStyles.importTableRow}>
                 <td>
                     <Checkbox
@@ -81,18 +56,15 @@ const EstimatesTable = ({
                             <span className={localStyles.checkboxText}>
                                 Browser Bookmarks
                             </span>
-                            <span className={localStyles.checkboxSubText}>
-                                from forever
-                            </span>
                         </div>
                     </Checkbox>
                 </td>
-                <td>{estimates[TYPE.BOOKMARK].complete}</td>
                 <td>{estimates[TYPE.BOOKMARK].remaining}</td>
                 <td>
                     {'~'}
                     {estimates[TYPE.BOOKMARK].timeRemaining}
                 </td>
+                <td>{estimates[TYPE.BOOKMARK].complete}</td>
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>
@@ -105,10 +77,7 @@ const EstimatesTable = ({
                     >
                         <div className={localStyles.labelContainer}>
                             <span className={localStyles.checkboxText}>
-                                Pocket import
-                            </span>
-                            <span className={localStyles.checkboxSubText}>
-                                Bookmarks, tags, time, reading list, archive
+                                Pocket
                             </span>
                         </div>
                     </Checkbox>
@@ -140,7 +109,7 @@ const EstimatesTable = ({
                                 position="right"
                             >
                                 <a
-                                    href="https://getpocket.com/export"
+                                    href="https://worldbrain.io/tutorials/importing"
                                     taget="_blank"
                                 >
                                     <span
@@ -190,9 +159,6 @@ const EstimatesTable = ({
                             <span className={localStyles.checkboxText}>
                                 HTML File
                             </span>
-                            <span className={localStyles.checkboxSubText}>
-                                Bookmarks, tags, time
-                            </span>
                         </div>
                     </Checkbox>
                 </td>
@@ -224,7 +190,7 @@ const EstimatesTable = ({
                                 position="right"
                             >
                                 <a
-                                    href="https://www.notion.so/worldbrain/7a12d7a019094785a14ff109e99a531d"
+                                    href="https://worldbrain.io/tutorials/importing"
                                     taget="_blank"
                                 >
                                     <span

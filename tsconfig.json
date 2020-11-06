@@ -54,6 +54,12 @@
             "@worldbrain/storex-hub/lib/*": [
                 "external/@worldbrain/storex-hub/ts/*"
             ],
+            "@worldbrain/storex-hub-interfaces": [
+                "external/@worldbrain/storex-hub-interfaces/ts"
+            ],
+            "@worldbrain/storex-hub-interfaces/lib/*": [
+                "external/@worldbrain/storex-hub-interfaces/ts/*"
+            ],
             "@worldbrain/memex-storage": [
                 "external/@worldbrain/memex-storage/ts"
             ],
@@ -79,15 +85,26 @@
             "@worldbrain/memex-url-utils": [
                 "external/@worldbrain/memex-url-utils/ts"
             ],
+            "@worldbrain/memex-url-utils/lib/*": [
+                "external/@worldbrain/memex-url-utils/ts/*"
+            ],
             "user-logic": ["external/user-logic/ts"],
             "user-logic/lib/*": ["external/user-logic/ts/*"],
+            "ui-logic-core": ["external/ui-logic/packages/ui-logic-core/ts"],
+            "ui-logic-core/lib/*": [
+                "external/ui-logic/packages/ui-logic-core/ts/*"
+            ],
+            "ui-logic-react": ["external/ui-logic/packages/ui-logic-react/ts"],
+            "ui-logic-react/lib/*": [
+                "external/ui-logic/packages/ui-logic-react/ts/*"
+            ],
             "simple-signalling": ["external/simple-signalling/ts"],
             "simple-signalling/lib/*": ["external/simple-signalling/ts/*"],
             "src/*": ["src/*"]
         },
         "lib": [
-            "es2017",
-            "es2018.promise",
+            "ES2019",
+            "ES2020",
             "dom",
             "dom.iterable",
             "esnext.asynciterable"

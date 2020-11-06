@@ -8,6 +8,7 @@ import {
     COLLECTION_NAMES,
 } from '@worldbrain/memex-storage/lib/pages/constants'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { Bookmark } from '@worldbrain/memex-storage/lib/mobile-app/features/overview/types'
 
 export default class BookmarksStorage extends StorageModule {
     static BMS_COLL = COLLECTION_NAMES.bookmark
@@ -45,6 +46,11 @@ export default class BookmarksStorage extends StorageModule {
                 operation: 'findObject',
                 args: { url: '$url:string' },
             },
+            findTabBookmarks: {
+                collection: this.bookmarksColl,
+                operation: 'findObjects',
+                args: { url: { $in: '$normalizedPageUrls' } },
+            },
         },
     })
 
@@ -55,25 +61,29 @@ export default class BookmarksStorage extends StorageModule {
         url: string
         time?: number
     }) {
-        const normalizedUrl = normalizeUrl(url, {})
+        const normalizedUrl = normalizeUrl(url)
         return this.operation('createBookmark', { url: normalizedUrl, time })
     }
 
     async delBookmark({ url }: { url: string }) {
-        const normalizedUrl = normalizeUrl(url, {})
+        const normalizedUrl = normalizeUrl(url)
         return this.operation('deleteBookmark', { url: normalizedUrl })
     }
 
     async createBookmarkIfNeeded(url: string, time: number) {
         if (!(await this.pageHasBookmark(url))) {
-            await this.addBookmark({ url, time })
+            await this.addBookmark({ url: normalizeUrl(url), time })
         }
     }
 
-    async pageHasBookmark(url: string): Promise<boolean> {
-        const normalizedUrl = normalizeUrl(url, {})
+    pageHasBookmark = async (url: string): Promise<boolean> => {
+        const normalizedUrl = normalizeUrl(url)
         return !!(await this.operation('findBookmarkByUrl', {
             url: normalizedUrl,
         }))
+    }
+
+    async findTabBookmarks(normalizedPageUrls: string[]): Promise<Bookmark[]> {
+        return this.operation('findTabBookmarks', { normalizedPageUrls })
     }
 }

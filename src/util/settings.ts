@@ -1,4 +1,5 @@
 import { Storage } from 'webextension-polyfill-ts'
+import { LimitedBrowserStorage } from './tests/browser-storage'
 
 export interface SettingStore<Settings> {
     set<Key extends keyof Settings>(
@@ -10,7 +11,7 @@ export interface SettingStore<Settings> {
 
 export class BrowserSettingsStore<Settings> implements SettingStore<Settings> {
     constructor(
-        private localBrowserStorage: Storage.LocalStorageArea,
+        private localBrowserStorage: LimitedBrowserStorage,
         private options?: {
             prefix?: string
         },

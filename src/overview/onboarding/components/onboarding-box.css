@@ -93,6 +93,7 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
+    text-align: center;
 }
 
 .bottomContainer {
@@ -222,6 +223,11 @@
     composes: onboardingGif;
 }
 
+.backupImg {
+    width: 40%;
+    margin-bottom: 100px;
+}
+
 .floatingImage {
     animation-name: float, scale-in-center;
     animation-duration: 6s, 1s;
@@ -273,6 +279,31 @@
     margin: 20px auto;
     justify-content: space-evenly;
     align-items: center;
+}
+
+.buttonBar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    & > div {
+        margin: 0 5px;
+    }
+}
+
+.skipButton {
+    font-weight: bold;
+    color: #3a2f45;
+    padding: 5px 10px;
+    display: flex;
+    border-radius: 3px;
+    margin-top: 5px;
+    font-size: 14px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
 }
 
 @keyframes float {

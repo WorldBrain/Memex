@@ -2,7 +2,12 @@ import { createReducer } from 'redux-act'
 
 import * as acts from './actions'
 
-export type ModalIds = 'Subscription' | null
+export type ModalIds =
+    | 'Subscription'
+    | 'ShareListModal'
+    | 'ShareAnnotationOnboardingModal'
+    | 'BetaFeatureNotifModal'
+    | null
 
 export interface State {
     modalId?: ModalIds
@@ -24,7 +29,7 @@ reducer.on(acts.show, (state, { modalId, options }) => {
     }
 })
 
-reducer.on(acts.close, state => {
+reducer.on(acts.close, (state) => {
     return {
         ...state,
         modalId: null,

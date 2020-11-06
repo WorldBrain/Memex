@@ -64,17 +64,18 @@
 
 .filterItem {
     display: flex;
+    align-items: center;
 }
 
 .clearFilters {
     composes: removeIcon from 'src/common-ui/icons.css';
     composes: nakedSquareButton from 'src/common-ui/elements.css';
-    background-size: 10px;
+    mask-size: 10px;
     cursor: pointer;
-    width: 18px;
-    height: 18px;
+    width: 15px;
+    height: 15px;
     margin: 0 5px;
-    background-position: center center;
+    mask-position: center center;
     display: inline-flex;
 
     &:hover {

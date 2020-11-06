@@ -1,5 +1,5 @@
 import { exec } from 'child_process'
-import { EnvironmentPlugin, DefinePlugin } from 'webpack'
+import { EnvironmentPlugin } from 'webpack'
 import ForkTsPlugin from 'fork-ts-checker-webpack-plugin'
 import CopyPlugin from 'copy-webpack-plugin'
 import HtmlPlugin from 'html-webpack-plugin'
@@ -10,15 +10,12 @@ import BuildNotifPlugin from 'webpack-build-notifier'
 import CssExtractPlugin from 'mini-css-extract-plugin'
 import SentryPlugin from '@sentry/webpack-plugin'
 import ZipPlugin from 'zip-webpack-plugin'
+import ScriptExtHtmlWebpackPlugin from 'script-ext-html-webpack-plugin'
 import PostCompilePlugin from 'post-compile-webpack-plugin'
-const Dotenv = require('dotenv-webpack')
-
-// Disabling this for now as it adds 2-4 seconds to inc. build time - look into finding out why
-// import WebExtReloadPlugin from 'webpack-chrome-extension-reloader'
-
 import initEnv from './env'
 import * as staticFiles from './static-files'
 import { output } from './config'
+const Dotenv = require('dotenv-webpack')
 
 /**
  * @param {boolean} tslint Denotes whether or not to enable linting on this thread as well as type checking.
@@ -33,7 +30,7 @@ const initTsPlugin = (tslint) =>
 export default function ({
     webExtReloadPort = 9090,
     mode = 'development',
-    template,
+    htmlTemplates,
     isCI = false,
     runSentry = false,
     notifsEnabled = false,
@@ -42,22 +39,23 @@ export default function ({
     extPackageName = 'extension.zip',
     sourcePackageName = 'source-code.zip',
 }) {
-    const envs = initEnv({ mode })
+    const { defaultEnv, envPath } = initEnv({ mode })
+
     const plugins = [
-        new EnvironmentPlugin(envs),
-        new Dotenv(),
+        new EnvironmentPlugin(defaultEnv),
+        new Dotenv({ path: envPath }),
         new CopyPlugin(staticFiles.copyPatterns),
         new HtmlPlugin({
             title: 'Popup',
             chunks: ['popup'],
             filename: 'popup.html',
-            template,
+            template: htmlTemplates.popup,
         }),
         new HtmlPlugin({
             title: 'Memex',
             chunks: ['options'],
             filename: 'options.html',
-            template,
+            template: htmlTemplates.options,
         }),
         new HtmlIncAssetsPlugin({
             append: false,
@@ -65,6 +63,11 @@ export default function ({
         }),
         new CssExtractPlugin({
             filename: '[name].css',
+        }),
+        new ScriptExtHtmlWebpackPlugin({
+            async: ['popup.js', 'lib/browser-polyfill.js'],
+            preload: /\.(css|js)$/,
+            prefetch: /\.(svg|png)$/,
         }),
     ]
 
@@ -74,12 +77,15 @@ export default function ({
                 environmentHash: {
                     root: process.cwd(),
                     directories: [],
-                    files: ['package-lock.json', 'yarn.lock', '.env'],
+                    files: [
+                        'yarn.lock',
+                        'package-lock.json',
+                        'private/.env.example',
+                        'private/.env.production',
+                        'private/.env.development',
+                    ],
                 },
             }),
-            // new WebExtReloadPlugin({
-            //     port: webExtReloadPort,
-            // }),
         )
     } else if (mode === 'production') {
         plugins.push(
@@ -87,7 +93,26 @@ export default function ({
                 release: process.env.npm_package_version,
                 include: output.path,
                 dryRun: !runSentry,
+                debug: true,
             }),
+        )
+    }
+
+    if (shouldPackage || isCI) {
+        plugins.push(
+            new ZipPlugin({
+                path: packagePath,
+                filename: extPackageName,
+                exclude: [/\.map/],
+            }),
+        )
+    }
+
+    if (shouldPackage) {
+        plugins.push(
+            new PostCompilePlugin(() =>
+                exec('git-archive-all dist/source-code.zip'),
+            ),
         )
     }
 
@@ -101,19 +126,6 @@ export default function ({
             new BuildNotifPlugin({
                 title: 'Memex Build',
             }),
-        )
-    }
-
-    if (shouldPackage) {
-        plugins.push(
-            new ZipPlugin({
-                path: packagePath,
-                filename: extPackageName,
-                exclude: [/\.map/],
-            }),
-            new PostCompilePlugin(() =>
-                exec('git-archive-all dist/source-code.zip'),
-            ),
         )
     }
 

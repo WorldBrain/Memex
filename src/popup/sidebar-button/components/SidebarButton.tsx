@@ -6,6 +6,7 @@ import ToggleSwitch from '../../components/ToggleSwitch'
 import { RootState, ClickHandler } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 
 const styles = require('./SidebarButton.css')
 const buttonStyles = require('../../components/Button.css')
@@ -24,11 +25,36 @@ interface DispatchProps {
     initState: () => Promise<void>
 }
 
+interface State {
+    highlightInfo: string
+}
+
 export type Props = OwnProps & StateProps & DispatchProps
 
 class TooltipButton extends PureComponent<Props> {
-    componentDidMount() {
+    async componentDidMount() {
         this.props.initState()
+        await this.getHighlightContextMenuTitle()
+    }
+
+    state = {
+        highlightInfo: undefined,
+    }
+
+    private async getHighlightContextMenuTitle() {
+        const {
+            shortcutsEnabled,
+            toggleSidebar,
+        } = await getKeyboardShortcutsState()
+
+        if (!shortcutsEnabled || !toggleSidebar.enabled) {
+            this.setState({
+                highlightInfo: `${toggleSidebar.shortcut} (disabled)`,
+            })
+        } else
+            this.setState({
+                highlightInfo: `${toggleSidebar.shortcut}`,
+            })
     }
 
     render() {
@@ -43,7 +69,7 @@ class TooltipButton extends PureComponent<Props> {
                     >
                         Open Sidebar
                         <p className={buttonStyles.subTitle}>
-                            only on this page
+                            {this.state.highlightInfo}
                         </p>
                     </Button>
                 </div>
@@ -63,7 +89,7 @@ class TooltipButton extends PureComponent<Props> {
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     isEnabled: selectors.isSidebarEnabled(state),
 })
 
@@ -71,12 +97,12 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
     props,
 ) => ({
-    openSidebar: async e => {
+    openSidebar: async (e) => {
         e.preventDefault()
         await dispatch(acts.openSideBar())
         setTimeout(props.closePopup, 200)
     },
-    handleChange: async e => {
+    handleChange: async (e) => {
         e.stopPropagation()
         e.preventDefault()
         await dispatch(acts.toggleSidebarFlag())
