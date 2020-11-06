@@ -121,9 +121,10 @@ const TextBox = styled.div`
     min-height: 30px;
     display: flex;
     align-items: center;
-    line-break: auto;
-    overflow-x: scroll;
+    overflow-x: hidden;
     line-height: 22px;
+    line-break: anywhere;
+
 
     & *:first-child {
         margin-top: 0px;
