@@ -103,6 +103,10 @@ export const delPageFromList = (url, isSocialPost) => async (
             : 'removePageFromList'
 
         if (listId === SPECIAL_LIST_IDS.INBOX) {
+            analytics.trackEvent({
+                category: 'Inbox',
+                action: 'removeFromInbox',
+            })
             dispatch(decInboxUnreadCount())
         }
 

@@ -1,30 +1,17 @@
 import React, { PureComponent } from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
+
+import analytics from 'src/analytics'
 import { LoadingIndicator } from 'src/common-ui/components'
 import {
-    TypographyHeadingBig,
     TypographyTextNormal,
     TypographyHeadingBigger,
-    TypographySubTextNormal,
     TypographyHeadingNormal,
     TypographyHeadingSmall,
 } from 'src/common-ui/components/design-library/typography'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-
-const Margin20 = styled.div`
-    height: 20px;
-`
-
-const HeaderText = styled.div`
-    font-family: Poppins;
-    font-style: normal;
-    font-weight: bold;
-    font-size: 14px;
-
-    margin-bottom: 10px;
-`
 
 const Text = styled.div`
     font-family: Poppins;
@@ -45,19 +32,6 @@ const ButtonsContainer = styled.div`
     & > * {
         margin: 0 5px;
     }
-`
-
-const Button = styled.button`
-    font-family: Poppins;
-    font-style: normal;
-    font-weight: bold;
-    font-size: 14px;
-    line-height: 21px;
-    cursor: pointer;
-
-    outline: none;
-    border: none;
-    background: transparent;
 `
 
 const InstructionsContainer = styled.div`
@@ -132,14 +106,6 @@ const BlockHeading = styled(TypographyHeadingNormal)`
     font-size: 18px;
 `
 
-interface ShareToggleProps {
-    isActive: boolean
-    activeText: string
-    inactiveText: string
-
-    onClickToggle: () => void
-}
-
 interface Props {
     isShared: boolean
     collectionName: string
@@ -165,6 +131,11 @@ export default class ShareListModalContent extends PureComponent<Props> {
     onClickCopy() {
         navigator.clipboard.writeText(this.props.shareUrl).catch((e) => {
             console.error(e)
+        })
+
+        analytics.trackEvent({
+            category: 'ContentSharing',
+            action: 'copyCollectionLink',
         })
 
         this.setState({ hasCopied: true })
@@ -237,7 +208,8 @@ export default class ShareListModalContent extends PureComponent<Props> {
                 <BetaInfoContainer>
                     <BlockHeading>🚀 This is a beta feature</BlockHeading>
                     <Text>
-                        What needs to change so it fits better into your workflow?
+                        What needs to change so it fits better into your
+                        workflow?
                     </Text>
 
                     <ButtonsContainer>

@@ -170,6 +170,9 @@ export type SidebarContainerEvents = UIEvent<{
         annotationUrl: string
     }
 
+    copyNoteLink: { link: string }
+    copyPageLink: { link: string }
+
     setPageUrl: { pageUrl: string }
 
     // Search
@@ -359,6 +362,28 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ isLocked: { $set: true } })
     unlock: EventHandler<'unlock'> = () =>
         this.emitMutation({ isLocked: { $set: false } })
+
+    copyNoteLink: EventHandler<'copyNoteLink'> = async ({
+        event: { link },
+    }) => {
+        this.options.analytics.trackEvent({
+            category: 'ContentSharing',
+            action: 'copyNoteLink',
+        })
+
+        await this.options.copyToClipboard(link)
+    }
+
+    copyPageLink: EventHandler<'copyPageLink'> = async ({
+        event: { link },
+    }) => {
+        this.options.analytics.trackEvent({
+            category: 'ContentSharing',
+            action: 'copyPageLink',
+        })
+
+        await this.options.copyToClipboard(link)
+    }
 
     private doSearch = debounce(this._doSearch, 300)
 

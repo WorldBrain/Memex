@@ -1,6 +1,7 @@
 // tslint:disable:forin
 import mapValues from 'lodash/mapValues'
 
+import { FakeAnalytics } from 'src/analytics/mock'
 import { SidebarContainerLogic, createEditFormsForAnnotations } from './logic'
 import {
     makeSingleDeviceUILogicTestFactory,
@@ -23,10 +24,12 @@ const setupLogicHelper = async ({
     device,
     pageUrl = DATA.CURRENT_TAB_URL_1,
     focusCreateForm = () => undefined,
+    copyToClipboard = () => undefined,
 }: {
     device: UILogicTestDevice
     pageUrl?: string
     focusCreateForm?: () => void
+    copyToClipboard?: (text: string) => Promise<boolean>
 }) => {
     const { backgroundModules } = device
 
@@ -43,6 +46,7 @@ const setupLogicHelper = async ({
         { skipPageIndexing: true },
     )
 
+    const analytics = new FakeAnalytics()
     const sidebarLogic = new SidebarContainerLogic({
         pageUrl,
         auth: backgroundModules.auth.remoteFunctions,
@@ -51,14 +55,16 @@ const setupLogicHelper = async ({
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
         annotations: annotationsBG,
         annotationsCache,
+        analytics,
         initialState: 'hidden',
         searchResultLimit: 10,
         focusCreateForm,
+        copyToClipboard,
     })
 
     const sidebar = device.createElement(sidebarLogic)
     await sidebar.init()
-    return { sidebar, sidebarLogic }
+    return { sidebar, sidebarLogic, analytics }
 }
 
 describe('SidebarContainerLogic', () => {
@@ -262,8 +268,6 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.annotations[0].isBookmarked).toBe(false)
         })
 
-        it('should be able to go to an annotation highlight on the page', async () => {})
-
         it('should be able to change annotation sharing access', async ({
             device,
         }) => {
@@ -296,6 +300,58 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.isLocked).toBe(true)
             await sidebar.processEvent('unlock', null)
             expect(sidebar.state.isLocked).toBe(false)
+        })
+
+        it('should be able to copy note link', async ({ device }) => {
+            let clipboard = ''
+            const { sidebar, analytics } = await setupLogicHelper({
+                device,
+                copyToClipboard: async (text) => {
+                    clipboard = text
+                    return true
+                },
+            })
+
+            expect(clipboard).toEqual('')
+            expect(analytics.popNew()).toEqual([])
+
+            await sidebar.processEvent('copyNoteLink', { link: 'test' })
+
+            expect(clipboard).toEqual('test')
+            expect(analytics.popNew()).toEqual([
+                {
+                    eventArgs: {
+                        category: 'ContentSharing',
+                        action: 'copyNoteLink',
+                    },
+                },
+            ])
+        })
+
+        it('should be able to copy page link', async ({ device }) => {
+            let clipboard = ''
+            const { sidebar, analytics } = await setupLogicHelper({
+                device,
+                copyToClipboard: async (text) => {
+                    clipboard = text
+                    return true
+                },
+            })
+
+            expect(clipboard).toEqual('')
+            expect(analytics.popNew()).toEqual([])
+
+            await sidebar.processEvent('copyPageLink', { link: 'test' })
+
+            expect(clipboard).toEqual('test')
+            expect(analytics.popNew()).toEqual([
+                {
+                    eventArgs: {
+                        category: 'ContentSharing',
+                        action: 'copyPageLink',
+                    },
+                },
+            ])
         })
     })
 

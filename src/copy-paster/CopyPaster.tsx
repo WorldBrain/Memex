@@ -1,5 +1,6 @@
 import React from 'react'
 
+import analytics from 'src/analytics'
 import { Template } from './types'
 import CopyPaster from './components/CopyPaster'
 import { copyPaster } from 'src/util/remote-functions-background'
@@ -90,6 +91,10 @@ export default class CopyPasterContainer extends React.PureComponent<
         } catch (err) {
             console.error('Something went really bad copying:', err.message)
         } finally {
+            analytics.trackEvent({
+                category: 'TextExporter',
+                action: 'copyToClipboard',
+            })
             this.setState({ isLoading: false })
         }
     }

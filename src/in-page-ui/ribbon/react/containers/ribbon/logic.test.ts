@@ -6,13 +6,12 @@ import {
 import {
     RibbonContainerLogic,
     INITIAL_RIBBON_COMMENT_BOX_STATE,
-    RibbonContainerOptions,
     RibbonLogicOptions,
 } from './logic'
 import { Annotation } from 'src/annotations/types'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
-import { FocusableComponent } from 'src/annotations/components/types'
+import { FakeAnalytics } from 'src/analytics/mock'
 
 function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
     return mapValues(remoteFunctions, (f) => {
@@ -57,8 +56,10 @@ describe('Ribbon logic', () => {
 
         let globalTooltipState = false
         let globalHighlightsState = false
+        const analytics = new FakeAnalytics()
 
         const ribbonLogic = new RibbonContainerLogic({
+            analytics,
             setRibbonShouldAutoHide: () => undefined,
             getSidebarEnabled: async () => true,
             setSidebarEnabled: async () => {},
@@ -96,7 +97,7 @@ describe('Ribbon logic', () => {
         })
 
         const ribbon = device.createElement(ribbonLogic)
-        return { ribbon, inPageUI, ribbonLogic }
+        return { ribbon, inPageUI, ribbonLogic, analytics }
     }
 
     it('should load', async ({ device }) => {
@@ -329,6 +330,38 @@ describe('Ribbon logic', () => {
         expect(isCreateFormFocused).toBe(false)
         await ribbon.processEvent('setShowCommentBox', { value: true })
         expect(isCreateFormFocused).toBe(true)
+    })
+
+    it('should fire event on adding add new tags', async ({ device }) => {
+        let addedTag: string
+        const { ribbon, analytics } = await setupTest(device, {
+            dependencies: {
+                tags: {
+                    updateTagForPage: ({ added }) => {
+                        addedTag = added
+                    },
+                } as any,
+            },
+        })
+
+        await ribbon.init()
+
+        expect(addedTag).toEqual(undefined)
+        expect(analytics.popNew()).toEqual([])
+
+        await ribbon.processEvent('updateTags', {
+            value: { added: 'test', deleted: null, selected: [] },
+        })
+
+        expect(addedTag).toEqual('test')
+        expect(analytics.popNew()).toEqual([
+            {
+                eventArgs: {
+                    category: 'Tags',
+                    action: 'createForPageViaRibbon',
+                },
+            },
+        ])
     })
 
     it('should rehydrate state on URL change', async ({ device }) => {
