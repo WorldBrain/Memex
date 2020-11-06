@@ -95,7 +95,7 @@ const IconStyledBox = styled.div`
     cursor: pointer;
     position: absolute;
     right: 5px;
-    top: 5px;
+    top: 0px;
     border-radius: 3px;
     padding: 3px;
     display: none;
