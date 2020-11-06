@@ -35,6 +35,13 @@ const ShareIconContainer = styled.div`
 	margin-right: 30px
 `
 
+const VideoFrame = styled.iframe`
+    display: flex;
+    width: 480px;
+    height: 270px;
+    margin-left: 40px;
+`
+
 const ShareIconFull = styled.div`
     background-image: url(${icons.shared});
     background-position: center center;
@@ -78,7 +85,7 @@ const BlockHeading = styled(TypographyHeadingNormal)`
 const LinkBox = styled.div`
     width: 100%;
     margin-top: 30px;
-    justify-content: center;
+    justify-content: flex-start;
     display: flex;
 `
 
@@ -86,7 +93,14 @@ const InstructionsContainer = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+`
+
+const InstructionsSubContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
 `
 
 const InstructionsBox = styled.div`
@@ -94,7 +108,6 @@ const InstructionsBox = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    height: 45px;
 `
 
 const LinkContainer = styled.div`
@@ -122,11 +135,14 @@ const Text = styled.div`
     font-family: 'Poppins', sans-serif;
 `
 
+
+
 export default class ShareAnnotationOnboardingModal extends Component<Props> {
     render() {
         return (
             <Modal {...this.props} large>
                 <InstructionsContainer>
+                <InstructionsSubContainer>
                     <InstructionsBox>
                         <TypographyHeadingBigger>
                             NEW: Share Annotations
@@ -136,20 +152,29 @@ export default class ShareAnnotationOnboardingModal extends Component<Props> {
                             They are also added to all shared collection the page is part of.
                         </TypographyTextNormal>
                     </InstructionsBox>
+                    <LinkBox>
+                        <ShareIconBox>
+                            <ShareIconContainer>
+                                <ShareIconFull />
+                                <ShareIconText>Shared</ShareIconText>
+                            </ShareIconContainer>
+                            <ShareIconContainer>
+                                <ShareIconEmpty />
+                                <ShareIconText>Private</ShareIconText>
+                            </ShareIconContainer>
+                        </ShareIconBox>
+                    </LinkBox>
+                </InstructionsSubContainer>
+                <VideoFrame
+                    src="https://www.youtube.com/embed/iRqE1CdKex0" 
+                    allowFullScreen
+                    frameBorder="0"
+                />
                 </InstructionsContainer>
 
-                <LinkBox>
-                    <ShareIconBox>
-                        <ShareIconContainer>
-                            <ShareIconFull />
-                            <ShareIconText>Shared</ShareIconText>
-                        </ShareIconContainer>
-                        <ShareIconContainer>
-                            <ShareIconEmpty />
-                            <ShareIconText>Private</ShareIconText>
-                        </ShareIconContainer>
-                    </ShareIconBox>
-                </LinkBox>
+
+
+                
                 <BetaInfoContainer>
                     <BlockHeading>🚀 This is a beta feature</BlockHeading>
                     <Text>
