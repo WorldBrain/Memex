@@ -1,4 +1,4 @@
-import { calculateBG } from '../../util/computed-styles'
+import { areElementStylesDark } from '../../util/computed-styles'
 const styles = require('src/highlighting/ui/styles.css')
 /**
  * Custom implementation of `dom-highlight-range`.
@@ -219,7 +219,7 @@ const highlightNode = (
     highlightClass: string,
     highlightTagName = 'memex-highlight',
 ) => {
-    const isDark = calculateBG(node.parentElement.parentElement)
+    const isDark = areElementStylesDark(node.parentElement.parentElement)
 
     // Create a highlight
     const highlight: HTMLElement = document.createElement(highlightTagName)

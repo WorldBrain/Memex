@@ -1,33 +1,4 @@
-// from https://github.com/styled-components/polished/
-export default function getLuminance(color: string): number {
-    if (color === 'transparent') {
-        return 0
-    }
-    const rgbColors = parseToRgb(color)
-    const [r, g, b] = rgbColors.map((color) => {
-        const channel = color / 255
-        return channel <= 0.03928
-            ? channel / 12.92
-            : ((channel + 0.055) / 1.055) ** 2.4
-    })
-    return parseFloat((0.2126 * r + 0.7152 * g + 0.0722 * b).toFixed(3))
-}
-
-// parses a css color string to rgb number array
-const parseToRgb = (colorString: string): number[] => {
-    if (colorString.startsWith('#')) {
-        return hexToRgb(colorString)
-    } else if (colorString.startsWith('r')) {
-        const parsedColor = colorString
-            .replace(/\w+\(?(.+)\)/, '$1')
-            .replace(/,\s?/g, '') // to handle non comma separated colors
-            .split('')
-            .map((n) => parseInt(n.trim(), 10))
-        return parsedColor
-    } else {
-        return hexToRgb(cssNamedColors[colorString] || '#000')
-    }
-}
+import { getLuminance } from 'polished'
 
 // Converts a hexidecimal color string to rgb number array
 export const hexToRgb = (hex: string): number[] => {
@@ -58,8 +29,9 @@ const parseColor = (color: string): boolean => {
             return false
     }
 }
-// Takes a color string and deterimes whether or not it is "dark" by calculating its luminance, and whether or not it is a "parsable" color
-export const checkBGColor = (color: string) => getLuminance(color) < 0.179
+// Takes a color string and deterimes whether or not it is "dark" by calculating its luminance
+export const isColorDark = (color: string, darkLuminanceUpperBound = 0.179) =>
+    getLuminance(color) < darkLuminanceUpperBound
 
 const parseBackgroundProperties = (
     background: string,
@@ -70,15 +42,15 @@ const parseBackgroundProperties = (
     switch (true) {
         case backgroundIsParsable && backgroundColorIsParsable: {
             // if both are parsable, background-color will take precedence
-            return checkBGColor(backgroundColor)
+            return isColorDark(backgroundColor)
         }
         case backgroundIsParsable && !backgroundColorIsParsable: {
             // bg is parseable, but bg-color is not
-            return checkBGColor(background)
+            return isColorDark(background)
         }
         case !backgroundIsParsable && backgroundColorIsParsable: {
             // bg is not parsable, but bg-color is
-            return checkBGColor(backgroundColor)
+            return isColorDark(backgroundColor)
         }
         case !backgroundIsParsable && !backgroundColorIsParsable: {
             // neither can be parsed
@@ -90,7 +62,7 @@ const parseBackgroundProperties = (
 }
 
 // Calculates the background or background-color of an element
-export const calculateBG = (el: HTMLElement): boolean => {
+export const areElementStylesDark = (el: HTMLElement): boolean => {
     const computedStyles = getComputedStyle(el)
     const { background, backgroundColor } = computedStyles
     const hasBackgroundPropertySet = background.length > 0
@@ -99,9 +71,9 @@ export const calculateBG = (el: HTMLElement): boolean => {
         case hasBackgroundPropertySet && hasBackgroundColorPropertySet:
             return parseBackgroundProperties(background, backgroundColor)
         case hasBackgroundPropertySet && !hasBackgroundColorPropertySet:
-            return checkBGColor(background)
+            return isColorDark(background)
         case !hasBackgroundPropertySet && hasBackgroundColorPropertySet:
-            return checkBGColor(backgroundColor)
+            return isColorDark(backgroundColor)
         default:
             return false
     }
