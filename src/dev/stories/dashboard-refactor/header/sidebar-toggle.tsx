@@ -11,7 +11,7 @@ export const sidebarToggleProps = {
             toggleSidebarLockedState: function () {},
             isSidebarLocked: false,
         },
-        sidebarToggleHoverState: {
+        hoverState: {
             onHoverEnter: function () {},
             onHoverLeave: function () {},
             isHovered: false,
@@ -22,7 +22,7 @@ export const sidebarToggleProps = {
             toggleSidebarLockedState: function () {},
             isSidebarLocked: false,
         },
-        sidebarToggleHoverState: {
+        hoverState: {
             onHoverEnter: function () {},
             onHoverLeave: function () {},
             isHovered: true,
@@ -33,7 +33,7 @@ export const sidebarToggleProps = {
             toggleSidebarLockedState: function () {},
             isSidebarLocked: true,
         },
-        sidebarToggleHoverState: {
+        hoverState: {
             onHoverEnter: function () {},
             onHoverLeave: function () {},
             isHovered: true,

@@ -77,7 +77,7 @@ export const RightArrow = styled.div`
 
 export interface SidebarToggleProps {
     sidebarLockedState: SidebarLockedState
-    sidebarToggleHoverState: HoverState
+    hoverState: HoverState
 }
 
 export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
@@ -88,13 +88,13 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
         return <RightArrow />
     }
     private renderButton() {
-        const { isHovered } = this.props.sidebarToggleHoverState
+        const { isHovered } = this.props.hoverState
         if (!isHovered) return <HamburgerButton />
         return <BtnBackground>{this.renderHoveredState()}</BtnBackground>
     }
     render() {
         const {
-            sidebarToggleHoverState: { onHoverEnter, onHoverLeave, isHovered },
+            hoverState: { onHoverEnter, onHoverLeave, isHovered },
             sidebarLockedState: { toggleSidebarLockedState },
         } = this.props
         return (

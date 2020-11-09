@@ -7,6 +7,18 @@ import SidebarHeader from 'src/dashboard-refactor/header/SidebarHeader/SidebarHe
 
 const stories = storiesOf('Dashboard Refactor|Header/Sidebar Header', module)
 
+const { lockedHover, noHover } = sidebarToggleProps
+const sidebarTogglePropsRenamed = {
+    lockedHover: {
+        sidebarToggleHoverState: lockedHover.hoverState,
+        ...lockedHover,
+    },
+    noHover: {
+        sidebarToggleHoverState: noHover.hoverState,
+        ...noHover,
+    },
+}
+
 const collectionsHeaderProps = {
     open: {
         sidebarPeekState: {
@@ -14,14 +26,14 @@ const collectionsHeaderProps = {
             isSidebarPeeking: false,
         },
         selectedCollectionHeader: 'Inbox',
-        ...sidebarToggleProps.lockedHover,
+        ...sidebarTogglePropsRenamed.lockedHover,
     },
     closed: {
         sidebarPeekState: {
             toggleSidebarPeekState: function () {},
             isSidebarPeeking: false,
         },
-        ...sidebarToggleProps.noHover,
+        ...sidebarTogglePropsRenamed.noHover,
     },
 }
 
