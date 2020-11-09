@@ -42,11 +42,11 @@ export function uninsertTab({ el, tabStr = '  ' }: InsertTabProps) {
     }
 }
 
-export function insertIndentedNewLine({el}: InsertTabProps) {
+export function insertIndentedNewLine({ el }: InsertTabProps) {
     const { value, selectionStart, selectionEnd } = el
 
-    let lineNo = value.substr(0, selectionStart).split(/\r?\n|\r/).length;
-    let lineText = el.value.split(/\r?\n|\r/)[lineNo - 1];
+    let lineNo = value.substr(0, selectionStart).split(/\r?\n|\r/).length
+    let lineText = el.value.split(/\r?\n|\r/)[lineNo - 1]
     let indentationCount = 0
     let indentationString = ''
 
@@ -55,16 +55,16 @@ export function insertIndentedNewLine({el}: InsertTabProps) {
         if (lineText.charAt(i) === ' ') {
             i++
         } else {
-           indentationString = lineText.slice(0, i)
-           break
+            indentationString = lineText.slice(0, i)
+            break
         }
     }
 
     el.value =
-    value.substring(0, selectionStart) +
-    '\n' + 
-    indentationString + 
-    value.substring(selectionEnd)
+        value.substring(0, selectionStart) +
+        '\n' +
+        indentationString +
+        value.substring(selectionEnd)
 
     let selectionStartNew = selectionStart + indentationString.length + 1
     let selectionEndNew = selectionEnd + indentationString.length + 1
@@ -72,5 +72,3 @@ export function insertIndentedNewLine({el}: InsertTabProps) {
     el.selectionStart = selectionStartNew
     el.selectionEnd = selectionEndNew
 }
-
-

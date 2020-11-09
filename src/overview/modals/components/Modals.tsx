@@ -22,9 +22,12 @@ const modalsMap: { [key in ModalIds]: (props: Props) => JSX.Element } = {
         <ShareAnnotationOnboardingModal onClose={onClose} {...modalOptions} />
     ),
     BetaFeatureNotifModal: ({ modalOptions, onClose }) => (
-        <BetaFeatureNotifModal onClose={()=>{
-                                                window.location.reload()
-                                            }} {...modalOptions} />
+        <BetaFeatureNotifModal
+            onClose={() => {
+                window.location.reload()
+            }}
+            {...modalOptions}
+        />
     ),
 }
 

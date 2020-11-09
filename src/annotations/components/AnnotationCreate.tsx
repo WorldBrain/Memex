@@ -7,7 +7,11 @@ import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/
 import { MarkdownPreview } from 'src/common-ui/components/markdown-preview'
 import TagInput from 'src/tags/ui/tag-input'
 import { FocusableComponent } from './types'
-import { insertTab, uninsertTab, insertIndentedNewLine } from 'src/common-ui/utils'
+import {
+    insertTab,
+    uninsertTab,
+    insertIndentedNewLine,
+} from 'src/common-ui/utils'
 
 interface State {
     isTagPickerShown: boolean
