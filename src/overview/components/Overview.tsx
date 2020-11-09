@@ -48,6 +48,7 @@ export interface Props {
     showSubscriptionModal: () => void
     showAnnotationShareModal: () => void
     showBetaFeatureNotifModal: () => void
+    resetActiveSidebarIndex: () => void
 }
 
 interface State {
@@ -206,6 +207,7 @@ class Overview extends PureComponent<Props, State> {
             this.annotationsSidebar.state.showState === 'visible'
         ) {
             this.annotationsSidebar.hideSidebar()
+            setTimeout(() => this.props.resetActiveSidebarIndex(), 200)
         }
     }
 
@@ -331,6 +333,8 @@ const mapDispatchToProps = (dispatch) => ({
     init: () => dispatch(searchBarActs.init()),
     setShowOnboardingMessage: () =>
         dispatch(resultActs.setShowOnboardingMessage(true)),
+    resetActiveSidebarIndex: () =>
+        dispatch(resultActs.resetActiveSidebarIndex()),
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
     showAnnotationShareModal: () =>
         dispatch(show({ modalId: 'ShareAnnotationOnboardingModal' })),
