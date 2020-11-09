@@ -94,7 +94,7 @@ class ResultItem extends PureComponent<Props> {
     }
 
     private handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        if (this.props.arePickersOpen) {
+        if (this.props.arePickersOpen || this.props.isSidebarOpen) {
             e.preventDefault()
         }
     }
