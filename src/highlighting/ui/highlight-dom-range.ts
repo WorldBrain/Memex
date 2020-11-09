@@ -1,4 +1,4 @@
-import { areElementStylesDark } from '../../util/computed-styles'
+import { areElementStylesDark } from '../../util/dark-mode-detection'
 const styles = require('src/highlighting/ui/styles.css')
 /**
  * Custom implementation of `dom-highlight-range`.
@@ -219,12 +219,11 @@ const highlightNode = (
     highlightClass: string,
     highlightTagName = 'memex-highlight',
 ) => {
-    const isDark = areElementStylesDark(node.parentElement.parentElement)
-
     // Create a highlight
     const highlight: HTMLElement = document.createElement(highlightTagName)
     highlight.classList.add(highlightClass)
-    if (isDark) {
+
+    if (areElementStylesDark(node.parentElement.parentElement)) {
         highlight.classList.add(styles['dark-mode'])
     }
 

@@ -1,6 +1,4 @@
-/* eslint-env jest */
-
-import { isColorDark, hexToRgb } from './computed-styles'
+import { isColorDark, hexToRgb } from './dark-mode-detection'
 
 describe('checkBGColor', () => {
     test('should return true for dark background colors', () => {
@@ -10,8 +8,10 @@ describe('checkBGColor', () => {
         expect(isColorDark('rgba(0,0,0,1)')).toBe(true)
         expect(isColorDark('white')).toBe(false)
         expect(isColorDark('blanchedalmond')).toBe(false)
-        expect(isColorDark('slate')).toBe(true)
+        expect(isColorDark('transparent')).toBe(true)
         expect(isColorDark('#BADA55')).toBe(false)
+        expect(isColorDark('hsl(36,10%,90%)')).toBe(false)
+        expect(isColorDark('hsl(16,25%,38%)')).toBe(true)
     })
 })
 
