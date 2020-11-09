@@ -3,8 +3,3 @@ export interface HoverState {
     onHoverLeave(): void
     isHovered: boolean
 }
-
-export interface SidebarLockedState {
-    onSidebarToggleClick(): void
-    isSidebarLocked: boolean
-}

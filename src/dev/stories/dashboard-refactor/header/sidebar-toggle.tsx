@@ -1,14 +1,14 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 
-import SidebarToggle from '../../../dashboard-refactor/header/SidebarToggle'
+import SidebarToggle from 'src/dashboard-refactor/header/SidebarHeader/SidebarToggle/SidebarToggle'
 
-const stories = storiesOf('Dashboard Refactor|Header/SidebarToggle', module)
+const stories = storiesOf('Dashboard Refactor|Header/Sidebar Toggle', module)
 
-const props = {
+export const sidebarToggleProps = {
     noHover: {
         sidebarLockedState: {
-            onSidebarToggleClick: function () {},
+            toggleSidebarLockedState: function () {},
             isSidebarLocked: false,
         },
         hoverState: {
@@ -19,7 +19,7 @@ const props = {
     },
     unlockedHover: {
         sidebarLockedState: {
-            onSidebarToggleClick: function () {},
+            toggleSidebarLockedState: function () {},
             isSidebarLocked: false,
         },
         hoverState: {
@@ -30,7 +30,7 @@ const props = {
     },
     lockedHover: {
         sidebarLockedState: {
-            onSidebarToggleClick: function () {},
+            toggleSidebarLockedState: function () {},
             isSidebarLocked: true,
         },
         hoverState: {
@@ -41,6 +41,10 @@ const props = {
     },
 }
 
-stories.add('No hover', () => <SidebarToggle {...props.noHover} />)
-stories.add('Unlocked hover', () => <SidebarToggle {...props.unlockedHover} />)
-stories.add('Locked hover', () => <SidebarToggle {...props.lockedHover} />)
+stories.add('No hover', () => <SidebarToggle {...sidebarToggleProps.noHover} />)
+stories.add('Unlocked hover', () => (
+    <SidebarToggle {...sidebarToggleProps.unlockedHover} />
+))
+stories.add('Locked hover', () => (
+    <SidebarToggle {...sidebarToggleProps.lockedHover} />
+))
