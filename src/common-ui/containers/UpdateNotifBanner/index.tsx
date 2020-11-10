@@ -8,6 +8,7 @@ import { NotifBanner, ThemeProps } from 'src/common-ui/components/NotifBanner'
 
 export interface Props extends Partial<LogicDeps>, ThemeProps {
     openLink?: (link: string) => void
+    location?: string
 }
 
 export class UpdateNotifBanner extends StatefulUIElement<Props, State, Event> {
@@ -37,6 +38,7 @@ export class UpdateNotifBanner extends StatefulUIElement<Props, State, Event> {
                 mainBtnText="What's new?"
                 onCloseBtnClick={() => this.processEvent('hide', null)}
                 onMainBtnClick={() => this.props.openLink(CHANGE_LOG_LINK)}
+                location={this.props.location}
                 {...this.props}
             />
         )

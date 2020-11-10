@@ -239,6 +239,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     protected renderTopBanner() {
-        return <UpdateNotifBanner />
+        return <UpdateNotifBanner location={'inpage'} />
     }
 }

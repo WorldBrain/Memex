@@ -1,5 +1,5 @@
 import React from 'react'
-import styled, { ThemeProvider } from 'styled-components'
+import styled, { ThemeProvider, css } from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface ThemeProps {
@@ -11,6 +11,7 @@ export interface Props extends ThemeProps {
     mainBtnText: string
     onMainBtnClick: React.MouseEventHandler
     onCloseBtnClick: React.MouseEventHandler
+    location?:string
 }
 
 export class NotifBanner extends React.PureComponent<Props> {
@@ -21,6 +22,7 @@ export class NotifBanner extends React.PureComponent<Props> {
     }
 
     render() {
+        console.log(this.props.location)
         return (
             <ThemeProvider theme={this.theme}>
                 <Banner>
@@ -42,10 +44,17 @@ const Banner = styled.div`
     flex-direction: row;
     background: #5cd9a6;
     height: 57px;
-    width: 100%;
-    padding: 0 300px;
-    position: absolute;
-    top: 0px;
+
+    ${(props) =>
+    props.location === "inpage" ?
+        css`
+          width: 70px;
+        `: css`
+          width: 100%;
+        `}
+    padding: 0 20px;
+    position: fixed;
+    bottom: 0px;
     z-index: 1000000;
     justify-content: center;
     align-items: center;
