@@ -11,7 +11,7 @@ const Results = (props) => {
 
     return (
         <>
-            <UpdateNotifBanner />
+            <UpdateNotifBanner theme={{ width: '405px', position: 'relative', iconSize: '20px' }} />
             <div
                 className={classNames(
                     styles.MEMEX_CONTAINER,
@@ -24,7 +24,7 @@ const Results = (props) => {
                 <div className={styles.header}>
                     <span className={styles.resultsText}>
                         <span className={styles.resultLength}>
-                            {props.totalCount - 1}
+                            {props.totalCount}
                         </span>{' '}
                         Memex results
                         <a

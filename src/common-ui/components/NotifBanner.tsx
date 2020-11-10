@@ -4,6 +4,8 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface ThemeProps {
     width?: string
+    position?: string 
+    iconSize?: string
 }
 
 export interface Props {
@@ -16,7 +18,7 @@ export interface Props {
 
 export class NotifBanner extends React.PureComponent<Props> {
     static defaultProps: Partial<Props> = {
-        theme: { width: '100%' },
+        theme: {width: '100%', iconSize: '24px'},
     }
 
     render() {
@@ -49,10 +51,9 @@ const Banner = styled.div`
     flex-direction: row;
     background: #5cd9a6;
     height: 57px;
-
     width: ${({ theme }) => theme.width};
+    position: ${({ theme }) => theme.position};
     padding: 0 20px;
-    position: fixed;
     bottom: 0px;
     z-index: 1000000;
     justify-content: center;
@@ -89,8 +90,8 @@ const MainBtn = styled.button`
     }
 `
 const CloseBtn = styled.img`
-    width: 24px;
-    height: 24px;
+    width: ${({ theme }) => theme.iconSize};
+    height: ${({ theme }) => theme.iconSize};
     padding: 4px;
     cursor: pointer;
     outline: none;

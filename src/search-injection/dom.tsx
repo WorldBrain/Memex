@@ -61,7 +61,7 @@ export const handleRender = async (
         ReactDOM.render(
             <StyleSheetManager target={target}>
                 <Container
-                    results={docs.slice(1, limit)}
+                    results={docs.slice(0, limit)}
                     len={totalCount}
                     rerender={renderComponent}
                     searchEngine={searchEngine}
