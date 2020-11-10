@@ -6,18 +6,13 @@ interface Theme {
 }
 
 export interface Props extends Theme {
-    mainText?: string
-    mainBtnText?: string
+    mainText: string
+    mainBtnText: string
     onClose: React.MouseEventHandler
     onMainBtnClick: React.MouseEventHandler
 }
 
 export class NotifBanner extends React.PureComponent<Props> {
-    static defaultProps: Partial<Props> = {
-        mainBtnText: `What's new?`,
-        mainText: 'Memex Updated!',
-    }
-
     private get theme(): Theme {
         return {
             wide: this.props.wide,
