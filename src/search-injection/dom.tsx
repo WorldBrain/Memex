@@ -4,6 +4,7 @@ DOM manipulation helper functions
 import { browser } from 'webextension-polyfill-ts'
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { StyleSheetManager } from 'styled-components'
 
 import Container from './components/container'
 import * as utils from './utils'
@@ -58,13 +59,15 @@ export const handleRender = async (
         // Passing this same function so that it can change position
 
         ReactDOM.render(
-            <Container
-                results={docs.slice(1, limit)}
-                len={totalCount}
-                rerender={renderComponent}
-                searchEngine={searchEngine}
-                requiresMigration={requiresMigration}
-            />,
+            <StyleSheetManager target={target}>
+                <Container
+                    results={docs.slice(1, limit)}
+                    len={totalCount}
+                    rerender={renderComponent}
+                    searchEngine={searchEngine}
+                    requiresMigration={requiresMigration}
+                />
+            </StyleSheetManager>,
             target,
         )
     }

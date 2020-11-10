@@ -1,19 +1,19 @@
 import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 
-interface Theme {
+export interface ThemeProps {
     wide?: boolean
 }
 
-export interface Props extends Theme {
+export interface Props extends ThemeProps {
     mainText: string
     mainBtnText: string
-    onClose: React.MouseEventHandler
     onMainBtnClick: React.MouseEventHandler
+    onCloseBtnClick: React.MouseEventHandler
 }
 
 export class NotifBanner extends React.PureComponent<Props> {
-    private get theme(): Theme {
+    private get theme(): ThemeProps {
         return {
             wide: this.props.wide,
         }
@@ -29,7 +29,7 @@ export class NotifBanner extends React.PureComponent<Props> {
                             {this.props.mainText}
                         </MainBtn>
                     </MainContent>
-                    <CloseBtn onClick={this.props.onMainBtnClick}>X</CloseBtn>
+                    <CloseBtn onClick={this.props.onCloseBtnClick}>X</CloseBtn>
                 </Banner>
             </ThemeProvider>
         )
@@ -37,10 +37,12 @@ export class NotifBanner extends React.PureComponent<Props> {
 }
 
 const Banner = styled.div`
+    display: flex;
+    flex-direction: row;
     background: #5cd9a6;
     height: 31px;
     width: 100%;
-    ${({ theme }) => (theme.wide ? `margin: 0 300px;` : '')}
+    ${({ theme }) => (theme.wide ? `padding: 0 300px;` : '')}
 `
 
 const MainContent = styled.div``

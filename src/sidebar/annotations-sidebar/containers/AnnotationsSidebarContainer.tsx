@@ -380,6 +380,10 @@ export class AnnotationsSidebarContainer<
         return null
     }
 
+    protected renderTopBanner() {
+        return null
+    }
+
     private renderTopBar() {
         if (this.props.skipTopBarRender) {
             return null
@@ -455,6 +459,7 @@ export class AnnotationsSidebarContainer<
         return (
             <ThemeProvider theme={this.props.theme}>
                 <ContainerStyled className="ignore-react-onclickoutside">
+                    {this.renderTopBanner()}
                     {this.renderTopBar()}
                     <AnnotationsSidebar
                         {...this.state}

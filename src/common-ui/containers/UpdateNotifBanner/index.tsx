@@ -4,9 +4,9 @@ import { Logic, LogicDeps, State, Event } from './logic'
 import { CHANGE_LOG_LINK } from './constants'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { NotifBanner } from 'src/common-ui/components/NotifBanner'
+import { NotifBanner, ThemeProps } from 'src/common-ui/components/NotifBanner'
 
-export interface Props extends Partial<LogicDeps> {
+export interface Props extends Partial<LogicDeps>, ThemeProps {
     openLink?: (link: string) => void
 }
 
@@ -35,8 +35,9 @@ export class UpdateNotifBanner extends StatefulUIElement<Props, State, Event> {
             <NotifBanner
                 mainText="Memex Updated!"
                 mainBtnText="What's new?"
-                onClose={() => this.processEvent('hide', null)}
+                onCloseBtnClick={() => this.processEvent('hide', null)}
                 onMainBtnClick={() => this.props.openLink(CHANGE_LOG_LINK)}
+                {...this.props}
             />
         )
     }
