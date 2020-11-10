@@ -22,10 +22,9 @@ export class NotifBanner extends React.PureComponent<Props> {
     }
 
     render() {
-        console.log(this.props.location)
         return (
             <ThemeProvider theme={this.theme}>
-                <Banner>
+                <Banner location={this.props.location}>
                     <MainContent>
                         <MainText>{this.props.mainText}</MainText>
                         <MainBtn onClick={this.props.onMainBtnClick}>
@@ -45,10 +44,9 @@ const Banner = styled.div`
     background: #5cd9a6;
     height: 57px;
 
-    ${(props) =>
-    props.location === "inpage" ?
+    ${(props) => props.location === "inpage" ?
         css`
-          width: 70px;
+          width: 80%;
         `: css`
           width: 100%;
         `}
@@ -58,7 +56,6 @@ const Banner = styled.div`
     z-index: 1000000;
     justify-content: center;
     align-items: center;
-    ${({ theme }) => (theme.wide ? `padding: 0 300px;` : '')}
 `
 
 const MainContent = styled.div`
