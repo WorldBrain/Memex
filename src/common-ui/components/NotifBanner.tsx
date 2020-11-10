@@ -1,37 +1,43 @@
 import React from 'react'
-import styled, { ThemeProvider, css } from 'styled-components'
+import styled, { ThemeProvider } from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface ThemeProps {
-    wide?: boolean
+    width?: string
 }
 
-export interface Props extends ThemeProps {
+export interface Props {
     mainText: string
     mainBtnText: string
+    theme?: ThemeProps
     onMainBtnClick: React.MouseEventHandler
     onCloseBtnClick: React.MouseEventHandler
-    location?:string
 }
 
 export class NotifBanner extends React.PureComponent<Props> {
-    private get theme(): ThemeProps {
-        return {
-            wide: this.props.wide,
-        }
+    static defaultProps: Partial<Props> = {
+        theme: { width: '100%' },
     }
 
     render() {
         return (
-            <ThemeProvider theme={this.theme}>
-                <Banner location={this.props.location}>
+            <ThemeProvider
+                theme={{
+                    ...NotifBanner.defaultProps.theme,
+                    ...this.props.theme,
+                }}
+            >
+                <Banner>
                     <MainContent>
                         <MainText>{this.props.mainText}</MainText>
                         <MainBtn onClick={this.props.onMainBtnClick}>
                             {this.props.mainBtnText}
                         </MainBtn>
                     </MainContent>
-                    <CloseBtn onClick={this.props.onCloseBtnClick} src={icons.close}/>
+                    <CloseBtn
+                        onClick={this.props.onCloseBtnClick}
+                        src={icons.close}
+                    />
                 </Banner>
             </ThemeProvider>
         )
@@ -44,12 +50,7 @@ const Banner = styled.div`
     background: #5cd9a6;
     height: 57px;
 
-    ${(props) => props.location === "inpage" ?
-        css`
-          width: 80%;
-        `: css`
-          width: 100%;
-        `}
+    width: ${({ theme }) => theme.width};
     padding: 0 20px;
     position: fixed;
     bottom: 0px;
