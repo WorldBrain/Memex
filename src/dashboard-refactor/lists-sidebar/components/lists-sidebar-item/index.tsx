@@ -4,13 +4,7 @@ import styled, { css, keyframes } from 'styled-components'
 import colors from '../../../colors'
 import { fonts } from '../../../styleConstants'
 
-import {
-    HoverState,
-    DroppableState,
-    SelectedState,
-    NewItemsCountState,
-} from 'src/dashboard-refactor/types'
-import { MoreActionButtonState } from './types'
+import { NewItemsCountState } from 'src/dashboard-refactor/types'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { Icon } from 'src/dashboard-refactor/styledComponents'
@@ -108,19 +102,46 @@ const NewItemsCount = styled.div`
     }
 `
 
-export interface ListsSidebarItemProps {
+// this type is differentiated from the type which governs the object passed down the tree to its parent:
+// the click handlers in this type have received their parameters from the parent and so receive none
+export interface ListsSidebarItemComponentProps {
     className?: string
     listName: string
     isEditing: boolean
-    selectedState: SelectedState
     hoverState: HoverState
+    selectedState: SelectedState
     droppableState: DroppableState
     newItemsCountState: NewItemsCountState
     moreActionButtonState: MoreActionButtonState
 }
 
+interface HoverState {
+    onHoverEnter(): void
+    onHoverLeave(): void
+    isHovered: boolean
+}
+
+interface SelectedState {
+    onSelection(): void
+    isSelected: boolean
+}
+
+interface DroppableState {
+    onDragOver(): void
+    onDragLeave(): void
+    onDrop(): void
+    isDraggedOver: boolean
+    isDroppable: boolean
+    isBlinking: boolean
+}
+
+interface MoreActionButtonState {
+    onMoreActionClick(): void
+    displayMoreActionButton
+}
+
 export default class ListsSidebarItem extends PureComponent<
-    ListsSidebarItemProps
+    ListsSidebarItemComponentProps
 > {
     private handleDragOver() {
         this.props.droppableState.onDragOver()
@@ -156,9 +177,16 @@ export default class ListsSidebarItem extends PureComponent<
                     <div>{newItemsCount}</div>
                 </NewItemsCount>
             )
-        if (isDroppable && isDraggedOver) return <Icon>+</Icon>
+        if (isDroppable && isDraggedOver)
+            return <Icon xy="12px" path="/img/plus.svg" />
         if (isHovered && displayMoreActionButton)
-            return <Icon onClick={onMoreActionClick}>M</Icon>
+            return (
+                <Icon
+                    onClick={onMoreActionClick}
+                    xy="12px"
+                    path="/img/open.svg"
+                />
+            )
     }
     private renderDefault() {
         const {

@@ -15,12 +15,12 @@ export interface DroppableState {
 export interface ExpandableState {
     isExpandable: boolean
     isExpanded: boolean
-    onExpand(): void
+    onExpand(listSrouce: ListSource): void
 }
 
 export interface AddableState {
     isAddable: boolean
-    onAdd(normalizedPageUrl: string): void
+    onAdd(listSource: ListSource): void
 }
 
 export interface HoverState {
@@ -33,3 +33,5 @@ export interface SelectedState {
     onSelection(normalizedPageUrl: string): void
     isSelected: boolean
 }
+
+export type ListSource = 'local-lists' | 'followed-list'
