@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import styles from 'src/dashboard-refactor/styleConstants'
-import { Icon } from 'src/dashboard-refactor/styled-components'
+import { Icon } from 'src/dashboard-refactor/styledComponents'
 import {
     AddableState,
     ExpandableState,
