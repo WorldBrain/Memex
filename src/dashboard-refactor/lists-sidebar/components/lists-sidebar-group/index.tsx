@@ -133,14 +133,15 @@ export default class ListsSidebarGroup extends PureComponent<
                     listId={listId}
                     isMenuDisplayed={isMenuDisplayed}
                     listsSidebarItemProps={listsSidebarItemProps}
-                    listsSidebarItemActionsArray={listsSidebarItemActionsArray.map(
-                        (actionsObj) => {
+                    listsSidebarItemActionsArray={
+                        listsSidebarItemActionsArray &&
+                        listsSidebarItemActionsArray.map((actionsObj) => {
                             return {
                                 onClick: actionsObj.onClick(listId),
                                 ...actionsObj,
                             }
-                        },
-                    )}
+                        })
+                    }
                 />
             )
         })

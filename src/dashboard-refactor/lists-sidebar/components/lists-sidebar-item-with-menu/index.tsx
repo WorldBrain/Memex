@@ -122,17 +122,18 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
                     }}
                 />
                 <MenuContainer isDisplayed={isMenuDisplayed}>
-                    {listsSidebarItemActionsArray.map((item, idx) => {
-                        const { label, iconPath, onClick } = item
-                        return (
-                            <MenuButton key={idx} onClick={onClick}>
-                                <Margin x="10px">
-                                    <Icon xy="12px" path={iconPath} />
-                                </Margin>
-                                {label}
-                            </MenuButton>
-                        )
-                    })}
+                    {listsSidebarItemActionsArray &&
+                        listsSidebarItemActionsArray.map((item, idx) => {
+                            const { label, iconPath, onClick } = item
+                            return (
+                                <MenuButton key={idx} onClick={onClick}>
+                                    <Margin x="10px">
+                                        <Icon xy="12px" path={iconPath} />
+                                    </Margin>
+                                    {label}
+                                </MenuButton>
+                            )
+                        })}
                 </MenuContainer>
             </Container>
         )
