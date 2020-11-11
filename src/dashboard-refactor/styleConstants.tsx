@@ -21,6 +21,9 @@ const styleConstants = {
             boxShadow: '0px 0px 4.20px rgba(0, 0, 0, 0.14)',
             borderRadius: '2.1px',
         },
+        sidebar: {
+            widthPx: 173,
+        },
     },
 }
 
