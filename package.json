@@ -117,7 +117,7 @@
         "socket.io-client": "^2.3.0",
         "strict-uri-encode": "^2.0.0",
         "string.prototype.matchall": "^3.0.1",
-        "styled-components": "^4.4.1",
+        "styled-components": "^5.2.1",
         "styled-props": "^1.1.2",
         "through2": "^2.0.3",
         "traverse": "^0.6.6",
