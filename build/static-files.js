@@ -55,7 +55,19 @@ export const copyPatterns = [
         toType: 'template',
     },
     {
-        from: 'src/pdf-viewer/index.{html,js}',
-        to: './pdf-viewer.[ext]',
+        from: 'src/pdf-viewer/app/*.{css,js,html}',
+        to: './pdf-viewer/viewer.[ext]',
+    },
+    {
+        from: 'src/pdf-viewer/app/images.*',
+        to: './pdf-viewer/images/[name].[ext]',
+    },
+    {
+        from: 'src/pdf-viewer/app/locale/locale.properties',
+        to: './pdf-viewer/locale/locale.properties',
+    },
+    {
+        from: 'src/pdf-viewer/app/locale/en-US/viewer.properties',
+        to: './pdf-viewer/locale/en-US/viewer.properties',
     },
 ]
