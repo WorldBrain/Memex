@@ -13,7 +13,7 @@ export function setupInPageSidebarUI(
     dependencies: AnnotationsSidebarDependencies,
 ) {
     ReactDOM.render(
-        <StyleSheetManager target={mount.shadowRoot}>
+        <StyleSheetManager target={mount.shadowRoot as any}>
             <AnnotationsSidebarInPage {...dependencies} />
         </StyleSheetManager>,
         mount.rootElement,

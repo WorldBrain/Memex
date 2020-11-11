@@ -14,7 +14,7 @@ export interface Props {
     name: string
     removeTooltipText?: string
     actOnAllTooltipText?: string
-    ResultItem: typeof React.Component
+    resultItem: React.ReactNode
     selected?: boolean
     focused?: boolean
 }
@@ -48,13 +48,7 @@ class EntryRow extends React.Component<Props> {
     }
 
     render() {
-        const {
-            name,
-            selected,
-            focused,
-            onPressActOnAll,
-            ResultItem,
-        } = this.props
+        const { selected, focused, onPressActOnAll, resultItem } = this.props
 
         return (
             <Row
@@ -63,10 +57,7 @@ class EntryRow extends React.Component<Props> {
                 onMouseOut={this.handleMouseOut}
                 isFocused={focused}
             >
-                <ResultItem selected={selected} isFocused={focused}>
-                    {name}
-                </ResultItem>
-
+                {resultItem}
                 <IconStyleWrapper show={focused}>
                     {selected && (
                         <ButtonTooltip

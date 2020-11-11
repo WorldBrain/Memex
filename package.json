@@ -169,6 +169,7 @@
         "@types/selenium-webdriver": "^4.0.0-alpha.7",
         "@types/simple-peer": "^6.1.6",
         "@types/sinon": "^7.0.3",
+        "@types/styled-components": "^5.1.4",
         "@types/url-regex": "^4.1.0",
         "@types/whatwg-url": "^6.4.0",
         "atob": "^2.1.2",
