@@ -80,6 +80,7 @@ export async function main() {
     const inPageUI = new SharedInPageUIState({
         getNormalizedPageUrl,
         loadComponent: (component) => {
+            console.log('loadComp GLOBAL:', component, components)
             // Treat highlights differently as they're not a separate content script
             if (component === 'highlights') {
                 components.highlights = resolvablePromise<void>()
@@ -261,11 +262,14 @@ export async function main() {
     // 7. Load components and associated content scripts if they are set to autoload
     // on each page.
     if (await tooltipUtils.getTooltipState()) {
+        console.log('load tooltip')
         await inPageUI.setupTooltip()
     }
 
     const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
+    console.log('hgiight:', areHighlightsEnabled)
     if (areHighlightsEnabled) {
+        console.log('load highlights')
         inPageUI.showHighlights()
         if (!annotationsCache.isEmpty) {
             inPageUI.loadComponent('sidebar')
@@ -273,7 +277,9 @@ export async function main() {
     }
 
     const isSidebarEnabled = await sidebarUtils.getSidebarState()
+    console.log('sidebar:', isSidebarEnabled)
     if (isSidebarEnabled) {
+        console.log('load sidebar')
         await inPageUI.loadComponent('ribbon')
     }
 }
@@ -283,6 +289,7 @@ export function createContentScriptLoader() {
     const loader: ContentScriptLoader = async (
         component: ContentScriptComponent,
     ) => {
+        console.log('CALLNG BG:', component)
         await runInBackground<
             ContentScriptsInterface<'caller'>
         >().injectContentScriptComponent({

@@ -42,6 +42,7 @@ export class ContentScriptsBackground {
     injectContentScriptComponent: ContentScriptsInterface<
         'provider'
     >['injectContentScriptComponent'] = async ({ tab }, { component }) => {
+        console.log('BG RUNNING CONTENT SCRIPT:', component, tab)
         this.options.injectScriptInTab(tab.id, {
             file: `/content_script_${component}.js`,
         })

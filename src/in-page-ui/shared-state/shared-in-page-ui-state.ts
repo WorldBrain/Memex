@@ -147,6 +147,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         component: InPageUIComponent,
         options: ShouldSetUpOptions = {},
     ) {
+        console.log('loadComp:', component)
         await this.options.loadComponent(component)
         this._maybeEmitShouldSetUp(component, options)
     }
@@ -276,6 +277,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         component: InPageUIComponent,
         options: ShouldSetUpOptions = {},
     ) {
+        console.log('maybe emit:', component, options, this.componentsSetUp)
         if (!this.componentsSetUp[component]) {
             this.events.emit('componentShouldSetUp', { component, options })
             this.componentsSetUp[component] = true
