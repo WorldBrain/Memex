@@ -17,3 +17,8 @@ import './copy-paster'*/
 import './annotations-sidebar'
 import './copy-paster'
 import './sharing'
+import './dashboard-refactor/header/sidebar-header'
+import './dashboard-refactor/header/sidebar-toggle'
+import './dashboard-refactor/header/search-bar'
+import './dashboard-refactor/lists-sidebar/list-item'
+import './dashboard-refactor/lists-sidebar/lists-sidebar-group'
