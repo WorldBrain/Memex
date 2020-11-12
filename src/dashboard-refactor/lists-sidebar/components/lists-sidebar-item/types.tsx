@@ -1,5 +1,5 @@
 import {
-    DroppableState,
+    DropReceivingState,
     HoverState,
     NewItemsCountState,
     SelectedState,
@@ -16,7 +16,7 @@ export interface ListsSidebarItemProps {
     isEditing: boolean
     hoverState: HoverState
     selectedState: SelectedState
-    droppableState: DroppableState
+    dropReceivingState: DropReceivingState
     newItemsCountState: NewItemsCountState
     moreActionButtonState: MoreActionButtonState
 }

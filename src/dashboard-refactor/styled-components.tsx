@@ -20,12 +20,16 @@ interface IconProps {
 export const Icon = styled.div<IconProps>`
     ${(props) =>
         css`
-            height: ${props.xy};
-            width: ${props.xy};
+            height: ${props.heightAndWidth};
+            width: ${props.heightAndWidth};
         `};
     ${(props) =>
         css`
-            ${props.path && `background-image: url(${props.path})`};
+            ${props.path &&
+            `background-image: url(${props.path});
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;`}
         `}
     ${(props) =>
         props.plus90 &&

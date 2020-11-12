@@ -75,7 +75,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
                 isEditing,
                 selectedState,
                 hoverState,
-                droppableState,
+                dropReceivingState,
                 newItemsCountState,
                 moreActionButtonState,
             },
@@ -104,14 +104,14 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
                         },
                         ...selectedState,
                     }}
-                    droppableState={{
+                    dropReceivingState={{
                         onDragOver() {
-                            droppableState.onDragOver(listId)
+                            dropReceivingState.onDragOver(listId)
                         },
                         onDragLeave() {
-                            droppableState.onDragLeave(listId)
+                            dropReceivingState.onDragLeave(listId)
                         },
-                        ...droppableState,
+                        ...dropReceivingState,
                     }}
                     newItemsCountState={newItemsCountState}
                     moreActionButtonState={{

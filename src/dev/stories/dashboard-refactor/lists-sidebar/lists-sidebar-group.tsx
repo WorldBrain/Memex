@@ -144,36 +144,6 @@ const inboxItemsProps = (name: string, isSelected?: boolean) => {
     }
 }
 
-// const inboxItemPropsTemplate = {
-//     isEditing: false,
-//     moreActionButtonState: {
-//         displayMoreActionButton: true,
-//         onMoreActionClick: () => {},
-//     },
-//     listName: 'AllSaved',
-//     selectedState: {
-//         isSelected: false,
-//         onSelection: () => {},
-//     },
-//     hoverState: {
-//         isHovered: false,
-//         onHoverEnter: () => {},
-//         onHoverLeave: () => {},
-//     },
-//     droppableState: {
-//         onDragOver: () => {},
-//         onDragLeave: () => {},
-//         onDrop: () => {},
-//         isDroppable: true,
-//         isDraggedOver: false,
-//         isBlinking: false,
-//     },
-//     newItemsCountState: {
-//         displayNewItemsCount: true,
-//         newItemsCount: 4,
-//     },
-// }
-
 export const listsSidebarGroupProps: {
     errorState: ListsSidebarGroupProps
     loadingState: ListsSidebarGroupProps
@@ -196,43 +166,6 @@ export const listsSidebarGroupProps: {
             inboxItemsProps('All Saved'),
             inboxItemsProps('Inbox', true),
             inboxItemsProps('Saved From Mobile'),
-            // {
-            //     listId: 'https://www.AllSaved.com/',
-            //     listsSidebarItemWithMenuProps: {
-            //         listId: 'https://www.AllSaved.com/',
-            //         isMenuDisplayed: false,
-            //         listsSidebarItemProps: {
-            //             ...inboxItemPropsTemplate,
-            //             listName: 'All Saved',
-            //         },
-            //     },
-            // },
-            // {
-            //     listId: 'https://www.Inbox.com/',
-            //     listsSidebarItemWithMenuProps: {
-            //         listId: 'https://www.Inbox.com/',
-            //         isMenuDisplayed: false,
-            //         listsSidebarItemProps: {
-            //             ...inboxItemPropsTemplate,
-            //             listName: 'Inbox',
-            //             selectedState: {
-            //                 ...inboxItemPropsTemplate.selectedState,
-            //                 isSelected: true,
-            //             },
-            //         },
-            //     },
-            // },
-            // {
-            //     listId: 'https://www.saved-from-mobile.com/',
-            //     listsSidebarItemWithMenuProps: {
-            //         listId: 'https://www.saved-from-mobile.com/',
-            //         isMenuDisplayed: false,
-            //         listsSidebarItemProps: {
-            //             ...inboxItemPropsTemplate,
-            //             listName: 'Saved From Mobile',
-            //         },
-            //     },
-            // },
         ],
         addableState: listsSidebarGroupPropsTemplate.addableState,
         expandableState: listsSidebarGroupPropsTemplate.expandableState,

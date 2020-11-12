@@ -5,11 +5,14 @@ import styled from 'styled-components'
 import colors from '../../colors'
 import { fonts } from '../../styles'
 
-interface SearchBarProps {
-    handleSearchBoxClick(): void
-    handleInputChange(evt): void
-    handleSubmit(): void
-    handleFiltersClick(): void
+export interface SearchBarProps {
+    onSearchBoxFocus(): void
+    onSearchBarInputChange(
+        event: { target: HTMLElement },
+        inputString: string,
+    ): void
+    onSearchSubmit(event: { searchQuery: string }): void
+    onSearchFiltersOpen(): void
     isSearchBoxSelected: boolean
     inputString?: string
 }

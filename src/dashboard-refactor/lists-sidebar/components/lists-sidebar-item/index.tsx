@@ -8,6 +8,7 @@ import { NewItemsCountState } from 'src/dashboard-refactor/types'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { Icon } from 'src/dashboard-refactor/styled-components'
+import { LodashIsBoolean } from 'lodash/fp'
 
 // probably want to use timing function to get this really looking good. This is just quick and dirty
 const blinkingAnimation = keyframes`
@@ -28,7 +29,15 @@ const iconWidth = 12
 const iconMargin = 7.5
 const unHoveredWidth = containerWidth - titleLeftMargin - iconMargin
 
-const Container = styled.div`
+interface ContainerProps {
+    isHovered: boolean
+    isSelected: boolean
+    isBlinking: boolean
+    isDraggedOver: boolean
+    canReceiveDroppedItems: boolean
+}
+
+const Container = styled.div<ContainerProps>`
     height: 27px;
     width: ${containerWidth}px;
     display: flex;
@@ -56,13 +65,18 @@ const Container = styled.div`
         cursor: ${(props) =>
             !props.isDraggedOver
                 ? `pointer`
-                : props.isDroppable
+                : props.canReceiveDroppedItems
                 ? `default`
                 : `not-allowed`};
     `}
     `
 
-const ListTitle = styled.p`
+interface ListTitleProps {
+    isHovered: boolean
+    isSelected: boolean
+}
+
+const ListTitle = styled.p<ListTitleProps>`
     margin: 0;
     font-family: ${fonts.primary.name};
     font-style: normal;
@@ -94,12 +108,13 @@ const NewItemsCount = styled.div`
     justify-content: center;
     align-items: center;
     background-color: ${colors.midGrey};
-    div {
-        font-family: ${fonts.primary.name};
-        font-weight: ${fonts.primary.weight.bold};
-        font-size: 10px;
-        line-height: 14px;
-    }
+`
+
+const NewItemsCountInnerDiv = styled.div`
+    font-family: ${fonts.primary.name};
+    font-weight: ${fonts.primary.weight.bold};
+    font-size: 10px;
+    line-height: 14px;
 `
 
 // this type is differentiated from the type which governs the object passed down the tree to its parent:
@@ -110,7 +125,7 @@ export interface ListsSidebarItemComponentProps {
     isEditing: boolean
     hoverState: HoverState
     selectedState: SelectedState
-    droppableState: DroppableState
+    dropReceivingState: DropReceivingState
     newItemsCountState: NewItemsCountState
     moreActionButtonState: MoreActionButtonState
 }
@@ -126,13 +141,13 @@ interface SelectedState {
     isSelected: boolean
 }
 
-interface DroppableState {
+export interface DropReceivingState {
     onDragOver(): void
     onDragLeave(): void
     onDrop(): void
+    triggerSuccessfulDropAnimation: boolean
     isDraggedOver: boolean
-    isDroppable: boolean
-    isBlinking: boolean
+    canReceiveDroppedItems: boolean
 }
 
 interface MoreActionButtonState {
@@ -143,27 +158,9 @@ interface MoreActionButtonState {
 export default class ListsSidebarItem extends PureComponent<
     ListsSidebarItemComponentProps
 > {
-    private handleDragOver() {
-        this.props.droppableState.onDragOver()
-    }
-    private handleDragLeave() {
-        this.props.droppableState.onDragLeave()
-    }
-    private handleDrop() {
-        this.props.droppableState.onDrop()
-    }
-    private handleHoverEnter() {
-        this.props.hoverState.onHoverEnter()
-    }
-    private handleHoverLeave() {
-        this.props.hoverState.onHoverLeave()
-    }
-    private handleItemSelect() {
-        this.props.selectedState.onSelection()
-    }
     private renderIcon() {
         const {
-            droppableState: { isDroppable, isDraggedOver },
+            dropReceivingState: { canReceiveDroppedItems, isDraggedOver },
             hoverState: { isHovered },
             newItemsCountState: { displayNewItemsCount, newItemsCount },
             moreActionButtonState: {
@@ -174,10 +171,12 @@ export default class ListsSidebarItem extends PureComponent<
         if (displayNewItemsCount)
             return (
                 <NewItemsCount>
-                    <div>{newItemsCount}</div>
+                    <NewItemsCountInnerDiv>
+                        {newItemsCount}
+                    </NewItemsCountInnerDiv>
                 </NewItemsCount>
             )
-        if (isDroppable && isDraggedOver)
+        if (canReceiveDroppedItems && isDraggedOver)
             return <Icon heightAndWidth="12px" path="/img/plus.svg" />
         if (isHovered && displayMoreActionButton)
             return (
@@ -192,26 +191,33 @@ export default class ListsSidebarItem extends PureComponent<
         const {
             className,
             listName,
-            hoverState: { isHovered },
-            selectedState: { isSelected },
-            droppableState: { isBlinking, isDraggedOver, isDroppable },
+            hoverState: { isHovered, onHoverEnter, onHoverLeave },
+            selectedState: { isSelected, onSelection },
+            dropReceivingState: {
+                isDraggedOver,
+                canReceiveDroppedItems,
+                triggerSuccessfulDropAnimation,
+                onDragOver,
+                onDragLeave,
+                onDrop,
+            },
             newItemsCountState: { displayNewItemsCount },
         } = this.props
         return (
             <Container
                 className={className}
-                onClick={this.handleItemSelect}
-                onMouseEnter={this.handleHoverEnter}
-                onMouseLeave={this.handleHoverLeave}
-                onDragOver={this.handleDragOver}
-                onDragEnter={this.handleDragOver}
-                onDragLeave={this.handleDragLeave}
-                onDrop={this.handleDrop}
-                isDroppable={isDroppable}
+                onClick={onSelection}
+                onMouseEnter={onHoverEnter}
+                onMouseLeave={onHoverLeave}
+                onDragOver={onDragOver}
+                onDragEnter={onDragOver}
+                onDragLeave={onDragLeave}
+                onDrop={onDrop}
+                isDroppable={canReceiveDroppedItems}
                 isDraggedOver={isDraggedOver}
                 isHovered={isHovered}
                 isSelected={isSelected}
-                isBlinking={isBlinking}
+                isBlinking={triggerSuccessfulDropAnimation}
             >
                 <Margin left="19px">
                     <ListTitle isHovered={isHovered} isSelected={isSelected}>
