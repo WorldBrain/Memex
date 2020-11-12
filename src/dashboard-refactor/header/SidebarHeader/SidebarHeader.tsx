@@ -21,7 +21,7 @@ export const SidebarHeaderContainer = styled.div`
 export const CollectionTitle = styled.p`
     margin: 0;
     font-family: ${fonts.primary.name};
-    font-weight: ${fonts.primary.bold};
+    font-weight: ${fonts.primary.weight.bold};
     line-height: 21px;
 `
 
