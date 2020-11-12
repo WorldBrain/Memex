@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 
-import styleConstants from '../../styleConstants'
+import styles from '../../styles'
 
 import { SidebarLockedState, SidebarPeekState } from './types'
 import { HoverState } from '../../types'
@@ -9,7 +9,7 @@ import { HoverState } from '../../types'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import SidebarToggle from './SidebarToggle/SidebarToggle'
 
-const { fonts } = styleConstants
+const { fonts } = styles
 
 export const SidebarHeaderContainer = styled.div`
     height: 100%;
@@ -21,7 +21,7 @@ export const SidebarHeaderContainer = styled.div`
 export const CollectionTitle = styled.p`
     margin: 0;
     font-family: ${fonts.primary.name};
-    font-weight: ${fonts.primary.bold};
+    font-weight: ${fonts.primary.weight.bold};
     line-height: 21px;
 `
 
@@ -42,7 +42,7 @@ export default class SidebarHeader extends PureComponent<SidebarHeaderProps> {
         } = this.props
         return (
             <SidebarHeaderContainer>
-                <Margin x="12px">
+                <Margin horizontal="12px">
                     <SidebarToggle
                         sidebarLockedState={sidebarLockedState}
                         hoverState={sidebarToggleHoverState}

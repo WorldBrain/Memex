@@ -2,8 +2,8 @@ import React, { PureComponent } from 'react'
 import styled, { css } from 'styled-components'
 
 interface MarginProps {
-    x?: string
-    y?: string
+    horizontal?: string
+    vertical?: string
     left?: string
     right?: string
     top?: string
@@ -12,13 +12,15 @@ interface MarginProps {
 
 const MarginDiv = styled.div`
     ${(props) => {
-        if (props.x) return `margin-left: ${props.x}; margin-right: ${props.x};`
+        if (props.horizontal)
+            return `margin-left: ${props.horizontal}; margin-right: ${props.horizontal};`
         return `${props.left ? `margin-left: ${props.left};` : ``}${
             props.right ? `margin-right: ${props.right};` : ``
         }`
     }}
     ${(props) => {
-        if (props.y) return `margin-top: ${props.y}; margin-bottom: ${props.y};`
+        if (props.vertical)
+            return `margin-top: ${props.vertical}; margin-bottom: ${props.vertical};`
         return `${props.top ? `margin-top: ${props.top};` : ``}${
             props.bottom ? `margin-bottom: ${props.bottom}` : ``
         }`
