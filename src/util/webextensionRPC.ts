@@ -223,7 +223,11 @@ if (typeof window !== 'undefined') {
 }
 
 async function incomingRPCListener(message, sender) {
-    if (!message || message[RPC_CALL] !== RPC_CALL) {
+    if (
+        !message ||
+        message[RPC_CALL] !== RPC_CALL ||
+        sender?.url === window.location.href
+    ) {
         return
     }
 
