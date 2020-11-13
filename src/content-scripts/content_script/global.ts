@@ -46,7 +46,9 @@ export async function main() {
     setupPageContentRPC()
     runInBackground<PageIndexingInterface<'caller'>>().setTabAsIndexable()
 
-    const getPageUrl = () => window.location.href
+    // const getPageUrl = () => window.location.href
+    const getPageUrl = () =>
+        new URL(window.location.href).searchParams.get('file')
     const getPageTitle = () => document.title
     const getNormalizedPageUrl = () => normalizeUrl(getPageUrl())
 
@@ -179,6 +181,7 @@ export async function main() {
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
                 analytics,
                 copyToClipboard,
+                getPageUrl,
             })
             components.sidebar?.resolve()
         },
