@@ -4,14 +4,13 @@ import onClickOutside from 'react-onclickoutside'
 
 import { ButtonTooltip } from 'src/common-ui/components'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
-import { MarkdownPreview } from 'src/common-ui/components/markdown-preview'
+import {
+    MarkdownPreviewAnnotationInsertMenu,
+    annotationMenuItems,
+} from 'src/common-ui/components/markdown-preview-insert-menu'
 import TagInput from 'src/tags/ui/tag-input'
 import { FocusableComponent } from './types'
-import {
-    insertTab,
-    uninsertTab,
-    insertIndentedNewLine,
-} from 'src/common-ui/utils'
+import { insertTab, uninsertTab } from 'src/common-ui/utils'
 
 interface State {
     isTagPickerShown: boolean
@@ -39,7 +38,9 @@ export interface Props
 export class AnnotationCreate extends React.Component<Props, State>
     implements FocusableComponent {
     private textAreaRef = React.createRef<HTMLTextAreaElement>()
-    private markdownPreviewRef = React.createRef<MarkdownPreview>()
+    private markdownPreviewRef = React.createRef<
+        MarkdownPreviewAnnotationInsertMenu
+    >()
     state = { isTagPickerShown: false }
 
     focus() {
@@ -59,8 +60,11 @@ export class AnnotationCreate extends React.Component<Props, State>
     private handleSave = () => {
         this.props.onSave()
 
-        if (this.markdownPreviewRef?.current?.state.showPreview) {
-            this.markdownPreviewRef.current.togglePreview()
+        if (
+            this.markdownPreviewRef?.current?.markdownPreviewRef.current?.state
+                .showPreview
+        ) {
+            this.markdownPreviewRef.current.markdownPreviewRef.current.togglePreview()
         }
     }
 
@@ -143,11 +147,13 @@ export class AnnotationCreate extends React.Component<Props, State>
     render() {
         return (
             <TextBoxContainerStyled>
-                <MarkdownPreview
+                <MarkdownPreviewAnnotationInsertMenu
                     ref={this.markdownPreviewRef}
                     customRef={this.textAreaRef}
                     onKeyDown={this.handleInputKeyDown}
                     value={this.props.comment}
+                    menuItems={annotationMenuItems}
+                    updateInputValue={this.props.onCommentChange}
                     renderInput={(inputProps) => (
                         <StyledTextArea
                             {...inputProps}
