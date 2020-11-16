@@ -1,10 +1,9 @@
-import { ListSource } from 'src/dashboard-refactor/types'
-import { ListsSearchables, ListsSearchResults } from './types'
+import { ListsSearchables, ListsSearchResult } from './types'
 
 export const searchLists = (
     searchStr: string,
     searchData: ListsSearchables,
-): Array<ListsSearchResults> => {
+): ListsSearchResult[] => {
     const { sources, lists } = searchData
     // 1. Loop through sources and create an array with an object per source
     //  - This should have a listSource prop and a resultsList prop with empty
@@ -16,21 +15,33 @@ export const searchLists = (
         })
         // 2. For each source run through lists and run search func. If match exists
         //    then add to resultsList array
-        const currentArrItem = arr[arr.length - 1]
-        lists.map((list, idx) => {
+        const sourceItemArr = arr[arr.length - 1]
+        lists.map((list) => {
             const { name, id } = list
-            if (name.startsWith(searchStr))
-                currentArrItem.resultsList.push({
+            const match = name.startsWith(searchStr)
+            if (match) {
+                sourceItemArr.push({
                     listId: id,
-                    isPerfectMatch: name.length === searchStr.length,
-                    matchStartIdx: 0,
-                    matchLength: searchStr.length,
+                    textPartArray: [],
                 })
+                // isolate textPartArray for list with matching name and populate
+                const textPartArray = sourceItemArr[sourceItemArr.length - 1]
+                textPartArray.push({
+                    text: searchStr,
+                    match: true,
+                })
+                // add non-matched string portion to array if not perfect match
+                if (!(name.length === searchStr.length))
+                    textPartArray.push({
+                        text: name.slice(searchStr.length),
+                        match: false,
+                    })
+            }
         })
-        // 3. Sort inner arrays by isPerfectMatch (if refactored then also by matchStartIdx asc)
-        currentArrItem.resultsList.sort((a, b) => {
-            let aSort = a.isPerfect || -1
-            let bSort = b.isPerfect || -1
+        // 3. Sort inner arrays with perfect matches first
+        sourceItemArr.resultsList.sort((a, b) => {
+            let aSort = a.textPartArray.length % 2
+            let bSort = b.textPartArray.length % 2
             return bSort - aSort
         })
         return arr

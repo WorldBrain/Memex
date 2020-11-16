@@ -1,4 +1,4 @@
-import { ListSource } from 'src/dashboard-refactor/types'
+import { ListSource, TextPart } from 'src/dashboard-refactor/types'
 
 interface ListsSearchArrayObject {
     source: ListSource
@@ -7,18 +7,16 @@ interface ListsSearchArrayObject {
 }
 
 export interface ListsSearchables {
-    sources: Array<ListSource>
-    lists: Array<ListsSearchArrayObject>
+    sources: ListSource[]
+    lists: ListsSearchArrayObject[]
 }
 
-interface ListsSearchResultItem {
-    listId: Number
-    isPerfectMatch: boolean
-    matchStartIndex: Number
-    matchLength: Number
+interface ListsSearchResultListItem {
+    listId: string
+    textPartArray: TextPart[]
 }
 
-export interface ListsSearchResults {
+export interface ListsSearchResult {
     listSource: ListSource
-    resultsList: Array<ListsSearchResultItem>
+    resultsList: ListsSearchResultListItem
 }

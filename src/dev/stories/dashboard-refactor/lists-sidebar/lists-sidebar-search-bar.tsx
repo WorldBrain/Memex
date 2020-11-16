@@ -11,26 +11,37 @@ const stories = storiesOf('Dashboard Refactor|Lists Sidebar/Search Bar', module)
 
 const template: ListsSidebarSearchBarProps = {
     isSearchBarFocused: false,
+    hasPerfectMatch: false,
     searchQuery: '',
     onListsSidebarSearchBarFocus: () => {},
     onListsSidebarSearchBarInputChange: () => {},
-    onListsSidebarSearchBarSubmit: () => {},
 }
 
 const listsSidebarSearchBarProps: {
     default: ListsSidebarSearchBarProps
+    withPerfectMatch: ListsSidebarSearchBarProps
     focused: ListsSidebarSearchBarProps
-    withInput: ListsSidebarSearchBarProps
+    withInputFocused: ListsSidebarSearchBarProps
+    withInputUnfocused: ListsSidebarSearchBarProps
 } = {
     default: template,
     focused: {
         ...template,
         isSearchBarFocused: true,
     },
-    withInput: {
+    withPerfectMatch: {
+        ...template,
+        hasPerfectMatch: true,
+    },
+    withInputFocused: {
         ...template,
         isSearchBarFocused: true,
         searchQuery: 'Cat',
+    },
+    withInputUnfocused: {
+        ...template,
+        isSearchBarFocused: false,
+        searchQuery: 'Gifs',
     },
 }
 
@@ -38,6 +49,14 @@ stories.add(
     'Default State',
     sidebarWrapperFunc(() => (
         <ListsSidebarSearchBar {...listsSidebarSearchBarProps.default} />
+    )),
+)
+stories.add(
+    'Perfect Match',
+    sidebarWrapperFunc(() => (
+        <ListsSidebarSearchBar
+            {...listsSidebarSearchBarProps.withPerfectMatch}
+        />
     )),
 )
 stories.add(
@@ -49,6 +68,16 @@ stories.add(
 stories.add(
     'With Input',
     sidebarWrapperFunc(() => (
-        <ListsSidebarSearchBar {...listsSidebarSearchBarProps.withInput} />
+        <ListsSidebarSearchBar
+            {...listsSidebarSearchBarProps.withInputFocused}
+        />
+    )),
+)
+stories.add(
+    'With Input',
+    sidebarWrapperFunc(() => (
+        <ListsSidebarSearchBar
+            {...listsSidebarSearchBarProps.withInputUnfocused}
+        />
     )),
 )

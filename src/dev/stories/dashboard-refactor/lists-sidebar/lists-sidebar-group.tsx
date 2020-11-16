@@ -19,7 +19,9 @@ import { ListsSidebarItemWithMenuProps } from 'src/dashboard-refactor/lists-side
 export const sidebarWrapperFunc = (ChildComponent) => {
     const Wrapper = styled.div`
         height: min-content;
-        width: 173px;
+        width: 193px;
+        background-color: #e1e1e1;
+        padding: 10px;
     `
     return () => {
         return (
