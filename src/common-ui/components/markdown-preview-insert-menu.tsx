@@ -1,10 +1,13 @@
 import React from 'react'
 import styled from 'styled-components'
 
+import { extractIdFromUrl } from 'src/util/youtube-url'
+
 import {
     MarkdownPreview,
     Props as MarkdownPreviewProps,
 } from './markdown-preview'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 interface MenuItemProps {
     name: string
@@ -93,8 +96,7 @@ export const annotationMenuItems: MenuItemProps[] = [
                 .toString()
                 .padStart(2, '0')}`
 
-            // TODO: Derive properly
-            const videoId = 'TESTID'
+            const videoId = extractIdFromUrl(document.location.href)
 
             return `[${humanTimestamp}](https://youtu.be/${videoId}?t=${timestampSecs})`
         },
@@ -102,7 +104,9 @@ export const annotationMenuItems: MenuItemProps[] = [
     {
         name: 'Link',
         getTextToInsert() {
-            return document.location.href
+            return `[${normalizeUrl(document.location.href)}](${
+                document.location.href
+            })`
         },
     },
 ]
