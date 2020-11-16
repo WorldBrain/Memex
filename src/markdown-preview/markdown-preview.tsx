@@ -1,8 +1,8 @@
 import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
-import { ButtonTooltip } from 'src/common-ui/components'
+import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 
-import Markdown from 'src/common-ui/components/markdown-renderer'
+import { ButtonTooltip } from 'src/common-ui/components'
 
 export interface MainInputProps<T = HTMLInputElement | HTMLTextAreaElement> {
     onKeyDown: React.KeyboardEventHandler

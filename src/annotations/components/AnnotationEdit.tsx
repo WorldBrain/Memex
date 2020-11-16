@@ -4,10 +4,8 @@ import styled from 'styled-components'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TagInput from 'src/tags/ui/tag-input'
-import {
-    MarkdownPreviewAnnotationInsertMenu,
-    annotationMenuItems,
-} from 'src/common-ui/components/markdown-preview-insert-menu'
+import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
+import { annotationMenuItems } from 'src/markdown-preview/insert-menu-entries'
 import { FocusableComponent } from './types'
 import { uninsertTab, insertTab } from 'src/common-ui/utils'
 

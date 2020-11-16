@@ -1,10 +1,10 @@
 import * as React from 'react'
 import styled from 'styled-components'
+import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { TextTruncator } from 'src/annotations/types'
 import { truncateText } from 'src/annotations/utils'
-import Markdown from 'src/common-ui/components/markdown-renderer'
 
 export interface Props {
     text: string
@@ -124,7 +124,6 @@ const TextBox = styled.div`
     overflow-x: hidden;
     line-height: 22px;
     line-break: anywhere;
-
 
     & *:first-child {
         margin-top: 0px;
