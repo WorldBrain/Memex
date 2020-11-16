@@ -2,7 +2,7 @@ import { Item, ServiceParser } from '../types'
 
 const parseNetscape: ServiceParser = (doc) => {
     const links = doc.getElementsByTagName('a')
-    const collectionName = 'Bookmarks Bar'
+    const collectionName = 'Imported Bookmarks'
     const items: Item[] = []
     for (const link of links) {
         if (!link.hasAttribute('href')) {

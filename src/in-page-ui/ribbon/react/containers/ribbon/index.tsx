@@ -9,6 +9,7 @@ import { StatefulUIElement } from 'src/util/ui-logic'
 import Ribbon from '../../components/ribbon'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
 import { AnnotationsSidebarProps } from 'src/sidebar/annotations-sidebar/components/AnnotationsSidebar'
+import analytics from 'src/analytics'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
@@ -28,6 +29,7 @@ export default class RibbonContainer extends StatefulUIElement<
             props,
             new RibbonContainerLogic({
                 ...props,
+                analytics,
                 focusCreateForm: () =>
                     this.ribbonRef?.current?.focusCreateForm(),
             }),

@@ -95,7 +95,7 @@ export const listsSidebarItemProps = {
     isEditing: {
         isEditing: true,
         moreActionButtonState,
-        listName: 'This is a very long collection name',
+        listName: 'Self-organising',
         selectedState: {
             onSelection: () => {},
             isSelected: true,

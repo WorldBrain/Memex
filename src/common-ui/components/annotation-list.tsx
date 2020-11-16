@@ -1,6 +1,7 @@
 import React, { Component, MouseEventHandler } from 'react'
 import cx from 'classnames'
 
+import analytics from 'src/analytics'
 import { Annotation as AnnotationFlawed } from 'src/annotations/types'
 import {
     AnnotationSharingInfo,
@@ -21,6 +22,7 @@ import {
     INIT_FORM_STATE,
 } from 'src/sidebar/annotations-sidebar/containers/logic'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
+import { copyToClipboard } from 'src/annotations/content_script/utils'
 
 const styles = require('./annotation-list.css')
 
@@ -249,7 +251,6 @@ class AnnotationList extends Component<Props, State> {
                 ...state.editForms,
                 [url]: {
                     ...state.editForms[url],
-                    showPreview: false,
                     commentText,
                 },
             },
@@ -292,6 +293,14 @@ class AnnotationList extends Component<Props, State> {
             <div className={styles.hoverBoxWrapper}>
                 <HoverBox>
                     <SingleNoteShareMenu
+                        copyLink={async (link) => {
+                            analytics.trackEvent({
+                                category: 'ContentSharing',
+                                action: 'copyNoteLink',
+                            })
+
+                            await copyToClipboard(link)
+                        }}
                         annotationUrl={annot.url}
                         postShareHook={() =>
                             this.updateAnnotationShareState(annot.url)({
@@ -346,14 +355,8 @@ class AnnotationList extends Component<Props, State> {
                 annotationEditDependencies={{
                     comment: this.state.editForms[annot.url].commentText,
                     tags: this.state.editForms[annot.url].tags,
-                    showPreview: this.state.editForms[annot.url].showPreview,
                     isTagInputActive: this.state.editForms[annot.url]
                         .isTagInputActive,
-                    toggleEditPreview: () =>
-                        this.handleEditFormUpdate(annot.url, (state) => ({
-                            showPreview: !state.editForms[annot.url]
-                                .showPreview,
-                        })),
                     onCommentChange: (commentText) =>
                         this.handleEditFormUpdate(annot.url, () => ({
                             commentText,

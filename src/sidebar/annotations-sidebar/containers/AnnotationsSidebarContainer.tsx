@@ -26,6 +26,8 @@ import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareMenu'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { copyToClipboard } from 'src/annotations/content_script/utils'
+import analytics from 'src/analytics'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -46,6 +48,8 @@ export class AnnotationsSidebarContainer<
             props,
             new SidebarContainerLogic({
                 ...props,
+                analytics,
+                copyToClipboard,
                 focusCreateForm: () =>
                     this.sidebarRef?.getInstance()?.focusCreateForm(),
             }),
@@ -163,12 +167,6 @@ export class AnnotationsSidebarContainer<
             isTagInputActive: form.isTagInputActive,
             comment: form.commentText,
             tags: form.tags,
-            showPreview: form.showPreview,
-            toggleEditPreview: () =>
-                this.processEvent('setEditPreview', {
-                    annotationUrl: annotation.url,
-                    showPreview: !form.showPreview,
-                }),
             updateTags: (args) =>
                 this.processEvent('updateTagsForEdit', {
                     annotationUrl: annotation.url,
@@ -280,6 +278,9 @@ export class AnnotationsSidebarContainer<
             <ShareMenuWrapper>
                 <HoverBox>
                     <SingleNoteShareMenu
+                        copyLink={(link) =>
+                            this.processEvent('copyNoteLink', { link })
+                        }
                         annotationUrl={currentAnnotationId}
                         postShareHook={() =>
                             this.processEvent('updateAnnotationShareInfo', {
@@ -317,6 +318,9 @@ export class AnnotationsSidebarContainer<
             <ShareMenuWrapperTopBar>
                 <HoverBox>
                     <AllNotesShareMenu
+                        copyLink={(link) =>
+                            this.processEvent('copyPageLink', { link })
+                        }
                         normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
                         postShareAllHook={() =>
                             this.processEvent('updateAllAnnotationsShareInfo', {
@@ -373,6 +377,10 @@ export class AnnotationsSidebarContainer<
     }
 
     protected renderModals() {
+        return null
+    }
+
+    protected renderTopBanner() {
         return null
     }
 
@@ -451,6 +459,7 @@ export class AnnotationsSidebarContainer<
         return (
             <ThemeProvider theme={this.props.theme}>
                 <ContainerStyled className="ignore-react-onclickoutside">
+                    {this.renderTopBanner()}
                     {this.renderTopBar()}
                     <AnnotationsSidebar
                         {...this.state}

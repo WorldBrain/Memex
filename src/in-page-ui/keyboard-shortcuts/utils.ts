@@ -78,15 +78,16 @@ export async function setKeyboardShortcutsState(
     )
 }
 
-function isAlpha(str) {
-    return /^[a-zA-Z]$/.test(str)
+function isAlpha(e: React.KeyboardEvent): boolean {
+    return e.keyCode >= 65 && e.keyCode <= 90
 }
 
 export const convertKeyboardEventToKeyString = (
-    e,
-    getKeyVal = (event) => event.key,
+    e: React.KeyboardEvent,
+    getKeyVal = (event: React.KeyboardEvent) =>
+        String.fromCharCode(event.keyCode),
 ) => {
-    if (!isAlpha(e.key)) {
+    if (!isAlpha(e)) {
         return ''
     }
 

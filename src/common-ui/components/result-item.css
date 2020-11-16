@@ -226,6 +226,7 @@
 .removeCollectionItemBox {
     display: flex;
     align-items: flex-start;
+    z-index: 1;
 
     & > div {
         height: fit-content;

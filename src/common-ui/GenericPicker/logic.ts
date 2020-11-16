@@ -216,7 +216,9 @@ export default abstract class GenericPickerLogic extends UILogic<
      */
     _queryRemote = async (term: string, selectedEntries: string[]) => {
         this.emitMutation({ loadingQueryResults: { $set: true } })
-        const results = await this.dependencies.queryEntries(term)
+        const results = await this.dependencies.queryEntries(
+            term.toLocaleLowerCase(),
+        )
         results.sort()
         const displayEntries = GenericPickerLogic.decorateEntryList(
             results,

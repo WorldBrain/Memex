@@ -266,12 +266,16 @@ function annotationToReadwise(
     annotation: Omit<Annotation, 'pageTitle'>,
     options: { pageData: PageData },
 ): ReadwiseHighlight {
-
-    const today = new Date();
-    const date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    const dateTime = date+' '+time;
-
+    const today = new Date()
+    const date =
+        today.getFullYear() +
+        '-' +
+        (today.getMonth() + 1) +
+        '-' +
+        today.getDate()
+    const time =
+        today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds()
+    const dateTime = date + ' ' + time
 
     return {
         title: options.pageData.fullTitle,
@@ -281,7 +285,9 @@ function annotationToReadwise(
         location_type: 'time_offset',
         highlighted_at: annotation.createdWhen,
         // highlight_url: annotation.url,
-        text: annotation?.body?.length ? annotation.body : 'Memex note from: '+ dateTime,
+        text: annotation?.body?.length
+            ? annotation.body
+            : 'Memex note from: ' + dateTime,
     }
 }
 

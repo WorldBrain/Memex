@@ -74,9 +74,9 @@ export interface AnalyticsEvents {
         | 'shareListEntryBatch'
         | 'unshareListEntry'
         | 'shareAnnotation'
-        | 'CopyNoteLink'
-        | 'CopyPageLink'
-        | 'CopyCollectionLink'
+        | 'copyNoteLink'
+        | 'copyPageLink'
+        | 'copyCollectionLink'
     InPageTooltip:
         | 'highlightText'
         | 'annotateText'
@@ -116,9 +116,9 @@ export interface AnalyticsEvents {
         | 'changeIndexingSetting'
         | 'enableKeyboardShortcuts'
         | 'disableKeyboardShortcuts'
-    Readwise:
-        | 'setupReadwise'
-        | 'removeReadwise'
+    Readwise: 'setupReadwise' | 'removeReadwise'
+    Inbox: 'filterByInbox' | 'removeFromInbox'
+    TextExporter: 'copyToClipboard'
 }
 
 export interface AnalyticsEventInfo {

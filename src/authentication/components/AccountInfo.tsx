@@ -11,7 +11,6 @@ import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { TaskState } from 'ui-logic-core/lib/types'
 
-
 const styles = require('./styles.css')
 
 const hiddenInProduction =
@@ -81,16 +80,17 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
             <FullPage>
                 {user != null && (
                     <div className={styles.AccountInfoBox}>
-                        {(this.state.isPioneer &&  this.state.loadState === 'success') && (
-                            <div className={styles.pioneerBox}>
-                                <div className={styles.pioneerTitle}>
-                                    🚀 Pioneer Edition
+                        {this.state.isPioneer &&
+                            this.state.loadState === 'success' && (
+                                <div className={styles.pioneerBox}>
+                                    <div className={styles.pioneerTitle}>
+                                        🚀 Pioneer Edition
+                                    </div>
+                                    <div className={styles.pioneerSubtitle}>
+                                        You have beta features enabled.
+                                    </div>
                                 </div>
-                                <div className={styles.pioneerSubtitle}>
-                                    You have beta features enabled.
-                                </div>
-                            </div>
-                        )}
+                            )}
 
                         <div className={styles.section}>
                             <TypographyInputTitle>
@@ -156,7 +156,8 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                             </div>
                         )}
                         {user.subscriptionStatus &&
-                            user.subscriptionStatus !== 'in_trial' && user.subscriptionStatus !== 'active' && (
+                            user.subscriptionStatus !== 'in_trial' &&
+                            user.subscriptionStatus !== 'active' && (
                                 <div className={styles.section}>
                                     <TypographyInputTitle>
                                         {' '}
@@ -171,9 +172,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                             readOnly
                                         />
                                         <PrimaryButton
-                                            onClick={
-                                                this.openPortal
-                                            }
+                                            onClick={this.openPortal}
                                         >
                                             {'Reactivate'}
                                         </PrimaryButton>

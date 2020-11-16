@@ -2,7 +2,6 @@ import React from 'react'
 import styled from 'styled-components'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
-import delay from 'src/util/delay'
 import {
     annotations as annotationsBG,
     contentSharing,
@@ -15,8 +14,6 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 import { LoadingIndicator } from 'src/common-ui/components'
 
 import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
-import { copyToClipboard } from 'src/in-page-ui/tooltip/utils'
-import analytics from 'src/analytics'
 
 interface State {
     shareAllState: TaskState
@@ -25,6 +22,7 @@ interface State {
 
 export interface Props {
     normalizedPageUrl: string
+    copyLink: (link: string) => Promise<void>
     closeShareMenu: () => void
     postShareAllHook?: () => void
     postUnshareAllHook?: () => void
@@ -126,14 +124,6 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
         this.props.postUnshareAllHook?.()
     }
 
-    private handleLinkCopy = async (link: string) => {
-        // analytics.trackEvent({
-        //     category: 'ContentSharing',
-        //     action: 'CopyPageLink',
-        // })
-        await copyToClipboard(link)
-    }
-
     // TODO: implement in milestone 3.
     //   It should: "remove the link of that page, so it deletes the shared-page object and all the associated annotation entries"
     //
@@ -151,7 +141,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                 // onUnshareAllClick={this.handleUnshareAll}
                 // onShareAllClick={this.handleShareAll}
                 getLink={this.getCreatedLink}
-                onCopyLinkClick={this.handleLinkCopy}
+                onCopyLinkClick={this.props.copyLink}
                 onClickOutside={this.props.closeShareMenu}
                 // checkboxCopy="Share all Notes on this page"
                 // checkboxTitleCopy="Share all Notes"

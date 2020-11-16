@@ -17,6 +17,8 @@ const TextInputBox = styled.div`
 `
 
 const TextArea = styled.textarea`
+    resize: both;
+    min-width: 280px;
     font-family: monospace;
 `
 
