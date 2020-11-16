@@ -2,11 +2,13 @@ import React from 'react'
 import styled from 'styled-components'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
+import { ClickAway } from 'src/util/click-away-wrapper'
 import { extractIdFromUrl, isUrlYTVideo } from 'src/util/youtube-url'
 import {
     MarkdownPreview,
     Props as MarkdownPreviewProps,
 } from './markdown-preview'
+import { isLoggable } from 'src/activity-logger'
 
 interface MenuItemProps {
     name: string
@@ -23,16 +25,26 @@ interface State {
     isOpen: boolean
 }
 
-export class MarkdownPreviewAnnotationInsertMenu extends React.Component<
+export class MarkdownPreviewAnnotationInsertMenu extends React.PureComponent<
     Props,
     State
 > {
     markdownPreviewRef = React.createRef<MarkdownPreview>()
+    private lastToggleCall = 0
 
     state: State = { isOpen: false }
 
-    private toggleOpenState = () =>
+    private toggleMenu = () => {
+        // This check covers the case when the menu is open and you click the button to close it:
+        //  It also triggers the "ClickAway" call of this method, which results in flickering between the 2 states
+        const now = Date.now()
+        if (now - this.lastToggleCall < 300) {
+            return
+        }
+        this.lastToggleCall = now
+
         this.setState((state) => ({ isOpen: !state.isOpen }))
+    }
 
     private handleItemClick: (
         props: MenuItemProps,
@@ -48,30 +60,33 @@ export class MarkdownPreviewAnnotationInsertMenu extends React.Component<
         )
 
         this.props.updateInputValue(newValue)
+        this.toggleMenu()
     }
 
     private renderInsertMenu = () => (
         <MenuContainer>
             <MenuBtn
                 theme={{ isMenuOpen: this.state.isOpen }}
-                onClick={this.toggleOpenState}
+                onClick={this.toggleMenu}
             >
                 Insert
             </MenuBtn>
             {this.state.isOpen && (
-                <Menu>
-                    {this.props.menuItems.map((props, i) => (
-                        <MenuItem
-                            key={i}
-                            onClick={this.handleItemClick(props)}
-                            theme={{
-                                isDisabled: props.isDisabled,
-                            }}
-                        >
-                            {props.name}
-                        </MenuItem>
-                    ))}
-                </Menu>
+                <ClickAway onClickAway={this.toggleMenu}>
+                    <Menu>
+                        {this.props.menuItems.map((props, i) => (
+                            <MenuItem
+                                key={i}
+                                onClick={this.handleItemClick(props)}
+                                theme={{
+                                    isDisabled: props.isDisabled,
+                                }}
+                            >
+                                {props.name}
+                            </MenuItem>
+                        ))}
+                    </Menu>
+                </ClickAway>
             )}
         </MenuContainer>
     )
@@ -157,6 +172,7 @@ export const annotationMenuItems: MenuItemProps[] = [
     },
     {
         name: 'Link',
+        isDisabled: !isLoggable({ url: document.location.href }),
         getTextToInsert() {
             return `[${normalizeUrl(document.location.href)}](${
                 document.location.href

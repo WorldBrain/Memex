@@ -26,7 +26,7 @@ interface State {
     showPreview: boolean
 }
 
-export class MarkdownPreview extends React.PureComponent<Props, State> {
+export class MarkdownPreview extends React.Component<Props, State> {
     static defaultProps: Partial<Props> = {
         isToggleKBShortcutKeyed: (e) => e.key === 'Enter' && e.altKey,
         renderSecondaryBtn: () => null,
