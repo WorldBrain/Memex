@@ -11,7 +11,14 @@ export default class OnboardingMessage extends React.PureComponent<Props> {
     }
 
     render() {
-        const descriptionText = <span><strong>Import your bookmarks to make them full-text searchable</strong> <br/> From Pocket, Diigo, Raindrop.io and many more.</span>
+        const descriptionText = (
+            <span>
+                <strong>
+                    Import your bookmarks to make them full-text searchable
+                </strong>{' '}
+                <br /> From Pocket, Diigo, Raindrop.io and many more.
+            </span>
+        )
 
         return (
             <ResultsMessage onDismiss={this.handleDismiss}>

@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react'
 import styled, { css, keyframes } from 'styled-components'
 
-import colors from '../../../colors'
-import { fonts } from '../../../styleConstants'
+import colors from 'src/dashboard-refactor/colors'
+import { fonts } from 'src/dashboard-refactor/styleConstants'
 
 import { NewItemsCountState } from 'src/dashboard-refactor/types'
 

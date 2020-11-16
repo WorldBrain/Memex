@@ -39,24 +39,20 @@ class CollectionsButton extends PureComponent<Props, State> {
         this.setState({ isIconHovered: false })
 
     private handleOpenCloseLockSidebar = () => {
-        this.props.lockOpenSidebar(
-            !this.props.isSidebarLocked,
-        )
+        this.props.lockOpenSidebar(!this.props.isSidebarLocked)
 
         if (this.props.isSidebarLocked) {
             this.props.closeSidebar()
         }
-
     }
 
     render() {
         return (
-            <div 
+            <div
                 className={styles.listBtnContainer}
                 onMouseEnter={this.handleMouseEnterIcon}
-                        onMouseLeave={this.handleMouseLeaveIcon}
-                        onClick={() => this.handleOpenCloseLockSidebar()
-                        }
+                onMouseLeave={this.handleMouseLeaveIcon}
+                onClick={() => this.handleOpenCloseLockSidebar()}
             >
                 <ButtonTooltip
                     tooltipText={

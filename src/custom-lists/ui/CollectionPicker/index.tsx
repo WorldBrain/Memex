@@ -82,7 +82,7 @@ class ListPicker extends StatefulUIElement<
             name={list.name}
             selected={list.selected}
             focused={list.focused}
-            ResultItem={ListResultItem}
+            resultItem={<ListResultItem>{list.name}</ListResultItem>}
             removeTooltipText="Remove from list"
             actOnAllTooltipText="Add all tabs in window to list"
         />

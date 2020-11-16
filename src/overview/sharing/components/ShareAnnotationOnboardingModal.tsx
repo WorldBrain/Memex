@@ -132,8 +132,10 @@ export default class ShareAnnotationOnboardingModal extends Component<Props> {
                             NEW: Share Annotations
                         </TypographyHeadingBigger>
                         <TypographyTextNormal>
-                            Once shared, anyone with the link can view them.<br/>
-                            They are also added to all shared collection the page is part of.
+                            Once shared, anyone with the link can view them.
+                            <br />
+                            They are also added to all shared collection the
+                            page is part of.
                         </TypographyTextNormal>
                     </InstructionsBox>
                 </InstructionsContainer>

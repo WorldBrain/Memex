@@ -15,6 +15,7 @@ import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { Annotation } from 'src/annotations/types'
 import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
 import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
+import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -234,6 +235,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                     />
                 )}
             </>
+        )
+    }
+
+    protected renderTopBanner() {
+        return (
+            <UpdateNotifBanner
+                theme={{ position: 'fixed', width: '410px', iconSize: '20px' }}
+            />
         )
     }
 }

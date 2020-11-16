@@ -78,7 +78,7 @@ storiesOf('Tags Refactored', module)
                             name="tag"
                             selected={false}
                             index={1}
-                            ResultItem={TagResultItem}
+                            resultItem={<TagResultItem>{'tag'}</TagResultItem>}
                         />
                     )}
                 />
@@ -92,7 +92,7 @@ storiesOf('Tags Refactored', module)
                 name="tag"
                 selected={false}
                 index={1}
-                ResultItem={TagResultItem}
+                resultItem={<TagResultItem>{'tag'}</TagResultItem>}
             />
         </div>
     ))

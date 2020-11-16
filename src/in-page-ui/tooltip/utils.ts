@@ -22,15 +22,6 @@ export const delayed = (f, delay) => {
 export const getExtURL = (location) =>
     browser.runtime ? browser.runtime.getURL(location) : location
 
-export const copyToClipboard = (text) => {
-    const dummy = document.createElement('input')
-    document.body.appendChild(dummy)
-    dummy.setAttribute('value', text)
-    dummy.select()
-    document.execCommand('copy')
-    document.body.removeChild(dummy)
-}
-
 export const getTooltipState: () => Promise<boolean> = async () =>
     getLocalStorage(
         constants.TOOLTIP_STORAGE_NAME,

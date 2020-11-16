@@ -355,6 +355,7 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                 }
                 isSocial={isSocialPost}
                 goToAnnotation={this.props.goToAnnotation}
+                isSidebarOpen={this.props.activeSidebarIndex !== -1}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
             />

@@ -132,7 +132,6 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
                 this.setState({ isAuthenticating: true })
             }
         }
-
     }
 
     private openPortal = async () => {

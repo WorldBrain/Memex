@@ -121,9 +121,7 @@ class Header extends PureComponent<Props> {
                             showUnreadCount={this.props.showUnreadCount}
                         />*/}
                         <Link to={this.props.settingsRoute}>
-                            <div 
-                                className={styles.settingsBox}
-                            >
+                            <div className={styles.settingsBox}>
                                 <span
                                     title="Settings"
                                     className={styles.settingsIcon}

@@ -29,7 +29,7 @@ export interface SidebarHeaderProps {
     sidebarLockedState: SidebarLockedState
     sidebarPeekState: SidebarPeekState
     sidebarToggleHoverState: HoverState
-    selectedCollectionHeader?: string
+    selectedList?: string
 }
 
 export default class SidebarHeader extends PureComponent<SidebarHeaderProps> {
@@ -38,22 +38,20 @@ export default class SidebarHeader extends PureComponent<SidebarHeaderProps> {
             sidebarLockedState,
             sidebarToggleHoverState,
             sidebarPeekState,
-            selectedCollectionHeader,
+            selectedList,
         } = this.props
         return (
             <SidebarHeaderContainer>
                 <Margin x="12px">
                     <SidebarToggle
                         sidebarLockedState={sidebarLockedState}
-                        sidebarToggleHoverState={sidebarToggleHoverState}
+                        hoverState={sidebarToggleHoverState}
                     />
                 </Margin>
                 {(sidebarLockedState.isSidebarLocked ||
                     sidebarPeekState.isSidebarPeeking) &&
-                    selectedCollectionHeader && (
-                        <CollectionTitle>
-                            {selectedCollectionHeader}
-                        </CollectionTitle>
+                    selectedList && (
+                        <CollectionTitle>{selectedList}</CollectionTitle>
                     )}
             </SidebarHeaderContainer>
         )

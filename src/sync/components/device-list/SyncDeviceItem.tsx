@@ -23,7 +23,9 @@ export default class SyncDeviceItem extends Component<Props> {
         const device = this.props.device
         return (
             <DeviceRow>
-                <Item>{device.devicePlatform} (Device-ID: {device.deviceId})</Item>
+                <Item>
+                    {device.devicePlatform} (Device-ID: {device.deviceId})
+                </Item>
                 <MiddleItem>
                     Time Added: {formatTime(device.createdWhen, true)}
                 </MiddleItem>

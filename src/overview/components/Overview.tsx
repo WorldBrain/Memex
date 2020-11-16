@@ -37,6 +37,7 @@ import { show } from 'src/overview/modals/actions'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
+import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -48,6 +49,7 @@ export interface Props {
     showSubscriptionModal: () => void
     showAnnotationShareModal: () => void
     showBetaFeatureNotifModal: () => void
+    resetActiveSidebarIndex: () => void
 }
 
 interface State {
@@ -206,6 +208,7 @@ class Overview extends PureComponent<Props, State> {
             this.annotationsSidebar.state.showState === 'visible'
         ) {
             this.annotationsSidebar.hideSidebar()
+            setTimeout(() => this.props.resetActiveSidebarIndex(), 200)
         }
     }
 
@@ -228,27 +231,31 @@ class Overview extends PureComponent<Props, State> {
 
     renderOverview() {
         return (
-            <div className={styles.mainWindow}>
-                <div
-                    className={classNames(styles.Overview, {
-                        [styles.OverviewWithNotif]: this.state.trialExpiry,
-                    })}
-                >
-                    <Head />
-                    <CollectionsButton />
-                    <Header />
-                    <SidebarLeft />
+            <>
+                <UpdateNotifBanner theme={{ position: 'fixed' }} />
+                <div className={styles.mainWindow}>
+                    <div
+                        className={classNames(styles.Overview, {
+                            [styles.OverviewWithNotif]: this.state.trialExpiry,
+                        })}
+                    >
+                        <Head />
+                        <CollectionsButton />
+                        <Header />
+                        <SidebarLeft />
 
-                    <Results
-                        toggleAnnotationsSidebar={
-                            this.handleAnnotationSidebarToggle
-                        }
-                        handleReaderViewClick={this.props.handleReaderViewClick}
-                    />
-                    <DeleteConfirmModal message="Delete page and related notes" />
-                    <DragElement />
+                        <Results
+                            toggleAnnotationsSidebar={
+                                this.handleAnnotationSidebarToggle
+                            }
+                            handleReaderViewClick={
+                                this.props.handleReaderViewClick
+                            }
+                        />
+                        <DeleteConfirmModal message="Delete page and related notes" />
+                        <DragElement />
 
-                    {/* <div className={styles.productHuntContainer}>
+                        {/* <div className={styles.productHuntContainer}>
                         <a
                             href="https://www.producthunt.com/posts/memex-1-0?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-memex-1-0"
                             target="_blank"
@@ -260,59 +267,62 @@ class Overview extends PureComponent<Props, State> {
                             />
                         </a>
                     </div> */}
-                    <AnnotationsSidebarInDashboardResults
-                        tags={this.tagsBG}
-                        auth={this.authBG}
-                        annotations={this.annotationsBG}
-                        customLists={this.customListsBG}
-                        contentSharing={this.contentSharingBG}
-                        refSidebar={this.annotationsSidebarRef}
-                        annotationsCache={this.annotationsCache}
-                        onClickOutside={this.handleClickOutsideSidebar}
-                        showAnnotationShareModal={
-                            this.props.showAnnotationShareModal
-                        }
-                        showBetaFeatureNotifModal={
-                            this.props.showBetaFeatureNotifModal
-                        }
-                    />
+                        <AnnotationsSidebarInDashboardResults
+                            tags={this.tagsBG}
+                            auth={this.authBG}
+                            annotations={this.annotationsBG}
+                            customLists={this.customListsBG}
+                            contentSharing={this.contentSharingBG}
+                            refSidebar={this.annotationsSidebarRef}
+                            annotationsCache={this.annotationsCache}
+                            onClickOutside={this.handleClickOutsideSidebar}
+                            showAnnotationShareModal={
+                                this.props.showAnnotationShareModal
+                            }
+                            showBetaFeatureNotifModal={
+                                this.props.showBetaFeatureNotifModal
+                            }
+                        />
 
-                    <Tooltip />
-                    <div className={styles.rightCorner}>
-                        <a
-                            href="https://worldbrain.io/feedback"
-                            target="_blank"
-                            className={styles.feedbackButton}
-                        >
-                            🐞 Feedback
-                        </a>
-                        {this.state.showUpgrade && (
-                            <div
-                                onClick={this.props.showSubscriptionModal}
-                                className={styles.pioneerBadge}
+                        <Tooltip />
+                        <div className={styles.rightCorner}>
+                            <a
+                                href="https://worldbrain.io/feedback"
+                                target="_blank"
+                                className={styles.feedbackButton}
                             >
-                                ⭐️ Upgrade Memex
-                            </div>
-                        )}
-                        <HelpBtn />
+                                🐞 Feedback
+                            </a>
+                            {this.state.showUpgrade && (
+                                <div
+                                    onClick={this.props.showSubscriptionModal}
+                                    className={styles.pioneerBadge}
+                                >
+                                    ⭐️ Upgrade Memex
+                                </div>
+                            )}
+                            <HelpBtn />
+                        </div>
                     </div>
+                    {this.state.trialExpiry && (
+                        <div className={styles.notifications}>
+                            {this.state.trialExpiry && (
+                                <TrialExpiryWarning
+                                    expiryDate={this.state.expiryDate}
+                                    showPaymentWindow={this.openPortal}
+                                    closeTrialNotif={() =>
+                                        this.closeTrialExpiryNotif()
+                                    }
+                                    loadingPortal={this.state.loadingPortal}
+                                    trialOverClosed={() =>
+                                        this.trialOverClosed()
+                                    }
+                                />
+                            )}
+                        </div>
+                    )}
                 </div>
-                {this.state.trialExpiry && (
-                    <div className={styles.notifications}>
-                        {this.state.trialExpiry && (
-                            <TrialExpiryWarning
-                                expiryDate={this.state.expiryDate}
-                                showPaymentWindow={this.openPortal}
-                                closeTrialNotif={() =>
-                                    this.closeTrialExpiryNotif()
-                                }
-                                loadingPortal={this.state.loadingPortal}
-                                trialOverClosed={() => this.trialOverClosed()}
-                            />
-                        )}
-                    </div>
-                )}
-            </div>
+            </>
         )
     }
 
@@ -331,6 +341,8 @@ const mapDispatchToProps = (dispatch) => ({
     init: () => dispatch(searchBarActs.init()),
     setShowOnboardingMessage: () =>
         dispatch(resultActs.setShowOnboardingMessage(true)),
+    resetActiveSidebarIndex: () =>
+        dispatch(resultActs.resetActiveSidebarIndex()),
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
     showAnnotationShareModal: () =>
         dispatch(show({ modalId: 'ShareAnnotationOnboardingModal' })),

@@ -88,7 +88,7 @@ class TagPicker extends StatefulUIElement<
             name={tag.name}
             focused={tag.focused}
             selected={tag.selected}
-            ResultItem={TagResultItem}
+            resultItem={<TagResultItem>{tag.name}</TagResultItem>}
             removeTooltipText="Remove tag from page"
             actOnAllTooltipText="Tag all tabs in window"
         />

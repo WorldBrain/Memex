@@ -8,7 +8,4 @@
 
 .textArea {
     composes: TextArea from 'src/common-ui/elements.css';
-
-    width: 100%;
-    margin: 0;
 }

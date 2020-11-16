@@ -38,8 +38,7 @@ export default class OnboardingTooltip extends React.PureComponent<Props> {
             <>
                 {this.renderImg()}
                 <div className={styles.textContainer}>
-                    <p className={styles.containerTitle}>
-                    </p>
+                    <p className={styles.containerTitle}></p>
                     <p className={styles.descriptionText}>
                         {this.props.descriptionText}
                     </p>
