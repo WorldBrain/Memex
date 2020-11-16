@@ -129,7 +129,7 @@ class NotificationContainer extends Component<Props> {
                     <OptIn key={i} label={button.label}>
                         <ToggleSwitch
                             defaultValue={localStorageNotif[action.key]}
-                            onChange={val =>
+                            onChange={(val) =>
                                 this.handleToggleStorageOption(action, val, id)
                             }
                         />{' '}
@@ -256,7 +256,7 @@ class NotificationContainer extends Component<Props> {
     }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     readNotificationList: selectors.readNotificationList(state),
     unreadNotificationList: selectors.unreadNotificationList(state),
     showMoreIndex: selectors.showMoreIndex(state),
@@ -268,7 +268,7 @@ const mapStateToProps = state => ({
     isLoadingBar: selectors.isLoadingBar(state),
 })
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
     ...bindActionCreators(
         {
             init: actions.init,
@@ -277,11 +277,11 @@ const mapDispatchToProps = dispatch => ({
         },
         dispatch,
     ),
-    handleToggleShowMore: index => event => {
+    handleToggleShowMore: (index) => (event) => {
         event.preventDefault()
         dispatch((actions.setShowMoreIndex as any)(index))
     },
-    handleTick: notification => event => {
+    handleTick: (notification) => (event) => {
         event.preventDefault()
         dispatch(actions.handleReadNotif(notification))
     },

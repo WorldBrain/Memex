@@ -101,14 +101,12 @@ export default class OnboardingStep extends React.PureComponent<Props> {
                             totalSteps={this.props.totalSteps}
                             currentStep={this.props.currentStep}
                         />
-                        <div 
-                        className={
-                            styles.skipButton
-                        }
-                        onClick={this.props.navToOverview}
-                    >
-                        skip
-                    </div>
+                        <div
+                            className={styles.skipButton}
+                            onClick={this.props.navToOverview}
+                        >
+                            skip
+                        </div>
                     </div>
                 </div>
             </div>

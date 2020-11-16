@@ -8,6 +8,7 @@ import { NewAnnotationOptions } from 'src/annotations/types'
 import { generateUrl } from 'src/annotations/utils'
 import { resolvablePromise } from 'src/util/resolvable'
 import { FocusableComponent } from 'src/annotations/components/types'
+import { Analytics } from 'src/analytics'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -72,6 +73,7 @@ export interface RibbonContainerOptions extends RibbonContainerDependencies {
 
 export interface RibbonLogicOptions extends RibbonContainerOptions {
     focusCreateForm: FocusableComponent['focus']
+    analytics: Analytics
 }
 
 type EventHandler<
@@ -385,6 +387,13 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
+        if (context === 'tagging' && event.value.added != null) {
+            this.dependencies.analytics.trackEvent({
+                category: 'Tags',
+                action: 'createForPageViaRibbon',
+            })
+        }
+
         const backendResult =
             context === 'commentBox'
                 ? Promise.resolve()

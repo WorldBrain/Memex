@@ -24,7 +24,6 @@ import { areTagsEquivalent } from 'src/tags/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 
 export interface EditForm {
-    showPreview: boolean
     isBookmarked: boolean
     isTagInputActive: boolean
     commentText: string
@@ -105,7 +104,6 @@ export type SidebarContainerEvents = UIEvent<{
     addNewPageComment: { comment?: string; tags?: string[] }
     setNewPageCommentAnchor: { anchor: Anchor }
     changeNewPageCommentText: { comment: string }
-    setEditPreview: { annotationUrl: string; showPreview: boolean }
     cancelEdit: { annotationUrl: string }
     changeEditCommentText: { annotationUrl: string; comment: string }
     saveNewPageComment: null
@@ -172,6 +170,9 @@ export type SidebarContainerEvents = UIEvent<{
         annotationUrl: string
     }
 
+    copyNoteLink: { link: string }
+    copyPageLink: { link: string }
+
     setPageUrl: { pageUrl: string }
 
     // Search
@@ -215,7 +216,6 @@ type EventHandler<
 > = UIEventHandler<SidebarContainerState, SidebarContainerEvents, EventName>
 
 export const INIT_FORM_STATE: EditForm = {
-    showPreview: false,
     isBookmarked: false,
     isTagInputActive: false,
     commentText: '',
@@ -362,6 +362,28 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ isLocked: { $set: true } })
     unlock: EventHandler<'unlock'> = () =>
         this.emitMutation({ isLocked: { $set: false } })
+
+    copyNoteLink: EventHandler<'copyNoteLink'> = async ({
+        event: { link },
+    }) => {
+        this.options.analytics.trackEvent({
+            category: 'ContentSharing',
+            action: 'copyNoteLink',
+        })
+
+        await this.options.copyToClipboard(link)
+    }
+
+    copyPageLink: EventHandler<'copyPageLink'> = async ({
+        event: { link },
+    }) => {
+        this.options.analytics.trackEvent({
+            category: 'ContentSharing',
+            action: 'copyPageLink',
+        })
+
+        await this.options.copyToClipboard(link)
+    }
 
     private doSearch = debounce(this._doSearch, 300)
 
@@ -519,21 +541,6 @@ export class SidebarContainerLogic extends UILogic<
                     [event.annotationUrl]: {
                         $set: 'default',
                     },
-                },
-            },
-            editForms: {
-                [event.annotationUrl]: {
-                    showPreview: { $set: false },
-                },
-            },
-        })
-    }
-
-    setEditPreview: EventHandler<'setEditPreview'> = ({ event }) => {
-        this.emitMutation({
-            editForms: {
-                [event.annotationUrl]: {
-                    showPreview: { $set: event.showPreview },
                 },
             },
         })

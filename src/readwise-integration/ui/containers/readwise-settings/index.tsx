@@ -74,14 +74,15 @@ class ReadwiseSettings extends StatefulUIElement<
                     </ErrorMessage>
                 )}
                 {selectors.showSyncRunning(this.state) && (
-                    <SuccessMessage>Syncing your existing annotations...</SuccessMessage>
+                    <SuccessMessage>
+                        Syncing your existing annotations...
+                    </SuccessMessage>
                 )}
             </div>
         )
     }
 
     confirmSyncKey() {
-
         this.processEvent('saveAPIKey', null)
 
         analytics.trackEvent({
@@ -91,7 +92,6 @@ class ReadwiseSettings extends StatefulUIElement<
     }
 
     removeSyncKey() {
-
         this.processEvent('removeAPIKey', null)
 
         analytics.trackEvent({
@@ -158,18 +158,14 @@ class ReadwiseSettings extends StatefulUIElement<
                     {selectors.showKeySaveButton(this.state) && (
                         <div>
                             <PrimaryAction
-                                onClick={() =>
-                                    this.confirmSyncKey()
-                                }
+                                onClick={() => this.confirmSyncKey()}
                                 label={'Confirm'}
                             />
                         </div>
                     )}
                     {selectors.showKeyRemoveButton(this.state) && (
                         <SecondaryAction
-                            onClick={() =>
-                                this.removeSyncKey()
-                            }
+                            onClick={() => this.removeSyncKey()}
                             label={'Remove'}
                         />
                     )}
@@ -198,7 +194,7 @@ class ReadwiseSettings extends StatefulUIElement<
             <>
                 {selectors.showSyncScreen(this.state) &&
                     this.renderSyncScreen()}
-                {selectors.showUnauthorized(this.state) && 
+                {selectors.showUnauthorized(this.state) &&
                     this.renderUnauthorized()}
                 {selectors.showForm(this.state) && this.renderForm()}
                 {selectors.showLoadingError(this.state) &&

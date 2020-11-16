@@ -127,9 +127,7 @@ class Subscribe extends React.Component<Props, State> {
                 ⭐️ Upgrade your Memex
             </PricingPlanTitle>
 
-            <TrialInfo>
-                30 days free trial
-            </TrialInfo>
+            <TrialInfo>30 days free trial</TrialInfo>
 
             {/*<PricingPlanItem className={''}>*/}
             {/*    📲 Encrypted Sync with your iOS or Android phone*/}

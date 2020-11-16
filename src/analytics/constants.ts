@@ -104,13 +104,13 @@ export const ANALYTICS_EVENTS: {
         shareAnnotation: {
             description: 'An annotation is shared',
         },
-        CopyNoteLink: {
+        copyNoteLink: {
             description: 'Copied NoteLink to clipboard',
         },
-        CopyPageLink: {
+        copyPageLink: {
             description: 'Copied PageLink to clipboard',
         },
-        CopyCollectionLink: {
+        copyCollectionLink: {
             description: 'Copied CollectionLink to clipboard',
         },
     },
@@ -369,6 +369,20 @@ export const ANALYTICS_EVENTS: {
         },
         removeReadwise: {
             description: 'Removing the Readwise Sync Key',
+        },
+    },
+    Inbox: {
+        filterByInbox: {
+            description: 'Dashboard has been filtered by Inbox',
+        },
+        removeFromInbox: {
+            description: 'Inbox entry has been explicitly removed',
+        },
+    },
+    TextExporter: {
+        copyToClipboard: {
+            description:
+                'The choice of copying a TextExporter template to the clipboard',
         },
     },
 }

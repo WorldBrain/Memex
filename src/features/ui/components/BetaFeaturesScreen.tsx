@@ -112,8 +112,8 @@ class BetaFeaturesScreen extends React.Component<
                                 Beta Features
                             </TypographyHeadingBigger>
 
-                            {(this.state.isPioneer &&  this.state.loadState === 'success'
-                            ) ? (
+                            {this.state.isPioneer &&
+                            this.state.loadState === 'success' ? (
                                 <TypographyTextNormal>
                                     👍 You're set up for using the beta
                                     features.
@@ -137,8 +137,9 @@ class BetaFeaturesScreen extends React.Component<
                             )}
                         </div>
                         <div className={settingsStyle.buttonBox}>
-                            {(!this.state.isPioneer &&  this.state.loadState === 'success'
-                             ) && this.renderUpgradeBtn()}
+                            {!this.state.isPioneer &&
+                                this.state.loadState === 'success' &&
+                                this.renderUpgradeBtn()}
                             <SecondaryAction
                                 onClick={() =>
                                     window.open(

@@ -4,12 +4,9 @@ import styled from 'styled-components'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { contentSharing } from 'src/util/remote-functions-background'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
-import { copyToClipboard } from 'src/annotations/content_script/utils'
-import analytics from 'src/analytics'
 
 interface State {
     // readyToRender: boolean
@@ -19,6 +16,7 @@ interface State {
 
 export interface Props {
     annotationUrl: string
+    copyLink: (link: string) => Promise<void>
     closeShareMenu: () => void
     postShareHook?: () => void
     postUnshareHook?: () => void
@@ -79,15 +77,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     // }
     // }
 
-    private handleLinkCopy = async (link: string) => {
-        // analytics.trackEvent({
-        //     category: 'ContentSharing',
-        //     action: 'CopyNoteLink',
-        // })
-
-        await copyToClipboard(link)
-    }
-
     private handleUnshare = async () => {
         if (this.state.unshareState === 'running') {
             return
@@ -108,7 +97,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             <ShareAnnotationMenu
                 // shareAllState={this.state.shareStatusState}
                 getLink={this.getLink}
-                onCopyLinkClick={this.handleLinkCopy}
+                onCopyLinkClick={this.props.copyLink}
                 onClickOutside={this.props.closeShareMenu}
                 // checkboxTitleCopy="Share Note"
                 // checkboxCopy="Share Note in all collections this page is in"

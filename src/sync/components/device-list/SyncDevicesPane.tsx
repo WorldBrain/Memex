@@ -121,8 +121,8 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
 
         if (
             (!this.props.isDeviceSyncAllowed &&
-            this.props.devices.length === 0) || this.props.subscriptionStatus === 'cancelled'
-
+                this.props.devices.length === 0) ||
+            this.props.subscriptionStatus === 'cancelled'
         ) {
             pairButton = (
                 <ButtonTooltip
@@ -166,7 +166,11 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
             )
         }
 
-        if (this.props.devices.length === 0 && this.props.isDeviceSyncAllowed && this.props.subscriptionStatus !== 'cancelled') {
+        if (
+            this.props.devices.length === 0 &&
+            this.props.isDeviceSyncAllowed &&
+            this.props.subscriptionStatus !== 'cancelled'
+        ) {
             pairButton = (
                 <SecondaryAction
                     onClick={this.handleOpenNewDevice}
@@ -208,17 +212,16 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
                 )}
                 <div className={styles.container}>
                     <div className={styles.syncLeftCol}>
-                            {this.props.devices.length > 0 && (
-                                <ButtonTooltip
-                                    tooltipText="Until now only one extension and one app can be synced. Soon more."
-                                    position="bottom"
-                                >
+                        {this.props.devices.length > 0 && (
+                            <ButtonTooltip
+                                tooltipText="Until now only one extension and one app can be synced. Soon more."
+                                position="bottom"
+                            >
                                 <p className={styles.syncTitle}>
-                                   Paired Devices
+                                    Paired Devices
                                 </p>
-                                </ButtonTooltip>
-                            )
-                        }
+                            </ButtonTooltip>
+                        )}
                     </div>
                     {pairButton}
                 </div>
@@ -370,9 +373,8 @@ class SyncDevicesPaneContainer extends React.Component<
                     />
                 </div>
                 <div className={styles.warningBox}>
-
-                    <a href="#/import">Import your bookmarks</a> before pairing your devices to prevent sync delays.
-
+                    <a href="#/import">Import your bookmarks</a> before pairing
+                    your devices to prevent sync delays.
                 </div>
                 <div className={settingsStyle.section}>
                     <div className={styles.mobileSection}>
@@ -382,7 +384,8 @@ class SyncDevicesPaneContainer extends React.Component<
                                     Download Memex GO
                                 </div>
                                 <div className={settingsStyle.infoText}>
-                                    Our mobile app to annotate and organise websites on the Go
+                                    Our mobile app to annotate and organise
+                                    websites on the Go
                                 </div>
                             </div>
                             <div className={styles.storeSection}>

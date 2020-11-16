@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import { bindActionCreators } from 'redux'
 import cx from 'classnames'
 
+import analytics from 'src/analytics'
 import { actions, selectors } from 'src/custom-lists'
 import extStyles from './Index.css'
 import CreateListForm from './CreateListForm'
@@ -126,6 +127,17 @@ class ListContainer extends Component {
         return this.props.showListShareModal({ list: this.props.lists[i] })
     }
 
+    handleStaticListItemClick = (list) => () => {
+        if (list.name === SPECIAL_LIST_NAMES.INBOX) {
+            analytics.trackEvent({
+                category: 'Inbox',
+                action: 'filterByInbox',
+            })
+        }
+
+        this.props.handleListItemClick(list)()
+    }
+
     renderAllLists = () => {
         return this.props.lists.map((list, i) => {
             if (list.isEditing) {
@@ -175,7 +187,7 @@ class ListContainer extends Component {
                 key={i + 1}
                 listName={list.name}
                 isFiltered={list.isFilterIndex}
-                onListItemClick={this.props.handleListItemClick(list)}
+                onListItemClick={this.handleStaticListItemClick(list)}
                 unreadCount={
                     list.name === SPECIAL_LIST_NAMES.INBOX
                         ? this.props.inboxUnreadCount

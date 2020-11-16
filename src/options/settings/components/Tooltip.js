@@ -41,8 +41,8 @@ class Tooltip extends React.Component {
                     Highlights & Annotations
                 </div>
                 <div className={styles.infoText}>
-                    Show Tooltip when highlighting text. <br/>You can also use keyboard
-                    shortcuts.
+                    Show Tooltip when highlighting text. <br />
+                    You can also use keyboard shortcuts.
                 </div>
                 <Checkbox
                     id="show-memex-link"

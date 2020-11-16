@@ -72,7 +72,7 @@ export default class BackupProcedure {
         }
 
         this.info.state = 'paused'
-        this.pausePromise = new Promise(resolve => {
+        this.pausePromise = new Promise((resolve) => {
             this.resolvePausePromise = resolve
         })
         this.events.emit('info', this.info)
@@ -94,7 +94,7 @@ export default class BackupProcedure {
         this.events = null
         this.info.state = 'cancelled'
         await this.completionPromise
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
             setTimeout(resolve, 1000)
         })
     }
@@ -109,7 +109,7 @@ export default class BackupProcedure {
         }
 
         let resolveCompletionPromise
-        this.completionPromise = new Promise(resolve => {
+        this.completionPromise = new Promise((resolve) => {
             resolveCompletionPromise = resolve
         })
 
@@ -160,7 +160,7 @@ export default class BackupProcedure {
                     this.reset()
                     resolveCompletionPromise()
                 })
-                .catch(async e => {
+                .catch(async (e) => {
                     this.running = false
                     if (process.env.NODE_ENV === 'production') {
                         Raven.captureException(e)
@@ -191,7 +191,7 @@ export default class BackupProcedure {
 
     async _queueInitialBackup(chunkSize = 1000) {
         const collections = this._getCollectionsToBackup().map(
-            coll => coll.name,
+            (coll) => coll.name,
         )
         await this.storageManager.operation(BackupPlugin.QUEUE_CHANGES, {
             collections,
@@ -252,7 +252,7 @@ export default class BackupProcedure {
 
         // console.log('uploading batch')
         if (process.env.MOCK_BACKUP_BACKEND === 'true') {
-            await new Promise(resolve => setTimeout(resolve, 500))
+            await new Promise((resolve) => setTimeout(resolve, 500))
         } else {
             await this.backend.backupChanges({
                 changes: batch.changes,
