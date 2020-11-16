@@ -1,16 +1,16 @@
 import React from 'react'
 import styled from 'styled-components'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
-import { extractIdFromUrl } from 'src/util/youtube-url'
-
+import { extractIdFromUrl, isUrlYTVideo } from 'src/util/youtube-url'
 import {
     MarkdownPreview,
     Props as MarkdownPreviewProps,
 } from './markdown-preview'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 interface MenuItemProps {
     name: string
+    isDisabled?: boolean
     getTextToInsert: () => string
 }
 
@@ -35,8 +35,13 @@ export class MarkdownPreviewAnnotationInsertMenu extends React.Component<
         this.setState((state) => ({ isOpen: !state.isOpen }))
 
     private handleItemClick: (
-        getTextToInsert: MenuItemProps['getTextToInsert'],
-    ) => React.MouseEventHandler = (getTextToInsert) => (e) => {
+        props: MenuItemProps,
+    ) => React.MouseEventHandler = ({ getTextToInsert, isDisabled }) => (e) => {
+        if (isDisabled) {
+            e.preventDefault()
+            return
+        }
+
         const newValue = getTextInsertedAtInputSelection(
             getTextToInsert(),
             this.markdownPreviewRef.current.mainInputRef.current,
@@ -53,9 +58,10 @@ export class MarkdownPreviewAnnotationInsertMenu extends React.Component<
                     {this.props.menuItems.map((props, i) => (
                         <MenuItem
                             key={i}
-                            onClick={this.handleItemClick(
-                                props.getTextToInsert,
-                            )}
+                            onClick={this.handleItemClick(props)}
+                            theme={{
+                                isDisabled: props.isDisabled,
+                            }}
                         >
                             {props.name}
                         </MenuItem>
@@ -84,6 +90,7 @@ const Menu = styled.ul``
 export const annotationMenuItems: MenuItemProps[] = [
     {
         name: 'YouTube Timestamp',
+        isDisabled: !isUrlYTVideo(document.location.href),
         getTextToInsert() {
             const videoEl = document.querySelector<HTMLVideoElement>(
                 '.video-stream',
