@@ -19,6 +19,7 @@ const textStyles = `
 const OuterContainer = styled.div`
     height: min-content
     width: 100%;
+    padding: 1px;
     background-color: #fff;
     border-radius: 3px;
     display: flex;
@@ -27,13 +28,12 @@ const OuterContainer = styled.div`
     align-items: center;
 `
 
-const InnerContainer = styled(Margin)<{ displayTopBorder?: boolean }>`
+const InnerContainer = styled.div<{ displayTopBorder?: boolean }>`
     height: 24px;
-    width: 100%;
     background-color: transparent;
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: start;
     align-items: center;
     ${(props) =>
         props.displayTopBorder &&
@@ -82,6 +82,7 @@ export interface ListsSidebarSearchBarProps {
     searchQuery?: string
     onListsSidebarSearchBarFocus(): void
     onListsSidebarSearchBarInputChange(): void
+    onListsSidebarSearchBarInputClear(): void
 }
 
 export default class ListsSidebarSearchBar extends PureComponent<
@@ -108,32 +109,48 @@ export default class ListsSidebarSearchBar extends PureComponent<
             isSearchBarFocused,
             onListsSidebarSearchBarFocus,
             onListsSidebarSearchBarInputChange,
+            onListsSidebarSearchBarInputClear,
         } = this.props
         return (
             <OuterContainer>
-                <InnerContainer
-                    onClick={onListsSidebarSearchBarFocus}
-                    horizontal="8px"
-                >
-                    <IconContainer>
-                        <Margin right="12px">
-                            <StyledIcon
-                                heightAndWidth="12px"
-                                path="/img/searchIcon.svg"
-                            />
-                        </Margin>
-                    </IconContainer>
-                    <Input
-                        placeholder="Search or add collection"
-                        isFocused={isSearchBarFocused}
-                        ref={this.inputRef}
-                        onChange={onListsSidebarSearchBarInputChange}
-                        value={searchQuery}
-                    />
-                </InnerContainer>
-                {!!this.props.searchQuery &&
-                    !this.props.hasPerfectMatch &&
-                    this.renderCreateNew()}
+                <Margin horizontal="8px">
+                    <InnerContainer
+                        onClick={onListsSidebarSearchBarFocus}
+                        horizontal="8px"
+                    >
+                        <IconContainer>
+                            <Margin right="12px">
+                                <StyledIcon
+                                    heightAndWidth="12px"
+                                    path="/img/searchIcon.svg"
+                                />
+                            </Margin>
+                        </IconContainer>
+                        <Input
+                            placeholder="Search or add collection"
+                            isFocused={isSearchBarFocused}
+                            ref={this.inputRef}
+                            onChange={onListsSidebarSearchBarInputChange}
+                            value={searchQuery}
+                        />
+                        {!!searchQuery && (
+                            <IconContainer>
+                                <Margin left="12px">
+                                    <Icon
+                                        heightAndWidth="12px"
+                                        path="/img/cross_grey.svg"
+                                        onClick={
+                                            onListsSidebarSearchBarInputClear
+                                        }
+                                    />
+                                </Margin>
+                            </IconContainer>
+                        )}
+                    </InnerContainer>
+                    {!!this.props.searchQuery &&
+                        !this.props.hasPerfectMatch &&
+                        this.renderCreateNew()}
+                </Margin>
             </OuterContainer>
         )
     }

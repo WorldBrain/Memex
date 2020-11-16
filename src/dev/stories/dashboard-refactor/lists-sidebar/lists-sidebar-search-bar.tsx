@@ -15,6 +15,7 @@ const template: ListsSidebarSearchBarProps = {
     searchQuery: '',
     onListsSidebarSearchBarFocus: () => {},
     onListsSidebarSearchBarInputChange: () => {},
+    onListsSidebarSearchBarInputClear: () => {},
 }
 
 const listsSidebarSearchBarProps: {
