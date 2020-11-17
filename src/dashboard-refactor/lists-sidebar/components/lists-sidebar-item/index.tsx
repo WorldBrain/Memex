@@ -4,10 +4,11 @@ import styled, { css, keyframes } from 'styled-components'
 import colors from '../../../colors'
 import { fonts } from '../../../styles'
 
-import { NewItemsCountState } from 'src/dashboard-refactor/types'
+import { NewItemsCountState, TextPart } from 'src/dashboard-refactor/types'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { Icon } from 'src/dashboard-refactor/styled-components'
+import { ListsSidebarItemComponentProps } from './types'
 
 // probably want to use timing function to get this really looking good. This is just quick and dirty
 const blinkingAnimation = keyframes`
@@ -116,47 +117,39 @@ const NewItemsCountInnerDiv = styled.div`
     line-height: 14px;
 `
 
-// this type is differentiated from the type which governs the object passed down the tree to its parent:
-// the click handlers in this type have received their parameters from the parent and so receive none
-export interface ListsSidebarItemComponentProps {
-    className?: string
-    listName: string
-    isEditing: boolean
-    hoverState: HoverState
-    selectedState: SelectedState
-    dropReceivingState: DropReceivingState
-    newItemsCountState: NewItemsCountState
-    moreActionButtonState: MoreActionButtonState
-}
-
-interface HoverState {
-    onHoverEnter(): void
-    onHoverLeave(): void
-    isHovered: boolean
-}
-
-interface SelectedState {
-    onSelection(): void
-    isSelected: boolean
-}
-
-export interface DropReceivingState {
-    onDragOver(): void
-    onDragLeave(): void
-    onDrop(): void
-    triggerSuccessfulDropAnimation: boolean
-    isDraggedOver: boolean
-    canReceiveDroppedItems: boolean
-}
-
-interface MoreActionButtonState {
-    onMoreActionClick(): void
-    displayMoreActionButton
-}
-
 export default class ListsSidebarItem extends PureComponent<
     ListsSidebarItemComponentProps
 > {
+    private renderListName = () => {
+        const {
+            listName,
+            hoverState: { isHovered },
+            selectedState: { isSelected },
+        } = this.props
+        if (typeof listName === 'string')
+            return (
+                <ListTitle isHovered={isHovered} isSelected={isSelected}>
+                    {listName}
+                </ListTitle>
+            )
+        let spanArray: JSX.Element[] = []
+        listName.forEach(({ text, match }) =>
+            spanArray.push(
+                match ? (
+                    <span style={{ fontWeight: fonts.primary.weight.bold }}>
+                        {text}
+                    </span>
+                ) : (
+                    <span>{text}</span>
+                ),
+            ),
+        )
+        return (
+            <ListTitle isHovered={isHovered} isSelected={isSelected}>
+                {spanArray}
+            </ListTitle>
+        )
+    }
     private renderIcon() {
         const {
             dropReceivingState: { canReceiveDroppedItems, isDraggedOver },
@@ -189,7 +182,6 @@ export default class ListsSidebarItem extends PureComponent<
     private renderDefault() {
         const {
             className,
-            listName,
             hoverState: { isHovered, onHoverEnter, onHoverLeave },
             selectedState: { isSelected, onSelection },
             dropReceivingState: {
@@ -220,7 +212,7 @@ export default class ListsSidebarItem extends PureComponent<
             >
                 <Margin left="19px">
                     <ListTitle isHovered={isHovered} isSelected={isSelected}>
-                        {listName}
+                        {this.renderListName()}
                     </ListTitle>
                 </Margin>
                 {(isHovered || displayNewItemsCount) && (
@@ -237,10 +229,17 @@ export default class ListsSidebarItem extends PureComponent<
             listName,
             selectedState: { isSelected },
         } = this.props
+        if (typeof listName === 'string')
+            // this is temporary until editableState is implemented
+            throw new Error(
+                'ListsSidebarComponent can not have listName prop of type string and isEditing === true',
+            )
         return (
             <Container className={className} isSelected={isSelected}>
                 <Margin left={`${titleLeftMargin}px`}>
-                    <ListTitle>{listName}</ListTitle>
+                    <ListTitle>
+                        {listName.map((obj) => obj.text).join()}
+                    </ListTitle>
                 </Margin>
             </Container>
         )

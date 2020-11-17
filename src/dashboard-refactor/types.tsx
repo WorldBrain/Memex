@@ -12,6 +12,11 @@ export interface DropReceivingState {
     onDrop(normalizedPageUrl: string): void
 }
 
+export interface TextPart {
+    text: string
+    match: boolean
+}
+
 export interface ExpandableState {
     isExpandable: boolean
     isExpanded: boolean
