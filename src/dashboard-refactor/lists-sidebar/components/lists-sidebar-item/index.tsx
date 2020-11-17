@@ -8,7 +8,6 @@ import { NewItemsCountState, TextPart } from 'src/dashboard-refactor/types'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { Icon } from 'src/dashboard-refactor/styled-components'
-import { LodashIsBoolean } from 'lodash/fp'
 import { ListsSidebarItemComponentProps } from './types'
 
 // probably want to use timing function to get this really looking good. This is just quick and dirty
