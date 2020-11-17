@@ -1,6 +1,3 @@
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
-
-import { isLoggable } from 'src/activity-logger'
 import { extractIdFromUrl, isUrlYTVideo } from 'src/util/youtube-url'
 import { MenuItemProps } from './types'
 
@@ -27,11 +24,8 @@ export const annotationMenuItems: MenuItemProps[] = [
     },
     {
         name: 'Link',
-        isDisabled: !isLoggable({ url: document.location.href }),
         getTextToInsert() {
-            return `[${normalizeUrl(document.location.href)}](${
-                document.location.href
-            })`
+            return '[LinkText](url)'
         },
     },
 ]
