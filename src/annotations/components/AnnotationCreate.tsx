@@ -5,7 +5,6 @@ import onClickOutside from 'react-onclickoutside'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
-import { annotationMenuItems } from 'src/markdown-preview/insert-menu-entries'
 import TagInput from 'src/tags/ui/tag-input'
 import { FocusableComponent } from './types'
 import { insertTab, uninsertTab } from 'src/common-ui/utils'
@@ -150,7 +149,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                     customRef={this.textAreaRef}
                     onKeyDown={this.handleInputKeyDown}
                     value={this.props.comment}
-                    menuItems={annotationMenuItems}
                     updateInputValue={this.props.onCommentChange}
                     renderInput={(inputProps) => (
                         <StyledTextArea
