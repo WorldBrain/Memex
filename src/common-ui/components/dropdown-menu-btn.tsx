@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { ThemeProvider } from 'styled-components'
 
 import { ClickAway } from 'src/util/click-away-wrapper'
 
@@ -8,10 +8,15 @@ export interface MenuItemProps {
     isDisabled?: boolean
 }
 
+interface ThemeProps {
+    leftMenuOffset?: string
+}
+
 export interface Props<T extends MenuItemProps = MenuItemProps> {
     menuItems: T[]
     btnChildren: React.ReactNode
     onMenuItemClick: (itemProps: T) => void
+    theme?: ThemeProps
 }
 
 interface State {
@@ -21,6 +26,13 @@ interface State {
 export class DropdownMenuBtn extends React.PureComponent<Props, State> {
     state: State = { isOpen: false }
     private lastToggleCall = 0
+
+    private get theme() {
+        return {
+            ...this.props.theme,
+            isMenuOpen: this.state.isOpen,
+        }
+    }
 
     private toggleMenu = () => {
         // This check covers the case when the menu is open and you click the button to close it:
@@ -60,19 +72,18 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
 
     render() {
         return (
-            <MenuContainer>
-                <MenuBtn
-                    theme={{ isMenuOpen: this.state.isOpen }}
-                    onClick={this.toggleMenu}
-                >
-                    {this.props.btnChildren}
-                </MenuBtn>
-                {this.state.isOpen && (
-                    <ClickAway onClickAway={this.toggleMenu}>
-                        <Menu>{this.renderMenuItems()}</Menu>
-                    </ClickAway>
-                )}
-            </MenuContainer>
+            <ThemeProvider theme={this.theme}>
+                <MenuContainer>
+                    <MenuBtn onClick={this.toggleMenu}>
+                        {this.props.btnChildren}
+                    </MenuBtn>
+                    {this.state.isOpen && (
+                        <ClickAway onClickAway={this.toggleMenu}>
+                            <Menu>{this.renderMenuItems()}</Menu>
+                        </ClickAway>
+                    )}
+                </MenuContainer>
+            </ThemeProvider>
         )
     }
 }
@@ -117,6 +128,7 @@ const MenuBtn = styled.button`
 
 const Menu = styled.ul`
     position: absolute;
+    ${({ theme }) => `left: ${theme.leftMenuOffset ?? 0};`}
     list-style: none;
     padding: 10px 0;
     background: white;
