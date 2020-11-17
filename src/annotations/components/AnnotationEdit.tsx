@@ -4,13 +4,9 @@ import styled from 'styled-components'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TagInput from 'src/tags/ui/tag-input'
-import { MarkdownPreview } from 'src/common-ui/components/markdown-preview'
+import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
 import { FocusableComponent } from './types'
-import {
-    uninsertTab,
-    insertTab,
-    insertIndentedNewLine,
-} from 'src/common-ui/utils'
+import { uninsertTab, insertTab } from 'src/common-ui/utils'
 
 export interface AnnotationEditEventProps {
     onEditConfirm: (url: string) => void
@@ -92,11 +88,12 @@ class AnnotationEdit extends React.Component<Props>
 
         return (
             <>
-                <MarkdownPreview
+                <MarkdownPreviewAnnotationInsertMenu
                     showPreviewBtnOnEmptyInput
                     customRef={this.textAreaRef}
                     onKeyDown={this.handleInputKeyDown}
                     value={this.props.comment}
+                    updateInputValue={this.props.onCommentChange}
                     renderInput={(inputProps) => (
                         <StyledTextArea
                             {...inputProps}
