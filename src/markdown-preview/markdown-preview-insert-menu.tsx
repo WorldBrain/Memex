@@ -26,6 +26,13 @@ export class MarkdownPreviewAnnotationInsertMenu extends React.PureComponent<
     markdownPreviewRef = React.createRef<MarkdownPreview>()
     state: State = { isOpen: false }
 
+    private focusMainInput() {
+        const input = this.markdownPreviewRef.current.mainInputRef.current
+
+        // TODO: keep the selection state on input blur and focus back to here
+        input.focus()
+    }
+
     private toggleMenu = () => {
         // This check covers the case when the menu is open and you click the button to close it:
         //  It also triggers the "ClickAway" call of this method, which results in flickering between the 2 states
@@ -53,7 +60,19 @@ export class MarkdownPreviewAnnotationInsertMenu extends React.PureComponent<
 
         this.props.updateInputValue(newValue)
         this.toggleMenu()
+        this.focusMainInput()
     }
+
+    private renderMenuItems = () =>
+        this.props.menuItems.map((props, i) => (
+            <MenuItem
+                key={i}
+                onClick={this.handleItemClick(props)}
+                theme={{ isDisabled: props.isDisabled }}
+            >
+                {props.name}
+            </MenuItem>
+        ))
 
     private renderInsertMenu = () => (
         <MenuContainer>
@@ -65,19 +84,7 @@ export class MarkdownPreviewAnnotationInsertMenu extends React.PureComponent<
             </MenuBtn>
             {this.state.isOpen && (
                 <ClickAway onClickAway={this.toggleMenu}>
-                    <Menu>
-                        {this.props.menuItems.map((props, i) => (
-                            <MenuItem
-                                key={i}
-                                onClick={this.handleItemClick(props)}
-                                theme={{
-                                    isDisabled: props.isDisabled,
-                                }}
-                            >
-                                {props.name}
-                            </MenuItem>
-                        ))}
-                    </Menu>
+                    <Menu>{this.renderMenuItems()}</Menu>
                 </ClickAway>
             )}
         </MenuContainer>
