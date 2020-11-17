@@ -1,8 +1,8 @@
 import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
-import { ButtonTooltip } from 'src/common-ui/components'
+import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 
-import Markdown from 'src/common-ui/components/markdown-renderer'
+import { ButtonTooltip } from 'src/common-ui/components'
 
 export interface MainInputProps<T = HTMLInputElement | HTMLTextAreaElement> {
     onKeyDown: React.KeyboardEventHandler
@@ -18,6 +18,7 @@ export interface Props {
      * Please ensure all `renderInput` method props are passed down into the underlying <input> or <textarea> el you render.
      */
     renderInput: (props: MainInputProps) => JSX.Element
+    renderSecondaryBtn?: () => JSX.Element
     isToggleKBShortcutKeyed?: (e: React.KeyboardEvent) => boolean
 }
 
@@ -25,9 +26,10 @@ interface State {
     showPreview: boolean
 }
 
-export class MarkdownPreview extends React.PureComponent<Props, State> {
+export class MarkdownPreview extends React.Component<Props, State> {
     static defaultProps: Partial<Props> = {
         isToggleKBShortcutKeyed: (e) => e.key === 'Enter' && e.altKey,
+        renderSecondaryBtn: () => null,
     }
 
     private selectionRange: [number, number] = [-1, -1]
@@ -48,7 +50,7 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
         }
     }
 
-    private get mainInputRef(): React.RefObject<HTMLInputElement> {
+    get mainInputRef(): React.RefObject<HTMLInputElement> {
         return this.props.customRef ?? this._mainInputRef
     }
 
@@ -115,8 +117,9 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
                     onKeyDown={this.handleSecretInputKeyDown}
                 />
                 <Container>
-                    {this.showPreviewBtn && (
-                        <PreviewButtonContainer>
+                    <PreviewButtonContainer>
+                        {this.props.renderSecondaryBtn()}
+                        {this.showPreviewBtn && (
                             <ButtonTooltip
                                 tooltipText="alt/option + Enter"
                                 position="bottom"
@@ -125,8 +128,8 @@ export class MarkdownPreview extends React.PureComponent<Props, State> {
                                     Preview
                                 </PreviewBtn>
                             </ButtonTooltip>
-                        </PreviewButtonContainer>
-                    )}
+                        )}
+                    </PreviewButtonContainer>
                     <EditorContainer>{this.renderEditor()}</EditorContainer>
                 </Container>
             </ThemeProvider>
