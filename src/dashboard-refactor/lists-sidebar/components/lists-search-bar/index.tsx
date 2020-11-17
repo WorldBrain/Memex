@@ -17,9 +17,9 @@ const textStyles = `
 `
 
 const OuterContainer = styled.div`
-    height: min-content
-    width: 100%;
-    padding: 1px;
+    height: min-content;
+    padding-left: 8px;
+    padding-right: 8px;
     background-color: #fff;
     border-radius: 3px;
     display: flex;
@@ -30,6 +30,7 @@ const OuterContainer = styled.div`
 
 const InnerContainer = styled.div<{ displayTopBorder?: boolean }>`
     height: 24px;
+    width: 100%;
     background-color: transparent;
     display: flex;
     flex-direction: row;
@@ -42,15 +43,16 @@ const InnerContainer = styled.div<{ displayTopBorder?: boolean }>`
         `}
 `
 
-const Input = styled.input<{ isFocused }>`
+const Input = styled.input<{ isFocused: boolean }>`
     ${textStyles}
     width: 100%
     border: none;
     ${(props) => {
         const { primary, secondary } = fonts.primary.colors
         return css`&::placeholder {
+            ${textStyles}
             color: ${props.isFocused ? secondary : primary};
-            ${textStyles}`
+            `
     }}}
     &:focus {
         outline: none;
@@ -113,44 +115,40 @@ export default class ListsSidebarSearchBar extends PureComponent<
         } = this.props
         return (
             <OuterContainer>
-                <Margin horizontal="8px">
-                    <InnerContainer
-                        onClick={onListsSidebarSearchBarFocus}
-                        horizontal="8px"
-                    >
+                <InnerContainer
+                    onClick={onListsSidebarSearchBarFocus}
+                    horizontal="8px"
+                >
+                    <IconContainer>
+                        <Margin right="12px">
+                            <StyledIcon
+                                heightAndWidth="12px"
+                                path="/img/searchIcon.svg"
+                            />
+                        </Margin>
+                    </IconContainer>
+                    <Input
+                        placeholder="Search or add collection"
+                        isFocused={isSearchBarFocused}
+                        ref={this.inputRef}
+                        onChange={onListsSidebarSearchBarInputChange}
+                        value={searchQuery}
+                    />
+                    {!!searchQuery && (
                         <IconContainer>
-                            <Margin right="12px">
-                                <StyledIcon
+                            <Margin left="12px">
+                                <Icon
                                     heightAndWidth="12px"
-                                    path="/img/searchIcon.svg"
+                                    path="/img/cross_grey.svg"
+                                    onClick={onListsSidebarSearchBarInputClear}
                                 />
                             </Margin>
                         </IconContainer>
-                        <Input
-                            placeholder="Search or add collection"
-                            isFocused={isSearchBarFocused}
-                            ref={this.inputRef}
-                            onChange={onListsSidebarSearchBarInputChange}
-                            value={searchQuery}
-                        />
-                        {!!searchQuery && (
-                            <IconContainer>
-                                <Margin left="12px">
-                                    <Icon
-                                        heightAndWidth="12px"
-                                        path="/img/cross_grey.svg"
-                                        onClick={
-                                            onListsSidebarSearchBarInputClear
-                                        }
-                                    />
-                                </Margin>
-                            </IconContainer>
-                        )}
-                    </InnerContainer>
-                    {!!this.props.searchQuery &&
-                        !this.props.hasPerfectMatch &&
-                        this.renderCreateNew()}
-                </Margin>
+                    )}
+                </InnerContainer>
+                {!!this.props.searchQuery &&
+                    !this.props.hasPerfectMatch &&
+                    this.renderCreateNew()}
             </OuterContainer>
         )
     }
