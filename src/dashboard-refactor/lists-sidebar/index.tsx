@@ -4,6 +4,8 @@ import styled, { css } from 'styled-components'
 import colors from 'src/dashboard-refactor/colors'
 import { ListsSidebarProps } from './types'
 import ListsSidebarGroup from './components/lists-sidebar-group'
+import ListsSidebarSearchBar from './components/lists-search-bar'
+import Margin from '../components/Margin'
 
 const Container = styled.div<{
     locked: boolean
@@ -39,23 +41,29 @@ const Container = styled.div<{
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
     render() {
         const {
-            sidebarLockedState: { isSidebarLocked },
-            sidebarPeekState: { isSidebarPeeking },
+            lockedState: { isSidebarLocked },
+            peekState: { isSidebarPeeking },
+            searchBarProps,
             listsGroups,
         } = this.props
         return (
             <Container peeking={isSidebarPeeking} locked={isSidebarLocked}>
-                {listsGroups.map((group) => {
-                    ;<ListsSidebarGroup
-                        hasTitle={group.hasTitle}
-                        listsGroupTitle={group.listsGroupTitle}
-                        listSource={group.listSource}
-                        listsArray={group.listsArray}
-                        addableState={group.addableState}
-                        expandableState={group.expandableState}
-                        taskState={group.taskState}
-                    />
-                })}
+                <Margin vertical="5px" horizontal="5px">
+                    <ListsSidebarSearchBar {...searchBarProps} />
+                </Margin>
+                {listsGroups.map((group) => (
+                    <Margin vertical="10px">
+                        <ListsSidebarGroup
+                            hasTitle={group.hasTitle}
+                            listsGroupTitle={group.listsGroupTitle}
+                            listSource={group.listSource}
+                            listsArray={group.listsArray}
+                            addableState={group.addableState}
+                            expandableState={group.expandableState}
+                            taskState={group.taskState}
+                        />
+                    </Margin>
+                ))}
             </Container>
         )
     }
