@@ -4,7 +4,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface ThemeProps {
     width?: string
-    position?: string 
+    position?: string
     iconSize?: string
 }
 
@@ -18,7 +18,7 @@ export interface Props {
 
 export class NotifBanner extends React.PureComponent<Props> {
     static defaultProps: Partial<Props> = {
-        theme: {width: '100%', iconSize: '24px'},
+        theme: { width: '100%', iconSize: '24px' },
     }
 
     render() {

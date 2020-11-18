@@ -4,11 +4,10 @@ import styled, { css } from 'styled-components'
 import styleConstants, { fonts } from 'src/dashboard-refactor/styleConstants'
 import colors from 'src/dashboard-refactor/colors'
 
-import UnstyledListsSidebarItem, {
-    ListsSidebarItemProps,
-} from '../lists-sidebar-item'
 import { Icon } from '../../../styledComponents'
+import UnstyledListsSidebarItem from '../lists-sidebar-item'
 import Margin from 'src/dashboard-refactor/components/Margin'
+import { ListsSidebarItemProps } from '../lists-sidebar-item/types'
 
 const Container = styled.div`
     position: relative;
@@ -53,15 +52,16 @@ const MenuButton = styled.div`
 `
 
 export interface ListsSidebarItemWithMenuProps {
+    listId: string
     listsSidebarItemProps: ListsSidebarItemProps
-    listsSidebarItemActionsArray: Array<ListsSidebarItemActionItem>
-    isDisplayed: boolean
+    listsSidebarItemActionsArray?: Array<ListsSidebarItemActionItem>
+    isMenuDisplayed?: boolean
 }
 
 export interface ListsSidebarItemActionItem {
     label: string
     iconPath: string
-    onClick(): void
+    onClick(normalizedPageUrl: string): void
 }
 
 export default class ListsSidebarItemWithMenu extends PureComponent<
@@ -69,25 +69,71 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
 > {
     render() {
         const {
-            listsSidebarItemProps,
+            listsSidebarItemProps: {
+                className,
+                listName,
+                isEditing,
+                selectedState,
+                hoverState,
+                droppableState,
+                newItemsCountState,
+                moreActionButtonState,
+            },
             listsSidebarItemActionsArray,
-            isDisplayed,
+            isMenuDisplayed,
+            listId,
         } = this.props
         return (
             <Container>
-                <ListsSidebarItem {...listsSidebarItemProps} />
-                <MenuContainer isDisplayed={isDisplayed}>
-                    {listsSidebarItemActionsArray.map((item, idx) => {
-                        const { label, iconPath, onClick } = item
-                        return (
-                            <MenuButton key={idx} onClick={onClick}>
-                                <Margin x="10px">
-                                    <Icon path={iconPath} />
-                                </Margin>
-                                {label}
-                            </MenuButton>
-                        )
-                    })}
+                <ListsSidebarItem
+                    className={className}
+                    listName={listName}
+                    isEditing={isEditing}
+                    hoverState={{
+                        onHoverEnter() {
+                            hoverState.onHoverEnter(listId)
+                        },
+                        onHoverLeave() {
+                            hoverState.onHoverLeave(listId)
+                        },
+                        ...hoverState,
+                    }}
+                    selectedState={{
+                        onSelected() {
+                            selectedState.onSelection(listId)
+                        },
+                        ...selectedState,
+                    }}
+                    droppableState={{
+                        onDragOver() {
+                            droppableState.onDragOver(listId)
+                        },
+                        onDragLeave() {
+                            droppableState.onDragLeave(listId)
+                        },
+                        ...droppableState,
+                    }}
+                    newItemsCountState={newItemsCountState}
+                    moreActionButtonState={{
+                        onMoreActionClick() {
+                            moreActionButtonState.onMoreActionClick(listId)
+                        },
+                        ...moreActionButtonState,
+                    }}
+                />
+                <MenuContainer isDisplayed={isMenuDisplayed}>
+                    {listsSidebarItemActionsArray &&
+                        listsSidebarItemActionsArray.map((item, idx) => {
+                            const { label, iconPath, onClick } = item
+                            return (
+                                <MenuButton key={idx} onClick={onClick}>
+                                    <Margin x="10px">
+                                        <Icon xy="12px" path={iconPath} />
+                                    </Margin>
+                                    {label}
+                                </MenuButton>
+                            )
+                        })}
                 </MenuContainer>
             </Container>
         )

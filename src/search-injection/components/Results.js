@@ -11,7 +11,13 @@ const Results = (props) => {
 
     return (
         <>
-            <UpdateNotifBanner theme={{ width: '405px', position: 'relative', iconSize: '20px' }} />
+            <UpdateNotifBanner
+                theme={{
+                    width: '405px',
+                    position: 'relative',
+                    iconSize: '20px',
+                }}
+            />
             <div
                 className={classNames(
                     styles.MEMEX_CONTAINER,

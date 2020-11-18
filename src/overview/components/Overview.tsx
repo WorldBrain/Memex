@@ -232,7 +232,7 @@ class Overview extends PureComponent<Props, State> {
     renderOverview() {
         return (
             <>
-                <UpdateNotifBanner theme={{ position: 'fixed'}}/>
+                <UpdateNotifBanner theme={{ position: 'fixed' }} />
                 <div className={styles.mainWindow}>
                     <div
                         className={classNames(styles.Overview, {

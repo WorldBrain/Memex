@@ -196,27 +196,45 @@ stories.add('Display New Items Count', () => (
 ))
 
 export const listsSidebarItemWithMenuProps: ListsSidebarItemWithMenuProps = {
-    isDisplayed: true,
+    listId: 'https://www.blah.com/',
+    isMenuDisplayed: true,
     listsSidebarItemProps: listsSidebarItemProps.hoveredAndSelected,
     listsSidebarItemActionsArray: [
         {
             label: 'Share',
             iconPath: '/img/share.svg',
-            onClick: () => {},
+            onClick: (normalizedPageUrl: string) => {},
         },
         {
             label: 'Delete',
             iconPath: '/img/trash.svg',
-            onClick: () => {},
+            onClick: (normalizedPageUrl: string) => {},
         },
         {
             label: 'Rename',
             iconPath: '/img/edit.svg',
-            onClick: () => {},
+            onClick: (normalizedPageUrl: string) => {},
         },
     ],
 }
 
-stories.add('Menu Extended', () => (
+export const listsSidebarItemWithShortMenuProps: ListsSidebarItemWithMenuProps = {
+    listId: 'https://www.blah.com/',
+    isMenuDisplayed: true,
+    listsSidebarItemProps: listsSidebarItemProps.hoveredAndSelected,
+    listsSidebarItemActionsArray: [
+        {
+            label: 'Unfollow',
+            iconPath: '/img/cross_circle.svg',
+            onClick: (normalizedPageUrl: string) => {},
+        },
+    ],
+}
+
+stories.add('3x Item Menu Extended', () => (
     <ListsSidebarItemWithMenu {...listsSidebarItemWithMenuProps} />
+))
+
+stories.add('1x Item Menu Extended', () => (
+    <ListsSidebarItemWithMenu {...listsSidebarItemWithShortMenuProps} />
 ))
