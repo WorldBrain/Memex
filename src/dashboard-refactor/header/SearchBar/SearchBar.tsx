@@ -5,17 +5,12 @@ import styled from 'styled-components'
 import colors from '../../colors'
 import { fonts } from '../../styles'
 
-export interface SearchBarProps {
-    onSearchBoxFocus(): void
-    onSearchBarInputChange(
-        event: { target: HTMLElement },
-        inputString: string,
-    ): void
-    onSearchSubmit(event: { searchQuery: string }): void
-    onSearchFiltersOpen(): void
-    isSearchBoxSelected: boolean
-    inputString?: string
-}
+const textStyles = `
+    font-family: ${fonts.primary.name};
+    font-style: normal;
+    font-weight: ${fonts.primary.weight.bold};
+    color: ${fonts.primary.colors.primary}
+`
 
 const SearchBarContainer = styled.div`
     height: 34px;
@@ -27,36 +22,73 @@ const SearchBarContainer = styled.div`
     border-radius: 5px;
 `
 
-const fontStyles = `
-    font-family: ${fonts.primary.name};
-    font-style: normal;
-    font-weight: ${fonts.primary.weight.bold};
-`
-
-const SearchHeader = styled.p`
-    margin: 0;
-    ${fontStyles}
+const Input = styled.input`
+    width: inherit;
+    ${textStyles}
     font-size: 12px;
     line-height: 18px;
+    border: none;
+    background-color: transparent;
+
+    &:focus {
+        outline: none;
+    }
+
+    &::placeholder {
+        ${textStyles}
+    }
 `
 
-const FilterButton = styled.p`
-    margin: 0;
-    ${fontStyles}
+const FilterButton = styled.div`
+    width: max-content;
+    ${textStyles}
     font-size: 10px;
     line-height: 15px;
+    cursor: pointer;
 `
 
+const FullWidthMargin = styled(Margin)`
+    width: 100%;
+`
+
+export interface SearchBarProps {
+    searchQuery: string
+    isSearchBarFocused: boolean
+    searchFiltersOpen: boolean
+    onSearchBoxFocus(): void
+    onSearchQueryChange(searchObject: any): void
+    onSearchFiltersOpen(): void
+}
+
 export default class SearchBar extends PureComponent<SearchBarProps> {
+    placeholder: string = 'Search your saved pages and notes'
+    inputRef = React.createRef<HTMLInputElement>()
+    componentDidMount = () => {
+        if (this.props.isSearchBarFocused) this.inputRef.current.focus()
+    }
     render() {
+        const {
+            searchFiltersOpen,
+            searchQuery,
+            onSearchQueryChange,
+            onSearchFiltersOpen,
+            onSearchBoxFocus,
+        } = this.props
         return (
             <Margin vertical="auto">
-                <SearchBarContainer>
-                    <Margin left="27px">
-                        <SearchHeader>Search</SearchHeader>
-                    </Margin>
-                    <Margin right="23px">
-                        <FilterButton>Filter</FilterButton>
+                <SearchBarContainer onClick={onSearchBoxFocus}>
+                    <FullWidthMargin left="27px">
+                        <Input
+                            ref={this.inputRef}
+                            placeholder={!searchQuery && this.placeholder}
+                            value={searchQuery}
+                            onChange={onSearchQueryChange}
+                        />
+                    </FullWidthMargin>
+                    <Margin horizontal="23px">
+                        <FilterButton onClick={onSearchFiltersOpen}>
+                            {searchFiltersOpen ? 'Remove Filters' : 'Filters'}
+                        </FilterButton>
                     </Margin>
                 </SearchBarContainer>
             </Margin>

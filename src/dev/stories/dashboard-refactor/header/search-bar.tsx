@@ -4,32 +4,36 @@ import SearchBar, {
     SearchBarProps,
 } from 'src/dashboard-refactor/header/SearchBar/SearchBar'
 
+const template: SearchBarProps = {
+    onSearchBoxFocus: () => console.log('Search Box Clicked'),
+    onSearchQueryChange: (searchObject) => console.log(searchObject),
+    onSearchFiltersOpen: () => console.log('Filters button clicked!'),
+    isSearchBarFocused: false,
+    searchFiltersOpen: false,
+    searchQuery: '',
+}
+
 const props: {
     default: SearchBarProps
     selected: SearchBarProps
     withInput: SearchBarProps
+    filtersOpen: SearchBarProps
 } = {
     default: {
-        onSearchBoxFocus: () => console.log('Search Box Clicked'),
-        onSearchBarInputChange: (event) => console.log(event.target),
-        onSearchSubmit: (event) => console.log(event.searchQuery),
-        onSearchFiltersOpen: () => console.log('Filters button clicked!'),
-        isSearchBoxSelected: false,
+        ...template,
     },
     selected: {
-        onSearchBoxFocus: () => console.log('Search Box Clicked'),
-        onSearchBarInputChange: (event) => console.log(event.target),
-        onSearchSubmit: (event) => console.log(event.searchQuery),
-        onSearchFiltersOpen: () => console.log('Filters button clicked!'),
-        isSearchBoxSelected: true,
+        ...template,
+        isSearchBarFocused: true,
     },
     withInput: {
-        onSearchBoxFocus: () => console.log('Search Box Clicked'),
-        onSearchSubmit: (event) => console.log(event.searchQuery),
-        onSearchBarInputChange: (event) => console.log(event.target),
-        onSearchFiltersOpen: () => console.log('Filters button clicked!'),
-        isSearchBoxSelected: true,
-        inputString: 'To thine ownself be true',
+        ...template,
+        isSearchBarFocused: true,
+        searchQuery: 'To thine ownself be true',
+    },
+    filtersOpen: {
+        ...template,
+        searchFiltersOpen: true,
     },
 }
 
@@ -38,3 +42,4 @@ const stories = storiesOf('Dashboard Refactor|Header/Search Input Box', module)
 stories.add('Unselected', () => <SearchBar {...props.default} />)
 stories.add('Selected', () => <SearchBar {...props.selected} />)
 stories.add('With Input', () => <SearchBar {...props.withInput} />)
+stories.add('Filters Open', () => <SearchBar {...props.filtersOpen} />)
