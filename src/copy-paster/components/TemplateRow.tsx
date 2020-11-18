@@ -22,6 +22,7 @@ interface State {
 }
 
 export default class TemplateRow extends Component<Props, State> {
+    private copyPromise: Promise<void> | null = null
     copyTimeout?: ReturnType<typeof setTimeout>
     state: State = { hasCopied: false, isLoading: false }
 
@@ -31,7 +32,19 @@ export default class TemplateRow extends Component<Props, State> {
         }
     }
 
-    private onClickCopy = async () => {
+    private handleSingleCopy = async () => {
+        if (this.copyPromise) {
+            return this.copyPromise
+        }
+
+        this.copyPromise = this.copy()
+
+        await this.copyPromise
+        this.copyPromise = null
+    }
+
+    private copy = async () => {
+        console.log('copying')
         this.setState({ isLoading: true })
         await this.props.onClick()
         this.setState({ hasCopied: true, isLoading: false })
@@ -65,7 +78,7 @@ export default class TemplateRow extends Component<Props, State> {
                 <Title>{title}</Title>
                 <ActionsContainer>
                     <ResultItemActionBtn
-                        onClick={this.onClickCopy}
+                        onClick={this.handleSingleCopy}
                         tooltipPosition="left"
                         imgSrc={icons.copy}
                         tooltipText="Copy"
@@ -95,7 +108,7 @@ export default class TemplateRow extends Component<Props, State> {
     }
 
     render() {
-        return <Row onClick={this.onClickCopy}>{this.renderRowBody()}</Row>
+        return <Row onClick={this.handleSingleCopy}>{this.renderRowBody()}</Row>
     }
 }
 

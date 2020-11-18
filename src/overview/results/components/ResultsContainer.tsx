@@ -138,9 +138,7 @@ class ResultsContainer extends React.Component<Props, State> {
         if (this.props.noResults) {
             return (
                 <ResultsMessage>
-                    <NoResultBadTerm>
-                        ¯\_(ツ)_/¯
-                    </NoResultBadTerm>
+                    <NoResultBadTerm>¯\_(ツ)_/¯</NoResultBadTerm>
                 </ResultsMessage>
             )
         }

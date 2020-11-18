@@ -1,27 +1,33 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
-import SearchBar from 'src/dashboard-refactor/header/SearchBar/SearchBar'
+import SearchBar, {
+    SearchBarProps,
+} from 'src/dashboard-refactor/header/SearchBar/SearchBar'
 
-const props = {
+const props: {
+    default: SearchBarProps
+    selected: SearchBarProps
+    withInput: SearchBarProps
+} = {
     default: {
-        handleSearchBoxClick: () => console.log('Search Box Clicked'),
-        handleInputChange: (evt) => console.log(evt.target.value),
-        handleSubmit: () => console.log('Form submitted'),
-        handleFiltersClick: () => console.log('Filters button clicked!'),
+        onSearchBoxFocus: () => console.log('Search Box Clicked'),
+        onSearchBarInputChange: (event) => console.log(event.target),
+        onSearchSubmit: (event) => console.log(event.searchQuery),
+        onSearchFiltersOpen: () => console.log('Filters button clicked!'),
         isSearchBoxSelected: false,
     },
     selected: {
-        handleSearchBoxClick: () => console.log('Search Box Clicked'),
-        handleInputChange: (evt) => console.log(evt.target.value),
-        handleSubmit: () => console.log('Form submitted'),
-        handleFiltersClick: () => console.log('Filters button clicked!'),
+        onSearchBoxFocus: () => console.log('Search Box Clicked'),
+        onSearchBarInputChange: (event) => console.log(event.target),
+        onSearchSubmit: (event) => console.log(event.searchQuery),
+        onSearchFiltersOpen: () => console.log('Filters button clicked!'),
         isSearchBoxSelected: true,
     },
     withInput: {
-        handleSearchBoxClick: () => console.log('Search Box Clicked'),
-        handleInputChange: (evt) => console.log(evt.target.value),
-        handleSubmit: () => console.log('Form submitted'),
-        handleFiltersClick: () => console.log('Filters button clicked!'),
+        onSearchBoxFocus: () => console.log('Search Box Clicked'),
+        onSearchSubmit: (event) => console.log(event.searchQuery),
+        onSearchBarInputChange: (event) => console.log(event.target),
+        onSearchFiltersOpen: () => console.log('Filters button clicked!'),
         isSearchBoxSelected: true,
         inputString: 'To thine ownself be true',
     },

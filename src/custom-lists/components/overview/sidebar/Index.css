@@ -113,6 +113,7 @@
 .wrapper {
     overflow-y: scroll;
     padding-bottom: 50px;
+    height: 100%;
 }
 
 .wrapperLocked {

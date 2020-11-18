@@ -19,9 +19,9 @@ export const setLastSharedAnnotationTimestamp = (
 
 export const truncateText: TextTruncator = (
     text,
-    { maxLength = 280, maxLineBreaks = 4 } = {
-        maxLength: 280,
-        maxLineBreaks: 4,
+    { maxLength = 400, maxLineBreaks = 8 } = {
+        maxLength: 400,
+        maxLineBreaks: 8,
     },
 ) => {
     if (text.length > maxLength) {

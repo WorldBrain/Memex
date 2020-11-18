@@ -4,12 +4,13 @@ import styled from 'styled-components'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TagInput from 'src/tags/ui/tag-input'
-import { SelectionIndices } from '../types'
+import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
+import { FocusableComponent } from './types'
+import { uninsertTab, insertTab } from 'src/common-ui/utils'
 
 export interface AnnotationEditEventProps {
     onEditConfirm: (url: string) => void
     onEditCancel: () => void
-    toggleEditPreview: () => void
     onCommentChange: (comment: string) => void
     setTagInputActive: (active: boolean) => void
     updateTags: PickerUpdateHandler
@@ -18,7 +19,6 @@ export interface AnnotationEditEventProps {
 
 export interface AnnotationEditGeneralProps {
     isTagInputActive: boolean
-    showPreview: boolean
     comment: string
     tags: string[]
 }
@@ -31,32 +31,22 @@ export interface Props
     rows: number
 }
 
-class AnnotationEdit extends React.Component<Props> {
+class AnnotationEdit extends React.Component<Props>
+    implements FocusableComponent {
     private textAreaRef = React.createRef<HTMLTextAreaElement>()
 
     componentDidMount() {
         this.focusOnInputEnd()
     }
 
-    get cursorIndex(): SelectionIndices {
-        return [
-            this.textAreaRef.current.selectionStart,
-            this.textAreaRef.current.selectionEnd,
-        ]
-    }
-
-    set cursorIndex(indices: SelectionIndices) {
-        this.focus(...indices)
-    }
-
-    focus(selectionStart: number, selectionEnd: number) {
+    focus() {
         this.textAreaRef.current.focus()
-        this.textAreaRef.current.setSelectionRange(selectionStart, selectionEnd)
     }
 
     focusOnInputEnd() {
         const inputLen = this.props.comment.length
-        this.focus(inputLen, inputLen)
+        this.textAreaRef.current.setSelectionRange(inputLen, inputLen)
+        this.focus()
     }
 
     private handleTagInputKeyDown: React.KeyboardEventHandler = (e) => {
@@ -69,16 +59,9 @@ class AnnotationEdit extends React.Component<Props> {
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         e.stopPropagation()
 
-        if (e.key === 'Enter') {
-            if (e.altKey) {
-                this.props.toggleEditPreview()
-                return
-            }
-
-            if (e.ctrlKey || e.metaKey) {
-                this.props.onEditConfirm(this.props.url)
-                return
-            }
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            this.props.onEditConfirm(this.props.url)
+            return
         }
 
         if (e.key === 'Escape') {
@@ -88,50 +71,12 @@ class AnnotationEdit extends React.Component<Props> {
 
         if (e.key === 'Tab' && !e.shiftKey) {
             e.preventDefault()
-            const value = this.textAreaRef.current!.value
-            const selectionStart = this.textAreaRef.current!.selectionStart
-            const selectionEnd = this.textAreaRef.current!.selectionEnd
-            this.textAreaRef.current!.value =
-                value.substring(0, selectionStart) +
-                '  ' +
-                value.substring(selectionEnd)
-            this.textAreaRef.current!.selectionStart =
-                selectionEnd + 2 - (selectionEnd - selectionStart)
-            this.textAreaRef.current!.selectionEnd =
-                selectionEnd + 2 - (selectionEnd - selectionStart)
+            insertTab({ el: this.textAreaRef.current })
         }
 
         if (e.key === 'Tab' && e.shiftKey) {
             e.preventDefault()
-            const value = this.textAreaRef.current!.value
-            const selectionStart = this.textAreaRef.current!.selectionStart
-            const selectionEnd = this.textAreaRef.current!.selectionEnd
-
-            const beforeStart = value
-                .substring(0, selectionStart)
-                .split('')
-                .reverse()
-                .join('')
-            const indexOfTab = beforeStart.indexOf('  ')
-            const indexOfNewline = beforeStart.indexOf('\n')
-
-            if (indexOfTab !== -1 && indexOfTab < indexOfNewline) {
-                this.textAreaRef.current!.value =
-                    beforeStart
-                        .substring(indexOfTab + 2)
-                        .split('')
-                        .reverse()
-                        .join('') +
-                    beforeStart
-                        .substring(0, indexOfTab)
-                        .split('')
-                        .reverse()
-                        .join('') +
-                    value.substring(selectionEnd)
-
-                this.textAreaRef.current!.selectionStart = selectionStart - 2
-                this.textAreaRef.current!.selectionEnd = selectionEnd - 2
-            }
+            uninsertTab({ el: this.textAreaRef.current })
         }
     }
 
@@ -143,13 +88,23 @@ class AnnotationEdit extends React.Component<Props> {
 
         return (
             <>
-                <StyledTextArea
-                    ref={this.textAreaRef}
-                    value={this.props.comment}
-                    onClick={() => this.props.setTagInputActive(false)}
-                    placeholder="Add private note (save with cmd/ctrl+enter)"
-                    onChange={(e) => this.props.onCommentChange(e.target.value)}
+                <MarkdownPreviewAnnotationInsertMenu
+                    showPreviewBtnOnEmptyInput
+                    customRef={this.textAreaRef}
                     onKeyDown={this.handleInputKeyDown}
+                    value={this.props.comment}
+                    updateInputValue={this.props.onCommentChange}
+                    renderInput={(inputProps) => (
+                        <StyledTextArea
+                            {...inputProps}
+                            value={this.props.comment}
+                            onClick={() => this.props.setTagInputActive(false)}
+                            placeholder="Add private note (save with cmd/ctrl+enter)"
+                            onChange={(e) =>
+                                this.props.onCommentChange(e.target.value)
+                            }
+                        />
+                    )}
                 />
                 <TagInput
                     deleteTag={this.props.deleteSingleTag}
@@ -176,7 +131,6 @@ const StyledTextArea = styled.textarea`
     border-radius: 3px;
     border: none;
     padding: 10px 7px;
-    margin: 10px 10px 5px 10px;
 
     &::placeholder {
         color: #3a2f45;

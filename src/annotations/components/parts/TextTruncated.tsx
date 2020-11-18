@@ -1,10 +1,10 @@
 import * as React from 'react'
 import styled from 'styled-components'
+import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { TextTruncator } from 'src/annotations/types'
 import { truncateText } from 'src/annotations/utils'
-import Markdown from 'src/common-ui/components/markdown-renderer'
 
 export interface Props {
     text: string
@@ -95,7 +95,7 @@ const IconStyledBox = styled.div`
     cursor: pointer;
     position: absolute;
     right: 5px;
-    top: 5px;
+    top: 0px;
     border-radius: 3px;
     padding: 3px;
     display: none;
@@ -121,97 +121,20 @@ const TextBox = styled.div`
     min-height: 30px;
     display: flex;
     align-items: center;
-    line-break: auto;
-    overflow-x: scroll;
+    overflow-x: hidden;
     line-height: 22px;
+    line-break: anywhere;
+
+    & *:first-child {
+        margin-top: 0px;
+    }
+
+    & *:last-child {
+        margin-bottom: 0px;
+    }
 
     &: hover ${IconStyledBox} {
         display: flex;
-    }
-
-    & h1 {
-        font-size: 1.5em
-        margin-block-end: 0em;
-        margin-bottom: -5px;
-    }
-
-    & h2 {
-        font-size: 1.3em
-        margin-block-end: 0em;
-        margin-bottom: -5px;
-    }
-
-    & h3 {
-        font-size: 1.1em
-        margin-block-end: 0em;
-        margin-bottom: -5px;
-    }
-
-    & h4 {
-        margin-block-end: 0em;
-        margin-bottom: -5px;
-    }
-
-    & blockquote {
-        border-left: 4px solid #5cd9a6
-        margin: 0px;
-        padding: 5px 5px 5px 15px;
-        font-style: italic;
-
-        & p {
-            margin: 0px;
-        }
-    }
-
-    & ul {
-        padding-inline-start: 20px;
-        margin-top: 10px;
-
-        & ul {
-            margin-top: 5px;
-        }
-
-    }
-
-    & ol {
-        padding-inline-start: 20px;
-        margin-top: 10px;
-
-        & ol {
-            margin-top: 5px;
-        }
-
-    }
-
-    & code {
-        padding: 0px 4px;
-        border: 1px solid #1d1c1d21;
-        border-radius: 3px;
-        color: #e01e5a;
-        background-color: #1d1c1d04
-    }
-
-    & pre {
-        padding: 10px;
-        color: #3a2f45;
-        border: 1px solid #1d1c1d21;
-        background-color: #1d1c1d04;
-        border-radius: 3px
-
-        & code {
-            background-color: transparent;
-            color: #3a2f45;
-            border: none;
-            padding: 0px;
-        }
-    }
-
-    & hr {
-        margin: 20px 0px;
-    }
-
-    & img {
-        height:
     }
 `
 

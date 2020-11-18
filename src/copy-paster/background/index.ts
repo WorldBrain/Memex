@@ -126,19 +126,24 @@ export default class CopyPasterBackground {
 
         // The results shape differ depending on whether or not a terms query was specified
         if (searchResponse.isAnnotsSearch) {
-            // TODO: Properly work out how to use this horrible shape again
             const annotsByPages: AnnotsByPageUrl[] = Object.values(
                 searchResponse.annotsByDay,
             )
+
             const pageUrlSet = new Set<string>()
             const annotUrlSet = new Set<string>()
 
-            // for (const annotsByPage of annotsByPages){
-            //     pageUrlSet.add(pageUrl)
-            //     (annotations as Annotation[]).forEach(a => annotUrlSet.add(a.url))
-            // }
+            for (const day of annotsByPages) {
+                for (const annots of Object.values(day)) {
+                    for (const annot of annots) {
+                        pageUrlSet.add(annot.pageUrl)
+                        annotUrlSet.add(annot.url)
+                    }
+                }
+            }
 
             normalizedPageUrls = [...pageUrlSet]
+            annotationUrls = [...annotUrlSet]
         } else {
             normalizedPageUrls = [
                 ...new Set(searchResponse.docs.map((page) => page.url)),

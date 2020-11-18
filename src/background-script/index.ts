@@ -21,6 +21,7 @@ import CopyPasterBackground from 'src/copy-paster/background'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
 import { INSTALL_TIME_KEY, OVERVIEW_URL } from 'src/constants'
 import { SEARCH_INJECTION_KEY } from 'src/search-injection/constants'
+import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
 
 // TODO: pass these deps down via constructor
 import {
@@ -129,6 +130,10 @@ class BackgroundScript {
     }
 
     private async handleUpdateLogic() {
+        if (process.env['SKIP_UPDATE_NOTIFICATION'] !== 'true') {
+            await this.storageAPI.local.set({ [READ_STORAGE_FLAG]: false })
+        }
+
         // Check whether old Search Injection boolean exists and replace it with new object
         const searchInjectionKey = (
             await this.storageAPI.local.get(SEARCH_INJECTION_KEY)
@@ -149,6 +154,9 @@ class BackgroundScript {
         })
     }
 
+    /**
+     * Runs on both extension update and install.
+     */
     private async handleUnifiedLogic() {
         await this.customListsBackground.createInboxListIfAbsent()
         await this.notifsBackground.deliverStaticNotifications()

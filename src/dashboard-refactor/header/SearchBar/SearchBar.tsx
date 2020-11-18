@@ -3,13 +3,16 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import styled from 'styled-components'
 
 import colors from '../../colors'
-import { fonts } from '../../styleConstants'
+import { fonts } from '../../styles'
 
-interface SearchBarProps {
-    handleSearchBoxClick(): void
-    handleInputChange(evt): void
-    handleSubmit(): void
-    handleFiltersClick(): void
+export interface SearchBarProps {
+    onSearchBoxFocus(): void
+    onSearchBarInputChange(
+        event: { target: HTMLElement },
+        inputString: string,
+    ): void
+    onSearchSubmit(event: { searchQuery: string }): void
+    onSearchFiltersOpen(): void
     isSearchBoxSelected: boolean
     inputString?: string
 }
@@ -27,7 +30,7 @@ const SearchBarContainer = styled.div`
 const fontStyles = `
     font-family: ${fonts.primary.name};
     font-style: normal;
-    font-weight: ${fonts.primary.bold};
+    font-weight: ${fonts.primary.weight.bold};
 `
 
 const SearchHeader = styled.p`
@@ -47,7 +50,7 @@ const FilterButton = styled.p`
 export default class SearchBar extends PureComponent<SearchBarProps> {
     render() {
         return (
-            <Margin y="auto">
+            <Margin vertical="auto">
                 <SearchBarContainer>
                     <Margin left="27px">
                         <SearchHeader>Search</SearchHeader>

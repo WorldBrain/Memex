@@ -70,10 +70,10 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         this.setState(reducer, () => writeShortcutState({ ...this.state }))
     }
 
-    recordBinding = async (e) => {
+    recordBinding: React.KeyboardEventHandler = async (e) => {
         e.preventDefault()
 
-        const name = e.target.name as string
+        const name = (e.target as HTMLInputElement).name as string
 
         // Afford way of clearing shortcut
         if (['Escape', 'Backspace'].includes(e.key)) {

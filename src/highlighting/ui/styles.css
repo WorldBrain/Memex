@@ -21,3 +21,7 @@
     transition: all 0.1s;
     cursor: pointer;
 }
+
+.dark-mode {
+    color: #000;
+}

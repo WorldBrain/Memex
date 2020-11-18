@@ -1,9 +1,11 @@
 import React from 'react'
 
+import analytics from 'src/analytics'
 import { Template } from './types'
 import CopyPaster from './components/CopyPaster'
 import { copyPaster } from 'src/util/remote-functions-background'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
+import * as Raven from 'src/util/raven'
 
 interface State {
     isLoading: boolean
@@ -89,7 +91,12 @@ export default class CopyPasterContainer extends React.PureComponent<
             await copyToClipboard(rendered)
         } catch (err) {
             console.error('Something went really bad copying:', err.message)
+            Raven.captureException(err)
         } finally {
+            analytics.trackEvent({
+                category: 'TextExporter',
+                action: 'copyToClipboard',
+            })
             this.setState({ isLoading: false })
         }
     }

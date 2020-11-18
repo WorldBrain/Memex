@@ -4,8 +4,10 @@ import onClickOutside from 'react-onclickoutside'
 
 import { ButtonTooltip } from 'src/common-ui/components'
 import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
+import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
 import TagInput from 'src/tags/ui/tag-input'
 import { FocusableComponent } from './types'
+import { insertTab, uninsertTab } from 'src/common-ui/utils'
 
 interface State {
     isTagPickerShown: boolean
@@ -33,6 +35,9 @@ export interface Props
 export class AnnotationCreate extends React.Component<Props, State>
     implements FocusableComponent {
     private textAreaRef = React.createRef<HTMLTextAreaElement>()
+    private markdownPreviewRef = React.createRef<
+        MarkdownPreviewAnnotationInsertMenu
+    >()
     state = { isTagPickerShown: false }
 
     focus() {
@@ -47,9 +52,18 @@ export class AnnotationCreate extends React.Component<Props, State>
         }
     }
 
-    private handleCancel = () => this.props.onCancel()
-    private handleSave = () => this.props.onSave()
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
+    private handleCancel = () => this.props.onCancel()
+    private handleSave = () => {
+        this.props.onSave()
+
+        if (
+            this.markdownPreviewRef?.current?.markdownPreviewRef.current?.state
+                .showPreview
+        ) {
+            this.markdownPreviewRef.current.markdownPreviewRef.current.togglePreview()
+        }
+    }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         // Allow escape keydown to bubble up to close the sidebar only if no input state
@@ -68,21 +82,17 @@ export class AnnotationCreate extends React.Component<Props, State>
             this.handleSave()
             return
         }
-    }
 
-    private renderInput() {
-        return (
-            <StyledTextArea
-                ref={this.textAreaRef}
-                value={this.props.comment}
-                onClick={this.hideTagPicker}
-                onKeyDown={this.handleInputKeyDown}
-                onChange={(e) => this.props.onCommentChange(e.target.value)}
-                placeholder="Add private note (save with cmd/ctrl+enter)"
-            />
-        )
-    }
+        if (e.key === 'Tab' && !e.shiftKey) {
+            e.preventDefault()
+            insertTab({ el: this.textAreaRef.current })
+        }
 
+        if (e.key === 'Tab' && e.shiftKey) {
+            e.preventDefault()
+            uninsertTab({ el: this.textAreaRef.current })
+        }
+    }
     private renderTagPicker() {
         const { tagPickerDependencies } = this.props
 
@@ -121,9 +131,11 @@ export class AnnotationCreate extends React.Component<Props, State>
                             Add
                         </SaveBtnStyled>
                     </ButtonTooltip>
-                    <CancelBtnStyled onClick={this.handleCancel}>
-                        Cancel
-                    </CancelBtnStyled>
+                    <ButtonTooltip tooltipText="esc" position="bottom">
+                        <CancelBtnStyled onClick={this.handleCancel}>
+                            Cancel
+                        </CancelBtnStyled>
+                    </ButtonTooltip>
                 </Flex>
             </FooterStyled>
         )
@@ -132,7 +144,24 @@ export class AnnotationCreate extends React.Component<Props, State>
     render() {
         return (
             <TextBoxContainerStyled>
-                {this.renderInput()}
+                <MarkdownPreviewAnnotationInsertMenu
+                    ref={this.markdownPreviewRef}
+                    customRef={this.textAreaRef}
+                    onKeyDown={this.handleInputKeyDown}
+                    value={this.props.comment}
+                    updateInputValue={this.props.onCommentChange}
+                    renderInput={(inputProps) => (
+                        <StyledTextArea
+                            {...inputProps}
+                            value={this.props.comment}
+                            onClick={this.hideTagPicker}
+                            placeholder="Add private note (save with cmd/ctrl+enter)"
+                            onChange={(e) =>
+                                this.props.onCommentChange(e.target.value)
+                            }
+                        />
+                    )}
+                />
                 {this.props.comment !== '' && (
                     <>
                         {this.renderTagPicker()}
@@ -152,10 +181,12 @@ const TextBoxContainerStyled = styled.div`
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    font-size: 13px;
+    font-size: 14px;
     background: white;
     width: 100%;
     border-radius: 5px;
+    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
+        rgba(15, 15, 15, 0.1) 0px 2px 4px;
 
     &:hover {
         background: white;
@@ -177,9 +208,7 @@ const StyledTextArea = styled.textarea`
     border-radius: 3px;
     border: none;
     padding: 10px 7px;
-    margin: 10px 10px 5px 10px;
     height: ${(props) => (props.value === '' ? '40px' : '150px')};
-
     width: auto;
 
     &::placeholder {

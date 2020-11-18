@@ -1,6 +1,4 @@
-export type UserBetaFeatureId =
-    | 'pdf-annotations'
-    | 'sharing-collections'
+export type UserBetaFeatureId = 'pdf-annotations' | 'sharing-collections'
 
 export interface UserBetaFeature {
     id: UserBetaFeatureId
@@ -32,12 +30,12 @@ const allFeatures: UserBetaFeature[] = [
     {
         id: 'sharing-collections',
         name: 'Sharing Collections & Annotations',
-        description: 'Easily share timeless repositories of quality content, feedback on articles, and create references to important text passages.',
+        description:
+            'Easily share timeless repositories of quality content, feedback on articles, and create references to important text passages.',
         link: 'https://worldbrain.io/tutorials/share-research',
         enabled: true,
         available: true,
     },
-    
 ]
 
 export type UserBetaFeatureMap = {

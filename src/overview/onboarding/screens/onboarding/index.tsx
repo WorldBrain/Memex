@@ -390,14 +390,14 @@ export default class OnboardingScreen extends StatefulUIElement<
                         currentStep={this.state.currentStep - 1}
                         navToOverview={this.props.navToOverview}
                     >
-                    <SecondaryAction
-                        onClick={() =>
-                            window.open(
-                                `https://worldbrain.io/tutorials/search`,
-                            )
-                        }
-                        label={'View Tutorials'}
-                    />
+                        <SecondaryAction
+                            onClick={() =>
+                                window.open(
+                                    `https://worldbrain.io/tutorials/search`,
+                                )
+                            }
+                            label={'View Tutorials'}
+                        />
                     </OnboardingStep>
                 )
             case 4:

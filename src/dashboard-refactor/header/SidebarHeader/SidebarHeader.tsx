@@ -1,19 +1,35 @@
 import React, { PureComponent } from 'react'
+import styled from 'styled-components'
+
+import styles from '../../styles'
+
+import { SidebarLockedState, SidebarPeekState } from '../../lists-sidebar/types'
+import { HoverState } from '../../types'
+
 import Margin from 'src/dashboard-refactor/components/Margin'
 import SidebarToggle from './SidebarToggle/SidebarToggle'
-import { CollectionTitle, SidebarHeaderContainer } from './styledComponents'
 
-import {
-    SidebarLockedState,
-    SidebarPeekState,
-    SidebarToggleHoverState,
-} from './types'
+const { fonts } = styles
+
+export const SidebarHeaderContainer = styled.div`
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+`
+
+export const CollectionTitle = styled.p`
+    margin: 0;
+    font-family: ${fonts.primary.name};
+    font-weight: ${fonts.primary.weight.bold};
+    line-height: 21px;
+`
 
 export interface SidebarHeaderProps {
     sidebarLockedState: SidebarLockedState
     sidebarPeekState: SidebarPeekState
-    sidebarToggleHoverState: SidebarToggleHoverState
-    selectedCollectionHeader?: string
+    sidebarToggleHoverState: HoverState
+    selectedList?: string
 }
 
 export default class SidebarHeader extends PureComponent<SidebarHeaderProps> {
@@ -22,22 +38,20 @@ export default class SidebarHeader extends PureComponent<SidebarHeaderProps> {
             sidebarLockedState,
             sidebarToggleHoverState,
             sidebarPeekState,
-            selectedCollectionHeader,
+            selectedList,
         } = this.props
         return (
             <SidebarHeaderContainer>
-                <Margin x="12px">
+                <Margin horizontal="12px">
                     <SidebarToggle
                         sidebarLockedState={sidebarLockedState}
-                        sidebarToggleHoverState={sidebarToggleHoverState}
+                        hoverState={sidebarToggleHoverState}
                     />
                 </Margin>
                 {(sidebarLockedState.isSidebarLocked ||
                     sidebarPeekState.isSidebarPeeking) &&
-                    selectedCollectionHeader && (
-                        <CollectionTitle>
-                            {selectedCollectionHeader}
-                        </CollectionTitle>
+                    selectedList && (
+                        <CollectionTitle>{selectedList}</CollectionTitle>
                     )}
             </SidebarHeaderContainer>
         )
