@@ -6,6 +6,7 @@ import { Icon } from 'src/dashboard-refactor/styled-components'
 
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
+import { SidebarLockedState } from '../../types'
 
 const textStyles = `
     font-family: ${fonts.primary.name};
@@ -16,11 +17,16 @@ const textStyles = `
     cursor: text;
 `
 
-const OuterContainer = styled.div`
+const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
     height: min-content;
     padding-left: 8px;
     padding-right: 8px;
-    background-color: #fff;
+    ${(props) =>
+        css`
+            background-color: ${props.isSidebarLocked
+                ? colors.lightMidGrey
+                : colors.white};
+        `}
     border-radius: 3px;
     display: flex;
     flex-direction: column;
@@ -86,6 +92,7 @@ export interface ListsSidebarSearchBarProps {
     onSearchQueryChange(inputString: string): void
     onInputClear(): void
     onCreateNew(newListName: string): void // should this return a promise?
+    sidebarLockedState: SidebarLockedState
 }
 
 export default class ListsSidebarSearchBar extends PureComponent<
@@ -124,9 +131,10 @@ export default class ListsSidebarSearchBar extends PureComponent<
             isSearchBarFocused,
             onFocus,
             onInputClear,
+            sidebarLockedState: { isSidebarLocked },
         } = this.props
         return (
-            <OuterContainer>
+            <OuterContainer isSidebarLocked={isSidebarLocked}>
                 <InnerContainer onClick={onFocus} horizontal="8px">
                     <IconContainer>
                         <Margin right="12px">
