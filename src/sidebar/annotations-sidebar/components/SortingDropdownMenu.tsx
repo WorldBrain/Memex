@@ -41,18 +41,27 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
 
     render() {
         return (
-            <DropdownMenuBtn
-                btnChildren={<IconImg src={icons.sort} />}
-                onMenuItemClick={this.props.onMenuItemClick}
-                menuItems={this.props.menuItems}
-                theme={{ leftMenuOffset: '-125px' }}
-                keepSelectedState
-            />
+            <DropdownMenuContainer>
+                <DropdownMenuBtn
+                    btnChildren={<IconImg src={icons.sort} />}
+                    onMenuItemClick={this.props.onMenuItemClick}
+                    menuItems={this.props.menuItems}
+                    theme={{ leftMenuOffset: '-125px' }}
+                    keepSelectedState
+                />
+            </DropdownMenuContainer>
         )
     }
 }
 
+const DropdownMenuContainer = styled.div`
+    & button {
+        width: 24px;
+        height: 24px;
+    }
+`
+
 const IconImg = styled.img`
-    height: 90%;
+    height: 100%;
     width: auto;
 `

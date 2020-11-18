@@ -22,7 +22,7 @@ export const share = browser.extension.getURL('/img/share.svg')
 export const shareWhite = browser.extension.getURL('/img/shareWhite.svg')
 export const shareEmpty = browser.extension.getURL('/img/shareEmpty.svg')
 export const lock = browser.extension.getURL('/img/lock.svg')
-export const sort = browser.extension.getURL('/img/shield.svg')
+export const sort = browser.extension.getURL('/img/sort.svg')
 export const shared = browser.extension.getURL('/img/shared.svg')
 export const saveIcon = browser.extension.getURL('/img/saveIcon.svg')
 

@@ -103,6 +103,11 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
 const MenuContainer = styled.div`
     position: relative;
     flex: 1;
+
+    & img {
+        width: 18px;
+        height: 18px;
+    }
 `
 
 const MenuItem = styled.li`
@@ -111,21 +116,20 @@ const MenuItem = styled.li`
             ? 'color: #97b2b8;'
             : '&:hover { background: #e0e0e0; cursor: pointer; }'}
 
-    font-weight: ${({ theme }) => (theme.isSelected ? 'bold' : 'normal')};
     padding: 10px 20px;
 `
 
 const MenuBtn = styled.button`
-    font-weight: ${({ theme }) => (theme.isMenuOpen ? 'bold' : 'normal')};
     box-sizing: border-box;
     cursor: pointer;
     font-size: 14px;
     border: none;
     outline: none;
-    padding: 3px 5px;
-    margin: 5px 5px -5px 0;
     background: transparent;
     border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:focus {
         background-color: grey;
