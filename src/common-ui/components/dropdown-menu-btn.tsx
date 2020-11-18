@@ -17,14 +17,20 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     btnChildren: React.ReactNode
     onMenuItemClick: (itemProps: T) => void
     theme?: ThemeProps
+    keepSelectedState?: boolean
 }
 
 interface State {
     isOpen: boolean
+    selected: number
 }
 
 export class DropdownMenuBtn extends React.PureComponent<Props, State> {
-    state: State = { isOpen: false }
+    state: State = {
+        isOpen: false,
+        selected: this.props.keepSelectedState ? 0 : -1,
+    }
+
     private lastToggleCall = 0
 
     private get theme() {
@@ -49,13 +55,14 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
 
     private handleItemClick: (
         props: MenuItemProps,
-    ) => React.MouseEventHandler = (props) => (e) => {
+        index: number,
+    ) => React.MouseEventHandler = (props, index) => (e) => {
         if (props.isDisabled) {
             e.preventDefault()
             return
         }
 
-        this.toggleMenu()
+        this.setState({ isOpen: this.props.keepSelectedState, selected: index })
         this.props.onMenuItemClick(props)
     }
 
@@ -63,8 +70,13 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
         this.props.menuItems.map((props, i) => (
             <MenuItem
                 key={i}
-                onClick={this.handleItemClick(props)}
-                theme={{ isDisabled: props.isDisabled }}
+                onClick={this.handleItemClick(props, i)}
+                theme={{
+                    isDisabled: props.isDisabled,
+                    isSelected: this.props.keepSelectedState
+                        ? this.state.selected === i
+                        : false,
+                }}
             >
                 {props.name}
             </MenuItem>
@@ -98,6 +110,8 @@ const MenuItem = styled.li`
         theme.isDisabled
             ? 'color: #97b2b8;'
             : '&:hover { background: #97b2b8; cursor: pointer; }'}
+
+    font-weight: ${({ theme }) => (theme.isSelected ? 'bold' : 'normal')};
     padding: 10px 20px;
 `
 
@@ -129,6 +143,7 @@ const MenuBtn = styled.button`
 const Menu = styled.ul`
     position: absolute;
     ${({ theme }) => `left: ${theme.leftMenuOffset ?? 0};`}
+    width: max-content;
     list-style: none;
     padding: 10px 0;
     background: white;

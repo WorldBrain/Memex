@@ -46,6 +46,7 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
                 onMenuItemClick={this.props.onMenuItemClick}
                 menuItems={this.props.menuItems}
                 theme={{ leftMenuOffset: '-125px' }}
+                keepSelectedState
             />
         )
     }
