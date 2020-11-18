@@ -13,12 +13,13 @@ const template: ListsSidebarSearchBarProps = {
     isSearchBarFocused: false,
     hasPerfectMatch: false,
     searchQuery: '',
-    onListsSidebarSearchBarFocus: () => {},
-    onListsSidebarSearchBarInputChange: () => {},
-    onListsSidebarSearchBarInputClear: () => {},
+    onFocus: () => {},
+    onSearchQueryChange: (inputString) => console.log(inputString),
+    onInputClear: () => {},
+    onCreateNew: (newListName) => console.log(newListName),
 }
 
-const listsSidebarSearchBarProps: {
+export const listsSidebarSearchBarProps: {
     default: ListsSidebarSearchBarProps
     withPerfectMatch: ListsSidebarSearchBarProps
     focused: ListsSidebarSearchBarProps
@@ -33,6 +34,7 @@ const listsSidebarSearchBarProps: {
     withPerfectMatch: {
         ...template,
         hasPerfectMatch: true,
+        searchQuery: 'Grumpy Cats',
     },
     withInputFocused: {
         ...template,

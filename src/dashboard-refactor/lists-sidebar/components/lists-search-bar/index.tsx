@@ -82,9 +82,10 @@ export interface ListsSidebarSearchBarProps {
     isSearchBarFocused: boolean
     hasPerfectMatch: boolean
     searchQuery?: string
-    onListsSidebarSearchBarFocus(): void
-    onListsSidebarSearchBarInputChange(): void
-    onListsSidebarSearchBarInputClear(): void
+    onFocus(): void
+    onSearchQueryChange(inputString: string): void
+    onInputClear(): void
+    onCreateNew(newListName: string): void // should this return a promise?
 }
 
 export default class ListsSidebarSearchBar extends PureComponent<
@@ -94,10 +95,22 @@ export default class ListsSidebarSearchBar extends PureComponent<
     componentDidMount = () => {
         if (this.props.isSearchBarFocused) this.inputRef.current.focus()
     }
+    handleInputChange: React.ChangeEventHandler = (
+        evt: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+        this.props.onSearchQueryChange(evt.currentTarget.value)
+    }
+    handleCreateNewClick: React.MouseEventHandler = (evt: React.MouseEvent) => {
+        this.props.onCreateNew(this.props.searchQuery)
+    }
     renderCreateNew = () => {
         const { searchQuery } = this.props
         return (
-            <InnerContainer horizontal="8px" displayTopBorder>
+            <InnerContainer
+                horizontal="8px"
+                displayTopBorder
+                onClick={this.handleCreateNewClick}
+            >
                 <Margin right="8px">
                     <TextSpan>Create New:</TextSpan>
                 </Margin>
@@ -109,16 +122,12 @@ export default class ListsSidebarSearchBar extends PureComponent<
         const {
             searchQuery,
             isSearchBarFocused,
-            onListsSidebarSearchBarFocus,
-            onListsSidebarSearchBarInputChange,
-            onListsSidebarSearchBarInputClear,
+            onFocus,
+            onInputClear,
         } = this.props
         return (
             <OuterContainer>
-                <InnerContainer
-                    onClick={onListsSidebarSearchBarFocus}
-                    horizontal="8px"
-                >
+                <InnerContainer onClick={onFocus} horizontal="8px">
                     <IconContainer>
                         <Margin right="12px">
                             <StyledIcon
@@ -131,7 +140,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
                         placeholder="Search or add collection"
                         isFocused={isSearchBarFocused}
                         ref={this.inputRef}
-                        onChange={onListsSidebarSearchBarInputChange}
+                        onChange={this.handleInputChange}
                         value={searchQuery}
                     />
                     {!!searchQuery && (
@@ -140,7 +149,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
                                 <Icon
                                     heightAndWidth="12px"
                                     path="/img/cross_grey.svg"
-                                    onClick={onListsSidebarSearchBarInputClear}
+                                    onClick={onInputClear}
                                 />
                             </Margin>
                         </IconContainer>
