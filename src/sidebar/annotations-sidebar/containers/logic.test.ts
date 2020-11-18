@@ -637,7 +637,7 @@ describe('SidebarContainerLogic', () => {
                     comment: 'Annot comment',
                     selector: {
                         descriptor: {
-                            content: { foo: 5 },
+                            content: [{ foo: 5 }],
                             strategy: 'eedwdwq',
                         },
                         quote: 'dawadawd',
@@ -684,7 +684,7 @@ describe('SidebarContainerLogic', () => {
                     comment: 'Annot comment',
                     selector: JSON.stringify({
                         descriptor: {
-                            content: { foo: 5 },
+                            content: [{ foo: 5 }],
                             strategy: 'eedwdwq',
                         },
                         quote: 'dawadawd',
@@ -721,7 +721,7 @@ describe('SidebarContainerLogic', () => {
                     comment: 'Annot comment',
                     selector: {
                         descriptor: {
-                            content: { foo: 5 },
+                            content: [{ foo: 5 }],
                             strategy: 'eedwdwq',
                         },
                         quote: 'dawadawd',
@@ -739,7 +739,7 @@ describe('SidebarContainerLogic', () => {
                     comment: 'Annot comment 2',
                     selector: {
                         descriptor: {
-                            content: { foo: 5 },
+                            content: [{ foo: 5 }],
                             strategy: 'eedwdwq',
                         },
                         quote: 'dawadawd 2',
@@ -759,8 +759,8 @@ describe('SidebarContainerLogic', () => {
             })
 
             expect(sidebar.state.annotations).toEqual([
-                expect.objectContaining({ url: annotationUrl2 }),
                 expect.objectContaining({ url: annotationUrl1 }),
+                expect.objectContaining({ url: annotationUrl2 }),
             ])
             await sidebarLogic._detectSharedAnnotations([
                 annotationUrl1,
