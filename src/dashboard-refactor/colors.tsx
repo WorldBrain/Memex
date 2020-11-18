@@ -1,4 +1,5 @@
 const colors = {
+    white: '#FFF',
     onHover: '#BABABA',
     onSelect: '#B6B6B6', // used for sidebar list item in selected state
     midGrey: '#C4C4C4', // used for Sidebar Toggle hovered/selected state
