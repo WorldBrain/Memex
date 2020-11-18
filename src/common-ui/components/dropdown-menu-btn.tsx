@@ -109,7 +109,7 @@ const MenuItem = styled.li`
     ${({ theme }) =>
         theme.isDisabled
             ? 'color: #97b2b8;'
-            : '&:hover { background: #97b2b8; cursor: pointer; }'}
+            : '&:hover { background: #e0e0e0; cursor: pointer; }'}
 
     font-weight: ${({ theme }) => (theme.isSelected ? 'bold' : 'normal')};
     padding: 10px 20px;
@@ -147,6 +147,10 @@ const Menu = styled.ul`
     list-style: none;
     padding: 10px 0;
     background: white;
-    border: black 1px solid;
-    border-radius: 5px;
+    border-radius: 3px;
+    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
+        rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+    background: white;
+    overflow: hidden;
+    overflow-y: scroll;
 `

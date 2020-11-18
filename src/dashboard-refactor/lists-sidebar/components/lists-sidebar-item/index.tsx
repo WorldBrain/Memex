@@ -13,6 +13,7 @@ import {
 import { MoreActionButtonState } from './types'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
+import { Icon } from 'src/dashboard-refactor/styledComponents'
 
 // probably want to use timing function to get this really looking good. This is just quick and dirty
 const blinkingAnimation = keyframes`
@@ -27,9 +28,15 @@ const blinkingAnimation = keyframes`
     }
 `
 
+const containerWidth = 173
+const titleLeftMargin = 19
+const iconWidth = 12
+const iconMargin = 7.5
+const unHoveredWidth = containerWidth - titleLeftMargin - iconMargin
+
 const Container = styled.div`
     height: 27px;
-    width: 100%;
+    width: ${containerWidth}px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -51,9 +58,18 @@ const Container = styled.div`
         css`
             animation: ${blinkingAnimation} 0.4s 2;
         `}
+    ${css`
+        cursor: ${(props) =>
+            !props.isDraggedOver
+                ? `pointer`
+                : props.isDroppable
+                ? `default`
+                : `not-allowed`};
+    `}
     `
 
-const ListTitle = styled.div`
+const ListTitle = styled.p`
+    margin: 0;
     font-family: ${fonts.primary.name};
     font-style: normal;
     ${(props) =>
@@ -64,12 +80,16 @@ const ListTitle = styled.div`
     font-size: 14px;
     line-height: 21px;
     height: 18px;
-`
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
-const Icon = styled.div`
-    height: 12px;
-    width: 12px;
-    font-size: 12px;
+    ${(props) =>
+        css`
+            width: ${props.isHovered
+                ? unHoveredWidth - iconMargin - iconWidth
+                : unHoveredWidth}px;
+        `}
 `
 
 const NewItemsCount = styled.div`
@@ -89,6 +109,7 @@ const NewItemsCount = styled.div`
 `
 
 export interface ListsSidebarItemProps {
+    className?: string
     listName: string
     isEditing: boolean
     selectedState: SelectedState
@@ -141,14 +162,16 @@ export default class ListsSidebarItem extends PureComponent<
     }
     private renderDefault() {
         const {
+            className,
             listName,
             hoverState: { isHovered },
             selectedState: { isSelected },
-            droppableState: { isBlinking },
+            droppableState: { isBlinking, isDraggedOver, isDroppable },
             newItemsCountState: { displayNewItemsCount },
         } = this.props
         return (
             <Container
+                className={className}
                 onClick={this.handleItemSelect}
                 onMouseEnter={this.handleHoverEnter}
                 onMouseLeave={this.handleHoverLeave}
@@ -156,27 +179,34 @@ export default class ListsSidebarItem extends PureComponent<
                 onDragEnter={this.handleDragOver}
                 onDragLeave={this.handleDragLeave}
                 onDrop={this.handleDrop}
+                isDroppable={isDroppable}
+                isDraggedOver={isDraggedOver}
                 isHovered={isHovered}
                 isSelected={isSelected}
                 isBlinking={isBlinking}
             >
                 <Margin left="19px">
-                    <ListTitle isSelected={isSelected}>{listName}</ListTitle>
+                    <ListTitle isHovered={isHovered} isSelected={isSelected}>
+                        {listName}
+                    </ListTitle>
                 </Margin>
                 {(isHovered || displayNewItemsCount) && (
-                    <Margin right="7.5px">{this.renderIcon()}</Margin>
+                    <Margin right={`${iconMargin}px`}>
+                        {this.renderIcon()}
+                    </Margin>
                 )}
             </Container>
         )
     }
     private renderEditing() {
         const {
+            className,
             listName,
             selectedState: { isSelected },
         } = this.props
         return (
-            <Container isSelected={isSelected}>
-                <Margin left="19px">
+            <Container className={className} isSelected={isSelected}>
+                <Margin left={`${titleLeftMargin}px`}>
                     <ListTitle>{listName}</ListTitle>
                 </Margin>
             </Container>
