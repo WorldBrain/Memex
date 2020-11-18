@@ -64,7 +64,7 @@ const setupLogicHelper = async ({
 
     const sidebar = device.createElement(sidebarLogic)
     await sidebar.init()
-    return { sidebar, sidebarLogic, analytics }
+    return { sidebar, sidebarLogic, analytics, annotationsCache }
 }
 
 describe('SidebarContainerLogic', () => {
@@ -506,214 +506,274 @@ describe('SidebarContainerLogic', () => {
         expect(sidebar.state.activeCopyPasterAnnotationId).toBeUndefined()
     })
 
-    it('should be able to set active annotation share menu', async ({
-        device,
-    }) => {
-        const { sidebar } = await setupLogicHelper({ device })
-        const id1 = 'test1'
-        const id2 = 'test2'
+    it('should be able to trigger annotation sorting', async ({ device }) => {
+        const { sidebar, annotationsCache } = await setupLogicHelper({ device })
+        const testPageUrl = 'testurl'
 
-        expect(sidebar.state.activeShareMenuNoteId).toBeUndefined()
-        sidebar.processEvent('setShareMenuNoteId', { id: id1 })
-        expect(sidebar.state.activeShareMenuNoteId).toEqual(id1)
-        sidebar.processEvent('setShareMenuNoteId', { id: id2 })
-        expect(sidebar.state.activeShareMenuNoteId).toEqual(id2)
-        sidebar.processEvent('resetShareMenuNoteId', null)
-        expect(sidebar.state.activeShareMenuNoteId).toBeUndefined()
-    })
+        const dummyAnnots = [
+            { url: 'test1', createdWhen: 1, pageUrl: testPageUrl },
+            { url: 'test2', createdWhen: 2, pageUrl: testPageUrl },
+            { url: 'test3', createdWhen: 3, pageUrl: testPageUrl },
+            { url: 'test4', createdWhen: 4, pageUrl: testPageUrl },
+        ] as any
 
-    it('should be able to update annotation sharing info', async ({
-        device,
-    }) => {
-        const { sidebar } = await setupLogicHelper({ device })
-        const id1 = 'test1'
-        const id2 = 'test2'
+        for (const annot of dummyAnnots) {
+            await device.storageManager
+                .collection('annotations')
+                .createObject(annot)
+        }
 
-        expect(sidebar.state.annotationSharingInfo).toEqual({})
-        sidebar.processEvent('updateAnnotationShareInfo', {
-            annotationUrl: id1,
-            info: { status: 'not-yet-shared', taskState: 'pristine' },
-        })
-        expect(sidebar.state.annotationSharingInfo).toEqual({
-            [id1]: { status: 'not-yet-shared', taskState: 'pristine' },
-        })
-        sidebar.processEvent('updateAnnotationShareInfo', {
-            annotationUrl: id1,
-            info: { status: 'shared', taskState: 'success' },
-        })
-        expect(sidebar.state.annotationSharingInfo).toEqual({
-            [id1]: { status: 'shared', taskState: 'success' },
-        })
-        sidebar.processEvent('updateAnnotationShareInfo', {
-            annotationUrl: id1,
-            info: { status: 'unshared' },
-        })
-        expect(sidebar.state.annotationSharingInfo).toEqual({
-            [id1]: { status: 'unshared', taskState: 'success' },
-        })
-        sidebar.processEvent('updateAnnotationShareInfo', {
-            annotationUrl: id2,
-            info: { status: 'shared', taskState: 'error' },
-        })
-        expect(sidebar.state.annotationSharingInfo).toEqual({
-            [id1]: { status: 'unshared', taskState: 'success' },
-            [id2]: { status: 'shared', taskState: 'error' },
-        })
-        sidebar.processEvent('updateAnnotationShareInfo', {
-            annotationUrl: id2,
-            info: { taskState: 'success' },
-        })
-        expect(sidebar.state.annotationSharingInfo).toEqual({
-            [id1]: { status: 'unshared', taskState: 'success' },
-            [id2]: { status: 'shared', taskState: 'success' },
-        })
-    })
+        await annotationsCache.load(testPageUrl)
 
-    it('should share annotations, simulating sidebar share process', async ({
-        device,
-    }) => {
-        const { contentSharing, directLinking } = device.backgroundModules
-        await device.authService.setUser(TEST_USER)
+        const projectUrl = (a) => a.url
 
-        const localListId = await sharingTestData.createContentSharingTestList(
-            device,
-        )
-        await contentSharing.shareList({
-            listId: localListId,
+        await sidebar.processEvent('sortAnnotations', {
+            sortingFn: (a, b) => +a.createdWhen - +b.createdWhen,
         })
-        await contentSharing.shareListEntries({
-            listId: localListId,
-        })
-        const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
-        const annotationUrl = await directLinking.createAnnotation(
-            {} as any,
-            {
-                pageUrl,
-                title: 'Page title',
-                body: 'Annot body',
-                comment: 'Annot comment',
-                selector: {
-                    descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
-                    quote: 'dawadawd',
-                },
-            },
-            { skipPageIndexing: true },
-        )
-
-        const { sidebar } = await setupLogicHelper({ device, pageUrl })
-
-        await sidebar.processEvent('receiveSharingAccessChange', {
-            sharingAccess: 'sharing-allowed',
-        })
-        expect(sidebar.state.annotationSharingAccess).toEqual('sharing-allowed')
-        expect(sidebar.state.annotations).toEqual([
-            expect.objectContaining({ url: annotationUrl }),
+        expect(sidebar.state.annotations.map(projectUrl)).toEqual([
+            'test1',
+            'test2',
+            'test3',
+            'test4',
         ])
 
-        // Triggers share menu opening
-        await sidebar.processEvent('shareAnnotation', {
-            context: 'pageAnnotations',
-            annotationUrl,
+        await sidebar.processEvent('sortAnnotations', {
+            sortingFn: (a, b) => +b.createdWhen - +a.createdWhen,
         })
-        expect(sidebar.state.activeShareMenuNoteId).toEqual(annotationUrl)
+        expect(sidebar.state.annotations.map(projectUrl)).toEqual([
+            'test4',
+            'test3',
+            'test2',
+            'test1',
+        ])
+    })
 
-        // BG calls that run automatically upon share menu opening
-        await contentSharing.shareAnnotation({ annotationUrl })
-        await contentSharing.shareAnnotationsToLists({
-            annotationUrls: [annotationUrl],
-            queueInteraction: 'skip-queue',
+    describe('sharing', () => {
+        it('should be able to set active annotation share menu', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({ device })
+            const id1 = 'test1'
+            const id2 = 'test2'
+
+            expect(sidebar.state.activeShareMenuNoteId).toBeUndefined()
+            sidebar.processEvent('setShareMenuNoteId', { id: id1 })
+            expect(sidebar.state.activeShareMenuNoteId).toEqual(id1)
+            sidebar.processEvent('setShareMenuNoteId', { id: id2 })
+            expect(sidebar.state.activeShareMenuNoteId).toEqual(id2)
+            sidebar.processEvent('resetShareMenuNoteId', null)
+            expect(sidebar.state.activeShareMenuNoteId).toBeUndefined()
         })
 
-        await contentSharing.waitForSync()
-        const serverStorage = await device.getServerStorage()
-        expect(
-            await serverStorage.storageManager
-                .collection('sharedAnnotation')
-                .findObjects({}),
-        ).toEqual([
-            expect.objectContaining({
-                body: 'Annot body',
-                comment: 'Annot comment',
-                selector: JSON.stringify({
-                    descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
-                    quote: 'dawadawd',
+        it('should be able to update annotation sharing info', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({ device })
+            const id1 = 'test1'
+            const id2 = 'test2'
+
+            expect(sidebar.state.annotationSharingInfo).toEqual({})
+            sidebar.processEvent('updateAnnotationShareInfo', {
+                annotationUrl: id1,
+                info: { status: 'not-yet-shared', taskState: 'pristine' },
+            })
+            expect(sidebar.state.annotationSharingInfo).toEqual({
+                [id1]: { status: 'not-yet-shared', taskState: 'pristine' },
+            })
+            sidebar.processEvent('updateAnnotationShareInfo', {
+                annotationUrl: id1,
+                info: { status: 'shared', taskState: 'success' },
+            })
+            expect(sidebar.state.annotationSharingInfo).toEqual({
+                [id1]: { status: 'shared', taskState: 'success' },
+            })
+            sidebar.processEvent('updateAnnotationShareInfo', {
+                annotationUrl: id1,
+                info: { status: 'unshared' },
+            })
+            expect(sidebar.state.annotationSharingInfo).toEqual({
+                [id1]: { status: 'unshared', taskState: 'success' },
+            })
+            sidebar.processEvent('updateAnnotationShareInfo', {
+                annotationUrl: id2,
+                info: { status: 'shared', taskState: 'error' },
+            })
+            expect(sidebar.state.annotationSharingInfo).toEqual({
+                [id1]: { status: 'unshared', taskState: 'success' },
+                [id2]: { status: 'shared', taskState: 'error' },
+            })
+            sidebar.processEvent('updateAnnotationShareInfo', {
+                annotationUrl: id2,
+                info: { taskState: 'success' },
+            })
+            expect(sidebar.state.annotationSharingInfo).toEqual({
+                [id1]: { status: 'unshared', taskState: 'success' },
+                [id2]: { status: 'shared', taskState: 'success' },
+            })
+        })
+
+        it('should share annotations, simulating sidebar share process', async ({
+            device,
+        }) => {
+            const { contentSharing, directLinking } = device.backgroundModules
+            await device.authService.setUser(TEST_USER)
+
+            const localListId = await sharingTestData.createContentSharingTestList(
+                device,
+            )
+            await contentSharing.shareList({
+                listId: localListId,
+            })
+            await contentSharing.shareListEntries({
+                listId: localListId,
+            })
+            const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
+            const annotationUrl = await directLinking.createAnnotation(
+                {} as any,
+                {
+                    pageUrl,
+                    title: 'Page title',
+                    body: 'Annot body',
+                    comment: 'Annot comment',
+                    selector: {
+                        descriptor: {
+                            content: { foo: 5 },
+                            strategy: 'eedwdwq',
+                        },
+                        quote: 'dawadawd',
+                    },
+                },
+                { skipPageIndexing: true },
+            )
+
+            const { sidebar } = await setupLogicHelper({ device, pageUrl })
+
+            await sidebar.processEvent('receiveSharingAccessChange', {
+                sharingAccess: 'sharing-allowed',
+            })
+            expect(sidebar.state.annotationSharingAccess).toEqual(
+                'sharing-allowed',
+            )
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({ url: annotationUrl }),
+            ])
+
+            // Triggers share menu opening
+            await sidebar.processEvent('shareAnnotation', {
+                context: 'pageAnnotations',
+                annotationUrl,
+            })
+            expect(sidebar.state.activeShareMenuNoteId).toEqual(annotationUrl)
+
+            // BG calls that run automatically upon share menu opening
+            await contentSharing.shareAnnotation({ annotationUrl })
+            await contentSharing.shareAnnotationsToLists({
+                annotationUrls: [annotationUrl],
+                queueInteraction: 'skip-queue',
+            })
+
+            await contentSharing.waitForSync()
+            const serverStorage = await device.getServerStorage()
+            expect(
+                await serverStorage.storageManager
+                    .collection('sharedAnnotation')
+                    .findObjects({}),
+            ).toEqual([
+                expect.objectContaining({
+                    body: 'Annot body',
+                    comment: 'Annot comment',
+                    selector: JSON.stringify({
+                        descriptor: {
+                            content: { foo: 5 },
+                            strategy: 'eedwdwq',
+                        },
+                        quote: 'dawadawd',
+                    }),
                 }),
-            }),
-        ])
-    })
+            ])
+        })
 
-    it('should detect shared annotations on initialization', async ({
-        device,
-    }) => {
-        const { contentSharing, directLinking } = device.backgroundModules
-        await device.authService.setUser(TEST_USER)
-
-        // Set up some shared data independent of the sidebar logic
-        const localListId = await sharingTestData.createContentSharingTestList(
+        it('should detect shared annotations on initialization', async ({
             device,
-        )
-        await contentSharing.shareList({
-            listId: localListId,
-        })
-        await contentSharing.shareListEntries({
-            listId: localListId,
-        })
-        const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
+        }) => {
+            const { contentSharing, directLinking } = device.backgroundModules
+            await device.authService.setUser(TEST_USER)
 
-        // This annotation will be shared
-        const annotationUrl1 = await directLinking.createAnnotation(
-            {} as any,
-            {
-                pageUrl,
-                title: 'Page title',
-                body: 'Annot body',
-                comment: 'Annot comment',
-                selector: {
-                    descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
-                    quote: 'dawadawd',
+            // Set up some shared data independent of the sidebar logic
+            const localListId = await sharingTestData.createContentSharingTestList(
+                device,
+            )
+            await contentSharing.shareList({
+                listId: localListId,
+            })
+            await contentSharing.shareListEntries({
+                listId: localListId,
+            })
+            const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
+
+            // This annotation will be shared
+            const annotationUrl1 = await directLinking.createAnnotation(
+                {} as any,
+                {
+                    pageUrl,
+                    title: 'Page title',
+                    body: 'Annot body',
+                    comment: 'Annot comment',
+                    selector: {
+                        descriptor: {
+                            content: { foo: 5 },
+                            strategy: 'eedwdwq',
+                        },
+                        quote: 'dawadawd',
+                    },
                 },
-            },
-            { skipPageIndexing: true },
-        )
-        // This annotation won't be shared
-        const annotationUrl2 = await directLinking.createAnnotation(
-            {} as any,
-            {
-                pageUrl,
-                title: 'Page title',
-                body: 'Annot body 2',
-                comment: 'Annot comment 2',
-                selector: {
-                    descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
-                    quote: 'dawadawd 2',
+                { skipPageIndexing: true },
+            )
+            // This annotation won't be shared
+            const annotationUrl2 = await directLinking.createAnnotation(
+                {} as any,
+                {
+                    pageUrl,
+                    title: 'Page title',
+                    body: 'Annot body 2',
+                    comment: 'Annot comment 2',
+                    selector: {
+                        descriptor: {
+                            content: { foo: 5 },
+                            strategy: 'eedwdwq',
+                        },
+                        quote: 'dawadawd 2',
+                    },
                 },
-            },
-            { skipPageIndexing: true },
-        )
+                { skipPageIndexing: true },
+            )
 
-        await contentSharing.shareAnnotation({ annotationUrl: annotationUrl1 })
-        await contentSharing.waitForSync()
+            await contentSharing.shareAnnotation({
+                annotationUrl: annotationUrl1,
+            })
+            await contentSharing.waitForSync()
 
-        const { sidebar, sidebarLogic } = await setupLogicHelper({
-            device,
-            pageUrl,
-        })
+            const { sidebar, sidebarLogic } = await setupLogicHelper({
+                device,
+                pageUrl,
+            })
 
-        expect(sidebar.state.annotations).toEqual([
-            expect.objectContaining({ url: annotationUrl2 }),
-            expect.objectContaining({ url: annotationUrl1 }),
-        ])
-        await sidebarLogic._detectSharedAnnotations([
-            annotationUrl1,
-            annotationUrl2,
-        ])
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({ url: annotationUrl2 }),
+                expect.objectContaining({ url: annotationUrl1 }),
+            ])
+            await sidebarLogic._detectSharedAnnotations([
+                annotationUrl1,
+                annotationUrl2,
+            ])
 
-        // Only the shared annot should show up in sharing info
-        expect(sidebar.state.annotationSharingInfo).toEqual({
-            [annotationUrl1]: {
-                status: 'shared',
-                taskState: 'pristine',
-            },
+            // Only the shared annot should show up in sharing info
+            expect(sidebar.state.annotationSharingInfo).toEqual({
+                [annotationUrl1]: {
+                    status: 'shared',
+                    taskState: 'pristine',
+                },
+            })
         })
     })
 })

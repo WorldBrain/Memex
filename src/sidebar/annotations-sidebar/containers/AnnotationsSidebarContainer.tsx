@@ -432,7 +432,13 @@ export class AnnotationsSidebarContainer<
                             tooltipText="Sort notes"
                             position="bottom"
                         >
-                            <SortingDropdownMenuBtn />
+                            <SortingDropdownMenuBtn
+                                onMenuItemClick={({ sortingFn }) =>
+                                    this.processEvent('sortAnnotations', {
+                                        sortingFn,
+                                    })
+                                }
+                            />
                         </ButtonTooltip>
                         <ButtonTooltip
                             tooltipText="Copy All Notes"

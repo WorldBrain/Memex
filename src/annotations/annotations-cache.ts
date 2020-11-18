@@ -4,6 +4,7 @@ import { EventEmitter } from 'events'
 import { Annotation } from 'src/annotations/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
+import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 
 export const createAnnotationsCache = (
     bgModules: {
@@ -44,6 +45,7 @@ export const createAnnotationsCache = (
 interface AnnotationCacheChanges {
     rollback: (annotations: Annotation[]) => void
     newState: (annotation: Annotation[]) => void
+    sorted: (annotations: Annotation[]) => void
     created: (annotation: Annotation) => void
     updated: (annotation: Annotation) => void
     deleted: (annotation: Annotation) => void
@@ -84,6 +86,7 @@ export interface AnnotationsCacheInterface {
     delete: (
         annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>,
     ) => Promise<void>
+    sort: (sortingFn: AnnotationsSorter) => void
 
     annotations: Annotation[]
     annotationChanges: AnnotationCacheChangeEvents
@@ -116,6 +119,12 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         this.annotations = annotations.reverse()
         this.annotationChanges.emit('load', this._annotations)
+        this.annotationChanges.emit('newState', this._annotations)
+    }
+
+    sort = (sortingFn: AnnotationsSorter) => {
+        this._annotations = this._annotations.sort(sortingFn)
+        this.annotationChanges.emit('sorted', this._annotations)
         this.annotationChanges.emit('newState', this._annotations)
     }
 

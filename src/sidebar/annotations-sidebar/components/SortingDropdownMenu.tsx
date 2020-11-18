@@ -13,42 +13,37 @@ import {
 } from 'src/common-ui/components/dropdown-menu-btn'
 
 interface SortingMenuItemProps extends MenuItemProps {
-    sort: AnnotationsSorter
+    sortingFn: AnnotationsSorter
 }
 
 export const defaultSortingMenuItems: SortingMenuItemProps[] = [
     {
         name: 'Position on Page',
-        sort: sortByPagePosition,
+        sortingFn: sortByPagePosition,
     },
     {
         name: 'Creation time (1-9)',
-        sort: (a, b) => sortByCreatedTime(a, b),
+        sortingFn: (a, b) => sortByCreatedTime(a, b),
     },
     {
         name: 'Creation time (9-1)',
-        sort: (a, b) => sortByCreatedTime(b, a),
+        sortingFn: (a, b) => sortByCreatedTime(b, a),
     },
 ]
 
 interface Props {
+    onMenuItemClick: (props: SortingMenuItemProps) => void
     menuItems?: SortingMenuItemProps[]
 }
 
 export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
     static defaultProps: Partial<Props> = { menuItems: defaultSortingMenuItems }
 
-    private handleMenuItemClick = ({ name }: SortingMenuItemProps) => {
-        this.props.menuItems.sort
-    }
-
-    private renderBtn = () => <IconImg src={icons.sort} />
-
     render() {
         return (
             <DropdownMenuBtn
-                btnChildren={this.renderBtn()}
-                onMenuItemClick={this.handleMenuItemClick}
+                btnChildren={<IconImg src={icons.sort} />}
+                onMenuItemClick={this.props.onMenuItemClick}
                 menuItems={this.props.menuItems}
                 theme={{ leftMenuOffset: '-125px' }}
             />
