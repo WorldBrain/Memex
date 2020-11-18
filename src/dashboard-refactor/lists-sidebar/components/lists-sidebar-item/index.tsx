@@ -85,19 +85,14 @@ const ListTitle = styled.p<ListTitleProps>`
         css`
             font-weight: ${fonts.primary.weight.bold};
         `}
-    font-size: 14px;
-    line-height: 21px;
+    font-size: 12px;
+    line-height: 18px;
     height: 18px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 
-    ${(props) =>
-        css`
-            width: ${props.isHovered
-                ? unHoveredWidth - iconMargin - iconWidth
-                : unHoveredWidth}px;
-        `}
+    max-width: 100%;
 `
 
 const NewItemsCount = styled.div`
