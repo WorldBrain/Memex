@@ -188,6 +188,16 @@ const EditorContainer = styled.div`
 
     & > div {
         padding: 10px 7px;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+
+        & *:first-child {
+            margin-top: 0;
+        }
+
+        & *:last-child {
+            margin-bottom: 0;
+        }
     }
 
     & textarea,
