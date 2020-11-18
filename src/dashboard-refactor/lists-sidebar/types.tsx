@@ -1,8 +1,10 @@
+import { ListsSidebarSearchBarProps } from './components/lists-search-bar'
 import { ListsSidebarGroupProps } from './components/lists-sidebar-group'
 
 export interface ListsSidebarProps {
-    sidebarLockedState: SidebarLockedState
-    sidebarPeekState: SidebarPeekState
+    lockedState: SidebarLockedState
+    peekState: SidebarPeekState
+    searchBarProps: ListsSidebarSearchBarProps
     listsGroups: ListsSidebarGroupProps[]
 }
 

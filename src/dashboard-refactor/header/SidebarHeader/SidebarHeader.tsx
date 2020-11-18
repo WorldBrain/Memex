@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 import styles from '../../styles'
 
-import { SidebarLockedState, SidebarPeekState } from './types'
+import { SidebarLockedState, SidebarPeekState } from '../../lists-sidebar/types'
 import { HoverState } from '../../types'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
