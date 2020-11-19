@@ -195,6 +195,107 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
+            'should substitute URL for missing title when uploading highlights to readwise',
+            () => {
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const omitTitle = ({
+                                    title,
+                                    pageTitle,
+                                    ...data
+                                }: any): any => data
+
+                                injectFakeTabs({
+                                    tabManagement:
+                                        setup.backgroundModules.tabManagement,
+                                    tabsAPI: setup.browserAPIs.tabs,
+                                    tabs: [
+                                        omitTitle(DATA.TEST_TAB_1),
+                                        omitTitle(DATA.TEST_TAB_2),
+                                    ],
+                                    includeTitle: true,
+                                })
+                                setup.fetch.post(READWISE_API_URL, {
+                                    status: 200,
+                                })
+
+                                await setup.storageManager
+                                    .collection('pages')
+                                    .createObject(omitTitle(DATA.PAGE_1))
+                                await setup.storageManager
+                                    .collection('pages')
+                                    .createObject(omitTitle(DATA.PAGE_2))
+
+                                const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: omitTitle(DATA.TEST_TAB_1) },
+                                    omitTitle(DATA.ANNOT_1),
+                                    { skipPageIndexing: true },
+                                )
+                                const secondAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: omitTitle(DATA.TEST_TAB_2) },
+                                    omitTitle(DATA.ANNOT_2),
+                                    { skipPageIndexing: true },
+                                )
+                                await setup.backgroundModules.readwise.setAPIKey(
+                                    {
+                                        validatedKey: 'my key',
+                                    },
+                                )
+                                setup.backgroundModules.readwise.uploadBatchSize = 1
+                                await setup.backgroundModules.readwise.uploadAllAnnotations(
+                                    {
+                                        queueInteraction: 'queue-and-return',
+                                    },
+                                )
+                                await setup.backgroundModules.readwise.actionQueue.waitForSync()
+                                await setup.backgroundModules.readwise.actionQueue.waitForSync()
+
+                                expectFetchCalls(
+                                    parseJsonFetchCalls(setup.fetch.calls()),
+                                    [
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    {
+                                                        ...DATA.UPLOADED_HIGHLIGHT_1(
+                                                            firstAnnotationUrl,
+                                                        ),
+                                                        title:
+                                                            DATA.TEST_TAB_1
+                                                                .normalized,
+                                                    },
+                                                ],
+                                            }),
+                                        },
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    {
+                                                        ...DATA.UPLOADED_HIGHLIGHT_2(
+                                                            secondAnnotationUrl,
+                                                        ),
+                                                        title:
+                                                            DATA.TEST_TAB_2
+                                                                .normalized,
+                                                    },
+                                                ],
+                                            }),
+                                        },
+                                    ],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
             'should sync annotation updates to Readwise',
             () => {
                 return {

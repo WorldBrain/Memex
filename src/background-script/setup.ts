@@ -244,6 +244,7 @@ export function createBackgroundModules(options: {
         getPageData: async (normalizedUrl) =>
             pick(
                 await pages.storage.getPage(normalizedUrl),
+                'url',
                 'fullUrl',
                 'fullTitle',
             ),

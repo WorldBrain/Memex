@@ -27,7 +27,7 @@ type ReadwiseInterfaceMethod<
     Method extends keyof ReadwiseInterface<'provider'>
 > = ReadwiseInterface<'provider'>[Method]['function']
 
-type PageData = Pick<Page, 'fullTitle' | 'fullUrl'>
+type PageData = Pick<Page, 'fullTitle' | 'fullUrl' | 'url'>
 type GetPageData = (normalizedUrl: string) => Promise<PageData>
 
 export class ReadwiseBackground {
@@ -278,13 +278,12 @@ function annotationToReadwise(
     const dateTime = date + ' ' + time
 
     return {
-        title: options.pageData.fullTitle,
+        title: options.pageData.fullTitle ?? options.pageData.url,
         source_url: options.pageData.fullUrl,
         source_type: 'article',
         note: annotation.comment?.length ? annotation.comment : undefined,
         location_type: 'time_offset',
         highlighted_at: annotation.createdWhen,
-        // highlight_url: annotation.url,
         text: annotation?.body?.length
             ? annotation.body
             : 'Memex note from: ' + dateTime,
