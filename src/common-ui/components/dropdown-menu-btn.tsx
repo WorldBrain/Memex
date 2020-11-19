@@ -2,6 +2,7 @@ import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { ClickAway } from 'src/util/click-away-wrapper'
+import ButtonTooltip, { Props as ButtonTooltipProps } from './button-tooltip'
 
 export interface MenuItemProps {
     name: string
@@ -18,6 +19,7 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     onMenuItemClick: (itemProps: T) => void
     theme?: ThemeProps
     keepSelectedState?: boolean
+    tooltipProps?: ButtonTooltipProps
 }
 
 interface State {
@@ -82,16 +84,44 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
             </MenuItem>
         ))
 
+    private renderMenuBtn = () => {
+        const btn = (
+            <MenuBtn onClick={this.toggleMenu}>
+                {this.props.btnChildren}
+            </MenuBtn>
+        )
+
+        if (this.props.tooltipProps) {
+            return (
+                <ButtonTooltip {...this.props.tooltipProps}>
+                    {btn}
+                </ButtonTooltip>
+            )
+        }
+
+        return btn
+    }
+
     render() {
         return (
             <ThemeProvider theme={this.theme}>
                 <MenuContainer>
-                    <MenuBtn onClick={this.toggleMenu}>
-                        {this.props.btnChildren}
-                    </MenuBtn>
+                    {this.renderMenuBtn()}
                     {this.state.isOpen && (
                         <ClickAway onClickAway={this.toggleMenu}>
-                            <Menu>{this.renderMenuItems()}</Menu>
+                            <Menu
+                                onMouseEnter={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation
+                                }}
+                            >
+                                {' '}
+                                {this.renderMenuItems()}
+                            </Menu>
                         </ClickAway>
                     )}
                 </MenuContainer>
