@@ -29,6 +29,7 @@ type ReadwiseInterfaceMethod<
 
 type PageData = Pick<Page, 'fullTitle' | 'fullUrl' | 'url'>
 type GetPageData = (normalizedUrl: string) => Promise<PageData>
+type GetAnnotationTags = (annotationUrl: string) => Promise<string[]>
 
 export class ReadwiseBackground {
     remoteFunctions: ReadwiseInterface<'provider'>
@@ -45,6 +46,7 @@ export class ReadwiseBackground {
             browserStorage: LimitedBrowserStorage
             fetch: typeof fetch
             getPageData: GetPageData
+            getAnnotationTags: GetAnnotationTags
             getAnnotationsByPks: (
                 annotationUrls: string[],
             ) => Promise<Annotation[]>
@@ -128,7 +130,9 @@ export class ReadwiseBackground {
         }
 
         for await (const annotation of this.options.streamAnnotations()) {
-            annotationBatch.push(annotation)
+            const tags = await this.options.getAnnotationTags(annotation.url)
+
+            annotationBatch.push({ ...annotation, tags })
             if (annotationBatch.length === this.uploadBatchSize) {
                 await scheduleBatch()
                 annotationBatch = []
@@ -277,11 +281,27 @@ function annotationToReadwise(
         today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds()
     const dateTime = date + ' ' + time
 
+    const formatNote = ({ comment = '', tags = [] }: Annotation) => {
+        if (!comment.length && !tags.length) {
+            return undefined
+        }
+
+        let text = ''
+        if (comment.length) {
+            text += comment
+        }
+        if (tags.length) {
+            text += (text.length ? ' .' : '.') + tags.join(' .')
+        }
+
+        return text
+    }
+
     return {
         title: options.pageData.fullTitle ?? options.pageData.url,
         source_url: options.pageData.fullUrl,
         source_type: 'article',
-        note: annotation.comment?.length ? annotation.comment : undefined,
+        note: formatNote(annotation),
         location_type: 'time_offset',
         highlighted_at: annotation.createdWhen,
         text: annotation?.body?.length

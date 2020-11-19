@@ -295,6 +295,122 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }
             },
         ),
+
+        backgroundIntegrationTest(
+            'should append any annotation tags to note text when uploading highlights to readwise',
+            () => {
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                injectFakeTabs({
+                                    tabManagement:
+                                        setup.backgroundModules.tabManagement,
+                                    tabsAPI: setup.browserAPIs.tabs,
+                                    tabs: [DATA.TEST_TAB_1, DATA.TEST_TAB_2],
+                                    includeTitle: true,
+                                })
+                                setup.fetch.post(READWISE_API_URL, {
+                                    status: 200,
+                                })
+
+                                const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: DATA.TEST_TAB_1 },
+                                    DATA.ANNOT_1,
+                                )
+                                await setup.backgroundModules.directLinking.addTagForAnnotation(
+                                    { tab: DATA.TEST_TAB_1 },
+                                    {
+                                        tag: DATA.TAG_1,
+                                        url: firstAnnotationUrl,
+                                    },
+                                )
+                                await setup.backgroundModules.directLinking.addTagForAnnotation(
+                                    { tab: DATA.TEST_TAB_1 },
+                                    {
+                                        tag: DATA.TAG_2,
+                                        url: firstAnnotationUrl,
+                                    },
+                                )
+                                await setup.backgroundModules.directLinking.addTagForAnnotation(
+                                    { tab: DATA.TEST_TAB_1 },
+                                    {
+                                        tag: DATA.TAG_3,
+                                        url: firstAnnotationUrl,
+                                    },
+                                )
+                                const secondAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: DATA.TEST_TAB_2 },
+                                    DATA.ANNOT_2,
+                                )
+                                await setup.backgroundModules.directLinking.addTagForAnnotation(
+                                    { tab: DATA.TEST_TAB_2 },
+                                    {
+                                        tag: DATA.TAG_2,
+                                        url: secondAnnotationUrl,
+                                    },
+                                )
+
+                                await setup.backgroundModules.readwise.setAPIKey(
+                                    {
+                                        validatedKey: 'my key',
+                                    },
+                                )
+                                setup.backgroundModules.readwise.uploadBatchSize = 1
+                                await setup.backgroundModules.readwise.uploadAllAnnotations(
+                                    {
+                                        queueInteraction: 'queue-and-return',
+                                    },
+                                )
+                                await setup.backgroundModules.readwise.actionQueue.waitForSync()
+                                await setup.backgroundModules.readwise.actionQueue.waitForSync()
+
+                                const expectedHighlight1 = DATA.UPLOADED_HIGHLIGHT_1(
+                                    firstAnnotationUrl,
+                                )
+                                const expectedHighlight2 = DATA.UPLOADED_HIGHLIGHT_2(
+                                    secondAnnotationUrl,
+                                )
+
+                                expectFetchCalls(
+                                    parseJsonFetchCalls(setup.fetch.calls()),
+                                    [
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    {
+                                                        ...expectedHighlight1,
+                                                        note:
+                                                            expectedHighlight1.note +
+                                                            ` .${DATA.TAG_1} .${DATA.TAG_2} .${DATA.TAG_3}`,
+                                                    },
+                                                ],
+                                            }),
+                                        },
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    {
+                                                        ...expectedHighlight2,
+                                                        note:
+                                                            expectedHighlight2.note +
+                                                            ` .${DATA.TAG_2}`,
+                                                    },
+                                                ],
+                                            }),
+                                        },
+                                    ],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
         backgroundIntegrationTest(
             'should sync annotation updates to Readwise',
             () => {
