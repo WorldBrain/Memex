@@ -144,8 +144,8 @@ const MenuItem = styled.li`
     ${({ theme }) =>
         theme.isDisabled
             ? 'color: #97b2b8;'
-            : '&:hover { background: #e0e0e0; cursor: pointer; }'}
-
+            : '&:hover { background: #e0e0e0; cursor: pointer; }'};
+    ${({ theme }) => theme.isSelected && 'font-weight: bold;'};
     padding: 10px 20px;
 `
 
