@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import styles from 'src/dashboard-refactor/styleConstants'
-import { Icon } from 'src/dashboard-refactor/styledComponents'
+import styles from 'src/dashboard-refactor/styles'
+import { Icon } from 'src/dashboard-refactor/styled-components'
 import {
     AddableState,
     ExpandableState,
@@ -159,11 +159,11 @@ export default class ListsSidebarGroup extends PureComponent<
                     <GroupHeaderContainer>
                         {isExpandable && (
                             <IconContainer onClick={this.handleExpandClick}>
-                                <Margin x="5.5px">
+                                <Margin horizontal="5.5px">
                                     <Icon
                                         plus90={isExpanded}
                                         minus90={!isExpanded}
-                                        xy="8px"
+                                        heightAndWidth="8px"
                                         path="/img/triangleSmall.svg"
                                     />
                                 </Margin>
@@ -172,8 +172,11 @@ export default class ListsSidebarGroup extends PureComponent<
                         <GroupHeaderInnerDiv className="inner">
                             <GroupTitle>{listsGroupTitle}</GroupTitle>
                             <IconContainer onClick={this.handleAddButtonClick}>
-                                <Margin x="8px">
-                                    <Icon xy="12px" path="/img/plus.svg" />
+                                <Margin horizontal="8px">
+                                    <Icon
+                                        heightAndWidth="12px"
+                                        path="/img/plus.svg"
+                                    />
                                 </Margin>
                             </IconContainer>
                         </GroupHeaderInnerDiv>

@@ -1,7 +1,9 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 
-import ListsSidebarItem from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/'
+import ListsSidebarItem, {
+    DropReceivingState,
+} from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/'
 import ListsSidebarItemWithMenu, {
     ListsSidebarItemWithMenuProps,
 } from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item-with-menu'
@@ -16,10 +18,10 @@ const moreActionButtonState = {
     displayMoreActionButton: true,
 }
 
-const droppableState = {
-    isDroppable: true, // this defines whether items can be dropped (not whether there is a state change on drag-over)
+const dropReceivingState: DropReceivingState = {
+    canReceiveDroppedItems: true, // this defines whether items can be dropped (not whether there is a state change on drag-over)
     isDraggedOver: false,
-    isBlinking: false,
+    triggerSuccessfulDropAnimation: false,
     onDragOver: () => {},
     onDragLeave: () => {},
     onDrop: () => {},
@@ -39,7 +41,7 @@ export const listsSidebarItemProps = {
             onHoverLeave: () => {},
             isHovered: false,
         },
-        droppableState,
+        dropReceivingState,
         newItemsCountState,
     },
     hovered: {
@@ -55,7 +57,7 @@ export const listsSidebarItemProps = {
             onHoverLeave: () => {},
             isHovered: true,
         },
-        droppableState,
+        dropReceivingState,
         newItemsCountState,
     },
     selected: {
@@ -71,7 +73,7 @@ export const listsSidebarItemProps = {
             onHoverLeave: () => {},
             isHovered: false,
         },
-        droppableState,
+        dropReceivingState,
         newItemsCountState,
     },
     hoveredAndSelected: {
@@ -87,7 +89,7 @@ export const listsSidebarItemProps = {
             onHoverLeave: () => {},
             isHovered: true,
         },
-        droppableState,
+        dropReceivingState,
         newItemsCountState,
     },
     isEditing: {
@@ -103,7 +105,7 @@ export const listsSidebarItemProps = {
             onHoverLeave: () => {},
             isHovered: false,
         },
-        droppableState,
+        dropReceivingState,
         newItemsCountState,
     },
     isDroppableAndDraggedOver: {
@@ -119,8 +121,8 @@ export const listsSidebarItemProps = {
             onHoverLeave: () => {},
             isHovered: true,
         },
-        droppableState: {
-            ...droppableState,
+        dropReceivingState: {
+            ...dropReceivingState,
             isDraggedOver: true,
         },
         newItemsCountState,
@@ -138,8 +140,8 @@ export const listsSidebarItemProps = {
             onHoverLeave: () => {},
             isHovered: true,
         },
-        droppableState: {
-            ...droppableState,
+        dropReceivingState: {
+            ...dropReceivingState,
             isBlinking: true,
         },
         newItemsCountState,
@@ -157,7 +159,7 @@ export const listsSidebarItemProps = {
             onHoverLeave: () => {},
             isHovered: false,
         },
-        droppableState,
+        dropReceivingState,
         newItemsCountState: {
             displayNewItemsCount: true,
             newItemsCount: Math.floor(Math.random() * 10),

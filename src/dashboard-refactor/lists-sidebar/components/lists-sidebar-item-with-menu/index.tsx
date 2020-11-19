@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react'
 import styled, { css } from 'styled-components'
 
-import styleConstants, { fonts } from 'src/dashboard-refactor/styleConstants'
+import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
 
-import { Icon } from '../../../styledComponents'
+import { Icon } from '../../../styled-components'
 import UnstyledListsSidebarItem from '../lists-sidebar-item'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { ListsSidebarItemProps } from '../lists-sidebar-item/types'
@@ -23,8 +23,8 @@ const MenuContainer = styled.div`
     left: 175px;
     top: 0px;
     background-color: #ffffff;
-    box-shadow: ${styleConstants.components.dropDown.boxShadow};
-    border-radius: ${styleConstants.components.dropDown.borderRadius};
+    box-shadow: ${styles.components.dropDown.boxShadow};
+    border-radius: ${styles.components.dropDown.borderRadius};
     ${(props) =>
         css`
             display: ${props.isDisplayed
@@ -75,7 +75,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
                 isEditing,
                 selectedState,
                 hoverState,
-                droppableState,
+                dropReceivingState,
                 newItemsCountState,
                 moreActionButtonState,
             },
@@ -104,14 +104,14 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
                         },
                         ...selectedState,
                     }}
-                    droppableState={{
+                    dropReceivingState={{
                         onDragOver() {
-                            droppableState.onDragOver(listId)
+                            dropReceivingState.onDragOver(listId)
                         },
                         onDragLeave() {
-                            droppableState.onDragLeave(listId)
+                            dropReceivingState.onDragLeave(listId)
                         },
-                        ...droppableState,
+                        ...dropReceivingState,
                     }}
                     newItemsCountState={newItemsCountState}
                     moreActionButtonState={{
@@ -127,8 +127,11 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
                             const { label, iconPath, onClick } = item
                             return (
                                 <MenuButton key={idx} onClick={onClick}>
-                                    <Margin x="10px">
-                                        <Icon xy="12px" path={iconPath} />
+                                    <Margin horizontal="10px">
+                                        <Icon
+                                            heightAndWidth="12px"
+                                            path={iconPath}
+                                        />
                                     </Margin>
                                     {label}
                                 </MenuButton>
