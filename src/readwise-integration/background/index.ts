@@ -7,7 +7,10 @@ import {
     ActionPreprocessor,
 } from '@worldbrain/memex-common/lib/action-queue/types'
 import { STORAGE_VERSIONS } from '@worldbrain/memex-common/lib/browser-extension/storage/versions'
-import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import {
+    StorageOperationEvent,
+    StorageChange,
+} from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import * as Raven from 'src/util/raven'
 import { ReadwiseAPI, ReadwiseHighlight } from './types/api'
 import { ReadwiseSettings } from './types/settings'
@@ -112,11 +115,6 @@ export class ReadwiseBackground {
     uploadAllAnnotations: ReadwiseInterfaceMethod<
         'uploadAllAnnotations'
     > = async ({ queueInteraction }) => {
-        // await new Promise((resolve) => setTimeout(resolve, 1000 * 3))
-        // if (1) {
-        //     return
-        // }
-
         const getFullPageUrl = makePageDataCache({
             getPageData: this.options.getPageData,
         })
@@ -206,6 +204,13 @@ export class ReadwiseBackground {
             return
         }
 
+        for (const change of event.info.changes) {
+            if (change.collection === 'annotations') {
+                await this.handleAnnotationPostStorageChange(change)
+                continue
+            }
+        }
+    }
         const getPageData = makePageDataCache({
             getPageData: this.options.getPageData,
         })
@@ -214,53 +219,65 @@ export class ReadwiseBackground {
             if (change.collection !== 'annotations') {
                 continue
             }
+    private async handleAnnotationPostStorageChange(
+        change: StorageChange<'post'>,
+    ) {
+        const getPageData = makePageDataCache({
+            getPageData: this.options.getPageData,
+        })
 
-            if (change.type === 'create') {
-                try {
-                    const annotation = {
-                        url: change.pk as string,
-                        ...change.values,
-                    } as Annotation
+        if (change.type === 'create') {
+            try {
+                const annotation = {
+                    url: change.pk as string,
+                    ...change.values,
+                    tags: await this.options.getAnnotationTags(
+                        change.pk as string,
+                    ),
+                } as Annotation
 
-                    const pageData = await getPageData(annotation.pageUrl)
-                    await this.actionQueue.scheduleAction(
-                        {
-                            type: 'post-highlights',
-                            highlights: [
-                                annotationToReadwise(annotation, {
-                                    pageData,
-                                }),
-                            ],
-                        },
-                        { queueInteraction: 'queue-and-return' },
-                    )
-                } catch (e) {
-                    console.error(e)
-                    Raven.captureException(e)
-                }
-            } else if (change.type === 'modify') {
-                try {
-                    const annotations = await this.options.getAnnotationsByPks(
-                        change.pks as string[],
-                    )
-                    const highlights: ReadwiseHighlight[] = await Promise.all(
-                        annotations.map(async (annotation) => {
-                            const pageData = await getPageData(
-                                annotation.pageUrl,
-                            )
-                            return annotationToReadwise(annotation, {
+                const pageData = await getPageData(annotation.pageUrl)
+                await this.actionQueue.scheduleAction(
+                    {
+                        type: 'post-highlights',
+                        highlights: [
+                            annotationToReadwise(annotation, {
                                 pageData,
-                            })
-                        }),
-                    )
-                    await this.actionQueue.scheduleAction(
-                        { type: 'post-highlights', highlights },
-                        { queueInteraction: 'queue-and-return' },
-                    )
-                } catch (e) {
-                    console.error(e)
-                    Raven.captureException(e)
-                }
+                            }),
+                        ],
+                    },
+                    { queueInteraction: 'queue-and-return' },
+                )
+            } catch (e) {
+                console.error(e)
+                Raven.captureException(e)
+            }
+        } else if (change.type === 'modify') {
+            try {
+                const annotations = await this.options.getAnnotationsByPks(
+                    change.pks as string[],
+                )
+                const highlights: ReadwiseHighlight[] = await Promise.all(
+                    annotations.map(async (annotation) => {
+                        const pageData = await getPageData(annotation.pageUrl)
+                        const tags = await this.options.getAnnotationTags(
+                            annotation.url,
+                        )
+                        return annotationToReadwise(
+                            { ...annotation, tags },
+                            {
+                                pageData,
+                            },
+                        )
+                    }),
+                )
+                await this.actionQueue.scheduleAction(
+                    { type: 'post-highlights', highlights },
+                    { queueInteraction: 'queue-and-return' },
+                )
+            } catch (e) {
+                console.error(e)
+                Raven.captureException(e)
             }
         }
     }
