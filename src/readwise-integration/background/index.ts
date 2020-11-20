@@ -25,6 +25,7 @@ import {
     registerRemoteFunctions,
 } from 'src/util/webextensionRPC'
 import { Page } from 'src/search'
+import { isUrlForAnnotation } from 'src/annotations/utils'
 
 type ReadwiseInterfaceMethod<
     Method extends keyof ReadwiseInterface<'provider'>
@@ -50,6 +51,7 @@ export class ReadwiseBackground {
             fetch: typeof fetch
             getPageData: GetPageData
             getAnnotationTags: GetAnnotationTags
+            getAnnotationData: GetAnnotationTags
             getAnnotationsByPks: (
                 annotationUrls: string[],
             ) => Promise<Annotation[]>
@@ -204,54 +206,63 @@ export class ReadwiseBackground {
             return
         }
 
+        const getPageData = makePageDataCache({
+            getPageData: this.options.getPageData,
+        })
+
         for (const change of event.info.changes) {
             if (change.collection === 'annotations') {
-                await this.handleAnnotationPostStorageChange(change)
+                await this.handleAnnotationPostStorageChange(
+                    change,
+                    getPageData,
+                )
+                continue
+            }
+
+            if (change.collection === 'tags') {
+                await this.handleTagPostStorageChange(change, getPageData)
                 continue
             }
         }
     }
-        const getPageData = makePageDataCache({
-            getPageData: this.options.getPageData,
-        })
 
-        for (const change of event.info.changes) {
-            if (change.collection !== 'annotations') {
-                continue
+    private async handleTagPostStorageChange(
+        change: StorageChange<'post'>,
+        getPageData: GetPageData,
+    ) {
+        if (['create', 'delete'].includes(change.type)) {
+            // There can only ever be one or multiple tags deleted for a single annotation, so just get the URL of one
+            const url =
+                change.type === 'create'
+                    ? (change.pk as [string, string])[1]
+                    : (change.pks as [string, string][])[0][1]
+
+            if (!isUrlForAnnotation(url)) {
+                return
             }
+
+            const [annotation] = await this.options.getAnnotationsByPks([url])
+
+            if (!annotation) {
+                return // The annotation no longer exists in some cases (delete annot + all assoc. data)
+            }
+
+            await this.handleSingleAnnotationChange(annotation, getPageData)
+        }
+    }
+
     private async handleAnnotationPostStorageChange(
         change: StorageChange<'post'>,
+        getPageData: GetPageData,
     ) {
-        const getPageData = makePageDataCache({
-            getPageData: this.options.getPageData,
-        })
-
         if (change.type === 'create') {
-            try {
-                const annotation = {
+            await this.handleSingleAnnotationChange(
+                {
                     url: change.pk as string,
                     ...change.values,
-                    tags: await this.options.getAnnotationTags(
-                        change.pk as string,
-                    ),
-                } as Annotation
-
-                const pageData = await getPageData(annotation.pageUrl)
-                await this.actionQueue.scheduleAction(
-                    {
-                        type: 'post-highlights',
-                        highlights: [
-                            annotationToReadwise(annotation, {
-                                pageData,
-                            }),
-                        ],
-                    },
-                    { queueInteraction: 'queue-and-return' },
-                )
-            } catch (e) {
-                console.error(e)
-                Raven.captureException(e)
-            }
+                } as Annotation,
+                getPageData,
+            )
         } else if (change.type === 'modify') {
             try {
                 const annotations = await this.options.getAnnotationsByPks(
@@ -265,9 +276,7 @@ export class ReadwiseBackground {
                         )
                         return annotationToReadwise(
                             { ...annotation, tags },
-                            {
-                                pageData,
-                            },
+                            { pageData },
                         )
                     }),
                 )
@@ -279,6 +288,32 @@ export class ReadwiseBackground {
                 console.error(e)
                 Raven.captureException(e)
             }
+        }
+    }
+
+    private async handleSingleAnnotationChange(
+        annotation: Annotation,
+        getPageData: GetPageData,
+    ) {
+        try {
+            const pageData = await getPageData(annotation.pageUrl)
+            const tags = await this.options.getAnnotationTags(annotation.url)
+
+            await this.actionQueue.scheduleAction(
+                {
+                    type: 'post-highlights',
+                    highlights: [
+                        annotationToReadwise(
+                            { ...annotation, tags },
+                            { pageData },
+                        ),
+                    ],
+                },
+                { queueInteraction: 'queue-and-return' },
+            )
+        } catch (e) {
+            console.error(e)
+            Raven.captureException(e)
         }
     }
 }
@@ -327,7 +362,7 @@ function annotationToReadwise(
     }
 }
 
-function makePageDataCache(options: { getPageData: GetPageData }) {
+function makePageDataCache(options: { getPageData: GetPageData }): GetPageData {
     const pageDataCache: { [normalizedUrl: string]: PageData } = {}
     const getPageData = async (normalizedUrl: string) => {
         if (pageDataCache[normalizedUrl]) {

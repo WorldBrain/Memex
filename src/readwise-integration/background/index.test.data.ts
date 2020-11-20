@@ -6,7 +6,7 @@ import { ReadwiseHighlight } from './types/api'
 export * from 'src/tests/common-fixtures.data'
 
 export const ANNOT_1: Annotation = {
-    url: DATA.PAGE_1.url + '#1',
+    url: DATA.PAGE_1.url + '#1111111111',
     body: 'Annotation body 1',
     pageTitle: 'test',
     pageUrl: normalizeUrl(DATA.PAGE_1.url),
@@ -21,7 +21,7 @@ export const ANNOT_1: Annotation = {
     tags: [],
 }
 export const ANNOT_2: Annotation = {
-    url: DATA.PAGE_2.url + '#1',
+    url: DATA.PAGE_2.url + '#1111111111',
     body: 'Annotation body 2',
     pageTitle: 'test 2',
     pageUrl: normalizeUrl(DATA.PAGE_2.url),
