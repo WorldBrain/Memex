@@ -51,7 +51,6 @@ export class ReadwiseBackground {
             fetch: typeof fetch
             getPageData: GetPageData
             getAnnotationTags: GetAnnotationTags
-            getAnnotationData: GetAnnotationTags
             getAnnotationsByPks: (
                 annotationUrls: string[],
             ) => Promise<Annotation[]>
