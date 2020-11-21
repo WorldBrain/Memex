@@ -799,6 +799,145 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
+            'should exclude tags with white space in them',
+            () => {
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setup.backgroundModules.readwise.setAPIKey(
+                                    {
+                                        validatedKey: 'my key',
+                                    },
+                                )
+
+                                injectFakeTabs({
+                                    tabManagement:
+                                        setup.backgroundModules.tabManagement,
+                                    tabsAPI: setup.browserAPIs.tabs,
+                                    tabs: [DATA.TEST_TAB_1, DATA.TEST_TAB_2],
+                                    includeTitle: true,
+                                })
+                                setup.fetch.post(READWISE_API_URL, {
+                                    status: 200,
+                                })
+
+                                const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: DATA.TEST_TAB_1 },
+                                    DATA.ANNOT_1,
+                                )
+                                await setup.backgroundModules.directLinking.addTagForAnnotation(
+                                    { tab: DATA.TEST_TAB_1 },
+                                    {
+                                        tag: DATA.TAG_1,
+                                        url: firstAnnotationUrl,
+                                    },
+                                )
+                                await setup.backgroundModules.directLinking.addTagForAnnotation(
+                                    { tab: DATA.TEST_TAB_1 },
+                                    {
+                                        tag: DATA.TAG_2,
+                                        url: firstAnnotationUrl,
+                                    },
+                                )
+                                await setup.backgroundModules.directLinking.addTagForAnnotation(
+                                    { tab: DATA.TEST_TAB_1 },
+                                    {
+                                        tag: 'test tag with whitepsace',
+                                        url: firstAnnotationUrl,
+                                    },
+                                )
+                                await setup.backgroundModules.directLinking.addTagForAnnotation(
+                                    { tab: DATA.TEST_TAB_1 },
+                                    {
+                                        tag: DATA.TAG_3,
+                                        url: firstAnnotationUrl,
+                                    },
+                                )
+
+                                await setup.backgroundModules.readwise.actionQueue.waitForSync()
+
+                                const expectedHighlight1 = DATA.UPLOADED_HIGHLIGHT_1(
+                                    firstAnnotationUrl,
+                                )
+
+                                expectFetchCalls(
+                                    parseJsonFetchCalls(setup.fetch.calls()),
+                                    [
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    expectedHighlight1,
+                                                ],
+                                            }),
+                                        },
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    {
+                                                        ...expectedHighlight1,
+                                                        note:
+                                                            `.${DATA.TAG_1}\n` +
+                                                            expectedHighlight1.note,
+                                                    },
+                                                ],
+                                            }),
+                                        },
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    {
+                                                        ...expectedHighlight1,
+                                                        note:
+                                                            `.${DATA.TAG_1} .${DATA.TAG_2}\n` +
+                                                            expectedHighlight1.note,
+                                                    },
+                                                ],
+                                            }),
+                                        },
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    {
+                                                        ...expectedHighlight1,
+                                                        note:
+                                                            `.${DATA.TAG_1} .${DATA.TAG_2}\n` +
+                                                            expectedHighlight1.note,
+                                                    },
+                                                ],
+                                            }),
+                                        },
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    {
+                                                        ...expectedHighlight1,
+                                                        note:
+                                                            `.${DATA.TAG_1} .${DATA.TAG_2} .${DATA.TAG_3}\n` +
+                                                            expectedHighlight1.note,
+                                                    },
+                                                ],
+                                            }),
+                                        },
+                                    ],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
             'should sync annotation updates to Readwise',
             () => {
                 return {
