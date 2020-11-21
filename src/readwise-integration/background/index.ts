@@ -338,11 +338,12 @@ function annotationToReadwise(
         }
 
         let text = ''
+        if (tags.length) {
+            text += '.' + tags.join(' .') + '\n'
+        }
+
         if (comment.length) {
             text += comment
-        }
-        if (tags.length) {
-            text += (text.length ? ' .' : '.') + tags.join(' .')
         }
 
         return text

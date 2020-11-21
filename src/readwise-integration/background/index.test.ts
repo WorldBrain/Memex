@@ -391,7 +391,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should append any annotation tags to note text when uploading highlights to readwise',
+            'should prepend any annotation tags to note text when uploading highlights to readwise',
             () => {
                 return {
                     steps: [
@@ -476,8 +476,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight1,
                                                         note:
-                                                            expectedHighlight1.note +
-                                                            ` .${DATA.TAG_1} .${DATA.TAG_2} .${DATA.TAG_3}`,
+                                                            `.${DATA.TAG_1} .${DATA.TAG_2} .${DATA.TAG_3}\n` +
+                                                            expectedHighlight1.note,
                                                     },
                                                 ],
                                             }),
@@ -490,8 +490,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight2,
                                                         note:
-                                                            expectedHighlight2.note +
-                                                            ` .${DATA.TAG_2}`,
+                                                            `.${DATA.TAG_2}\n` +
+                                                            expectedHighlight2.note,
                                                     },
                                                 ],
                                             }),
@@ -505,7 +505,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should append any annotation tags to note text when uploading highlights to readwise on tag creation',
+            'should prepend any annotation tags to note text when uploading highlights to readwise on tag creation',
             () => {
                 return {
                     steps: [
@@ -594,8 +594,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight1,
                                                         note:
-                                                            expectedHighlight1.note +
-                                                            ` .${DATA.TAG_1}`,
+                                                            `.${DATA.TAG_1}\n` +
+                                                            expectedHighlight1.note,
                                                     },
                                                 ],
                                             }),
@@ -608,8 +608,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight1,
                                                         note:
-                                                            expectedHighlight1.note +
-                                                            ` .${DATA.TAG_1} .${DATA.TAG_2}`,
+                                                            `.${DATA.TAG_1} .${DATA.TAG_2}\n` +
+                                                            expectedHighlight1.note,
                                                     },
                                                 ],
                                             }),
@@ -622,8 +622,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight1,
                                                         note:
-                                                            expectedHighlight1.note +
-                                                            ` .${DATA.TAG_1} .${DATA.TAG_2} .${DATA.TAG_3}`,
+                                                            `.${DATA.TAG_1} .${DATA.TAG_2} .${DATA.TAG_3}\n` +
+                                                            expectedHighlight1.note,
                                                     },
                                                 ],
                                             }),
@@ -645,8 +645,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight2,
                                                         note:
-                                                            expectedHighlight2.note +
-                                                            ` .${DATA.TAG_2}`,
+                                                            `.${DATA.TAG_2}\n` +
+                                                            expectedHighlight2.note,
                                                     },
                                                 ],
                                             }),
@@ -742,8 +742,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight1,
                                                         note:
-                                                            expectedHighlight1.note +
-                                                            ` .${DATA.TAG_1}`,
+                                                            `.${DATA.TAG_1}\n` +
+                                                            expectedHighlight1.note,
                                                     },
                                                 ],
                                             }),
@@ -756,8 +756,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight1,
                                                         note:
-                                                            expectedHighlight1.note +
-                                                            ` .${DATA.TAG_1} .${DATA.TAG_2}`,
+                                                            `.${DATA.TAG_1} .${DATA.TAG_2}\n` +
+                                                            expectedHighlight1.note,
                                                     },
                                                 ],
                                             }),
@@ -770,8 +770,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight1,
                                                         note:
-                                                            expectedHighlight1.note +
-                                                            ` .${DATA.TAG_1} .${DATA.TAG_2} .${DATA.TAG_3}`,
+                                                            `.${DATA.TAG_1} .${DATA.TAG_2} .${DATA.TAG_3}\n` +
+                                                            expectedHighlight1.note,
                                                     },
                                                 ],
                                             }),
@@ -784,8 +784,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight1,
                                                         note:
-                                                            expectedHighlight1.note +
-                                                            ` .${DATA.TAG_1} .${DATA.TAG_3}`,
+                                                            `.${DATA.TAG_1} .${DATA.TAG_3}\n` +
+                                                            expectedHighlight1.note,
                                                     },
                                                 ],
                                             }),
