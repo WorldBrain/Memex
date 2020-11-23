@@ -249,10 +249,15 @@ export default class TagsBackground {
         const toAdd = newTags.filter((tag) => !existingTagsSet.has(tag))
         const toDelete = existingTags.filter((tag) => !newTagsSet.has(tag))
 
-        await this.addTagsToExistingAnnotationUrl({
-            url,
-            tags: toAdd,
-        })
-        await this.deleteTagsForPage({ url, tags: toDelete })
+        if (toAdd.length) {
+            await this.addTagsToExistingAnnotationUrl({
+                url,
+                tags: toAdd,
+            })
+        }
+
+        if (toDelete.length) {
+            await this.deleteTagsForPage({ url, tags: toDelete })
+        }
     }
 }

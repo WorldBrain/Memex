@@ -244,9 +244,16 @@ export function createBackgroundModules(options: {
         getPageData: async (normalizedUrl) =>
             pick(
                 await pages.storage.getPage(normalizedUrl),
+                'url',
                 'fullUrl',
                 'fullTitle',
             ),
+        getAnnotationTags: async (annotationUrl) =>
+            (
+                await directLinking.annotationStorage.getTagsByAnnotationUrl(
+                    annotationUrl,
+                )
+            ).map(({ name }) => name.replace(/\s+/g, '-')),
         getAnnotationsByPks: async (pks) => {
             return directLinking.annotationStorage.getAnnotations(pks)
         },
