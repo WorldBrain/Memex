@@ -799,7 +799,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should exclude tags with white space in them',
+            'should sub tags with spaces in them for hyphens',
             () => {
                 return {
                     steps: [
@@ -843,7 +843,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await setup.backgroundModules.directLinking.addTagForAnnotation(
                                     { tab: DATA.TEST_TAB_1 },
                                     {
-                                        tag: 'test tag with whitepsace',
+                                        tag: 'test tag  with   whitespace',
                                         url: firstAnnotationUrl,
                                     },
                                 )
@@ -909,7 +909,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight1,
                                                         note:
-                                                            `.${DATA.TAG_1} .${DATA.TAG_2}\n` +
+                                                            `.${DATA.TAG_1} .${DATA.TAG_2} .test-tag-with-whitespace\n` +
                                                             expectedHighlight1.note,
                                                     },
                                                 ],
@@ -923,7 +923,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight1,
                                                         note:
-                                                            `.${DATA.TAG_1} .${DATA.TAG_2} .${DATA.TAG_3}\n` +
+                                                            `.${DATA.TAG_1} .${DATA.TAG_2} .${DATA.TAG_3} .test-tag-with-whitespace\n` +
                                                             expectedHighlight1.note,
                                                     },
                                                 ],

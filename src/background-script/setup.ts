@@ -253,9 +253,7 @@ export function createBackgroundModules(options: {
                 await directLinking.annotationStorage.getTagsByAnnotationUrl(
                     annotationUrl,
                 )
-            )
-                .filter(({ name }) => !/\s/.test(name))
-                .map(({ name }) => name),
+            ).map(({ name }) => name.replace(/\s+/g, '-')),
         getAnnotationsByPks: async (pks) => {
             return directLinking.annotationStorage.getAnnotations(pks)
         },
