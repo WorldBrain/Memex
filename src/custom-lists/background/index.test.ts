@@ -221,9 +221,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 listId = await customLists(
                                     setup,
-                                ).createCustomList({
-                                    name: TEST_LIST_1,
-                                })
+                                ).createCustomList({ name: TEST_LIST_1 })
                             },
                             expectedStorageChanges: {
                                 customLists: (): StorageCollectionDiff => ({
@@ -340,6 +338,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: expect.any(Number),
                                     name: TEST_LIST_2,
                                     searchableName: TEST_LIST_2,
+                                    nameTerms: ['updated', 'list', 'title'],
                                     isDeletable: true,
                                     isNestable: true,
                                     createdAt: expect.any(Date),
