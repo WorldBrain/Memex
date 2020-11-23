@@ -2,7 +2,7 @@ import React from 'react'
 import { storiesOf } from '@storybook/react'
 import SearchBar, {
     SearchBarProps,
-} from 'src/dashboard-refactor/header/SearchBar/SearchBar'
+} from 'src/dashboard-refactor/header/search-bar'
 
 const template: SearchBarProps = {
     onSearchBoxFocus: () => console.log('Search Box Clicked'),

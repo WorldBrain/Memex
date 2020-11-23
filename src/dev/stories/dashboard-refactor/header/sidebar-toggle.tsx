@@ -3,7 +3,7 @@ import { storiesOf } from '@storybook/react'
 
 import SidebarToggle, {
     SidebarToggleProps,
-} from 'src/dashboard-refactor/header/SidebarHeader/SidebarToggle/SidebarToggle'
+} from 'src/dashboard-refactor/header/sidebar-header/sidebar-toggle/'
 import { SidebarLockedState } from 'src/dashboard-refactor/lists-sidebar/types'
 import { HoverState } from 'src/dashboard-refactor/types'
 
