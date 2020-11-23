@@ -131,7 +131,10 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         try {
             const annotUrl = await backendOperations.create(annotation)
-            await backendOperations.updateTags(annotUrl, annotation.tags)
+
+            if (annotation.tags.length) {
+                await backendOperations.updateTags(annotUrl, annotation.tags)
+            }
         } catch (e) {
             this._annotations = stateBeforeModifications
             this.annotationChanges.emit('rollback', stateBeforeModifications)
