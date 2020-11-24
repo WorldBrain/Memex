@@ -18,7 +18,7 @@ const Container = styled.div<{
     ${(props) =>
         props.locked &&
         css`
-            height: 100%
+            height: 100%;
             background-color: ${colors.lightGrey};
         `}
     ${(props) =>

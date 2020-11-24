@@ -24,8 +24,8 @@ const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
     ${(props) =>
         css`
             background-color: ${props.isSidebarLocked
-                ? colors.lightMidGrey
-                : colors.white};
+                ? colors.white
+                : colors.lightMidGrey};
         `}
     border-radius: 3px;
     display: flex;
@@ -51,8 +51,9 @@ const InnerContainer = styled.div<{ displayTopBorder?: boolean }>`
 
 const Input = styled.input<{ isFocused: boolean }>`
     ${textStyles}
-    width: 100%
+    width: 100%;
     border: none;
+    background: inherit;
     ${(props) => {
         const { primary, secondary } = fonts.primary.colors
         return css`&::placeholder {
@@ -137,7 +138,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
             <OuterContainer isSidebarLocked={isSidebarLocked}>
                 <InnerContainer onClick={onFocus} horizontal="8px">
                     <IconContainer>
-                        <Margin right="12px">
+                        <Margin right="8px">
                             <StyledIcon
                                 heightAndWidth="12px"
                                 path="/img/searchIcon.svg"

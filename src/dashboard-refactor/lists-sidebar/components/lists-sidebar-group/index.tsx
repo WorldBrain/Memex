@@ -41,7 +41,7 @@ const GroupHeaderInnerDiv = styled.div`
 `
 
 const GroupTitle = styled.div`
-    colors: ${fonts.primary.colors.secondary};
+    color: ${fonts.primary.colors.secondary};
     font-family: ${fonts.primary.name};
     font-weight: ${fonts.primary.weight.bold};
     font-size: 12px;

@@ -25,7 +25,10 @@ const peekState: SidebarPeekState = {
 const template: ListsSidebarProps = {
     lockedState: lockedState,
     peekState: peekState,
-    searchBarProps: listsSidebarSearchBarProps.default,
+    searchBarProps: {
+        ...listsSidebarSearchBarProps.default,
+        sidebarLockedState: lockedState,
+    },
     listsGroups: [
         listsSidebarGroupProps.inboxes,
         listsSidebarGroupProps.myCollectionsExpanded,
@@ -51,6 +54,13 @@ export const listsSidebarStoryProps: {
         lockedState: {
             ...lockedState,
             isSidebarLocked: true,
+        },
+        searchBarProps: {
+            ...listsSidebarSearchBarProps.default,
+            sidebarLockedState: {
+                ...template.searchBarProps.sidebarLockedState,
+                isSidebarLocked: true,
+            },
         },
     },
 }
