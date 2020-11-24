@@ -6,8 +6,14 @@ import ListsSidebarSearchBar, {
 } from '../../../../dashboard-refactor/lists-sidebar/components/lists-search-bar/'
 
 import { sidebarWrapperFunc } from './lists-sidebar-group'
+import { SidebarLockedState } from 'src/dashboard-refactor/lists-sidebar/types'
 
 const stories = storiesOf('Dashboard Refactor|Lists Sidebar/Search Bar', module)
+
+const sidebarLockedState: SidebarLockedState = {
+    isSidebarLocked: true,
+    toggleSidebarLockedState: () => console.log('Xoxo'),
+}
 
 const template: ListsSidebarSearchBarProps = {
     isSearchBarFocused: false,
@@ -17,6 +23,7 @@ const template: ListsSidebarSearchBarProps = {
     onSearchQueryChange: (inputString) => console.log(inputString),
     onInputClear: () => {},
     onCreateNew: (newListName) => console.log(newListName),
+    sidebarLockedState: sidebarLockedState,
 }
 
 export const listsSidebarSearchBarProps: {
