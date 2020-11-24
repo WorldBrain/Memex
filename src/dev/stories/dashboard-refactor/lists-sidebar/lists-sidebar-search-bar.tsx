@@ -12,7 +12,7 @@ const stories = storiesOf('Dashboard Refactor|Lists Sidebar/Search Bar', module)
 
 const sidebarLockedState: SidebarLockedState = {
     isSidebarLocked: true,
-    toggleSidebarLockedState: () => console.log('Xoxo'),
+    toggleSidebarLockedState: () => {},
 }
 
 const template: ListsSidebarSearchBarProps = {
@@ -28,12 +28,20 @@ const template: ListsSidebarSearchBarProps = {
 
 export const listsSidebarSearchBarProps: {
     default: ListsSidebarSearchBarProps
+    defaultPeeking: ListsSidebarSearchBarProps
     withPerfectMatch: ListsSidebarSearchBarProps
     focused: ListsSidebarSearchBarProps
     withInputFocused: ListsSidebarSearchBarProps
     withInputUnfocused: ListsSidebarSearchBarProps
 } = {
     default: template,
+    defaultPeeking: {
+        ...template,
+        sidebarLockedState: {
+            ...sidebarLockedState,
+            isSidebarLocked: false,
+        },
+    },
     focused: {
         ...template,
         isSearchBarFocused: true,
