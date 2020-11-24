@@ -1,5 +1,8 @@
+import { StringChain } from 'lodash'
 import React from 'react'
+import { LoadingIndicator } from 'src/common-ui/components'
 import styled, { css, keyframes } from 'styled-components'
+import Margin from './components/Margin'
 
 const rotate = (rotation: Number) => {
     return keyframes`0% {
@@ -42,3 +45,35 @@ export const Icon = styled.div<IconProps>`
             animation: ${rotate(-90)} 1s ease-in 1;
         `}
 `
+
+interface LoadingContainerProps {
+    top?: string
+    bottom?: string
+    left?: string
+    right?: string
+    horizontal?: string
+    vertical?: string
+    backgroundColor: string
+}
+
+export const renderLoadingContainer = (props: LoadingContainerProps) => {
+    const LoadingContainer = styled(Margin)<LoadingContainerProps>`
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    `
+    const Spinner = styled(LoadingIndicator)`
+        ${(props) =>
+            css`
+                &::after {
+                    background: ${props.backgroundColor};
+                }
+            `}
+    `
+    return (
+        <LoadingContainer {...props}>
+            <Spinner />
+        </LoadingContainer>
+    )
+}

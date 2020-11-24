@@ -1,7 +1,10 @@
 import React, { PureComponent } from 'react'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import styles from 'src/dashboard-refactor/styles'
-import { Icon } from 'src/dashboard-refactor/styled-components'
+import {
+    Icon,
+    renderLoadingContainer,
+} from 'src/dashboard-refactor/styled-components'
 import {
     AddableState,
     ExpandableState,
@@ -13,19 +16,11 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import ListsSidebarItemWithMenu, {
     ListsSidebarItemWithMenuProps,
 } from '../lists-sidebar-item-with-menu'
-import { LoadingIndicator } from 'src/common-ui/components'
 
 const { fonts } = styles
 
-const expandIconWidthPx = 8
-const expandIconMarginWidthPx = 5.5 * 2
-const addIconWidthPx = 12
-const addIconMarginWidthPx = 8 * 2
-
-const containerWidthPx = styles.components.sidebar.widthPx
-
 const Container = styled.div`
-    width: ${containerWidthPx};
+    width: 100%;
     position: relative;
 `
 
@@ -38,27 +33,21 @@ const GroupHeaderContainer = styled.div`
 `
 
 const GroupHeaderInnerDiv = styled.div`
-    width: 100%
+    width: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
 `
 
-const GroupTitle = styled.p`
-    colors: ${fonts.primary.colors.secondary}
+const GroupTitle = styled.div`
+    colors: ${fonts.primary.colors.secondary};
     font-family: ${fonts.primary.name};
     font-weight: ${fonts.primary.weight.bold};
     font-size: 12px;
     line-height: 18px;
 
-    width: ${
-        containerWidthPx -
-        expandIconWidthPx -
-        expandIconMarginWidthPx -
-        addIconWidthPx -
-        addIconMarginWidthPx
-    }px;
+    width: max-content;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -69,13 +58,6 @@ const IconContainer = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-`
-
-const LoadingContainer = styled(Margin)`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
 `
 
 export interface ListsSidebarGroupProps {
@@ -106,11 +88,10 @@ export default class ListsSidebarGroup extends PureComponent<
         return <div>Error! Oh Noes!</div>
     }
     renderLoadingState = function () {
-        return (
-            <LoadingContainer y="15px">
-                <LoadingIndicator />
-            </LoadingContainer>
-        )
+        return renderLoadingContainer({
+            vertical: '15px',
+            backgroundColor: '#e1e1e1',
+        })
     }
     renderLists = () => {
         const {
