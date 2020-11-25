@@ -27,6 +27,7 @@ const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
                 ? colors.white
                 : colors.lightMidGrey};
         `}
+    border-bottom: 1px solid ${colors.lighterGrey};
     border-radius: 3px;
     display: flex;
     flex-direction: column;
