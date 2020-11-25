@@ -1120,12 +1120,12 @@ function mobileSyncTests(suiteOptions: {
             listIds.push(object.id)
         }
         await mobileStorage.modules.metaPicker.createPageListEntry({
-            pageUrl: testPage.fullUrl,
+            fullPageUrl: testPage.fullUrl,
             listId: listIds[0],
         })
 
         await mobileStorage.modules.metaPicker.createPageListEntry({
-            pageUrl: testPage.fullUrl,
+            fullPageUrl: testPage.fullUrl,
             listId: listIds[0],
         })
 
@@ -1193,6 +1193,8 @@ function mobileSyncTests(suiteOptions: {
                 createdAt: expect.any(Date),
                 id: expect.any(Number),
                 name: 'widgets',
+                searchableName: 'widgets',
+                nameTerms: ['widgets'],
                 pages: [],
             },
             {
@@ -1200,6 +1202,8 @@ function mobileSyncTests(suiteOptions: {
                 createdAt: expect.any(Date),
                 id: expect.any(Number),
                 name: 'thingies',
+                searchableName: 'thingies',
+                nameTerms: ['thingies'],
                 pages: [],
             },
         ])
@@ -1212,6 +1216,8 @@ function mobileSyncTests(suiteOptions: {
             createdAt: expect.any(Date),
             id: expect.any(Number),
             name: 'widgets',
+            searchableName: 'widgets',
+            nameTerms: ['widgets'],
             pages: ['https://www.test.com/foo'],
         })
     })
@@ -1328,7 +1334,7 @@ function mobileSyncTests(suiteOptions: {
         })
         await mobile.storage.modules.metaPicker.createPageListEntry({
             listId: localListId,
-            pageUrl: 'https://www.eggs.com/foo',
+            fullPageUrl: 'https://www.eggs.com/foo',
         })
 
         await mobile.services.sync.continuousSync.forceIncrementalSync()

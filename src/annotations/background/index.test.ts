@@ -76,7 +76,8 @@ const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext
                     createdAt: expect.any(Date),
                     name: SPECIAL_LIST_NAMES.INBOX,
                     id: SPECIAL_LIST_IDS.INBOX,
-                    searchableName: undefined,
+                    searchableName: SPECIAL_LIST_NAMES.INBOX,
+                    nameTerms: [SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase()],
                     isDeletable: false,
                     isNestable: false,
                 },
@@ -136,7 +137,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     object: {
                                         createdAt: expect.any(Date),
                                         name: SPECIAL_LIST_NAMES.INBOX,
-                                        searchableName: undefined,
+                                        searchableName:
+                                            SPECIAL_LIST_NAMES.INBOX,
+                                        nameTerms: [
+                                            SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
+                                        ],
                                         id: SPECIAL_LIST_IDS.INBOX,
                                         isDeletable: false,
                                         isNestable: false,
@@ -765,7 +770,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         createdAt: expect.any(Date),
                                         name: SPECIAL_LIST_NAMES.INBOX,
                                         id: SPECIAL_LIST_IDS.INBOX,
-                                        searchableName: undefined,
+                                        searchableName:
+                                            SPECIAL_LIST_NAMES.INBOX,
+                                        nameTerms: [
+                                            SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
+                                        ],
                                         isDeletable: false,
                                         isNestable: false,
                                     },
@@ -983,7 +992,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         createdAt: expect.any(Date),
                                         name: SPECIAL_LIST_NAMES.INBOX,
                                         id: SPECIAL_LIST_IDS.INBOX,
-                                        searchableName: undefined,
+                                        searchableName:
+                                            SPECIAL_LIST_NAMES.INBOX,
+                                        nameTerms: [
+                                            SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
+                                        ],
                                         isDeletable: false,
                                         isNestable: false,
                                     },
@@ -1208,7 +1221,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         createdAt: expect.any(Date),
                                         name: SPECIAL_LIST_NAMES.INBOX,
                                         id: SPECIAL_LIST_IDS.INBOX,
-                                        searchableName: undefined,
+                                        searchableName:
+                                            SPECIAL_LIST_NAMES.INBOX,
+                                        nameTerms: [
+                                            SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
+                                        ],
                                         isDeletable: false,
                                         isNestable: false,
                                     },

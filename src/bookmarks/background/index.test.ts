@@ -123,6 +123,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                     object: {
                                         createdAt: expect.any(Date),
                                         name: SPECIAL_LIST_NAMES.INBOX,
+                                        searchableName:
+                                            SPECIAL_LIST_NAMES.INBOX,
+                                        nameTerms: [
+                                            SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
+                                        ],
                                         id: SPECIAL_LIST_IDS.INBOX,
                                         isDeletable: false,
                                         isNestable: false,
@@ -228,6 +233,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                     object: {
                                         createdAt: expect.any(Date),
                                         name: SPECIAL_LIST_NAMES.INBOX,
+                                        searchableName:
+                                            SPECIAL_LIST_NAMES.INBOX,
+                                        nameTerms: [
+                                            SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase(),
+                                        ],
                                         id: SPECIAL_LIST_IDS.INBOX,
                                         isDeletable: false,
                                         isNestable: false,
@@ -257,6 +267,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                 pk: SPECIAL_LIST_IDS.INBOX,
                                 value: {
                                     name: SPECIAL_LIST_NAMES.INBOX,
+                                    searchableName: SPECIAL_LIST_NAMES.INBOX,
                                     isDeletable: false,
                                     isNestable: false,
                                     createdAt: expect.any(Date),
