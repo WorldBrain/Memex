@@ -56,7 +56,7 @@ interface LoadingContainerProps {
     backgroundColor: string
 }
 
-export const renderLoadingContainer = (props: LoadingContainerProps) => {
+export const LoadingContainer = (props: LoadingContainerProps) => {
     const LoadingContainer = styled(Margin)<LoadingContainerProps>`
         display: flex;
         flex-direction: row;
