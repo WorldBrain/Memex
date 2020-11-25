@@ -9,7 +9,7 @@ const textStyles = `
     font-family: ${fonts.primary.name};
     font-style: normal;
     font-weight: ${fonts.primary.weight.bold};
-    color: ${fonts.primary.colors.primary}
+    color: ${fonts.primary.colors.primary};
 `
 
 const SearchBarContainer = styled.div`
