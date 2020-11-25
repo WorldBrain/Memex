@@ -7,6 +7,9 @@ const colors = {
     lightGrey: '#E1E1E1', // used for Header Search Bar background
     lighterGrey: '#CCC', // used for divider on white background
     iconDefault: '#3A2F45',
+    error: {
+        pink: '#F2AFB0',
+    },
     fonts: {
         primary: '#000',
         secondary: '#535353',

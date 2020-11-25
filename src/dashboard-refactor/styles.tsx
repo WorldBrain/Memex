@@ -16,11 +16,14 @@ export const fonts = {
 
 const styles = {
     fonts,
+    boxShadow: {
+        overlayElement: '0px 0px 4.20px rgba(0, 0, 0, 0.14)',
+    },
+    borderRadius: {
+        light: '2.1px',
+        medium: '3px',
+    },
     components: {
-        dropDown: {
-            boxShadow: '0px 0px 4.20px rgba(0, 0, 0, 0.14)',
-            borderRadius: '2.1px',
-        },
         sidebar: {
             widthPx: 173,
         },

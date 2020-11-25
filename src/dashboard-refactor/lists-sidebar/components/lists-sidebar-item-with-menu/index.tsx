@@ -22,9 +22,9 @@ const MenuContainer = styled.div`
     position: absolute;
     left: 175px;
     top: 0px;
-    background-color: #ffffff;
-    box-shadow: ${styles.components.dropDown.boxShadow};
-    border-radius: ${styles.components.dropDown.borderRadius};
+    background-color: ${colors.white};
+    box-shadow: ${styles.boxShadow.overlayElement};
+    border-radius: ${styles.boxShadow.overlayElement};
     ${(props) =>
         css`
             display: ${props.isDisplayed
