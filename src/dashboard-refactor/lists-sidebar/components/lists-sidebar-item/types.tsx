@@ -3,7 +3,7 @@ import {
     HoverState,
     NewItemsCountState,
     SelectedState,
-    TextPart,
+    SearchResultTextPart,
 } from 'src/dashboard-refactor/types'
 
 export interface MoreActionButtonState {
@@ -13,7 +13,7 @@ export interface MoreActionButtonState {
 
 export interface ListsSidebarItemProps {
     className?: string
-    listName: TextPart[] | string
+    listName: SearchResultTextPart[] | string
     isEditing: boolean
     hoverState: HoverState
     selectedState: SelectedState
@@ -26,7 +26,7 @@ export interface ListsSidebarItemProps {
 // the click handlers in this type have received their parameters from the parent and so receive none
 export interface ListsSidebarItemComponentProps {
     className?: string
-    listName: TextPart[] | string
+    listName: SearchResultTextPart[] | string
     isEditing: boolean
     hoverState: HoverComponentState
     selectedState: SelectedComponentState
