@@ -1,4 +1,4 @@
-import { ListSource, TextPart } from 'src/dashboard-refactor/types'
+import { ListSource, SearchResultTextPart } from 'src/dashboard-refactor/types'
 
 interface ListsSearchArrayObject {
     source: ListSource
@@ -13,7 +13,7 @@ export interface ListsSearchables {
 
 interface ListsSearchResultListItem {
     listId: string
-    textPartArray: TextPart[]
+    textPartArray: SearchResultTextPart[]
 }
 
 export interface ListsSearchResult {

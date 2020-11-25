@@ -4,8 +4,6 @@ import styled, { css, keyframes } from 'styled-components'
 import colors from '../../../colors'
 import { fonts } from '../../../styles'
 
-import { NewItemsCountState, TextPart } from 'src/dashboard-refactor/types'
-
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import { ListsSidebarItemComponentProps } from './types'
@@ -25,9 +23,7 @@ const blinkingAnimation = keyframes`
 
 const containerWidth = 173
 const titleLeftMargin = 19
-const iconWidth = 12
 const iconMargin = 7.5
-const unHoveredWidth = containerWidth - titleLeftMargin - iconMargin
 
 interface ContainerProps {
     isHovered: boolean

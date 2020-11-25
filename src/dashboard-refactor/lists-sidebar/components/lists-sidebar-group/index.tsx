@@ -4,6 +4,7 @@ import styles from 'src/dashboard-refactor/styles'
 import {
     Icon,
     LoadingContainer,
+    LoadingIndicator,
 } from 'src/dashboard-refactor/styled-components'
 import {
     AddableState,
@@ -88,7 +89,13 @@ export default class ListsSidebarGroup extends PureComponent<
         return <div>Error! Oh Noes!</div>
     }
     renderLoadingState = function () {
-        return <LoadingContainer vertical="15px" backgroundColor="#e1e1e1" />
+        return (
+            <Margin vertical="15px">
+                <LoadingContainer>
+                    <LoadingIndicator backgroundColor="#e1e1e1" />
+                </LoadingContainer>
+            </Margin>
+        )
     }
     renderLists = () => {
         const {

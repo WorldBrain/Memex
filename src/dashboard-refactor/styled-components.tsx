@@ -1,8 +1,6 @@
-import { StringChain } from 'lodash'
 import React from 'react'
-import { LoadingIndicator } from 'src/common-ui/components'
 import styled, { css, keyframes } from 'styled-components'
-import Margin from './components/Margin'
+import { LoadingIndicator as Spinner } from 'src/common-ui/components'
 
 const rotate = (rotation: Number) => {
     return keyframes`0% {
@@ -46,34 +44,64 @@ export const Icon = styled.div<IconProps>`
         `}
 `
 
-interface LoadingContainerProps {
-    top?: string
-    bottom?: string
-    left?: string
-    right?: string
-    horizontal?: string
-    vertical?: string
-    backgroundColor: string
-}
-
-export const LoadingContainer = (props: LoadingContainerProps) => {
-    const LoadingContainer = styled(Margin)<LoadingContainerProps>`
+export const LoadingContainer = ({ children }) => {
+    const Container = styled.div`
+        width: 100%;
         display: flex;
-        flex-direction: row;
         align-items: center;
         justify-content: center;
     `
-    const Spinner = styled(LoadingIndicator)`
+    return <Container>{children}</Container>
+}
+
+const loadingRotation = keyframes`
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+`
+
+export const LoadingIndicator = styled.div<{ backgroundColor: string }>`
+    display: block;
+    position: relative;
+    font-size: 10px;
+    text-indent: -9999em;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #99879f;
+    background: gradient(left, #99879f 10%, rgba(60, 46, 71, 0) 42%);
+    background: linear-gradient(to right, #99879f 10%, rgba(60, 46, 71, 0) 42%);
+    animation: ${loadingRotation} 1.4s infinite linear;
+    transform: translateZ(0);
+
+    &::before {
+        border-radius: 100% 0 0 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        content: '';
+    }
+
+    &::after {
         ${(props) =>
             css`
-                &::after {
-                    background: ${props.backgroundColor};
-                }
-            `}
-    `
-    return (
-        <LoadingContainer {...props}>
-            <Spinner />
-        </LoadingContainer>
-    )
-}
+                background: ${props.backgroundColor
+                    ? props.backgroundColor
+                    : '#fff'};
+            `};
+        width: 65%;
+        height: 65%;
+        border-radius: 50%;
+        content: '';
+        margin: auto;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+    }
+`
