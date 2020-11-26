@@ -9,7 +9,7 @@ interface NormalizedState<T> {
     byId: { [id: string]: T }
 }
 
-interface Note {
+export interface Note {
     url: string
     comment?: string
     highlight?: string
@@ -17,8 +17,9 @@ interface Note {
     createdAt: Date
 }
 
-interface Page {
-    url: string
+export interface Page {
+    normalizedUrl: string
+    fullUrl: string
     title: string
     createdAt: Date
     isBookmarked: boolean

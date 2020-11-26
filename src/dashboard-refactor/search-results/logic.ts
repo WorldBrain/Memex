@@ -1,14 +1,23 @@
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
-import { TaskState } from 'ui-logic-core/lib/types'
 
-import { RootState as State, NotesType, PageState, NoteState } from './types'
+import { RootState as State, NotesType, Note, Page } from './types'
 import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
+
+interface PageNotesEventArgs {
+    pageId: string
+    day: number
+}
 
 export type Events = UIEvent<{
     setPageBookmark: { id: string; isBookmarked: boolean }
-    setPageNotesShown: { pageId: string; day: number; areShown: boolean }
-    setPageNotesSort: { pageId: string; sortingFn: AnnotationsSorter }
-    setPageNotesType: { pageId: string; noteType: NotesType }
+
+    setPageNotesShown: PageNotesEventArgs & { areShown: boolean }
+    setPageNotesSort: PageNotesEventArgs & { sortingFn: AnnotationsSorter }
+    setPageNotesType: PageNotesEventArgs & { noteType: NotesType }
+
+    setPagesLookup: { pages: Page[] }
+
+    example: null
 }>
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
@@ -52,11 +61,61 @@ export class SearchResultsLogic extends UILogic<State, Events> {
                 [event.day]: {
                     pages: {
                         byId: {
-                            [event.pageId]: { areNotesShown: event.areShown },
+                            [event.pageId]: {
+                                areNotesShown: { $set: event.areShown },
+                            },
                         },
                     },
                 },
             },
         })
+    }
+
+    setPageNotesSort: EventHandler<'setPageNotesSort'> = ({ event }) => {
+        this.emitMutation({
+            results: {
+                [event.day]: {
+                    pages: {
+                        byId: {
+                            [event.pageId]: {
+                                sortingFn: { $set: event.sortingFn },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setPageNotesType: EventHandler<'setPageNotesType'> = ({ event }) => {
+        this.emitMutation({
+            results: {
+                [event.day]: {
+                    pages: {
+                        byId: {
+                            [event.pageId]: {
+                                notesType: { $set: event.noteType },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setPagesLookup: EventHandler<'setPagesLookup'> = ({ event: { pages } }) => {
+        const allIds = pages.map((page) => page.normalizedUrl)
+        const byId = pages.reduce(
+            (acc, curr) => ({ ...acc, [curr.normalizedUrl]: curr }),
+            {},
+        )
+
+        this.emitMutation({
+            pagesLookup: { allIds: { $set: allIds }, byId: { $set: byId } },
+        })
+    }
+
+    example: EventHandler<'example'> = ({ event }) => {
+        this.emitMutation({})
     }
 }
