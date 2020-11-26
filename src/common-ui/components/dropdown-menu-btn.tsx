@@ -2,6 +2,7 @@ import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { ClickAway } from 'src/util/click-away-wrapper'
+import ButtonTooltip, { Props as ButtonTooltipProps } from './button-tooltip'
 
 export interface MenuItemProps {
     name: string
@@ -17,14 +18,21 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     btnChildren: React.ReactNode
     onMenuItemClick: (itemProps: T) => void
     theme?: ThemeProps
+    keepSelectedState?: boolean
+    tooltipProps?: ButtonTooltipProps
 }
 
 interface State {
     isOpen: boolean
+    selected: number
 }
 
 export class DropdownMenuBtn extends React.PureComponent<Props, State> {
-    state: State = { isOpen: false }
+    state: State = {
+        isOpen: false,
+        selected: this.props.keepSelectedState ? 0 : -1,
+    }
+
     private lastToggleCall = 0
 
     private get theme() {
@@ -49,13 +57,14 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
 
     private handleItemClick: (
         props: MenuItemProps,
-    ) => React.MouseEventHandler = (props) => (e) => {
+        index: number,
+    ) => React.MouseEventHandler = (props, index) => (e) => {
         if (props.isDisabled) {
             e.preventDefault()
             return
         }
 
-        this.toggleMenu()
+        this.setState({ isOpen: this.props.keepSelectedState, selected: index })
         this.props.onMenuItemClick(props)
     }
 
@@ -63,23 +72,56 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
         this.props.menuItems.map((props, i) => (
             <MenuItem
                 key={i}
-                onClick={this.handleItemClick(props)}
-                theme={{ isDisabled: props.isDisabled }}
+                onClick={this.handleItemClick(props, i)}
+                theme={{
+                    isDisabled: props.isDisabled,
+                    isSelected: this.props.keepSelectedState
+                        ? this.state.selected === i
+                        : false,
+                }}
             >
                 {props.name}
             </MenuItem>
         ))
 
+    private renderMenuBtn = () => {
+        const btn = (
+            <MenuBtn onClick={this.toggleMenu}>
+                {this.props.btnChildren}
+            </MenuBtn>
+        )
+
+        if (this.props.tooltipProps) {
+            return (
+                <ButtonTooltip {...this.props.tooltipProps}>
+                    {btn}
+                </ButtonTooltip>
+            )
+        }
+
+        return btn
+    }
+
     render() {
         return (
             <ThemeProvider theme={this.theme}>
                 <MenuContainer>
-                    <MenuBtn onClick={this.toggleMenu}>
-                        {this.props.btnChildren}
-                    </MenuBtn>
+                    {this.renderMenuBtn()}
                     {this.state.isOpen && (
                         <ClickAway onClickAway={this.toggleMenu}>
-                            <Menu>{this.renderMenuItems()}</Menu>
+                            <Menu
+                                onMouseEnter={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation
+                                }}
+                            >
+                                {' '}
+                                {this.renderMenuItems()}
+                            </Menu>
                         </ClickAway>
                     )}
                 </MenuContainer>
@@ -91,27 +133,33 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
 const MenuContainer = styled.div`
     position: relative;
     flex: 1;
+
+    & img {
+        width: 18px;
+        height: 18px;
+    }
 `
 
 const MenuItem = styled.li`
     ${({ theme }) =>
         theme.isDisabled
             ? 'color: #97b2b8;'
-            : '&:hover { background: #e0e0e0; cursor: pointer; }'}
+            : '&:hover { background: #e0e0e0; cursor: pointer; }'};
+    ${({ theme }) => theme.isSelected && 'font-weight: bold;'};
     padding: 10px 20px;
 `
 
 const MenuBtn = styled.button`
-    font-weight: ${({ theme }) => (theme.isMenuOpen ? 'bold' : 'normal')};
     box-sizing: border-box;
     cursor: pointer;
     font-size: 14px;
     border: none;
     outline: none;
-    padding: 3px 5px;
-    margin: 5px 5px -5px 0;
     background: transparent;
     border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:focus {
         background-color: grey;
@@ -129,6 +177,7 @@ const MenuBtn = styled.button`
 const Menu = styled.ul`
     position: absolute;
     ${({ theme }) => `left: ${theme.leftMenuOffset ?? 0};`}
+    width: max-content;
     list-style: none;
     padding: 10px 0;
     background: white;

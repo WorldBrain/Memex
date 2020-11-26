@@ -3,8 +3,7 @@ import cx from 'classnames'
 
 const styles = require('./button-tooltip.css')
 
-interface Props {
-    children: React.ReactNode
+export interface Props {
     tooltipText: string
     position: string
 }

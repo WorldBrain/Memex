@@ -28,6 +28,7 @@ import { PageNotesCopyPaster } from 'src/copy-paster'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import analytics from 'src/analytics'
+import { SortingDropdownMenuBtn } from '../components/SortingDropdownMenu'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -427,6 +428,13 @@ export class AnnotationsSidebarContainer<
                             ))}
                     </TopBarActionBtns>
                     <TopBarActionBtns>
+                        <SortingDropdownMenuBtn
+                            onMenuItemClick={({ sortingFn }) =>
+                                this.processEvent('sortAnnotations', {
+                                    sortingFn,
+                                })
+                            }
+                        />
                         <ButtonTooltip
                             tooltipText="Copy All Notes"
                             position="bottom"

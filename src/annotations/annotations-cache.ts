@@ -4,6 +4,10 @@ import { EventEmitter } from 'events'
 import { Annotation } from 'src/annotations/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
+import {
+    AnnotationsSorter,
+    sortByPagePosition,
+} from 'src/sidebar/annotations-sidebar/sorting'
 
 export const createAnnotationsCache = (
     bgModules: {
@@ -13,6 +17,7 @@ export const createAnnotationsCache = (
     options: { skipPageIndexing?: boolean } = {},
 ): AnnotationsCache =>
     new AnnotationsCache({
+        sortingFn: sortByPagePosition,
         backendOperations: {
             load: async (pageUrl) =>
                 bgModules.annotations.listAnnotationsByPageUrl({ pageUrl }),
@@ -44,6 +49,7 @@ export const createAnnotationsCache = (
 interface AnnotationCacheChanges {
     rollback: (annotations: Annotation[]) => void
     newState: (annotation: Annotation[]) => void
+    sorted: (annotations: Annotation[]) => void
     created: (annotation: Annotation) => void
     updated: (annotation: Annotation) => void
     deleted: (annotation: Annotation) => void
@@ -55,6 +61,7 @@ export type AnnotationCacheChangeEvents = TypedEventEmitter<
 >
 
 export interface AnnotationsCacheDependencies {
+    sortingFn: AnnotationsSorter
     backendOperations?: {
         load: (
             pageUrl: string,
@@ -84,6 +91,7 @@ export interface AnnotationsCacheInterface {
     delete: (
         annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>,
     ) => Promise<void>
+    sort: (sortingFn?: AnnotationsSorter) => void
 
     annotations: Annotation[]
     annotationChanges: AnnotationCacheChangeEvents
@@ -114,8 +122,18 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             args,
         )
 
-        this.annotations = annotations.reverse()
+        this.annotations = annotations.sort(this.dependencies.sortingFn)
         this.annotationChanges.emit('load', this._annotations)
+        this.annotationChanges.emit('newState', this._annotations)
+    }
+
+    sort = (sortingFn?: AnnotationsSorter) => {
+        if (sortingFn) {
+            this.dependencies.sortingFn = sortingFn
+        }
+
+        this._annotations = this._annotations.sort(this.dependencies.sortingFn)
+        this.annotationChanges.emit('sorted', this._annotations)
         this.annotationChanges.emit('newState', this._annotations)
     }
 
@@ -131,7 +149,10 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         try {
             const annotUrl = await backendOperations.create(annotation)
-            await backendOperations.updateTags(annotUrl, annotation.tags)
+
+            if (annotation.tags.length) {
+                await backendOperations.updateTags(annotUrl, annotation.tags)
+            }
         } catch (e) {
             this._annotations = stateBeforeModifications
             this.annotationChanges.emit('rollback', stateBeforeModifications)

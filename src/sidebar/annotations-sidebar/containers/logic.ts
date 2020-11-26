@@ -22,6 +22,7 @@ import {
 } from 'src/content-sharing/ui/types'
 import { areTagsEquivalent } from 'src/tags/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
+import { AnnotationsSorter } from '../sorting'
 
 export interface EditForm {
     isBookmarked: boolean
@@ -99,6 +100,8 @@ export type SidebarContainerEvents = UIEvent<{
     hide: null
     lock: null
     unlock: null
+
+    sortAnnotations: { sortingFn: AnnotationsSorter }
 
     // Adding a new page comment
     addNewPageComment: { comment?: string; tags?: string[] }
@@ -343,6 +346,10 @@ export class SidebarContainerLogic extends UILogic<
             annotations.map((annotation) => annotation.url),
         )
     }
+
+    sortAnnotations: EventHandler<'sortAnnotations'> = ({
+        event: { sortingFn },
+    }) => this.options.annotationsCache.sort(sortingFn)
 
     private async loadBeta() {
         const isAllowed = await this.options.auth.isAuthorizedForFeature('beta')
