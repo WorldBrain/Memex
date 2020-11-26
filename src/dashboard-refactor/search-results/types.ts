@@ -1,37 +1,54 @@
+import { TaskState } from 'ui-logic-core/lib/types'
+
 import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 
-type Note = any
-type Page = any
-type NoteType = 'search' | 'user' | 'followed'
+export type NotesType = 'search' | 'user' | 'followed'
+
+interface NormalizedState<T> {
+    allIds: string[]
+    byId: { [id: string]: T }
+}
+
+interface Note {
+    url: string
+    comment?: string
+    highlight?: string
+    editedAt?: Date
+    createdAt: Date
+}
+
+interface Page {
+    url: string
+    title: string
+    createdAt: Date
+    isBookmarked: boolean
+}
 
 interface NewNoteFormState {
     inputValue: string
     // TODO: work out these states (may re-use from sidebar state)
 }
 
-interface NoteState {
-    id: string
-    // TODO: work out individual note states
-}
-
-interface PageState {
-    id: string
-    noteType: NoteType
-    areNotesShown: boolean
-    sortingFn: AnnotationsSorter
-    newNoteForm: NewNoteFormState
-    notes: { [name in NoteType]: NoteState[] }
-}
-
 interface ResultsByDay {
-    date: Date
-    pages: PageState[]
+    day: number
+    pages: NormalizedState<{
+        id: string
+        notesType: NotesType
+        areNotesShown: boolean
+        loadNotesState: TaskState
+        sortingFn: AnnotationsSorter
+        newNoteForm: NewNoteFormState
+        noteIds: { [key in NotesType]: string[] }
+    }>
 }
 
 export interface RootState {
-    results: ResultsByDay[]
+    results: { [day: number]: ResultsByDay }
     areAllNotesShown: boolean
     searchType: 'pages' | 'notes'
-    pagesLookup: { [id: string]: Page }
-    notesLookup: { [id: string]: Note }
+    searchState: TaskState
+    paginationState: TaskState
+
+    pagesLookup: NormalizedState<Page>
+    notesLookup: NormalizedState<Note>
 }
