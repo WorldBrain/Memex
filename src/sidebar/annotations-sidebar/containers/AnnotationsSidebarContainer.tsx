@@ -578,6 +578,14 @@ const TopBarActionBtns = styled.div`
     display: grid;
     grid-auto-flow: column;
     grid-gap: 8px;
+    height: 24px;
+
+    & * {
+        height: 24px;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+    }
 `
 
 const CloseBtn = styled.button`
