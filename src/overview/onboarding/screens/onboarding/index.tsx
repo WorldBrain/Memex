@@ -299,7 +299,50 @@ export default class OnboardingScreen extends StatefulUIElement<
             case 0:
                 return (
                     <div>
-                        <OnboardingStep
+                        <div className={styles.welcomeScreen}>
+                            <img
+                                src={'/img/onlyIconLogo.svg'}
+                                className={styles.logoImg}
+                            />
+                            <div className={styles.titleText}>
+                                All you need to know to get started
+                            </div>
+                            <div className={styles.horizontalLine} />
+                            <div className={styles.shortcutContainer}>
+                                <div className={styles.shortcutDescriptionBox}>
+                                    <div className={styles.shortcutDescription}>
+                                        Save current page
+                                    </div>
+                                    <div className={styles.shortcutDescription}>
+                                        Annotate highlighted Text
+                                    </div>
+                                    <div className={styles.shortcutDescription}>
+                                        Full-Text search pages and highlights
+                                    </div>
+                                </div>
+                                <div className={styles.shortcutNameBox}>
+                                    <div className={styles.shortcutName}>
+                                        alt+s
+                                    </div>
+                                    <div className={styles.shortcutName}>
+                                        alt+a
+                                    </div>
+                                    <div className={styles.shortcutName}>
+                                        alt+d
+                                    </div>
+                                </div>
+                            </div>
+                            <PrimaryAction
+                                label={'Try it out'}
+                                onClick={() =>
+                                    window.open(
+                                        'https://en.wikipedia.org/wiki/Memex',
+                                    )
+                                }
+                            />
+                        </div>
+
+                        {/*<OnboardingStep
                             isInitStep
                             titleText="Welcome to your Memex"
                             subtitleText="Let's get started with a quick setup"
@@ -312,7 +355,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                             )}
                             renderImage={this.logoImage}
                             navToOverview={this.props.navToOverview}
-                        />
+                        />*/}
                     </div>
                 )
             case 1:

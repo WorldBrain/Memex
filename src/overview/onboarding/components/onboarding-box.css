@@ -130,7 +130,7 @@
 }
 
 .logoImg {
-    width: 80px;
+    width: 50px;
     height: auto;
     margin-bottom: 20px;
 }
@@ -328,4 +328,70 @@
     100% {
         opacity: 1;
     }
+}
+
+.welcomeScreen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.titleText {
+    font-size: 24px;
+    color: #3a2f45;
+    font-weight: bold;
+    text-align: center;
+}
+
+.horizontalLine {
+    width: 200px;
+    border-bottom: 2px solid #00000020;
+    margin: 20px 0 40px 0;
+}
+
+.shortcutContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    margin-bottom: 40px;
+}
+
+.shortcutBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.shortcutDescriptionBox {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-right: 20px;
+    flex-direction: column;
+}
+
+.shortcutDescription {
+    font-size: 20px;
+    text-align: right;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.shortcutNameBox {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    width: 240px;
+}
+
+.shortcutName {
+    color: #5cd9a6;
+    font-weight: bold;
+    font-size: 20px;
+    text-align: left;
+    margin-bottom: 15px;
+    width: 100%;
 }
