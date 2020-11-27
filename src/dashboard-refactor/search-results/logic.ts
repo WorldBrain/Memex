@@ -1,20 +1,19 @@
-import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
+import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
 
-import { runInBackground } from 'src/util/webextensionRPC'
 import {
     RootState as State,
     NotesType,
     PageData,
-    NormalizedState,
     PageResult,
     SearchType,
     SearchResultsDependencies,
 } from './types'
 import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 import {
-    SearchInterface,
     StandardSearchResponse,
+    AnnotationsSearchResponse,
 } from 'src/search/background/types'
+import * as utils from './util'
 
 interface PageNotesEventArgs {
     pageId: string
@@ -38,6 +37,7 @@ export type Events = UIEvent<{
     // Misc data setters
     setPageData: { pages: PageData[] }
     setPageSearchResult: { result: StandardSearchResponse }
+    setAnnotationSearchResult: { result: AnnotationsSearchResponse }
 
     example: null
 }>
@@ -49,15 +49,6 @@ type EventHandler<EventName extends keyof Events> = UIEventHandler<
 >
 
 export class SearchResultsLogic extends UILogic<State, Events> {
-    getInitialPageResultState = (id: string): PageResult => ({
-        id,
-        notesType: 'user',
-        areNotesShown: false,
-        sortingFn: (a, b) => 1,
-        loadNotesState: 'pristine',
-        newNoteForm: { inputValue: '' },
-        noteIds: { user: [], followed: [], search: [] },
-    })
     constructor(private options: SearchResultsDependencies) {
         super()
     }
@@ -80,49 +71,24 @@ export class SearchResultsLogic extends UILogic<State, Events> {
         }
     }
 
-    setPageSearchResultState(result: StandardSearchResponse) {
-        const pageData: NormalizedState<PageData> = {
-            allIds: [],
-            byId: {},
-        }
-        const pageResults: NormalizedState<PageResult> = {
-            allIds: [],
-            byId: {},
-        }
-
-        for (const pageResult of result.docs) {
-            const id = pageResult.url
-
-            pageData.byId[id] = {
-                title: pageResult.title,
-                fullUrl: pageResult.url,
-                normalizedUrl: pageResult.url,
-                displayTime: pageResult.displayTime,
-                isBookmarked: pageResult.hasBookmark,
-            }
-            pageResults.byId[id] = this.getInitialPageResultState(
-                pageResult.url,
-            )
-
-            pageData.allIds.push(id)
-            pageResults.allIds.push(id)
-        }
-
+    setPageSearchResult: EventHandler<'setPageSearchResult'> = ({ event }) => {
+        const state = utils.pageSearchResultToState(event.result)
         this.emitMutation({
-            pageData: { $set: pageData },
-            results: {
-                $set: {
-                    [-1]: {
-                        day: -1,
-                        pages: pageResults,
-                    },
-                },
-            },
+            results: { $set: state.results },
+            noteData: { $set: state.noteData },
+            pageData: { $set: state.pageData },
         })
     }
 
-    setPageSearchResult: EventHandler<'setPageSearchResult'> = ({ event }) => {
-        this.setPageSearchResultState(event.result)
+    setAnnotationSearchResult: EventHandler<'setAnnotationSearchResult'> = ({
+        event,
+    }) => {
+        const state = utils.annotationSearchResultToState(event.result)
+        this.emitMutation({
+            results: { $set: state.results },
+            noteData: { $set: state.noteData },
+            pageData: { $set: state.pageData },
+        })
     }
 
     setPageBookmark: EventHandler<'setPageBookmark'> = ({ event }) => {

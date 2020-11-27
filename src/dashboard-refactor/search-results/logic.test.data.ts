@@ -1,6 +1,12 @@
 import { PageData } from './types'
-import { StandardSearchResponse, AnnotPage } from 'src/search/background/types'
+import {
+    StandardSearchResponse,
+    AnnotPage,
+    AnnotationsSearchResponse,
+} from 'src/search/background/types'
 import { Annotation } from 'src/annotations/types'
+
+export const DAY_1 = new Date('2020-11-26').getTime()
 
 export const PAGE_1: PageData = {
     normalizedUrl: 'test.com',
@@ -41,4 +47,17 @@ const pageDataToSearchRes = (
 export const PAGE_SEARCH_RESULT_1: StandardSearchResponse = {
     docs: [PAGE_1, PAGE_2, PAGE_3].map((data) => pageDataToSearchRes(data)),
     resultsExhausted: false,
+}
+
+export const ANNOT_SEARCH_RESULT_1: AnnotationsSearchResponse = {
+    isAnnotsSearch: true,
+    resultsExhausted: false,
+    docs: [PAGE_1, PAGE_2, PAGE_3].map((data) => pageDataToSearchRes(data)),
+    annotsByDay: {
+        [DAY_1]: {
+            [PAGE_1.normalizedUrl]: [],
+            [PAGE_2.normalizedUrl]: [],
+            [PAGE_3.normalizedUrl]: [],
+        },
+    },
 }

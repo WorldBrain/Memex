@@ -4,6 +4,7 @@ import {
 } from 'src/tests/ui-logic-tests'
 import { SearchResultsLogic } from './logic'
 import * as DATA from './logic.test.data'
+import * as utils from './util'
 
 async function setupTest(
     device: UILogicTestDevice,
@@ -113,14 +114,14 @@ describe('Dashboard search results logic', () => {
         })
 
         it('should be able to set note type', async ({ device }) => {
-            const { searchResults, logic } = await setupTest(device, {
+            const { searchResults } = await setupTest(device, {
                 seedData: true,
             })
             const pageId = DATA.PAGE_1.normalizedUrl
 
             expect(
                 searchResults.state.results[-1].pages.byId[pageId].notesType,
-            ).toEqual(logic.getInitialPageResultState('').notesType)
+            ).toEqual(utils.getInitialPageResultState('').notesType)
             await searchResults.processEvent('setPageNotesType', {
                 day: -1,
                 pageId,
@@ -148,7 +149,7 @@ describe('Dashboard search results logic', () => {
         })
 
         it('should be able to set new note input value', async ({ device }) => {
-            const { searchResults, logic } = await setupTest(device, {
+            const { searchResults } = await setupTest(device, {
                 seedData: true,
             })
             const pageId = DATA.PAGE_1.normalizedUrl
@@ -157,7 +158,7 @@ describe('Dashboard search results logic', () => {
                 searchResults.state.results[-1].pages.byId[pageId].newNoteForm
                     .inputValue,
             ).toEqual(
-                logic.getInitialPageResultState('').newNoteForm.inputValue,
+                utils.getInitialPageResultState('').newNoteForm.inputValue,
             )
             await searchResults.processEvent('setPageNewNoteValue', {
                 day: -1,

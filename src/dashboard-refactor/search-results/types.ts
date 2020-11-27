@@ -1,7 +1,14 @@
 import { TaskState } from 'ui-logic-core/lib/types'
 
 import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
+import {
+    AnnotationsSearchResponse,
+    StandardSearchResponse,
+} from 'src/search/background/types'
 
+export type SearchResultToState = (
+    result: AnnotationsSearchResponse | StandardSearchResponse,
+) => Pick<RootState, 'results' | 'noteData' | 'pageData'>
 export type SearchType = 'pages' | 'notes'
 export type NotesType = 'search' | 'user' | 'followed'
 
@@ -40,7 +47,7 @@ export interface PageResult {
     noteIds: { [key in NotesType]: string[] }
 }
 
-interface PageResultsByDay {
+export interface PageResultsByDay {
     day: number
     pages: NormalizedState<PageResult>
 }
