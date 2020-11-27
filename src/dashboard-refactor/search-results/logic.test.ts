@@ -13,8 +13,9 @@ async function setupTest(
     const searchResults = device.createElement(logic)
 
     if (args.seedData) {
-        const pages = [DATA.PAGE_1, DATA.PAGE_2, DATA.PAGE_3]
-        await searchResults.processEvent('setPagesLookup', { pages })
+        await searchResults.processEvent('setPageSearchResult', {
+            result: DATA.PAGE_SEARCH_RESULT_1,
+        })
     }
 
     return { searchResults, logic }
@@ -27,21 +28,21 @@ describe('Dashboard search results logic', () => {
         const { searchResults } = await setupTest(device, { seedData: true })
         const pageId = DATA.PAGE_2.normalizedUrl
 
-        expect(searchResults.state.pagesLookup.byId[pageId].isBookmarked).toBe(
+        expect(searchResults.state.pageData.byId[pageId].isBookmarked).toBe(
             false,
         )
         await searchResults.processEvent('setPageBookmark', {
             id: pageId,
             isBookmarked: true,
         })
-        expect(searchResults.state.pagesLookup.byId[pageId].isBookmarked).toBe(
+        expect(searchResults.state.pageData.byId[pageId].isBookmarked).toBe(
             true,
         )
         await searchResults.processEvent('setPageBookmark', {
             id: pageId,
             isBookmarked: false,
         })
-        expect(searchResults.state.pagesLookup.byId[pageId].isBookmarked).toBe(
+        expect(searchResults.state.pageData.byId[pageId].isBookmarked).toBe(
             false,
         )
     })

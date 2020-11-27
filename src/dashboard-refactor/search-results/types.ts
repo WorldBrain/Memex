@@ -4,24 +4,23 @@ import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 
 export type NotesType = 'search' | 'user' | 'followed'
 
-interface NormalizedState<T> {
+export interface NormalizedState<T> {
     allIds: string[]
     byId: { [id: string]: T }
 }
 
-export interface Note {
+export interface NoteData {
     url: string
     comment?: string
     highlight?: string
-    editedAt?: Date
-    createdAt: Date
+    displayTime: number
 }
 
-export interface Page {
+export interface PageData {
     normalizedUrl: string
     fullUrl: string
     title: string
-    createdAt: Date
+    displayTime: number
     isBookmarked: boolean
 }
 
@@ -30,26 +29,29 @@ interface NewNoteFormState {
     // TODO: work out these states (may re-use from sidebar state)
 }
 
-interface ResultsByDay {
+export interface PageResult {
+    id: string
+    notesType: NotesType
+    areNotesShown: boolean
+    loadNotesState: TaskState
+    sortingFn: AnnotationsSorter
+    newNoteForm: NewNoteFormState
+    noteIds: { [key in NotesType]: string[] }
+}
+
+interface PageResultsByDay {
     day: number
-    pages: NormalizedState<{
-        id: string
-        notesType: NotesType
-        areNotesShown: boolean
-        loadNotesState: TaskState
-        sortingFn: AnnotationsSorter
-        newNoteForm: NewNoteFormState
-        noteIds: { [key in NotesType]: string[] }
-    }>
+    pages: NormalizedState<PageResult>
 }
 
 export interface RootState {
-    results: { [day: number]: ResultsByDay }
+    results: { [day: number]: PageResultsByDay }
     areAllNotesShown: boolean
     searchType: 'pages' | 'notes'
+
     searchState: TaskState
     paginationState: TaskState
 
-    pagesLookup: NormalizedState<Page>
-    notesLookup: NormalizedState<Note>
+    pageData: NormalizedState<PageData>
+    noteData: NormalizedState<NoteData>
 }
