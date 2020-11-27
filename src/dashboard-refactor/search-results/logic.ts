@@ -7,6 +7,7 @@ import {
     PageData,
     NormalizedState,
     PageResult,
+    SearchType,
 } from './types'
 import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 import {
@@ -20,12 +21,19 @@ interface PageNotesEventArgs {
 }
 
 export type Events = UIEvent<{
+    // Root state mutations
+    setSearchType: { searchType: SearchType }
+    setAllNotesShown: { areShown: boolean }
+
+    // Page data state mutations (*shared with all* occurences of the page in different days)
     setPageBookmark: { id: string; isBookmarked: boolean }
 
+    // Page result state mutations (*specific to each* occurence of the page in different days)
     setPageNotesShown: PageNotesEventArgs & { areShown: boolean }
     setPageNotesSort: PageNotesEventArgs & { sortingFn: AnnotationsSorter }
     setPageNotesType: PageNotesEventArgs & { noteType: NotesType }
 
+    // Misc data setters
     setPageData: { pages: PageData[] }
     setPageSearchResult: { result: StandardSearchResponse }
 
@@ -180,6 +188,14 @@ export class SearchResultsLogic extends UILogic<State, Events> {
         this.emitMutation({
             pageData: { allIds: { $set: allIds }, byId: { $set: byId } },
         })
+    }
+
+    setSearchType: EventHandler<'setSearchType'> = ({ event }) => {
+        this.emitMutation({ searchType: { $set: event.searchType } })
+    }
+
+    setAllNotesShown: EventHandler<'setAllNotesShown'> = ({ event }) => {
+        this.emitMutation({ areAllNotesShown: { $set: event.areShown } })
     }
 
     example: EventHandler<'example'> = ({ event }) => {
