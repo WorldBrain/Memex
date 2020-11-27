@@ -39,7 +39,7 @@ type EventHandler<EventName extends keyof Events> = UIEventHandler<
 >
 
 export class SearchResultsLogic extends UILogic<State, Events> {
-    private getInitialPageResultState = (id: string): PageResult => ({
+    getInitialPageResultState = (id: string): PageResult => ({
         id,
         notesType: 'user',
         areNotesShown: false,

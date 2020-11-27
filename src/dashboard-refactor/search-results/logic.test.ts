@@ -46,4 +46,64 @@ describe('Dashboard search results logic', () => {
             false,
         )
     })
+
+    it('should be able to show and hide notes', async ({ device }) => {
+        const { searchResults } = await setupTest(device, { seedData: true })
+        const pageId = DATA.PAGE_3.normalizedUrl
+
+        expect(
+            searchResults.state.results[-1].pages.byId[pageId].areNotesShown,
+        ).toBe(false)
+        await searchResults.processEvent('setPageNotesShown', {
+            day: -1,
+            pageId,
+            areShown: true,
+        })
+        expect(
+            searchResults.state.results[-1].pages.byId[pageId].areNotesShown,
+        ).toBe(true)
+        await searchResults.processEvent('setPageNotesShown', {
+            day: -1,
+            pageId,
+            areShown: false,
+        })
+        expect(
+            searchResults.state.results[-1].pages.byId[pageId].areNotesShown,
+        ).toBe(false)
+    })
+
+    it('should be able to set note type', async ({ device }) => {
+        const { searchResults, logic } = await setupTest(device, {
+            seedData: true,
+        })
+        const pageId = DATA.PAGE_1.normalizedUrl
+
+        expect(
+            searchResults.state.results[-1].pages.byId[pageId].notesType,
+        ).toEqual(logic.getInitialPageResultState('').notesType)
+        await searchResults.processEvent('setPageNotesType', {
+            day: -1,
+            pageId,
+            noteType: 'followed',
+        })
+        expect(
+            searchResults.state.results[-1].pages.byId[pageId].notesType,
+        ).toEqual('followed')
+        await searchResults.processEvent('setPageNotesType', {
+            day: -1,
+            pageId,
+            noteType: 'search',
+        })
+        expect(
+            searchResults.state.results[-1].pages.byId[pageId].notesType,
+        ).toEqual('search')
+        await searchResults.processEvent('setPageNotesType', {
+            day: -1,
+            pageId,
+            noteType: 'user',
+        })
+        expect(
+            searchResults.state.results[-1].pages.byId[pageId].notesType,
+        ).toEqual('user')
+    })
 })
