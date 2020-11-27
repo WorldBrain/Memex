@@ -8,6 +8,7 @@ import {
     NormalizedState,
     PageResult,
     SearchType,
+    SearchResultsDependencies,
 } from './types'
 import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 import {
@@ -57,6 +58,9 @@ export class SearchResultsLogic extends UILogic<State, Events> {
         newNoteForm: { inputValue: '' },
         noteIds: { user: [], followed: [], search: [] },
     })
+    constructor(private options: SearchResultsDependencies) {
+        super()
+    }
 
     getInitialState(): State {
         return {

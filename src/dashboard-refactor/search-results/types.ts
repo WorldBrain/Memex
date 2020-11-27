@@ -61,3 +61,5 @@ export interface RootState {
     searchState: TaskState
     paginationState: TaskState
 }
+
+export interface SearchResultsDependencies {}

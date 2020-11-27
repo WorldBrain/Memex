@@ -9,7 +9,7 @@ async function setupTest(
     device: UILogicTestDevice,
     args: { seedData?: boolean } = {},
 ) {
-    const logic = new SearchResultsLogic()
+    const logic = new SearchResultsLogic({})
     const searchResults = device.createElement(logic)
 
     if (args.seedData) {
