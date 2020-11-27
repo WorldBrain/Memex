@@ -146,5 +146,46 @@ describe('Dashboard search results logic', () => {
                 searchResults.state.results[-1].pages.byId[pageId].notesType,
             ).toEqual('user')
         })
+
+        it('should be able to set new note input value', async ({ device }) => {
+            const { searchResults, logic } = await setupTest(device, {
+                seedData: true,
+            })
+            const pageId = DATA.PAGE_1.normalizedUrl
+
+            expect(
+                searchResults.state.results[-1].pages.byId[pageId].newNoteForm
+                    .inputValue,
+            ).toEqual(
+                logic.getInitialPageResultState('').newNoteForm.inputValue,
+            )
+            await searchResults.processEvent('setPageNewNoteValue', {
+                day: -1,
+                pageId,
+                value: 'followed',
+            })
+            expect(
+                searchResults.state.results[-1].pages.byId[pageId].newNoteForm
+                    .inputValue,
+            ).toEqual('followed')
+            await searchResults.processEvent('setPageNewNoteValue', {
+                day: -1,
+                pageId,
+                value: 'search',
+            })
+            expect(
+                searchResults.state.results[-1].pages.byId[pageId].newNoteForm
+                    .inputValue,
+            ).toEqual('search')
+            await searchResults.processEvent('setPageNewNoteValue', {
+                day: -1,
+                pageId,
+                value: 'user',
+            })
+            expect(
+                searchResults.state.results[-1].pages.byId[pageId].newNoteForm
+                    .inputValue,
+            ).toEqual('user')
+        })
     })
 })

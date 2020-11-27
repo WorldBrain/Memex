@@ -32,6 +32,7 @@ export type Events = UIEvent<{
     setPageNotesShown: PageNotesEventArgs & { areShown: boolean }
     setPageNotesSort: PageNotesEventArgs & { sortingFn: AnnotationsSorter }
     setPageNotesType: PageNotesEventArgs & { noteType: NotesType }
+    setPageNewNoteValue: PageNotesEventArgs & { value: string }
 
     // Misc data setters
     setPageData: { pages: PageData[] }
@@ -170,6 +171,24 @@ export class SearchResultsLogic extends UILogic<State, Events> {
                         byId: {
                             [event.pageId]: {
                                 notesType: { $set: event.noteType },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setPageNewNoteValue: EventHandler<'setPageNewNoteValue'> = ({ event }) => {
+        this.emitMutation({
+            results: {
+                [event.day]: {
+                    pages: {
+                        byId: {
+                            [event.pageId]: {
+                                newNoteForm: {
+                                    inputValue: { $set: event.value },
+                                },
                             },
                         },
                     },
