@@ -2,21 +2,38 @@ import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
-import { SearchResultsLogic } from './logic'
+import { SearchResultsLogic, Events } from './logic'
 import * as DATA from './logic.test.data'
 import * as utils from './util'
+import {
+    StandardSearchResponse,
+    AnnotationsSearchResponse,
+} from 'src/search/background/types'
+import { TestLogicContainer } from 'ui-logic-core/lib/testing'
+import { RootState } from './types'
+
+type DataSeeder = (logic: TestLogicContainer<RootState, Events>) => void
+type DataSeederCreator = (
+    data?: StandardSearchResponse | AnnotationsSearchResponse,
+) => DataSeeder
+
+const setPageSearchResult: DataSeederCreator = (
+    result = DATA.PAGE_SEARCH_RESULT_1,
+) => (logic) => logic.processEvent('setPageSearchResult', { result })
+
+const setNoteSearchResult: DataSeederCreator = (
+    result: any = DATA.ANNOT_SEARCH_RESULT_2,
+) => (logic) => logic.processEvent('setAnnotationSearchResult', { result })
 
 async function setupTest(
     device: UILogicTestDevice,
-    args: { seedData?: boolean } = {},
+    args: { seedData?: DataSeeder } = {},
 ) {
     const logic = new SearchResultsLogic({})
     const searchResults = device.createElement(logic)
 
     if (args.seedData) {
-        await searchResults.processEvent('setPageSearchResult', {
-            result: DATA.PAGE_SEARCH_RESULT_1,
-        })
+        args.seedData(searchResults)
     }
 
     return { searchResults, logic }
@@ -58,7 +75,7 @@ describe('Dashboard search results logic', () => {
     describe('page data state mutations', () => {
         it('should be able to toggle page bookmarks', async ({ device }) => {
             const { searchResults } = await setupTest(device, {
-                seedData: true,
+                seedData: setPageSearchResult(),
             })
             const pageId = DATA.PAGE_2.normalizedUrl
 
@@ -82,111 +99,239 @@ describe('Dashboard search results logic', () => {
         })
     })
 
-    describe('page result state mutations', () => {
-        it('should be able to show and hide notes', async ({ device }) => {
-            const { searchResults } = await setupTest(device, {
-                seedData: true,
-            })
-            const pageId = DATA.PAGE_3.normalizedUrl
+    describe('nested page result state mutations', () => {
+        describe('page search results', () => {
+            it('should be able to show and hide notes', async ({ device }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(),
+                })
+                const day = -1
+                const pageId = DATA.PAGE_3.normalizedUrl
 
-            expect(
-                searchResults.state.results[-1].pages.byId[pageId]
-                    .areNotesShown,
-            ).toBe(false)
-            await searchResults.processEvent('setPageNotesShown', {
-                day: -1,
-                pageId,
-                areShown: true,
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .areNotesShown,
+                ).toBe(false)
+                await searchResults.processEvent('setPageNotesShown', {
+                    day,
+                    pageId,
+                    areShown: true,
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .areNotesShown,
+                ).toBe(true)
+                await searchResults.processEvent('setPageNotesShown', {
+                    day,
+                    pageId,
+                    areShown: false,
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .areNotesShown,
+                ).toBe(false)
             })
-            expect(
-                searchResults.state.results[-1].pages.byId[pageId]
-                    .areNotesShown,
-            ).toBe(true)
-            await searchResults.processEvent('setPageNotesShown', {
-                day: -1,
-                pageId,
-                areShown: false,
+
+            it('should be able to set note type', async ({ device }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(),
+                })
+                const day = -1
+                const pageId = DATA.PAGE_1.normalizedUrl
+
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .notesType,
+                ).toEqual(utils.getInitialPageResultState('').notesType)
+                await searchResults.processEvent('setPageNotesType', {
+                    day,
+                    pageId,
+                    noteType: 'followed',
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .notesType,
+                ).toEqual('followed')
+                await searchResults.processEvent('setPageNotesType', {
+                    day,
+                    pageId,
+                    noteType: 'search',
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .notesType,
+                ).toEqual('search')
+                await searchResults.processEvent('setPageNotesType', {
+                    day,
+                    pageId,
+                    noteType: 'user',
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .notesType,
+                ).toEqual('user')
             })
-            expect(
-                searchResults.state.results[-1].pages.byId[pageId]
-                    .areNotesShown,
-            ).toBe(false)
+
+            it('should be able to set new note input value', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(),
+                })
+                const day = -1
+                const pageId = DATA.PAGE_1.normalizedUrl
+
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .newNoteForm.inputValue,
+                ).toEqual(
+                    utils.getInitialPageResultState('').newNoteForm.inputValue,
+                )
+                await searchResults.processEvent('setPageNewNoteValue', {
+                    day,
+                    pageId,
+                    value: 'followed',
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .newNoteForm.inputValue,
+                ).toEqual('followed')
+                await searchResults.processEvent('setPageNewNoteValue', {
+                    day,
+                    pageId,
+                    value: 'search',
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .newNoteForm.inputValue,
+                ).toEqual('search')
+                await searchResults.processEvent('setPageNewNoteValue', {
+                    day,
+                    pageId,
+                    value: 'user',
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .newNoteForm.inputValue,
+                ).toEqual('user')
+            })
         })
 
-        it('should be able to set note type', async ({ device }) => {
-            const { searchResults } = await setupTest(device, {
-                seedData: true,
-            })
-            const pageId = DATA.PAGE_1.normalizedUrl
+        describe('note search results', () => {
+            it('should be able to show and hide notes', async ({ device }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setNoteSearchResult(),
+                })
+                const day = DATA.DAY_2
+                const pageId = DATA.PAGE_3.normalizedUrl
 
-            expect(
-                searchResults.state.results[-1].pages.byId[pageId].notesType,
-            ).toEqual(utils.getInitialPageResultState('').notesType)
-            await searchResults.processEvent('setPageNotesType', {
-                day: -1,
-                pageId,
-                noteType: 'followed',
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .areNotesShown,
+                ).toBe(false)
+                await searchResults.processEvent('setPageNotesShown', {
+                    day,
+                    pageId,
+                    areShown: true,
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .areNotesShown,
+                ).toBe(true)
+                await searchResults.processEvent('setPageNotesShown', {
+                    day,
+                    pageId,
+                    areShown: false,
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .areNotesShown,
+                ).toBe(false)
             })
-            expect(
-                searchResults.state.results[-1].pages.byId[pageId].notesType,
-            ).toEqual('followed')
-            await searchResults.processEvent('setPageNotesType', {
-                day: -1,
-                pageId,
-                noteType: 'search',
-            })
-            expect(
-                searchResults.state.results[-1].pages.byId[pageId].notesType,
-            ).toEqual('search')
-            await searchResults.processEvent('setPageNotesType', {
-                day: -1,
-                pageId,
-                noteType: 'user',
-            })
-            expect(
-                searchResults.state.results[-1].pages.byId[pageId].notesType,
-            ).toEqual('user')
-        })
 
-        it('should be able to set new note input value', async ({ device }) => {
-            const { searchResults } = await setupTest(device, {
-                seedData: true,
-            })
-            const pageId = DATA.PAGE_1.normalizedUrl
+            it('should be able to set note type', async ({ device }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setNoteSearchResult(),
+                })
+                const day = DATA.DAY_2
+                const pageId = DATA.PAGE_1.normalizedUrl
 
-            expect(
-                searchResults.state.results[-1].pages.byId[pageId].newNoteForm
-                    .inputValue,
-            ).toEqual(
-                utils.getInitialPageResultState('').newNoteForm.inputValue,
-            )
-            await searchResults.processEvent('setPageNewNoteValue', {
-                day: -1,
-                pageId,
-                value: 'followed',
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .notesType,
+                ).toEqual(utils.getInitialPageResultState('').notesType)
+                await searchResults.processEvent('setPageNotesType', {
+                    day,
+                    pageId,
+                    noteType: 'followed',
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .notesType,
+                ).toEqual('followed')
+                await searchResults.processEvent('setPageNotesType', {
+                    day,
+                    pageId,
+                    noteType: 'search',
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .notesType,
+                ).toEqual('search')
+                await searchResults.processEvent('setPageNotesType', {
+                    day,
+                    pageId,
+                    noteType: 'user',
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .notesType,
+                ).toEqual('user')
             })
-            expect(
-                searchResults.state.results[-1].pages.byId[pageId].newNoteForm
-                    .inputValue,
-            ).toEqual('followed')
-            await searchResults.processEvent('setPageNewNoteValue', {
-                day: -1,
-                pageId,
-                value: 'search',
+
+            it('should be able to set new note input value', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setNoteSearchResult(),
+                })
+                const day = DATA.DAY_2
+                const pageId = DATA.PAGE_1.normalizedUrl
+
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .newNoteForm.inputValue,
+                ).toEqual(
+                    utils.getInitialPageResultState('').newNoteForm.inputValue,
+                )
+                await searchResults.processEvent('setPageNewNoteValue', {
+                    day,
+                    pageId,
+                    value: 'followed',
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .newNoteForm.inputValue,
+                ).toEqual('followed')
+                await searchResults.processEvent('setPageNewNoteValue', {
+                    day,
+                    pageId,
+                    value: 'search',
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .newNoteForm.inputValue,
+                ).toEqual('search')
+                await searchResults.processEvent('setPageNewNoteValue', {
+                    day,
+                    pageId,
+                    value: 'user',
+                })
+                expect(
+                    searchResults.state.results[day].pages.byId[pageId]
+                        .newNoteForm.inputValue,
+                ).toEqual('user')
             })
-            expect(
-                searchResults.state.results[-1].pages.byId[pageId].newNoteForm
-                    .inputValue,
-            ).toEqual('search')
-            await searchResults.processEvent('setPageNewNoteValue', {
-                day: -1,
-                pageId,
-                value: 'user',
-            })
-            expect(
-                searchResults.state.results[-1].pages.byId[pageId].newNoteForm
-                    .inputValue,
-            ).toEqual('user')
         })
     })
 })
