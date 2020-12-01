@@ -1,7 +1,8 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { StyleSheetManager } from 'styled-components'
+import { StyleSheetManager, ThemeProvider } from 'styled-components'
 
+import { theme } from 'src/common-ui/components/design-library/theme'
 import RibbonHolder from './containers/ribbon-holder'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { RibbonContainerDependencies } from './containers/ribbon/types'
@@ -15,7 +16,9 @@ export function setupRibbonUI(
 ) {
     ReactDOM.render(
         <StyleSheetManager target={target}>
-            <RibbonHolder {...options} />
+            <ThemeProvider theme={theme}>
+                <RibbonHolder {...options} />
+            </ThemeProvider>
         </StyleSheetManager>,
         target,
     )
