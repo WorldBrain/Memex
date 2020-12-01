@@ -10,6 +10,7 @@ import {
     PageResultsByDay,
     NoteData,
     SearchResultToState,
+    NoteResult,
 } from './types'
 
 export const initNormalizedState = <T>(): NormalizedState<T> => ({
@@ -35,7 +36,7 @@ export const annotationSearchResultToState: SearchResultToState = (
     }
 
     const pageData = initNormalizedState<PageData>()
-    const noteData = initNormalizedState<NoteData>()
+    const noteData = initNormalizedState<NoteData & NoteResult>()
 
     const resultState: { [day: number]: PageResultsByDay } = {}
     const dayEntries: [number, AnnotsByPageUrl][] = Object.entries(
@@ -60,6 +61,10 @@ export const annotationSearchResultToState: SearchResultToState = (
                     displayTime:
                         annotation.lastEdited?.getTime() ??
                         annotation.createdWhen.getTime(),
+                    commentEditValue: annotation.comment ?? '',
+                    tags: annotation.tags ?? [],
+                    isTagPickerShown: false,
+                    isEditing: false,
                 }
             }
         }
@@ -90,7 +95,7 @@ export const pageSearchResultToState: SearchResultToState = (
     result: StandardSearchResponse,
 ) => {
     const pageData = initNormalizedState<PageData>()
-    const noteData = initNormalizedState<NoteData>()
+    const noteData = initNormalizedState<NoteData & NoteResult>()
     const pageResults = initNormalizedState<PageResult>()
 
     for (const pageResult of result.docs) {
@@ -119,6 +124,10 @@ export const pageSearchResultToState: SearchResultToState = (
                 displayTime:
                     annotation.lastEdited?.getTime() ??
                     annotation.createdWhen.getTime(),
+                commentEditValue: annotation.comment ?? '',
+                tags: annotation.tags ?? [],
+                isTagPickerShown: false,
+                isEditing: false,
             }
         }
     }

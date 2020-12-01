@@ -176,6 +176,112 @@ export class SearchResultsLogic extends UILogic<State, Events> {
         })
     }
 
+    setPageNoteEditing: EventHandler<'setPageNoteEditing'> = ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            isEditing: { $set: event.isEditing },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setPageNoteTagPickerShown: EventHandler<'setPageNoteTagPickerShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            isTagPickerShown: { $set: event.isShown },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setPageNoteTags: EventHandler<'setPageNoteTags'> = ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            tags: { $set: event.tags },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setPageNoteCommentValue: EventHandler<'setPageNoteCommentValue'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            commentEditValue: { $set: event.value },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    cancelPageNoteEdit: EventHandler<'cancelPageNoteEdit'> = ({
+        event,
+        previousState,
+    }) => {
+        const { comment } = previousState.searchResults.noteData.byId[
+            event.noteId
+        ]
+
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            isEditing: { $set: false },
+                            commentEditValue: { $set: comment ?? '' },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    savePageNoteEdit: EventHandler<'savePageNoteEdit'> = async ({
+        event,
+        previousState,
+    }) => {
+        const { commentEditValue } = previousState.searchResults.noteData.byId[
+            event.noteId
+        ]
+
+        // TODO: call BG
+
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            isEditing: { $set: false },
+                            comment: { $set: commentEditValue },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
     example: EventHandler<'example'> = ({ event }) => {
         this.emitMutation({})
     }

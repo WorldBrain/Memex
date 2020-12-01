@@ -371,4 +371,213 @@ describe('Dashboard search results logic', () => {
             })
         })
     })
+
+    describe('nested page note result state mutations', () => {
+        it('should be able to toggle note edit state', async ({ device }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+            })
+            const noteId = DATA.NOTE_2.url
+
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId]
+                    .isEditing,
+            ).toEqual(false)
+
+            await searchResults.processEvent('setPageNoteEditing', {
+                noteId,
+                isEditing: true,
+            })
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId]
+                    .isEditing,
+            ).toEqual(true)
+
+            await searchResults.processEvent('setPageNoteEditing', {
+                noteId,
+                isEditing: false,
+            })
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId]
+                    .isEditing,
+            ).toEqual(false)
+        })
+
+        it('should be able to toggle note tag picker shown state', async ({
+            device,
+        }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+            })
+            const noteId = DATA.NOTE_2.url
+
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId]
+                    .isTagPickerShown,
+            ).toEqual(false)
+
+            await searchResults.processEvent('setPageNoteTagPickerShown', {
+                noteId,
+                isShown: true,
+            })
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId]
+                    .isTagPickerShown,
+            ).toEqual(true)
+
+            await searchResults.processEvent('setPageNoteTagPickerShown', {
+                noteId,
+                isShown: false,
+            })
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId]
+                    .isTagPickerShown,
+            ).toEqual(false)
+        })
+
+        it('should be able to set note tag state', async ({ device }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+            })
+            const noteId = DATA.NOTE_2.url
+
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId].tags,
+            ).toEqual([])
+
+            await searchResults.processEvent('setPageNoteTags', {
+                noteId,
+                tags: ['test'],
+            })
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId].tags,
+            ).toEqual(['test'])
+
+            await searchResults.processEvent('setPageNoteTags', {
+                noteId,
+                tags: ['test', 'again'],
+            })
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId].tags,
+            ).toEqual(['test', 'again'])
+
+            await searchResults.processEvent('setPageNoteTags', {
+                noteId,
+                tags: [],
+            })
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId].tags,
+            ).toEqual([])
+        })
+
+        it('should be able to set note edit comment value state', async ({
+            device,
+        }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+            })
+            const noteId = DATA.NOTE_2.url
+
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId]
+                    .commentEditValue,
+            ).toEqual(DATA.NOTE_2.comment)
+
+            await searchResults.processEvent('setPageNoteCommentValue', {
+                noteId,
+                value: 'test',
+            })
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId]
+                    .commentEditValue,
+            ).toEqual('test')
+
+            await searchResults.processEvent('setPageNoteCommentValue', {
+                noteId,
+                value: 'test again',
+            })
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId]
+                    .commentEditValue,
+            ).toEqual('test again')
+        })
+
+        it('should be able to cancel edited note state', async ({ device }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+            })
+            const noteId = DATA.NOTE_2.url
+            const updatedComment = 'test'
+
+            await searchResults.processEvent('setPageNoteEditing', {
+                noteId,
+                isEditing: true,
+            })
+            await searchResults.processEvent('setPageNoteCommentValue', {
+                noteId,
+                value: updatedComment,
+            })
+
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId],
+            ).toEqual(
+                expect.objectContaining({
+                    comment: DATA.NOTE_2.comment,
+                    commentEditValue: updatedComment,
+                    isEditing: true,
+                }),
+            )
+
+            await searchResults.processEvent('cancelPageNoteEdit', { noteId })
+
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId],
+            ).toEqual(
+                expect.objectContaining({
+                    comment: DATA.NOTE_2.comment,
+                    commentEditValue: DATA.NOTE_2.comment,
+                    isEditing: false,
+                }),
+            )
+        })
+
+        it('should be able to save edited note state', async ({ device }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+            })
+            const noteId = DATA.NOTE_2.url
+            const updatedComment = 'test'
+
+            await searchResults.processEvent('setPageNoteEditing', {
+                noteId,
+                isEditing: true,
+            })
+            await searchResults.processEvent('setPageNoteCommentValue', {
+                noteId,
+                value: updatedComment,
+            })
+
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId],
+            ).toEqual(
+                expect.objectContaining({
+                    comment: DATA.NOTE_2.comment,
+                    commentEditValue: updatedComment,
+                    isEditing: true,
+                }),
+            )
+
+            await searchResults.processEvent('savePageNoteEdit', { noteId })
+
+            expect(
+                searchResults.state.searchResults.noteData.byId[noteId],
+            ).toEqual(
+                expect.objectContaining({
+                    comment: updatedComment,
+                    commentEditValue: updatedComment,
+                    isEditing: false,
+                }),
+            )
+        })
+    })
 })

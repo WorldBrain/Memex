@@ -38,6 +38,13 @@ interface NewNoteFormState {
     // TODO: work out these states (may re-use from sidebar state)
 }
 
+export interface NoteResult {
+    isTagPickerShown: boolean
+    commentEditValue: string
+    isEditing: boolean
+    tags: string[]
+}
+
 export interface PageResult {
     id: string
     notesType: NotesType
@@ -60,19 +67,23 @@ export interface RootState {
     /** Holds page data specific to each page occurence on a specific day. */
     results: { [day: number]: PageResultsByDay }
 
-    // Disply data lookups
+    // Display data lookups
     /** Holds page data shared with all page occurences on any day. */
     pageData: NormalizedState<PageData>
-    noteData: NormalizedState<NoteData>
+    noteData: NormalizedState<NoteData & NoteResult>
 
     // Async operation states
     searchState: TaskState
     paginationState: TaskState
 }
 
-interface PageNotesEventArgs {
+interface PageEventArgs {
     pageId: string
     day: number
+}
+
+interface NoteEventArgs {
+    noteId: string
 }
 
 export type Events = UIEvent<{
@@ -84,10 +95,18 @@ export type Events = UIEvent<{
     setPageBookmark: { id: string; isBookmarked: boolean }
 
     // Page result state mutations (*specific to each* occurence of the page in different days)
-    setPageNotesShown: PageNotesEventArgs & { areShown: boolean }
-    setPageNotesSort: PageNotesEventArgs & { sortingFn: AnnotationsSorter }
-    setPageNotesType: PageNotesEventArgs & { noteType: NotesType }
-    setPageNewNoteValue: PageNotesEventArgs & { value: string }
+    setPageNotesShown: PageEventArgs & { areShown: boolean }
+    setPageNotesSort: PageEventArgs & { sortingFn: AnnotationsSorter }
+    setPageNotesType: PageEventArgs & { noteType: NotesType }
+    setPageNewNoteValue: PageEventArgs & { value: string }
+
+    // Note result state mutations
+    setPageNoteEditing: NoteEventArgs & { isEditing: boolean }
+    setPageNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
+    setPageNoteTags: NoteEventArgs & { tags: string[] }
+    setPageNoteCommentValue: NoteEventArgs & { value: string }
+    savePageNoteEdit: NoteEventArgs
+    cancelPageNoteEdit: NoteEventArgs
 
     // Misc data setters
     setPageData: { pages: PageData[] }

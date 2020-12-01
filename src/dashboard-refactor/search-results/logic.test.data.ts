@@ -95,6 +95,15 @@ export const PAGE_SEARCH_RESULT_1: StandardSearchResponse = {
     resultsExhausted: false,
 }
 
+export const PAGE_SEARCH_RESULT_2: StandardSearchResponse = {
+    docs: [
+        pageDataToSearchRes(PAGE_1, [NOTE_1, NOTE_2, NOTE_3]),
+        pageDataToSearchRes(PAGE_2, []),
+        pageDataToSearchRes(PAGE_3, [NOTE_4, NOTE_5]),
+    ],
+    resultsExhausted: false,
+}
+
 export const ANNOT_SEARCH_RESULT_1: AnnotationsSearchResponse = {
     isAnnotsSearch: true,
     resultsExhausted: false,
