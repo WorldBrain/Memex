@@ -12,7 +12,7 @@ export interface Props {
     setTagInputActive: (isTagInputActive: boolean) => void
     deleteTag: (tag: string) => void
     updateTags: PickerUpdateHandler
-    onKeyDown?: React.KeyboardEventHandler
+    onKeyDown?: React.KeyboardEventHandler<HTMLDivElement>
     isTagInputActive: boolean
     tags: string[]
 }
@@ -50,7 +50,7 @@ class TagInput extends React.Component<Props> {
 
     render() {
         return (
-            <div onKeyDown={(e) => this.props.onKeyDown?.(e)}>
+            <div onKeyDown={this.props.onKeyDown}>
                 <TagHolder
                     clickHandler={this.handleTagHolderClick}
                     {...this.props}

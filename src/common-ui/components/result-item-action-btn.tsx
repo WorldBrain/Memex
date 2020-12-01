@@ -8,7 +8,7 @@ const styles = require('./result-item.css')
 export interface Props {
     tooltipText: string
     tooltipPosition?: string
-    onClick: MouseEventHandler
+    onClick: MouseEventHandler<HTMLButtonElement>
     imgSrc: string
     className?: string
     refHandler?: (el: HTMLElement) => void

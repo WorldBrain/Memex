@@ -7,7 +7,7 @@ export interface Props extends HTMLProps<HTMLDivElement> {
     listName: string
     isFiltered?: boolean
     unreadCount?: number
-    onListItemClick: MouseEventHandler
+    onListItemClick: MouseEventHandler<HTMLDivElement>
 }
 
 export class StaticListItem extends Component<Props> {

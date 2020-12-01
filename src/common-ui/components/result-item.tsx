@@ -72,7 +72,7 @@ class ResultItem extends PureComponent<Props> {
         return `${this.props.fullUrl}`
     }
 
-    dragStart: DragEventHandler = (e) => {
+    dragStart: DragEventHandler<HTMLAnchorElement> = (e) => {
         const { fullUrl, setUrlDragged, isSocial } = this.props
 
         setUrlDragged(fullUrl)

@@ -117,7 +117,7 @@ class ListItem extends Component<Props, State> {
         }))
     }
 
-    private handleDrop: DragEventHandler = (e) => {
+    private handleDrop: DragEventHandler<HTMLDivElement> = (e) => {
         e.preventDefault()
         this.handleDragLeave()
         // const url = e.dataTransfer.getData('URL')
