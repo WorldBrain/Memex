@@ -1,3 +1,18 @@
+import { UIEvent } from 'ui-logic-core'
+
+import {
+    RootState as SearchResultsState,
+    Events as SearchResultEvents,
+} from './search-results/types'
+
+export interface RootState {
+    searchResults: SearchResultsState
+}
+
+export type Events = UIEvent<SearchResultEvents & { example: null }>
+
+export interface DashboardDependencies {}
+
 export interface NewItemsCountState {
     displayNewItemsCount: boolean
     newItemsCount: number

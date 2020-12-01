@@ -2,7 +2,8 @@ import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
-import { SearchResultsLogic, Events } from './logic'
+import { SearchResultsLogic } from '../logic'
+import { Events, RootState } from '../types'
 import * as DATA from './logic.test.data'
 import * as utils from './util'
 import {
@@ -10,7 +11,6 @@ import {
     AnnotationsSearchResponse,
 } from 'src/search/background/types'
 import { TestLogicContainer } from 'ui-logic-core/lib/testing'
-import { RootState } from './types'
 
 type DataSeeder = (logic: TestLogicContainer<RootState, Events>) => void
 type DataSeederCreator = (
@@ -46,29 +46,41 @@ describe('Dashboard search results logic', () => {
         it('should be able to set page search type', async ({ device }) => {
             const { searchResults } = await setupTest(device)
 
-            expect(searchResults.state.searchType).toEqual('pages')
+            expect(searchResults.state.searchResults.searchType).toEqual(
+                'pages',
+            )
             await searchResults.processEvent('setSearchType', {
                 searchType: 'notes',
             })
-            expect(searchResults.state.searchType).toEqual('notes')
+            expect(searchResults.state.searchResults.searchType).toEqual(
+                'notes',
+            )
             await searchResults.processEvent('setSearchType', {
                 searchType: 'pages',
             })
-            expect(searchResults.state.searchType).toEqual('pages')
+            expect(searchResults.state.searchResults.searchType).toEqual(
+                'pages',
+            )
         })
 
         it('should be able to set all notes shown', async ({ device }) => {
             const { searchResults } = await setupTest(device)
 
-            expect(searchResults.state.searchType).toEqual('pages')
+            expect(searchResults.state.searchResults.searchType).toEqual(
+                'pages',
+            )
             await searchResults.processEvent('setSearchType', {
                 searchType: 'notes',
             })
-            expect(searchResults.state.searchType).toEqual('notes')
+            expect(searchResults.state.searchResults.searchType).toEqual(
+                'notes',
+            )
             await searchResults.processEvent('setSearchType', {
                 searchType: 'pages',
             })
-            expect(searchResults.state.searchType).toEqual('pages')
+            expect(searchResults.state.searchResults.searchType).toEqual(
+                'pages',
+            )
         })
     })
 
@@ -79,23 +91,26 @@ describe('Dashboard search results logic', () => {
             })
             const pageId = DATA.PAGE_2.normalizedUrl
 
-            expect(searchResults.state.pageData.byId[pageId].isBookmarked).toBe(
-                false,
-            )
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId]
+                    .isBookmarked,
+            ).toBe(false)
             await searchResults.processEvent('setPageBookmark', {
                 id: pageId,
                 isBookmarked: true,
             })
-            expect(searchResults.state.pageData.byId[pageId].isBookmarked).toBe(
-                true,
-            )
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId]
+                    .isBookmarked,
+            ).toBe(true)
             await searchResults.processEvent('setPageBookmark', {
                 id: pageId,
                 isBookmarked: false,
             })
-            expect(searchResults.state.pageData.byId[pageId].isBookmarked).toBe(
-                false,
-            )
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId]
+                    .isBookmarked,
+            ).toBe(false)
         })
     })
 
@@ -109,8 +124,9 @@ describe('Dashboard search results logic', () => {
                 const pageId = DATA.PAGE_3.normalizedUrl
 
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .areNotesShown,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].areNotesShown,
                 ).toBe(false)
                 await searchResults.processEvent('setPageNotesShown', {
                     day,
@@ -118,8 +134,9 @@ describe('Dashboard search results logic', () => {
                     areShown: true,
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .areNotesShown,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].areNotesShown,
                 ).toBe(true)
                 await searchResults.processEvent('setPageNotesShown', {
                     day,
@@ -127,8 +144,9 @@ describe('Dashboard search results logic', () => {
                     areShown: false,
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .areNotesShown,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].areNotesShown,
                 ).toBe(false)
             })
 
@@ -140,8 +158,9 @@ describe('Dashboard search results logic', () => {
                 const pageId = DATA.PAGE_1.normalizedUrl
 
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .notesType,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].notesType,
                 ).toEqual(utils.getInitialPageResultState('').notesType)
                 await searchResults.processEvent('setPageNotesType', {
                     day,
@@ -149,8 +168,9 @@ describe('Dashboard search results logic', () => {
                     noteType: 'followed',
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .notesType,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].notesType,
                 ).toEqual('followed')
                 await searchResults.processEvent('setPageNotesType', {
                     day,
@@ -158,8 +178,9 @@ describe('Dashboard search results logic', () => {
                     noteType: 'search',
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .notesType,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].notesType,
                 ).toEqual('search')
                 await searchResults.processEvent('setPageNotesType', {
                     day,
@@ -167,8 +188,9 @@ describe('Dashboard search results logic', () => {
                     noteType: 'user',
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .notesType,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].notesType,
                 ).toEqual('user')
             })
 
@@ -182,8 +204,9 @@ describe('Dashboard search results logic', () => {
                 const pageId = DATA.PAGE_1.normalizedUrl
 
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .newNoteForm.inputValue,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].newNoteForm.inputValue,
                 ).toEqual(
                     utils.getInitialPageResultState('').newNoteForm.inputValue,
                 )
@@ -193,8 +216,9 @@ describe('Dashboard search results logic', () => {
                     value: 'followed',
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .newNoteForm.inputValue,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].newNoteForm.inputValue,
                 ).toEqual('followed')
                 await searchResults.processEvent('setPageNewNoteValue', {
                     day,
@@ -202,8 +226,9 @@ describe('Dashboard search results logic', () => {
                     value: 'search',
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .newNoteForm.inputValue,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].newNoteForm.inputValue,
                 ).toEqual('search')
                 await searchResults.processEvent('setPageNewNoteValue', {
                     day,
@@ -211,8 +236,9 @@ describe('Dashboard search results logic', () => {
                     value: 'user',
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .newNoteForm.inputValue,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].newNoteForm.inputValue,
                 ).toEqual('user')
             })
         })
@@ -226,8 +252,9 @@ describe('Dashboard search results logic', () => {
                 const pageId = DATA.PAGE_3.normalizedUrl
 
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .areNotesShown,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].areNotesShown,
                 ).toBe(false)
                 await searchResults.processEvent('setPageNotesShown', {
                     day,
@@ -235,8 +262,9 @@ describe('Dashboard search results logic', () => {
                     areShown: true,
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .areNotesShown,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].areNotesShown,
                 ).toBe(true)
                 await searchResults.processEvent('setPageNotesShown', {
                     day,
@@ -244,8 +272,9 @@ describe('Dashboard search results logic', () => {
                     areShown: false,
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .areNotesShown,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].areNotesShown,
                 ).toBe(false)
             })
 
@@ -257,8 +286,9 @@ describe('Dashboard search results logic', () => {
                 const pageId = DATA.PAGE_1.normalizedUrl
 
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .notesType,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].notesType,
                 ).toEqual(utils.getInitialPageResultState('').notesType)
                 await searchResults.processEvent('setPageNotesType', {
                     day,
@@ -266,8 +296,9 @@ describe('Dashboard search results logic', () => {
                     noteType: 'followed',
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .notesType,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].notesType,
                 ).toEqual('followed')
                 await searchResults.processEvent('setPageNotesType', {
                     day,
@@ -275,8 +306,9 @@ describe('Dashboard search results logic', () => {
                     noteType: 'search',
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .notesType,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].notesType,
                 ).toEqual('search')
                 await searchResults.processEvent('setPageNotesType', {
                     day,
@@ -284,8 +316,9 @@ describe('Dashboard search results logic', () => {
                     noteType: 'user',
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .notesType,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].notesType,
                 ).toEqual('user')
             })
 
@@ -299,8 +332,9 @@ describe('Dashboard search results logic', () => {
                 const pageId = DATA.PAGE_1.normalizedUrl
 
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .newNoteForm.inputValue,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].newNoteForm.inputValue,
                 ).toEqual(
                     utils.getInitialPageResultState('').newNoteForm.inputValue,
                 )
@@ -310,8 +344,9 @@ describe('Dashboard search results logic', () => {
                     value: 'followed',
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .newNoteForm.inputValue,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].newNoteForm.inputValue,
                 ).toEqual('followed')
                 await searchResults.processEvent('setPageNewNoteValue', {
                     day,
@@ -319,8 +354,9 @@ describe('Dashboard search results logic', () => {
                     value: 'search',
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .newNoteForm.inputValue,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].newNoteForm.inputValue,
                 ).toEqual('search')
                 await searchResults.processEvent('setPageNewNoteValue', {
                     day,
@@ -328,8 +364,9 @@ describe('Dashboard search results logic', () => {
                     value: 'user',
                 })
                 expect(
-                    searchResults.state.results[day].pages.byId[pageId]
-                        .newNoteForm.inputValue,
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].newNoteForm.inputValue,
                 ).toEqual('user')
             })
         })

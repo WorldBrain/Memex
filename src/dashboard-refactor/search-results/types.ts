@@ -1,4 +1,5 @@
 import { TaskState } from 'ui-logic-core/lib/types'
+import { UIEvent } from 'ui-logic-core'
 
 import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 import {
@@ -69,4 +70,27 @@ export interface RootState {
     paginationState: TaskState
 }
 
-export interface SearchResultsDependencies {}
+interface PageNotesEventArgs {
+    pageId: string
+    day: number
+}
+
+export type Events = UIEvent<{
+    // Root state mutations
+    setSearchType: { searchType: SearchType }
+    setAllNotesShown: { areShown: boolean }
+
+    // Page data state mutations (*shared with all* occurences of the page in different days)
+    setPageBookmark: { id: string; isBookmarked: boolean }
+
+    // Page result state mutations (*specific to each* occurence of the page in different days)
+    setPageNotesShown: PageNotesEventArgs & { areShown: boolean }
+    setPageNotesSort: PageNotesEventArgs & { sortingFn: AnnotationsSorter }
+    setPageNotesType: PageNotesEventArgs & { noteType: NotesType }
+    setPageNewNoteValue: PageNotesEventArgs & { value: string }
+
+    // Misc data setters
+    setPageData: { pages: PageData[] }
+    setPageSearchResult: { result: StandardSearchResponse }
+    setAnnotationSearchResult: { result: AnnotationsSearchResponse }
+}>
