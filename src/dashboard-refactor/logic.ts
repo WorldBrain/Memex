@@ -126,7 +126,51 @@ export class SearchResultsLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageNewNoteValue: EventHandler<'setPageNewNoteValue'> = ({ event }) => {
+    setPageNewNoteTagPickerShown: EventHandler<
+        'setPageNewNoteTagPickerShown'
+    > = ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    newNoteForm: {
+                                        isTagPickerShown: {
+                                            $set: event.isShown,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setPageNewNoteTags: EventHandler<'setPageNewNoteTags'> = ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    newNoteForm: { tags: { $set: event.tags } },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setPageNewNoteCommentValue: EventHandler<'setPageNewNoteCommentValue'> = ({
+        event,
+    }) => {
         this.emitMutation({
             searchResults: {
                 results: {
@@ -136,6 +180,77 @@ export class SearchResultsLogic extends UILogic<State, Events> {
                                 [event.pageId]: {
                                     newNoteForm: {
                                         inputValue: { $set: event.value },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    cancelPageNewNoteEdit: EventHandler<'cancelPageNewNoteEdit'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    newNoteForm: {
+                                        $set: utils.getInitialFormState(),
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    savePageNewNoteEdit: EventHandler<'savePageNewNoteEdit'> = async ({
+        event,
+        previousState,
+    }) => {
+        const formState =
+            previousState.searchResults.results[event.day].pages.byId[
+                event.pageId
+            ].newNoteForm
+
+        // TODO: Call BG
+        const newNoteId = Date.now().toString()
+
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    allIds: { $push: [newNoteId] },
+                    byId: {
+                        [newNoteId]: {
+                            $set: {
+                                url: newNoteId,
+                                displayTime: Date.now(),
+                                comment: formState.inputValue,
+                                tags: formState.tags,
+                                isEditing: false,
+                                editNoteForm: utils.getInitialFormState(),
+                            },
+                        },
+                    },
+                },
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    newNoteForm: {
+                                        $set: utils.getInitialFormState(),
+                                    },
+                                    noteIds: {
+                                        user: { $push: [newNoteId] },
                                     },
                                 },
                             },
@@ -198,7 +313,9 @@ export class SearchResultsLogic extends UILogic<State, Events> {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            isTagPickerShown: { $set: event.isShown },
+                            editNoteForm: {
+                                isTagPickerShown: { $set: event.isShown },
+                            },
                         },
                     },
                 },
@@ -212,7 +329,9 @@ export class SearchResultsLogic extends UILogic<State, Events> {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            tags: { $set: event.tags },
+                            editNoteForm: {
+                                tags: { $set: event.tags },
+                            },
                         },
                     },
                 },
@@ -228,7 +347,9 @@ export class SearchResultsLogic extends UILogic<State, Events> {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            commentEditValue: { $set: event.value },
+                            editNoteForm: {
+                                inputValue: { $set: event.value },
+                            },
                         },
                     },
                 },
@@ -240,7 +361,7 @@ export class SearchResultsLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const { comment } = previousState.searchResults.noteData.byId[
+        const { comment, tags } = previousState.searchResults.noteData.byId[
             event.noteId
         ]
 
@@ -250,7 +371,11 @@ export class SearchResultsLogic extends UILogic<State, Events> {
                     byId: {
                         [event.noteId]: {
                             isEditing: { $set: false },
-                            commentEditValue: { $set: comment ?? '' },
+                            editNoteForm: {
+                                isTagPickerShown: { $set: false },
+                                inputValue: { $set: comment ?? '' },
+                                tags: { $set: tags ?? [] },
+                            },
                         },
                     },
                 },
@@ -262,9 +387,9 @@ export class SearchResultsLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const { commentEditValue } = previousState.searchResults.noteData.byId[
+        const { inputValue, tags } = previousState.searchResults.noteData.byId[
             event.noteId
-        ]
+        ].editNoteForm
 
         // TODO: call BG
 
@@ -274,7 +399,8 @@ export class SearchResultsLogic extends UILogic<State, Events> {
                     byId: {
                         [event.noteId]: {
                             isEditing: { $set: false },
-                            comment: { $set: commentEditValue },
+                            comment: { $set: inputValue },
+                            tags: { $set: tags },
                         },
                     },
                 },

@@ -18,8 +18,15 @@ export interface NormalizedState<T> {
     byId: { [id: string]: T }
 }
 
+export interface NoteFormState {
+    isTagPickerShown: boolean
+    inputValue: string
+    tags: string[]
+}
+
 export interface NoteData {
     url: string
+    tags: string[]
     comment?: string
     highlight?: string
     displayTime: number
@@ -33,16 +40,9 @@ export interface PageData {
     isBookmarked: boolean
 }
 
-interface NewNoteFormState {
-    inputValue: string
-    // TODO: work out these states (may re-use from sidebar state)
-}
-
 export interface NoteResult {
-    isTagPickerShown: boolean
-    commentEditValue: string
     isEditing: boolean
-    tags: string[]
+    editNoteForm: NoteFormState
 }
 
 export interface PageResult {
@@ -51,7 +51,7 @@ export interface PageResult {
     areNotesShown: boolean
     loadNotesState: TaskState
     sortingFn: AnnotationsSorter
-    newNoteForm: NewNoteFormState
+    newNoteForm: NoteFormState
     noteIds: { [key in NotesType]: string[] }
 }
 
@@ -98,13 +98,19 @@ export type Events = UIEvent<{
     setPageNotesShown: PageEventArgs & { areShown: boolean }
     setPageNotesSort: PageEventArgs & { sortingFn: AnnotationsSorter }
     setPageNotesType: PageEventArgs & { noteType: NotesType }
-    setPageNewNoteValue: PageEventArgs & { value: string }
 
-    // Note result state mutations
-    setPageNoteEditing: NoteEventArgs & { isEditing: boolean }
+    // New note form state mutations
+    setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }
+    setPageNewNoteCommentValue: PageEventArgs & { value: string }
+    setPageNewNoteTags: PageEventArgs & { tags: string[] }
+    savePageNewNoteEdit: PageEventArgs
+    cancelPageNewNoteEdit: PageEventArgs
+
+    // Note edit form state mutations
     setPageNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
-    setPageNoteTags: NoteEventArgs & { tags: string[] }
     setPageNoteCommentValue: NoteEventArgs & { value: string }
+    setPageNoteEditing: NoteEventArgs & { isEditing: boolean }
+    setPageNoteTags: NoteEventArgs & { tags: string[] }
     savePageNoteEdit: NoteEventArgs
     cancelPageNoteEdit: NoteEventArgs
 

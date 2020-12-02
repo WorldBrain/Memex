@@ -62,6 +62,7 @@ export const NOTE_1: NoteData = {
     url: PAGE_1.normalizedUrl + '#0123456789',
     displayTime: new Date('2020-11-26T01:05').getTime(),
     comment: 'Test webpage internet javascript',
+    tags: [],
 }
 
 export const NOTE_2: NoteData = {
@@ -69,12 +70,14 @@ export const NOTE_2: NoteData = {
     displayTime: new Date('2020-11-26T01:07').getTime(),
     comment: 'webpage internet javascript',
     highlight: 'Some test text',
+    tags: [],
 }
 
 export const NOTE_3: NoteData = {
     url: PAGE_1.normalizedUrl + '#0123456789123',
     displayTime: new Date('2020-11-27T18:05').getTime(),
     comment: 'Test webpage internet javascript deer',
+    tags: [],
 }
 
 export const NOTE_4: NoteData = {
@@ -82,12 +85,14 @@ export const NOTE_4: NoteData = {
     displayTime: new Date('2020-11-26T05:15').getTime(),
     comment: 'Memex is a web extensions',
     highlight: 'memex web extension chrome firefox browser',
+    tags: [],
 }
 
 export const NOTE_5: NoteData = {
     url: PAGE_3.normalizedUrl + '#012345678912309',
     displayTime: new Date('2020-11-27T18:15').getTime(),
     highlight: 'memex deer duck garage',
+    tags: [],
 }
 
 export const PAGE_SEARCH_RESULT_1: StandardSearchResponse = {

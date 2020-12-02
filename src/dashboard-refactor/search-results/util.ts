@@ -11,11 +11,18 @@ import {
     NoteData,
     SearchResultToState,
     NoteResult,
+    NoteFormState,
 } from './types'
 
 export const initNormalizedState = <T>(): NormalizedState<T> => ({
     allIds: [],
     byId: {},
+})
+
+export const getInitialFormState = (): NoteFormState => ({
+    tags: [],
+    inputValue: '',
+    isTagPickerShown: false,
 })
 
 export const getInitialPageResultState = (id: string): PageResult => ({
@@ -24,8 +31,13 @@ export const getInitialPageResultState = (id: string): PageResult => ({
     areNotesShown: false,
     sortingFn: (a, b) => 1,
     loadNotesState: 'pristine',
-    newNoteForm: { inputValue: '' },
+    newNoteForm: getInitialFormState(),
     noteIds: { user: [], followed: [], search: [] },
+})
+
+export const getInitialNoteResultState = (id: string): NoteResult => ({
+    isEditing: false,
+    editNoteForm: getInitialFormState(),
 })
 
 export const annotationSearchResultToState: SearchResultToState = (
@@ -58,13 +70,16 @@ export const annotationSearchResultToState: SearchResultToState = (
                     url: annotation.url,
                     highlight: annotation.body,
                     comment: annotation.comment,
+                    tags: annotation.tags ?? [],
                     displayTime:
                         annotation.lastEdited?.getTime() ??
                         annotation.createdWhen.getTime(),
-                    commentEditValue: annotation.comment ?? '',
-                    tags: annotation.tags ?? [],
-                    isTagPickerShown: false,
                     isEditing: false,
+                    editNoteForm: {
+                        inputValue: annotation.comment ?? '',
+                        tags: annotation.tags ?? [],
+                        isTagPickerShown: false,
+                    },
                 }
             }
         }
@@ -121,13 +136,16 @@ export const pageSearchResultToState: SearchResultToState = (
                 url: annotation.url,
                 highlight: annotation.body,
                 comment: annotation.comment,
+                tags: annotation.tags ?? [],
                 displayTime:
                     annotation.lastEdited?.getTime() ??
                     annotation.createdWhen.getTime(),
-                commentEditValue: annotation.comment ?? '',
-                tags: annotation.tags ?? [],
-                isTagPickerShown: false,
                 isEditing: false,
+                editNoteForm: {
+                    inputValue: annotation.comment ?? '',
+                    tags: annotation.tags ?? [],
+                    isTagPickerShown: false,
+                },
             }
         }
     }
