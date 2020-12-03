@@ -15,7 +15,7 @@ const processEvent = remoteFunction('processEvent')
 const styles = require('./DateRangeSelection.css')
 // const stylesPro = require('../../tooltips/components/tooltip.css')
 
-interface Props {
+export interface Props {
     env: 'inpage' | 'overview'
     startDate: number
     startDateText: string
