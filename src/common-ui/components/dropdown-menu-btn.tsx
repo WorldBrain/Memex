@@ -6,6 +6,7 @@ import ButtonTooltip, { Props as ButtonTooltipProps } from './button-tooltip'
 
 export interface MenuItemProps {
     name: string
+    info?: string
     isDisabled?: boolean
 }
 
@@ -20,6 +21,7 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     theme?: ThemeProps
     keepSelectedState?: boolean
     tooltipProps?: ButtonTooltipProps
+    initSelectedIndex?: number
 }
 
 interface State {
@@ -28,9 +30,13 @@ interface State {
 }
 
 export class DropdownMenuBtn extends React.PureComponent<Props, State> {
+    static defaultProps: Partial<Props> = { initSelectedIndex: 0 }
+
     state: State = {
         isOpen: false,
-        selected: this.props.keepSelectedState ? 0 : -1,
+        selected: this.props.keepSelectedState
+            ? this.props.initSelectedIndex
+            : -1,
     }
 
     private lastToggleCall = 0
