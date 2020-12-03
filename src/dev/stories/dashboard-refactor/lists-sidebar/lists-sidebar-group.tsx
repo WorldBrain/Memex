@@ -16,10 +16,12 @@ import { AddableState, ExpandableState } from 'src/dashboard-refactor/types'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { ListsSidebarItemWithMenuProps } from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item-with-menu'
 
-const wrapperFunc = (ChildComponent) => {
+export const sidebarWrapperFunc = (ChildComponent) => {
     const Wrapper = styled.div`
         height: min-content;
-        width: 173px;
+        width: 193px;
+        background-color: #e1e1e1;
+        padding: 10px;
     `
     return () => {
         return (
@@ -200,37 +202,37 @@ export const listsSidebarGroupProps: {
 
 stories.add(
     'Error',
-    wrapperFunc(() => (
+    sidebarWrapperFunc(() => (
         <ListsSidebarGroup {...listsSidebarGroupProps.errorState} />
     )),
 )
 stories.add(
     'Loading',
-    wrapperFunc(() => (
+    sidebarWrapperFunc(() => (
         <ListsSidebarGroup {...listsSidebarGroupProps.loadingState} />
     )),
 )
 stories.add(
     'Inboxes',
-    wrapperFunc(() => (
+    sidebarWrapperFunc(() => (
         <ListsSidebarGroup {...listsSidebarGroupProps.inboxes} />
     )),
 )
 stories.add(
     'My Collections Expanded',
-    wrapperFunc(() => (
+    sidebarWrapperFunc(() => (
         <ListsSidebarGroup {...listsSidebarGroupProps.myCollectionsExpanded} />
     )),
 )
 stories.add(
     'My Collections Collapsed',
-    wrapperFunc(() => (
+    sidebarWrapperFunc(() => (
         <ListsSidebarGroup {...listsSidebarGroupProps.myCollectionsCollapsed} />
     )),
 )
 stories.add(
     'Followed Collections',
-    wrapperFunc(() => (
+    sidebarWrapperFunc(() => (
         <ListsSidebarGroup
             {...listsSidebarGroupProps.followedCollectionsExpanded}
         />

@@ -3,7 +3,7 @@ import { storiesOf } from '@storybook/react'
 
 import { sidebarToggleProps } from './sidebar-toggle'
 
-import SidebarHeader from 'src/dashboard-refactor/header/SidebarHeader/SidebarHeader'
+import SidebarHeader from 'src/dashboard-refactor/header/sidebar-header/'
 
 const stories = storiesOf('Dashboard Refactor|Header/Sidebar Header', module)
 

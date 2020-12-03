@@ -1,12 +1,14 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 
-import ListsSidebarItem, {
-    DropReceivingState,
-} from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/'
+import ListsSidebarItem from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/'
 import ListsSidebarItemWithMenu, {
     ListsSidebarItemWithMenuProps,
 } from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item-with-menu'
+import {
+    DropReceivingComponentState,
+    ListsSidebarItemComponentProps,
+} from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/types'
 
 const newItemsCountState = {
     displayNewItemsCount: false,
@@ -18,7 +20,7 @@ const moreActionButtonState = {
     displayMoreActionButton: true,
 }
 
-const dropReceivingState: DropReceivingState = {
+const dropReceivingState: DropReceivingComponentState = {
     canReceiveDroppedItems: true, // this defines whether items can be dropped (not whether there is a state change on drag-over)
     isDraggedOver: false,
     triggerSuccessfulDropAnimation: false,
@@ -27,143 +29,119 @@ const dropReceivingState: DropReceivingState = {
     onDrop: () => {},
 }
 
+const hoverState = {
+    onHoverEnter: () => {},
+    onHoverLeave: () => {},
+    isHovered: false,
+}
+
+const selectedState = {
+    onSelection: () => {},
+    isSelected: false,
+}
+
+const template: ListsSidebarItemComponentProps = {
+    isEditing: false,
+    listName: [
+        {
+            text: 'Cool List Name',
+            match: false,
+        },
+    ],
+    hoverState,
+    selectedState,
+    dropReceivingState,
+    newItemsCountState,
+    moreActionButtonState,
+}
+
 export const listsSidebarItemProps = {
     default: {
-        isEditing: false,
-        moreActionButtonState,
-        listName: 'This is a very long collection name',
-        selectedState: {
-            onSelection: () => {},
-            isSelected: false,
-        },
-        hoverState: {
-            onHoverEnter: () => {},
-            onHoverLeave: () => {},
-            isHovered: false,
-        },
-        dropReceivingState,
-        newItemsCountState,
+        ...template,
     },
     hovered: {
-        isEditing: false,
-        moreActionButtonState,
-        listName: 'This is a very long collection name',
-        selectedState: {
-            onSelection: () => {},
-            isSelected: false,
-        },
+        ...template,
         hoverState: {
-            onHoverEnter: () => {},
-            onHoverLeave: () => {},
+            ...hoverState,
             isHovered: true,
         },
-        dropReceivingState,
-        newItemsCountState,
     },
     selected: {
-        isEditing: false,
-        moreActionButtonState,
-        listName: 'This is a very long collection name',
+        ...template,
         selectedState: {
-            onSelection: () => {},
+            ...selectedState,
             isSelected: true,
         },
-        hoverState: {
-            onHoverEnter: () => {},
-            onHoverLeave: () => {},
-            isHovered: false,
-        },
-        dropReceivingState,
-        newItemsCountState,
     },
     hoveredAndSelected: {
-        isEditing: false,
-        moreActionButtonState,
-        listName: 'This is a very long collection name',
+        ...template,
         selectedState: {
-            onSelection: () => {},
+            ...selectedState,
             isSelected: true,
         },
         hoverState: {
-            onHoverEnter: () => {},
-            onHoverLeave: () => {},
+            ...hoverState,
             isHovered: true,
         },
-        dropReceivingState,
-        newItemsCountState,
     },
     isEditing: {
+        ...template,
         isEditing: true,
-        moreActionButtonState,
-        listName: 'This is a very long collection name',
         selectedState: {
-            onSelection: () => {},
+            ...selectedState,
             isSelected: true,
         },
-        hoverState: {
-            onHoverEnter: () => {},
-            onHoverLeave: () => {},
-            isHovered: false,
-        },
-        dropReceivingState,
-        newItemsCountState,
     },
     isDroppableAndDraggedOver: {
-        isEditing: false,
-        moreActionButtonState,
-        listName: `This is a very long collection name`,
-        selectedState: {
-            onSelection: () => {},
-            isSelected: false,
-        },
+        ...template,
         hoverState: {
-            onHoverEnter: () => {},
-            onHoverLeave: () => {},
+            ...hoverState,
             isHovered: true,
         },
         dropReceivingState: {
             ...dropReceivingState,
             isDraggedOver: true,
         },
-        newItemsCountState,
     },
     onDrop: {
-        isEditing: false,
-        moreActionButtonState,
-        listName: `This is a very long collection name`,
-        selectedState: {
-            onSelection: () => {},
-            isSelected: false,
-        },
+        ...template,
         hoverState: {
-            onHoverEnter: () => {},
-            onHoverLeave: () => {},
+            ...hoverState,
             isHovered: true,
         },
         dropReceivingState: {
             ...dropReceivingState,
-            isBlinking: true,
+            triggerSuccessfulDropAnimation: true,
         },
-        newItemsCountState,
     },
     displayNewItemsCount: {
-        isEditing: false,
-        moreActionButtonState,
-        listName: 'This is a very long collection name',
-        selectedState: {
-            onSelection: () => {},
-            isSelected: false,
-        },
-        hoverState: {
-            onHoverEnter: () => {},
-            onHoverLeave: () => {},
-            isHovered: false,
-        },
-        dropReceivingState,
+        ...template,
         newItemsCountState: {
             displayNewItemsCount: true,
             newItemsCount: Math.floor(Math.random() * 10),
         },
+    },
+    longName: {
+        ...template,
+        listName: [
+            {
+                text: 'This is a very long collection name',
+                match: false,
+            },
+        ],
+    },
+    searchMatch: {
+        ...template,
+        listName: [
+            {
+                text: 'Astro',
+                match: true,
+            },
+            {
+                text: 'physics',
+                match: false,
+            },
+        ],
     },
 }
 
@@ -195,6 +173,12 @@ stories.add('On Drop', () => (
 ))
 stories.add('Display New Items Count', () => (
     <ListsSidebarItem {...listsSidebarItemProps.displayNewItemsCount} />
+))
+stories.add('Long List Name', () => (
+    <ListsSidebarItem {...listsSidebarItemProps.longName} />
+))
+stories.add('Search Restul', () => (
+    <ListsSidebarItem {...listsSidebarItemProps.searchMatch} />
 ))
 
 export const listsSidebarItemWithMenuProps: ListsSidebarItemWithMenuProps = {

@@ -3,7 +3,7 @@ import React, { PureComponent } from 'react'
 import styled, { css } from 'styled-components'
 import colors from '../../../colors'
 
-import { SidebarLockedState } from '../types'
+import { SidebarLockedState } from '../../../lists-sidebar/types'
 import { HoverState } from '../../../types'
 
 const buttonStyles = `

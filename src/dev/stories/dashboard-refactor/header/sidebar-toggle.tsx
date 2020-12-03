@@ -1,41 +1,48 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 
-import SidebarToggle from 'src/dashboard-refactor/header/SidebarHeader/SidebarToggle/SidebarToggle'
+import SidebarToggle, {
+    SidebarToggleProps,
+} from 'src/dashboard-refactor/header/sidebar-header/sidebar-toggle/'
+import { SidebarLockedState } from 'src/dashboard-refactor/lists-sidebar/types'
+import { HoverState } from 'src/dashboard-refactor/types'
 
 const stories = storiesOf('Dashboard Refactor|Header/Sidebar Toggle', module)
 
+const sidebarLockedState: SidebarLockedState = {
+    isSidebarLocked: false,
+    toggleSidebarLockedState: () => {},
+}
+
+const hoverState: HoverState = {
+    isHovered: false,
+    onHoverEnter: () => {},
+    onHoverLeave: () => {},
+}
+
+const template: SidebarToggleProps = {
+    sidebarLockedState: sidebarLockedState,
+    hoverState: hoverState,
+}
+
 export const sidebarToggleProps = {
     noHover: {
-        sidebarLockedState: {
-            toggleSidebarLockedState: function () {},
-            isSidebarLocked: false,
-        },
-        hoverState: {
-            onHoverEnter: function () {},
-            onHoverLeave: function () {},
-            isHovered: false,
-        },
+        ...template,
     },
     unlockedHover: {
-        sidebarLockedState: {
-            toggleSidebarLockedState: function () {},
-            isSidebarLocked: false,
-        },
+        ...template,
         hoverState: {
-            onHoverEnter: function () {},
-            onHoverLeave: function () {},
+            ...hoverState,
             isHovered: true,
         },
     },
     lockedHover: {
         sidebarLockedState: {
-            toggleSidebarLockedState: function () {},
+            ...sidebarLockedState,
             isSidebarLocked: true,
         },
         hoverState: {
-            onHoverEnter: function () {},
-            onHoverLeave: function () {},
+            ...hoverState,
             isHovered: true,
         },
     },
