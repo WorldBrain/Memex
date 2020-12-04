@@ -314,7 +314,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                         Save current page
                                     </div>
                                     <div className={styles.shortcutDescription}>
-                                        Annotate highlighted Text
+                                        Annotate highlighted text
                                     </div>
                                     <div className={styles.shortcutDescription}>
                                         Full-Text search pages and highlights
