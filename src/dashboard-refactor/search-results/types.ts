@@ -7,6 +7,28 @@ import {
     StandardSearchResponse,
 } from 'src/search/background/types'
 
+export interface InteractionProps {
+    onCopyPasterBtnClick: React.MouseEventHandler
+    onListPickerBtnClick: React.MouseEventHandler
+    onTagPickerBtnClick: React.MouseEventHandler
+    onBookmarkBtnClick: React.MouseEventHandler
+    onNotesBtnClick: React.MouseEventHandler
+    onReplyBtnClick: React.MouseEventHandler
+    onShareBtnClick: React.MouseEventHandler
+    onTrashBtnClick: React.MouseEventHandler
+}
+
+export type PageInteractionProps = {
+    [Key in keyof InteractionProps]: (
+        day: number,
+        pageId: string,
+    ) => InteractionProps[Key]
+}
+
+export type NoteInteractionProps = {
+    [Key in keyof InteractionProps]: (noteId: string) => InteractionProps[Key]
+}
+
 export type SearchResultToState = (
     result: AnnotationsSearchResponse | StandardSearchResponse,
 ) => Pick<RootState, 'results' | 'noteData' | 'pageData'>
