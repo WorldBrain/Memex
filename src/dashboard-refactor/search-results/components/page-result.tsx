@@ -4,19 +4,15 @@ import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { PageData } from '../types'
+import { PageData, InteractionProps } from '../types'
 
-export interface Props extends PageData {
-    onCopyPasterBtnClick: React.MouseEventHandler
-    onListPickerBtnClick: React.MouseEventHandler
-    onTagPickerBtnClick: React.MouseEventHandler
-    onNotesBtnClick: React.MouseEventHandler
-    onShareBtnClick: React.MouseEventHandler
-    onTrashBtnClick: React.MouseEventHandler
-    isShared: boolean
-    hasNotes: boolean
-    hasLists: boolean
-    hasTags: boolean
+export interface Props
+    extends PageData,
+        Omit<InteractionProps, 'onReplyBtnClick'> {
+    isShared?: boolean
+    hasNotes?: boolean
+    hasLists?: boolean
+    hasTags?: boolean
 }
 
 export default class PageResult extends PureComponent<Props> {
@@ -67,6 +63,13 @@ export default class PageResult extends PureComponent<Props> {
                                     ? icons.commentEditFull
                                     : icons.commentEdit,
                                 onClick: this.props.onNotesBtnClick,
+                            },
+                            {
+                                key: 'bookmark-page-btn',
+                                image: this.props.isBookmarked
+                                    ? icons.heartFull
+                                    : icons.heartEmpty,
+                                onClick: this.props.onBookmarkBtnClick,
                             },
                         ]}
                     />

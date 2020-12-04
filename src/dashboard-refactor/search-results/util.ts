@@ -12,6 +12,9 @@ import {
     SearchResultToState,
     NoteResult,
     NoteFormState,
+    NoteInteractionProps,
+    PageInteractionProps,
+    InteractionProps,
 } from './types'
 
 export const initNormalizedState = <T>(): NormalizedState<T> => ({
@@ -24,6 +27,19 @@ export const getInitialFormState = (): NoteFormState => ({
     inputValue: '',
     isTagPickerShown: false,
 })
+
+export const setupInteractionProps = (
+    props: PageInteractionProps | NoteInteractionProps,
+    ...args
+): InteractionProps => {
+    const interactionProps = {} as InteractionProps
+
+    for (const [key, interactionSetup] of Object.entries(props)) {
+        interactionProps[key] = interactionSetup(...args)
+    }
+
+    return interactionProps
+}
 
 export const getInitialPageResultState = (id: string): PageResult => ({
     id,
