@@ -75,3 +75,29 @@ export interface FiltersState {
     domainsIncluded: string[]
     domainsExcluded: string[]
 }
+
+export type FilterEvents = UIEvent<{
+    setSearchQuery: { query: string }
+    setSearchBarFocused: { isFocused: boolean }
+
+    setSearchFiltersOpen: { isOpen: boolean }
+    setTagFilterActive: { isActive: boolean }
+    setDateFilterActive: { isActive: boolean }
+    setDomainFilterActive: { isActive: boolean }
+
+    setDateFromInputValue: { value: string }
+    setDateToInputValue: { value: string }
+    setDateFrom: { value: number }
+    setDateTo: { value: number }
+
+    addIncludedTag: { tag: string }
+    delIncludedTag: { tag: string }
+    addIncludedDomain: { tag: string }
+    delIncludedDomain: { tag: string }
+    setTagsIncluded: { tags: string[] }
+    setTagsExcluded: { tags: string[] }
+    setDomainsIncluded: { domains: string[] }
+    setDomainsExcluded: { domains: string[] }
+
+    resetFilters: null
+}>
