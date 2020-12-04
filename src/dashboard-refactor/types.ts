@@ -55,3 +55,23 @@ export interface SelectedState {
 }
 
 export type ListSource = 'local-lists' | 'followed-list'
+
+// TODO: move this into the filter's dir once merged in
+export interface FiltersState {
+    searchQuery: string
+    isSearchBarFocused: boolean
+    searchFiltersOpen: boolean
+    isTagFilterActive: boolean
+    isDateFilterActive: boolean
+    isDomainFilterActive: boolean
+
+    dateFromInput?: string
+    dateToInput?: string
+    dateFrom?: number
+    dateTo?: number
+
+    tagsIncluded: string[]
+    tagsExcluded: string[]
+    domainsIncluded: string[]
+    domainsExcluded: string[]
+}
