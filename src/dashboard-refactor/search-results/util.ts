@@ -28,11 +28,11 @@ export const getInitialFormState = (): NoteFormState => ({
     isTagPickerShown: false,
 })
 
-export const setupInteractionProps = (
-    props: PageInteractionProps | NoteInteractionProps,
+export const setupInteractionProps = <T = InteractionProps>(
+    props: { [key: string]: (...args) => any },
     ...args
-): InteractionProps => {
-    const interactionProps = {} as InteractionProps
+): T => {
+    const interactionProps = {} as T
 
     for (const [key, interactionSetup] of Object.entries(props)) {
         interactionProps[key] = interactionSetup(...args)
