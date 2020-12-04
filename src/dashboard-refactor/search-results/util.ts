@@ -12,8 +12,6 @@ import {
     SearchResultToState,
     NoteResult,
     NoteFormState,
-    NoteInteractionProps,
-    PageInteractionProps,
     InteractionProps,
 } from './types'
 

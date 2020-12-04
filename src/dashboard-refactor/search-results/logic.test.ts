@@ -1,43 +1,11 @@
+import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import {
-    makeSingleDeviceUILogicTestFactory,
-    UILogicTestDevice,
-} from 'src/tests/ui-logic-tests'
-import { SearchResultsLogic } from '../logic'
-import { Events, RootState } from '../types'
-import * as DATA from './logic.test.data'
+    setupTest,
+    setPageSearchResult,
+    setNoteSearchResult,
+} from '../logic.test.util'
+import * as DATA from '../logic.test.data'
 import * as utils from './util'
-import {
-    StandardSearchResponse,
-    AnnotationsSearchResponse,
-} from 'src/search/background/types'
-import { TestLogicContainer } from 'ui-logic-core/lib/testing'
-
-type DataSeeder = (logic: TestLogicContainer<RootState, Events>) => void
-type DataSeederCreator = (
-    data?: StandardSearchResponse | AnnotationsSearchResponse,
-) => DataSeeder
-
-const setPageSearchResult: DataSeederCreator = (
-    result = DATA.PAGE_SEARCH_RESULT_1,
-) => (logic) => logic.processEvent('setPageSearchResult', { result })
-
-const setNoteSearchResult: DataSeederCreator = (
-    result: any = DATA.ANNOT_SEARCH_RESULT_2,
-) => (logic) => logic.processEvent('setAnnotationSearchResult', { result })
-
-async function setupTest(
-    device: UILogicTestDevice,
-    args: { seedData?: DataSeeder } = {},
-) {
-    const logic = new SearchResultsLogic({})
-    const searchResults = device.createElement(logic)
-
-    if (args.seedData) {
-        args.seedData(searchResults)
-    }
-
-    return { searchResults, logic }
-}
 
 describe('Dashboard search results logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()

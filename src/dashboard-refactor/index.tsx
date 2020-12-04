@@ -1,4 +1,4 @@
-import { SearchResultsLogic } from './logic'
+import { DashboardLogic } from './logic'
 import { RootState, Events, DashboardDependencies } from './types'
 import { StatefulUIElement } from 'src/util/ui-logic'
 
@@ -10,7 +10,7 @@ export class DashboardContainer extends StatefulUIElement<
     Events
 > {
     constructor(props: Props) {
-        super(props, new SearchResultsLogic(props))
+        super(props, new DashboardLogic(props))
     }
 
     render() {

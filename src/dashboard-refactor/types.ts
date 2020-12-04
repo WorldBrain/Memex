@@ -7,9 +7,12 @@ import {
 
 export interface RootState {
     searchResults: SearchResultsState
+    searchFilters: SearchFiltersState
 }
 
-export type Events = UIEvent<SearchResultEvents & { example: null }>
+export type Events = UIEvent<
+    SearchResultEvents & SearchFilterEvents & { example: null }
+>
 
 export interface DashboardDependencies {}
 
@@ -57,7 +60,7 @@ export interface SelectedState {
 export type ListSource = 'local-lists' | 'followed-list'
 
 // TODO: move this into the filter's dir once merged in
-export interface FiltersState {
+export interface SearchFiltersState {
     searchQuery: string
     isSearchBarFocused: boolean
     searchFiltersOpen: boolean
@@ -65,8 +68,8 @@ export interface FiltersState {
     isDateFilterActive: boolean
     isDomainFilterActive: boolean
 
-    dateFromInput?: string
-    dateToInput?: string
+    dateFromInput: string
+    dateToInput: string
     dateFrom?: number
     dateTo?: number
 
@@ -76,7 +79,7 @@ export interface FiltersState {
     domainsExcluded: string[]
 }
 
-export type FilterEvents = UIEvent<{
+export type SearchFilterEvents = UIEvent<{
     setSearchQuery: { query: string }
     setSearchBarFocused: { isFocused: boolean }
 
@@ -92,8 +95,14 @@ export type FilterEvents = UIEvent<{
 
     addIncludedTag: { tag: string }
     delIncludedTag: { tag: string }
-    addIncludedDomain: { tag: string }
-    delIncludedDomain: { tag: string }
+    addExcludedTag: { tag: string }
+    delExcludedTag: { tag: string }
+
+    addIncludedDomain: { domain: string }
+    delIncludedDomain: { domain: string }
+    addExcludedDomain: { domain: string }
+    delExcludedDomain: { domain: string }
+
     setTagsIncluded: { tags: string[] }
     setTagsExcluded: { tags: string[] }
     setDomainsIncluded: { domains: string[] }

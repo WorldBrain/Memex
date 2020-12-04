@@ -9,7 +9,7 @@ type EventHandler<EventName extends keyof Events> = UIEventHandler<
     EventName
 >
 
-export class SearchResultsLogic extends UILogic<State, Events> {
+export class DashboardLogic extends UILogic<State, Events> {
     constructor(private options: DashboardDependencies) {
         super()
     }
@@ -31,9 +31,24 @@ export class SearchResultsLogic extends UILogic<State, Events> {
                 searchState: 'pristine',
                 paginationState: 'pristine',
             },
+            searchFilters: {
+                searchQuery: '',
+                isSearchBarFocused: false,
+                domainsExcluded: [],
+                domainsIncluded: [],
+                isDateFilterActive: false,
+                isDomainFilterActive: false,
+                isTagFilterActive: false,
+                searchFiltersOpen: false,
+                tagsExcluded: [],
+                tagsIncluded: [],
+                dateFromInput: '',
+                dateToInput: '',
+            },
         }
     }
 
+    /* START - search result event handlers */
     setPageSearchResult: EventHandler<'setPageSearchResult'> = ({ event }) => {
         const state = utils.pageSearchResultToState(event.result)
         this.emitMutation({
@@ -407,6 +422,35 @@ export class SearchResultsLogic extends UILogic<State, Events> {
             },
         })
     }
+    /* END - search result event handlers */
+
+    /* START - search filter event handlers */
+    savePageNoteEdit: EventHandler<'savePageNoteEdit'> = async ({
+        event,
+        previousState,
+    }) => {
+        const { inputValue, tags } = previousState.searchResults.noteData.byId[
+            event.noteId
+        ].editNoteForm
+
+        // TODO: call BG
+
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            isEditing: { $set: false },
+                            comment: { $set: inputValue },
+                            tags: { $set: tags },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    /* END - search filter event handlers */
 
     example: EventHandler<'example'> = ({ event }) => {
         this.emitMutation({})
