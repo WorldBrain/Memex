@@ -1,6 +1,7 @@
 import Dexie from 'dexie'
 import Storex from '@worldbrain/storex'
 import { Storage } from 'webextension-polyfill-ts'
+import textStemmer from '@worldbrain/memex-stemmer'
 import { URLNormalizer } from '@worldbrain/memex-url-utils'
 import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
 
@@ -18,6 +19,24 @@ export interface Migrations {
 }
 
 export const migrations: Migrations = {
+    /*
+     * We messed this up due to a bug with our storage layer logic, which means we need to rederive the searchable terms field.
+     */
+    'searchable-list-name-2': async ({ storex }) => {
+        const lists = storex.collection('customLists')
+        const data = await lists.findAllObjects<any>({})
+
+        for (const { id, name, nameTerms } of data) {
+            if (nameTerms) {
+                continue
+            }
+
+            await lists.updateOneObject(
+                { id },
+                { nameTerms: [...textStemmer(name)], searchableName: name },
+            )
+        }
+    },
     /*
      * We wanted to add the ability to search for individual terms that can appear
      * in a list's name. So we've added a 'text' field and this migration populates it

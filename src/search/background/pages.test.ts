@@ -424,6 +424,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                         id: listId,
                                         name: 'test',
                                         searchableName: 'test',
+                                        nameTerms: ['test'],
                                         isDeletable: true,
                                         isNestable: true,
                                         createdAt: expect.any(Date),
