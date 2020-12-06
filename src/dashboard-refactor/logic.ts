@@ -425,31 +425,207 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* END - search result event handlers */
 
     /* START - search filter event handlers */
-    savePageNoteEdit: EventHandler<'savePageNoteEdit'> = async ({
-        event,
-        previousState,
-    }) => {
-        const { inputValue, tags } = previousState.searchResults.noteData.byId[
-            event.noteId
-        ].editNoteForm
-
-        // TODO: call BG
-
+    setSearchQuery: EventHandler<'setSearchQuery'> = async ({ event }) => {
         this.emitMutation({
-            searchResults: {
-                noteData: {
-                    byId: {
-                        [event.noteId]: {
-                            isEditing: { $set: false },
-                            comment: { $set: inputValue },
-                            tags: { $set: tags },
-                        },
-                    },
-                },
-            },
+            searchFilters: { searchQuery: { $set: event.query } },
         })
     }
 
+    setSearchBarFocus: EventHandler<'setSearchBarFocus'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: { isSearchBarFocused: { $set: event.isFocused } },
+        })
+    }
+
+    setSearchFiltersOpen: EventHandler<'setSearchFiltersOpen'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: { searchFiltersOpen: { $set: event.isOpen } },
+        })
+    }
+
+    setTagFilterActive: EventHandler<'setTagFilterActive'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: { isTagFilterActive: { $set: event.isActive } },
+        })
+    }
+
+    setDateFilterActive: EventHandler<'setDateFilterActive'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: { isDateFilterActive: { $set: event.isActive } },
+        })
+    }
+
+    setDomainFilterActive: EventHandler<'setDomainFilterActive'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: { isDomainFilterActive: { $set: event.isActive } },
+        })
+    }
+
+    setDateFromInputValue: EventHandler<'setDateFromInputValue'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: { dateFromInput: { $set: event.value } },
+        })
+    }
+
+    setDateToInputValue: EventHandler<'setDateToInputValue'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: { dateToInput: { $set: event.value } },
+        })
+    }
+
+    setDateFrom: EventHandler<'setDateFrom'> = async ({ event }) => {
+        this.emitMutation({
+            searchFilters: { dateFrom: { $set: event.value } },
+        })
+    }
+
+    setDateTo: EventHandler<'setDateTo'> = async ({ event }) => {
+        this.emitMutation({ searchFilters: { dateTo: { $set: event.value } } })
+    }
+
+    addIncludedTag: EventHandler<'addIncludedTag'> = async ({ event }) => {
+        this.emitMutation({
+            searchFilters: { tagsIncluded: { $push: [event.tag] } },
+        })
+    }
+
+    delIncludedTag: EventHandler<'delIncludedTag'> = async ({
+        event,
+        previousState,
+    }) => {
+        const index = previousState.searchFilters.tagsIncluded.findIndex(
+            (tag) => tag === event.tag,
+        )
+
+        if (index === -1) {
+            return
+        }
+
+        this.emitMutation({
+            searchFilters: { tagsIncluded: { $splice: [[index, 1]] } },
+        })
+    }
+
+    addExcludedTag: EventHandler<'addExcludedTag'> = async ({ event }) => {
+        this.emitMutation({
+            searchFilters: { tagsExcluded: { $push: [event.tag] } },
+        })
+    }
+
+    delExcludedTag: EventHandler<'delExcludedTag'> = async ({
+        event,
+        previousState,
+    }) => {
+        const index = previousState.searchFilters.tagsExcluded.findIndex(
+            (tag) => tag === event.tag,
+        )
+
+        if (index === -1) {
+            return
+        }
+
+        this.emitMutation({
+            searchFilters: { tagsExcluded: { $splice: [[index, 1]] } },
+        })
+    }
+
+    addIncludedDomain: EventHandler<'addIncludedDomain'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: { domainsIncluded: { $push: [event.domain] } },
+        })
+    }
+
+    delIncludedDomain: EventHandler<'delIncludedDomain'> = async ({
+        event,
+        previousState,
+    }) => {
+        const index = previousState.searchFilters.domainsIncluded.findIndex(
+            (tag) => tag === event.domain,
+        )
+
+        if (index === -1) {
+            return
+        }
+
+        this.emitMutation({
+            searchFilters: { domainsIncluded: { $splice: [[index, 1]] } },
+        })
+    }
+
+    addExcludedDomain: EventHandler<'addExcludedDomain'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: { domainsExcluded: { $push: [event.domain] } },
+        })
+    }
+
+    delExcludedDomain: EventHandler<'delExcludedDomain'> = async ({
+        event,
+        previousState,
+    }) => {
+        const index = previousState.searchFilters.domainsExcluded.findIndex(
+            (tag) => tag === event.domain,
+        )
+
+        if (index === -1) {
+            return
+        }
+
+        this.emitMutation({
+            searchFilters: { domainsExcluded: { $splice: [[index, 1]] } },
+        })
+    }
+
+    setTagsIncluded: EventHandler<'setTagsIncluded'> = async ({ event }) => {
+        this.emitMutation({
+            searchFilters: { tagsIncluded: { $set: event.tags } },
+        })
+    }
+
+    setTagsExcluded: EventHandler<'setTagsExcluded'> = async ({ event }) => {
+        this.emitMutation({
+            searchFilters: { tagsExcluded: { $set: event.tags } },
+        })
+    }
+
+    setDomainsIncluded: EventHandler<'setDomainsIncluded'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: { domainsIncluded: { $set: event.domains } },
+        })
+    }
+
+    setDomainsExcluded: EventHandler<'setDomainsExcluded'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: { domainsExcluded: { $set: event.domains } },
+        })
+    }
+
+    resetFilters: EventHandler<'resetFilters'> = async ({ event }) => {
+        this.emitMutation({
+            searchFilters: { $set: this.getInitialState().searchFilters },
+        })
+    }
     /* END - search filter event handlers */
 
     example: EventHandler<'example'> = ({ event }) => {

@@ -1,4 +1,4 @@
-import { PageData, NoteData } from './types'
+import { PageData, NoteData } from './search-results/types'
 import {
     StandardSearchResponse,
     AnnotPage,

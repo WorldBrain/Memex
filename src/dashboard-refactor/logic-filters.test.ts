@@ -19,13 +19,13 @@ describe('Dashboard search filters logic', () => {
         expect(searchResults.state.searchFilters.isSearchBarFocused).toEqual(
             false,
         )
-        await searchResults.processEvent('setSearchBarFocused', {
+        await searchResults.processEvent('setSearchBarFocus', {
             isFocused: true,
         })
         expect(searchResults.state.searchFilters.isSearchBarFocused).toEqual(
             true,
         )
-        await searchResults.processEvent('setSearchBarFocused', {
+        await searchResults.processEvent('setSearchBarFocus', {
             isFocused: false,
         })
         expect(searchResults.state.searchFilters.isSearchBarFocused).toEqual(
@@ -162,13 +162,11 @@ describe('Dashboard search filters logic', () => {
         const { searchResults } = await setupTest(device)
         const dateValue = 'test'
 
-        expect(searchResults.state.searchFilters.dateFromInput).toEqual('')
+        expect(searchResults.state.searchFilters.dateToInput).toEqual('')
         await searchResults.processEvent('setDateToInputValue', {
             value: dateValue,
         })
-        expect(searchResults.state.searchFilters.dateFromInput).toEqual(
-            dateValue,
-        )
+        expect(searchResults.state.searchFilters.dateToInput).toEqual(dateValue)
     })
 
     it('should be able to add and remove included + excluded tag filters', async ({

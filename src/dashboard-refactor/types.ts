@@ -81,7 +81,7 @@ export interface SearchFiltersState {
 
 export type SearchFilterEvents = UIEvent<{
     setSearchQuery: { query: string }
-    setSearchBarFocused: { isFocused: boolean }
+    setSearchBarFocus: { isFocused: boolean }
 
     setSearchFiltersOpen: { isOpen: boolean }
     setTagFilterActive: { isActive: boolean }
