@@ -6,7 +6,7 @@ import { sizeConstants } from 'src/dashboard-refactor/constants'
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { DatePicker, TagPicker, DomainPicker, ListPicker } from './components/'
+import { DatePicker, TagPicker, ListPicker } from './components/'
 
 import { SelectedState } from '../../types'
 import { Props as DateRangeSelectionProps } from 'src/overview/search-bar/components/DateRangeSelection'
