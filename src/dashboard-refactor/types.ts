@@ -11,7 +11,12 @@ export interface RootState {
 }
 
 export type Events = UIEvent<
-    SearchResultEvents & SearchFilterEvents & { example: null }
+    SearchResultEvents &
+        SearchFilterEvents & {
+            searchPages: null
+            searchNotes: null
+            example: null
+        }
 >
 
 export interface DashboardDependencies {}
