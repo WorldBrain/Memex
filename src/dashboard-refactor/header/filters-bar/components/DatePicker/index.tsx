@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import DateRangeSelection, {
     Props as DateRangeSelectionProps,
-} from 'src/overview/search-bar/components/DateRangeSelection'
+} from './DateRangeSelection'
 
 export default class DatePicker extends PureComponent<DateRangeSelectionProps> {
     render() {
