@@ -6,6 +6,7 @@ import {
     AnnotationsSearchResponse,
     StandardSearchResponse,
 } from 'src/search/background/types'
+import { PipelineRes } from 'src/search'
 
 export interface InteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -54,10 +55,8 @@ export interface NoteData {
     displayTime: number
 }
 
-export interface PageData {
+export type PageData = Pick<PipelineRes, 'fullUrl' | 'fullTitle'> & {
     normalizedUrl: string
-    fullUrl: string
-    title: string
     displayTime: number
     isBookmarked: boolean
 }

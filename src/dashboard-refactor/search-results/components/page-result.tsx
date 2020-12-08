@@ -21,7 +21,7 @@ export default class PageResult extends PureComponent<Props> {
             <ItemBox>
                 <StyledPageResult>
                     <PageContentBox>
-                        <PageTitle>{this.props.title}</PageTitle>
+                        <PageTitle>{this.props.fullTitle}</PageTitle>
                         <PageUrl>{this.props.fullUrl}</PageUrl>
                     </PageContentBox>
 

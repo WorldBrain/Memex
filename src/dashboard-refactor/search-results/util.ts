@@ -109,7 +109,7 @@ export const annotationSearchResultToState: SearchResultToState = (
 
         pageData.allIds.push(id)
         pageData.byId[id] = {
-            title: pageResult.title,
+            fullTitle: pageResult.title,
             fullUrl: pageResult.url,
             normalizedUrl: pageResult.url,
             displayTime: pageResult.displayTime,
@@ -131,7 +131,7 @@ export const pageSearchResultToState: SearchResultToState = (
         const id = pageResult.url
 
         pageData.byId[id] = {
-            title: pageResult.title,
+            fullTitle: pageResult.title,
             fullUrl: pageResult.url,
             normalizedUrl: pageResult.url,
             displayTime: pageResult.displayTime,

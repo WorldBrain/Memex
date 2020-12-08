@@ -11,7 +11,7 @@ const pageDataToSearchRes = (
     notes: NoteData[] = [],
 ): AnnotPage => ({
     url: page.normalizedUrl,
-    title: page.title,
+    title: page.fullTitle,
     hasBookmark: page.isBookmarked,
     annotations: notes.map((note) => noteDataToSearchRes(note, page)),
     annotsCount: notes.length,
@@ -38,7 +38,7 @@ export const PAGE_1: PageData = {
     normalizedUrl: 'test.com',
     fullUrl: 'https://test.com',
     isBookmarked: false,
-    title: 'Test page',
+    fullTitle: 'Test page',
     displayTime: new Date('2020-11-26T01:00').getTime(),
 }
 
@@ -46,7 +46,7 @@ export const PAGE_2: PageData = {
     normalizedUrl: 'getmemex.com',
     fullUrl: 'https://getmemex.com',
     isBookmarked: false,
-    title: 'Memex ext is good',
+    fullTitle: 'Memex ext is good',
     displayTime: new Date('2020-11-26T05:00').getTime(),
 }
 
@@ -54,7 +54,7 @@ export const PAGE_3: PageData = {
     normalizedUrl: 'getmemex.com/sub',
     fullUrl: 'https://getmemex.com/sub',
     isBookmarked: false,
-    title: 'Memex ext is a web extension',
+    fullTitle: 'Memex ext is a web extension',
     displayTime: new Date('2020-11-26T05:10').getTime(),
 }
 
