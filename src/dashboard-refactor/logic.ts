@@ -1,10 +1,10 @@
 import { UILogic, UIEventHandler } from 'ui-logic-core'
-import { TaskState } from 'ui-logic-core/lib/types'
 
-import { RootState as State, DashboardDependencies, Events } from './types'
 import * as utils from './search-results/util'
+import { executeUITask } from 'src/util/ui-logic'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { SearchInterface } from 'src/search/background/types'
+import { RootState as State, DashboardDependencies, Events } from './types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -57,80 +57,78 @@ export class DashboardLogic extends UILogic<State, Events> {
     searchPages: EventHandler<'searchPages'> = async ({
         previousState: { searchFilters },
     }) => {
-        const emit = (state: TaskState) =>
-            this.emitMutation({
-                searchResults: { searchState: { $set: state } },
-            })
+        await executeUITask(
+            this,
+            (taskState) => ({
+                searchResults: { searchState: { $set: taskState } },
+            }),
+            async () => {
+                const result = await this.searchBG.searchPages({
+                    contentTypes: {
+                        pages: true,
+                        highlights: false,
+                        notes: false,
+                    },
+                    endDate: searchFilters.dateTo,
+                    startDate: searchFilters.dateFrom,
+                    query: searchFilters.searchQuery,
+                    domainsInc: searchFilters.domainsIncluded,
+                    domainsExc: searchFilters.domainsExcluded,
+                    tagsInc: searchFilters.tagsIncluded,
+                    tagsExc: searchFilters.tagsExcluded,
+                })
 
-        try {
-            emit('running')
-            const result = await this.searchBG.searchPages({
-                contentTypes: { pages: true, highlights: false, notes: false },
-                endDate: searchFilters.dateTo,
-                startDate: searchFilters.dateFrom,
-                query: searchFilters.searchQuery,
-                domainsInc: searchFilters.domainsIncluded,
-                domainsExc: searchFilters.domainsExcluded,
-                tagsInc: searchFilters.tagsIncluded,
-                tagsExc: searchFilters.tagsExcluded,
-            })
-            emit('success')
+                const {
+                    noteData,
+                    pageData,
+                    results,
+                } = utils.pageSearchResultToState(result)
 
-            const {
-                noteData,
-                pageData,
-                results,
-            } = utils.pageSearchResultToState(result)
-
-            this.emitMutation({
-                searchResults: {
-                    results: { $set: results },
-                    pageData: { $set: pageData },
-                    noteData: { $set: noteData },
-                },
-            })
-        } catch (err) {
-            emit('error')
-        }
+                this.emitMutation({
+                    searchResults: {
+                        results: { $set: results },
+                        pageData: { $set: pageData },
+                        noteData: { $set: noteData },
+                    },
+                })
+            },
+        )
     }
 
     searchNotes: EventHandler<'searchNotes'> = async ({
         previousState: { searchFilters },
     }) => {
-        const emit = (state: TaskState) =>
-            this.emitMutation({
-                searchResults: { searchState: { $set: state } },
-            })
+        await executeUITask(
+            this,
+            (taskState) => ({
+                searchResults: { searchState: { $set: taskState } },
+            }),
+            async () => {
+                const result = await this.searchBG.searchAnnotations({
+                    endDate: searchFilters.dateTo,
+                    startDate: searchFilters.dateFrom,
+                    query: searchFilters.searchQuery,
+                    domainsInc: searchFilters.domainsIncluded,
+                    domainsExc: searchFilters.domainsExcluded,
+                    tagsInc: searchFilters.tagsIncluded,
+                    tagsExc: searchFilters.tagsExcluded,
+                })
 
-        try {
-            emit('running')
-            const result = await this.searchBG.searchAnnotations({
-                endDate: searchFilters.dateTo,
-                startDate: searchFilters.dateFrom,
-                query: searchFilters.searchQuery,
-                domainsInc: searchFilters.domainsIncluded,
-                domainsExc: searchFilters.domainsExcluded,
-                tagsInc: searchFilters.tagsIncluded,
-                tagsExc: searchFilters.tagsExcluded,
-            })
-            emit('success')
+                const {
+                    noteData,
+                    pageData,
+                    results,
+                } = utils.annotationSearchResultToState(result)
 
-            const {
-                noteData,
-                pageData,
-                results,
-            } = utils.annotationSearchResultToState(result)
-
-            this.emitMutation({
-                searchResults: {
-                    results: { $set: results },
-                    pageData: { $set: pageData },
-                    noteData: { $set: noteData },
-                },
-            })
-        } catch (err) {
-            emit('error')
-        }
+                this.emitMutation({
+                    searchResults: {
+                        results: { $set: results },
+                        pageData: { $set: pageData },
+                        noteData: { $set: noteData },
+                    },
+                })
+            },
+        )
     }
     /* END - Misc event handlers */
 
