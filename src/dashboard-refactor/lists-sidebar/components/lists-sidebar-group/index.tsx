@@ -17,6 +17,7 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import ListsSidebarItemWithMenu, {
     ListsSidebarItemWithMenuProps,
 } from '../lists-sidebar-item-with-menu'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 const { fonts } = styles
 
@@ -68,7 +69,7 @@ export interface ListsSidebarGroupProps {
     listsArray: Array<ListsSidebarItemsArrayObject>
     addableState: AddableState
     expandableState: ExpandableState
-    taskState: TaskState
+    loadingState: TaskState
 }
 
 export interface ListsSidebarItemsArrayObject {
@@ -133,7 +134,7 @@ export default class ListsSidebarGroup extends PureComponent<
     }
     render() {
         const {
-            taskState,
+            loadingState,
             listsGroupTitle,
             hasTitle,
             expandableState: { isExpanded, isExpandable },
@@ -149,7 +150,7 @@ export default class ListsSidebarGroup extends PureComponent<
                                         plus90={isExpanded}
                                         minus90={!isExpanded}
                                         heightAndWidth="8px"
-                                        path="/img/triangleSmall.svg"
+                                        path={icons.triangle}
                                     />
                                 </Margin>
                             </IconContainer>
@@ -160,16 +161,16 @@ export default class ListsSidebarGroup extends PureComponent<
                                 <Margin horizontal="8px">
                                     <Icon
                                         heightAndWidth="12px"
-                                        path="/img/plus.svg"
+                                        path={icons.plus}
                                     />
                                 </Margin>
                             </IconContainer>
                         </GroupHeaderInnerDiv>
                     </GroupHeaderContainer>
                 )}
-                {taskState === 'running' && this.renderLoadingState()}
-                {taskState === 'error' && this.renderErrorState()}
-                {taskState === 'success' && this.renderLists()}
+                {loadingState === 'running' && this.renderLoadingState()}
+                {loadingState === 'error' && this.renderErrorState()}
+                {loadingState === 'success' && this.renderLists()}
             </Container>
         )
     }

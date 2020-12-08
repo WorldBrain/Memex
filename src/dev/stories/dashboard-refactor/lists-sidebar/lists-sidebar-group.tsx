@@ -125,7 +125,7 @@ const listsSidebarGroupPropsTemplate: ListsSidebarGroupProps = {
     listsArray,
     addableState,
     expandableState,
-    taskState,
+    loadingState: taskState,
 }
 
 const inboxItemsProps = (name: string, isSelected?: boolean) => {
@@ -156,11 +156,11 @@ export const listsSidebarGroupProps: {
 } = {
     errorState: {
         ...listsSidebarGroupPropsTemplate,
-        taskState: 'error',
+        loadingState: 'error',
     },
     loadingState: {
         ...listsSidebarGroupPropsTemplate,
-        taskState: 'running',
+        loadingState: 'running',
     },
     inboxes: {
         ...listsSidebarGroupPropsTemplate,
@@ -171,7 +171,7 @@ export const listsSidebarGroupProps: {
         ],
         addableState: listsSidebarGroupPropsTemplate.addableState,
         expandableState: listsSidebarGroupPropsTemplate.expandableState,
-        taskState: listsSidebarGroupPropsTemplate.taskState,
+        loadingState: listsSidebarGroupPropsTemplate.loadingState,
         hasTitle: false,
     },
     myCollectionsExpanded: {

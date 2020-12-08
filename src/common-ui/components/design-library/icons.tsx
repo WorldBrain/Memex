@@ -14,6 +14,8 @@ export const commentEdit = browser.extension.getURL('/img/comment_edit.svg')
 export const commentEditFull = browser.extension.getURL(
     '/img/comment_edit_full.svg',
 )
+export const triangle = browser.extension.getURL('/img/triangleSmall.svg')
+export const plus = browser.extension.getURL('/img/plus.svg')
 export const trash = browser.extension.getURL('/img/trash.svg')
 export const goTo = browser.extension.getURL('/img/open.svg')
 export const copy = browser.extension.getURL('/img/copy.svg')

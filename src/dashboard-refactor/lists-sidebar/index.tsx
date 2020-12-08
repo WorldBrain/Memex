@@ -60,7 +60,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             listsArray={group.listsArray}
                             addableState={group.addableState}
                             expandableState={group.expandableState}
-                            taskState={group.taskState}
+                            loadingState={group.loadingState}
                         />
                     </Margin>
                 ))}
