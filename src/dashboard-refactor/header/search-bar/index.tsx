@@ -55,6 +55,7 @@ export interface SearchBarProps {
     searchQuery: string
     isSearchBarFocused: boolean
     searchFiltersOpen: boolean
+    searchFiltersActive: []
     onSearchBarFocus(): void
     onSearchQueryChange(searchObject: any): void
     onSearchFiltersOpen(): void
@@ -64,7 +65,9 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
     placeholder: string = 'Search your saved pages and notes'
     inputRef = React.createRef<HTMLInputElement>()
     componentDidMount = () => {
-        if (this.props.isSearchBarFocused) this.inputRef.current.focus()
+        if (this.props.isSearchBarFocused) {
+            this.inputRef.current.focus()
+        }
     }
     render() {
         const {
