@@ -50,6 +50,24 @@ export class DashboardLogic extends UILogic<State, Events> {
                 dateFromInput: '',
                 dateToInput: '',
             },
+            listsSidebar: {
+                isSidebarPeeking: false,
+                isSidebarLocked: false,
+                searchQuery: '',
+                listData: {},
+                followedLists: {
+                    loadingState: 'pristine',
+                    isExpanded: false,
+                    listIds: [],
+                },
+                localLists: {
+                    isAddInputShown: false,
+                    addInputValue: '',
+                    loadingState: 'pristine',
+                    isExpanded: false,
+                    listIds: [],
+                },
+            },
         }
     }
 
@@ -711,6 +729,121 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
     /* END - search filter event handlers */
+
+    /* START - lists sidebar event handlers */
+    setSidebarLocked: EventHandler<'setSidebarLocked'> = async ({ event }) => {
+        this.emitMutation({
+            listsSidebar: { isSidebarLocked: { $set: event.isLocked } },
+        })
+    }
+
+    setSidebarPeeking: EventHandler<'setSidebarPeeking'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
+        })
+    }
+
+    setListQueryValue: EventHandler<'setListQueryValue'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: { searchQuery: { $set: event.value } },
+        })
+    }
+
+    setAddListInputValue: EventHandler<'setAddListInputValue'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                localLists: { addInputValue: { $set: event.value } },
+            },
+        })
+    }
+
+    setAddListInputShown: EventHandler<'setAddListInputShown'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                localLists: { isAddInputShown: { $set: event.isShown } },
+            },
+        })
+    }
+
+    addNewList: EventHandler<'addNewList'> = async ({
+        previousState: { listsSidebar },
+    }) => {
+        // TODO: BG call
+        const mockList = {
+            id: Date.now(),
+            name: listsSidebar.localLists.addInputValue,
+        }
+
+        this.emitMutation({
+            listsSidebar: {
+                listData: { [mockList.id]: { $set: mockList } },
+                localLists: { listIds: { $push: [mockList.id] } },
+            },
+        })
+    }
+
+    setLocalListsExpanded: EventHandler<'setLocalListsExpanded'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                localLists: { isExpanded: { $set: event.isExpanded } },
+            },
+        })
+    }
+
+    setFollowedListsExpanded: EventHandler<
+        'setFollowedListsExpanded'
+    > = async ({ event }) => {
+        this.emitMutation({
+            listsSidebar: {
+                followedLists: { isExpanded: { $set: event.isExpanded } },
+            },
+        })
+    }
+
+    setLocalLists: EventHandler<'setLocalLists'> = async ({ event }) => {
+        const listIds: number[] = []
+        const listDataById = {}
+
+        for (const list of event.lists) {
+            listIds.push(list.id)
+            listDataById[list.id] = list
+        }
+
+        this.emitMutation({
+            listsSidebar: {
+                listData: { $merge: listDataById },
+                localLists: { listIds: { $set: listIds } },
+            },
+        })
+    }
+
+    setFollowedLists: EventHandler<'setFollowedLists'> = async ({ event }) => {
+        const listIds: number[] = []
+        const listDataById = {}
+
+        for (const list of event.lists) {
+            listIds.push(list.id)
+            listDataById[list.id] = list
+        }
+
+        this.emitMutation({
+            listsSidebar: {
+                listData: { $merge: listDataById },
+                followedLists: { listIds: { $set: listIds } },
+            },
+        })
+    }
+    /* END - lists sidebar event handlers */
 
     example: EventHandler<'example'> = ({ event }) => {
         this.emitMutation({})
