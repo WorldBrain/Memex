@@ -1,6 +1,7 @@
 import { browser } from 'webextension-polyfill-ts'
 import PDFJS from 'pdfjs-dist'
 import transformPageText from 'src/util/transform-page-text'
+import fetchLocalOrRemote from 'src/util/fetchLocal'
 
 // Run PDF.js to extract text from each page and read document metadata.
 async function extractContent(pdfData: ArrayBuffer) {
@@ -43,7 +44,7 @@ export default async function extractPdfContent(
     let blob = 'blob' in input ? input.blob : undefined
 
     if (!('blob' in input)) {
-        const response = await fetch(input.url)
+        const response = await fetchLocalOrRemote(input.url)
 
         if (response.status >= 400 && response.status < 600) {
             return Promise.reject(
