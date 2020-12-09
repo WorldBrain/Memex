@@ -105,7 +105,81 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderSearchResults() {
-        return <SearchResultsContainer {...this.state} />
+        return (
+            <SearchResultsContainer
+                {...this.state.searchResults}
+                onPageNotesSortSelection={(day, pageId) => (sortingFn) =>
+                    this.processEvent('setPageNotesSort', {
+                        day,
+                        pageId,
+                        sortingFn,
+                    })}
+                onPageNotesTypeSelection={(day, pageId) => (noteType) =>
+                    this.processEvent('setPageNotesType', {
+                        day,
+                        pageId,
+                        noteType,
+                    })}
+                onShowAllNotesClick={() =>
+                    this.processEvent('setAllNotesShown', {
+                        areShown: !this.state.searchResults.areAllNotesShown,
+                    })
+                }
+                onNotesSearchSwitch={() =>
+                    this.processEvent('setSearchType', { searchType: 'notes' })
+                }
+                onPagesSearchSwitch={() =>
+                    this.processEvent('setSearchType', { searchType: 'pages' })
+                }
+                pageInteractionProps={{
+                    onBookmarkBtnClick: (day, pageId) => () =>
+                        this.processEvent('setPageBookmark', {
+                            id: pageId,
+                            isBookmarked: !this.state.searchResults.pageData
+                                .byId[pageId].isBookmarked,
+                        }),
+                    onNotesBtnClick: (day, pageId) => () =>
+                        this.processEvent('setPageNotesShown', {
+                            day,
+                            pageId,
+                            areShown: !this.state.searchResults.results[day]
+                                .pages.byId[pageId].areNotesShown,
+                        }),
+                    onTagPickerBtnClick: (day, pageId) => () => null, // TODO: this.processEvent('setPageTagPickerShown', { day, pageId, areShown: !this.state.searchResults.results[day].pages.byId[pageId].areNotesShown }),
+                    onCopyPasterBtnClick: (day, pageId) => () => null, // TODO: this.processEvent('setPageCopyPasterShown', { day, pageId, areShown: !this.state.searchResults.results[day].pages.byId[pageId].areNotesShown }),
+                    onListPickerBtnClick: (day, pageId) => () => null, // TODO: this.processEvent('setPageListPickerShown', { day, pageId, areShown: !this.state.searchResults.results[day].pages.byId[pageId].areNotesShown }),
+                    onReplyBtnClick: (day, pageId) => () => null,
+                    onShareBtnClick: (day, pageId) => () => null,
+                    onTrashBtnClick: (day, pageId) => () => null,
+                }}
+                newNoteInteractionProps={{
+                    onCancel: (day, pageId) => () =>
+                        this.processEvent('cancelPageNewNoteEdit', {
+                            day,
+                            pageId,
+                        }),
+                    onCommentChange: (day, pageId) => (value) =>
+                        this.processEvent('setPageNewNoteCommentValue', {
+                            day,
+                            pageId,
+                            value,
+                        }),
+                    onTagsUpdate: (day, pageId) => (tags) =>
+                        this.processEvent('setPageNewNoteTags', {
+                            day,
+                            pageId,
+                            tags,
+                        }),
+                    onSave: (day, pageId) => () =>
+                        this.processEvent('savePageNewNoteEdit', {
+                            day,
+                            pageId,
+                        }),
+                }}
+                noteInteractionProps={{} as any} // TODO: none of these state mutation events exist yet
+                tagPickerDependencies={{} as any} // TODO
+            />
+        )
     }
 
     render() {
