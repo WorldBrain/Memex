@@ -12,15 +12,13 @@ import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/Search
 import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
-import EntryRow, {
-    IconStyleWrapper,
-    ActOnAllTabsButton,
-} from 'src/common-ui/GenericPicker/components/EntryRow'
+import EntryRow from // ActOnAllTabsButton, // IconStyleWrapper,
+'src/common-ui/GenericPicker/components/EntryRow'
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
-import { EntrySelectedDomain } from './components/EntrySelectedDomain'
+// import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import { EntrySelectedList } from './components/EntrySelectedList'
 import { DomainResultItem } from './components/DomainResultItem'
 
 class DomainPicker extends StatefulUIElement<
@@ -143,7 +141,7 @@ class DomainPicker extends StatefulUIElement<
                     value={this.state.query}
                     loading={this.state.loadingQueryResults}
                     before={
-                        <EntrySelectedDomain
+                        <EntrySelectedList
                             dataAttributeName="list-name"
                             entriesSelected={this.state.selectedEntries}
                             onPress={this.handleSelectedDomainPress}

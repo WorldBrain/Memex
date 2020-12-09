@@ -9,7 +9,7 @@ interface Props {
     onPress: (entry: string) => void
 }
 
-export class EntrySelectedDomain extends React.PureComponent<Props> {
+export class EntrySelectedList extends React.PureComponent<Props> {
     private get dataAttribute(): string {
         return `data-${this.props.dataAttributeName}`
     }
