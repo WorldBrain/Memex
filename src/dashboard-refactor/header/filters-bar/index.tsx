@@ -5,9 +5,12 @@ import colors from 'src/dashboard-refactor/colors'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { collections, tags } from 'src/util/remote-functions-background'
 
+import TagPicker from 'src/tags/ui/TagPicker'
+import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { DatePicker, TagPicker, ListPicker, DomainPicker } from './components/'
+import { DatePicker, DomainPicker } from './components/'
 
 import { SelectedState } from '../../types'
 import { Props as DateRangeSelectionProps } from 'src/overview/search-bar/components/DateRangeSelection'
@@ -112,7 +115,22 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     }
 
     private renderTagPicker = () => {
-        return <TagPicker {...this.props.pickerProps.tagPickerProps} />
+        const {
+            onToggleShowPicker,
+            onEntriesListUpdate,
+            initialSelectedEntries,
+        } = this.props.pickerProps.tagPickerProps
+        return (
+            <TagPicker
+                onUpdateEntrySelection={onEntriesListUpdate}
+                queryEntries={(query) =>
+                    tags.searchForTagSuggestions({ query })
+                }
+                loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
+                initialSelectedEntries={async () => initialSelectedEntries}
+                onEscapeKeyDown={onToggleShowPicker}
+            />
+        )
     }
 
     private renderDomainPicker = () => {
@@ -133,7 +151,22 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     }
 
     private renderListPicker = () => {
-        return <ListPicker {...this.props.pickerProps.listPickerProps} />
+        const {
+            onEntriesListUpdate,
+            initialSelectedEntries,
+            onToggleShowPicker,
+        } = this.props.pickerProps.listPickerProps
+        return (
+            <CollectionPicker
+                onUpdateEntrySelection={onEntriesListUpdate}
+                queryEntries={(query) =>
+                    collections.searchForListSuggestions({ query })
+                }
+                loadDefaultSuggestions={collections.fetchInitialListSuggestions}
+                initialSelectedEntries={async () => initialSelectedEntries}
+                onEscapeKeyDown={onToggleShowPicker}
+            />
+        )
     }
 
     render() {
