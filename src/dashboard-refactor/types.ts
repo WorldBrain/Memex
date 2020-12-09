@@ -4,15 +4,21 @@ import {
     RootState as SearchResultsState,
     Events as SearchResultEvents,
 } from './search-results/types'
+import {
+    RootState as ListsSidebarState,
+    Events as ListsSidebarEvents,
+} from './lists-sidebar/types'
 
 export interface RootState {
     searchResults: SearchResultsState
     searchFilters: SearchFiltersState
+    listsSidebar: ListsSidebarState
 }
 
 export type Events = UIEvent<
     SearchResultEvents &
-        SearchFilterEvents & {
+        SearchFilterEvents &
+        ListsSidebarEvents & {
             searchPages: null
             searchNotes: null
             example: null

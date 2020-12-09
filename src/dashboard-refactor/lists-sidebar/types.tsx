@@ -21,6 +21,7 @@ export interface SidebarPeekState {
 }
 
 export interface ListData {
+    id: number
     name: string
 }
 
@@ -47,6 +48,7 @@ export type Events = UIEvent<{
 
     setAddListInputShown: { isShown: boolean }
     setAddListInputValue: { value: string }
+    addNewList: null
 
     setLocalLists: { lists: ListData[] }
     setFollowedLists: { lists: ListData[] }

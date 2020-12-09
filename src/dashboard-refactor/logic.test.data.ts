@@ -5,6 +5,7 @@ import {
     AnnotationsSearchResponse,
 } from 'src/search/background/types'
 import { Annotation } from 'src/annotations/types'
+import { ListData } from './lists-sidebar/types'
 
 const pageDataToSearchRes = (
     page: PageData,
@@ -146,3 +147,8 @@ export const ANNOT_SEARCH_RESULT_2: AnnotationsSearchResponse = {
         },
     },
 }
+
+export const LISTS_1: ListData[] = [
+    { id: 1, name: 'test 1' },
+    { id: 2, name: 'test 2' },
+]
