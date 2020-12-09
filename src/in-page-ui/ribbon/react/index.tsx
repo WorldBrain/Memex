@@ -13,6 +13,7 @@ export function setupRibbonUI(
         containerDependencies: RibbonContainerDependencies
     },
 ) {
+    console.log('rendering ribbon')
     ReactDOM.render(
         <StyleSheetManager target={target}>
             <RibbonHolder {...options} />

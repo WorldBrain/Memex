@@ -3,8 +3,19 @@ seek = require('dom-seek')
 xpathRange = require('./range')
 
 html = require('./html')
-RenderingStates = require('../pdfjs-rendering-states')
 {TextPositionAnchor, TextQuoteAnchor} = require('./types')
+
+# Enum values for page rendering states (IRenderableView#renderingState)
+# in PDF.js. Taken from web/pdf_rendering_queue.js in the PDF.js library.
+#
+# Reproduced here because this enum is not exported consistently across
+# different versions of PDF.js
+RenderingStates = {
+  INITIAL: 0,
+  RUNNING: 1,
+  PAUSED: 2,
+  FINISHED: 3,
+}
 
 # Caches for performance
 

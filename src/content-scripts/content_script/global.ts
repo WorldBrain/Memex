@@ -46,7 +46,9 @@ export async function main() {
     setupPageContentRPC()
     runInBackground<PageIndexingInterface<'caller'>>().setTabAsIndexable()
 
-    const getPageUrl = () => window.location.href
+    // const getPageUrl = () => window.location.href
+    const getPageUrl = () =>
+        new URL(window.location.href).searchParams.get('file')
     const getPageTitle = () => document.title
     const getNormalizedPageUrl = () => normalizeUrl(getPageUrl())
 
@@ -80,6 +82,7 @@ export async function main() {
     const inPageUI = new SharedInPageUIState({
         getNormalizedPageUrl,
         loadComponent: (component) => {
+            console.log('loadComp GLOBAL:', component, components)
             // Treat highlights differently as they're not a separate content script
             if (component === 'highlights') {
                 components.highlights = resolvablePromise<void>()
@@ -178,6 +181,7 @@ export async function main() {
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
                 analytics,
                 copyToClipboard,
+                getPageUrl,
             })
             components.sidebar?.resolve()
         },
@@ -253,7 +257,7 @@ export async function main() {
             action: 'createFromShortcut',
         }),
     })
-    const loadContentScript = createContentScriptLoader()
+    const loadContentScript = createContentScriptLoader({ loadRemotely: false })
     if (shouldIncludeSearchInjection(window.location.hostname)) {
         loadContentScript('search_injection')
     }
@@ -261,11 +265,14 @@ export async function main() {
     // 7. Load components and associated content scripts if they are set to autoload
     // on each page.
     if (await tooltipUtils.getTooltipState()) {
+        console.log('load tooltip')
         await inPageUI.setupTooltip()
     }
 
     const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
+    console.log('hgiight:', areHighlightsEnabled)
     if (areHighlightsEnabled) {
+        console.log('load highlights')
         inPageUI.showHighlights()
         if (!annotationsCache.isEmpty) {
             inPageUI.loadComponent('sidebar')
@@ -273,14 +280,16 @@ export async function main() {
     }
 
     const isSidebarEnabled = await sidebarUtils.getSidebarState()
+    console.log('sidebar:', isSidebarEnabled)
     if (isSidebarEnabled) {
+        console.log('load sidebar')
         await inPageUI.loadComponent('ribbon')
     }
 }
 
 type ContentScriptLoader = (component: ContentScriptComponent) => Promise<void>
-export function createContentScriptLoader() {
-    const loader: ContentScriptLoader = async (
+export function createContentScriptLoader(args: { loadRemotely: boolean }) {
+    const remoteLoader: ContentScriptLoader = async (
         component: ContentScriptComponent,
     ) => {
         await runInBackground<
@@ -289,7 +298,16 @@ export function createContentScriptLoader() {
             component,
         })
     }
-    return loader
+
+    const localLoader: ContentScriptLoader = async (
+        component: ContentScriptComponent,
+    ) => {
+        const script = document.createElement('script')
+        script.src = `../content_script_${component}.js`
+        document.body.appendChild(script)
+    }
+
+    return args?.loadRemotely ? remoteLoader : localLoader
 }
 
 export function loadRibbonOnMouseOver(loadRibbon: () => void) {

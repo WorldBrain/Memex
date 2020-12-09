@@ -1,6 +1,6 @@
 import * as domTextQuote from 'dom-anchor-text-quote'
 import * as domTextPosition from 'dom-anchor-text-position'
-import * as hypAnchoring from './anchoring/html'
+import * as hypAnchoring from './anchoring/pdf'
 import { highlightDOMRange } from '../highlight-dom-range'
 
 export async function selectionToDescriptor({ selection }) {
@@ -35,7 +35,7 @@ export async function descriptorToRange({ descriptor }) {
     if (
         !hasAncestor(
             rangeFromQuote.commonAncestorContainer,
-            node => node.tagName && node.tagName.toLowerCase() === 'script',
+            (node) => node.tagName && node.tagName.toLowerCase() === 'script',
         )
     ) {
         return rangeFromQuote

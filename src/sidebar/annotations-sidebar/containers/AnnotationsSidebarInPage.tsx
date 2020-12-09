@@ -21,6 +21,7 @@ export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
     inPageUI: SharedInPageUIInterface
     highlighter: HighlightInteractionsInterface
+    getPageUrl: () => string
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<

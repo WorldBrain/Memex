@@ -9,6 +9,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { ContentScriptsInterface } from '../background/types'
 
 export const main: RibbonScriptMain = async (options) => {
+    console.log('inside ribbon setup')
     const cssFile = browser.extension.getURL(`/content_script_ribbon.css`)
     let mount: ReturnType<typeof createInPageUI> | null = null
     const createMount = () => {
@@ -18,25 +19,31 @@ export const main: RibbonScriptMain = async (options) => {
             ])
         }
     }
+    console.log('creat mount')
     createMount()
+    console.log('after creat mount')
 
     options.inPageUI.events.on('componentShouldSetUp', ({ component }) => {
+        console.log('componentShouldSetup:', component)
         if (component === 'ribbon') {
             setUp()
         }
     })
     options.inPageUI.events.on('componentShouldDestroy', ({ component }) => {
+        console.log('componentShouldDestroy:', component)
         if (component === 'ribbon') {
             destroy()
         }
     })
 
     const setUp = async () => {
+        console.log('calling ribbon setup')
         const currentTab = await runInBackground<
             ContentScriptsInterface<'caller'>
         >().getCurrentTab()
 
         createMount()
+        console.log('mount created')
         setupRibbonUI(mount.rootElement, {
             containerDependencies: {
                 ...options,
