@@ -39,6 +39,7 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
         listData: { [id: number]: ListData }
         followedLists: Omit<ListGroup, 'isAddInputShown' | 'addInputValue'>
         localLists: ListGroup
+        selectedListId?: number
     }
 
 export type Events = UIEvent<{
@@ -54,4 +55,6 @@ export type Events = UIEvent<{
     setFollowedLists: { lists: ListData[] }
     setLocalListsExpanded: { isExpanded: boolean }
     setFollowedListsExpanded: { isExpanded: boolean }
+
+    setSelectedListId: { listId: number }
 }>

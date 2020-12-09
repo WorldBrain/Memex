@@ -810,6 +810,20 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setSelectedListId: EventHandler<'setSelectedListId'> = async ({
+        event,
+        previousState,
+    }) => {
+        const listIdToSet =
+            previousState.listsSidebar.selectedListId === event.listId
+                ? undefined
+                : event.listId
+
+        this.emitMutation({
+            listsSidebar: { selectedListId: { $set: listIdToSet } },
+        })
+    }
+
     setLocalLists: EventHandler<'setLocalLists'> = async ({ event }) => {
         const listIds: number[] = []
         const listDataById = {}

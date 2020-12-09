@@ -46,6 +46,26 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.searchQuery).toEqual('again')
     })
 
+    it('should be able to selected lists to filter in search', async ({
+        device,
+    }) => {
+        const { searchResults } = await setupTest(device)
+
+        expect(searchResults.state.listsSidebar.selectedListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setSelectedListId', { listId: 123 })
+        expect(searchResults.state.listsSidebar.selectedListId).toEqual(123)
+        await searchResults.processEvent('setSelectedListId', { listId: 123 })
+        expect(searchResults.state.listsSidebar.selectedListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setSelectedListId', { listId: 123 })
+        expect(searchResults.state.listsSidebar.selectedListId).toEqual(123)
+        await searchResults.processEvent('setSelectedListId', { listId: 1 })
+        expect(searchResults.state.listsSidebar.selectedListId).toEqual(1)
+    })
+
     it('should be able to mutate add local list input states', async ({
         device,
     }) => {
