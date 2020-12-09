@@ -168,14 +168,16 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                     </InnerContainer>
                 </Container>
                 <InnerContainer>
-                    {dateFilterSelectedState.isSelected &&
-                        this.renderDatePicker()}
-                    {tagFilterSelectedState.isSelected &&
-                        this.renderTagPicker()}
-                    {domainFilterSelectedState.isSelected &&
-                        this.renderDomainPicker()}
-                    {listFilterSelectedState.isSelected &&
-                        this.renderListPicker()}
+                    <Margin horizontal="7px">
+                        {dateFilterSelectedState.isSelected &&
+                            this.renderDatePicker()}
+                        {tagFilterSelectedState.isSelected &&
+                            this.renderTagPicker()}
+                        {domainFilterSelectedState.isSelected &&
+                            this.renderDomainPicker()}
+                        {listFilterSelectedState.isSelected &&
+                            this.renderListPicker()}
+                    </Margin>
                 </InnerContainer>
             </>
         )
