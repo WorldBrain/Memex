@@ -2,6 +2,7 @@ import { UIEvent } from 'ui-logic-core'
 
 import { ListsSidebarSearchBarProps } from './components/lists-search-bar'
 import { ListsSidebarGroupProps } from './components/lists-sidebar-group'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 export interface ListsSidebarProps {
     lockedState: SidebarLockedState
@@ -38,6 +39,7 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
     Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
         listData: { [id: number]: ListData }
         followedLists: Omit<ListGroup, 'isAddInputShown' | 'addInputValue'>
+        newListCreateState: TaskState
         localLists: ListGroup
         selectedListId?: number
     }

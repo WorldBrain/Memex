@@ -385,10 +385,23 @@ describe('Dashboard search results logic', () => {
                     ].newNoteForm.tags,
                 ).toEqual(newNoteTags)
 
-                await searchResults.processEvent('savePageNewNoteEdit', {
-                    day,
-                    pageId,
-                })
+                expect(
+                    searchResults.state.searchResults.newNoteCreateState,
+                ).toEqual('pristine')
+                const saveNoteP = searchResults.processEvent(
+                    'savePageNewNoteEdit',
+                    {
+                        day,
+                        pageId,
+                    },
+                )
+                expect(
+                    searchResults.state.searchResults.newNoteCreateState,
+                ).toEqual('running')
+                await saveNoteP
+                expect(
+                    searchResults.state.searchResults.newNoteCreateState,
+                ).toEqual('success')
 
                 const latestNoteId =
                     searchResults.state.searchResults.noteData.allIds[
@@ -784,7 +797,19 @@ describe('Dashboard search results logic', () => {
                     }),
                 )
 
-                await searchResults.processEvent('savePageNoteEdit', { noteId })
+                expect(
+                    searchResults.state.searchResults.noteUpdateState,
+                ).toEqual('pristine')
+                const editP = searchResults.processEvent('savePageNoteEdit', {
+                    noteId,
+                })
+                expect(
+                    searchResults.state.searchResults.noteUpdateState,
+                ).toEqual('running')
+                await editP
+                expect(
+                    searchResults.state.searchResults.noteUpdateState,
+                ).toEqual('success')
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId],

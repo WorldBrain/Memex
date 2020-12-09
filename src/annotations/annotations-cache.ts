@@ -8,6 +8,7 @@ import {
     AnnotationsSorter,
     sortByPagePosition,
 } from 'src/sidebar/annotations-sidebar/sorting'
+import { haveTagsChanged } from 'src/util/have-tags-changed'
 
 export const createAnnotationsCache = (
     bgModules: {
@@ -221,15 +222,6 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             throw e
         }
     }
-}
-
-function haveTagsChanged(before: string[], after: string[]): boolean {
-    if (before.length !== after.length) {
-        return true
-    }
-
-    const afterSet = new Set(after)
-    return !before.every((tag) => afterSet.has(tag))
 }
 
 function formatAnnotations(annotations: Annotation[]): Annotation[] {

@@ -96,6 +96,8 @@ export interface RootState {
     // Async operation states
     searchState: TaskState
     paginationState: TaskState
+    noteUpdateState: TaskState
+    newNoteCreateState: TaskState
 }
 
 interface PageEventArgs {

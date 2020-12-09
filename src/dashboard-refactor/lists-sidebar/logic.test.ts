@@ -191,4 +191,47 @@ describe('Dashboard search results logic', () => {
             listIds,
         })
     })
+
+    it('should be able to create a new local list', async ({ device }) => {
+        const { searchResults } = await setupTest(device)
+        const listName = 'test'
+
+        expect(
+            await device.storageManager
+                .collection('customLists')
+                .findAllObjects({}),
+        ).toEqual([])
+        expect(searchResults.state.listsSidebar.newListCreateState).toEqual(
+            'pristine',
+        )
+        expect(searchResults.state.listsSidebar.listData).toEqual({})
+        expect(
+            searchResults.state.listsSidebar.localLists.listIds.length,
+        ).toEqual(0)
+
+        await searchResults.processEvent('setAddListInputValue', {
+            value: listName,
+        })
+
+        const createP = searchResults.processEvent('addNewList', null)
+        expect(searchResults.state.listsSidebar.newListCreateState).toEqual(
+            'running',
+        )
+        await createP
+        expect(searchResults.state.listsSidebar.newListCreateState).toEqual(
+            'success',
+        )
+
+        expect(
+            await device.storageManager
+                .collection('customLists')
+                .findAllObjects({}),
+        ).toEqual([expect.objectContaining({ name: listName })])
+        expect(searchResults.state.listsSidebar.listData).toEqual({
+            [expect.any(Number)]: expect.objectContaining({ name: listName }),
+        })
+        expect(
+            searchResults.state.listsSidebar.localLists.listIds.length,
+        ).toEqual(1)
+    })
 })

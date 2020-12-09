@@ -5,6 +5,9 @@ import { executeUITask } from 'src/util/ui-logic'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { SearchInterface } from 'src/search/background/types'
 import { RootState as State, DashboardDependencies, Events } from './types'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { AnnotationInterface } from 'src/annotations/background/types'
+import { haveTagsChanged } from 'src/util/have-tags-changed'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -13,7 +16,9 @@ type EventHandler<EventName extends keyof Events> = UIEventHandler<
 >
 
 export class DashboardLogic extends UILogic<State, Events> {
+    private listsBG = runInBackground<RemoteCollectionsInterface>()
     private searchBG = runInBackground<SearchInterface>()
+    private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
 
     constructor(private options: DashboardDependencies) {
         super()
@@ -35,6 +40,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 areAllNotesShown: false,
                 searchState: 'pristine',
                 paginationState: 'pristine',
+                noteUpdateState: 'pristine',
+                newNoteCreateState: 'pristine',
             },
             searchFilters: {
                 searchQuery: '',
@@ -51,6 +58,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 dateToInput: '',
             },
             listsSidebar: {
+                newListCreateState: 'pristine',
                 isSidebarPeeking: false,
                 isSidebarLocked: false,
                 searchQuery: '',
@@ -338,44 +346,60 @@ export class DashboardLogic extends UILogic<State, Events> {
                 event.pageId
             ].newNoteForm
 
-        // TODO: Call BG
-        const newNoteId = Date.now().toString()
+        await executeUITask(
+            this,
+            (taskState) => ({
+                searchResults: { newNoteCreateState: { $set: taskState } },
+            }),
+            async () => {
+                const newNoteId = await this.annotationsBG.createAnnotation({
+                    pageUrl: event.pageId,
+                    comment: formState.inputValue,
+                })
+                if (formState.tags.length) {
+                    await this.annotationsBG.updateAnnotationTags({
+                        url: newNoteId,
+                        tags: formState.tags,
+                    })
+                }
 
-        this.emitMutation({
-            searchResults: {
-                noteData: {
-                    allIds: { $push: [newNoteId] },
-                    byId: {
-                        [newNoteId]: {
-                            $set: {
-                                url: newNoteId,
-                                displayTime: Date.now(),
-                                comment: formState.inputValue,
-                                tags: formState.tags,
-                                isEditing: false,
-                                editNoteForm: utils.getInitialFormState(),
+                this.emitMutation({
+                    searchResults: {
+                        noteData: {
+                            allIds: { $push: [newNoteId] },
+                            byId: {
+                                [newNoteId]: {
+                                    $set: {
+                                        url: newNoteId,
+                                        displayTime: Date.now(),
+                                        comment: formState.inputValue,
+                                        tags: formState.tags,
+                                        isEditing: false,
+                                        editNoteForm: utils.getInitialFormState(),
+                                    },
+                                },
                             },
                         },
-                    },
-                },
-                results: {
-                    [event.day]: {
-                        pages: {
-                            byId: {
-                                [event.pageId]: {
-                                    newNoteForm: {
-                                        $set: utils.getInitialFormState(),
-                                    },
-                                    noteIds: {
-                                        user: { $push: [newNoteId] },
+                        results: {
+                            [event.day]: {
+                                pages: {
+                                    byId: {
+                                        [event.pageId]: {
+                                            newNoteForm: {
+                                                $set: utils.getInitialFormState(),
+                                            },
+                                            noteIds: {
+                                                user: { $push: [newNoteId] },
+                                            },
+                                        },
                                     },
                                 },
                             },
                         },
                     },
-                },
+                })
             },
-        })
+        )
     }
 
     setPageData: EventHandler<'setPageData'> = ({ event: { pages } }) => {
@@ -504,25 +528,47 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const { inputValue, tags } = previousState.searchResults.noteData.byId[
-            event.noteId
-        ].editNoteForm
+        const {
+            editNoteForm,
+            ...noteData
+        } = previousState.searchResults.noteData.byId[event.noteId]
+        const tagsHaveChanged = haveTagsChanged(
+            noteData.tags,
+            editNoteForm.tags,
+        )
 
-        // TODO: call BG
+        await executeUITask(
+            this,
+            (taskState) => ({
+                searchResults: { noteUpdateState: { $set: taskState } },
+            }),
+            async () => {
+                await this.annotationsBG.editAnnotation(
+                    event.noteId,
+                    editNoteForm.inputValue,
+                )
+                if (tagsHaveChanged) {
+                    await this.annotationsBG.updateAnnotationTags({
+                        url: event.noteId,
+                        tags: editNoteForm.tags,
+                    })
+                }
 
-        this.emitMutation({
-            searchResults: {
-                noteData: {
-                    byId: {
-                        [event.noteId]: {
-                            isEditing: { $set: false },
-                            comment: { $set: inputValue },
-                            tags: { $set: tags },
+                this.emitMutation({
+                    searchResults: {
+                        noteData: {
+                            byId: {
+                                [event.noteId]: {
+                                    isEditing: { $set: false },
+                                    comment: { $set: editNoteForm.inputValue },
+                                    tags: { $set: editNoteForm.tags },
+                                },
+                            },
                         },
                     },
-                },
+                })
             },
-        })
+        )
     }
     /* END - search result event handlers */
 
@@ -776,18 +822,30 @@ export class DashboardLogic extends UILogic<State, Events> {
     addNewList: EventHandler<'addNewList'> = async ({
         previousState: { listsSidebar },
     }) => {
-        // TODO: BG call
-        const mockList = {
-            id: Date.now(),
-            name: listsSidebar.localLists.addInputValue,
-        }
+        const newListName = listsSidebar.localLists.addInputValue.trim()
 
-        this.emitMutation({
-            listsSidebar: {
-                listData: { [mockList.id]: { $set: mockList } },
-                localLists: { listIds: { $push: [mockList.id] } },
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listsSidebar: { newListCreateState: { $set: taskState } },
+            }),
+            async () => {
+                const listId = await this.listsBG.createCustomList({
+                    name: newListName,
+                })
+
+                this.emitMutation({
+                    listsSidebar: {
+                        localLists: { listIds: { $push: [listId] } },
+                        listData: {
+                            [listId]: {
+                                $set: { id: listId, name: newListName },
+                            },
+                        },
+                    },
+                })
             },
-        })
+        )
     }
 
     setLocalListsExpanded: EventHandler<'setLocalListsExpanded'> = async ({
