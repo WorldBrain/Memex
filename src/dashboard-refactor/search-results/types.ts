@@ -17,13 +17,15 @@ export interface InteractionProps {
     onReplyBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
+    onEditBtnClick: React.MouseEventHandler
+    onCommentChange: React.KeyboardEventHandler<HTMLTextAreaElement>
 }
 
 export type PageInteractionProps = {
-    [Key in keyof Omit<InteractionProps, 'onReplyBtnClick'>]: (
-        day: number,
-        pageId: string,
-    ) => InteractionProps[Key]
+    [Key in keyof Omit<
+        InteractionProps,
+        'onReplyBtnClick' | 'onEditBtnClick' | 'onCommentChange'
+    >]: (day: number, pageId: string) => InteractionProps[Key]
 }
 
 export type NoteInteractionProps = {

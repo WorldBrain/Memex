@@ -4,24 +4,59 @@ import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { NoteData, InteractionProps } from '../types'
+import { NoteData, NoteResult, InteractionProps } from '../types'
 
 export interface Props
     extends NoteData,
+        NoteResult,
         Omit<InteractionProps, 'onNotesBtnClick'> {
     isShared?: boolean
     hasTags?: boolean
 }
 
-export default class NoteResult extends PureComponent<Props> {
+export default class NoteResultView extends PureComponent<Props> {
+    private renderComment() {
+        if (!this.props.comment) {
+            return null
+        }
+
+        if (this.props.isEditing) {
+            return (
+                <NoteCommentContainer>
+                    <NoteCommentEditInput
+                        onChange={this.props.onCommentChange}
+                        value={this.props.editNoteForm.inputValue}
+                    />
+                </NoteCommentContainer>
+            )
+        }
+
+        return (
+            <NoteCommentContainer>
+                <NoteComment>{this.props.highlight}</NoteComment>
+                <NoteCommentEditBtn onClick={this.props.onEditBtnClick}>
+                    X
+                </NoteCommentEditBtn>
+            </NoteCommentContainer>
+        )
+    }
+
+    private renderHighlight() {
+        if (!this.props.highlight) {
+            return null
+        }
+
+        return <NoteHighlight>{this.props.highlight}</NoteHighlight>
+    }
+
     render() {
         return (
             <ItemBox>
-                <StyledPageResult>
-                    <PageContentBox>
-                        <PageTitle>{this.props.highlight}</PageTitle>
-                        {/* <PageUrl>{this.props.fullUrl}</PageUrl> */}
-                    </PageContentBox>
+                <StyledNoteResult>
+                    <NoteContentBox>
+                        {this.renderHighlight()}
+                        {this.renderComment()}
+                    </NoteContentBox>
 
                     <ItemBoxBottom
                         creationInfo={{ createdWhen: this.props.displayTime }}
@@ -57,26 +92,28 @@ export default class NoteResult extends PureComponent<Props> {
                             },
                             {
                                 key: 'bookmark-note-btn',
-                                image: icons.heartFull,
-                                // TODO: add bookmark to NoteData
-                                // image: this.props.isBookmarked
-                                //     ? icons.heartFull
-                                //     : icons.heartEmpty,
+                                image: this.props.isBookmarked
+                                    ? icons.heartFull
+                                    : icons.heartEmpty,
                                 onClick: this.props.onBookmarkBtnClick,
                             },
                         ]}
                     />
-                </StyledPageResult>
+                </StyledNoteResult>
             </ItemBox>
         )
     }
 }
 
-const StyledPageResult = styled.div`
+const StyledNoteResult = styled.div`
     display: flex;
 `
 
-const PageContentBox = styled.div``
+const NoteContentBox = styled.div``
 
-const PageTitle = styled.h1``
-const PageUrl = styled.span``
+const NoteHighlight = styled.span``
+const NoteCommentContainer = styled.div``
+const NoteCommentEditBtn = styled.button``
+const NoteCommentEditActionBtn = styled.button``
+const NoteComment = styled.span``
+const NoteCommentEditInput = styled.textarea``

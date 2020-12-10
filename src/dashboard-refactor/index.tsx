@@ -200,6 +200,11 @@ export class DashboardContainer extends StatefulUIElement<
                         }),
                 }}
                 noteInteractionProps={{
+                    onEditBtnClick: (noteId) => () =>
+                        this.processEvent('setNoteEditing', {
+                            noteId,
+                            isEditing: true,
+                        }),
                     onTagPickerBtnClick: (noteId) => () =>
                         this.processEvent('setNoteTagPickerShown', {
                             noteId,
@@ -241,8 +246,13 @@ export class DashboardContainer extends StatefulUIElement<
                                 noteId
                             ].isDeleteModalShown,
                         }),
+                    onCommentChange: (noteId) => (e) =>
+                        this.processEvent('setNoteEditCommentValue', {
+                            noteId,
+                            value: (e.target as HTMLTextAreaElement).value,
+                        }),
                     onShareBtnClick: (noteId) => () => null, // TODO
-                }} // TODO: none of these state mutation events exist yet
+                }}
                 tagPickerDependencies={{} as any} // TODO
             />
         )

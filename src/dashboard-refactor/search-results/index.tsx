@@ -123,7 +123,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         {...page}
                         {...interactionProps}
                     />
-                    {this.renderPageNotes()}
+                    {this.renderPageNotes(page, day)}
                 </>
             )
         })
