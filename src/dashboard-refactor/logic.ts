@@ -197,6 +197,82 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setPageDeleteModalShown: EventHandler<'setPageDeleteModalShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                pageData: {
+                    byId: {
+                        [event.id]: {
+                            isDeleteModalShown: { $set: event.isShown },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setPageCopyPasterShown: EventHandler<'setPageCopyPasterShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    isCopyPasterShown: { $set: event.isShown },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setPageListPickerShown: EventHandler<'setPageListPickerShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    isListPickerShown: { $set: event.isShown },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setPageTagPickerShown: EventHandler<'setPageTagPickerShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    isTagPickerShown: { $set: event.isShown },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
     setPageNotesShown: EventHandler<'setPageNotesShown'> = ({ event }) => {
         this.emitMutation({
             searchResults: {
@@ -315,9 +391,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    cancelPageNewNoteEdit: EventHandler<'cancelPageNewNoteEdit'> = ({
-        event,
-    }) => {
+    cancelPageNewNote: EventHandler<'cancelPageNewNote'> = ({ event }) => {
         this.emitMutation({
             searchResults: {
                 results: {
@@ -337,7 +411,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    savePageNewNoteEdit: EventHandler<'savePageNewNoteEdit'> = async ({
+    savePageNewNote: EventHandler<'savePageNewNote'> = async ({
         event,
         previousState,
     }) => {

@@ -80,10 +80,146 @@ describe('Dashboard search results logic', () => {
                     .isBookmarked,
             ).toBe(false)
         })
+
+        it('should be able to toggle page delete modal', async ({ device }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(),
+            })
+            const pageId = DATA.PAGE_2.normalizedUrl
+
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId]
+                    .isDeleteModalShown,
+            ).toBe(false)
+            await searchResults.processEvent('setPageDeleteModalShown', {
+                id: pageId,
+                isShown: true,
+            })
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId]
+                    .isDeleteModalShown,
+            ).toBe(true)
+            await searchResults.processEvent('setPageDeleteModalShown', {
+                id: pageId,
+                isShown: false,
+            })
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId]
+                    .isDeleteModalShown,
+            ).toBe(false)
+        })
     })
 
     describe('nested page result state mutations', () => {
         describe('page search results', () => {
+            it('should be able to show and hide copy paster', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(),
+                })
+                const day = -1
+                const pageId = DATA.PAGE_3.normalizedUrl
+
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isCopyPasterShown,
+                ).toBe(false)
+                await searchResults.processEvent('setPageCopyPasterShown', {
+                    day,
+                    pageId,
+                    isShown: true,
+                })
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isCopyPasterShown,
+                ).toBe(true)
+                await searchResults.processEvent('setPageCopyPasterShown', {
+                    day,
+                    pageId,
+                    isShown: false,
+                })
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isCopyPasterShown,
+                ).toBe(false)
+            })
+
+            it('should be able to show and hide tag picker', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(),
+                })
+                const day = -1
+                const pageId = DATA.PAGE_3.normalizedUrl
+
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isTagPickerShown,
+                ).toBe(false)
+                await searchResults.processEvent('setPageTagPickerShown', {
+                    day,
+                    pageId,
+                    isShown: true,
+                })
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isTagPickerShown,
+                ).toBe(true)
+                await searchResults.processEvent('setPageTagPickerShown', {
+                    day,
+                    pageId,
+                    isShown: false,
+                })
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isTagPickerShown,
+                ).toBe(false)
+            })
+
+            it('should be able to show and hide list picker', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(),
+                })
+                const day = -1
+                const pageId = DATA.PAGE_3.normalizedUrl
+
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isListPickerShown,
+                ).toBe(false)
+                await searchResults.processEvent('setPageListPickerShown', {
+                    day,
+                    pageId,
+                    isShown: true,
+                })
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isListPickerShown,
+                ).toBe(true)
+                await searchResults.processEvent('setPageListPickerShown', {
+                    day,
+                    pageId,
+                    isShown: false,
+                })
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isListPickerShown,
+                ).toBe(false)
+            })
+
             it('should be able to show and hide notes', async ({ device }) => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
@@ -334,7 +470,7 @@ describe('Dashboard search results logic', () => {
                     ].newNoteForm.tags,
                 ).toEqual(newNoteTags)
 
-                await searchResults.processEvent('cancelPageNewNoteEdit', {
+                await searchResults.processEvent('cancelPageNewNote', {
                     day,
                     pageId,
                 })
@@ -389,7 +525,7 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.newNoteCreateState,
                 ).toEqual('pristine')
                 const saveNoteP = searchResults.processEvent(
-                    'savePageNewNoteEdit',
+                    'savePageNewNote',
                     {
                         day,
                         pageId,

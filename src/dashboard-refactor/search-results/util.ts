@@ -43,6 +43,9 @@ export const getInitialPageResultState = (id: string): PageResult => ({
     id,
     notesType: 'user',
     areNotesShown: false,
+    isTagPickerShown: false,
+    isCopyPasterShown: false,
+    isListPickerShown: false,
     sortingFn: (a, b) => 1,
     loadNotesState: 'pristine',
     newNoteForm: getInitialFormState(),
@@ -109,6 +112,7 @@ export const annotationSearchResultToState: SearchResultToState = (
 
         pageData.allIds.push(id)
         pageData.byId[id] = {
+            isDeleteModalShown: false,
             fullTitle: pageResult.title,
             fullUrl: pageResult.url,
             normalizedUrl: pageResult.url,
@@ -136,6 +140,7 @@ export const pageSearchResultToState: SearchResultToState = (
             normalizedUrl: pageResult.url,
             displayTime: pageResult.displayTime,
             isBookmarked: pageResult.hasBookmark,
+            isDeleteModalShown: false,
         }
         pageResults.byId[id] = getInitialPageResultState(pageResult.url)
 

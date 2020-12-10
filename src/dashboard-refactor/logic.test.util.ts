@@ -27,7 +27,7 @@ export async function setupTest(
     args: { seedData?: DataSeeder } = {},
 ) {
     const logic = new DashboardLogic({})
-    const searchResults = device.createElement(logic)
+    const searchResults = device.createElement<RootState, Events>(logic)
 
     if (args.seedData) {
         args.seedData(searchResults)

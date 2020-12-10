@@ -145,16 +145,39 @@ export class DashboardContainer extends StatefulUIElement<
                             areShown: !this.state.searchResults.results[day]
                                 .pages.byId[pageId].areNotesShown,
                         }),
-                    onTagPickerBtnClick: (day, pageId) => () => null, // TODO: this.processEvent('setPageTagPickerShown', { day, pageId, areShown: !this.state.searchResults.results[day].pages.byId[pageId].areNotesShown }),
-                    onCopyPasterBtnClick: (day, pageId) => () => null, // TODO: this.processEvent('setPageCopyPasterShown', { day, pageId, areShown: !this.state.searchResults.results[day].pages.byId[pageId].areNotesShown }),
-                    onListPickerBtnClick: (day, pageId) => () => null, // TODO: this.processEvent('setPageListPickerShown', { day, pageId, areShown: !this.state.searchResults.results[day].pages.byId[pageId].areNotesShown }),
-                    onReplyBtnClick: (day, pageId) => () => null,
-                    onShareBtnClick: (day, pageId) => () => null,
-                    onTrashBtnClick: (day, pageId) => () => null,
+                    onTagPickerBtnClick: (day, pageId) => () =>
+                        this.processEvent('setPageTagPickerShown', {
+                            day,
+                            pageId,
+                            isShown: !this.state.searchResults.results[day]
+                                .pages.byId[pageId].isTagPickerShown,
+                        }),
+                    onListPickerBtnClick: (day, pageId) => () =>
+                        this.processEvent('setPageListPickerShown', {
+                            day,
+                            pageId,
+                            isShown: !this.state.searchResults.results[day]
+                                .pages.byId[pageId].isListPickerShown,
+                        }),
+                    onCopyPasterBtnClick: (day, pageId) => () =>
+                        this.processEvent('setPageCopyPasterShown', {
+                            day,
+                            pageId,
+                            isShown: !this.state.searchResults.results[day]
+                                .pages.byId[pageId].isCopyPasterShown,
+                        }),
+                    onTrashBtnClick: (day, pageId) => () =>
+                        this.processEvent('setPageDeleteModalShown', {
+                            id: pageId,
+                            isShown: !this.state.searchResults.pageData.byId[
+                                pageId
+                            ].isDeleteModalShown,
+                        }),
+                    onShareBtnClick: (day, pageId) => () => null, // TODO: figure out share btn
                 }}
                 newNoteInteractionProps={{
                     onCancel: (day, pageId) => () =>
-                        this.processEvent('cancelPageNewNoteEdit', {
+                        this.processEvent('cancelPageNewNote', {
                             day,
                             pageId,
                         }),
@@ -171,7 +194,7 @@ export class DashboardContainer extends StatefulUIElement<
                             tags,
                         }),
                     onSave: (day, pageId) => () =>
-                        this.processEvent('savePageNewNoteEdit', {
+                        this.processEvent('savePageNewNote', {
                             day,
                             pageId,
                         }),

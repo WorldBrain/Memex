@@ -20,7 +20,7 @@ export interface InteractionProps {
 }
 
 export type PageInteractionProps = {
-    [Key in keyof InteractionProps]: (
+    [Key in keyof Omit<InteractionProps, 'onReplyBtnClick'>]: (
         day: number,
         pageId: string,
     ) => InteractionProps[Key]
@@ -59,6 +59,7 @@ export type PageData = Pick<PipelineRes, 'fullUrl' | 'fullTitle'> & {
     normalizedUrl: string
     displayTime: number
     isBookmarked: boolean
+    isDeleteModalShown: boolean
 }
 
 export interface NoteResult {
@@ -70,6 +71,9 @@ export interface PageResult {
     id: string
     notesType: NotesType
     areNotesShown: boolean
+    isTagPickerShown: boolean
+    isListPickerShown: boolean
+    isCopyPasterShown: boolean
     loadNotesState: TaskState
     sortingFn: AnnotationsSorter
     newNoteForm: NoteFormState
@@ -116,8 +120,12 @@ export type Events = UIEvent<{
 
     // Page data state mutations (*shared with all* occurences of the page in different days)
     setPageBookmark: { id: string; isBookmarked: boolean }
+    setPageDeleteModalShown: { id: string; isShown: boolean }
 
     // Page result state mutations (*specific to each* occurence of the page in different days)
+    setPageCopyPasterShown: PageEventArgs & { isShown: boolean }
+    setPageListPickerShown: PageEventArgs & { isShown: boolean }
+    setPageTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageNotesShown: PageEventArgs & { areShown: boolean }
     setPageNotesSort: PageEventArgs & { sortingFn: AnnotationsSorter }
     setPageNotesType: PageEventArgs & { noteType: NotesType }
@@ -126,12 +134,13 @@ export type Events = UIEvent<{
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageNewNoteCommentValue: PageEventArgs & { value: string }
     setPageNewNoteTags: PageEventArgs & { tags: string[] }
-    savePageNewNoteEdit: PageEventArgs
-    cancelPageNewNoteEdit: PageEventArgs
+    cancelPageNewNote: PageEventArgs
+    savePageNewNote: PageEventArgs
 
     // Note edit form state mutations
     setPageNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
     setPageNoteCommentValue: NoteEventArgs & { value: string }
+    setPageNoteRepliesShown: NoteEventArgs & { areShown: boolean }
     setPageNoteEditing: NoteEventArgs & { isEditing: boolean }
     setPageNoteTags: NoteEventArgs & { tags: string[] }
     savePageNoteEdit: NoteEventArgs
