@@ -16,6 +16,7 @@ import SearchTypeSwitch, {
 import ExpandAllNotes from './components/expand-all-notes'
 import DayResultGroup from './components/day-result-group'
 import PageResult from './components/page-result'
+import NoteResult from './components/note-result'
 import { setupInteractionProps } from './util'
 import NotesTypeDropdownMenu from './components/notes-type-dropdown-menu'
 import { SortingDropdownMenuBtn } from 'src/sidebar/annotations-sidebar/components/SortingDropdownMenu'
@@ -61,12 +62,14 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             notesType,
             normalizedUrl,
             newNoteForm,
+            noteIds,
         }: PageResultData & PageData,
         day: number,
     ) {
         if (!areNotesShown) {
             return false
         }
+        const { noteInteractionProps } = this.props
 
         const newNoteInteractionProps = setupInteractionProps<
             AnnotationCreateEventProps
@@ -101,6 +104,43 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     {...newNoteInteractionProps}
                     tagPickerDependencies={this.props.tagPickerDependencies}
                 />
+                {noteIds[notesType].map((noteId) => {
+                    const noteData = this.props.noteData.byId[noteId]
+
+                    return (
+                        <NoteResult
+                            key={noteId}
+                            {...noteData}
+                            onListPickerBtnClick={noteInteractionProps.onListPickerBtnClick(
+                                noteId,
+                            )}
+                            onCopyPasterBtnClick={noteInteractionProps.onCopyPasterBtnClick(
+                                noteId,
+                            )}
+                            onBookmarkBtnClick={noteInteractionProps.onBookmarkBtnClick(
+                                noteId,
+                            )}
+                            onCommentChange={noteInteractionProps.onCommentChange(
+                                noteId,
+                            )}
+                            onEditBtnClick={noteInteractionProps.onEditBtnClick(
+                                noteId,
+                            )}
+                            onReplyBtnClick={noteInteractionProps.onReplyBtnClick(
+                                noteId,
+                            )}
+                            onTagPickerBtnClick={noteInteractionProps.onTagPickerBtnClick(
+                                noteId,
+                            )}
+                            onTrashBtnClick={noteInteractionProps.onTrashBtnClick(
+                                noteId,
+                            )}
+                            onShareBtnClick={noteInteractionProps.onShareBtnClick(
+                                noteId,
+                            )}
+                        />
+                    )
+                })}
             </>
         )
     }
