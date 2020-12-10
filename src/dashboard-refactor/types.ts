@@ -46,17 +46,6 @@ export interface SearchResultTextPart {
     match: boolean
 }
 
-export interface ExpandableState {
-    isExpandable: boolean
-    isExpanded: boolean
-    onExpand(listSrouce: ListSource): void
-}
-
-export interface AddableState {
-    isAddable: boolean
-    onAdd(listSource: ListSource): void
-}
-
 export interface HoverState {
     onHoverEnter(normalizedPageUrl: string): void
     onHoverLeave(normalizedPageUrl: string): void

@@ -53,15 +53,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                 </Margin>
                 {listsGroups.map((group) => (
                     <Margin vertical="10px">
-                        <ListsSidebarGroup
-                            hasTitle={group.hasTitle}
-                            listsGroupTitle={group.listsGroupTitle}
-                            listSource={group.listSource}
-                            listsArray={group.listsArray}
-                            addableState={group.addableState}
-                            expandableState={group.expandableState}
-                            loadingState={group.loadingState}
-                        />
+                        <ListsSidebarGroup {...group} />
                     </Margin>
                 ))}
             </Container>

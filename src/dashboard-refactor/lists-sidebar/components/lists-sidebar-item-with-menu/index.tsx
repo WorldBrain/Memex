@@ -8,6 +8,7 @@ import { Icon } from '../../../styled-components'
 import UnstyledListsSidebarItem from '../lists-sidebar-item'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { ListsSidebarItemProps } from '../lists-sidebar-item/types'
+import { ListSource } from 'src/dashboard-refactor/types'
 
 const Container = styled.div`
     position: relative;
@@ -52,10 +53,15 @@ const MenuButton = styled.div`
 `
 
 export interface ListsSidebarItemWithMenuProps {
+    name: string
     listId: string
-    listsSidebarItemProps: ListsSidebarItemProps
-    listsSidebarItemActionsArray?: Array<ListsSidebarItemActionItem>
+    source?: ListSource
     isMenuDisplayed?: boolean
+    listsSidebarItemProps: ListsSidebarItemProps
+    onUnfollowClick?: React.MouseEventHandler
+    onRenameClick?: React.MouseEventHandler
+    onDeleteClick?: React.MouseEventHandler
+    onShareClick?: React.MouseEventHandler
 }
 
 export interface ListsSidebarItemActionItem {
@@ -67,6 +73,48 @@ export interface ListsSidebarItemActionItem {
 export default class ListsSidebarItemWithMenu extends PureComponent<
     ListsSidebarItemWithMenuProps
 > {
+    private renderMenuBtns() {
+        if (!this.props.source) {
+            return false
+        }
+
+        if (this.props.source === 'followed-list') {
+            return (
+                <>
+                    <MenuButton onClick={this.props.onUnfollowClick}>
+                        <Margin horizontal="10px">
+                            <Icon heightAndWidth="12px" path={'TODO.svg'} />
+                        </Margin>
+                        Unfollow
+                    </MenuButton>
+                </>
+            )
+        }
+
+        return (
+            <>
+                <MenuButton onClick={this.props.onShareClick}>
+                    <Margin horizontal="10px">
+                        <Icon heightAndWidth="12px" path={'TODO.svg'} />
+                    </Margin>
+                    Share
+                </MenuButton>
+                <MenuButton onClick={this.props.onDeleteClick}>
+                    <Margin horizontal="10px">
+                        <Icon heightAndWidth="12px" path={'TODO.svg'} />
+                    </Margin>
+                    Delete
+                </MenuButton>
+                <MenuButton onClick={this.props.onRenameClick}>
+                    <Margin horizontal="10px">
+                        <Icon heightAndWidth="12px" path={'TODO.svg'} />
+                    </Margin>
+                    Rename
+                </MenuButton>
+            </>
+        )
+    }
+
     render() {
         const {
             listsSidebarItemProps: {
@@ -79,7 +127,6 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
                 newItemsCountState,
                 moreActionButtonState,
             },
-            listsSidebarItemActionsArray,
             isMenuDisplayed,
             listId,
         } = this.props
@@ -122,21 +169,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
                     }}
                 />
                 <MenuContainer isDisplayed={isMenuDisplayed}>
-                    {listsSidebarItemActionsArray &&
-                        listsSidebarItemActionsArray.map((item, idx) => {
-                            const { label, iconPath, onClick } = item
-                            return (
-                                <MenuButton key={idx} onClick={onClick}>
-                                    <Margin horizontal="10px">
-                                        <Icon
-                                            heightAndWidth="12px"
-                                            path={iconPath}
-                                        />
-                                    </Margin>
-                                    {label}
-                                </MenuButton>
-                            )
-                        })}
+                    {this.renderMenuBtns()}
                 </MenuContainer>
             </Container>
         )

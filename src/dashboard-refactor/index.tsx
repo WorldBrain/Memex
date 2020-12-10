@@ -50,51 +50,32 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 listsGroups={[
                     {
-                        hasTitle: false,
-                        addableState: { isAddable: false, onAdd: () => null },
-                        expandableState: {
-                            isExpandable: false,
-                            isExpanded: true,
-                            onExpand: () => null,
-                        },
+                        isExpanded: true,
                         loadingState: 'pristine',
                         listsArray: [],
                     },
                     {
-                        hasTitle: true,
-                        listsGroupTitle: 'My collections',
-                        listSource: 'local-lists',
-                        addableState: {
-                            isAddable: true,
-                            onAdd: () => this.processEvent('addNewList', null),
-                        },
-                        expandableState: {
-                            isExpandable: true,
-                            isExpanded: true,
-                            onExpand: () =>
-                                this.processEvent('setLocalListsExpanded', {
-                                    isExpanded: !this.state.listsSidebar
-                                        .localLists.isExpanded,
-                                }),
-                        },
+                        title: 'My collections',
+                        onAddBtnClick: () =>
+                            this.processEvent('addNewList', null),
+                        isExpanded: true,
+                        onExpandBtnClick: () =>
+                            this.processEvent('setLocalListsExpanded', {
+                                isExpanded: !this.state.listsSidebar.localLists
+                                    .isExpanded,
+                            }),
                         loadingState: this.state.listsSidebar.localLists
                             .loadingState,
                         listsArray: [], // TODO: sort out types and properly derive this from `state.listData`
                     },
                     {
-                        hasTitle: true,
-                        listsGroupTitle: 'Followed collections',
-                        listSource: 'followed-list',
-                        addableState: { isAddable: false, onAdd: () => null },
-                        expandableState: {
-                            isExpandable: true,
-                            isExpanded: true,
-                            onExpand: () =>
-                                this.processEvent('setFollowedListsExpanded', {
-                                    isExpanded: !this.state.listsSidebar
-                                        .followedLists.isExpanded,
-                                }),
-                        },
+                        title: 'Followed collections',
+                        isExpanded: true,
+                        onExpandBtnClick: () =>
+                            this.processEvent('setFollowedListsExpanded', {
+                                isExpanded: !this.state.listsSidebar
+                                    .followedLists.isExpanded,
+                            }),
                         loadingState: this.state.listsSidebar.followedLists
                             .loadingState,
                         listsArray: [], // TODO: sort out types and properly derive this from `state.listData`
