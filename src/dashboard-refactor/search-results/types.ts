@@ -27,7 +27,9 @@ export type PageInteractionProps = {
 }
 
 export type NoteInteractionProps = {
-    [Key in keyof InteractionProps]: (noteId: string) => InteractionProps[Key]
+    [Key in keyof Omit<InteractionProps, 'onNotesBtnClick'>]: (
+        noteId: string,
+    ) => InteractionProps[Key]
 }
 
 export type SearchResultToState = (
@@ -64,6 +66,12 @@ export type PageData = Pick<PipelineRes, 'fullUrl' | 'fullTitle'> & {
 
 export interface NoteResult {
     isEditing: boolean
+    isBookmarked: boolean
+    areRepliesShown: boolean
+    isTagPickerShown: boolean
+    isListPickerShown: boolean
+    isCopyPasterShown: boolean
+    isDeleteModalShown: boolean
     editNoteForm: NoteFormState
 }
 
@@ -137,14 +145,20 @@ export type Events = UIEvent<{
     cancelPageNewNote: PageEventArgs
     savePageNewNote: PageEventArgs
 
+    // Note result state mutations
+    setNoteDeleteModalShown: NoteEventArgs & { isShown: boolean }
+    setNoteCopyPasterShown: NoteEventArgs & { isShown: boolean }
+    setNoteListPickerShown: NoteEventArgs & { isShown: boolean }
+    setNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
+    setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
+    setNoteBookmark: NoteEventArgs & { isBookmarked: boolean }
+    setNoteEditing: NoteEventArgs & { isEditing: boolean }
+    setNoteTags: NoteEventArgs & { tags: string[] }
+
     // Note edit form state mutations
-    setPageNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
-    setPageNoteCommentValue: NoteEventArgs & { value: string }
-    setPageNoteRepliesShown: NoteEventArgs & { areShown: boolean }
-    setPageNoteEditing: NoteEventArgs & { isEditing: boolean }
-    setPageNoteTags: NoteEventArgs & { tags: string[] }
-    savePageNoteEdit: NoteEventArgs
-    cancelPageNoteEdit: NoteEventArgs
+    setNoteEditCommentValue: NoteEventArgs & { value: string }
+    cancelNoteEdit: NoteEventArgs
+    saveNoteEdit: NoteEventArgs
 
     // Misc data setters
     setPageData: { pages: PageData[] }

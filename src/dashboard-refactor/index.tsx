@@ -199,7 +199,50 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                         }),
                 }}
-                noteInteractionProps={{} as any} // TODO: none of these state mutation events exist yet
+                noteInteractionProps={{
+                    onTagPickerBtnClick: (noteId) => () =>
+                        this.processEvent('setNoteTagPickerShown', {
+                            noteId,
+                            isShown: !this.state.searchResults.noteData.byId[
+                                noteId
+                            ].isTagPickerShown,
+                        }),
+                    onBookmarkBtnClick: (noteId) => () =>
+                        this.processEvent('setNoteBookmark', {
+                            noteId,
+                            isBookmarked: !this.state.searchResults.noteData
+                                .byId[noteId].isBookmarked,
+                        }),
+                    onCopyPasterBtnClick: (noteId) => () =>
+                        this.processEvent('setNoteCopyPasterShown', {
+                            noteId,
+                            isShown: !this.state.searchResults.noteData.byId[
+                                noteId
+                            ].isCopyPasterShown,
+                        }),
+                    onListPickerBtnClick: (noteId) => () =>
+                        this.processEvent('setNoteListPickerShown', {
+                            noteId,
+                            isShown: !this.state.searchResults.noteData.byId[
+                                noteId
+                            ].isListPickerShown,
+                        }),
+                    onReplyBtnClick: (noteId) => () =>
+                        this.processEvent('setNoteRepliesShown', {
+                            noteId,
+                            areShown: !this.state.searchResults.noteData.byId[
+                                noteId
+                            ].areRepliesShown,
+                        }),
+                    onTrashBtnClick: (noteId) => () =>
+                        this.processEvent('setNoteDeleteModalShown', {
+                            noteId,
+                            isShown: !this.state.searchResults.noteData.byId[
+                                noteId
+                            ].isDeleteModalShown,
+                        }),
+                    onShareBtnClick: (noteId) => () => null, // TODO
+                }} // TODO: none of these state mutation events exist yet
                 tagPickerDependencies={{} as any} // TODO
             />
         )

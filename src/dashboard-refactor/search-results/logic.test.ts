@@ -718,7 +718,7 @@ describe('Dashboard search results logic', () => {
                         .isEditing,
                 ).toEqual(false)
 
-                await searchResults.processEvent('setPageNoteEditing', {
+                await searchResults.processEvent('setNoteEditing', {
                     noteId,
                     isEditing: true,
                 })
@@ -727,13 +727,173 @@ describe('Dashboard search results logic', () => {
                         .isEditing,
                 ).toEqual(true)
 
-                await searchResults.processEvent('setPageNoteEditing', {
+                await searchResults.processEvent('setNoteEditing', {
                     noteId,
                     isEditing: false,
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .isEditing,
+                ).toEqual(false)
+            })
+
+            it('should be able to toggle note list picker shown state', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                const noteId = DATA.NOTE_2.url
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isListPickerShown,
+                ).toEqual(false)
+
+                await searchResults.processEvent('setNoteListPickerShown', {
+                    noteId,
+                    isShown: true,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isListPickerShown,
+                ).toEqual(true)
+
+                await searchResults.processEvent('setNoteListPickerShown', {
+                    noteId,
+                    isShown: false,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isListPickerShown,
+                ).toEqual(false)
+            })
+
+            it('should be able to toggle note copy paster shown state', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                const noteId = DATA.NOTE_2.url
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isCopyPasterShown,
+                ).toEqual(false)
+
+                await searchResults.processEvent('setNoteCopyPasterShown', {
+                    noteId,
+                    isShown: true,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isCopyPasterShown,
+                ).toEqual(true)
+
+                await searchResults.processEvent('setNoteCopyPasterShown', {
+                    noteId,
+                    isShown: false,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isCopyPasterShown,
+                ).toEqual(false)
+            })
+
+            it('should be able to toggle note delete modal shown state', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                const noteId = DATA.NOTE_2.url
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isDeleteModalShown,
+                ).toEqual(false)
+
+                await searchResults.processEvent('setNoteDeleteModalShown', {
+                    noteId,
+                    isShown: true,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isDeleteModalShown,
+                ).toEqual(true)
+
+                await searchResults.processEvent('setNoteDeleteModalShown', {
+                    noteId,
+                    isShown: false,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isDeleteModalShown,
+                ).toEqual(false)
+            })
+
+            it('should be able to toggle note replies shown state', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                const noteId = DATA.NOTE_2.url
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .areRepliesShown,
+                ).toEqual(false)
+
+                await searchResults.processEvent('setNoteRepliesShown', {
+                    noteId,
+                    areShown: true,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .areRepliesShown,
+                ).toEqual(true)
+
+                await searchResults.processEvent('setNoteRepliesShown', {
+                    noteId,
+                    areShown: false,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .areRepliesShown,
+                ).toEqual(false)
+            })
+
+            it('should be able to toggle note bookmark state', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                const noteId = DATA.NOTE_2.url
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isBookmarked,
+                ).toEqual(false)
+
+                await searchResults.processEvent('setNoteBookmark', {
+                    noteId,
+                    isBookmarked: true,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isBookmarked,
+                ).toEqual(true)
+
+                await searchResults.processEvent('setNoteBookmark', {
+                    noteId,
+                    isBookmarked: false,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isBookmarked,
                 ).toEqual(false)
             })
 
@@ -747,25 +907,25 @@ describe('Dashboard search results logic', () => {
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
-                        .editNoteForm.isTagPickerShown,
+                        .isTagPickerShown,
                 ).toEqual(false)
 
-                await searchResults.processEvent('setPageNoteTagPickerShown', {
+                await searchResults.processEvent('setNoteTagPickerShown', {
                     noteId,
                     isShown: true,
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
-                        .editNoteForm.isTagPickerShown,
+                        .isTagPickerShown,
                 ).toEqual(true)
 
-                await searchResults.processEvent('setPageNoteTagPickerShown', {
+                await searchResults.processEvent('setNoteTagPickerShown', {
                     noteId,
                     isShown: false,
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
-                        .editNoteForm.isTagPickerShown,
+                        .isTagPickerShown,
                 ).toEqual(false)
             })
 
@@ -780,31 +940,31 @@ describe('Dashboard search results logic', () => {
                         .editNoteForm.tags,
                 ).toEqual([])
 
-                await searchResults.processEvent('setPageNoteTags', {
+                await searchResults.processEvent('setNoteTags', {
                     noteId,
                     tags: ['test'],
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
-                        .editNoteForm.tags,
+                        .tags,
                 ).toEqual(['test'])
 
-                await searchResults.processEvent('setPageNoteTags', {
+                await searchResults.processEvent('setNoteTags', {
                     noteId,
                     tags: ['test', 'again'],
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
-                        .editNoteForm.tags,
+                        .tags,
                 ).toEqual(['test', 'again'])
 
-                await searchResults.processEvent('setPageNoteTags', {
+                await searchResults.processEvent('setNoteTags', {
                     noteId,
                     tags: [],
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
-                        .editNoteForm.tags,
+                        .tags,
                 ).toEqual([])
             })
 
@@ -821,7 +981,7 @@ describe('Dashboard search results logic', () => {
                         .editNoteForm.inputValue,
                 ).toEqual(DATA.NOTE_2.comment)
 
-                await searchResults.processEvent('setPageNoteCommentValue', {
+                await searchResults.processEvent('setNoteEditCommentValue', {
                     noteId,
                     value: 'test',
                 })
@@ -830,7 +990,7 @@ describe('Dashboard search results logic', () => {
                         .editNoteForm.inputValue,
                 ).toEqual('test')
 
-                await searchResults.processEvent('setPageNoteCommentValue', {
+                await searchResults.processEvent('setNoteEditCommentValue', {
                     noteId,
                     value: 'test again',
                 })
@@ -848,36 +1008,29 @@ describe('Dashboard search results logic', () => {
                 })
                 const noteId = DATA.NOTE_2.url
                 const updatedComment = 'test'
-                const updatedTags = ['test']
 
-                await searchResults.processEvent('setPageNoteEditing', {
+                await searchResults.processEvent('setNoteEditing', {
                     noteId,
                     isEditing: true,
                 })
-                await searchResults.processEvent('setPageNoteCommentValue', {
+                await searchResults.processEvent('setNoteEditCommentValue', {
                     noteId,
                     value: updatedComment,
-                })
-                await searchResults.processEvent('setPageNoteTags', {
-                    noteId,
-                    tags: updatedTags,
                 })
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
                     expect.objectContaining({
-                        tags: [],
                         comment: DATA.NOTE_2.comment,
                         isEditing: true,
                         editNoteForm: expect.objectContaining({
                             inputValue: updatedComment,
-                            tags: updatedTags,
                         }),
                     }),
                 )
 
-                await searchResults.processEvent('cancelPageNoteEdit', {
+                await searchResults.processEvent('cancelNoteEdit', {
                     noteId,
                 })
 
@@ -885,12 +1038,10 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
                     expect.objectContaining({
-                        tags: [],
                         comment: DATA.NOTE_2.comment,
                         isEditing: false,
                         editNoteForm: expect.objectContaining({
                             inputValue: DATA.NOTE_2.comment,
-                            tags: [],
                         }),
                     }),
                 )
@@ -904,19 +1055,14 @@ describe('Dashboard search results logic', () => {
                 })
                 const noteId = DATA.NOTE_2.url
                 const updatedComment = 'test'
-                const updatedTags = ['test']
 
-                await searchResults.processEvent('setPageNoteEditing', {
+                await searchResults.processEvent('setNoteEditing', {
                     noteId,
                     isEditing: true,
                 })
-                await searchResults.processEvent('setPageNoteCommentValue', {
+                await searchResults.processEvent('setNoteEditCommentValue', {
                     noteId,
                     value: updatedComment,
-                })
-                await searchResults.processEvent('setPageNoteTags', {
-                    noteId,
-                    tags: updatedTags,
                 })
 
                 expect(
@@ -928,7 +1074,6 @@ describe('Dashboard search results logic', () => {
                         isEditing: true,
                         editNoteForm: expect.objectContaining({
                             inputValue: updatedComment,
-                            tags: updatedTags,
                         }),
                     }),
                 )
@@ -936,7 +1081,7 @@ describe('Dashboard search results logic', () => {
                 expect(
                     searchResults.state.searchResults.noteUpdateState,
                 ).toEqual('pristine')
-                const editP = searchResults.processEvent('savePageNoteEdit', {
+                const editP = searchResults.processEvent('saveNoteEdit', {
                     noteId,
                 })
                 expect(
@@ -951,12 +1096,10 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
                     expect.objectContaining({
-                        tags: updatedTags,
                         comment: updatedComment,
                         isEditing: false,
                         editNoteForm: expect.objectContaining({
                             inputValue: updatedComment,
-                            tags: updatedTags,
                         }),
                     }),
                 )

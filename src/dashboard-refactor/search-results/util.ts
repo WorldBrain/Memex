@@ -52,8 +52,14 @@ export const getInitialPageResultState = (id: string): PageResult => ({
     noteIds: { user: [], followed: [], search: [] },
 })
 
-export const getInitialNoteResultState = (id: string): NoteResult => ({
+export const getInitialNoteResultState = (): NoteResult => ({
     isEditing: false,
+    isBookmarked: false,
+    areRepliesShown: false,
+    isTagPickerShown: false,
+    isCopyPasterShown: false,
+    isListPickerShown: false,
+    isDeleteModalShown: false,
     editNoteForm: getInitialFormState(),
 })
 
@@ -88,6 +94,12 @@ export const annotationSearchResultToState: SearchResultToState = (
                     highlight: annotation.body,
                     comment: annotation.comment,
                     tags: annotation.tags ?? [],
+                    isBookmarked: annotation.isBookmarked ?? false,
+                    areRepliesShown: false,
+                    isTagPickerShown: false,
+                    isCopyPasterShown: false,
+                    isListPickerShown: false,
+                    isDeleteModalShown: false,
                     displayTime:
                         annotation.lastEdited?.getTime() ??
                         annotation.createdWhen.getTime(),
@@ -156,6 +168,12 @@ export const pageSearchResultToState: SearchResultToState = (
                 highlight: annotation.body,
                 comment: annotation.comment,
                 tags: annotation.tags ?? [],
+                isBookmarked: annotation.isBookmarked ?? false,
+                areRepliesShown: false,
+                isTagPickerShown: false,
+                isCopyPasterShown: false,
+                isListPickerShown: false,
+                isDeleteModalShown: false,
                 displayTime:
                     annotation.lastEdited?.getTime() ??
                     annotation.createdWhen.getTime(),

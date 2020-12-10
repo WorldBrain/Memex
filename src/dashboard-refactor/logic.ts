@@ -448,8 +448,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         displayTime: Date.now(),
                                         comment: formState.inputValue,
                                         tags: formState.tags,
-                                        isEditing: false,
-                                        editNoteForm: utils.getInitialFormState(),
+                                        ...utils.getInitialNoteResultState(),
                                     },
                                 },
                             },
@@ -506,7 +505,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageNoteEditing: EventHandler<'setPageNoteEditing'> = ({ event }) => {
+    setNoteEditing: EventHandler<'setNoteEditing'> = ({ event }) => {
         this.emitMutation({
             searchResults: {
                 noteData: {
@@ -520,7 +519,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageNoteTagPickerShown: EventHandler<'setPageNoteTagPickerShown'> = ({
+    setNoteTagPickerShown: EventHandler<'setNoteTagPickerShown'> = ({
         event,
     }) => {
         this.emitMutation({
@@ -528,9 +527,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            editNoteForm: {
-                                isTagPickerShown: { $set: event.isShown },
-                            },
+                            isTagPickerShown: { $set: event.isShown },
                         },
                     },
                 },
@@ -538,15 +535,15 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageNoteTags: EventHandler<'setPageNoteTags'> = ({ event }) => {
+    setNoteListPickerShown: EventHandler<'setNoteListPickerShown'> = ({
+        event,
+    }) => {
         this.emitMutation({
             searchResults: {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            editNoteForm: {
-                                tags: { $set: event.tags },
-                            },
+                            isListPickerShown: { $set: event.isShown },
                         },
                     },
                 },
@@ -554,7 +551,81 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageNoteCommentValue: EventHandler<'setPageNoteCommentValue'> = ({
+    setNoteCopyPasterShown: EventHandler<'setNoteCopyPasterShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            isCopyPasterShown: { $set: event.isShown },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setNoteDeleteModalShown: EventHandler<'setNoteDeleteModalShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            isDeleteModalShown: { $set: event.isShown },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setNoteRepliesShown: EventHandler<'setNoteRepliesShown'> = ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            areRepliesShown: { $set: event.areShown },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setNoteBookmark: EventHandler<'setNoteBookmark'> = ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            isBookmarked: { $set: event.isBookmarked },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setNoteTags: EventHandler<'setNoteTags'> = ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            tags: { $set: event.tags },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setNoteEditCommentValue: EventHandler<'setNoteEditCommentValue'> = ({
         event,
     }) => {
         this.emitMutation({
@@ -572,7 +643,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    cancelPageNoteEdit: EventHandler<'cancelPageNoteEdit'> = ({
+    cancelNoteEdit: EventHandler<'cancelNoteEdit'> = ({
         event,
         previousState,
     }) => {
@@ -598,7 +669,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    savePageNoteEdit: EventHandler<'savePageNoteEdit'> = async ({
+    saveNoteEdit: EventHandler<'saveNoteEdit'> = async ({
         event,
         previousState,
     }) => {
