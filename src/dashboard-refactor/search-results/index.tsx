@@ -26,7 +26,6 @@ import {
     AnnotationCreate,
     AnnotationCreateEventProps,
 } from 'src/annotations/components/AnnotationCreate'
-import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 
 // TODO: figure out what old logic was doing
 const timestampToString = (timestamp: number) => timestamp.toString()
@@ -39,7 +38,6 @@ export type Props = RootState &
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
         onShowAllNotesClick: React.MouseEventHandler
-        tagPickerDependencies: GenericPickerDependenciesMinusSave
         newNoteInteractionProps: {
             [Key in keyof AnnotationCreateEventProps]: (
                 day: number,
@@ -112,7 +110,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     comment={newNoteForm.inputValue}
                     tags={newNoteForm.tags}
                     {...newNoteInteractionProps}
-                    tagPickerDependencies={this.props.tagPickerDependencies}
                 />
                 {noteIds[notesType].map(this.renderNoteResult)}
             </>

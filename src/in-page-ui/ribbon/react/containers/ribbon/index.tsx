@@ -8,7 +8,6 @@ import {
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Ribbon from '../../components/ribbon'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
-import { AnnotationsSidebarProps } from 'src/sidebar/annotations-sidebar/components/AnnotationsSidebar'
 import analytics from 'src/analytics'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
@@ -69,15 +68,6 @@ export default class RibbonContainer extends StatefulUIElement<
                 tags: this.state.commentBox.tags,
             },
         })
-    }
-
-    protected getTagProps(): AnnotationsSidebarProps['annotationTagProps'] {
-        return {
-            loadDefaultSuggestions: () =>
-                this.props.tags.fetchInitialTagSuggestions(),
-            queryEntries: (query) =>
-                this.props.tags.searchForTagSuggestions({ query }),
-        }
     }
 
     handleExternalAction = (event: { action: InPageUIRibbonAction }) => {
@@ -155,14 +145,10 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.processEvent('tagAllTabs', { value }),
                     updateTags: (value) =>
                         this.processEvent('updateTags', { value }),
-                    fetchInitialTagSuggestions: () =>
-                        this.props.tags.fetchInitialTagSuggestions(),
                     fetchInitialTagSelections: () =>
                         this.props.tags.fetchPageTags({
                             url: this.props.currentTab.url,
                         }),
-                    queryTagSuggestions: (query: string) =>
-                        this.props.tags.searchForTagSuggestions({ query }),
                 }}
                 lists={{
                     ...this.state.lists,
@@ -174,15 +160,9 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.processEvent('setShowListsPicker', {
                             value,
                         }),
-                    fetchInitialListSuggestions: () =>
-                        this.props.customLists.fetchInitialListSuggestions(),
                     fetchInitialListSelections: () =>
                         this.props.customLists.fetchPageLists({
                             url: this.props.currentTab.url,
-                        }),
-                    queryListSuggestions: (query: string) =>
-                        this.props.customLists.searchForListSuggestions({
-                            query,
                         }),
                 }}
                 search={{

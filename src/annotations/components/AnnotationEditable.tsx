@@ -13,7 +13,6 @@ import AnnotationEdit, {
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
-import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import { SidebarAnnotationTheme, SelectionIndices } from '../types'
 import {
     AnnotationSharingInfo,
@@ -38,7 +37,6 @@ export interface AnnotationEditableProps {
     tags: string[]
     isBookmarked?: boolean
     mode: AnnotationMode
-    tagPickerDependencies: GenericPickerDependenciesMinusSave
     annotationFooterDependencies: AnnotationFooterEventProps
     annotationEditDependencies: AnnotationEditGeneralProps &
         AnnotationEditEventProps
@@ -164,7 +162,6 @@ export default class AnnotationEditable extends React.Component<Props> {
             mode,
             annotationEditDependencies,
             annotationFooterDependencies,
-            tagPickerDependencies,
         } = this.props
 
         if (mode === 'edit') {
@@ -173,7 +170,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                     ref={this.annotEditRef}
                     {...this.props}
                     {...annotationEditDependencies}
-                    tagPickerDependencies={tagPickerDependencies}
                     rows={2}
                 />
             )

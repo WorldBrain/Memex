@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
 
 import { ButtonTooltip } from 'src/common-ui/components'
-import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
 import TagInput from 'src/tags/ui/tag-input'
 import { FocusableComponent } from './types'
@@ -28,9 +27,7 @@ export interface AnnotationCreateGeneralProps {
 
 export interface Props
     extends AnnotationCreateGeneralProps,
-        AnnotationCreateEventProps {
-    tagPickerDependencies: GenericPickerDependenciesMinusSave
-}
+        AnnotationCreateEventProps {}
 
 export class AnnotationCreate extends React.Component<Props, State>
     implements FocusableComponent {
@@ -94,11 +91,8 @@ export class AnnotationCreate extends React.Component<Props, State>
         }
     }
     private renderTagPicker() {
-        const { tagPickerDependencies } = this.props
-
         return (
             <TagInput
-                queryTagSuggestions={tagPickerDependencies.queryEntries}
                 updateTags={async ({ selected }) =>
                     this.props.onTagsUpdate(selected)
                 }
@@ -107,9 +101,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                     this.setState({ isTagPickerShown })
                 }
                 tags={this.props.tags}
-                fetchInitialTagSuggestions={
-                    tagPickerDependencies.loadDefaultSuggestions
-                }
                 deleteTag={(tag) =>
                     this.props.onTagsUpdate(
                         this.props.tags.filter((_tag) => _tag !== tag),

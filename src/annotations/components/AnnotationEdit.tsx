@@ -2,7 +2,6 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
-import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import TagInput from 'src/tags/ui/tag-input'
 import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
 import { FocusableComponent } from './types'
@@ -26,7 +25,6 @@ export interface AnnotationEditGeneralProps {
 export interface Props
     extends AnnotationEditEventProps,
         AnnotationEditGeneralProps {
-    tagPickerDependencies: GenericPickerDependenciesMinusSave
     url: string
     rows: number
 }
@@ -81,11 +79,6 @@ class AnnotationEdit extends React.Component<Props>
     }
 
     render() {
-        const {
-            loadDefaultSuggestions,
-            queryEntries,
-        } = this.props.tagPickerDependencies
-
         return (
             <>
                 <MarkdownPreviewAnnotationInsertMenu
@@ -108,8 +101,6 @@ class AnnotationEdit extends React.Component<Props>
                 />
                 <TagInput
                     deleteTag={this.props.deleteSingleTag}
-                    queryTagSuggestions={queryEntries}
-                    fetchInitialTagSuggestions={loadDefaultSuggestions}
                     onKeyDown={this.handleTagInputKeyDown}
                     {...this.props}
                 />

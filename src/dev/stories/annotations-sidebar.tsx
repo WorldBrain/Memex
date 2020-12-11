@@ -120,11 +120,6 @@ async function createDependencies() {
             onMouseEnter: action('startMouseOver'),
             onMouseLeave: action('endMouseOver'),
         },
-        annotationTagProps: {
-            loadDefaultSuggestions: async () => TAGS,
-            queryEntries: async (query) =>
-                TAGS.filter((tag) => tag.startsWith(query)),
-        },
         handleScrollPagination: () => undefined,
         onClickOutside: action('clickOutside'),
         annotations,

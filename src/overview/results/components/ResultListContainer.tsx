@@ -205,12 +205,6 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                 <div ref={(ref) => this.setListDivRef(ref)}>
                     <CollectionPicker
                         onUpdateEntrySelection={this.handleListUpdate(index)}
-                        queryEntries={(query) =>
-                            collections.searchForListSuggestions({ query })
-                        }
-                        loadDefaultSuggestions={
-                            collections.fetchInitialListSuggestions
-                        }
                         initialSelectedEntries={async () => selectedLists}
                         onEscapeKeyDown={
                             this.props.handleListBtnClick(index) as any
@@ -234,10 +228,6 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                 <div ref={(ref) => this.setTagDivRef(ref)}>
                     <TagPicker
                         onUpdateEntrySelection={this.handleTagUpdate(index)}
-                        queryEntries={(query) =>
-                            tags.searchForTagSuggestions({ query })
-                        }
-                        loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
                         initialSelectedEntries={async () => selectedTags}
                         onEscapeKeyDown={
                             this.props.handleTagBtnClick(index) as any

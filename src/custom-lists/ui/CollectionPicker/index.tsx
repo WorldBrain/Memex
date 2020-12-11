@@ -22,12 +22,19 @@ import { fontSizeNormal } from 'src/common-ui/components/design-library/typograp
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { EntrySelectedList } from './components/EntrySelectedList'
 import { ListResultItem } from './components/ListResultItem'
+import { collections } from 'src/util/remote-functions-background'
 
 class ListPicker extends StatefulUIElement<
     ListPickerDependencies,
     ListPickerState,
     ListPickerEvent
 > {
+    static defaultProps: Partial<ListPickerDependencies> = {
+        queryEntries: (query) =>
+            collections.searchForListSuggestions({ query }),
+        loadDefaultSuggestions: collections.fetchInitialListSuggestions,
+    }
+
     constructor(props: ListPickerDependencies) {
         super(props, new ListPickerLogic(props))
     }

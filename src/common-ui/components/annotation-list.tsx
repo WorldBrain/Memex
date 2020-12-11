@@ -414,12 +414,6 @@ class AnnotationList extends Component<Props, State> {
                                   )
                             : undefined,
                 }}
-                tagPickerDependencies={{
-                    loadDefaultSuggestions: () =>
-                        this.tagsBG.fetchInitialTagSuggestions(),
-                    queryEntries: (query) =>
-                        this.tagsBG.searchForTagSuggestions({ query }),
-                }}
             />
         ))
     }

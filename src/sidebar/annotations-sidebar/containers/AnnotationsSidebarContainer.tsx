@@ -231,15 +231,6 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    protected getTagProps(): AnnotationsSidebarProps['annotationTagProps'] {
-        return {
-            loadDefaultSuggestions: () =>
-                this.props.tags.fetchInitialTagSuggestions(),
-            queryEntries: (query) =>
-                this.props.tags.searchForTagSuggestions({ query }),
-        }
-    }
-
     private handleCopyAllNotesClick: React.MouseEventHandler = (e) => {
         e.preventDefault()
 
@@ -482,7 +473,6 @@ export class AnnotationsSidebarContainer<
                         }
                         isAnnotationCreateShown={this.state.showCommentBox}
                         hoverAnnotationUrl={this.state.hoverAnnotationUrl}
-                        annotationTagProps={this.getTagProps()}
                         annotationCreateProps={this.getCreateProps()}
                         annotationEditableProps={this.getEditableProps()}
                         bindAnnotationFooterEventProps={(url) =>
