@@ -17,6 +17,8 @@ const pageDataToSearchRes = (
     annotations: notes.map((note) => noteDataToSearchRes(note, page)),
     annotsCount: notes.length,
     displayTime: page.displayTime,
+    lists: [],
+    tags: [],
 })
 
 const noteDataToSearchRes = (
@@ -41,6 +43,9 @@ export const PAGE_1: PageData = {
     isBookmarked: false,
     fullTitle: 'Test page',
     displayTime: new Date('2020-11-26T01:00').getTime(),
+    isDeleteModalShown: false,
+    lists: [],
+    tags: [],
 }
 
 export const PAGE_2: PageData = {
@@ -49,6 +54,9 @@ export const PAGE_2: PageData = {
     isBookmarked: false,
     fullTitle: 'Memex ext is good',
     displayTime: new Date('2020-11-26T05:00').getTime(),
+    isDeleteModalShown: false,
+    lists: [],
+    tags: [],
 }
 
 export const PAGE_3: PageData = {
@@ -57,10 +65,14 @@ export const PAGE_3: PageData = {
     isBookmarked: false,
     fullTitle: 'Memex ext is a web extension',
     displayTime: new Date('2020-11-26T05:10').getTime(),
+    isDeleteModalShown: false,
+    lists: [],
+    tags: [],
 }
 
 export const NOTE_1: NoteData = {
     url: PAGE_1.normalizedUrl + '#0123456789',
+    pageUrl: PAGE_1.normalizedUrl,
     displayTime: new Date('2020-11-26T01:05').getTime(),
     comment: 'Test webpage internet javascript',
     tags: [],
@@ -68,6 +80,7 @@ export const NOTE_1: NoteData = {
 
 export const NOTE_2: NoteData = {
     url: PAGE_1.normalizedUrl + '#01234567811',
+    pageUrl: PAGE_1.normalizedUrl,
     displayTime: new Date('2020-11-26T01:07').getTime(),
     comment: 'webpage internet javascript',
     highlight: 'Some test text',
@@ -76,6 +89,7 @@ export const NOTE_2: NoteData = {
 
 export const NOTE_3: NoteData = {
     url: PAGE_1.normalizedUrl + '#0123456789123',
+    pageUrl: PAGE_1.normalizedUrl,
     displayTime: new Date('2020-11-27T18:05').getTime(),
     comment: 'Test webpage internet javascript deer',
     tags: [],
@@ -83,6 +97,7 @@ export const NOTE_3: NoteData = {
 
 export const NOTE_4: NoteData = {
     url: PAGE_3.normalizedUrl + '#012345678912213',
+    pageUrl: PAGE_3.normalizedUrl,
     displayTime: new Date('2020-11-26T05:15').getTime(),
     comment: 'Memex is a web extensions',
     highlight: 'memex web extension chrome firefox browser',
@@ -91,6 +106,7 @@ export const NOTE_4: NoteData = {
 
 export const NOTE_5: NoteData = {
     url: PAGE_3.normalizedUrl + '#012345678912309',
+    pageUrl: PAGE_3.normalizedUrl,
     displayTime: new Date('2020-11-27T18:15').getTime(),
     highlight: 'memex deer duck garage',
     tags: [],
