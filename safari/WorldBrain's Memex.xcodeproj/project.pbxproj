@@ -1,0 +1,586 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1312DE5425820D79000294F6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1312DE5325820D79000294F6 /* AppDelegate.swift */; };
+		1312DE5725820D79000294F6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE5525820D79000294F6 /* Main.storyboard */; };
+		1312DE5925820D79000294F6 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1312DE5825820D79000294F6 /* ViewController.swift */; };
+		1312DE5B25820D7B000294F6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE5A25820D7B000294F6 /* Assets.xcassets */; };
+		1312DE6225820D7C000294F6 /* WorldBrain's Memex Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 1312DE6125820D7C000294F6 /* WorldBrain's Memex Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1312DE6725820D7C000294F6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1312DE6625820D7C000294F6 /* Cocoa.framework */; };
+		1312DE6A25820D7C000294F6 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1312DE6925820D7C000294F6 /* SafariWebExtensionHandler.swift */; };
+		1312DE8D25820D7C000294F6 /* content_script.css in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE7725820D7C000294F6 /* content_script.css */; };
+		1312DE8E25820D7C000294F6 /* content_script_ribbon.js in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE7825820D7C000294F6 /* content_script_ribbon.js */; };
+		1312DE8F25820D7C000294F6 /* content_script_ribbon.css in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE7925820D7C000294F6 /* content_script_ribbon.css */; };
+		1312DE9025820D7C000294F6 /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE7A25820D7C000294F6 /* popup.js */; };
+		1312DE9125820D7C000294F6 /* content_script_tooltip.css in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE7B25820D7C000294F6 /* content_script_tooltip.css */; };
+		1312DE9225820D7C000294F6 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE7C25820D7C000294F6 /* background.js */; };
+		1312DE9325820D7C000294F6 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE7D25820D7C000294F6 /* popup.html */; };
+		1312DE9425820D7C000294F6 /* options.js in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE7E25820D7C000294F6 /* options.js */; };
+		1312DE9525820D7C000294F6 /* content_script_search_injection.css in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE7F25820D7C000294F6 /* content_script_search_injection.css */; };
+		1312DE9625820D7C000294F6 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE8025820D7C000294F6 /* img */; };
+		1312DE9725820D7C000294F6 /* content_script_sidebar.css in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE8125820D7C000294F6 /* content_script_sidebar.css */; };
+		1312DE9825820D7C000294F6 /* content_script.js in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE8225820D7C000294F6 /* content_script.js */; };
+		1312DE9925820D7C000294F6 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE8325820D7C000294F6 /* manifest.json */; };
+		1312DE9A25820D7C000294F6 /* content_script_sidebar.js in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE8425820D7C000294F6 /* content_script_sidebar.js */; };
+		1312DE9B25820D7C000294F6 /* lib in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE8525820D7C000294F6 /* lib */; };
+		1312DE9C25820D7C000294F6 /* options.html in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE8625820D7C000294F6 /* options.html */; };
+		1312DE9D25820D7C000294F6 /* content_script_tooltip.js in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE8725820D7C000294F6 /* content_script_tooltip.js */; };
+		1312DE9E25820D7C000294F6 /* popup.css in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE8825820D7C000294F6 /* popup.css */; };
+		1312DE9F25820D7C000294F6 /* 0.js in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE8925820D7C000294F6 /* 0.js */; };
+		1312DEA025820D7C000294F6 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE8A25820D7C000294F6 /* fonts */; };
+		1312DEA125820D7C000294F6 /* content_script_search_injection.js in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE8B25820D7C000294F6 /* content_script_search_injection.js */; };
+		1312DEA225820D7C000294F6 /* options.css in Resources */ = {isa = PBXBuildFile; fileRef = 1312DE8C25820D7C000294F6 /* options.css */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1312DE6325820D7C000294F6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1312DE4725820D79000294F6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1312DE6025820D7C000294F6;
+			remoteInfo = "WorldBrain's Memex Extension";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		1312DE7225820D7C000294F6 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				1312DE6225820D7C000294F6 /* WorldBrain's Memex Extension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1312DE4F25820D79000294F6 /* WorldBrain's Memex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "WorldBrain's Memex.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1312DE5225820D79000294F6 /* WorldBrain_s_Memex.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WorldBrain_s_Memex.entitlements; sourceTree = "<group>"; };
+		1312DE5325820D79000294F6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		1312DE5625820D79000294F6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		1312DE5825820D79000294F6 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		1312DE5A25820D7B000294F6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1312DE5C25820D7B000294F6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1312DE6125820D7C000294F6 /* WorldBrain's Memex Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "WorldBrain's Memex Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1312DE6625820D7C000294F6 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		1312DE6925820D7C000294F6 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
+		1312DE6B25820D7C000294F6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1312DE6C25820D7C000294F6 /* WorldBrain_s_Memex_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WorldBrain_s_Memex_Extension.entitlements; sourceTree = "<group>"; };
+		1312DE7725820D7C000294F6 /* content_script.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = content_script.css; path = ../../extension/content_script.css; sourceTree = "<group>"; };
+		1312DE7825820D7C000294F6 /* content_script_ribbon.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = content_script_ribbon.js; path = ../../extension/content_script_ribbon.js; sourceTree = "<group>"; };
+		1312DE7925820D7C000294F6 /* content_script_ribbon.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = content_script_ribbon.css; path = ../../extension/content_script_ribbon.css; sourceTree = "<group>"; };
+		1312DE7A25820D7C000294F6 /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = popup.js; path = ../../extension/popup.js; sourceTree = "<group>"; };
+		1312DE7B25820D7C000294F6 /* content_script_tooltip.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = content_script_tooltip.css; path = ../../extension/content_script_tooltip.css; sourceTree = "<group>"; };
+		1312DE7C25820D7C000294F6 /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = background.js; path = ../../extension/background.js; sourceTree = "<group>"; };
+		1312DE7D25820D7C000294F6 /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = ../../extension/popup.html; sourceTree = "<group>"; };
+		1312DE7E25820D7C000294F6 /* options.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = options.js; path = ../../extension/options.js; sourceTree = "<group>"; };
+		1312DE7F25820D7C000294F6 /* content_script_search_injection.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = content_script_search_injection.css; path = ../../extension/content_script_search_injection.css; sourceTree = "<group>"; };
+		1312DE8025820D7C000294F6 /* img */ = {isa = PBXFileReference; lastKnownFileType = folder; name = img; path = ../../extension/img; sourceTree = "<group>"; };
+		1312DE8125820D7C000294F6 /* content_script_sidebar.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = content_script_sidebar.css; path = ../../extension/content_script_sidebar.css; sourceTree = "<group>"; };
+		1312DE8225820D7C000294F6 /* content_script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = content_script.js; path = ../../extension/content_script.js; sourceTree = "<group>"; };
+		1312DE8325820D7C000294F6 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ../../extension/manifest.json; sourceTree = "<group>"; };
+		1312DE8425820D7C000294F6 /* content_script_sidebar.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = content_script_sidebar.js; path = ../../extension/content_script_sidebar.js; sourceTree = "<group>"; };
+		1312DE8525820D7C000294F6 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = ../../extension/lib; sourceTree = "<group>"; };
+		1312DE8625820D7C000294F6 /* options.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = options.html; path = ../../extension/options.html; sourceTree = "<group>"; };
+		1312DE8725820D7C000294F6 /* content_script_tooltip.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = content_script_tooltip.js; path = ../../extension/content_script_tooltip.js; sourceTree = "<group>"; };
+		1312DE8825820D7C000294F6 /* popup.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = popup.css; path = ../../extension/popup.css; sourceTree = "<group>"; };
+		1312DE8925820D7C000294F6 /* 0.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = 0.js; path = ../../extension/0.js; sourceTree = "<group>"; };
+		1312DE8A25820D7C000294F6 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = ../../extension/fonts; sourceTree = "<group>"; };
+		1312DE8B25820D7C000294F6 /* content_script_search_injection.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = content_script_search_injection.js; path = ../../extension/content_script_search_injection.js; sourceTree = "<group>"; };
+		1312DE8C25820D7C000294F6 /* options.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = options.css; path = ../../extension/options.css; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1312DE4C25820D79000294F6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1312DE5E25820D7C000294F6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1312DE6725820D7C000294F6 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1312DE4625820D79000294F6 = {
+			isa = PBXGroup;
+			children = (
+				1312DE5125820D79000294F6 /* WorldBrain's Memex */,
+				1312DE6825820D7C000294F6 /* WorldBrain's Memex Extension */,
+				1312DE6525820D7C000294F6 /* Frameworks */,
+				1312DE5025820D79000294F6 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1312DE5025820D79000294F6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1312DE4F25820D79000294F6 /* WorldBrain's Memex.app */,
+				1312DE6125820D7C000294F6 /* WorldBrain's Memex Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1312DE5125820D79000294F6 /* WorldBrain's Memex */ = {
+			isa = PBXGroup;
+			children = (
+				1312DE5225820D79000294F6 /* WorldBrain_s_Memex.entitlements */,
+				1312DE5325820D79000294F6 /* AppDelegate.swift */,
+				1312DE5525820D79000294F6 /* Main.storyboard */,
+				1312DE5825820D79000294F6 /* ViewController.swift */,
+				1312DE5A25820D7B000294F6 /* Assets.xcassets */,
+				1312DE5C25820D7B000294F6 /* Info.plist */,
+			);
+			path = "WorldBrain's Memex";
+			sourceTree = "<group>";
+		};
+		1312DE6525820D7C000294F6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1312DE6625820D7C000294F6 /* Cocoa.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		1312DE6825820D7C000294F6 /* WorldBrain's Memex Extension */ = {
+			isa = PBXGroup;
+			children = (
+				1312DE7625820D7C000294F6 /* Resources */,
+				1312DE6925820D7C000294F6 /* SafariWebExtensionHandler.swift */,
+				1312DE6B25820D7C000294F6 /* Info.plist */,
+				1312DE6C25820D7C000294F6 /* WorldBrain_s_Memex_Extension.entitlements */,
+			);
+			path = "WorldBrain's Memex Extension";
+			sourceTree = "<group>";
+		};
+		1312DE7625820D7C000294F6 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				1312DE7725820D7C000294F6 /* content_script.css */,
+				1312DE7825820D7C000294F6 /* content_script_ribbon.js */,
+				1312DE7925820D7C000294F6 /* content_script_ribbon.css */,
+				1312DE7A25820D7C000294F6 /* popup.js */,
+				1312DE7B25820D7C000294F6 /* content_script_tooltip.css */,
+				1312DE7C25820D7C000294F6 /* background.js */,
+				1312DE7D25820D7C000294F6 /* popup.html */,
+				1312DE7E25820D7C000294F6 /* options.js */,
+				1312DE7F25820D7C000294F6 /* content_script_search_injection.css */,
+				1312DE8025820D7C000294F6 /* img */,
+				1312DE8125820D7C000294F6 /* content_script_sidebar.css */,
+				1312DE8225820D7C000294F6 /* content_script.js */,
+				1312DE8325820D7C000294F6 /* manifest.json */,
+				1312DE8425820D7C000294F6 /* content_script_sidebar.js */,
+				1312DE8525820D7C000294F6 /* lib */,
+				1312DE8625820D7C000294F6 /* options.html */,
+				1312DE8725820D7C000294F6 /* content_script_tooltip.js */,
+				1312DE8825820D7C000294F6 /* popup.css */,
+				1312DE8925820D7C000294F6 /* 0.js */,
+				1312DE8A25820D7C000294F6 /* fonts */,
+				1312DE8B25820D7C000294F6 /* content_script_search_injection.js */,
+				1312DE8C25820D7C000294F6 /* options.css */,
+			);
+			name = Resources;
+			path = "WorldBrain's Memex Extension";
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1312DE4E25820D79000294F6 /* WorldBrain's Memex */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1312DE7325820D7C000294F6 /* Build configuration list for PBXNativeTarget "WorldBrain's Memex" */;
+			buildPhases = (
+				1312DE4B25820D79000294F6 /* Sources */,
+				1312DE4C25820D79000294F6 /* Frameworks */,
+				1312DE4D25820D79000294F6 /* Resources */,
+				1312DE7225820D7C000294F6 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1312DE6425820D7C000294F6 /* PBXTargetDependency */,
+			);
+			name = "WorldBrain's Memex";
+			productName = "WorldBrain's Memex";
+			productReference = 1312DE4F25820D79000294F6 /* WorldBrain's Memex.app */;
+			productType = "com.apple.product-type.application";
+		};
+		1312DE6025820D7C000294F6 /* WorldBrain's Memex Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1312DE6F25820D7C000294F6 /* Build configuration list for PBXNativeTarget "WorldBrain's Memex Extension" */;
+			buildPhases = (
+				1312DE5D25820D7C000294F6 /* Sources */,
+				1312DE5E25820D7C000294F6 /* Frameworks */,
+				1312DE5F25820D7C000294F6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "WorldBrain's Memex Extension";
+			productName = "WorldBrain's Memex Extension";
+			productReference = 1312DE6125820D7C000294F6 /* WorldBrain's Memex Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1312DE4725820D79000294F6 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1220;
+				LastUpgradeCheck = 1220;
+				TargetAttributes = {
+					1312DE4E25820D79000294F6 = {
+						CreatedOnToolsVersion = 12.2;
+					};
+					1312DE6025820D7C000294F6 = {
+						CreatedOnToolsVersion = 12.2;
+					};
+				};
+			};
+			buildConfigurationList = 1312DE4A25820D79000294F6 /* Build configuration list for PBXProject "WorldBrain's Memex" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 1312DE4625820D79000294F6;
+			productRefGroup = 1312DE5025820D79000294F6 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1312DE4E25820D79000294F6 /* WorldBrain's Memex */,
+				1312DE6025820D7C000294F6 /* WorldBrain's Memex Extension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1312DE4D25820D79000294F6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1312DE5B25820D7B000294F6 /* Assets.xcassets in Resources */,
+				1312DE5725820D79000294F6 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1312DE5F25820D7C000294F6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1312DE9725820D7C000294F6 /* content_script_sidebar.css in Resources */,
+				1312DE9625820D7C000294F6 /* img in Resources */,
+				1312DE9325820D7C000294F6 /* popup.html in Resources */,
+				1312DE9925820D7C000294F6 /* manifest.json in Resources */,
+				1312DE9425820D7C000294F6 /* options.js in Resources */,
+				1312DE9125820D7C000294F6 /* content_script_tooltip.css in Resources */,
+				1312DE9B25820D7C000294F6 /* lib in Resources */,
+				1312DE8D25820D7C000294F6 /* content_script.css in Resources */,
+				1312DE9525820D7C000294F6 /* content_script_search_injection.css in Resources */,
+				1312DE9F25820D7C000294F6 /* 0.js in Resources */,
+				1312DE8E25820D7C000294F6 /* content_script_ribbon.js in Resources */,
+				1312DEA025820D7C000294F6 /* fonts in Resources */,
+				1312DEA125820D7C000294F6 /* content_script_search_injection.js in Resources */,
+				1312DE8F25820D7C000294F6 /* content_script_ribbon.css in Resources */,
+				1312DE9C25820D7C000294F6 /* options.html in Resources */,
+				1312DE9A25820D7C000294F6 /* content_script_sidebar.js in Resources */,
+				1312DE9225820D7C000294F6 /* background.js in Resources */,
+				1312DE9E25820D7C000294F6 /* popup.css in Resources */,
+				1312DE9025820D7C000294F6 /* popup.js in Resources */,
+				1312DE9825820D7C000294F6 /* content_script.js in Resources */,
+				1312DEA225820D7C000294F6 /* options.css in Resources */,
+				1312DE9D25820D7C000294F6 /* content_script_tooltip.js in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1312DE4B25820D79000294F6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1312DE5925820D79000294F6 /* ViewController.swift in Sources */,
+				1312DE5425820D79000294F6 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1312DE5D25820D7C000294F6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1312DE6A25820D7C000294F6 /* SafariWebExtensionHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1312DE6425820D7C000294F6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1312DE6025820D7C000294F6 /* WorldBrain's Memex Extension */;
+			targetProxy = 1312DE6325820D7C000294F6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		1312DE5525820D79000294F6 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1312DE5625820D79000294F6 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		1312DE6D25820D7C000294F6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		1312DE6E25820D7C000294F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		1312DE7025820D7C000294F6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "WorldBrain's Memex Extension/WorldBrain_s_Memex_Extension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = "WorldBrain's Memex Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourCompany.WorldBrain-s-Memex.Extension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		1312DE7125820D7C000294F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "WorldBrain's Memex Extension/WorldBrain_s_Memex_Extension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = "WorldBrain's Memex Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourCompany.WorldBrain-s-Memex.Extension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		1312DE7425820D7C000294F6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "WorldBrain's Memex/WorldBrain_s_Memex.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "WorldBrain's Memex/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourCompany.WorldBrain-s-Memex";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		1312DE7525820D7C000294F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "WorldBrain's Memex/WorldBrain_s_Memex.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "WorldBrain's Memex/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourCompany.WorldBrain-s-Memex";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1312DE4A25820D79000294F6 /* Build configuration list for PBXProject "WorldBrain's Memex" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1312DE6D25820D7C000294F6 /* Debug */,
+				1312DE6E25820D7C000294F6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1312DE6F25820D7C000294F6 /* Build configuration list for PBXNativeTarget "WorldBrain's Memex Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1312DE7025820D7C000294F6 /* Debug */,
+				1312DE7125820D7C000294F6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1312DE7325820D7C000294F6 /* Build configuration list for PBXNativeTarget "WorldBrain's Memex" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1312DE7425820D7C000294F6 /* Debug */,
+				1312DE7525820D7C000294F6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1312DE4725820D79000294F6 /* Project object */;
+}

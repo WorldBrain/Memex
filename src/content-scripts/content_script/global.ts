@@ -43,6 +43,7 @@ import { copyToClipboard } from 'src/annotations/content_script/utils'
 // and dependencies of content scripts.
 
 export async function main() {
+    console.log('main function called!')
     setupPageContentRPC()
     runInBackground<PageIndexingInterface<'caller'>>().setTabAsIndexable()
 
