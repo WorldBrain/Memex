@@ -63,10 +63,7 @@ export interface PagePickerProps {
 
 // NOTE: Derived type - edit the original
 export type PagePickerAugdProps = {
-    [Key in keyof PagePickerProps]: (
-        day: number,
-        pageId: string,
-    ) => PagePickerProps[Key]
+    [Key in keyof PagePickerProps]: (pageId: string) => PagePickerProps[Key]
 }
 
 export type SearchResultToState = (
@@ -166,6 +163,8 @@ export type Events = UIEvent<{
     setAllNotesShown: { areShown: boolean }
 
     // Page data state mutations (*shared with all* occurences of the page in different days)
+    setPageTags: { id: string; added?: string; deleted?: string }
+    setPageLists: { id: string; added?: string; deleted?: string }
     setPageBookmark: { id: string; isBookmarked: boolean }
     setPageDeleteModalShown: { id: string; isShown: boolean }
 
@@ -191,7 +190,7 @@ export type Events = UIEvent<{
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
     setNoteBookmark: NoteEventArgs & { isBookmarked: boolean }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
-    setNoteTags: NoteEventArgs & { tags: string[] }
+    setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
 
     // Note edit form state mutations
     setNoteEditCommentValue: NoteEventArgs & { value: string }

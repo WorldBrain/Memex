@@ -156,6 +156,18 @@ export class DashboardContainer extends StatefulUIElement<
                         }),
                     onShareBtnClick: (day, pageId) => () => null, // TODO: figure out share btn
                 }}
+                pagePickerProps={{
+                    onListPickerUpdate: (pageId) => (args) =>
+                        this.processEvent('setPageLists', {
+                            id: pageId,
+                            ...args,
+                        }),
+                    onTagPickerUpdate: (pageId) => (args) =>
+                        this.processEvent('setPageTags', {
+                            id: pageId,
+                            ...args,
+                        }),
+                }}
                 newNoteInteractionProps={{
                     onCancel: (day, pageId) => () =>
                         this.processEvent('cancelPageNewNote', {
@@ -206,13 +218,6 @@ export class DashboardContainer extends StatefulUIElement<
                                 noteId
                             ].isCopyPasterShown,
                         }),
-                    onListPickerBtnClick: (noteId) => () =>
-                        this.processEvent('setNoteListPickerShown', {
-                            noteId,
-                            isShown: !this.state.searchResults.noteData.byId[
-                                noteId
-                            ].isListPickerShown,
-                        }),
                     onReplyBtnClick: (noteId) => () =>
                         this.processEvent('setNoteRepliesShown', {
                             noteId,
@@ -234,7 +239,10 @@ export class DashboardContainer extends StatefulUIElement<
                         }),
                     onShareBtnClick: (noteId) => () => null, // TODO
                 }}
-                tagPickerDependencies={{} as any} // TODO
+                notePickerProps={{
+                    onTagPickerUpdate: (noteId) => (args) =>
+                        this.processEvent('setNoteTags', { noteId, ...args }),
+                }}
             />
         )
     }

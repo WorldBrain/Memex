@@ -81,6 +81,90 @@ describe('Dashboard search results logic', () => {
             ).toBe(false)
         })
 
+        it('should be able to set page tags', async ({ device }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(),
+            })
+            const pageId = DATA.PAGE_2.normalizedUrl
+
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId].tags,
+            ).toEqual([])
+
+            await searchResults.processEvent('setPageTags', {
+                id: pageId,
+                added: DATA.TAG_1,
+            })
+            await searchResults.processEvent('setPageTags', {
+                id: pageId,
+                added: DATA.TAG_2,
+            })
+
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId].tags,
+            ).toEqual([DATA.TAG_1, DATA.TAG_2])
+
+            await searchResults.processEvent('setPageTags', {
+                id: pageId,
+                deleted: DATA.TAG_1,
+            })
+
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId].tags,
+            ).toEqual([DATA.TAG_2])
+
+            await searchResults.processEvent('setPageTags', {
+                id: pageId,
+                added: DATA.TAG_3,
+            })
+
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId].tags,
+            ).toEqual([DATA.TAG_2, DATA.TAG_3])
+        })
+
+        it('should be able to set page lists', async ({ device }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(),
+            })
+            const pageId = DATA.PAGE_2.normalizedUrl
+
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId].tags,
+            ).toEqual([])
+
+            await searchResults.processEvent('setPageLists', {
+                id: pageId,
+                added: DATA.LISTS_1[0].name,
+            })
+            await searchResults.processEvent('setPageLists', {
+                id: pageId,
+                added: DATA.LISTS_1[1].name,
+            })
+
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId].tags,
+            ).toEqual([DATA.LISTS_1[0].name, DATA.LISTS_1[1].name])
+
+            await searchResults.processEvent('setPageLists', {
+                id: pageId,
+                deleted: DATA.LISTS_1[0].name,
+            })
+
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId].tags,
+            ).toEqual([DATA.LISTS_1[1].name])
+
+            await searchResults.processEvent('setPageLists', {
+                id: pageId,
+                added: DATA.LISTS_1[2].name,
+            })
+
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId].tags,
+            ).toEqual([DATA.LISTS_1[1].name, DATA.LISTS_1[2].name])
+        })
+
         it('should be able to toggle page delete modal', async ({ device }) => {
             const { searchResults } = await setupTest(device, {
                 seedData: setPageSearchResult(),
@@ -910,25 +994,33 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteTags', {
                     noteId,
-                    tags: ['test'],
+                    added: DATA.TAG_1,
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .tags,
-                ).toEqual(['test'])
+                ).toEqual([DATA.TAG_1])
 
                 await searchResults.processEvent('setNoteTags', {
                     noteId,
-                    tags: ['test', 'again'],
+                    added: DATA.TAG_2,
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .tags,
-                ).toEqual(['test', 'again'])
+                ).toEqual([DATA.TAG_1, DATA.TAG_2])
 
                 await searchResults.processEvent('setNoteTags', {
                     noteId,
-                    tags: [],
+                    deleted: DATA.TAG_1,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .tags,
+                ).toEqual([DATA.TAG_2])
+                await searchResults.processEvent('setNoteTags', {
+                    noteId,
+                    deleted: DATA.TAG_2,
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]

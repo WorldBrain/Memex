@@ -167,4 +167,9 @@ export const ANNOT_SEARCH_RESULT_2: AnnotationsSearchResponse = {
 export const LISTS_1: ListData[] = [
     { id: 1, name: 'test 1' },
     { id: 2, name: 'test 2' },
+    { id: 3, name: 'test 3' },
 ]
+
+export const TAG_1 = 'test 1'
+export const TAG_2 = 'test 2'
+export const TAG_3 = 'test 3'

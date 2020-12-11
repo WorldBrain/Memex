@@ -99,7 +99,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         const pickerProps = bindFunctionalProps<
             PagePickerAugdProps,
             PagePickerProps
-        >(this.props.pagePickerProps, day, pageId)
+        >(this.props.pagePickerProps, pageId)
 
         return (
             <>

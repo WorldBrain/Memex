@@ -8,6 +8,20 @@ import { RootState as State, DashboardDependencies, Events } from './types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import { haveTagsChanged } from 'src/util/have-tags-changed'
+import { RemoteTagsInterface } from 'src/tags/background/types'
+
+const updatePickerValues = (event: { added?: string; deleted?: string }) => (
+    values: string[],
+) => {
+    if (event.added) {
+        return [...new Set([...values, event.added])]
+    }
+    if (event.deleted) {
+        return values.filter((tag) => tag !== event.deleted)
+    }
+
+    return values
+}
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -16,6 +30,7 @@ type EventHandler<EventName extends keyof Events> = UIEventHandler<
 >
 
 export class DashboardLogic extends UILogic<State, Events> {
+    private tagsBG = runInBackground<RemoteTagsInterface>()
     private listsBG = runInBackground<RemoteCollectionsInterface>()
     private searchBG = runInBackground<SearchInterface>()
     private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
@@ -194,6 +209,46 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             },
+        })
+    }
+
+    setPageTags: EventHandler<'setPageTags'> = async ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                pageData: {
+                    byId: {
+                        [event.id]: {
+                            tags: { $apply: updatePickerValues(event) },
+                        },
+                    },
+                },
+            },
+        })
+
+        await this.tagsBG.updateTagForPage({
+            url: event.id,
+            added: event.added,
+            deleted: event.deleted,
+        })
+    }
+
+    setPageLists: EventHandler<'setPageLists'> = async ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                pageData: {
+                    byId: {
+                        [event.id]: {
+                            lists: { $apply: updatePickerValues(event) },
+                        },
+                    },
+                },
+            },
+        })
+
+        await this.listsBG.updateListForPage({
+            url: event.id,
+            added: event.added,
+            deleted: event.deleted,
         })
     }
 
@@ -596,17 +651,23 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setNoteTags: EventHandler<'setNoteTags'> = ({ event }) => {
+    setNoteTags: EventHandler<'setNoteTags'> = async ({ event }) => {
         this.emitMutation({
             searchResults: {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            tags: { $set: event.tags },
+                            tags: { $apply: updatePickerValues(event) },
                         },
                     },
                 },
             },
+        })
+
+        await this.annotationsBG.editAnnotationTags({
+            url: event.noteId,
+            tagsToBeAdded: [event.added],
+            tagsToBeDeleted: [event.deleted],
         })
     }
 
