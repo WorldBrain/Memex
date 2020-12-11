@@ -4,18 +4,66 @@ import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { PageData, InteractionProps } from '../types'
+import {
+    PageData,
+    PageInteractionProps,
+    PageResult,
+    PagePickerProps,
+} from '../types'
+import TagPicker from 'src/tags/ui/TagPicker'
+import { PageNotesCopyPaster } from 'src/copy-paster'
+import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 
 export interface Props
     extends PageData,
-        Omit<InteractionProps, 'onReplyBtnClick'> {
+        PageResult,
+        PageInteractionProps,
+        PagePickerProps {
     isShared?: boolean
     hasNotes?: boolean
     hasLists?: boolean
     hasTags?: boolean
 }
 
-export default class PageResult extends PureComponent<Props> {
+export default class PageResultView extends PureComponent<Props> {
+    private renderPopouts() {
+        if (this.props.isTagPickerShown) {
+            return (
+                <TagPicker
+                    onUpdateEntrySelection={this.props.onTagPickerUpdate}
+                    initialSelectedEntries={() => this.props.tags}
+                />
+            )
+        }
+
+        if (this.props.isListPickerShown) {
+            return (
+                <CollectionPicker
+                    onUpdateEntrySelection={this.props.onListPickerUpdate}
+                    initialSelectedEntries={() => this.props.lists}
+                />
+            )
+        }
+
+        if (this.props.isCopyPasterShown) {
+            return (
+                <PageNotesCopyPaster
+                    normalizedPageUrls={[this.props.normalizedUrl]}
+                />
+            )
+        }
+
+        return null
+    }
+
+    private renderModals() {
+        if (this.props.isDeleteModalShown) {
+            return <p>TODO: DELETE MODAL!!!!</p>
+        }
+
+        return null
+    }
+
     render() {
         return (
             <ItemBox>
@@ -74,10 +122,15 @@ export default class PageResult extends PureComponent<Props> {
                         ]}
                     />
                 </StyledPageResult>
+                <PopoutContainer>{this.renderPopouts()}</PopoutContainer>
+                <ModalContainer>{this.renderModals()}</ModalContainer>
             </ItemBox>
         )
     }
 }
+
+const PopoutContainer = styled.div``
+const ModalContainer = styled.div``
 
 const StyledPageResult = styled.div`
     display: flex;

@@ -7,6 +7,7 @@ import {
     StandardSearchResponse,
 } from 'src/search/background/types'
 import { PipelineRes } from 'src/search'
+import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 export interface InteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -26,6 +27,7 @@ export type PageInteractionProps = Omit<
     'onReplyBtnClick' | 'onEditBtnClick' | 'onCommentChange'
 >
 
+// NOTE: Derived type - edit the original
 export type PageInteractionAugdProps = {
     [Key in keyof PageInteractionProps]: (
         day: number,
@@ -33,17 +35,44 @@ export type PageInteractionAugdProps = {
     ) => InteractionProps[Key]
 }
 
-export type NoteInteractionProps = Omit<InteractionProps, 'onNotesBtnClick'>
+export type NoteInteractionProps = Omit<
+    InteractionProps,
+    'onNotesBtnClick' | 'onListPickerBtnClick'
+>
 
+// NOTE: Derived type - edit the original
 export type NoteInteractionAugdProps = {
     [Key in keyof NoteInteractionProps]: (
         noteId: string,
     ) => InteractionProps[Key]
 }
 
+export interface NotePickerProps {
+    onTagPickerUpdate: PickerUpdateHandler
+}
+
+// NOTE: Derived type - edit the original
+export type NotePickerAugdProps = {
+    [Key in keyof NotePickerProps]: (noteId: string) => NotePickerProps[Key]
+}
+
+export interface PagePickerProps {
+    onListPickerUpdate: PickerUpdateHandler
+    onTagPickerUpdate: PickerUpdateHandler
+}
+
+// NOTE: Derived type - edit the original
+export type PagePickerAugdProps = {
+    [Key in keyof PagePickerProps]: (
+        day: number,
+        pageId: string,
+    ) => PagePickerProps[Key]
+}
+
 export type SearchResultToState = (
     result: AnnotationsSearchResponse | StandardSearchResponse,
 ) => Pick<RootState, 'results' | 'noteData' | 'pageData'>
+
 export type SearchType = 'pages' | 'notes'
 export type NotesType = 'search' | 'user' | 'followed'
 
@@ -60,14 +89,16 @@ export interface NoteFormState {
 
 export interface NoteData {
     url: string
+    pageUrl: string
     tags: string[]
     comment?: string
     highlight?: string
     displayTime: number
 }
 
-export type PageData = Pick<PipelineRes, 'fullUrl' | 'fullTitle'> & {
+export type PageData = Pick<PipelineRes, 'fullUrl' | 'fullTitle' | 'tags'> & {
     normalizedUrl: string
+    lists: string[]
     displayTime: number
     isBookmarked: boolean
     isDeleteModalShown: boolean
@@ -78,7 +109,6 @@ export interface NoteResult {
     isBookmarked: boolean
     areRepliesShown: boolean
     isTagPickerShown: boolean
-    isListPickerShown: boolean
     isCopyPasterShown: boolean
     isDeleteModalShown: boolean
     editNoteForm: NoteFormState
@@ -157,7 +187,6 @@ export type Events = UIEvent<{
     // Note result state mutations
     setNoteDeleteModalShown: NoteEventArgs & { isShown: boolean }
     setNoteCopyPasterShown: NoteEventArgs & { isShown: boolean }
-    setNoteListPickerShown: NoteEventArgs & { isShown: boolean }
     setNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
     setNoteBookmark: NoteEventArgs & { isBookmarked: boolean }

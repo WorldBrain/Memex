@@ -9,6 +9,11 @@ import {
     NoteInteractionAugdProps,
     NotesType,
     NoteInteractionProps,
+    PagePickerProps,
+    NotePickerProps,
+    PageInteractionProps,
+    PagePickerAugdProps,
+    NotePickerAugdProps,
 } from './types'
 import TopBar from './components/result-top-bar'
 import SearchTypeSwitch, {
@@ -18,7 +23,7 @@ import ExpandAllNotes from './components/expand-all-notes'
 import DayResultGroup from './components/day-result-group'
 import PageResult from './components/page-result'
 import NoteResult from './components/note-result'
-import { setupInteractionProps } from './util'
+import { bindFunctionalProps } from './util'
 import NotesTypeDropdownMenu from './components/notes-type-dropdown-menu'
 import { SortingDropdownMenuBtn } from 'src/sidebar/annotations-sidebar/components/SortingDropdownMenu'
 import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
@@ -37,6 +42,8 @@ export type Props = RootState &
     > & {
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
+        pagePickerProps: PagePickerAugdProps
+        notePickerProps: NotePickerAugdProps
         onShowAllNotesClick: React.MouseEventHandler
         newNoteInteractionProps: {
             [Key in keyof AnnotationCreateEventProps]: (
@@ -57,12 +64,54 @@ export type Props = RootState &
 export default class SearchResultsContainer extends PureComponent<Props> {
     private renderNoteResult = (noteId: string) => {
         const noteData = this.props.noteData.byId[noteId]
-        const interactionProps = setupInteractionProps<NoteInteractionProps>(
-            this.props.noteInteractionProps,
-            noteId,
-        )
 
-        return <NoteResult key={noteId} {...noteData} {...interactionProps} />
+        const interactionProps = bindFunctionalProps<
+            NoteInteractionAugdProps,
+            NoteInteractionProps
+        >(this.props.noteInteractionProps, noteId)
+
+        const pickerProps = bindFunctionalProps<
+            NotePickerAugdProps,
+            NotePickerProps
+        >(this.props.notePickerProps, noteId)
+
+        return (
+            <NoteResult
+                key={noteId}
+                {...noteData}
+                {...interactionProps}
+                {...pickerProps}
+            />
+        )
+    }
+
+    private renderPageResult = (pageId: string, day: number) => {
+        const page = {
+            ...this.props.pageData.byId[pageId],
+            ...this.props.results[day].pages.byId[pageId],
+        }
+
+        const interactionProps = bindFunctionalProps<
+            PageInteractionAugdProps,
+            PageInteractionProps
+        >(this.props.pageInteractionProps, day, pageId)
+
+        const pickerProps = bindFunctionalProps<
+            PagePickerAugdProps,
+            PagePickerProps
+        >(this.props.pagePickerProps, day, pageId)
+
+        return (
+            <>
+                <PageResult
+                    key={pageId + day.toString()}
+                    {...interactionProps}
+                    {...pickerProps}
+                    {...page}
+                />
+                {this.renderPageNotes(page, day)}
+            </>
+        )
     }
 
     private renderPageNotes(
@@ -76,10 +125,12 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         day: number,
     ) {
         if (!areNotesShown) {
-            return false
+            return null
         }
+        const { newNoteInteractionProps } = this.props
 
-        const newNoteInteractionProps = setupInteractionProps<
+        const boundAnnotCreateProps = bindFunctionalProps<
+            typeof newNoteInteractionProps,
             AnnotationCreateEventProps
         >(this.props.newNoteInteractionProps, day, normalizedUrl)
 
@@ -109,49 +160,20 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 <AnnotationCreate
                     comment={newNoteForm.inputValue}
                     tags={newNoteForm.tags}
-                    {...newNoteInteractionProps}
+                    {...boundAnnotCreateProps}
                 />
                 {noteIds[notesType].map(this.renderNoteResult)}
             </>
         )
     }
 
-    private renderPageResults(
-        pages: Array<PageResultData & PageData>,
-        day: number,
-    ) {
-        return pages.map((page) => {
-            const interactionProps = setupInteractionProps(
-                this.props.pageInteractionProps,
-                day,
-                page.normalizedUrl,
-            )
-
-            return (
-                <>
-                    <PageResult
-                        key={page.normalizedUrl + day.toString()}
-                        {...page}
-                        {...interactionProps}
-                    />
-                    {this.renderPageNotes(page, day)}
-                </>
-            )
-        })
-    }
-
     private renderResultsByDay() {
         const days: JSX.Element[] = []
 
         for (const { day, pages } of Object.values(this.props.results)) {
-            const pagesData = pages.allIds.map((id) => ({
-                ...pages.byId[id],
-                ...this.props.pageData.byId[id],
-            }))
-
             days.push(
                 <DayResultGroup key={day} when={timestampToString(day)}>
-                    {this.renderPageResults(pagesData, day)}
+                    {pages.allIds.map((id) => this.renderPageResult(id, day))}
                 </DayResultGroup>,
             )
         }

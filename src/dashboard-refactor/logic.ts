@@ -442,15 +442,16 @@ export class DashboardLogic extends UILogic<State, Events> {
                         noteData: {
                             allIds: { $push: [newNoteId] },
                             byId: {
-                                [newNoteId]: {
-                                    $set: {
+                                $apply: (byId) => ({
+                                    ...byId,
+                                    [newNoteId]: {
                                         url: newNoteId,
                                         displayTime: Date.now(),
                                         comment: formState.inputValue,
                                         tags: formState.tags,
                                         ...utils.getInitialNoteResultState(),
                                     },
-                                },
+                                }),
                             },
                         },
                         results: {
@@ -528,22 +529,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     byId: {
                         [event.noteId]: {
                             isTagPickerShown: { $set: event.isShown },
-                        },
-                    },
-                },
-            },
-        })
-    }
-
-    setNoteListPickerShown: EventHandler<'setNoteListPickerShown'> = ({
-        event,
-    }) => {
-        this.emitMutation({
-            searchResults: {
-                noteData: {
-                    byId: {
-                        [event.noteId]: {
-                            isListPickerShown: { $set: event.isShown },
                         },
                     },
                 },

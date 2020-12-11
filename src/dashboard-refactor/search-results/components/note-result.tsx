@@ -4,9 +4,20 @@ import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { NoteData, NoteResult, NoteInteractionProps } from '../types'
+import {
+    NoteData,
+    NoteResult,
+    NoteInteractionProps,
+    NotePickerProps,
+} from '../types'
+import TagPicker from 'src/tags/ui/TagPicker'
+import { PageNotesCopyPaster } from 'src/copy-paster'
 
-export interface Props extends NoteData, NoteResult, NoteInteractionProps {
+export interface Props
+    extends NoteData,
+        NoteResult,
+        NoteInteractionProps,
+        NotePickerProps {
     isShared?: boolean
     hasTags?: boolean
 }
@@ -44,6 +55,36 @@ export default class NoteResultView extends PureComponent<Props> {
         }
 
         return <NoteHighlight>{this.props.highlight}</NoteHighlight>
+    }
+
+    private renderPopouts() {
+        if (this.props.isTagPickerShown) {
+            return (
+                <TagPicker
+                    onUpdateEntrySelection={this.props.onTagPickerUpdate}
+                    initialSelectedEntries={() => this.props.tags}
+                />
+            )
+        }
+
+        if (this.props.isCopyPasterShown) {
+            return (
+                <PageNotesCopyPaster
+                    annotationUrls={[this.props.url]}
+                    normalizedPageUrls={[this.props.pageUrl]}
+                />
+            )
+        }
+
+        return null
+    }
+
+    private renderModals() {
+        if (this.props.isDeleteModalShown) {
+            return <p>TODO: DELETE MODAL!!!!</p>
+        }
+
+        return null
     }
 
     render() {
@@ -97,10 +138,15 @@ export default class NoteResultView extends PureComponent<Props> {
                         ]}
                     />
                 </StyledNoteResult>
+                <PopoutContainer>{this.renderPopouts()}</PopoutContainer>
+                <ModalContainer>{this.renderModals()}</ModalContainer>
             </ItemBox>
         )
     }
 }
+
+const PopoutContainer = styled.div``
+const ModalContainer = styled.div``
 
 const StyledNoteResult = styled.div`
     display: flex;

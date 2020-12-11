@@ -737,38 +737,6 @@ describe('Dashboard search results logic', () => {
                 ).toEqual(false)
             })
 
-            it('should be able to toggle note list picker shown state', async ({
-                device,
-            }) => {
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                })
-                const noteId = DATA.NOTE_2.url
-
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId]
-                        .isListPickerShown,
-                ).toEqual(false)
-
-                await searchResults.processEvent('setNoteListPickerShown', {
-                    noteId,
-                    isShown: true,
-                })
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId]
-                        .isListPickerShown,
-                ).toEqual(true)
-
-                await searchResults.processEvent('setNoteListPickerShown', {
-                    noteId,
-                    isShown: false,
-                })
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId]
-                        .isListPickerShown,
-                ).toEqual(false)
-            })
-
             it('should be able to toggle note copy paster shown state', async ({
                 device,
             }) => {

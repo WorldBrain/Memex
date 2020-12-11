@@ -2,6 +2,7 @@ import {
     StandardSearchResponse,
     AnnotationsSearchResponse,
     AnnotsByPageUrl,
+    AnnotPage,
 } from 'src/search/background/types'
 import {
     PageData,
@@ -14,6 +15,7 @@ import {
     NoteFormState,
     InteractionProps,
 } from './types'
+import { Annotation } from 'src/annotations/types'
 
 export const initNormalizedState = <T>(): NormalizedState<T> => ({
     allIds: [],
@@ -26,17 +28,20 @@ export const getInitialFormState = (): NoteFormState => ({
     isTagPickerShown: false,
 })
 
-export const setupInteractionProps = <T = InteractionProps>(
-    props: { [key: string]: (...args) => any },
+export const bindFunctionalProps = <
+    Props = { [key: string]: (...args: any) => any },
+    BoundProps = { [key: string]: (...args: any) => any }
+>(
+    props: Props,
     ...args
-): T => {
-    const interactionProps = {} as T
+): BoundProps => {
+    const boundProps = {} as BoundProps
 
-    for (const [key, interactionSetup] of Object.entries(props)) {
-        interactionProps[key] = interactionSetup(...args)
+    for (const [key, fn] of Object.entries(props)) {
+        boundProps[key] = fn(...args)
     }
 
-    return interactionProps
+    return boundProps
 }
 
 export const getInitialPageResultState = (id: string): PageResult => ({
@@ -58,9 +63,42 @@ export const getInitialNoteResultState = (): NoteResult => ({
     areRepliesShown: false,
     isTagPickerShown: false,
     isCopyPasterShown: false,
-    isListPickerShown: false,
     isDeleteModalShown: false,
     editNoteForm: getInitialFormState(),
+})
+
+const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
+    tags: pageResult.tags,
+    lists: pageResult.lists,
+    fullUrl: pageResult.url,
+    isDeleteModalShown: false,
+    fullTitle: pageResult.title,
+    normalizedUrl: pageResult.url,
+    displayTime: pageResult.displayTime,
+    isBookmarked: pageResult.hasBookmark,
+})
+
+const annotationToNoteData = (
+    annotation: Annotation,
+): NoteData & NoteResult => ({
+    url: annotation.url,
+    pageUrl: annotation.pageUrl,
+    highlight: annotation.body,
+    comment: annotation.comment,
+    tags: annotation.tags ?? [],
+    isBookmarked: annotation.isBookmarked ?? false,
+    areRepliesShown: false,
+    isTagPickerShown: false,
+    isCopyPasterShown: false,
+    isDeleteModalShown: false,
+    displayTime:
+        annotation.lastEdited?.getTime() ?? annotation.createdWhen.getTime(),
+    isEditing: false,
+    editNoteForm: {
+        inputValue: annotation.comment ?? '',
+        tags: annotation.tags ?? [],
+        isTagPickerShown: false,
+    },
 })
 
 export const annotationSearchResultToState: SearchResultToState = (
@@ -89,27 +127,7 @@ export const annotationSearchResultToState: SearchResultToState = (
                 pageResults.byId[pageUrl].noteIds.search.push(annotation.url)
 
                 noteData.allIds.push(annotation.url)
-                noteData.byId[annotation.url] = {
-                    url: annotation.url,
-                    highlight: annotation.body,
-                    comment: annotation.comment,
-                    tags: annotation.tags ?? [],
-                    isBookmarked: annotation.isBookmarked ?? false,
-                    areRepliesShown: false,
-                    isTagPickerShown: false,
-                    isCopyPasterShown: false,
-                    isListPickerShown: false,
-                    isDeleteModalShown: false,
-                    displayTime:
-                        annotation.lastEdited?.getTime() ??
-                        annotation.createdWhen.getTime(),
-                    isEditing: false,
-                    editNoteForm: {
-                        inputValue: annotation.comment ?? '',
-                        tags: annotation.tags ?? [],
-                        isTagPickerShown: false,
-                    },
-                }
+                noteData.byId[annotation.url] = annotationToNoteData(annotation)
             }
         }
 
@@ -123,14 +141,7 @@ export const annotationSearchResultToState: SearchResultToState = (
         const id = pageResult.url
 
         pageData.allIds.push(id)
-        pageData.byId[id] = {
-            isDeleteModalShown: false,
-            fullTitle: pageResult.title,
-            fullUrl: pageResult.url,
-            normalizedUrl: pageResult.url,
-            displayTime: pageResult.displayTime,
-            isBookmarked: pageResult.hasBookmark,
-        }
+        pageData.byId[id] = pageResultToPageData(pageResult)
     }
 
     return { noteData, pageData, results: resultState }
@@ -146,14 +157,7 @@ export const pageSearchResultToState: SearchResultToState = (
     for (const pageResult of result.docs) {
         const id = pageResult.url
 
-        pageData.byId[id] = {
-            fullTitle: pageResult.title,
-            fullUrl: pageResult.url,
-            normalizedUrl: pageResult.url,
-            displayTime: pageResult.displayTime,
-            isBookmarked: pageResult.hasBookmark,
-            isDeleteModalShown: false,
-        }
+        pageData.byId[id] = pageResultToPageData(pageResult)
         pageResults.byId[id] = getInitialPageResultState(pageResult.url)
 
         pageData.allIds.push(id)
@@ -163,27 +167,7 @@ export const pageSearchResultToState: SearchResultToState = (
             pageResults.byId[id].noteIds.search.push(annotation.url)
 
             noteData.allIds.push(annotation.url)
-            noteData.byId[annotation.url] = {
-                url: annotation.url,
-                highlight: annotation.body,
-                comment: annotation.comment,
-                tags: annotation.tags ?? [],
-                isBookmarked: annotation.isBookmarked ?? false,
-                areRepliesShown: false,
-                isTagPickerShown: false,
-                isCopyPasterShown: false,
-                isListPickerShown: false,
-                isDeleteModalShown: false,
-                displayTime:
-                    annotation.lastEdited?.getTime() ??
-                    annotation.createdWhen.getTime(),
-                isEditing: false,
-                editNoteForm: {
-                    inputValue: annotation.comment ?? '',
-                    tags: annotation.tags ?? [],
-                    isTagPickerShown: false,
-                },
-            }
+            noteData.byId[annotation.url] = annotationToNoteData(annotation)
         }
     }
 
