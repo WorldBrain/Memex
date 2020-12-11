@@ -4,12 +4,9 @@ import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { NoteData, NoteResult, InteractionProps } from '../types'
+import { NoteData, NoteResult, NoteInteractionProps } from '../types'
 
-export interface Props
-    extends NoteData,
-        NoteResult,
-        Omit<InteractionProps, 'onNotesBtnClick'> {
+export interface Props extends NoteData, NoteResult, NoteInteractionProps {
     isShared?: boolean
     hasTags?: boolean
 }

@@ -5,9 +5,10 @@ import {
     RootState,
     PageResult as PageResultData,
     PageData,
-    PageInteractionProps,
-    NoteInteractionProps,
+    PageInteractionAugdProps,
+    NoteInteractionAugdProps,
     NotesType,
+    NoteInteractionProps,
 } from './types'
 import TopBar from './components/result-top-bar'
 import SearchTypeSwitch, {
@@ -35,8 +36,8 @@ export type Props = RootState &
         SearchTypeSwitchProps,
         'onNotesSearchSwitch' | 'onPagesSearchSwitch'
     > & {
-        pageInteractionProps: PageInteractionProps
-        noteInteractionProps: NoteInteractionProps
+        pageInteractionProps: PageInteractionAugdProps
+        noteInteractionProps: NoteInteractionAugdProps
         onShowAllNotesClick: React.MouseEventHandler
         tagPickerDependencies: GenericPickerDependenciesMinusSave
         newNoteInteractionProps: {
@@ -56,6 +57,16 @@ export type Props = RootState &
     }
 
 export default class SearchResultsContainer extends PureComponent<Props> {
+    private renderNoteResult = (noteId: string) => {
+        const noteData = this.props.noteData.byId[noteId]
+        const interactionProps = setupInteractionProps<NoteInteractionProps>(
+            this.props.noteInteractionProps,
+            noteId,
+        )
+
+        return <NoteResult key={noteId} {...noteData} {...interactionProps} />
+    }
+
     private renderPageNotes(
         {
             areNotesShown,
@@ -69,7 +80,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         if (!areNotesShown) {
             return false
         }
-        const { noteInteractionProps } = this.props
 
         const newNoteInteractionProps = setupInteractionProps<
             AnnotationCreateEventProps
@@ -104,43 +114,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     {...newNoteInteractionProps}
                     tagPickerDependencies={this.props.tagPickerDependencies}
                 />
-                {noteIds[notesType].map((noteId) => {
-                    const noteData = this.props.noteData.byId[noteId]
-
-                    return (
-                        <NoteResult
-                            key={noteId}
-                            {...noteData}
-                            onListPickerBtnClick={noteInteractionProps.onListPickerBtnClick(
-                                noteId,
-                            )}
-                            onCopyPasterBtnClick={noteInteractionProps.onCopyPasterBtnClick(
-                                noteId,
-                            )}
-                            onBookmarkBtnClick={noteInteractionProps.onBookmarkBtnClick(
-                                noteId,
-                            )}
-                            onCommentChange={noteInteractionProps.onCommentChange(
-                                noteId,
-                            )}
-                            onEditBtnClick={noteInteractionProps.onEditBtnClick(
-                                noteId,
-                            )}
-                            onReplyBtnClick={noteInteractionProps.onReplyBtnClick(
-                                noteId,
-                            )}
-                            onTagPickerBtnClick={noteInteractionProps.onTagPickerBtnClick(
-                                noteId,
-                            )}
-                            onTrashBtnClick={noteInteractionProps.onTrashBtnClick(
-                                noteId,
-                            )}
-                            onShareBtnClick={noteInteractionProps.onShareBtnClick(
-                                noteId,
-                            )}
-                        />
-                    )
-                })}
+                {noteIds[notesType].map(this.renderNoteResult)}
             </>
         )
     }

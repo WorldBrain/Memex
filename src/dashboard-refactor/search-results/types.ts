@@ -21,15 +21,22 @@ export interface InteractionProps {
     onCommentChange: React.KeyboardEventHandler<HTMLTextAreaElement>
 }
 
-export type PageInteractionProps = {
-    [Key in keyof Omit<
-        InteractionProps,
-        'onReplyBtnClick' | 'onEditBtnClick' | 'onCommentChange'
-    >]: (day: number, pageId: string) => InteractionProps[Key]
+export type PageInteractionProps = Omit<
+    InteractionProps,
+    'onReplyBtnClick' | 'onEditBtnClick' | 'onCommentChange'
+>
+
+export type PageInteractionAugdProps = {
+    [Key in keyof PageInteractionProps]: (
+        day: number,
+        pageId: string,
+    ) => InteractionProps[Key]
 }
 
-export type NoteInteractionProps = {
-    [Key in keyof Omit<InteractionProps, 'onNotesBtnClick'>]: (
+export type NoteInteractionProps = Omit<InteractionProps, 'onNotesBtnClick'>
+
+export type NoteInteractionAugdProps = {
+    [Key in keyof NoteInteractionProps]: (
         noteId: string,
     ) => InteractionProps[Key]
 }
