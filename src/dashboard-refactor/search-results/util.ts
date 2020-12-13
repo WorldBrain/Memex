@@ -44,7 +44,10 @@ export const bindFunctionalProps = <
     return boundProps
 }
 
-export const getInitialPageResultState = (id: string): PageResult => ({
+export const getInitialPageResultState = (
+    id: string,
+    noteIds: string[] = [],
+): PageResult => ({
     id,
     notesType: 'user',
     areNotesShown: false,
@@ -54,7 +57,7 @@ export const getInitialPageResultState = (id: string): PageResult => ({
     sortingFn: (a, b) => 1,
     loadNotesState: 'pristine',
     newNoteForm: getInitialFormState(),
-    noteIds: { user: [], followed: [], search: [] },
+    noteIds: { user: noteIds, followed: [], search: [] },
 })
 
 export const getInitialNoteResultState = (): NoteResult => ({
@@ -120,8 +123,13 @@ export const annotationSearchResultToState: SearchResultToState = (
         const pageResults = initNormalizedState<PageResult>()
 
         for (const [pageUrl, annotations] of Object.entries(annotsByPageUrl)) {
+            const noteIds = annotations.map((a) => a.url)
+
             pageResults.allIds.push(pageUrl)
-            pageResults.byId[pageUrl] = getInitialPageResultState(pageUrl)
+            pageResults.byId[pageUrl] = getInitialPageResultState(
+                pageUrl,
+                noteIds,
+            )
 
             for (const annotation of annotations) {
                 pageResults.byId[pageUrl].noteIds.search.push(annotation.url)
@@ -156,9 +164,13 @@ export const pageSearchResultToState: SearchResultToState = (
 
     for (const pageResult of result.docs) {
         const id = pageResult.url
+        const noteIds = pageResult.annotations.map((a) => a.url)
 
         pageData.byId[id] = pageResultToPageData(pageResult)
-        pageResults.byId[id] = getInitialPageResultState(pageResult.url)
+        pageResults.byId[id] = getInitialPageResultState(
+            pageResult.url,
+            noteIds,
+        )
 
         pageData.allIds.push(id)
         pageResults.allIds.push(id)

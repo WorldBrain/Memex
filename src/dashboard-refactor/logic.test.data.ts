@@ -113,7 +113,11 @@ export const NOTE_5: NoteData = {
 }
 
 export const PAGE_SEARCH_RESULT_1: StandardSearchResponse = {
-    docs: [PAGE_1, PAGE_2, PAGE_3].map((data) => pageDataToSearchRes(data)),
+    docs: [
+        pageDataToSearchRes(PAGE_1, []),
+        pageDataToSearchRes(PAGE_2, []),
+        pageDataToSearchRes(PAGE_3, []),
+    ],
     resultsExhausted: false,
 }
 
@@ -129,7 +133,11 @@ export const PAGE_SEARCH_RESULT_2: StandardSearchResponse = {
 export const ANNOT_SEARCH_RESULT_1: AnnotationsSearchResponse = {
     isAnnotsSearch: true,
     resultsExhausted: false,
-    docs: [PAGE_1, PAGE_2, PAGE_3].map((data) => pageDataToSearchRes(data)),
+    docs: [
+        pageDataToSearchRes(PAGE_1, []),
+        pageDataToSearchRes(PAGE_2, []),
+        pageDataToSearchRes(PAGE_3, []),
+    ],
     annotsByDay: {
         [DAY_1]: {
             [PAGE_1.normalizedUrl]: [],
@@ -142,7 +150,11 @@ export const ANNOT_SEARCH_RESULT_1: AnnotationsSearchResponse = {
 export const ANNOT_SEARCH_RESULT_2: AnnotationsSearchResponse = {
     isAnnotsSearch: true,
     resultsExhausted: false,
-    docs: [PAGE_1, PAGE_2, PAGE_3].map((data) => pageDataToSearchRes(data)),
+    docs: [
+        pageDataToSearchRes(PAGE_1, [NOTE_1, NOTE_2, NOTE_3]),
+        pageDataToSearchRes(PAGE_2, []),
+        pageDataToSearchRes(PAGE_3, [NOTE_4, NOTE_5]),
+    ],
     annotsByDay: {
         [DAY_1]: {
             [PAGE_1.normalizedUrl]: [NOTE_1, NOTE_2].map((note) =>

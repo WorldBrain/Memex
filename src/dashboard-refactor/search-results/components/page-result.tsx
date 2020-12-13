@@ -20,12 +20,18 @@ export interface Props
         PageInteractionProps,
         PagePickerProps {
     isShared?: boolean
-    hasNotes?: boolean
-    hasLists?: boolean
     hasTags?: boolean
 }
 
 export default class PageResultView extends PureComponent<Props> {
+    private get hasNotes(): boolean {
+        return this.props.noteIds[this.props.notesType].length > 0
+    }
+
+    private get hasLists(): boolean {
+        return this.props.lists.length > 0
+    }
+
     private renderPopouts() {
         if (this.props.isTagPickerShown) {
             return (
@@ -102,14 +108,16 @@ export default class PageResultView extends PureComponent<Props> {
                             },
                             {
                                 key: 'list-page-btn',
-                                image: icons.hamburger,
+                                image: this.hasLists
+                                    ? icons.collectionsFull
+                                    : icons.collectionsEmpty,
                                 onClick: this.props.onListPickerBtnClick,
                             },
                             {
                                 key: 'expand-notes-btn',
-                                image: this.props.hasNotes
-                                    ? icons.commentEditFull
-                                    : icons.commentEdit,
+                                image: this.hasNotes
+                                    ? icons.commentFull
+                                    : icons.commentEmpty,
                                 onClick: this.props.onNotesBtnClick,
                             },
                             {
