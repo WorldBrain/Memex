@@ -182,39 +182,21 @@ stories.add('Search Restul', () => (
 ))
 
 export const listsSidebarItemWithMenuProps: ListsSidebarItemWithMenuProps = {
-    listId: 'https://www.blah.com/',
+    name: 'test A',
     isMenuDisplayed: true,
+    listId: 'https://www.blah.com/',
     listsSidebarItemProps: listsSidebarItemProps.hoveredAndSelected,
-    listsSidebarItemActionsArray: [
-        {
-            label: 'Share',
-            iconPath: '/img/share.svg',
-            onClick: (normalizedPageUrl: string) => {},
-        },
-        {
-            label: 'Delete',
-            iconPath: '/img/trash.svg',
-            onClick: (normalizedPageUrl: string) => {},
-        },
-        {
-            label: 'Rename',
-            iconPath: '/img/edit.svg',
-            onClick: (normalizedPageUrl: string) => {},
-        },
-    ],
+    onDeleteClick: () => {},
+    onRenameClick: () => {},
+    onShareClick: () => {},
 }
 
 export const listsSidebarItemWithShortMenuProps: ListsSidebarItemWithMenuProps = {
-    listId: 'https://www.blah.com/',
+    name: 'test A',
     isMenuDisplayed: true,
+    listId: 'https://www.blah.com/',
     listsSidebarItemProps: listsSidebarItemProps.hoveredAndSelected,
-    listsSidebarItemActionsArray: [
-        {
-            label: 'Unfollow',
-            iconPath: '/img/cross_circle.svg',
-            onClick: (normalizedPageUrl: string) => {},
-        },
-    ],
+    onUnfollowClick: () => {},
 }
 
 stories.add('3x Item Menu Extended', () => (
