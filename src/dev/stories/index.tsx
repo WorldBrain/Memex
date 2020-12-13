@@ -15,6 +15,7 @@ import './copy-paster'
 import './sharing'*/
 import './in-page-ui'
 import './annotations-sidebar'
+import './dashboard-refactor'
 import './dashboard-refactor/header/sidebar-header'
 import './dashboard-refactor/header/sidebar-toggle'
 import './dashboard-refactor/header/search-bar'
