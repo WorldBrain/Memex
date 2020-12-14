@@ -6,19 +6,12 @@ import { SidebarContainerLogic, createEditFormsForAnnotations } from './logic'
 import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
+    insertBackgroundFunctionTab,
 } from 'src/tests/ui-logic-tests'
 import * as DATA from './logic.test.data'
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import * as sharingTestData from 'src/content-sharing/background/index.test.data'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-
-function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
-    return mapValues(remoteFunctions, (f) => {
-        return (...args: any[]) => {
-            return f({ tab }, ...args)
-        }
-    })
-}
 
 const setupLogicHelper = async ({
     device,
@@ -35,7 +28,6 @@ const setupLogicHelper = async ({
 
     const annotationsBG = insertBackgroundFunctionTab(
         device.backgroundModules.directLinking.remoteFunctions,
-        {},
     ) as any
 
     const annotationsCache = createAnnotationsCache(

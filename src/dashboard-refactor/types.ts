@@ -8,6 +8,10 @@ import {
     RootState as ListsSidebarState,
     Events as ListsSidebarEvents,
 } from './lists-sidebar/types'
+import { RemoteTagsInterface } from 'src/tags/background/types'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { SearchInterface } from 'src/search/background/types'
+import { AnnotationInterface } from 'src/annotations/background/types'
 
 export interface RootState {
     searchResults: SearchResultsState
@@ -25,7 +29,12 @@ export type Events = UIEvent<
         }
 >
 
-export interface DashboardDependencies {}
+export interface DashboardDependencies {
+    tagsBG: RemoteTagsInterface
+    listsBG: RemoteCollectionsInterface
+    searchBG: SearchInterface
+    annotationsBG: AnnotationInterface<'caller'>
+}
 
 export interface NewItemsCountState {
     displayNewItemsCount: boolean

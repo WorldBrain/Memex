@@ -1,6 +1,9 @@
 import { TestLogicContainer } from 'ui-logic-core/lib/testing'
 
-import { UILogicTestDevice } from 'src/tests/ui-logic-tests'
+import {
+    UILogicTestDevice,
+    insertBackgroundFunctionTab,
+} from 'src/tests/ui-logic-tests'
 import { DashboardLogic } from './logic'
 import { Events, RootState } from './types'
 import * as DATA from './logic.test.data'
@@ -26,7 +29,16 @@ export async function setupTest(
     device: UILogicTestDevice,
     args: { seedData?: DataSeeder } = {},
 ) {
-    const logic = new DashboardLogic({})
+    const annotationsBG = insertBackgroundFunctionTab(
+        device.backgroundModules.directLinking.remoteFunctions,
+    ) as any
+
+    const logic = new DashboardLogic({
+        annotationsBG,
+        searchBG: device.backgroundModules.search.remoteFunctions.search,
+        listsBG: device.backgroundModules.customLists.remoteFunctions,
+        tagsBG: device.backgroundModules.tags.remoteFunctions,
+    })
     const searchResults = device.createElement<RootState, Events>(logic)
 
     if (args.seedData) {

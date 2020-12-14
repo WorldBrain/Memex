@@ -5,6 +5,7 @@ import { DashboardLogic } from './logic'
 import { RootState, Events, DashboardDependencies } from './types'
 import ListsSidebarContainer from './lists-sidebar'
 import SearchResultsContainer from './search-results'
+import { runInBackground } from 'src/util/webextensionRPC'
 
 export interface Props extends DashboardDependencies {}
 
@@ -13,6 +14,13 @@ export class DashboardContainer extends StatefulUIElement<
     RootState,
     Events
 > {
+    static defaultProps: Partial<Props> = {
+        annotationsBG: runInBackground(),
+        searchBG: runInBackground(),
+        listsBG: runInBackground(),
+        tagsBG: runInBackground(),
+    }
+
     constructor(props: Props) {
         super(props, new DashboardLogic(props))
     }

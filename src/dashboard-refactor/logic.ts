@@ -2,13 +2,8 @@ import { UILogic, UIEventHandler } from 'ui-logic-core'
 
 import * as utils from './search-results/util'
 import { executeUITask } from 'src/util/ui-logic'
-import { runInBackground } from 'src/util/webextensionRPC'
-import { SearchInterface } from 'src/search/background/types'
 import { RootState as State, DashboardDependencies, Events } from './types'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import { AnnotationInterface } from 'src/annotations/background/types'
 import { haveTagsChanged } from 'src/util/have-tags-changed'
-import { RemoteTagsInterface } from 'src/tags/background/types'
 
 const updatePickerValues = (event: { added?: string; deleted?: string }) => (
     values: string[],
@@ -30,11 +25,6 @@ type EventHandler<EventName extends keyof Events> = UIEventHandler<
 >
 
 export class DashboardLogic extends UILogic<State, Events> {
-    private tagsBG = runInBackground<RemoteTagsInterface>()
-    private listsBG = runInBackground<RemoteCollectionsInterface>()
-    private searchBG = runInBackground<SearchInterface>()
-    private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
-
     constructor(private options: DashboardDependencies) {
         super()
     }
@@ -104,7 +94,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { searchState: { $set: taskState } },
             }),
             async () => {
-                const result = await this.searchBG.searchPages({
+                const result = await this.options.searchBG.searchPages({
                     contentTypes: {
                         pages: true,
                         highlights: false,
@@ -145,7 +135,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { searchState: { $set: taskState } },
             }),
             async () => {
-                const result = await this.searchBG.searchAnnotations({
+                const result = await this.options.searchBG.searchAnnotations({
                     endDate: searchFilters.dateTo,
                     startDate: searchFilters.dateFrom,
                     query: searchFilters.searchQuery,
@@ -225,7 +215,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
 
-        await this.tagsBG.updateTagForPage({
+        await this.options.tagsBG.updateTagForPage({
             url: event.id,
             added: event.added,
             deleted: event.deleted,
@@ -245,7 +235,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
 
-        await this.listsBG.updateListForPage({
+        await this.options.listsBG.updateListForPage({
             url: event.id,
             added: event.added,
             deleted: event.deleted,
@@ -486,7 +476,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     comment: formState.inputValue,
                 })
                 if (formState.tags.length) {
-                    await this.annotationsBG.updateAnnotationTags({
+                    await this.options.annotationsBG.updateAnnotationTags({
                         url: newNoteId,
                         tags: formState.tags,
                     })
@@ -664,7 +654,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
 
-        await this.annotationsBG.editAnnotationTags({
+        await this.options.annotationsBG.editAnnotationTags({
             url: event.noteId,
             tagsToBeAdded: [event.added],
             tagsToBeDeleted: [event.deleted],
@@ -734,12 +724,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { noteUpdateState: { $set: taskState } },
             }),
             async () => {
-                await this.annotationsBG.editAnnotation(
+                await this.options.annotationsBG.editAnnotation(
                     event.noteId,
                     editNoteForm.inputValue,
                 )
                 if (tagsHaveChanged) {
-                    await this.annotationsBG.updateAnnotationTags({
+                    await this.options.annotationsBG.updateAnnotationTags({
                         url: event.noteId,
                         tags: editNoteForm.tags,
                     })
@@ -1021,7 +1011,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { newListCreateState: { $set: taskState } },
             }),
             async () => {
-                const listId = await this.listsBG.createCustomList({
+                const listId = await this.options.listsBG.createCustomList({
                     name: newListName,
                 })
 
