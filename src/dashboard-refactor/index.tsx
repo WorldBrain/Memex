@@ -168,6 +168,9 @@ export class DashboardContainer extends StatefulUIElement<
                     onListPickerUpdate: (pageId) => (args) =>
                         this.processEvent('setPageLists', {
                             id: pageId,
+                            fullPageUrl: this.state.searchResults.pageData.byId[
+                                pageId
+                            ].fullUrl,
                             ...args,
                         }),
                     onTagPickerUpdate: (pageId) => (args) =>
@@ -198,6 +201,9 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('savePageNewNote', {
                             day,
                             pageId,
+                            fullPageUrl: this.state.searchResults.pageData.byId[
+                                pageId
+                            ].fullUrl,
                         }),
                 }}
                 noteInteractionProps={{

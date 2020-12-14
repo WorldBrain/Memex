@@ -66,6 +66,7 @@ export interface RemoteCollectionsInterface {
         deleted?: string
         url: string
         tabId?: number
+        skipPageIndexing?: boolean
     }): Promise<void>
     getInboxUnreadCount(): Promise<number>
 }

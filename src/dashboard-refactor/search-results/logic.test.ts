@@ -130,38 +130,46 @@ describe('Dashboard search results logic', () => {
             const pageId = DATA.PAGE_2.normalizedUrl
 
             expect(
-                searchResults.state.searchResults.pageData.byId[pageId].tags,
+                searchResults.state.searchResults.pageData.byId[pageId].lists,
             ).toEqual([])
 
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
+                fullPageUrl: 'https://' + pageId,
                 added: DATA.LISTS_1[0].name,
+                skipPageIndexing: true,
             })
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
+                fullPageUrl: 'https://' + pageId,
                 added: DATA.LISTS_1[1].name,
+                skipPageIndexing: true,
             })
 
             expect(
-                searchResults.state.searchResults.pageData.byId[pageId].tags,
+                searchResults.state.searchResults.pageData.byId[pageId].lists,
             ).toEqual([DATA.LISTS_1[0].name, DATA.LISTS_1[1].name])
 
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
+                fullPageUrl: 'https://' + pageId,
                 deleted: DATA.LISTS_1[0].name,
+                skipPageIndexing: true,
             })
 
             expect(
-                searchResults.state.searchResults.pageData.byId[pageId].tags,
+                searchResults.state.searchResults.pageData.byId[pageId].lists,
             ).toEqual([DATA.LISTS_1[1].name])
 
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
+                fullPageUrl: 'https://' + pageId,
                 added: DATA.LISTS_1[2].name,
+                skipPageIndexing: true,
             })
 
             expect(
-                searchResults.state.searchResults.pageData.byId[pageId].tags,
+                searchResults.state.searchResults.pageData.byId[pageId].lists,
             ).toEqual([DATA.LISTS_1[1].name, DATA.LISTS_1[2].name])
         })
 
@@ -613,6 +621,8 @@ describe('Dashboard search results logic', () => {
                     {
                         day,
                         pageId,
+                        fullPageUrl: 'https://' + pageId,
+                        skipPageIndexing: true,
                     },
                 )
                 expect(

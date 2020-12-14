@@ -236,9 +236,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
 
         await this.options.listsBG.updateListForPage({
-            url: event.id,
+            url: event.fullPageUrl,
             added: event.added,
             deleted: event.deleted,
+            skipPageIndexing: event.skipPageIndexing,
         })
     }
 
@@ -471,10 +472,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { newNoteCreateState: { $set: taskState } },
             }),
             async () => {
-                const newNoteId = await this.annotationsBG.createAnnotation({
-                    pageUrl: event.pageId,
-                    comment: formState.inputValue,
-                })
+                const newNoteId = await this.options.annotationsBG.createAnnotation(
+                    {
+                        pageUrl: event.fullPageUrl,
+                        comment: formState.inputValue,
+                    },
+                    { skipPageIndexing: event.skipPageIndexing },
+                )
                 if (formState.tags.length) {
                     await this.options.annotationsBG.updateAnnotationTags({
                         url: newNoteId,

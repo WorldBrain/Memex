@@ -164,7 +164,13 @@ export type Events = UIEvent<{
 
     // Page data state mutations (*shared with all* occurences of the page in different days)
     setPageTags: { id: string; added?: string; deleted?: string }
-    setPageLists: { id: string; added?: string; deleted?: string }
+    setPageLists: {
+        id: string
+        fullPageUrl: string
+        added?: string
+        deleted?: string
+        skipPageIndexing?: boolean
+    }
     setPageBookmark: { id: string; isBookmarked: boolean }
     setPageDeleteModalShown: { id: string; isShown: boolean }
 
@@ -181,7 +187,10 @@ export type Events = UIEvent<{
     setPageNewNoteCommentValue: PageEventArgs & { value: string }
     setPageNewNoteTags: PageEventArgs & { tags: string[] }
     cancelPageNewNote: PageEventArgs
-    savePageNewNote: PageEventArgs
+    savePageNewNote: PageEventArgs & {
+        fullPageUrl: string
+        skipPageIndexing?: boolean
+    }
 
     // Note result state mutations
     setNoteDeleteModalShown: NoteEventArgs & { isShown: boolean }

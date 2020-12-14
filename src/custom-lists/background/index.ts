@@ -241,11 +241,13 @@ export default class CustomListBackground {
         id,
         url,
         tabId,
+        skipPageIndexing,
         suppressVisitCreation,
     }: {
         id: number
         url: string
         tabId?: number
+        skipPageIndexing?: boolean
         suppressVisitCreation?: boolean
     }): Promise<{ object: PageListEntry }> => {
         if (!isFullUrl(url)) {
@@ -258,14 +260,16 @@ export default class CustomListBackground {
             type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
         })
 
-        await this.options.pages.indexPage(
-            {
-                tabId,
-                fullUrl: url,
-                visitTime: !suppressVisitCreation ? '$now' : undefined,
-            },
-            { addInboxEntryOnCreate: true },
-        )
+        if (!skipPageIndexing) {
+            await this.options.pages.indexPage(
+                {
+                    tabId,
+                    fullUrl: url,
+                    visitTime: !suppressVisitCreation ? '$now' : undefined,
+                },
+                { addInboxEntryOnCreate: true },
+            )
+        }
 
         const retVal = await this.storage.insertPageToList({
             listId: id,
@@ -396,11 +400,13 @@ export default class CustomListBackground {
         deleted,
         url,
         tabId,
+        skipPageIndexing,
     }: {
         added?: string
         deleted?: string
         url: string
         tabId?: number
+        skipPageIndexing?: boolean
     }) => {
         const name = added ?? deleted
         let list = await this.fetchListByName({ name })
@@ -410,7 +416,12 @@ export default class CustomListBackground {
         }
 
         if (added) {
-            await this.insertPageToList({ id: list.id, url, tabId })
+            await this.insertPageToList({
+                id: list.id,
+                url,
+                tabId,
+                skipPageIndexing,
+            })
         }
 
         if (deleted) {

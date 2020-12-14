@@ -223,13 +223,13 @@ describe('Dashboard search results logic', () => {
         )
 
         expect(
+            Object.values(searchResults.state.listsSidebar.listData)[0],
+        ).toEqual(expect.objectContaining({ name: listName }))
+        expect(
             await device.storageManager
                 .collection('customLists')
                 .findAllObjects({}),
         ).toEqual([expect.objectContaining({ name: listName })])
-        expect(searchResults.state.listsSidebar.listData).toEqual({
-            [expect.any(Number)]: expect.objectContaining({ name: listName }),
-        })
         expect(
             searchResults.state.listsSidebar.localLists.listIds.length,
         ).toEqual(1)
