@@ -93,7 +93,7 @@ export const filtersBarStoryProps: {
     },
     displayedListsSelected: {
         ...template,
-        tagFilterSelectedState: {
+        listFilterSelectedState: {
             ...selectedStateTemplate,
             isSelected: true,
         },
