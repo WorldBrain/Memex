@@ -29,10 +29,15 @@ export const datePickerPropsTemplate: DateRangeSelectionProps = {
     changeTooltip: () => {},
 }
 
+const initialSelectedEntriesTemplate = ['Generic Entry 1', 'Generic Entry 2']
+const defaultSuggestionsTemplate = ['Generic Entry 3']
+
 export const genericPickerPropsTemplate: FilterPickerProps = {
     onToggleShowPicker: () => {},
     onEntriesListUpdate: async () => {},
-    initialSelectedEntries: ['Generic Entry 1', 'Generic Entry 2'],
+    initialSelectedEntries: initialSelectedEntriesTemplate,
+    queryEntries: async (query) => initialSelectedEntriesTemplate,
+    loadDefaultSuggestions: () => defaultSuggestionsTemplate,
 }
 
 const template: FiltersBarProps = {
