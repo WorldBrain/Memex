@@ -1,6 +1,6 @@
 export interface BookmarksInterface {
     addPageBookmark(args: {
-        url?: string
+        url: string
         fullUrl: string
         timestamp?: number
         tabId?: number

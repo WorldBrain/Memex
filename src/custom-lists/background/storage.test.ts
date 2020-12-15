@@ -279,7 +279,7 @@ describe('Custom List Integrations', () => {
             // Bookmark a page - new inbox entry should be created - re-bookmark after deleting entry - no new entry created
             setMockFetchPage(url2)
             await checkInboxEntry(url2, { shouldExist: false })
-            await bookmarks.addBookmark({ fullUrl: url2 })
+            await bookmarks.addBookmark({ url: url2, fullUrl: url2 })
             await checkInboxEntry(url2, { shouldExist: true })
             await customLists.removePageFromList({
                 id: SPECIAL_LIST_IDS.INBOX,
@@ -287,7 +287,7 @@ describe('Custom List Integrations', () => {
             })
             await checkInboxEntry(url2, { shouldExist: false })
             await bookmarks.storage.delBookmark({ url: url2 })
-            await bookmarks.addBookmark({ fullUrl: url2 })
+            await bookmarks.addBookmark({ url: url2, fullUrl: url2 })
             await checkInboxEntry(url2, { shouldExist: false })
 
             // Annotate a page - new inbox entry should be created - annotate again after deleting entry - no new entry created

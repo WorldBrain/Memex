@@ -10,6 +10,7 @@ import { PageIndexingBackground } from 'src/page-indexing/background'
 import pick from 'lodash/pick'
 import { pageIsStub } from 'src/page-indexing/utils'
 import { Analytics } from 'src/analytics/types'
+import normalize from '@worldbrain/memex-url-utils/lib/normalize'
 
 export default class BookmarksBackground {
     storage: BookmarksStorage
@@ -70,7 +71,10 @@ export default class BookmarksBackground {
             )
         }
 
-        await this.storage.createBookmarkIfNeeded(fullUrl, params.timestamp)
+        await this.storage.createBookmarkIfNeeded(
+            params.url ?? normalize(fullUrl),
+            params.timestamp,
+        )
 
         this.options.analytics.trackEvent({
             category: 'Bookmarks',
@@ -141,6 +145,6 @@ export default class BookmarksBackground {
             tabId = activeTab.id
         }
 
-        return this.addPageBookmark({ fullUrl: node.url, tabId })
+        return this.addPageBookmark({ url: node.url, fullUrl: node.url, tabId })
     }
 }

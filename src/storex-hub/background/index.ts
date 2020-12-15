@@ -39,6 +39,7 @@ export class StorexHubBackground {
                 time: number
             }) => Promise<void>
             addBookmark: (bookmark: {
+                url: string
                 normalizedUrl: string
                 fullUrl: string
                 time: number

@@ -39,7 +39,10 @@ describe('bookmarks background unit tests', () => {
         ] as Tabs.Tab[]
 
         for (const index of bmIndicies) {
-            await bookmarksBG.addBookmark({ fullUrl: mockTabs[index].url })
+            await bookmarksBG.addBookmark({
+                fullUrl: mockTabs[index].url,
+                url: mockTabs[index].url,
+            })
         }
 
         expect(await bookmarksBG.findTabBookmarks(mockTabs)).toEqual(
@@ -66,6 +69,7 @@ describe('bookmarks background unit tests', () => {
 
         try {
             await backgroundModules.bookmarks.addPageBookmark({
+                url: testUrl,
                 fullUrl: testFullUrl,
             })
         } catch (err) {
@@ -96,6 +100,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                         execute: async ({ setup }) => {
                             await setup.backgroundModules.bookmarks.addBookmark(
                                 {
+                                    url: DATA.PAGE_1.url,
                                     fullUrl: DATA.PAGE_1.fullUrl,
                                     timestamp: DATA.BOOKMARK_1,
                                     tabId: DATA.TEST_TAB_1.id,
@@ -201,6 +206,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                         execute: async ({ setup }) => {
                             await setup.backgroundModules.bookmarks.addBookmark(
                                 {
+                                    url: DATA.PAGE_1.url,
                                     fullUrl: DATA.PAGE_1.fullUrl,
                                     timestamp: DATA.BOOKMARK_1,
                                     tabId: DATA.TEST_TAB_1.id,

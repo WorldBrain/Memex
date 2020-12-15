@@ -25,7 +25,7 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
             dispatch(setIsBookmarked(false))
         } else {
             dispatch(setIsBookmarked(true))
-            await bookmarks.addPageBookmark({ fullUrl: url, tabId })
+            await bookmarks.addPageBookmark({ url, fullUrl: url, tabId })
             dispatch(setIsBookmarked(true))
 
             analytics.trackEvent({

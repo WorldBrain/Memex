@@ -262,6 +262,7 @@ export class RibbonContainerLogic extends UILogic<
         try {
             if (shouldBeBookmarked) {
                 await this.dependencies.bookmarks.addPageBookmark({
+                    url: postInitState.pageUrl, // TODO (PDF, Content Types) - Is adding the pageUrl appropriate here? do we instead need a fullUrl to IdentifyingUrl function?
                     fullUrl: postInitState.pageUrl,
                     tabId: this.dependencies.currentTab.id,
                 })
