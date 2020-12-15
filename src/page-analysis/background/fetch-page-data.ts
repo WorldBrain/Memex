@@ -8,6 +8,7 @@ import extractPageMetadataFromRawContent, {
 } from './content-extraction'
 import { PageDataResult } from './types'
 import { FetchPageDataError } from './fetch-page-data-error'
+import fetchLocalOrRemote from 'src/util/fetchLocal'
 
 export type FetchPageData = (args: {
     url: string
@@ -114,7 +115,10 @@ const fetchTimeout = (
     { signal, ...options }: { signal?: AbortSignal } = {},
 ) => {
     const controller = new AbortController()
-    const promise = fetch(url, { signal: controller.signal, ...options })
+    const promise = fetchLocalOrRemote(url, {
+        signal: controller.signal,
+        ...options,
+    })
     if (signal) {
         signal.addEventListener('abort', () => controller.abort())
     }

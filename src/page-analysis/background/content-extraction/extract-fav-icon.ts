@@ -1,4 +1,5 @@
 import responseToDataUrl from 'response-to-data-url'
+import { isLocalUrl } from 'src/util/fetchLocal'
 
 /**
  * @param url
@@ -29,6 +30,10 @@ async function getFavIcon(favIconUrl) {
         return
     }
 
+    // TODO (PDFs & Content Types): What substitutes are there for local file fav icons, or non-html favicons (pdfs), ommit and fill in from type?
+    if (isLocalUrl(favIconUrl)) {
+        return undefined
+    }
     const response = await fetch(favIconUrl)
 
     if (response.status >= 400 && response.status < 600) {
