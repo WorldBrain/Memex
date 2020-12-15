@@ -8,6 +8,7 @@ import ListsSidebarItemWithMenu, {
 import {
     DropReceivingComponentState,
     ListsSidebarItemComponentProps,
+    ListNameHighlightIndices,
 } from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/types'
 
 const newItemsCountState = {
@@ -42,12 +43,7 @@ const selectedState = {
 
 const template: ListsSidebarItemComponentProps = {
     isEditing: false,
-    listName: [
-        {
-            text: 'Cool List Name',
-            match: false,
-        },
-    ],
+    name: 'Cool List Name',
     hoverState,
     selectedState,
     dropReceivingState,
@@ -123,25 +119,12 @@ export const listsSidebarItemProps = {
     },
     longName: {
         ...template,
-        listName: [
-            {
-                text: 'This is a very long collection name',
-                match: false,
-            },
-        ],
+        listName: 'This is a very long collection name',
     },
     searchMatch: {
         ...template,
-        listName: [
-            {
-                text: 'Astro',
-                match: true,
-            },
-            {
-                text: 'physics',
-                match: false,
-            },
-        ],
+        listName: 'Astrophysics',
+        nameHighlightIndices: [0, 5] as ListNameHighlightIndices,
     },
 }
 
@@ -185,7 +168,7 @@ export const listsSidebarItemWithMenuProps: ListsSidebarItemWithMenuProps = {
     name: 'test A',
     isMenuDisplayed: true,
     listId: 'https://www.blah.com/',
-    listsSidebarItemProps: listsSidebarItemProps.hoveredAndSelected,
+    ...listsSidebarItemProps.hoveredAndSelected,
     onDeleteClick: () => {},
     onRenameClick: () => {},
     onShareClick: () => {},
@@ -195,7 +178,7 @@ export const listsSidebarItemWithShortMenuProps: ListsSidebarItemWithMenuProps =
     name: 'test A',
     isMenuDisplayed: true,
     listId: 'https://www.blah.com/',
-    listsSidebarItemProps: listsSidebarItemProps.hoveredAndSelected,
+    ...listsSidebarItemProps.hoveredAndSelected,
     onUnfollowClick: () => {},
 }
 

@@ -42,9 +42,9 @@ export interface NewItemsCountState {
 }
 
 export interface DropReceivingState {
-    canReceiveDroppedItems: boolean // this defines whether items can be dropped (not whether there is a state change on drag-over)
-    isDraggedOver: boolean
-    triggerSuccessfulDropAnimation: boolean
+    isDraggedOver?: boolean
+    canReceiveDroppedItems?: boolean // this defines whether items can be dropped (not whether there is a state change on drag-over)
+    triggerSuccessfulDropAnimation?: boolean
     onDragOver(normalizedPageUrl: string): void
     onDragLeave(normalizedPageUrl: string): void
     onDrop(normalizedPageUrl: string): void

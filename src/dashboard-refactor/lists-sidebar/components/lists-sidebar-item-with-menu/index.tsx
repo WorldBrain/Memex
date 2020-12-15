@@ -52,22 +52,15 @@ const MenuButton = styled.div`
     }
 `
 
-export interface ListsSidebarItemWithMenuProps {
+export interface ListsSidebarItemWithMenuProps extends ListsSidebarItemProps {
     name: string
     listId: string
     source?: ListSource
     isMenuDisplayed?: boolean
-    listsSidebarItemProps: ListsSidebarItemProps
     onUnfollowClick?: React.MouseEventHandler
     onRenameClick?: React.MouseEventHandler
     onDeleteClick?: React.MouseEventHandler
     onShareClick?: React.MouseEventHandler
-}
-
-export interface ListsSidebarItemActionItem {
-    label: string
-    iconPath: string
-    onClick(normalizedPageUrl: string): void
 }
 
 export default class ListsSidebarItemWithMenu extends PureComponent<
@@ -117,16 +110,14 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
 
     render() {
         const {
-            listsSidebarItemProps: {
-                className,
-                listName,
-                isEditing,
-                selectedState,
-                hoverState,
-                dropReceivingState,
-                newItemsCountState,
-                moreActionButtonState,
-            },
+            className,
+            name: listName,
+            isEditing,
+            selectedState,
+            hoverState,
+            dropReceivingState,
+            newItemsCountState,
+            moreActionButtonState,
             isMenuDisplayed,
             listId,
         } = this.props

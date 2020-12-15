@@ -3,35 +3,37 @@ import {
     HoverState,
     NewItemsCountState,
     SelectedState,
-    SearchResultTextPart,
 } from 'src/dashboard-refactor/types'
 
 export interface MoreActionButtonState {
     onMoreActionClick(normalizedPageUrl: string): void
-    displayMoreActionButton: boolean
+    displayMoreActionButton?: boolean
 }
 
-export interface ListsSidebarItemProps {
+export type ListNameHighlightIndices = [number, number]
+
+export interface ListsSidebarItemCommonProps {
     className?: string
-    listName: SearchResultTextPart[] | string
+    name: string
     isEditing: boolean
+    newItemsCountState: NewItemsCountState
+    nameHighlightIndices?: ListNameHighlightIndices
+}
+
+export interface ListsSidebarItemProps extends ListsSidebarItemCommonProps {
     hoverState: HoverState
     selectedState: SelectedState
     dropReceivingState: DropReceivingState
-    newItemsCountState: NewItemsCountState
     moreActionButtonState: MoreActionButtonState
 }
 
 // this type is differentiated from the type which governs the object passed down the tree to its parent:
 // the click handlers in this type have received their parameters from the parent and so receive none
-export interface ListsSidebarItemComponentProps {
-    className?: string
-    listName: SearchResultTextPart[] | string
-    isEditing: boolean
+export interface ListsSidebarItemComponentProps
+    extends ListsSidebarItemCommonProps {
     hoverState: HoverComponentState
     selectedState: SelectedComponentState
     dropReceivingState: DropReceivingComponentState
-    newItemsCountState: NewItemsCountState
     moreActionButtonState: MoreActionButtonComponentState
 }
 
@@ -50,12 +52,12 @@ export interface DropReceivingComponentState {
     onDragOver(): void
     onDragLeave(): void
     onDrop(): void
-    triggerSuccessfulDropAnimation: boolean
-    isDraggedOver: boolean
-    canReceiveDroppedItems: boolean
+    isDraggedOver?: boolean
+    canReceiveDroppedItems?: boolean
+    triggerSuccessfulDropAnimation?: boolean
 }
 
 interface MoreActionButtonComponentState {
     onMoreActionClick(): void
-    displayMoreActionButton
+    displayMoreActionButton?: boolean
 }

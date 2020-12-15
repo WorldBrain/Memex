@@ -51,8 +51,8 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                 <Margin vertical="5px" horizontal="5px">
                     <ListsSidebarSearchBar {...searchBarProps} />
                 </Margin>
-                {listsGroups.map((group) => (
-                    <Margin vertical="10px">
+                {listsGroups.map((group, i) => (
+                    <Margin key={i} vertical="10px">
                         <ListsSidebarGroup {...group} />
                     </Margin>
                 ))}

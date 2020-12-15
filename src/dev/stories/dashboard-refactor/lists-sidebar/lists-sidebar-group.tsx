@@ -4,7 +4,6 @@ import styled from 'styled-components'
 
 import ListsSidebarGroup, {
     ListsSidebarGroupProps,
-    ListsSidebarItemsArrayObject,
 } from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-group'
 
 import {
@@ -46,45 +45,33 @@ const listsSidebarItemWithMenuPropsHidden: ListsSidebarItemWithMenuProps = {
 const listsArray: Array<ListsSidebarItemWithMenuProps> = [
     {
         ...listsSidebarItemWithMenuPropsHidden,
-        listsSidebarItemProps: {
-            ...listsSidebarItemProps.default,
-            listName: 'Cool List',
-        },
+        ...listsSidebarItemProps.default,
+        name: 'Cool List',
     },
     {
         ...listsSidebarItemWithMenuPropsHidden,
-        listsSidebarItemProps: {
-            ...listsSidebarItemProps.default,
-            listName: 'Cooler List',
-        },
+        ...listsSidebarItemProps.default,
+        name: 'Cooler List',
     },
     {
         ...listsSidebarItemWithMenuPropsHidden,
-        listsSidebarItemProps: {
-            ...listsSidebarItemProps.default,
-            listName: 'Crazy List',
-        },
+        ...listsSidebarItemProps.default,
+        name: 'Crazy List',
     },
     {
         ...listsSidebarItemWithMenuPropsHidden,
-        listsSidebarItemProps: {
-            ...listsSidebarItemProps.default,
-            listName: 'Intruiging List',
-        },
+        ...listsSidebarItemProps.default,
+        name: 'Intruiging List',
     },
     {
         ...listsSidebarItemWithMenuPropsHidden,
-        listsSidebarItemProps: {
-            ...listsSidebarItemProps.default,
-            listName: 'Sexy List',
-        },
+        ...listsSidebarItemProps.default,
+        name: 'Sexy List',
     },
     {
         ...listsSidebarItemWithMenuPropsHidden,
-        listsSidebarItemProps: {
-            ...listsSidebarItemProps.hovered,
-            listName: 'cat gifs',
-        },
+        ...listsSidebarItemProps.hovered,
+        name: 'cat gifs',
     },
 ]
 
@@ -102,13 +89,10 @@ const inboxItemsProps = (
     return {
         name,
         listId: `https://www.${name}.com/`,
-        listsSidebarItemProps: {
-            ...listsSidebarItemProps.displayNewItemsCount,
-            selectedState: {
-                ...listsSidebarItemProps.displayNewItemsCount.selectedState,
-                isSelected,
-            },
-            listName: name,
+        ...listsSidebarItemProps.displayNewItemsCount,
+        selectedState: {
+            ...listsSidebarItemProps.displayNewItemsCount.selectedState,
+            isSelected,
         },
     }
 }

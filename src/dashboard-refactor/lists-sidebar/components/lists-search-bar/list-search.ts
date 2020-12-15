@@ -31,17 +31,18 @@ export const searchLists = (
                     match: true,
                 })
                 // add non-matched string portion to array if not perfect match
-                if (!(name.length === searchStr.length))
+                if (!(name.length === searchStr.length)) {
                     textPartArray.push({
                         text: name.slice(searchStr.length),
                         match: false,
                     })
+                }
             }
         })
         // 3. Sort inner arrays with perfect matches first
         sourceItemArr.resultsList.sort((a, b) => {
-            let aSort = a.textPartArray.length % 2
-            let bSort = b.textPartArray.length % 2
+            const aSort = a.textPartArray.length % 2
+            const bSort = b.textPartArray.length % 2
             return bSort - aSort
         })
         return arr
