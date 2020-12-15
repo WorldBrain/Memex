@@ -49,7 +49,9 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
         localLists: LocalListGroup
         newListCreateState: TaskState
 
+        editingListId?: number
         selectedListId?: number
+        showMoreMenuListId?: number
     }
 
 export type Events = UIEvent<{
@@ -66,5 +68,7 @@ export type Events = UIEvent<{
     setLocalListsExpanded: { isExpanded: boolean }
     setFollowedListsExpanded: { isExpanded: boolean }
 
+    setEditingListId: { listId: number }
     setSelectedListId: { listId: number }
+    setShowMoreMenuListId: { listId: number }
 }>

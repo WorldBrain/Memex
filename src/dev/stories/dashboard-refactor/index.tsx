@@ -114,6 +114,12 @@ class DashboardWrapper extends React.PureComponent<WrapperProps> {
             )
         }
 
+        await this.dashboardRef.current.processEvent('setSidebarLocked', {
+            isLocked: true,
+        })
+        await this.dashboardRef.current.processEvent('setLocalListsExpanded', {
+            isExpanded: true,
+        })
         await this.dashboardRef.current.processEvent('setLocalLists', {
             lists: [
                 { id: 1, name: 'test' },

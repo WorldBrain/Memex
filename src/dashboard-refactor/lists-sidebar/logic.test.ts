@@ -66,6 +66,50 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.selectedListId).toEqual(1)
     })
 
+    it("should be able set lists' edit state", async ({ device }) => {
+        const { searchResults } = await setupTest(device)
+
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setEditingListId', { listId: 123 })
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
+        await searchResults.processEvent('setEditingListId', { listId: 123 })
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setEditingListId', { listId: 123 })
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
+        await searchResults.processEvent('setEditingListId', { listId: 1 })
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(1)
+    })
+
+    it("should be able set lists' show more action btn state", async ({
+        device,
+    }) => {
+        const { searchResults } = await setupTest(device)
+
+        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setShowMoreMenuListId', {
+            listId: 123,
+        })
+        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
+        await searchResults.processEvent('setShowMoreMenuListId', {
+            listId: 123,
+        })
+        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setShowMoreMenuListId', {
+            listId: 123,
+        })
+        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
+        await searchResults.processEvent('setShowMoreMenuListId', { listId: 1 })
+        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(1)
+    })
+
     it('should be able to mutate add local list input states', async ({
         device,
     }) => {

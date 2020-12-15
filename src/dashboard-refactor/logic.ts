@@ -65,7 +65,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 newListCreateState: 'pristine',
                 isSidebarPeeking: false,
-                isSidebarLocked: true,
+                isSidebarLocked: false,
                 searchQuery: '',
                 listData: {},
                 followedLists: {
@@ -77,7 +77,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     isAddInputShown: false,
                     addInputValue: '',
                     loadingState: 'pristine',
-                    isExpanded: true,
+                    isExpanded: false,
                     listIds: [],
                 },
             },
@@ -1064,6 +1064,34 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         this.emitMutation({
             listsSidebar: { selectedListId: { $set: listIdToSet } },
+        })
+    }
+
+    setEditingListId: EventHandler<'setEditingListId'> = async ({
+        event,
+        previousState,
+    }) => {
+        const listIdToSet =
+            previousState.listsSidebar.editingListId === event.listId
+                ? undefined
+                : event.listId
+
+        this.emitMutation({
+            listsSidebar: { editingListId: { $set: listIdToSet } },
+        })
+    }
+
+    setShowMoreMenuListId: EventHandler<'setShowMoreMenuListId'> = async ({
+        event,
+        previousState,
+    }) => {
+        const listIdToSet =
+            previousState.listsSidebar.showMoreMenuListId === event.listId
+                ? undefined
+                : event.listId
+
+        this.emitMutation({
+            listsSidebar: { showMoreMenuListId: { $set: listIdToSet } },
         })
     }
 

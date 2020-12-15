@@ -33,11 +33,14 @@ export class DashboardContainer extends StatefulUIElement<
         hoverState: {} as any,
         listId: list.id,
         name: list.name,
+        isEditing: this.state.listsSidebar.editingListId === list.id,
         selectedState: {
             isSelected: this.state.listsSidebar.selectedListId === list.id,
             onSelection: (listId) =>
                 this.processEvent('setSelectedListId', { listId }),
         },
+        onMoreActionClick: (listId) =>
+            this.processEvent('setShowMoreMenuListId', { listId }),
     })
 
     private renderListsSidebar() {
@@ -48,8 +51,6 @@ export class DashboardContainer extends StatefulUIElement<
                     isLocked: !this.state.listsSidebar.isSidebarLocked,
                 }),
         }
-        console.log('render:', this.state.listsSidebar.localLists)
-        console.log('render:', this.state.listsSidebar.listData)
 
         return (
             <ListsSidebarContainer
@@ -75,13 +76,17 @@ export class DashboardContainer extends StatefulUIElement<
                     onFocus: () => null,
                     onSearchQueryChange: (query) =>
                         this.processEvent('setSearchQuery', { query }),
-                    onInputClear: () => null,
+                    onInputClear: () =>
+                        this.processEvent('setSearchQuery', { query: '' }),
                 }}
                 listsGroups={[
                     {
                         title: 'My collections',
                         onAddBtnClick: () =>
-                            this.processEvent('addNewList', null),
+                            this.processEvent('setAddListInputShown', {
+                                isShown: !this.state.listsSidebar.localLists
+                                    .isAddInputShown,
+                            }),
                         isExpanded: this.state.listsSidebar.localLists
                             .isExpanded,
                         onExpandBtnClick: () =>
