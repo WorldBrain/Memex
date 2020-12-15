@@ -6,6 +6,8 @@ import { RootState, Events, DashboardDependencies } from './types'
 import ListsSidebarContainer from './lists-sidebar'
 import SearchResultsContainer from './search-results'
 import { runInBackground } from 'src/util/webextensionRPC'
+import { ListsSidebarItemWithMenuProps } from './lists-sidebar/components/lists-sidebar-item-with-menu'
+import { ListData } from './lists-sidebar/types'
 
 export interface Props extends DashboardDependencies {}
 
@@ -25,6 +27,19 @@ export class DashboardContainer extends StatefulUIElement<
         super(props, new DashboardLogic(props))
     }
 
+    private listStateToProps = (
+        list: ListData,
+    ): ListsSidebarItemWithMenuProps => ({
+        hoverState: {} as any,
+        listId: list.id,
+        name: list.name,
+        selectedState: {
+            isSelected: this.state.listsSidebar.selectedListId === list.id,
+            onSelection: (listId) =>
+                this.processEvent('setSelectedListId', { listId }),
+        },
+    })
+
     private renderListsSidebar() {
         const lockedState = {
             isSidebarLocked: this.state.listsSidebar.isSidebarLocked,
@@ -33,7 +48,8 @@ export class DashboardContainer extends StatefulUIElement<
                     isLocked: !this.state.listsSidebar.isSidebarLocked,
                 }),
         }
-        this.state.listsSidebar.selectedListId
+        console.log('render:', this.state.listsSidebar.localLists)
+        console.log('render:', this.state.listsSidebar.listData)
 
         return (
             <ListsSidebarContainer
@@ -75,7 +91,12 @@ export class DashboardContainer extends StatefulUIElement<
                             }),
                         loadingState: this.state.listsSidebar.localLists
                             .loadingState,
-                        listsArray: [], // TODO: sort out types and properly derive this from `state.listData`
+                        listsArray: this.state.listsSidebar.localLists.listIds.map(
+                            (listId) =>
+                                this.listStateToProps(
+                                    this.state.listsSidebar.listData[listId],
+                                ),
+                        ),
                     },
                     {
                         title: 'Followed collections',
@@ -88,7 +109,12 @@ export class DashboardContainer extends StatefulUIElement<
                             }),
                         loadingState: this.state.listsSidebar.followedLists
                             .loadingState,
-                        listsArray: [], // TODO: sort out types and properly derive this from `state.listData`
+                        listsArray: this.state.listsSidebar.followedLists.listIds.map(
+                            (listId) =>
+                                this.listStateToProps(
+                                    this.state.listsSidebar.listData[listId],
+                                ),
+                        ),
                     },
                 ]}
             />

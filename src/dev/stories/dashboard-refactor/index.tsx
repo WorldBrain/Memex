@@ -97,19 +97,30 @@ interface WrapperProps {
 class DashboardWrapper extends React.PureComponent<WrapperProps> {
     private dashboardRef = React.createRef<DashboardContainer>()
 
-    componentDidMount() {
+    async componentDidMount() {
         if (this.props.pageResults) {
-            this.dashboardRef.current.processEvent('setPageSearchResult', {
-                result: this.props.pageResults,
-            })
+            await this.dashboardRef.current.processEvent(
+                'setPageSearchResult',
+                {
+                    result: this.props.pageResults,
+                },
+            )
         } else if (this.props.noteResults) {
-            this.dashboardRef.current.processEvent(
+            await this.dashboardRef.current.processEvent(
                 'setAnnotationSearchResult',
                 {
                     result: this.props.noteResults,
                 },
             )
         }
+
+        await this.dashboardRef.current.processEvent('setLocalLists', {
+            lists: [
+                { id: 1, name: 'test' },
+                { id: 2, name: 'another test' },
+                { id: 3, name: 'third test' },
+            ],
+        })
     }
 
     render() {

@@ -37,7 +37,6 @@ const template: ListsSidebarItemComponentProps = {
     hoverState,
     selectedState,
     dropReceivingState,
-    newItemsCount: 0,
 }
 
 export const listsSidebarItemProps = {
@@ -101,10 +100,7 @@ export const listsSidebarItemProps = {
     },
     displayNewItemsCount: {
         ...template,
-        newItemsCountState: {
-            displayNewItemsCount: true,
-            newItemsCount: Math.floor(Math.random() * 10),
-        },
+        newItemsCount: Math.floor(Math.random() * 10),
     },
     longName: {
         ...template,

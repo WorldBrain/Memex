@@ -64,7 +64,7 @@ export interface ListsSidebarGroupProps {
     loadingState: TaskState
     onAddBtnClick?: React.MouseEventHandler
     onExpandBtnClick?: React.MouseEventHandler
-    listsArray: Array<ListsSidebarItemWithMenuProps>
+    listsArray: ListsSidebarItemWithMenuProps[]
 }
 
 export interface ListsSidebarItemsArrayObject {
@@ -94,16 +94,23 @@ export default class ListsSidebarGroup extends PureComponent<
             return null
         }
 
+        if (this.props.loadingState === 'running') {
+            return this.renderLoadingState()
+        }
+
+        if (this.props.loadingState === 'error') {
+            this.renderErrorState()
+        }
+
         return this.props.listsArray.map((listObj, idx) => (
             <ListsSidebarItemWithMenu key={idx} {...listObj} />
         ))
     }
 
     render() {
-        const { loadingState, title: listsGroupTitle } = this.props
         return (
             <Container>
-                {listsGroupTitle && (
+                {this.props.title && (
                     <GroupHeaderContainer>
                         {this.props.onExpandBtnClick && (
                             <IconContainer
@@ -120,7 +127,7 @@ export default class ListsSidebarGroup extends PureComponent<
                             </IconContainer>
                         )}
                         <GroupHeaderInnerDiv className="inner">
-                            <GroupTitle>{listsGroupTitle}</GroupTitle>
+                            <GroupTitle>{this.props.title}</GroupTitle>
                             {this.props.onAddBtnClick && (
                                 <IconContainer
                                     onClick={this.props.onAddBtnClick}
@@ -136,9 +143,7 @@ export default class ListsSidebarGroup extends PureComponent<
                         </GroupHeaderInnerDiv>
                     </GroupHeaderContainer>
                 )}
-                {loadingState === 'running' && this.renderLoadingState()}
-                {loadingState === 'error' && this.renderErrorState()}
-                {loadingState === 'success' && this.renderLists()}
+                {this.renderLists()}
             </Container>
         )
     }

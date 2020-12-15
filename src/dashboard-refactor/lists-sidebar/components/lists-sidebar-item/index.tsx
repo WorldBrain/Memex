@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import styled, { keyframes } from 'styled-components'
+import styled, { keyframes, css } from 'styled-components'
 
 import colors from '../../../colors'
 import { fonts } from '../../../styles'
@@ -37,12 +37,17 @@ const Container = styled.div<Props>`
     &:hover {
         background-color: ${colors.onHover};
         ${({ selectedState }: Props) =>
-            selectedState.isSelected && `background-color: ${colors.onSelect};`}
+            selectedState?.isSelected &&
+            css`
+                background-color: ${colors.onSelect};
+            `}
     }
 
     ${({ dropReceivingState }: Props) =>
         dropReceivingState?.triggerSuccessfulDropAnimation &&
-        `animation: ${blinkingAnimation} 0.4s 2;`}
+        css`
+            animation: ${blinkingAnimation} 0.4s 2;
+        `}
 
     cursor: ${({ dropReceivingState }: Props) =>
         !dropReceivingState?.isDraggedOver
