@@ -25,6 +25,9 @@ const MarginDiv = styled.div`
             props.bottom ? `margin-bottom: ${props.bottom}` : ``
         }`
     }}
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `
 
 export default class Margin extends PureComponent<MarginProps> {
