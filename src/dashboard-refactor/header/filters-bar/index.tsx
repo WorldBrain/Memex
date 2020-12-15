@@ -11,7 +11,7 @@ import { DatePicker, TagPicker, ListPicker } from './components/'
 import { SelectedState } from '../../types'
 import { Props as DateRangeSelectionProps } from 'src/overview/search-bar/components/DateRangeSelection'
 import { FilterPickerProps } from './components/types'
-import { FilterPickerLabel } from './types'
+import { SearchFilterLabel } from '../types'
 
 const windowWidth: number = window.innerWidth
 const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
@@ -71,7 +71,7 @@ export interface FiltersBarProps {
 
 export default class FiltersBar extends PureComponent<FiltersBarProps> {
     private renderFilterSelectButton = (
-        label: FilterPickerLabel,
+        label: SearchFilterLabel,
         selectedState: SelectedState,
     ) => {
         const { isSelected, onSelection } = selectedState

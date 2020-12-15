@@ -5,7 +5,6 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 
 import colors from '../../colors'
 import { fonts } from '../../styles'
-import { SearchFilterDetail } from '../types'
 
 const textStyles = `
     font-family: ${fonts.primary.name};
