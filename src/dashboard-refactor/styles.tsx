@@ -1,3 +1,4 @@
+import { colorBrandMintGreen } from 'src/common-ui/components/design-library/colors'
 import colors from './colors'
 
 export const fonts = {
@@ -26,6 +27,13 @@ const styles = {
     components: {
         sidebar: {
             widthPx: 173,
+        },
+        syncStatusIcon: {
+            colors: {
+                green: colorBrandMintGreen,
+                yellow: '#FAFF00',
+                red: '#DF1313',
+            },
         },
     },
 }

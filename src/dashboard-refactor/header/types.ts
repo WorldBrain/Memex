@@ -1,3 +1,5 @@
+export type SyncStatusIconState = 'green' | 'yellow' | 'red'
+
 export type FilterKey = 't' | 'd' | 'c' | '-t' | '-d' | '-c' | 'from' | 'to'
 
 export type SearchQueryParsed = SearchQueryPart[]
