@@ -1,9 +1,11 @@
 import React, { PureComponent } from 'react'
-import Margin from 'src/dashboard-refactor/components/Margin'
 import styled from 'styled-components'
+
+import Margin from 'src/dashboard-refactor/components/Margin'
 
 import colors from '../../colors'
 import { fonts } from '../../styles'
+import { SearchFilterDetail } from '../types'
 
 const textStyles = `
     font-family: ${fonts.primary.name};
@@ -57,7 +59,7 @@ export interface SearchBarProps {
     searchFiltersOpen: boolean
     searchFiltersActive: []
     onSearchBarFocus(): void
-    onSearchQueryChange(searchObject: any): void
+    onSearchQueryChange(queryString: string): void
     onSearchFiltersOpen(): void
 }
 
@@ -69,11 +71,15 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
             this.inputRef.current.focus()
         }
     }
+    handleChange: React.FormEventHandler = (evt) => {
+        // need to amend getFilterStrings function to pull through search terms as well, then
+        // bundle them in an object to send with the onSearchQueryChange func
+        this.props.onSearchQueryChange(evt.currentTarget.textContent)
+    }
     render() {
         const {
             searchFiltersOpen,
             searchQuery,
-            onSearchQueryChange,
             onSearchFiltersOpen,
             onSearchBarFocus,
         } = this.props
@@ -85,7 +91,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             ref={this.inputRef}
                             placeholder={!searchQuery && this.placeholder}
                             value={searchQuery}
-                            onChange={onSearchQueryChange}
+                            onChange={this.handleChange}
                         />
                     </FullWidthMargin>
                     <Margin horizontal="23px">

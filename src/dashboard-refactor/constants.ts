@@ -12,6 +12,25 @@ export const sizeConstants = {
 }
 
 /**
+ * Pattern to match string of FilterKey type in search query string
+ */
+export const SEARCH_QUERY_FILTER_KEY_PATTERN = /(from|to|(-?)[dtc]):/
+export const SEARCH_QUERY_FILTER_KEY_PATTERN_G = /(from|to|(-?)[dtc]):/g
+
+/**
+ * Pattern to match filter key at end of string
+ */
+export const SEARCH_QUERY_END_FILTER_KEY_PATTERN = /(from|to|(-?)[dtc]):$/
+
+/**
+ * Pattern to test whether a string contains a valid contiguous search filter string
+ * at end of string. Such a string starts with a string of type FilterKey and contains
+ * comma separated strings (strings with a space are within double commas). A search
+ * filter string ends with a space.
+ */
+export const VALID_FILTER_STRING_PATTERN = /(,|:)("(.+?)"|[^" ]+?) ?$/
+
+/**
  * Pattern to match entire string to match `domain.tld`-like format + optional subdomain
  * prefix, ccTLD postfix, `site:` prefix, and excluded `-` prefix.
  */
