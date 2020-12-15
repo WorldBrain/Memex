@@ -12,7 +12,7 @@ export interface DropReceivingState {
     onDrop(normalizedPageUrl: string): void
 }
 
-export interface TextPart {
+export interface SearchResultTextPart {
     text: string
     match: boolean
 }

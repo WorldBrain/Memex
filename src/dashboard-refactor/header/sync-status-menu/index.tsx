@@ -1,27 +1,28 @@
 import React, { PureComponent } from 'react'
-import { LoadingIndicator } from 'src/common-ui/components'
-import colors from 'src/dashboard-refactor/colors'
-import Margin from 'src/dashboard-refactor/components/Margin'
-import styles, { fonts } from 'src/dashboard-refactor/styles'
-import { Icon } from 'src/dashboard-refactor/styled-components'
 import styled, { css } from 'styled-components'
+import moment, { MomentInput } from 'moment'
+
+import styles, { fonts } from 'src/dashboard-refactor/styles'
+import colors from 'src/dashboard-refactor/colors'
+
+import { LoadingIndicator } from 'src/common-ui/components'
+import { Icon } from 'src/dashboard-refactor/styled-components'
+
 import { BackupState, SyncState, UnSyncedItemState } from './types'
 import { HoverState } from 'src/dashboard-refactor/types'
-import { String } from 'lodash'
-import moment, { MomentInput } from 'moment'
 
 const Container = styled.div`
     height: min-content;
     width: 183px;
+    padding: 7px;
     background-color: ${colors.white};
     display: flex;
     flex-direction: column;
+    box-shadow: ${styles.boxShadow.overlayElement};
 `
 
 const Row = styled.div`
     height: min-content;
-    width: 100%;
-    padding: 7px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -30,9 +31,39 @@ const Row = styled.div`
 
 const RowContainer = styled.div`
     height: max-content;
-    width: max-content;
+    width: 100%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
     display: flex;
     flex-direction: column;
+`
+
+const NotificationBox = styled(RowContainer)`
+    height: 32px;
+    padding: 0 !important;
+    justify-content: center;
+    align-items: center;
+    background-color: ${colors.error.pink};
+    box-shadow: ${styles.boxShadow.overlayElement};
+    border-radius: ${styles.borderRadius.medium};
+`
+
+const IconContainer = styled(Icon)<{
+    disabled: boolean
+}>`
+    padding-right: 10px;
+    ${(props) =>
+        props.disabled &&
+        css`
+            opacity: 0.5;
+        `}
+    ${(props) =>
+        !props.disabled &&
+        css`
+            cursor: pointer;
+        `}
 `
 
 const textStyles = `
@@ -55,24 +86,17 @@ const TextBlock = styled.div<{
         `}
 `
 
-const NotificationBox = styled.div`
-    height: 32px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: ${colors.error.pink};
-    box-shadow: ${styles.boxShadow.overlayElement};
-    border-radius: ${styles.borderRadius.medium};
-`
-
 const TextBlockSmall = styled.div`
     ${textStyles}
     font-weight: ${fonts.primary.weight.bold};
     font-size: 8px;
     line-height: 12px;
     text-align: center;
+`
+
+const StyledAnchor = styled.a`
+    color: ${colors.fonts.secondary};
+    text-decoration: none;
 `
 
 export interface SyncStatusMenuProps {
@@ -91,18 +115,23 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     private getTimeSinceNowString: any = (inputDate: Date) => {
         const now: MomentInput = moment(new Date())
         const dt: MomentInput = moment(inputDate)
+        const seconds: number = now.diff(dt, 'seconds')
+        const minutes: number = now.diff(dt, 'minutes')
+        const hours: number = now.diff(dt, 'hours')
+        const days: number = now.diff(dt, 'days')
+        const years: number = now.diff(dt, 'years')
         let str: string
-        if (now.diff(dt, 'seconds') < 60) str = 'Seconds ago'
-        if (now.diff(dt, 'minutes') < 2) str = '1 min ago'
-        if (now.diff(dt, 'minutes') < 15) str = 'Minutes ago'
-        if (now.diff(dt, 'minutes') < 30) str = '15 min ago'
-        if (now.diff(dt, 'hours') < 1) str = '30 min ago'
-        if (now.diff(dt, 'hours') < 2) str = 'An hour ago'
-        if (now.diff(dt, 'days') < 1) str = `${now.diff(dt, 'hours')} ago`
-        if (now.diff(dt, 'days') < 2) str = 'One day ago'
-        if (now.diff(dt, 'days') < 30) str = `${now.diff(dt, 'days')} ago`
-        if (now.diff(dt, 'years') < 1) str = dt.format('MMM Do')
-        if (now.diff(dt, 'years') >= 1) str = dt.format('ll')
+        if (seconds < 60) str = 'Seconds ago'
+        if (minutes < 2) str = '1 min ago'
+        if (minutes < 15) str = 'Minutes ago'
+        if (minutes < 30) str = '15 min ago'
+        if (hours < 1) str = '30 min ago'
+        if (hours < 2) str = 'An hour ago'
+        if (days < 1) str = `${hours} ago`
+        if (days < 2) str = 'One day ago'
+        if (days < 30) str = `${days} ago`
+        if (years < 1) str = dt.format('MMM Do')
+        if (years >= 1) str = dt.format('ll')
         return str
     }
     private renderNotificationBox = (
@@ -111,12 +140,10 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     ) => {
         return (
             <Row>
-                <RowContainer>
-                    <NotificationBox>
-                        <TextBlockSmall>{topSpanContent}</TextBlockSmall>
-                        <TextBlockSmall>{bottomSpanContent}</TextBlockSmall>
-                    </NotificationBox>
-                </RowContainer>
+                <NotificationBox>
+                    <TextBlockSmall>{topSpanContent}</TextBlockSmall>
+                    <TextBlockSmall>{bottomSpanContent}</TextBlockSmall>
+                </NotificationBox>
             </Row>
         )
     }
@@ -130,13 +157,15 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         return this.renderNotificationBox(
             `Your last ${syncType} failed.`,
             <span>
-                <a href="">Contact Support</a> if retry fails too.
+                <StyledAnchor href="">Contact Support</StyledAnchor> if retry
+                fails too.
             </span>,
         )
     }
     private renderRow = (
         syncType: 'sync' | 'backup',
         status: SyncState | BackupState,
+        isSyncRunDisabled: boolean,
         clickHandler: () => void,
     ) => {
         // this function capitalises the first word of the sentence
@@ -146,7 +175,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             return toReplace.toUpperCase()
         })
         return (
-            <Margin horizontal="17px" vertical="12px">
+            <div>
                 <Row>
                     <RowContainer>
                         <TextBlock bold>{`${string} status`}</TextBlock>
@@ -157,8 +186,8 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                                     : 'No backup set yet')}
                             {status === 'enabled' && `${string} enabled`}
                             {status === 'running' && `In progress`}
-                            {status === 'success' &&
-                                `Last sync: ${this.getTimeSinceNowString(
+                            {(status === 'success' || status === 'error') &&
+                                `Last ${syncType}: ${this.getTimeSinceNowString(
                                     new Date(),
                                 )}`}
                         </TextBlock>
@@ -166,16 +195,18 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                     {status === 'running' ? (
                         <LoadingIndicator />
                     ) : (
-                        <Icon
-                            heightAndWidth="12px"
+                        <IconContainer
+                            disabled={isSyncRunDisabled}
+                            heightAndWidth="15px"
                             path={`/img/${
                                 status === 'disabled' ? 'arrowRight' : 'reload'
                             }.svg`}
+                            onClick={clickHandler}
                         />
                     )}
                 </Row>
                 {status === 'error' && this.renderError(syncType)}
-            </Margin>
+            </div>
         )
     }
     render() {
@@ -187,8 +218,18 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         } = this.props
         return (
             <Container>
-                {this.renderRow('sync', syncState, onInitiateSync)}
-                {this.renderRow('backup', backupState, onInitiateBackup)}
+                {this.renderRow(
+                    'sync',
+                    syncState,
+                    backupState === 'running',
+                    onInitiateSync,
+                )}
+                {this.renderRow(
+                    'backup',
+                    backupState,
+                    syncState === 'running',
+                    onInitiateBackup,
+                )}
                 {backupState === 'disabled' && this.renderBackupReminder()}
             </Container>
         )
