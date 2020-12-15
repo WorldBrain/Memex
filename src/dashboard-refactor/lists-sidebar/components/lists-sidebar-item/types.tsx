@@ -1,30 +1,11 @@
-import {
-    DropReceivingState,
-    HoverState,
-    NewItemsCountState,
-    SelectedState,
-} from 'src/dashboard-refactor/types'
-
-export interface MoreActionButtonState {
-    onMoreActionClick(normalizedPageUrl: string): void
-    displayMoreActionButton?: boolean
-}
-
 export type ListNameHighlightIndices = [number, number]
 
 export interface ListsSidebarItemCommonProps {
     className?: string
     name: string
-    isEditing: boolean
-    newItemsCountState: NewItemsCountState
+    isEditing?: boolean
+    newItemsCount?: number
     nameHighlightIndices?: ListNameHighlightIndices
-}
-
-export interface ListsSidebarItemProps extends ListsSidebarItemCommonProps {
-    hoverState: HoverState
-    selectedState: SelectedState
-    dropReceivingState: DropReceivingState
-    moreActionButtonState: MoreActionButtonState
 }
 
 // this type is differentiated from the type which governs the object passed down the tree to its parent:
@@ -33,8 +14,8 @@ export interface ListsSidebarItemComponentProps
     extends ListsSidebarItemCommonProps {
     hoverState: HoverComponentState
     selectedState: SelectedComponentState
-    dropReceivingState: DropReceivingComponentState
-    moreActionButtonState: MoreActionButtonComponentState
+    dropReceivingState?: DropReceivingComponentState
+    onMoreActionClick?: () => void
 }
 
 interface HoverComponentState {
@@ -58,6 +39,5 @@ export interface DropReceivingComponentState {
 }
 
 interface MoreActionButtonComponentState {
-    onMoreActionClick(): void
     displayMoreActionButton?: boolean
 }

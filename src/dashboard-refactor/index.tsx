@@ -33,10 +33,15 @@ export class DashboardContainer extends StatefulUIElement<
                     isLocked: !this.state.listsSidebar.isSidebarLocked,
                 }),
         }
+        this.state.listsSidebar.selectedListId
 
         return (
             <ListsSidebarContainer
                 lockedState={lockedState}
+                onListSelection={(listId) =>
+                    this.processEvent('setSelectedListId', { listId })
+                }
+                selectedListId={this.state.listsSidebar.selectedListId}
                 peekState={{
                     isSidebarPeeking: this.state.listsSidebar.isSidebarPeeking,
                     toggleSidebarPeekState: () =>
@@ -58,15 +63,11 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 listsGroups={[
                     {
-                        isExpanded: true,
-                        loadingState: 'pristine',
-                        listsArray: [],
-                    },
-                    {
                         title: 'My collections',
                         onAddBtnClick: () =>
                             this.processEvent('addNewList', null),
-                        isExpanded: true,
+                        isExpanded: this.state.listsSidebar.localLists
+                            .isExpanded,
                         onExpandBtnClick: () =>
                             this.processEvent('setLocalListsExpanded', {
                                 isExpanded: !this.state.listsSidebar.localLists
@@ -78,7 +79,8 @@ export class DashboardContainer extends StatefulUIElement<
                     },
                     {
                         title: 'Followed collections',
-                        isExpanded: true,
+                        isExpanded: this.state.listsSidebar.followedLists
+                            .isExpanded,
                         onExpandBtnClick: () =>
                             this.processEvent('setFollowedListsExpanded', {
                                 isExpanded: !this.state.listsSidebar

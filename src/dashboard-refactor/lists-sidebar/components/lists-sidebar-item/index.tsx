@@ -41,13 +41,13 @@ const Container = styled.div<Props>`
     }
 
     ${({ dropReceivingState }: Props) =>
-        dropReceivingState.triggerSuccessfulDropAnimation &&
+        dropReceivingState?.triggerSuccessfulDropAnimation &&
         `animation: ${blinkingAnimation} 0.4s 2;`}
 
     cursor: ${({ dropReceivingState }: Props) =>
-        !dropReceivingState.isDraggedOver
+        !dropReceivingState?.isDraggedOver
             ? `pointer`
-            : dropReceivingState.canReceiveDroppedItems
+            : dropReceivingState?.canReceiveDroppedItems
             ? `default`
             : `not-allowed`};
 `
@@ -112,16 +112,13 @@ export default class ListsSidebarItem extends PureComponent<Props> {
 
     private renderIcon() {
         const {
-            dropReceivingState: { canReceiveDroppedItems, isDraggedOver },
+            dropReceivingState,
             hoverState: { isHovered },
-            newItemsCountState: { displayNewItemsCount, newItemsCount },
-            moreActionButtonState: {
-                onMoreActionClick,
-                displayMoreActionButton,
-            },
+            newItemsCount,
+            onMoreActionClick,
         } = this.props
 
-        if (displayNewItemsCount) {
+        if (newItemsCount) {
             return (
                 <NewItemsCount>
                     <NewItemsCountInnerDiv>
@@ -131,11 +128,11 @@ export default class ListsSidebarItem extends PureComponent<Props> {
             )
         }
 
-        if (canReceiveDroppedItems && isDraggedOver) {
+        if (dropReceivingState?.isDraggedOver) {
             return <Icon heightAndWidth="12px" path="/img/plus.svg" />
         }
 
-        if (isHovered && displayMoreActionButton) {
+        if (isHovered && onMoreActionClick) {
             return (
                 <Icon
                     onClick={onMoreActionClick}
@@ -147,13 +144,12 @@ export default class ListsSidebarItem extends PureComponent<Props> {
     }
 
     private renderDefault() {
-        const { hoverState, newItemsCountState } = this.props
+        const { hoverState, newItemsCount } = this.props
 
         return (
             <Container {...this.props}>
                 <Margin left="19px">{this.renderTitle()}</Margin>
-                {(hoverState.isHovered ||
-                    newItemsCountState.displayNewItemsCount) && (
+                {(hoverState.isHovered || newItemsCount) && (
                     <Margin right={`${iconMargin}px`}>
                         {this.renderIcon()}
                     </Margin>

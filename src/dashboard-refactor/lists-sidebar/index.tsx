@@ -6,6 +6,7 @@ import { ListsSidebarProps } from './types'
 import ListsSidebarGroup from './components/lists-sidebar-group'
 import ListsSidebarSearchBar from './components/lists-search-bar'
 import Margin from '../components/Margin'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 
 const Container = styled.div<{
     locked: boolean
@@ -24,7 +25,7 @@ const Container = styled.div<{
     ${(props) =>
         props.peeking &&
         css`
-            height: max-content;
+            height: max-contenth
             background-color: ${colors.white};
             box-shadow: 2px 0px 4px rgba(0, 0, 0, 0.25);
             margin-top: 9px;
@@ -50,6 +51,46 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
             <Container peeking={isSidebarPeeking} locked={isSidebarLocked}>
                 <Margin vertical="5px" horizontal="5px">
                     <ListsSidebarSearchBar {...searchBarProps} />
+                </Margin>
+                <Margin vertical="10px">
+                    <ListsSidebarGroup
+                        isExpanded
+                        loadingState="success"
+                        listsArray={[
+                            {
+                                name: 'All Saved',
+                                listId: -1,
+                                selectedState: {
+                                    isSelected:
+                                        this.props.selectedListId === -1,
+                                    onSelection: this.props.onListSelection,
+                                },
+                                hoverState: {} as any,
+                            },
+                            {
+                                name: 'Inbox',
+                                listId: SPECIAL_LIST_IDS.INBOX,
+                                selectedState: {
+                                    isSelected:
+                                        this.props.selectedListId ===
+                                        SPECIAL_LIST_IDS.INBOX,
+                                    onSelection: this.props.onListSelection,
+                                },
+                                hoverState: {} as any,
+                            },
+                            {
+                                name: 'Saved on Mobile',
+                                listId: SPECIAL_LIST_IDS.INBOX + 1,
+                                selectedState: {
+                                    isSelected:
+                                        this.props.selectedListId ===
+                                        SPECIAL_LIST_IDS.INBOX + 1,
+                                    onSelection: this.props.onListSelection,
+                                },
+                                hoverState: {} as any,
+                            },
+                        ]}
+                    />
                 </Margin>
                 {listsGroups.map((group, i) => (
                     <Margin key={i} vertical="10px">

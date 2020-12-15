@@ -88,7 +88,7 @@ const inboxItemsProps = (
 ): ListsSidebarItemWithMenuProps => {
     return {
         name,
-        listId: `https://www.${name}.com/`,
+        listId: name.length,
         ...listsSidebarItemProps.displayNewItemsCount,
         selectedState: {
             ...listsSidebarItemProps.displayNewItemsCount.selectedState,

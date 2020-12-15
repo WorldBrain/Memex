@@ -7,8 +7,13 @@ import colors from 'src/dashboard-refactor/colors'
 import { Icon } from '../../../styled-components'
 import UnstyledListsSidebarItem from '../lists-sidebar-item'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { ListsSidebarItemProps } from '../lists-sidebar-item/types'
-import { ListSource } from 'src/dashboard-refactor/types'
+import {
+    ListSource,
+    DropReceivingState,
+    HoverState,
+    SelectedState,
+} from 'src/dashboard-refactor/types'
+import { ListsSidebarItemCommonProps } from '../lists-sidebar-item/types'
 
 const Container = styled.div`
     position: relative;
@@ -52,15 +57,20 @@ const MenuButton = styled.div`
     }
 `
 
-export interface ListsSidebarItemWithMenuProps extends ListsSidebarItemProps {
+export interface ListsSidebarItemWithMenuProps
+    extends ListsSidebarItemCommonProps {
     name: string
-    listId: string
+    listId: number
     source?: ListSource
     isMenuDisplayed?: boolean
     onUnfollowClick?: React.MouseEventHandler
     onRenameClick?: React.MouseEventHandler
     onDeleteClick?: React.MouseEventHandler
     onShareClick?: React.MouseEventHandler
+    hoverState: HoverState
+    selectedState: SelectedState
+    dropReceivingState?: DropReceivingState
+    onMoreActionClick?: (id: number) => void
 }
 
 export default class ListsSidebarItemWithMenu extends PureComponent<
@@ -110,23 +120,17 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
 
     render() {
         const {
-            className,
-            name: listName,
-            isEditing,
             selectedState,
             hoverState,
             dropReceivingState,
-            newItemsCountState,
-            moreActionButtonState,
+            onMoreActionClick,
             isMenuDisplayed,
             listId,
+            ...props
         } = this.props
         return (
             <Container>
                 <ListsSidebarItem
-                    className={className}
-                    listName={listName}
-                    isEditing={isEditing}
                     hoverState={{
                         onHoverEnter() {
                             hoverState.onHoverEnter(listId)
@@ -142,22 +146,21 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
                         },
                         ...selectedState,
                     }}
-                    dropReceivingState={{
-                        onDragOver() {
-                            dropReceivingState.onDragOver(listId)
-                        },
-                        onDragLeave() {
-                            dropReceivingState.onDragLeave(listId)
-                        },
-                        ...dropReceivingState,
-                    }}
-                    newItemsCountState={newItemsCountState}
-                    moreActionButtonState={{
-                        onMoreActionClick() {
-                            moreActionButtonState.onMoreActionClick(listId)
-                        },
-                        ...moreActionButtonState,
-                    }}
+                    dropReceivingState={
+                        dropReceivingState == null
+                            ? undefined
+                            : {
+                                  onDragOver() {
+                                      dropReceivingState.onDragOver(listId)
+                                  },
+                                  onDragLeave() {
+                                      dropReceivingState.onDragLeave(listId)
+                                  },
+                                  ...dropReceivingState,
+                              }
+                    }
+                    onMoreActionClick={() => onMoreActionClick(listId)}
+                    {...props}
                 />
                 <MenuContainer isDisplayed={isMenuDisplayed}>
                     {this.renderMenuBtns()}

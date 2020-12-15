@@ -22,9 +22,15 @@ const peekState: SidebarPeekState = {
     toggleSidebarPeekState: () => {},
 }
 
+let selectedListId: number | undefined
+
 const template: ListsSidebarProps = {
-    lockedState: lockedState,
-    peekState: peekState,
+    lockedState,
+    peekState,
+    onListSelection: (listId) => {
+        selectedListId = listId
+    },
+    selectedListId,
     searchBarProps: {
         ...listsSidebarSearchBarProps.default,
         sidebarLockedState: lockedState,

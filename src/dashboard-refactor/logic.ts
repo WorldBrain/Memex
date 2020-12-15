@@ -65,7 +65,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 newListCreateState: 'pristine',
                 isSidebarPeeking: false,
-                isSidebarLocked: false,
+                isSidebarLocked: true,
                 searchQuery: '',
                 listData: {},
                 followedLists: {
@@ -77,7 +77,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     isAddInputShown: false,
                     addInputValue: '',
                     loadingState: 'pristine',
-                    isExpanded: false,
+                    isExpanded: true,
                     listIds: [],
                 },
             },

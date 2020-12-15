@@ -11,16 +11,6 @@ import {
     ListNameHighlightIndices,
 } from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/types'
 
-const newItemsCountState = {
-    displayNewItemsCount: false,
-    newItemsCount: 0,
-}
-
-const moreActionButtonState = {
-    onMoreActionClick: () => {},
-    displayMoreActionButton: true,
-}
-
 const dropReceivingState: DropReceivingComponentState = {
     canReceiveDroppedItems: true, // this defines whether items can be dropped (not whether there is a state change on drag-over)
     isDraggedOver: false,
@@ -47,8 +37,7 @@ const template: ListsSidebarItemComponentProps = {
     hoverState,
     selectedState,
     dropReceivingState,
-    newItemsCountState,
-    moreActionButtonState,
+    newItemsCount: 0,
 }
 
 export const listsSidebarItemProps = {
@@ -167,7 +156,7 @@ stories.add('Search Restul', () => (
 export const listsSidebarItemWithMenuProps: ListsSidebarItemWithMenuProps = {
     name: 'test A',
     isMenuDisplayed: true,
-    listId: 'https://www.blah.com/',
+    listId: 123,
     ...listsSidebarItemProps.hoveredAndSelected,
     onDeleteClick: () => {},
     onRenameClick: () => {},
@@ -177,7 +166,7 @@ export const listsSidebarItemWithMenuProps: ListsSidebarItemWithMenuProps = {
 export const listsSidebarItemWithShortMenuProps: ListsSidebarItemWithMenuProps = {
     name: 'test A',
     isMenuDisplayed: true,
-    listId: 'https://www.blah.com/',
+    listId: 123,
     ...listsSidebarItemProps.hoveredAndSelected,
     onUnfollowClick: () => {},
 }

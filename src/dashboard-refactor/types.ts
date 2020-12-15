@@ -36,18 +36,12 @@ export interface DashboardDependencies {
     annotationsBG: AnnotationInterface<'caller'>
 }
 
-export interface NewItemsCountState {
-    displayNewItemsCount: boolean
-    newItemsCount: number
-}
-
 export interface DropReceivingState {
     isDraggedOver?: boolean
-    canReceiveDroppedItems?: boolean // this defines whether items can be dropped (not whether there is a state change on drag-over)
     triggerSuccessfulDropAnimation?: boolean
-    onDragOver(normalizedPageUrl: string): void
-    onDragLeave(normalizedPageUrl: string): void
-    onDrop(normalizedPageUrl: string): void
+    onDragOver(id: number): void
+    onDragLeave(id: number): void
+    onDrop(id: number): void
 }
 
 export interface SearchResultTextPart {
@@ -56,13 +50,13 @@ export interface SearchResultTextPart {
 }
 
 export interface HoverState {
-    onHoverEnter(normalizedPageUrl: string): void
-    onHoverLeave(normalizedPageUrl: string): void
+    onHoverEnter(id: number): void
+    onHoverLeave(id: number): void
     isHovered: boolean
 }
 
 export interface SelectedState {
-    onSelection(normalizedPageUrl: string): void
+    onSelection(id: number): void
     isSelected: boolean
 }
 

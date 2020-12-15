@@ -5,6 +5,8 @@ import { ListsSidebarGroupProps } from './components/lists-sidebar-group'
 import { TaskState } from 'ui-logic-core/lib/types'
 
 export interface ListsSidebarProps {
+    onListSelection: (id: number) => void
+    selectedListId?: number
     lockedState: SidebarLockedState
     peekState: SidebarPeekState
     searchBarProps: ListsSidebarSearchBarProps
@@ -26,21 +28,27 @@ export interface ListData {
     name: string
 }
 
-export interface ListGroup
+export interface ListGroupCommon
     extends Pick<ListsSidebarGroupProps, 'loadingState'> {
     isExpanded: boolean
+    listIds: number[]
+}
+
+export interface FollowedListGroup extends ListGroupCommon {}
+
+export interface LocalListGroup extends ListGroupCommon {
     isAddInputShown: boolean
     addInputValue: string
-    listIds: number[]
 }
 
 export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
     Pick<SidebarPeekState, 'isSidebarPeeking'> &
     Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
         listData: { [id: number]: ListData }
-        followedLists: Omit<ListGroup, 'isAddInputShown' | 'addInputValue'>
+        followedLists: FollowedListGroup
+        localLists: LocalListGroup
         newListCreateState: TaskState
-        localLists: ListGroup
+
         selectedListId?: number
     }
 
