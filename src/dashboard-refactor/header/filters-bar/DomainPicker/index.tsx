@@ -12,8 +12,7 @@ import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/Search
 import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
-import EntryRow from // ActOnAllTabsButton, // IconStyleWrapper,
-'src/common-ui/GenericPicker/components/EntryRow'
+import EntryRow from 'src/common-ui/GenericPicker/components/EntryRow' // ActOnAllTabsButton, // IconStyleWrapper,
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
