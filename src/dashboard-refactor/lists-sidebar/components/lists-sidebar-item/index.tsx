@@ -94,7 +94,11 @@ const NewItemsCountInnerDiv = styled.div`
 export default class ListsSidebarItem extends PureComponent<Props> {
     private renderTitle() {
         if (!this.props.nameHighlightIndices) {
-            return <ListTitle {...this.props}>{this.props.name}</ListTitle>
+            return (
+                <ListTitle selectedState={this.props.selectedState}>
+                    {this.props.name}
+                </ListTitle>
+            )
         }
 
         const [from, to] = this.props.nameHighlightIndices
@@ -105,7 +109,7 @@ export default class ListsSidebarItem extends PureComponent<Props> {
         ]
 
         return (
-            <ListTitle {...this.props}>
+            <ListTitle selectedState={this.props.selectedState}>
                 {namePre.length > 0 && <span>{namePre}</span>}
                 <span style={{ fontWeight: fonts.primary.weight.bold }}>
                     {nameHighlighted}
@@ -118,7 +122,6 @@ export default class ListsSidebarItem extends PureComponent<Props> {
     private renderIcon() {
         const {
             dropReceivingState,
-            hoverState: { isHovered },
             newItemsCount,
             onMoreActionClick,
         } = this.props
@@ -137,7 +140,7 @@ export default class ListsSidebarItem extends PureComponent<Props> {
             return <Icon heightAndWidth="12px" path="/img/plus.svg" />
         }
 
-        if (isHovered && onMoreActionClick) {
+        if (onMoreActionClick) {
             return (
                 <Icon
                     onClick={onMoreActionClick}
@@ -146,21 +149,6 @@ export default class ListsSidebarItem extends PureComponent<Props> {
                 />
             )
         }
-    }
-
-    private renderDefault() {
-        const { hoverState, newItemsCount } = this.props
-
-        return (
-            <Container {...this.props}>
-                <Margin left="19px">{this.renderTitle()}</Margin>
-                {(hoverState.isHovered || newItemsCount) && (
-                    <Margin right={`${iconMargin}px`}>
-                        {this.renderIcon()}
-                    </Margin>
-                )}
-            </Container>
-        )
     }
 
     private renderEditing() {
@@ -182,7 +170,13 @@ export default class ListsSidebarItem extends PureComponent<Props> {
         if (this.props.isEditing) {
             return this.renderEditing()
         }
+        const { onMoreActionClick, ...props } = this.props
 
-        return this.renderDefault()
+        return (
+            <Container {...props}>
+                <Margin left="19px">{this.renderTitle()}</Margin>
+                <Margin right={`${iconMargin}px`}>{this.renderIcon()}</Margin>
+            </Container>
+        )
     }
 }

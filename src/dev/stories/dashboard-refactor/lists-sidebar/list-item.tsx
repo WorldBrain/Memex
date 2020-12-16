@@ -34,7 +34,6 @@ const selectedState = {
 const template: ListsSidebarItemComponentProps = {
     isEditing: false,
     name: 'Cool List Name',
-    hoverState,
     selectedState,
     dropReceivingState,
 }

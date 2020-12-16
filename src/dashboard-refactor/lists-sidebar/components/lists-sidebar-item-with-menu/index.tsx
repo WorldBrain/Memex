@@ -10,7 +10,6 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import {
     ListSource,
     DropReceivingState,
-    HoverState,
     SelectedState,
 } from 'src/dashboard-refactor/types'
 import { ListsSidebarItemCommonProps } from '../lists-sidebar-item/types'
@@ -67,7 +66,6 @@ export interface ListsSidebarItemWithMenuProps
     onRenameClick?: React.MouseEventHandler
     onDeleteClick?: React.MouseEventHandler
     onShareClick?: React.MouseEventHandler
-    hoverState: HoverState
     selectedState: SelectedState
     dropReceivingState?: DropReceivingState
     onMoreActionClick?: (id: number) => void
@@ -121,7 +119,6 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
     render() {
         const {
             selectedState,
-            hoverState,
             dropReceivingState,
             onMoreActionClick,
             isMenuDisplayed,
@@ -131,20 +128,11 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
         return (
             <Container>
                 <ListsSidebarItem
-                    hoverState={{
-                        onHoverEnter() {
-                            hoverState.onHoverEnter(listId)
-                        },
-                        onHoverLeave() {
-                            hoverState.onHoverLeave(listId)
-                        },
-                        ...hoverState,
-                    }}
                     selectedState={{
+                        ...selectedState,
                         onSelected() {
                             selectedState.onSelection(listId)
                         },
-                        ...selectedState,
                     }}
                     dropReceivingState={
                         dropReceivingState == null
@@ -159,7 +147,11 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
                                   ...dropReceivingState,
                               }
                     }
-                    onMoreActionClick={() => onMoreActionClick(listId)}
+                    onMoreActionClick={
+                        onMoreActionClick == null
+                            ? undefined
+                            : () => onMoreActionClick(listId)
+                    }
                     {...props}
                 />
                 <MenuContainer isDisplayed={isMenuDisplayed}>

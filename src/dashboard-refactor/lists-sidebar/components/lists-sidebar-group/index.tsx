@@ -6,7 +6,6 @@ import {
     LoadingContainer,
     LoadingIndicator,
 } from 'src/dashboard-refactor/styled-components'
-import { ListSource } from 'src/dashboard-refactor/types'
 import styled from 'styled-components'
 
 import { TaskState } from 'ui-logic-core/lib/types'

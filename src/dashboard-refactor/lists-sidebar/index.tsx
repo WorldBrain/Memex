@@ -65,7 +65,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         this.props.selectedListId === -1,
                                     onSelection: this.props.onListSelection,
                                 },
-                                hoverState: {} as any,
                             },
                             {
                                 name: 'Inbox',
@@ -76,7 +75,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         SPECIAL_LIST_IDS.INBOX,
                                     onSelection: this.props.onListSelection,
                                 },
-                                hoverState: {} as any,
                             },
                             {
                                 name: 'Saved on Mobile',
@@ -87,7 +85,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         SPECIAL_LIST_IDS.INBOX + 1,
                                     onSelection: this.props.onListSelection,
                                 },
-                                hoverState: {} as any,
                             },
                         ]}
                     />

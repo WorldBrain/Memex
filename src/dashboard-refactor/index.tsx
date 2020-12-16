@@ -2,7 +2,7 @@ import React from 'react'
 import { StatefulUIElement } from 'src/util/ui-logic'
 
 import { DashboardLogic } from './logic'
-import { RootState, Events, DashboardDependencies } from './types'
+import { RootState, Events, DashboardDependencies, ListSource } from './types'
 import ListsSidebarContainer from './lists-sidebar'
 import SearchResultsContainer from './search-results'
 import { runInBackground } from 'src/util/webextensionRPC'
@@ -29,11 +29,13 @@ export class DashboardContainer extends StatefulUIElement<
 
     private listStateToProps = (
         list: ListData,
+        source: ListSource,
     ): ListsSidebarItemWithMenuProps => ({
-        hoverState: {} as any,
+        source,
         listId: list.id,
         name: list.name,
         isEditing: this.state.listsSidebar.editingListId === list.id,
+        isMenuDisplayed: this.state.listsSidebar.showMoreMenuListId === list.id,
         selectedState: {
             isSelected: this.state.listsSidebar.selectedListId === list.id,
             onSelection: (listId) =>
@@ -100,6 +102,7 @@ export class DashboardContainer extends StatefulUIElement<
                             (listId) =>
                                 this.listStateToProps(
                                     this.state.listsSidebar.listData[listId],
+                                    'local-lists',
                                 ),
                         ),
                     },
@@ -118,6 +121,7 @@ export class DashboardContainer extends StatefulUIElement<
                             (listId) =>
                                 this.listStateToProps(
                                     this.state.listsSidebar.listData[listId],
+                                    'followed-list',
                                 ),
                         ),
                     },
