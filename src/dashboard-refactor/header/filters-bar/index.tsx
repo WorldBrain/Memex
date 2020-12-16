@@ -115,10 +115,12 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
 
     private renderTagPicker = () => {
         const {
-            onToggleShowPicker,
-            onEntriesListUpdate,
+            query,
             initialSelectedEntries,
             queryEntries,
+            onToggleShowPicker,
+            onEntriesListUpdate,
+            onSearchInputChanged,
             loadDefaultSuggestions,
         } = this.props.pickerProps.tagPickerProps
         return (
@@ -128,33 +130,42 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 loadDefaultSuggestions={loadDefaultSuggestions}
                 initialSelectedEntries={async () => initialSelectedEntries}
                 onEscapeKeyDown={onToggleShowPicker}
+                query={query}
+                onSearchInputChanged={onSearchInputChanged}
             />
         )
     }
 
     // private renderDomainPicker = () => {
     //     const {
+    //         onToggleShowPicker,
     //         onEntriesListUpdate,
     //         initialSelectedEntries,
-    //         onToggleShowPicker,
+    //         queryEntries,
+    //         loadDefaultSuggestions,
+    //         query,
+    //         onSearchInputChanged
     //     } = this.props.pickerProps.domainPickerProps
     //     return (
     //         <DomainPicker
     //             onUpdateEntrySelection={onEntriesListUpdate}
-    //             queryEntries={(query) => this.getFilteredDomains({ query })}
-    //             loadDefaultSuggestions={this.getSuggestedDomains}
+    //             queryEntries={queryEntries}
+    //             loadDefaultSuggestions={loadDefaultSuggestions}
     //             initialSelectedEntries={async () => initialSelectedEntries}
     //             onEscapeKeyDown={onToggleShowPicker}
-    //         />
+    //             query={query}
+    //             onSearchInputChanged={onSearchInputChanged}
     //     )
     // }
 
     private renderListPicker = () => {
         const {
-            onEntriesListUpdate,
+            query,
             initialSelectedEntries,
-            onToggleShowPicker,
             queryEntries,
+            onToggleShowPicker,
+            onEntriesListUpdate,
+            onSearchInputChanged,
             loadDefaultSuggestions,
         } = this.props.pickerProps.listPickerProps
         return (
@@ -164,6 +175,8 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 loadDefaultSuggestions={loadDefaultSuggestions}
                 initialSelectedEntries={async () => initialSelectedEntries}
                 onEscapeKeyDown={onToggleShowPicker}
+                query={query}
+                onSearchInputChanged={onSearchInputChanged}
             />
         )
     }

@@ -32,6 +32,13 @@ class ListPicker extends StatefulUIElement<
         super(props, new ListPickerLogic(props))
     }
 
+    componentDidUpdate(prevProps) {
+        const { query } = this.props
+        if (prevProps.query !== query) {
+            this.processEvent('searchInputChanged', { query })
+        }
+    }
+
     handleClickOutside = () => {
         if (this.props.onClickOutside) {
             this.props.onClickOutside()
@@ -43,6 +50,7 @@ class ListPicker extends StatefulUIElement<
     handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
 
     handleSearchInputChanged = (query: string) => {
+        this.props.onSearchInputChanged({ query })
         return this.processEvent('searchInputChanged', { query })
     }
 

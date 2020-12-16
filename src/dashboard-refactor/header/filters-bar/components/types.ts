@@ -1,7 +1,9 @@
 export interface FilterPickerProps {
-    onToggleShowPicker: () => void
+    query?: string
     initialSelectedEntries: string[]
-    onEntriesListUpdate: () => Promise<void>
     queryEntries: (query: string) => Promise<string[]>
+    onToggleShowPicker: () => void
+    onEntriesListUpdate: () => Promise<void>
+    onSearchInputChanged: (evt: { query: string }) => void
     loadDefaultSuggestions: () => string[] | Promise<string[]>
 }
