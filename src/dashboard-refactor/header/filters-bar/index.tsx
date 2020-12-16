@@ -9,11 +9,12 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
+import DomainPicker from './DomainPicker/'
+
+import { SelectedState } from '../../types'
 import DatePicker, {
     DateRangeSelectionProps,
 } from 'src/overview/search-bar/components/DateRangeSelection'
-
-import { SelectedState } from '../../types'
 import { FilterPickerProps } from './types'
 import { SearchFilterLabel } from '../types'
 
@@ -120,8 +121,8 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             initialSelectedEntries,
             queryEntries,
             onToggleShowPicker,
+            onSearchInputChange,
             onEntriesListUpdate,
-            onSearchInputChanged,
             loadDefaultSuggestions,
         } = this.props.pickerProps.tagPickerProps
         return (
@@ -132,32 +133,33 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 initialSelectedEntries={async () => initialSelectedEntries}
                 onEscapeKeyDown={onToggleShowPicker}
                 query={query}
-                onSearchInputChanged={onSearchInputChanged}
+                onSearchInputChange={onSearchInputChange}
             />
         )
     }
 
-    // private renderDomainPicker = () => {
-    //     const {
-    //         onToggleShowPicker,
-    //         onEntriesListUpdate,
-    //         initialSelectedEntries,
-    //         queryEntries,
-    //         loadDefaultSuggestions,
-    //         query,
-    //         onSearchInputChanged
-    //     } = this.props.pickerProps.domainPickerProps
-    //     return (
-    //         <DomainPicker
-    //             onUpdateEntrySelection={onEntriesListUpdate}
-    //             queryEntries={queryEntries}
-    //             loadDefaultSuggestions={loadDefaultSuggestions}
-    //             initialSelectedEntries={async () => initialSelectedEntries}
-    //             onEscapeKeyDown={onToggleShowPicker}
-    //             query={query}
-    //             onSearchInputChanged={onSearchInputChanged}
-    //     )
-    // }
+    private renderDomainPicker = () => {
+        const {
+            query,
+            initialSelectedEntries,
+            queryEntries,
+            onToggleShowPicker,
+            onSearchInputChange,
+            onEntriesListUpdate,
+            loadDefaultSuggestions,
+        } = this.props.pickerProps.domainPickerProps
+        return (
+            <DomainPicker
+                onUpdateEntrySelection={onEntriesListUpdate}
+                queryEntries={queryEntries}
+                loadDefaultSuggestions={loadDefaultSuggestions}
+                initialSelectedEntries={async () => initialSelectedEntries}
+                onEscapeKeyDown={onToggleShowPicker}
+                query={query}
+                onSearchInputChange={onSearchInputChange}
+            />
+        )
+    }
 
     private renderListPicker = () => {
         const {
@@ -165,8 +167,8 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             initialSelectedEntries,
             queryEntries,
             onToggleShowPicker,
+            onSearchInputChange,
             onEntriesListUpdate,
-            onSearchInputChanged,
             loadDefaultSuggestions,
         } = this.props.pickerProps.listPickerProps
         return (
@@ -177,7 +179,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 initialSelectedEntries={async () => initialSelectedEntries}
                 onEscapeKeyDown={onToggleShowPicker}
                 query={query}
-                onSearchInputChanged={onSearchInputChanged}
+                onSearchInputChange={onSearchInputChange}
             />
         )
     }

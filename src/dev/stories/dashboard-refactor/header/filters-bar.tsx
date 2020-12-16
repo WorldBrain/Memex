@@ -41,7 +41,7 @@ export const genericPickerPropsTemplate: FilterPickerProps = {
     queryEntries: async (query) => initialSelectedEntriesTemplate,
     onToggleShowPicker: () => {},
     onEntriesListUpdate: async () => {},
-    onSearchInputChanged: () => {},
+    onSearchInputChange: () => {},
     loadDefaultSuggestions: () => defaultSuggestionsTemplate,
 }
 

@@ -57,7 +57,7 @@ class TagPicker extends StatefulUIElement<
     handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
 
     handleSearchInputChanged = (query: string) => {
-        this.props.onSearchInputChanged({ query })
+        this.props.onSearchInputChange({ query })
         return this.processEvent('searchInputChanged', { query })
     }
 
