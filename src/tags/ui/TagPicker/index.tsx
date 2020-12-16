@@ -33,6 +33,13 @@ class TagPicker extends StatefulUIElement<
         super(props, new TagPickerLogic(props))
     }
 
+    componentDidUpdate(prevProps) {
+        const { query } = this.props
+        if (prevProps.query !== query) {
+            this.processEvent('searchInputChanged', { query })
+        }
+    }
+
     handleClickOutside = (e) => {
         if (this.props.onClickOutside) {
             this.props.onClickOutside(e)
@@ -46,9 +53,11 @@ class TagPicker extends StatefulUIElement<
 
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
         this.processEvent('setSearchInputRef', { ref })
+
     handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
 
     handleSearchInputChanged = (query: string) => {
+        this.props.onSearchInputChange({ query })
         return this.processEvent('searchInputChanged', { query })
     }
 

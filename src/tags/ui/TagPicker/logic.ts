@@ -8,6 +8,8 @@ import GenericPickerLogic, {
 
 export interface TagPickerDependencies extends GenericPickerDependencies {
     onClickOutside?: React.MouseEventHandler
+    query?: string
+    onSearchInputChange?: (evt: { query: string }) => void
 }
 
 export type TagPickerEvent = GenericPickerEvent

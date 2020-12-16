@@ -29,6 +29,13 @@ class DomainPicker extends StatefulUIElement<
         super(props, new DomainPickerLogic(props))
     }
 
+    componentDidUpdate(prevProps) {
+        const { query } = this.props
+        if (prevProps.query !== query) {
+            this.processEvent('searchInputChanged', { query })
+        }
+    }
+
     handleClickOutside: React.MouseEventHandler = (e) => {
         if (this.props.onClickOutside) {
             this.props.onClickOutside(e) // this required an event parameter, but in the collections picker it did not (src/custom-lists/ui/CollectionPicker/index.tsx)
@@ -37,12 +44,13 @@ class DomainPicker extends StatefulUIElement<
 
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
         this.processEvent('setSearchInputRef', { ref })
+
     handleOuterSearchBoxClick: React.MouseEventHandler = () =>
         this.processEvent('focusInput', {})
 
     handleSearchInputChanged = (query: string) => {
-        // this should be a React.KeyboardEventHandle type, but the onChange is overwritten upstream
-        this.processEvent('searchInputChanged', { query })
+        this.props.onSearchInputChange({ query })
+        return this.processEvent('searchInputChanged', { query })
     }
 
     handleSelectedDomainPress = (domain: string) =>

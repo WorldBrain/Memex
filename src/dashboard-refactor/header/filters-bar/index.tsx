@@ -118,55 +118,69 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
 
     private renderTagPicker = () => {
         const {
-            onToggleShowPicker,
-            onEntriesListUpdate,
+            query,
             initialSelectedEntries,
+            queryEntries,
+            onToggleShowPicker,
+            onSearchInputChange,
+            onEntriesListUpdate,
+            loadDefaultSuggestions,
         } = this.props.pickerProps.tagPickerProps
         return (
             <TagPicker
                 onUpdateEntrySelection={onEntriesListUpdate}
-                queryEntries={(query) =>
-                    tags.searchForTagSuggestions({ query })
-                }
-                loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
+                queryEntries={queryEntries}
+                loadDefaultSuggestions={loadDefaultSuggestions}
                 initialSelectedEntries={async () => initialSelectedEntries}
                 onEscapeKeyDown={onToggleShowPicker}
+                query={query}
+                onSearchInputChange={onSearchInputChange}
             />
         )
     }
 
     private renderDomainPicker = () => {
         const {
-            onEntriesListUpdate,
+            query,
             initialSelectedEntries,
+            queryEntries,
             onToggleShowPicker,
+            onSearchInputChange,
+            onEntriesListUpdate,
+            loadDefaultSuggestions,
         } = this.props.pickerProps.domainPickerProps
         return (
             <DomainPicker
                 onUpdateEntrySelection={onEntriesListUpdate}
-                queryEntries={(query) => this.getFilteredDomains({ query })}
-                loadDefaultSuggestions={this.getSuggestedDomains}
+                queryEntries={queryEntries}
+                loadDefaultSuggestions={loadDefaultSuggestions}
                 initialSelectedEntries={async () => initialSelectedEntries}
                 onEscapeKeyDown={onToggleShowPicker}
+                query={query}
+                onSearchInputChange={onSearchInputChange}
             />
         )
     }
 
     private renderListPicker = () => {
         const {
-            onEntriesListUpdate,
+            query,
             initialSelectedEntries,
+            queryEntries,
             onToggleShowPicker,
+            onSearchInputChange,
+            onEntriesListUpdate,
+            loadDefaultSuggestions,
         } = this.props.pickerProps.listPickerProps
         return (
             <CollectionPicker
                 onUpdateEntrySelection={onEntriesListUpdate}
-                queryEntries={(query) =>
-                    collections.searchForListSuggestions({ query })
-                }
-                loadDefaultSuggestions={collections.fetchInitialListSuggestions}
+                queryEntries={queryEntries}
+                loadDefaultSuggestions={loadDefaultSuggestions}
                 initialSelectedEntries={async () => initialSelectedEntries}
                 onEscapeKeyDown={onToggleShowPicker}
+                query={query}
+                onSearchInputChange={onSearchInputChange}
             />
         )
     }

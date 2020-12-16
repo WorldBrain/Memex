@@ -8,6 +8,8 @@ import GenericPickerLogic, {
 
 export interface DomainPickerDependencies extends GenericPickerDependencies {
     onClickOutside?: React.MouseEventHandler
+    query?: string
+    onSearchInputChange?: (evt: { query: string }) => void
 }
 
 export type DomainPickerEvent = GenericPickerEvent
