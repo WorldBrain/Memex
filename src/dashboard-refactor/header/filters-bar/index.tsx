@@ -10,12 +10,14 @@ import { collections, tags } from 'src/util/remote-functions-background'
 import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { DatePicker, DomainPicker } from './components/'
+import DomainPicker from './DomainPicker/'
 
 import { SelectedState } from '../../types'
-import { Props as DateRangeSelectionProps } from 'src/overview/search-bar/components/DateRangeSelection'
-import { FilterPickerProps } from './components/types'
-import { FilterPickerLabel } from './types'
+import DatePicker, {
+    DateRangeSelectionProps,
+} from 'src/overview/search-bar/components/DateRangeSelection'
+import { FilterPickerProps } from './types'
+import { SearchFilterLabel } from '../types'
 
 const windowWidth: number = window.innerWidth
 const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
@@ -95,7 +97,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     }
 
     private renderFilterSelectButton = (
-        label: FilterPickerLabel,
+        label: SearchFilterLabel,
         selectedState: SelectedState,
     ): JSX.Element => {
         const { isSelected, onSelection } = selectedState

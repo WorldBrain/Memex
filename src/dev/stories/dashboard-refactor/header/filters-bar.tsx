@@ -4,9 +4,9 @@ import FiltersBar, {
     FiltersBarProps,
 } from 'src/dashboard-refactor/header/filters-bar'
 import { SelectedState } from 'src/dashboard-refactor/types'
-import { Props as DateRangeSelectionProps } from 'src/overview/search-bar/components/DateRangeSelection'
+import { DateRangeSelectionProps } from 'src/overview/search-bar/components/DateRangeSelection'
 import moment from 'moment'
-import { FilterPickerProps } from 'src/dashboard-refactor/header/filters-bar/components/types'
+import { FilterPickerProps } from 'src/dashboard-refactor/header/filters-bar/types'
 
 const stories = storiesOf('Dashboard Refactor|Header/Filters Bar', module)
 
