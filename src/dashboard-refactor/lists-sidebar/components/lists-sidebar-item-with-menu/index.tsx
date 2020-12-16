@@ -130,7 +130,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
                 <ListsSidebarItem
                     selectedState={{
                         ...selectedState,
-                        onSelected() {
+                        onSelection() {
                             selectedState.onSelection(listId)
                         },
                     }}
@@ -138,19 +138,22 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
                         dropReceivingState == null
                             ? undefined
                             : {
+                                  ...dropReceivingState,
                                   onDragOver() {
                                       dropReceivingState.onDragOver(listId)
                                   },
                                   onDragLeave() {
                                       dropReceivingState.onDragLeave(listId)
                                   },
-                                  ...dropReceivingState,
                               }
                     }
                     onMoreActionClick={
                         onMoreActionClick == null
                             ? undefined
-                            : () => onMoreActionClick(listId)
+                            : (e) => {
+                                  e.stopPropagation()
+                                  onMoreActionClick(listId)
+                              }
                     }
                     {...props}
                 />

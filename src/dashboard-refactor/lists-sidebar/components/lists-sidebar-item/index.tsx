@@ -36,12 +36,13 @@ const Container = styled.div<Props>`
 
     &:hover {
         background-color: ${colors.onHover};
-        ${({ selectedState }: Props) =>
-            selectedState?.isSelected &&
-            css`
-                background-color: ${colors.onSelect};
-            `}
     }
+
+    ${({ selectedState }: Props) =>
+        selectedState?.isSelected &&
+        css`
+            background-color: ${colors.onSelect};
+        `}
 
     ${({ dropReceivingState }: Props) =>
         dropReceivingState?.triggerSuccessfulDropAnimation &&
@@ -173,7 +174,7 @@ export default class ListsSidebarItem extends PureComponent<Props> {
         const { onMoreActionClick, ...props } = this.props
 
         return (
-            <Container {...props}>
+            <Container {...props} onClick={props.selectedState.onSelection}>
                 <Margin left="19px">{this.renderTitle()}</Margin>
                 <Margin right={`${iconMargin}px`}>{this.renderIcon()}</Margin>
             </Container>
