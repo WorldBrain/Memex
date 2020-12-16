@@ -24,6 +24,7 @@ import {
     remoteEventEmitter,
     RemoteEventEmitter,
 } from 'src/util/webextensionRPC'
+import ActivityStreamsBackground from 'src/activity-streams/background'
 
 // interface ListPush {
 //     actionsPending: number
@@ -57,6 +58,7 @@ export default class ContentSharingBackground {
             annotationStorage: AnnotationStorage
             auth: AuthBackground
             analytics: Analytics
+            activityStreams: Pick<ActivityStreamsBackground, 'backend'>
             getContentSharing: () => Promise<ContentSharingStorage>
         },
     ) {
@@ -487,12 +489,6 @@ export default class ContentSharingBackground {
         }
     }
 
-    sharePage = async (options: {
-        normalizedUrl: string
-    }): Promise<{ remoteId: string }> => {
-        return { remoteId: '' }
-    }
-
     unshareAnnotation: ContentSharingInterface['unshareAnnotation'] = async (
         options,
     ) => {
@@ -729,10 +725,19 @@ export default class ContentSharingBackground {
             })
         } else if (action.type === 'ensure-page-info') {
             for (const pageInfo of action.data) {
-                await contentSharing.ensurePageInfo({
+                const pageReference = await contentSharing.ensurePageInfo({
                     pageInfo,
                     creatorReference: userReference,
                 })
+                this.options.activityStreams.backend
+                    .followEntity({
+                        entityType: 'sharedPageInfo',
+                        entity: pageReference,
+                        feeds: { home: true },
+                    })
+                    .catch((err) => {
+                        console.error('Error following page: ', err.message)
+                    })
             }
         }
     }

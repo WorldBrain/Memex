@@ -31,6 +31,7 @@ import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { ServerStorage } from 'src/storage/types'
 import { Browser } from 'webextension-polyfill-ts'
 import { TabManager } from 'src/tab-management/background/tab-manager'
+import { P } from 'js-combinatorics'
 
 fetchMock.restore()
 
@@ -124,6 +125,11 @@ export async function setupBackgroundIntegrationTest(
         ? new MockFetchPageDataProcessor()
         : null
 
+    let callFirebaseFunction = async (name: string, ...args: any[]) => {
+        throw new Error(
+            `Tried to call Firebase function, but no mock was for that`,
+        )
+    }
     const backgroundModules = createBackgroundModules({
         getNow,
         storageManager,
@@ -139,6 +145,9 @@ export async function setupBackgroundIntegrationTest(
         auth,
         disableSyncEnryption: !options?.enableSyncEncyption,
         fetch,
+        callFirebaseFunction: (name, ...args) => {
+            return callFirebaseFunction(name, ...args)
+        },
     })
     backgroundModules.sync.initialSync.wrtc = wrtc
     backgroundModules.sync.initialSync.debug = false
@@ -196,6 +205,9 @@ export async function setupBackgroundIntegrationTest(
         browserAPIs,
         fetchPageDataProcessor,
         injectTime: (injected) => (getTime = injected),
+        injectCallFirebaseFunction: (injected) => {
+            callFirebaseFunction = injected
+        },
         fetch,
     }
 }

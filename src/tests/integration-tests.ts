@@ -69,6 +69,9 @@ export interface BackgroundIntegrationTestSetup {
     subscriptionService: MemorySubscriptionsService
     getServerStorage(): Promise<ServerStorage>
     injectTime: (getNow: () => number) => void
+    injectCallFirebaseFunction: (
+        f: <Returns>(name: string, ...args: any[]) => Promise<Returns>,
+    ) => void
     fetch: fetchMock.FetchMockSandbox
 }
 export interface BackgroundIntegrationTestContext {
