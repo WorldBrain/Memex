@@ -37,11 +37,11 @@ describe('Dashboard search results logic', () => {
         const { searchResults } = await setupTest(device)
 
         expect(searchResults.state.listsSidebar.searchQuery).toEqual('')
-        await searchResults.processEvent('setListQueryValue', { value: 'test' })
+        await searchResults.processEvent('setListQueryValue', { query: 'test' })
         expect(searchResults.state.listsSidebar.searchQuery).toEqual('test')
 
         await searchResults.processEvent('setListQueryValue', {
-            value: 'again',
+            query: 'again',
         })
         expect(searchResults.state.listsSidebar.searchQuery).toEqual('again')
     })

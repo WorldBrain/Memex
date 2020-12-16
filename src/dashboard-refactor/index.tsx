@@ -77,9 +77,9 @@ export class DashboardContainer extends StatefulUIElement<
                     onCreateNew: () => this.processEvent('addNewList', null),
                     onFocus: () => null,
                     onSearchQueryChange: (query) =>
-                        this.processEvent('setSearchQuery', { query }),
+                        this.processEvent('setListQueryValue', { query }),
                     onInputClear: () =>
-                        this.processEvent('setSearchQuery', { query: '' }),
+                        this.processEvent('setListQueryValue', { query: '' }),
                 }}
                 listsGroups={[
                     {

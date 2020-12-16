@@ -980,7 +980,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
     }) => {
         this.emitMutation({
-            listsSidebar: { searchQuery: { $set: event.value } },
+            listsSidebar: { searchQuery: { $set: event.query } },
         })
     }
 

@@ -57,7 +57,7 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
 export type Events = UIEvent<{
     setSidebarLocked: { isLocked: boolean }
     setSidebarPeeking: { isPeeking: boolean }
-    setListQueryValue: { value: string }
+    setListQueryValue: { query: string }
 
     setAddListInputShown: { isShown: boolean }
     setAddListInputValue: { value: string }
