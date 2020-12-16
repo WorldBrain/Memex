@@ -4,9 +4,9 @@ import FiltersBar, {
     FiltersBarProps,
 } from 'src/dashboard-refactor/header/filters-bar'
 import { SelectedState } from 'src/dashboard-refactor/types'
-import { Props as DateRangeSelectionProps } from 'src/overview/search-bar/components/DateRangeSelection'
+import { DateRangeSelectionProps } from 'src/overview/search-bar/components/DateRangeSelection'
 import moment from 'moment'
-import { FilterPickerProps } from 'src/dashboard-refactor/header/filters-bar/components/types'
+import { FilterPickerProps } from 'src/dashboard-refactor/header/filters-bar/types'
 
 const stories = storiesOf('Dashboard Refactor|Header/Filters Bar', module)
 
@@ -29,14 +29,19 @@ export const datePickerPropsTemplate: DateRangeSelectionProps = {
     changeTooltip: () => {},
 }
 
-const initialSelectedEntriesTemplate = ['Generic Entry 1', 'Generic Entry 2']
-const defaultSuggestionsTemplate = ['Generic Entry 3']
+const defaultSuggestionsTemplate = [
+    'Generic Entry 1',
+    'Generic Entry 2',
+    'Other Entry',
+]
+const initialSelectedEntriesTemplate = [defaultSuggestionsTemplate[0]]
 
 export const genericPickerPropsTemplate: FilterPickerProps = {
-    onToggleShowPicker: () => {},
-    onEntriesListUpdate: async () => {},
     initialSelectedEntries: initialSelectedEntriesTemplate,
     queryEntries: async (query) => initialSelectedEntriesTemplate,
+    onToggleShowPicker: () => {},
+    onEntriesListUpdate: async () => {},
+    onSearchInputChange: () => {},
     loadDefaultSuggestions: () => defaultSuggestionsTemplate,
 }
 
@@ -57,6 +62,7 @@ export const filtersBarStoryProps: {
     displayedDateSelected: FiltersBarProps
     displayedDomainsSelected: FiltersBarProps
     displayedTagsSelected: FiltersBarProps
+    displayedTagsSelectedWithQuery: FiltersBarProps
     displayedListsSelected: FiltersBarProps
 } = {
     hidden: {
@@ -91,6 +97,19 @@ export const filtersBarStoryProps: {
             tagPickerProps: genericPickerPropsTemplate,
         },
     },
+    displayedTagsSelectedWithQuery: {
+        ...template,
+        tagFilterSelectedState: {
+            ...selectedStateTemplate,
+            isSelected: true,
+        },
+        pickerProps: {
+            tagPickerProps: {
+                ...genericPickerPropsTemplate,
+                query: 'Generic',
+            },
+        },
+    },
     displayedListsSelected: {
         ...template,
         listFilterSelectedState: {
@@ -115,6 +134,9 @@ stories.add('Domain Filter Selected', () => (
 ))
 stories.add('Tag Filter Selected', () => (
     <FiltersBar {...filtersBarStoryProps.displayedTagsSelected} />
+))
+stories.add('Tag Filter Selected With Input', () => (
+    <FiltersBar {...filtersBarStoryProps.displayedTagsSelectedWithQuery} />
 ))
 stories.add('List Filter Selected', () => (
     <FiltersBar {...filtersBarStoryProps.displayedListsSelected} />
