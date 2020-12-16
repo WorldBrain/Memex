@@ -42,7 +42,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     byId: {},
                 },
                 searchType: 'pages',
-                areAllNotesShown: false,
                 searchState: 'pristine',
                 paginationState: 'pristine',
                 noteUpdateState: 'pristine',
@@ -547,12 +546,37 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setAllNotesShown: EventHandler<'setAllNotesShown'> = ({ event }) => {
-        this.emitMutation({
-            searchResults: {
-                areAllNotesShown: { $set: event.areShown },
-            },
-        })
+    setAllNotesShown: EventHandler<'setAllNotesShown'> = ({
+        previousState,
+    }) => {
+        const applyChangeTooAll = (newState: boolean) => (results) => {
+            for (const { day, pages } of Object.values(
+                previousState.searchResults.results,
+            )) {
+                for (const pageId of Object.values(pages.allIds)) {
+                    results[day].pages.byId[pageId].areNotesShown = newState
+                }
+            }
+            return results
+        }
+
+        if (utils.areAllNotesShown(previousState.searchResults)) {
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        $apply: applyChangeTooAll(false),
+                    },
+                },
+            })
+        } else {
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        $apply: applyChangeTooAll(true),
+                    },
+                },
+            })
+        }
     }
 
     setNoteEditing: EventHandler<'setNoteEditing'> = ({ event }) => {

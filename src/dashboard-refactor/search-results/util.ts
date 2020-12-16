@@ -13,7 +13,7 @@ import {
     SearchResultToState,
     NoteResult,
     NoteFormState,
-    InteractionProps,
+    RootState,
 } from './types'
 import { Annotation } from 'src/annotations/types'
 
@@ -27,6 +27,17 @@ export const getInitialFormState = (): NoteFormState => ({
     inputValue: '',
     isTagPickerShown: false,
 })
+
+export const areAllNotesShown = ({ results }: RootState): boolean => {
+    for (const { pages } of Object.values(results)) {
+        for (const { areNotesShown } of Object.values(pages.byId)) {
+            if (!areNotesShown) {
+                return false
+            }
+        }
+    }
+    return true
+}
 
 export const bindFunctionalProps = <
     Props = { [key: string]: (...args: any) => any },

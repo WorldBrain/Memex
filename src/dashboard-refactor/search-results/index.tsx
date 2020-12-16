@@ -40,6 +40,7 @@ export type Props = RootState &
         SearchTypeSwitchProps,
         'onNotesSearchSwitch' | 'onPagesSearchSwitch'
     > & {
+        areAllNotesShown: boolean
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
         pagePickerProps: PagePickerAugdProps

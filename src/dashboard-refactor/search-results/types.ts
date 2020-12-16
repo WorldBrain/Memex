@@ -131,7 +131,6 @@ export interface PageResultsByDay {
 
 export interface RootState {
     searchType: SearchType
-    areAllNotesShown: boolean
 
     /** Holds page data specific to each page occurence on a specific day. */
     results: { [day: number]: PageResultsByDay }

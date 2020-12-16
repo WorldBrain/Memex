@@ -8,6 +8,7 @@ import SearchResultsContainer from './search-results'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { ListsSidebarItemWithMenuProps } from './lists-sidebar/components/lists-sidebar-item-with-menu'
 import { ListData } from './lists-sidebar/types'
+import * as searchResultUtils from './search-results/util'
 
 export interface Props extends DashboardDependencies {}
 
@@ -134,6 +135,9 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <SearchResultsContainer
                 {...this.state.searchResults}
+                areAllNotesShown={searchResultUtils.areAllNotesShown(
+                    this.state.searchResults,
+                )}
                 onPageNotesSortSelection={(day, pageId) => (sortingFn) =>
                     this.processEvent('setPageNotesSort', {
                         day,
@@ -147,9 +151,7 @@ export class DashboardContainer extends StatefulUIElement<
                         noteType,
                     })}
                 onShowAllNotesClick={() =>
-                    this.processEvent('setAllNotesShown', {
-                        areShown: !this.state.searchResults.areAllNotesShown,
-                    })
+                    this.processEvent('setAllNotesShown', null)
                 }
                 onNotesSearchSwitch={() =>
                     this.processEvent('setSearchType', { searchType: 'notes' })
