@@ -9,11 +9,12 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { DatePicker } from './components/'
+import DatePicker, {
+    DateRangeSelectionProps,
+} from 'src/overview/search-bar/components/DateRangeSelection'
 
 import { SelectedState } from '../../types'
-import { Props as DateRangeSelectionProps } from 'src/overview/search-bar/components/DateRangeSelection'
-import { FilterPickerProps } from './components/types'
+import { FilterPickerProps } from './types'
 import { SearchFilterLabel } from '../types'
 
 const windowWidth: number = window.innerWidth
