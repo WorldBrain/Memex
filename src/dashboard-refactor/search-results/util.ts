@@ -1,3 +1,5 @@
+import moment from 'moment'
+
 import {
     StandardSearchResponse,
     AnnotationsSearchResponse,
@@ -16,6 +18,14 @@ import {
     RootState,
 } from './types'
 import { Annotation } from 'src/annotations/types'
+
+export const formatDayGroupTime = (day: number) =>
+    moment(day).calendar(null, {
+        sameDay: '[Today]',
+        lastDay: '[Yesterday]',
+        lastWeek: '[Last] dddd',
+        sameElse: 'dddd, DD MMMM, YYYY',
+    })
 
 export const initNormalizedState = <T>(): NormalizedState<T> => ({
     allIds: [],
@@ -132,6 +142,7 @@ export const annotationSearchResultToState: SearchResultToState = (
     ) as any
 
     for (const [day, annotsByPageUrl] of dayEntries) {
+        const dayNumber = +day // Make sure to cast to `number`, as Object.entries will auto-cast it to a `string`
         const pageResults = initNormalizedState<PageResult>()
 
         for (const [pageUrl, annotations] of Object.entries(annotsByPageUrl)) {
@@ -151,8 +162,8 @@ export const annotationSearchResultToState: SearchResultToState = (
             }
         }
 
-        resultState[day] = {
-            day,
+        resultState[dayNumber] = {
+            day: dayNumber,
             pages: pageResults,
         }
     }

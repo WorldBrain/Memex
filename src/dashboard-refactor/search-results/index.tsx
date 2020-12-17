@@ -23,7 +23,7 @@ import ExpandAllNotes from './components/expand-all-notes'
 import DayResultGroup from './components/day-result-group'
 import PageResult from './components/page-result'
 import NoteResult from './components/note-result'
-import { bindFunctionalProps } from './util'
+import { bindFunctionalProps, formatDayGroupTime } from './util'
 import NotesTypeDropdownMenu from './components/notes-type-dropdown-menu'
 import { SortingDropdownMenuBtn } from 'src/sidebar/annotations-sidebar/components/SortingDropdownMenu'
 import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
@@ -32,8 +32,8 @@ import {
     AnnotationCreateEventProps,
 } from 'src/annotations/components/AnnotationCreate'
 
-// TODO: figure out what old logic was doing
-const timestampToString = (timestamp: number) => timestamp.toString()
+const timestampToString = (timestamp: number) =>
+    timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
 
 export type Props = RootState &
     Pick<
