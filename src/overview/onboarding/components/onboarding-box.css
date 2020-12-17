@@ -355,28 +355,35 @@
     justify-content: center;
     align-items: center;
     flex-direction: row;
-    margin-bottom: 40px;
+    margin: 40px 0;
 }
 
 .shortcutBox {
     display: flex;
+    border-radius: 5px;
+    box-shadow: 0 2px 3px 2px #e0e0e0;
+    margin: 20px;
+    flex-direction: column;
+    padding: 30px;
     justify-content: center;
     align-items: center;
+    width: 350px;
+    height: 250px;
 }
 
 .shortcutDescriptionBox {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
-    margin-right: 20px;
     flex-direction: column;
 }
 
 .shortcutDescription {
     font-size: 20px;
-    text-align: right;
+    text-align: center;
     width: 100%;
     margin-bottom: 15px;
+    font-weight: bold;
 }
 
 .shortcutNameBox {
@@ -389,9 +396,46 @@
 
 .shortcutName {
     color: #5cd9a6;
-    font-weight: bold;
+    font-weight: 400;
     font-size: 20px;
-    text-align: left;
-    margin-bottom: 15px;
+    text-align: center;
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.keyboardButton {
+    padding: 5px 15px;
+    color: #3a2f45;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    vertical-align: middle;
+    margin: 10px;
+    border-radius: 5px;
+    background: linear-gradient(145deg, #e6e6e6, #fff);
+    box-shadow: 3px 3px 7px #d9d9d9, -3px -3px 7px #fff;
+}
+
+.macOptionIcon {
+    width: auto;
+    height: 24px;
+    padding: 4px;
+    margin-left: 5px;
+}
+
+.tryOutButton {
+    & div {
+        width: 150px;
+        height: 50px;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+    }
+
+    & span {
+        font-size: 20px;
+    }
 }
