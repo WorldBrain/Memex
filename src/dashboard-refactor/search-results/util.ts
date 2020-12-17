@@ -108,6 +108,7 @@ const annotationToNoteData = (
     displayTime:
         annotation.lastEdited?.getTime() ?? annotation.createdWhen.getTime(),
     isEditing: false,
+    isEdited: annotation.lastEdited != null,
     editNoteForm: {
         inputValue: annotation.comment ?? '',
         tags: annotation.tags ?? [],

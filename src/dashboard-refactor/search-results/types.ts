@@ -90,6 +90,7 @@ export interface NoteData {
     tags: string[]
     comment?: string
     highlight?: string
+    isEdited?: boolean
     displayTime: number
 }
 

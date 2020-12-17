@@ -97,7 +97,14 @@ export default class NoteResultView extends PureComponent<Props> {
                     </NoteContentBox>
 
                     <ItemBoxBottom
-                        creationInfo={{ createdWhen: this.props.displayTime }}
+                        creationInfo={{
+                            createdWhen: this.props.isEdited
+                                ? undefined
+                                : this.props.displayTime,
+                            lastEdited: this.props.isEdited
+                                ? this.props.displayTime
+                                : undefined,
+                        }}
                         actions={[
                             {
                                 key: 'copy-paste-note-btn',

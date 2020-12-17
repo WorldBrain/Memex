@@ -27,6 +27,7 @@ const noteDataToSearchRes = (
     tags: string[] = [],
 ): Annotation => ({
     createdWhen: new Date(note.displayTime),
+    lastEdited: note.isEdited ? new Date(note.displayTime) : undefined,
     pageUrl: page.normalizedUrl,
     comment: note.comment,
     body: note.highlight,
@@ -75,6 +76,7 @@ export const NOTE_1: NoteData = {
     pageUrl: PAGE_1.normalizedUrl,
     displayTime: new Date('2020-11-26T01:05').getTime(),
     comment: 'Test webpage internet javascript',
+    isEdited: true,
     tags: [],
 }
 
@@ -92,6 +94,7 @@ export const NOTE_3: NoteData = {
     pageUrl: PAGE_1.normalizedUrl,
     displayTime: new Date('2020-11-27T18:05').getTime(),
     comment: 'Test webpage internet javascript deer',
+    isEdited: true,
     tags: [],
 }
 
