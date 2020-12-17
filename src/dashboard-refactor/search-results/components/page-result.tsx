@@ -74,6 +74,13 @@ export default class PageResultView extends PureComponent<Props> {
         return (
             <ItemBox>
                 <StyledPageResult>
+                    <FavIconBox>
+                        {this.props.favIconURI ? (
+                            <FavIconImg src={this.props.favIconURI} />
+                        ) : (
+                            <FavIconPlaceholder />
+                        )}
+                    </FavIconBox>
                     <PageContentBox>
                         <PageTitle>{this.props.fullTitle}</PageTitle>
                         <PageUrl>{this.props.fullUrl}</PageUrl>
@@ -143,6 +150,15 @@ const ModalContainer = styled.div``
 const StyledPageResult = styled.div`
     display: flex;
 `
+
+const FavIconBox = styled.div``
+const FavIconPlaceholder = styled.div`
+    width: 25px;
+    height: 25px;
+    border: 1px solid #efefef;
+    border-radius: 30px;
+`
+const FavIconImg = styled.img``
 
 const PageContentBox = styled.div``
 

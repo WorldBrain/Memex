@@ -94,7 +94,10 @@ export interface NoteData {
     displayTime: number
 }
 
-export type PageData = Pick<PipelineRes, 'fullUrl' | 'fullTitle' | 'tags'> & {
+export type PageData = Pick<
+    PipelineRes,
+    'fullUrl' | 'fullTitle' | 'tags' | 'favIconURI'
+> & {
     normalizedUrl: string
     lists: string[]
     displayTime: number
