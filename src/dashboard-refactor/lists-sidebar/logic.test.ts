@@ -308,4 +308,139 @@ describe('Dashboard search results logic', () => {
             searchResults.state.listsSidebar.localLists.listIds.length,
         ).toEqual(1)
     })
+
+    it('should be able to cancel list deletion', async ({ device }) => {
+        const { searchResults } = await setupTest(device)
+        const listName = 'testList'
+
+        await searchResults.processEvent('setAddListInputValue', {
+            value: listName,
+        })
+        await searchResults.processEvent('addNewList', null)
+
+        const listId = +Object.keys(
+            searchResults.state.listsSidebar.listData,
+        )[0]
+
+        expect(
+            await device.storageManager
+                .collection('customLists')
+                .findOneObject({ id: listId }),
+        ).toEqual(
+            expect.objectContaining({
+                id: listId,
+                name: listName,
+            }),
+        )
+        expect(
+            searchResults.state.listsSidebar.localLists.listIds.includes(
+                listId,
+            ),
+        ).toEqual(true)
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual({
+            id: listId,
+            name: listName,
+        })
+
+        expect(searchResults.state.listsSidebar.deletingListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setDeletingListId', { listId })
+        expect(searchResults.state.listsSidebar.deletingListId).toEqual(listId)
+        await searchResults.processEvent('cancelListDelete', null)
+        expect(searchResults.state.listsSidebar.deletingListId).toEqual(
+            undefined,
+        )
+
+        expect(
+            await device.storageManager
+                .collection('customLists')
+                .findOneObject({ id: listId }),
+        ).toEqual(
+            expect.objectContaining({
+                id: listId,
+                name: listName,
+            }),
+        )
+        expect(
+            searchResults.state.listsSidebar.localLists.listIds.includes(
+                listId,
+            ),
+        ).toEqual(true)
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual({
+            id: listId,
+            name: listName,
+        })
+    })
+
+    it('should be able to confirm list deletion', async ({ device }) => {
+        const { searchResults } = await setupTest(device)
+        const listName = 'testList'
+
+        await searchResults.processEvent('setAddListInputValue', {
+            value: listName,
+        })
+        await searchResults.processEvent('addNewList', null)
+
+        const listId = +Object.keys(
+            searchResults.state.listsSidebar.listData,
+        )[0]
+
+        expect(
+            await device.storageManager
+                .collection('customLists')
+                .findOneObject({ id: listId }),
+        ).toEqual(
+            expect.objectContaining({
+                id: listId,
+                name: listName,
+            }),
+        )
+        expect(
+            searchResults.state.listsSidebar.localLists.listIds.includes(
+                listId,
+            ),
+        ).toEqual(true)
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual({
+            id: listId,
+            name: listName,
+        })
+
+        expect(searchResults.state.listsSidebar.listDeleteState).toEqual(
+            'pristine',
+        )
+        expect(searchResults.state.listsSidebar.deletingListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setDeletingListId', { listId })
+        expect(searchResults.state.listsSidebar.deletingListId).toEqual(listId)
+
+        const deleteP = searchResults.processEvent('confirmListDelete', null)
+        expect(searchResults.state.listsSidebar.listDeleteState).toEqual(
+            'running',
+        )
+
+        await deleteP
+
+        expect(searchResults.state.listsSidebar.listDeleteState).toEqual(
+            'success',
+        )
+        expect(searchResults.state.listsSidebar.deletingListId).toEqual(
+            undefined,
+        )
+
+        expect(
+            await device.storageManager
+                .collection('customLists')
+                .findOneObject({ id: listId }),
+        ).toEqual(null)
+        expect(
+            searchResults.state.listsSidebar.localLists.listIds.includes(
+                listId,
+            ),
+        ).toEqual(false)
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual(
+            undefined,
+        )
+    })
 })

@@ -9,6 +9,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { ListsSidebarItemWithMenuProps } from './lists-sidebar/components/lists-sidebar-item-with-menu'
 import { ListData } from './lists-sidebar/types'
 import * as searchResultUtils from './search-results/util'
+import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 
 export interface Props extends DashboardDependencies {}
 
@@ -51,6 +52,8 @@ export class DashboardContainer extends StatefulUIElement<
             this.processEvent('setEditingListId', { listId: list.id }),
         onMoreActionClick: () =>
             this.processEvent('setShowMoreMenuListId', { listId: list.id }),
+        onDeleteClick: () =>
+            this.processEvent('setDeletingListId', { listId: list.id }),
     })
 
     private renderListsSidebar() {
@@ -307,11 +310,29 @@ export class DashboardContainer extends StatefulUIElement<
         )
     }
 
+    private renderModals() {
+        if (this.state.listsSidebar.deletingListId) {
+            return (
+                <DeleteConfirmModal
+                    isShown
+                    message="Delete collection? This does not delete the pages in it"
+                    onClose={() => this.processEvent('cancelListDelete', null)}
+                    deleteDocs={() =>
+                        this.processEvent('confirmListDelete', null)
+                    }
+                />
+            )
+        }
+
+        return null
+    }
+
     render() {
         return (
             <>
                 {this.renderListsSidebar()}
                 {this.renderSearchResults()}
+                {this.renderModals()}
             </>
         )
     }

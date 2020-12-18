@@ -63,6 +63,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
             listsSidebar: {
                 newListCreateState: 'pristine',
+                listDeleteState: 'pristine',
                 isSidebarPeeking: false,
                 isSidebarLocked: false,
                 searchQuery: '',
@@ -1166,6 +1167,57 @@ export class DashboardLogic extends UILogic<State, Events> {
                 followedLists: { listIds: { $set: listIds } },
             },
         })
+    }
+
+    setDeletingListId: EventHandler<'setDeletingListId'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                deletingListId: { $set: event.listId },
+            },
+        })
+    }
+
+    cancelListDelete: EventHandler<'cancelListDelete'> = async ({ event }) => {
+        this.emitMutation({
+            listsSidebar: {
+                deletingListId: { $set: undefined },
+            },
+        })
+    }
+
+    confirmListDelete: EventHandler<'confirmListDelete'> = async ({
+        event,
+        previousState,
+    }) => {
+        const listId = previousState.listsSidebar.deletingListId
+        // TODO: support for non-local lists
+        const localListIds = previousState.listsSidebar.localLists.listIds.filter(
+            (id) => id !== listId,
+        )
+
+        if (!listId) {
+            throw new Error('No list ID is set for deletion')
+        }
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listsSidebar: { listDeleteState: { $set: taskState } },
+            }),
+            async () => {
+                await this.options.listsBG.removeList({ id: listId })
+
+                this.emitMutation({
+                    listsSidebar: {
+                        deletingListId: { $set: undefined },
+                        localLists: { listIds: { $set: localListIds } },
+                        listData: { $unset: [listId] },
+                    },
+                })
+            },
+        )
     }
     /* END - lists sidebar event handlers */
 
