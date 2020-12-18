@@ -1,5 +1,5 @@
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
-import { setupTest } from '../logic.test.util'
+import { setupTest, setPageSearchResult } from '../logic.test.util'
 import * as DATA from '../logic.test.data'
 
 describe('Dashboard search results logic', () => {
@@ -66,13 +66,43 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.selectedListId).toEqual(1)
     })
 
+    it('should be able set list name to edit', async ({ device }) => {
+        const { searchResults } = await setupTest(device)
+
+        expect(searchResults.state.listsSidebar.editingListName).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setEditingListName', {
+            value: 'test',
+        })
+        expect(searchResults.state.listsSidebar.editingListName).toEqual('test')
+        await searchResults.processEvent('setEditingListName', {
+            value: 'tester',
+        })
+
+        expect(searchResults.state.listsSidebar.editingListName).toEqual(
+            'tester',
+        )
+    })
+
     it("should be able set lists' edit state", async ({ device }) => {
         const { searchResults } = await setupTest(device)
+
+        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setShowMoreMenuListId', {
+            listId: 123,
+        })
+        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
 
         expect(searchResults.state.listsSidebar.editingListId).toEqual(
             undefined,
         )
         await searchResults.processEvent('setEditingListId', { listId: 123 })
+        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(
+            undefined,
+        )
         expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
         await searchResults.processEvent('setEditingListId', { listId: 123 })
         expect(searchResults.state.listsSidebar.editingListId).toEqual(

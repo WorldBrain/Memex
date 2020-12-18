@@ -6,6 +6,8 @@ export interface ListsSidebarItemCommonProps {
     isEditing?: boolean
     newItemsCount?: number
     nameHighlightIndices?: ListNameHighlightIndices
+    onEditListName?: React.KeyboardEventHandler<HTMLInputElement>
+    editingListName?: string
 }
 
 // this type is differentiated from the type which governs the object passed down the tree to its parent:

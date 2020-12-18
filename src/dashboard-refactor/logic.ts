@@ -1091,6 +1091,14 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setEditingListName: EventHandler<'setEditingListName'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: { editingListName: { $set: event.value } },
+        })
+    }
+
     setEditingListId: EventHandler<'setEditingListId'> = async ({
         event,
         previousState,
@@ -1100,8 +1108,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                 ? undefined
                 : event.listId
 
+        const editingListName =
+            previousState.listsSidebar.listData[listIdToSet]?.name
+
         this.emitMutation({
-            listsSidebar: { editingListId: { $set: listIdToSet } },
+            listsSidebar: {
+                editingListName: { $set: editingListName },
+                editingListId: { $set: listIdToSet },
+                showMoreMenuListId: { $set: undefined },
+            },
         })
     }
 

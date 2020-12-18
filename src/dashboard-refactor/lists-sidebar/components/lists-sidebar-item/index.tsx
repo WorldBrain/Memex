@@ -75,6 +75,8 @@ const ListTitle = styled.p<Props>`
     max-width: 100%;
 `
 
+const EditableListTitle = styled.input<Props>``
+
 const NewItemsCount = styled.div`
     width: 30px;
     height: 14px;
@@ -161,7 +163,10 @@ export default class ListsSidebarItem extends PureComponent<Props> {
         return (
             <Container className={className} isSelected={isSelected}>
                 <Margin left={`${titleLeftMargin}px`}>
-                    <ListTitle {...this.props}>{this.props.name}</ListTitle>
+                    <EditableListTitle
+                        onChange={this.props.onEditListName}
+                        value={this.props.editingListName}
+                    />
                 </Margin>
             </Container>
         )

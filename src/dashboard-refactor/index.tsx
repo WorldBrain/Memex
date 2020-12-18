@@ -42,8 +42,15 @@ export class DashboardContainer extends StatefulUIElement<
             onSelection: (listId) =>
                 this.processEvent('setSelectedListId', { listId }),
         },
-        onMoreActionClick: (listId) =>
-            this.processEvent('setShowMoreMenuListId', { listId }),
+        editingListName: this.state.listsSidebar.editingListName,
+        onEditListName: (e) =>
+            this.processEvent('setEditingListName', {
+                value: (e.target as HTMLInputElement).value,
+            }),
+        onRenameClick: () =>
+            this.processEvent('setEditingListId', { listId: list.id }),
+        onMoreActionClick: () =>
+            this.processEvent('setShowMoreMenuListId', { listId: list.id }),
     })
 
     private renderListsSidebar() {

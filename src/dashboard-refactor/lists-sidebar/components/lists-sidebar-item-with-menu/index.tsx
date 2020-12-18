@@ -68,7 +68,7 @@ export interface ListsSidebarItemWithMenuProps
     onShareClick?: React.MouseEventHandler
     selectedState: SelectedState
     dropReceivingState?: DropReceivingState
-    onMoreActionClick?: (id: number) => void
+    onMoreActionClick?: (listId: number) => void
 }
 
 export default class ListsSidebarItemWithMenu extends PureComponent<
