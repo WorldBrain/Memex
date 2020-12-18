@@ -43,6 +43,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
                 searchType: 'pages',
                 searchState: 'pristine',
+                noteDeleteState: 'pristine',
+                pageDeleteState: 'pristine',
                 paginationState: 'pristine',
                 noteUpdateState: 'pristine',
                 newNoteCreateState: 'pristine',
@@ -578,6 +580,75 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             })
         }
+    }
+
+    setDeletingNoteId: EventHandler<'setDeletingNoteId'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: { deletingNoteArgs: { $set: event } },
+        })
+    }
+
+    cancelNoteDelete: EventHandler<'cancelNoteDelete'> = async ({}) => {
+        this.emitMutation({
+            searchResults: {
+                deletingNoteArgs: { $set: undefined },
+            },
+        })
+    }
+
+    confirmNoteDelete: EventHandler<'confirmNoteDelete'> = async ({
+        event,
+        previousState: { searchResults },
+    }) => {
+        const { noteId, pageId, day } = searchResults.deletingNoteArgs
+        const pageResult = searchResults.results[day].pages.byId[pageId]
+        const pageResultNoteIds = pageResult.noteIds[
+            pageResult.notesType
+        ].filter((id) => id !== noteId)
+        const notesAllIds = searchResults.noteData.allIds.filter(
+            (id) => id !== noteId,
+        )
+
+        if (!noteId) {
+            throw new Error('No note ID is set for deletion')
+        }
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                searchResults: { noteDeleteState: { $set: taskState } },
+            }),
+            async () => {
+                await this.options.annotationsBG.deleteAnnotation(noteId)
+
+                this.emitMutation({
+                    searchResults: {
+                        deletingNoteArgs: { $set: undefined },
+                        results: {
+                            [day]: {
+                                pages: {
+                                    byId: {
+                                        [pageId]: {
+                                            noteIds: {
+                                                [pageResult.notesType]: {
+                                                    $set: pageResultNoteIds,
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        noteData: {
+                            allIds: { $set: notesAllIds },
+                            byId: { $unset: [noteId] },
+                        },
+                    },
+                })
+            },
+        )
     }
 
     setNoteEditing: EventHandler<'setNoteEditing'> = ({ event }) => {

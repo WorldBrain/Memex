@@ -1174,6 +1174,137 @@ describe('Dashboard search results logic', () => {
                     }),
                 )
             })
+
+            it('should be able to cancel note deletion', async ({ device }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                const noteId = DATA.NOTE_1.url
+
+                expect(
+                    await device.storageManager
+                        .collection('annotations')
+                        .findOneObject({ url: noteId }),
+                ).toEqual(
+                    expect.objectContaining({
+                        url: noteId,
+                        comment: DATA.NOTE_1.comment,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.deletingNoteArgs,
+                ).toEqual(undefined)
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        ...DATA.NOTE_1,
+                    }),
+                )
+
+                await searchResults.processEvent('setDeletingNoteId', {
+                    noteId,
+                    pageId: DATA.PAGE_1.normalizedUrl,
+                    day: -1,
+                })
+                expect(
+                    searchResults.state.searchResults.deletingNoteArgs,
+                ).toEqual({
+                    noteId,
+                    pageId: DATA.PAGE_1.normalizedUrl,
+                    day: -1,
+                })
+
+                await searchResults.processEvent('cancelNoteDelete', null)
+
+                expect(
+                    await device.storageManager
+                        .collection('annotations')
+                        .findOneObject({ url: noteId }),
+                ).toEqual(
+                    expect.objectContaining({
+                        url: noteId,
+                        comment: DATA.NOTE_1.comment,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.deletingNoteArgs,
+                ).toEqual(undefined)
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        ...DATA.NOTE_1,
+                    }),
+                )
+            })
+
+            it('should be able to confirm note deletion', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                const noteId = DATA.NOTE_1.url
+
+                expect(
+                    await device.storageManager
+                        .collection('annotations')
+                        .findOneObject({ url: noteId }),
+                ).toEqual(
+                    expect.objectContaining({
+                        url: noteId,
+                        comment: DATA.NOTE_1.comment,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.deletingNoteArgs,
+                ).toEqual(undefined)
+                expect(
+                    searchResults.state.searchResults.noteData.allIds.includes(
+                        noteId,
+                    ),
+                ).toEqual(true)
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        ...DATA.NOTE_1,
+                    }),
+                )
+
+                await searchResults.processEvent('setDeletingNoteId', {
+                    noteId,
+                    pageId: DATA.PAGE_1.normalizedUrl,
+                    day: -1,
+                })
+                expect(
+                    searchResults.state.searchResults.deletingNoteArgs,
+                ).toEqual({
+                    noteId,
+                    pageId: DATA.PAGE_1.normalizedUrl,
+                    day: -1,
+                })
+
+                await searchResults.processEvent('confirmNoteDelete', null)
+
+                expect(
+                    await device.storageManager
+                        .collection('annotations')
+                        .findOneObject({ url: noteId }),
+                ).toEqual(null)
+                expect(
+                    searchResults.state.searchResults.deletingNoteArgs,
+                ).toEqual(undefined)
+                expect(
+                    searchResults.state.searchResults.noteData.allIds.includes(
+                        noteId,
+                    ),
+                ).toEqual(false)
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(undefined)
+            })
         })
     })
 })

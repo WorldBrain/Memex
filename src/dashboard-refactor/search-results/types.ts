@@ -135,6 +135,8 @@ export interface PageResultsByDay {
 
 export interface RootState {
     searchType: SearchType
+    deletingPageId?: string
+    deletingNoteArgs?: PageEventArgs & NoteEventArgs
 
     /** Holds page data specific to each page occurence on a specific day. */
     results: { [day: number]: PageResultsByDay }
@@ -146,6 +148,8 @@ export interface RootState {
 
     // Async operation states
     searchState: TaskState
+    noteDeleteState: TaskState
+    pageDeleteState: TaskState
     paginationState: TaskState
     noteUpdateState: TaskState
     newNoteCreateState: TaskState
@@ -176,6 +180,9 @@ export type Events = UIEvent<{
     }
     setPageBookmark: { id: string; isBookmarked: boolean }
     setPageDeleteModalShown: { id: string; isShown: boolean }
+    setDeletingPageId: { id: string }
+    confirmPageDelete: null
+    cancelPageDelete: null
 
     // Page result state mutations (*specific to each* occurence of the page in different days)
     setPageCopyPasterShown: PageEventArgs & { isShown: boolean }
@@ -203,6 +210,9 @@ export type Events = UIEvent<{
     setNoteBookmark: NoteEventArgs & { isBookmarked: boolean }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
+    setDeletingNoteId: NoteEventArgs & PageEventArgs
+    confirmNoteDelete: null
+    cancelNoteDelete: null
 
     // Note edit form state mutations
     setNoteEditCommentValue: NoteEventArgs & { value: string }

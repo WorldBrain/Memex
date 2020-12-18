@@ -12,18 +12,51 @@ import {
     AnnotationsSearchResponse,
 } from 'src/search/background/types'
 
-type DataSeeder = (logic: TestLogicContainer<RootState, Events>) => void
-type DataSeederCreator = (
-    data?: StandardSearchResponse | AnnotationsSearchResponse,
-) => DataSeeder
+type DataSeeder = (
+    logic: TestLogicContainer<RootState, Events>,
+    device: UILogicTestDevice,
+) => Promise<void>
+type DataSeederCreator<
+    T = StandardSearchResponse | AnnotationsSearchResponse
+> = (data?: T) => DataSeeder
 
 export const setPageSearchResult: DataSeederCreator = (
     result = DATA.PAGE_SEARCH_RESULT_1,
-) => (logic) => logic.processEvent('setPageSearchResult', { result })
+) => async (logic, { storageManager }) => {
+    for (const page of result.docs) {
+        await storageManager.collection('pages').createObject({
+            url: page.url,
+            title: page.title,
+        })
+
+        for (const annot of page.annotations) {
+            await storageManager.collection('annotations').createObject({
+                ...annot,
+            })
+        }
+
+        for (const tag of page.tags) {
+            await storageManager.collection('tags').createObject({
+                name: tag,
+                url: page.url,
+            })
+        }
+
+        if (page.hasBookmark) {
+            await storageManager.collection('bookmarks').createObject({
+                url: page.url,
+                time: Date.now(),
+            })
+        }
+    }
+    logic.processEvent('setPageSearchResult', { result })
+}
 
 export const setNoteSearchResult: DataSeederCreator = (
     result: any = DATA.ANNOT_SEARCH_RESULT_2,
-) => (logic) => logic.processEvent('setAnnotationSearchResult', { result })
+) => async (logic) => {
+    logic.processEvent('setAnnotationSearchResult', { result })
+}
 
 export async function setupTest(
     device: UILogicTestDevice,
@@ -42,7 +75,7 @@ export async function setupTest(
     const searchResults = device.createElement<RootState, Events>(logic)
 
     if (args.seedData) {
-        args.seedData(searchResults)
+        await args.seedData(searchResults, device)
     }
 
     return { searchResults, logic }

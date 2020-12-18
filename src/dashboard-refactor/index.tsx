@@ -324,6 +324,32 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
+        if (this.state.searchResults.deletingNoteArgs) {
+            return (
+                <DeleteConfirmModal
+                    isShown
+                    message="Delete note?"
+                    onClose={() => this.processEvent('cancelNoteDelete', null)}
+                    deleteDocs={() =>
+                        this.processEvent('confirmNoteDelete', null)
+                    }
+                />
+            )
+        }
+
+        if (this.state.searchResults.deletingPageId) {
+            return (
+                <DeleteConfirmModal
+                    isShown
+                    message="Delete page and related notes?"
+                    onClose={() => this.processEvent('cancelPageDelete', null)}
+                    deleteDocs={() =>
+                        this.processEvent('confirmPageDelete', null)
+                    }
+                />
+            )
+        }
+
         return null
     }
 
