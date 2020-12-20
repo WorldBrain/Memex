@@ -245,22 +245,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageDeleteModalShown: EventHandler<'setPageDeleteModalShown'> = ({
-        event,
-    }) => {
-        this.emitMutation({
-            searchResults: {
-                pageData: {
-                    byId: {
-                        [event.id]: {
-                            isDeleteModalShown: { $set: event.isShown },
-                        },
-                    },
-                },
-            },
-        })
-    }
-
     setDeletingPageArgs: EventHandler<'setDeletingPageArgs'> = async ({
         event,
     }) => {
@@ -749,22 +733,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     byId: {
                         [event.noteId]: {
                             isCopyPasterShown: { $set: event.isShown },
-                        },
-                    },
-                },
-            },
-        })
-    }
-
-    setNoteDeleteModalShown: EventHandler<'setNoteDeleteModalShown'> = ({
-        event,
-    }) => {
-        this.emitMutation({
-            searchResults: {
-                noteData: {
-                    byId: {
-                        [event.noteId]: {
-                            isDeleteModalShown: { $set: event.isShown },
                         },
                     },
                 },

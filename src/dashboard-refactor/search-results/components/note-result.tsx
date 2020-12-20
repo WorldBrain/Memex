@@ -79,14 +79,6 @@ export default class NoteResultView extends PureComponent<Props> {
         return null
     }
 
-    private renderModals() {
-        if (this.props.isDeleteModalShown) {
-            return <p>TODO: DELETE MODAL!!!!</p>
-        }
-
-        return null
-    }
-
     render() {
         return (
             <ItemBox>
@@ -146,14 +138,12 @@ export default class NoteResultView extends PureComponent<Props> {
                     />
                 </StyledNoteResult>
                 <PopoutContainer>{this.renderPopouts()}</PopoutContainer>
-                <ModalContainer>{this.renderModals()}</ModalContainer>
             </ItemBox>
         )
     }
 }
 
 const PopoutContainer = styled.div``
-const ModalContainer = styled.div``
 
 const StyledNoteResult = styled.div`
     display: flex;

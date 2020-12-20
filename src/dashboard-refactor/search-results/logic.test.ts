@@ -175,34 +175,6 @@ describe('Dashboard search results logic', () => {
             ).toEqual([DATA.LISTS_1[1].name, DATA.LISTS_1[2].name])
         })
 
-        it('should be able to toggle page delete modal', async ({ device }) => {
-            const { searchResults } = await setupTest(device, {
-                seedData: setPageSearchResult(),
-            })
-            const pageId = DATA.PAGE_2.normalizedUrl
-
-            expect(
-                searchResults.state.searchResults.pageData.byId[pageId]
-                    .isDeleteModalShown,
-            ).toBe(false)
-            await searchResults.processEvent('setPageDeleteModalShown', {
-                id: pageId,
-                isShown: true,
-            })
-            expect(
-                searchResults.state.searchResults.pageData.byId[pageId]
-                    .isDeleteModalShown,
-            ).toBe(true)
-            await searchResults.processEvent('setPageDeleteModalShown', {
-                id: pageId,
-                isShown: false,
-            })
-            expect(
-                searchResults.state.searchResults.pageData.byId[pageId]
-                    .isDeleteModalShown,
-            ).toBe(false)
-        })
-
         it('should be able to cancel page deletion', async ({ device }) => {
             const { searchResults } = await setupTest(device, {
                 seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
@@ -998,38 +970,6 @@ describe('Dashboard search results logic', () => {
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .isCopyPasterShown,
-                ).toEqual(false)
-            })
-
-            it('should be able to toggle note delete modal shown state', async ({
-                device,
-            }) => {
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                })
-                const noteId = DATA.NOTE_2.url
-
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId]
-                        .isDeleteModalShown,
-                ).toEqual(false)
-
-                await searchResults.processEvent('setNoteDeleteModalShown', {
-                    noteId,
-                    isShown: true,
-                })
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId]
-                        .isDeleteModalShown,
-                ).toEqual(true)
-
-                await searchResults.processEvent('setNoteDeleteModalShown', {
-                    noteId,
-                    isShown: false,
-                })
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId]
-                        .isDeleteModalShown,
                 ).toEqual(false)
             })
 

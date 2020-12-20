@@ -63,13 +63,15 @@ export type Props = RootState &
     }
 
 export default class SearchResultsContainer extends PureComponent<Props> {
-    private renderNoteResult = (noteId: string) => {
+    private renderNoteResult = (day: number, pageId: string) => (
+        noteId: string,
+    ) => {
         const noteData = this.props.noteData.byId[noteId]
 
         const interactionProps = bindFunctionalProps<
             NoteInteractionAugdProps,
             NoteInteractionProps
-        >(this.props.noteInteractionProps, noteId)
+        >(this.props.noteInteractionProps, noteId, day, pageId)
 
         const pickerProps = bindFunctionalProps<
             NotePickerAugdProps,
@@ -163,7 +165,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     tags={newNoteForm.tags}
                     {...boundAnnotCreateProps}
                 />
-                {noteIds[notesType].map(this.renderNoteResult)}
+                {noteIds[notesType].map(
+                    this.renderNoteResult(day, normalizedUrl),
+                )}
             </>
         )
     }

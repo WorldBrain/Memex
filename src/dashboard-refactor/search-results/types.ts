@@ -44,6 +44,8 @@ export type NoteInteractionProps = Omit<
 export type NoteInteractionAugdProps = {
     [Key in keyof NoteInteractionProps]: (
         noteId: string,
+        day: number,
+        pageId: string,
     ) => InteractionProps[Key]
 }
 
@@ -102,7 +104,6 @@ export type PageData = Pick<
     lists: string[]
     displayTime: number
     isBookmarked: boolean
-    isDeleteModalShown: boolean
 }
 
 export interface NoteResult {
@@ -111,7 +112,6 @@ export interface NoteResult {
     areRepliesShown: boolean
     isTagPickerShown: boolean
     isCopyPasterShown: boolean
-    isDeleteModalShown: boolean
     editNoteForm: NoteFormState
 }
 
@@ -179,7 +179,6 @@ export type Events = UIEvent<{
         skipPageIndexing?: boolean
     }
     setPageBookmark: { id: string; isBookmarked: boolean }
-    setPageDeleteModalShown: { id: string; isShown: boolean }
     setDeletingPageArgs: PageEventArgs
     confirmPageDelete: null
     cancelPageDelete: null
@@ -203,7 +202,6 @@ export type Events = UIEvent<{
     }
 
     // Note result state mutations
-    setNoteDeleteModalShown: NoteEventArgs & { isShown: boolean }
     setNoteCopyPasterShown: NoteEventArgs & { isShown: boolean }
     setNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }

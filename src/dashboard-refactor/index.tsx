@@ -205,11 +205,9 @@ export class DashboardContainer extends StatefulUIElement<
                                 .pages.byId[pageId].isCopyPasterShown,
                         }),
                     onTrashBtnClick: (day, pageId) => () =>
-                        this.processEvent('setPageDeleteModalShown', {
-                            id: pageId,
-                            isShown: !this.state.searchResults.pageData.byId[
-                                pageId
-                            ].isDeleteModalShown,
+                        this.processEvent('setDeletingPageArgs', {
+                            day,
+                            pageId,
                         }),
                     onShareBtnClick: (day, pageId) => () => null, // TODO: figure out share btn
                 }}
@@ -288,12 +286,11 @@ export class DashboardContainer extends StatefulUIElement<
                                 noteId
                             ].areRepliesShown,
                         }),
-                    onTrashBtnClick: (noteId) => () =>
-                        this.processEvent('setNoteDeleteModalShown', {
+                    onTrashBtnClick: (noteId, day, pageId) => () =>
+                        this.processEvent('setDeletingNoteArgs', {
                             noteId,
-                            isShown: !this.state.searchResults.noteData.byId[
-                                noteId
-                            ].isDeleteModalShown,
+                            pageId,
+                            day,
                         }),
                     onCommentChange: (noteId) => (e) =>
                         this.processEvent('setNoteEditCommentValue', {

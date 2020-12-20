@@ -44,7 +44,6 @@ export const PAGE_1: PageData = {
     isBookmarked: false,
     fullTitle: 'Test page',
     displayTime: new Date('2020-11-26T01:00').getTime(),
-    isDeleteModalShown: false,
     lists: [],
     tags: [],
 }
@@ -55,7 +54,6 @@ export const PAGE_2: PageData = {
     isBookmarked: false,
     fullTitle: 'Memex ext is good',
     displayTime: new Date('2020-11-26T05:00').getTime(),
-    isDeleteModalShown: false,
     lists: [],
     tags: [],
 }
@@ -66,7 +64,6 @@ export const PAGE_3: PageData = {
     isBookmarked: false,
     fullTitle: 'Memex ext is a web extension',
     displayTime: new Date('2020-11-26T05:10').getTime(),
-    isDeleteModalShown: false,
     lists: [],
     tags: [],
 }

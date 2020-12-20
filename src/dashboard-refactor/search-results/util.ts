@@ -87,7 +87,6 @@ export const getInitialNoteResultState = (): NoteResult => ({
     areRepliesShown: false,
     isTagPickerShown: false,
     isCopyPasterShown: false,
-    isDeleteModalShown: false,
     editNoteForm: getInitialFormState(),
 })
 
@@ -95,7 +94,6 @@ const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
     tags: pageResult.tags,
     lists: pageResult.lists,
     fullUrl: pageResult.url,
-    isDeleteModalShown: false,
     fullTitle: pageResult.title,
     normalizedUrl: pageResult.url,
     displayTime: pageResult.displayTime,
@@ -114,7 +112,6 @@ const annotationToNoteData = (
     areRepliesShown: false,
     isTagPickerShown: false,
     isCopyPasterShown: false,
-    isDeleteModalShown: false,
     displayTime:
         annotation.lastEdited?.getTime() ?? annotation.createdWhen.getTime(),
     isEditing: false,

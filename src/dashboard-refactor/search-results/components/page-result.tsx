@@ -62,14 +62,6 @@ export default class PageResultView extends PureComponent<Props> {
         return null
     }
 
-    private renderModals() {
-        if (this.props.isDeleteModalShown) {
-            return <p>TODO: DELETE MODAL!!!!</p>
-        }
-
-        return null
-    }
-
     render() {
         return (
             <ItemBox>
@@ -138,14 +130,12 @@ export default class PageResultView extends PureComponent<Props> {
                     />
                 </StyledPageResult>
                 <PopoutContainer>{this.renderPopouts()}</PopoutContainer>
-                <ModalContainer>{this.renderModals()}</ModalContainer>
             </ItemBox>
         )
     }
 }
 
 const PopoutContainer = styled.div``
-const ModalContainer = styled.div``
 
 const StyledPageResult = styled.div`
     display: flex;
