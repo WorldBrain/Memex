@@ -261,6 +261,66 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setDeletingPageArgs: EventHandler<'setDeletingPageArgs'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: { deletingPageArgs: { $set: event } },
+        })
+    }
+
+    cancelPageDelete: EventHandler<'cancelPageDelete'> = async ({}) => {
+        this.emitMutation({
+            searchResults: {
+                deletingPageArgs: { $set: undefined },
+            },
+        })
+    }
+
+    confirmPageDelete: EventHandler<'confirmPageDelete'> = async ({
+        previousState: { searchResults },
+    }) => {
+        if (!searchResults.deletingPageArgs) {
+            throw new Error('No page ID is set for deletion')
+        }
+
+        const { pageId, day } = searchResults.deletingPageArgs
+        const pageAllIds = searchResults.pageData.allIds.filter(
+            (id) => id !== pageId,
+        )
+        const pageResultsAllIds = searchResults.results[
+            day
+        ].pages.allIds.filter((id) => id !== pageId)
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                searchResults: { pageDeleteState: { $set: taskState } },
+            }),
+            async () => {
+                await this.options.searchBG.delPages([pageId])
+
+                this.emitMutation({
+                    searchResults: {
+                        deletingPageArgs: { $set: undefined },
+                        results: {
+                            [day]: {
+                                pages: {
+                                    allIds: { $set: pageResultsAllIds },
+                                    byId: { $unset: [pageId] },
+                                },
+                            },
+                        },
+                        pageData: {
+                            byId: { $unset: [pageId] },
+                            allIds: { $set: pageAllIds },
+                        },
+                    },
+                })
+            },
+        )
+    }
+
     setPageCopyPasterShown: EventHandler<'setPageCopyPasterShown'> = ({
         event,
     }) => {
@@ -582,7 +642,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
-    setDeletingNoteId: EventHandler<'setDeletingNoteId'> = async ({
+    setDeletingNoteArgs: EventHandler<'setDeletingNoteArgs'> = async ({
         event,
     }) => {
         this.emitMutation({
@@ -599,9 +659,12 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     confirmNoteDelete: EventHandler<'confirmNoteDelete'> = async ({
-        event,
         previousState: { searchResults },
     }) => {
+        if (!searchResults.deletingNoteArgs) {
+            throw new Error('No note ID is set for deletion')
+        }
+
         const { noteId, pageId, day } = searchResults.deletingNoteArgs
         const pageResult = searchResults.results[day].pages.byId[pageId]
         const pageResultNoteIds = pageResult.noteIds[
@@ -610,10 +673,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         const notesAllIds = searchResults.noteData.allIds.filter(
             (id) => id !== noteId,
         )
-
-        if (!noteId) {
-            throw new Error('No note ID is set for deletion')
-        }
 
         await executeUITask(
             this,

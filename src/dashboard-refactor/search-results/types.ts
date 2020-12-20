@@ -135,7 +135,7 @@ export interface PageResultsByDay {
 
 export interface RootState {
     searchType: SearchType
-    deletingPageId?: string
+    deletingPageArgs?: PageEventArgs
     deletingNoteArgs?: PageEventArgs & NoteEventArgs
 
     /** Holds page data specific to each page occurence on a specific day. */
@@ -180,7 +180,7 @@ export type Events = UIEvent<{
     }
     setPageBookmark: { id: string; isBookmarked: boolean }
     setPageDeleteModalShown: { id: string; isShown: boolean }
-    setDeletingPageId: { id: string }
+    setDeletingPageArgs: PageEventArgs
     confirmPageDelete: null
     cancelPageDelete: null
 
@@ -210,7 +210,7 @@ export type Events = UIEvent<{
     setNoteBookmark: NoteEventArgs & { isBookmarked: boolean }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
-    setDeletingNoteId: NoteEventArgs & PageEventArgs
+    setDeletingNoteArgs: NoteEventArgs & PageEventArgs
     confirmNoteDelete: null
     cancelNoteDelete: null
 

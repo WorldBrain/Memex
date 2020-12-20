@@ -337,7 +337,7 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (this.state.searchResults.deletingPageId) {
+        if (this.state.searchResults.deletingPageArgs) {
             return (
                 <DeleteConfirmModal
                     isShown

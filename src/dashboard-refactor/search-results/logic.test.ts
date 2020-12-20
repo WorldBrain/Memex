@@ -202,6 +202,142 @@ describe('Dashboard search results logic', () => {
                     .isDeleteModalShown,
             ).toBe(false)
         })
+
+        it('should be able to cancel page deletion', async ({ device }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+            })
+            const pageId = DATA.PAGE_1.normalizedUrl
+            delete DATA.PAGE_1.fullUrl
+
+            expect(
+                await device.storageManager
+                    .collection('pages')
+                    .findOneObject({ url: pageId }),
+            ).toEqual(
+                expect.objectContaining({
+                    url: pageId,
+                    title: DATA.PAGE_1.fullTitle,
+                }),
+            )
+            expect(searchResults.state.searchResults.deletingPageArgs).toEqual(
+                undefined,
+            )
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId],
+            ).toEqual(
+                expect.objectContaining({
+                    ...DATA.PAGE_1,
+                }),
+            )
+
+            await searchResults.processEvent('setDeletingPageArgs', {
+                pageId,
+                day: -1,
+            })
+            expect(searchResults.state.searchResults.deletingPageArgs).toEqual({
+                pageId,
+                day: -1,
+            })
+
+            await searchResults.processEvent('cancelPageDelete', null)
+
+            expect(
+                await device.storageManager
+                    .collection('pages')
+                    .findOneObject({ url: pageId }),
+            ).toEqual(
+                expect.objectContaining({
+                    url: pageId,
+                    title: DATA.PAGE_1.fullTitle,
+                }),
+            )
+            expect(searchResults.state.searchResults.deletingPageArgs).toEqual(
+                undefined,
+            )
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId],
+            ).toEqual(
+                expect.objectContaining({
+                    ...DATA.PAGE_1,
+                }),
+            )
+        })
+
+        it('should be able to confirm page deletion', async ({ device }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+            })
+            const pageId = DATA.PAGE_1.normalizedUrl
+            delete DATA.PAGE_1.fullUrl
+
+            expect(
+                await device.storageManager
+                    .collection('pages')
+                    .findOneObject({ url: pageId }),
+            ).toEqual(
+                expect.objectContaining({
+                    url: pageId,
+                    title: DATA.PAGE_1.fullTitle,
+                }),
+            )
+            expect(searchResults.state.searchResults.deletingPageArgs).toEqual(
+                undefined,
+            )
+            expect(
+                searchResults.state.searchResults.pageData.allIds.includes(
+                    pageId,
+                ),
+            ).toEqual(true)
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId],
+            ).toEqual(
+                expect.objectContaining({
+                    ...DATA.PAGE_1,
+                }),
+            )
+
+            await searchResults.processEvent('setDeletingPageArgs', {
+                pageId,
+                day: -1,
+            })
+            expect(searchResults.state.searchResults.deletingPageArgs).toEqual({
+                pageId,
+                day: -1,
+            })
+
+            expect(searchResults.state.searchResults.pageDeleteState).toEqual(
+                'pristine',
+            )
+            const deleteP = searchResults.processEvent(
+                'confirmPageDelete',
+                null,
+            )
+            expect(searchResults.state.searchResults.pageDeleteState).toEqual(
+                'running',
+            )
+            await deleteP
+            expect(searchResults.state.searchResults.pageDeleteState).toEqual(
+                'success',
+            )
+
+            expect(
+                await device.storageManager
+                    .collection('pages')
+                    .findOneObject({ url: pageId }),
+            ).toEqual(null)
+            expect(searchResults.state.searchResults.deletingPageArgs).toEqual(
+                undefined,
+            )
+            expect(
+                searchResults.state.searchResults.pageData.allIds.includes(
+                    pageId,
+                ),
+            ).toEqual(false)
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId],
+            ).toEqual(undefined)
+        })
     })
 
     describe('nested page result state mutations', () => {
@@ -1204,7 +1340,7 @@ describe('Dashboard search results logic', () => {
                     }),
                 )
 
-                await searchResults.processEvent('setDeletingNoteId', {
+                await searchResults.processEvent('setDeletingNoteArgs', {
                     noteId,
                     pageId: DATA.PAGE_1.normalizedUrl,
                     day: -1,
@@ -1275,7 +1411,7 @@ describe('Dashboard search results logic', () => {
                     }),
                 )
 
-                await searchResults.processEvent('setDeletingNoteId', {
+                await searchResults.processEvent('setDeletingNoteArgs', {
                     noteId,
                     pageId: DATA.PAGE_1.normalizedUrl,
                     day: -1,
@@ -1288,7 +1424,20 @@ describe('Dashboard search results logic', () => {
                     day: -1,
                 })
 
-                await searchResults.processEvent('confirmNoteDelete', null)
+                expect(
+                    searchResults.state.searchResults.noteDeleteState,
+                ).toEqual('pristine')
+                const deleteP = searchResults.processEvent(
+                    'confirmNoteDelete',
+                    null,
+                )
+                expect(
+                    searchResults.state.searchResults.noteDeleteState,
+                ).toEqual('running')
+                await deleteP
+                expect(
+                    searchResults.state.searchResults.noteDeleteState,
+                ).toEqual('success')
 
                 expect(
                     await device.storageManager
