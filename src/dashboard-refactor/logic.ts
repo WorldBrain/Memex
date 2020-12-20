@@ -756,8 +756,8 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         await this.options.annotationsBG.editAnnotationTags({
             url: event.noteId,
-            tagsToBeAdded: [event.added],
-            tagsToBeDeleted: [event.deleted],
+            tagsToBeAdded: event.added ? [event.added] : [],
+            tagsToBeDeleted: event.deleted ? [event.deleted] : [],
         })
     }
 

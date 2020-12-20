@@ -8,7 +8,9 @@ import * as DATA from '../logic.test.data'
 import * as utils from './util'
 
 describe('Dashboard search results logic', () => {
-    const it = makeSingleDeviceUILogicTestFactory()
+    const it = makeSingleDeviceUILogicTestFactory({
+        includePostSyncProcessor: true,
+    })
 
     describe('root state mutations', () => {
         it('should be able to set page search type', async ({ device }) => {
