@@ -1,5 +1,6 @@
 import React from 'react'
 import onClickOutside from 'react-onclickoutside'
+import { isEqual } from 'lodash'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -33,10 +34,21 @@ class TagPicker extends StatefulUIElement<
         super(props, new TagPickerLogic(props))
     }
 
-    componentDidUpdate(prevProps) {
-        const { query } = this.props
+    searchInputPlaceholder = this.props.searchInputPlaceholder || 'Add Tags'
+    removeToolTipText = this.props.removeToolTipText || 'Remove tag from page'
+
+    componentDidUpdate(prevProps, prevState) {
+        const {
+            props: { query, onSelectedEntriesChange },
+            state: { selectedEntries },
+        } = this
         if (prevProps.query !== query) {
             this.processEvent('searchInputChanged', { query })
+        }
+        const a = prevState.selectedEntries
+        const b = selectedEntries
+        if (a.length !== b.length || !isEqual(a, b)) {
+            onSelectedEntriesChange({ selectedEntries })
         }
     }
 
@@ -98,7 +110,7 @@ class TagPicker extends StatefulUIElement<
             focused={tag.focused}
             selected={tag.selected}
             resultItem={<TagResultItem>{tag.name}</TagResultItem>}
-            removeTooltipText="Remove tag from page"
+            removeTooltipText={this.removeToolTipText}
             actOnAllTooltipText="Tag all tabs in window"
         />
     )
@@ -146,7 +158,7 @@ class TagPicker extends StatefulUIElement<
         return (
             <>
                 <PickerSearchInput
-                    searchInputPlaceholder="Add tags"
+                    searchInputPlaceholder={this.searchInputPlaceholder}
                     showPlaceholder={this.state.selectedEntries.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}

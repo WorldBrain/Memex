@@ -43,6 +43,7 @@ export const genericPickerPropsTemplate: FilterPickerProps = {
     onEntriesListUpdate: async () => {},
     onSearchInputChange: () => {},
     loadDefaultSuggestions: () => defaultSuggestionsTemplate,
+    onSelectedEntriesChange: (evt) => {},
 }
 
 const template: FiltersBarProps = {

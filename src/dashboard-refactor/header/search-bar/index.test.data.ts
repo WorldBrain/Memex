@@ -1,6 +1,7 @@
 import { SearchQueryParsed } from '../types'
 
 // const testStrings = [
+//     't:',
 //     `d:domain`,
 //     `search`,
 //     `search term`,
@@ -22,6 +23,18 @@ interface TestData {
 }
 
 const testData: TestData[] = [
+    {
+        testString: `t:`,
+        expected: [
+            {
+                type: 'filter',
+                detail: {
+                    filterType: 'tagsIncluded',
+                    filters: [],
+                },
+            },
+        ],
+    },
     {
         testString: `d:domain`,
         expected: [

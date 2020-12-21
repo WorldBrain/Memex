@@ -1,5 +1,6 @@
 import React from 'react'
 import onClickOutside from 'react-onclickoutside'
+import { isEqual } from 'lodash'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -16,7 +17,6 @@ import EntryRow from 'src/common-ui/GenericPicker/components/EntryRow' // ActOnA
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
-// import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { EntrySelectedList } from './components/EntrySelectedList'
 import { DomainResultItem } from './components/DomainResultItem'
 
@@ -29,16 +29,28 @@ class DomainPicker extends StatefulUIElement<
         super(props, new DomainPickerLogic(props))
     }
 
-    componentDidUpdate(prevProps) {
-        const { query } = this.props
+    searchInputPlaceholder =
+        this.props.searchInputPlaceholder || 'Domains to Search'
+    removeToolTipText = this.props.removeToolTipText || 'Remove filter'
+
+    componentDidUpdate(prevProps, prevState) {
+        const {
+            props: { query, onSelectedEntriesChange },
+            state: { selectedEntries },
+        } = this
         if (prevProps.query !== query) {
             this.processEvent('searchInputChanged', { query })
+        }
+        const a = prevState.selectedEntries
+        const b = selectedEntries
+        if (a.length !== b.length || !isEqual(a, b)) {
+            onSelectedEntriesChange({ selectedEntries })
         }
     }
 
     handleClickOutside: React.MouseEventHandler = (e) => {
         if (this.props.onClickOutside) {
-            this.props.onClickOutside(e) // this required an event parameter, but in the collections picker it did not (src/custom-lists/ui/CollectionPicker/index.tsx)
+            this.props.onClickOutside(e) // this is defined as type react.MouseEventHandler for the collection picker but as a standard function with no params or return for the tag picker
         }
     }
 
@@ -59,16 +71,6 @@ class DomainPicker extends StatefulUIElement<
     handleResultDomainPress = (domain: DisplayEntry) =>
         this.processEvent('resultEntryPress', { entry: domain })
 
-    // these are commented as they exist for tags and collections, but do not seem to fit the business logic for domains
-
-    // handleResultDomainAllPress = (domain: DisplayEntry) =>
-    //     this.processEvent('resultEntryAllPress', { entry: domain })
-
-    // handleNewDomainAllPress = () =>
-    //     this.processEvent('newEntryAllPress', {
-    //         entry: this.state.newEntryName,
-    //     })
-
     handleResultDomainFocus = (domain: DisplayEntry, index?: number) =>
         this.processEvent('resultEntryFocus', { entry: domain, index })
 
@@ -80,11 +82,6 @@ class DomainPicker extends StatefulUIElement<
     renderDomainRow = (domain: DisplayEntry, index: number) => (
         <EntryRow
             onPress={this.handleResultDomainPress}
-            // onPressActOnAll={
-            //     this.props.actOnAllTabs
-            //         ? (t) => this.handleResultDomainAllPress(t)
-            //         : undefined
-            // }
             onFocus={this.handleResultDomainFocus}
             key={`DomainKeyName-${domain.name}`}
             index={index}
@@ -92,39 +89,22 @@ class DomainPicker extends StatefulUIElement<
             selected={domain.selected}
             focused={domain.focused}
             resultItem={<DomainResultItem>{domain.name}</DomainResultItem>}
-            removeTooltipText="Remove from list"
-            // actOnAllTooltipText="Add all tabs in window to list"
+            removeTooltipText="Remove filter"
         />
     )
-
-    // renderNewDomainAllTabsButton = () =>
-    //     this.props.actOnAllTabs && (
-    //         <IconStyleWrapper show>
-    //             <ButtonTooltip
-    //                 tooltipText="List all tabs in window"
-    //                 position="left"
-    //             >
-    //                 <ActOnAllTabsButton
-    //                     size={20}
-    //                     onClick={this.handleNewDomainAllPress}
-    //                 />
-    //             </ButtonTooltip>
-    //         </IconStyleWrapper>
-    //     )
-
     renderEmptyDomain() {
         if (this.state.newEntryName !== '') {
             return
         }
 
         return (
-            <EmptyDomainssView>
+            <EmptyDomainsView>
                 <strong>No Collections yet</strong>
                 <br />
                 Add new collections
                 <br />
                 via the search bar
-            </EmptyDomainssView>
+            </EmptyDomainsView>
         )
     }
 
@@ -140,7 +120,7 @@ class DomainPicker extends StatefulUIElement<
         return (
             <>
                 <PickerSearchInput
-                    searchInputPlaceholder="Add to collection"
+                    searchInputPlaceholder={this.searchInputPlaceholder}
                     showPlaceholder={this.state.selectedEntries.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}
@@ -149,7 +129,7 @@ class DomainPicker extends StatefulUIElement<
                     loading={this.state.loadingQueryResults}
                     before={
                         <EntrySelectedList
-                            dataAttributeName="list-name"
+                            dataAttributeName="domain-name"
                             entriesSelected={this.state.selectedEntries}
                             onPress={this.handleSelectedDomainPress}
                         />
@@ -171,7 +151,7 @@ class DomainPicker extends StatefulUIElement<
                     entries={this.state.displayEntries}
                     renderEntryRow={this.renderDomainRow}
                     emptyView={this.renderEmptyDomain()}
-                    id="listResults"
+                    id="domainResults"
                 />
             </>
         )
@@ -207,7 +187,7 @@ const OuterSearchBox = styled.div`
     border-radius: 3px;
 `
 
-const EmptyDomainssView = styled.div`
+const EmptyDomainsView = styled.div`
     color: ${(props) => props.theme.tag.text};
     padding: 10px 15px;
     font-weight: 400;
