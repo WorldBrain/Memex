@@ -10,8 +10,9 @@ import { Icon } from 'src/dashboard-refactor/styled-components'
 
 import { BackupState, SyncState, UnSyncedItemState } from './types'
 import { DisplayState, HoverState } from 'src/dashboard-refactor/types'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
-const Container = styled.div<{
+const Container = styled(HoverBox)<{
     isDisplayed: boolean
 }>`
     height: min-content;
@@ -221,7 +222,13 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             onInitiateBackup,
         } = this.props
         return (
-            <Container isDisplayed={isDisplayed}>
+            <Container
+                isDisplayed={isDisplayed}
+                withRelativeContainer
+                width="min-content"
+                left="50px"
+                top="50px"
+            >
                 {this.renderRow(
                     'sync',
                     syncState,

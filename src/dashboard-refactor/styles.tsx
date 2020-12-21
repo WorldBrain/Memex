@@ -28,6 +28,9 @@ const styles = {
         sidebar: {
             widthPx: 173,
         },
+        searchBar: {
+            widthPx: 650,
+        },
         syncStatusIcon: {
             colors: {
                 green: colorBrandMintGreen,

@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import Margin from 'src/dashboard-refactor/components/Margin'
 
 import colors from '../../colors'
-import { fonts } from '../../styles'
+import styles, { fonts } from '../../styles'
 
 const textStyles = `
     font-family: ${fonts.primary.name};
@@ -15,7 +15,7 @@ const textStyles = `
 
 const SearchBarContainer = styled.div`
     height: 34px;
-    width: 650px;
+    width: ${styles.components.searchBar.widthPx}px;
     display: flex;
     justify-content: space-between;
     align-items: center;
