@@ -118,13 +118,13 @@ class DomainPicker extends StatefulUIElement<
         }
 
         return (
-            <EmptyDomainssView>
+            <EmptyDomainsView>
                 <strong>No Collections yet</strong>
                 <br />
                 Add new collections
                 <br />
                 via the search bar
-            </EmptyDomainssView>
+            </EmptyDomainsView>
         )
     }
 
@@ -207,7 +207,7 @@ const OuterSearchBox = styled.div`
     border-radius: 3px;
 `
 
-const EmptyDomainssView = styled.div`
+const EmptyDomainsView = styled.div`
     color: ${(props) => props.theme.tag.text};
     padding: 10px 15px;
     font-weight: 400;
