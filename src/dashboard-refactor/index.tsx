@@ -43,11 +43,12 @@ export class DashboardContainer extends StatefulUIElement<
             onSelection: (listId) =>
                 this.processEvent('setSelectedListId', { listId }),
         },
-        editingListName: this.state.listsSidebar.editingListName,
-        onEditListName: (e) =>
-            this.processEvent('setEditingListName', {
-                value: (e.target as HTMLInputElement).value,
-            }),
+        editableProps: {
+            onCancelClick: () => this.processEvent('cancelListEdit', null),
+            onConfirmClick: (value) =>
+                this.processEvent('confirmListEdit', { value }),
+            initValue: list.name,
+        },
         onRenameClick: () =>
             this.processEvent('setEditingListId', { listId: list.id }),
         onMoreActionClick: () =>
@@ -85,7 +86,8 @@ export class DashboardContainer extends StatefulUIElement<
                     sidebarLockedState: lockedState,
                     isSearchBarFocused: false,
                     hasPerfectMatch: true,
-                    onCreateNew: () => this.processEvent('addNewList', null),
+                    onCreateNew: (value) =>
+                        this.processEvent('confirmListCreate', { value }),
                     onFocus: () => null,
                     onSearchQueryChange: (query) =>
                         this.processEvent('setListQueryValue', { query }),
@@ -100,6 +102,12 @@ export class DashboardContainer extends StatefulUIElement<
                                 isShown: !this.state.listsSidebar.localLists
                                     .isAddInputShown,
                             }),
+                        confirmAddNewList: (value) =>
+                            this.processEvent('confirmListCreate', { value }),
+                        cancelAddNewList: () =>
+                            this.processEvent('cancelListCreate', null),
+                        isAddInputShown: this.state.listsSidebar.localLists
+                            .isAddInputShown,
                         isExpanded: this.state.listsSidebar.localLists
                             .isExpanded,
                         onExpandBtnClick: () =>

@@ -21,13 +21,9 @@ const blinkingAnimation = keyframes`
     }
 `
 
-const containerWidth = 173
-const titleLeftMargin = 19
-const iconMargin = 7.5
-
 const Container = styled.div<Props>`
     height: 27px;
-    width: ${containerWidth}px;
+    width: 173px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -74,8 +70,6 @@ const ListTitle = styled.p<Props>`
 
     max-width: 100%;
 `
-
-const EditableListTitle = styled.input<Props>``
 
 const NewItemsCount = styled.div`
     width: 30px;
@@ -154,34 +148,13 @@ export default class ListsSidebarItem extends PureComponent<Props> {
         }
     }
 
-    private renderEditing() {
-        const {
-            className,
-            selectedState: { isSelected },
-        } = this.props
-
-        return (
-            <Container className={className} isSelected={isSelected}>
-                <Margin left={`${titleLeftMargin}px`}>
-                    <EditableListTitle
-                        onChange={this.props.onEditListName}
-                        value={this.props.editingListName}
-                    />
-                </Margin>
-            </Container>
-        )
-    }
-
     render() {
-        if (this.props.isEditing) {
-            return this.renderEditing()
-        }
         const { onMoreActionClick, ...props } = this.props
 
         return (
             <Container {...props} onClick={props.selectedState.onSelection}>
                 <Margin left="19px">{this.renderTitle()}</Margin>
-                <Margin right={`${iconMargin}px`}>{this.renderIcon()}</Margin>
+                <Margin right="7.5px">{this.renderIcon()}</Margin>
             </Container>
         )
     }

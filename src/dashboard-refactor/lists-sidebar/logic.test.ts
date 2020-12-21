@@ -66,25 +66,6 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.selectedListId).toEqual(1)
     })
 
-    it('should be able set list name to edit', async ({ device }) => {
-        const { searchResults } = await setupTest(device)
-
-        expect(searchResults.state.listsSidebar.editingListName).toEqual(
-            undefined,
-        )
-        await searchResults.processEvent('setEditingListName', {
-            value: 'test',
-        })
-        expect(searchResults.state.listsSidebar.editingListName).toEqual('test')
-        await searchResults.processEvent('setEditingListName', {
-            value: 'tester',
-        })
-
-        expect(searchResults.state.listsSidebar.editingListName).toEqual(
-            'tester',
-        )
-    })
-
     it("should be able set lists' edit state", async ({ device }) => {
         const { searchResults } = await setupTest(device)
 
@@ -114,6 +95,91 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.editingListId).toEqual(1)
     })
 
+    it('should be able to edit lists', async ({ device }) => {
+        const { searchResults } = await setupTest(device)
+        const name = 'test'
+        const nameUpdated = 'test list'
+
+        await searchResults.processEvent('confirmListCreate', { value: name })
+        const listId = +Object.keys(
+            searchResults.state.listsSidebar.listData,
+        )[0]
+
+        expect(
+            await device.storageManager
+                .collection('customLists')
+                .findOneObject({ id: listId }),
+        ).toEqual(expect.objectContaining({ id: listId, name }))
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual({
+            id: listId,
+            name,
+        })
+
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setEditingListId', { listId })
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(listId)
+
+        await searchResults.processEvent('confirmListEdit', {
+            value: nameUpdated,
+        })
+
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(
+            undefined,
+        )
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual({
+            id: listId,
+            name: nameUpdated,
+        })
+        expect(
+            await device.storageManager
+                .collection('customLists')
+                .findOneObject({ id: listId }),
+        ).toEqual(expect.objectContaining({ id: listId, name: nameUpdated }))
+    })
+
+    it('should be able to cancel list edit', async ({ device }) => {
+        const { searchResults } = await setupTest(device)
+        const name = 'test'
+
+        await searchResults.processEvent('confirmListCreate', { value: name })
+        const listId = +Object.keys(
+            searchResults.state.listsSidebar.listData,
+        )[0]
+
+        expect(
+            await device.storageManager
+                .collection('customLists')
+                .findOneObject({ id: listId }),
+        ).toEqual(expect.objectContaining({ id: listId, name }))
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual({
+            id: listId,
+            name,
+        })
+
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setEditingListId', { listId })
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(listId)
+
+        await searchResults.processEvent('cancelListEdit', null)
+
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(
+            undefined,
+        )
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual({
+            id: listId,
+            name,
+        })
+        expect(
+            await device.storageManager
+                .collection('customLists')
+                .findOneObject({ id: listId }),
+        ).toEqual(expect.objectContaining({ id: listId, name }))
+    })
+
     it("should be able set lists' show more action btn state", async ({
         device,
     }) => {
@@ -138,33 +204,6 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
         await searchResults.processEvent('setShowMoreMenuListId', { listId: 1 })
         expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(1)
-    })
-
-    it('should be able to mutate add local list input states', async ({
-        device,
-    }) => {
-        const { searchResults } = await setupTest(device)
-
-        expect(
-            searchResults.state.listsSidebar.localLists.addInputValue,
-        ).toEqual('')
-        expect(
-            searchResults.state.listsSidebar.localLists.isAddInputShown,
-        ).toEqual(false)
-
-        await searchResults.processEvent('setAddListInputShown', {
-            isShown: true,
-        })
-        await searchResults.processEvent('setAddListInputValue', {
-            value: 'hi',
-        })
-
-        expect(
-            searchResults.state.listsSidebar.localLists.addInputValue,
-        ).toEqual('hi')
-        expect(
-            searchResults.state.listsSidebar.localLists.isAddInputShown,
-        ).toEqual(true)
     })
 
     it('should be able to expand local and followed lists states', async ({
@@ -219,7 +258,6 @@ describe('Dashboard search results logic', () => {
             loadingState: 'pristine',
             isAddInputShown: false,
             isExpanded: false,
-            addInputValue: '',
             listIds: [],
         })
 
@@ -234,7 +272,6 @@ describe('Dashboard search results logic', () => {
             loadingState: 'pristine',
             isAddInputShown: false,
             isExpanded: false,
-            addInputValue: '',
             listIds,
         })
     })
@@ -275,7 +312,7 @@ describe('Dashboard search results logic', () => {
                 .collection('customLists')
                 .findAllObjects({}),
         ).toEqual([])
-        expect(searchResults.state.listsSidebar.newListCreateState).toEqual(
+        expect(searchResults.state.listsSidebar.listCreateState).toEqual(
             'pristine',
         )
         expect(searchResults.state.listsSidebar.listData).toEqual({})
@@ -283,18 +320,26 @@ describe('Dashboard search results logic', () => {
             searchResults.state.listsSidebar.localLists.listIds.length,
         ).toEqual(0)
 
-        await searchResults.processEvent('setAddListInputValue', {
+        await searchResults.processEvent('setAddListInputShown', {
+            isShown: true,
+        })
+        expect(
+            searchResults.state.listsSidebar.localLists.isAddInputShown,
+        ).toEqual(true)
+
+        const createP = searchResults.processEvent('confirmListCreate', {
             value: listName,
         })
-
-        const createP = searchResults.processEvent('addNewList', null)
-        expect(searchResults.state.listsSidebar.newListCreateState).toEqual(
+        expect(searchResults.state.listsSidebar.listCreateState).toEqual(
             'running',
         )
         await createP
-        expect(searchResults.state.listsSidebar.newListCreateState).toEqual(
+        expect(searchResults.state.listsSidebar.listCreateState).toEqual(
             'success',
         )
+        expect(
+            searchResults.state.listsSidebar.localLists.isAddInputShown,
+        ).toEqual(false)
 
         expect(
             Object.values(searchResults.state.listsSidebar.listData)[0],
@@ -309,14 +354,50 @@ describe('Dashboard search results logic', () => {
         ).toEqual(1)
     })
 
+    it('should be able to cancel a new local list add', async ({ device }) => {
+        const { searchResults } = await setupTest(device)
+        const listName = 'test'
+
+        expect(
+            await device.storageManager
+                .collection('customLists')
+                .findAllObjects({}),
+        ).toEqual([])
+        expect(searchResults.state.listsSidebar.listData).toEqual({})
+        expect(
+            searchResults.state.listsSidebar.localLists.listIds.length,
+        ).toEqual(0)
+
+        await searchResults.processEvent('setAddListInputShown', {
+            isShown: true,
+        })
+        expect(
+            searchResults.state.listsSidebar.localLists.isAddInputShown,
+        ).toEqual(true)
+
+        await searchResults.processEvent('cancelListCreate', null)
+
+        expect(
+            searchResults.state.listsSidebar.localLists.isAddInputShown,
+        ).toEqual(false)
+        expect(
+            await device.storageManager
+                .collection('customLists')
+                .findAllObjects({}),
+        ).toEqual([])
+        expect(searchResults.state.listsSidebar.listData).toEqual({})
+        expect(
+            searchResults.state.listsSidebar.localLists.listIds.length,
+        ).toEqual(0)
+    })
+
     it('should be able to cancel list deletion', async ({ device }) => {
         const { searchResults } = await setupTest(device)
         const listName = 'testList'
 
-        await searchResults.processEvent('setAddListInputValue', {
+        await searchResults.processEvent('confirmListCreate', {
             value: listName,
         })
-        await searchResults.processEvent('addNewList', null)
 
         const listId = +Object.keys(
             searchResults.state.listsSidebar.listData,
@@ -377,10 +458,9 @@ describe('Dashboard search results logic', () => {
         const { searchResults } = await setupTest(device)
         const listName = 'testList'
 
-        await searchResults.processEvent('setAddListInputValue', {
+        await searchResults.processEvent('confirmListCreate', {
             value: listName,
         })
-        await searchResults.processEvent('addNewList', null)
 
         const listId = +Object.keys(
             searchResults.state.listsSidebar.listData,

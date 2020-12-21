@@ -64,8 +64,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                 dateToInput: '',
             },
             listsSidebar: {
-                newListCreateState: 'pristine',
+                listCreateState: 'pristine',
                 listDeleteState: 'pristine',
+                listEditState: 'pristine',
                 isSidebarPeeking: false,
                 isSidebarLocked: false,
                 searchQuery: '',
@@ -77,7 +78,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
                 localLists: {
                     isAddInputShown: false,
-                    addInputValue: '',
                     loadingState: 'pristine',
                     isExpanded: false,
                     listIds: [],
@@ -1107,16 +1107,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setAddListInputValue: EventHandler<'setAddListInputValue'> = async ({
-        event,
-    }) => {
-        this.emitMutation({
-            listsSidebar: {
-                localLists: { addInputValue: { $set: event.value } },
-            },
-        })
-    }
-
     setAddListInputShown: EventHandler<'setAddListInputShown'> = async ({
         event,
     }) => {
@@ -1127,15 +1117,25 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    addNewList: EventHandler<'addNewList'> = async ({
-        previousState: { listsSidebar },
+    cancelListCreate: EventHandler<'cancelListCreate'> = async ({ event }) => {
+        this.emitMutation({
+            listsSidebar: {
+                localLists: {
+                    isAddInputShown: { $set: false },
+                },
+            },
+        })
+    }
+
+    confirmListCreate: EventHandler<'confirmListCreate'> = async ({
+        event,
     }) => {
-        const newListName = listsSidebar.localLists.addInputValue.trim()
+        const newListName = event.value.trim()
 
         await executeUITask(
             this,
             (taskState) => ({
-                listsSidebar: { newListCreateState: { $set: taskState } },
+                listsSidebar: { listCreateState: { $set: taskState } },
             }),
             async () => {
                 const listId = await this.options.listsBG.createCustomList({
@@ -1144,7 +1144,10 @@ export class DashboardLogic extends UILogic<State, Events> {
 
                 this.emitMutation({
                     listsSidebar: {
-                        localLists: { listIds: { $push: [listId] } },
+                        localLists: {
+                            isAddInputShown: { $set: false },
+                            listIds: { $push: [listId] },
+                        },
                         listData: {
                             [listId]: {
                                 $set: { id: listId, name: newListName },
@@ -1190,11 +1193,47 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setEditingListName: EventHandler<'setEditingListName'> = async ({
+    confirmListEdit: EventHandler<'confirmListEdit'> = async ({
         event,
+        previousState,
     }) => {
+        const { editingListId: listId } = previousState.listsSidebar
+
+        if (!listId) {
+            throw new Error('No list ID is set for editing')
+        }
+
+        const { name: oldName } = previousState.listsSidebar.listData[listId]
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listsSidebar: { listEditState: { $set: taskState } },
+            }),
+            async () => {
+                await this.options.listsBG.updateListName({
+                    id: listId,
+                    oldName,
+                    newName: event.value,
+                })
+
+                this.emitMutation({
+                    listsSidebar: {
+                        listData: {
+                            [listId]: { name: { $set: event.value } },
+                        },
+                        editingListId: { $set: undefined },
+                    },
+                })
+            },
+        )
+    }
+
+    cancelListEdit: EventHandler<'cancelListEdit'> = async ({}) => {
         this.emitMutation({
-            listsSidebar: { editingListName: { $set: event.value } },
+            listsSidebar: {
+                editingListId: { $set: undefined },
+            },
         })
     }
 
@@ -1207,12 +1246,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 ? undefined
                 : event.listId
 
-        const editingListName =
-            previousState.listsSidebar.listData[listIdToSet]?.name
-
         this.emitMutation({
             listsSidebar: {
-                editingListName: { $set: editingListName },
                 editingListId: { $set: listIdToSet },
                 showMoreMenuListId: { $set: undefined },
             },

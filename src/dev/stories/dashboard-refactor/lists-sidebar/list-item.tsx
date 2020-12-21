@@ -32,8 +32,6 @@ const selectedState = {
 }
 
 const template: ListsSidebarItemComponentProps = {
-    editingListName: 'Cool List Name',
-    onEditListName: () => {},
     isEditing: false,
     name: 'Cool List Name',
     selectedState,

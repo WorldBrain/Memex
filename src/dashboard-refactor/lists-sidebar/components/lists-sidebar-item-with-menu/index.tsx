@@ -13,6 +13,9 @@ import {
     SelectedState,
 } from 'src/dashboard-refactor/types'
 import { ListsSidebarItemCommonProps } from '../lists-sidebar-item/types'
+import ListsSidebarEditableItem, {
+    Props as EditableItemProps,
+} from '../lists-sidebar-editable-item'
 
 const Container = styled.div`
     position: relative;
@@ -66,8 +69,9 @@ export interface ListsSidebarItemWithMenuProps
     onRenameClick?: React.MouseEventHandler
     onDeleteClick?: React.MouseEventHandler
     onShareClick?: React.MouseEventHandler
-    selectedState: SelectedState
     dropReceivingState?: DropReceivingState
+    editableProps?: EditableItemProps
+    selectedState: SelectedState
     onMoreActionClick?: (listId: number) => void
 }
 
@@ -122,9 +126,15 @@ export default class ListsSidebarItemWithMenu extends PureComponent<
             dropReceivingState,
             onMoreActionClick,
             isMenuDisplayed,
+            isEditing,
             listId,
             ...props
         } = this.props
+
+        if (isEditing) {
+            return <ListsSidebarEditableItem {...this.props.editableProps} />
+        }
+
         return (
             <Container>
                 <ListsSidebarItem

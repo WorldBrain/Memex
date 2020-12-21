@@ -38,7 +38,6 @@ export interface FollowedListGroup extends ListGroupCommon {}
 
 export interface LocalListGroup extends ListGroupCommon {
     isAddInputShown: boolean
-    addInputValue: string
 }
 
 export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
@@ -47,14 +46,15 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
         listData: { [id: number]: ListData }
         followedLists: FollowedListGroup
         localLists: LocalListGroup
-        newListCreateState: TaskState
-        editingListName?: string
 
         editingListId?: number
         selectedListId?: number
         deletingListId?: number
-        listDeleteState: TaskState
         showMoreMenuListId?: number
+
+        listDeleteState: TaskState
+        listCreateState: TaskState
+        listEditState: TaskState
     }
 
 export type Events = UIEvent<{
@@ -63,15 +63,16 @@ export type Events = UIEvent<{
     setListQueryValue: { query: string }
 
     setAddListInputShown: { isShown: boolean }
-    setAddListInputValue: { value: string }
-    addNewList: null
+    cancelListCreate: null
+    confirmListCreate: { value: string }
 
     setLocalLists: { lists: ListData[] }
     setFollowedLists: { lists: ListData[] }
     setLocalListsExpanded: { isExpanded: boolean }
     setFollowedListsExpanded: { isExpanded: boolean }
 
-    setEditingListName: { value: string }
+    confirmListEdit: { value: string }
+    cancelListEdit: null
     setEditingListId: { listId: number }
     setSelectedListId: { listId: number }
     setShowMoreMenuListId: { listId: number }

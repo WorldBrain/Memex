@@ -13,6 +13,7 @@ import ListsSidebarItemWithMenu, {
     ListsSidebarItemWithMenuProps,
 } from '../lists-sidebar-item-with-menu'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import ListsSidebarEditableItem from '../lists-sidebar-editable-item'
 
 const { fonts } = styles
 
@@ -60,7 +61,10 @@ const IconContainer = styled.div`
 export interface ListsSidebarGroupProps {
     title?: string
     isExpanded: boolean
+    isAddInputShown?: boolean
     loadingState: TaskState
+    confirmAddNewList?: (name: string) => void
+    cancelAddNewList?: (name: string) => void
     onAddBtnClick?: React.MouseEventHandler
     onExpandBtnClick?: React.MouseEventHandler
     listsArray: ListsSidebarItemWithMenuProps[]
@@ -101,9 +105,22 @@ export default class ListsSidebarGroup extends PureComponent<
             this.renderErrorState()
         }
 
-        return this.props.listsArray.map((listObj, idx) => (
+        const listItems = this.props.listsArray.map((listObj, idx) => (
             <ListsSidebarItemWithMenu key={idx} {...listObj} />
         ))
+
+        if (this.props.isAddInputShown) {
+            return [
+                <ListsSidebarEditableItem
+                    key="add-list"
+                    onCancelClick={this.props.cancelAddNewList!}
+                    onConfirmClick={this.props.confirmAddNewList!}
+                />,
+                ...listItems,
+            ]
+        }
+
+        return listItems
     }
 
     render() {
