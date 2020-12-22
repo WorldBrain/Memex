@@ -174,6 +174,7 @@ export default class CustomListStorage extends StorageModule {
             await this.operation('createList', {
                 name: SPECIAL_LIST_NAMES.INBOX,
                 id: SPECIAL_LIST_IDS.INBOX,
+                searchableName: SPECIAL_LIST_NAMES.INBOX,
                 isDeletable: false,
                 isNestable: false,
                 createdAt,

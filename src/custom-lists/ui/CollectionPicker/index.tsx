@@ -146,6 +146,12 @@ class ListPicker extends StatefulUIElement<
                         />
                     }
                 />
+                <EntryResultsList
+                    entries={this.state.displayEntries}
+                    renderEntryRow={this.renderListRow}
+                    emptyView={this.renderEmptyList()}
+                    id="listResults"
+                />
                 {this.state.newEntryName !== '' && (
                     <AddNewEntry
                         resultItem={
@@ -158,12 +164,6 @@ class ListPicker extends StatefulUIElement<
                         {this.renderNewListAllTabsButton()}
                     </AddNewEntry>
                 )}
-                <EntryResultsList
-                    entries={this.state.displayEntries}
-                    renderEntryRow={this.renderListRow}
-                    emptyView={this.renderEmptyList()}
-                    id="listResults"
-                />
             </>
         )
     }
