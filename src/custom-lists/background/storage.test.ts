@@ -128,6 +128,8 @@ describe('Custom List Integrations', () => {
                 }),
             ).toEqual({
                 name: SPECIAL_LIST_NAMES.INBOX,
+                searchableName: SPECIAL_LIST_NAMES.INBOX,
+                nameTerms: [SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase()],
                 id: SPECIAL_LIST_IDS.INBOX,
                 isDeletable: false,
                 isNestable: false,
@@ -147,6 +149,8 @@ describe('Custom List Integrations', () => {
             ).toEqual(
                 expect.objectContaining({
                     name: SPECIAL_LIST_NAMES.INBOX,
+                    searchableName: SPECIAL_LIST_NAMES.INBOX,
+                    nameTerms: [SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase()],
                     id: SPECIAL_LIST_IDS.INBOX,
                     isDeletable: false,
                     isNestable: false,
@@ -161,6 +165,8 @@ describe('Custom List Integrations', () => {
                 }),
             ).toEqual({
                 name: SPECIAL_LIST_NAMES.INBOX,
+                searchableName: SPECIAL_LIST_NAMES.INBOX,
+                nameTerms: [SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase()],
                 id: SPECIAL_LIST_IDS.INBOX,
                 isDeletable: false,
                 isNestable: false,
@@ -192,6 +198,8 @@ describe('Custom List Integrations', () => {
                 }),
             ).toEqual({
                 name: SPECIAL_LIST_NAMES.INBOX,
+                searchableName: SPECIAL_LIST_NAMES.INBOX,
+                nameTerms: [SPECIAL_LIST_NAMES.INBOX.toLocaleLowerCase()],
                 id: SPECIAL_LIST_IDS.INBOX,
                 isDeletable: false,
                 isNestable: false,

@@ -1,17 +1,15 @@
 import React, { Component, DragEventHandler } from 'react'
 import cx from 'classnames'
-import { withCurrentUser } from 'src/authentication/components/AuthConnector'
-import { AuthContextInterface } from 'src/authentication/background/types'
 import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
-import CustomListStorage from 'src/custom-lists/background/storage'
 
-import analytics from 'src/analytics'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { runInBackground } from 'src/util/webextensionRPC'
+import analytics from 'src/analytics'
 
 const styles = require('./list-item.css')
 
-export interface Props extends AuthContextInterface {
+export interface Props {
     listName: string
     listId: number
     isFiltered?: boolean
@@ -21,8 +19,6 @@ export interface Props extends AuthContextInterface {
     onAddPageToList: (url: string, isSocialPost: boolean) => void
     onListItemClick: () => void
     plans?: UserPlan[]
-    contentSharing: ContentSharingInterface
-    customLists: CustomListStorage
 }
 
 interface State {
