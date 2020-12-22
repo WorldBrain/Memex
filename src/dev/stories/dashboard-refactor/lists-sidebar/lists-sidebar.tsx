@@ -2,10 +2,10 @@ import React from 'react'
 import { storiesOf } from '@storybook/react'
 
 import {
-    ListsSidebarProps,
     SidebarLockedState,
     SidebarPeekState,
 } from 'src/dashboard-refactor/lists-sidebar/types'
+import { ListsSidebarProps } from 'src/dashboard-refactor/lists-sidebar'
 import { listsSidebarSearchBarProps } from './lists-sidebar-search-bar'
 import { listsSidebarGroupProps } from './lists-sidebar-group'
 import ListsSidebar from 'src/dashboard-refactor/lists-sidebar'

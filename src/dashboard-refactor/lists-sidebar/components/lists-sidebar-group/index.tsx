@@ -9,9 +9,7 @@ import {
 import styled from 'styled-components'
 
 import { TaskState } from 'ui-logic-core/lib/types'
-import ListsSidebarItemWithMenu, {
-    Props,
-} from '../lists-sidebar-item-with-menu'
+import { Props as ListsSidebarItemProps } from '../lists-sidebar-item-with-menu'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import ListsSidebarEditableItem from '../lists-sidebar-editable-item'
 
@@ -67,12 +65,7 @@ export interface ListsSidebarGroupProps {
     cancelAddNewList?: (name: string) => void
     onAddBtnClick?: React.MouseEventHandler
     onExpandBtnClick?: React.MouseEventHandler
-    listsArray: Props[]
-}
-
-export interface ListsSidebarItemsArrayObject {
-    listId: string
-    listsSidebarItemWithMenuProps: Props
+    listsArray?: ListsSidebarItemProps[]
 }
 
 export default class ListsSidebarGroup extends PureComponent<
@@ -92,7 +85,7 @@ export default class ListsSidebarGroup extends PureComponent<
         )
     }
 
-    private renderLists = () => {
+    private renderGroupContent() {
         if (!this.props.isExpanded) {
             return null
         }
@@ -102,25 +95,19 @@ export default class ListsSidebarGroup extends PureComponent<
         }
 
         if (this.props.loadingState === 'error') {
-            this.renderErrorState()
+            return this.renderErrorState()
         }
-
-        const listItems = this.props.listsArray.map((listObj, idx) => (
-            <ListsSidebarItemWithMenu key={idx} {...listObj} />
-        ))
 
         if (this.props.isAddInputShown) {
-            return [
+            return (
                 <ListsSidebarEditableItem
-                    key="add-list"
                     onCancelClick={this.props.cancelAddNewList!}
                     onConfirmClick={this.props.confirmAddNewList!}
-                />,
-                ...listItems,
-            ]
+                />
+            )
         }
 
-        return listItems
+        return this.props.children
     }
 
     render() {
@@ -159,7 +146,7 @@ export default class ListsSidebarGroup extends PureComponent<
                         </GroupHeaderInnerDiv>
                     </GroupHeaderContainer>
                 )}
-                {this.renderLists()}
+                {this.renderGroupContent()}
             </Container>
         )
     }

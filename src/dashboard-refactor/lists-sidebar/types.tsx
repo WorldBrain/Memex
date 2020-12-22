@@ -4,15 +4,6 @@ import { ListsSidebarSearchBarProps } from './components/lists-search-bar'
 import { ListsSidebarGroupProps } from './components/lists-sidebar-group'
 import { TaskState } from 'ui-logic-core/lib/types'
 
-export interface ListsSidebarProps {
-    onListSelection: (id: number) => void
-    selectedListId?: number
-    lockedState: SidebarLockedState
-    peekState: SidebarPeekState
-    searchBarProps: ListsSidebarSearchBarProps
-    listsGroups: ListsSidebarGroupProps[]
-}
-
 export interface SidebarLockedState {
     toggleSidebarLockedState(): void
     isSidebarLocked: boolean
