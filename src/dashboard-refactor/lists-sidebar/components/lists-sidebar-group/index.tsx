@@ -10,7 +10,7 @@ import styled from 'styled-components'
 
 import { TaskState } from 'ui-logic-core/lib/types'
 import ListsSidebarItemWithMenu, {
-    ListsSidebarItemWithMenuProps,
+    Props,
 } from '../lists-sidebar-item-with-menu'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import ListsSidebarEditableItem from '../lists-sidebar-editable-item'
@@ -67,12 +67,12 @@ export interface ListsSidebarGroupProps {
     cancelAddNewList?: (name: string) => void
     onAddBtnClick?: React.MouseEventHandler
     onExpandBtnClick?: React.MouseEventHandler
-    listsArray: ListsSidebarItemWithMenuProps[]
+    listsArray: Props[]
 }
 
 export interface ListsSidebarItemsArrayObject {
     listId: string
-    listsSidebarItemWithMenuProps: ListsSidebarItemWithMenuProps
+    listsSidebarItemWithMenuProps: Props
 }
 
 export default class ListsSidebarGroup extends PureComponent<

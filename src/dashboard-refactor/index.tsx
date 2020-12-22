@@ -6,7 +6,7 @@ import { RootState, Events, DashboardDependencies, ListSource } from './types'
 import ListsSidebarContainer from './lists-sidebar'
 import SearchResultsContainer from './search-results'
 import { runInBackground } from 'src/util/webextensionRPC'
-import { ListsSidebarItemWithMenuProps } from './lists-sidebar/components/lists-sidebar-item-with-menu'
+import { Props as ListSidebarItemProps } from './lists-sidebar/components/lists-sidebar-item-with-menu'
 import { ListData } from './lists-sidebar/types'
 import * as searchResultUtils from './search-results/util'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
@@ -32,7 +32,7 @@ export class DashboardContainer extends StatefulUIElement<
     private listStateToProps = (
         list: ListData,
         source: ListSource,
-    ): ListsSidebarItemWithMenuProps => ({
+    ): ListSidebarItemProps => ({
         source,
         listId: list.id,
         name: list.name,

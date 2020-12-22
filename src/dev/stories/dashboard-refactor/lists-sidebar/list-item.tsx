@@ -1,17 +1,13 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 
-import ListsSidebarItem from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/'
-import ListsSidebarItemWithMenu, {
-    ListsSidebarItemWithMenuProps,
+import ListsSidebarItem, {
+    Props,
 } from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item-with-menu'
-import {
-    DropReceivingComponentState,
-    ListsSidebarItemComponentProps,
-    ListNameHighlightIndices,
-} from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/types'
+import { DropReceivingState } from 'src/dashboard-refactor/types'
+import { ListNameHighlightIndices } from 'src/dashboard-refactor/lists-sidebar/types'
 
-const dropReceivingState: DropReceivingComponentState = {
+const dropReceivingState: DropReceivingState = {
     canReceiveDroppedItems: true, // this defines whether items can be dropped (not whether there is a state change on drag-over)
     isDraggedOver: false,
     triggerSuccessfulDropAnimation: false,
@@ -31,7 +27,8 @@ const selectedState = {
     isSelected: false,
 }
 
-const template: ListsSidebarItemComponentProps = {
+const template: Props = {
+    listId: -1,
     isEditing: false,
     name: 'Cool List Name',
     selectedState,
@@ -148,7 +145,7 @@ stories.add('Search Restul', () => (
     <ListsSidebarItem {...listsSidebarItemProps.searchMatch} />
 ))
 
-export const listsSidebarItemWithMenuProps: ListsSidebarItemWithMenuProps = {
+export const listsSidebarItemWithMenuProps: Props = {
     name: 'test A',
     isMenuDisplayed: true,
     listId: 123,
@@ -158,7 +155,7 @@ export const listsSidebarItemWithMenuProps: ListsSidebarItemWithMenuProps = {
     onShareClick: () => {},
 }
 
-export const listsSidebarItemWithShortMenuProps: ListsSidebarItemWithMenuProps = {
+export const listsSidebarItemWithShortMenuProps: Props = {
     name: 'test A',
     isMenuDisplayed: true,
     listId: 123,
@@ -167,9 +164,9 @@ export const listsSidebarItemWithShortMenuProps: ListsSidebarItemWithMenuProps =
 }
 
 stories.add('3x Item Menu Extended', () => (
-    <ListsSidebarItemWithMenu {...listsSidebarItemWithMenuProps} />
+    <ListsSidebarItem {...listsSidebarItemWithMenuProps} />
 ))
 
 stories.add('1x Item Menu Extended', () => (
-    <ListsSidebarItemWithMenu {...listsSidebarItemWithShortMenuProps} />
+    <ListsSidebarItem {...listsSidebarItemWithShortMenuProps} />
 ))

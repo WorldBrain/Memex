@@ -38,6 +38,7 @@ export interface DashboardDependencies {
 
 export interface DropReceivingState {
     isDraggedOver?: boolean
+    canReceiveDroppedItems?: boolean
     triggerSuccessfulDropAnimation?: boolean
     onDragOver(id: number): void
     onDragLeave(id: number): void

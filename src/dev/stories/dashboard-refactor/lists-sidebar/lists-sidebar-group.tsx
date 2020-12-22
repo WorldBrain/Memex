@@ -12,7 +12,7 @@ import {
     listsSidebarItemWithShortMenuProps,
 } from './list-item'
 import { TaskState } from 'ui-logic-core/lib/types'
-import { ListsSidebarItemWithMenuProps } from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item-with-menu'
+import { Props } from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item-with-menu'
 
 export const sidebarWrapperFunc = (ChildComponent) => {
     const Wrapper = styled.div`
@@ -37,12 +37,12 @@ const stories = storiesOf(
 
 const taskState: TaskState = 'success'
 
-const listsSidebarItemWithMenuPropsHidden: ListsSidebarItemWithMenuProps = {
+const listsSidebarItemWithMenuPropsHidden: Props = {
     ...listsSidebarItemWithMenuProps,
     isMenuDisplayed: false,
 }
 
-const listsArray: Array<ListsSidebarItemWithMenuProps> = [
+const listsArray: Array<Props> = [
     {
         ...listsSidebarItemWithMenuPropsHidden,
         ...listsSidebarItemProps.default,
@@ -82,10 +82,7 @@ const listsSidebarGroupPropsTemplate: ListsSidebarGroupProps = {
     listsArray: [],
 }
 
-const inboxItemsProps = (
-    name: string,
-    isSelected = false,
-): ListsSidebarItemWithMenuProps => {
+const inboxItemsProps = (name: string, isSelected = false): Props => {
     return {
         name,
         listId: name.length,

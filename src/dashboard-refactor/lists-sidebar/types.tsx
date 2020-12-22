@@ -81,3 +81,5 @@ export type Events = UIEvent<{
     confirmListDelete: null
     cancelListDelete: null
 }>
+
+export type ListNameHighlightIndices = [number, number]
