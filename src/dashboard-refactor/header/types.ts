@@ -3,13 +3,17 @@ export type FilterKey = 't' | 'd' | 'c' | '-t' | '-d' | '-c' | 'from' | 'to'
 export type SearchQueryParsed = SearchQueryPart[]
 
 export interface SearchQueryPart {
-    type: 'filter' | 'search terms'
-    detail?: SearchFilterDetail | string
+    type: 'filter' | 'searchTerms' | 'filterFragment' | 'trailingWhitespace'
+    detail?: SearchFilterDetail | SearchTermDetail
 }
 
 export interface SearchFilterDetail {
     filterType: FilterList
     filters: string[]
+}
+
+interface SearchTermDetail {
+    value: string
 }
 
 export type FilterList =
