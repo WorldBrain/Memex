@@ -12,17 +12,37 @@ import {
 } from '../types'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { PageNotesCopyPaster } from 'src/copy-paster'
+import { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
+import {
+    getShareAnnotationBtnState,
+    SHARE_BUTTON_ICONS,
+    getShareAnnotationBtnAction,
+    SHARE_BUTTON_LABELS,
+} from 'src/annotations/sharing-utils'
 
 export interface Props
     extends NoteData,
         NoteResult,
         NoteInteractionProps,
         NotePickerProps {
+    sharingAccess: AnnotationSharingAccess
     isShared?: boolean
     hasTags?: boolean
 }
 
 export default class NoteResultView extends PureComponent<Props> {
+    private get sharingData() {
+        const sharingProps = {
+            ...this.props,
+            onShare: this.props.onShareBtnClick,
+            onUnshare: this.props.onUnshareBtnClick,
+        }
+        return {
+            state: getShareAnnotationBtnState(sharingProps),
+            action: getShareAnnotationBtnAction(sharingProps),
+        }
+    }
+
     private renderComment() {
         if (!this.props.comment) {
             return null
@@ -110,10 +130,14 @@ export default class NoteResultView extends PureComponent<Props> {
                             },
                             {
                                 key: 'share-note-btn',
-                                image: this.props.isShared
-                                    ? icons.shared
-                                    : icons.shareEmpty,
-                                onClick: this.props.onShareBtnClick,
+                                image:
+                                    SHARE_BUTTON_ICONS[this.sharingData.state],
+                                onClick: this.sharingData.action,
+                                tooltipText:
+                                    SHARE_BUTTON_LABELS[this.sharingData.state],
+                                isDisabled: ['sharing', 'unsharing'].includes(
+                                    this.sharingData.state,
+                                ),
                             },
                             {
                                 key: 'tag-note-btn',

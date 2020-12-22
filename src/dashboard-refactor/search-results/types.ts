@@ -8,6 +8,7 @@ import {
 } from 'src/search/background/types'
 import { PipelineRes } from 'src/search'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
+import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 
 export interface InteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -17,6 +18,7 @@ export interface InteractionProps {
     onNotesBtnClick: React.MouseEventHandler
     onReplyBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
+    onUnshareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
     onEditBtnClick: React.MouseEventHandler
     onCommentChange: React.KeyboardEventHandler<HTMLTextAreaElement>
@@ -94,6 +96,7 @@ export interface NoteData {
     highlight?: string
     isEdited?: boolean
     displayTime: number
+    sharingInfo: AnnotationSharingInfo
 }
 
 export type PageData = Pick<
