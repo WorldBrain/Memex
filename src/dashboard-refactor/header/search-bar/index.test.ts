@@ -9,9 +9,7 @@ describe('Search query string parsing', () => {
             if (!expected) {
                 expect(searchDetailArray).toBeNull()
             }
-            searchDetailArray.forEach((value, index) => {
-                expect(value).toEqual(expected[index])
-            })
+            expect(searchDetailArray).toEqual(expected)
         })
     }
 })

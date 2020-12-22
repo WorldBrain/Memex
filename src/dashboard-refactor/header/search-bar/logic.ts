@@ -11,7 +11,7 @@ interface FilterKeyMapping {
     filter: FilterList
 }
 
-const filterKeysMapping: FilterKeyMapping[] = [
+export const filterKeysMapping: FilterKeyMapping[] = [
     {
         value: 't',
         filter: 'tagsIncluded',
@@ -83,8 +83,8 @@ export const getQueryObjectFromString: (str: string) => SearchQueryParsed = (
     }
     if (filterKeys[0].index > 0) {
         results.unshift({
-            type: 'search terms',
-            detail: str.trim(),
+            type: 'searchTerms',
+            detail: { value: str.trim() },
         })
     }
     return results
@@ -135,8 +135,8 @@ const extractFiltersAndQueryTerms: (
         const filterString = slicedSplitStr.join(' ')
         if (searchTerms) {
             results.unshift({
-                type: 'search terms',
-                detail: searchTerms,
+                type: 'searchTerms',
+                detail: { value: searchTerms },
             })
         }
         if (filterString.match(VALID_FILTER_STRING_PATTERN)) {

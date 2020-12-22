@@ -10,6 +10,7 @@ import { SearchQueryParsed } from '../types'
 //     `from:"date"`,
 //     `to:"date"`,
 //     ``,
+//     `t:foo foo bar foo bar`,
 //     `bar t:foo,bar,"foo bar" foo`,
 //     `foo from:"date" to:"other date" bar`,
 //     `foo t:tag,"other tag" c:list,"other list"`,
@@ -51,8 +52,8 @@ const testData: TestData[] = [
         testString: `search`,
         expected: [
             {
-                type: 'search terms',
-                detail: 'search',
+                type: 'searchTerms',
+                detail: { value: 'search' },
             },
         ],
     },
@@ -60,8 +61,8 @@ const testData: TestData[] = [
         testString: `search term`,
         expected: [
             {
-                type: 'search terms',
-                detail: 'search term',
+                type: 'searchTerms',
+                detail: { value: 'search term' },
             },
         ],
     },
@@ -118,11 +119,27 @@ const testData: TestData[] = [
         expected: [],
     },
     {
+        testString: `t:foo foo bar foo bar`,
+        expected: [
+            {
+                type: 'filter',
+                detail: {
+                    filterType: 'tagsIncluded',
+                    filters: ['foo'],
+                },
+            },
+            {
+                type: 'searchTerms',
+                detail: { value: 'foo bar foo bar' },
+            },
+        ],
+    },
+    {
         testString: `bar t:foo,bar,"foo bar" foo`,
         expected: [
             {
-                type: 'search terms',
-                detail: 'bar',
+                type: 'searchTerms',
+                detail: { value: 'bar' },
             },
             {
                 type: 'filter',
@@ -132,8 +149,8 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'search terms',
-                detail: 'foo',
+                type: 'searchTerms',
+                detail: { value: 'foo' },
             },
         ],
     },
@@ -141,8 +158,8 @@ const testData: TestData[] = [
         testString: `foo from:"date" to:"other date" bar`,
         expected: [
             {
-                type: 'search terms',
-                detail: 'foo',
+                type: 'searchTerms',
+                detail: { value: 'foo' },
             },
             {
                 type: 'filter',
@@ -159,8 +176,8 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'search terms',
-                detail: 'bar',
+                type: 'searchTerms',
+                detail: { value: 'bar' },
             },
         ],
     },
@@ -168,8 +185,8 @@ const testData: TestData[] = [
         testString: `foo t:tag,"other tag" c:list,"other list"`,
         expected: [
             {
-                type: 'search terms',
-                detail: 'foo',
+                type: 'searchTerms',
+                detail: { value: 'foo' },
             },
             {
                 type: 'filter',
@@ -191,8 +208,8 @@ const testData: TestData[] = [
         testString: `foo t:tag,"other tag" c:list,"other `,
         expected: [
             {
-                type: 'search terms',
-                detail: 'foo',
+                type: 'searchTerms',
+                detail: { value: 'foo' },
             },
             {
                 type: 'filter',
@@ -214,8 +231,8 @@ const testData: TestData[] = [
         testString: `foo t:tag bar d:foo.com,foobar.com foobar`,
         expected: [
             {
-                type: 'search terms',
-                detail: 'foo',
+                type: 'searchTerms',
+                detail: { value: 'foo' },
             },
             {
                 type: 'filter',
@@ -225,8 +242,8 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'search terms',
-                detail: 'bar',
+                type: 'searchTerms',
+                detail: { value: 'bar' },
             },
             {
                 type: 'filter',
@@ -236,8 +253,8 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'search terms',
-                detail: 'foobar',
+                type: 'searchTerms',
+                detail: { value: 'foobar' },
             },
         ],
     },
