@@ -1,182 +1,235 @@
+import { stripUnit } from 'polished'
 import {
     VALID_FILTER_STRING_PATTERN,
     SEARCH_QUERY_FILTER_KEY_PATTERN,
     SEARCH_QUERY_FILTER_KEY_PATTERN_G,
     SEARCH_QUERY_END_FILTER_KEY_PATTERN,
 } from 'src/dashboard-refactor/constants'
-import { FilterList, FilterKey, SearchQueryParsed } from '../types'
+import {
+    FilterKey,
+    SearchFilterType,
+    SearchQueryPart,
+    QueryFilterPart,
+    QueryTermPart,
+} from '../types'
+
+// Rules:
+// 1. Filter keys
+//  a. if character is ':', apply filterKeyTest function.
+//      - if returns !false, add SearchFilterDetail object to array
+//      - if returns false, continue
+//  b. if filter key is found, remove preceding characters and add them to array
+// 2. Filter strings
+//  a. if filter key detected, pass string to function which:
+//      - takes string as param
+//      - returns object containing string index and array of valid filters
+//      1. loops through string from character after ':'
+//      2. sets isInQuotes = true on the first " char and = false on second
+//          - if comma first, set to false and discard portion of string
+//      3. if comma and !isiInQuotes, add preceding string to array (trimming
+//          quotes) then restart with remaining string after the comma
+//      4. if space and isInQuotes, continue
+//      5. if (space and !isInQuotes) or (end of string and !isInQuotes), add last
+//          segment to array of filters and return
+//      6. if end of string and isInQuotes, discard section since last comma and
+//          return
+//  b. if returned index is equal to str.length-1, return array
+// 3. Strings
+//  a. if parser detects a valid filter key, push preceding str segment into array
+//  b. if parser reaches end of string outside of valid filter string, push preceding
+//      str segment into array and return
+
+// test strings:
+// `foo t:tag,"other tag" c:list,"other `,
+// `foo t:tag bar d:foo.com,foobar.com foobar`,
 
 interface FilterKeyMapping {
-    value: FilterKey
-    filter: FilterList
+    key: FilterKey
+    filterType: SearchFilterType
+    isExclusion?: boolean
+    variant?: 'from' | 'to'
 }
 
-export const filterKeysMapping: FilterKeyMapping[] = [
+const mapping: FilterKeyMapping[] = [
     {
-        value: 't',
-        filter: 'tagsIncluded',
+        key: 't',
+        filterType: 'tag',
     },
     {
-        value: '-t',
-        filter: 'tagsExcluded',
+        key: '-t',
+        filterType: 'tag',
+        isExclusion: true,
     },
     {
-        value: 'd',
-        filter: 'domainsIncluded',
+        key: 'd',
+        filterType: 'domain',
     },
     {
-        value: '-d',
-        filter: 'domainsExcluded',
+        key: 'd',
+        filterType: 'domain',
+        isExclusion: true,
     },
     {
-        value: 'c',
-        filter: 'listsIncluded',
+        key: 'c',
+        filterType: 'list',
     },
     {
-        value: '-c',
-        filter: 'listsExcluded',
+        key: 'c',
+        filterType: 'list',
+        isExclusion: true,
     },
     {
-        value: 'from',
-        filter: 'dateFrom',
+        key: 'from',
+        filterType: 'date',
+        variant: 'from',
     },
     {
-        value: 'to',
-        filter: 'dateTo',
+        key: 'to',
+        filterType: 'date',
+        variant: 'to',
     },
 ]
 
-interface FilterKeyMatch {
-    filterKey: FilterKey
-    isExclusion: boolean
-    index: number
-}
-
-/**
- * Extracts all valid filter strings from a string.
- * Valid filter strings start with one of 'from:', 'to:', 't:', 'd:', 'c:', '-t:',
- * '-d:', '-c:' and contain a string of alphanumeric characters (with spaces
- * allowed if within double quotes)
- * @param str string from which to extract filter strings
- */
-
-export const getQueryObjectFromString: (str: string) => SearchQueryParsed = (
-    str,
+export const parseSearchQuery: (queryString: string) => SearchQueryPart[] = (
+    queryString,
 ) => {
-    const filterKeys = getFilterKeys(str)
-    if (!filterKeys[0]) {
-        return []
-    }
-    const results: SearchQueryParsed = []
+    const parsedQuery: SearchQueryPart[] = []
+    // define var to hold unprocessed part of string
+    let fragment: string = ''
+    // define control booleans
+    let isInFilterStr: boolean
+    let isInQuotes: boolean
+    let followsClosingQuote: boolean
+    for (let i = 0; i < queryString.length; i++) {
+        const char = queryString[i]
+        fragment += char
 
-    // separate the string into chunks starting with a valid filter key to find the
-    // portion of them which constitutes a valid filter string
-    for (let i = filterKeys.length - 1; i >= 0; i--) {
-        // chop off last filterkey chunk
-        const { filterKey, index } = filterKeys[i]
-        const chunk = str.slice(index)
-        // reduce copy to exclude new chunk
-        str = str.slice(0, index)
-        // return array of filters and search terms for chunk and add to beginning of results
-        const queryLogic = extractFiltersAndQueryTerms(chunk, filterKey)
-        results.unshift(...queryLogic)
-    }
-    if (filterKeys[0].index > 0) {
-        results.unshift({
-            type: 'searchTerms',
-            detail: { value: str.trim() },
-        })
-    }
-    return results
-}
-
-/**
- * find details of all valid filter keys in a string
- *
- * @param str the query string returned by the onChange event
- * @returns filterKey: string value of the filter key,
- * isExclusion: boolean describing whether key is for an exclusion filter,
- * index: index of the first character of the match
- */
-
-const getFilterKeys: (str: string) => FilterKeyMatch[] = (str) => {
-    const reg = SEARCH_QUERY_FILTER_KEY_PATTERN_G
-    const arr: FilterKeyMatch[] = []
-    const result = str.matchAll(reg)
-    let match = result.next()
-    let isExclusion: boolean
-    while (!match.done) {
-        isExclusion = match.value[1][0] === `-`
-        arr.push({
-            filterKey: match.value[1],
-            isExclusion,
-            index: match.value.index,
-        })
-        match = result.next()
-    }
-    return arr
-}
-
-/**
- * Removes section of string from end which is not part of valid filter string and
- * returns it as a string of search queries
- * @param chunk string starting with a valid filter key
- */
-const extractFiltersAndQueryTerms: (
-    str: string,
-    filterKey: FilterKey,
-) => SearchQueryParsed = (str, filterKey) => {
-    const splitStr = str.split(' ')
-    const results: SearchQueryParsed = []
-    let searchTerms: string
-    for (let j = splitStr.length; j > 0; j--) {
-        const slicedSplitStr: string[] = splitStr.slice(0, j)
-        searchTerms = splitStr.slice(j).join(' ').trim() // this overwrites until searchTerms contains all non-filter-string space-separated words in the initial string
-        const filterString = slicedSplitStr.join(' ')
-        if (searchTerms) {
-            results.unshift({
-                type: 'searchTerms',
-                detail: { value: searchTerms },
-            })
+        // this code protects against more than 2x " chars in one filter section
+        if (followsClosingQuote) {
+            followsClosingQuote = false
+            if (char === ',') {
+                continue
+            } else {
+                pushNewFiltersToArray(fragment, parsedQuery)
+                isInFilterStr = false
+                fragment = ''
+                continue
+            }
         }
-        if (filterString.match(VALID_FILTER_STRING_PATTERN)) {
-            results.unshift({
-                type: 'filter',
-                detail: {
-                    filterType: filterKeysMapping.find(
-                        (obj) => filterKey === obj.value,
-                    ).filter,
-                    filters: getFilters(filterString),
-                },
-            })
-            return results
+
+        // if in filter string, apply relevant rules
+        if (isInFilterStr) {
+            if (char === '"') {
+                if (isInQuotes) {
+                    followsClosingQuote = true
+                }
+                isInQuotes = !isInQuotes
+                continue
+            }
+            if (isInQuotes && char === ',') {
+                isInQuotes = !isInQuotes
+                continue
+            }
+            if (char === ' ') {
+                if (isInQuotes) {
+                    continue
+                }
+                // extract filters from fragment and push into array
+                // note the fragment is altered here in order to ensure the whiteSpace is counted as searchTerm and not appended to a filter
+                pushNewFiltersToArray(
+                    fragment.slice(0, fragment.length - 1),
+                    parsedQuery,
+                )
+                // this is the place to emit any mutations to close state pickers
+                isInFilterStr = false
+                fragment = ' '
+                continue
+            }
+        }
+
+        // check for filter key completion
+        if (!isInFilterStr && char === ':') {
+            const filterKeyParts = parseFilterKey(fragment)
+            if (filterKeyParts) {
+                // this is the place to perform any state mutations to open pickers
+                parsedQuery.push(...filterKeyParts)
+                isInFilterStr = true
+                fragment = ''
+                continue
+            }
         }
     }
-    return results
+
+    // run steps for string end
+    if (fragment) {
+        if (isInFilterStr) {
+            pushNewFiltersToArray(fragment, parsedQuery)
+        } else {
+            parsedQuery.push(getSearchTermPart(fragment))
+        }
+    }
+
+    return parsedQuery
 }
 
-/**
- * Extracts individual search filters from a valid filter string
- * @param filterString a valid filter string which returns true when tested against
- * /(,|:)("(.+?)"|[^" ]+?) $/
- */
-const getFilters: (filterString: string) => string[] = (filterString) => {
-    // remove filter key from string
-    const filterKeyMatch = filterString.match(SEARCH_QUERY_FILTER_KEY_PATTERN)
-    const trimmedStr = filterString.slice(
-        filterKeyMatch.index + filterKeyMatch[0].length,
+const pushNewFiltersToArray: (
+    fragment: string,
+    parsedQuery: SearchQueryPart[],
+) => void = (fragment, parsedQuery) => {
+    const filterList = parseFilterString(fragment)
+    parsedQuery[parsedQuery.length - 1].detail['filters'].push(...filterList)
+}
+
+const parseFilterString: (filterString: string) => string[] = (
+    filterString,
+) => {
+    const filters = filterString.replace(/"|\"|\\\"/g, '').split(',')
+    return filters
+}
+
+const parseFilterKey: (str: string) => SearchQueryPart[] = (str) => {
+    const queryParts: SearchQueryPart[] = []
+    // test to see if preceding characters form a valid filter key
+    const match = str.match(SEARCH_QUERY_END_FILTER_KEY_PATTERN)
+    if (match) {
+        // remove filter key from end of string
+        const precedingStr = str.slice(0, str.length - match[0].length)
+        if (precedingStr) {
+            queryParts.push(getSearchTermPart(precedingStr))
+        }
+        // add filter key detail to array
+        queryParts.push(getFilterKeyPart(match[1]))
+        return queryParts
+    }
+}
+
+const getSearchTermPart: (str: string) => QueryTermPart = (str) => {
+    return {
+        type: 'searchTerm',
+        detail: {
+            value: str,
+        },
+    }
+}
+
+const getFilterKeyPart: (filterKey: string) => SearchQueryPart = (
+    filterKey,
+) => {
+    const { filterType, isExclusion, variant } = mapping.find(
+        (val) => val.key === filterKey,
     )
-    const cleanedStr = trimmedStr.replace(/\"|\\\"/g, ``)
-    return cleanedStr.split(',').map((str) => str.trim())
-}
-
-/**
- * Test string for filter key match.
- * @param str query string from onChange event
- * @returns null or string value of filter key
- */
-
-export const filterKeyTest: (str: string) => string = (str) => {
-    const match = str.match(SEARCH_QUERY_END_FILTER_KEY_PATTERN)[1]
-    return match[1]
+    const queryFilterPart: QueryFilterPart = {
+        type: 'filter',
+        detail: {
+            filterType,
+            filters: [],
+        },
+    }
+    if (isExclusion) {
+        queryFilterPart.detail['isExclusion'] = true
+    }
+    if (variant) {
+        queryFilterPart.detail['variant'] = variant
+    }
+    return queryFilterPart
 }
