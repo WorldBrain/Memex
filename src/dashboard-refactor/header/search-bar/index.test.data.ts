@@ -1,4 +1,4 @@
-import { SearchQueryParsed } from '../types'
+import { SearchQueryPart } from '../types'
 
 // const testStrings = [
 //     't:',
@@ -10,6 +10,7 @@ import { SearchQueryParsed } from '../types'
 //     `from:"date"`,
 //     `to:"date"`,
 //     ``,
+//     `foo t:foo,bar,"foo"" bar"`,
 //     `t:foo foo bar foo bar`,
 //     `bar t:foo,bar,"foo bar" foo`,
 //     `foo from:"date" to:"other date" bar`,
@@ -20,7 +21,7 @@ import { SearchQueryParsed } from '../types'
 
 interface TestData {
     testString: string
-    expected: SearchQueryParsed
+    expected: SearchQueryPart[]
 }
 
 const testData: TestData[] = [
@@ -30,7 +31,7 @@ const testData: TestData[] = [
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'tagsIncluded',
+                    filterType: 'tag',
                     filters: [],
                 },
             },
@@ -42,7 +43,7 @@ const testData: TestData[] = [
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'domainsIncluded',
+                    filterType: 'domain',
                     filters: ['domain'],
                 },
             },
@@ -52,7 +53,7 @@ const testData: TestData[] = [
         testString: `search`,
         expected: [
             {
-                type: 'searchTerms',
+                type: 'searchTerm',
                 detail: { value: 'search' },
             },
         ],
@@ -61,7 +62,7 @@ const testData: TestData[] = [
         testString: `search term`,
         expected: [
             {
-                type: 'searchTerms',
+                type: 'searchTerm',
                 detail: { value: 'search term' },
             },
         ],
@@ -72,7 +73,7 @@ const testData: TestData[] = [
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'listsIncluded',
+                    filterType: 'list',
                     filters: ['list'],
                 },
             },
@@ -84,7 +85,7 @@ const testData: TestData[] = [
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'tagsIncluded',
+                    filterType: 'tag',
                     filters: ['tag'],
                 },
             },
@@ -96,7 +97,8 @@ const testData: TestData[] = [
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'dateFrom',
+                    filterType: 'date',
+                    variant: 'from',
                     filters: ['date'],
                 },
             },
@@ -108,7 +110,8 @@ const testData: TestData[] = [
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'dateTo',
+                    filterType: 'date',
+                    variant: 'to',
                     filters: ['date'],
                 },
             },
@@ -119,18 +122,40 @@ const testData: TestData[] = [
         expected: [],
     },
     {
+        testString: `foo t:foo,bar,"foo"" bar"`,
+        expected: [
+            {
+                type: 'searchTerm',
+                detail: { value: 'foo ' },
+            },
+            {
+                type: 'filter',
+                detail: {
+                    filterType: 'tag',
+                    filters: ['foo', 'bar', 'foo'],
+                },
+            },
+            {
+                type: 'searchTerm',
+                detail: {
+                    value: '" bar"',
+                },
+            },
+        ],
+    },
+    {
         testString: `t:foo foo bar foo bar`,
         expected: [
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'tagsIncluded',
+                    filterType: 'tag',
                     filters: ['foo'],
                 },
             },
             {
-                type: 'searchTerms',
-                detail: { value: 'foo bar foo bar' },
+                type: 'searchTerm',
+                detail: { value: ' foo bar foo bar' },
             },
         ],
     },
@@ -138,19 +163,19 @@ const testData: TestData[] = [
         testString: `bar t:foo,bar,"foo bar" foo`,
         expected: [
             {
-                type: 'searchTerms',
-                detail: { value: 'bar' },
+                type: 'searchTerm',
+                detail: { value: 'bar ' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'tagsIncluded',
+                    filterType: 'tag',
                     filters: ['foo', 'bar', 'foo bar'],
                 },
             },
             {
-                type: 'searchTerms',
-                detail: { value: 'foo' },
+                type: 'searchTerm',
+                detail: { value: ' foo' },
             },
         ],
     },
@@ -158,47 +183,57 @@ const testData: TestData[] = [
         testString: `foo from:"date" to:"other date" bar`,
         expected: [
             {
-                type: 'searchTerms',
-                detail: { value: 'foo' },
+                type: 'searchTerm',
+                detail: { value: 'foo ' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'dateFrom',
+                    filterType: 'date',
+                    variant: 'from',
                     filters: ['date'],
                 },
             },
             {
+                type: 'searchTerm',
+                detail: { value: ' ' },
+            },
+            {
                 type: 'filter',
                 detail: {
-                    filterType: 'dateTo',
+                    filterType: 'date',
+                    variant: 'to',
                     filters: ['other date'],
                 },
             },
             {
-                type: 'searchTerms',
-                detail: { value: 'bar' },
+                type: 'searchTerm',
+                detail: { value: ' bar' },
             },
         ],
     },
     {
-        testString: `foo t:tag,"other tag" c:list,"other list"`,
+        testString: `foo t:tag,"other tag"  c:list,"other list"`,
         expected: [
             {
-                type: 'searchTerms',
-                detail: { value: 'foo' },
+                type: 'searchTerm',
+                detail: { value: 'foo ' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'tagsIncluded',
+                    filterType: 'tag',
                     filters: ['tag', 'other tag'],
                 },
             },
             {
+                type: 'searchTerm',
+                detail: { value: '  ' },
+            },
+            {
                 type: 'filter',
                 detail: {
-                    filterType: 'listsIncluded',
+                    filterType: 'list',
                     filters: ['list', 'other list'],
                 },
             },
@@ -208,53 +243,61 @@ const testData: TestData[] = [
         testString: `foo t:tag,"other tag" c:list,"other `,
         expected: [
             {
-                type: 'searchTerms',
-                detail: { value: 'foo' },
+                type: 'searchTerm',
+                detail: { value: 'foo ' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'tagsIncluded',
+                    filterType: 'tag',
                     filters: ['tag', 'other tag'],
                 },
             },
             {
+                type: 'searchTerm',
+                detail: { value: ' ' },
+            },
+            {
                 type: 'filter',
                 detail: {
-                    filterType: 'listsIncluded',
+                    filterType: 'list',
                     filters: ['list'],
                 },
+            },
+            {
+                type: 'searchTerm',
+                detail: { value: ' ' },
             },
         ],
     },
     {
-        testString: `foo t:tag bar d:foo.com,foobar.com foobar`,
+        testString: `foo t:tag bar d:foo.com,foobar.com foobar `,
         expected: [
             {
-                type: 'searchTerms',
-                detail: { value: 'foo' },
+                type: 'searchTerm',
+                detail: { value: 'foo ' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'tagsIncluded',
+                    filterType: 'tag',
                     filters: ['tag'],
                 },
             },
             {
-                type: 'searchTerms',
-                detail: { value: 'bar' },
+                type: 'searchTerm',
+                detail: { value: ' bar ' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'domainsIncluded',
+                    filterType: 'domain',
                     filters: ['foo.com', 'foobar.com'],
                 },
             },
             {
-                type: 'searchTerms',
-                detail: { value: 'foobar' },
+                type: 'searchTerm',
+                detail: { value: ' foobar ' },
             },
         ],
     },
