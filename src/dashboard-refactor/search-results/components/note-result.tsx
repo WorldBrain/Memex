@@ -12,7 +12,10 @@ import {
 } from '../types'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { PageNotesCopyPaster } from 'src/copy-paster'
-import { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
+import {
+    AnnotationSharingAccess,
+    AnnotationSharingInfo,
+} from 'src/content-sharing/ui/types'
 import {
     getShareAnnotationBtnState,
     SHARE_BUTTON_ICONS,
@@ -26,6 +29,7 @@ export interface Props
         NoteInteractionProps,
         NotePickerProps {
     sharingAccess: AnnotationSharingAccess
+    sharingInfo?: AnnotationSharingInfo
     isShared?: boolean
     hasTags?: boolean
 }

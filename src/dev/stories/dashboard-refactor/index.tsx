@@ -26,9 +26,11 @@ async function createDependencies(): Promise<DashboardProps> {
 
     return {
         annotationsBG,
+        authBG: backgroundModules.auth.remoteFunctions,
+        tagsBG: backgroundModules.tags.remoteFunctions,
         listsBG: backgroundModules.customLists.remoteFunctions,
         searchBG: backgroundModules.search.remoteFunctions.search,
-        tagsBG: backgroundModules.tags.remoteFunctions,
+        contentShareBG: backgroundModules.contentSharing.remoteFunctions,
     }
 }
 

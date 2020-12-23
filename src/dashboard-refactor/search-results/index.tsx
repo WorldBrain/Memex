@@ -81,6 +81,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         return (
             <NoteResult
                 key={noteId}
+                sharingAccess={this.props.sharingAccess}
+                sharingInfo={this.props.noteSharingInfo[noteId]}
                 {...noteData}
                 {...interactionProps}
                 {...pickerProps}

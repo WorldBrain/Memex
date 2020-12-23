@@ -8,7 +8,10 @@ import {
 } from 'src/search/background/types'
 import { PipelineRes } from 'src/search'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
-import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
+import {
+    AnnotationSharingInfo,
+    AnnotationSharingAccess,
+} from 'src/content-sharing/ui/types'
 
 export interface InteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -96,7 +99,6 @@ export interface NoteData {
     highlight?: string
     isEdited?: boolean
     displayTime: number
-    sharingInfo: AnnotationSharingInfo
 }
 
 export type PageData = Pick<
@@ -137,6 +139,9 @@ export interface PageResultsByDay {
 }
 
 export interface RootState {
+    sharingAccess: AnnotationSharingAccess
+    noteSharingInfo: { [noteId: string]: AnnotationSharingInfo }
+
     searchType: SearchType
     deletingPageArgs?: PageEventArgs
     deletingNoteArgs?: PageEventArgs & NoteEventArgs
@@ -166,6 +171,9 @@ interface PageEventArgs {
 interface NoteEventArgs {
     noteId: string
 }
+
+// Needs day, page ID, and note ID to access correct note in nested search results states
+type NoteDataEventArgs = NoteEventArgs & PageEventArgs
 
 export type Events = UIEvent<{
     // Root state mutations
@@ -211,7 +219,8 @@ export type Events = UIEvent<{
     setNoteBookmark: NoteEventArgs & { isBookmarked: boolean }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
-    setDeletingNoteArgs: NoteEventArgs & PageEventArgs
+    updateNoteShareState: NoteDataEventArgs
+    setDeletingNoteArgs: NoteDataEventArgs
     confirmNoteDelete: null
     cancelNoteDelete: null
 

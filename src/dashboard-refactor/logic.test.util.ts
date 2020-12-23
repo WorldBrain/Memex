@@ -68,9 +68,11 @@ export async function setupTest(
 
     const logic = new DashboardLogic({
         annotationsBG,
-        searchBG: device.backgroundModules.search.remoteFunctions.search,
-        listsBG: device.backgroundModules.customLists.remoteFunctions,
+        authBG: device.backgroundModules.auth.remoteFunctions,
         tagsBG: device.backgroundModules.tags.remoteFunctions,
+        listsBG: device.backgroundModules.customLists.remoteFunctions,
+        searchBG: device.backgroundModules.search.remoteFunctions.search,
+        contentShareBG: device.backgroundModules.contentSharing.remoteFunctions,
     })
     const searchResults = device.createElement<RootState, Events>(logic)
 

@@ -1,4 +1,5 @@
 import { UIEvent } from 'ui-logic-core'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 import {
     RootState as SearchResultsState,
@@ -12,8 +13,11 @@ import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { SearchInterface } from 'src/search/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 export interface RootState {
+    loadState: TaskState
     searchResults: SearchResultsState
     searchFilters: SearchFiltersState
     listsSidebar: ListsSidebarState
@@ -31,6 +35,8 @@ export type Events = UIEvent<
 
 export interface DashboardDependencies {
     tagsBG: RemoteTagsInterface
+    authBG: AuthRemoteFunctionsInterface
+    contentShareBG: ContentSharingInterface
     listsBG: RemoteCollectionsInterface
     searchBG: SearchInterface
     annotationsBG: AnnotationInterface<'caller'>

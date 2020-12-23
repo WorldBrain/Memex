@@ -1,9 +1,10 @@
-import { UILogic, UIEventHandler } from 'ui-logic-core'
+import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 
 import * as utils from './search-results/util'
-import { executeUITask } from 'src/util/ui-logic'
+import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
 import { haveTagsChanged } from 'src/util/have-tags-changed'
+import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 
 const updatePickerValues = (event: { added?: string; deleted?: string }) => (
     values: string[],
@@ -31,7 +32,10 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     getInitialState(): State {
         return {
+            loadState: 'pristine',
             searchResults: {
+                sharingAccess: 'feature-disabled',
+                noteSharingInfo: {},
                 results: {},
                 pageData: {
                     allIds: [],
@@ -86,16 +90,60 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
+    init: EventHandler<'init'> = async ({}) => {
+        await loadInitial(this, async () => {
+            await this.getSharingAccess()
+        })
+    }
+
+    async getSharingAccess() {
+        const isAllowed = await this.options.authBG.isAuthorizedForFeature(
+            'beta',
+        )
+
+        this.emitMutation({
+            searchResults: {
+                sharingAccess: {
+                    $set: isAllowed ? 'sharing-allowed' : 'feature-disabled',
+                },
+            },
+        })
+    }
+
+    async detectSharedNotes({ searchResults }: State) {
+        const noteSharingInfo: { [noteId: string]: AnnotationSharingInfo } = {}
+        const shareableNoteIds = new Set<string>()
+
+        for (const { pages } of Object.values(searchResults.results)) {
+            for (const { noteIds } of Object.values(pages.byId)) {
+                noteIds.search.forEach((id) => shareableNoteIds.add(id))
+                noteIds.user.forEach((id) => shareableNoteIds.add(id))
+            }
+        }
+
+        const remoteIds = await this.options.contentShareBG.getRemoteAnnotationIds(
+            {
+                annotationUrls: [...shareableNoteIds],
+            },
+        )
+
+        for (const localId of Object.keys(remoteIds)) {
+            noteSharingInfo[localId] = {
+                status: 'shared',
+                taskState: 'pristine',
+            }
+        }
+    }
+
     /* START - Misc event handlers */
-    searchPages: EventHandler<'searchPages'> = async ({
-        previousState: { searchFilters },
-    }) => {
+    searchPages: EventHandler<'searchPages'> = async ({ previousState }) => {
         await executeUITask(
             this,
             (taskState) => ({
                 searchResults: { searchState: { $set: taskState } },
             }),
             async () => {
+                const { searchFilters } = previousState
                 const result = await this.options.searchBG.searchPages({
                     contentTypes: {
                         pages: true,
@@ -117,26 +165,28 @@ export class DashboardLogic extends UILogic<State, Events> {
                     results,
                 } = utils.pageSearchResultToState(result)
 
-                this.emitMutation({
+                const mutation: UIMutation<State> = {
                     searchResults: {
                         results: { $set: results },
                         pageData: { $set: pageData },
                         noteData: { $set: noteData },
                     },
-                })
+                }
+                const state = this.withMutation(previousState, mutation)
+                this.emitMutation(mutation)
+                await this.detectSharedNotes(state)
             },
         )
     }
 
-    searchNotes: EventHandler<'searchNotes'> = async ({
-        previousState: { searchFilters },
-    }) => {
+    searchNotes: EventHandler<'searchNotes'> = async ({ previousState }) => {
         await executeUITask(
             this,
             (taskState) => ({
                 searchResults: { searchState: { $set: taskState } },
             }),
             async () => {
+                const { searchFilters } = previousState
                 const result = await this.options.searchBG.searchAnnotations({
                     endDate: searchFilters.dateTo,
                     startDate: searchFilters.dateFrom,
@@ -153,13 +203,17 @@ export class DashboardLogic extends UILogic<State, Events> {
                     results,
                 } = utils.annotationSearchResultToState(result)
 
-                this.emitMutation({
+                const mutation: UIMutation<State> = {
                     searchResults: {
                         results: { $set: results },
                         pageData: { $set: pageData },
                         noteData: { $set: noteData },
                     },
-                })
+                }
+
+                const state = this.withMutation(previousState, mutation)
+                this.emitMutation(mutation)
+                await this.detectSharedNotes(state)
             },
         )
     }
