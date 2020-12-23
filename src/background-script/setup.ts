@@ -61,7 +61,6 @@ import { runInTab } from 'src/util/webextensionRPC'
 import { PageAnalyzerInterface } from 'src/page-analysis/types'
 import { TabManager } from 'src/tab-management/background/tab-manager'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
-import { type } from 'openpgp'
 import pick from 'lodash/pick'
 
 export interface BackgroundModules {

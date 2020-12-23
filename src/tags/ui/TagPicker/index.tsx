@@ -158,6 +158,12 @@ class TagPicker extends StatefulUIElement<
                         />
                     }
                 />
+                <EntryResultsList
+                    entries={this.state.displayEntries}
+                    renderEntryRow={this.renderTagRow}
+                    emptyView={this.renderEmptyList()}
+                    id="tagResults"
+                />
                 {this.shouldShowAddNew && (
                     <AddNewEntry
                         resultItem={
@@ -170,12 +176,6 @@ class TagPicker extends StatefulUIElement<
                         {this.renderNewTagAllTabsButton()}
                     </AddNewEntry>
                 )}
-                <EntryResultsList
-                    entries={this.state.displayEntries}
-                    renderEntryRow={this.renderTagRow}
-                    emptyView={this.renderEmptyList()}
-                    id="tagResults"
-                />
             </>
         )
     }

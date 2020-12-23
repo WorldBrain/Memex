@@ -82,6 +82,20 @@ function isAlpha(e: React.KeyboardEvent): boolean {
     return e.keyCode >= 65 && e.keyCode <= 90
 }
 
+function checkOperatingSystem() {
+    let OperatingSystem = navigator.platform
+
+    if (OperatingSystem.startsWith('Mac')) {
+        return 'Mac'
+    }
+    if (OperatingSystem.startsWith('Win')) {
+        return 'Win'
+    }
+    if (OperatingSystem.startsWith('Linux')) {
+        return 'alt'
+    }
+}
+
 export const convertKeyboardEventToKeyString = (
     e: React.KeyboardEvent,
     getKeyVal = (event: React.KeyboardEvent) =>
@@ -91,11 +105,23 @@ export const convertKeyboardEventToKeyString = (
         return ''
     }
 
-    return (
-        (e.altKey ? 'alt+' : '') +
-        (e.ctrlKey ? 'ctrl+' : '') +
-        (e.metaKey ? 'meta+' : '') +
-        (e.shiftKey ? 'shift+' : '') +
-        getKeyVal(e).toLowerCase()
-    )
+    if (checkOperatingSystem() === 'Mac') {
+        return (
+            (e.altKey ? 'option+' : '') +
+            (e.ctrlKey ? 'ctrl+' : '') +
+            (e.metaKey ? 'meta+' : '') +
+            (e.shiftKey ? 'shift+' : '') +
+            getKeyVal(e).toLowerCase()
+        )
+    }
+
+    if (checkOperatingSystem() === 'Win') {
+        return (
+            (e.altKey ? 'alt+' : '') +
+            (e.ctrlKey ? 'ctrl+' : '') +
+            (e.metaKey ? 'meta+' : '') +
+            (e.shiftKey ? 'shift+' : '') +
+            getKeyVal(e).toLowerCase()
+        )
+    }
 }

@@ -11,7 +11,7 @@ interface Props {
 export default (props: Props) => {
     return (
         <AddNew onClick={props.onPress}>
-            <span>Create</span>
+            <span>Create (Enter)</span>
             {props.resultItem}
             <Flex />
             {props.children}
@@ -27,7 +27,6 @@ export const AddNew = styled.div`
     align-items: start;
     display: flex;
     align-items: center;
-    background: ${(props) => props.theme.border};
     color: ${(props) => props.theme.text};
     font-size: ${fontSizeSmall}px;
     padding: 4px;
