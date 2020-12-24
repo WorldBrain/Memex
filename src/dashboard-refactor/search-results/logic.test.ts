@@ -192,7 +192,7 @@ describe('Dashboard search results logic', () => {
                     title: DATA.PAGE_1.fullTitle,
                 }),
             )
-            expect(searchResults.state.searchResults.deletingPageArgs).toEqual(
+            expect(searchResults.state.modals.deletingPageArgs).toEqual(
                 undefined,
             )
             expect(
@@ -207,7 +207,7 @@ describe('Dashboard search results logic', () => {
                 pageId,
                 day: -1,
             })
-            expect(searchResults.state.searchResults.deletingPageArgs).toEqual({
+            expect(searchResults.state.modals.deletingPageArgs).toEqual({
                 pageId,
                 day: -1,
             })
@@ -224,7 +224,7 @@ describe('Dashboard search results logic', () => {
                     title: DATA.PAGE_1.fullTitle,
                 }),
             )
-            expect(searchResults.state.searchResults.deletingPageArgs).toEqual(
+            expect(searchResults.state.modals.deletingPageArgs).toEqual(
                 undefined,
             )
             expect(
@@ -253,7 +253,7 @@ describe('Dashboard search results logic', () => {
                     title: DATA.PAGE_1.fullTitle,
                 }),
             )
-            expect(searchResults.state.searchResults.deletingPageArgs).toEqual(
+            expect(searchResults.state.modals.deletingPageArgs).toEqual(
                 undefined,
             )
             expect(
@@ -273,7 +273,7 @@ describe('Dashboard search results logic', () => {
                 pageId,
                 day: -1,
             })
-            expect(searchResults.state.searchResults.deletingPageArgs).toEqual({
+            expect(searchResults.state.modals.deletingPageArgs).toEqual({
                 pageId,
                 day: -1,
             })
@@ -298,7 +298,7 @@ describe('Dashboard search results logic', () => {
                     .collection('pages')
                     .findOneObject({ url: pageId }),
             ).toEqual(null)
-            expect(searchResults.state.searchResults.deletingPageArgs).toEqual(
+            expect(searchResults.state.modals.deletingPageArgs).toEqual(
                 undefined,
             )
             expect(
@@ -1269,9 +1269,9 @@ describe('Dashboard search results logic', () => {
                         comment: DATA.NOTE_1.comment,
                     }),
                 )
-                expect(
-                    searchResults.state.searchResults.deletingNoteArgs,
-                ).toEqual(undefined)
+                expect(searchResults.state.modals.deletingNoteArgs).toEqual(
+                    undefined,
+                )
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
@@ -1285,9 +1285,7 @@ describe('Dashboard search results logic', () => {
                     pageId: DATA.PAGE_1.normalizedUrl,
                     day: -1,
                 })
-                expect(
-                    searchResults.state.searchResults.deletingNoteArgs,
-                ).toEqual({
+                expect(searchResults.state.modals.deletingNoteArgs).toEqual({
                     noteId,
                     pageId: DATA.PAGE_1.normalizedUrl,
                     day: -1,
@@ -1305,9 +1303,9 @@ describe('Dashboard search results logic', () => {
                         comment: DATA.NOTE_1.comment,
                     }),
                 )
-                expect(
-                    searchResults.state.searchResults.deletingNoteArgs,
-                ).toEqual(undefined)
+                expect(searchResults.state.modals.deletingNoteArgs).toEqual(
+                    undefined,
+                )
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
@@ -1335,9 +1333,9 @@ describe('Dashboard search results logic', () => {
                         comment: DATA.NOTE_1.comment,
                     }),
                 )
-                expect(
-                    searchResults.state.searchResults.deletingNoteArgs,
-                ).toEqual(undefined)
+                expect(searchResults.state.modals.deletingNoteArgs).toEqual(
+                    undefined,
+                )
                 expect(
                     searchResults.state.searchResults.noteData.allIds.includes(
                         noteId,
@@ -1356,9 +1354,7 @@ describe('Dashboard search results logic', () => {
                     pageId: DATA.PAGE_1.normalizedUrl,
                     day: -1,
                 })
-                expect(
-                    searchResults.state.searchResults.deletingNoteArgs,
-                ).toEqual({
+                expect(searchResults.state.modals.deletingNoteArgs).toEqual({
                     noteId,
                     pageId: DATA.PAGE_1.normalizedUrl,
                     day: -1,
@@ -1384,9 +1380,9 @@ describe('Dashboard search results logic', () => {
                         .collection('annotations')
                         .findOneObject({ url: noteId }),
                 ).toEqual(null)
-                expect(
-                    searchResults.state.searchResults.deletingNoteArgs,
-                ).toEqual(undefined)
+                expect(searchResults.state.modals.deletingNoteArgs).toEqual(
+                    undefined,
+                )
                 expect(
                     searchResults.state.searchResults.noteData.allIds.includes(
                         noteId,

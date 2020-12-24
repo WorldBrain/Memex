@@ -4,6 +4,8 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import {
     RootState as SearchResultsState,
     Events as SearchResultEvents,
+    NoteDataEventArgs,
+    PageEventArgs,
 } from './search-results/types'
 import {
     RootState as ListsSidebarState,
@@ -21,10 +23,12 @@ export interface RootState {
     searchResults: SearchResultsState
     searchFilters: SearchFiltersState
     listsSidebar: ListsSidebarState
+    modals: DashboardModalsState
 }
 
 export type Events = UIEvent<
-    SearchResultEvents &
+    DashboardModalsEvents &
+        SearchResultEvents &
         SearchFilterEvents &
         ListsSidebarEvents & {
             searchPages: null
@@ -66,6 +70,28 @@ export interface SelectedState {
     onSelection(id: number): void
     isSelected: boolean
 }
+
+export interface DashboardModalsState {
+    showShareList?: boolean
+    showBetaFeature?: boolean
+    showSubscription?: boolean
+    showNoteShareOnboarding?: boolean
+
+    deletingListId?: number
+    deletingPageArgs?: PageEventArgs
+    deletingNoteArgs?: NoteDataEventArgs
+}
+
+export type DashboardModalsEvents = UIEvent<{
+    setShowShareListModal: { isShown: boolean }
+    setShowBetaFeatureModal: { isShown: boolean }
+    setShowSubscriptionModal: { isShown: boolean }
+    setShowNoteShareOnboardingModal: { isShown: boolean }
+
+    setDeletingListId: { listId: number }
+    setDeletingPageArgs: PageEventArgs
+    setDeletingNoteArgs: NoteDataEventArgs
+}>
 
 export type ListSource = 'local-lists' | 'followed-list'
 

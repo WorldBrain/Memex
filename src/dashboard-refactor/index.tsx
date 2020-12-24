@@ -318,7 +318,7 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderModals() {
-        if (this.state.listsSidebar.deletingListId) {
+        if (this.state.modals.deletingListId) {
             return (
                 <DeleteConfirmModal
                     isShown
@@ -331,7 +331,7 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (this.state.searchResults.deletingNoteArgs) {
+        if (this.state.modals.deletingNoteArgs) {
             return (
                 <DeleteConfirmModal
                     isShown
@@ -344,7 +344,7 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (this.state.searchResults.deletingPageArgs) {
+        if (this.state.modals.deletingPageArgs) {
             return (
                 <DeleteConfirmModal
                     isShown

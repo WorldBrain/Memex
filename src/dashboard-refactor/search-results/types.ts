@@ -143,8 +143,6 @@ export interface RootState {
     noteSharingInfo: { [noteId: string]: AnnotationSharingInfo }
 
     searchType: SearchType
-    deletingPageArgs?: PageEventArgs
-    deletingNoteArgs?: PageEventArgs & NoteEventArgs
 
     /** Holds page data specific to each page occurence on a specific day. */
     results: { [day: number]: PageResultsByDay }
@@ -163,17 +161,17 @@ export interface RootState {
     newNoteCreateState: TaskState
 }
 
-interface PageEventArgs {
+export interface PageEventArgs {
     pageId: string
     day: number
 }
 
-interface NoteEventArgs {
+export interface NoteEventArgs {
     noteId: string
 }
 
 // Needs day, page ID, and note ID to access correct note in nested search results states
-type NoteDataEventArgs = NoteEventArgs & PageEventArgs
+export type NoteDataEventArgs = NoteEventArgs & PageEventArgs
 
 export type Events = UIEvent<{
     // Root state mutations
@@ -190,7 +188,6 @@ export type Events = UIEvent<{
         skipPageIndexing?: boolean
     }
     setPageBookmark: { id: string; isBookmarked: boolean }
-    setDeletingPageArgs: PageEventArgs
     confirmPageDelete: null
     cancelPageDelete: null
 
@@ -220,7 +217,6 @@ export type Events = UIEvent<{
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
     updateNoteShareState: NoteDataEventArgs
-    setDeletingNoteArgs: NoteDataEventArgs
     confirmNoteDelete: null
     cancelNoteDelete: null
 

@@ -40,7 +40,6 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
 
         editingListId?: number
         selectedListId?: number
-        deletingListId?: number
         showMoreMenuListId?: number
 
         listDeleteState: TaskState
@@ -68,7 +67,6 @@ export type Events = UIEvent<{
     setSelectedListId: { listId: number }
     setShowMoreMenuListId: { listId: number }
 
-    setDeletingListId: { listId: number }
     confirmListDelete: null
     cancelListDelete: null
 }>

@@ -423,15 +423,11 @@ describe('Dashboard search results logic', () => {
             name: listName,
         })
 
-        expect(searchResults.state.listsSidebar.deletingListId).toEqual(
-            undefined,
-        )
+        expect(searchResults.state.modals.deletingListId).toEqual(undefined)
         await searchResults.processEvent('setDeletingListId', { listId })
-        expect(searchResults.state.listsSidebar.deletingListId).toEqual(listId)
+        expect(searchResults.state.modals.deletingListId).toEqual(listId)
         await searchResults.processEvent('cancelListDelete', null)
-        expect(searchResults.state.listsSidebar.deletingListId).toEqual(
-            undefined,
-        )
+        expect(searchResults.state.modals.deletingListId).toEqual(undefined)
 
         expect(
             await device.storageManager
@@ -489,11 +485,9 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.listDeleteState).toEqual(
             'pristine',
         )
-        expect(searchResults.state.listsSidebar.deletingListId).toEqual(
-            undefined,
-        )
+        expect(searchResults.state.modals.deletingListId).toEqual(undefined)
         await searchResults.processEvent('setDeletingListId', { listId })
-        expect(searchResults.state.listsSidebar.deletingListId).toEqual(listId)
+        expect(searchResults.state.modals.deletingListId).toEqual(listId)
 
         const deleteP = searchResults.processEvent('confirmListDelete', null)
         expect(searchResults.state.listsSidebar.listDeleteState).toEqual(
@@ -505,9 +499,7 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.listDeleteState).toEqual(
             'success',
         )
-        expect(searchResults.state.listsSidebar.deletingListId).toEqual(
-            undefined,
-        )
+        expect(searchResults.state.modals.deletingListId).toEqual(undefined)
 
         expect(
             await device.storageManager

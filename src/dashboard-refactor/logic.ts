@@ -32,6 +32,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     getInitialState(): State {
         return {
+            modals: {},
             loadState: 'pristine',
             searchResults: {
                 sharingAccess: 'feature-disabled',
@@ -303,26 +304,24 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
     }) => {
         this.emitMutation({
-            searchResults: { deletingPageArgs: { $set: event } },
+            modals: { deletingPageArgs: { $set: event } },
         })
     }
 
     cancelPageDelete: EventHandler<'cancelPageDelete'> = async ({}) => {
         this.emitMutation({
-            searchResults: {
-                deletingPageArgs: { $set: undefined },
-            },
+            modals: { deletingPageArgs: { $set: undefined } },
         })
     }
 
     confirmPageDelete: EventHandler<'confirmPageDelete'> = async ({
-        previousState: { searchResults },
+        previousState: { searchResults, modals },
     }) => {
-        if (!searchResults.deletingPageArgs) {
+        if (!modals.deletingPageArgs) {
             throw new Error('No page ID is set for deletion')
         }
 
-        const { pageId, day } = searchResults.deletingPageArgs
+        const { pageId, day } = modals.deletingPageArgs
         const pageAllIds = searchResults.pageData.allIds.filter(
             (id) => id !== pageId,
         )
@@ -339,8 +338,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 await this.options.searchBG.delPages([pageId])
 
                 this.emitMutation({
-                    searchResults: {
+                    modals: {
                         deletingPageArgs: { $set: undefined },
+                    },
+                    searchResults: {
                         results: {
                             [day]: {
                                 pages: {
@@ -684,26 +685,24 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
     }) => {
         this.emitMutation({
-            searchResults: { deletingNoteArgs: { $set: event } },
+            modals: { deletingNoteArgs: { $set: event } },
         })
     }
 
     cancelNoteDelete: EventHandler<'cancelNoteDelete'> = async ({}) => {
         this.emitMutation({
-            searchResults: {
-                deletingNoteArgs: { $set: undefined },
-            },
+            modals: { deletingNoteArgs: { $set: undefined } },
         })
     }
 
     confirmNoteDelete: EventHandler<'confirmNoteDelete'> = async ({
-        previousState: { searchResults },
+        previousState: { modals, searchResults },
     }) => {
-        if (!searchResults.deletingNoteArgs) {
+        if (!modals.deletingNoteArgs) {
             throw new Error('No note ID is set for deletion')
         }
 
-        const { noteId, pageId, day } = searchResults.deletingNoteArgs
+        const { noteId, pageId, day } = modals.deletingNoteArgs
         const pageResult = searchResults.results[day].pages.byId[pageId]
         const pageResultNoteIds = pageResult.noteIds[
             pageResult.notesType
@@ -721,8 +720,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 await this.options.annotationsBG.deleteAnnotation(noteId)
 
                 this.emitMutation({
-                    searchResults: {
+                    modals: {
                         deletingNoteArgs: { $set: undefined },
+                    },
+                    searchResults: {
                         results: {
                             [day]: {
                                 pages: {
@@ -1360,7 +1361,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
     }) => {
         this.emitMutation({
-            listsSidebar: {
+            modals: {
                 deletingListId: { $set: event.listId },
             },
         })
@@ -1368,7 +1369,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     cancelListDelete: EventHandler<'cancelListDelete'> = async ({ event }) => {
         this.emitMutation({
-            listsSidebar: {
+            modals: {
                 deletingListId: { $set: undefined },
             },
         })
@@ -1378,7 +1379,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const listId = previousState.listsSidebar.deletingListId
+        const listId = previousState.modals.deletingListId
         // TODO: support for non-local lists
         const localListIds = previousState.listsSidebar.localLists.listIds.filter(
             (id) => id !== listId,
@@ -1397,8 +1398,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 await this.options.listsBG.removeList({ id: listId })
 
                 this.emitMutation({
-                    listsSidebar: {
+                    modals: {
                         deletingListId: { $set: undefined },
+                    },
+                    listsSidebar: {
                         localLists: { listIds: { $set: localListIds } },
                         listData: { $unset: [listId] },
                     },
