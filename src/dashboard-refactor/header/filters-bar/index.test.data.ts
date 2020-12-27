@@ -1,4 +1,4 @@
-import { SearchQueryParsed, SearchFilterDetail } from '../types'
+import { SearchFilterDetail, SearchQueryPart } from '../types'
 
 // const newFilterObjs = [
 //     't:',
@@ -19,38 +19,42 @@ import { SearchQueryParsed, SearchFilterDetail } from '../types'
 
 interface TestData {
     newFilterObj: SearchFilterDetail
-    oldQueryArray: SearchQueryParsed
-    newQueryArray: SearchQueryParsed
+    oldQueryArray: SearchQueryPart[]
+    newQueryArray: SearchQueryPart[]
 }
 
 const testData: TestData[] = [
     {
         newFilterObj: {
-            filterType: 'tagsIncluded',
+            filterType: 'tag',
             filters: [],
+            rawContent: '',
         },
         oldQueryArray: [],
         newQueryArray: [
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'tagsIncluded',
+                    filterType: 'tag',
                     filters: [],
+                    rawContent: '',
                 },
             },
         ],
     },
     {
         newFilterObj: {
-            filterType: 'domainsIncluded',
+            filterType: 'domain',
             filters: ['domain'],
+            rawContent: 'domain',
         },
         oldQueryArray: [
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'domainsIncluded',
+                    filterType: 'domain',
                     filters: [],
+                    rawContent: '',
                 },
             },
         ],
@@ -58,48 +62,55 @@ const testData: TestData[] = [
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'domainsIncluded',
+                    filterType: 'domain',
                     filters: ['domain'],
+                    rawContent: 'domain',
                 },
             },
         ],
     },
     {
         newFilterObj: {
-            filterType: 'dateFrom',
+            filterType: 'date',
+            variant: 'from',
             filters: ['date'],
+            rawContent: '"date"',
         },
         oldQueryArray: [
             {
-                type: 'searchTerms',
+                type: 'string',
                 detail: { value: 'search' },
             },
         ],
         newQueryArray: [
             {
-                type: 'searchTerms',
-                detail: { value: 'search' },
+                type: 'string',
+                detail: { value: 'search ' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'dateFrom',
+                    filterType: 'date',
+                    variant: 'from',
                     filters: ['date'],
+                    rawContent: '"date"',
                 },
             },
         ],
     },
     {
         newFilterObj: {
-            filterType: 'listsIncluded',
+            filterType: 'list',
             filters: ['other lists'],
+            rawContent: '"other lists"',
         },
         oldQueryArray: [
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'listsIncluded',
+                    filterType: 'list',
                     filters: ['list'],
+                    rawContent: 'list',
                 },
             },
         ],
@@ -107,179 +118,192 @@ const testData: TestData[] = [
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'listsIncluded',
+                    filterType: 'list',
                     filters: ['list', 'other lists'],
+                    rawContent: 'list,"other lists"',
                 },
             },
         ],
     },
     {
         newFilterObj: {
-            filterType: 'dateTo',
+            filterType: 'date',
+            variant: 'to',
             filters: ['date'],
+            rawContent: '"date"',
         },
         oldQueryArray: [],
         newQueryArray: [
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'dateTo',
+                    filterType: 'date',
+                    variant: 'to',
                     filters: ['date'],
+                    rawContent: '"date"',
                 },
             },
         ],
     },
     {
         newFilterObj: {
-            filterType: 'tagsIncluded',
+            filterType: 'tag',
             filters: ['foo bar'],
+            rawContent: '"foo bar"',
         },
         oldQueryArray: [
             {
-                type: 'searchTerms',
+                type: 'string',
                 detail: { value: 'bar' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'tagsIncluded',
+                    filterType: 'tag',
                     filters: ['foo', 'bar'],
+                    rawContent: 'foo,bar',
                 },
             },
             {
-                type: 'searchTerms',
+                type: 'string',
                 detail: { value: 'foo' },
             },
         ],
         newQueryArray: [
             {
-                type: 'searchTerms',
+                type: 'string',
                 detail: { value: 'bar' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'tagsIncluded',
+                    filterType: 'tag',
                     filters: ['foo', 'bar', 'foo bar'],
+                    rawContent: 'foo,bar,"foo bar"',
                 },
             },
             {
-                type: 'searchTerms',
+                type: 'string',
                 detail: { value: 'foo' },
             },
         ],
     },
     {
         newFilterObj: {
-            filterType: 'dateTo',
-            filters: ['other date'],
+            filterType: 'date',
+            variant: 'to',
+            filters: [''],
+            rawContent: '',
         },
         oldQueryArray: [
             {
-                type: 'searchTerms',
+                type: 'string',
                 detail: { value: 'foo' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'dateFrom',
+                    filterType: 'date',
+                    variant: 'from',
                     filters: ['date'],
+                    rawContent: '"date"',
                 },
             },
             {
-                type: 'filter',
-                detail: {
-                    filterType: 'dateTo',
-                    filters: [],
-                },
-            },
-            {
-                type: 'searchTerms',
+                type: 'string',
                 detail: { value: 'bar' },
             },
         ],
         newQueryArray: [
             {
-                type: 'searchTerms',
+                type: 'string',
                 detail: { value: 'foo' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'dateFrom',
+                    filterType: 'date',
+                    variant: 'from',
                     filters: ['date'],
+                    rawContent: '"date"',
                 },
+            },
+            {
+                type: 'string',
+                detail: { value: ' ' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'dateTo',
+                    filterType: 'date',
+                    variant: 'to',
                     filters: ['other date'],
+                    rawContent: '"other date"',
                 },
             },
             {
-                type: 'searchTerms',
+                type: 'string',
                 detail: { value: 'bar' },
             },
         ],
     },
     {
         newFilterObj: {
-            filterType: 'listsIncluded',
+            filterType: 'list',
             filters: ['better list'],
+            rawContent: '"better list"',
         },
         oldQueryArray: [
             {
-                type: 'searchTerms',
-                detail: { value: 'foo' },
+                type: 'string',
+                detail: { value: 'foo ' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'tagsIncluded',
+                    filterType: 'tag',
                     filters: ['tag', 'other tag'],
+                    rawContent: 'tag,"other tag"',
                 },
+            },
+            {
+                type: 'string',
+                detail: { value: ' ' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'listsIncluded',
-                    filters: ['list'],
+                    filterType: 'list',
+                    filters: ['list', 'other '],
+                    rawContent: 'list,"other ',
+                    lastFilterIncompleteQuote: true,
                 },
-            },
-            {
-                type: 'filterFragment',
-                detail: { value: '"other' },
-            },
-            {
-                type: 'trailingWhitespace',
             },
         ],
         newQueryArray: [
             {
-                type: 'searchTerms',
+                type: 'string',
                 detail: { value: 'foo' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'tagsIncluded',
+                    filterType: 'tag',
                     filters: ['tag', 'other tag'],
+                    rawContent: 'tag,"other tag"',
                 },
+            },
+            {
+                type: 'string',
+                detail: { value: ' ' },
             },
             {
                 type: 'filter',
                 detail: {
-                    filterType: 'listsIncluded',
-                    filters: ['list', 'better list'],
+                    filterType: 'list',
+                    filters: ['list', 'other ', 'better list'],
+                    rawContent: 'list,"other ","better list"',
                 },
-            },
-            {
-                type: 'filterFragment',
-                detail: { value: '"other' },
-            },
-            {
-                type: 'trailingWhitespace',
             },
         ],
     },

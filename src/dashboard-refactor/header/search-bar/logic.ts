@@ -1,10 +1,4 @@
-import { stripUnit } from 'polished'
-import {
-    VALID_FILTER_STRING_PATTERN,
-    SEARCH_QUERY_FILTER_KEY_PATTERN,
-    SEARCH_QUERY_FILTER_KEY_PATTERN_G,
-    SEARCH_QUERY_END_FILTER_KEY_PATTERN,
-} from 'src/dashboard-refactor/constants'
+import { SEARCH_QUERY_END_FILTER_KEY_PATTERN } from 'src/dashboard-refactor/constants'
 import {
     FilterKey,
     SearchFilterType,
@@ -104,15 +98,18 @@ export const parseSearchQuery: (queryString: string) => SearchQueryPart[] = (
         const char = queryString[i]
         fragment += char
 
-        // this code protects against more than 2x " chars in one filter section
+        // this code ensures that a filter string ends after quotes if a non-comma char is detected
         if (followsClosingQuote) {
             followsClosingQuote = false
             if (char === ',') {
                 continue
             } else {
-                pushNewFiltersToArray(fragment, parsedQuery)
+                pushNewFiltersToArray(
+                    fragment.slice(0, fragment.length - 1),
+                    parsedQuery,
+                )
+                fragment = fragment[fragment.length - 1]
                 isInFilterStr = false
-                fragment = ''
                 continue
             }
         }
@@ -140,9 +137,9 @@ export const parseSearchQuery: (queryString: string) => SearchQueryPart[] = (
                     fragment.slice(0, fragment.length - 1),
                     parsedQuery,
                 )
+                fragment = fragment[fragment.length - 1]
                 // this is the place to emit any mutations to close state pickers
                 isInFilterStr = false
-                fragment = ' '
                 continue
             }
         }
@@ -165,7 +162,7 @@ export const parseSearchQuery: (queryString: string) => SearchQueryPart[] = (
         if (isInFilterStr) {
             pushNewFiltersToArray(fragment, parsedQuery)
         } else {
-            parsedQuery.push(getSearchTermPart(fragment))
+            pushSearchTermToArray(fragment, parsedQuery)
         }
     }
 
@@ -175,9 +172,11 @@ export const parseSearchQuery: (queryString: string) => SearchQueryPart[] = (
 const pushNewFiltersToArray: (
     fragment: string,
     parsedQuery: SearchQueryPart[],
-) => void = (fragment, parsedQuery) => {
-    const filterList = parseFilterString(fragment)
-    parsedQuery[parsedQuery.length - 1].detail['filters'].push(...filterList)
+) => SearchQueryPart[] = (fragment, parsedQuery) => {
+    const filters = parseFilterString(fragment)
+    parsedQuery[parsedQuery.length - 1].detail['rawContent'] = fragment
+    parsedQuery[parsedQuery.length - 1].detail['filters'].push(...filters)
+    return parsedQuery
 }
 
 const parseFilterString: (filterString: string) => string[] = (
@@ -195,7 +194,7 @@ const parseFilterKey: (str: string) => SearchQueryPart[] = (str) => {
         // remove filter key from end of string
         const precedingStr = str.slice(0, str.length - match[0].length)
         if (precedingStr) {
-            queryParts.push(getSearchTermPart(precedingStr))
+            pushSearchTermToArray(precedingStr, queryParts)
         }
         // add filter key detail to array
         queryParts.push(getFilterKeyPart(match[1]))
@@ -203,13 +202,25 @@ const parseFilterKey: (str: string) => SearchQueryPart[] = (str) => {
     }
 }
 
-const getSearchTermPart: (str: string) => QueryTermPart = (str) => {
-    return {
-        type: 'searchTerm',
-        detail: {
-            value: str,
-        },
+const pushSearchTermToArray: (
+    str: string,
+    parsedQuery: SearchQueryPart[],
+) => SearchQueryPart[] = (str, parsedQuery) => {
+    const existingPart =
+        parsedQuery[parsedQuery.length - 1]?.type === 'searchTerm'
+            ? parsedQuery[parsedQuery.length - 1]
+            : null
+    if (existingPart) {
+        existingPart.detail['value'] += str
+    } else {
+        parsedQuery.push({
+            type: 'searchTerm',
+            detail: {
+                value: str,
+            },
+        })
     }
+    return parsedQuery
 }
 
 const getFilterKeyPart: (filterKey: string) => SearchQueryPart = (
@@ -223,6 +234,7 @@ const getFilterKeyPart: (filterKey: string) => SearchQueryPart = (
         detail: {
             filterType,
             filters: [],
+            rawContent: '',
         },
     }
     if (isExclusion) {

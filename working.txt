@@ -14,20 +14,21 @@
 
 // Direction of work
 
-// Filters Pickers
-// X 1. Fix build
-// X 2. Move prop def'n to carried-down props
-// 3. Investigate whether query value can be passed in through props
+// Search-Bar filter logic
+// 1. Update logic to use 'string' instead of 'searchTerm' for the QueryStringPart detail
+// 2. Rename pushNewFiltersToArray func to pushFiltersToArray
+// 3. Alter pushNewFiltersToArray func to flag incomplete filters (if isInQuotes === true 
+//    upon string end)
 
-Problem: Picker query string is controlled internally
-Possible solutions:
-1. Overwrite this.state.query in picker UI components
-2. Extend each picker UI component which runs this.processEvent('searchInputChanged', {query})
-3. Add a 'queryOverride' dependency to the generic picker logic and emit a mutation for the 
-   query value on init
+// Filters-Bar filter logic
+// 1. Update function to detect lastFilterIncompleteQuote: true
 
-// Header
-// Built out header component first draft plus stories. Haven't checked them yet.
+// Query filter logic misc
+// 1. Build out logic to control states
+// 2. Test end to end
+//    a. String to object and back to string
+//    b. Object to string and back to object
+
 
 // Misc:
 // X 1. Integrate changes from lists-sidebar-group PR

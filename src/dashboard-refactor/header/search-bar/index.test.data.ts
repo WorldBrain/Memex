@@ -12,7 +12,7 @@ import { SearchQueryPart } from '../types'
 //     ``,
 //     `foo t:foo,bar,"foo"" bar"`,
 //     `t:foo foo bar foo bar`,
-//     `bar t:foo,bar,"foo bar" foo`,
+//     `foo t:foo,bar,"foo bar" bar`,
 //     `foo from:"date" to:"other date" bar`,
 //     `foo t:tag,"other tag" c:list,"other list"`,
 //     `foo t:tag,"other tag" c:list,"other `,
@@ -33,6 +33,7 @@ const testData: TestData[] = [
                 detail: {
                     filterType: 'tag',
                     filters: [],
+                    rawContent: '',
                 },
             },
         ],
@@ -45,6 +46,7 @@ const testData: TestData[] = [
                 detail: {
                     filterType: 'domain',
                     filters: ['domain'],
+                    rawContent: 'domain',
                 },
             },
         ],
@@ -75,6 +77,7 @@ const testData: TestData[] = [
                 detail: {
                     filterType: 'list',
                     filters: ['list'],
+                    rawContent: 'list',
                 },
             },
         ],
@@ -87,6 +90,7 @@ const testData: TestData[] = [
                 detail: {
                     filterType: 'tag',
                     filters: ['tag'],
+                    rawContent: 'tag',
                 },
             },
         ],
@@ -100,6 +104,7 @@ const testData: TestData[] = [
                     filterType: 'date',
                     variant: 'from',
                     filters: ['date'],
+                    rawContent: '"date"',
                 },
             },
         ],
@@ -113,6 +118,7 @@ const testData: TestData[] = [
                     filterType: 'date',
                     variant: 'to',
                     filters: ['date'],
+                    rawContent: '"date"',
                 },
             },
         ],
@@ -120,6 +126,31 @@ const testData: TestData[] = [
     {
         testString: ``,
         expected: [],
+    },
+    {
+        testString: `foo t:foo,"bar"foo`,
+        expected: [
+            {
+                type: 'searchTerm',
+                detail: {
+                    value: 'foo ',
+                },
+            },
+            {
+                type: 'filter',
+                detail: {
+                    filterType: 'tag',
+                    filters: ['foo', 'bar'],
+                    rawContent: 'foo,"bar"',
+                },
+            },
+            {
+                type: 'searchTerm',
+                detail: {
+                    value: 'foo',
+                },
+            },
+        ],
     },
     {
         testString: `foo t:foo,bar,"foo"" bar"`,
@@ -133,6 +164,7 @@ const testData: TestData[] = [
                 detail: {
                     filterType: 'tag',
                     filters: ['foo', 'bar', 'foo'],
+                    rawContent: 'foo,bar,"foo"',
                 },
             },
             {
@@ -151,6 +183,7 @@ const testData: TestData[] = [
                 detail: {
                     filterType: 'tag',
                     filters: ['foo'],
+                    rawContent: 'foo',
                 },
             },
             {
@@ -171,6 +204,7 @@ const testData: TestData[] = [
                 detail: {
                     filterType: 'tag',
                     filters: ['foo', 'bar', 'foo bar'],
+                    rawContent: 'foo,bar,"foo bar"',
                 },
             },
             {
@@ -192,6 +226,7 @@ const testData: TestData[] = [
                     filterType: 'date',
                     variant: 'from',
                     filters: ['date'],
+                    rawContent: '"date"',
                 },
             },
             {
@@ -204,6 +239,7 @@ const testData: TestData[] = [
                     filterType: 'date',
                     variant: 'to',
                     filters: ['other date'],
+                    rawContent: '"other date"',
                 },
             },
             {
@@ -224,6 +260,7 @@ const testData: TestData[] = [
                 detail: {
                     filterType: 'tag',
                     filters: ['tag', 'other tag'],
+                    rawContent: 'tag,"other tag"',
                 },
             },
             {
@@ -235,6 +272,7 @@ const testData: TestData[] = [
                 detail: {
                     filterType: 'list',
                     filters: ['list', 'other list'],
+                    rawContent: 'list,"other list"',
                 },
             },
         ],
@@ -251,6 +289,7 @@ const testData: TestData[] = [
                 detail: {
                     filterType: 'tag',
                     filters: ['tag', 'other tag'],
+                    rawContent: 'tag,"other tag"',
                 },
             },
             {
@@ -261,12 +300,9 @@ const testData: TestData[] = [
                 type: 'filter',
                 detail: {
                     filterType: 'list',
-                    filters: ['list'],
+                    filters: ['list', 'other '],
+                    rawContent: 'list,"other ',
                 },
-            },
-            {
-                type: 'searchTerm',
-                detail: { value: ' ' },
             },
         ],
     },
@@ -282,6 +318,7 @@ const testData: TestData[] = [
                 detail: {
                     filterType: 'tag',
                     filters: ['tag'],
+                    rawContent: 'tag',
                 },
             },
             {
@@ -293,6 +330,7 @@ const testData: TestData[] = [
                 detail: {
                     filterType: 'domain',
                     filters: ['foo.com', 'foobar.com'],
+                    rawContent: 'foo.com,foobar.com',
                 },
             },
             {

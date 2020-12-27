@@ -1,6 +1,6 @@
 export type FilterKey = 't' | 'd' | 'c' | '-t' | '-d' | '-c' | 'from' | 'to'
 
-export type SearchQueryPart = QueryFilterPart | QueryTermPart
+export type SearchQueryPart = QueryFilterPart | QueryStringPart | undefined
 
 export interface QueryFilterPart {
     type: 'filter'
@@ -9,13 +9,15 @@ export interface QueryFilterPart {
 
 export interface SearchFilterDetail {
     filterType: SearchFilterType
+    rawContent: string
     filters: string[]
     isExclusion?: boolean
     variant?: 'from' | 'to'
+    lastFilterIncompleteQuote?: boolean
 }
 
-export interface QueryTermPart {
-    type: 'searchTerm'
+export interface QueryStringPart {
+    type: 'string'
     detail: { value: string }
 }
 
