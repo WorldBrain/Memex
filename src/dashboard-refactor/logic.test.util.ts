@@ -11,6 +11,7 @@ import {
     StandardSearchResponse,
     AnnotationsSearchResponse,
 } from 'src/search/background/types'
+import { FakeAnalytics } from 'src/analytics/mock'
 
 type DataSeeder = (
     logic: TestLogicContainer<RootState, Events>,
@@ -58,21 +59,35 @@ export const setNoteSearchResult: DataSeederCreator = (
     logic.processEvent('setAnnotationSearchResult', { result })
 }
 
+const defaultTestSetupDeps = {
+    copyToClipboard: () => undefined,
+}
+
 export async function setupTest(
     device: UILogicTestDevice,
-    args: { seedData?: DataSeeder } = {},
+    args: {
+        seedData?: DataSeeder
+        copyToClipboard?: (text: string) => Promise<boolean>
+    } = {
+        copyToClipboard: defaultTestSetupDeps.copyToClipboard,
+    },
 ) {
     const annotationsBG = insertBackgroundFunctionTab(
         device.backgroundModules.directLinking.remoteFunctions,
     ) as any
 
+    const analytics = new FakeAnalytics()
+
     const logic = new DashboardLogic({
+        analytics,
         annotationsBG,
         authBG: device.backgroundModules.auth.remoteFunctions,
         tagsBG: device.backgroundModules.tags.remoteFunctions,
         listsBG: device.backgroundModules.customLists.remoteFunctions,
         searchBG: device.backgroundModules.search.remoteFunctions.search,
         contentShareBG: device.backgroundModules.contentSharing.remoteFunctions,
+        copyToClipboard:
+            args.copyToClipboard ?? defaultTestSetupDeps.copyToClipboard,
     })
     const searchResults = device.createElement<RootState, Events>(logic)
 
@@ -80,5 +95,5 @@ export async function setupTest(
         await args.seedData(searchResults, device)
     }
 
-    return { searchResults, logic }
+    return { searchResults, logic, analytics }
 }

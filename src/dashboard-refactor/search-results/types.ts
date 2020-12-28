@@ -13,37 +13,41 @@ import {
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 
-export interface InteractionProps {
+export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
-    onListPickerBtnClick: React.MouseEventHandler
     onTagPickerBtnClick: React.MouseEventHandler
     onBookmarkBtnClick: React.MouseEventHandler
-    onNotesBtnClick: React.MouseEventHandler
-    onReplyBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
-    onUnshareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
-    onEditBtnClick: React.MouseEventHandler
-    onCommentChange: React.KeyboardEventHandler<HTMLTextAreaElement>
 }
 
 export type PageInteractionProps = Omit<
-    InteractionProps,
+    CommonInteractionProps,
     'onReplyBtnClick' | 'onEditBtnClick' | 'onCommentChange'
->
+> & {
+    onListPickerBtnClick: React.MouseEventHandler
+    onNotesBtnClick: React.MouseEventHandler
+}
 
 // NOTE: Derived type - edit the original
 export type PageInteractionAugdProps = {
     [Key in keyof PageInteractionProps]: (
         day: number,
         pageId: string,
-    ) => InteractionProps[Key]
+    ) => PageInteractionProps[Key]
 }
 
 export type NoteInteractionProps = Omit<
-    InteractionProps,
+    CommonInteractionProps,
     'onNotesBtnClick' | 'onListPickerBtnClick'
->
+> & {
+    hideShareMenu: () => void
+    copySharedLink: (link: string) => Promise<void>
+    updateShareInfo: (info: Partial<AnnotationSharingInfo>) => void
+    onEditBtnClick: React.MouseEventHandler
+    onReplyBtnClick: React.MouseEventHandler
+    onCommentChange: React.KeyboardEventHandler<HTMLTextAreaElement>
+}
 
 // NOTE: Derived type - edit the original
 export type NoteInteractionAugdProps = {
@@ -51,7 +55,7 @@ export type NoteInteractionAugdProps = {
         noteId: string,
         day: number,
         pageId: string,
-    ) => InteractionProps[Key]
+    ) => NoteInteractionProps[Key]
 }
 
 export interface NotePickerProps {
@@ -116,6 +120,7 @@ export interface NoteResult {
     isBookmarked: boolean
     areRepliesShown: boolean
     isTagPickerShown: boolean
+    isShareMenuShown: boolean
     isCopyPasterShown: boolean
     editNoteForm: NoteFormState
 }
@@ -216,7 +221,12 @@ export type Events = UIEvent<{
     setNoteBookmark: NoteEventArgs & { isBookmarked: boolean }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
-    updateNoteShareState: NoteDataEventArgs
+    showNoteShareMenu: NoteEventArgs
+    hideNoteShareMenu: NoteEventArgs
+    copySharedNoteLink: NoteEventArgs & { link: string }
+    updateNoteShareInfo: NoteEventArgs & {
+        info: Partial<AnnotationSharingInfo>
+    }
     confirmNoteDelete: null
     cancelNoteDelete: null
 

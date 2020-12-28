@@ -5,6 +5,10 @@ import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
 import { haveTagsChanged } from 'src/util/have-tags-changed'
 import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
+import {
+    getLastSharedAnnotationTimestamp,
+    setLastSharedAnnotationTimestamp,
+} from 'src/annotations/utils'
 
 const updatePickerValues = (event: { added?: string; deleted?: string }) => (
     values: string[],
@@ -841,6 +845,93 @@ export class DashboardLogic extends UILogic<State, Events> {
             tagsToBeAdded: event.added ? [event.added] : [],
             tagsToBeDeleted: event.deleted ? [event.deleted] : [],
         })
+    }
+
+    updateNoteShareInfo: EventHandler<'updateNoteShareInfo'> = async ({
+        event,
+        previousState: {
+            searchResults: { noteSharingInfo },
+        },
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                noteSharingInfo: {
+                    $merge: {
+                        [event.noteId]: {
+                            ...noteSharingInfo[event.noteId],
+                            ...event.info,
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    copySharedNoteLink: EventHandler<'copySharedNoteLink'> = async ({
+        event: { link },
+    }) => {
+        this.options.analytics.trackEvent({
+            category: 'ContentSharing',
+            action: 'copyNoteLink',
+        })
+
+        await this.options.copyToClipboard(link)
+    }
+
+    hideNoteShareMenu: EventHandler<'showNoteShareMenu'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            isShareMenuShown: {
+                                $set: false,
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    showNoteShareMenu: EventHandler<'showNoteShareMenu'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (previousState.searchResults.sharingAccess === 'feature-disabled') {
+            this.emitMutation({ modals: { showBetaFeature: { $set: true } } })
+            return
+        }
+
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            isShareMenuShown: {
+                                $set: true,
+                            },
+                        },
+                    },
+                },
+            },
+        })
+
+        await this.getLastSharedNoteTimestamp()
+    }
+
+    private async getLastSharedNoteTimestamp() {
+        const lastShared = await getLastSharedAnnotationTimestamp()
+
+        if (lastShared == null) {
+            this.emitMutation({
+                modals: { showNoteShareOnboarding: { $set: true } },
+            })
+        }
+
+        await setLastSharedAnnotationTimestamp()
     }
 
     setNoteEditCommentValue: EventHandler<'setNoteEditCommentValue'> = ({

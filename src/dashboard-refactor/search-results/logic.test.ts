@@ -1116,6 +1116,133 @@ describe('Dashboard search results logic', () => {
                 ).toEqual([])
             })
 
+            it('should show beta feature modal on note share when account feature disabled', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                const noteId = DATA.NOTE_2.url
+
+                expect(searchResults.state.modals.showBetaFeature).toBeFalsy()
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isShareMenuShown,
+                ).toEqual(false)
+
+                await searchResults.processEvent('showNoteShareMenu', {
+                    noteId,
+                })
+
+                expect(searchResults.state.modals.showBetaFeature).toEqual(true)
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isShareMenuShown,
+                ).toEqual(false)
+            })
+
+            it('should be able to show note share menu', async ({ device }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                const noteId = DATA.NOTE_2.url
+
+                await searchResults.processMutation({
+                    searchResults: {
+                        sharingAccess: { $set: 'sharing-allowed' },
+                    },
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isShareMenuShown,
+                ).toEqual(false)
+
+                await searchResults.processEvent('showNoteShareMenu', {
+                    noteId,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isShareMenuShown,
+                ).toEqual(true)
+            })
+
+            it('should be update note share info', async ({ device }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                const noteId = DATA.NOTE_2.url
+
+                expect(
+                    searchResults.state.searchResults.noteSharingInfo[noteId],
+                ).toEqual(undefined)
+
+                await searchResults.processEvent('updateNoteShareInfo', {
+                    noteId,
+                    info: { status: 'not-yet-shared', taskState: 'pristine' },
+                })
+                expect(
+                    searchResults.state.searchResults.noteSharingInfo[noteId],
+                ).toEqual({
+                    status: 'not-yet-shared',
+                    taskState: 'pristine',
+                })
+
+                await searchResults.processEvent('updateNoteShareInfo', {
+                    noteId,
+                    info: { status: 'shared', taskState: 'success' },
+                })
+                expect(
+                    searchResults.state.searchResults.noteSharingInfo[noteId],
+                ).toEqual({
+                    status: 'shared',
+                    taskState: 'success',
+                })
+
+                await searchResults.processEvent('updateNoteShareInfo', {
+                    noteId,
+                    info: { status: 'unshared', taskState: 'error' },
+                })
+                expect(
+                    searchResults.state.searchResults.noteSharingInfo[noteId],
+                ).toEqual({
+                    status: 'unshared',
+                    taskState: 'error',
+                })
+            })
+
+            it('should be able to copy note links', async ({ device }) => {
+                let clipboard = ''
+                const { searchResults, analytics } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                    copyToClipboard: async (text) => {
+                        clipboard = text
+                        return true
+                    },
+                })
+                const noteId = DATA.NOTE_2.url
+                const link = 'test'
+
+                expect(clipboard).toEqual('')
+                expect(analytics.popNew()).toEqual([])
+
+                await searchResults.processEvent('copySharedNoteLink', {
+                    noteId,
+                    link,
+                })
+
+                expect(clipboard).toEqual(link)
+                expect(analytics.popNew()).toEqual([
+                    {
+                        eventArgs: {
+                            category: 'ContentSharing',
+                            action: 'copyNoteLink',
+                        },
+                    },
+                ])
+            })
+
             it('should be able to set note edit comment value state', async ({
                 device,
             }) => {

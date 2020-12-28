@@ -17,6 +17,7 @@ import { SearchInterface } from 'src/search/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { Analytics } from 'src/analytics'
 
 export interface RootState {
     loadState: TaskState
@@ -38,12 +39,14 @@ export type Events = UIEvent<
 >
 
 export interface DashboardDependencies {
+    analytics: Analytics
     tagsBG: RemoteTagsInterface
     authBG: AuthRemoteFunctionsInterface
     contentShareBG: ContentSharingInterface
     listsBG: RemoteCollectionsInterface
     searchBG: SearchInterface
     annotationsBG: AnnotationInterface<'caller'>
+    copyToClipboard: (text: string) => Promise<boolean>
 }
 
 export interface DropReceivingState {

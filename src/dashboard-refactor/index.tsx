@@ -218,7 +218,6 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                         }),
                     onShareBtnClick: (day, pageId) => () => null, // TODO: figure out share btn
-                    onUnshareBtnClick: (day, pageId) => () => null, // TODO: figure out share btn
                 }}
                 pagePickerProps={{
                     onListPickerUpdate: (pageId) => (args) =>
@@ -306,8 +305,20 @@ export class DashboardContainer extends StatefulUIElement<
                             noteId,
                             value: (e.target as HTMLTextAreaElement).value,
                         }),
-                    onShareBtnClick: (noteId) => () => null, // TODO
-                    onUnshareBtnClick: (noteId) => () => null, // TODO
+                    onShareBtnClick: (noteId) => () =>
+                        this.processEvent('showNoteShareMenu', { noteId }),
+                    hideShareMenu: (noteId) => () =>
+                        this.processEvent('hideNoteShareMenu', { noteId }),
+                    updateShareInfo: (noteId) => (info) =>
+                        this.processEvent('updateNoteShareInfo', {
+                            noteId,
+                            info,
+                        }),
+                    copySharedLink: (noteId) => (link) =>
+                        this.processEvent('copySharedNoteLink', {
+                            noteId,
+                            link,
+                        }),
                 }}
                 notePickerProps={{
                     onTagPickerUpdate: (noteId) => (args) =>

@@ -15,6 +15,7 @@ import {
 } from 'src/search/background/types'
 import { insertBackgroundFunctionTab } from 'src/tests/ui-logic-tests'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
+import { FakeAnalytics } from 'src/analytics/mock'
 
 // TODO: Try to get this working - currently fails due to `browser.runtime.onMessage.addListener` not being defineddddd
 async function createDependencies(): Promise<DashboardProps> {
@@ -25,6 +26,11 @@ async function createDependencies(): Promise<DashboardProps> {
     ) as any
 
     return {
+        analytics: new FakeAnalytics(),
+        copyToClipboard: async (text) => {
+            await navigator.clipboard.writeText(text)
+            return true
+        },
         annotationsBG,
         authBG: backgroundModules.auth.remoteFunctions,
         tagsBG: backgroundModules.tags.remoteFunctions,

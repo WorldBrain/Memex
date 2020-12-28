@@ -86,6 +86,7 @@ export const getInitialNoteResultState = (): NoteResult => ({
     isBookmarked: false,
     areRepliesShown: false,
     isTagPickerShown: false,
+    isShareMenuShown: false,
     isCopyPasterShown: false,
     editNoteForm: getInitialFormState(),
 })
@@ -112,6 +113,7 @@ const annotationToNoteData = (
     areRepliesShown: false,
     isTagPickerShown: false,
     isCopyPasterShown: false,
+    isShareMenuShown: false,
     displayTime:
         annotation.lastEdited?.getTime() ?? annotation.createdWhen.getTime(),
     isEditing: false,

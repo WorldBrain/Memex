@@ -22,6 +22,7 @@ import {
     getShareAnnotationBtnAction,
     SHARE_BUTTON_LABELS,
 } from 'src/annotations/sharing-utils'
+import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 
 export interface Props
     extends NoteData,
@@ -39,7 +40,7 @@ export default class NoteResultView extends PureComponent<Props> {
         const sharingProps = {
             ...this.props,
             onShare: this.props.onShareBtnClick,
-            onUnshare: this.props.onUnshareBtnClick,
+            onUnshare: this.props.onShareBtnClick,
         }
         return {
             state: getShareAnnotationBtnState(sharingProps),
@@ -96,6 +97,28 @@ export default class NoteResultView extends PureComponent<Props> {
                 <PageNotesCopyPaster
                     annotationUrls={[this.props.url]}
                     normalizedPageUrls={[this.props.pageUrl]}
+                />
+            )
+        }
+
+        if (this.props.isShareMenuShown) {
+            return (
+                <SingleNoteShareMenu
+                    annotationUrl={this.props.url}
+                    closeShareMenu={this.props.hideShareMenu}
+                    copyLink={this.props.copySharedLink}
+                    postShareHook={() =>
+                        this.props.updateShareInfo({
+                            status: 'shared',
+                            taskState: 'success',
+                        })
+                    }
+                    postUnshareHook={() =>
+                        this.props.updateShareInfo({
+                            status: 'unshared',
+                            taskState: 'success',
+                        })
+                    }
                 />
             )
         }
