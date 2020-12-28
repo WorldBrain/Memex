@@ -5,7 +5,7 @@
         "yarn.lock": true
     },
     "stylelint.enable": true,
-    "eslint.enable": true,
+    "eslint.probe": ["javascript", "javascriptreact"],
     "tslint.enable": true,
     "editor.formatOnSave": true,
     "typescript.tsdk": "node_modules/typescript/lib"
