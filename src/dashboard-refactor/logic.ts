@@ -36,7 +36,12 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     getInitialState(): State {
         return {
-            modals: {},
+            modals: {
+                showShareList: false,
+                showBetaFeature: false,
+                showSubscription: false,
+                showNoteShareOnboarding: false,
+            },
             loadState: 'pristine',
             searchResults: {
                 sharingAccess: 'feature-disabled',
@@ -223,6 +228,48 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
     /* END - Misc event handlers */
+
+    /* START - modal event handlers */
+    setShowShareListModal: EventHandler<'setShowShareListModal'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            modals: {
+                showShareList: { $set: event.isShown },
+            },
+        })
+    }
+
+    setShowBetaFeatureModal: EventHandler<'setShowBetaFeatureModal'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            modals: {
+                showBetaFeature: { $set: event.isShown },
+            },
+        })
+    }
+
+    setShowSubscriptionModal: EventHandler<'setShowSubscriptionModal'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            modals: {
+                showSubscription: { $set: event.isShown },
+            },
+        })
+    }
+
+    setShowNoteShareOnboardingModal: EventHandler<
+        'setShowNoteShareOnboardingModal'
+    > = ({ event }) => {
+        this.emitMutation({
+            modals: {
+                showNoteShareOnboarding: { $set: event.isShown },
+            },
+        })
+    }
+    /* END - modal event handlers */
 
     /* START - search result event handlers */
     setPageSearchResult: EventHandler<'setPageSearchResult'> = ({ event }) => {
