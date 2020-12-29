@@ -17,7 +17,7 @@ export interface SearchFilterDetail {
 }
 
 export interface QueryStringPart {
-    type: 'string'
+    type: 'queryString'
     detail: { value: string }
 }
 

@@ -78,13 +78,13 @@ const testData: TestData[] = [
         },
         oldQueryArray: [
             {
-                type: 'string',
+                type: 'queryString',
                 detail: { value: 'search' },
             },
         ],
         newQueryArray: [
             {
-                type: 'string',
+                type: 'queryString',
                 detail: { value: 'search ' },
             },
             {
@@ -153,7 +153,7 @@ const testData: TestData[] = [
         },
         oldQueryArray: [
             {
-                type: 'string',
+                type: 'queryString',
                 detail: { value: 'bar' },
             },
             {
@@ -165,13 +165,13 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'string',
+                type: 'queryString',
                 detail: { value: 'foo' },
             },
         ],
         newQueryArray: [
             {
-                type: 'string',
+                type: 'queryString',
                 detail: { value: 'bar' },
             },
             {
@@ -183,7 +183,7 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'string',
+                type: 'queryString',
                 detail: { value: 'foo' },
             },
         ],
@@ -197,8 +197,8 @@ const testData: TestData[] = [
         },
         oldQueryArray: [
             {
-                type: 'string',
-                detail: { value: 'foo' },
+                type: 'queryString',
+                detail: { value: 'foo ' },
             },
             {
                 type: 'filter',
@@ -210,13 +210,13 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'string',
+                type: 'queryString',
                 detail: { value: 'bar' },
             },
         ],
         newQueryArray: [
             {
-                type: 'string',
+                type: 'queryString',
                 detail: { value: 'foo' },
             },
             {
@@ -229,7 +229,66 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'string',
+                type: 'queryString',
+                detail: { value: ' ' },
+            },
+            {
+                type: 'filter',
+                detail: {
+                    filterType: 'date',
+                    variant: 'to',
+                    filters: [''],
+                    rawContent: '',
+                },
+            },
+            {
+                type: 'queryString',
+                detail: { value: ' bar' },
+            },
+        ],
+    },
+    {
+        newFilterObj: {
+            filterType: 'date',
+            variant: 'to',
+            filters: ['other date'],
+            rawContent: '"other date"',
+        },
+        oldQueryArray: [
+            {
+                type: 'queryString',
+                detail: { value: 'foo ' },
+            },
+            {
+                type: 'filter',
+                detail: {
+                    filterType: 'date',
+                    variant: 'from',
+                    filters: ['date'],
+                    rawContent: '"date"',
+                },
+            },
+            {
+                type: 'queryString',
+                detail: { value: 'bar' },
+            },
+        ],
+        newQueryArray: [
+            {
+                type: 'queryString',
+                detail: { value: 'foo' },
+            },
+            {
+                type: 'filter',
+                detail: {
+                    filterType: 'date',
+                    variant: 'from',
+                    filters: ['date'],
+                    rawContent: '"date"',
+                },
+            },
+            {
+                type: 'queryString',
                 detail: { value: ' ' },
             },
             {
@@ -242,8 +301,8 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'string',
-                detail: { value: 'bar' },
+                type: 'queryString',
+                detail: { value: ' bar' },
             },
         ],
     },
@@ -255,7 +314,7 @@ const testData: TestData[] = [
         },
         oldQueryArray: [
             {
-                type: 'string',
+                type: 'queryString',
                 detail: { value: 'foo ' },
             },
             {
@@ -267,7 +326,7 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'string',
+                type: 'queryString',
                 detail: { value: ' ' },
             },
             {
@@ -282,7 +341,7 @@ const testData: TestData[] = [
         ],
         newQueryArray: [
             {
-                type: 'string',
+                type: 'queryString',
                 detail: { value: 'foo' },
             },
             {
@@ -294,7 +353,7 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'string',
+                type: 'queryString',
                 detail: { value: ' ' },
             },
             {

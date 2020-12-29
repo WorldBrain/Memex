@@ -4,7 +4,7 @@ import {
     SearchFilterType,
     SearchQueryPart,
     QueryFilterPart,
-    QueryTermPart,
+    QueryStringPart,
 } from '../types'
 
 // Rules:
@@ -207,14 +207,14 @@ const pushSearchTermToArray: (
     parsedQuery: SearchQueryPart[],
 ) => SearchQueryPart[] = (str, parsedQuery) => {
     const existingPart =
-        parsedQuery[parsedQuery.length - 1]?.type === 'searchTerm'
+        parsedQuery[parsedQuery.length - 1]?.type === 'queryString'
             ? parsedQuery[parsedQuery.length - 1]
             : null
     if (existingPart) {
         existingPart.detail['value'] += str
     } else {
         parsedQuery.push({
-            type: 'searchTerm',
+            type: 'queryString',
             detail: {
                 value: str,
             },

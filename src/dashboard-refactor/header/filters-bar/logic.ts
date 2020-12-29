@@ -20,7 +20,7 @@ export const addFilterToSearchQuery: (
             // if array has at least one item, ensure that the last item, if a searchTerm, ends with a space
             const { type, detail } = queryArray[queryArray.length - 1]
             let value = detail['value']
-            if (type === 'searchTerm' && value[value.length] !== ' ') {
+            if (type === 'queryString' && value[value.length] !== ' ') {
                 detail['value'] += ' '
             }
         }

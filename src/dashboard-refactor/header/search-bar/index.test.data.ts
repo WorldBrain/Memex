@@ -55,7 +55,7 @@ const testData: TestData[] = [
         testString: `search`,
         expected: [
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: 'search' },
             },
         ],
@@ -64,7 +64,7 @@ const testData: TestData[] = [
         testString: `search term`,
         expected: [
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: 'search term' },
             },
         ],
@@ -131,7 +131,7 @@ const testData: TestData[] = [
         testString: `foo t:foo,"bar"foo`,
         expected: [
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: {
                     value: 'foo ',
                 },
@@ -145,7 +145,7 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: {
                     value: 'foo',
                 },
@@ -156,7 +156,7 @@ const testData: TestData[] = [
         testString: `foo t:foo,bar,"foo"" bar"`,
         expected: [
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: 'foo ' },
             },
             {
@@ -168,7 +168,7 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: {
                     value: '" bar"',
                 },
@@ -187,7 +187,7 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: ' foo bar foo bar' },
             },
         ],
@@ -196,7 +196,7 @@ const testData: TestData[] = [
         testString: `bar t:foo,bar,"foo bar" foo`,
         expected: [
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: 'bar ' },
             },
             {
@@ -208,7 +208,7 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: ' foo' },
             },
         ],
@@ -217,7 +217,7 @@ const testData: TestData[] = [
         testString: `foo from:"date" to:"other date" bar`,
         expected: [
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: 'foo ' },
             },
             {
@@ -230,7 +230,7 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: ' ' },
             },
             {
@@ -243,7 +243,7 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: ' bar' },
             },
         ],
@@ -252,7 +252,7 @@ const testData: TestData[] = [
         testString: `foo t:tag,"other tag"  c:list,"other list"`,
         expected: [
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: 'foo ' },
             },
             {
@@ -264,7 +264,7 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: '  ' },
             },
             {
@@ -281,7 +281,7 @@ const testData: TestData[] = [
         testString: `foo t:tag,"other tag" c:list,"other `,
         expected: [
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: 'foo ' },
             },
             {
@@ -293,7 +293,7 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: ' ' },
             },
             {
@@ -310,7 +310,7 @@ const testData: TestData[] = [
         testString: `foo t:tag bar d:foo.com,foobar.com foobar `,
         expected: [
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: 'foo ' },
             },
             {
@@ -322,7 +322,7 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: ' bar ' },
             },
             {
@@ -334,7 +334,7 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'searchTerm',
+                type: 'queryString',
                 detail: { value: ' foobar ' },
             },
         ],
