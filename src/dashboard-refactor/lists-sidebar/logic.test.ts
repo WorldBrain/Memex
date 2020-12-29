@@ -1,6 +1,7 @@
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest, setPageSearchResult } from '../logic.test.util'
 import * as DATA from '../logic.test.data'
+import { getListShareUrl } from 'src/content-sharing/utils'
 
 describe('Dashboard search results logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -110,10 +111,12 @@ describe('Dashboard search results logic', () => {
                 .collection('customLists')
                 .findOneObject({ id: listId }),
         ).toEqual(expect.objectContaining({ id: listId, name }))
-        expect(searchResults.state.listsSidebar.listData[listId]).toEqual({
-            id: listId,
-            name,
-        })
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual(
+            expect.objectContaining({
+                id: listId,
+                name,
+            }),
+        )
 
         expect(searchResults.state.listsSidebar.editingListId).toEqual(
             undefined,
@@ -128,10 +131,12 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.editingListId).toEqual(
             undefined,
         )
-        expect(searchResults.state.listsSidebar.listData[listId]).toEqual({
-            id: listId,
-            name: nameUpdated,
-        })
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual(
+            expect.objectContaining({
+                id: listId,
+                name: nameUpdated,
+            }),
+        )
         expect(
             await device.storageManager
                 .collection('customLists')
@@ -153,10 +158,12 @@ describe('Dashboard search results logic', () => {
                 .collection('customLists')
                 .findOneObject({ id: listId }),
         ).toEqual(expect.objectContaining({ id: listId, name }))
-        expect(searchResults.state.listsSidebar.listData[listId]).toEqual({
-            id: listId,
-            name,
-        })
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual(
+            expect.objectContaining({
+                id: listId,
+                name,
+            }),
+        )
 
         expect(searchResults.state.listsSidebar.editingListId).toEqual(
             undefined,
@@ -169,10 +176,12 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.editingListId).toEqual(
             undefined,
         )
-        expect(searchResults.state.listsSidebar.listData[listId]).toEqual({
-            id: listId,
-            name,
-        })
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual(
+            expect.objectContaining({
+                id: listId,
+                name,
+            }),
+        )
         expect(
             await device.storageManager
                 .collection('customLists')
@@ -418,10 +427,12 @@ describe('Dashboard search results logic', () => {
                 listId,
             ),
         ).toEqual(true)
-        expect(searchResults.state.listsSidebar.listData[listId]).toEqual({
-            id: listId,
-            name: listName,
-        })
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual(
+            expect.objectContaining({
+                id: listId,
+                name: listName,
+            }),
+        )
 
         expect(searchResults.state.modals.deletingListId).toEqual(undefined)
         await searchResults.processEvent('setDeletingListId', { listId })
@@ -444,10 +455,12 @@ describe('Dashboard search results logic', () => {
                 listId,
             ),
         ).toEqual(true)
-        expect(searchResults.state.listsSidebar.listData[listId]).toEqual({
-            id: listId,
-            name: listName,
-        })
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual(
+            expect.objectContaining({
+                id: listId,
+                name: listName,
+            }),
+        )
     })
 
     it('should be able to confirm list deletion', async ({ device }) => {
@@ -477,10 +490,12 @@ describe('Dashboard search results logic', () => {
                 listId,
             ),
         ).toEqual(true)
-        expect(searchResults.state.listsSidebar.listData[listId]).toEqual({
-            id: listId,
-            name: listName,
-        })
+        expect(searchResults.state.listsSidebar.listData[listId]).toEqual(
+            expect.objectContaining({
+                id: listId,
+                name: listName,
+            }),
+        )
 
         expect(searchResults.state.listsSidebar.listDeleteState).toEqual(
             'pristine',
@@ -514,5 +529,51 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.listData[listId]).toEqual(
             undefined,
         )
+    })
+
+    it('should be able to share list', async ({ device }) => {
+        const listId = 123
+        const remoteListId = 'test'
+        device.backgroundModules.contentSharing.remoteFunctions.shareListEntries = async () => {}
+        device.backgroundModules.contentSharing.remoteFunctions.shareList = async () => ({
+            remoteListId,
+        })
+
+        const { searchResults } = await setupTest(device)
+        searchResults.processMutation({
+            listsSidebar: {
+                listData: {
+                    [listId]: {
+                        $set: {
+                            id: listId,
+                            listCreationState: 'pristine',
+                            name: 'test',
+                        },
+                    },
+                },
+            },
+        })
+
+        expect(
+            searchResults.state.listsSidebar.listData[listId].listCreationState,
+        ).toEqual('pristine')
+        expect(
+            searchResults.state.listsSidebar.listData[listId].shareUrl,
+        ).toBeUndefined()
+
+        await searchResults.processEvent('setShareListId', { listId })
+        const shareP = searchResults.processEvent('shareList', null)
+
+        expect(
+            searchResults.state.listsSidebar.listData[listId].listCreationState,
+        ).toEqual('running')
+        await shareP
+
+        expect(
+            searchResults.state.listsSidebar.listData[listId].listCreationState,
+        ).toEqual('success')
+        expect(
+            searchResults.state.listsSidebar.listData[listId].shareUrl,
+        ).toEqual(getListShareUrl({ remoteListId }))
     })
 })

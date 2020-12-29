@@ -177,9 +177,9 @@ export const ANNOT_SEARCH_RESULT_2: AnnotationsSearchResponse = {
 }
 
 export const LISTS_1: ListData[] = [
-    { id: 1, name: 'test 1' },
-    { id: 2, name: 'test 2' },
-    { id: 3, name: 'test 3' },
+    { id: 1, name: 'test 1', listCreationState: 'pristine' },
+    { id: 2, name: 'test 2', listCreationState: 'pristine' },
+    { id: 3, name: 'test 3', listCreationState: 'pristine' },
 ]
 
 export const TAG_1 = 'test 1'

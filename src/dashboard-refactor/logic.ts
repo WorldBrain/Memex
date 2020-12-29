@@ -9,6 +9,7 @@ import {
     getLastSharedAnnotationTimestamp,
     setLastSharedAnnotationTimestamp,
 } from 'src/annotations/utils'
+import { getListShareUrl } from 'src/content-sharing/utils'
 
 const updatePickerValues = (event: { added?: string; deleted?: string }) => (
     values: string[],
@@ -37,7 +38,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     getInitialState(): State {
         return {
             modals: {
-                showShareList: false,
                 showBetaFeature: false,
                 showSubscription: false,
                 showNoteShareOnboarding: false,
@@ -78,6 +78,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 dateToInput: '',
             },
             listsSidebar: {
+                listShareLoadingState: 'pristine',
                 listCreateState: 'pristine',
                 listDeleteState: 'pristine',
                 listEditState: 'pristine',
@@ -230,14 +231,44 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* END - Misc event handlers */
 
     /* START - modal event handlers */
-    setShowShareListModal: EventHandler<'setShowShareListModal'> = ({
-        event,
+    setShareListId: EventHandler<'setShareListId'> = async ({
+        event: { listId },
     }) => {
-        this.emitMutation({
-            modals: {
-                showShareList: { $set: event.isShown },
+        if (!listId) {
+            this.emitMutation({
+                modals: { shareListId: { $set: undefined } },
+            })
+            return
+        }
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listsSidebar: { listShareLoadingState: { $set: taskState } },
+            }),
+            async () => {
+                const remoteListId = await this.options.contentShareBG.getRemoteListId(
+                    { localListId: listId },
+                )
+                const shareUrl = remoteListId
+                    ? getListShareUrl({ remoteListId })
+                    : undefined
+
+                this.emitMutation({
+                    modals: {
+                        shareListId: { $set: listId },
+                    },
+                    listsSidebar: {
+                        listData: {
+                            [listId]: {
+                                isShared: { $set: !!remoteListId },
+                                shareUrl: { $set: shareUrl },
+                            },
+                        },
+                    },
+                })
             },
-        })
+        )
     }
 
     setShowBetaFeatureModal: EventHandler<'setShowBetaFeatureModal'> = ({
@@ -1343,7 +1374,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                         listData: {
                             [listId]: {
-                                $set: { id: listId, name: newListName },
+                                $set: {
+                                    id: listId,
+                                    name: newListName,
+                                    listCreationState: 'pristine',
+                                },
                             },
                         },
                     },
@@ -1546,6 +1581,47 @@ export class DashboardLogic extends UILogic<State, Events> {
                 })
             },
         )
+    }
+
+    shareList: EventHandler<'shareList'> = async ({ previousState }) => {
+        const { shareListId: listId } = previousState.modals
+
+        if (!listId) {
+            throw new Error('No list ID is set for sharing')
+        }
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listsSidebar: {
+                    listData: {
+                        [listId]: { listCreationState: { $set: taskState } },
+                    },
+                },
+            }),
+            async () => {
+                const {
+                    remoteListId,
+                } = await this.options.contentShareBG.shareList({ listId })
+                await this.options.contentShareBG.shareListEntries({ listId })
+
+                this.emitMutation({
+                    listsSidebar: {
+                        listData: {
+                            [listId]: {
+                                shareUrl: {
+                                    $set: getListShareUrl({ remoteListId }),
+                                },
+                            },
+                        },
+                    },
+                })
+            },
+        )
+    }
+
+    unshareList: EventHandler<'unshareList'> = async ({ event }) => {
+        console.warn('List unshare not yet implemented')
     }
     /* END - lists sidebar event handlers */
 

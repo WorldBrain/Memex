@@ -10,6 +10,7 @@ import { Props as ListSidebarItemProps } from './lists-sidebar/components/lists-
 import { ListData } from './lists-sidebar/types'
 import * as searchResultUtils from './search-results/util'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
+import ShareListModalContent from 'src/overview/sharing/components/ShareListModalContent'
 
 export interface Props extends DashboardDependencies {}
 
@@ -55,6 +56,8 @@ export class DashboardContainer extends StatefulUIElement<
             this.processEvent('setShowMoreMenuListId', { listId: list.id }),
         onDeleteClick: () =>
             this.processEvent('setDeletingListId', { listId: list.id }),
+        onShareClick: () =>
+            this.processEvent('setShareListId', { listId: list.id }),
     })
 
     private renderListsSidebar() {
@@ -329,7 +332,14 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderModals() {
-        if (this.state.modals.deletingListId) {
+        const {
+            deletingListId,
+            deletingNoteArgs,
+            deletingPageArgs,
+            shareListId,
+        } = this.state.modals
+
+        if (deletingListId) {
             return (
                 <DeleteConfirmModal
                     isShown
@@ -342,7 +352,7 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (this.state.modals.deletingNoteArgs) {
+        if (deletingNoteArgs) {
             return (
                 <DeleteConfirmModal
                     isShown
@@ -355,7 +365,7 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (this.state.modals.deletingPageArgs) {
+        if (deletingPageArgs) {
             return (
                 <DeleteConfirmModal
                     isShown
@@ -363,6 +373,23 @@ export class DashboardContainer extends StatefulUIElement<
                     onClose={() => this.processEvent('cancelPageDelete', null)}
                     deleteDocs={() =>
                         this.processEvent('confirmPageDelete', null)
+                    }
+                />
+            )
+        }
+
+        if (shareListId) {
+            const listData = this.state.listsSidebar.listData[shareListId]
+
+            return (
+                <ShareListModalContent
+                    onClose={() => this.processEvent('setShareListId', {})}
+                    isShared={listData.isShared}
+                    listCreationState={listData.listCreationState}
+                    listName={listData.name}
+                    shareUrl={listData.shareUrl}
+                    onGenerateLinkClick={() =>
+                        this.processEvent('shareList', null)
                     }
                 />
             )

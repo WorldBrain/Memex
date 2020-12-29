@@ -17,6 +17,9 @@ export interface SidebarPeekState {
 export interface ListData {
     id: number
     name: string
+    shareUrl?: string
+    isShared?: boolean
+    listCreationState: TaskState
 }
 
 export interface ListGroupCommon
@@ -45,6 +48,7 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
         listDeleteState: TaskState
         listCreateState: TaskState
         listEditState: TaskState
+        listShareLoadingState: TaskState
     }
 
 export type Events = UIEvent<{
@@ -69,6 +73,9 @@ export type Events = UIEvent<{
 
     confirmListDelete: null
     cancelListDelete: null
+
+    shareList: null
+    unshareList: null
 }>
 
 export type ListNameHighlightIndices = [number, number]

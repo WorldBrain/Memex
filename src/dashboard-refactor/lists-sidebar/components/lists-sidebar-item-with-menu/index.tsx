@@ -15,6 +15,7 @@ import ListsSidebarEditableItem, {
     Props as EditableItemProps,
 } from '../lists-sidebar-editable-item'
 import { ListNameHighlightIndices } from '../../types'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface Props {
     className?: string
@@ -66,19 +67,19 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             <>
                 <MenuButton onClick={this.props.onShareClick}>
                     <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={'TODO.svg'} />
+                        <Icon heightAndWidth="12px" path={icons.share} />
                     </Margin>
                     Share
                 </MenuButton>
                 <MenuButton onClick={this.props.onDeleteClick}>
                     <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={'TODO.svg'} />
+                        <Icon heightAndWidth="12px" path={icons.remove} />
                     </Margin>
                     Delete
                 </MenuButton>
                 <MenuButton onClick={this.props.onRenameClick}>
                     <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={'TODO.svg'} />
+                        <Icon heightAndWidth="12px" path={icons.edit} />
                     </Margin>
                     Rename
                 </MenuButton>

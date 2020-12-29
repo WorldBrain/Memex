@@ -12,6 +12,7 @@ import {
 import { TaskState } from 'ui-logic-core/lib/types'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
+import { Modal } from 'src/common-ui/components'
 
 const Text = styled.div`
     font-family: Poppins;
@@ -108,15 +109,11 @@ const BlockHeading = styled(TypographyHeadingNormal)`
 
 interface Props {
     isShared: boolean
-    collectionName: string
+    listName: string
     shareUrl?: string
     listCreationState: TaskState
-    entriesUploadState: TaskState
-
-    onClickToggle: () => void
-    onClickLetUsKnow: () => void
-    onClickViewRoadmap: () => void
-    onClickSharingTutorial: () => void
+    onGenerateLinkClick: () => void
+    onClose: () => void
 }
 
 const COPY_TIMEOUT = 2000
@@ -149,6 +146,9 @@ export default class ShareListModalContent extends PureComponent<Props> {
         }, COPY_TIMEOUT)
     }
 
+    private openUrl = (url: string, target?: string) => () =>
+        window.open(url, target)
+
     componentWillUnmount() {
         if (this.copyTimeout) {
             clearTimeout(this.copyTimeout)
@@ -157,77 +157,86 @@ export default class ShareListModalContent extends PureComponent<Props> {
 
     render() {
         return (
-            <ShareModalBox>
-                <InstructionsContainer>
-                    <InstructionsBox>
-                        <TypographyHeadingBigger>
-                            Share "{this.props.collectionName}"
-                        </TypographyHeadingBigger>
-                        <TypographyTextNormal>
-                            Anyone with this link can view your collection
-                        </TypographyTextNormal>
-                    </InstructionsBox>
-                    {!this.props.isShared && (
-                        <PrimaryAction
-                            label={'Generate Link'}
-                            onClick={this.props.onClickToggle}
-                        />
-                    )}
-                    {this.props.listCreationState === 'running' && (
-                        <UploadingContainer>
-                            <TypographyHeadingNormal>
-                                Uploading Collection
-                            </TypographyHeadingNormal>
-                            <LoadingIndicator />
-                        </UploadingContainer>
-                    )}
-                </InstructionsContainer>
-
-                <LinkContainer>
-                    <LinkBox>
-                        {this.props.isShared && (
-                            <ShareUrlBox onClick={() => this.onClickCopy()}>
-                                <ShareUrl>
-                                    {this.props.shareUrl}
-                                    {this.props.listCreationState ===
-                                        'running' && 'Creating list...'}
-                                    {this.props.listCreationState === 'error' &&
-                                        'Error while sharing list...'}
-                                </ShareUrl>
-                                {this.props.shareUrl && (
-                                    <TypographyHeadingSmall>
-                                        {this.state.hasCopied
-                                            ? 'Copied to Clipboard'
-                                            : 'Copy'}
-                                    </TypographyHeadingSmall>
-                                )}
-                            </ShareUrlBox>
+            <Modal large onClose={this.props.onClose}>
+                <ShareModalBox>
+                    <InstructionsContainer>
+                        <InstructionsBox>
+                            <TypographyHeadingBigger>
+                                Share "{this.props.listName}"
+                            </TypographyHeadingBigger>
+                            <TypographyTextNormal>
+                                Anyone with this link can view your collection
+                            </TypographyTextNormal>
+                        </InstructionsBox>
+                        {!this.props.isShared && (
+                            <PrimaryAction
+                                label="Generate Link"
+                                onClick={this.props.onGenerateLinkClick}
+                            />
                         )}
-                    </LinkBox>
-                </LinkContainer>
-                <BetaInfoContainer>
-                    <BlockHeading>🚀 This is a beta feature</BlockHeading>
-                    <Text>
-                        What needs to change so it fits better into your
-                        workflow?
-                    </Text>
+                        {this.props.listCreationState === 'running' && (
+                            <UploadingContainer>
+                                <TypographyHeadingNormal>
+                                    Uploading Collection
+                                </TypographyHeadingNormal>
+                                <LoadingIndicator />
+                            </UploadingContainer>
+                        )}
+                    </InstructionsContainer>
 
-                    <ButtonsContainer>
-                        <PrimaryAction
-                            label={'Share Feedback'}
-                            onClick={this.props.onClickLetUsKnow}
-                        />
-                        <SecondaryAction
-                            label={'View Roadmap'}
-                            onClick={this.props.onClickViewRoadmap}
-                        />
-                        <SecondaryAction
-                            label={'Tutorial'}
-                            onClick={this.props.onClickSharingTutorial}
-                        />
-                    </ButtonsContainer>
-                </BetaInfoContainer>
-            </ShareModalBox>
+                    <LinkContainer>
+                        <LinkBox>
+                            {this.props.isShared && (
+                                <ShareUrlBox onClick={() => this.onClickCopy()}>
+                                    <ShareUrl>
+                                        {this.props.shareUrl}
+                                        {this.props.listCreationState ===
+                                            'running' && 'Creating list...'}
+                                        {this.props.listCreationState ===
+                                            'error' &&
+                                            'Error while sharing list...'}
+                                    </ShareUrl>
+                                    {this.props.shareUrl && (
+                                        <TypographyHeadingSmall>
+                                            {this.state.hasCopied
+                                                ? 'Copied to Clipboard'
+                                                : 'Copy'}
+                                        </TypographyHeadingSmall>
+                                    )}
+                                </ShareUrlBox>
+                            )}
+                        </LinkBox>
+                    </LinkContainer>
+                    <BetaInfoContainer>
+                        <BlockHeading>🚀 This is a beta feature</BlockHeading>
+                        <Text>
+                            What needs to change so it fits better into your
+                            workflow?
+                        </Text>
+
+                        <ButtonsContainer>
+                            <PrimaryAction
+                                label="Share Feedback"
+                                onClick={this.openUrl(
+                                    'https://worldbrain.io/feedback',
+                                )}
+                            />
+                            <SecondaryAction
+                                label="View Roadmap"
+                                onClick={this.openUrl(
+                                    'https://worldbrain.io/roadmap',
+                                )}
+                            />
+                            <SecondaryAction
+                                label="Tutorial"
+                                onClick={this.openUrl(
+                                    'https://worldbrain.io/tutorials/memex-social',
+                                )}
+                            />
+                        </ButtonsContainer>
+                    </BetaInfoContainer>
+                </ShareModalBox>
+            </Modal>
         )
     }
 }
