@@ -1,27 +1,22 @@
 // Status of work
 
 //  Branches:
-//  1. Header, sync status menu, and search bar are all on their own branches now
-//    - Note, header will have to merge in search bar changes before it's pushed 
-        (as I based it off sync-status-menu)
-
-//  Pickers:
-//  - We use 2 different kinds of pickers. I've decided to go ahead with using the more
-//    modern ones refactored and used currently everywhere in the app but in the search 
-//    filters.
-//  - This requires building a domains picker from scratch
+//  Working on filter-query-logic currently
+//  Other work is on header branch. This is ready to merge now that I've shifted the
+//   filter logic work to the top level dir
 
 
 // Direction of work
 
-// Search-Bar filter logic
-// 1. Update logic to use 'string' instead of 'searchTerm' for the QueryStringPart detail
-// 2. Rename pushNewFiltersToArray func to pushFiltersToArray
-// 3. Alter pushNewFiltersToArray func to flag incomplete filters (if isInQuotes === true 
-//    upon string end)
+// Filter parsing logic
+// X1. Update logic to use 'string' instead of 'searchTerm' for the QueryStringPart detail
+// X2. Rename pushNewFiltersToArray func to pushFiltersToArray
+// 3. Alter pushFiltersToArray func to accept Boolean if last filter string part is a 
+//      filter query. This needs to be added as its own type (type: 'filterQuery')
 
-// Filters-Bar filter logic
-// 1. Update function to detect lastFilterIncompleteQuote: true
+// Constructing logic
+// 1. Amend constructSearchQuery func to handle FilterQueryPart SearchStringPart and FilterPart 
+//      types
 
 // Query filter logic misc
 // 1. Build out logic to control states
