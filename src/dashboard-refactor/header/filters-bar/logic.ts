@@ -1,16 +1,26 @@
-import { SearchFilterDetail, SearchQueryPart } from '../types'
+import { SearchFilterDetail, SearchQueryPart, QueryFilterPart } from '../types'
 
 export const addFilterToSearchQuery: (
     filterDetail: SearchFilterDetail,
     queryArray: SearchQueryPart[],
-) => SearchQueryPart[] = ({ filterType, filters, rawContent }, queryArray) => {
-    // find existing filters object for matching filterType
+) => SearchQueryPart[] = (
+    { filterType, filters, rawContent, variant, isExclusion },
+    queryArray,
+) => {
+    // find existing filters object for matching filterType (and variant and exclusion if they exist)
     const match = queryArray.find(
-        (val) => val.detail['filterType'] === filterType,
+        (val) =>
+            val.detail['filterType'] === filterType &&
+            (variant ? val.detail['variant'] === variant : true) &&
+            (isExclusion ? val.detail['isExclusion'] === isExclusion : true),
     )
     if (match) {
         match.detail['filters'].push(filters[0])
         if (match.detail['rawContent']) {
+            if (match.detail['lastFilterIncompleteQuote']) {
+                delete match.detail['lastFilterIncompleteQuote']
+                match.detail['rawContent'] += `"`
+            }
             match.detail['rawContent'] += `,`
         }
         match.detail['rawContent'] += rawContent
@@ -24,14 +34,21 @@ export const addFilterToSearchQuery: (
                 detail['value'] += ' '
             }
         }
-        queryArray.push({
+        const filterObj: QueryFilterPart = {
             type: 'filter',
             detail: {
                 filterType,
                 filters,
                 rawContent,
             },
-        })
+        }
+        if (variant) {
+            filterObj.detail['variant'] = variant
+        }
+        if (isExclusion) {
+            filterObj.detail['isExclusion'] = isExclusion
+        }
+        queryArray.push(filterObj)
     }
     return queryArray
 }
