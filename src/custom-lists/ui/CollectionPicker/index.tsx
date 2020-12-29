@@ -34,8 +34,8 @@ class ListPicker extends StatefulUIElement<
     }
 
     searchInputPlaceholder =
-        this.props.searchInputPlaceholder || 'Add to Collection'
-    removeToolTipText = this.props.removeToolTipText || 'Remove from list'
+        this.props.searchInputPlaceholder ?? 'Add to Collection'
+    removeToolTipText = this.props.removeToolTipText ?? 'Remove from list'
 
     componentDidUpdate(prevProps, prevState) {
         const {

@@ -30,8 +30,8 @@ class DomainPicker extends StatefulUIElement<
     }
 
     searchInputPlaceholder =
-        this.props.searchInputPlaceholder || 'Domains to Search'
-    removeToolTipText = this.props.removeToolTipText || 'Remove filter'
+        this.props.searchInputPlaceholder ?? 'Domains to Search'
+    removeToolTipText = this.props.removeToolTipText ?? 'Remove filter'
 
     componentDidUpdate(prevProps, prevState) {
         const {

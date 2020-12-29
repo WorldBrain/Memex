@@ -34,8 +34,8 @@ class TagPicker extends StatefulUIElement<
         super(props, new TagPickerLogic(props))
     }
 
-    searchInputPlaceholder = this.props.searchInputPlaceholder || 'Add Tags'
-    removeToolTipText = this.props.removeToolTipText || 'Remove tag from page'
+    searchInputPlaceholder = this.props.searchInputPlaceholder ?? 'Add Tags'
+    removeToolTipText = this.props.removeToolTipText ?? 'Remove tag from page'
 
     componentDidUpdate(prevProps, prevState) {
         const {
