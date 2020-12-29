@@ -1,6 +1,6 @@
 import React from 'react'
 import onClickOutside from 'react-onclickoutside'
-import { isEqual } from 'lodash'
+import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
