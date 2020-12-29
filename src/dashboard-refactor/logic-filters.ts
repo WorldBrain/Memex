@@ -52,3 +52,30 @@ export const addFilterToSearchQuery: (
     }
     return queryArray
 }
+
+const findFilterPartIndex = (
+    { detail: { filterType, isExclusion, variant } }: QueryFilterPart,
+    parsedQuery: SearchQueryPart[],
+): number => {
+    const index = parsedQuery.findIndex(
+        (val) =>
+            val.detail['filterType'] === filterType &&
+            (variant ? val.detail['variant'] === variant : true) &&
+            (isExclusion ? val.detail['isExclusion'] === isExclusion : true),
+    )
+    return index
+}
+
+const insertFilterPartToQueryString = (
+    filterPart: QueryFilterPart,
+    parsedQuery: SearchQueryPart[],
+): SearchQueryPart[] => {
+    return parsedQuery
+}
+
+const insertFilterToQueryString = (
+    filter: string,
+    filterPart: QueryFilterPart,
+): QueryFilterPart => {
+    return filterPart
+}
