@@ -4,38 +4,34 @@ import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
-import TagPickerLogic, {
-    TagPickerDependencies,
-    TagPickerEvent,
-    TagPickerState,
-} from 'src/tags/ui/TagPicker/logic'
+import DomainPickerLogic, {
+    DomainPickerDependencies,
+    DomainPickerEvent,
+    DomainPickerState,
+} from './logic'
 import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
 import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
-import EntryRow, {
-    IconStyleWrapper,
-    ActOnAllTabsButton,
-} from 'src/common-ui/GenericPicker/components/EntryRow'
+import EntryRow from 'src/common-ui/GenericPicker/components/EntryRow' // ActOnAllTabsButton, // IconStyleWrapper,
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
-import { TagResultItem } from './components/TagResultItem'
-import { EntrySelectedTag } from './components/EntrySelectedTag'
-import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
+import { EntrySelectedList } from './components/EntrySelectedList'
+import { DomainResultItem } from './components/DomainResultItem'
 
-class TagPicker extends StatefulUIElement<
-    TagPickerDependencies,
-    TagPickerState,
-    TagPickerEvent
+class DomainPicker extends StatefulUIElement<
+    DomainPickerDependencies,
+    DomainPickerState,
+    DomainPickerEvent
 > {
-    constructor(props: TagPickerDependencies) {
-        super(props, new TagPickerLogic(props))
+    constructor(props: DomainPickerDependencies) {
+        super(props, new DomainPickerLogic(props))
     }
 
-    searchInputPlaceholder = this.props.searchInputPlaceholder ?? 'Add Tags'
-    removeToolTipText = this.props.removeToolTipText ?? 'Remove tag from page'
+    searchInputPlaceholder =
+        this.props.searchInputPlaceholder ?? 'Domains to Search'
+    removeToolTipText = this.props.removeToolTipText ?? 'Remove filter'
 
     componentDidUpdate(prevProps, prevState) {
         const {
@@ -52,97 +48,63 @@ class TagPicker extends StatefulUIElement<
         }
     }
 
-    handleClickOutside = (e) => {
+    handleClickOutside: React.MouseEventHandler = (e) => {
         if (this.props.onClickOutside) {
-            this.props.onClickOutside(e)
+            this.props.onClickOutside(e) // this is defined as type react.MouseEventHandler for the collection picker but as a standard function with no params or return for the tag picker
         }
-    }
-
-    get shouldShowAddNew(): boolean {
-        const { newEntryName } = this.state
-        return newEntryName !== '' && VALID_TAG_PATTERN.test(newEntryName)
     }
 
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
         this.processEvent('setSearchInputRef', { ref })
 
-    handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
+    handleOuterSearchBoxClick: React.MouseEventHandler = () =>
+        this.processEvent('focusInput', {})
 
     handleSearchInputChanged = (query: string) => {
         this.props.onSearchInputChange({ query })
         return this.processEvent('searchInputChanged', { query })
     }
 
-    handleSelectedTagPress = (tag: string) =>
-        this.processEvent('selectedEntryPress', { entry: tag })
+    handleSelectedDomainPress = (domain: string) =>
+        this.processEvent('selectedEntryPress', { entry: domain })
 
-    handleResultTagPress = (tag: DisplayEntry) =>
-        this.processEvent('resultEntryPress', { entry: tag })
+    handleResultDomainPress = (domain: DisplayEntry) =>
+        this.processEvent('resultEntryPress', { entry: domain })
 
-    handleResultTagAllPress = (tag: DisplayEntry) =>
-        this.processEvent('resultEntryAllPress', { entry: tag })
+    handleResultDomainFocus = (domain: DisplayEntry, index?: number) =>
+        this.processEvent('resultEntryFocus', { entry: domain, index })
 
-    handleNewTagAllPress = () =>
-        this.processEvent('newEntryAllPress', {
-            entry: this.state.newEntryName,
-        })
-
-    handleResultTagFocus = (tag: DisplayEntry, index?: number) =>
-        this.processEvent('resultEntryFocus', { entry: tag, index })
-
-    handleNewTagPress = () =>
+    handleNewDomainPress = () =>
         this.processEvent('newEntryPress', { entry: this.state.newEntryName })
 
     handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
 
-    renderTagRow = (tag: DisplayEntry, index: number) => (
+    renderDomainRow = (domain: DisplayEntry, index: number) => (
         <EntryRow
-            onPress={this.handleResultTagPress}
-            onPressActOnAll={
-                this.props.actOnAllTabs
-                    ? (t) => this.handleResultTagAllPress(t)
-                    : undefined
-            }
-            onFocus={this.handleResultTagFocus}
-            key={`TagKeyName-${tag.name}`}
+            onPress={this.handleResultDomainPress}
+            onFocus={this.handleResultDomainFocus}
+            key={`DomainKeyName-${domain.name}`}
             index={index}
-            name={tag.name}
-            focused={tag.focused}
-            selected={tag.selected}
-            resultItem={<TagResultItem>{tag.name}</TagResultItem>}
-            removeTooltipText={this.removeToolTipText}
-            actOnAllTooltipText="Tag all tabs in window"
+            name={domain.name}
+            selected={domain.selected}
+            focused={domain.focused}
+            resultItem={<DomainResultItem>{domain.name}</DomainResultItem>}
+            removeTooltipText="Remove filter"
         />
     )
-
-    renderNewTagAllTabsButton = () =>
-        this.props.actOnAllTabs && (
-            <IconStyleWrapper show>
-                <ButtonTooltip
-                    tooltipText="Tag all tabs in window"
-                    position="left"
-                >
-                    <ActOnAllTabsButton
-                        size={20}
-                        onClick={this.handleNewTagAllPress}
-                    />
-                </ButtonTooltip>
-            </IconStyleWrapper>
-        )
-
-    renderEmptyList() {
+    renderEmptyDomain() {
         if (this.state.newEntryName !== '') {
             return
         }
 
         return (
-            <EmptyTagsView>
-                <strong>No Tags yet</strong>
+            <EmptyDomainsView>
+                <strong>No Collections yet</strong>
                 <br />
-                Add new tags
+                Add new collections
                 <br />
                 via the search bar
-            </EmptyTagsView>
+            </EmptyDomainsView>
         )
     }
 
@@ -166,31 +128,31 @@ class TagPicker extends StatefulUIElement<
                     value={this.state.query}
                     loading={this.state.loadingQueryResults}
                     before={
-                        <EntrySelectedTag
-                            dataAttributeName="tag-name"
+                        <EntrySelectedList
+                            dataAttributeName="domain-name"
                             entriesSelected={this.state.selectedEntries}
-                            onPress={this.handleSelectedTagPress}
+                            onPress={this.handleSelectedDomainPress}
                         />
                     }
                 />
-                <EntryResultsList
-                    entries={this.state.displayEntries}
-                    renderEntryRow={this.renderTagRow}
-                    emptyView={this.renderEmptyList()}
-                    id="tagResults"
-                />
-                {this.shouldShowAddNew && (
+                {this.state.newEntryName !== '' && (
                     <AddNewEntry
                         resultItem={
-                            <TagResultItem>
+                            <DomainResultItem>
                                 {this.state.newEntryName}
-                            </TagResultItem>
+                            </DomainResultItem>
                         }
-                        onPress={this.handleNewTagPress}
+                        onPress={this.handleNewDomainPress}
                     >
-                        {this.renderNewTagAllTabsButton()}
+                        {/* {this.renderNewDomainAllTabsButton()} */}
                     </AddNewEntry>
                 )}
+                <EntryResultsList
+                    entries={this.state.displayEntries}
+                    renderEntryRow={this.renderDomainRow}
+                    emptyView={this.renderEmptyDomain()}
+                    id="domainResults"
+                />
             </>
         )
     }
@@ -225,7 +187,7 @@ const OuterSearchBox = styled.div`
     border-radius: 3px;
 `
 
-const EmptyTagsView = styled.div`
+const EmptyDomainsView = styled.div`
     color: ${(props) => props.theme.tag.text};
     padding: 10px 15px;
     font-weight: 400;
@@ -233,4 +195,4 @@ const EmptyTagsView = styled.div`
     text-align: center;
 `
 
-export default onClickOutside(TagPicker)
+export default onClickOutside(DomainPicker)

@@ -1,4 +1,4 @@
-import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
+import { DOMAIN_TLD_PATTERN } from 'src/dashboard-refactor/constants'
 
 import GenericPickerLogic, {
     GenericPickerDependencies,
@@ -6,7 +6,7 @@ import GenericPickerLogic, {
     GenericPickerState,
 } from 'src/common-ui/GenericPicker/logic'
 
-export interface TagPickerDependencies extends GenericPickerDependencies {
+export interface DomainPickerDependencies extends GenericPickerDependencies {
     onClickOutside?: React.MouseEventHandler
     query?: string
     onSearchInputChange?: (evt: { query: string }) => void
@@ -15,16 +15,16 @@ export interface TagPickerDependencies extends GenericPickerDependencies {
     removeToolTipText?: string
 }
 
-export type TagPickerEvent = GenericPickerEvent
-export type TagPickerState = GenericPickerState
+export type DomainPickerEvent = GenericPickerEvent
+export type DomainPickerState = GenericPickerState
 
-export default class TagPickerLogic extends GenericPickerLogic {
-    protected pickerName = 'Tag'
+export default class DomainPickerLogic extends GenericPickerLogic {
+    protected pickerName = 'Domain'
 
     validateEntry = (entry: string) => {
         entry = this._validateEntry(entry)
 
-        if (!VALID_TAG_PATTERN.test(entry)) {
+        if (!DOMAIN_TLD_PATTERN.test(entry)) {
             throw Error(
                 `${this.pickerName} Validation: Can't add invalid entry`,
             )

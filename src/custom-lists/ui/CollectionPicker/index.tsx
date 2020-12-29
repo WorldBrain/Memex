@@ -1,5 +1,6 @@
 import React from 'react'
 import onClickOutside from 'react-onclickoutside'
+import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -32,6 +33,25 @@ class ListPicker extends StatefulUIElement<
         super(props, new ListPickerLogic(props))
     }
 
+    searchInputPlaceholder =
+        this.props.searchInputPlaceholder ?? 'Add to Collection'
+    removeToolTipText = this.props.removeToolTipText ?? 'Remove from list'
+
+    componentDidUpdate(prevProps, prevState) {
+        const {
+            props: { query, onSelectedEntriesChange },
+            state: { selectedEntries },
+        } = this
+        if (prevProps.query !== query) {
+            this.processEvent('searchInputChanged', { query })
+        }
+        const a = prevState.selectedEntries
+        const b = selectedEntries
+        if (a.length !== b.length || !isEqual(a, b)) {
+            onSelectedEntriesChange({ selectedEntries })
+        }
+    }
+
     handleClickOutside = () => {
         if (this.props.onClickOutside) {
             this.props.onClickOutside()
@@ -43,6 +63,7 @@ class ListPicker extends StatefulUIElement<
     handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
 
     handleSearchInputChanged = (query: string) => {
+        this.props.onSearchInputChange({ query })
         return this.processEvent('searchInputChanged', { query })
     }
 
@@ -83,7 +104,7 @@ class ListPicker extends StatefulUIElement<
             selected={list.selected}
             focused={list.focused}
             resultItem={<ListResultItem>{list.name}</ListResultItem>}
-            removeTooltipText="Remove from list"
+            removeTooltipText={this.removeToolTipText}
             actOnAllTooltipText="Add all tabs in window to list"
         />
     )
@@ -131,7 +152,7 @@ class ListPicker extends StatefulUIElement<
         return (
             <>
                 <PickerSearchInput
-                    searchInputPlaceholder="Add to collection"
+                    searchInputPlaceholder={this.searchInputPlaceholder}
                     showPlaceholder={this.state.selectedEntries.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}

@@ -6,6 +6,11 @@ import GenericPickerLogic, {
 
 export interface ListPickerDependencies extends GenericPickerDependencies {
     onClickOutside?: () => void
+    query?: string
+    onSearchInputChange?: (evt: { query: string }) => void
+    onSelectedEntriesChange?: (evt: { selectedEntries: string[] }) => void
+    searchInputPlaceholder?: string
+    removeToolTipText?: string
 }
 
 export type ListPickerEvent = GenericPickerEvent
