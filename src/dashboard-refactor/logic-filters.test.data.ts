@@ -1,4 +1,4 @@
-import { SearchFilterDetail, SearchQueryPart } from '../types'
+import { SearchFilterDetail, ParsedSearchQuery } from './types'
 
 // const newFilterObjs = [
 //     't:',
@@ -19,8 +19,8 @@ import { SearchFilterDetail, SearchQueryPart } from '../types'
 
 interface TestData {
     newFilterObj: SearchFilterDetail
-    oldQueryArray: SearchQueryPart[]
-    newQueryArray: SearchQueryPart[]
+    oldQueryArray: ParsedSearchQuery
+    newQueryArray: ParsedSearchQuery
 }
 
 const testData: TestData[] = [
@@ -211,7 +211,7 @@ const testData: TestData[] = [
             },
             {
                 type: 'queryString',
-                detail: { value: 'bar' },
+                detail: { value: ' bar' },
             },
         ],
         newQueryArray: [

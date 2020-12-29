@@ -1,4 +1,3 @@
-import { SEARCH_QUERY_END_FILTER_KEY_PATTERN } from 'src/dashboard-refactor/constants'
 import {
     FilterKey,
     SearchFilterType,
