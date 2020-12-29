@@ -1,3 +1,5 @@
+import { SearchFilterType } from './header/types'
+
 export interface NewItemsCountState {
     displayNewItemsCount: boolean
     newItemsCount: number
@@ -40,3 +42,28 @@ export interface SelectedState {
 }
 
 export type ListSource = 'local-lists' | 'followed-list'
+
+export type ParsedSearchQuery = (
+    | QueryFilterPart
+    | QueryStringPart
+    | undefined
+)[]
+
+export interface QueryFilterPart {
+    type: 'filter'
+    detail: SearchFilterDetail
+}
+
+export interface SearchFilterDetail {
+    filterType: SearchFilterType
+    rawContent: string
+    filters: string[]
+    isExclusion?: boolean
+    variant?: 'from' | 'to'
+    lastFilterIncompleteQuote?: boolean
+}
+
+export interface QueryStringPart {
+    type: 'searchString'
+    detail: { value: string }
+}
