@@ -19,13 +19,6 @@
 // X 2. Move prop def'n to carried-down props
 // 3. Investigate whether query value can be passed in through props
 
-Problem: Picker query string is controlled internally
-Possible solutions:
-1. Overwrite this.state.query in picker UI components
-2. Extend each picker UI component which runs this.processEvent('searchInputChanged', {query})
-3. Add a 'queryOverride' dependency to the generic picker logic and emit a mutation for the 
-   query value on init
-
 // Header
 // Built out header component first draft plus stories. Haven't checked them yet.
 

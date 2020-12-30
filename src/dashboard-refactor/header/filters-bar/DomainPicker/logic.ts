@@ -10,6 +10,9 @@ export interface DomainPickerDependencies extends GenericPickerDependencies {
     onClickOutside?: React.MouseEventHandler
     query?: string
     onSearchInputChange?: (evt: { query: string }) => void
+    onSelectedEntriesChange?: (evt: { selectedEntries: string[] }) => void
+    searchInputPlaceholder?: string
+    removeToolTipText?: string
 }
 
 export type DomainPickerEvent = GenericPickerEvent
