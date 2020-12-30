@@ -1,41 +1,37 @@
 import { SearchFilterDetail, ParsedSearchQuery } from './types'
 
-// const newFilterObjs = [
-//     't:',
-//     `d:domain`,
-//     `search`,
-//     `search term`,
-//     `c:list `,
-//     `t:tag`,
-//     `from:"date"`,
-//     `to:"date"`,
-//     ``,
-//     `bar t:foo,bar,"foo bar" foo`,
-//     `foo from:"date" to:"other date" bar`,
-//     `foo t:tag,"other tag" c:list,"other list"`,
-//     `foo t:tag,"other tag" c:list,"other `,
-//     `foo t:tag bar d:foo.com,foobar.com foobar`,
-// ]
+const testStrings = [
+    't:',
+    `d:domain`,
+    `search`,
+    `search term`,
+    `c:list `,
+    `t:tag`,
+    `from:"date"`,
+    `to:"date"`,
+    ``,
+    `bar t:foo,bar,"foo bar" foo`,
+    `foo from:"date" to:"other date" bar`,
+    `foo t:tag,"other tag" c:list,"other list"`,
+    `foo t:tag,"other tag" c:list,"other `,
+    `foo t:tag bar d:foo.com,foobar.com foobar`,
+]
 
-interface TestData {
-    newFilterObj: SearchFilterDetail
-    oldQueryArray: ParsedSearchQuery
-    newQueryArray: ParsedSearchQuery
+interface ParsingTestData {
+    testString: string
+    expected: ParsedSearchQuery
 }
 
-const testData: TestData[] = [
+const parsingTestData: ParsingTestData[] = [
     {
-        newFilterObj: {
-            filterType: 'tag',
-            filters: [],
-            rawContent: '',
-        },
-        oldQueryArray: [],
-        newQueryArray: [
+        testString: `t:`,
+        expected: [
             {
                 type: 'filter',
+                startIndex: 0,
+                endIndex: 1,
                 detail: {
-                    filterType: 'tag',
+                    type: 'tag',
                     filters: [],
                     rawContent: '',
                 },
@@ -43,136 +39,190 @@ const testData: TestData[] = [
         ],
     },
     {
-        newFilterObj: {
-            filterType: 'domain',
-            filters: ['domain'],
-            rawContent: 'domain',
-        },
-        oldQueryArray: [
+        testString: `d:domain`,
+        expected: [
             {
                 type: 'filter',
+                startIndex: 0,
+                endIndex: 7,
                 detail: {
-                    filterType: 'domain',
+                    type: 'domain',
                     filters: [],
-                    rawContent: '',
-                },
-            },
-        ],
-        newQueryArray: [
-            {
-                type: 'filter',
-                detail: {
-                    filterType: 'domain',
-                    filters: ['domain'],
-                    rawContent: 'domain',
+                    query: 'domain',
+                    rawContent: 'd:domain',
                 },
             },
         ],
     },
     {
-        newFilterObj: {
-            filterType: 'date',
-            variant: 'from',
-            filters: ['date'],
-            rawContent: '"date"',
-        },
-        oldQueryArray: [
+        testString: `search`,
+        expected: [
             {
-                type: 'queryString',
+                type: 'searchString',
+                startIndex: 0,
+                endIndex: 5,
                 detail: { value: 'search' },
             },
         ],
-        newQueryArray: [
+    },
+    {
+        testString: `search term`,
+        expected: [
             {
-                type: 'queryString',
-                detail: { value: 'search ' },
+                type: 'searchString',
+                startIndex: 0,
+                endIndex: `search term`.length - 1,
+                detail: { value: 'search term' },
             },
+        ],
+    },
+    {
+        testString: `c:list`,
+        expected: [
             {
                 type: 'filter',
+                startIndex: 0,
+                endIndex: `c:list`.length - 1,
                 detail: {
-                    filterType: 'date',
+                    type: 'list',
+                    filters: [],
+                    query: 'list',
+                    rawContent: 'c:list',
+                },
+            },
+        ],
+    },
+    {
+        testString: `t:tag`,
+        expected: [
+            {
+                type: 'filter',
+                startIndex: 0,
+                endIndex: `t:tag`.length - 1,
+                detail: {
+                    type: 'tag',
+                    filters: [],
+                    query: 'tag',
+                    rawContent: 't:tag',
+                },
+            },
+        ],
+    },
+    {
+        testString: `from:"date"`,
+        expected: [
+            {
+                type: 'filter',
+                startIndex: 0,
+                endIndex: `from:"date"`.length - 1,
+                detail: {
+                    type: 'date',
                     variant: 'from',
                     filters: ['date'],
-                    rawContent: '"date"',
+                    rawContent: 'from:"date"',
                 },
             },
         ],
     },
     {
-        newFilterObj: {
-            filterType: 'list',
-            filters: ['other lists'],
-            rawContent: '"other lists"',
-        },
-        oldQueryArray: [
+        testString: `to:"date"`,
+        expected: [
             {
                 type: 'filter',
+                startIndex: 0,
+                endIndex: `to:"date"`.length - 1,
                 detail: {
-                    filterType: 'list',
-                    filters: ['list'],
-                    rawContent: 'list',
-                },
-            },
-        ],
-        newQueryArray: [
-            {
-                type: 'filter',
-                detail: {
-                    filterType: 'list',
-                    filters: ['list', 'other lists'],
-                    rawContent: 'list,"other lists"',
-                },
-            },
-        ],
-    },
-    {
-        newFilterObj: {
-            filterType: 'date',
-            variant: 'to',
-            filters: ['date'],
-            rawContent: '"date"',
-        },
-        oldQueryArray: [],
-        newQueryArray: [
-            {
-                type: 'filter',
-                detail: {
-                    filterType: 'date',
+                    type: 'date',
                     variant: 'to',
                     filters: ['date'],
-                    rawContent: '"date"',
+                    rawContent: 'to:"date"',
                 },
             },
         ],
     },
     {
-        newFilterObj: {
-            filterType: 'tag',
-            filters: ['foo bar'],
-            rawContent: '"foo bar"',
-        },
-        oldQueryArray: [
+        testString: ``,
+        expected: [],
+    },
+    {
+        testString: `foo t:foo,"bar"foo`,
+        expected: [
             {
-                type: 'queryString',
-                detail: { value: 'bar' },
+                type: 'searchString',
+                startIndex: 0,
+                endIndex: 'foo '.length - 1,
+                detail: {
+                    value: 'foo ',
+                },
+            },
+            {
+                type: 'filter',
+                startIndex: 'foo '.length,
+                endIndex: 'foo t:foo,"bar"'.length - 1,
+                detail: {
+                    type: 'tag',
+                    filters: ['foo', 'bar'],
+                    rawContent: 't:foo,"bar"',
+                },
+            },
+            {
+                type: 'searchString',
+                startIndex: 'foo t:foo,"bar"'.length,
+                endIndex: `foo t:foo,"bar"foo`.length - 1,
+                detail: {
+                    value: 'foo',
+                },
+            },
+        ],
+    },
+    {
+        testString: `foo t:foo,bar,"foo"" bar"`,
+        expected: [
+            {
+                type: 'searchString',
+                startIndex: 0,
+                endIndex: 'foo '.length - 1,
+                detail: { value: 'foo ' },
             },
             {
                 type: 'filter',
                 detail: {
                     filterType: 'tag',
-                    filters: ['foo', 'bar'],
-                    rawContent: 'foo,bar',
+                    filters: ['foo', 'bar', 'foo'],
+                    rawContent: 'foo,bar,"foo"',
                 },
             },
             {
-                type: 'queryString',
-                detail: { value: 'foo' },
+                type: 'searchString',
+                detail: {
+                    value: '" bar"',
+                },
             },
         ],
-        newQueryArray: [
+    },
+    {
+        testString: `t:foo foo bar foo bar`,
+        expected: [
             {
-                type: 'queryString',
-                detail: { value: 'bar' },
+                type: 'filter',
+                detail: {
+                    filterType: 'tag',
+                    filters: ['foo'],
+                    rawContent: 'foo',
+                },
+            },
+            {
+                type: 'searchString',
+                detail: { value: ' foo bar foo bar' },
+            },
+        ],
+    },
+    {
+        testString: `bar t:foo,bar,"foo bar" foo`,
+        expected: [
+            {
+                type: 'searchString',
+                detail: { value: 'bar ' },
             },
             {
                 type: 'filter',
@@ -183,21 +233,16 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'queryString',
-                detail: { value: 'foo' },
+                type: 'searchString',
+                detail: { value: ' foo' },
             },
         ],
     },
     {
-        newFilterObj: {
-            filterType: 'date',
-            variant: 'to',
-            filters: [''],
-            rawContent: '',
-        },
-        oldQueryArray: [
+        testString: `foo from:"date" to:"other date" bar`,
+        expected: [
             {
-                type: 'queryString',
+                type: 'searchString',
                 detail: { value: 'foo ' },
             },
             {
@@ -210,85 +255,7 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'queryString',
-                detail: { value: ' bar' },
-            },
-        ],
-        newQueryArray: [
-            {
-                type: 'queryString',
-                detail: { value: 'foo' },
-            },
-            {
-                type: 'filter',
-                detail: {
-                    filterType: 'date',
-                    variant: 'from',
-                    filters: ['date'],
-                    rawContent: '"date"',
-                },
-            },
-            {
-                type: 'queryString',
-                detail: { value: ' ' },
-            },
-            {
-                type: 'filter',
-                detail: {
-                    filterType: 'date',
-                    variant: 'to',
-                    filters: [''],
-                    rawContent: '',
-                },
-            },
-            {
-                type: 'queryString',
-                detail: { value: ' bar' },
-            },
-        ],
-    },
-    {
-        newFilterObj: {
-            filterType: 'date',
-            variant: 'to',
-            filters: ['other date'],
-            rawContent: '"other date"',
-        },
-        oldQueryArray: [
-            {
-                type: 'queryString',
-                detail: { value: 'foo ' },
-            },
-            {
-                type: 'filter',
-                detail: {
-                    filterType: 'date',
-                    variant: 'from',
-                    filters: ['date'],
-                    rawContent: '"date"',
-                },
-            },
-            {
-                type: 'queryString',
-                detail: { value: 'bar' },
-            },
-        ],
-        newQueryArray: [
-            {
-                type: 'queryString',
-                detail: { value: 'foo' },
-            },
-            {
-                type: 'filter',
-                detail: {
-                    filterType: 'date',
-                    variant: 'from',
-                    filters: ['date'],
-                    rawContent: '"date"',
-                },
-            },
-            {
-                type: 'queryString',
+                type: 'searchString',
                 detail: { value: ' ' },
             },
             {
@@ -301,20 +268,16 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'queryString',
+                type: 'searchString',
                 detail: { value: ' bar' },
             },
         ],
     },
     {
-        newFilterObj: {
-            filterType: 'list',
-            filters: ['better list'],
-            rawContent: '"better list"',
-        },
-        oldQueryArray: [
+        testString: `foo t:tag,"other tag"  c:list,"other list"`,
+        expected: [
             {
-                type: 'queryString',
+                type: 'searchString',
                 detail: { value: 'foo ' },
             },
             {
@@ -326,23 +289,25 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'queryString',
-                detail: { value: ' ' },
+                type: 'searchString',
+                detail: { value: '  ' },
             },
             {
                 type: 'filter',
                 detail: {
                     filterType: 'list',
-                    filters: ['list', 'other '],
-                    rawContent: 'list,"other ',
-                    lastFilterIncompleteQuote: true,
+                    filters: ['list', 'other list'],
+                    rawContent: 'list,"other list"',
                 },
             },
         ],
-        newQueryArray: [
+    },
+    {
+        testString: `foo t:tag,"other tag" c:list,"other `,
+        expected: [
             {
-                type: 'queryString',
-                detail: { value: 'foo' },
+                type: 'searchString',
+                detail: { value: 'foo ' },
             },
             {
                 type: 'filter',
@@ -353,16 +318,49 @@ const testData: TestData[] = [
                 },
             },
             {
-                type: 'queryString',
+                type: 'searchString',
                 detail: { value: ' ' },
             },
             {
                 type: 'filter',
                 detail: {
                     filterType: 'list',
-                    filters: ['list', 'other ', 'better list'],
-                    rawContent: 'list,"other ","better list"',
+                    filters: ['list', 'other '],
+                    rawContent: 'list,"other ',
                 },
+            },
+        ],
+    },
+    {
+        testString: `foo t:tag bar d:foo.com,foobar.com foobar `,
+        expected: [
+            {
+                type: 'searchString',
+                detail: { value: 'foo ' },
+            },
+            {
+                type: 'filter',
+                detail: {
+                    filterType: 'tag',
+                    filters: ['tag'],
+                    rawContent: 'tag',
+                },
+            },
+            {
+                type: 'searchString',
+                detail: { value: ' bar ' },
+            },
+            {
+                type: 'filter',
+                detail: {
+                    filterType: 'domain',
+                    filters: ['foo.com', 'foobar.com'],
+                    rawContent: 'foo.com,foobar.com',
+                },
+            },
+            {
+                type: 'searchString',
+                detail: { value: ' foobar ' },
             },
         ],
     },

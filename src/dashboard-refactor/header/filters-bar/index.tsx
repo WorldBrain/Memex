@@ -79,7 +79,7 @@ export interface FiltersBarProps {
     tagFilterSelectedState: SelectedState
     listFilterSelectedState: SelectedState
     pickerProps: {
-        datePickerProps?: DateRangeSelectionProps
+        datePickerProps?: Omit<DateRangeSelectionProps, 'env' & 'disabled'>
         tagPickerProps?: FilterPickerProps
         domainPickerProps?: FilterPickerProps
         listPickerProps?: FilterPickerProps
@@ -124,7 +124,12 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     }
 
     private renderDatePicker = () => {
-        return <DatePicker {...this.props.pickerProps.datePickerProps} />
+        return (
+            <DatePicker
+                env="overview"
+                {...this.props.pickerProps.datePickerProps}
+            />
+        )
     }
 
     private renderTagPicker = () => {

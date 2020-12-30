@@ -41,6 +41,11 @@ export interface SelectedState {
     isSelected: boolean
 }
 
+export interface CursorLocationState {
+    location: number
+    onCursorLocationChange: (event: { location: number }) => void
+}
+
 export type ListSource = 'local-lists' | 'followed-list'
 
 export type ParsedSearchQuery = (
@@ -49,21 +54,29 @@ export type ParsedSearchQuery = (
     | undefined
 )[]
 
+export interface QueryStringPart {
+    type: 'searchString'
+    startIndex: number
+    endIndex: number
+    detail: { value: string }
+}
+
 export interface QueryFilterPart {
     type: 'filter'
-    detail: SearchFilterDetail
+    startIndex: number
+    endIndex: number
+    detail: SearchFilterDetail | DateFilterDetail
 }
 
 export interface SearchFilterDetail {
-    filterType: SearchFilterType
+    type: SearchFilterType
     rawContent: string
     filters: string[]
+    query?: string
     isExclusion?: boolean
-    variant?: 'from' | 'to'
-    lastFilterIncompleteQuote?: boolean
 }
 
-export interface QueryStringPart {
-    type: 'searchString'
-    detail: { value: string }
+type DateFilterDetail = Omit<SearchFilterDetail, 'type'> & {
+    type: 'date'
+    variant: 'from' | 'to'
 }

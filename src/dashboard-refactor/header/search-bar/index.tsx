@@ -5,6 +5,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 
 import colors from '../../colors'
 import { fonts } from '../../styles'
+import { CursorLocationState } from 'src/dashboard-refactor/types'
 
 const textStyles = `
     font-family: ${fonts.primary.name};
@@ -54,9 +55,10 @@ const FullWidthMargin = styled(Margin)`
 
 export interface SearchBarProps {
     searchQuery: string
+    cursorLocationState: CursorLocationState
     isSearchBarFocused: boolean
     searchFiltersOpen: boolean
-    searchFiltersActive: []
+    // searchFiltersActive: [] // this is probably unnecessary given the filter query logic state manipulation parses queryString at the state layer
     onSearchBarFocus(): void
     onSearchQueryChange(queryString: string): void
     onSearchFiltersOpen(): void
@@ -68,6 +70,14 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
     componentDidMount = () => {
         if (this.props.isSearchBarFocused) {
             this.inputRef.current.focus()
+        }
+    }
+    componentDidUpdate = (prevProps) => {
+        const { selectionStart } = this.inputRef.current
+        if (selectionStart !== prevProps.cursorLocationState.location) {
+            this.props.cursorLocationState.onCursorLocationChange({
+                location: selectionStart,
+            })
         }
     }
     handleChange: React.FormEventHandler = (evt) => {
