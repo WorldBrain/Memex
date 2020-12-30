@@ -68,6 +68,7 @@ export async function setupTest(
     args: {
         seedData?: DataSeeder
         copyToClipboard?: (text: string) => Promise<boolean>
+        overrideSearchTrigger?: boolean
     } = {
         copyToClipboard: defaultTestSetupDeps.copyToClipboard,
     },
@@ -89,6 +90,15 @@ export async function setupTest(
         copyToClipboard:
             args.copyToClipboard ?? defaultTestSetupDeps.copyToClipboard,
     })
+
+    if (args.overrideSearchTrigger) {
+        logic['searchTriggeredCount'] = 0
+
+        logic['runSearch'] = async () => {
+            logic['searchTriggeredCount']++
+        }
+    }
+
     const searchResults = device.createElement<RootState, Events>(logic)
 
     if (args.seedData) {

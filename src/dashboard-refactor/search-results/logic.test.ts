@@ -14,20 +14,29 @@ describe('Dashboard search results logic', () => {
 
     describe('root state mutations', () => {
         it('should be able to set page search type', async ({ device }) => {
-            const { searchResults } = await setupTest(device)
+            const { searchResults } = await setupTest(device, {
+                overrideSearchTrigger: true,
+            })
 
+            expect(searchResults.logic['searchTriggeredCount']).toBe(0)
             expect(searchResults.state.searchResults.searchType).toEqual(
                 'pages',
             )
+
             await searchResults.processEvent('setSearchType', {
                 searchType: 'notes',
             })
+
+            expect(searchResults.logic['searchTriggeredCount']).toBe(1)
             expect(searchResults.state.searchResults.searchType).toEqual(
                 'notes',
             )
+
             await searchResults.processEvent('setSearchType', {
                 searchType: 'pages',
             })
+
+            expect(searchResults.logic['searchTriggeredCount']).toBe(2)
             expect(searchResults.state.searchResults.searchType).toEqual(
                 'pages',
             )

@@ -5,12 +5,18 @@ describe('Dashboard search filters logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
     it('should be able to set the search query', async ({ device }) => {
-        const { searchResults } = await setupTest(device)
+        const { searchResults } = await setupTest(device, {
+            overrideSearchTrigger: true,
+        })
         const testQuery = 'test'
 
         expect(searchResults.state.searchFilters.searchQuery).toEqual('')
+        expect(searchResults.logic['searchTriggeredCount']).toBe(0)
+
         await searchResults.processEvent('setSearchQuery', { query: testQuery })
+
         expect(searchResults.state.searchFilters.searchQuery).toEqual(testQuery)
+        expect(searchResults.logic['searchTriggeredCount']).toBe(1)
     })
 
     it('should be able to set the search bar focus', async ({ device }) => {
@@ -124,21 +130,33 @@ describe('Dashboard search filters logic', () => {
     it('should be able to set the date from filter value', async ({
         device,
     }) => {
-        const { searchResults } = await setupTest(device)
+        const { searchResults } = await setupTest(device, {
+            overrideSearchTrigger: true,
+        })
         const dateValue = 1
 
         expect(searchResults.state.searchFilters.dateFrom).toBeUndefined()
+        expect(searchResults.logic['searchTriggeredCount']).toBe(0)
+
         await searchResults.processEvent('setDateFrom', { value: dateValue })
+
         expect(searchResults.state.searchFilters.dateFrom).toEqual(dateValue)
+        expect(searchResults.logic['searchTriggeredCount']).toBe(1)
     })
 
     it('should be able to set the date to filter value', async ({ device }) => {
-        const { searchResults } = await setupTest(device)
+        const { searchResults } = await setupTest(device, {
+            overrideSearchTrigger: true,
+        })
         const dateValue = 1
 
         expect(searchResults.state.searchFilters.dateTo).toBeUndefined()
+        expect(searchResults.logic['searchTriggeredCount']).toBe(0)
+
         await searchResults.processEvent('setDateTo', { value: dateValue })
+
         expect(searchResults.state.searchFilters.dateTo).toEqual(dateValue)
+        expect(searchResults.logic['searchTriggeredCount']).toBe(1)
     })
 
     it('should be able to set the date from NLP input value', async ({
@@ -172,97 +190,141 @@ describe('Dashboard search filters logic', () => {
     it('should be able to add and remove included + excluded tag filters', async ({
         device,
     }) => {
-        const { searchResults } = await setupTest(device)
+        const { searchResults } = await setupTest(device, {
+            overrideSearchTrigger: true,
+        })
         const tag1 = 'test'
         const tag2 = 'test again'
 
         expect(searchResults.state.searchFilters.tagsIncluded).toEqual([])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(0)
+
         await searchResults.processEvent('addIncludedTag', {
             tag: tag1,
         })
+
         expect(searchResults.state.searchFilters.tagsIncluded).toEqual([tag1])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(1)
+
         await searchResults.processEvent('addIncludedTag', {
             tag: tag2,
         })
+
         expect(searchResults.state.searchFilters.tagsIncluded).toEqual([
             tag1,
             tag2,
         ])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(2)
+
         await searchResults.processEvent('delIncludedTag', {
             tag: tag1,
         })
+
         expect(searchResults.state.searchFilters.tagsIncluded).toEqual([tag2])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(3)
 
         expect(searchResults.state.searchFilters.tagsExcluded).toEqual([])
+
         await searchResults.processEvent('addExcludedTag', {
             tag: tag1,
         })
+
         expect(searchResults.state.searchFilters.tagsExcluded).toEqual([tag1])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(4)
+
         await searchResults.processEvent('addExcludedTag', {
             tag: tag2,
         })
+
         expect(searchResults.state.searchFilters.tagsExcluded).toEqual([
             tag1,
             tag2,
         ])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(5)
+
         await searchResults.processEvent('delExcludedTag', {
             tag: tag1,
         })
+
         expect(searchResults.state.searchFilters.tagsExcluded).toEqual([tag2])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(6)
     })
 
     it('should be able to add and remove included + excluded domain filters', async ({
         device,
     }) => {
-        const { searchResults } = await setupTest(device)
+        const { searchResults } = await setupTest(device, {
+            overrideSearchTrigger: true,
+        })
         const domain1 = 'test.com'
         const domain2 = 'getmemex.com'
 
         expect(searchResults.state.searchFilters.domainsIncluded).toEqual([])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(0)
+
         await searchResults.processEvent('addIncludedDomain', {
             domain: domain1,
         })
+
         expect(searchResults.state.searchFilters.domainsIncluded).toEqual([
             domain1,
         ])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(1)
+
         await searchResults.processEvent('addIncludedDomain', {
             domain: domain2,
         })
+
         expect(searchResults.state.searchFilters.domainsIncluded).toEqual([
             domain1,
             domain2,
         ])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(2)
+
         await searchResults.processEvent('delIncludedDomain', {
             domain: domain1,
         })
+
         expect(searchResults.state.searchFilters.domainsIncluded).toEqual([
             domain2,
         ])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(3)
 
         expect(searchResults.state.searchFilters.domainsExcluded).toEqual([])
+
         await searchResults.processEvent('addExcludedDomain', {
             domain: domain1,
         })
+
         expect(searchResults.state.searchFilters.domainsExcluded).toEqual([
             domain1,
         ])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(4)
+
         await searchResults.processEvent('addExcludedDomain', {
             domain: domain2,
         })
+
         expect(searchResults.state.searchFilters.domainsExcluded).toEqual([
             domain1,
             domain2,
         ])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(5)
+
         await searchResults.processEvent('delExcludedDomain', {
             domain: domain1,
         })
+
         expect(searchResults.state.searchFilters.domainsExcluded).toEqual([
             domain2,
         ])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(6)
     })
 
     it('should be able to reset filters', async ({ device }) => {
-        const { searchResults, logic } = await setupTest(device)
+        const { searchResults, logic } = await setupTest(device, {
+            overrideSearchTrigger: true,
+        })
 
         const tag1 = 'test'
         const tag2 = 'test again'
@@ -298,6 +360,7 @@ describe('Dashboard search filters logic', () => {
 
         await searchResults.processEvent('resetFilters', null)
 
+        expect(searchResults.logic['searchTriggeredCount']).toBe(8)
         expect(searchResults.state.searchFilters).toEqual(
             expect.objectContaining({
                 ...logic.getInitialState().searchFilters,

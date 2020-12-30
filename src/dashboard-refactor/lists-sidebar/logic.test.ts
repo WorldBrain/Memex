@@ -50,21 +50,36 @@ describe('Dashboard search results logic', () => {
     it('should be able to selected lists to filter in search', async ({
         device,
     }) => {
-        const { searchResults } = await setupTest(device)
+        const { searchResults } = await setupTest(device, {
+            overrideSearchTrigger: true,
+        })
 
         expect(searchResults.state.listsSidebar.selectedListId).toEqual(
             undefined,
         )
+        expect(searchResults.logic['searchTriggeredCount']).toBe(0)
+
         await searchResults.processEvent('setSelectedListId', { listId: 123 })
+
         expect(searchResults.state.listsSidebar.selectedListId).toEqual(123)
+        expect(searchResults.logic['searchTriggeredCount']).toBe(1)
+
         await searchResults.processEvent('setSelectedListId', { listId: 123 })
+
         expect(searchResults.state.listsSidebar.selectedListId).toEqual(
             undefined,
         )
+        expect(searchResults.logic['searchTriggeredCount']).toBe(2)
+
         await searchResults.processEvent('setSelectedListId', { listId: 123 })
+
         expect(searchResults.state.listsSidebar.selectedListId).toEqual(123)
+        expect(searchResults.logic['searchTriggeredCount']).toBe(3)
+
         await searchResults.processEvent('setSelectedListId', { listId: 1 })
+
         expect(searchResults.state.listsSidebar.selectedListId).toEqual(1)
+        expect(searchResults.logic['searchTriggeredCount']).toBe(4)
     })
 
     it("should be able set lists' edit state", async ({ device }) => {

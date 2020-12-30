@@ -101,12 +101,14 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
-    init: EventHandler<'init'> = async ({}) => {
+    init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial(this, async () => {
             await this.getSharingAccess()
+            await this.runSearch(previousState)
         })
     }
 
+    /* START - Misc helper methods */
     async getSharingAccess() {
         const isAllowed = await this.options.authBG.isAuthorizedForFeature(
             'beta',
@@ -145,6 +147,28 @@ export class DashboardLogic extends UILogic<State, Events> {
             }
         }
     }
+
+    /**
+     * Helper which emits a mutation followed by a search using the post-mutation state.
+     */
+    private async mutateAndTriggerSearch(
+        previousState: State,
+        mutation: UIMutation<State>,
+    ) {
+        this.emitMutation(mutation)
+        const nextState = this.withMutation(previousState, mutation)
+        await this.runSearch(nextState)
+    }
+
+    private async runSearch(state: State) {
+        if (state.searchResults.searchType === 'pages') {
+            await this.searchPages({ previousState: state, event: null })
+        } else if (state.searchResults.searchType === 'notes') {
+            await this.searchNotes({ previousState: state, event: null })
+        }
+    }
+
+    /* END - Misc helper methods */
 
     /* START - Misc event handlers */
     searchPages: EventHandler<'searchPages'> = async ({ previousState }) => {
@@ -722,8 +746,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setSearchType: EventHandler<'setSearchType'> = ({ event }) => {
-        this.emitMutation({
+    setSearchType: EventHandler<'setSearchType'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.mutateAndTriggerSearch(previousState, {
             searchResults: {
                 searchType: { $set: event.searchType },
             },
@@ -1105,8 +1132,11 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* END - search result event handlers */
 
     /* START - search filter event handlers */
-    setSearchQuery: EventHandler<'setSearchQuery'> = async ({ event }) => {
-        this.emitMutation({
+    setSearchQuery: EventHandler<'setSearchQuery'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { searchQuery: { $set: event.query } },
         })
     }
@@ -1167,18 +1197,26 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setDateFrom: EventHandler<'setDateFrom'> = async ({ event }) => {
-        this.emitMutation({
+    setDateFrom: EventHandler<'setDateFrom'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { dateFrom: { $set: event.value } },
         })
     }
 
-    setDateTo: EventHandler<'setDateTo'> = async ({ event }) => {
-        this.emitMutation({ searchFilters: { dateTo: { $set: event.value } } })
+    setDateTo: EventHandler<'setDateTo'> = async ({ event, previousState }) => {
+        await this.mutateAndTriggerSearch(previousState, {
+            searchFilters: { dateTo: { $set: event.value } },
+        })
     }
 
-    addIncludedTag: EventHandler<'addIncludedTag'> = async ({ event }) => {
-        this.emitMutation({
+    addIncludedTag: EventHandler<'addIncludedTag'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { tagsIncluded: { $push: [event.tag] } },
         })
     }
@@ -1195,13 +1233,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        this.emitMutation({
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { tagsIncluded: { $splice: [[index, 1]] } },
         })
     }
 
-    addExcludedTag: EventHandler<'addExcludedTag'> = async ({ event }) => {
-        this.emitMutation({
+    addExcludedTag: EventHandler<'addExcludedTag'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { tagsExcluded: { $push: [event.tag] } },
         })
     }
@@ -1218,15 +1259,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        this.emitMutation({
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { tagsExcluded: { $splice: [[index, 1]] } },
         })
     }
 
     addIncludedDomain: EventHandler<'addIncludedDomain'> = async ({
         event,
+        previousState,
     }) => {
-        this.emitMutation({
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { domainsIncluded: { $push: [event.domain] } },
         })
     }
@@ -1243,15 +1285,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        this.emitMutation({
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { domainsIncluded: { $splice: [[index, 1]] } },
         })
     }
 
     addExcludedDomain: EventHandler<'addExcludedDomain'> = async ({
         event,
+        previousState,
     }) => {
-        this.emitMutation({
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { domainsExcluded: { $push: [event.domain] } },
         })
     }
@@ -1268,41 +1311,52 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        this.emitMutation({
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { domainsExcluded: { $splice: [[index, 1]] } },
         })
     }
 
-    setTagsIncluded: EventHandler<'setTagsIncluded'> = async ({ event }) => {
-        this.emitMutation({
+    setTagsIncluded: EventHandler<'setTagsIncluded'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { tagsIncluded: { $set: event.tags } },
         })
     }
 
-    setTagsExcluded: EventHandler<'setTagsExcluded'> = async ({ event }) => {
-        this.emitMutation({
+    setTagsExcluded: EventHandler<'setTagsExcluded'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { tagsExcluded: { $set: event.tags } },
         })
     }
 
     setDomainsIncluded: EventHandler<'setDomainsIncluded'> = async ({
         event,
+        previousState,
     }) => {
-        this.emitMutation({
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { domainsIncluded: { $set: event.domains } },
         })
     }
 
     setDomainsExcluded: EventHandler<'setDomainsExcluded'> = async ({
         event,
+        previousState,
     }) => {
-        this.emitMutation({
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { domainsExcluded: { $set: event.domains } },
         })
     }
 
-    resetFilters: EventHandler<'resetFilters'> = async ({ event }) => {
-        this.emitMutation({
+    resetFilters: EventHandler<'resetFilters'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { $set: this.getInitialState().searchFilters },
         })
     }
@@ -1416,7 +1470,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 ? undefined
                 : event.listId
 
-        this.emitMutation({
+        await this.mutateAndTriggerSearch(previousState, {
             listsSidebar: { selectedListId: { $set: listIdToSet } },
         })
     }
