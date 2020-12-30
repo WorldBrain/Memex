@@ -4,45 +4,34 @@ import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
-import ListPickerLogic, {
-    ListPickerDependencies,
-    ListPickerEvent,
-    ListPickerState,
-} from 'src/custom-lists/ui/CollectionPicker/logic'
+import DomainPickerLogic, {
+    DomainPickerDependencies,
+    DomainPickerEvent,
+    DomainPickerState,
+} from './logic'
 import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
 import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
-import EntryRow, {
-    IconStyleWrapper,
-    ActOnAllTabsButton,
-} from 'src/common-ui/GenericPicker/components/EntryRow'
+import EntryRow from 'src/common-ui/GenericPicker/components/EntryRow' // ActOnAllTabsButton, // IconStyleWrapper,
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { EntrySelectedList } from './components/EntrySelectedList'
-import { ListResultItem } from './components/ListResultItem'
-import { collections } from 'src/util/remote-functions-background'
+import { DomainResultItem } from './components/DomainResultItem'
 
-class ListPicker extends StatefulUIElement<
-    ListPickerDependencies,
-    ListPickerState,
-    ListPickerEvent
+class DomainPicker extends StatefulUIElement<
+    DomainPickerDependencies,
+    DomainPickerState,
+    DomainPickerEvent
 > {
-    static defaultProps: Partial<ListPickerDependencies> = {
-        queryEntries: (query) =>
-            collections.searchForListSuggestions({ query }),
-        loadDefaultSuggestions: collections.fetchInitialListSuggestions,
-    }
-
-    constructor(props: ListPickerDependencies) {
-        super(props, new ListPickerLogic(props))
+    constructor(props: DomainPickerDependencies) {
+        super(props, new DomainPickerLogic(props))
     }
 
     searchInputPlaceholder =
-        this.props.searchInputPlaceholder ?? 'Add to Collection'
-    removeToolTipText = this.props.removeToolTipText ?? 'Remove from list'
+        this.props.searchInputPlaceholder ?? 'Domains to Search'
+    removeToolTipText = this.props.removeToolTipText ?? 'Remove filter'
 
     componentDidUpdate(prevProps, prevState) {
         const {
@@ -59,91 +48,63 @@ class ListPicker extends StatefulUIElement<
         }
     }
 
-    handleClickOutside = () => {
+    handleClickOutside: React.MouseEventHandler = (e) => {
         if (this.props.onClickOutside) {
-            this.props.onClickOutside()
+            this.props.onClickOutside(e) // this is defined as type react.MouseEventHandler for the collection picker but as a standard function with no params or return for the tag picker
         }
     }
 
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
         this.processEvent('setSearchInputRef', { ref })
-    handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
+
+    handleOuterSearchBoxClick: React.MouseEventHandler = () =>
+        this.processEvent('focusInput', {})
 
     handleSearchInputChanged = (query: string) => {
         this.props.onSearchInputChange({ query })
         return this.processEvent('searchInputChanged', { query })
     }
 
-    handleSelectedListPress = (list: string) =>
-        this.processEvent('selectedEntryPress', { entry: list })
+    handleSelectedDomainPress = (domain: string) =>
+        this.processEvent('selectedEntryPress', { entry: domain })
 
-    handleResultListPress = (list: DisplayEntry) =>
-        this.processEvent('resultEntryPress', { entry: list })
+    handleResultDomainPress = (domain: DisplayEntry) =>
+        this.processEvent('resultEntryPress', { entry: domain })
 
-    handleResultListAllPress = (list: DisplayEntry) =>
-        this.processEvent('resultEntryAllPress', { entry: list })
+    handleResultDomainFocus = (domain: DisplayEntry, index?: number) =>
+        this.processEvent('resultEntryFocus', { entry: domain, index })
 
-    handleNewListAllPress = () =>
-        this.processEvent('newEntryAllPress', {
-            entry: this.state.newEntryName,
-        })
-
-    handleResultListFocus = (list: DisplayEntry, index?: number) =>
-        this.processEvent('resultEntryFocus', { entry: list, index })
-
-    handleNewListPress = () =>
+    handleNewDomainPress = () =>
         this.processEvent('newEntryPress', { entry: this.state.newEntryName })
 
     handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
 
-    renderListRow = (list: DisplayEntry, index: number) => (
+    renderDomainRow = (domain: DisplayEntry, index: number) => (
         <EntryRow
-            onPress={this.handleResultListPress}
-            onPressActOnAll={
-                this.props.actOnAllTabs
-                    ? (t) => this.handleResultListAllPress(t)
-                    : undefined
-            }
-            onFocus={this.handleResultListFocus}
-            key={`ListKeyName-${list.name}`}
+            onPress={this.handleResultDomainPress}
+            onFocus={this.handleResultDomainFocus}
+            key={`DomainKeyName-${domain.name}`}
             index={index}
-            name={list.name}
-            selected={list.selected}
-            focused={list.focused}
-            resultItem={<ListResultItem>{list.name}</ListResultItem>}
-            removeTooltipText={this.removeToolTipText}
-            actOnAllTooltipText="Add all tabs in window to list"
+            name={domain.name}
+            selected={domain.selected}
+            focused={domain.focused}
+            resultItem={<DomainResultItem>{domain.name}</DomainResultItem>}
+            removeTooltipText="Remove filter"
         />
     )
-
-    renderNewListAllTabsButton = () =>
-        this.props.actOnAllTabs && (
-            <IconStyleWrapper show>
-                <ButtonTooltip
-                    tooltipText="List all tabs in window"
-                    position="left"
-                >
-                    <ActOnAllTabsButton
-                        size={20}
-                        onClick={this.handleNewListAllPress}
-                    />
-                </ButtonTooltip>
-            </IconStyleWrapper>
-        )
-
-    renderEmptyList() {
+    renderEmptyDomain() {
         if (this.state.newEntryName !== '') {
             return
         }
 
         return (
-            <EmptyListsView>
+            <EmptyDomainsView>
                 <strong>No Collections yet</strong>
                 <br />
                 Add new collections
                 <br />
                 via the search bar
-            </EmptyListsView>
+            </EmptyDomainsView>
         )
     }
 
@@ -168,30 +129,30 @@ class ListPicker extends StatefulUIElement<
                     loading={this.state.loadingQueryResults}
                     before={
                         <EntrySelectedList
-                            dataAttributeName="list-name"
+                            dataAttributeName="domain-name"
                             entriesSelected={this.state.selectedEntries}
-                            onPress={this.handleSelectedListPress}
+                            onPress={this.handleSelectedDomainPress}
                         />
                     }
-                />
-                <EntryResultsList
-                    entries={this.state.displayEntries}
-                    renderEntryRow={this.renderListRow}
-                    emptyView={this.renderEmptyList()}
-                    id="listResults"
                 />
                 {this.state.newEntryName !== '' && (
                     <AddNewEntry
                         resultItem={
-                            <ListResultItem>
+                            <DomainResultItem>
                                 {this.state.newEntryName}
-                            </ListResultItem>
+                            </DomainResultItem>
                         }
-                        onPress={this.handleNewListPress}
+                        onPress={this.handleNewDomainPress}
                     >
-                        {this.renderNewListAllTabsButton()}
+                        {/* {this.renderNewDomainAllTabsButton()} */}
                     </AddNewEntry>
                 )}
+                <EntryResultsList
+                    entries={this.state.displayEntries}
+                    renderEntryRow={this.renderDomainRow}
+                    emptyView={this.renderEmptyDomain()}
+                    id="domainResults"
+                />
             </>
         )
     }
@@ -226,7 +187,7 @@ const OuterSearchBox = styled.div`
     border-radius: 3px;
 `
 
-const EmptyListsView = styled.div`
+const EmptyDomainsView = styled.div`
     color: ${(props) => props.theme.tag.text};
     padding: 10px 15px;
     font-weight: 400;
@@ -234,4 +195,4 @@ const EmptyListsView = styled.div`
     text-align: center;
 `
 
-export default onClickOutside(ListPicker)
+export default onClickOutside(DomainPicker)

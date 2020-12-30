@@ -5,9 +5,10 @@ import SearchBar, {
 } from 'src/dashboard-refactor/header/search-bar'
 
 const template: SearchBarProps = {
-    onSearchBarFocus: () => console.log('Search Box Clicked'),
-    onSearchQueryChange: (searchObject) => console.log(searchObject),
-    onSearchFiltersOpen: () => console.log('Filters button clicked!'),
+    onSearchBarFocus: () => {},
+    onSearchQueryChange: (queryString) => {},
+    onSearchFiltersOpen: () => {},
+    searchFiltersActive: [],
     isSearchBarFocused: false,
     searchFiltersOpen: false,
     searchQuery: '',

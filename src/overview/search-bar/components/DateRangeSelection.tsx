@@ -6,29 +6,29 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import analytics from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { DATE_PICKER_DATE_FORMAT as FORMAT } from '../constants'
+import { DATE_PICKER_DATE_FORMAT as FORMAT } from 'src/dashboard-refactor/constants'
 import './datepicker-overrides.css'
-import { EVENT_NAMES } from '../../../analytics/internal/constants'
+import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import DatePickerInput from './datepicker-input'
 
 const processEvent = remoteFunction('processEvent')
 const styles = require('./DateRangeSelection.css')
 // const stylesPro = require('../../tooltips/components/tooltip.css')
 
-interface Props {
+export interface DateRangeSelectionProps {
     env: 'inpage' | 'overview'
     startDate: number
     startDateText: string
     endDate: number
     endDateText: string
+    disabled: boolean
     onStartDateChange: (...args) => void
     onStartDateTextChange: (...args) => void
     onEndDateChange: (...args) => void
     onEndDateTextChange: (...args) => void
-    disabled: boolean
     changeTooltip: (...args) => void
 }
-class DateRangeSelection extends Component<Props> {
+class DateRangeSelection extends Component<DateRangeSelectionProps> {
     startDatePicker: any
     endDatePicker: any
 
@@ -271,7 +271,6 @@ class DateRangeSelection extends Component<Props> {
                     <div className={styles.dateTitleContainer}>
                         <span className={styles.dateTitle}>From</span>
                         <DatePickerInput
-                            placeholder="🕒 type time..."
                             value={this.state.startDateText || startDateText}
                             name="from"
                             onChange={this.handleRawInputChange({
@@ -295,11 +294,8 @@ class DateRangeSelection extends Component<Props> {
                             dateFormat={FORMAT}
                             isClearable
                             selected={startDate && moment(startDate)}
-                            selectsStart
                             disabledKeyboardNavigation
-                            startDate={moment(startDate)}
-                            endDate={moment(endDate)}
-                            maxDate={moment()}
+                            maxDate={moment(endDate)}
                             onChange={this.handleDateChange({
                                 isStartDate: true,
                             })}
@@ -311,7 +307,6 @@ class DateRangeSelection extends Component<Props> {
                     <div className={styles.dateTitleContainer}>
                         <span className={styles.dateTitle}>To</span>
                         <DatePickerInput
-                            placeholder="🕒 type time..."
                             value={this.state.endDateText || endDateText}
                             name="to"
                             onChange={this.handleRawInputChange({
@@ -335,9 +330,7 @@ class DateRangeSelection extends Component<Props> {
                             dateFormat={FORMAT}
                             isClearable
                             selected={endDate && moment(endDate)}
-                            selectsEnd
-                            startDate={moment(startDate)}
-                            endDate={moment(endDate)}
+                            minDate={moment(startDate)}
                             maxDate={moment()}
                             disabledKeyboardNavigation
                             onChange={this.handleDateChange({

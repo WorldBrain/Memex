@@ -1,0 +1,33 @@
+// Status of work
+
+//  Branches:
+//  1. Header, sync status menu, and search bar are all on their own branches now
+//    - Note, header will have to merge in search bar changes before it's pushed 
+        (as I based it off sync-status-menu)
+
+//  Pickers:
+//  - We use 2 different kinds of pickers. I've decided to go ahead with using the more
+//    modern ones refactored and used currently everywhere in the app but in the search 
+//    filters.
+//  - This requires building a domains picker from scratch
+
+
+// Direction of work
+
+// Filters Pickers
+// X 1. Fix build
+// X 2. Move prop def'n to carried-down props
+// 3. Investigate whether query value can be passed in through props
+
+// Header
+// Built out header component first draft plus stories. Haven't checked them yet.
+
+// Misc:
+// X 1. Integrate changes from lists-sidebar-group PR
+// 2. Integrate feedback from Figma
+//  - Sidebar hide behaviour
+//  - Searchbar debounce of 500ms before search
+// 3. Add link to SSM Contact Support anchor
+// 4. Refactor DateRangeSelection component to styled-components
+// 5. Change search bar 'Close Filters' button to have 3 states as per figma comment
+//    https://www.figma.com/file/5Uodgoylm43m3AjnQu8qu0?node-id=580:346#52013860
