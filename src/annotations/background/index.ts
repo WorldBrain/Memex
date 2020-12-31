@@ -453,10 +453,24 @@ export default class DirectLinkingBackground {
         if (isSocialPost) {
             pk = await this.lookupSocialId(pk)
         }
+        const isBookmarked = await this.getAnnotBookmark(_, { url: pk })
+        const listEntries = await this.annotationStorage.findListEntriesByUrl({
+            url: pk,
+        })
+        const tags = await this.getTagsByAnnotationUrl(_, pk)
 
-        await this.annotationStorage.deleteTagsByUrl({ url: pk })
-        await this.annotationStorage.deleteBookmarkByUrl({ url: pk })
-        await this.annotationStorage.deleteListEntriesByUrl({ url: pk })
+        if (isBookmarked) {
+            await this.annotationStorage.deleteBookmarkByUrl({ url: pk })
+        }
+
+        if (listEntries?.length) {
+            await this.annotationStorage.deleteListEntriesByUrl({ url: pk })
+        }
+
+        if (tags?.length) {
+            await this.annotationStorage.deleteTagsByUrl({ url: pk })
+        }
+
         await this.annotationStorage.deleteAnnotation(pk)
     }
 
