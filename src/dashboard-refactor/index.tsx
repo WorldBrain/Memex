@@ -14,6 +14,8 @@ import ShareListModalContent from 'src/overview/sharing/components/ShareListModa
 import { isDuringInstall } from 'src/overview/onboarding/utils'
 import Onboarding from 'src/overview/onboarding'
 import { HelpBtn } from 'src/overview/help-btn'
+import { AnnotationsSidebarInDashboardResults as NotesSidebar } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
+import { AnnotationsSidebarContainer as NotesSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
 import { OVERVIEW_URL } from 'src/constants'
 
 export interface Props extends DashboardDependencies {}
@@ -28,6 +30,12 @@ export class DashboardContainer extends StatefulUIElement<
         searchBG: runInBackground(),
         listsBG: runInBackground(),
         tagsBG: runInBackground(),
+    }
+
+    private notesSidebarRef = React.createRef<NotesSidebarContainer>()
+
+    get notesSidebar(): NotesSidebarContainer {
+        return this.notesSidebarRef.current
     }
 
     constructor(props: Props) {
@@ -192,12 +200,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 .byId[pageId].isBookmarked,
                         }),
                     onNotesBtnClick: (day, pageId) => () =>
-                        this.processEvent('setPageNotesShown', {
-                            day,
-                            pageId,
-                            areShown: !this.state.searchResults.results[day]
-                                .pages.byId[pageId].areNotesShown,
-                        }),
+                        this.handleNotesSidebarToggle(day, pageId),
                     onTagPickerBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageTagPickerShown', {
                             day,
@@ -402,6 +405,32 @@ export class DashboardContainer extends StatefulUIElement<
         return null
     }
 
+    private handleNotesSidebarToggle = async (day: number, pageId: string) => {
+        this.processEvent('setPageNotesShown', {
+            day,
+            pageId,
+            areShown: !this.state.searchResults.results[day].pages.byId[pageId]
+                .areNotesShown,
+        })
+
+        const isAlreadyOpenForOtherPage =
+            pageId !== this.notesSidebar.state.pageUrl
+
+        if (
+            this.notesSidebar.state.showState === 'hidden' ||
+            isAlreadyOpenForOtherPage
+        ) {
+            this.notesSidebar.setPageUrl(pageId)
+            this.notesSidebar.showSidebar()
+        } else if (this.notesSidebar.state.showState === 'visible') {
+            this.notesSidebar.hideSidebar()
+        }
+    }
+
+    private handleClickOutsideNotesSidebar: React.MouseEventHandler = (e) => {
+        this.notesSidebar.hideSidebar()
+    }
+
     private handleOnboardingComplete = () => {
         window.location.href = OVERVIEW_URL
         window.location.reload()
@@ -422,6 +451,25 @@ export class DashboardContainer extends StatefulUIElement<
                 {this.renderListsSidebar()}
                 {this.renderSearchResults()}
                 {this.renderModals()}
+                <NotesSidebar
+                    tags={this.props.tagsBG}
+                    auth={this.props.authBG}
+                    refSidebar={this.notesSidebarRef}
+                    customLists={this.props.listsBG}
+                    annotations={this.props.annotationsBG}
+                    contentSharing={this.props.contentShareBG}
+                    onClickOutside={this.handleClickOutsideNotesSidebar}
+                    showAnnotationShareModal={() =>
+                        this.processEvent('setShowNoteShareOnboardingModal', {
+                            isShown: true,
+                        })
+                    }
+                    showBetaFeatureNotifModal={() =>
+                        this.processEvent('setShowBetaFeatureModal', {
+                            isShown: true,
+                        })
+                    }
+                />
                 <HelpBtn />
             </>
         )
