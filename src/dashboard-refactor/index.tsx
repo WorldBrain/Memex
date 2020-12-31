@@ -11,6 +11,10 @@ import { ListData } from './lists-sidebar/types'
 import * as searchResultUtils from './search-results/util'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import ShareListModalContent from 'src/overview/sharing/components/ShareListModalContent'
+import { isDuringInstall } from 'src/overview/onboarding/utils'
+import Onboarding from 'src/overview/onboarding'
+import { HelpBtn } from 'src/overview/help-btn'
+import { OVERVIEW_URL } from 'src/constants'
 
 export interface Props extends DashboardDependencies {}
 
@@ -398,13 +402,36 @@ export class DashboardContainer extends StatefulUIElement<
         return null
     }
 
-    render() {
+    private handleOnboardingComplete = () => {
+        window.location.href = OVERVIEW_URL
+        window.location.reload()
+    }
+
+    private renderOnboarding() {
+        return (
+            <>
+                <Onboarding navToOverview={this.handleOnboardingComplete} />
+                <HelpBtn />
+            </>
+        )
+    }
+
+    private renderDashboard() {
         return (
             <>
                 {this.renderListsSidebar()}
                 {this.renderSearchResults()}
                 {this.renderModals()}
+                <HelpBtn />
             </>
         )
+    }
+
+    render() {
+        if (isDuringInstall()) {
+            return this.renderOnboarding()
+        }
+
+        return this.renderDashboard()
     }
 }
