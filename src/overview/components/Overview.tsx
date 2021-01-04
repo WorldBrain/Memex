@@ -180,23 +180,10 @@ class Overview extends PureComponent<Props, State> {
         window.open(portalLink['access_url'])
     }
 
-    private handleAnnotationSidebarToggle = async (args?: {
+    private handleAnnotationSidebarToggle = (args?: {
         pageUrl: string
         pageTitle?: string
-    }) => {
-        const isAlreadyOpenForOtherPage =
-            args.pageUrl !== this.annotationsSidebar.state.pageUrl
-
-        if (
-            this.annotationsSidebar.state.showState === 'hidden' ||
-            isAlreadyOpenForOtherPage
-        ) {
-            this.annotationsSidebar.setPageUrl(args.pageUrl)
-            this.annotationsSidebar.showSidebar()
-        } else if (this.annotationsSidebar.state.showState === 'visible') {
-            this.annotationsSidebar.hideSidebar()
-        }
-    }
+    }) => this.annotationsSidebar.toggleSidebarShowForPageId(args.pageUrl)
 
     private handleClickOutsideSidebar: React.MouseEventHandler = (e) => {
         const wasResultAnnotBtnClicked = (e.target as HTMLElement)?.classList?.contains(

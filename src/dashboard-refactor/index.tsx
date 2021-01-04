@@ -16,7 +16,10 @@ import Onboarding from 'src/overview/onboarding'
 import { HelpBtn } from 'src/overview/help-btn'
 import { AnnotationsSidebarInDashboardResults as NotesSidebar } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { AnnotationsSidebarContainer as NotesSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
-import { OVERVIEW_URL } from 'src/constants'
+import {
+    AnnotationsCacheInterface,
+    createAnnotationsCache,
+} from 'src/annotations/annotations-cache'
 
 export interface Props extends DashboardDependencies {}
 
@@ -32,14 +35,16 @@ export class DashboardContainer extends StatefulUIElement<
         tagsBG: runInBackground(),
     }
 
+    private annotationsCache: AnnotationsCacheInterface
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
-
-    get notesSidebar(): NotesSidebarContainer {
-        return this.notesSidebarRef.current
-    }
 
     constructor(props: Props) {
         super(props, new DashboardLogic(props))
+
+        this.annotationsCache = createAnnotationsCache({
+            annotations: props.annotationsBG,
+            tags: props.tagsBG,
+        })
     }
 
     private listStateToProps = (
@@ -199,8 +204,21 @@ export class DashboardContainer extends StatefulUIElement<
                             isBookmarked: !this.state.searchResults.pageData
                                 .byId[pageId].isBookmarked,
                         }),
-                    onNotesBtnClick: (day, pageId) => () =>
-                        this.handleNotesSidebarToggle(day, pageId),
+                    onNotesBtnClick: (day, pageId) => (e) => {
+                        if (e.shiftKey) {
+                            this.notesSidebarRef.current.toggleSidebarShowForPageId(
+                                pageId,
+                            )
+                            return
+                        }
+
+                        this.processEvent('setPageNotesShown', {
+                            day,
+                            pageId,
+                            areShown: !this.state.searchResults.results[day]
+                                .pages.byId[pageId].areNotesShown,
+                        })
+                    },
                     onTagPickerBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageTagPickerShown', {
                             day,
@@ -405,46 +423,6 @@ export class DashboardContainer extends StatefulUIElement<
         return null
     }
 
-    private handleNotesSidebarToggle = async (day: number, pageId: string) => {
-        this.processEvent('setPageNotesShown', {
-            day,
-            pageId,
-            areShown: !this.state.searchResults.results[day].pages.byId[pageId]
-                .areNotesShown,
-        })
-
-        const isAlreadyOpenForOtherPage =
-            pageId !== this.notesSidebar.state.pageUrl
-
-        if (
-            this.notesSidebar.state.showState === 'hidden' ||
-            isAlreadyOpenForOtherPage
-        ) {
-            this.notesSidebar.setPageUrl(pageId)
-            this.notesSidebar.showSidebar()
-        } else if (this.notesSidebar.state.showState === 'visible') {
-            this.notesSidebar.hideSidebar()
-        }
-    }
-
-    private handleClickOutsideNotesSidebar: React.MouseEventHandler = (e) => {
-        this.notesSidebar.hideSidebar()
-    }
-
-    private handleOnboardingComplete = () => {
-        window.location.href = OVERVIEW_URL
-        window.location.reload()
-    }
-
-    private renderOnboarding() {
-        return (
-            <>
-                <Onboarding navToOverview={this.handleOnboardingComplete} />
-                <HelpBtn />
-            </>
-        )
-    }
-
     private renderDashboard() {
         return (
             <>
@@ -457,8 +435,8 @@ export class DashboardContainer extends StatefulUIElement<
                     refSidebar={this.notesSidebarRef}
                     customLists={this.props.listsBG}
                     annotations={this.props.annotationsBG}
+                    annotationsCache={this.annotationsCache}
                     contentSharing={this.props.contentShareBG}
-                    onClickOutside={this.handleClickOutsideNotesSidebar}
                     showAnnotationShareModal={() =>
                         this.processEvent('setShowNoteShareOnboardingModal', {
                             isShown: true,
@@ -477,7 +455,12 @@ export class DashboardContainer extends StatefulUIElement<
 
     render() {
         if (isDuringInstall()) {
-            return this.renderOnboarding()
+            return (
+                <>
+                    <Onboarding />
+                    <HelpBtn />
+                </>
+            )
         }
 
         return this.renderDashboard()

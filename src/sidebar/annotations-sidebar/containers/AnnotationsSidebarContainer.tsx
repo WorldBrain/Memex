@@ -57,6 +57,17 @@ export class AnnotationsSidebarContainer<
         )
     }
 
+    toggleSidebarShowForPageId(pageId: string) {
+        const isAlreadyOpenForOtherPage = pageId !== this.state.pageUrl
+
+        if (this.state.showState === 'hidden' || isAlreadyOpenForOtherPage) {
+            this.setPageUrl(pageId)
+            this.showSidebar()
+        } else if (this.state.showState === 'visible') {
+            this.hideSidebar()
+        }
+    }
+
     showSidebar() {
         this.processEvent('show', null)
     }
