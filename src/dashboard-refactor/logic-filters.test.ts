@@ -1,13 +1,29 @@
 import expect from 'expect'
-import { addFilterToSearchQuery } from './logic'
-import TEST_CASES from './index.test.data'
+import { parseSearchQuery, constructQueryString } from './logic-filters'
+import TEST_DATA from './logic-filters.test.data'
 
+// parsing tests
 describe('Search query string parsing', () => {
-    for (let i = 0; i < TEST_CASES.length; i++) {
-        it(`Should accurately parse test case ${i} into search terms and filters`, () => {
-            const { newFilterObj, oldQueryArray, newQueryArray } = TEST_CASES[i]
-            const result = addFilterToSearchQuery(newFilterObj, oldQueryArray)
-            expect(result).toEqual(newQueryArray)
+    for (const { queryString, parsedQuery } of TEST_DATA) {
+        it(`Should accurately parse the string "${queryString}" into search terms and filters`, () => {
+            const searchDetailArray = parseSearchQuery(queryString)
+            if (!parsedQuery) {
+                expect(searchDetailArray).toBeNull()
+            }
+            expect(searchDetailArray).toEqual(parsedQuery)
+        })
+    }
+})
+
+// construct string tests
+describe('Search query string parsing', () => {
+    for (const { queryString, parsedQuery } of TEST_DATA) {
+        it(`Should accurately return the string "${queryString}" from its parsed query array`, () => {
+            const constructedString = constructQueryString(parsedQuery)
+            if (!constructedString) {
+                expect(queryString).toBeNull()
+            }
+            expect(constructQueryString).toEqual(queryString)
         })
     }
 })
