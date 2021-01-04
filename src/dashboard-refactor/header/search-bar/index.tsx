@@ -67,11 +67,13 @@ export interface SearchBarProps {
 export default class SearchBar extends PureComponent<SearchBarProps> {
     placeholder: string = 'Search your saved pages and notes'
     inputRef = React.createRef<HTMLInputElement>()
+
     componentDidMount = () => {
         if (this.props.isSearchBarFocused) {
             this.inputRef.current.focus()
         }
     }
+
     componentDidUpdate = (prevProps) => {
         const { selectionStart } = this.inputRef.current
         if (selectionStart !== prevProps.cursorLocationState.location) {
@@ -80,11 +82,13 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
             })
         }
     }
+
     handleChange: React.FormEventHandler = (evt) => {
         // need to amend getFilterStrings function to pull through search terms as well, then
         // bundle them in an object to send with the onSearchQueryChange func
         this.props.onSearchQueryChange(evt.currentTarget.textContent)
     }
+
     render() {
         const {
             searchFiltersOpen,
