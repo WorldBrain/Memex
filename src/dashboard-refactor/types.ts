@@ -65,18 +65,25 @@ export interface QueryFilterPart {
     type: 'filter'
     startIndex: number
     endIndex: number
-    detail: SearchFilterDetail | DateFilterDetail
+    detail: SearchFilterDetail
 }
 
-export interface SearchFilterDetail {
+export type SearchFilterDetail = TextFilterDetail | DateFilterDetail
+
+export interface TextFilterDetail {
     type: SearchFilterType
     rawContent: string
     filters: string[]
     query?: string
     isExclusion?: boolean
+    variant?: undefined
 }
 
-type DateFilterDetail = Omit<SearchFilterDetail, 'type'> & {
+type DateFilterDetail = Omit<TextFilterDetail, 'type' | 'variant'> & {
     type: 'date'
     variant: 'from' | 'to'
 }
+
+export type FilterMutationDetail =
+    | Omit<SearchFilterDetail, 'rawContent'>
+    | Omit<DateFilterDetail, 'rawContent'>

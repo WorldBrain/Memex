@@ -4,7 +4,7 @@ import { ParsedSearchQuery, QueryFilterPart, SearchFilterDetail } from './types'
 
 interface FilterKeyMapping {
     key: FilterKey
-    filterType: SearchFilterType
+    type: SearchFilterType
     isExclusion?: boolean
     variant?: 'from' | 'to'
 }
@@ -12,60 +12,62 @@ interface FilterKeyMapping {
 const filterKeyMapping: FilterKeyMapping[] = [
     {
         key: 't',
-        filterType: 'tag',
+        type: 'tag',
     },
     {
         key: '-t',
-        filterType: 'tag',
+        type: 'tag',
         isExclusion: true,
     },
     {
         key: 'd',
-        filterType: 'domain',
+        type: 'domain',
     },
     {
         key: 'd',
-        filterType: 'domain',
+        type: 'domain',
         isExclusion: true,
     },
     {
         key: 'c',
-        filterType: 'list',
+        type: 'list',
     },
     {
         key: 'c',
-        filterType: 'list',
+        type: 'list',
         isExclusion: true,
     },
     {
         key: 'from',
-        filterType: 'date',
+        type: 'date',
         variant: 'from',
     },
     {
         key: 'to',
-        filterType: 'date',
+        type: 'date',
         variant: 'to',
     },
 ]
+
+// misc logic
 
 const getFilterMappingFromKey = (filterKey: string): FilterKeyMapping => {
     return filterKeyMapping.find((val) => val.key === filterKey)
 }
 
+// parsing logic
+
 const getFilterPartFromKey = (
     endIndex: number,
     filterKey: string,
 ): QueryFilterPart => {
-    const { filterType, isExclusion, variant } = getFilterMappingFromKey(
-        filterKey,
-    )
+    const { type, isExclusion, variant } = getFilterMappingFromKey(filterKey)
     const queryFilterPart: QueryFilterPart = {
         type: 'filter',
-        startIndex: endIndex - `${filterKey}:`.length,
+        startIndex: endIndex - (`${filterKey}:`.length - 1),
         endIndex,
         detail: {
-            filterType,
+            type,
             filters: [],
             rawContent: `${filterKey}:`,
         },
@@ -84,17 +86,16 @@ const pushSearchStringToArray = (
     str: string,
     parsedQuery: ParsedSearchQuery,
 ): ParsedSearchQuery => {
-    const existingPart =
-        parsedQuery[parsedQuery.length - 1].type === 'searchString'
-            ? parsedQuery[parsedQuery.length - 1]
-            : null
-    if (existingPart) {
-        existingPart.detail['value'] += str
-        existingPart.endIndex += str.length
+    const lastPart = parsedQuery[parsedQuery.length - 1]
+    const lastStringPart =
+        lastPart && lastPart.type === 'searchString' ? lastPart : null
+    if (lastStringPart) {
+        lastStringPart.detail['value'] += str
+        lastStringPart.endIndex += str.length
     } else {
         parsedQuery.push({
             type: 'searchString',
-            startIndex: endIndex - str.length,
+            startIndex: endIndex - (str.length - 1),
             endIndex,
             detail: {
                 value: str,
@@ -144,7 +145,7 @@ const pushFiltersToArray = (
     detail['filters'].push(...filters)
     filterPart.endIndex = endIndex
     if (containsFilterQuery && filterPart.detail['type'] !== 'date') {
-        detail['filterQuery'] = detail['filters'].pop()
+        detail['query'] = detail['filters'].pop()
     }
     return parsedQuery
 }
@@ -174,8 +175,10 @@ export const parseSearchQuery: (queryString: string) => ParsedSearchQuery = (
             if (char === ',') {
                 continue
             } else {
+                // note the fragment is altered here in order to ensure the whiteSpace is counted as searchTerm and not appended to a filter
+                // note the index here is altered to account for the fact that the fragment is passed through on the char _after_ the filter string finishes
                 pushFiltersToArray(
-                    i,
+                    i - 1,
                     fragment.slice(0, fragment.length - 1),
                     parsedQuery,
                 )
@@ -204,8 +207,9 @@ export const parseSearchQuery: (queryString: string) => ParsedSearchQuery = (
                 }
                 // extract filters from fragment and push into array
                 // note the fragment is altered here in order to ensure the whiteSpace is counted as searchTerm and not appended to a filter
+                // note the index here is altered to account for the fact that the fragment is passed through on the char _after_ the filter string finishes
                 pushFiltersToArray(
-                    i,
+                    i - 1,
                     fragment.slice(0, fragment.length - 1),
                     parsedQuery,
                 )
@@ -236,14 +240,25 @@ export const parseSearchQuery: (queryString: string) => ParsedSearchQuery = (
     // run steps for string end
     if (fragment) {
         if (isInFilterStr) {
-            pushFiltersToArray(queryString.length, fragment, parsedQuery, true)
+            pushFiltersToArray(
+                queryString.length - 1,
+                fragment,
+                parsedQuery,
+                !followsClosingQuote,
+            )
         } else {
-            pushSearchStringToArray(queryString.length, fragment, parsedQuery)
+            pushSearchStringToArray(
+                queryString.length - 1,
+                fragment,
+                parsedQuery,
+            )
         }
     }
 
     return parsedQuery
 }
+
+// string constructing logic
 
 /**
  * Constructs a query string (of type string) from an array of type ParsedSearchQuery.
@@ -254,44 +269,66 @@ export const constructQueryString = (
     parsedQuery: ParsedSearchQuery,
 ): string => {
     let queryString: string = ''
-    return parsedQuery.reduce((queryString, currentPart) => {
-        if (currentPart.type === 'filter') {
-            // find mapped filter key and append to string
-            const key = getFilterKeyFromDetail(currentPart.detail)
-            const { variant, rawContent } = currentPart.detail
-            queryString += `${key}:${rawContent}`
-            if (variant) {
-                queryString += `${variant}:`
+    const returnString: string = parsedQuery.reduce(
+        (queryString, currentPart) => {
+            if (currentPart.type === 'filter') {
+                // find mapped filter key and append to string
+                const key = getFilterKeyFromDetail(currentPart.detail)
+                const {
+                    filters,
+                    query,
+                    variant,
+                    rawContent,
+                } = currentPart.detail
+                // queryString += currentPart.detail.rawContent
+                if (variant) {
+                    queryString += `${variant}:`
+                } else {
+                    queryString += `${key}:`
+                }
+                if (filters) {
+                    queryString += getRawContentFromFiltersArray(filters)
+                }
+                if (query) {
+                    queryString += formatFilterQuery(query)
+                }
             } else {
-                queryString += `${key}:`
+                // else append string value
+                queryString += currentPart.detail.value
             }
-        } else {
-            // else append string value
-            queryString += currentPart.detail.value
-        }
-        return queryString
-    }, queryString)
+            return queryString
+        },
+        queryString,
+    )
+    if (typeof queryString !== 'string') return 'ABORT! FAILURE!'
+    return returnString
+}
+
+const formatFilterQuery = (filterQuery: string): string => {
+    filterQuery = /\s/.test(filterQuery) ? `"${filterQuery}` : filterQuery
+    filterQuery = `,${filterQuery}`
+    return filterQuery
 }
 
 const getFilterKeyFromDetail = (
     filterDetail: SearchFilterDetail,
 ): FilterKey => {
-    const { filterType, isExclusion, variant } = filterDetail
+    const { type, isExclusion, variant } = filterDetail
     return filterKeyMapping.find(
         (val) =>
-            val.filterType === filterType &&
+            val.type === type &&
             (variant ? val.variant === variant : true) &&
             (isExclusion ? val.isExclusion === isExclusion : true),
     ).key
 }
 
 const findMatchingFilterPartIndex = (
-    { filterType, isExclusion, variant }: SearchFilterDetail,
+    { type, isExclusion, variant }: SearchFilterDetail,
     parsedQuery: ParsedSearchQuery,
 ): number => {
     const index = parsedQuery.findIndex(
         (val) =>
-            val.detail['filterType'] === filterType &&
+            val.detail['filterType'] === type &&
             (variant ? val.detail['variant'] === variant : true) &&
             (isExclusion ? val.detail['isExclusion'] === isExclusion : true),
     )
