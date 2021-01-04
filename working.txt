@@ -1,36 +1,41 @@
-// Status of work
+ Status of work
 
-//  Branches:
-//  Working on filter-query-logic currently
-//  Other work is on header branch. This is ready to merge now that I've shifted the
-//   filter logic work to the top level dir
-
-
-// Direction of work
-
-// Filter parsing logic
-// X1. Update logic to use 'string' instead of 'searchTerm' for the QueryStringPart detail
-// X2. Rename pushNewFiltersToArray func to pushFiltersToArray
-// 3. Alter pushFiltersToArray func to accept Boolean if last filter string part is a 
-//      filter query. This needs to be added as its own type (type: 'filterQuery')
-
-// Constructing logic
-// 1. Amend constructSearchQuery func to handle FilterQueryPart SearchStringPart and FilterPart 
-//      types
-
-// Query filter logic misc
-// 1. Build out logic to control states
-// 2. Test end to end
-//    a. String to object and back to string
-//    b. Object to string and back to object
+  Branches:
+  Working on filter-query-logic currently
+  Other work is on header branch. This is ready to merge now that I've shifted the
+   filter logic work to the top level dir
 
 
-// Misc:
-// X 1. Integrate changes from lists-sidebar-group PR
-// 2. Integrate feedback from Figma
-//  - Sidebar hide behaviour
-//  - Searchbar debounce of 500ms before search
-// 3. Add link to SSM Contact Support anchor
-// 4. Refactor DateRangeSelection component to styled-components
-// 5. Change search bar 'Close Filters' button to have 3 states as per figma comment
-//    https://www.figma.com/file/5Uodgoylm43m3AjnQu8qu0?node-id=580:346#52013860
+ Direction of work
+
+ Query filter logic misc
+ 1. Build out logic to control states
+ 2. Test end to end
+    a. String to object and back to string
+    b. Object to string and back to object
+
+ Where I'm leaving things Monday 4.1.21
+ Test data is all built
+ Parsing is working fine with all tests passed
+ Construction is failing all tests with the returned value 'Function Anonymous'
+ Manual spot testing of construction logic shows it's working as expected
+ Haven't yet built testing logic for filter updated
+
+ Filter Updates
+ Most of the heavy lifting is done but need to build top-level function to receive mutations
+  and return updated query string (? - could return something else but brain is fried)
+
+ Cursor Position
+ Already built into test data
+ Need to build event handler to sync picker state (isOpen) and cursor position
+  - bi-directional: both on cursor position change and on picker open
+
+ Misc:
+ X 1. Integrate changes from lists-sidebar-group PR
+ 2. Integrate feedback from Figma
+  - Sidebar hide behaviour
+  - Searchbar debounce of 500ms before search
+ 3. Add link to SSM Contact Support anchor
+ 4. Refactor DateRangeSelection component to styled-components
+ 5. Change search bar 'Close Filters' button to have 3 states as per figma comment
+    https:www.figma.com/file/5Uodgoylm43m3AjnQu8qu0?node-id=580:346#52013860
