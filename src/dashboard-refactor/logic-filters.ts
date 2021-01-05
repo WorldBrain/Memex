@@ -356,6 +356,31 @@ const getRawContentFromFiltersArray = (filtersArray: string[]): string => {
 }
 
 // filters update logic
+/**
+ * Takes query string and a filter detail object and ensures the query string accurately reflects
+ * the filter object
+ * @param queryString the string to update
+ * @param incomingFilter object of type SearchFilterDetail
+ */
+export const syncQueryStringFilters = (
+    queryString: string,
+    incomingFilter: SearchFilterDetail,
+): string => {
+    let resultString: string = ''
+    const parsedQuery = parseSearchQuery(queryString)
+    const filterPartToUpdate =
+        parsedQuery[findMatchingFilterPartIndex(incomingFilter, parsedQuery)]
+    if (filterPartToUpdate.type === 'filter') {
+        resultString = updateFiltersInQueryString(
+            queryString,
+            filterPartToUpdate.detail,
+        )
+    }
+    if (!resultString) {
+        resultString = pushFilterKeyToQueryString(incomingFilter, queryString)
+    }
+    return resultString
+}
 
 /**
  * takes query string and object specifying detail of filter key to be added and returns
@@ -363,7 +388,7 @@ const getRawContentFromFiltersArray = (filtersArray: string[]): string => {
  * @param filterPart
  * @param queryString
  */
-export const pushFilterKeyToQueryString = (
+const pushFilterKeyToQueryString = (
     filterDetail: SearchFilterDetail,
     queryString: string,
 ): string => {
@@ -404,29 +429,31 @@ export const removeEmptyFilterStringsFromQueryString = (
  * Takes query string and an object specifying the filter to be added and
  * returns the correctly formatted query string
  * @param queryString the string to update
- * @param filterPart the object of type SearchFilterDetail to use in updating the string
+ * @param filterDetail the object of type SearchFilterDetail to use in updating the string
  */
-export const updateFiltersInQueryString = (
-    filterDetail: SearchFilterDetail,
+const updateFiltersInQueryString = (
     queryString: string,
+    newDetail: SearchFilterDetail,
 ): string => {
-    const parsedQuery: ParsedSearchQuery = parseSearchQuery(queryString)
-    const targetPart: SearchQueryPart =
-        parsedQuery[findMatchingFilterPartIndex(filterDetail, parsedQuery)]
-    if (targetPart.type === 'filter') {
-        targetPart.detail.filters = filterDetail.filters
-        targetPart.detail.rawContent = getRawContentFromFiltersArray(
-            filterDetail.filters,
+    const parsedQuery = parseSearchQuery(queryString)
+    const updateIndex = findMatchingFilterPartIndex(newDetail, parsedQuery)
+    const foundPart = parsedQuery[updateIndex]
+    if (foundPart.type === 'filter') {
+        const detailToUpdate = foundPart.detail
+        detailToUpdate.filters = newDetail.filters
+        detailToUpdate.rawContent = getRawContentFromFiltersArray(
+            newDetail.filters,
         )
-        if (filterDetail.isExclusion) {
-            targetPart.detail.isExclusion = filterDetail.isExclusion
+        if (newDetail.isExclusion) {
+            detailToUpdate.isExclusion = newDetail.isExclusion
         }
-        if (filterDetail.type === 'date') {
-            targetPart.detail['variant'] = filterDetail['variant']
+        if (newDetail.type === 'date') {
+            detailToUpdate['variant'] = newDetail['variant']
         }
-        if (filterDetail.query.length > 0) {
-            targetPart.detail.query = filterDetail.query
+        if (newDetail.query.length > 0) {
+            detailToUpdate.query = newDetail.query
         }
+        parsedQuery[updateIndex].detail = detailToUpdate
         return constructQueryString(parsedQuery)
     }
 }
