@@ -323,7 +323,9 @@ const formatFilterQuery = (filterQuery: string): string => {
 }
 
 export const findMatchingFilterPartIndex = (
-    filterDetail: SearchFilterDetail,
+    filterDetail: Omit<SearchFilterDetail, 'rawContent'> & {
+        rawContent?: string
+    },
     parsedQuery: ParsedSearchQuery,
 ): number => {
     const { type, isExclusion } = filterDetail
