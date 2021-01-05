@@ -10,6 +10,7 @@ import {
     setLastSharedAnnotationTimestamp,
 } from 'src/annotations/utils'
 import { getListShareUrl } from 'src/content-sharing/utils'
+import { ListData } from './lists-sidebar/types'
 
 const updatePickerValues = (event: { added?: string; deleted?: string }) => (
     values: string[],
@@ -104,7 +105,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial(this, async () => {
             await this.getSharingAccess()
-            await this.runSearch(previousState)
+            const listsP = this.loadLocalLists()
+            const searchP = this.runSearch(previousState)
+
+            await Promise.all([listsP, searchP])
         })
     }
 
@@ -146,6 +150,50 @@ export class DashboardLogic extends UILogic<State, Events> {
                 taskState: 'pristine',
             }
         }
+    }
+
+    async loadLocalLists() {
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listsSidebar: {
+                    localLists: { loadingState: { $set: taskState } },
+                },
+            }),
+            async () => {
+                const lists = await this.options.listsBG.fetchAllLists({
+                    limit: 1000,
+                    skipMobileList: true,
+                })
+
+                const listIds: number[] = []
+                const listData: { [id: number]: ListData } = {}
+
+                for (const { id, name } of lists) {
+                    const remoteListId = await this.options.contentShareBG.getRemoteListId(
+                        { localListId: id },
+                    )
+
+                    listIds.push(id)
+                    listData[id] = {
+                        id,
+                        name,
+                        listCreationState: 'pristine',
+                        isShared: !!remoteListId,
+                        shareUrl: remoteListId
+                            ? getListShareUrl({ remoteListId })
+                            : undefined,
+                    }
+                }
+
+                this.emitMutation({
+                    listsSidebar: {
+                        listData: { $set: listData },
+                        localLists: { listIds: { $set: listIds } },
+                    },
+                })
+            },
+        )
     }
 
     /**
