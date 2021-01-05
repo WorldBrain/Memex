@@ -26,14 +26,14 @@ export type SharingState =
 export const SHARE_BUTTON_LABELS: {
     [Key in SharingState]: string
 } = {
-    'feature-disabled': 'Share note',
-    'not-shared-yet': 'Share note',
+    'feature-disabled': 'Share Note',
+    'not-shared-yet': 'Share Note',
     'already-shared': 'Get Note Link',
-    sharing: 'Sharing note...',
-    'sharing-success': 'Note shared',
+    sharing: 'Sharing Note...',
+    'sharing-success': 'Note Shared',
     'sharing-error': 'Error Sharing Note',
-    unsharing: 'Unsharing note',
-    'unsharing-success': 'Note unshared',
+    unsharing: 'Unsharing Note',
+    'unsharing-success': 'Note Unshared',
     'unsharing-error': 'Error Un-sharing Note',
 }
 

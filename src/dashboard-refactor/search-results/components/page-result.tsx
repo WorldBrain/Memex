@@ -85,11 +85,14 @@ export default class PageResultView extends PureComponent<Props> {
                                 key: 'copy-paste-page-btn',
                                 image: icons.copy,
                                 onClick: this.props.onCopyPasterBtnClick,
+                                tooltipText: 'Copy Page',
                             },
                             {
                                 key: 'delete-page-btn',
                                 image: icons.trash,
                                 onClick: this.props.onTrashBtnClick,
+                                tooltipText:
+                                    'Delete Page & all related content',
                             },
                             {
                                 key: 'share-page-btn',
@@ -97,6 +100,7 @@ export default class PageResultView extends PureComponent<Props> {
                                     ? icons.shared
                                     : icons.shareEmpty,
                                 onClick: this.props.onShareBtnClick,
+                                tooltipText: 'Share Page',
                             },
                             {
                                 key: 'tag-page-btn',
@@ -104,6 +108,7 @@ export default class PageResultView extends PureComponent<Props> {
                                     ? icons.tagFull
                                     : icons.tagEmpty,
                                 onClick: this.props.onTagPickerBtnClick,
+                                tooltipText: 'Tag Page',
                             },
                             {
                                 key: 'list-page-btn',
@@ -111,6 +116,7 @@ export default class PageResultView extends PureComponent<Props> {
                                     ? icons.collectionsFull
                                     : icons.collectionsEmpty,
                                 onClick: this.props.onListPickerBtnClick,
+                                tooltipText: 'Edit Collections',
                             },
                             {
                                 key: 'expand-notes-btn',
@@ -118,6 +124,7 @@ export default class PageResultView extends PureComponent<Props> {
                                     ? icons.commentFull
                                     : icons.commentEmpty,
                                 onClick: this.props.onNotesBtnClick,
+                                tooltipText: 'Add/View Notes',
                             },
                             {
                                 key: 'bookmark-page-btn',
@@ -125,6 +132,7 @@ export default class PageResultView extends PureComponent<Props> {
                                     ? icons.heartFull
                                     : icons.heartEmpty,
                                 onClick: this.props.onBookmarkBtnClick,
+                                tooltipText: 'Favorite Page',
                             },
                         ]}
                     />

@@ -149,11 +149,13 @@ export default class NoteResultView extends PureComponent<Props> {
                                 key: 'copy-paste-note-btn',
                                 image: icons.copy,
                                 onClick: this.props.onCopyPasterBtnClick,
+                                tooltipText: 'Copy Note',
                             },
                             {
                                 key: 'delete-note-btn',
                                 image: icons.trash,
                                 onClick: this.props.onTrashBtnClick,
+                                tooltipText: 'Delete Note',
                             },
                             {
                                 key: 'share-note-btn',
@@ -172,11 +174,13 @@ export default class NoteResultView extends PureComponent<Props> {
                                     ? icons.tagFull
                                     : icons.tagEmpty,
                                 onClick: this.props.onTagPickerBtnClick,
+                                tooltipText: 'Tag Note',
                             },
                             {
                                 key: 'reply-to-note-btn',
                                 image: icons.commentAdd,
                                 onClick: this.props.onReplyBtnClick,
+                                tooltipText: 'Reply To Note',
                             },
                             {
                                 key: 'bookmark-note-btn',
@@ -184,6 +188,7 @@ export default class NoteResultView extends PureComponent<Props> {
                                     ? icons.heartFull
                                     : icons.heartEmpty,
                                 onClick: this.props.onBookmarkBtnClick,
+                                tooltipText: 'Favorite Note',
                             },
                         ]}
                     />
