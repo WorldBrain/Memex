@@ -20,6 +20,7 @@ export default class DayResultGroup extends PureComponent<Props> {
 
 const DayContainer = styled.div`
     display: flex;
+    flex-direction: column;
 `
 
 const DayWhenText = styled.h1``

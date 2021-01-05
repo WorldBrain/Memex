@@ -1,4 +1,5 @@
 import React from 'react'
+import styled from 'styled-components'
 import { StatefulUIElement } from 'src/util/ui-logic'
 
 import { DashboardLogic } from './logic'
@@ -425,7 +426,7 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderDashboard() {
         return (
-            <>
+            <Container>
                 {this.renderListsSidebar()}
                 {this.renderSearchResults()}
                 {this.renderModals()}
@@ -449,7 +450,7 @@ export class DashboardContainer extends StatefulUIElement<
                     }
                 />
                 <HelpBtn />
-            </>
+            </Container>
         )
     }
 
@@ -466,3 +467,8 @@ export class DashboardContainer extends StatefulUIElement<
         return this.renderDashboard()
     }
 }
+
+const Container = styled.div`
+    display: flex;
+    flex-direction: row;
+`

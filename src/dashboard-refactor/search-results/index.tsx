@@ -208,4 +208,5 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
 const ResultsContainer = styled.div`
     display: flex;
+    flex-direction: column;
 `
