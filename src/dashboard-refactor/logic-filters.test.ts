@@ -1,5 +1,9 @@
 import expect from 'expect'
-import { parseSearchQuery, constructQueryString } from './logic-filters'
+import {
+    parseSearchQuery,
+    constructQueryString,
+    syncQueryStringFilters,
+} from './logic-filters'
 import TEST_DATA from './logic-filters.test.data'
 
 // parsing tests
@@ -30,7 +34,19 @@ describe('Search query string construction logic', () => {
     }
 })
 
-// add filters
-// describe('Adding a filter to the query string', () => {
-//     it('')
-// })
+// filter mutations
+
+describe('Filter parsing logic', () => {
+    for (const {
+        queryString,
+        filtersData: { updatedFilters, newQuery },
+    } of TEST_DATA) {
+        it(`Should correctly update the query string to '${newQuery}'`, () => {
+            const resultString = syncQueryStringFilters(
+                queryString,
+                updatedFilters,
+            )
+            expect(resultString).toEqual(newQuery)
+        })
+    }
+})
