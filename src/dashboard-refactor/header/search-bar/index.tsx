@@ -90,7 +90,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             ref={this.inputRef}
                             placeholder={
                                 !searchQuery &&
-                                (this.props.placeholder ||
+                                (this.props.placeholder ??
                                     'Search your saved pages and notes')
                             }
                             value={searchQuery}

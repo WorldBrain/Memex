@@ -48,7 +48,7 @@ const SyncStatusHeaderText = styled.span<{
     line-height: 15px;
     white-space: nowrap;
     overflow: hidden;
-    ${(props) => props.textCentered && 'text-align: center;'}
+    ${(props) => (props.textCentered ? 'text-align: center;' : '')}
 `
 
 export interface HeaderProps {
@@ -59,15 +59,10 @@ export interface HeaderProps {
 }
 
 export default class Header extends PureComponent<HeaderProps> {
-    static defaultProps = {
-        searchPlaceholder: 'Search your saved pages and notes',
-        pricingUrl: 'https://worldbrain.io/pricing',
-        settingsIconUrl: '/img/settings.svg',
-        checkedIcon: 'img/checked_green.svg',
-        crossIcon: 'img/cross.svg',
-        settingsRoute: '/settings',
-        overviewUrl: OVERVIEW_URL,
-    }
+    pricingUrl = 'https://worldbrain.io/pricing'
+    settingsIconUrl = 'img/settings.svg'
+    settingsRoute = '/settings'
+    overviewUrl = OVERVIEW_URL
 
     handleSyncStatusHeaderClick = () => {
         this.props.syncStatusMenuProps.displayState.toggleDisplayState()
