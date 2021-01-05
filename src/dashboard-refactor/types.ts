@@ -48,11 +48,9 @@ export interface CursorLocationState {
 
 export type ListSource = 'local-lists' | 'followed-list'
 
-export type ParsedSearchQuery = (
-    | QueryFilterPart
-    | QueryStringPart
-    | undefined
-)[]
+export type ParsedSearchQuery = SearchQueryPart[]
+
+export type SearchQueryPart = QueryFilterPart | QueryStringPart | undefined
 
 export interface QueryStringPart {
     type: 'searchString'
