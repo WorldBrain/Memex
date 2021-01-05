@@ -62,11 +62,13 @@ const getFilterMappingFromKey = (filterKey: string): FilterKeyMapping => {
 const getFilterKeyFromDetail = (
     filterDetail: SearchFilterDetail,
 ): FilterKey => {
-    const { type, isExclusion, variant } = filterDetail
+    const { type, isExclusion } = filterDetail
     return filterKeyMapping.find(
         (val) =>
             val.type === type &&
-            (variant ? val.variant === variant : true) &&
+            (filterDetail['variant']
+                ? val.variant === filterDetail['variant']
+                : true) &&
             (isExclusion ? val.isExclusion === isExclusion : true),
     ).key
 }
@@ -289,15 +291,10 @@ export const constructQueryString = (
             if (currentPart.type === 'filter') {
                 // find mapped filter key and append to string
                 const key = getFilterKeyFromDetail(currentPart.detail)
-                const {
-                    filters,
-                    query,
-                    variant,
-                    rawContent,
-                } = currentPart.detail
+                const { filters, query, rawContent } = currentPart.detail
                 // queryString += currentPart.detail.rawContent
-                if (variant) {
-                    queryString += `${variant}:`
+                if (currentPart.detail.type === 'date') {
+                    queryString += `${currentPart.detail['variant']}:`
                 } else {
                     queryString += `${key}:`
                 }
@@ -325,14 +322,17 @@ const formatFilterQuery = (filterQuery: string): string => {
     return filterQuery
 }
 
-const findMatchingFilterPartIndex = (
-    { type, isExclusion, variant }: SearchFilterDetail,
+export const findMatchingFilterPartIndex = (
+    filterDetail: SearchFilterDetail,
     parsedQuery: ParsedSearchQuery,
 ): number => {
+    const { type, isExclusion } = filterDetail
     const index = parsedQuery.findIndex(
         (val) =>
             val.detail['filterType'] === type &&
-            (variant ? val.detail['variant'] === variant : true) &&
+            (filterDetail['variant']
+                ? val.detail['variant'] === filterDetail['variant']
+                : true) &&
             (isExclusion ? val.detail['isExclusion'] === isExclusion : true),
     )
     return index
@@ -420,7 +420,7 @@ export const updateFiltersInQueryString = (
             targetPart.detail.isExclusion = filterDetail.isExclusion
         }
         if (filterDetail.type === 'date') {
-            targetPart.detail.variant = filterDetail.variant
+            targetPart.detail['variant'] = filterDetail['variant']
         }
         if (filterDetail.query.length > 0) {
             targetPart.detail.query = filterDetail.query

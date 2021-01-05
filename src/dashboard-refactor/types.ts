@@ -74,7 +74,6 @@ export interface TextFilterDetail {
     filters: string[]
     query?: string
     isExclusion?: boolean
-    variant?: undefined
 }
 
 type DateFilterDetail = Omit<TextFilterDetail, 'type' | 'variant'> & {
@@ -83,5 +82,5 @@ type DateFilterDetail = Omit<TextFilterDetail, 'type' | 'variant'> & {
 }
 
 export type FilterMutationDetail =
-    | Omit<SearchFilterDetail, 'rawContent'>
+    | Omit<TextFilterDetail, 'rawContent'>
     | Omit<DateFilterDetail, 'rawContent'>
