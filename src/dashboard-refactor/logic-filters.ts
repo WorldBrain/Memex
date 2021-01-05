@@ -1,6 +1,11 @@
 import { SEARCH_QUERY_END_FILTER_KEY_PATTERN } from 'src/dashboard-refactor/constants'
 import { FilterKey, SearchFilterType } from './header/types'
-import { ParsedSearchQuery, QueryFilterPart, SearchFilterDetail } from './types'
+import {
+    ParsedSearchQuery,
+    QueryFilterPart,
+    SearchFilterDetail,
+    SearchQueryPart,
+} from './types'
 
 interface FilterKeyMapping {
     key: FilterKey
@@ -50,13 +55,23 @@ const filterKeyMapping: FilterKeyMapping[] = [
 ]
 
 // misc logic
-
 const getFilterMappingFromKey = (filterKey: string): FilterKeyMapping => {
     return filterKeyMapping.find((val) => val.key === filterKey)
 }
 
-// parsing logic
+const getFilterKeyFromDetail = (
+    filterDetail: SearchFilterDetail,
+): FilterKey => {
+    const { type, isExclusion, variant } = filterDetail
+    return filterKeyMapping.find(
+        (val) =>
+            val.type === type &&
+            (variant ? val.variant === variant : true) &&
+            (isExclusion ? val.isExclusion === isExclusion : true),
+    ).key
+}
 
+// parsing logic
 const getFilterPartFromKey = (
     endIndex: number,
     filterKey: string,
@@ -310,18 +325,6 @@ const formatFilterQuery = (filterQuery: string): string => {
     return filterQuery
 }
 
-const getFilterKeyFromDetail = (
-    filterDetail: SearchFilterDetail,
-): FilterKey => {
-    const { type, isExclusion, variant } = filterDetail
-    return filterKeyMapping.find(
-        (val) =>
-            val.type === type &&
-            (variant ? val.variant === variant : true) &&
-            (isExclusion ? val.isExclusion === isExclusion : true),
-    ).key
-}
-
 const findMatchingFilterPartIndex = (
     { type, isExclusion, variant }: SearchFilterDetail,
     parsedQuery: ParsedSearchQuery,
@@ -350,6 +353,8 @@ const getRawContentFromFiltersArray = (filtersArray: string[]): string => {
     return rawContent
 }
 
+// filters update logic
+
 /**
  * takes query string and object specifying detail of filter key to be added and returns
  * correctly formatted query string
@@ -369,22 +374,115 @@ export const pushFilterKeyToQueryString = (
     return queryString
 }
 
-/**
- * Takes query string and an object specifying the filter to be added and
- * returns the correctly formatted query string
- * @param queryString
- * @param filterPart
- */
-export const insertFilterToQueryString = (
+export const removeEmptyFilterStringsFromQueryString = (
     filterDetail: SearchFilterDetail,
     queryString: string,
 ): string => {
-    const parsedQuery = parseSearchQuery(queryString)
-    const targetPart =
-        parsedQuery[findMatchingFilterPartIndex(filterDetail, parsedQuery)]
-    targetPart.detail['filters'].push(...filterDetail.filters)
-    targetPart.detail['rawContent'] = getRawContentFromFiltersArray(
-        filterDetail.filters,
-    )
-    return constructQueryString(parsedQuery)
+    const parsedQuery: ParsedSearchQuery = parseSearchQuery(queryString)
+    const filteredQuery: ParsedSearchQuery = parsedQuery.filter((queryPart) => {
+        if (queryPart.type !== 'filter') {
+            return true
+        }
+        // return false for case where filtered queryPart.detail represents the same filter key as param filterDetail
+        //  and where queryPart.filters is not empty or query is not empty, else true
+        return (
+            queryPart.detail.filters.length > 0 ||
+            queryPart.detail.query.length > 0 ||
+            !(
+                getFilterKeyFromDetail(filterDetail) ===
+                getFilterKeyFromDetail(queryPart.detail)
+            )
+        )
+    })
+
+    return constructQueryString(filteredQuery)
 }
+
+/**
+ * Takes query string and an object specifying the filter to be added and
+ * returns the correctly formatted query string
+ * @param queryString the string to update
+ * @param filterPart the object of type SearchFilterDetail to use in updating the string
+ */
+export const updateFiltersInQueryString = (
+    filterDetail: SearchFilterDetail,
+    queryString: string,
+): string => {
+    const parsedQuery: ParsedSearchQuery = parseSearchQuery(queryString)
+    const targetPart: SearchQueryPart =
+        parsedQuery[findMatchingFilterPartIndex(filterDetail, parsedQuery)]
+    if (targetPart.type === 'filter') {
+        targetPart.detail.filters = filterDetail.filters
+        targetPart.detail.rawContent = getRawContentFromFiltersArray(
+            filterDetail.filters,
+        )
+        if (filterDetail.isExclusion) {
+            targetPart.detail.isExclusion = filterDetail.isExclusion
+        }
+        if (filterDetail.type === 'date') {
+            targetPart.detail.variant = filterDetail.variant
+        }
+        if (filterDetail.query.length > 0) {
+            targetPart.detail.query = filterDetail.query
+        }
+        return constructQueryString(parsedQuery)
+    }
+}
+
+const getCursorPositionQueryPart = (
+    queryString: string,
+    cursorIndex: number,
+): SearchQueryPart => {
+    const parsedQuery: ParsedSearchQuery = parseSearchQuery(queryString)
+    return parsedQuery.find(
+        ({ startIndex, endIndex }) =>
+            cursorIndex >= startIndex && cursorIndex <= endIndex,
+    )
+}
+
+/**
+ * Takes in the query string and the cursor's position in it and returns the type of the
+ * filter string in which it resides, or false if it does not sit in a filter string
+ * N.B. this is only for applications where the isExclusion and variant flag are not used
+ * @param queryString a string
+ * @param cursorIndex a number detailing the string index after which the cursor sits
+ */
+export const getCursorPositionFilterType = (
+    queryString: string,
+    cursorIndex: number,
+): SearchFilterType | false => {
+    const cursorPart: SearchQueryPart = getCursorPositionQueryPart(
+        queryString,
+        cursorIndex,
+    )
+    if (!cursorPart ?? cursorPart.type !== 'filter') {
+        return false
+    }
+    return cursorPart.detail.type
+}
+
+// filters state shape
+// interface SearchFiltersState {
+//     searchQuery: string
+//     searchQueryCursorPosition: number
+//     isSearchBarFocused: boolean
+//     searchFiltersOpen: boolean
+//     isTagFilterActive: boolean
+//     isDateFilterActive: boolean
+//     isDomainFilterActive: boolean
+
+//     dateFromInput: string
+//     dateToInput: string
+//     dateFrom?: number
+//     dateTo?: number
+
+//     tagsIncluded: string[]
+//     tagsExcluded: string[]
+//     tagsQuery: string
+//     listsIncluded: string[]
+//     listsExcluded: string[]
+//     listsQuery: string[]
+//     domainsIncluded: string[]
+//     domainsExcluded: string[]
+//     domainsQuery: string
+// }
