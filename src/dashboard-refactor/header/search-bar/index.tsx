@@ -58,10 +58,9 @@ export interface SearchBarProps {
     cursorLocationState: CursorLocationState
     isSearchBarFocused: boolean
     searchFiltersOpen: boolean
-    // searchFiltersActive: [] // this is probably unnecessary given the filter query logic state manipulation parses queryString at the state layer
     onSearchBarFocus(): void
     onSearchQueryChange(queryString: string): void
-    onSearchFiltersOpen(): void
+    toggleSearchFiltersBar(): void
 }
 
 export default class SearchBar extends PureComponent<SearchBarProps> {
@@ -93,7 +92,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         const {
             searchFiltersOpen,
             searchQuery,
-            onSearchFiltersOpen,
+            toggleSearchFiltersBar,
             onSearchBarFocus,
         } = this.props
         return (
@@ -108,7 +107,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                         />
                     </FullWidthMargin>
                     <Margin horizontal="23px">
-                        <FilterButton onClick={onSearchFiltersOpen}>
+                        <FilterButton onClick={toggleSearchFiltersBar}>
                             {searchFiltersOpen ? 'Remove Filters' : 'Filters'}
                         </FilterButton>
                     </Margin>
