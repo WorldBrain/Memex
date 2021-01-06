@@ -1,4 +1,7 @@
 export const sizeConstants = {
+    header: {
+        heightPx: 55,
+    },
     searchBar: {
         heightPx: 50,
         widthPx: 650,
@@ -7,7 +10,10 @@ export const sizeConstants = {
         widthPx: 173,
     },
     syncStatusMenu: {
-        WidthPx: 183,
+        widthPx: 183,
+    },
+    searchResults: {
+        widthPx: 800,
     },
 }
 

@@ -9,12 +9,13 @@ import SidebarHeader, { SidebarHeaderProps } from './sidebar-header'
 import styles, { fonts } from '../styles'
 import { Icon } from '../styled-components'
 import Margin from '../components/Margin'
+import { sizeConstants } from 'src/dashboard-refactor/constants'
 
 const Container = styled.div`
-    height: 45px;
+    height: ${sizeConstants.header.heightPx}px;
     width: 100%;
-    position: fixed;
-    top: 0px;
+    position: sticky;
+    top: 0;
     display: flex;
     flex-direction: row;
     align-items: center;

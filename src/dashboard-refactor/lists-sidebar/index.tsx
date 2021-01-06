@@ -14,6 +14,7 @@ import Margin from '../components/Margin'
 import ListsSidebarItem, {
     Props as ListsSidebarItemProps,
 } from './components/lists-sidebar-item-with-menu'
+import { sizeConstants } from '../constants'
 
 const Container = styled.div<{
     locked: boolean
@@ -22,7 +23,9 @@ const Container = styled.div<{
     display: flex;
     flex-direction: column;
     justify-content: start;
-    width: 173px;
+    width: ${sizeConstants.listsSidebar.widthPx}px;
+    position: fixed;
+    top: ${sizeConstants.header.heightPx}px;
     ${(props) =>
         props.locked &&
         css`

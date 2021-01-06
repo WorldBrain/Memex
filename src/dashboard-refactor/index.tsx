@@ -31,10 +31,12 @@ export class DashboardContainer extends StatefulUIElement<
     Events
 > {
     static defaultProps: Partial<Props> = {
+        contentShareBG: runInBackground(),
         annotationsBG: runInBackground(),
         searchBG: runInBackground(),
         listsBG: runInBackground(),
         tagsBG: runInBackground(),
+        authBG: runInBackground(),
     }
 
     private annotationsCache: AnnotationsCacheInterface
@@ -554,5 +556,5 @@ export class DashboardContainer extends StatefulUIElement<
 
 const Container = styled.div`
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
 `

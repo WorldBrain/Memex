@@ -31,6 +31,7 @@ import {
     AnnotationCreate,
     AnnotationCreateEventProps,
 } from 'src/annotations/components/AnnotationCreate'
+import { sizeConstants } from '../constants'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -209,4 +210,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 const ResultsContainer = styled.div`
     display: flex;
     flex-direction: column;
+    align-self: center;
+    max-width: ${sizeConstants.searchResults.widthPx}px;
 `
