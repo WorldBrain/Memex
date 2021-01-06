@@ -58,7 +58,8 @@ export const testData: TestData[] = [
         filtersData: {
             updatedFilters: {
                 type: 'domain',
-                filters: ['domain'],
+                filters: [],
+                query: 'domain',
                 rawContent: `d:domain`,
             },
             newQuery: `d:domain `,

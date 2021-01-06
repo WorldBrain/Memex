@@ -35,12 +35,12 @@ describe('Search query string construction logic', () => {
 })
 
 // filter mutations
-
 describe('Filter parsing logic', () => {
-    for (const {
-        queryString,
-        filtersData: { updatedFilters, newQuery },
-    } of TEST_DATA) {
+    for (const { queryString, filtersData } of TEST_DATA) {
+        if (!filtersData) {
+            continue
+        }
+        const { updatedFilters, newQuery } = filtersData
         it(`Should correctly update the query string to '${newQuery}'`, () => {
             const resultString = syncQueryStringFilters(
                 queryString,
@@ -50,3 +50,6 @@ describe('Filter parsing logic', () => {
         })
     }
 })
+
+// removing filter key (on picker close)
+describe('Filter key removal logic', () => {})
