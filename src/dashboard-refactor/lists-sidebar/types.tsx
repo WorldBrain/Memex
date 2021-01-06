@@ -44,6 +44,7 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
         editingListId?: number
         selectedListId?: number
         showMoreMenuListId?: number
+        isSidebarToggleHovered?: boolean
 
         listDeleteState: TaskState
         listCreateState: TaskState
@@ -54,6 +55,7 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
 export type Events = UIEvent<{
     setSidebarLocked: { isLocked: boolean }
     setSidebarPeeking: { isPeeking: boolean }
+    setSidebarToggleHovered: { isHovered: boolean }
     setListQueryValue: { query: string }
 
     setAddListInputShown: { isShown: boolean }

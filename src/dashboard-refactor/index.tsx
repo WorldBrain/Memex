@@ -119,9 +119,15 @@ export class DashboardContainer extends StatefulUIElement<
                             }),
                     },
                     sidebarToggleHoverState: {
-                        isHovered: true,
-                        onHoverEnter: unimplemented,
-                        onHoverLeave: unimplemented,
+                        isHovered: listsSidebar.isSidebarToggleHovered,
+                        onHoverEnter: () =>
+                            this.processEvent('setSidebarToggleHovered', {
+                                isHovered: true,
+                            }),
+                        onHoverLeave: () =>
+                            this.processEvent('setSidebarToggleHovered', {
+                                isHovered: false,
+                            }),
                     },
                     selectedListName,
                 }}

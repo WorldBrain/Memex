@@ -34,6 +34,29 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.isSidebarPeeking).toEqual(false)
     })
 
+    it('should be able to set sidebar toggle hovered state', async ({
+        device,
+    }) => {
+        const { searchResults } = await setupTest(device)
+
+        expect(
+            searchResults.state.listsSidebar.isSidebarToggleHovered,
+        ).toBeFalsy()
+        await searchResults.processEvent('setSidebarToggleHovered', {
+            isHovered: true,
+        })
+        expect(searchResults.state.listsSidebar.isSidebarToggleHovered).toEqual(
+            true,
+        )
+
+        await searchResults.processEvent('setSidebarToggleHovered', {
+            isHovered: false,
+        })
+        expect(searchResults.state.listsSidebar.isSidebarToggleHovered).toEqual(
+            false,
+        )
+    })
+
     it('should be able to set list query input state', async ({ device }) => {
         const { searchResults } = await setupTest(device)
 

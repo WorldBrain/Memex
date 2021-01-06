@@ -1425,6 +1425,14 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setSidebarToggleHovered: EventHandler<'setSidebarToggleHovered'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: { isSidebarToggleHovered: { $set: event.isHovered } },
+        })
+    }
+
     setListQueryValue: EventHandler<'setListQueryValue'> = async ({
         event,
     }) => {
