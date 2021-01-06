@@ -31,7 +31,7 @@ export interface SidebarHeaderProps {
     sidebarLockedState: SidebarLockedState
     sidebarPeekState: SidebarPeekState
     sidebarToggleHoverState: HoverState
-    selectedList?: string
+    selectedListName?: string
 }
 
 export default class SidebarHeader extends PureComponent<SidebarHeaderProps> {
@@ -40,7 +40,7 @@ export default class SidebarHeader extends PureComponent<SidebarHeaderProps> {
             sidebarLockedState,
             sidebarToggleHoverState,
             sidebarPeekState,
-            selectedList,
+            selectedListName: selectedList,
         } = this.props
         return (
             <SidebarHeaderContainer>

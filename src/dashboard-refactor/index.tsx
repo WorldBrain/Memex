@@ -6,6 +6,7 @@ import { DashboardLogic } from './logic'
 import { RootState, Events, DashboardDependencies, ListSource } from './types'
 import ListsSidebarContainer from './lists-sidebar'
 import SearchResultsContainer from './search-results'
+import HeaderContainer from './header'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { Props as ListSidebarItemProps } from './lists-sidebar/components/lists-sidebar-item-with-menu'
 import { ListData } from './lists-sidebar/types'
@@ -78,12 +79,93 @@ export class DashboardContainer extends StatefulUIElement<
             this.processEvent('setShareListId', { listId: list.id }),
     })
 
+    private renderHeader() {
+        const { searchFilters, listsSidebar } = this.state
+        const selectedListName =
+            listsSidebar.listData[listsSidebar.selectedListId]?.name
+
+        const unimplemented = () => undefined
+
+        return (
+            <HeaderContainer
+                searchBarProps={{
+                    searchQuery: searchFilters.searchQuery,
+                    searchFiltersOpen: searchFilters.searchFiltersOpen,
+                    isSearchBarFocused: searchFilters.isSearchBarFocused,
+                    onSearchBarFocus: () =>
+                        this.processEvent('setSearchBarFocus', {
+                            isFocused: true,
+                        }),
+                    onSearchFiltersOpen: () =>
+                        this.processEvent('setSearchFiltersOpen', {
+                            isOpen: !searchFilters.searchFiltersOpen,
+                        }),
+                    onSearchQueryChange: (query) =>
+                        this.processEvent('setSearchQuery', { query }),
+                }}
+                sidebarHeaderProps={{
+                    sidebarLockedState: {
+                        isSidebarLocked: listsSidebar.isSidebarLocked,
+                        toggleSidebarLockedState: () =>
+                            this.processEvent('setSidebarLocked', {
+                                isLocked: !listsSidebar.isSidebarLocked,
+                            }),
+                    },
+                    sidebarPeekState: {
+                        isSidebarPeeking: listsSidebar.isSidebarPeeking,
+                        toggleSidebarPeekState: () =>
+                            this.processEvent('setSidebarPeeking', {
+                                isPeeking: !listsSidebar.isSidebarPeeking,
+                            }),
+                    },
+                    sidebarToggleHoverState: {
+                        isHovered: true,
+                        onHoverEnter: unimplemented,
+                        onHoverLeave: unimplemented,
+                    },
+                    selectedListName,
+                }}
+                syncStatusIconState="green"
+                syncStatusMenuProps={{
+                    displayState: {
+                        isDisplayed: false,
+                        toggleDisplayState: unimplemented,
+                    },
+                    backupRunHoverState: {
+                        isHovered: false,
+                        onHoverEnter: unimplemented,
+                        onHoverLeave: unimplemented,
+                    },
+                    syncRunHoverState: {
+                        isHovered: false,
+                        onHoverEnter: unimplemented,
+                        onHoverLeave: unimplemented,
+                    },
+                    unSyncedItemState: {
+                        onHideUnSyncedItemCount: unimplemented,
+                        onShowUnSyncedItemCount: unimplemented,
+                        showUnSyncedItemCount: false,
+                        unSyncedItemCount: 0,
+                    },
+                    lastSuccessfulBackupDateTime: new Date(),
+                    lastSuccessfulSyncDateTime: new Date(),
+                    onInitiateBackup: unimplemented,
+                    onInitiateSync: unimplemented,
+                    backupState: 'disabled',
+                    syncState: 'disabled',
+                }}
+            />
+        )
+    }
+
     private renderListsSidebar() {
+        const { listsSidebar } = this.state
+
         const lockedState = {
-            isSidebarLocked: this.state.listsSidebar.isSidebarLocked,
+            isSidebarLocked: listsSidebar.isSidebarLocked,
             toggleSidebarLockedState: () =>
                 this.processEvent('setSidebarLocked', {
-                    isLocked: !this.state.listsSidebar.isSidebarLocked,
+                    isLocked: !listsSidebar.isSidebarLocked,
                 }),
         }
 
@@ -93,17 +175,16 @@ export class DashboardContainer extends StatefulUIElement<
                 onListSelection={(listId) =>
                     this.processEvent('setSelectedListId', { listId })
                 }
-                selectedListId={this.state.listsSidebar.selectedListId}
+                selectedListId={listsSidebar.selectedListId}
                 peekState={{
-                    isSidebarPeeking: this.state.listsSidebar.isSidebarPeeking,
+                    isSidebarPeeking: listsSidebar.isSidebarPeeking,
                     toggleSidebarPeekState: () =>
                         this.processEvent('setSidebarPeeking', {
-                            isPeeking: !this.state.listsSidebar
-                                .isSidebarPeeking,
+                            isPeeking: !listsSidebar.isSidebarPeeking,
                         }),
                 }}
                 searchBarProps={{
-                    searchQuery: this.state.listsSidebar.searchQuery,
+                    searchQuery: listsSidebar.searchQuery,
                     sidebarLockedState: lockedState,
                     isSearchBarFocused: false,
                     hasPerfectMatch: true,
@@ -120,47 +201,42 @@ export class DashboardContainer extends StatefulUIElement<
                         title: 'My collections',
                         onAddBtnClick: () =>
                             this.processEvent('setAddListInputShown', {
-                                isShown: !this.state.listsSidebar.localLists
+                                isShown: !listsSidebar.localLists
                                     .isAddInputShown,
                             }),
                         confirmAddNewList: (value) =>
                             this.processEvent('confirmListCreate', { value }),
                         cancelAddNewList: () =>
                             this.processEvent('cancelListCreate', null),
-                        isAddInputShown: this.state.listsSidebar.localLists
-                            .isAddInputShown,
-                        isExpanded: this.state.listsSidebar.localLists
-                            .isExpanded,
+                        isAddInputShown:
+                            listsSidebar.localLists.isAddInputShown,
+                        isExpanded: listsSidebar.localLists.isExpanded,
                         onExpandBtnClick: () =>
                             this.processEvent('setLocalListsExpanded', {
-                                isExpanded: !this.state.listsSidebar.localLists
-                                    .isExpanded,
+                                isExpanded: !listsSidebar.localLists.isExpanded,
                             }),
-                        loadingState: this.state.listsSidebar.localLists
-                            .loadingState,
-                        listsArray: this.state.listsSidebar.localLists.listIds.map(
+                        loadingState: listsSidebar.localLists.loadingState,
+                        listsArray: listsSidebar.localLists.listIds.map(
                             (listId) =>
                                 this.listStateToProps(
-                                    this.state.listsSidebar.listData[listId],
+                                    listsSidebar.listData[listId],
                                     'local-lists',
                                 ),
                         ),
                     },
                     {
                         title: 'Followed collections',
-                        isExpanded: this.state.listsSidebar.followedLists
-                            .isExpanded,
+                        isExpanded: listsSidebar.followedLists.isExpanded,
                         onExpandBtnClick: () =>
                             this.processEvent('setFollowedListsExpanded', {
-                                isExpanded: !this.state.listsSidebar
-                                    .followedLists.isExpanded,
+                                isExpanded: !listsSidebar.followedLists
+                                    .isExpanded,
                             }),
-                        loadingState: this.state.listsSidebar.followedLists
-                            .loadingState,
-                        listsArray: this.state.listsSidebar.followedLists.listIds.map(
+                        loadingState: listsSidebar.followedLists.loadingState,
+                        listsArray: listsSidebar.followedLists.listIds.map(
                             (listId) =>
                                 this.listStateToProps(
-                                    this.state.listsSidebar.listData[listId],
+                                    listsSidebar.listData[listId],
                                     'followed-list',
                                 ),
                         ),
@@ -171,11 +247,13 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderSearchResults() {
+        const { searchResults } = this.state
+
         return (
             <SearchResultsContainer
-                {...this.state.searchResults}
+                {...searchResults}
                 areAllNotesShown={searchResultUtils.areAllNotesShown(
-                    this.state.searchResults,
+                    searchResults,
                 )}
                 onPageNotesSortSelection={(day, pageId) => (sortingFn) =>
                     this.processEvent('setPageNotesSort', {
@@ -202,8 +280,8 @@ export class DashboardContainer extends StatefulUIElement<
                     onBookmarkBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageBookmark', {
                             id: pageId,
-                            isBookmarked: !this.state.searchResults.pageData
-                                .byId[pageId].isBookmarked,
+                            isBookmarked: !searchResults.pageData.byId[pageId]
+                                .isBookmarked,
                         }),
                     onNotesBtnClick: (day, pageId) => (e) => {
                         if (e.shiftKey) {
@@ -216,30 +294,34 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setPageNotesShown', {
                             day,
                             pageId,
-                            areShown: !this.state.searchResults.results[day]
-                                .pages.byId[pageId].areNotesShown,
+                            areShown: !searchResults.results[day].pages.byId[
+                                pageId
+                            ].areNotesShown,
                         })
                     },
                     onTagPickerBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageTagPickerShown', {
                             day,
                             pageId,
-                            isShown: !this.state.searchResults.results[day]
-                                .pages.byId[pageId].isTagPickerShown,
+                            isShown: !searchResults.results[day].pages.byId[
+                                pageId
+                            ].isTagPickerShown,
                         }),
                     onListPickerBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageListPickerShown', {
                             day,
                             pageId,
-                            isShown: !this.state.searchResults.results[day]
-                                .pages.byId[pageId].isListPickerShown,
+                            isShown: !searchResults.results[day].pages.byId[
+                                pageId
+                            ].isListPickerShown,
                         }),
                     onCopyPasterBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageCopyPasterShown', {
                             day,
                             pageId,
-                            isShown: !this.state.searchResults.results[day]
-                                .pages.byId[pageId].isCopyPasterShown,
+                            isShown: !searchResults.results[day].pages.byId[
+                                pageId
+                            ].isCopyPasterShown,
                         }),
                     onTrashBtnClick: (day, pageId) => () =>
                         this.processEvent('setDeletingPageArgs', {
@@ -252,9 +334,8 @@ export class DashboardContainer extends StatefulUIElement<
                     onListPickerUpdate: (pageId) => (args) =>
                         this.processEvent('setPageLists', {
                             id: pageId,
-                            fullPageUrl: this.state.searchResults.pageData.byId[
-                                pageId
-                            ].fullUrl,
+                            fullPageUrl:
+                                searchResults.pageData.byId[pageId].fullUrl,
                             ...args,
                         }),
                     onTagPickerUpdate: (pageId) => (args) =>
@@ -285,9 +366,8 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('savePageNewNote', {
                             day,
                             pageId,
-                            fullPageUrl: this.state.searchResults.pageData.byId[
-                                pageId
-                            ].fullUrl,
+                            fullPageUrl:
+                                searchResults.pageData.byId[pageId].fullUrl,
                         }),
                 }}
                 noteInteractionProps={{
@@ -299,29 +379,26 @@ export class DashboardContainer extends StatefulUIElement<
                     onTagPickerBtnClick: (noteId) => () =>
                         this.processEvent('setNoteTagPickerShown', {
                             noteId,
-                            isShown: !this.state.searchResults.noteData.byId[
-                                noteId
-                            ].isTagPickerShown,
+                            isShown: !searchResults.noteData.byId[noteId]
+                                .isTagPickerShown,
                         }),
                     onBookmarkBtnClick: (noteId) => () =>
                         this.processEvent('setNoteBookmark', {
                             noteId,
-                            isBookmarked: !this.state.searchResults.noteData
-                                .byId[noteId].isBookmarked,
+                            isBookmarked: !searchResults.noteData.byId[noteId]
+                                .isBookmarked,
                         }),
                     onCopyPasterBtnClick: (noteId) => () =>
                         this.processEvent('setNoteCopyPasterShown', {
                             noteId,
-                            isShown: !this.state.searchResults.noteData.byId[
-                                noteId
-                            ].isCopyPasterShown,
+                            isShown: !searchResults.noteData.byId[noteId]
+                                .isCopyPasterShown,
                         }),
                     onReplyBtnClick: (noteId) => () =>
                         this.processEvent('setNoteRepliesShown', {
                             noteId,
-                            areShown: !this.state.searchResults.noteData.byId[
-                                noteId
-                            ].areRepliesShown,
+                            areShown: !searchResults.noteData.byId[noteId]
+                                .areRepliesShown,
                         }),
                     onTrashBtnClick: (noteId, day, pageId) => () =>
                         this.processEvent('setDeletingNoteArgs', {
@@ -427,6 +504,7 @@ export class DashboardContainer extends StatefulUIElement<
     private renderDashboard() {
         return (
             <Container>
+                {this.renderHeader()}
                 {this.renderListsSidebar()}
                 {this.renderSearchResults()}
                 {this.renderModals()}

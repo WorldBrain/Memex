@@ -31,7 +31,7 @@ export const sidebarHeaderPropsTemplate: {
             toggleSidebarPeekState: function () {},
             isSidebarPeeking: false,
         },
-        selectedList: 'Inbox',
+        selectedListName: 'Inbox',
         ...sidebarTogglePropsRenamed.lockedHover,
     },
     closed: {
@@ -47,7 +47,7 @@ export const sidebarHeaderPropsTemplate: {
             toggleSidebarPeekState: function () {},
             isSidebarPeeking: false,
         },
-        selectedList: 'Inbox',
+        selectedListName: 'Inbox',
     },
 }
 
