@@ -39,4 +39,9 @@ export interface SelectedState {
     isSelected: boolean
 }
 
+export interface DisplayState {
+    isDisplayed: boolean
+    toggleDisplayState: () => void
+}
+
 export type ListSource = 'local-lists' | 'followed-list'

@@ -4,7 +4,7 @@ import { storiesOf } from '@storybook/react'
 import SyncStatusMenu, {
     SyncStatusMenuProps,
 } from 'src/dashboard-refactor/header/sync-status-menu'
-import { HoverState } from 'src/dashboard-refactor/types'
+import { DisplayState, HoverState } from 'src/dashboard-refactor/types'
 import { UnSyncedItemState } from 'src/dashboard-refactor/header/sync-status-menu/types'
 
 const stories = storiesOf('Dashboard Refactor|Header/Sync Status Menu', module)
@@ -15,6 +15,11 @@ const hoverState: HoverState = {
     onHoverLeave: () => {},
 }
 
+const displayState: DisplayState = {
+    isDisplayed: true,
+    toggleDisplayState: () => {},
+}
+
 const unSyncedItemState: UnSyncedItemState = {
     showUnSyncedItemCount: false,
     unSyncedItemCount: Math.floor(Math.random() * 100),
@@ -23,6 +28,7 @@ const unSyncedItemState: UnSyncedItemState = {
 }
 
 const template: SyncStatusMenuProps = {
+    displayState: displayState,
     syncState: 'enabled',
     backupState: 'enabled',
     lastSuccessfulSyncDateTime: new Date(),
@@ -35,6 +41,7 @@ const template: SyncStatusMenuProps = {
 }
 
 export const syncStatusMenuStoryProps: {
+    hidden: SyncStatusMenuProps
     allEnabled: SyncStatusMenuProps
     allSuccessful: SyncStatusMenuProps
     allDisabled: SyncStatusMenuProps
@@ -46,6 +53,13 @@ export const syncStatusMenuStoryProps: {
     syncError: SyncStatusMenuProps
     backupError: SyncStatusMenuProps
 } = {
+    hidden: {
+        ...template,
+        displayState: {
+            ...displayState,
+            isDisplayed: false,
+        },
+    },
     allEnabled: template,
     allSuccessful: {
         ...template,
