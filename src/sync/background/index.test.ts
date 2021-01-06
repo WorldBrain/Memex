@@ -1115,12 +1115,12 @@ function mobileSyncTests(suiteOptions: {
             listIds.push(object.id)
         }
         await mobileStorage.modules.metaPicker.createPageListEntry({
-            pageUrl: testPage.fullUrl,
+            fullPageUrl: testPage.fullUrl,
             listId: listIds[0],
         })
 
         await mobileStorage.modules.metaPicker.createPageListEntry({
-            pageUrl: testPage.fullUrl,
+            fullPageUrl: testPage.fullUrl,
             listId: listIds[0],
         })
 
@@ -1323,7 +1323,7 @@ function mobileSyncTests(suiteOptions: {
         })
         await mobile.storage.modules.metaPicker.createPageListEntry({
             listId: localListId,
-            pageUrl: 'https://www.eggs.com/foo',
+            fullPageUrl: 'https://www.eggs.com/foo',
         })
 
         await mobile.services.sync.continuousSync.forceIncrementalSync()
