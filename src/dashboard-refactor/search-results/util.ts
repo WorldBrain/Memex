@@ -114,8 +114,9 @@ const annotationToNoteData = (
     isTagPickerShown: false,
     isCopyPasterShown: false,
     isShareMenuShown: false,
-    displayTime:
-        annotation.lastEdited?.getTime() ?? annotation.createdWhen.getTime(),
+    displayTime: new Date(
+        annotation.lastEdited ?? annotation.createdWhen,
+    ).getTime(),
     isEditing: false,
     isEdited: annotation.lastEdited != null,
     editNoteForm: {
