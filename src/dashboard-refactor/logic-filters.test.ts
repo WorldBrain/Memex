@@ -29,19 +29,19 @@ describe('Search query string construction logic', () => {
             if (typeof constructedString === 'undefined') {
                 expect(queryString).toBeNull()
             }
-            expect(constructQueryString).toEqual(queryString)
+            expect(constructedString).toEqual(queryString)
         })
     }
 })
 
 // filter mutations
-
 describe('Filter parsing logic', () => {
-    for (const {
-        queryString,
-        filtersData: { updatedFilters, newQuery },
-    } of TEST_DATA) {
-        it(`Should correctly update the query string to '${newQuery}'`, () => {
+    for (const { queryString, filtersData } of TEST_DATA) {
+        if (!filtersData) {
+            continue
+        }
+        const { updatedFilters, newQuery } = filtersData
+        it(`Should correctly update the query string '${queryString}' to '${newQuery}'`, () => {
             const resultString = syncQueryStringFilters(
                 queryString,
                 updatedFilters,
@@ -50,3 +50,6 @@ describe('Filter parsing logic', () => {
         })
     }
 })
+
+// removing filter key (on picker close)
+describe('Filter key removal logic', () => {})

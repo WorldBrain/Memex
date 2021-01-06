@@ -1,8 +1,10 @@
 import { SEARCH_QUERY_END_FILTER_KEY_PATTERN } from 'src/dashboard-refactor/constants'
 import { FilterKey, SearchFilterType } from './header/types'
 import {
+    NewFilterDetail,
     ParsedSearchQuery,
     QueryFilterPart,
+    QueryStringPart,
     SearchFilterDetail,
     SearchQueryPart,
 } from './types'
@@ -60,7 +62,7 @@ const getFilterMappingFromKey = (filterKey: string): FilterKeyMapping => {
 }
 
 const getFilterKeyFromDetail = (
-    filterDetail: SearchFilterDetail,
+    filterDetail: SearchFilterDetail | NewFilterDetail,
 ): FilterKey => {
     const { type, isExclusion } = filterDetail
     return filterKeyMapping.find(
@@ -110,16 +112,20 @@ const pushSearchStringToArray = (
         lastStringPart.detail['value'] += str
         lastStringPart.endIndex += str.length
     } else {
-        parsedQuery.push({
-            type: 'searchString',
-            startIndex: endIndex - (str.length - 1),
-            endIndex,
-            detail: {
-                value: str,
-            },
-        })
+        parsedQuery.push(getQueryStringPart(str, endIndex))
     }
     return parsedQuery
+}
+
+const getQueryStringPart = (str: string, endIndex: number): QueryStringPart => {
+    return {
+        type: 'searchString',
+        startIndex: endIndex - (str.length - 1),
+        endIndex,
+        detail: {
+            value: str,
+        },
+    }
 }
 
 const parseFilterString: (filterString: string) => string[] = (
@@ -161,7 +167,10 @@ const pushFiltersToArray = (
     detail['rawContent'] += fragment
     detail['filters'].push(...filters)
     filterPart.endIndex = endIndex
-    if (containsFilterQuery && filterPart.detail['type'] !== 'date') {
+    if (
+        (containsFilterQuery && filterPart.detail['type'] !== 'date') ||
+        filters[filters.length - 1] === ''
+    ) {
         detail['query'] = detail['filters'].pop()
     }
     return parsedQuery
@@ -276,7 +285,6 @@ export const parseSearchQuery: (queryString: string) => ParsedSearchQuery = (
 }
 
 // string constructing logic
-
 /**
  * Constructs a query string (of type string) from an array of type ParsedSearchQuery.
  * The inverse of the parseSearchQuery function.
@@ -286,73 +294,15 @@ export const constructQueryString = (
     parsedQuery: ParsedSearchQuery,
 ): string => {
     let queryString: string = ''
-    const returnString: string = parsedQuery.reduce(
-        (queryString, currentPart) => {
-            if (currentPart.type === 'filter') {
-                // find mapped filter key and append to string
-                const key = getFilterKeyFromDetail(currentPart.detail)
-                const { filters, query, rawContent } = currentPart.detail
-                // queryString += currentPart.detail.rawContent
-                if (currentPart.detail.type === 'date') {
-                    queryString += `${currentPart.detail['variant']}:`
-                } else {
-                    queryString += `${key}:`
-                }
-                if (filters) {
-                    queryString += getRawContentFromFiltersArray(filters)
-                }
-                if (query) {
-                    queryString += formatFilterQuery(query)
-                }
-            } else {
-                // else append string value
-                queryString += currentPart.detail.value
-            }
-            return queryString
-        },
-        queryString,
-    )
-    if (typeof queryString !== 'string') return 'ABORT! FAILURE!'
-    return returnString
-}
-
-const formatFilterQuery = (filterQuery: string): string => {
-    filterQuery = /\s/.test(filterQuery) ? `"${filterQuery}` : filterQuery
-    filterQuery = `,${filterQuery}`
-    return filterQuery
-}
-
-export const findMatchingFilterPartIndex = (
-    filterDetail: Omit<SearchFilterDetail, 'rawContent'> & {
-        rawContent?: string
-    },
-    parsedQuery: ParsedSearchQuery,
-): number => {
-    const { type, isExclusion } = filterDetail
-    const index = parsedQuery.findIndex(
-        (val) =>
-            val.detail['filterType'] === type &&
-            (filterDetail['variant']
-                ? val.detail['variant'] === filterDetail['variant']
-                : true) &&
-            (isExclusion ? val.detail['isExclusion'] === isExclusion : true),
-    )
-    return index
-}
-
-const getRawContentFromFiltersArray = (filtersArray: string[]): string => {
-    let rawContent: string = ''
-    filtersArray.forEach((filter, index, arr) => {
-        if (/\s/.test(filter)) {
-            rawContent += `"${filter}"`
+    const returnString = parsedQuery.reduce((queryString, currentPart) => {
+        if (currentPart.type === 'filter') {
+            queryString += currentPart.detail.rawContent
         } else {
-            rawContent += filter
+            queryString += currentPart.detail.value
         }
-        if (arr[index + 1]) {
-            rawContent += ','
-        }
-    })
-    return rawContent
+        return queryString
+    }, queryString)
+    return returnString
 }
 
 // filters update logic
@@ -370,16 +320,98 @@ export const syncQueryStringFilters = (
     const parsedQuery = parseSearchQuery(queryString)
     const filterPartToUpdate =
         parsedQuery[findMatchingFilterPartIndex(incomingFilter, parsedQuery)]
-    if (filterPartToUpdate.type === 'filter') {
-        resultString = updateFiltersInQueryString(
-            queryString,
-            filterPartToUpdate.detail,
-        )
+    if (filterPartToUpdate && filterPartToUpdate.type === 'filter') {
+        resultString = updateFiltersInQueryString(queryString, incomingFilter)
     }
-    if (!resultString) {
+    if (!filterPartToUpdate) {
         resultString = pushFilterKeyToQueryString(incomingFilter, queryString)
+        resultString = updateFiltersInQueryString(resultString, incomingFilter)
     }
     return resultString
+}
+
+/**
+ * Takes query string and an object specifying the filter to be added and returns the
+ * correctly formatted query string, or the original queryString if no changes made
+ * @param queryString the string to update
+ * @param filterDetail the object of type SearchFilterDetail to use in updating the string
+ */
+const updateFiltersInQueryString = (
+    queryString: string,
+    newDetail: SearchFilterDetail,
+): string => {
+    const parsedQuery = parseSearchQuery(queryString)
+    const updateIndex = findMatchingFilterPartIndex(newDetail, parsedQuery)
+    const foundPart = parsedQuery[updateIndex]
+    if (foundPart.type === 'filter') {
+        foundPart.detail.filters = newDetail.filters
+        foundPart.detail.rawContent = formatFilterString(newDetail)
+        if (newDetail.isExclusion) {
+            foundPart.detail.isExclusion = newDetail.isExclusion
+        }
+        if (newDetail.type === 'date') {
+            foundPart.detail['variant'] = newDetail['variant']
+            if (updateIndex === parsedQuery.length - 1) {
+                parsedQuery.push(
+                    getQueryStringPart(' ', foundPart.endIndex + 1),
+                )
+            }
+        }
+        if (newDetail.query && newDetail.query.length > 0) {
+            foundPart.detail.query = formatFilterQuery(newDetail.query)
+        }
+        return constructQueryString(parsedQuery)
+    }
+    return queryString
+}
+
+const formatFilterQuery = (filterQuery: string): string => {
+    if (/\s/.test(filterQuery)) {
+        filterQuery = `"${filterQuery}`
+    }
+    return filterQuery
+}
+
+export const findMatchingFilterPartIndex = (
+    newFilterDetail: NewFilterDetail,
+    parsedQuery: ParsedSearchQuery,
+): number => {
+    const index = parsedQuery.findIndex((part) => {
+        if (part.type !== 'filter') return false
+        if (
+            part.detail.type === 'date' &&
+            part.detail['variant'] === newFilterDetail['variant']
+        )
+            return true
+        if (
+            part.detail.type === newFilterDetail.type &&
+            (newFilterDetail.isExclusion
+                ? part.detail.isExclusion === newFilterDetail.isExclusion
+                : true)
+        )
+            return true
+    })
+    return index
+}
+
+const formatFilterString = (filterDetail: NewFilterDetail): string => {
+    let rawContent: string = ''
+    const isDate = filterDetail.type === 'date'
+    rawContent += `${getFilterKeyFromDetail(filterDetail)}:`
+    filterDetail.filters.forEach((filter) => {
+        if (/\s/.test(filter) || isDate) {
+            rawContent += `"${filter}"`
+        } else {
+            rawContent += filter
+        }
+        if (!isDate) {
+            rawContent += ','
+        }
+    })
+    if (filterDetail.query && filterDetail.query.length > 0) {
+        rawContent += filterDetail.query
+    }
+    return rawContent
 }
 
 /**
@@ -389,14 +421,14 @@ export const syncQueryStringFilters = (
  * @param queryString
  */
 const pushFilterKeyToQueryString = (
-    filterDetail: SearchFilterDetail,
+    incomingFilter: SearchFilterDetail,
     queryString: string,
 ): string => {
     // ensure that if the queryString is not empty a whitespace precedes the filter part
     if (queryString.length > 1 && queryString[queryString.length - 1] !== ' ') {
         queryString += ' '
     }
-    const filterKey = getFilterKeyFromDetail(filterDetail)
+    const filterKey = getFilterKeyFromDetail(incomingFilter)
     queryString += `${filterKey}:`
     return queryString
 }
@@ -423,39 +455,6 @@ export const removeEmptyFilterStringsFromQueryString = (
     })
 
     return constructQueryString(filteredQuery)
-}
-
-/**
- * Takes query string and an object specifying the filter to be added and
- * returns the correctly formatted query string
- * @param queryString the string to update
- * @param filterDetail the object of type SearchFilterDetail to use in updating the string
- */
-const updateFiltersInQueryString = (
-    queryString: string,
-    newDetail: SearchFilterDetail,
-): string => {
-    const parsedQuery = parseSearchQuery(queryString)
-    const updateIndex = findMatchingFilterPartIndex(newDetail, parsedQuery)
-    const foundPart = parsedQuery[updateIndex]
-    if (foundPart.type === 'filter') {
-        const detailToUpdate = foundPart.detail
-        detailToUpdate.filters = newDetail.filters
-        detailToUpdate.rawContent = getRawContentFromFiltersArray(
-            newDetail.filters,
-        )
-        if (newDetail.isExclusion) {
-            detailToUpdate.isExclusion = newDetail.isExclusion
-        }
-        if (newDetail.type === 'date') {
-            detailToUpdate['variant'] = newDetail['variant']
-        }
-        if (newDetail.query.length > 0) {
-            detailToUpdate.query = newDetail.query
-        }
-        parsedQuery[updateIndex].detail = detailToUpdate
-        return constructQueryString(parsedQuery)
-    }
 }
 
 const getCursorPositionQueryPart = (

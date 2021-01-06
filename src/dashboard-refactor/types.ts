@@ -68,6 +68,10 @@ export interface QueryFilterPart {
 
 export type SearchFilterDetail = TextFilterDetail | DateFilterDetail
 
+export type NewFilterDetail =
+    | Omit<TextFilterDetail, 'rawContent'>
+    | Omit<DateFilterDetail, 'rawContent'>
+
 export interface TextFilterDetail {
     type: SearchFilterType
     rawContent: string
@@ -80,7 +84,3 @@ type DateFilterDetail = Omit<TextFilterDetail, 'type' | 'variant'> & {
     type: 'date'
     variant: 'from' | 'to'
 }
-
-export type FilterMutationDetail =
-    | Omit<TextFilterDetail, 'rawContent'>
-    | Omit<DateFilterDetail, 'rawContent'>

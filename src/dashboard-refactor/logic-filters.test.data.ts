@@ -1,9 +1,4 @@
-import {
-    FilterMutationDetail,
-    ParsedSearchQuery,
-    QueryFilterPart,
-    SearchFilterDetail,
-} from './types'
+import { NewFilterDetail, ParsedSearchQuery } from './types'
 
 const testStrings: string[] = [
     `t:`,
@@ -26,7 +21,7 @@ const testStrings: string[] = [
 ]
 
 interface FiltersTestData {
-    updatedFilters: SearchFilterDetail
+    updatedFilters: NewFilterDetail
     newQuery: string
     cursorIndex: number
 }
@@ -54,14 +49,30 @@ export const testData: TestData[] = [
         ],
     },
     {
+        queryString: `t:tag,`,
+        parsedQuery: [
+            {
+                type: 'filter',
+                startIndex: 0,
+                endIndex: 't:tag,'.length - 1,
+                detail: {
+                    type: 'tag',
+                    filters: ['tag'],
+                    rawContent: 't:tag,',
+                    query: '',
+                },
+            },
+        ],
+    },
+    {
         queryString: `d:domain`,
         filtersData: {
             updatedFilters: {
                 type: 'domain',
                 filters: ['domain'],
-                rawContent: `d:domain`,
+                query: '',
             },
-            newQuery: `d:domain `,
+            newQuery: `d:domain,`,
             cursorIndex: `d:domain `.length - 1,
         },
         parsedQuery: [
@@ -96,7 +107,6 @@ export const testData: TestData[] = [
                 type: 'domain',
                 filters: [],
                 query: 'Doma',
-                rawContent: `d:Doma`,
             },
             newQuery: 'search term d:Doma',
             cursorIndex: 'search term d:Doma'.length - 1,
@@ -126,7 +136,6 @@ export const testData: TestData[] = [
             updatedFilters: {
                 type: 'list',
                 filters: [],
-                rawContent: 'c:',
             },
             newQuery: 'c:',
             cursorIndex: 'c:'.length - 1,
@@ -146,13 +155,24 @@ export const testData: TestData[] = [
         ],
     },
     {
+        queryString: `c:list `,
+        filtersData: {
+            updatedFilters: {
+                type: 'list',
+                filters: [],
+                query: 'list',
+            },
+            newQuery: 'c:list ',
+            cursorIndex: 'c:list'.length - 1,
+        },
+    },
+    {
         queryString: `t:tag`,
         filtersData: {
             updatedFilters: {
                 type: 'domain',
                 filters: [],
                 query: 'domain',
-                rawContent: 'd:domain',
             },
             newQuery: `t:tag d:domain`,
             cursorIndex: `t:tag d:domain`.length - 1,
@@ -177,11 +197,10 @@ export const testData: TestData[] = [
             updatedFilters: {
                 type: 'date',
                 variant: 'from',
-                filters: ['date'],
-                rawContent: 'from:"date"',
+                filters: ['other date'],
             },
-            newQuery: 'from:"date" ',
-            cursorIndex: 'from:"date" '.length - 1,
+            newQuery: 'from:"other date" ',
+            cursorIndex: 'from:"other date" '.length - 1,
         },
         parsedQuery: [
             {
@@ -203,7 +222,6 @@ export const testData: TestData[] = [
             updatedFilters: {
                 type: 'tag',
                 filters: ['tagzzz'],
-                rawContent: 't:tagzzz',
             },
             newQuery: 'to:"date" t:tagzzz ',
             cursorIndex: 'to:"date" t:tagzzz '.length - 1,
@@ -230,7 +248,6 @@ export const testData: TestData[] = [
                 type: 'date',
                 variant: 'from',
                 filters: ['dis a date'],
-                rawContent: 'from:"dis a date"',
             },
             newQuery: 'from:"dis a date"',
             cursorIndex: 'from:"dis a date"'.length - 1,
@@ -270,7 +287,6 @@ export const testData: TestData[] = [
             updatedFilters: {
                 type: 'tag',
                 filters: ['foo'],
-                rawContent: 't:foo',
             },
             newQuery: `foo t:foo foo`,
             cursorIndex: `foo t:foo`.length - 1,
@@ -282,7 +298,6 @@ export const testData: TestData[] = [
             updatedFilters: {
                 type: 'tag',
                 filters: ['foo', 'bar'],
-                rawContent: 't:foo,bar',
             },
             newQuery: `foo t:foo,bar " bar"`,
             cursorIndex: `foo t:foo,bar`.length - 1,
@@ -320,7 +335,6 @@ export const testData: TestData[] = [
             updatedFilters: {
                 type: 'tag',
                 filters: ['foo', 'bar', 'foo bar', 'fooey'],
-                rawContent: 't:foo,bar,"foo bar",fooey',
             },
             newQuery: `foo t:foo,bar,"foo bar",fooey " bar"`,
             cursorIndex: `foo t:foo,bar,"foo bar",fooey " bar"`.length - 1,
@@ -332,7 +346,6 @@ export const testData: TestData[] = [
             updatedFilters: {
                 type: 'tag',
                 filters: [],
-                rawContent: 't:',
             },
             newQuery: 't: foo bar foo bar',
             cursorIndex: 't:'.length - 1,
@@ -435,7 +448,6 @@ export const testData: TestData[] = [
                 type: 'tag',
                 filters: ['tag', 'other tag'],
                 query: 'yet another ta',
-                rawContent: 't:tag,"other tag","yet another ta',
             },
             newQuery: `foo t:tag,"other tag","yet another ta c:list,"other list"`,
             cursorIndex: `foo t:tag,"other tag","yet another ta`.length - 1,
@@ -482,7 +494,6 @@ export const testData: TestData[] = [
             updatedFilters: {
                 type: 'domain',
                 filters: ['domain', 'other domain'],
-                rawContent: 'd:domain,"other domain"',
             },
             newQuery: `foo t:tag,"other tag" d:domain,"other domain"`,
             cursorIndex:
