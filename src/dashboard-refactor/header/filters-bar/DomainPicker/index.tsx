@@ -33,18 +33,21 @@ class DomainPicker extends StatefulUIElement<
         this.props.searchInputPlaceholder ?? 'Domains to Search'
     removeToolTipText = this.props.removeToolTipText ?? 'Remove filter'
 
-    componentDidUpdate(prevProps, prevState) {
-        const {
-            props: { query, onSelectedEntriesChange },
-            state: { selectedEntries },
-        } = this
-        if (prevProps.query !== query) {
-            this.processEvent('searchInputChanged', { query })
+    componentDidUpdate(
+        prevProps: DomainPickerDependencies,
+        prevState: DomainPickerState,
+    ) {
+        if (prevProps.query !== this.props.query) {
+            this.processEvent('searchInputChanged', { query: this.props.query })
         }
-        const a = prevState.selectedEntries
-        const b = selectedEntries
-        if (a.length !== b.length || !isEqual(a, b)) {
-            onSelectedEntriesChange({ selectedEntries })
+
+        const prev = prevState.selectedEntries
+        const curr = this.state.selectedEntries
+
+        if (prev.length !== curr.length || !isEqual(prev, curr)) {
+            this.props.onSelectedEntriesChange?.({
+                selectedEntries: this.state.selectedEntries,
+            })
         }
     }
 

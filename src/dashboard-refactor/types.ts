@@ -74,6 +74,11 @@ export interface SelectedState {
     isSelected: boolean
 }
 
+export interface DisplayState {
+    isDisplayed: boolean
+    toggleDisplayState: () => void
+}
+
 export interface DashboardModalsState {
     shareListId?: number
     showBetaFeature?: boolean

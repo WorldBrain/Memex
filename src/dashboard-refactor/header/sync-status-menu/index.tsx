@@ -9,14 +9,17 @@ import { LoadingIndicator } from 'src/common-ui/components'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 
 import { BackupState, SyncState, UnSyncedItemState } from './types'
-import { HoverState } from 'src/dashboard-refactor/types'
+import { DisplayState, HoverState } from 'src/dashboard-refactor/types'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
-const Container = styled.div`
+const Container = styled(HoverBox)<{
+    isDisplayed: boolean
+}>`
     height: min-content;
     width: 183px;
     padding: 7px;
     background-color: ${colors.white};
-    display: flex;
+    display: ${(props) => (props.isDisplayed ? 'flex' : 'none')};
     flex-direction: column;
     box-shadow: ${styles.boxShadow.overlayElement};
 `
@@ -100,6 +103,7 @@ const StyledAnchor = styled.a`
 `
 
 export interface SyncStatusMenuProps {
+    displayState: DisplayState
     syncState: SyncState
     backupState: BackupState
     lastSuccessfulSyncDateTime: Date
@@ -211,13 +215,20 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     }
     render() {
         const {
+            displayState: { isDisplayed },
             syncState,
             backupState,
             onInitiateSync,
             onInitiateBackup,
         } = this.props
         return (
-            <Container>
+            <Container
+                isDisplayed={isDisplayed}
+                withRelativeContainer
+                width="min-content"
+                left="50px"
+                top="50px"
+            >
                 {this.renderRow(
                     'sync',
                     syncState,

@@ -427,7 +427,7 @@ export default class AnnotationStorage extends StorageModule {
         return this.operation('deleteListEntriesByUrl', { url })
     }
 
-    findListEntriesByUrl({ url }: { url: string }) {
+    findListEntriesByUrl({ url }: { url: string }): Promise<AnnotListEntry[]> {
         return this.operation('findListEntriesByUrl', { url })
     }
 }

@@ -195,6 +195,9 @@ export class ReadwiseBackground {
         return { valid: true }
     }
 
+    private filterNullChanges = (change: StorageChange<'post'>): boolean =>
+        change.type === 'create' ? !!change.pk : !!change.pks?.length
+
     async handlePostStorageChange(
         event: StorageOperationEvent<'post'>,
         options: {
@@ -209,7 +212,9 @@ export class ReadwiseBackground {
             getPageData: this.options.getPageData,
         })
 
-        for (const change of event.info.changes) {
+        for (const change of event.info.changes.filter(
+            this.filterNullChanges,
+        )) {
             if (change.collection === 'annotations') {
                 await this.handleAnnotationPostStorageChange(
                     change,

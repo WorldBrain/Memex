@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import Margin from 'src/dashboard-refactor/components/Margin'
 
 import colors from '../../colors'
-import { fonts } from '../../styles'
+import styles, { fonts } from '../../styles'
 
 const textStyles = `
     font-family: ${fonts.primary.name};
@@ -15,7 +15,7 @@ const textStyles = `
 
 const SearchBarContainer = styled.div`
     height: 34px;
-    width: 650px;
+    width: ${styles.components.searchBar.widthPx}px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -53,6 +53,7 @@ const FullWidthMargin = styled(Margin)`
 `
 
 export interface SearchBarProps {
+    placeholder?: string
     searchQuery: string
     isSearchBarFocused: boolean
     searchFiltersOpen: boolean
@@ -63,7 +64,6 @@ export interface SearchBarProps {
 }
 
 export default class SearchBar extends PureComponent<SearchBarProps> {
-    placeholder: string = 'Search your saved pages and notes'
     inputRef = React.createRef<HTMLInputElement>()
     componentDidMount = () => {
         if (this.props.isSearchBarFocused) {
@@ -88,9 +88,14 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                     <FullWidthMargin left="27px">
                         <Input
                             ref={this.inputRef}
-                            placeholder={!searchQuery && this.placeholder}
+                            placeholder={
+                                !searchQuery &&
+                                (this.props.placeholder ??
+                                    'Search your saved pages and notes')
+                            }
                             value={searchQuery}
                             onChange={this.handleChange}
+                            autoComplete="off"
                         />
                     </FullWidthMargin>
                     <Margin horizontal="23px">
