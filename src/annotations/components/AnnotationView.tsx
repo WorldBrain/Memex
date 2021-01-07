@@ -9,15 +9,11 @@ export interface Props {
     comment?: string
     theme: SidebarAnnotationTheme
     onTagClick?: (tag: string) => void
-    confirmEdit?: () => void
-    cancelEdit?: () => void
-    onEditIconClick: () => void
+    onEditIconClick: React.MouseEventHandler
 }
 
 /* tslint:disable-next-line variable-name */
 class AnnotationView extends React.Component<Props> {
-    private secretInputRef = React.createRef<HTMLInputElement>()
-
     private bindHandleTagPillClick: (tag: string) => React.MouseEventHandler = (
         tag,
     ) => (event) => {

@@ -21,17 +21,17 @@ export interface Props extends AnnotationFooterEventProps {
 }
 
 export interface AnnotationFooterEventProps {
-    onDeleteConfirm: () => void
-    onDeleteCancel: () => void
-    onDeleteIconClick: () => void
-    onEditConfirm: () => void
-    onEditCancel: () => void
-    onEditIconClick: () => void
+    onDeleteConfirm: React.MouseEventHandler
+    onDeleteCancel: React.MouseEventHandler
+    onDeleteIconClick: React.MouseEventHandler
+    onEditConfirm: React.MouseEventHandler
+    onEditCancel: React.MouseEventHandler
+    onEditIconClick: React.MouseEventHandler
     onShareClick: React.MouseEventHandler
     onUnshareClick: React.MouseEventHandler
-    toggleBookmark: () => void
-    onGoToAnnotation?: () => void
-    onCopyPasterBtnClick: () => void
+    toggleBookmark: React.MouseEventHandler
+    onGoToAnnotation?: React.MouseEventHandler
+    onCopyPasterBtnClick: React.MouseEventHandler
 }
 
 class AnnotationFooter extends React.Component<Props> {
@@ -117,8 +117,8 @@ class AnnotationFooter extends React.Component<Props> {
         const { mode } = this.props
 
         let actionBtnText: string
-        let actionBtnHandler: () => void
-        let cancelBtnHandler: () => void
+        let actionBtnHandler: React.MouseEventHandler
+        let cancelBtnHandler: React.MouseEventHandler
 
         if (mode === 'delete') {
             actionBtnText = 'Delete'
