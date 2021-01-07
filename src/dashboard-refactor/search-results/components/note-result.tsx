@@ -23,6 +23,7 @@ import {
     SHARE_BUTTON_LABELS,
 } from 'src/annotations/sharing-utils'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 export interface Props
     extends NoteData,
@@ -85,41 +86,47 @@ export default class NoteResultView extends PureComponent<Props> {
     private renderPopouts() {
         if (this.props.isTagPickerShown) {
             return (
-                <TagPicker
-                    onUpdateEntrySelection={this.props.onTagPickerUpdate}
-                    initialSelectedEntries={() => this.props.tags}
-                />
+                <HoverBox>
+                    <TagPicker
+                        onUpdateEntrySelection={this.props.onTagPickerUpdate}
+                        initialSelectedEntries={() => this.props.tags}
+                    />
+                </HoverBox>
             )
         }
 
         if (this.props.isCopyPasterShown) {
             return (
-                <PageNotesCopyPaster
-                    annotationUrls={[this.props.url]}
-                    normalizedPageUrls={[this.props.pageUrl]}
-                />
+                <HoverBox>
+                    <PageNotesCopyPaster
+                        annotationUrls={[this.props.url]}
+                        normalizedPageUrls={[this.props.pageUrl]}
+                    />
+                </HoverBox>
             )
         }
 
         if (this.props.isShareMenuShown) {
             return (
-                <SingleNoteShareMenu
-                    annotationUrl={this.props.url}
-                    closeShareMenu={this.props.hideShareMenu}
-                    copyLink={this.props.copySharedLink}
-                    postShareHook={() =>
-                        this.props.updateShareInfo({
-                            status: 'shared',
-                            taskState: 'success',
-                        })
-                    }
-                    postUnshareHook={() =>
-                        this.props.updateShareInfo({
-                            status: 'unshared',
-                            taskState: 'success',
-                        })
-                    }
-                />
+                <HoverBox>
+                    <SingleNoteShareMenu
+                        annotationUrl={this.props.url}
+                        closeShareMenu={this.props.hideShareMenu}
+                        copyLink={this.props.copySharedLink}
+                        postShareHook={() =>
+                            this.props.updateShareInfo({
+                                status: 'shared',
+                                taskState: 'success',
+                            })
+                        }
+                        postUnshareHook={() =>
+                            this.props.updateShareInfo({
+                                status: 'unshared',
+                                taskState: 'success',
+                            })
+                        }
+                    />
+                </HoverBox>
             )
         }
 

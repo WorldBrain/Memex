@@ -13,6 +13,7 @@ import {
 import TagPicker from 'src/tags/ui/TagPicker'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 export interface Props
     extends PageData,
@@ -35,27 +36,33 @@ export default class PageResultView extends PureComponent<Props> {
     private renderPopouts() {
         if (this.props.isTagPickerShown) {
             return (
-                <TagPicker
-                    onUpdateEntrySelection={this.props.onTagPickerUpdate}
-                    initialSelectedEntries={() => this.props.tags}
-                />
+                <HoverBox>
+                    <TagPicker
+                        onUpdateEntrySelection={this.props.onTagPickerUpdate}
+                        initialSelectedEntries={() => this.props.tags}
+                    />
+                </HoverBox>
             )
         }
 
         if (this.props.isListPickerShown) {
             return (
-                <CollectionPicker
-                    onUpdateEntrySelection={this.props.onListPickerUpdate}
-                    initialSelectedEntries={() => this.props.lists}
-                />
+                <HoverBox>
+                    <CollectionPicker
+                        onUpdateEntrySelection={this.props.onListPickerUpdate}
+                        initialSelectedEntries={() => this.props.lists}
+                    />
+                </HoverBox>
             )
         }
 
         if (this.props.isCopyPasterShown) {
             return (
-                <PageNotesCopyPaster
-                    normalizedPageUrls={[this.props.normalizedUrl]}
-                />
+                <HoverBox>
+                    <PageNotesCopyPaster
+                        normalizedPageUrls={[this.props.normalizedUrl]}
+                    />
+                </HoverBox>
             )
         }
 
@@ -94,14 +101,14 @@ export default class PageResultView extends PureComponent<Props> {
                                 tooltipText:
                                     'Delete Page & all related content',
                             },
-                            {
-                                key: 'share-page-btn',
-                                image: this.props.isShared
-                                    ? icons.shared
-                                    : icons.shareEmpty,
-                                onClick: this.props.onShareBtnClick,
-                                tooltipText: 'Share Page',
-                            },
+                            // {
+                            //     key: 'share-page-btn',
+                            //     image: this.props.isShared
+                            //         ? icons.shared
+                            //         : icons.shareEmpty,
+                            //     onClick: this.props.onShareBtnClick,
+                            //     tooltipText: 'Share Page',
+                            // },
                             {
                                 key: 'tag-page-btn',
                                 image: this.props.hasTags
