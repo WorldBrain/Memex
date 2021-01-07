@@ -1,7 +1,7 @@
 import { MemexTheme as Theme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export const theme: Theme = {
-    spacings: {
+    spacing: {
         none: '0',
         smallest: '0.25rem',
         small: '0.5rem',
