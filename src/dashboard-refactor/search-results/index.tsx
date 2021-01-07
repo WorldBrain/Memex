@@ -22,7 +22,6 @@ import SearchTypeSwitch, {
 import ExpandAllNotes from './components/expand-all-notes'
 import DayResultGroup from './components/day-result-group'
 import PageResult from './components/page-result'
-import NoteResult from './components/note-result'
 import { bindFunctionalProps, formatDayGroupTime } from './util'
 import NotesTypeDropdownMenu from './components/notes-type-dropdown-menu'
 import { SortingDropdownMenuBtn } from 'src/sidebar/annotations-sidebar/components/SortingDropdownMenu'
@@ -32,6 +31,7 @@ import {
     AnnotationCreateEventProps,
 } from 'src/annotations/components/AnnotationCreate'
 import { sizeConstants } from '../constants'
+import AnnotationEditable from 'src/annotations/components/AnnotationEditable'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -79,14 +79,48 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             NotePickerProps
         >(this.props.notePickerProps, noteId)
 
+        const dummyEvent = {} as any
+
         return (
-            <NoteResult
+            <AnnotationEditable
                 key={noteId}
-                sharingAccess={this.props.sharingAccess}
+                body={noteData.highlight}
+                comment={noteData.comment}
+                isBookmarked={noteData.isBookmarked}
+                createdWhen={new Date(noteData.displayTime)}
+                mode={noteData.isEditing ? 'edit' : 'default'}
                 sharingInfo={this.props.noteSharingInfo[noteId]}
-                {...noteData}
-                {...interactionProps}
-                {...pickerProps}
+                sharingAccess={this.props.sharingAccess}
+                renderCopyPasterForAnnotation={() => null}
+                renderShareMenuForAnnotation={() => null}
+                annotationEditDependencies={
+                    {
+                        comment: noteData.editNoteForm.inputValue,
+                        tags: noteData.editNoteForm.tags,
+                        isTagInputActive:
+                            noteData.editNoteForm.isTagPickerShown,
+                        onCommentChange: (value) =>
+                            interactionProps.onCommentChange({
+                                target: { value },
+                            } as any),
+                        onEditCancel: () =>
+                            interactionProps.onEditCancel(dummyEvent),
+                        onEditConfirm: () =>
+                            interactionProps.onEditConfirm(dummyEvent),
+                    } as any
+                }
+                annotationFooterDependencies={{
+                    onDeleteCancel: () => undefined,
+                    onDeleteConfirm: () => undefined,
+                    onDeleteIconClick: interactionProps.onTrashBtnClick,
+                    onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
+                    onEditCancel: interactionProps.onEditCancel,
+                    onEditConfirm: interactionProps.onEditConfirm,
+                    onEditIconClick: interactionProps.onEditBtnClick,
+                    onShareClick: interactionProps.onShareBtnClick,
+                    onUnshareClick: interactionProps.onShareBtnClick,
+                    toggleBookmark: interactionProps.onBookmarkBtnClick,
+                }}
             />
         )
     }

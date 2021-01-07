@@ -384,6 +384,14 @@ export class DashboardContainer extends StatefulUIElement<
                             noteId,
                             isEditing: true,
                         }),
+                    onEditCancel: (noteId) => () =>
+                        this.processEvent('cancelNoteEdit', {
+                            noteId,
+                        }),
+                    onEditConfirm: (noteId) => () =>
+                        this.processEvent('saveNoteEdit', {
+                            noteId,
+                        }),
                     onTagPickerBtnClick: (noteId) => () =>
                         this.processEvent('setNoteTagPickerShown', {
                             noteId,
