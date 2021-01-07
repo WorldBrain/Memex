@@ -57,7 +57,6 @@ export const TERM_CLEAN_PATTERN = /^-?(site:)?-?(?=\w+)/
 
 export const DATE_PICKER_DATE_FORMAT = 'DD-MM-YYYY'
 
-// unsure if this is required?
 export const PAGE_SIZE = 10
 
 export const SEARCH_INPUT_SPLIT_PATTERN = /-?#\"([-.\w]+ ?)+\"|\S+/g

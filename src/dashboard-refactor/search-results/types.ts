@@ -145,6 +145,10 @@ export interface PageResultsByDay {
     pages: NormalizedState<PageResult>
 }
 
+export type NestedResults = {
+    [day: number]: PageResultsByDay
+}
+
 export interface RootState {
     sharingAccess: AnnotationSharingAccess
     noteSharingInfo: { [noteId: string]: AnnotationSharingInfo }
@@ -152,7 +156,8 @@ export interface RootState {
     searchType: SearchType
 
     /** Holds page data specific to each page occurence on a specific day. */
-    results: { [day: number]: PageResultsByDay }
+    results: NestedResults
+    areResultsExhausted: boolean
 
     // Display data lookups
     /** Holds page data shared with all page occurences on any day. */
@@ -161,6 +166,7 @@ export interface RootState {
 
     // Async operation states
     searchState: TaskState
+    searchPaginationState: TaskState
     noteDeleteState: TaskState
     pageDeleteState: TaskState
     paginationState: TaskState

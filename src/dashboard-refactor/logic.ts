@@ -10,6 +10,7 @@ import {
     setLastSharedAnnotationTimestamp,
 } from 'src/annotations/utils'
 import { getListShareUrl } from 'src/content-sharing/utils'
+import { PAGE_SIZE } from 'src/dashboard-refactor/constants'
 import { ListData } from './lists-sidebar/types'
 
 const updatePickerValues = (event: { added?: string; deleted?: string }) => (
@@ -48,6 +49,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 sharingAccess: 'feature-disabled',
                 noteSharingInfo: {},
                 results: {},
+                areResultsExhausted: false,
                 pageData: {
                     allIds: [],
                     byId: {},
@@ -63,6 +65,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 paginationState: 'pristine',
                 noteUpdateState: 'pristine',
                 newNoteCreateState: 'pristine',
+                searchPaginationState: 'pristine',
             },
             searchFilters: {
                 searchQuery: '',
@@ -77,6 +80,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 tagsIncluded: [],
                 dateFromInput: '',
                 dateToInput: '',
+                limit: PAGE_SIZE,
+                skip: 0,
             },
             listsSidebar: {
                 listShareLoadingState: 'pristine',
@@ -208,97 +213,123 @@ export class DashboardLogic extends UILogic<State, Events> {
         await this.runSearch(nextState)
     }
 
-    private async runSearch(state: State) {
-        if (state.searchResults.searchType === 'pages') {
-            await this.searchPages({ previousState: state, event: null })
-        } else if (state.searchResults.searchType === 'notes') {
-            await this.searchNotes({ previousState: state, event: null })
-        }
+    private async runSearch(previousState: State, paginate?: boolean) {
+        await this.search({ previousState, event: { paginate } })
     }
 
     /* END - Misc helper methods */
 
     /* START - Misc event handlers */
-    searchPages: EventHandler<'searchPages'> = async ({ previousState }) => {
+    search: EventHandler<'search'> = async ({ previousState, event }) => {
+        let nextState: State
         await executeUITask(
             this,
             (taskState) => ({
-                searchResults: { searchState: { $set: taskState } },
+                searchResults: {
+                    [event.paginate
+                        ? 'searchPaginationState'
+                        : 'searchState']: { $set: taskState },
+                },
             }),
             async () => {
-                const { searchFilters } = previousState
-                const result = await this.options.searchBG.searchPages({
-                    contentTypes: {
-                        pages: true,
-                        highlights: false,
-                        notes: false,
-                    },
-                    endDate: searchFilters.dateTo,
-                    startDate: searchFilters.dateFrom,
-                    query: searchFilters.searchQuery,
-                    domainsInc: searchFilters.domainsIncluded,
-                    domainsExc: searchFilters.domainsExcluded,
-                    tagsInc: searchFilters.tagsIncluded,
-                    tagsExc: searchFilters.tagsExcluded,
-                })
+                const { noteData, pageData, results, resultsExhausted } =
+                    previousState.searchResults.searchType === 'pages'
+                        ? await this.searchPages(previousState, event.paginate)
+                        : await this.searchNotes(previousState, event.paginate)
 
-                const {
-                    noteData,
-                    pageData,
-                    results,
-                } = utils.pageSearchResultToState(result)
+                const mutation: UIMutation<State> = event.paginate
+                    ? {
+                          searchResults: {
+                              results: {
+                                  $apply: (prev) =>
+                                      utils.mergeSearchResults(prev, results),
+                              },
+                              pageData: {
+                                  $apply: (prev) =>
+                                      utils.mergeNormalizedStates(
+                                          prev,
+                                          pageData,
+                                      ),
+                              },
+                              noteData: {
+                                  $apply: (prev) =>
+                                      utils.mergeNormalizedStates(
+                                          prev,
+                                          noteData,
+                                      ),
+                              },
+                              areResultsExhausted: { $set: resultsExhausted },
+                          },
+                          searchFilters: {
+                              skip: { $apply: (skip) => skip + PAGE_SIZE },
+                          },
+                      }
+                    : {
+                          searchResults: {
+                              results: { $set: results },
+                              pageData: { $set: pageData },
+                              noteData: { $set: noteData },
+                              areResultsExhausted: { $set: resultsExhausted },
+                          },
+                          searchFilters: { skip: { $set: 0 } },
+                      }
 
-                const mutation: UIMutation<State> = {
-                    searchResults: {
-                        results: { $set: results },
-                        pageData: { $set: pageData },
-                        noteData: { $set: noteData },
-                    },
-                }
-                const state = this.withMutation(previousState, mutation)
+                nextState = this.withMutation(previousState, mutation)
+
                 this.emitMutation(mutation)
-                await this.detectSharedNotes(state)
             },
         )
+
+        await this.detectSharedNotes(nextState)
     }
 
-    searchNotes: EventHandler<'searchNotes'> = async ({ previousState }) => {
-        await executeUITask(
-            this,
-            (taskState) => ({
-                searchResults: { searchState: { $set: taskState } },
-            }),
-            async () => {
-                const { searchFilters } = previousState
-                const result = await this.options.searchBG.searchAnnotations({
-                    endDate: searchFilters.dateTo,
-                    startDate: searchFilters.dateFrom,
-                    query: searchFilters.searchQuery,
-                    domainsInc: searchFilters.domainsIncluded,
-                    domainsExc: searchFilters.domainsExcluded,
-                    tagsInc: searchFilters.tagsIncluded,
-                    tagsExc: searchFilters.tagsExcluded,
-                })
-
-                const {
-                    noteData,
-                    pageData,
-                    results,
-                } = utils.annotationSearchResultToState(result)
-
-                const mutation: UIMutation<State> = {
-                    searchResults: {
-                        results: { $set: results },
-                        pageData: { $set: pageData },
-                        noteData: { $set: noteData },
-                    },
-                }
-
-                const state = this.withMutation(previousState, mutation)
-                this.emitMutation(mutation)
-                await this.detectSharedNotes(state)
+    private searchPages = async (
+        { searchFilters }: State,
+        paginate?: boolean,
+    ) => {
+        const result = await this.options.searchBG.searchPages({
+            contentTypes: {
+                pages: true,
+                highlights: false,
+                notes: false,
             },
-        )
+            endDate: searchFilters.dateTo,
+            startDate: searchFilters.dateFrom,
+            query: searchFilters.searchQuery,
+            domainsInc: searchFilters.domainsIncluded,
+            domainsExc: searchFilters.domainsExcluded,
+            tagsInc: searchFilters.tagsIncluded,
+            tagsExc: searchFilters.tagsExcluded,
+            limit: searchFilters.limit,
+            skip: paginate ? searchFilters.skip + PAGE_SIZE : 0,
+        })
+
+        return {
+            ...utils.pageSearchResultToState(result),
+            resultsExhausted: result.resultsExhausted,
+        }
+    }
+
+    private searchNotes = async (
+        { searchFilters }: State,
+        paginate?: boolean,
+    ) => {
+        const result = await this.options.searchBG.searchAnnotations({
+            endDate: searchFilters.dateTo,
+            startDate: searchFilters.dateFrom,
+            query: searchFilters.searchQuery,
+            domainsInc: searchFilters.domainsIncluded,
+            domainsExc: searchFilters.domainsExcluded,
+            tagsInc: searchFilters.tagsIncluded,
+            tagsExc: searchFilters.tagsExcluded,
+            limit: searchFilters.limit,
+            skip: paginate ? searchFilters.skip + PAGE_SIZE : 0,
+        })
+
+        return {
+            ...utils.annotationSearchResultToState(result),
+            resultsExhausted: result.resultsExhausted,
+        }
     }
     /* END - Misc event handlers */
 

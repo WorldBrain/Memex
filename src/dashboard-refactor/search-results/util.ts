@@ -16,6 +16,7 @@ import {
     NoteResult,
     NoteFormState,
     RootState,
+    NestedResults,
 } from './types'
 import { Annotation } from 'src/annotations/types'
 
@@ -211,4 +212,38 @@ export const pageSearchResultToState: SearchResultToState = (
         pageData,
         results: { [-1]: { day: -1, pages: pageResults } },
     }
+}
+
+export const mergeNormalizedStates = <T>(
+    ...toMerge: NormalizedState<T>[]
+): NormalizedState<T> => {
+    const merged: NormalizedState<T> = initNormalizedState()
+
+    for (const state of toMerge) {
+        merged.allIds = [...new Set([...merged.allIds, ...state.allIds])]
+        merged.byId = { ...merged.byId, ...state.byId }
+    }
+
+    return merged
+}
+
+export const mergeSearchResults = (
+    ...toMerge: NestedResults[]
+): NestedResults => {
+    const merged: NestedResults = {}
+
+    for (const results of toMerge) {
+        for (const { day, pages } of Object.values(results)) {
+            if (!merged[day]) {
+                merged[day] = {
+                    day,
+                    pages: initNormalizedState(),
+                }
+            }
+
+            merged[day].pages = mergeNormalizedStates(merged[day].pages, pages)
+        }
+    }
+
+    return merged
 }

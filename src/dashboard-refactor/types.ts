@@ -32,8 +32,7 @@ export type Events = UIEvent<
         SearchResultEvents &
         SearchFilterEvents &
         ListsSidebarEvents & {
-            searchPages: null
-            searchNotes: null
+            search: { paginate?: boolean }
             example: null
         }
 >
@@ -121,6 +120,9 @@ export interface SearchFiltersState {
     tagsExcluded: string[]
     domainsIncluded: string[]
     domainsExcluded: string[]
+
+    limit: number
+    skip: number
 }
 
 export type SearchFilterEvents = UIEvent<{

@@ -260,6 +260,9 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <SearchResultsContainer
                 {...searchResults}
+                paginateSearch={() =>
+                    this.processEvent('search', { paginate: true })
+                }
                 areAllNotesShown={searchResultUtils.areAllNotesShown(
                     searchResults,
                 )}

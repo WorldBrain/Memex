@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
+import Waypoint from 'react-waypoint'
 
 import {
     RootState,
@@ -32,6 +33,7 @@ import {
 } from 'src/annotations/components/AnnotationCreate'
 import { sizeConstants } from '../constants'
 import AnnotationEditable from 'src/annotations/components/AnnotationEditable'
+import { LoadingIndicator } from 'src/common-ui/components'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -61,9 +63,16 @@ export type Props = RootState &
             day: number,
             pageId: string,
         ): (sorter: AnnotationsSorter) => void
+        paginateSearch(): Promise<void>
     }
 
 export default class SearchResultsContainer extends PureComponent<Props> {
+    private renderLoader = (props: { key?: string } = {}) => (
+        <Loader>
+            <LoadingIndicator {...props} />
+        </Loader>
+    )
+
     private renderNoteResult = (day: number, pageId: string) => (
         noteId: string,
     ) => {
@@ -73,11 +82,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             NoteInteractionAugdProps,
             NoteInteractionProps
         >(this.props.noteInteractionProps, noteId, day, pageId)
-
-        const pickerProps = bindFunctionalProps<
-            NotePickerAugdProps,
-            NotePickerProps
-        >(this.props.notePickerProps, noteId)
 
         const dummyEvent = {} as any
 
@@ -122,35 +126,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     toggleBookmark: interactionProps.onBookmarkBtnClick,
                 }}
             />
-        )
-    }
-
-    private renderPageResult = (pageId: string, day: number) => {
-        const page = {
-            ...this.props.pageData.byId[pageId],
-            ...this.props.results[day].pages.byId[pageId],
-        }
-
-        const interactionProps = bindFunctionalProps<
-            PageInteractionAugdProps,
-            PageInteractionProps
-        >(this.props.pageInteractionProps, day, pageId)
-
-        const pickerProps = bindFunctionalProps<
-            PagePickerAugdProps,
-            PagePickerProps
-        >(this.props.pagePickerProps, pageId)
-
-        return (
-            <>
-                <PageResult
-                    key={pageId + day.toString()}
-                    {...interactionProps}
-                    {...pickerProps}
-                    {...page}
-                />
-                {this.renderPageNotes(page, day)}
-            </>
         )
     }
 
@@ -209,7 +184,40 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         )
     }
 
+    private renderPageResult = (pageId: string, day: number) => {
+        const page = {
+            ...this.props.pageData.byId[pageId],
+            ...this.props.results[day].pages.byId[pageId],
+        }
+
+        const interactionProps = bindFunctionalProps<
+            PageInteractionAugdProps,
+            PageInteractionProps
+        >(this.props.pageInteractionProps, day, pageId)
+
+        const pickerProps = bindFunctionalProps<
+            PagePickerAugdProps,
+            PagePickerProps
+        >(this.props.pagePickerProps, pageId)
+
+        return (
+            <>
+                <PageResult
+                    key={pageId + day.toString()}
+                    {...interactionProps}
+                    {...pickerProps}
+                    {...page}
+                />
+                {this.renderPageNotes(page, day)}
+            </>
+        )
+    }
+
     private renderResultsByDay() {
+        if (this.props.searchState === 'running') {
+            return this.renderLoader()
+        }
+
         const days: JSX.Element[] = []
 
         for (const { day, pages } of Object.values(this.props.results)) {
@@ -217,6 +225,17 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 <DayResultGroup key={day} when={timestampToString(day)}>
                     {pages.allIds.map((id) => this.renderPageResult(id, day))}
                 </DayResultGroup>,
+            )
+        }
+
+        if (this.props.searchPaginationState === 'running') {
+            days.push(this.renderLoader({ key: 'loader' }))
+        } else if (!this.props.areResultsExhausted) {
+            days.push(
+                <Waypoint
+                    key="pagination-waypoint"
+                    onEnter={() => this.props.paginateSearch()}
+                />,
             )
         }
 
@@ -241,9 +260,17 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     }
 }
 
+const Loader = styled.div`
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`
+
 const ResultsContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-self: center;
     max-width: ${sizeConstants.searchResults.widthPx}px;
+    margin-bottom: 100px;
 `
