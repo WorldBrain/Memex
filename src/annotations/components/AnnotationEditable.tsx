@@ -1,23 +1,30 @@
 import * as React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
+import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
+import ItemBoxBottom from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
 
+import * as icons from 'src/common-ui/components/design-library/icons'
 import niceTime from 'src/util/nice-time'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 // import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import AnnotationView from 'src/annotations/components/AnnotationView'
-import AnnotationFooter, {
-    AnnotationFooterEventProps,
-} from 'src/annotations/components/AnnotationFooter'
+import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import AnnotationEdit, {
     AnnotationEditGeneralProps,
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
-import { SidebarAnnotationTheme, SelectionIndices } from '../types'
+import { SidebarAnnotationTheme } from '../types'
 import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
+import {
+    SHARE_BUTTON_ICONS,
+    SHARE_BUTTON_LABELS,
+    getShareAnnotationBtnState,
+    getShareAnnotationBtnAction,
+} from '../sharing-utils'
 
 export interface AnnotationEditableGeneralProps {}
 
@@ -58,7 +65,6 @@ export default class AnnotationEditable extends React.Component<Props> {
     private annotEditRef = React.createRef<AnnotationEdit>()
     private boxRef: HTMLDivElement = null
     private removeEventListeners?: () => void
-    private cursorIndices: SelectionIndices
 
     static defaultProps: Partial<Props> = {
         mode: 'default',
@@ -76,6 +82,33 @@ export default class AnnotationEditable extends React.Component<Props> {
 
     focus() {
         this.annotEditRef?.current?.focusOnInputEnd()
+    }
+
+    private get sharingData() {
+        const sharingProps = {
+            ...this.props,
+            onShare: this.props.annotationFooterDependencies.onShareClick,
+            onUnshare: this.props.annotationFooterDependencies.onShareClick,
+        }
+        return {
+            state: getShareAnnotationBtnState(sharingProps),
+            action: getShareAnnotationBtnAction(sharingProps),
+        }
+    }
+
+    private get creationInfo() {
+        // TODO: Figure out why these dates are so unpredictable and fix it
+        const handleDateData = (date: string | number | Date): number =>
+            typeof date === 'number'
+                ? date
+                : typeof date === 'string'
+                ? new Date(date).getTime()
+                : date?.getTime()
+
+        return {
+            createdWhen: handleDateData(this.props.createdWhen),
+            lastEdited: handleDateData(this.props.lastEdited),
+        }
     }
 
     private get isEdited(): boolean {
@@ -139,24 +172,6 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
-    private renderFooter() {
-        const {
-            annotationFooterDependencies,
-            annotationEditDependencies,
-            onGoToAnnotation,
-            ...props
-        } = this.props
-
-        return (
-            <AnnotationFooter
-                {...props}
-                {...annotationFooterDependencies}
-                isEdited={this.isEdited}
-                timestamp={this.getFormattedTimestamp()}
-            />
-        )
-    }
-
     private renderMainAnnotation() {
         const {
             mode,
@@ -201,19 +216,89 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     render() {
+        const { annotationFooterDependencies: footerDeps } = this.props
+
         return (
             <ThemeProvider theme={this.theme}>
-                <AnnotationStyled
-                    id={this.props.url} // Focusing on annotation relies on this ID.
-                    ref={this.setBoxRef}
-                    onClick={this.handleGoToAnnotation}
-                >
-                    {this.renderHighlightBody()}
-                    {this.renderMainAnnotation()}
-                    {this.renderFooter()}
-                    {this.renderCopyPaster()}
-                    {this.renderShareMenu()}
-                </AnnotationStyled>
+                <ItemBox>
+                    <AnnotationStyled
+                        id={this.props.url} // Focusing on annotation relies on this ID.
+                        ref={this.setBoxRef}
+                        onClick={this.handleGoToAnnotation}
+                    >
+                        {this.renderHighlightBody()}
+                        {this.renderMainAnnotation()}
+                        <FooterStyled>
+                            <ItemBoxBottom
+                                creationInfo={this.creationInfo}
+                                actions={[
+                                    {
+                                        key: 'delete-note-btn',
+                                        image: icons.trash,
+                                        onClick: footerDeps.onDeleteIconClick,
+                                        tooltipText: 'Delete Note',
+                                    },
+                                    this.props.body?.length > 0
+                                        ? {
+                                              key: 'go-to-to-note-btn',
+                                              image: icons.goTo,
+                                              onClick: () =>
+                                                  this.props.onGoToAnnotation(
+                                                      this.props.url,
+                                                  ),
+                                              tooltipText: 'Open in Page',
+                                          }
+                                        : null,
+                                    {
+                                        key: 'tag-note-btn',
+                                        image:
+                                            this.props.tags?.length > 0
+                                                ? icons.tagFull
+                                                : icons.tagEmpty,
+                                        onClick: () =>
+                                            this.props.annotationEditDependencies.setTagInputActive(
+                                                true,
+                                            ),
+                                        tooltipText: 'Tag Note',
+                                    },
+                                    {
+                                        key: 'copy-paste-note-btn',
+                                        image: icons.copy,
+                                        onClick:
+                                            footerDeps.onCopyPasterBtnClick,
+                                        tooltipText: 'Copy Note',
+                                    },
+                                    {
+                                        key: 'share-note-btn',
+                                        image:
+                                            SHARE_BUTTON_ICONS[
+                                                this.sharingData.state
+                                            ],
+                                        onClick: footerDeps.onShareClick,
+                                        tooltipText:
+                                            SHARE_BUTTON_LABELS[
+                                                this.sharingData.state
+                                            ],
+                                        isDisabled: [
+                                            'sharing',
+                                            'unsharing',
+                                        ].includes(this.sharingData.state),
+                                    },
+                                    {
+                                        key: 'bookmark-note-btn',
+                                        image: this.props.isBookmarked
+                                            ? icons.heartFull
+                                            : icons.heartEmpty,
+                                        onClick: footerDeps.toggleBookmark,
+                                        tooltipText: 'Favorite Note',
+                                    },
+                                ]}
+                            />
+                        </FooterStyled>
+                        {this.renderCopyPaster()}
+                        {this.renderShareMenu()}
+                    </AnnotationStyled>
+                </ItemBox>
             </ThemeProvider>
         )
     }
@@ -227,8 +312,6 @@ const CopyPasterWrapper = styled.div`
     left: 70px;
 `
 
-const HighlightTextStyled = styled.span``
-
 const HighlightStyled = styled.div`
     font-weight: 400;
     font-size: 14px;
@@ -240,13 +323,14 @@ const HighlightStyled = styled.div`
     line-break: normal;
 `
 
-const AnnotationStyled = styled.div`
-    border-radius: 3px;
+const FooterStyled = styled.div`
+    margin-left: 20px;
+    margin-right: 5px;
+`
 
+const AnnotationStyled = styled.div`
     color: rgb(54, 54, 46);
 
-    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
-        rgba(15, 15, 15, 0.1) 0px 2px 4px;
     transition: background 120ms ease-in 0s;
 
     &:hover {
@@ -255,30 +339,22 @@ const AnnotationStyled = styled.div`
     }
 
     box-sizing: border-box;
-    width: 97%;
     display: flex;
     flex-direction: column;
     font-size: 14px;
-    margin: 10px 0 5px 0;
+    padding: 10px;
     cursor: pointer;
     animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
 
-    ${({ theme }) =>
-        theme.isActive &&
-        `
-        box-shadow: 0px 0px 5px 1px #00000080;
-    `}
-
     cursor: ${({ theme }) => theme.cursor}
+        ${({ theme }) =>
+            theme.isEditing &&
+            `
+    background-color: white;
+    cursor: default;
 
-    ${({ theme }) =>
-        theme.isEditing &&
-        `
+    &:hover {
         background-color: white;
-        cursor: default;
-
-        &:hover {
-            background-color: white;
-        }
-    `}
+    }
+    `};
 `
