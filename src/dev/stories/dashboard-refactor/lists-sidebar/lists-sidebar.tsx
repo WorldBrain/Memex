@@ -5,10 +5,11 @@ import {
     SidebarLockedState,
     SidebarPeekState,
 } from 'src/dashboard-refactor/lists-sidebar/types'
-import { ListsSidebarProps } from 'src/dashboard-refactor/lists-sidebar'
+import ListsSidebar, {
+    ListsSidebarProps,
+} from 'src/dashboard-refactor/lists-sidebar'
 import { listsSidebarSearchBarProps } from './lists-sidebar-search-bar'
 import { listsSidebarGroupProps } from './lists-sidebar-group'
-import ListsSidebar from 'src/dashboard-refactor/lists-sidebar'
 
 const stories = storiesOf('Dashboard Refactor|Lists Sidebar/Sidebar', module)
 
@@ -19,7 +20,7 @@ const lockedState: SidebarLockedState = {
 
 const peekState: SidebarPeekState = {
     isSidebarPeeking: false,
-    toggleSidebarPeekState: () => {},
+    setSidebarPeekState: () => () => {},
 }
 
 let selectedListId: number | undefined

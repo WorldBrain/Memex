@@ -10,13 +10,16 @@ describe('Dashboard search results logic', () => {
         const { searchResults } = await setupTest(device)
 
         expect(searchResults.state.listsSidebar.isSidebarLocked).toEqual(false)
+        expect(searchResults.state.listsSidebar.isSidebarPeeking).toEqual(false)
         await searchResults.processEvent('setSidebarLocked', { isLocked: true })
         expect(searchResults.state.listsSidebar.isSidebarLocked).toEqual(true)
+        expect(searchResults.state.listsSidebar.isSidebarPeeking).toEqual(false)
 
         await searchResults.processEvent('setSidebarLocked', {
             isLocked: false,
         })
         expect(searchResults.state.listsSidebar.isSidebarLocked).toEqual(false)
+        expect(searchResults.state.listsSidebar.isSidebarPeeking).toEqual(true)
     })
 
     it('should be able to set sidebar peeking state', async ({ device }) => {
@@ -42,19 +45,25 @@ describe('Dashboard search results logic', () => {
         expect(
             searchResults.state.listsSidebar.isSidebarToggleHovered,
         ).toBeFalsy()
+        expect(searchResults.state.listsSidebar.isSidebarPeeking).toBeFalsy()
+
         await searchResults.processEvent('setSidebarToggleHovered', {
             isHovered: true,
         })
+
         expect(searchResults.state.listsSidebar.isSidebarToggleHovered).toEqual(
             true,
         )
+        expect(searchResults.state.listsSidebar.isSidebarPeeking).toEqual(true)
 
         await searchResults.processEvent('setSidebarToggleHovered', {
             isHovered: false,
         })
+
         expect(searchResults.state.listsSidebar.isSidebarToggleHovered).toEqual(
             false,
         )
+        expect(searchResults.state.listsSidebar.isSidebarPeeking).toEqual(false)
     })
 
     it('should be able to set list query input state', async ({ device }) => {
@@ -259,20 +268,6 @@ describe('Dashboard search results logic', () => {
         const { searchResults } = await setupTest(device)
 
         expect(searchResults.state.listsSidebar.localLists.isExpanded).toEqual(
-            false,
-        )
-        expect(
-            searchResults.state.listsSidebar.followedLists.isExpanded,
-        ).toEqual(false)
-
-        await searchResults.processEvent('setLocalListsExpanded', {
-            isExpanded: true,
-        })
-        await searchResults.processEvent('setFollowedListsExpanded', {
-            isExpanded: true,
-        })
-
-        expect(searchResults.state.listsSidebar.localLists.isExpanded).toEqual(
             true,
         )
         expect(
@@ -292,6 +287,20 @@ describe('Dashboard search results logic', () => {
         expect(
             searchResults.state.listsSidebar.followedLists.isExpanded,
         ).toEqual(false)
+
+        await searchResults.processEvent('setLocalListsExpanded', {
+            isExpanded: true,
+        })
+        await searchResults.processEvent('setFollowedListsExpanded', {
+            isExpanded: true,
+        })
+
+        expect(searchResults.state.listsSidebar.localLists.isExpanded).toEqual(
+            true,
+        )
+        expect(
+            searchResults.state.listsSidebar.followedLists.isExpanded,
+        ).toEqual(true)
     })
 
     it('should be able to set local lists state', async ({ device }) => {
@@ -304,7 +313,7 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.localLists).toEqual({
             loadingState: 'pristine',
             isAddInputShown: false,
-            isExpanded: false,
+            isExpanded: true,
             listIds: [],
         })
 
@@ -318,7 +327,7 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.localLists).toEqual({
             loadingState: 'pristine',
             isAddInputShown: false,
-            isExpanded: false,
+            isExpanded: true,
             listIds,
         })
     })
@@ -332,7 +341,7 @@ describe('Dashboard search results logic', () => {
         ).toEqual([])
         expect(searchResults.state.listsSidebar.followedLists).toEqual({
             loadingState: 'pristine',
-            isExpanded: false,
+            isExpanded: true,
             listIds: [],
         })
 
@@ -345,7 +354,7 @@ describe('Dashboard search results logic', () => {
         ).toEqual(DATA.LISTS_1)
         expect(searchResults.state.listsSidebar.followedLists).toEqual({
             loadingState: 'pristine',
-            isExpanded: false,
+            isExpanded: true,
             listIds,
         })
     })

@@ -28,7 +28,7 @@ export const sidebarHeaderPropsTemplate: {
 } = {
     open: {
         sidebarPeekState: {
-            toggleSidebarPeekState: function () {},
+            setSidebarPeekState: () => () => {},
             isSidebarPeeking: false,
         },
         selectedListName: 'Inbox',
@@ -36,7 +36,7 @@ export const sidebarHeaderPropsTemplate: {
     },
     closed: {
         sidebarPeekState: {
-            toggleSidebarPeekState: function () {},
+            setSidebarPeekState: () => () => {},
             isSidebarPeeking: false,
         },
         ...sidebarTogglePropsRenamed.noHover,
@@ -44,7 +44,7 @@ export const sidebarHeaderPropsTemplate: {
     closedSelected: {
         ...sidebarTogglePropsRenamed.noHover,
         sidebarPeekState: {
-            toggleSidebarPeekState: function () {},
+            setSidebarPeekState: () => () => {},
             isSidebarPeeking: false,
         },
         selectedListName: 'Inbox',

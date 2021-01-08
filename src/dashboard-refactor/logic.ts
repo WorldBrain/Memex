@@ -94,13 +94,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listData: {},
                 followedLists: {
                     loadingState: 'pristine',
-                    isExpanded: false,
+                    isExpanded: true,
                     listIds: [],
                 },
                 localLists: {
                     isAddInputShown: false,
                     loadingState: 'pristine',
-                    isExpanded: false,
+                    isExpanded: true,
                     listIds: [],
                 },
             },
@@ -1444,7 +1444,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* START - lists sidebar event handlers */
     setSidebarLocked: EventHandler<'setSidebarLocked'> = async ({ event }) => {
         this.emitMutation({
-            listsSidebar: { isSidebarLocked: { $set: event.isLocked } },
+            listsSidebar: {
+                isSidebarLocked: { $set: event.isLocked },
+                isSidebarPeeking: { $set: !event.isLocked },
+            },
         })
     }
 
@@ -1457,10 +1460,16 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     setSidebarToggleHovered: EventHandler<'setSidebarToggleHovered'> = async ({
+        previousState: { listsSidebar },
         event,
     }) => {
         this.emitMutation({
-            listsSidebar: { isSidebarToggleHovered: { $set: event.isHovered } },
+            listsSidebar: {
+                isSidebarToggleHovered: { $set: event.isHovered },
+                isSidebarPeeking: {
+                    $set: !listsSidebar.isSidebarLocked && event.isHovered,
+                },
+            },
         })
     }
 

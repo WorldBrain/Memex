@@ -10,7 +10,7 @@ export interface SidebarLockedState {
 }
 
 export interface SidebarPeekState {
-    toggleSidebarPeekState(): void
+    setSidebarPeekState: (isPeeking: boolean) => () => void
     isSidebarPeeking: boolean
 }
 

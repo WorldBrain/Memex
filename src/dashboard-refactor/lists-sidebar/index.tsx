@@ -16,7 +16,7 @@ import ListsSidebarItem, {
 } from './components/lists-sidebar-item-with-menu'
 import { sizeConstants } from '../constants'
 
-const Container = styled.div<{
+const Sidebar = styled.div<{
     locked: boolean
     peeking: boolean
 }>`
@@ -49,6 +49,16 @@ const Container = styled.div<{
         `}
 `
 
+const Container = styled.div``
+
+const PeekTrigger = styled.div`
+    height: 100%;
+    width: 10px;
+    position: absolute;
+    background: transparent;
+    /* z-index: 3000; */
+`
+
 export interface ListsSidebarProps {
     onListSelection: (id: number) => void
     selectedListId?: number
@@ -70,52 +80,62 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
             listsGroups,
         } = this.props
         return (
-            <Container peeking={isSidebarPeeking} locked={isSidebarLocked}>
-                <Margin vertical="5px" horizontal="5px">
-                    <ListsSidebarSearchBar {...searchBarProps} />
-                </Margin>
-                <Margin vertical="10px">
-                    <ListsSidebarGroup isExpanded loadingState="success">
-                        {this.renderLists([
-                            {
-                                name: 'All Saved',
-                                listId: -1,
-                                selectedState: {
-                                    isSelected:
-                                        this.props.selectedListId === -1,
-                                    onSelection: this.props.onListSelection,
+            <Container
+                onMouseLeave={this.props.peekState.setSidebarPeekState(false)}
+            >
+                <PeekTrigger
+                    onMouseEnter={this.props.peekState.setSidebarPeekState(
+                        true,
+                    )}
+                    onDragEnter={this.props.peekState.setSidebarPeekState(true)}
+                />
+                <Sidebar peeking={isSidebarPeeking} locked={isSidebarLocked}>
+                    <Margin vertical="5px" horizontal="5px">
+                        <ListsSidebarSearchBar {...searchBarProps} />
+                    </Margin>
+                    <Margin vertical="10px">
+                        <ListsSidebarGroup isExpanded loadingState="success">
+                            {this.renderLists([
+                                {
+                                    name: 'All Saved',
+                                    listId: -1,
+                                    selectedState: {
+                                        isSelected:
+                                            this.props.selectedListId === -1,
+                                        onSelection: this.props.onListSelection,
+                                    },
                                 },
-                            },
-                            {
-                                name: 'Inbox',
-                                listId: SPECIAL_LIST_IDS.INBOX,
-                                selectedState: {
-                                    isSelected:
-                                        this.props.selectedListId ===
-                                        SPECIAL_LIST_IDS.INBOX,
-                                    onSelection: this.props.onListSelection,
+                                {
+                                    name: 'Inbox',
+                                    listId: SPECIAL_LIST_IDS.INBOX,
+                                    selectedState: {
+                                        isSelected:
+                                            this.props.selectedListId ===
+                                            SPECIAL_LIST_IDS.INBOX,
+                                        onSelection: this.props.onListSelection,
+                                    },
                                 },
-                            },
-                            {
-                                name: 'Saved on Mobile',
-                                listId: SPECIAL_LIST_IDS.INBOX + 1,
-                                selectedState: {
-                                    isSelected:
-                                        this.props.selectedListId ===
-                                        SPECIAL_LIST_IDS.INBOX + 1,
-                                    onSelection: this.props.onListSelection,
+                                {
+                                    name: 'Saved on Mobile',
+                                    listId: SPECIAL_LIST_IDS.INBOX + 1,
+                                    selectedState: {
+                                        isSelected:
+                                            this.props.selectedListId ===
+                                            SPECIAL_LIST_IDS.INBOX + 1,
+                                        onSelection: this.props.onListSelection,
+                                    },
                                 },
-                            },
-                        ])}
-                    </ListsSidebarGroup>
-                </Margin>
-                {listsGroups.map((group, i) => (
-                    <Margin key={i} vertical="10px">
-                        <ListsSidebarGroup {...group}>
-                            {this.renderLists(group.listsArray)}
+                            ])}
                         </ListsSidebarGroup>
                     </Margin>
-                ))}
+                    {listsGroups.map((group, i) => (
+                        <Margin key={i} vertical="10px">
+                            <ListsSidebarGroup {...group}>
+                                {this.renderLists(group.listsArray)}
+                            </ListsSidebarGroup>
+                        </Margin>
+                    ))}
+                </Sidebar>
             </Container>
         )
     }

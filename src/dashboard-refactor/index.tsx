@@ -115,9 +115,9 @@ export class DashboardContainer extends StatefulUIElement<
                     },
                     sidebarPeekState: {
                         isSidebarPeeking: listsSidebar.isSidebarPeeking,
-                        toggleSidebarPeekState: () =>
+                        setSidebarPeekState: (isPeeking) => () =>
                             this.processEvent('setSidebarPeeking', {
-                                isPeeking: !listsSidebar.isSidebarPeeking,
+                                isPeeking,
                             }),
                     },
                     sidebarToggleHoverState: {
@@ -186,9 +186,9 @@ export class DashboardContainer extends StatefulUIElement<
                 selectedListId={listsSidebar.selectedListId}
                 peekState={{
                     isSidebarPeeking: listsSidebar.isSidebarPeeking,
-                    toggleSidebarPeekState: () =>
+                    setSidebarPeekState: (isPeeking) => () =>
                         this.processEvent('setSidebarPeeking', {
-                            isPeeking: !listsSidebar.isSidebarPeeking,
+                            isPeeking,
                         }),
                 }}
                 searchBarProps={{
