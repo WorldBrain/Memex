@@ -1,5 +1,7 @@
 import { browser } from 'webextension-polyfill-ts'
 
+export const settings = browser.extension.getURL('/img/settings.svg')
+
 export const check = browser.extension.getURL('/img/check.svg')
 export const close = browser.extension.getURL('/img/close.svg')
 export const tagFull = browser.extension.getURL('/img/tag_full.svg')

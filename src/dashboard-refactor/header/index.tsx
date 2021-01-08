@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 
-import { OVERVIEW_URL } from 'src/constants'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import { SETTINGS_URL } from 'src/constants'
 import SearchBar, { SearchBarProps } from './search-bar'
 import { SyncStatusIconState } from './types'
 import SyncStatusMenu, { SyncStatusMenuProps } from './sync-status-menu'
@@ -61,9 +62,6 @@ export interface HeaderProps {
 
 export default class Header extends PureComponent<HeaderProps> {
     pricingUrl = 'https://worldbrain.io/pricing'
-    settingsIconUrl = 'img/settings.svg'
-    settingsRoute = '/settings'
-    overviewUrl = OVERVIEW_URL
 
     handleSyncStatusHeaderClick = () => {
         this.props.syncStatusMenuProps.displayState.toggleDisplayState()
@@ -98,7 +96,9 @@ export default class Header extends PureComponent<HeaderProps> {
                         <SyncStatusHeaderText>Sync Status</SyncStatusHeaderText>
                     </div>
                     <Margin vertical="auto" horizontal="17px">
-                        <Icon heightAndWidth="18px" path="/img/settings.svg" />
+                        <a href={SETTINGS_URL}>
+                            <Icon heightAndWidth="18px" path={icons.settings} />
+                        </a>
                     </Margin>
                     <SyncStatusMenu {...syncStatusMenuProps} />
                 </RightHeader>
