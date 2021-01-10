@@ -11,7 +11,6 @@ import {
     NotesType,
     NoteInteractionProps,
     PagePickerProps,
-    NotePickerProps,
     PageInteractionProps,
     PagePickerAugdProps,
     NotePickerAugdProps,
@@ -34,6 +33,10 @@ import {
 import { sizeConstants } from '../constants'
 import AnnotationEditable from 'src/annotations/components/AnnotationEditable'
 import { LoadingIndicator } from 'src/common-ui/components'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import { PageNotesCopyPaster } from 'src/copy-paster'
+import TagPicker from 'src/tags/ui/TagPicker'
+import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -95,9 +98,53 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 mode={noteData.isEditing ? 'edit' : 'default'}
                 sharingInfo={this.props.noteSharingInfo[noteId]}
                 sharingAccess={this.props.sharingAccess}
-                renderCopyPasterForAnnotation={() => null}
-                renderTagsPickerForAnnotation={() => null}
-                renderShareMenuForAnnotation={() => null}
+                renderCopyPasterForAnnotation={() =>
+                    noteData.isCopyPasterShown && (
+                        <HoverBox>
+                            <PageNotesCopyPaster
+                                annotationUrls={[noteId]}
+                                normalizedPageUrls={[pageId]}
+                            />
+                        </HoverBox>
+                    )
+                }
+                renderTagsPickerForAnnotation={() =>
+                    noteData.isTagPickerShown && (
+                        <HoverBox>
+                            <TagPicker
+                                initialSelectedEntries={() => noteData.tags}
+                                onUpdateEntrySelection={
+                                    interactionProps.updateTags
+                                }
+                            />
+                        </HoverBox>
+                    )
+                }
+                renderShareMenuForAnnotation={() =>
+                    noteData.isShareMenuShown && (
+                        <HoverBox>
+                            <SingleNoteShareMenu
+                                annotationUrl={noteId}
+                                closeShareMenu={() =>
+                                    interactionProps.onShareBtnClick(dummyEvent)
+                                }
+                                copyLink={interactionProps.copySharedLink}
+                                postShareHook={() =>
+                                    interactionProps.updateShareInfo({
+                                        status: 'shared',
+                                        taskState: 'success',
+                                    })
+                                }
+                                postUnshareHook={() =>
+                                    interactionProps.updateShareInfo({
+                                        status: 'unshared',
+                                        taskState: 'success',
+                                    })
+                                }
+                            />
+                        </HoverBox>
+                    )
+                }
                 annotationEditDependencies={{
                     comment: noteData.editNoteForm.inputValue,
                     onCommentChange: (value) =>

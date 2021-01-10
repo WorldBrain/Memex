@@ -419,6 +419,8 @@ export class DashboardContainer extends StatefulUIElement<
                             areShown: !searchResults.noteData.byId[noteId]
                                 .areRepliesShown,
                         }),
+                    updateTags: (noteId) => (args) =>
+                        this.processEvent('setNoteTags', { ...args, noteId }),
                     onTrashBtnClick: (noteId, day, pageId) => () =>
                         this.processEvent('setDeletingNoteArgs', {
                             noteId,

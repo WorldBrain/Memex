@@ -44,6 +44,7 @@ export type NoteInteractionProps = Omit<
     hideShareMenu: () => void
     copySharedLink: (link: string) => Promise<void>
     updateShareInfo: (info: Partial<AnnotationSharingInfo>) => void
+    updateTags: PickerUpdateHandler
     onEditCancel: React.MouseEventHandler
     onEditConfirm: React.MouseEventHandler
     onEditBtnClick: React.MouseEventHandler
