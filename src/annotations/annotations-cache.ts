@@ -21,7 +21,10 @@ export const createAnnotationsCache = (
         sortingFn: sortByPagePosition,
         backendOperations: {
             load: async (pageUrl) =>
-                bgModules.annotations.listAnnotationsByPageUrl({ pageUrl }),
+                bgModules.annotations.listAnnotationsByPageUrl({
+                    pageUrl,
+                    withTags: true,
+                }),
             create: async (annotation) =>
                 bgModules.annotations.createAnnotation(annotation, {
                     skipPageIndexing: options.skipPageIndexing,
@@ -93,6 +96,7 @@ export interface AnnotationsCacheInterface {
         annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>,
     ) => Promise<void>
     sort: (sortingFn?: AnnotationsSorter) => void
+    getAnnotationById: (id: string) => Annotation
 
     annotations: Annotation[]
     annotationChanges: AnnotationCacheChangeEvents
@@ -116,6 +120,9 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     get isEmpty(): boolean {
         return this._annotations.length === 0
     }
+
+    getAnnotationById = (id: string): Annotation =>
+        this.annotations.find((annot) => annot.url === id)
 
     load = async (url, args = {}) => {
         const annotations = await this.dependencies.backendOperations.load(

@@ -263,8 +263,17 @@ export default class DirectLinkingBackground {
         return result
     }
 
-    listAnnotationsByPageUrl = async ({ tab }: TabArg, { pageUrl }) => {
-        return this.annotationStorage.listAnnotationsByPageUrl({ pageUrl })
+    listAnnotationsByPageUrl = async (
+        { tab }: TabArg,
+        {
+            pageUrl,
+            ...args
+        }: { pageUrl: string; withTags?: boolean; withBookmarks?: boolean },
+    ) => {
+        return this.annotationStorage.listAnnotationsByPageUrl({
+            pageUrl,
+            ...args,
+        })
     }
 
     getAllAnnotationsByUrl = async (

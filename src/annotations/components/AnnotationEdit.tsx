@@ -1,8 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
-import TagInput from 'src/tags/ui/tag-input'
 import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
 import { FocusableComponent } from './types'
 import { uninsertTab, insertTab } from 'src/common-ui/utils'
@@ -11,15 +9,10 @@ export interface AnnotationEditEventProps {
     onEditConfirm: (url: string) => void
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
-    setTagInputActive: (active: boolean) => void
-    updateTags: PickerUpdateHandler
-    deleteSingleTag: (tag: string) => void
 }
 
 export interface AnnotationEditGeneralProps {
-    isTagInputActive: boolean
     comment: string
-    tags: string[]
 }
 
 export interface Props
@@ -45,13 +38,6 @@ class AnnotationEdit extends React.Component<Props>
         const inputLen = this.props.comment.length
         this.textAreaRef.current.setSelectionRange(inputLen, inputLen)
         this.focus()
-    }
-
-    private handleTagInputKeyDown: React.KeyboardEventHandler = (e) => {
-        // Only check for `Tab` and `Shift + Tab`, handle rest of the events normally.
-        if (e.key === 'Tab') {
-            this.props.setTagInputActive(false)
-        }
     }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
@@ -91,18 +77,12 @@ class AnnotationEdit extends React.Component<Props>
                         <StyledTextArea
                             {...inputProps}
                             value={this.props.comment}
-                            onClick={() => this.props.setTagInputActive(false)}
                             placeholder="Add private note (save with cmd/ctrl+enter)"
                             onChange={(e) =>
                                 this.props.onCommentChange(e.target.value)
                             }
                         />
                     )}
-                />
-                <TagInput
-                    deleteTag={this.props.deleteSingleTag}
-                    onKeyDown={this.handleTagInputKeyDown}
-                    {...this.props}
                 />
             </>
         )

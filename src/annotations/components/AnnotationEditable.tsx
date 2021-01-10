@@ -4,9 +4,7 @@ import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import niceTime from 'src/util/nice-time'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
-// import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import AnnotationView from 'src/annotations/components/AnnotationView'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import AnnotationEdit, {
@@ -25,6 +23,7 @@ import {
     getShareAnnotationBtnState,
     getShareAnnotationBtnAction,
 } from '../sharing-utils'
+import { ButtonTooltip } from 'src/common-ui/components'
 
 export interface AnnotationEditableGeneralProps {}
 
@@ -47,6 +46,7 @@ export interface AnnotationEditableProps {
     annotationFooterDependencies: AnnotationFooterEventProps
     annotationEditDependencies: AnnotationEditGeneralProps &
         AnnotationEditEventProps
+    renderTagsPickerForAnnotation: (id: string) => JSX.Element
     renderCopyPasterForAnnotation: (id: string) => JSX.Element
     renderShareMenuForAnnotation: (id: string) => JSX.Element
 }
@@ -111,13 +111,6 @@ export default class AnnotationEditable extends React.Component<Props> {
         }
     }
 
-    private get isEdited(): boolean {
-        return (
-            this.props.lastEdited &&
-            this.props.lastEdited !== this.props.createdWhen
-        )
-    }
-
     private get theme(): SidebarAnnotationTheme {
         return {
             cursor: this.props.isClickable ? 'pointer' : 'auto',
@@ -148,9 +141,6 @@ export default class AnnotationEditable extends React.Component<Props> {
     private setBoxRef = (ref: HTMLDivElement) => {
         this.boxRef = ref
     }
-
-    private getFormattedTimestamp = () =>
-        niceTime(this.props.lastEdited ?? this.props.createdWhen)
 
     private handleGoToAnnotation = () => {
         if (!this.props.isClickable) {
@@ -199,6 +189,113 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
+    private renderDefaultFooter() {
+        const { annotationFooterDependencies: footerDeps } = this.props
+
+        return (
+            <DefaultFooterStyled>
+                <ItemBoxBottom
+                    creationInfo={this.creationInfo}
+                    actions={[
+                        {
+                            key: 'delete-note-btn',
+                            image: icons.trash,
+                            onClick: footerDeps.onDeleteIconClick,
+                            tooltipText: 'Delete Note',
+                        },
+                        this.props.body?.length > 0
+                            ? {
+                                  key: 'go-to-to-note-btn',
+                                  image: icons.goTo,
+                                  onClick: () =>
+                                      this.props.onGoToAnnotation(
+                                          this.props.url,
+                                      ),
+                                  tooltipText: 'Open in Page',
+                              }
+                            : null,
+                        {
+                            key: 'tag-note-btn',
+                            image:
+                                this.props.tags?.length > 0
+                                    ? icons.tagFull
+                                    : icons.tagEmpty,
+                            onClick: footerDeps.onTagIconClick,
+                            tooltipText: 'Tag Note',
+                        },
+                        {
+                            key: 'copy-paste-note-btn',
+                            image: icons.copy,
+                            onClick: footerDeps.onCopyPasterBtnClick,
+                            tooltipText: 'Copy Note',
+                        },
+                        {
+                            key: 'share-note-btn',
+                            image: SHARE_BUTTON_ICONS[this.sharingData.state],
+                            onClick: footerDeps.onShareClick,
+                            tooltipText:
+                                SHARE_BUTTON_LABELS[this.sharingData.state],
+                            isDisabled: ['sharing', 'unsharing'].includes(
+                                this.sharingData.state,
+                            ),
+                        },
+                        {
+                            key: 'bookmark-note-btn',
+                            image: this.props.isBookmarked
+                                ? icons.heartFull
+                                : icons.heartEmpty,
+                            onClick: footerDeps.toggleBookmark,
+                            tooltipText: 'Favorite Note',
+                        },
+                    ]}
+                />
+            </DefaultFooterStyled>
+        )
+    }
+
+    private renderFooter() {
+        const { mode, annotationFooterDependencies: footerDeps } = this.props
+
+        let actionBtnText: string
+        let actionBtnHandler: React.MouseEventHandler
+        let cancelBtnHandler: React.MouseEventHandler
+
+        if (mode === 'delete') {
+            actionBtnText = 'Delete'
+            actionBtnHandler = footerDeps.onDeleteConfirm
+            cancelBtnHandler = footerDeps.onDeleteCancel
+        } else if (mode === 'edit') {
+            actionBtnText = 'Save'
+            actionBtnHandler = footerDeps.onEditConfirm
+            cancelBtnHandler = footerDeps.onEditCancel
+        } else {
+            return this.renderDefaultFooter()
+        }
+
+        return (
+            <>
+                {mode === 'delete' && (
+                    <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
+                )}
+                <BtnContainerStyled>
+                    <ButtonTooltip tooltipText="esc" position="bottom">
+                        <CancelBtnStyled onClick={cancelBtnHandler}>
+                            Cancel
+                        </CancelBtnStyled>
+                    </ButtonTooltip>
+                    <ButtonTooltip
+                        tooltipText="ctrl/cmd + Enter"
+                        position="bottom"
+                    >
+                        <ActionBtnStyled onClick={actionBtnHandler}>
+                            {actionBtnText}
+                        </ActionBtnStyled>
+                    </ButtonTooltip>
+                </BtnContainerStyled>
+            </>
+        )
+    }
+
     private renderShareMenu() {
         return (
             <ShareMenuWrapper>
@@ -215,9 +312,15 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
-    render() {
-        const { annotationFooterDependencies: footerDeps } = this.props
+    private renderTagsPicker() {
+        return (
+            <TagPickerWrapper>
+                {this.props.renderTagsPickerForAnnotation(this.props.url)}
+            </TagPickerWrapper>
+        )
+    }
 
+    render() {
         return (
             <ThemeProvider theme={this.theme}>
                 <ItemBox>
@@ -228,73 +331,8 @@ export default class AnnotationEditable extends React.Component<Props> {
                     >
                         {this.renderHighlightBody()}
                         {this.renderMainAnnotation()}
-                        <FooterStyled>
-                            <ItemBoxBottom
-                                creationInfo={this.creationInfo}
-                                actions={[
-                                    {
-                                        key: 'delete-note-btn',
-                                        image: icons.trash,
-                                        onClick: footerDeps.onDeleteIconClick,
-                                        tooltipText: 'Delete Note',
-                                    },
-                                    this.props.body?.length > 0
-                                        ? {
-                                              key: 'go-to-to-note-btn',
-                                              image: icons.goTo,
-                                              onClick: () =>
-                                                  this.props.onGoToAnnotation(
-                                                      this.props.url,
-                                                  ),
-                                              tooltipText: 'Open in Page',
-                                          }
-                                        : null,
-                                    {
-                                        key: 'tag-note-btn',
-                                        image:
-                                            this.props.tags?.length > 0
-                                                ? icons.tagFull
-                                                : icons.tagEmpty,
-                                        onClick: () =>
-                                            this.props.annotationEditDependencies.setTagInputActive(
-                                                true,
-                                            ),
-                                        tooltipText: 'Tag Note',
-                                    },
-                                    {
-                                        key: 'copy-paste-note-btn',
-                                        image: icons.copy,
-                                        onClick:
-                                            footerDeps.onCopyPasterBtnClick,
-                                        tooltipText: 'Copy Note',
-                                    },
-                                    {
-                                        key: 'share-note-btn',
-                                        image:
-                                            SHARE_BUTTON_ICONS[
-                                                this.sharingData.state
-                                            ],
-                                        onClick: footerDeps.onShareClick,
-                                        tooltipText:
-                                            SHARE_BUTTON_LABELS[
-                                                this.sharingData.state
-                                            ],
-                                        isDisabled: [
-                                            'sharing',
-                                            'unsharing',
-                                        ].includes(this.sharingData.state),
-                                    },
-                                    {
-                                        key: 'bookmark-note-btn',
-                                        image: this.props.isBookmarked
-                                            ? icons.heartFull
-                                            : icons.heartEmpty,
-                                        onClick: footerDeps.toggleBookmark,
-                                        tooltipText: 'Favorite Note',
-                                    },
-                                ]}
-                            />
-                        </FooterStyled>
+                        {this.renderFooter()}
+                        {this.renderTagsPicker()}
                         {this.renderCopyPaster()}
                         {this.renderShareMenu()}
                     </AnnotationStyled>
@@ -304,6 +342,9 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 }
 
+const TagPickerWrapper = styled.div`
+    position: relative;
+`
 const ShareMenuWrapper = styled.div`
     position: relative;
 `
@@ -323,7 +364,7 @@ const HighlightStyled = styled.div`
     line-break: normal;
 `
 
-const FooterStyled = styled.div`
+const DefaultFooterStyled = styled.div`
     margin-left: 20px;
     margin-right: 5px;
 `
@@ -357,4 +398,64 @@ const AnnotationStyled = styled.div`
         background-color: white;
     }
     `};
+`
+
+const DeleteConfirmStyled = styled.span`
+    box-sizing: border-box;
+    font-weight: 800;
+    font-size: 15px;
+    color: #000;
+    margin-right: 5px;
+`
+
+const CancelBtnStyled = styled.button`
+    box-sizing: border-box;
+    cursor: pointer;
+    font-size: 14px;
+    border: none;
+    outline: none;
+    padding: 3px 5px;
+    background: transparent;
+    border-radius: 3px;
+    color: red;
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
+
+    &:focus {
+        background-color: #79797945;
+    }
+`
+
+const BtnContainerStyled = styled.div`
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    width: 100%;
+`
+
+const ActionBtnStyled = styled.button`
+    box-sizing: border-box;
+    cursor: pointer;
+    font-size: 14px;
+    border: none;
+    outline: none;
+    padding: 3px 5px;
+    margin-right: 5px;
+    background: transparent;
+    border-radius: 3px;
+    font-weight: 700;
+
+    &:focus {
+        background-color: grey;
+    }
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
+
+    &:focus {
+        background-color: #79797945;
+    }
 `

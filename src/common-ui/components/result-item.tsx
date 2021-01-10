@@ -40,6 +40,7 @@ export interface Props extends Partial<SocialPage> {
     areAnnotationsExpanded?: boolean
     isResponsibleForSidebar?: boolean
     activeShareMenuNoteId: string | undefined
+    activeTagPickerNoteId: string | undefined
     activeCopyPasterAnnotationId: string | undefined
     isOverview?: boolean
     isSocial?: boolean
@@ -63,6 +64,7 @@ export interface Props extends Partial<SocialPage> {
     setTagButtonRef: (el: HTMLElement) => void
     setListButtonRef: (el: HTMLElement) => void
     setCopyPasterButtonRef: (el: HTMLElement) => void
+    setActiveTagPickerNoteId: (id: string) => void
     setActiveShareMenuNoteId?: (id: string) => void
     setActiveCopyPasterAnnotationId?: (id: string) => void
 }

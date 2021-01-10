@@ -494,8 +494,24 @@ describe('SidebarContainerLogic', () => {
         expect(sidebar.state.activeCopyPasterAnnotationId).toEqual(id1)
         sidebar.processEvent('setCopyPasterAnnotationId', { id: id2 })
         expect(sidebar.state.activeCopyPasterAnnotationId).toEqual(id2)
-        sidebar.processEvent('resetCopyPasterAnnotationId', null)
+        sidebar.processEvent('setCopyPasterAnnotationId', { id: undefined })
         expect(sidebar.state.activeCopyPasterAnnotationId).toBeUndefined()
+    })
+
+    it('should be able to set active annotation tag picker', async ({
+        device,
+    }) => {
+        const { sidebar } = await setupLogicHelper({ device })
+        const id1 = 'test1'
+        const id2 = 'test2'
+
+        expect(sidebar.state.activeTagPickerAnnotationId).toBeUndefined()
+        sidebar.processEvent('setTagPickerAnnotationId', { id: id1 })
+        expect(sidebar.state.activeTagPickerAnnotationId).toEqual(id1)
+        sidebar.processEvent('setTagPickerAnnotationId', { id: id2 })
+        expect(sidebar.state.activeTagPickerAnnotationId).toEqual(id2)
+        sidebar.processEvent('resetTagPickerAnnotationId', null)
+        expect(sidebar.state.activeTagPickerAnnotationId).toBeUndefined()
     })
 
     it('should be able to trigger annotation sorting', async ({ device }) => {

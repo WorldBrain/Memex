@@ -32,6 +32,7 @@ const styles = require('./ResultList.css')
 
 interface LocalState {
     tagSuggestions: string[]
+    activeTagPickerNoteId: string | undefined
     activeShareMenuNoteId: string | undefined
     activeCopyPasterAnnotationId: string | undefined
 }
@@ -113,6 +114,7 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
 
     state: LocalState = {
         tagSuggestions: [],
+        activeTagPickerNoteId: undefined,
         activeShareMenuNoteId: undefined,
         activeCopyPasterAnnotationId: undefined,
     }
@@ -310,6 +312,10 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                 onReaderBtnClick={this.handleReaderBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
                 activeShareMenuNoteId={this.state.activeShareMenuNoteId}
+                setActiveTagPickerNoteId={(id) =>
+                    this.setState({ activeTagPickerNoteId: id })
+                }
+                activeTagPickerNoteId={this.state.activeTagPickerNoteId}
                 setActiveShareMenuNoteId={
                     this.props.isBetaEnabled
                         ? (id) =>

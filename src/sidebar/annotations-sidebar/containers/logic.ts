@@ -50,6 +50,7 @@ export interface SidebarContainerState {
 
     showAllNotesCopyPaster: boolean
     activeCopyPasterAnnotationId: string | undefined
+    activeTagPickerAnnotationId: string | undefined
 
     pageUrl?: string
     annotations: Annotation[]
@@ -198,6 +199,8 @@ export type SidebarContainerEvents = UIEvent<{
 
     setAllNotesCopyPasterShown: { shown: boolean }
     setCopyPasterAnnotationId: { id: string }
+    setTagPickerAnnotationId: { id: string }
+    resetTagPickerAnnotationId: null
     resetCopyPasterAnnotationId: null
 
     setAllNotesShareMenuShown: { shown: boolean }
@@ -269,6 +272,7 @@ export class SidebarContainerLogic extends UILogic<
 
             showAllNotesCopyPaster: false,
             activeCopyPasterAnnotationId: undefined,
+            activeTagPickerAnnotationId: undefined,
 
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
@@ -489,6 +493,26 @@ export class SidebarContainerLogic extends UILogic<
             activeCopyPasterAnnotationId: { $set: newId },
             showAllNotesCopyPaster: { $set: false },
         })
+    }
+
+    setTagPickerAnnotationId: EventHandler<'setTagPickerAnnotationId'> = ({
+        event,
+        previousState,
+    }) => {
+        const newId =
+            previousState.activeTagPickerAnnotationId === event.id
+                ? undefined
+                : event.id
+
+        this.emitMutation({
+            activeTagPickerAnnotationId: { $set: newId },
+        })
+    }
+
+    resetTagPickerAnnotationId: EventHandler<
+        'resetTagPickerAnnotationId'
+    > = () => {
+        this.emitMutation({ activeTagPickerAnnotationId: { $set: undefined } })
     }
 
     resetCopyPasterAnnotationId: EventHandler<

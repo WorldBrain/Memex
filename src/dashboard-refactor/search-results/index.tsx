@@ -96,26 +96,23 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 sharingInfo={this.props.noteSharingInfo[noteId]}
                 sharingAccess={this.props.sharingAccess}
                 renderCopyPasterForAnnotation={() => null}
+                renderTagsPickerForAnnotation={() => null}
                 renderShareMenuForAnnotation={() => null}
-                annotationEditDependencies={
-                    {
-                        comment: noteData.editNoteForm.inputValue,
-                        tags: noteData.editNoteForm.tags,
-                        isTagInputActive:
-                            noteData.editNoteForm.isTagPickerShown,
-                        onCommentChange: (value) =>
-                            interactionProps.onCommentChange({
-                                target: { value },
-                            } as any),
-                        onEditCancel: () =>
-                            interactionProps.onEditCancel(dummyEvent),
-                        onEditConfirm: () =>
-                            interactionProps.onEditConfirm(dummyEvent),
-                    } as any
-                }
+                annotationEditDependencies={{
+                    comment: noteData.editNoteForm.inputValue,
+                    onCommentChange: (value) =>
+                        interactionProps.onCommentChange({
+                            target: { value },
+                        } as any),
+                    onEditCancel: () =>
+                        interactionProps.onEditCancel(dummyEvent),
+                    onEditConfirm: () =>
+                        interactionProps.onEditConfirm(dummyEvent),
+                }}
                 annotationFooterDependencies={{
                     onDeleteCancel: () => undefined,
                     onDeleteConfirm: () => undefined,
+                    onTagIconClick: interactionProps.onTagPickerBtnClick,
                     onDeleteIconClick: interactionProps.onTrashBtnClick,
                     onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
                     onEditCancel: interactionProps.onEditCancel,

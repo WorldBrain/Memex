@@ -69,6 +69,7 @@ async function createDependencies() {
     const sidebarDependencies: AnnotationsSidebarProps = {
         renderShareMenuForAnnotation: () => null,
         renderCopyPasterForAnnotation: () => null,
+        renderTagsPickerForAnnotation: () => null,
         sharingAccess: 'sharing-allowed',
         isAnnotationCreateShown: true,
         isSearchLoading: false,
@@ -93,6 +94,7 @@ async function createDependencies() {
         bindAnnotationFooterEventProps: (a) => ({
             onDeleteConfirm: action('confirmDelete'),
             onDeleteCancel: action('cancelDelete'),
+            onTagIconClick: action('clickTagIcon'),
             onEditConfirm: action('confirmEdit'),
             onEditCancel: action('cancelEdit'),
             onShareClick: action('share'),
