@@ -1,3 +1,4 @@
+import { Browser } from 'webextension-polyfill-ts'
 import { UIEvent } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
 
@@ -18,6 +19,7 @@ import { AnnotationInterface } from 'src/annotations/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { Analytics } from 'src/analytics'
+import { getLocalStorage } from 'src/util/storage'
 
 export interface RootState {
     loadState: TaskState
@@ -46,6 +48,7 @@ export interface DashboardDependencies {
     searchBG: SearchInterface
     annotationsBG: AnnotationInterface<'caller'>
     copyToClipboard: (text: string) => Promise<boolean>
+    localStorage: Browser['storage']['local']
 }
 
 export interface DropReceivingState {

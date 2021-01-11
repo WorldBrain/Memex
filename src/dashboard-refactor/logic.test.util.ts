@@ -1,3 +1,4 @@
+import { browser } from 'webextension-polyfill-ts'
 import { TestLogicContainer } from 'ui-logic-core/lib/testing'
 
 import {
@@ -82,6 +83,7 @@ export async function setupTest(
     const logic = new DashboardLogic({
         analytics,
         annotationsBG,
+        localStorage: browser.storage.local,
         authBG: device.backgroundModules.auth.remoteFunctions,
         tagsBG: device.backgroundModules.tags.remoteFunctions,
         listsBG: device.backgroundModules.customLists.remoteFunctions,

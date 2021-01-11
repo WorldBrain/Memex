@@ -1,4 +1,5 @@
 import React from 'react'
+import { browser } from 'webextension-polyfill-ts'
 import { storiesOf } from '@storybook/react'
 import { ThemeProvider } from 'styled-components'
 
@@ -32,6 +33,7 @@ async function createDependencies(): Promise<DashboardProps> {
             return true
         },
         annotationsBG,
+        localStorage: browser.storage.local,
         authBG: backgroundModules.auth.remoteFunctions,
         tagsBG: backgroundModules.tags.remoteFunctions,
         listsBG: backgroundModules.customLists.remoteFunctions,

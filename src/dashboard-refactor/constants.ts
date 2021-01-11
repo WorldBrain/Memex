@@ -66,3 +66,9 @@ export const SEARCH_INPUT_SPLIT_PATTERN = /-?#\"([-.\w]+ ?)+\"|\S+/g
  * eg: #tag #"tag tag" -#tag
  */
 export const TAG_CLEAN_PATTERN = /[#"]/g
+
+const KEY_PREFIX = '@Dashboard-'
+
+export const STORAGE_KEYS = {
+    listSidebarLocked: KEY_PREFIX + 'list_sidebar_locked',
+}

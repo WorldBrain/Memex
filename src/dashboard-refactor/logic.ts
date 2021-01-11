@@ -10,7 +10,7 @@ import {
     setLastSharedAnnotationTimestamp,
 } from 'src/annotations/utils'
 import { getListShareUrl } from 'src/content-sharing/utils'
-import { PAGE_SIZE } from 'src/dashboard-refactor/constants'
+import { PAGE_SIZE, STORAGE_KEYS } from 'src/dashboard-refactor/constants'
 import { ListData } from './lists-sidebar/types'
 
 const updatePickerValues = (event: { added?: string; deleted?: string }) => (
@@ -109,6 +109,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial(this, async () => {
+            await this.hydrateStateFromLocalStorage()
             await this.getSharingAccess()
             const listsP = this.loadLocalLists()
             const searchP = this.runSearch(previousState)
@@ -118,6 +119,21 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     /* START - Misc helper methods */
+    async hydrateStateFromLocalStorage() {
+        const listsSidebarLocked =
+            (
+                await this.options.localStorage.get(
+                    STORAGE_KEYS.listSidebarLocked,
+                )
+            )[STORAGE_KEYS.listSidebarLocked] ?? false
+
+        this.emitMutation({
+            listsSidebar: {
+                isSidebarLocked: { $set: listsSidebarLocked },
+            },
+        })
+    }
+
     async getSharingAccess() {
         const isAllowed = await this.options.authBG.isAuthorizedForFeature(
             'beta',
@@ -1460,6 +1476,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isSidebarLocked: { $set: event.isLocked },
                 isSidebarPeeking: { $set: !event.isLocked },
             },
+        })
+
+        await this.options.localStorage.set({
+            [STORAGE_KEYS.listSidebarLocked]: event.isLocked,
         })
     }
 

@@ -1,7 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
-import { StatefulUIElement } from 'src/util/ui-logic'
+import { browser } from 'webextension-polyfill-ts'
 
+import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
 import { RootState, Events, DashboardDependencies, ListSource } from './types'
 import ListsSidebarContainer from './lists-sidebar'
@@ -31,6 +32,7 @@ export class DashboardContainer extends StatefulUIElement<
     Events
 > {
     static defaultProps: Partial<Props> = {
+        localStorage: browser.storage.local,
         contentShareBG: runInBackground(),
         annotationsBG: runInBackground(),
         searchBG: runInBackground(),
