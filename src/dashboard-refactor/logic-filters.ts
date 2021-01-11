@@ -314,16 +314,15 @@ export const constructQueryString = (
  */
 export const syncQueryStringFilters = (
     queryString: string,
-    incomingFilter: SearchFilterDetail,
+    incomingFilter: NewFilterDetail,
 ): string => {
     let resultString: string = ''
     const parsedQuery = parseSearchQuery(queryString)
     const filterPartToUpdate =
-        parsedQuery[findMatchingFilterPartIndex(incomingFilter, parsedQuery)]
+        parsedQuery[getLastMatchingFilterPartIndex(incomingFilter, parsedQuery)]
     if (filterPartToUpdate && filterPartToUpdate.type === 'filter') {
         resultString = updateFiltersInQueryString(queryString, incomingFilter)
-    }
-    if (!filterPartToUpdate) {
+    } else {
         resultString = pushFilterKeyToQueryString(incomingFilter, queryString)
         resultString = updateFiltersInQueryString(resultString, incomingFilter)
     }
@@ -338,10 +337,10 @@ export const syncQueryStringFilters = (
  */
 const updateFiltersInQueryString = (
     queryString: string,
-    newDetail: SearchFilterDetail,
+    newDetail: NewFilterDetail,
 ): string => {
     const parsedQuery = parseSearchQuery(queryString)
-    const updateIndex = findMatchingFilterPartIndex(newDetail, parsedQuery)
+    const updateIndex = getLastMatchingFilterPartIndex(newDetail, parsedQuery)
     const foundPart = parsedQuery[updateIndex]
     if (foundPart.type === 'filter') {
         foundPart.detail.filters = newDetail.filters
@@ -351,18 +350,61 @@ const updateFiltersInQueryString = (
         }
         if (newDetail.type === 'date') {
             foundPart.detail['variant'] = newDetail['variant']
-            if (updateIndex === parsedQuery.length - 1) {
-                parsedQuery.push(
-                    getQueryStringPart(' ', foundPart.endIndex + 1),
-                )
-            }
         }
         if (newDetail.query && newDetail.query.length > 0) {
             foundPart.detail.query = formatFilterQuery(newDetail.query)
         }
+        queryString = formatQueryString('', parsedQuery)
         return constructQueryString(parsedQuery)
     }
     return queryString
+}
+
+const formatQueryString = (
+    queryString: string,
+    parsedQuery?: ParsedSearchQuery,
+): string => {
+    if (!parsedQuery) {
+        parsedQuery = parseSearchQuery(queryString)
+    }
+    parsedQuery.forEach((part, idx) => {
+        const prevPart = parsedQuery[idx - 1]
+        const nextPart = parsedQuery[idx + 1]
+        if (part.type === 'filter') {
+            if (prevPart) {
+                if (
+                    prevPart.type === 'searchString' &&
+                    prevPart.detail.value[prevPart.detail.value.length - 1] !==
+                        ' '
+                ) {
+                    prevPart.detail.value += ' '
+                }
+                if (prevPart.type === 'filter') {
+                    parsedQuery.splice(
+                        idx,
+                        0,
+                        getQueryStringPart(' ', prevPart.endIndex + 1),
+                    )
+                }
+            }
+            if (nextPart) {
+                if (
+                    nextPart.type === 'searchString' &&
+                    nextPart.detail.value[0] !== ' '
+                ) {
+                    nextPart.detail.value = ` ${nextPart.detail.value}`
+                }
+                if (nextPart.type === 'filter') {
+                    parsedQuery.splice(
+                        idx + 1,
+                        0,
+                        getQueryStringPart(' ', prevPart.endIndex + 1),
+                    )
+                }
+            }
+        }
+    })
+    return constructQueryString(parsedQuery)
 }
 
 const formatFilterQuery = (filterQuery: string): string => {
@@ -372,39 +414,43 @@ const formatFilterQuery = (filterQuery: string): string => {
     return filterQuery
 }
 
-export const findMatchingFilterPartIndex = (
+export const getLastMatchingFilterPartIndex = (
     newFilterDetail: NewFilterDetail,
     parsedQuery: ParsedSearchQuery,
 ): number => {
-    const index = parsedQuery.findIndex((part) => {
-        if (part.type !== 'filter') return false
-        if (
-            part.detail.type === 'date' &&
-            part.detail['variant'] === newFilterDetail['variant']
-        )
-            return true
-        if (
-            part.detail.type === newFilterDetail.type &&
-            (newFilterDetail.isExclusion
-                ? part.detail.isExclusion === newFilterDetail.isExclusion
-                : true)
-        )
-            return true
-    })
-    return index
+    let queryPartIndex
+    parsedQuery
+        .slice()
+        .reverse()
+        .forEach((part, idx) => {
+            if (part.type !== 'filter') return false
+            if (
+                part.detail.type === 'date' &&
+                part.detail['variant'] === newFilterDetail['variant']
+            )
+                return (queryPartIndex = idx)
+            if (
+                part.detail.type === newFilterDetail.type &&
+                (newFilterDetail.isExclusion
+                    ? part.detail.isExclusion === newFilterDetail.isExclusion
+                    : true)
+            )
+                return (queryPartIndex = idx)
+        })
+    return Math.abs(queryPartIndex - parsedQuery.length) - 1
 }
 
 const formatFilterString = (filterDetail: NewFilterDetail): string => {
     let rawContent: string = ''
     const isDate = filterDetail.type === 'date'
     rawContent += `${getFilterKeyFromDetail(filterDetail)}:`
-    filterDetail.filters.forEach((filter) => {
+    filterDetail.filters.forEach((filter, idx, arr) => {
         if (/\s/.test(filter) || isDate) {
             rawContent += `"${filter}"`
         } else {
             rawContent += filter
         }
-        if (!isDate) {
+        if (idx !== arr.length - 1) {
             rawContent += ','
         }
     })
@@ -421,7 +467,7 @@ const formatFilterString = (filterDetail: NewFilterDetail): string => {
  * @param queryString
  */
 const pushFilterKeyToQueryString = (
-    incomingFilter: SearchFilterDetail,
+    incomingFilter: NewFilterDetail,
     queryString: string,
 ): string => {
     // ensure that if the queryString is not empty a whitespace precedes the filter part
