@@ -21,7 +21,7 @@ const testStrings: string[] = [
 ]
 
 interface FiltersTestData {
-    updatedFilters: NewFilterDetail
+    newFilterDetail: NewFilterDetail
     newQuery: string
     cursorIndex: number
 }
@@ -67,12 +67,12 @@ export const testData: TestData[] = [
     {
         queryString: `d:domain`,
         filtersData: {
-            updatedFilters: {
+            newFilterDetail: {
                 type: 'domain',
                 filters: ['domain'],
                 query: '',
             },
-            newQuery: `d:domain,`,
+            newQuery: `d:domain`,
             cursorIndex: `d:domain `.length - 1,
         },
         parsedQuery: [
@@ -103,7 +103,7 @@ export const testData: TestData[] = [
     {
         queryString: `search term d:`,
         filtersData: {
-            updatedFilters: {
+            newFilterDetail: {
                 type: 'domain',
                 filters: [],
                 query: 'Doma',
@@ -133,7 +133,7 @@ export const testData: TestData[] = [
     {
         queryString: `c:list`,
         filtersData: {
-            updatedFilters: {
+            newFilterDetail: {
                 type: 'list',
                 filters: [],
             },
@@ -157,7 +157,7 @@ export const testData: TestData[] = [
     {
         queryString: `c:list `,
         filtersData: {
-            updatedFilters: {
+            newFilterDetail: {
                 type: 'list',
                 filters: [],
                 query: 'list',
@@ -169,7 +169,7 @@ export const testData: TestData[] = [
     {
         queryString: `t:tag`,
         filtersData: {
-            updatedFilters: {
+            newFilterDetail: {
                 type: 'domain',
                 filters: [],
                 query: 'domain',
@@ -194,7 +194,7 @@ export const testData: TestData[] = [
     {
         queryString: `from:"date"`,
         filtersData: {
-            updatedFilters: {
+            newFilterDetail: {
                 type: 'date',
                 variant: 'from',
                 filters: ['other date'],
@@ -219,11 +219,11 @@ export const testData: TestData[] = [
     {
         queryString: `to:"date"`,
         filtersData: {
-            updatedFilters: {
+            newFilterDetail: {
                 type: 'tag',
                 filters: ['tagzzz'],
             },
-            newQuery: 'to:"date" t:tagzzz ',
+            newQuery: 'to:"date" t:tagzzz,',
             cursorIndex: 'to:"date" t:tagzzz '.length - 1,
         },
         parsedQuery: [
@@ -244,17 +244,25 @@ export const testData: TestData[] = [
         queryString: ``,
         parsedQuery: [],
         filtersData: {
-            updatedFilters: {
+            newFilterDetail: {
                 type: 'date',
                 variant: 'from',
-                filters: ['dis a date'],
+                filters: [],
             },
-            newQuery: 'from:"dis a date"',
-            cursorIndex: 'from:"dis a date"'.length - 1,
+            newQuery: 'from:',
+            cursorIndex: 'from:'.length - 1,
         },
     },
     {
         queryString: `foo t:foo,"bar"foo`,
+        filtersData: {
+            newFilterDetail: {
+                type: 'tag',
+                filters: ['foo'],
+            },
+            newQuery: `foo t:foo foo`,
+            cursorIndex: `foo t:foo`.length - 1,
+        },
         parsedQuery: [
             {
                 type: 'searchString',
@@ -283,19 +291,11 @@ export const testData: TestData[] = [
                 },
             },
         ],
-        filtersData: {
-            updatedFilters: {
-                type: 'tag',
-                filters: ['foo'],
-            },
-            newQuery: `foo t:foo foo`,
-            cursorIndex: `foo t:foo`.length - 1,
-        },
     },
     {
         queryString: `foo t:foo,bar,"foo bar"" bar"`,
         filtersData: {
-            updatedFilters: {
+            newFilterDetail: {
                 type: 'tag',
                 filters: ['foo', 'bar'],
             },
@@ -332,7 +332,7 @@ export const testData: TestData[] = [
     {
         queryString: `foo t:foo,bar,"foo bar"" bar"`,
         filtersData: {
-            updatedFilters: {
+            newFilterDetail: {
                 type: 'tag',
                 filters: ['foo', 'bar', 'foo bar', 'fooey'],
             },
@@ -343,7 +343,7 @@ export const testData: TestData[] = [
     {
         queryString: `t:foo foo bar foo bar`,
         filtersData: {
-            updatedFilters: {
+            newFilterDetail: {
                 type: 'tag',
                 filters: [],
             },
@@ -444,7 +444,7 @@ export const testData: TestData[] = [
     {
         queryString: `foo t:tag,"other tag"  c:list,"other list"`,
         filtersData: {
-            updatedFilters: {
+            newFilterDetail: {
                 type: 'tag',
                 filters: ['tag', 'other tag'],
                 query: 'yet another ta',
@@ -491,7 +491,7 @@ export const testData: TestData[] = [
     {
         queryString: `foo t:tag,"other tag" d:domain,"other `,
         filtersData: {
-            updatedFilters: {
+            newFilterDetail: {
                 type: 'domain',
                 filters: ['domain', 'other domain'],
             },

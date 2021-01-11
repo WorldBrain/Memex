@@ -40,11 +40,11 @@ describe('Filter parsing logic', () => {
         if (!filtersData) {
             continue
         }
-        const { updatedFilters, newQuery } = filtersData
+        const { newFilterDetail, newQuery } = filtersData
         it(`Should correctly update the query string '${queryString}' to '${newQuery}'`, () => {
             const resultString = syncQueryStringFilters(
                 queryString,
-                updatedFilters,
+                newFilterDetail,
             )
             expect(resultString).toEqual(newQuery)
         })
