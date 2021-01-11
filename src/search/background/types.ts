@@ -59,7 +59,9 @@ export interface AnnotSearchParams {
     base64Img?: boolean
 }
 
-export interface PageSearchParams extends AnnotSearchParams {
+export interface PageSearchParams
+    extends Omit<AnnotSearchParams, 'collections'> {
+    lists?: number[]
     contentTypes: ContentTypes
 }
 

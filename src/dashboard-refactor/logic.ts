@@ -284,9 +284,14 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     private searchPages = async (
-        { searchFilters }: State,
+        { searchFilters, listsSidebar }: State,
         paginate?: boolean,
     ) => {
+        const lists =
+            listsSidebar.selectedListId != null
+                ? [listsSidebar.selectedListId]
+                : undefined
+
         const result = await this.options.searchBG.searchPages({
             contentTypes: {
                 pages: true,
@@ -302,6 +307,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             tagsExc: searchFilters.tagsExcluded,
             limit: searchFilters.limit,
             skip: paginate ? searchFilters.skip + PAGE_SIZE : 0,
+            lists,
         })
 
         return {
@@ -311,9 +317,14 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     private searchNotes = async (
-        { searchFilters }: State,
+        { searchFilters, listsSidebar }: State,
         paginate?: boolean,
     ) => {
+        const collections =
+            listsSidebar.selectedListId != null
+                ? [listsSidebar.selectedListId]
+                : undefined
+
         const result = await this.options.searchBG.searchAnnotations({
             endDate: searchFilters.dateTo,
             startDate: searchFilters.dateFrom,
@@ -324,6 +335,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             tagsExc: searchFilters.tagsExcluded,
             limit: searchFilters.limit,
             skip: paginate ? searchFilters.skip + PAGE_SIZE : 0,
+            collections,
         })
 
         return {
