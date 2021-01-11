@@ -389,17 +389,24 @@ const formatQueryString = (
             }
             if (nextPart) {
                 if (
-                    nextPart.type === 'searchString' &&
-                    nextPart.detail.value[0] !== ' '
-                ) {
-                    nextPart.detail.value = ` ${nextPart.detail.value}`
-                }
-                if (nextPart.type === 'filter') {
-                    parsedQuery.splice(
-                        idx + 1,
-                        0,
-                        getQueryStringPart(' ', prevPart.endIndex + 1),
+                    !(
+                        part.detail.query &&
+                        part.detail.query[part.detail.query.length - 1] === ' '
                     )
+                ) {
+                    if (
+                        nextPart.type === 'searchString' &&
+                        nextPart.detail.value[0] !== ' '
+                    ) {
+                        nextPart.detail.value = ` ${nextPart.detail.value}`
+                    }
+                    if (nextPart.type === 'filter') {
+                        parsedQuery.splice(
+                            idx + 1,
+                            0,
+                            getQueryStringPart(' ', prevPart.endIndex + 1),
+                        )
+                    }
                 }
             }
         }
@@ -450,12 +457,15 @@ const formatFilterString = (filterDetail: NewFilterDetail): string => {
         } else {
             rawContent += filter
         }
-        if (idx !== arr.length - 1) {
+        if (
+            idx !== arr.length - 1 ||
+            (filterDetail.query && filterDetail.query.length > 0)
+        ) {
             rawContent += ','
         }
     })
     if (filterDetail.query && filterDetail.query.length > 0) {
-        rawContent += filterDetail.query
+        rawContent += formatFilterQuery(filterDetail.query)
     }
     return rawContent
 }

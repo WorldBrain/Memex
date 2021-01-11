@@ -199,8 +199,8 @@ export const testData: TestData[] = [
                 variant: 'from',
                 filters: ['other date'],
             },
-            newQuery: 'from:"other date" ',
-            cursorIndex: 'from:"other date" '.length - 1,
+            newQuery: 'from:"other date"',
+            cursorIndex: 'from:"other date"'.length - 1,
         },
         parsedQuery: [
             {
@@ -223,8 +223,8 @@ export const testData: TestData[] = [
                 type: 'tag',
                 filters: ['tagzzz'],
             },
-            newQuery: 'to:"date" t:tagzzz,',
-            cursorIndex: 'to:"date" t:tagzzz '.length - 1,
+            newQuery: 'to:"date" t:tagzzz',
+            cursorIndex: 'to:"date" t:tagzzz'.length - 1,
         },
         parsedQuery: [
             {
@@ -447,10 +447,10 @@ export const testData: TestData[] = [
             newFilterDetail: {
                 type: 'tag',
                 filters: ['tag', 'other tag'],
-                query: 'yet another ta',
+                query: 'yet another ',
             },
-            newQuery: `foo t:tag,"other tag","yet another ta c:list,"other list"`,
-            cursorIndex: `foo t:tag,"other tag","yet another ta`.length - 1,
+            newQuery: `foo t:tag,"other tag","yet another   c:list,"other list"`,
+            cursorIndex: `foo t:tag,"other tag","yet another `.length - 1,
         },
         parsedQuery: [
             {
