@@ -95,6 +95,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 comment={noteData.comment}
                 isBookmarked={noteData.isBookmarked}
                 createdWhen={new Date(noteData.displayTime)}
+                lastEdited={
+                    noteData.isEdited
+                        ? new Date(noteData.displayTime)
+                        : undefined
+                }
                 mode={noteData.isEditing ? 'edit' : 'default'}
                 sharingInfo={this.props.noteSharingInfo[noteId]}
                 sharingAccess={this.props.sharingAccess}
