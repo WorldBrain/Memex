@@ -51,7 +51,6 @@ const template: FiltersBarProps = {
     dateFilterSelectedState: selectedStateTemplate,
     domainFilterSelectedState: selectedStateTemplate,
     tagFilterSelectedState: selectedStateTemplate,
-    listFilterSelectedState: selectedStateTemplate,
     pickerProps: {
         datePickerProps: datePickerPropsTemplate,
     },
@@ -64,7 +63,6 @@ export const filtersBarStoryProps: {
     displayedDomainsSelected: FiltersBarProps
     displayedTagsSelected: FiltersBarProps
     displayedTagsSelectedWithQuery: FiltersBarProps
-    displayedListsSelected: FiltersBarProps
 } = {
     hidden: {
         ...template,
@@ -111,16 +109,6 @@ export const filtersBarStoryProps: {
             },
         },
     },
-    displayedListsSelected: {
-        ...template,
-        listFilterSelectedState: {
-            ...selectedStateTemplate,
-            isSelected: true,
-        },
-        pickerProps: {
-            listPickerProps: genericPickerPropsTemplate,
-        },
-    },
 }
 
 stories.add('Hidden', () => <FiltersBar {...filtersBarStoryProps.hidden} />)
@@ -138,7 +126,4 @@ stories.add('Tag Filter Selected', () => (
 ))
 stories.add('Tag Filter Selected With Input', () => (
     <FiltersBar {...filtersBarStoryProps.displayedTagsSelectedWithQuery} />
-))
-stories.add('List Filter Selected', () => (
-    <FiltersBar {...filtersBarStoryProps.displayedListsSelected} />
 ))

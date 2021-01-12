@@ -7,7 +7,6 @@ import styles, { fonts } from 'src/dashboard-refactor/styles'
 import { remoteFunction } from 'src/util/webextensionRPC'
 
 import TagPickerUnstyled from 'src/tags/ui/TagPicker'
-import CollectionPickerUnstyled from 'src/custom-lists/ui/CollectionPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import DomainPickerUnstyled from './DomainPicker/'
 
@@ -60,10 +59,6 @@ const TextSpan = styled.span`
     line-height: 15px;
 `
 
-const CollectionPicker = styled(CollectionPickerUnstyled)`
-    width: 200px;
-`
-
 const TagPicker = styled(TagPickerUnstyled)`
     width: 200px;
 `
@@ -77,12 +72,10 @@ export interface FiltersBarProps {
     dateFilterSelectedState: SelectedState
     domainFilterSelectedState: SelectedState
     tagFilterSelectedState: SelectedState
-    listFilterSelectedState: SelectedState
     pickerProps: {
         datePickerProps?: DateRangeSelectionProps
         tagPickerProps?: FilterPickerProps
         domainPickerProps?: FilterPickerProps
-        listPickerProps?: FilterPickerProps
     }
 }
 
@@ -163,31 +156,12 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         )
     }
 
-    private renderListPicker = () => {
-        const {
-            initialSelectedEntries,
-            onToggleShowPicker,
-            onEntriesListUpdate,
-        } = this.props.pickerProps.listPickerProps
-        return (
-            <CollectionPicker
-                {...this.props.pickerProps.listPickerProps}
-                onUpdateEntrySelection={onEntriesListUpdate}
-                initialSelectedEntries={async () => initialSelectedEntries}
-                onEscapeKeyDown={onToggleShowPicker}
-                searchInputPlaceholder="Add Collection Filters"
-                removeToolTipText="Remove filter"
-            />
-        )
-    }
-
     render() {
         const {
             isDisplayed,
             dateFilterSelectedState,
             tagFilterSelectedState,
             domainFilterSelectedState,
-            listFilterSelectedState,
         } = this.props
 
         return (
@@ -206,10 +180,6 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             'Tags',
                             tagFilterSelectedState,
                         )}
-                        {this.renderFilterSelectButton(
-                            'Collections',
-                            listFilterSelectedState,
-                        )}
                     </InnerContainer>
                 </Container>
                 <InnerContainer>
@@ -220,8 +190,6 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             this.renderTagPicker()}
                         {domainFilterSelectedState.isSelected &&
                             this.renderDomainPicker()}
-                        {listFilterSelectedState.isSelected &&
-                            this.renderListPicker()}
                     </Margin>
                 </InnerContainer>
             </>
