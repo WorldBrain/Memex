@@ -38,12 +38,8 @@ const initialSelectedEntriesTemplate = [defaultSuggestionsTemplate[0]]
 
 export const genericPickerPropsTemplate: FilterPickerProps = {
     initialSelectedEntries: initialSelectedEntriesTemplate,
-    queryEntries: async (query) => initialSelectedEntriesTemplate,
     onToggleShowPicker: () => {},
-    onEntriesListUpdate: async () => {},
-    onSearchInputChange: () => {},
-    loadDefaultSuggestions: () => defaultSuggestionsTemplate,
-    onSelectedEntriesChange: (evt) => {},
+    onUpdateEntrySelection: async () => {},
 }
 
 const template: FiltersBarProps = {
@@ -105,7 +101,6 @@ export const filtersBarStoryProps: {
         pickerProps: {
             tagPickerProps: {
                 ...genericPickerPropsTemplate,
-                query: 'Generic',
             },
         },
     },

@@ -12,19 +12,7 @@ import {
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { PAGE_SIZE, STORAGE_KEYS } from 'src/dashboard-refactor/constants'
 import { ListData } from './lists-sidebar/types'
-
-const updatePickerValues = (event: { added?: string; deleted?: string }) => (
-    values: string[],
-) => {
-    if (event.added) {
-        return [...new Set([...values, event.added])]
-    }
-    if (event.deleted) {
-        return values.filter((tag) => tag !== event.deleted)
-    }
-
-    return values
-}
+import { updatePickerValues } from './util'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,

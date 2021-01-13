@@ -80,9 +80,9 @@ export interface FiltersBarProps {
 }
 
 export default class FiltersBar extends PureComponent<FiltersBarProps> {
-    private getFilteredDomains: (args: {
-        query: string
-    }) => Promise<string[]> = async ({ query }) => {
+    private queryDomains: (query: string) => Promise<string[]> = async (
+        query,
+    ) => {
         const domainList: string[] = await this.getSuggestedDomains()
         const filteredDomains: string[] = domainList.filter((domain) =>
             domain.startsWith(query),
@@ -121,17 +121,15 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     }
 
     private renderTagPicker = () => {
-        const {
-            initialSelectedEntries,
-            onToggleShowPicker,
-            onEntriesListUpdate,
-        } = this.props.pickerProps.tagPickerProps
+        const { tagPickerProps } = this.props.pickerProps
         return (
             <TagPicker
-                {...this.props.pickerProps.tagPickerProps}
-                onUpdateEntrySelection={onEntriesListUpdate}
-                initialSelectedEntries={async () => initialSelectedEntries}
-                onEscapeKeyDown={onToggleShowPicker}
+                initialSelectedEntries={async () =>
+                    tagPickerProps.initialSelectedEntries
+                }
+                onUpdateEntrySelection={tagPickerProps.onUpdateEntrySelection}
+                onEscapeKeyDown={tagPickerProps.onToggleShowPicker}
+                onClickOutside={tagPickerProps.onToggleShowPicker}
                 searchInputPlaceholder="Add Tag Filters"
                 removeToolTipText="Remove filter"
             />
@@ -139,19 +137,21 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     }
 
     private renderDomainPicker = () => {
-        const {
-            initialSelectedEntries,
-            onToggleShowPicker,
-            onEntriesListUpdate,
-        } = this.props.pickerProps.domainPickerProps
+        const { domainPickerProps } = this.props.pickerProps
         return (
             <DomainPicker
-                {...this.props.pickerProps.domainPickerProps}
-                onUpdateEntrySelection={onEntriesListUpdate}
-                initialSelectedEntries={async () => initialSelectedEntries}
-                onEscapeKeyDown={onToggleShowPicker}
+                initialSelectedEntries={async () =>
+                    domainPickerProps.initialSelectedEntries
+                }
+                onUpdateEntrySelection={
+                    domainPickerProps.onUpdateEntrySelection
+                }
+                onEscapeKeyDown={domainPickerProps.onToggleShowPicker}
+                onClickOutside={domainPickerProps.onToggleShowPicker}
                 searchInputPlaceholder="Add Domain Filters"
                 removeToolTipText="Remove filter"
+                queryEntries={this.queryDomains}
+                loadDefaultSuggestions={this.getSuggestedDomains}
             />
         )
     }

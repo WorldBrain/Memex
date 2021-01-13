@@ -17,12 +17,16 @@ import ShareListModalContent from 'src/overview/sharing/components/ShareListModa
 import { isDuringInstall } from 'src/overview/onboarding/utils'
 import Onboarding from 'src/overview/onboarding'
 import { HelpBtn } from 'src/overview/help-btn'
+import FiltersBar from './header/filters-bar'
 import { AnnotationsSidebarInDashboardResults as NotesSidebar } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { AnnotationsSidebarContainer as NotesSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
 import {
     AnnotationsCacheInterface,
     createAnnotationsCache,
 } from 'src/annotations/annotations-cache'
+import { updatePickerValues } from './util'
+
+const __unimplemented = () => undefined
 
 export interface Props extends DashboardDependencies {}
 
@@ -83,12 +87,82 @@ export class DashboardContainer extends StatefulUIElement<
             this.processEvent('setShareListId', { listId: list.id }),
     })
 
+    private renderFiltersBar() {
+        const { searchFilters, listsSidebar } = this.state
+
+        const toggleShowTagPicker = () =>
+            this.processEvent('setTagFilterActive', {
+                isActive: !searchFilters.isTagFilterActive,
+            })
+        const toggleShowDomainPicker = () =>
+            this.processEvent('setDomainFilterActive', {
+                isActive: !searchFilters.isDomainFilterActive,
+            })
+
+        return (
+            <FiltersBar
+                isDisplayed={searchFilters.searchFiltersOpen}
+                dateFilterSelectedState={{
+                    isSelected: searchFilters.isDateFilterActive,
+                    onSelection: () =>
+                        this.processEvent('setDateFilterActive', {
+                            isActive: !searchFilters.isDateFilterActive,
+                        }),
+                }}
+                domainFilterSelectedState={{
+                    isSelected: searchFilters.isDomainFilterActive,
+                    onSelection: toggleShowDomainPicker,
+                }}
+                tagFilterSelectedState={{
+                    isSelected: searchFilters.isTagFilterActive,
+                    onSelection: toggleShowTagPicker,
+                }}
+                pickerProps={{
+                    datePickerProps: {
+                        startDate: searchFilters.dateFrom,
+                        startDateText: searchFilters.dateFromInput,
+                        endDate: searchFilters.dateTo,
+                        endDateText: searchFilters.dateToInput,
+                        onStartDateChange: (value) =>
+                            this.processEvent('setDateFrom', { value }),
+                        onStartDateTextChange: (value) =>
+                            this.processEvent('setDateFromInputValue', {
+                                value,
+                            }),
+                        onEndDateChange: (value) =>
+                            this.processEvent('setDateTo', { value }),
+                        onEndDateTextChange: (value) =>
+                            this.processEvent('setDateToInputValue', { value }),
+                    },
+                    domainPickerProps: {
+                        onToggleShowPicker: toggleShowDomainPicker,
+                        initialSelectedEntries: searchFilters.domainsIncluded,
+                        onUpdateEntrySelection: (args) =>
+                            this.processEvent('setDomainsIncluded', {
+                                domains: updatePickerValues(args)(
+                                    searchFilters.domainsIncluded,
+                                ),
+                            }),
+                    },
+                    tagPickerProps: {
+                        onToggleShowPicker: toggleShowTagPicker,
+                        initialSelectedEntries: searchFilters.tagsIncluded,
+                        onUpdateEntrySelection: (args) =>
+                            this.processEvent('setTagsIncluded', {
+                                tags: updatePickerValues(args)(
+                                    searchFilters.tagsIncluded,
+                                ),
+                            }),
+                    },
+                }}
+            />
+        )
+    }
+
     private renderHeader() {
         const { searchFilters, listsSidebar } = this.state
         const selectedListName =
             listsSidebar.listData[listsSidebar.selectedListId]?.name
-
-        const unimplemented = () => undefined
 
         return (
             <HeaderContainer
@@ -139,28 +213,28 @@ export class DashboardContainer extends StatefulUIElement<
                 syncStatusMenuProps={{
                     displayState: {
                         isDisplayed: false,
-                        toggleDisplayState: unimplemented,
+                        toggleDisplayState: __unimplemented,
                     },
                     backupRunHoverState: {
                         isHovered: false,
-                        onHoverEnter: unimplemented,
-                        onHoverLeave: unimplemented,
+                        onHoverEnter: __unimplemented,
+                        onHoverLeave: __unimplemented,
                     },
                     syncRunHoverState: {
                         isHovered: false,
-                        onHoverEnter: unimplemented,
-                        onHoverLeave: unimplemented,
+                        onHoverEnter: __unimplemented,
+                        onHoverLeave: __unimplemented,
                     },
                     unSyncedItemState: {
-                        onHideUnSyncedItemCount: unimplemented,
-                        onShowUnSyncedItemCount: unimplemented,
+                        onHideUnSyncedItemCount: __unimplemented,
+                        onShowUnSyncedItemCount: __unimplemented,
                         showUnSyncedItemCount: false,
                         unSyncedItemCount: 0,
                     },
                     lastSuccessfulBackupDateTime: new Date(),
                     lastSuccessfulSyncDateTime: new Date(),
-                    onInitiateBackup: unimplemented,
-                    onInitiateSync: unimplemented,
+                    onInitiateBackup: __unimplemented,
+                    onInitiateSync: __unimplemented,
                     backupState: 'disabled',
                     syncState: 'disabled',
                 }}
@@ -528,6 +602,7 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <Container>
                 {this.renderHeader()}
+                {this.renderFiltersBar()}
                 {this.renderListsSidebar()}
                 {this.renderSearchResults()}
                 {this.renderModals()}
