@@ -13,6 +13,7 @@ import {
 import TagPicker from 'src/tags/ui/TagPicker'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+import Margin from 'src/dashboard-refactor/components/Margin'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 export interface Props
@@ -69,22 +70,31 @@ export default class PageResultView extends PureComponent<Props> {
         return null
     }
 
+    getDomain() {
+        let domain = this.props.fullUrl.split('/')
+
+        return domain[0]
+    }
+
     render() {
         return (
             <ItemBox>
                 <StyledPageResult>
-                    <FavIconBox>
-                        {this.props.favIconURI ? (
-                            <FavIconImg src={this.props.favIconURI} />
-                        ) : (
-                            <FavIconPlaceholder />
-                        )}
-                    </FavIconBox>
                     <PageContentBox>
-                        <PageTitle>{this.props.fullTitle}</PageTitle>
-                        <PageUrl>{this.props.fullUrl}</PageUrl>
+                        <ResultContent>
+                            <FavIconBox>
+                                {this.props.favIconURI ? (
+                                    <FavIconImg src={this.props.favIconURI} />
+                                ) : (
+                                    <FavIconPlaceholder />
+                                )}
+                            </FavIconBox>
+                            <PageUrl>{this.getDomain()}</PageUrl>
+                        </ResultContent>
+                        <PageTitle vertical="10px">
+                            {this.props.fullTitle}
+                        </PageTitle>
                     </PageContentBox>
-
                     <ItemBoxBottom
                         creationInfo={{ createdWhen: this.props.displayTime }}
                         actions={[
@@ -133,14 +143,14 @@ export default class PageResultView extends PureComponent<Props> {
                                 onClick: this.props.onNotesBtnClick,
                                 tooltipText: 'Add/View Notes',
                             },
-                            {
-                                key: 'bookmark-page-btn',
-                                image: this.props.isBookmarked
-                                    ? icons.heartFull
-                                    : icons.heartEmpty,
-                                onClick: this.props.onBookmarkBtnClick,
-                                tooltipText: 'Favorite Page',
-                            },
+                            // {
+                            //     key: 'bookmark-page-btn',
+                            //     image: this.props.isBookmarked
+                            //         ? icons.heartFull
+                            //         : icons.heartEmpty,
+                            //     onClick: this.props.onBookmarkBtnClick,
+                            //     tooltipText: 'Favorite Page',
+                            // },
                         ]}
                     />
                 </StyledPageResult>
@@ -154,18 +164,42 @@ const PopoutContainer = styled.div``
 
 const StyledPageResult = styled.div`
     display: flex;
+    flex-direction: column;
 `
 
-const FavIconBox = styled.div``
+const FavIconBox = styled.div`
+    margin-right: 10px;
+`
 const FavIconPlaceholder = styled.div`
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
     border: 1px solid #efefef;
     border-radius: 30px;
 `
 const FavIconImg = styled.img``
 
-const PageContentBox = styled.div``
+const PageContentBox = styled.div`
+    display: flex;
+    flex-direction: column;
 
-const PageTitle = styled.h1``
-const PageUrl = styled.span``
+    padding: 15px 15px 5px 15px;
+    border-bottom: 1px solid #e0e0e0;
+`
+
+const ResultContent = styled(Margin)`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+`
+
+const PageTitle = styled(Margin)`
+    font-size: 14px;
+    font-weight: bold;
+    color: #3a2f45;
+    justify-content: flex-start;
+`
+const PageUrl = styled.span`
+    font-size: 12px;
+    color: #545454;
+`

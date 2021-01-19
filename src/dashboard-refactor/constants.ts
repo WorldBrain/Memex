@@ -4,13 +4,13 @@ export const sizeConstants = {
     },
     searchBar: {
         heightPx: 50,
-        widthPx: 650,
+        widthPx: 540,
     },
     listsSidebar: {
-        widthPx: 173,
+        widthPx: 150,
     },
     syncStatusMenu: {
-        widthPx: 183,
+        widthPx: 150,
     },
     searchResults: {
         widthPx: 800,

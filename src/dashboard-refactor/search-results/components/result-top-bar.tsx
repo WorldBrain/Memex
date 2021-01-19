@@ -21,7 +21,7 @@ export default class ResultTopBar extends PureComponent<Props> {
 const TopBarContainer = styled.div`
     display: flex;
     justify-content: space-between;
-    1px solid ${colors.lighterGrey};
+    width: 100%;
 `
 
 const TopBarSection = styled.div``

@@ -25,7 +25,6 @@ const SearchBarContainer = styled.div`
 
 const Input = styled.input`
     width: inherit;
-    ${textStyles}
     font-size: 12px;
     line-height: 18px;
     border: none;
@@ -43,7 +42,7 @@ const Input = styled.input`
 const FilterButton = styled.div`
     width: max-content;
     ${textStyles}
-    font-size: 10px;
+    font-size: 12px;
     line-height: 15px;
     cursor: pointer;
 `
@@ -84,7 +83,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         return (
             <Margin vertical="auto">
                 <SearchBarContainer onClick={onSearchBarFocus}>
-                    <FullWidthMargin left="27px">
+                    <FullWidthMargin left="15px">
                         <Input
                             ref={this.inputRef}
                             placeholder={
@@ -96,7 +95,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             autoComplete="off"
                         />
                     </FullWidthMargin>
-                    <Margin horizontal="23px">
+                    <Margin horizontal="15px">
                         <FilterButton onClick={onSearchFiltersOpen}>
                             {searchFiltersOpen ? 'Remove Filters' : 'Filters'}
                         </FilterButton>

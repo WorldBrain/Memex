@@ -37,6 +37,7 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import TagPicker from 'src/tags/ui/TagPicker'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
+import Margin from 'src/dashboard-refactor/components/Margin'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -199,8 +200,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         >(this.props.newNoteInteractionProps, day, normalizedUrl)
 
         return (
-            <>
-                <TopBar
+            <PageNotesBox bottom="10px" left="20px">
+                <NoteTopBarBox
                     leftSide={
                         <NotesTypeDropdownMenu
                             notesTypeSelection={notesType}
@@ -229,7 +230,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 {noteIds[notesType].map(
                     this.renderNoteResult(day, normalizedUrl),
                 )}
-            </>
+            </PageNotesBox>
         )
     }
 
@@ -250,7 +251,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         >(this.props.pagePickerProps, pageId)
 
         return (
-            <>
+            <ResultBox bottom="10px">
                 <PageResult
                     key={pageId + day.toString()}
                     {...interactionProps}
@@ -258,7 +259,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     {...page}
                 />
                 {this.renderPageNotes(page, day)}
-            </>
+            </ResultBox>
         )
     }
 
@@ -293,21 +294,47 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
     render() {
         return (
-            <ResultsContainer>
-                <TopBar
-                    leftSide={<SearchTypeSwitch {...this.props} />}
-                    rightSide={
-                        <ExpandAllNotes
-                            isEnabled={this.props.areAllNotesShown}
-                            onClick={this.props.onShowAllNotesClick}
-                        />
-                    }
-                />
+            <ResultsContainer bottom="100px">
+                <PageTopBarBox bottom="5px">
+                    <TopBar
+                        leftSide={<SearchTypeSwitch {...this.props} />}
+                        rightSide={
+                            <ExpandAllNotes
+                                isEnabled={this.props.areAllNotesShown}
+                                onClick={this.props.onShowAllNotesClick}
+                            />
+                        }
+                    />
+                </PageTopBarBox>
                 {this.renderResultsByDay()}
             </ResultsContainer>
         )
     }
 }
+
+const PageTopBarBox = styled(Margin)`
+    width: 100%;
+    position: st;
+`
+
+const NoteTopBarBox = styled(TopBar)`
+    width: 100%;
+`
+
+const ResultBox = styled(Margin)`
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+`
+
+const PageNotesBox = styled(Margin)`
+    flex-direction: column;
+    justify-content: space-between;
+    width: fill-available;
+    padding-left: 10px;
+    padding-top: 5px;
+    border-left: 3px solid #5cd9a6;
+`
 
 const Loader = styled.div`
     width: 100%;
@@ -316,10 +343,11 @@ const Loader = styled.div`
     justify-content: center;
 `
 
-const ResultsContainer = styled.div`
+const ResultsContainer = styled(Margin)`
     display: flex;
     flex-direction: column;
     align-self: center;
     max-width: ${sizeConstants.searchResults.widthPx}px;
     margin-bottom: 100px;
+    width: fill-available;
 `

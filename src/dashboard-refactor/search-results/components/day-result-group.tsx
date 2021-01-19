@@ -21,6 +21,7 @@ export default class DayResultGroup extends PureComponent<Props> {
 const DayContainer = styled.div`
     display: flex;
     flex-direction: column;
+    width: fill-available;
 `
 
 const DayWhenText = styled.h1``

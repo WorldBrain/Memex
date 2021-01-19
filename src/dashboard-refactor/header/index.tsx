@@ -21,6 +21,8 @@ const Container = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    background: #f5f5f5;
+    z-index: 5000;
 `
 
 const RightHeader = styled.div`
@@ -40,13 +42,20 @@ const SyncStatusIcon = styled.div<{
         styles.components.syncStatusIcon.colors[props.color]};
 `
 
+const SyncStatusHeaderBox = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+`
+
 const SyncStatusHeaderText = styled.span<{
     textCentered: boolean
 }>`
     font-family: ${fonts.primary.name};
     font-weight: ${fonts.primary.weight.bold};
     color: ${fonts.primary.colors.primary};
-    font-size: 10px;
+    font-size: 12px;
     line-height: 15px;
     white-space: nowrap;
     overflow: hidden;
@@ -79,7 +88,7 @@ export default class Header extends PureComponent<HeaderProps> {
                 <SidebarHeader {...sidebarHeaderProps} />
                 <SearchBar {...searchBarProps} />
                 <RightHeader>
-                    <div
+                    <SyncStatusHeaderBox
                         onClick={
                             syncStatusMenuProps.displayState.toggleDisplayState
                         }
@@ -94,7 +103,7 @@ export default class Header extends PureComponent<HeaderProps> {
                             </SyncStatusIcon>
                         </Margin>
                         <SyncStatusHeaderText>Sync Status</SyncStatusHeaderText>
-                    </div>
+                    </SyncStatusHeaderBox>
                     <Margin vertical="auto" horizontal="17px">
                         <a href={SETTINGS_URL}>
                             <Icon heightAndWidth="18px" path={icons.settings} />

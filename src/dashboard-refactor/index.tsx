@@ -25,6 +25,7 @@ import {
     createAnnotationsCache,
 } from 'src/annotations/annotations-cache'
 import { updatePickerValues } from './util'
+import Margin from './components/Margin'
 
 const __unimplemented = () => undefined
 
@@ -603,6 +604,7 @@ export class DashboardContainer extends StatefulUIElement<
             <Container>
                 {this.renderHeader()}
                 {this.renderFiltersBar()}
+                <Margin bottom="10px" />
                 {this.renderListsSidebar()}
                 {this.renderSearchResults()}
                 {this.renderModals()}
@@ -647,4 +649,5 @@ export class DashboardContainer extends StatefulUIElement<
 const Container = styled.div`
     display: flex;
     flex-direction: column;
+    width: fill-available;
 `
