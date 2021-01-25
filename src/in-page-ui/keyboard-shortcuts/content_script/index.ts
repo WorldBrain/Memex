@@ -38,20 +38,11 @@ function prepareShortcutHandler(handler: () => Promise<void>) {
     return function (event) {
         event.preventDefault()
         event.stopPropagation()
-        return handler().catch(catchExtInvalidatedErr)
-    }
-}
-
-/*
- * This is really important. Without it keyboard shortcut listeners set up with Mousetrap
- *  in a content script will clash with listeners set up in future instances of the
- *  content script when they are doubly loaded during an extension update. This ensures
- *  that these situations are caught in the old content script and shortcut listeners
- *  are removed.
- */
-const catchExtInvalidatedErr = (err: Error) => {
-    if (err instanceof RpcError) {
-        resetKeyboardShortcuts()
+        return handler().catch((err) => {
+            if (err instanceof RpcError) {
+                resetKeyboardShortcuts()
+            }
+        })
     }
 }
 
