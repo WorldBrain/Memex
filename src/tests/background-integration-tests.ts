@@ -31,6 +31,7 @@ import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { ServerStorage } from 'src/storage/types'
 import { Browser } from 'webextension-polyfill-ts'
 import { TabManager } from 'src/tab-management/background/tab-manager'
+import { createServices } from 'src/services'
 
 fetchMock.restore()
 
@@ -66,11 +67,14 @@ export async function setupBackgroundIntegrationTest(
     const getServerStorage =
         options?.getServerStorage ?? createLazyMemoryServerStorage()
 
-    const authService = new MemoryAuthService()
-    const subscriptionService = new MemorySubscriptionsService()
+    const services = await createServices({
+        backend: 'memory',
+        getServerStorage,
+    })
+
     const auth: AuthBackground = new AuthBackground({
-        authService,
-        subscriptionService,
+        authService: services.auth,
+        subscriptionService: services.subscriptions,
         scheduleJob: (job: JobDefinition) => {
             console['info'](
                 'Running job immediately while in testing, job:',
@@ -138,6 +142,7 @@ export async function setupBackgroundIntegrationTest(
         fetchPageDataProcessor,
         auth,
         disableSyncEnryption: !options?.enableSyncEncyption,
+        services,
         fetch,
     })
     backgroundModules.sync.initialSync.wrtc = wrtc
@@ -190,8 +195,8 @@ export async function setupBackgroundIntegrationTest(
         browserLocalStorage,
         storageOperationLogger,
         storageChangeDetector,
-        authService,
-        subscriptionService,
+        authService: services.auth as MemoryAuthService,
+        subscriptionService: services.subscriptions as MemorySubscriptionsService,
         getServerStorage,
         browserAPIs,
         fetchPageDataProcessor,

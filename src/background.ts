@@ -22,7 +22,6 @@ import {
     registerBackgroundModuleCollections,
 } from './background-script/setup'
 import { createFirebaseSignalTransport } from './sync/background/signalling'
-import { DevAuthState } from 'src/authentication/background/setup'
 import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import pipeline from 'src/search/pipeline'
@@ -33,6 +32,7 @@ import {
     createLazyServerStorage,
     createServerStorageManager,
 } from './storage/server'
+import { createServices } from './services'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -52,7 +52,14 @@ export async function main() {
     })
 
     const storageManager = initStorex()
+    // TODO: work out how to still lazy load the server storage stuff
+    const services = await createServices({
+        backend: 'memory',
+        getServerStorage,
+    })
+
     const backgroundModules = createBackgroundModules({
+        services,
         getServerStorage,
         signalTransportFactory: createFirebaseSignalTransport,
         analyticsManager: analytics,
@@ -62,9 +69,6 @@ export async function main() {
         getSharedSyncLog: async () =>
             (await getServerStorage()).storageModules.sharedSyncLog,
         storageManager,
-        authOptions: {
-            devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,
-        },
         getIceServers: async () => {
             const firebase = await getFirebase()
             const generateToken = firebase
