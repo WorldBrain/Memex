@@ -52,7 +52,6 @@ export async function main() {
     })
 
     const storageManager = initStorex()
-    // TODO: work out how to still lazy load the server storage stuff
     const services = await createServices({
         backend: 'memory',
         getServerStorage,

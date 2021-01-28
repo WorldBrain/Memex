@@ -8,6 +8,7 @@ import {
 } from 'src/background-script/setup'
 import { MemoryLocalStorage } from 'src/util/tests/local-storage'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
+import { createServices } from 'src/services'
 
 type CommandLineArguments =
     | { command: 'list-collections' }
@@ -49,9 +50,15 @@ async function main() {
         global['URL'] = URL
     }
 
+    const services = await createServices({
+        backend: 'memory',
+        getServerStorage: () => Promise.reject(), // FIXME
+    })
+
     const storageManager = initStorex()
     const backgroundModules = createBackgroundModules({
         getServerStorage: () => Promise.reject(), // FIXME
+        services,
         getSharedSyncLog: null,
         signalTransportFactory: null,
         analyticsManager: null,
