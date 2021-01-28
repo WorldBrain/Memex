@@ -29,10 +29,6 @@ export const tsLoader = {
     },
 }
 
-export const coffeescriptLoader = {
-    loader: 'coffeescript-loader',
-}
-
 export const injectStylesLoader = {
     loader: 'style-loader',
 }
@@ -103,15 +99,6 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
         use: [babelLoader, tsLoader],
     }
 
-    const coffee = {
-        test: /\.coffee?$/,
-        include: path.resolve(
-            context,
-            './src/highlighting/ui/anchoring/anchoring',
-        ),
-        use: [babelLoader, coffeescriptLoader],
-    }
-
     const cssModules = {
         test: /\.css$/,
         include: path.resolve(context, './src'),
@@ -148,16 +135,8 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
     }
 
     if (isCI) {
-        return [main, coffee, imgLoader, cssModules, cssVanilla]
+        return [main, imgLoader, cssModules, cssVanilla]
     }
 
-    return [
-        main,
-        coffee,
-        imgLoader,
-        lint,
-        cssModules,
-        cssVanilla,
-        stringReplaceLoader,
-    ]
+    return [main, imgLoader, lint, cssModules, cssVanilla, stringReplaceLoader]
 }
