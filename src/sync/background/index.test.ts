@@ -1486,6 +1486,7 @@ describe('SyncBackground', () => {
                                     sharedSyncLog,
                                     contentSharing: null,
                                     userManagement: null,
+                                    activityStreams: null,
                                     contentConversations: null,
                                 },
                             }),

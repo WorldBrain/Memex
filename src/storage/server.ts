@@ -12,6 +12,7 @@ import { createOperationLoggingMiddleware } from 'src/storage/middleware'
 import { ContentSharingStorage } from 'src/content-sharing/background/storage'
 import { ServerStorage } from './types'
 import ContentConversationStorage from '@worldbrain/memex-common/lib/content-conversations/storage'
+import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
 
 let shouldLogOperations = false
 
@@ -75,12 +76,16 @@ export function createLazyServerStorage(
             const userManagement = new UserStorage({
                 storageManager,
             })
+            const activityStreams = new ActivityStreamsStorage({
+                storageManager,
+            })
             const serverStorage: ServerStorage = {
                 storageManager,
                 storageModules: {
                     sharedSyncLog,
                     userManagement,
                     contentSharing,
+                    activityStreams,
                     contentConversations,
                 },
             }
