@@ -137,8 +137,6 @@ export async function setupBackgroundIntegrationTest(
         browserAPIs,
         tabManager: options?.tabManager,
         signalTransportFactory: options?.signalTransportFactory,
-        getSharedSyncLog: async () =>
-            (await getServerStorage()).storageModules.sharedSyncLog,
         fetchPageDataProcessor,
         auth,
         disableSyncEnryption: !options?.enableSyncEncyption,
@@ -201,6 +199,7 @@ export async function setupBackgroundIntegrationTest(
         browserAPIs,
         fetchPageDataProcessor,
         injectTime: (injected) => (getTime = injected),
+        services,
         fetch,
     }
 }

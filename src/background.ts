@@ -65,8 +65,6 @@ export async function main() {
         localStorageChangesManager,
         fetchPageDataProcessor,
         browserAPIs: browser,
-        getSharedSyncLog: async () =>
-            (await getServerStorage()).storageModules.sharedSyncLog,
         storageManager,
         getIceServers: async () => {
             const firebase = await getFirebase()

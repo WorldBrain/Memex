@@ -89,11 +89,10 @@ export function createLazyServerStorage(
                     contentConversations,
                 },
             }
-            registerModuleMapCollections(storageManager.registry, {
-                sharedSyncLog,
-                contentSharing,
-                userManagement,
-            })
+            registerModuleMapCollections(
+                storageManager.registry,
+                serverStorage.storageModules,
+            )
             await storageManager.finishInitialization()
 
             return serverStorage
