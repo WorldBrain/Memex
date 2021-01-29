@@ -10,7 +10,8 @@ export type ActivityStatus =
     | 'error'
 
 export interface ActivityIndicatorInterface {
-    hasUnseenActivity: () => Promise<ActivityStatus>
+    checkActivityStatus: () => Promise<ActivityStatus>
+    markActivitiesAsSeen: () => Promise<void>
 }
 
 export default class ActivityIndicatorBackground {
@@ -23,7 +24,8 @@ export default class ActivityIndicatorBackground {
         },
     ) {
         this.remoteFunctions = {
-            hasUnseenActivity: this.hasUnseenActivity,
+            checkActivityStatus: this.checkActivityStatus,
+            markActivitiesAsSeen: this.markActivitiesAsSeen,
         }
     }
 
@@ -31,7 +33,49 @@ export default class ActivityIndicatorBackground {
         makeRemotelyCallable(this.remoteFunctions)
     }
 
-    hasUnseenActivity: ActivityIndicatorInterface['hasUnseenActivity'] = async () => {
-        return 'not-logged-in'
+    checkActivityStatus: ActivityIndicatorInterface['checkActivityStatus'] = async () => {
+        const { activityStreams, auth } = this.options.services
+
+        const user = await auth.getCurrentUser()
+        if (!user) {
+            return 'not-logged-in'
+        }
+
+        const storage = await this.options.getActivityStreamsStorage()
+
+        const [serviceResult, storageResult] = await Promise.all([
+            activityStreams.getHomeFeedInfo(),
+            storage.retrieveHomeFeedTimestamp({
+                user: { type: 'user-reference', id: user.id },
+            }),
+        ])
+
+        if (!serviceResult?.latestActivityTimestamp) {
+            return 'all-seen'
+        }
+
+        if (!storageResult?.timestamp) {
+            return 'has-unseen'
+        }
+
+        return serviceResult.latestActivityTimestamp > storageResult.timestamp
+            ? 'has-unseen'
+            : 'all-seen'
+    }
+
+    markActivitiesAsSeen = async (timestamp = Date.now()) => {
+        const { auth } = this.options.services
+
+        const user = await auth.getCurrentUser()
+        if (!user) {
+            throw new Error('Cannot mark activities as seen if not logged in')
+        }
+
+        const storage = await this.options.getActivityStreamsStorage()
+
+        await storage.updateHomeFeedTimestamp({
+            timestamp,
+            user: { id: user.id, type: 'user-reference' },
+        })
     }
 }
