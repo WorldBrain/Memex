@@ -16,6 +16,7 @@ import { auth, contentSharing } from 'src/util/remote-functions-background'
 import { StaticListItem } from './static-list-item'
 import { show } from 'src/overview/modals/actions'
 import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
+import FeedActivityIndicator from 'src/activity-indicator/ui'
 
 const styles = require('./Index.css')
 
@@ -177,14 +178,14 @@ class ListContainer extends Component {
 
     renderSpecialLists = () => [
         <StaticListItem
-            key={0}
+            key="all-saved-list"
             listName="All Saved"
             isFiltered={!this.props.isListFilterActive}
             onListItemClick={this.props.handleAllSavedClick}
         />,
         ...this.props.specialLists.map((list, i) => (
             <StaticListItem
-                key={i + 1}
+                key={i}
                 listName={list.name}
                 isFiltered={list.isFilterIndex}
                 onListItemClick={this.handleStaticListItemClick(list)}
@@ -195,6 +196,10 @@ class ListContainer extends Component {
                 }
             />
         )),
+        <FeedActivityIndicator
+            key="activity-feed-indicator"
+            openFeedUrl={() => window.open('https://getmemex.com', '_blank')}
+        />,
     ]
 
     renderCreateList = (shouldDisplayForm, value = null) =>

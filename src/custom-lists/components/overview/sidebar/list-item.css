@@ -99,6 +99,21 @@
     font-size: 12px;
 }
 
+.feed {
+    width: 16px;
+    height: 13px;
+    margin-right: 3em;
+    border-radius: 10px;
+}
+
+.feedHasActivity {
+    background-color: #5cd9a6;
+}
+
+.feedNoActivity {
+    background-color: red;
+}
+
 @keyframes appear {
     0% {
         transform: translateX(5px);
