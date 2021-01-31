@@ -1,5 +1,6 @@
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
+import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 
 async function setupTest() {
     const {
@@ -32,6 +33,7 @@ describe('Activity indicator background tests', () => {
     it('should be able to check for unseen activities', async () => {
         const {
             activityIndicatorBG,
+            getServerStorage,
             services: { activityStreams, auth },
         } = await setupTest()
 
@@ -39,24 +41,52 @@ describe('Activity indicator background tests', () => {
             'test',
             'password',
         )
+        const userReference: UserReference = {
+            type: 'user-reference',
+            id: 'test',
+        }
 
         // Not yet any activity
         expect(await activityIndicatorBG.checkActivityStatus()).toEqual(
             'all-seen',
         )
 
+        const { storageModules } = await getServerStorage()
+
+        await storageModules.userManagement.ensureUser(
+            { displayName: 'test' },
+            userReference,
+        )
+
+        const listReference = await storageModules.contentSharing.createSharedList(
+            {
+                listData: { title: 'test-list' },
+                localListId: 123,
+                userReference,
+            },
+        )
+
+        await storageModules.contentSharing.createListEntries({
+            listReference,
+            userReference,
+            listEntries: [
+                {
+                    entryTitle: 'test-title',
+                    originalUrl: 'test.com',
+                    normalizedUrl: 'test.com',
+                },
+            ],
+        })
+
         await activityStreams.addActivity({
             activityType: 'sharedListEntry',
             entityType: 'sharedList',
+            entity: listReference,
             activity: {
                 entryReference: {
                     type: 'shared-list-entry-reference',
-                    id: 'test-list',
+                    id: 1,
                 },
-            },
-            entity: {
-                type: 'shared-list-reference',
-                id: 'test-list',
             },
         })
 
