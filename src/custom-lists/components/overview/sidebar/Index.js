@@ -198,7 +198,9 @@ class ListContainer extends Component {
         )),
         <FeedActivityIndicator
             key="activity-feed-indicator"
-            openFeedUrl={() => window.open('https://getmemex.com', '_blank')}
+            openFeedUrl={() =>
+                window.open('https://memex.social/feed', '_blank')
+            }
         />,
     ]
 

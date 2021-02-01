@@ -1,6 +1,7 @@
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 async function setupTest() {
     const {
@@ -37,58 +38,93 @@ describe('Activity indicator background tests', () => {
             services: { activityStreams, auth },
         } = await setupTest()
 
+        const userAReference: UserReference = {
+            type: 'user-reference',
+            id: 'test-1',
+        }
+        const userBReference: UserReference = {
+            type: 'user-reference',
+            id: 'test-2',
+        }
         await (auth as MemoryAuthService).loginWithEmailAndPassword(
-            'test',
+            userBReference.id as string,
             'password',
         )
-        const userReference: UserReference = {
-            type: 'user-reference',
-            id: 'test',
-        }
 
         // Not yet any activity
         expect(await activityIndicatorBG.checkActivityStatus()).toEqual(
             'all-seen',
         )
 
+        // Set up test data + add reply activity
         const { storageModules } = await getServerStorage()
 
         await storageModules.userManagement.ensureUser(
-            { displayName: 'test' },
-            userReference,
+            { displayName: userAReference.id as string },
+            userAReference,
+        )
+        await storageModules.userManagement.ensureUser(
+            { displayName: userBReference.id as string },
+            userBReference,
         )
 
-        const listReference = await storageModules.contentSharing.createSharedList(
+        const annotationReference: SharedAnnotationReference = {
+            type: 'shared-annotation-reference',
+            id: 'test-annot',
+        }
+
+        const pageInfoReference = await storageModules.contentSharing.createPageInfo(
             {
-                listData: { title: 'test-list' },
-                localListId: 123,
-                userReference,
-            },
-        )
-
-        await storageModules.contentSharing.createListEntries({
-            listReference,
-            userReference,
-            listEntries: [
-                {
-                    entryTitle: 'test-title',
-                    originalUrl: 'test.com',
+                creatorReference: userAReference,
+                pageInfo: {
+                    fullTitle: 'AAAA',
+                    originalUrl: 'https://test.com',
                     normalizedUrl: 'test.com',
                 },
-            ],
+            },
+        )
+        const {
+            sharedAnnotationReferences,
+        } = await storageModules.contentSharing.createAnnotations({
+            creator: userAReference,
+            listReferences: [],
+            annotationsByPage: {
+                ['test.com']: [
+                    {
+                        localId: 'test.com#123',
+                        createdWhen: Date.now(),
+                        comment: 'TESST',
+                    },
+                ],
+            },
+        })
+
+        const {
+            reference: replyReference,
+        } = await storageModules.contentConversations.createReply({
+            annotationReference,
+            normalizedPageUrl: 'test.com',
+            pageCreatorReference: userAReference,
+            userReference: userBReference,
+            reply: { content: 'TEST' },
         })
 
         await activityStreams.addActivity({
-            activityType: 'sharedListEntry',
-            entityType: 'sharedList',
-            entity: listReference,
+            activityType: 'conversationReply',
+            entityType: 'sharedAnnotation',
+            entity: sharedAnnotationReferences['test.com#123'],
             activity: {
-                entryReference: {
-                    type: 'shared-list-entry-reference',
-                    id: 1,
-                },
+                isFirstReply: true,
+                replyReference,
             },
         })
+
+        // Login as other user so that the activity should show up in stream
+        auth.signOut()
+        await (auth as MemoryAuthService).loginWithEmailAndPassword(
+            userAReference.id as string,
+            'password',
+        )
 
         expect(await activityIndicatorBG.checkActivityStatus()).toEqual(
             'has-unseen',
