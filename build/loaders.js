@@ -75,11 +75,12 @@ export const stringReplaceLoader = {
     test: /firebaseui\.css$/,
     loader: 'string-replace-loader',
     include: path.resolve('node_modules/firebaseui/dist/'),
-    query: {
-        search:
-            '@import url(https://fonts.googleapis.com/css?family=Roboto:400,500,700);',
-        replace: '',
-    },
+    // FIXME: Update this to webpack 5
+    // query: {
+    //     search:
+    //         '@import url(https://fonts.googleapis.com/css?family=Roboto:400,500,700);',
+    //     replace: '',
+    // },
 }
 
 export default ({ mode, context, isCI = false, injectStyles = false }) => {

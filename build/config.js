@@ -62,6 +62,11 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
             symlinks: false,
             mainFields: ['browser', 'main', 'module'],
             alias: aliases,
+            fallback: {
+                path: require.resolve('path-browserify'),
+                stream: require.resolve('stream-browserify'),
+                process: require.resolve('process'),
+            },
         },
         stats: {
             assetsSort: 'size',
@@ -70,7 +75,6 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
             cachedAssets: false,
             entrypoints: false,
             excludeAssets: /\.(png|svg)/,
-            maxModules: 5,
         },
         performance: {
             hints: false,

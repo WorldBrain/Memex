@@ -255,7 +255,7 @@ export async function main() {
             action: 'createFromShortcut',
         }),
     })
-    const loadContentScript = createContentScriptLoader()
+    const loadContentScript = createContentScriptLoader({ loadRemotely: false })
     if (shouldIncludeSearchInjection(window.location.hostname)) {
         loadContentScript('search_injection')
     }
@@ -281,8 +281,8 @@ export async function main() {
 }
 
 type ContentScriptLoader = (component: ContentScriptComponent) => Promise<void>
-export function createContentScriptLoader() {
-    const loader: ContentScriptLoader = async (
+export function createContentScriptLoader(args: { loadRemotely: boolean }) {
+    const remoteLoader: ContentScriptLoader = async (
         component: ContentScriptComponent,
     ) => {
         await runInBackground<
@@ -291,7 +291,16 @@ export function createContentScriptLoader() {
             component,
         })
     }
-    return loader
+
+    const localLoader: ContentScriptLoader = async (
+        component: ContentScriptComponent,
+    ) => {
+        const script = document.createElement('script')
+        script.src = `../content_script_${component}.js`
+        document.body.appendChild(script)
+    }
+
+    return args?.loadRemotely ? remoteLoader : localLoader
 }
 
 export function loadRibbonOnMouseOver(loadRibbon: () => void) {

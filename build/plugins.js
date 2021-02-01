@@ -3,14 +3,12 @@ import { EnvironmentPlugin } from 'webpack'
 import ForkTsPlugin from 'fork-ts-checker-webpack-plugin'
 import CopyPlugin from 'copy-webpack-plugin'
 import HtmlPlugin from 'html-webpack-plugin'
-import HtmlIncAssetsPlugin from 'html-webpack-include-assets-plugin'
-import HardSourcePlugin from 'hard-source-webpack-plugin'
+var HtmlWebpackTagsPlugin = require('html-webpack-tags-plugin')
 import StylelintPlugin from 'stylelint-webpack-plugin'
 import BuildNotifPlugin from 'webpack-build-notifier'
 import CssExtractPlugin from 'mini-css-extract-plugin'
 import SentryPlugin from '@sentry/webpack-plugin'
 import ZipPlugin from 'zip-webpack-plugin'
-import ScriptExtHtmlWebpackPlugin from 'script-ext-html-webpack-plugin'
 import PostCompilePlugin from 'post-compile-webpack-plugin'
 import initEnv from './env'
 import * as staticFiles from './static-files'
@@ -45,6 +43,9 @@ export default function ({
         new EnvironmentPlugin(defaultEnv),
         new Dotenv({ path: envPath }),
         new CopyPlugin(staticFiles.copyPatterns),
+        new CssExtractPlugin({
+            filename: '[name].css',
+        }),
         new HtmlPlugin({
             title: 'Popup',
             chunks: ['popup'],
@@ -57,36 +58,31 @@ export default function ({
             filename: 'options.html',
             template: htmlTemplates.options,
         }),
-        new HtmlIncAssetsPlugin({
+        new HtmlWebpackTagsPlugin({
             append: false,
-            assets: staticFiles.htmlAssets,
-        }),
-        new CssExtractPlugin({
-            filename: '[name].css',
-        }),
-        new ScriptExtHtmlWebpackPlugin({
-            async: ['popup.js', 'lib/browser-polyfill.js'],
-            preload: /\.(css|js)$/,
-            prefetch: /\.(svg|png)$/,
+            tags: staticFiles.htmlAssets,
         }),
     ]
 
     if (mode === 'development') {
-        plugins.push(
-            new HardSourcePlugin({
-                environmentHash: {
-                    root: process.cwd(),
-                    directories: [],
-                    files: [
-                        'yarn.lock',
-                        'package-lock.json',
-                        'private/.env.example',
-                        'private/.env.production',
-                        'private/.env.development',
-                    ],
-                },
-            }),
-        )
+        // FIXME: Webpack 5 does not need / is not compatible with this plugin.
+        // is there any config here to update webpack with?
+        //
+        // plugins.push(
+        //     new HardSourcePlugin({
+        //         environmentHash: {
+        //             root: process.cwd(),
+        //             directories: [],
+        //             files: [
+        //                 'yarn.lock',
+        //                 'package-lock.json',
+        //                 'private/.env.example',
+        //                 'private/.env.production',
+        //                 'private/.env.development',
+        //             ],
+        //         },
+        //     }),
+        // )
     } else if (mode === 'production') {
         plugins.push(
             new SentryPlugin({

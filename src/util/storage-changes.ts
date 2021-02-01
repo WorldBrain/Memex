@@ -29,7 +29,11 @@ export class StorageChangesManager {
         this.listeners = new Map<
             StorageAreaName,
             Map<string, StorageKeyListener>
-        >([['sync', new Map()], ['local', new Map()], ['managed', new Map()]])
+        >([
+            ['sync', new Map()],
+            ['local', new Map()],
+            ['managed', new Map()],
+        ])
     }
 
     /**

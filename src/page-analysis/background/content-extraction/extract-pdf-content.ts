@@ -1,15 +1,22 @@
 import { browser } from 'webextension-polyfill-ts'
-import * as PDFJS from 'pdfjs-dist'
+import PDFJS from 'pdfjs-dist/webpack'
 import transformPageText from 'src/util/transform-page-text'
 
 // Run PDF.js to extract text from each page and read document metadata.
 async function extractContent(pdfData: ArrayBuffer) {
+    return {
+        fullText: '',
+        author: '',
+        title: '',
+        keywords: [''],
+    }
     // Point PDF.js to its worker code, a static file in the extension.
     PDFJS.GlobalWorkerOptions.workerSrc = browser.extension.getURL(
-        '/lib/pdf.worker.min.js',
+        'pdf.worker.js',
     )
 
     // Load PDF document into PDF.js
+    // @ts-ignore
     const pdf = await PDFJS.getDocument(pdfData).promise
 
     // Read text from pages one by one (in parallel may be too heavy).

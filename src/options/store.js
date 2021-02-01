@@ -68,8 +68,8 @@ export default function configureStore({ ReduxDevTools = undefined } = {}) {
     initSentry({ reduxMiddlewares: middlewares, stateTransformer })
 
     const enhancers = [
-        overviewPage.enhancer,
-        imports.enhancer,
+        // overviewPage.enhancer,
+        // imports.enhancer,
         applyMiddleware(...middlewares),
     ]
 

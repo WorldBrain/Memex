@@ -9,6 +9,7 @@ import React from 'react'
 import SyncDevicesPaneContainer from '../sync/components/device-list/SyncDevicesPane'
 import DashboardResultsContainer from 'src/overview/components/DashboardResultsContainer'
 import BetaFeaturesScreen from 'src/features/ui/components/BetaFeaturesScreen'
+import Reader from 'src/reader/components/Reader'
 
 export default [
     {
@@ -22,6 +23,13 @@ export default [
         pathname: '/overview',
         component: DashboardResultsContainer,
         icon: 'home',
+        useOwnLayout: true,
+    },
+    {
+        name: 'PDF Reader',
+        pathname: '/read',
+        component: Reader,
+        icon: 'settings',
         useOwnLayout: true,
     },
     {

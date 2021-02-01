@@ -1,0 +1,39 @@
+#!/bin/sh
+
+set -eu
+
+# This script fetches the latest build of PDF.js from the viewer demo
+# page.
+#
+# See https://github.com/mozilla/pdf.js/wiki/Setup-pdf.js-in-a-website#from-examples
+#
+# To update PDF.js to the latest version:
+#
+# 1. Create a new branch and run this script.
+# 2. Rebuild the extension and verify that PDFs work as expected in Chrome
+# 3. Commit the changes to the `src/vendor/` directory
+
+DEST_DIR=src/vendor/pdfjs
+PREFIX=pdf.js-gh-pages
+COMPONENTS="$PREFIX/build $PREFIX/web $PREFIX/LICENSE"
+
+# Download the latest version of the PDF.js library and viewer.
+rm -rf $DEST_DIR
+mkdir -p $DEST_DIR
+
+# Get the latest build of the viewer
+curl -L https://github.com/mozilla/pdf.js/archive/gh-pages.tar.gz \
+  | tar -xz --directory $DEST_DIR --strip-components=1 $COMPONENTS
+
+# Remove example content from viewer
+rm $DEST_DIR/web/*.pdf
+
+# Remove sourcemaps. These increase the size of the extension significantly.
+find $DEST_DIR/ -name '*.map' -delete
+
+# Remove the check that the PDF being loaded is from the same origin as the
+# viewer.
+sed -i -e 's/HOSTED_VIEWER_ORIGINS.includes(viewerOrigin)/true \/*  *\//' $DEST_DIR/web/viewer.js
+
+# Modify the viewer HTML page to load the Hypothesis client.
+#sed -i '' -e 's/<\/head>/<script src="\/pdfjs-init.js"><\/script><\/head>/' $DEST_DIR/web/viewer.html
