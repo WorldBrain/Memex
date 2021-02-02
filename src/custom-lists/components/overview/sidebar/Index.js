@@ -176,6 +176,14 @@ class ListContainer extends Component {
         })
     }
 
+    whichFeed = () => {
+        if (process.env.NODE_ENV === 'production') {
+            return 'https://memex.social/feed'
+        } else {
+            return 'https://staging.memex.social/feed'
+        }
+    }
+
     renderSpecialLists = () => [
         <StaticListItem
             key="all-saved-list"
@@ -198,9 +206,7 @@ class ListContainer extends Component {
         )),
         <FeedActivityIndicator
             key="activity-feed-indicator"
-            openFeedUrl={() =>
-                window.open('https://memex.social/feed', '_blank')
-            }
+            openFeedUrl={() => window.open(this.whichFeed(), '_blank')}
         />,
     ]
 
