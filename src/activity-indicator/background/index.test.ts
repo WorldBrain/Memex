@@ -68,11 +68,6 @@ describe('Activity indicator background tests', () => {
             userBReference,
         )
 
-        const annotationReference: SharedAnnotationReference = {
-            type: 'shared-annotation-reference',
-            id: 'test-annot',
-        }
-
         const pageInfoReference = await storageModules.contentSharing.createPageInfo(
             {
                 creatorReference: userAReference,
@@ -102,7 +97,7 @@ describe('Activity indicator background tests', () => {
         const {
             reference: replyReference,
         } = await storageModules.contentConversations.createReply({
-            annotationReference,
+            annotationReference: sharedAnnotationReferences['test.com#123'],
             normalizedPageUrl: 'test.com',
             pageCreatorReference: userAReference,
             userReference: userBReference,
