@@ -112,6 +112,7 @@ describe('Activity indicator background tests', () => {
                 isFirstReply: true,
                 replyReference,
             },
+            follow: { home: true },
         })
 
         // Login as other user so that the activity should show up in stream
