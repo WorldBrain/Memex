@@ -1,7 +1,6 @@
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 async function setupTest() {
     const {
@@ -38,6 +37,14 @@ describe('Activity indicator background tests', () => {
             services: { activityStreams, auth },
         } = await setupTest()
 
+        const loginTestUser = ({ id }: UserReference) => {
+            auth.signOut()
+            return (auth as MemoryAuthService).loginWithEmailAndPassword(
+                id as string,
+                'password',
+            )
+        }
+
         const userAReference: UserReference = {
             type: 'user-reference',
             id: 'test-1',
@@ -46,17 +53,15 @@ describe('Activity indicator background tests', () => {
             type: 'user-reference',
             id: 'test-2',
         }
-        await (auth as MemoryAuthService).loginWithEmailAndPassword(
-            userBReference.id as string,
-            'password',
-        )
+
+        await loginTestUser(userAReference)
 
         // Not yet any activity
         expect(await activityIndicatorBG.checkActivityStatus()).toEqual(
             'all-seen',
         )
 
-        // Set up test data + add reply activity
+        // Set up pre-req data
         const { storageModules } = await getServerStorage()
 
         await storageModules.userManagement.ensureUser(
@@ -68,16 +73,15 @@ describe('Activity indicator background tests', () => {
             userBReference,
         )
 
-        const pageInfoReference = await storageModules.contentSharing.createPageInfo(
-            {
-                creatorReference: userAReference,
-                pageInfo: {
-                    fullTitle: 'AAAA',
-                    originalUrl: 'https://test.com',
-                    normalizedUrl: 'test.com',
-                },
+        await storageModules.contentSharing.createPageInfo({
+            creatorReference: userAReference,
+            pageInfo: {
+                fullTitle: 'AAAA',
+                originalUrl: 'https://test.com',
+                normalizedUrl: 'test.com',
             },
-        )
+        })
+
         const {
             sharedAnnotationReferences,
         } = await storageModules.contentSharing.createAnnotations({
@@ -94,6 +98,13 @@ describe('Activity indicator background tests', () => {
             },
         })
 
+        // Ensure the annot author follows their own annot
+        await activityStreams.followEntity({
+            entityType: 'sharedAnnotation',
+            entity: sharedAnnotationReferences['test.com#123'],
+            feeds: { home: true },
+        })
+
         const {
             reference: replyReference,
         } = await storageModules.contentConversations.createReply({
@@ -104,6 +115,9 @@ describe('Activity indicator background tests', () => {
             reply: { content: 'TEST' },
         })
 
+        // Login as other user so that reply activity gets assoc. with them (they are the replier)
+        await loginTestUser(userBReference)
+
         await activityStreams.addActivity({
             activityType: 'conversationReply',
             entityType: 'sharedAnnotation',
@@ -112,18 +126,18 @@ describe('Activity indicator background tests', () => {
                 isFirstReply: true,
                 replyReference,
             },
-            follow: { home: true },
         })
 
-        // Login as other user so that the activity should show up in stream
-        auth.signOut()
-        await (auth as MemoryAuthService).loginWithEmailAndPassword(
-            userAReference.id as string,
-            'password',
-        )
+        // Log back in as original user (annotation author), to check their activity status
+        await loginTestUser(userAReference)
 
         expect(await activityIndicatorBG.checkActivityStatus()).toEqual(
             'has-unseen',
+        )
+
+        await activityIndicatorBG.markActivitiesAsSeen()
+        expect(await activityIndicatorBG.checkActivityStatus()).toEqual(
+            'all-seen',
         )
     })
 

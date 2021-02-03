@@ -43,24 +43,29 @@ export default class ActivityIndicatorBackground {
 
         const storage = await this.options.getActivityStreamsStorage()
 
-        const [serviceResult, storageResult] = await Promise.all([
-            activityStreams.getHomeFeedInfo(),
-            storage.retrieveHomeFeedTimestamp({
-                user: { type: 'user-reference', id: user.id },
-            }),
-        ])
+        try {
+            const [serviceResult, storageResult] = await Promise.all([
+                activityStreams.getHomeFeedInfo(),
+                storage.retrieveHomeFeedTimestamp({
+                    user: { type: 'user-reference', id: user.id },
+                }),
+            ])
 
-        if (!serviceResult?.latestActivityTimestamp) {
-            return 'all-seen'
+            if (!serviceResult?.latestActivityTimestamp) {
+                return 'all-seen'
+            }
+
+            if (!storageResult?.timestamp) {
+                return 'has-unseen'
+            }
+
+            return serviceResult.latestActivityTimestamp >
+                storageResult.timestamp
+                ? 'has-unseen'
+                : 'all-seen'
+        } catch (err) {
+            return 'error'
         }
-
-        if (!storageResult?.timestamp) {
-            return 'has-unseen'
-        }
-
-        return serviceResult.latestActivityTimestamp > storageResult.timestamp
-            ? 'has-unseen'
-            : 'all-seen'
     }
 
     markActivitiesAsSeen = async (timestamp = Date.now()) => {
