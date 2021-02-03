@@ -64,6 +64,7 @@ export default class ActivityIndicatorBackground {
                 ? 'has-unseen'
                 : 'all-seen'
         } catch (err) {
+            console.error(err)
             return 'error'
         }
     }
