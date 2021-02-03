@@ -20,6 +20,58 @@ export interface Migrations {
 
 export const migrations: Migrations = {
     /*
+     * There was a bug in some annotation refactoring (due to url normalisation)
+     * that meant some annotations are created with a full url as the prefixed key
+     */
+    'normalise-all-annotation-url-keys': async ({
+        db,
+        storex,
+        normalizeUrl,
+    }) => {
+        // go through all annotation urls that beggin with http
+
+        // update their key to be normalised
+        // update their relations to be normalised (annot bookmarks, etc, )
+        // update social sharing too? yikes,
+
+        const annotationsNormalised = []
+
+        await db
+            .table('annotations')
+            .toCollection()
+            .filter((annot) => annot.url.startsWith('http'))
+            .modify((annot) => {
+                try {
+                    const oldUrl = annot.url
+                    const [url, id] = annot.url.split('#')
+                    annot.url = `${normalizeUrl(url)}#${id}`
+                    // Save the value for updating it's relations
+                    annotationsNormalised.push({ ...annot, ...{ oldUrl } })
+                } catch (e) {
+                    console.error('Error migrating old annotation', annot)
+                    console.error(e)
+                }
+            })
+
+        for (const annotation of annotationsNormalised) {
+            await db
+                .table('annotBookmarks')
+                .where('url')
+                .equals(annotation.oldUrl)
+                .modify((a) => (a.url = annotation.url))
+            await db
+                .table('tags')
+                .where('url')
+                .equals(annotation.oldUrl)
+                .modify((a) => (a.url = annotation.url))
+        }
+
+        console.log(
+            'Fixed normalisation for annotations',
+            annotationsNormalised,
+        )
+    },
+    /*
      * We messed this up due to a bug with our storage layer logic, which means we need to rederive the searchable terms field.
      */
     'searchable-list-name-2': async ({ storex }) => {
