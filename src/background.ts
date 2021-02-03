@@ -53,7 +53,7 @@ export async function main() {
 
     const storageManager = initStorex()
     const services = await createServices({
-        backend: 'memory',
+        backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
         getServerStorage,
     })
 
