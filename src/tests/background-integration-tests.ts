@@ -128,6 +128,11 @@ export async function setupBackgroundIntegrationTest(
         ? new MockFetchPageDataProcessor()
         : null
 
+    let callFirebaseFunction = async (name: string, ...args: any[]) => {
+        throw new Error(
+            `Tried to call Firebase function, but no mock was for that`,
+        )
+    }
     const backgroundModules = createBackgroundModules({
         getNow,
         storageManager,
@@ -142,6 +147,9 @@ export async function setupBackgroundIntegrationTest(
         disableSyncEnryption: !options?.enableSyncEncyption,
         services,
         fetch,
+        callFirebaseFunction: (name, ...args) => {
+            return callFirebaseFunction(name, ...args)
+        },
     })
     backgroundModules.sync.initialSync.wrtc = wrtc
     backgroundModules.sync.initialSync.debug = false
@@ -200,6 +208,9 @@ export async function setupBackgroundIntegrationTest(
         fetchPageDataProcessor,
         injectTime: (injected) => (getTime = injected),
         services,
+        injectCallFirebaseFunction: (injected) => {
+            callFirebaseFunction = injected
+        },
         fetch,
     }
 }

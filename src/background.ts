@@ -74,6 +74,11 @@ export async function main() {
             const response = await generateToken({})
             return response.data.iceServers
         },
+        callFirebaseFunction: <Returns>(name: string, ...args: any[]) => {
+            const firebase = getFirebase()
+            const callable = firebase.functions().httpsCallable(name)
+            return (callable(...args) as any) as Promise<Returns>
+        },
     })
     registerBackgroundModuleCollections(storageManager, backgroundModules)
 

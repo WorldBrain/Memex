@@ -24,6 +24,7 @@ import {
     remoteEventEmitter,
     RemoteEventEmitter,
 } from 'src/util/webextensionRPC'
+import ActivityStreamsBackground from 'src/activity-streams/background'
 
 // interface ListPush {
 //     actionsPending: number
@@ -44,6 +45,8 @@ export default class ContentSharingBackground {
     _scheduledRetry: () => Promise<void>
     _scheduledRetryTimeout: ReturnType<typeof setTimeout>
 
+    _ensuredPages: { [normalizedUrl: string]: string } = {}
+
     private readonly ACTION_RETRY_INTERVAL = 1000 * 60 * 5
 
     // _listPushes: {
@@ -57,6 +60,7 @@ export default class ContentSharingBackground {
             annotationStorage: AnnotationStorage
             auth: AuthBackground
             analytics: Analytics
+            activityStreams: Pick<ActivityStreamsBackground, 'backend'>
             getContentSharing: () => Promise<ContentSharingStorage>
         },
     ) {
@@ -425,6 +429,10 @@ export default class ContentSharingBackground {
                 `Tried to execute sharing action without being authenticated`,
             )
         }
+        if (this._ensuredPages[normalizedPageUrl]) {
+            return this._ensuredPages[normalizedPageUrl]
+        }
+
         const userReference = {
             type: 'user-reference' as 'user-reference',
             id: userId,
@@ -440,7 +448,9 @@ export default class ContentSharingBackground {
             pageInfo: pick(page, 'fullTitle', 'originalUrl', 'normalizedUrl'),
             creatorReference: userReference,
         })
-        return contentSharing.getSharedPageInfoLinkID(reference)
+        const id = contentSharing.getSharedPageInfoLinkID(reference)
+        this._ensuredPages[normalizedPageUrl] = id
+        return id
     }
 
     unshareAnnotationsFromLists: ContentSharingInterface['unshareAnnotationsFromLists'] = async (
@@ -485,12 +495,6 @@ export default class ContentSharingBackground {
                 )
             }
         }
-    }
-
-    sharePage = async (options: {
-        normalizedUrl: string
-    }): Promise<{ remoteId: string }> => {
-        return { remoteId: '' }
     }
 
     unshareAnnotation: ContentSharingInterface['unshareAnnotation'] = async (
@@ -729,10 +733,25 @@ export default class ContentSharingBackground {
             })
         } else if (action.type === 'ensure-page-info') {
             for (const pageInfo of action.data) {
-                await contentSharing.ensurePageInfo({
+                if (this._ensuredPages[pageInfo.normalizedUrl]) {
+                    return
+                }
+                const pageReference = await contentSharing.ensurePageInfo({
                     pageInfo,
                     creatorReference: userReference,
                 })
+                this._ensuredPages[
+                    pageInfo.normalizedUrl
+                ] = contentSharing.getSharedPageInfoLinkID(pageReference)
+                this.options.activityStreams.backend
+                    .followEntity({
+                        entityType: 'sharedPageInfo',
+                        entity: pageReference,
+                        feeds: { home: true },
+                    })
+                    .catch((err) => {
+                        console.error('Error following page: ', err.message)
+                    })
             }
         }
     }
@@ -806,6 +825,25 @@ export default class ContentSharingBackground {
                         normalizedPageUrls: [pageUrl],
                     })
                     const pageTitle = pageTitles[pageUrl]
+
+                    const originalUrl =
+                        'https://' + normalizeUrl(listEntry.fullUrl)
+                    await this.scheduleAction(
+                        {
+                            type: 'ensure-page-info',
+                            data: [
+                                {
+                                    createdWhen: '$now',
+                                    normalizedUrl: pageUrl,
+                                    originalUrl,
+                                    fullTitle: pageTitle,
+                                },
+                            ],
+                        },
+                        {
+                            queueInteraction: 'queue-and-return',
+                        },
+                    )
                     await this.scheduleAction(
                         {
                             type: 'add-shared-list-entries',
@@ -816,9 +854,7 @@ export default class ContentSharingBackground {
                                     createdWhen: Date.now(),
                                     entryTitle: pageTitle,
                                     normalizedUrl: pageUrl,
-                                    originalUrl:
-                                        'https://' +
-                                        normalizeUrl(listEntry.fullUrl),
+                                    originalUrl,
                                 },
                             ],
                         },

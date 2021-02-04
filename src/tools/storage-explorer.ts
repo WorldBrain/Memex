@@ -73,6 +73,7 @@ async function main() {
             },
         } as any,
         fetchPageDataProcessor: new MockFetchPageDataProcessor(),
+        callFirebaseFunction: () => null as any,
     })
     const storageModules = getBackgroundStorageModules(backgroundModules)
 

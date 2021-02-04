@@ -57,8 +57,7 @@ import { PageAnalyzerInterface } from 'src/page-analysis/types'
 import { TabManager } from 'src/tab-management/background/tab-manager'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
 import pick from 'lodash/pick'
-import { Services } from 'src/services/types'
-import ActivityIndicatorBackground from 'src/activity-indicator/background'
+import ActivityStreamsBackground from 'src/activity-streams/background'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -89,6 +88,7 @@ export interface BackgroundModules {
     contentSharing: ContentSharingBackground
     tabManagement: TabManagementBackground
     readwise: ReadwiseBackground
+    activityStreams: ActivityStreamsBackground
 }
 
 const globalFetch: typeof fetch =
@@ -101,6 +101,10 @@ export function createBackgroundModules(options: {
     getServerStorage: () => Promise<ServerStorage>
     signalTransportFactory: SignalTransportFactory
     localStorageChangesManager: StorageChangesManager
+    callFirebaseFunction: <Returns>(
+        name: string,
+        ...args: any[]
+    ) => Promise<Returns>
     fetchPageDataProcessor?: FetchPageProcessor
     tabManager?: TabManager
     auth?: AuthBackground
@@ -121,6 +125,15 @@ export function createBackgroundModules(options: {
         extractRawPageContent: (tabId) =>
             runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),
     })
+    const callFirebaseFunction = <Returns>(name: string, ...args: any[]) => {
+        const call = options.callFirebaseFunction
+        if (!call) {
+            throw new Error(
+                `Tried to call Firebase Function '${name}', but did not provide a function to call it`,
+            )
+        }
+        return call<Returns>(name, ...args)
+    }
 
     const analytics = new AnalyticsBackground(options.analyticsManager, {
         localBrowserStorage: options.browserAPIs.storage.local,
@@ -214,20 +227,20 @@ export function createBackgroundModules(options: {
                 jobScheduler.scheduler,
             ),
             backendFunctions: {
-                registerBetaUser: async (params) => {
-                    const firebase = getFirebase()
-                    const callable = firebase
-                        .functions()
-                        .httpsCallable('registerBetaUser')
-                    await callable(params)
-                },
+                registerBetaUser: async (params) =>
+                    callFirebaseFunction('registerBetaUser', params),
             },
             getUserManagement: async () =>
                 (await options.getServerStorage()).storageModules
                     .userManagement,
         })
 
+    const activityStreams = new ActivityStreamsBackground({
+        storageManager,
+        callFirebaseFunction,
+    })
     const contentSharing = new ContentSharingBackground({
+        activityStreams,
         storageManager,
         customLists: customLists.storage,
         annotationStorage: directLinking.annotationStorage,
@@ -413,6 +426,7 @@ export function createBackgroundModules(options: {
             contextMenuAPI: options.browserAPIs.contextMenus,
         }),
         copyPaster,
+        activityStreams,
         contentSharing,
     }
 }
