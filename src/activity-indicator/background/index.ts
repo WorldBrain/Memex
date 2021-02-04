@@ -1,4 +1,5 @@
 import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
+import * as Raven from 'src/util/raven'
 
 import { Services } from 'src/services/types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
@@ -65,6 +66,7 @@ export default class ActivityIndicatorBackground {
                 : 'all-seen'
         } catch (err) {
             console.error(err)
+            Raven.captureException(err)
             return 'error'
         }
     }

@@ -57,7 +57,9 @@ import { PageAnalyzerInterface } from 'src/page-analysis/types'
 import { TabManager } from 'src/tab-management/background/tab-manager'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
 import pick from 'lodash/pick'
+import ActivityIndicatorBackground from 'src/activity-indicator/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
+import { Services } from 'src/services/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
