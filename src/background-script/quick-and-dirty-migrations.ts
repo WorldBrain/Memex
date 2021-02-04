@@ -28,48 +28,43 @@ export const migrations: Migrations = {
         storex,
         normalizeUrl,
     }) => {
-        // go through all annotation urls that beggin with http
+        const annotations = new Map()
 
-        // update their key to be normalised
-        // update their relations to be normalised (annot bookmarks, etc, )
-        // update social sharing too? yikes,
-
-        const annotationsNormalised = []
-
+        // go through all annotation urls that begin with http
         await db
             .table('annotations')
-            .toCollection()
-            .filter((annot) => annot.url.startsWith('http'))
+            .where('url')
+            .startsWith('http')
             .modify((annot) => {
                 try {
                     const oldUrl = annot.url
+
+                    // Normalise the part before the '#' id
                     const [url, id] = annot.url.split('#')
                     annot.url = `${normalizeUrl(url)}#${id}`
+
                     // Save the value for updating it's relations
-                    annotationsNormalised.push({ ...annot, ...{ oldUrl } })
+                    annotations.set(oldUrl, { ...annot, ...{ oldUrl } })
                 } catch (e) {
                     console.error('Error migrating old annotation', annot)
                     console.error(e)
                 }
             })
 
-        for (const annotation of annotationsNormalised) {
-            await db
-                .table('annotBookmarks')
-                .where('url')
-                .equals(annotation.oldUrl)
-                .modify((a) => (a.url = annotation.url))
-            await db
-                .table('tags')
-                .where('url')
-                .equals(annotation.oldUrl)
-                .modify((a) => (a.url = annotation.url))
-        }
+        await db
+            .table('annotBookmarks')
+            .where('url')
+            .anyOf([...annotations.keys()])
+            .modify((a) => {
+                console.log({ a, url: annotations.get(a.url).url })
+                return (a.url = annotations.get(a.url).url)
+            })
 
-        console.log(
-            'Fixed normalisation for annotations',
-            annotationsNormalised,
-        )
+        await db
+            .table('tags')
+            .where('url')
+            .anyOf([...annotations.keys()])
+            .modify((a) => (a.url = annotations.get(a.url).url))
     },
     /*
      * We messed this up due to a bug with our storage layer logic, which means we need to rederive the searchable terms field.
