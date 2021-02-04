@@ -31,10 +31,6 @@ import alarms from './alarms'
 import { setupNotificationClickListener } from 'src/util/notifications'
 import { StorageChangesManager } from 'src/util/storage-changes'
 import { AuthBackground } from 'src/authentication/background'
-import {
-    createAuthDependencies,
-    DevAuthState,
-} from 'src/authentication/background/setup'
 import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
 import { FeaturesBeta } from 'src/features/background/feature-beta'
 import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
@@ -49,7 +45,6 @@ import { ContentScriptsBackground } from 'src/content-scripts/background'
 import { InPageUIBackground } from 'src/in-page-ui/background'
 import { AnalyticsBackground } from 'src/analytics/background'
 import { Analytics } from 'src/analytics/types'
-import { subscriptionRedirect } from 'src/authentication/background/redirect'
 import { PipelineRes } from 'src/search'
 import CopyPasterBackground from 'src/copy-paster/background'
 import { ReaderBackground } from 'src/reader/background'
@@ -62,6 +57,8 @@ import { PageAnalyzerInterface } from 'src/page-analysis/types'
 import { TabManager } from 'src/tab-management/background/tab-manager'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
 import pick from 'lodash/pick'
+import { Services } from 'src/services/types'
+import ActivityIndicatorBackground from 'src/activity-indicator/background'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -69,6 +66,7 @@ export interface BackgroundModules {
     notifications: NotificationBackground
     social: SocialBackground
     connectivityChecker: ConnectivityCheckerBackground
+    activityIndicator: ActivityIndicatorBackground
     directLinking: DirectLinkingBackground
     pages: PageIndexingBackground
     search: SearchBackground
@@ -98,16 +96,15 @@ const globalFetch: typeof fetch =
 
 export function createBackgroundModules(options: {
     storageManager: StorageManager
+    services: Services
     browserAPIs: Browser
     getServerStorage: () => Promise<ServerStorage>
     signalTransportFactory: SignalTransportFactory
-    getSharedSyncLog: () => Promise<SharedSyncLog>
     localStorageChangesManager: StorageChangesManager
     fetchPageDataProcessor?: FetchPageProcessor
     tabManager?: TabManager
     auth?: AuthBackground
     analyticsManager: Analytics
-    authOptions?: { devAuthState: DevAuthState }
     disableSyncEnryption?: boolean
     getIceServers?: () => Promise<string[]>
     getNow?: () => number
@@ -182,6 +179,12 @@ export function createBackgroundModules(options: {
 
     const social = new SocialBackground({ storageManager })
 
+    const activityIndicator = new ActivityIndicatorBackground({
+        services: options.services,
+        getActivityStreamsStorage: async () =>
+            (await options.getServerStorage()).storageModules.activityStreams,
+    })
+
     const customLists = new CustomListBackground({
         analytics,
         storageManager,
@@ -204,10 +207,8 @@ export function createBackgroundModules(options: {
     const auth =
         options.auth ||
         new AuthBackground({
-            ...createAuthDependencies({
-                ...options.authOptions,
-                redirectUrl: subscriptionRedirect,
-            }),
+            authService: options.services.auth,
+            subscriptionService: options.services.subscriptions,
             localStorageArea: options.browserAPIs.storage.local,
             scheduleJob: jobScheduler.scheduler.scheduleJobOnce.bind(
                 jobScheduler.scheduler,
@@ -317,6 +318,7 @@ export function createBackgroundModules(options: {
         directLinking,
         search,
         eventLog: new EventLogBackground({ storageManager }),
+        activityIndicator,
         customLists,
         tags,
         bookmarks,
@@ -333,7 +335,8 @@ export function createBackgroundModules(options: {
         sync: new SyncBackground({
             signalTransportFactory: options.signalTransportFactory,
             disableEncryption: options.disableSyncEnryption,
-            getSharedSyncLog: options.getSharedSyncLog,
+            getSharedSyncLog: async () =>
+                (await options.getServerStorage()).storageModules.sharedSyncLog,
             getIceServers: options.getIceServers,
             browserAPIs: options.browserAPIs,
             appVersion: process.env.VERSION,
@@ -439,6 +442,7 @@ export async function setupBackgroundModules(
     backgroundModules.directLinking.setupRemoteFunctions()
     backgroundModules.directLinking.setupRequestInterceptor()
     backgroundModules.search.setupRemoteFunctions()
+    backgroundModules.activityIndicator.setupRemoteFunctions()
     backgroundModules.eventLog.setupRemoteFunctions()
     backgroundModules.backupModule.setBackendFromStorage()
     backgroundModules.backupModule.setupRemoteFunctions()

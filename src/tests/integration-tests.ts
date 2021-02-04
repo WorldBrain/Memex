@@ -19,6 +19,7 @@ import { ServerStorage } from 'src/storage/types'
 import { Browser } from 'webextension-polyfill-ts'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 import fetchMock from 'fetch-mock'
+import { Services } from 'src/services/types'
 
 export interface IntegrationTestSuite<StepContext> {
     description: string
@@ -61,6 +62,7 @@ export interface BackgroundIntegrationTestSetup {
     storageManager: StorageManager
     backgroundModules: BackgroundModules
     browserAPIs: Browser
+    services: Services
     fetchPageDataProcessor: MockFetchPageDataProcessor | null
     browserLocalStorage: MemoryBrowserStorage
     storageChangeDetector: StorageChangeDetector
