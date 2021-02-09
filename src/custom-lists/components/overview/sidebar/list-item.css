@@ -94,16 +94,17 @@
     background: #e0e0e0;
     padding: 2px 16px;
     border-radius: 10px;
-    margin: 0 20px;
+    margin: 0 1em;
     font-weight: 600;
     font-size: 12px;
 }
 
 .feed {
-    width: 16px;
-    height: 13px;
-    margin-right: 3em;
+    width: 14px;
+    height: 14px;
+    margin-right: 1em;
     border-radius: 10px;
+    padding: 8px;
 }
 
 .feedHasActivity {
@@ -111,7 +112,7 @@
 }
 
 .feedNoActivity {
-    background-color: red;
+    display: none;
 }
 
 @keyframes appear {
