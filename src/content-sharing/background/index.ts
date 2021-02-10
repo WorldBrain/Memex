@@ -653,12 +653,17 @@ export default class ContentSharingBackground {
                 ),
             })
         } else if (action.type === 'change-shared-list-title') {
-            await contentSharing.updateListTitle(
-                contentSharing.getSharedListReferenceFromLinkID(
-                    action.remoteListId,
-                ),
-                action.newTitle,
-            )
+            if (action.newTitle) {
+                // Check whether newTitle is actually present, because there was a bug
+                // that queued a name change on any change to the list,
+                // even if there was no name change
+                await contentSharing.updateListTitle(
+                    contentSharing.getSharedListReferenceFromLinkID(
+                        action.remoteListId,
+                    ),
+                    action.newTitle,
+                )
+            }
         } else if (action.type === 'share-annotations') {
             const remoteListIds = await Promise.all(
                 action.localListIds.map((localId) =>
