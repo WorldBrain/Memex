@@ -880,6 +880,10 @@ export default class ContentSharingBackground {
             } else if (change.type === 'modify') {
                 if (change.collection === 'customLists') {
                     for (const pk of change.pks) {
+                        if (!change.updates.name) {
+                            continue
+                        }
+
                         const localListId = pk as number
                         const remoteListId = await this.storage.getRemoteListId(
                             {
