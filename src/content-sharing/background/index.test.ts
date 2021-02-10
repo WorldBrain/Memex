@@ -6,6 +6,7 @@ import {
     backgroundIntegrationTest,
     BackgroundIntegrationTestSetup,
     BackgroundIntegrationTestInstance,
+    BackgroundIntegrationTestContext,
 } from 'src/tests/integration-tests'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import * as data from './index.test.data'
@@ -13,6 +14,11 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 function convertRemoteId(id: string) {
     return parseInt(id, 10)
+}
+
+async function setupTest({ setup }: BackgroundIntegrationTestContext) {
+    setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
+    setup.injectCallFirebaseFunction(async <Returns>() => null as Returns)
 }
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
@@ -26,9 +32,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 let remoteListId: string
 
                 return {
-                    setup: async ({ setup }) => {
-                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-                    },
+                    setup: setupTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -131,9 +135,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 let localListId: number
 
                 return {
-                    setup: async ({ setup }) => {
-                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-                    },
+                    setup: setupTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -205,9 +207,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 let localListId: number
 
                 return {
-                    setup: async ({ setup }) => {
-                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-                    },
+                    setup: setupTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -267,9 +267,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 let localListId: number
 
                 return {
-                    setup: async ({ setup }) => {
-                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-                    },
+                    setup: setupTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -321,9 +319,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 let localListId: number
 
                 return {
-                    setup: async ({ setup }) => {
-                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-                    },
+                    setup: setupTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -396,9 +392,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 let localListId: number
 
                 return {
-                    setup: async ({ setup }) => {
-                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-                    },
+                    setup: setupTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -505,9 +499,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 let localListId: number
 
                 return {
-                    setup: async ({ setup }) => {
-                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-                    },
+                    setup: setupTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -613,9 +605,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 let secondLocalListId: number
 
                 return {
-                    setup: async ({ setup }) => {
-                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-                    },
+                    setup: setupTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -773,9 +763,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 let localListId: number
 
                 return {
-                    setup: async ({ setup }) => {
-                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-                    },
+                    setup: setupTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -840,9 +828,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 let secondLocalListId: number
 
                 return {
-                    setup: async ({ setup }) => {
-                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-                    },
+                    setup: setupTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -987,9 +973,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 let localListIds: number[]
 
                 return {
-                    setup: async ({ setup }) => {
-                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-                    },
+                    setup: setupTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -1086,9 +1070,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 let localListIds: number[]
 
                 return {
-                    setup: async ({ setup }) => {
-                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-                    },
+                    setup: setupTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
@@ -1193,9 +1175,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 let localListIds: number[]
 
                 return {
-                    setup: async ({ setup }) => {
-                        setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-                    },
+                    setup: setupTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
