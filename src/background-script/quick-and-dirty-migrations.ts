@@ -55,11 +55,7 @@ export const migrations: Migrations = {
             .table('annotBookmarks')
             .where('url')
             .anyOf([...annotations.keys()])
-            .modify((a) => {
-                console.log({ a, url: annotations.get(a.url).url })
-                return (a.url = annotations.get(a.url).url)
-            })
-
+            .modify((a) => (a.url = annotations.get(a.url).url))
         await db
             .table('tags')
             .where('url')
