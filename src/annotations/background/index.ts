@@ -37,6 +37,7 @@ import { limitSuggestionsStorageLength } from 'src/tags/background'
 import { generateUrl } from 'src/annotations/utils'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import { Analytics } from 'src/analytics/types'
+import { getUrl } from 'src/util/uri-utils'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -253,7 +254,7 @@ export default class DirectLinkingBackground {
         const result = await this.backend.createDirectLink(request)
         await this.annotationStorage.createAnnotation({
             pageTitle,
-            pageUrl: this._normalizeUrl(tab.url),
+            pageUrl: this._normalizeUrl(getUrl(tab.url)),
             body: request.anchor.quote,
             url: result.url,
             selector: request.anchor,
@@ -290,7 +291,7 @@ export default class DirectLinkingBackground {
             },
         )
 
-        url = url == null && tab != null ? tab.url : url
+        url = url == null && tab != null ? getUrl(tab.url) : url
         url = isSocialPost
             ? await this.lookupSocialId(url)
             : this._normalizeUrl(url)
@@ -344,7 +345,7 @@ export default class DirectLinkingBackground {
         toCreate: CreateAnnotationParams,
         { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
-        let fullPageUrl = tab?.url ?? toCreate.pageUrl
+        let fullPageUrl = getUrl(tab?.url) ?? toCreate.pageUrl
         if (!isFullUrl(fullPageUrl)) {
             fullPageUrl = toCreate.pageUrl
             if (!isFullUrl(fullPageUrl)) {

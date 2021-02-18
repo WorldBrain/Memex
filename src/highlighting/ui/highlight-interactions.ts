@@ -18,6 +18,7 @@ import {
 } from 'src/annotations/annotations-cache'
 import { generateUrl } from 'src/annotations/utils'
 import { AnalyticsEvent } from 'src/analytics/types'
+import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
 
 const styles = require('src/highlighting/ui/styles.css')
 
@@ -220,26 +221,29 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     data: highlight,
                 })
 
-                const range = await retryUntil(
+                /*const range = await retryUntil(
                     () => descriptorToRange({ descriptor }),
                     (_range) => _range !== null,
                     {
                         intervalMiliseconds: 200,
                         timeoutMiliseconds: 5000,
                     },
-                )
+                )*/
+                const range = await descriptorToRange({ descriptor })
+                // console.log(`highlight-interactions renderHighlight`,{range})
 
-                markRange({ range, cssClass: baseClass })
+                highlightRange(range, baseClass)
+                // markRange({ range, cssClass: baseClass })
 
                 this.attachEventListenersToNewHighlights(highlight, onClick)
             })
         } catch (e) {
-            Raven.captureException(e)
-            console.error(
-                'MEMEX: Error during annotation anchoring/highlighting:',
-                e,
-            )
-            console.error(e.stack)
+            // Raven.captureException(e)
+            // console.error(
+            //     'MEMEX: Error during annotation anchoring/highlighting:',
+            //     e,
+            // )
+            console.error(e)
             return false
         }
 

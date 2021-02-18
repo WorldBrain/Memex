@@ -2,6 +2,7 @@ import { PipelineRes, SearchIndex } from 'src/search'
 import PageStorage from './background/storage'
 import * as Raven from 'src/util/raven'
 import { PageIndexingBackground } from './background'
+import { getUrl } from 'src/util/uri-utils'
 
 export function pageIsStub(page: PipelineRes): boolean {
     return (
@@ -31,7 +32,7 @@ export async function maybeIndexTabs(
                 .createPage(
                     {
                         tabId: tab.id,
-                        fullUrl: tab.url,
+                        fullUrl: getUrl(tab.url),
                         allowScreenshot: false,
                         visitTime: options.time,
                     },
@@ -40,7 +41,7 @@ export async function maybeIndexTabs(
                 .catch(handleErrors)
 
             if (!error) {
-                indexed.push({ fullUrl: tab.url })
+                indexed.push({ fullUrl: getUrl(tab.url) })
             }
         }),
     )
