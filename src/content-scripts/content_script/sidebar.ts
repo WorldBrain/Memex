@@ -7,8 +7,6 @@ import {
     setupInPageSidebarUI,
     destroyInPageSidebarUI,
 } from 'src/sidebar/annotations-sidebar/index'
-import { runInBackground } from 'src/util/webextensionRPC'
-import { ContentScriptsInterface } from '../background/types'
 import { InPageUIRootMount } from 'src/in-page-ui/types'
 
 export const main: SidebarScriptMain = async (dependencies) => {

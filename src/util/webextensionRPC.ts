@@ -26,10 +26,7 @@ import { EventEmitter } from 'events'
 import { AuthRemoteEvents } from 'src/authentication/background/types'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 import { ContentSharingEvents } from 'src/content-sharing/background/types'
-
-// Our secret tokens to recognise our messages
-const RPC_CALL = '__RPC_CALL__'
-const RPC_RESPONSE = '__RPC_RESPONSE__'
+import { PortBasedRPCManager } from 'src/util/rpc/rpc'
 
 export class RpcError extends Error {
     constructor(message) {
@@ -128,10 +125,12 @@ interface RPCOpts {
 // Runs a remoteFunction in the background script
 export function runInBackground<T extends object>(): T {
     return new Proxy<T>({} as T, {
-        get(target, property): any {
-            return (...args) => {
-                return _remoteFunction(property.toString())(...args)
-            }
+        get(target, property): (...args: any[]) => Promise<any> {
+            return async (...args) =>
+                rpcConnection.postMessageRequestToExtension(
+                    property.toString(),
+                    args,
+                )
         },
     })
 }
@@ -140,9 +139,12 @@ export function runInBackground<T extends object>(): T {
 export function runInTab<T extends object>(tabId): T {
     return new Proxy<T>({} as T, {
         get(target, property): any {
-            return (...args) => {
-                return _remoteFunction(property.toString(), { tabId })(...args)
-            }
+            return (...args) =>
+                rpcConnection.postMessageRequestToTab(
+                    tabId,
+                    property.toString(),
+                    args,
+                )
         },
     })
 }
@@ -151,67 +153,15 @@ export function runInTab<T extends object>(tabId): T {
 export function remoteFunction(
     funcName: string,
     { tabId }: { tabId?: number } = {},
-) {
-    return _remoteFunction(funcName, { tabId })
-}
-
-// Create a proxy function that invokes the specified remote function.
-// Arguments
-// - funcName (required): name of the function as registered on the remote side.
-// - options (optional): {
-//       tabId: The id of the tab whose content script is the remote side.
-//              Leave undefined to call the background script (from a tab).
-//   }
-function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
-    const otherSide =
-        tabId !== undefined
-            ? "the tab's content script"
-            : 'the background script'
-
-    const f = async function (...args) {
-        const message = {
-            [RPC_CALL]: RPC_CALL,
-            funcName,
-            args,
-        }
-
-        // Try send the message and await the response.
-        let response
-        try {
-            response =
-                tabId !== undefined
-                    ? await browser.tabs.sendMessage(tabId, message)
-                    : await browser.runtime.sendMessage(message)
-        } catch (err) {
-            throw new RpcError(err.message)
-        }
-
-        // Check if it was *our* listener that responded.
-        if (!response || response[RPC_RESPONSE] !== RPC_RESPONSE) {
-            throw new RpcError(
-                `RPC got a response from an interfering listener. Wanted ${RPC_RESPONSE} but got ${response?.[RPC_RESPONSE]}. Response:${response}`,
-            )
-        }
-
-        // If we could not invoke the function on the other side, throw an error.
-        if (response.rpcError) {
-            throw new RpcError(response.rpcError)
-        }
-
-        // Return the value or throw the error we received from the other side.
-        if (response.errorMessage) {
-            console.error(
-                `Error occured on remote side, please check it's console for more details`,
-            )
-            throw new RemoteError(response.errorMessage)
-        } else {
-            return response.returnValue
-        }
+): any {
+    // console.log(`depreciated: remoteFunction call for: ${funcName}`)
+    if (tabId) {
+        return (...args) =>
+            rpcConnection.postMessageRequestToTab(tabId, funcName, args)
+    } else {
+        return (...args) =>
+            rpcConnection.postMessageRequestToExtension(funcName, args)
     }
-
-    // Give it a name, could be helpful in debugging
-    Object.defineProperty(f, 'name', { value: `${funcName}_RPC` })
-    return f
 }
 
 // === Executing side ===
@@ -221,56 +171,6 @@ const remotelyCallableFunctions =
 if (typeof window !== 'undefined') {
     window['remoteFunctions'] = remotelyCallableFunctions
 }
-
-async function incomingRPCListener(message, sender) {
-    if (!message || message[RPC_CALL] !== RPC_CALL) {
-        return
-    }
-
-    const funcName = message.funcName
-    const args = message.hasOwnProperty('args') ? message.args : []
-    const func = remotelyCallableFunctions[funcName]
-
-    if (func === undefined) {
-        console.error(`Received RPC for unknown function: ${funcName}`)
-        return {
-            rpcError: `No such function registered for RPC: ${funcName}`,
-            [RPC_RESPONSE]: RPC_RESPONSE,
-        }
-    }
-    const extraArg = {
-        tab: sender.tab,
-    }
-
-    // Run the function
-    let returnValue
-    try {
-        returnValue = func(extraArg, ...args)
-    } catch (error) {
-        console.error(error)
-        return {
-            errorMessage: error.message,
-            [RPC_RESPONSE]: RPC_RESPONSE,
-        }
-    }
-
-    try {
-        returnValue = await returnValue
-        return {
-            returnValue,
-            [RPC_RESPONSE]: RPC_RESPONSE,
-        }
-    } catch (error) {
-        console.error(error)
-        return {
-            errorMessage: error.message,
-            [RPC_RESPONSE]: RPC_RESPONSE,
-        }
-    }
-}
-
-// A bit of global state to ensure we only attach the event listener once.
-let enabled = false
 
 export function setupRemoteFunctionsImplementations<T>(
     implementations: RemoteFunctionImplementations<'provider'>,
@@ -322,15 +222,11 @@ export function makeRemotelyCallable<T>(
             console.warn(error)
         }
     }
-
     // Add the functions to our global repetoir.
     Object.assign(remotelyCallableFunctions, functions)
-
-    // Enable the listener if needed.
-    if (!enabled) {
-        browser.runtime.onMessage.addListener(incomingRPCListener)
-        enabled = true
-    }
+    // console.log('assigned to remotelyCallableFunctions this new functions', {
+    //     functions,
+    // })
 }
 
 export class RemoteFunctionRegistry {
@@ -446,4 +342,17 @@ export function getRemoteEventEmitter<EventType extends keyof RemoteEvents>(
     remoteEventEmitters[eventType] = newEmitter
     registerRemoteEventForwarder()
     return newEmitter
+}
+
+// Containing the evil globals here
+let rpcConnection: PortBasedRPCManager
+export const setRpcConnection = (sideName) => {
+    rpcConnection = new PortBasedRPCManager(
+        sideName,
+        (name) => remotelyCallableFunctions[name],
+        browser.runtime.connect,
+        browser.runtime.onConnect,
+    )
+
+    return rpcConnection
 }

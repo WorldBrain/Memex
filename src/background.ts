@@ -5,7 +5,10 @@ import { createSelfTests } from '@worldbrain/memex-common/lib/self-tests'
 import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
 import initSentry from './util/raven'
-import { setupRemoteFunctionsImplementations } from 'src/util/webextensionRPC'
+import {
+    setRpcConnection,
+    setupRemoteFunctionsImplementations,
+} from 'src/util/webextensionRPC'
 import { StorageChangesManager } from 'src/util/storage-changes'
 
 // Features that require manual instantiation to setup
@@ -35,6 +38,8 @@ import {
 import { createServices } from './services'
 
 export async function main() {
+    setRpcConnection('background').registerListenerForIncomingConnections()
+
     const localStorageChangesManager = new StorageChangesManager({
         storage: browser.storage,
     })
