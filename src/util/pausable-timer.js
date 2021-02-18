@@ -19,6 +19,9 @@ class PausableTimer {
     set delay(val) {
         this._remain = val
     }
+    get delay() {
+        return this._remain
+    }
 
     /**
      * Resumes a paused timer, storing the resumed time and new timer ID as state.

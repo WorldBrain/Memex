@@ -15,6 +15,7 @@ export const eslintLoader = {
     loader: 'eslint-loader',
     options: {
         cache: true,
+        formatter: require('eslint/lib/cli-engine/formatters/stylish'),
     },
 }
 

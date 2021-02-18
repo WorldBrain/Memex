@@ -1,4 +1,5 @@
 // @ts-nocheck
+/* eslint-disable */
 
 /**
  * This module exports a set of classes for converting between DOM `Range`

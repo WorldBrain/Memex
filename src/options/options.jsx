@@ -10,7 +10,6 @@ import routes from './routes'
 import { ModalsContainer } from '../overview/modals/components/ModalsContainer'
 import { AuthContextProvider } from 'src/authentication/components/AuthContextProvider'
 import { setRpcConnection } from 'src/util/webextensionRPC'
-import { browser } from 'webextension-polyfill-ts/src/generated/index'
 
 // Include development tools if we are not building for production
 const ReduxDevTools = undefined
