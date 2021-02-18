@@ -12,6 +12,7 @@ export interface SidebarContainerDependencies {
         topBarLeft?: JSX.Element
     }
     pageUrl?: string
+    getPageUrl: () => string
     pageTitle?: string
     searchResultLimit?: number
     showGoToAnnotationBtn?: boolean

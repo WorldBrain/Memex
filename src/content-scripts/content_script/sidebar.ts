@@ -39,14 +39,10 @@ export const main: SidebarScriptMain = async (dependencies) => {
     )
 
     const setUp = async (options: { showOnLoad?: boolean } = {}) => {
-        const currentTab = await runInBackground<
-            ContentScriptsInterface<'caller'>
-        >().getCurrentTab()
-
         createMount()
         setupInPageSidebarUI(mount, {
             ...dependencies,
-            pageUrl: currentTab.url,
+            pageUrl: dependencies.getPageUrl(),
             initialState: options.showOnLoad ? 'visible' : 'hidden',
         })
     }

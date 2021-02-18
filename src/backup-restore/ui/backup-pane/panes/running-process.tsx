@@ -166,7 +166,7 @@ export default class RunningProcess extends React.Component<Props> {
                     <div className={overviewStyles.showWarning}>
                         <span className={overviewStyles.WarningIcon} />
                         <span className={overviewStyles.showWarningText}>
-                            With a lot of data (> 25.000 pages) it is
+                            With a lot of data ({'>'} 25.000 pages) it is
                             recommended running this over night.
                         </span>
                     </div>

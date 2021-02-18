@@ -30,15 +30,14 @@ export const main: RibbonScriptMain = async (options) => {
     })
 
     const setUp = async () => {
-        const currentTab = await runInBackground<
-            ContentScriptsInterface<'caller'>
-        >().getCurrentTab()
-
         createMount()
         setupRibbonUI(mount.rootElement, {
             containerDependencies: {
                 ...options,
-                currentTab,
+                currentTab: (await browser.tabs?.getCurrent()) ?? {
+                    id: undefined,
+                    url: options.getPageUrl(),
+                },
                 setSidebarEnabled: setSidebarState,
                 getSidebarEnabled: getSidebarState,
             },

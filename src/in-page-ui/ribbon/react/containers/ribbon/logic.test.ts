@@ -59,6 +59,7 @@ describe('Ribbon logic', () => {
         const analytics = new FakeAnalytics()
 
         const ribbonLogic = new RibbonContainerLogic({
+            getPageUrl: () => currentTab.normalizedUrl,
             analytics,
             setRibbonShouldAutoHide: () => undefined,
             getSidebarEnabled: async () => true,

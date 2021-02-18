@@ -38,6 +38,7 @@ import analytics from 'src/analytics'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
 import { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
+import { getUrl } from 'src/util/uri-utils'
 import { browser } from 'webextension-polyfill-ts'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
@@ -50,7 +51,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
     setupPageContentRPC()
     runInBackground<PageIndexingInterface<'caller'>>().setTabAsIndexable()
 
-    const getPageUrl = () => window.location.href
+    const getPageUrl = () => getUrl(window.location.href)
     const getPageTitle = () => document.title
     const getNormalizedPageUrl = () => normalizeUrl(getPageUrl())
 
@@ -152,6 +153,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
                     getState: tooltipUtils.getHighlightsState,
                     setState: tooltipUtils.setHighlightsState,
                 },
+                getPageUrl: getNormalizedPageUrl,
             })
             components.ribbon?.resolve()
         },
@@ -182,6 +184,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
                 analytics,
                 copyToClipboard,
+                getPageUrl,
             })
             components.sidebar?.resolve()
         },
@@ -257,7 +260,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
             action: 'createFromShortcut',
         }),
     })
-    const loadContentScript = createContentScriptLoader()
+    const loadContentScript = createContentScriptLoader({ loadRemotely })
     if (shouldIncludeSearchInjection(window.location.hostname)) {
         loadContentScript('search_injection')
     }
@@ -283,8 +286,8 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
 }
 
 type ContentScriptLoader = (component: ContentScriptComponent) => Promise<void>
-export function createContentScriptLoader() {
-    const loader: ContentScriptLoader = async (
+export function createContentScriptLoader(args: { loadRemotely: boolean }) {
+    const remoteLoader: ContentScriptLoader = async (
         component: ContentScriptComponent,
     ) => {
         await runInBackground<
@@ -293,7 +296,16 @@ export function createContentScriptLoader() {
             component,
         })
     }
-    return loader
+
+    const localLoader: ContentScriptLoader = async (
+        component: ContentScriptComponent,
+    ) => {
+        const script = document.createElement('script')
+        script.src = `../content_script_${component}.js`
+        document.body.appendChild(script)
+    }
+
+    return args?.loadRemotely ? remoteLoader : localLoader
 }
 
 export function loadRibbonOnMouseOver(loadRibbon: () => void) {
@@ -305,5 +317,3 @@ export function loadRibbonOnMouseOver(loadRibbon: () => void) {
     }
     document.addEventListener('mousemove', listener)
 }
-
-main()

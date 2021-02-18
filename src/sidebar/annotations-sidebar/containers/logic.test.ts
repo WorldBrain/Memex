@@ -60,6 +60,7 @@ const setupLogicHelper = async ({
         searchResultLimit: 10,
         focusCreateForm,
         copyToClipboard,
+        getPageUrl: () => pageUrl,
     })
 
     const sidebar = device.createElement(sidebarLogic)

@@ -151,13 +151,5 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
         return [main, coffee, imgLoader, cssModules, cssVanilla]
     }
 
-    return [
-        main,
-        coffee,
-        imgLoader,
-        lint,
-        cssModules,
-        cssVanilla,
-        stringReplaceLoader,
-    ]
+    return [main, imgLoader, lint, cssModules, cssVanilla, stringReplaceLoader]
 }

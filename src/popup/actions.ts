@@ -8,6 +8,7 @@ import { acts as collectionActs } from './collections-button'
 import { acts as blacklistActs } from './blacklist-button'
 import { TabManagementInterface } from 'src/tab-management/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
+import { getUrl } from 'src/util/uri-utils'
 
 const fetchPageTagsRPC = remoteFunction('fetchPageTags')
 const fetchListsRPC = remoteFunction('fetchListPagesByUrl')
@@ -30,7 +31,7 @@ const getCurrentTab = async () => {
             currentWindow: true,
         })
     } else {
-        const url = window.location.href
+        const url = getUrl(window.location.href)
         if (url) {
             currentTab = await tabs.fetchTabByUrl(url)
         }
