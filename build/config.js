@@ -5,7 +5,7 @@ import initPlugins from './plugins'
 import initMinimizers from './minimizers'
 import { externalTsModules } from './external'
 
-export const extensions = ['.ts', '.tsx', '.js', '.jsx', '.coffee']
+export const extensions = ['.ts', '.tsx', '.js', '.jsx']
 
 export const entry = {
     background: './src/background.ts',
