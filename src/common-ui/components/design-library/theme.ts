@@ -14,6 +14,8 @@ export const theme: Theme = {
         warning: 'red',
         primary: '#3a2f45',
         subText: '#aeaeae',
+        purple: '#5671cf',
+        darkgrey: '#545454',
         secondary: '#5cd9a6',
         grey: '#e0e0e0',
         black: '000',
