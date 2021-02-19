@@ -239,7 +239,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 this.sharingData.state,
                             ),
                         },
-                        {
+                        footerDeps.toggleBookmark && {
                             key: 'bookmark-note-btn',
                             image: this.props.isBookmarked
                                 ? icons.heartFull

@@ -446,20 +446,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageBookmark: EventHandler<'setPageBookmark'> = ({ event }) => {
-        this.emitMutation({
-            searchResults: {
-                pageData: {
-                    byId: {
-                        [event.id]: {
-                            isBookmarked: { $set: event.isBookmarked },
-                        },
-                    },
-                },
-            },
-        })
-    }
-
     setPageTags: EventHandler<'setPageTags'> = async ({ event }) => {
         this.emitMutation({
             searchResults: {
@@ -1006,20 +992,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     byId: {
                         [event.noteId]: {
                             areRepliesShown: { $set: event.areShown },
-                        },
-                    },
-                },
-            },
-        })
-    }
-
-    setNoteBookmark: EventHandler<'setNoteBookmark'> = ({ event }) => {
-        this.emitMutation({
-            searchResults: {
-                noteData: {
-                    byId: {
-                        [event.noteId]: {
-                            isBookmarked: { $set: event.isBookmarked },
                         },
                     },
                 },

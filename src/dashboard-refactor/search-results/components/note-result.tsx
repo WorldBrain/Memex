@@ -189,14 +189,6 @@ export default class NoteResultView extends PureComponent<Props> {
                                 onClick: this.props.onReplyBtnClick,
                                 tooltipText: 'Reply To Note',
                             },
-                            {
-                                key: 'bookmark-note-btn',
-                                image: this.props.isBookmarked
-                                    ? icons.heartFull
-                                    : icons.heartEmpty,
-                                onClick: this.props.onBookmarkBtnClick,
-                                tooltipText: 'Favorite Note',
-                            },
                         ]}
                     />
                 </StyledNoteResult>

@@ -94,7 +94,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 key={noteId}
                 body={noteData.highlight}
                 comment={noteData.comment}
-                isBookmarked={noteData.isBookmarked}
                 createdWhen={new Date(noteData.displayTime)}
                 lastEdited={
                     noteData.isEdited
@@ -173,7 +172,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     onEditIconClick: interactionProps.onEditBtnClick,
                     onShareClick: interactionProps.onShareBtnClick,
                     onUnshareClick: interactionProps.onShareBtnClick,
-                    toggleBookmark: interactionProps.onBookmarkBtnClick,
                 }}
             />
         )

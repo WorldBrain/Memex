@@ -16,7 +16,6 @@ import {
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
     onTagPickerBtnClick: React.MouseEventHandler
-    onBookmarkBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
 }
@@ -115,12 +114,10 @@ export type PageData = Pick<
     normalizedUrl: string
     lists: string[]
     displayTime: number
-    isBookmarked: boolean
 }
 
 export interface NoteResult {
     isEditing: boolean
-    isBookmarked: boolean
     areRepliesShown: boolean
     isTagPickerShown: boolean
     isShareMenuShown: boolean
@@ -201,7 +198,6 @@ export type Events = UIEvent<{
         deleted?: string
         skipPageIndexing?: boolean
     }
-    setPageBookmark: { id: string; isBookmarked: boolean }
     confirmPageDelete: null
     cancelPageDelete: null
 
@@ -227,7 +223,6 @@ export type Events = UIEvent<{
     setNoteCopyPasterShown: NoteEventArgs & { isShown: boolean }
     setNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
-    setNoteBookmark: NoteEventArgs & { isBookmarked: boolean }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
     showNoteShareMenu: NoteEventArgs

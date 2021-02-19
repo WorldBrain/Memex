@@ -143,14 +143,6 @@ export default class PageResultView extends PureComponent<Props> {
                                 onClick: this.props.onNotesBtnClick,
                                 tooltipText: 'Add/View Notes',
                             },
-                            // {
-                            //     key: 'bookmark-page-btn',
-                            //     image: this.props.isBookmarked
-                            //         ? icons.heartFull
-                            //         : icons.heartEmpty,
-                            //     onClick: this.props.onBookmarkBtnClick,
-                            //     tooltipText: 'Favorite Page',
-                            // },
                         ]}
                     />
                 </StyledPageResult>

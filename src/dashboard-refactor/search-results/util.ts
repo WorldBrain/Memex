@@ -84,7 +84,6 @@ export const getInitialPageResultState = (
 
 export const getInitialNoteResultState = (): NoteResult => ({
     isEditing: false,
-    isBookmarked: false,
     areRepliesShown: false,
     isTagPickerShown: false,
     isShareMenuShown: false,
@@ -99,7 +98,6 @@ const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
     fullTitle: pageResult.title,
     normalizedUrl: pageResult.url,
     displayTime: pageResult.displayTime,
-    isBookmarked: pageResult.hasBookmark,
 })
 
 const annotationToNoteData = (
@@ -110,7 +108,6 @@ const annotationToNoteData = (
     highlight: annotation.body,
     comment: annotation.comment,
     tags: annotation.tags ?? [],
-    isBookmarked: annotation.isBookmarked ?? false,
     areRepliesShown: false,
     isTagPickerShown: false,
     isCopyPasterShown: false,

@@ -64,34 +64,6 @@ describe('Dashboard search results logic', () => {
     })
 
     describe('page data state mutations', () => {
-        it('should be able to toggle page bookmarks', async ({ device }) => {
-            const { searchResults } = await setupTest(device, {
-                seedData: setPageSearchResult(),
-            })
-            const pageId = DATA.PAGE_2.normalizedUrl
-
-            expect(
-                searchResults.state.searchResults.pageData.byId[pageId]
-                    .isBookmarked,
-            ).toBe(false)
-            await searchResults.processEvent('setPageBookmark', {
-                id: pageId,
-                isBookmarked: true,
-            })
-            expect(
-                searchResults.state.searchResults.pageData.byId[pageId]
-                    .isBookmarked,
-            ).toBe(true)
-            await searchResults.processEvent('setPageBookmark', {
-                id: pageId,
-                isBookmarked: false,
-            })
-            expect(
-                searchResults.state.searchResults.pageData.byId[pageId]
-                    .isBookmarked,
-            ).toBe(false)
-        })
-
         it('should be able to set page tags', async ({ device }) => {
             const { searchResults } = await setupTest(device, {
                 seedData: setPageSearchResult(),
@@ -1011,38 +983,6 @@ describe('Dashboard search results logic', () => {
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .areRepliesShown,
-                ).toEqual(false)
-            })
-
-            it('should be able to toggle note bookmark state', async ({
-                device,
-            }) => {
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                })
-                const noteId = DATA.NOTE_2.url
-
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId]
-                        .isBookmarked,
-                ).toEqual(false)
-
-                await searchResults.processEvent('setNoteBookmark', {
-                    noteId,
-                    isBookmarked: true,
-                })
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId]
-                        .isBookmarked,
-                ).toEqual(true)
-
-                await searchResults.processEvent('setNoteBookmark', {
-                    noteId,
-                    isBookmarked: false,
-                })
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId]
-                        .isBookmarked,
                 ).toEqual(false)
             })
 

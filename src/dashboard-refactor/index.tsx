@@ -365,12 +365,6 @@ export class DashboardContainer extends StatefulUIElement<
                     this.processEvent('setSearchType', { searchType: 'pages' })
                 }
                 pageInteractionProps={{
-                    onBookmarkBtnClick: (day, pageId) => () =>
-                        this.processEvent('setPageBookmark', {
-                            id: pageId,
-                            isBookmarked: !searchResults.pageData.byId[pageId]
-                                .isBookmarked,
-                        }),
                     onNotesBtnClick: (day, pageId) => (e) => {
                         if (e.shiftKey) {
                             this.notesSidebarRef.current.toggleSidebarShowForPageId(
@@ -477,12 +471,6 @@ export class DashboardContainer extends StatefulUIElement<
                             noteId,
                             isShown: !searchResults.noteData.byId[noteId]
                                 .isTagPickerShown,
-                        }),
-                    onBookmarkBtnClick: (noteId) => () =>
-                        this.processEvent('setNoteBookmark', {
-                            noteId,
-                            isBookmarked: !searchResults.noteData.byId[noteId]
-                                .isBookmarked,
                         }),
                     onCopyPasterBtnClick: (noteId) => () =>
                         this.processEvent('setNoteCopyPasterShown', {
