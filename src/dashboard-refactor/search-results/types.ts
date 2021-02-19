@@ -190,7 +190,12 @@ export type Events = UIEvent<{
     setAllNotesShown: { areShown: boolean }
 
     // Page data state mutations (*shared with all* occurences of the page in different days)
-    setPageTags: { id: string; added?: string; deleted?: string }
+    setPageTags: {
+        id: string
+        fullPageUrl: string
+        added?: string
+        deleted?: string
+    }
     setPageLists: {
         id: string
         fullPageUrl: string

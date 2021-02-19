@@ -423,6 +423,8 @@ export class DashboardContainer extends StatefulUIElement<
                     onTagPickerUpdate: (pageId) => (args) =>
                         this.processEvent('setPageTags', {
                             id: pageId,
+                            fullPageUrl:
+                                searchResults.pageData.byId[pageId].fullUrl,
                             ...args,
                         }),
                 }}

@@ -115,7 +115,7 @@ export const getInitialNoteResultState = (): NoteResult => ({
 const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
     tags: pageResult.tags,
     lists: pageResult.lists,
-    fullUrl: pageResult.url,
+    fullUrl: pageResult.fullUrl,
     fullTitle: pageResult.title,
     normalizedUrl: pageResult.url,
     displayTime: pageResult.displayTime,

@@ -460,9 +460,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
 
         await this.options.tagsBG.updateTagForPage({
-            url: event.id,
-            added: event.added,
+            url: event.fullPageUrl,
             deleted: event.deleted,
+            added: event.added,
         })
     }
 

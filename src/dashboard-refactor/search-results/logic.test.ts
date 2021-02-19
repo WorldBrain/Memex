@@ -69,6 +69,7 @@ describe('Dashboard search results logic', () => {
                 seedData: setPageSearchResult(),
             })
             const pageId = DATA.PAGE_2.normalizedUrl
+            const fullPageUrl = DATA.PAGE_2.fullUrl
 
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId].tags,
@@ -76,10 +77,12 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent('setPageTags', {
                 id: pageId,
+                fullPageUrl,
                 added: DATA.TAG_1,
             })
             await searchResults.processEvent('setPageTags', {
                 id: pageId,
+                fullPageUrl,
                 added: DATA.TAG_2,
             })
 
@@ -89,6 +92,7 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent('setPageTags', {
                 id: pageId,
+                fullPageUrl,
                 deleted: DATA.TAG_1,
             })
 
@@ -98,6 +102,7 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent('setPageTags', {
                 id: pageId,
+                fullPageUrl,
                 added: DATA.TAG_3,
             })
 

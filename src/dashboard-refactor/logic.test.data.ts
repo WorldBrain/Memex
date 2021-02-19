@@ -12,6 +12,7 @@ const pageDataToSearchRes = (
     notes: NoteData[] = [],
 ): AnnotPage => ({
     url: page.normalizedUrl,
+    fullUrl: page.fullUrl,
     title: page.fullTitle,
     hasBookmark: false,
     annotations: notes.map((note) => noteDataToSearchRes(note, page)),
