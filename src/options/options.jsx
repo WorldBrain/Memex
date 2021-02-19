@@ -17,7 +17,7 @@ const ReduxDevTools = undefined
 //     ? require('src/dev/redux-devtools-component').default
 //     : undefined
 
-setRpcConnection('extension-page-options').registerConnectionToBackground()
+setupRpcConnection({ sideName: 'extension-page-options', role: 'content' })
 
 const store = configureStore({ ReduxDevTools })
 

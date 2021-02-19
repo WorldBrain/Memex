@@ -6,7 +6,7 @@ import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
 import initSentry from './util/raven'
 import {
-    setRpcConnection,
+    setupRpcConnection,
     setupRemoteFunctionsImplementations,
 } from 'src/util/webextensionRPC'
 import { StorageChangesManager } from 'src/util/storage-changes'
@@ -38,7 +38,7 @@ import {
 import { createServices } from './services'
 
 export async function main() {
-    setRpcConnection('background').registerListenerForIncomingConnections()
+    setupRpcConnection({ sideName: 'background', role: 'background' })
 
     const localStorageChangesManager = new StorageChangesManager({
         storage: browser.storage,
