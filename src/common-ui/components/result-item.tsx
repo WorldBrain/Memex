@@ -14,6 +14,8 @@ import { SocialPage } from 'src/social-integration/types'
 import PageResultItem from './page-result-item'
 import SocialResultItem from './social-result-item'
 import SemiCircularRibbon from './semi-circular-ribbon'
+import { isFullUrlPDF } from 'src/util/uri-utils'
+import { getExtURL } from 'src/in-page-ui/tooltip/utils'
 
 const styles = require('./result-item.css')
 
@@ -69,6 +71,12 @@ export interface Props extends Partial<SocialPage> {
 
 class ResultItem extends PureComponent<Props> {
     get hrefToPage() {
+        if (isFullUrlPDF(this.props.fullUrl)) {
+            return `${getExtURL('/pdfjs/viewer.html')}?file=${
+                this.props.fullUrl
+            }`
+        }
+
         return `${this.props.fullUrl}`
     }
 
