@@ -17,8 +17,29 @@ import {
     NoteFormState,
     RootState,
     NestedResults,
+    NotesType,
 } from './types'
 import { Annotation } from 'src/annotations/types'
+
+export const notesTypeToString = (type: NotesType): string => {
+    if (type === 'user') {
+        return 'Your notes'
+    }
+    if (type === 'followed') {
+        return 'Shared with you'
+    }
+    return 'Results'
+}
+
+export const stringToNotesType = (str: string): NotesType => {
+    if (str === 'Your notes') {
+        return 'user'
+    }
+    if (str === 'Shared with you') {
+        return 'followed'
+    }
+    return 'search'
+}
 
 export const formatDayGroupTime = (day: number) =>
     moment(day).calendar(null, {

@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import { NotesType } from '../types'
-import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
+import { notesTypeToString, stringToNotesType } from '../util'
 
 export interface Props {
     notesTypeSelection: NotesType
@@ -14,22 +14,22 @@ export default class NotesTypeDropdownMenu extends PureComponent<Props> {
         return (
             <DropdownMenuBtn
                 keepSelectedState
-                initSelectedIndex={1}
+                initSelectedIndex={0}
                 onMenuItemClick={({ name }) =>
-                    this.props.onNotesTypeSelection(name as NotesType)
+                    this.props.onNotesTypeSelection(stringToNotesType(name))
                 }
-                btnChildren="Results"
+                btnChildren={notesTypeToString(this.props.notesTypeSelection)}
                 menuItems={[
+                    // {
+                    //     name: notesTypeToString('search'),
+                    //     info: 'Notes that match the search results',
+                    // },
                     {
-                        name: 'Results',
-                        info: 'Notes that match the search results',
-                    },
-                    {
-                        name: 'Your notes',
+                        name: notesTypeToString('user'),
                         info: 'All notes you made on this page',
                     },
                     {
-                        name: 'Shared with you',
+                        name: notesTypeToString('followed'),
                         info: 'Notes shared with you via collections',
                     },
                 ]}
