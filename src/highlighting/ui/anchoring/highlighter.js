@@ -53,6 +53,7 @@
 // @ts-nocheck
 /* eslint-disable */
 import { isNodeInRange } from './range-util'
+import { colorBrandMintGreen } from 'src/common-ui/components/design-library/colors'
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
 
@@ -167,6 +168,7 @@ function drawHighlightsAbovePdfCanvas(highlightEl) {
 
     if (isCssBlendSupported) {
         rect.setAttribute('class', 'hypothesis-svg-highlight')
+        rect.setAttribute('style', `fill: ${colorBrandMintGreen};`)
     } else {
         rect.setAttribute('class', 'hypothesis-svg-highlight is-opaque')
     }

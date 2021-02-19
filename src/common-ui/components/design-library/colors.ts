@@ -11,6 +11,7 @@ export const colorBlue = `#83c9f4`
 export const colorDarkText = `#3A2F45`
 export const colorText = `#3a2f45`
 export const colorError = `#F45F5F`
+export const colorTextHighlight = `#65ffc8`
 
 // Shades of grey listed in Notion (design / colours). Scale to be from 1-10 from light to dark
 export const colorWhite = `#fff`
