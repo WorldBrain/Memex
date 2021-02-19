@@ -7,9 +7,9 @@ import ErrorBoundary from 'src/common-ui/components/ErrorBoundary'
 import RuntimeError from 'src/common-ui/components/RuntimeError'
 import Popup from './container'
 import configureStore from './store'
-import { setRpcConnection } from 'src/util/webextensionRPC'
+import { setupRpcConnection } from 'src/util/webextensionRPC'
 
-setRpcConnection('content-script-popup').registerConnectionToBackground()
+setupRpcConnection({ sideName: 'content-script-popup', role: 'content' })
 
 const store = configureStore()
 

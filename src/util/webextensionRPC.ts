@@ -346,13 +346,24 @@ export function getRemoteEventEmitter<EventType extends keyof RemoteEvents>(
 
 // Containing the evil globals here
 let rpcConnection: PortBasedRPCManager
-export const setRpcConnection = (sideName) => {
+export const setupRpcConnection = (options: {
+    sideName: string
+    role: 'content' | 'background'
+}) => {
     rpcConnection = new PortBasedRPCManager(
-        sideName,
+        options.sideName,
         (name) => remotelyCallableFunctions[name],
         browser.runtime.connect,
         browser.runtime.onConnect,
     )
+
+    if (options.role === 'content') {
+        rpcConnection.registerConnectionToBackground()
+    }
+
+    if (options.role === 'background') {
+        rpcConnection.registerListenerForIncomingConnections()
+    }
 
     return rpcConnection
 }

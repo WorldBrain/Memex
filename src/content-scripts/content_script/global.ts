@@ -14,7 +14,7 @@ import {
     runInBackground,
     RemoteFunctionRegistry,
     makeRemotelyCallableType,
-    setRpcConnection,
+    setupRpcConnection,
 } from 'src/util/webextensionRPC'
 import { Resolvable, resolvablePromise } from 'src/util/resolvable'
 import { ContentScriptRegistry } from './types'
@@ -45,7 +45,7 @@ import { browser } from 'webextension-polyfill-ts'
 // and dependencies of content scripts.
 
 export async function main({ loadRemotely } = { loadRemotely: true }) {
-    setRpcConnection('content-script-global').registerConnectionToBackground()
+    setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
 
     setupPageContentRPC()
     runInBackground<PageIndexingInterface<'caller'>>().setTabAsIndexable()
