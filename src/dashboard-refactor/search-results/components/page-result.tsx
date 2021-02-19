@@ -22,12 +22,18 @@ export interface Props
         PageInteractionProps,
         PagePickerProps {
     isShared?: boolean
-    hasTags?: boolean
 }
 
 export default class PageResultView extends PureComponent<Props> {
+    private get hasTags(): boolean {
+        return this.props.tags.length > 0
+    }
+
     private get hasNotes(): boolean {
-        return this.props.noteIds[this.props.notesType].length > 0
+        return (
+            this.props.hasNotes ||
+            this.props.noteIds[this.props.notesType].length > 0
+        )
     }
 
     private get hasLists(): boolean {
@@ -121,7 +127,7 @@ export default class PageResultView extends PureComponent<Props> {
                             // },
                             {
                                 key: 'tag-page-btn',
-                                image: this.props.hasTags
+                                image: this.hasTags
                                     ? icons.tagFull
                                     : icons.tagEmpty,
                                 onClick: this.props.onTagPickerBtnClick,

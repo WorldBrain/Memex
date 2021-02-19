@@ -114,6 +114,7 @@ export type PageData = Pick<
     normalizedUrl: string
     lists: string[]
     displayTime: number
+    hasNotes: boolean
 }
 
 export interface NoteResult {

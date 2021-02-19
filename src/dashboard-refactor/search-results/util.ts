@@ -119,6 +119,7 @@ const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
     fullTitle: pageResult.title,
     normalizedUrl: pageResult.url,
     displayTime: pageResult.displayTime,
+    hasNotes: pageResult.annotsCount > 0,
 })
 
 const annotationToNoteData = (
