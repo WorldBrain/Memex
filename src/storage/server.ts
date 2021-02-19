@@ -11,6 +11,8 @@ import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import { createOperationLoggingMiddleware } from 'src/storage/middleware'
 import { ContentSharingStorage } from 'src/content-sharing/background/storage'
 import { ServerStorage } from './types'
+import ContentConversationStorage from '@worldbrain/memex-common/lib/content-conversations/storage'
+import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
 
 let shouldLogOperations = false
 
@@ -66,22 +68,31 @@ export function createLazyServerStorage(
                 storageManager,
                 ...options,
             })
+            const contentConversations = new ContentConversationStorage({
+                storageManager,
+                contentSharing,
+                ...options,
+            })
             const userManagement = new UserStorage({
+                storageManager,
+            })
+            const activityStreams = new ActivityStreamsStorage({
                 storageManager,
             })
             const serverStorage: ServerStorage = {
                 storageManager,
                 storageModules: {
                     sharedSyncLog,
-                    contentSharing,
                     userManagement,
+                    contentSharing,
+                    activityStreams,
+                    contentConversations,
                 },
             }
-            registerModuleMapCollections(storageManager.registry, {
-                sharedSyncLog,
-                contentSharing,
-                userManagement,
-            })
+            registerModuleMapCollections(
+                storageManager.registry,
+                serverStorage.storageModules,
+            )
             await storageManager.finishInitialization()
 
             return serverStorage

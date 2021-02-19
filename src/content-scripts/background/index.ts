@@ -3,6 +3,7 @@ import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { Tabs, WebNavigation, Runtime } from 'webextension-polyfill-ts'
 import { getSidebarState } from 'src/sidebar-overlay/utils'
+import ActivityStreamsBackground from 'src/activity-streams/background'
 
 export class ContentScriptsBackground {
     remoteFunctions: ContentScriptsInterface<'provider'>

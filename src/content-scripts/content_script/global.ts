@@ -104,7 +104,7 @@ export async function main() {
         getSelection: () => document.getSelection(),
         getUrlAndTitle: () => ({
             title: getPageTitle(),
-            pageUrl: getPageUrl(),
+            pageUrl: getNormalizedPageUrl(),
         }),
     }
 

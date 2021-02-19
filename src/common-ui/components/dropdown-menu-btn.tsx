@@ -193,4 +193,5 @@ const Menu = styled.ul`
     background: white;
     overflow: hidden;
     overflow-y: scroll;
+    z-index: 10;
 `

@@ -27,7 +27,6 @@ export default class CopyPasterBackground {
                 ContentSharingBackground,
                 | 'shareAnnotations'
                 | 'shareAnnotationsToLists'
-                | 'sharePage'
                 | 'storage'
                 | 'ensureRemotePageId'
             >

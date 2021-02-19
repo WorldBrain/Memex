@@ -26,6 +26,14 @@ export class StaticListItem extends Component<Props> {
                         {this.props.unreadCount}
                     </span>
                 )}
+                {this.props.listName === 'Feed' && (
+                    <span
+                        className={cx(styles.feed, {
+                            [styles.feedNoActivity]: !this.props.unreadCount,
+                            [styles.feedHasActivity]: !!this.props.unreadCount,
+                        })}
+                    />
+                )}
             </div>
         )
     }

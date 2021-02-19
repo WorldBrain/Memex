@@ -364,6 +364,8 @@ export default class DirectLinkingBackground {
         }
 
         let normalizedPageUrl = this._normalizeUrl(fullPageUrl)
+        toCreate.url = this._normalizeUrl(normalizedPageUrl)
+
         if (toCreate.isSocialPost) {
             normalizedPageUrl = await this.lookupSocialId(normalizedPageUrl)
         }
@@ -383,6 +385,18 @@ export default class DirectLinkingBackground {
                 { addInboxEntryOnCreate: true },
             )
         }
+
+        if (isFullUrl(normalizedPageUrl) || isFullUrl(annotationUrl)) {
+            console.error(
+                `Tried to create annotation with non-normalised url`,
+                {
+                    normalizedPageUrl,
+                    annotationUrl,
+                },
+            )
+            throw new Error(`Cannot create annotation with non-normalised url`)
+        }
+
         await this.annotationStorage.createAnnotation({
             pageUrl: normalizedPageUrl,
             url: annotationUrl,
