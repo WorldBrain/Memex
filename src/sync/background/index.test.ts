@@ -1149,7 +1149,7 @@ function mobileSyncTests(suiteOptions: {
         ).toEqual({
             docs: [
                 {
-                    annotations: [],
+                    annotations: [expect.anything()],
                     annotsCount: 1,
                     displayTime: expect.any(Number),
                     favIcon: undefined,
