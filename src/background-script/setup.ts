@@ -31,10 +31,6 @@ import alarms from './alarms'
 import { setupNotificationClickListener } from 'src/util/notifications'
 import { StorageChangesManager } from 'src/util/storage-changes'
 import { AuthBackground } from 'src/authentication/background'
-import {
-    createAuthDependencies,
-    DevAuthState,
-} from 'src/authentication/background/setup'
 import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
 import { FeaturesBeta } from 'src/features/background/feature-beta'
 import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
@@ -49,7 +45,6 @@ import { ContentScriptsBackground } from 'src/content-scripts/background'
 import { InPageUIBackground } from 'src/in-page-ui/background'
 import { AnalyticsBackground } from 'src/analytics/background'
 import { Analytics } from 'src/analytics/types'
-import { subscriptionRedirect } from 'src/authentication/background/redirect'
 import { PipelineRes } from 'src/search'
 import CopyPasterBackground from 'src/copy-paster/background'
 import { ReaderBackground } from 'src/reader/background'
@@ -61,8 +56,10 @@ import { runInTab } from 'src/util/webextensionRPC'
 import { PageAnalyzerInterface } from 'src/page-analysis/types'
 import { TabManager } from 'src/tab-management/background/tab-manager'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
-import { type } from 'openpgp'
 import pick from 'lodash/pick'
+import ActivityIndicatorBackground from 'src/activity-indicator/background'
+import ActivityStreamsBackground from 'src/activity-streams/background'
+import { Services } from 'src/services/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -70,6 +67,7 @@ export interface BackgroundModules {
     notifications: NotificationBackground
     social: SocialBackground
     connectivityChecker: ConnectivityCheckerBackground
+    activityIndicator: ActivityIndicatorBackground
     directLinking: DirectLinkingBackground
     pages: PageIndexingBackground
     search: SearchBackground
@@ -92,6 +90,7 @@ export interface BackgroundModules {
     contentSharing: ContentSharingBackground
     tabManagement: TabManagementBackground
     readwise: ReadwiseBackground
+    activityStreams: ActivityStreamsBackground
 }
 
 const globalFetch: typeof fetch =
@@ -99,16 +98,19 @@ const globalFetch: typeof fetch =
 
 export function createBackgroundModules(options: {
     storageManager: StorageManager
+    services: Services
     browserAPIs: Browser
     getServerStorage: () => Promise<ServerStorage>
     signalTransportFactory: SignalTransportFactory
-    getSharedSyncLog: () => Promise<SharedSyncLog>
     localStorageChangesManager: StorageChangesManager
+    callFirebaseFunction: <Returns>(
+        name: string,
+        ...args: any[]
+    ) => Promise<Returns>
     fetchPageDataProcessor?: FetchPageProcessor
     tabManager?: TabManager
     auth?: AuthBackground
     analyticsManager: Analytics
-    authOptions?: { devAuthState: DevAuthState }
     disableSyncEnryption?: boolean
     getIceServers?: () => Promise<string[]>
     getNow?: () => number
@@ -125,6 +127,15 @@ export function createBackgroundModules(options: {
         extractRawPageContent: (tabId) =>
             runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),
     })
+    const callFirebaseFunction = <Returns>(name: string, ...args: any[]) => {
+        const call = options.callFirebaseFunction
+        if (!call) {
+            throw new Error(
+                `Tried to call Firebase Function '${name}', but did not provide a function to call it`,
+            )
+        }
+        return call<Returns>(name, ...args)
+    }
 
     const analytics = new AnalyticsBackground(options.analyticsManager, {
         localBrowserStorage: options.browserAPIs.storage.local,
@@ -183,6 +194,12 @@ export function createBackgroundModules(options: {
 
     const social = new SocialBackground({ storageManager })
 
+    const activityIndicator = new ActivityIndicatorBackground({
+        services: options.services,
+        getActivityStreamsStorage: async () =>
+            (await options.getServerStorage()).storageModules.activityStreams,
+    })
+
     const customLists = new CustomListBackground({
         analytics,
         storageManager,
@@ -205,29 +222,27 @@ export function createBackgroundModules(options: {
     const auth =
         options.auth ||
         new AuthBackground({
-            ...createAuthDependencies({
-                ...options.authOptions,
-                redirectUrl: subscriptionRedirect,
-            }),
+            authService: options.services.auth,
+            subscriptionService: options.services.subscriptions,
             localStorageArea: options.browserAPIs.storage.local,
             scheduleJob: jobScheduler.scheduler.scheduleJobOnce.bind(
                 jobScheduler.scheduler,
             ),
             backendFunctions: {
-                registerBetaUser: async (params) => {
-                    const firebase = getFirebase()
-                    const callable = firebase
-                        .functions()
-                        .httpsCallable('registerBetaUser')
-                    await callable(params)
-                },
+                registerBetaUser: async (params) =>
+                    callFirebaseFunction('registerBetaUser', params),
             },
             getUserManagement: async () =>
                 (await options.getServerStorage()).storageModules
                     .userManagement,
         })
 
+    const activityStreams = new ActivityStreamsBackground({
+        storageManager,
+        callFirebaseFunction,
+    })
     const contentSharing = new ContentSharingBackground({
+        activityStreams,
         storageManager,
         customLists: customLists.storage,
         annotationStorage: directLinking.annotationStorage,
@@ -244,9 +259,16 @@ export function createBackgroundModules(options: {
         getPageData: async (normalizedUrl) =>
             pick(
                 await pages.storage.getPage(normalizedUrl),
+                'url',
                 'fullUrl',
                 'fullTitle',
             ),
+        getAnnotationTags: async (annotationUrl) =>
+            (
+                await directLinking.annotationStorage.getTagsByAnnotationUrl(
+                    annotationUrl,
+                )
+            ).map(({ name }) => name.replace(/\s+/g, '-')),
         getAnnotationsByPks: async (pks) => {
             return directLinking.annotationStorage.getAnnotations(pks)
         },
@@ -311,6 +333,7 @@ export function createBackgroundModules(options: {
         directLinking,
         search,
         eventLog: new EventLogBackground({ storageManager }),
+        activityIndicator,
         customLists,
         tags,
         bookmarks,
@@ -327,7 +350,8 @@ export function createBackgroundModules(options: {
         sync: new SyncBackground({
             signalTransportFactory: options.signalTransportFactory,
             disableEncryption: options.disableSyncEnryption,
-            getSharedSyncLog: options.getSharedSyncLog,
+            getSharedSyncLog: async () =>
+                (await options.getServerStorage()).storageModules.sharedSyncLog,
             getIceServers: options.getIceServers,
             browserAPIs: options.browserAPIs,
             appVersion: process.env.VERSION,
@@ -404,6 +428,7 @@ export function createBackgroundModules(options: {
             contextMenuAPI: options.browserAPIs.contextMenus,
         }),
         copyPaster,
+        activityStreams,
         contentSharing,
     }
 }
@@ -433,6 +458,7 @@ export async function setupBackgroundModules(
     backgroundModules.directLinking.setupRemoteFunctions()
     backgroundModules.directLinking.setupRequestInterceptor()
     backgroundModules.search.setupRemoteFunctions()
+    backgroundModules.activityIndicator.setupRemoteFunctions()
     backgroundModules.eventLog.setupRemoteFunctions()
     backgroundModules.backupModule.setBackendFromStorage()
     backgroundModules.backupModule.setupRemoteFunctions()

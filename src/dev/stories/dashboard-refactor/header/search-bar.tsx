@@ -8,13 +8,12 @@ const template: SearchBarProps = {
     onSearchBarFocus: () => {},
     onSearchQueryChange: (queryString) => {},
     onSearchFiltersOpen: () => {},
-    searchFiltersActive: [],
     isSearchBarFocused: false,
     searchFiltersOpen: false,
     searchQuery: '',
 }
 
-const props: {
+export const headerSearchBarPropsTemplate: {
     default: SearchBarProps
     selected: SearchBarProps
     withInput: SearchBarProps
@@ -40,6 +39,12 @@ const props: {
 
 const stories = storiesOf('Dashboard Refactor|Header/Search Input Box', module)
 
-stories.add('Unselected', () => <SearchBar {...props.default} />)
-stories.add('Selected', () => <SearchBar {...props.selected} />)
-stories.add('With Input', () => <SearchBar {...props.withInput} />)
+stories.add('Unselected', () => (
+    <SearchBar {...headerSearchBarPropsTemplate.default} />
+))
+stories.add('Selected', () => (
+    <SearchBar {...headerSearchBarPropsTemplate.selected} />
+))
+stories.add('With Input', () => (
+    <SearchBar {...headerSearchBarPropsTemplate.withInput} />
+))

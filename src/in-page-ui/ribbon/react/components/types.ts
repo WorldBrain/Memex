@@ -31,8 +31,8 @@ export interface RibbonSidebarProps {
     setShowSidebarCommentBox: (value: boolean) => void
 }
 
-export interface RibbonCommentBoxProps
-    extends Pick<CommonTaggingProps, 'tags'> {
+export interface RibbonCommentBoxProps {
+    tags: string[]
     commentText: string
     showCommentBox: boolean
     isCommentSaved: boolean
@@ -48,19 +48,14 @@ export interface RibbonBookmarkProps {
     toggleBookmark: () => void
 }
 
-export interface RibbonTaggingProps extends CommonTaggingProps {
+export interface RibbonTaggingProps {
+    tags: string[]
     pageHasTags: boolean
     showTagsPicker: boolean
     updateTags: PickerUpdateHandler
     tagAllTabs: (value: string) => Promise<void>
     setShowTagsPicker: (value: boolean) => void
     fetchInitialTagSelections: () => Promise<string[]>
-}
-
-export interface CommonTaggingProps {
-    tags: string[]
-    queryTagSuggestions: (query: string) => Promise<string[]>
-    fetchInitialTagSuggestions: () => Promise<string[]>
 }
 
 export interface ListEntryArgs {
@@ -74,8 +69,6 @@ export interface RibbonListsProps {
     updateLists: PickerUpdateHandler
     listAllTabs: (value: string) => Promise<void>
     setShowListsPicker: (value: boolean) => void
-    queryListSuggestions: (query: string) => Promise<string[]>
-    fetchInitialListSuggestions: () => Promise<string[]>
     fetchInitialListSelections: () => Promise<string[]>
 }
 

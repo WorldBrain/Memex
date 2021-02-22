@@ -154,7 +154,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                         this.state.shareAllState === 'running' ? (
                             <LoadingIndicator />
                         ) : (
-                            'Share all notes'
+                            'Share all notes on page'
                         )
                     }
                     onClick={
@@ -169,7 +169,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                         this.state.unshareAllState === 'running' ? (
                             <LoadingIndicator />
                         ) : (
-                            'Un-share all notes'
+                            'Un-share all notes on page'
                         )
                     }
                     onClick={
@@ -195,8 +195,8 @@ const SharedNoteInfo = styled.div`
     justify-content: center;
     text-align: center;
     align-items: center;
-    font-size: 1
     margin: 10px 0 0;
+    line-height: 16px;
 
     & > span {
         text-align: center;

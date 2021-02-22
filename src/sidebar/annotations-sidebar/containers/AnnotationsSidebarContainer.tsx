@@ -28,6 +28,9 @@ import { PageNotesCopyPaster } from 'src/copy-paster'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import analytics from 'src/analytics'
+import { SortingDropdownMenuBtn } from '../components/SortingDropdownMenu'
+import TagPicker from 'src/tags/ui/TagPicker'
+import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -54,6 +57,17 @@ export class AnnotationsSidebarContainer<
                     this.sidebarRef?.getInstance()?.focusCreateForm(),
             }),
         )
+    }
+
+    toggleSidebarShowForPageId(pageId: string) {
+        const isAlreadyOpenForOtherPage = pageId !== this.state.pageUrl
+
+        if (this.state.showState === 'hidden' || isAlreadyOpenForOtherPage) {
+            this.setPageUrl(pageId)
+            this.showSidebar()
+        } else if (this.state.showState === 'visible') {
+            this.hideSidebar()
+        }
     }
 
     showSidebar() {
@@ -152,6 +166,10 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('setCopyPasterAnnotationId', {
                     id: annotation.url,
                 }),
+            onTagIconClick: () =>
+                this.processEvent('setTagPickerAnnotationId', {
+                    id: annotation.url,
+                }),
         }
     }
 
@@ -164,24 +182,7 @@ export class AnnotationsSidebarContainer<
         const form = editForms[annotation.url] ?? { ...INIT_FORM_STATE }
 
         return {
-            isTagInputActive: form.isTagInputActive,
             comment: form.commentText,
-            tags: form.tags,
-            updateTags: (args) =>
-                this.processEvent('updateTagsForEdit', {
-                    annotationUrl: annotation.url,
-                    ...args,
-                }),
-            deleteSingleTag: (tag) =>
-                this.processEvent('deleteEditCommentTag', {
-                    annotationUrl: annotation.url,
-                    tag,
-                }),
-            setTagInputActive: (active) =>
-                this.processEvent('setEditCommentTagPicker', {
-                    annotationUrl: annotation.url,
-                    active,
-                }),
             onCommentChange: (comment) =>
                 this.processEvent('changeEditCommentText', {
                     annotationUrl: annotation.url,
@@ -230,13 +231,16 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    protected getTagProps(): AnnotationsSidebarProps['annotationTagProps'] {
-        return {
-            loadDefaultSuggestions: () =>
-                this.props.tags.fetchInitialTagSuggestions(),
-            queryEntries: (query) =>
-                this.props.tags.searchForTagSuggestions({ query }),
-        }
+    private handleTagsUpdate = (url: string): PickerUpdateHandler => async ({
+        added,
+        deleted,
+    }) => {
+        const annot = this.props.annotationsCache.getAnnotationById(url)
+        const newTags = added
+            ? [...annot.tags, added]
+            : annot.tags.filter((tag) => tag !== deleted)
+
+        await this.props.annotationsCache.update({ ...annot, tags: newTags })
     }
 
     private handleCopyAllNotesClick: React.MouseEventHandler = (e) => {
@@ -266,6 +270,35 @@ export class AnnotationsSidebarContainer<
             <CopyPasterWrapper>
                 {this.renderCopyPasterManager([currentAnnotationId])}
             </CopyPasterWrapper>
+        )
+    }
+
+    private renderTagPickerForAnnotation = (currentAnnotationId: string) => {
+        if (this.state.activeTagPickerAnnotationId !== currentAnnotationId) {
+            return null
+        }
+
+        const annot = this.props.annotationsCache.getAnnotationById(
+            currentAnnotationId,
+        )
+
+        return (
+            <TagPickerWrapper>
+                <HoverBox>
+                    <TagPicker
+                        initialSelectedEntries={() => annot.tags}
+                        onUpdateEntrySelection={this.handleTagsUpdate(
+                            currentAnnotationId,
+                        )}
+                        onClickOutside={() =>
+                            this.processEvent(
+                                'resetTagPickerAnnotationId',
+                                null,
+                            )
+                        }
+                    />
+                </HoverBox>
+            </TagPickerWrapper>
         )
     }
 
@@ -427,6 +460,13 @@ export class AnnotationsSidebarContainer<
                             ))}
                     </TopBarActionBtns>
                     <TopBarActionBtns>
+                        <SortingDropdownMenuBtn
+                            onMenuItemClick={({ sortingFn }) =>
+                                this.processEvent('sortAnnotations', {
+                                    sortingFn,
+                                })
+                            }
+                        />
                         <ButtonTooltip
                             tooltipText="Copy All Notes"
                             position="bottom"
@@ -474,7 +514,6 @@ export class AnnotationsSidebarContainer<
                         }
                         isAnnotationCreateShown={this.state.showCommentBox}
                         hoverAnnotationUrl={this.state.hoverAnnotationUrl}
-                        annotationTagProps={this.getTagProps()}
                         annotationCreateProps={this.getCreateProps()}
                         annotationEditableProps={this.getEditableProps()}
                         bindAnnotationFooterEventProps={(url) =>
@@ -496,6 +535,9 @@ export class AnnotationsSidebarContainer<
                         }
                         renderShareMenuForAnnotation={
                             this.renderShareMenuForAnnotation
+                        }
+                        renderTagsPickerForAnnotation={
+                            this.renderTagPickerForAnnotation
                         }
                     />
                 </ContainerStyled>
@@ -524,6 +566,12 @@ const CopyPasterWrapperTopBar = styled.div`
 `
 
 const CopyPasterWrapper = styled.div`
+    position: sticky;
+    left: 75px;
+    z-index: 5;
+`
+
+const TagPickerWrapper = styled.div`
     position: sticky;
     left: 75px;
     z-index: 5;
@@ -570,6 +618,14 @@ const TopBarActionBtns = styled.div`
     display: grid;
     grid-auto-flow: column;
     grid-gap: 8px;
+    height: 24px;
+
+    & * {
+        height: 24px;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+    }
 `
 
 const CloseBtn = styled.button`

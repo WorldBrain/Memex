@@ -2,13 +2,14 @@ import React from 'react'
 import { storiesOf } from '@storybook/react'
 
 import {
-    ListsSidebarProps,
     SidebarLockedState,
     SidebarPeekState,
 } from 'src/dashboard-refactor/lists-sidebar/types'
+import ListsSidebar, {
+    ListsSidebarProps,
+} from 'src/dashboard-refactor/lists-sidebar'
 import { listsSidebarSearchBarProps } from './lists-sidebar-search-bar'
 import { listsSidebarGroupProps } from './lists-sidebar-group'
-import ListsSidebar from 'src/dashboard-refactor/lists-sidebar'
 
 const stories = storiesOf('Dashboard Refactor|Lists Sidebar/Sidebar', module)
 
@@ -19,12 +20,18 @@ const lockedState: SidebarLockedState = {
 
 const peekState: SidebarPeekState = {
     isSidebarPeeking: false,
-    toggleSidebarPeekState: () => {},
+    setSidebarPeekState: () => () => {},
 }
 
+let selectedListId: number | undefined
+
 const template: ListsSidebarProps = {
-    lockedState: lockedState,
-    peekState: peekState,
+    lockedState,
+    peekState,
+    onListSelection: (listId) => {
+        selectedListId = listId
+    },
+    selectedListId,
     searchBarProps: {
         ...listsSidebarSearchBarProps.default,
         sidebarLockedState: lockedState,

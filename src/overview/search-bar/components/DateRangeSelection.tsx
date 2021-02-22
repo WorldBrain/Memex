@@ -16,19 +16,26 @@ const styles = require('./DateRangeSelection.css')
 // const stylesPro = require('../../tooltips/components/tooltip.css')
 
 export interface DateRangeSelectionProps {
-    env: 'inpage' | 'overview'
+    env?: 'inpage' | 'overview'
     startDate: number
     startDateText: string
     endDate: number
     endDateText: string
-    disabled: boolean
+    disabled?: boolean
     onStartDateChange: (...args) => void
     onStartDateTextChange: (...args) => void
     onEndDateChange: (...args) => void
     onEndDateTextChange: (...args) => void
-    changeTooltip: (...args) => void
+    changeTooltip?: (...args) => void
 }
+
 class DateRangeSelection extends Component<DateRangeSelectionProps> {
+    static defaultProps: Partial<DateRangeSelectionProps> = {
+        changeTooltip: () => {},
+        env: 'overview',
+        disabled: false,
+    }
+
     startDatePicker: any
     endDatePicker: any
 

@@ -1,6 +1,6 @@
 import React from 'react'
 import onClickOutside from 'react-onclickoutside'
-import { isEqual } from 'lodash'
+import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -30,21 +30,24 @@ class DomainPicker extends StatefulUIElement<
     }
 
     searchInputPlaceholder =
-        this.props.searchInputPlaceholder || 'Domains to Search'
-    removeToolTipText = this.props.removeToolTipText || 'Remove filter'
+        this.props.searchInputPlaceholder ?? 'Domains to Search'
+    removeToolTipText = this.props.removeToolTipText ?? 'Remove filter'
 
-    componentDidUpdate(prevProps, prevState) {
-        const {
-            props: { query, onSelectedEntriesChange },
-            state: { selectedEntries },
-        } = this
-        if (prevProps.query !== query) {
-            this.processEvent('searchInputChanged', { query })
+    componentDidUpdate(
+        prevProps: DomainPickerDependencies,
+        prevState: DomainPickerState,
+    ) {
+        if (prevProps.query !== this.props.query) {
+            this.processEvent('searchInputChanged', { query: this.props.query })
         }
-        const a = prevState.selectedEntries
-        const b = selectedEntries
-        if (a.length !== b.length || !isEqual(a, b)) {
-            onSelectedEntriesChange({ selectedEntries })
+
+        const prev = prevState.selectedEntries
+        const curr = this.state.selectedEntries
+
+        if (prev.length !== curr.length || !isEqual(prev, curr)) {
+            this.props.onSelectedEntriesChange?.({
+                selectedEntries: this.state.selectedEntries,
+            })
         }
     }
 
@@ -61,7 +64,7 @@ class DomainPicker extends StatefulUIElement<
         this.processEvent('focusInput', {})
 
     handleSearchInputChanged = (query: string) => {
-        this.props.onSearchInputChange({ query })
+        this.props.onSearchInputChange?.({ query })
         return this.processEvent('searchInputChanged', { query })
     }
 

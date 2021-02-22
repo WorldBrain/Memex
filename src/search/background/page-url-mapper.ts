@@ -4,6 +4,7 @@ import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import { Page } from 'src/search/models'
 import { reshapePageForDisplay } from './utils'
 import { AnnotPage } from './types'
+import { Annotation } from 'src/annotations/types'
 import { User, SocialPage } from 'src/social-integration/types'
 import { USERS_COLL, BMS_COLL } from 'src/social-integration/constants'
 import {
@@ -213,6 +214,22 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         })
     }
 
+    private async lookupAnnots(
+        pageUrls: string[],
+        annotMap: Map<string, Annotation[]>,
+    ) {
+        const annots = (await this.backend.dexieInstance
+            .table('annotations')
+            .where('pageUrl')
+            .anyOf(pageUrls)
+            .toArray()) as Annotation[]
+
+        annots.forEach((annot) => {
+            const prev = annotMap.get(annot.pageUrl) ?? []
+            annotMap.set(annot.pageUrl, [...prev, annot])
+        })
+    }
+
     private async lookupLatestTimes(
         pageUrls: string[],
         timeMap: Map<string, number>,
@@ -294,7 +311,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         const pageMap = new Map<string, Page>()
         const tagMap = new Map<string, string[]>()
         const listMap = new Map<string, string[]>()
-        const countMap = new Map<string, number>()
+        const annotMap = new Map<string, Annotation[]>()
         const timeMap = new Map<string, number>()
 
         // Run the first set of queries to get display data
@@ -302,7 +319,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             this.lookupPages(pageUrls, pageMap, base64Img),
             this.lookupTags(pageUrls, tagMap),
             this.lookupLists(pageUrls, listMap),
-            this.lookupAnnotsCounts(pageUrls, countMap),
+            this.lookupAnnots(pageUrls, annotMap),
         ])
 
         const hostnames = new Set(
@@ -337,7 +354,8 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                     favIcon: favIconMap.get(page.hostname),
                     tags: tagMap.get(url) ?? [],
                     lists: listMap.get(url) ?? [],
-                    annotsCount: countMap.get(url),
+                    annotations: annotMap.get(url) ?? [],
+                    annotsCount: annotMap.get(url)?.length,
                     displayTime: latestTimes
                         ? latestTimes[i]
                         : timeMap.get(url),

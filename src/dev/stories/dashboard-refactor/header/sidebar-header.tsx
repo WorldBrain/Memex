@@ -3,43 +3,60 @@ import { storiesOf } from '@storybook/react'
 
 import { sidebarToggleProps } from './sidebar-toggle'
 
-import SidebarHeader from 'src/dashboard-refactor/header/sidebar-header/'
+import SidebarHeader, {
+    SidebarHeaderProps,
+} from 'src/dashboard-refactor/header/sidebar-header/'
 
 const stories = storiesOf('Dashboard Refactor|Header/Sidebar Header', module)
 
 const { lockedHover, noHover } = sidebarToggleProps
 const sidebarTogglePropsRenamed = {
     lockedHover: {
-        sidebarToggleHoverState: lockedHover.hoverState,
         ...lockedHover,
+        sidebarToggleHoverState: lockedHover.hoverState,
     },
     noHover: {
-        sidebarToggleHoverState: noHover.hoverState,
         ...noHover,
+        sidebarToggleHoverState: noHover.hoverState,
     },
 }
 
-const collectionsHeaderProps = {
+export const sidebarHeaderPropsTemplate: {
+    open: SidebarHeaderProps
+    closed: SidebarHeaderProps
+    closedSelected: SidebarHeaderProps
+} = {
     open: {
         sidebarPeekState: {
-            toggleSidebarPeekState: function () {},
+            setSidebarPeekState: () => () => {},
             isSidebarPeeking: false,
         },
-        selectedCollectionHeader: 'Inbox',
+        selectedListName: 'Inbox',
         ...sidebarTogglePropsRenamed.lockedHover,
     },
     closed: {
         sidebarPeekState: {
-            toggleSidebarPeekState: function () {},
+            setSidebarPeekState: () => () => {},
             isSidebarPeeking: false,
         },
         ...sidebarTogglePropsRenamed.noHover,
     },
+    closedSelected: {
+        ...sidebarTogglePropsRenamed.noHover,
+        sidebarPeekState: {
+            setSidebarPeekState: () => () => {},
+            isSidebarPeeking: false,
+        },
+        selectedListName: 'Inbox',
+    },
 }
 
 stories.add('Sidebar Header/Open', () => (
-    <SidebarHeader {...collectionsHeaderProps.open} />
+    <SidebarHeader {...sidebarHeaderPropsTemplate.open} />
 ))
 stories.add('Sidebar Header/Closed', () => (
-    <SidebarHeader {...collectionsHeaderProps.closed} />
+    <SidebarHeader {...sidebarHeaderPropsTemplate.closed} />
+))
+stories.add('Sidebar Header/Closed with Inbox selected', () => (
+    <SidebarHeader {...sidebarHeaderPropsTemplate.closedSelected} />
 ))

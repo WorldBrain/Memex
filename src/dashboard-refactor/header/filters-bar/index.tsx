@@ -7,7 +7,6 @@ import styles, { fonts } from 'src/dashboard-refactor/styles'
 import { remoteFunction } from 'src/util/webextensionRPC'
 
 import TagPickerUnstyled from 'src/tags/ui/TagPicker'
-import CollectionPickerUnstyled from 'src/custom-lists/ui/CollectionPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import DomainPickerUnstyled from './DomainPicker/'
 
@@ -60,10 +59,6 @@ const TextSpan = styled.span`
     line-height: 15px;
 `
 
-const CollectionPicker = styled(CollectionPickerUnstyled)`
-    width: 200px;
-`
-
 const TagPicker = styled(TagPickerUnstyled)`
     width: 200px;
 `
@@ -77,19 +72,17 @@ export interface FiltersBarProps {
     dateFilterSelectedState: SelectedState
     domainFilterSelectedState: SelectedState
     tagFilterSelectedState: SelectedState
-    listFilterSelectedState: SelectedState
     pickerProps: {
         datePickerProps?: Omit<DateRangeSelectionProps, 'env' & 'disabled'>
         tagPickerProps?: FilterPickerProps
         domainPickerProps?: FilterPickerProps
-        listPickerProps?: FilterPickerProps
     }
 }
 
 export default class FiltersBar extends PureComponent<FiltersBarProps> {
-    private getFilteredDomains: (args: {
-        query: string
-    }) => Promise<string[]> = async ({ query }) => {
+    private queryDomains: (query: string) => Promise<string[]> = async (
+        query,
+    ) => {
         const domainList: string[] = await this.getSuggestedDomains()
         const filteredDomains: string[] = domainList.filter((domain) =>
             domain.startsWith(query),
@@ -133,17 +126,15 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     }
 
     private renderTagPicker = () => {
-        const {
-            initialSelectedEntries,
-            onToggleShowPicker,
-            onEntriesListUpdate,
-        } = this.props.pickerProps.tagPickerProps
+        const { tagPickerProps } = this.props.pickerProps
         return (
             <TagPicker
-                {...this.props.pickerProps.tagPickerProps}
-                onUpdateEntrySelection={onEntriesListUpdate}
-                initialSelectedEntries={async () => initialSelectedEntries}
-                onEscapeKeyDown={onToggleShowPicker}
+                initialSelectedEntries={async () =>
+                    tagPickerProps.initialSelectedEntries
+                }
+                onUpdateEntrySelection={tagPickerProps.onUpdateEntrySelection}
+                onEscapeKeyDown={tagPickerProps.onToggleShowPicker}
+                onClickOutside={tagPickerProps.onToggleShowPicker}
                 searchInputPlaceholder="Add Tag Filters"
                 removeToolTipText="Remove filter"
             />
@@ -151,37 +142,21 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     }
 
     private renderDomainPicker = () => {
-        const {
-            initialSelectedEntries,
-            onToggleShowPicker,
-            onEntriesListUpdate,
-        } = this.props.pickerProps.domainPickerProps
+        const { domainPickerProps } = this.props.pickerProps
         return (
             <DomainPicker
-                {...this.props.pickerProps.domainPickerProps}
-                onUpdateEntrySelection={onEntriesListUpdate}
-                initialSelectedEntries={async () => initialSelectedEntries}
-                onEscapeKeyDown={onToggleShowPicker}
+                initialSelectedEntries={async () =>
+                    domainPickerProps.initialSelectedEntries
+                }
+                onUpdateEntrySelection={
+                    domainPickerProps.onUpdateEntrySelection
+                }
+                onEscapeKeyDown={domainPickerProps.onToggleShowPicker}
+                onClickOutside={domainPickerProps.onToggleShowPicker}
                 searchInputPlaceholder="Add Domain Filters"
                 removeToolTipText="Remove filter"
-            />
-        )
-    }
-
-    private renderListPicker = () => {
-        const {
-            initialSelectedEntries,
-            onToggleShowPicker,
-            onEntriesListUpdate,
-        } = this.props.pickerProps.listPickerProps
-        return (
-            <CollectionPicker
-                {...this.props.pickerProps.listPickerProps}
-                onUpdateEntrySelection={onEntriesListUpdate}
-                initialSelectedEntries={async () => initialSelectedEntries}
-                onEscapeKeyDown={onToggleShowPicker}
-                searchInputPlaceholder="Add Collection Filters"
-                removeToolTipText="Remove filter"
+                queryEntries={this.queryDomains}
+                loadDefaultSuggestions={this.getSuggestedDomains}
             />
         )
     }
@@ -192,7 +167,6 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             dateFilterSelectedState,
             tagFilterSelectedState,
             domainFilterSelectedState,
-            listFilterSelectedState,
         } = this.props
 
         return (
@@ -211,10 +185,6 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             'Tags',
                             tagFilterSelectedState,
                         )}
-                        {this.renderFilterSelectButton(
-                            'Collections',
-                            listFilterSelectedState,
-                        )}
                     </InnerContainer>
                 </Container>
                 <InnerContainer>
@@ -225,8 +195,6 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             this.renderTagPicker()}
                         {domainFilterSelectedState.isSelected &&
                             this.renderDomainPicker()}
-                        {listFilterSelectedState.isSelected &&
-                            this.renderListPicker()}
                     </Margin>
                 </InnerContainer>
             </>

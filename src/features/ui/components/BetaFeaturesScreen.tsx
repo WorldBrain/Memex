@@ -265,6 +265,7 @@ class BetaFeaturesScreen extends React.Component<
         )
     }
 }
+
 export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
     toggleBetaFeatures: (val) => dispatch(resultsActs.setBetaFeatures(val)),

@@ -60,10 +60,10 @@ export default class ReadwiseSettingsLogic extends UILogic<
         }
 
         let keyValid = false
-        await executeUITask<ReadwiseSettingsState, 'keySaveState', void>(
+        await executeUITask<ReadwiseSettingsState>(
             this,
             'keySaveState',
-            async (context) => {
+            async () => {
                 this.emitMutation({ apiKeyEditable: { $set: false } })
 
                 const validationResult = await this.dependencies.readwise.validateAPIKey(
@@ -74,7 +74,7 @@ export default class ReadwiseSettingsLogic extends UILogic<
                         keySaveError: { $set: 'This API key is not valid' },
                         apiKeyEditable: { $set: true },
                     })
-                    return context.emitError()
+                    return
                 }
 
                 keyValid = true
@@ -87,10 +87,10 @@ export default class ReadwiseSettingsLogic extends UILogic<
         if (!keyValid || !previousState.syncExistingNotes) {
             return
         }
-        await executeUITask<ReadwiseSettingsState, 'syncState', void>(
+        await executeUITask<ReadwiseSettingsState>(
             this,
             'syncState',
-            async (context) => {
+            async () => {
                 await this.dependencies.readwise.uploadAllAnnotations({
                     queueInteraction: 'queue-and-return',
                 })

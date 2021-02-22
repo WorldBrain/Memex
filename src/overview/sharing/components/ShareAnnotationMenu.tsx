@@ -207,6 +207,11 @@ export default ShareAnnotationMenu
 
 const Menu = styled.div`
     padding: 10px 15px;
+
+    & * {
+        font-family: 'Poppins', sans-serif;
+        line-height: 22px;
+    }
 `
 
 const Spacing = styled.div`
@@ -222,6 +227,7 @@ const SectionTitle = styled.div`
 const SectionDescription = styled.div`
     font-size: 12px;
     color: #3a2f45;
+    padding-bottom: 5px;
 `
 
 const LinkCopierBox = styled.div`
@@ -246,7 +252,7 @@ const RemoveIcon = styled.img`
 `
 
 const LinkCopier = styled.button`
-    width: 100%
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;

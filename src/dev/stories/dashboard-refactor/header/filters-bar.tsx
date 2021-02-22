@@ -38,12 +38,8 @@ const initialSelectedEntriesTemplate = [defaultSuggestionsTemplate[0]]
 
 export const genericPickerPropsTemplate: FilterPickerProps = {
     initialSelectedEntries: initialSelectedEntriesTemplate,
-    queryEntries: async (query) => initialSelectedEntriesTemplate,
     onToggleShowPicker: () => {},
-    onEntriesListUpdate: async () => {},
-    onSearchInputChange: () => {},
-    loadDefaultSuggestions: () => defaultSuggestionsTemplate,
-    onSelectedEntriesChange: (evt) => {},
+    onUpdateEntrySelection: async () => {},
 }
 
 const template: FiltersBarProps = {
@@ -51,7 +47,6 @@ const template: FiltersBarProps = {
     dateFilterSelectedState: selectedStateTemplate,
     domainFilterSelectedState: selectedStateTemplate,
     tagFilterSelectedState: selectedStateTemplate,
-    listFilterSelectedState: selectedStateTemplate,
     pickerProps: {
         datePickerProps: datePickerPropsTemplate,
     },
@@ -64,7 +59,6 @@ export const filtersBarStoryProps: {
     displayedDomainsSelected: FiltersBarProps
     displayedTagsSelected: FiltersBarProps
     displayedTagsSelectedWithQuery: FiltersBarProps
-    displayedListsSelected: FiltersBarProps
 } = {
     hidden: {
         ...template,
@@ -107,18 +101,7 @@ export const filtersBarStoryProps: {
         pickerProps: {
             tagPickerProps: {
                 ...genericPickerPropsTemplate,
-                query: 'Generic',
             },
-        },
-    },
-    displayedListsSelected: {
-        ...template,
-        listFilterSelectedState: {
-            ...selectedStateTemplate,
-            isSelected: true,
-        },
-        pickerProps: {
-            listPickerProps: genericPickerPropsTemplate,
         },
     },
 }
@@ -138,7 +121,4 @@ stories.add('Tag Filter Selected', () => (
 ))
 stories.add('Tag Filter Selected With Input', () => (
     <FiltersBar {...filtersBarStoryProps.displayedTagsSelectedWithQuery} />
-))
-stories.add('List Filter Selected', () => (
-    <FiltersBar {...filtersBarStoryProps.displayedListsSelected} />
 ))

@@ -4,6 +4,11 @@ import { EventEmitter } from 'events'
 import { Annotation } from 'src/annotations/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
+import {
+    AnnotationsSorter,
+    sortByPagePosition,
+} from 'src/sidebar/annotations-sidebar/sorting'
+import { haveTagsChanged } from 'src/util/have-tags-changed'
 
 export const createAnnotationsCache = (
     bgModules: {
@@ -13,9 +18,13 @@ export const createAnnotationsCache = (
     options: { skipPageIndexing?: boolean } = {},
 ): AnnotationsCache =>
     new AnnotationsCache({
+        sortingFn: sortByPagePosition,
         backendOperations: {
             load: async (pageUrl) =>
-                bgModules.annotations.listAnnotationsByPageUrl({ pageUrl }),
+                bgModules.annotations.listAnnotationsByPageUrl({
+                    pageUrl,
+                    withTags: true,
+                }),
             create: async (annotation) =>
                 bgModules.annotations.createAnnotation(annotation, {
                     skipPageIndexing: options.skipPageIndexing,
@@ -44,6 +53,7 @@ export const createAnnotationsCache = (
 interface AnnotationCacheChanges {
     rollback: (annotations: Annotation[]) => void
     newState: (annotation: Annotation[]) => void
+    sorted: (annotations: Annotation[]) => void
     created: (annotation: Annotation) => void
     updated: (annotation: Annotation) => void
     deleted: (annotation: Annotation) => void
@@ -55,6 +65,7 @@ export type AnnotationCacheChangeEvents = TypedEventEmitter<
 >
 
 export interface AnnotationsCacheDependencies {
+    sortingFn: AnnotationsSorter
     backendOperations?: {
         load: (
             pageUrl: string,
@@ -84,6 +95,8 @@ export interface AnnotationsCacheInterface {
     delete: (
         annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>,
     ) => Promise<void>
+    sort: (sortingFn?: AnnotationsSorter) => void
+    getAnnotationById: (id: string) => Annotation
 
     annotations: Annotation[]
     annotationChanges: AnnotationCacheChangeEvents
@@ -108,14 +121,27 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         return this._annotations.length === 0
     }
 
+    getAnnotationById = (id: string): Annotation =>
+        this.annotations.find((annot) => annot.url === id)
+
     load = async (url, args = {}) => {
         const annotations = await this.dependencies.backendOperations.load(
             url,
             args,
         )
 
-        this.annotations = annotations.reverse()
+        this.annotations = annotations.sort(this.dependencies.sortingFn)
         this.annotationChanges.emit('load', this._annotations)
+        this.annotationChanges.emit('newState', this._annotations)
+    }
+
+    sort = (sortingFn?: AnnotationsSorter) => {
+        if (sortingFn) {
+            this.dependencies.sortingFn = sortingFn
+        }
+
+        this._annotations = this._annotations.sort(this.dependencies.sortingFn)
+        this.annotationChanges.emit('sorted', this._annotations)
         this.annotationChanges.emit('newState', this._annotations)
     }
 
@@ -131,7 +157,10 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         try {
             const annotUrl = await backendOperations.create(annotation)
-            await backendOperations.updateTags(annotUrl, annotation.tags)
+
+            if (annotation.tags.length) {
+                await backendOperations.updateTags(annotUrl, annotation.tags)
+            }
         } catch (e) {
             this._annotations = stateBeforeModifications
             this.annotationChanges.emit('rollback', stateBeforeModifications)
@@ -200,15 +229,6 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             throw e
         }
     }
-}
-
-function haveTagsChanged(before: string[], after: string[]): boolean {
-    if (before.length !== after.length) {
-        return true
-    }
-
-    const afterSet = new Set(after)
-    return !before.every((tag) => afterSet.has(tag))
 }
 
 function formatAnnotations(annotations: Annotation[]): Annotation[] {

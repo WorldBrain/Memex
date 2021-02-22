@@ -22,7 +22,6 @@ import {
     registerBackgroundModuleCollections,
 } from './background-script/setup'
 import { createFirebaseSignalTransport } from './sync/background/signalling'
-import { DevAuthState } from 'src/authentication/background/setup'
 import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import pipeline from 'src/search/pipeline'
@@ -33,6 +32,7 @@ import {
     createLazyServerStorage,
     createServerStorageManager,
 } from './storage/server'
+import { createServices } from './services'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -52,19 +52,20 @@ export async function main() {
     })
 
     const storageManager = initStorex()
+    const services = await createServices({
+        backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
+        getServerStorage,
+    })
+
     const backgroundModules = createBackgroundModules({
+        services,
         getServerStorage,
         signalTransportFactory: createFirebaseSignalTransport,
         analyticsManager: analytics,
         localStorageChangesManager,
         fetchPageDataProcessor,
         browserAPIs: browser,
-        getSharedSyncLog: async () =>
-            (await getServerStorage()).storageModules.sharedSyncLog,
         storageManager,
-        authOptions: {
-            devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,
-        },
         getIceServers: async () => {
             const firebase = await getFirebase()
             const generateToken = firebase
@@ -72,6 +73,11 @@ export async function main() {
                 .httpsCallable('generateTwilioNTSToken')
             const response = await generateToken({})
             return response.data.iceServers
+        },
+        callFirebaseFunction: <Returns>(name: string, ...args: any[]) => {
+            const firebase = getFirebase()
+            const callable = firebase.functions().httpsCallable(name)
+            return (callable(...args) as any) as Promise<Returns>
         },
     })
     registerBackgroundModuleCollections(storageManager, backgroundModules)

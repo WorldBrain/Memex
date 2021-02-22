@@ -262,6 +262,7 @@ function extensionSyncTests(suiteOptions: {
             id: listId,
             name: 'My list',
             searchableName: 'My list',
+            nameTerms: ['list'],
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -312,6 +313,7 @@ function extensionSyncTests(suiteOptions: {
             id: listId,
             name: 'Updated List Title',
             searchableName: 'Updated List Title',
+            nameTerms: expect.arrayContaining(['updated', 'list', 'title']),
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -338,6 +340,7 @@ function extensionSyncTests(suiteOptions: {
             id: listId,
             name: 'Another Updated List Title',
             searchableName: 'Another Updated List Title',
+            nameTerms: expect.arrayContaining(['updated', 'list', 'title']),
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -438,6 +441,7 @@ function extensionSyncTests(suiteOptions: {
             id: listId,
             name: 'My list',
             searchableName: 'My list',
+            nameTerms: ['list'],
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -495,6 +499,7 @@ function extensionSyncTests(suiteOptions: {
             id: listId,
             name: 'My list',
             searchableName: 'My list',
+            nameTerms: ['list'],
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -1115,12 +1120,12 @@ function mobileSyncTests(suiteOptions: {
             listIds.push(object.id)
         }
         await mobileStorage.modules.metaPicker.createPageListEntry({
-            pageUrl: testPage.fullUrl,
+            fullPageUrl: testPage.fullUrl,
             listId: listIds[0],
         })
 
         await mobileStorage.modules.metaPicker.createPageListEntry({
-            pageUrl: testPage.fullUrl,
+            fullPageUrl: testPage.fullUrl,
             listId: listIds[0],
         })
 
@@ -1144,7 +1149,7 @@ function mobileSyncTests(suiteOptions: {
         ).toEqual({
             docs: [
                 {
-                    annotations: [],
+                    annotations: [expect.anything()],
                     annotsCount: 1,
                     displayTime: expect.any(Number),
                     favIcon: undefined,
@@ -1188,6 +1193,8 @@ function mobileSyncTests(suiteOptions: {
                 createdAt: expect.any(Date),
                 id: expect.any(Number),
                 name: 'widgets',
+                searchableName: 'widgets',
+                nameTerms: ['widgets'],
                 pages: [],
             },
             {
@@ -1195,6 +1202,8 @@ function mobileSyncTests(suiteOptions: {
                 createdAt: expect.any(Date),
                 id: expect.any(Number),
                 name: 'thingies',
+                searchableName: 'thingies',
+                nameTerms: ['thingies'],
                 pages: [],
             },
         ])
@@ -1207,6 +1216,8 @@ function mobileSyncTests(suiteOptions: {
             createdAt: expect.any(Date),
             id: expect.any(Number),
             name: 'widgets',
+            searchableName: 'widgets',
+            nameTerms: ['widgets'],
             pages: ['https://www.test.com/foo'],
         })
     })
@@ -1323,7 +1334,7 @@ function mobileSyncTests(suiteOptions: {
         })
         await mobile.storage.modules.metaPicker.createPageListEntry({
             listId: localListId,
-            pageUrl: 'https://www.eggs.com/foo',
+            fullPageUrl: 'https://www.eggs.com/foo',
         })
 
         await mobile.services.sync.continuousSync.forceIncrementalSync()
@@ -1475,6 +1486,8 @@ describe('SyncBackground', () => {
                                     sharedSyncLog,
                                     contentSharing: null,
                                     userManagement: null,
+                                    activityStreams: null,
+                                    contentConversations: null,
                                 },
                             }),
                             userId,

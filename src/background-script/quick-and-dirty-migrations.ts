@@ -1,6 +1,7 @@
 import Dexie from 'dexie'
 import Storex from '@worldbrain/storex'
 import { Storage } from 'webextension-polyfill-ts'
+import textStemmer from '@worldbrain/memex-stemmer'
 import { URLNormalizer } from '@worldbrain/memex-url-utils'
 import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
 
@@ -18,6 +19,67 @@ export interface Migrations {
 }
 
 export const migrations: Migrations = {
+    /*
+     * There was a bug in some annotation refactoring (due to url normalisation)
+     * that meant some annotations are created with a full url as the prefixed key
+     */
+    'normalise-all-annotation-url-keys': async ({
+        db,
+        storex,
+        normalizeUrl,
+    }) => {
+        const annotations = new Map()
+
+        // go through all annotation urls that begin with http
+        await db
+            .table('annotations')
+            .where('url')
+            .startsWith('http')
+            .modify((annot) => {
+                try {
+                    const oldUrl = annot.url
+
+                    // Normalise the part before the '#' id
+                    const [url, id] = annot.url.split('#')
+                    annot.url = `${normalizeUrl(url)}#${id}`
+
+                    // Save the value for updating it's relations
+                    annotations.set(oldUrl, { ...annot, ...{ oldUrl } })
+                } catch (e) {
+                    console.error('Error migrating old annotation', annot)
+                    console.error(e)
+                }
+            })
+
+        await db
+            .table('annotBookmarks')
+            .where('url')
+            .anyOf([...annotations.keys()])
+            .modify((a) => (a.url = annotations.get(a.url).url))
+        await db
+            .table('tags')
+            .where('url')
+            .anyOf([...annotations.keys()])
+            .modify((a) => (a.url = annotations.get(a.url).url))
+    },
+    /*
+     * We messed this up due to a bug with our storage layer logic, which means we need to rederive the searchable terms field.
+     */
+    'searchable-list-name-2': async ({ storex }) => {
+        const lists = storex.collection('customLists')
+        const data = await lists.findAllObjects<any>({})
+
+        for (const { id, name, nameTerms } of data) {
+            if (nameTerms) {
+                continue
+            }
+
+            await lists.updateOneObject(
+                { id },
+                { nameTerms: [...textStemmer(name)], searchableName: name },
+            )
+        }
+    },
     /*
      * We wanted to add the ability to search for individual terms that can appear
      * in a list's name. So we've added a 'text' field and this migration populates it

@@ -1,13 +1,19 @@
 export const sizeConstants = {
+    header: {
+        heightPx: 55,
+    },
     searchBar: {
         heightPx: 50,
-        widthPx: 650,
+        widthPx: 540,
     },
     listsSidebar: {
-        widthPx: 173,
+        widthPx: 150,
     },
     syncStatusMenu: {
-        WidthPx: 183,
+        widthPx: 150,
+    },
+    searchResults: {
+        widthPx: 800,
     },
 }
 
@@ -51,7 +57,6 @@ export const TERM_CLEAN_PATTERN = /^-?(site:)?-?(?=\w+)/
 
 export const DATE_PICKER_DATE_FORMAT = 'DD-MM-YYYY'
 
-// unsure if this is required?
 export const PAGE_SIZE = 10
 
 export const SEARCH_INPUT_SPLIT_PATTERN = /-?#\"([-.\w]+ ?)+\"|\S+/g
@@ -61,3 +66,9 @@ export const SEARCH_INPUT_SPLIT_PATTERN = /-?#\"([-.\w]+ ?)+\"|\S+/g
  * eg: #tag #"tag tag" -#tag
  */
 export const TAG_CLEAN_PATTERN = /[#"]/g
+
+const KEY_PREFIX = '@Dashboard-'
+
+export const STORAGE_KEYS = {
+    listSidebarLocked: KEY_PREFIX + 'list_sidebar_locked',
+}

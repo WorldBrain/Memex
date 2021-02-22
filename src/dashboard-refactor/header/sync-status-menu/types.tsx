@@ -9,7 +9,7 @@ export type BackupState =
 
 export interface UnSyncedItemState {
     showUnSyncedItemCount: boolean
-    unSyncedItemCount: Number
+    unSyncedItemCount: number
     onShowUnSyncedItemCount: () => void
     onHideUnSyncedItemCount: () => void
 }

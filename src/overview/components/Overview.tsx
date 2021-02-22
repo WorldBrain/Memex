@@ -38,6 +38,7 @@ import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
+import { DashboardContainer as NewDash } from 'src/dashboard-refactor'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -180,23 +181,10 @@ class Overview extends PureComponent<Props, State> {
         window.open(portalLink['access_url'])
     }
 
-    private handleAnnotationSidebarToggle = async (args?: {
+    private handleAnnotationSidebarToggle = (args?: {
         pageUrl: string
         pageTitle?: string
-    }) => {
-        const isAlreadyOpenForOtherPage =
-            args.pageUrl !== this.annotationsSidebar.state.pageUrl
-
-        if (
-            this.annotationsSidebar.state.showState === 'hidden' ||
-            isAlreadyOpenForOtherPage
-        ) {
-            this.annotationsSidebar.setPageUrl(args.pageUrl)
-            this.annotationsSidebar.showSidebar()
-        } else if (this.annotationsSidebar.state.showState === 'visible') {
-            this.annotationsSidebar.hideSidebar()
-        }
-    }
+    }) => this.annotationsSidebar.toggleSidebarShowForPageId(args.pageUrl)
 
     private handleClickOutsideSidebar: React.MouseEventHandler = (e) => {
         const wasResultAnnotBtnClicked = (e.target as HTMLElement)?.classList?.contains(
@@ -327,6 +315,11 @@ class Overview extends PureComponent<Props, State> {
     }
 
     render() {
+        // TODO: properly integrate new dashboard
+        if (location.href.indexOf('new-dash') > -1) {
+            return <NewDash />
+        }
+
         if (isDuringInstall()) {
             return this.renderOnboarding()
         }

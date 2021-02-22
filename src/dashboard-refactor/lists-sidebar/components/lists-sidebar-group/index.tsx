@@ -6,17 +6,12 @@ import {
     LoadingContainer,
     LoadingIndicator,
 } from 'src/dashboard-refactor/styled-components'
-import {
-    AddableState,
-    ExpandableState,
-    ListSource,
-} from 'src/dashboard-refactor/types'
 import styled from 'styled-components'
 
 import { TaskState } from 'ui-logic-core/lib/types'
-import ListsSidebarItemWithMenu, {
-    ListsSidebarItemWithMenuProps,
-} from '../lists-sidebar-item-with-menu'
+import { Props as ListsSidebarItemProps } from '../lists-sidebar-item-with-menu'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import ListsSidebarEditableItem from '../lists-sidebar-editable-item'
 
 const { fonts } = styles
 
@@ -62,33 +57,25 @@ const IconContainer = styled.div`
 `
 
 export interface ListsSidebarGroupProps {
-    hasTitle: boolean
-    listsGroupTitle?: string
-    listSource?: ListSource
-    listsArray: Array<ListsSidebarItemsArrayObject>
-    addableState: AddableState
-    expandableState: ExpandableState
-    taskState: TaskState
-}
-
-export interface ListsSidebarItemsArrayObject {
-    listId: string
-    listsSidebarItemWithMenuProps: ListsSidebarItemWithMenuProps
+    title?: string
+    isExpanded: boolean
+    isAddInputShown?: boolean
+    loadingState: TaskState
+    confirmAddNewList?: (name: string) => void
+    cancelAddNewList?: (name: string) => void
+    onAddBtnClick?: React.MouseEventHandler
+    onExpandBtnClick?: React.MouseEventHandler
+    listsArray?: ListsSidebarItemProps[]
 }
 
 export default class ListsSidebarGroup extends PureComponent<
     ListsSidebarGroupProps
 > {
-    handleExpandClick = function () {
-        this.props.expandableState.onExpand(this.props.listSource)
-    }
-    handleAddButtonClick = function () {
-        this.props.addableState.onAdd(this.props.listSource)
-    }
-    renderErrorState = function () {
+    private renderErrorState = function () {
         return <div>Error! Oh Noes!</div>
     }
-    renderLoadingState = function () {
+
+    private renderLoadingState = function () {
         return (
             <Margin vertical="15px">
                 <LoadingContainer>
@@ -97,79 +84,69 @@ export default class ListsSidebarGroup extends PureComponent<
             </Margin>
         )
     }
-    renderLists = () => {
-        const {
-            expandableState: { isExpanded },
-            listsArray,
-        } = this.props
-        if (!isExpanded) return <div></div>
-        return listsArray.map((listObj, idx) => {
-            const {
-                listsSidebarItemWithMenuProps: {
-                    listsSidebarItemActionsArray,
-                    listsSidebarItemProps,
-                    isMenuDisplayed,
-                },
-                listId,
-            } = listObj
+
+    private renderGroupContent() {
+        if (!this.props.isExpanded) {
+            return null
+        }
+
+        if (this.props.loadingState === 'running') {
+            return this.renderLoadingState()
+        }
+
+        if (this.props.loadingState === 'error') {
+            return this.renderErrorState()
+        }
+
+        if (this.props.isAddInputShown) {
             return (
-                <ListsSidebarItemWithMenu
-                    key={idx}
-                    listId={listId}
-                    isMenuDisplayed={isMenuDisplayed}
-                    listsSidebarItemProps={listsSidebarItemProps}
-                    listsSidebarItemActionsArray={
-                        listsSidebarItemActionsArray &&
-                        listsSidebarItemActionsArray.map((actionsObj) => {
-                            return {
-                                onClick: actionsObj.onClick(listId),
-                                ...actionsObj,
-                            }
-                        })
-                    }
+                <ListsSidebarEditableItem
+                    onCancelClick={this.props.cancelAddNewList!}
+                    onConfirmClick={this.props.confirmAddNewList!}
                 />
             )
-        })
+        }
+
+        return this.props.children
     }
+
     render() {
-        const {
-            taskState,
-            listsGroupTitle,
-            hasTitle,
-            expandableState: { isExpanded, isExpandable },
-        } = this.props
         return (
             <Container>
-                {hasTitle && (
+                {this.props.title && (
                     <GroupHeaderContainer>
-                        {isExpandable && (
-                            <IconContainer onClick={this.handleExpandClick}>
+                        {this.props.onExpandBtnClick && (
+                            <IconContainer
+                                onClick={this.props.onExpandBtnClick}
+                            >
                                 <Margin horizontal="5.5px">
                                     <Icon
-                                        plus90={isExpanded}
-                                        minus90={!isExpanded}
+                                        plus90={this.props.isExpanded}
+                                        minus90={!this.props.isExpanded}
                                         heightAndWidth="8px"
-                                        path="/img/triangleSmall.svg"
+                                        path={icons.triangle}
                                     />
                                 </Margin>
                             </IconContainer>
                         )}
                         <GroupHeaderInnerDiv className="inner">
-                            <GroupTitle>{listsGroupTitle}</GroupTitle>
-                            <IconContainer onClick={this.handleAddButtonClick}>
-                                <Margin horizontal="8px">
-                                    <Icon
-                                        heightAndWidth="12px"
-                                        path="/img/plus.svg"
-                                    />
-                                </Margin>
-                            </IconContainer>
+                            <GroupTitle>{this.props.title}</GroupTitle>
+                            {this.props.onAddBtnClick && (
+                                <IconContainer
+                                    onClick={this.props.onAddBtnClick}
+                                >
+                                    <Margin horizontal="8px">
+                                        <Icon
+                                            heightAndWidth="12px"
+                                            path={icons.plus}
+                                        />
+                                    </Margin>
+                                </IconContainer>
+                            )}
                         </GroupHeaderInnerDiv>
                     </GroupHeaderContainer>
                 )}
-                {taskState === 'running' && this.renderLoadingState()}
-                {taskState === 'error' && this.renderErrorState()}
-                {taskState === 'success' && this.renderLists()}
+                {this.renderGroupContent()}
             </Container>
         )
     }

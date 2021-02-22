@@ -1,6 +1,6 @@
 import React from 'react'
 import onClickOutside from 'react-onclickoutside'
-import { isEqual } from 'lodash'
+import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -23,32 +23,42 @@ import { fontSizeNormal } from 'src/common-ui/components/design-library/typograp
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { EntrySelectedList } from './components/EntrySelectedList'
 import { ListResultItem } from './components/ListResultItem'
+import { collections } from 'src/util/remote-functions-background'
 
 class ListPicker extends StatefulUIElement<
     ListPickerDependencies,
     ListPickerState,
     ListPickerEvent
 > {
+    static defaultProps: Partial<ListPickerDependencies> = {
+        queryEntries: (query) =>
+            collections.searchForListSuggestions({ query }),
+        loadDefaultSuggestions: collections.fetchInitialListSuggestions,
+    }
+
     constructor(props: ListPickerDependencies) {
         super(props, new ListPickerLogic(props))
     }
 
     searchInputPlaceholder =
-        this.props.searchInputPlaceholder || 'Add to Collection'
-    removeToolTipText = this.props.removeToolTipText || 'Remove from list'
+        this.props.searchInputPlaceholder ?? 'Add to Collection'
+    removeToolTipText = this.props.removeToolTipText ?? 'Remove from list'
 
-    componentDidUpdate(prevProps, prevState) {
-        const {
-            props: { query, onSelectedEntriesChange },
-            state: { selectedEntries },
-        } = this
-        if (prevProps.query !== query) {
-            this.processEvent('searchInputChanged', { query })
+    componentDidUpdate(
+        prevProps: ListPickerDependencies,
+        prevState: ListPickerState,
+    ) {
+        if (prevProps.query !== this.props.query) {
+            this.processEvent('searchInputChanged', { query: this.props.query })
         }
-        const a = prevState.selectedEntries
-        const b = selectedEntries
-        if (a.length !== b.length || !isEqual(a, b)) {
-            onSelectedEntriesChange({ selectedEntries })
+
+        const prev = prevState.selectedEntries
+        const curr = this.state.selectedEntries
+
+        if (prev.length !== curr.length || !isEqual(prev, curr)) {
+            this.props.onSelectedEntriesChange?.({
+                selectedEntries: this.state.selectedEntries,
+            })
         }
     }
 
@@ -63,7 +73,7 @@ class ListPicker extends StatefulUIElement<
     handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
 
     handleSearchInputChanged = (query: string) => {
-        this.props.onSearchInputChange({ query })
+        this.props.onSearchInputChange?.({ query })
         return this.processEvent('searchInputChanged', { query })
     }
 
@@ -167,6 +177,12 @@ class ListPicker extends StatefulUIElement<
                         />
                     }
                 />
+                <EntryResultsList
+                    entries={this.state.displayEntries}
+                    renderEntryRow={this.renderListRow}
+                    emptyView={this.renderEmptyList()}
+                    id="listResults"
+                />
                 {this.state.newEntryName !== '' && (
                     <AddNewEntry
                         resultItem={
@@ -179,12 +195,6 @@ class ListPicker extends StatefulUIElement<
                         {this.renderNewListAllTabsButton()}
                     </AddNewEntry>
                 )}
-                <EntryResultsList
-                    entries={this.state.displayEntries}
-                    renderEntryRow={this.renderListRow}
-                    emptyView={this.renderEmptyList()}
-                    id="listResults"
-                />
             </>
         )
     }

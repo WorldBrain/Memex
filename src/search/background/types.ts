@@ -6,6 +6,7 @@ import { PageIndexingBackground } from 'src/page-indexing/background'
 
 export interface AnnotPage {
     url: string
+    fullUrl: string
     title?: string
     hasBookmark: boolean
     /** Object URL to the in-memory location of the assoc. screenshot. */
@@ -17,6 +18,8 @@ export interface AnnotPage {
     annotsCount: number
     annotations: Annotation[]
     pageId?: string
+    tags: string[]
+    lists: string[]
 }
 
 export interface AnnotSearchParams {
@@ -57,7 +60,9 @@ export interface AnnotSearchParams {
     base64Img?: boolean
 }
 
-export interface PageSearchParams extends AnnotSearchParams {
+export interface PageSearchParams
+    extends Omit<AnnotSearchParams, 'collections'> {
+    lists?: number[]
     contentTypes: ContentTypes
 }
 

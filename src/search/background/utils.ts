@@ -52,7 +52,7 @@ export const reshapePageForDisplay = (page) => ({
     hasBookmark: page.hasBookmark,
     screenshot: page.screenshot,
     favIcon: page.favIcon,
-    annotations: [],
+    annotations: page.annotations ?? [],
     tags: page.tags,
     lists: page.lists,
     displayTime: page.displayTime,

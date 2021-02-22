@@ -32,8 +32,8 @@ export interface StateProps {
 
 export interface DispatchProps {
     hideCopyPaster: () => void
-    clickShareListIcon: React.MouseEventHandler
-    handleCopyPasterIconClick: React.MouseEventHandler
+    clickShareListIcon: React.MouseEventHandler<HTMLButtonElement>
+    handleCopyPasterIconClick: React.MouseEventHandler<HTMLButtonElement>
     handleUnfoldAllClick: React.MouseEventHandler<HTMLButtonElement>
     handleSearchTypeClick: (
         searchType: 'page' | 'notes' | 'social',

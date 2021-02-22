@@ -1,6 +1,6 @@
 import React from 'react'
 import onClickOutside from 'react-onclickoutside'
-import { isEqual } from 'lodash'
+import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -24,31 +24,40 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { TagResultItem } from './components/TagResultItem'
 import { EntrySelectedTag } from './components/EntrySelectedTag'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
+import { tags } from 'src/util/remote-functions-background'
 
 class TagPicker extends StatefulUIElement<
     TagPickerDependencies,
     TagPickerState,
     TagPickerEvent
 > {
+    static defaultProps: Partial<TagPickerDependencies> = {
+        queryEntries: (query) => tags.searchForTagSuggestions({ query }),
+        loadDefaultSuggestions: tags.fetchInitialTagSuggestions,
+    }
+
     constructor(props: TagPickerDependencies) {
         super(props, new TagPickerLogic(props))
     }
 
-    searchInputPlaceholder = this.props.searchInputPlaceholder || 'Add Tags'
-    removeToolTipText = this.props.removeToolTipText || 'Remove tag from page'
+    searchInputPlaceholder = this.props.searchInputPlaceholder ?? 'Add Tags'
+    removeToolTipText = this.props.removeToolTipText ?? 'Remove tag from page'
 
-    componentDidUpdate(prevProps, prevState) {
-        const {
-            props: { query, onSelectedEntriesChange },
-            state: { selectedEntries },
-        } = this
-        if (prevProps.query !== query) {
-            this.processEvent('searchInputChanged', { query })
+    componentDidUpdate(
+        prevProps: TagPickerDependencies,
+        prevState: TagPickerState,
+    ) {
+        if (prevProps.query !== this.props.query) {
+            this.processEvent('searchInputChanged', { query: this.props.query })
         }
-        const a = prevState.selectedEntries
-        const b = selectedEntries
-        if (a.length !== b.length || !isEqual(a, b)) {
-            onSelectedEntriesChange({ selectedEntries })
+
+        const prev = prevState.selectedEntries
+        const curr = this.state.selectedEntries
+
+        if (prev.length !== curr.length || !isEqual(prev, curr)) {
+            this.props.onSelectedEntriesChange?.({
+                selectedEntries: this.state.selectedEntries,
+            })
         }
     }
 
@@ -69,7 +78,7 @@ class TagPicker extends StatefulUIElement<
     handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
 
     handleSearchInputChanged = (query: string) => {
-        this.props.onSearchInputChange({ query })
+        this.props.onSearchInputChange?.({ query })
         return this.processEvent('searchInputChanged', { query })
     }
 
@@ -173,6 +182,12 @@ class TagPicker extends StatefulUIElement<
                         />
                     }
                 />
+                <EntryResultsList
+                    entries={this.state.displayEntries}
+                    renderEntryRow={this.renderTagRow}
+                    emptyView={this.renderEmptyList()}
+                    id="tagResults"
+                />
                 {this.shouldShowAddNew && (
                     <AddNewEntry
                         resultItem={
@@ -185,12 +200,6 @@ class TagPicker extends StatefulUIElement<
                         {this.renderNewTagAllTabsButton()}
                     </AddNewEntry>
                 )}
-                <EntryResultsList
-                    entries={this.state.displayEntries}
-                    renderEntryRow={this.renderTagRow}
-                    emptyView={this.renderEmptyList()}
-                    id="tagResults"
-                />
             </>
         )
     }

@@ -17,7 +17,6 @@ import { Flex } from 'src/common-ui/components/design-library/Flex'
 import { Annotation } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
 import { AnnotationMode, SidebarTheme } from '../types'
-import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import {
     AnnotationEditGeneralProps,
@@ -40,6 +39,7 @@ export interface AnnotationsSidebarProps {
     handleScrollPagination: () => void
 
     renderCopyPasterForAnnotation: (id: string) => JSX.Element
+    renderTagsPickerForAnnotation: (id: string) => JSX.Element
     renderShareMenuForAnnotation: (id: string) => JSX.Element
 
     onClickOutside: React.MouseEventHandler
@@ -53,7 +53,6 @@ export interface AnnotationsSidebarProps {
         AnnotationEditableEventProps
     annotationCreateProps: AnnotationCreateGeneralProps &
         AnnotationCreateEventProps
-    annotationTagProps: GenericPickerDependenciesMinusSave
 
     sharingAccess: AnnotationSharingAccess
     isSearchLoading: boolean
@@ -158,7 +157,6 @@ class AnnotationsSidebar extends React.Component<
                     <AnnotationCreate
                         {...this.props.annotationCreateProps}
                         ref={(ref) => (this.annotationCreateRef = ref)}
-                        tagPickerDependencies={this.props.annotationTagProps}
                     />
                 </NewAnnotationBoxStyled>
                 <NewAnnotationSeparator />
@@ -198,7 +196,6 @@ class AnnotationsSidebar extends React.Component<
                 sharingInfo={this.props.annotationSharingInfo[annot.url]}
                 isActive={this.props.activeAnnotationUrl === annot.url}
                 isHovered={this.props.hoverAnnotationUrl === annot.url}
-                tagPickerDependencies={this.props.annotationTagProps}
                 annotationEditDependencies={this.props.bindAnnotationEditProps(
                     annot,
                 )}

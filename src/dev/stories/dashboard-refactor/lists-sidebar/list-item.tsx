@@ -1,26 +1,13 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 
-import ListsSidebarItem from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/'
-import ListsSidebarItemWithMenu, {
-    ListsSidebarItemWithMenuProps,
+import ListsSidebarItem, {
+    Props,
 } from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item-with-menu'
-import {
-    DropReceivingComponentState,
-    ListsSidebarItemComponentProps,
-} from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item/types'
+import { DropReceivingState } from 'src/dashboard-refactor/types'
+import { ListNameHighlightIndices } from 'src/dashboard-refactor/lists-sidebar/types'
 
-const newItemsCountState = {
-    displayNewItemsCount: false,
-    newItemsCount: 0,
-}
-
-const moreActionButtonState = {
-    onMoreActionClick: () => {},
-    displayMoreActionButton: true,
-}
-
-const dropReceivingState: DropReceivingComponentState = {
+const dropReceivingState: DropReceivingState = {
     canReceiveDroppedItems: true, // this defines whether items can be dropped (not whether there is a state change on drag-over)
     isDraggedOver: false,
     triggerSuccessfulDropAnimation: false,
@@ -40,19 +27,12 @@ const selectedState = {
     isSelected: false,
 }
 
-const template: ListsSidebarItemComponentProps = {
+const template: Props = {
+    listId: -1,
     isEditing: false,
-    listName: [
-        {
-            text: 'Cool List Name',
-            match: false,
-        },
-    ],
-    hoverState,
+    name: 'Cool List Name',
     selectedState,
     dropReceivingState,
-    newItemsCountState,
-    moreActionButtonState,
 }
 
 export const listsSidebarItemProps = {
@@ -116,32 +96,16 @@ export const listsSidebarItemProps = {
     },
     displayNewItemsCount: {
         ...template,
-        newItemsCountState: {
-            displayNewItemsCount: true,
-            newItemsCount: Math.floor(Math.random() * 10),
-        },
+        newItemsCount: Math.floor(Math.random() * 10),
     },
     longName: {
         ...template,
-        listName: [
-            {
-                text: 'This is a very long collection name',
-                match: false,
-            },
-        ],
+        listName: 'This is a very long collection name',
     },
     searchMatch: {
         ...template,
-        listName: [
-            {
-                text: 'Astro',
-                match: true,
-            },
-            {
-                text: 'physics',
-                match: false,
-            },
-        ],
+        listName: 'Astrophysics',
+        nameHighlightIndices: [0, 5] as ListNameHighlightIndices,
     },
 }
 
@@ -181,46 +145,28 @@ stories.add('Search Restul', () => (
     <ListsSidebarItem {...listsSidebarItemProps.searchMatch} />
 ))
 
-export const listsSidebarItemWithMenuProps: ListsSidebarItemWithMenuProps = {
-    listId: 'https://www.blah.com/',
+export const listsSidebarItemWithMenuProps: Props = {
+    name: 'test A',
     isMenuDisplayed: true,
-    listsSidebarItemProps: listsSidebarItemProps.hoveredAndSelected,
-    listsSidebarItemActionsArray: [
-        {
-            label: 'Share',
-            iconPath: '/img/share.svg',
-            onClick: (normalizedPageUrl: string) => {},
-        },
-        {
-            label: 'Delete',
-            iconPath: '/img/trash.svg',
-            onClick: (normalizedPageUrl: string) => {},
-        },
-        {
-            label: 'Rename',
-            iconPath: '/img/edit.svg',
-            onClick: (normalizedPageUrl: string) => {},
-        },
-    ],
+    listId: 123,
+    ...listsSidebarItemProps.hoveredAndSelected,
+    onDeleteClick: () => {},
+    onRenameClick: () => {},
+    onShareClick: () => {},
 }
 
-export const listsSidebarItemWithShortMenuProps: ListsSidebarItemWithMenuProps = {
-    listId: 'https://www.blah.com/',
+export const listsSidebarItemWithShortMenuProps: Props = {
+    name: 'test A',
     isMenuDisplayed: true,
-    listsSidebarItemProps: listsSidebarItemProps.hoveredAndSelected,
-    listsSidebarItemActionsArray: [
-        {
-            label: 'Unfollow',
-            iconPath: '/img/cross_circle.svg',
-            onClick: (normalizedPageUrl: string) => {},
-        },
-    ],
+    listId: 123,
+    ...listsSidebarItemProps.hoveredAndSelected,
+    onUnfollowClick: () => {},
 }
 
 stories.add('3x Item Menu Extended', () => (
-    <ListsSidebarItemWithMenu {...listsSidebarItemWithMenuProps} />
+    <ListsSidebarItem {...listsSidebarItemWithMenuProps} />
 ))
 
 stories.add('1x Item Menu Extended', () => (
-    <ListsSidebarItemWithMenu {...listsSidebarItemWithShortMenuProps} />
+    <ListsSidebarItem {...listsSidebarItemWithShortMenuProps} />
 ))

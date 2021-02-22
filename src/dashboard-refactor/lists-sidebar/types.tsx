@@ -1,12 +1,8 @@
+import { UIEvent } from 'ui-logic-core'
+
 import { ListsSidebarSearchBarProps } from './components/lists-search-bar'
 import { ListsSidebarGroupProps } from './components/lists-sidebar-group'
-
-export interface ListsSidebarProps {
-    lockedState: SidebarLockedState
-    peekState: SidebarPeekState
-    searchBarProps: ListsSidebarSearchBarProps
-    listsGroups: ListsSidebarGroupProps[]
-}
+import { TaskState } from 'ui-logic-core/lib/types'
 
 export interface SidebarLockedState {
     toggleSidebarLockedState(): void
@@ -14,6 +10,74 @@ export interface SidebarLockedState {
 }
 
 export interface SidebarPeekState {
-    toggleSidebarPeekState(): void
+    setSidebarPeekState: (isPeeking: boolean) => () => void
     isSidebarPeeking: boolean
 }
+
+export interface ListData {
+    id: number
+    name: string
+    shareUrl?: string
+    isShared?: boolean
+    listCreationState: TaskState
+}
+
+export interface ListGroupCommon
+    extends Pick<ListsSidebarGroupProps, 'loadingState'> {
+    isExpanded: boolean
+    listIds: number[]
+}
+
+export interface FollowedListGroup extends ListGroupCommon {}
+
+export interface LocalListGroup extends ListGroupCommon {
+    isAddInputShown: boolean
+}
+
+export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
+    Pick<SidebarPeekState, 'isSidebarPeeking'> &
+    Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
+        listData: { [id: number]: ListData }
+        followedLists: FollowedListGroup
+        localLists: LocalListGroup
+
+        editingListId?: number
+        selectedListId?: number
+        showMoreMenuListId?: number
+        isSidebarToggleHovered?: boolean
+
+        listDeleteState: TaskState
+        listCreateState: TaskState
+        listEditState: TaskState
+        listShareLoadingState: TaskState
+    }
+
+export type Events = UIEvent<{
+    setSidebarLocked: { isLocked: boolean }
+    setSidebarPeeking: { isPeeking: boolean }
+    setSidebarToggleHovered: { isHovered: boolean }
+    setListQueryValue: { query: string }
+
+    setAddListInputShown: { isShown: boolean }
+    cancelListCreate: null
+    confirmListCreate: { value: string }
+
+    setLocalLists: { lists: ListData[] }
+    setFollowedLists: { lists: ListData[] }
+    setLocalListsExpanded: { isExpanded: boolean }
+    setFollowedListsExpanded: { isExpanded: boolean }
+
+    confirmListEdit: { value: string }
+    cancelListEdit: null
+    setEditingListId: { listId: number }
+    setSelectedListId: { listId: number }
+    setShowMoreMenuListId: { listId: number }
+
+    confirmListDelete: null
+    cancelListDelete: null
+
+    shareList: null
+    unshareList: null
+}>
+
+export type ListNameHighlightIndices = [number, number]

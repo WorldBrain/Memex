@@ -6,6 +6,7 @@ export interface Props {
     left?: string
     right?: string
     bottom?: string
+    width?: string
     withRelativeContainer?: boolean
 }
 
@@ -31,13 +32,15 @@ export const HoverBoxContainer = styled.div`
     ${(props) => (props.bottom ? `bottom: ${props.bottom}` : '')}
 `
 
-export const HoverBoxDiv = styled.div`
+export const HoverBoxDiv = styled.div<{
+    width?: string
+}>`
     box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
     overflow: visible;
     position: absolute;
     border-radius: 3px;
-    width: 300px;
+    width: ${(props) => (props.width ? props.width : '300px')};
     background-color: #fff;
     border-radius: 3px;
     z-index: 3;

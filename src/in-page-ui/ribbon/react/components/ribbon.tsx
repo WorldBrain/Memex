@@ -133,13 +133,9 @@ export default class Ribbon extends Component<Props, State> {
                 >
                     <TagPicker
                         onUpdateEntrySelection={this.props.tagging.updateTags}
-                        queryEntries={this.props.tagging.queryTagSuggestions}
                         actOnAllTabs={this.props.tagging.tagAllTabs}
                         initialSelectedEntries={
                             this.props.tagging.fetchInitialTagSelections
-                        }
-                        loadDefaultSuggestions={
-                            this.props.tagging.fetchInitialTagSuggestions
                         }
                         onEscapeKeyDown={this.hideTagPicker}
                         handleClickOutside={this.hideTagPicker}
@@ -162,13 +158,9 @@ export default class Ribbon extends Component<Props, State> {
                 >
                     <CollectionPicker
                         onUpdateEntrySelection={this.props.lists.updateLists}
-                        queryEntries={this.props.lists.queryListSuggestions}
                         actOnAllTabs={this.props.lists.listAllTabs}
                         initialSelectedEntries={
                             this.props.lists.fetchInitialListSelections
-                        }
-                        loadDefaultSuggestions={
-                            this.props.lists.fetchInitialListSuggestions
                         }
                         onEscapeKeyDown={this.hideListPicker}
                         handleClickOutside={this.hideListPicker}
@@ -467,15 +459,6 @@ export default class Ribbon extends Component<Props, State> {
                                                     false,
                                                 )
                                             }
-                                            tagPickerDependencies={{
-                                                initialSelectedEntries: () =>
-                                                    this.props.commentBox.tags,
-                                                queryEntries: this.props.tagging
-                                                    .queryTagSuggestions,
-                                                loadDefaultSuggestions: this
-                                                    .props.tagging
-                                                    .fetchInitialTagSuggestions,
-                                            }}
                                             onSave={
                                                 this.props.commentBox
                                                     .saveComment

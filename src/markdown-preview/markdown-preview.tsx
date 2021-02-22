@@ -140,10 +140,13 @@ export class MarkdownPreview extends React.Component<Props, State> {
 const PreviewButtonContainer = styled.div`
     background-color: #f7f7f7;
     width: -webkit-fill-available;
+    width: -moz-available;
     border-bottom: 1px solid #e0e0e0;
-    padding-bottom: 7px;
+    height: 30px;
+    padding: 0px 2px;
+    align-items: center;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
 `
 
 const PreviewBtn = styled.button`
@@ -154,7 +157,6 @@ const PreviewBtn = styled.button`
     border: none;
     outline: none;
     padding: 3px 5px;
-    margin: 5px 5px -5px 0;
     background: transparent;
     border-radius: 3px;
 
@@ -187,6 +189,16 @@ const EditorContainer = styled.div`
 
     & > div {
         padding: 10px 7px;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+
+        & *:first-child {
+            margin-top: 0;
+        }
+
+        & *:last-child {
+            margin-bottom: 0;
+        }
     }
 
     & textarea,

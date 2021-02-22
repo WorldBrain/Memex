@@ -2,8 +2,10 @@ import 'core-js'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
-import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
+import { ThemeProvider } from 'styled-components'
 
+import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
+import { theme } from 'src/common-ui/components/design-library/theme'
 import configureStore from './store'
 import Router from './router'
 import routes from './routes'
@@ -22,13 +24,15 @@ window.store = store
 
 ReactDOM.render(
     <Provider store={store}>
-        <ErrorBoundary component={RuntimeError}>
-            <AuthContextProvider>
-                <Router routes={routes} />
-                {ReduxDevTools && <ReduxDevTools />}
-                <ModalsContainer />
-            </AuthContextProvider>
-        </ErrorBoundary>
+        <ThemeProvider theme={theme}>
+            <ErrorBoundary component={RuntimeError}>
+                <AuthContextProvider>
+                    <Router routes={routes} />
+                    {ReduxDevTools && <ReduxDevTools />}
+                    <ModalsContainer />
+                </AuthContextProvider>
+            </ErrorBoundary>
+        </ThemeProvider>
     </Provider>,
     document.getElementById('app'),
 )

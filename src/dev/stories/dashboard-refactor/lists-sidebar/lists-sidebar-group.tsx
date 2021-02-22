@@ -4,7 +4,6 @@ import styled from 'styled-components'
 
 import ListsSidebarGroup, {
     ListsSidebarGroupProps,
-    ListsSidebarItemsArrayObject,
 } from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-group'
 
 import {
@@ -12,9 +11,8 @@ import {
     listsSidebarItemWithMenuProps,
     listsSidebarItemWithShortMenuProps,
 } from './list-item'
-import { AddableState, ExpandableState } from 'src/dashboard-refactor/types'
 import { TaskState } from 'ui-logic-core/lib/types'
-import { ListsSidebarItemWithMenuProps } from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item-with-menu'
+import { Props } from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item-with-menu'
 
 export const sidebarWrapperFunc = (ChildComponent) => {
     const Wrapper = styled.div`
@@ -37,111 +35,61 @@ const stories = storiesOf(
     module,
 )
 
-const addableState: AddableState = {
-    isAddable: true,
-    onAdd: () => {},
-}
-
-const expandableState: ExpandableState = {
-    isExpandable: true,
-    isExpanded: true,
-    onExpand: () => {},
-}
-
 const taskState: TaskState = 'success'
 
-const listsSidebarItemWithMenuPropsHidden: ListsSidebarItemWithMenuProps = {
+const listsSidebarItemWithMenuPropsHidden: Props = {
     ...listsSidebarItemWithMenuProps,
     isMenuDisplayed: false,
 }
 
-const listsArray: Array<ListsSidebarItemsArrayObject> = [
+const listsArray: Array<Props> = [
     {
-        listId: '1',
-        listsSidebarItemWithMenuProps: {
-            ...listsSidebarItemWithMenuPropsHidden,
-            listsSidebarItemProps: {
-                ...listsSidebarItemProps.default,
-                listName: 'Cool List',
-            },
-        },
+        ...listsSidebarItemWithMenuPropsHidden,
+        ...listsSidebarItemProps.default,
+        name: 'Cool List',
     },
     {
-        listId: '2',
-        listsSidebarItemWithMenuProps: {
-            ...listsSidebarItemWithMenuPropsHidden,
-            listsSidebarItemProps: {
-                ...listsSidebarItemProps.default,
-                listName: 'Cooler List',
-            },
-        },
+        ...listsSidebarItemWithMenuPropsHidden,
+        ...listsSidebarItemProps.default,
+        name: 'Cooler List',
     },
     {
-        listId: '3',
-        listsSidebarItemWithMenuProps: {
-            ...listsSidebarItemWithMenuPropsHidden,
-            listsSidebarItemProps: {
-                ...listsSidebarItemProps.default,
-                listName: 'Crazy List',
-            },
-        },
+        ...listsSidebarItemWithMenuPropsHidden,
+        ...listsSidebarItemProps.default,
+        name: 'Crazy List',
     },
     {
-        listId: '4',
-        listsSidebarItemWithMenuProps: {
-            ...listsSidebarItemWithMenuPropsHidden,
-            listsSidebarItemProps: {
-                ...listsSidebarItemProps.default,
-                listName: 'Intruiging List',
-            },
-        },
+        ...listsSidebarItemWithMenuPropsHidden,
+        ...listsSidebarItemProps.default,
+        name: 'Intruiging List',
     },
     {
-        listId: '6',
-        listsSidebarItemWithMenuProps: {
-            ...listsSidebarItemWithMenuPropsHidden,
-            listsSidebarItemProps: {
-                ...listsSidebarItemProps.default,
-                listName: 'Sexy List',
-            },
-        },
+        ...listsSidebarItemWithMenuPropsHidden,
+        ...listsSidebarItemProps.default,
+        name: 'Sexy List',
     },
     {
-        listId: '7',
-        listsSidebarItemWithMenuProps: {
-            ...listsSidebarItemWithMenuPropsHidden,
-            listsSidebarItemProps: {
-                ...listsSidebarItemProps.hovered,
-                listName: 'cat gifs',
-            },
-        },
+        ...listsSidebarItemWithMenuPropsHidden,
+        ...listsSidebarItemProps.hovered,
+        name: 'cat gifs',
     },
 ]
 
 const listsSidebarGroupPropsTemplate: ListsSidebarGroupProps = {
-    hasTitle: true,
-    listsGroupTitle: 'My Collections',
-    listSource: 'local-lists',
-    listsArray,
-    addableState,
-    expandableState,
-    taskState,
+    title: 'My Collections',
+    loadingState: taskState,
+    isExpanded: false,
+    listsArray: [],
 }
 
-const inboxItemsProps = (name: string, isSelected?: boolean) => {
-    if (!isSelected) isSelected = false
+const inboxItemsProps = (name: string, isSelected = false): Props => {
     return {
-        listId: `https://www.${name}.com/`,
-        listsSidebarItemWithMenuProps: {
-            listId: `https://www.${name}.com/`,
-            listsSidebarItemProps: {
-                ...listsSidebarItemProps.displayNewItemsCount,
-                selectedState: {
-                    ...listsSidebarItemProps.displayNewItemsCount.selectedState,
-                    isSelected: isSelected,
-                },
-                listName: name,
-            },
+        name,
+        listId: name.length,
+        ...listsSidebarItemProps.displayNewItemsCount,
+        selectedState: {
+            ...listsSidebarItemProps.displayNewItemsCount.selectedState,
+            isSelected,
         },
     }
 }
@@ -156,11 +104,11 @@ export const listsSidebarGroupProps: {
 } = {
     errorState: {
         ...listsSidebarGroupPropsTemplate,
-        taskState: 'error',
+        loadingState: 'error',
     },
     loadingState: {
         ...listsSidebarGroupPropsTemplate,
-        taskState: 'running',
+        loadingState: 'running',
     },
     inboxes: {
         ...listsSidebarGroupPropsTemplate,
@@ -169,32 +117,25 @@ export const listsSidebarGroupProps: {
             inboxItemsProps('Inbox', true),
             inboxItemsProps('Saved From Mobile'),
         ],
-        addableState: listsSidebarGroupPropsTemplate.addableState,
-        expandableState: listsSidebarGroupPropsTemplate.expandableState,
-        taskState: listsSidebarGroupPropsTemplate.taskState,
-        hasTitle: false,
+        onExpandBtnClick: () => null,
+        onAddBtnClick: () => null,
+        loadingState: listsSidebarGroupPropsTemplate.loadingState,
     },
     myCollectionsExpanded: {
         ...listsSidebarGroupPropsTemplate,
     },
     myCollectionsCollapsed: {
         ...listsSidebarGroupPropsTemplate,
-        expandableState: {
-            ...expandableState,
-            isExpanded: false,
-        },
+        isExpanded: false,
     },
     followedCollectionsExpanded: {
         ...listsSidebarGroupPropsTemplate,
-        listsGroupTitle: 'Followed Collections',
-        listSource: 'followed-list',
+        title: 'Followed Collections',
         listsArray: [
             ...listsArray.slice(0, listsArray.length - 2),
             {
                 ...listsArray[5],
-                listsSidebarItemWithMenuProps: {
-                    ...listsSidebarItemWithShortMenuProps,
-                },
+                ...listsSidebarItemWithShortMenuProps,
             },
         ],
     },

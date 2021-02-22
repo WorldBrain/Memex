@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import Margin from 'src/dashboard-refactor/components/Margin'
 
 import colors from '../../colors'
-import { fonts } from '../../styles'
+import styles, { fonts } from '../../styles'
 import { CursorLocationState } from 'src/dashboard-refactor/types'
 
 const textStyles = `
@@ -16,7 +16,7 @@ const textStyles = `
 
 const SearchBarContainer = styled.div`
     height: 34px;
-    width: 650px;
+    width: ${styles.components.searchBar.widthPx}px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -26,7 +26,6 @@ const SearchBarContainer = styled.div`
 
 const Input = styled.input`
     width: inherit;
-    ${textStyles}
     font-size: 12px;
     line-height: 18px;
     border: none;
@@ -44,7 +43,7 @@ const Input = styled.input`
 const FilterButton = styled.div`
     width: max-content;
     ${textStyles}
-    font-size: 10px;
+    font-size: 12px;
     line-height: 15px;
     cursor: pointer;
 `
@@ -54,6 +53,7 @@ const FullWidthMargin = styled(Margin)`
 `
 
 export interface SearchBarProps {
+    placeholder?: string
     searchQuery: string
     cursorLocationState: CursorLocationState
     isSearchBarFocused: boolean
@@ -64,7 +64,6 @@ export interface SearchBarProps {
 }
 
 export default class SearchBar extends PureComponent<SearchBarProps> {
-    placeholder: string = 'Search your saved pages and notes'
     inputRef = React.createRef<HTMLInputElement>()
 
     componentDidMount = () => {
@@ -82,10 +81,10 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         }
     }
 
-    handleChange: React.FormEventHandler = (evt) => {
+    handleChange: React.KeyboardEventHandler = (evt) => {
         // need to amend getFilterStrings function to pull through search terms as well, then
         // bundle them in an object to send with the onSearchQueryChange func
-        this.props.onSearchQueryChange(evt.currentTarget.textContent)
+        this.props.onSearchQueryChange((evt.target as HTMLInputElement).value)
     }
 
     render() {
@@ -98,12 +97,16 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         return (
             <Margin vertical="auto">
                 <SearchBarContainer onClick={onSearchBarFocus}>
-                    <FullWidthMargin left="27px">
+                    <FullWidthMargin left="15px">
                         <Input
                             ref={this.inputRef}
-                            placeholder={!searchQuery && this.placeholder}
+                            placeholder={
+                                this.props.placeholder ??
+                                'Search your saved pages and notes'
+                            }
                             value={searchQuery}
                             onChange={this.handleChange}
+                            autoComplete="off"
                         />
                     </FullWidthMargin>
                     <Margin horizontal="23px">

@@ -263,8 +263,17 @@ export default class DirectLinkingBackground {
         return result
     }
 
-    listAnnotationsByPageUrl = async ({ tab }: TabArg, { pageUrl }) => {
-        return this.annotationStorage.listAnnotationsByPageUrl({ pageUrl })
+    listAnnotationsByPageUrl = async (
+        { tab }: TabArg,
+        {
+            pageUrl,
+            ...args
+        }: { pageUrl: string; withTags?: boolean; withBookmarks?: boolean },
+    ) => {
+        return this.annotationStorage.listAnnotationsByPageUrl({
+            pageUrl,
+            ...args,
+        })
     }
 
     getAllAnnotationsByUrl = async (
@@ -355,6 +364,8 @@ export default class DirectLinkingBackground {
         }
 
         let normalizedPageUrl = this._normalizeUrl(fullPageUrl)
+        toCreate.url = this._normalizeUrl(normalizedPageUrl)
+
         if (toCreate.isSocialPost) {
             normalizedPageUrl = await this.lookupSocialId(normalizedPageUrl)
         }
@@ -374,6 +385,18 @@ export default class DirectLinkingBackground {
                 { addInboxEntryOnCreate: true },
             )
         }
+
+        if (isFullUrl(normalizedPageUrl) || isFullUrl(annotationUrl)) {
+            console.error(
+                `Tried to create annotation with non-normalised url`,
+                {
+                    normalizedPageUrl,
+                    annotationUrl,
+                },
+            )
+            throw new Error(`Cannot create annotation with non-normalised url`)
+        }
+
         await this.annotationStorage.createAnnotation({
             pageUrl: normalizedPageUrl,
             url: annotationUrl,
@@ -453,10 +476,24 @@ export default class DirectLinkingBackground {
         if (isSocialPost) {
             pk = await this.lookupSocialId(pk)
         }
+        const isBookmarked = await this.getAnnotBookmark(_, { url: pk })
+        const listEntries = await this.annotationStorage.findListEntriesByUrl({
+            url: pk,
+        })
+        const tags = await this.getTagsByAnnotationUrl(_, pk)
 
-        await this.annotationStorage.deleteTagsByUrl({ url: pk })
-        await this.annotationStorage.deleteBookmarkByUrl({ url: pk })
-        await this.annotationStorage.deleteListEntriesByUrl({ url: pk })
+        if (isBookmarked) {
+            await this.annotationStorage.deleteBookmarkByUrl({ url: pk })
+        }
+
+        if (listEntries?.length) {
+            await this.annotationStorage.deleteListEntriesByUrl({ url: pk })
+        }
+
+        if (tags?.length) {
+            await this.annotationStorage.deleteTagsByUrl({ url: pk })
+        }
+
         await this.annotationStorage.deleteAnnotation(pk)
     }
 

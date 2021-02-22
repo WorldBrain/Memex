@@ -7,7 +7,7 @@ export interface Props extends HTMLProps<HTMLDivElement> {
     listName: string
     isFiltered?: boolean
     unreadCount?: number
-    onListItemClick: MouseEventHandler
+    onListItemClick: MouseEventHandler<HTMLDivElement>
 }
 
 export class StaticListItem extends Component<Props> {
@@ -25,6 +25,14 @@ export class StaticListItem extends Component<Props> {
                     <span className={styles.unreadCount}>
                         {this.props.unreadCount}
                     </span>
+                )}
+                {this.props.listName === 'Feed' && (
+                    <span
+                        className={cx(styles.feed, {
+                            [styles.feedNoActivity]: !this.props.unreadCount,
+                            [styles.feedHasActivity]: !!this.props.unreadCount,
+                        })}
+                    />
                 )}
             </div>
         )

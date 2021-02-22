@@ -8,6 +8,8 @@ export const VISIT_3 = 1569989800000
 export const VISIT_4 = 1569982122200
 export const VISIT_5 = 1569984425254
 export const TAG_1 = 'tag-1'
+export const TAG_2 = 'tag-2'
+export const TAG_3 = 'tag-3'
 
 export const PAGE_1 = {
     url: 'lorem.com',

@@ -8,11 +8,13 @@ import { HoverState } from '../../types'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 import SidebarToggle from './sidebar-toggle'
+import { sizeConstants } from 'src/dashboard-refactor/constants'
 
 const { fonts } = styles
 
 export const SidebarHeaderContainer = styled.div`
     height: 100%;
+    width: ${sizeConstants.listsSidebar.widthPx}px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -29,7 +31,7 @@ export interface SidebarHeaderProps {
     sidebarLockedState: SidebarLockedState
     sidebarPeekState: SidebarPeekState
     sidebarToggleHoverState: HoverState
-    selectedList?: string
+    selectedListName?: string
 }
 
 export default class SidebarHeader extends PureComponent<SidebarHeaderProps> {
@@ -38,7 +40,7 @@ export default class SidebarHeader extends PureComponent<SidebarHeaderProps> {
             sidebarLockedState,
             sidebarToggleHoverState,
             sidebarPeekState,
-            selectedList,
+            selectedListName: selectedList,
         } = this.props
         return (
             <SidebarHeaderContainer>
