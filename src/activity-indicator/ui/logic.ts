@@ -1,12 +1,14 @@
 import { UILogic, UIEventHandler, UIEvent } from 'ui-logic-core'
 import { ActivityIndicatorInterface } from '../background'
 import { runInBackground } from 'src/util/webextensionRPC'
+import { auth } from 'src/util/remote-functions-background'
 
 export interface Dependencies {
     openFeedUrl: () => void
 }
 
 export interface State {
+    isShown: boolean
     hasFeedActivity: boolean
 }
 
@@ -31,16 +33,19 @@ export default class Logic extends UILogic<State, Events> {
 
     getInitialState(): State {
         return {
+            isShown: true,
             hasFeedActivity: false,
         }
     }
 
     init: EventHandler<'init'> = async () => {
         const activityStatus = await this.activityIndicatorBG.checkActivityStatus()
-
         this.emitMutation({
             hasFeedActivity: { $set: activityStatus === 'has-unseen' },
         })
+
+        const isBetaAllowed = await auth.isAuthorizedForFeature('beta')
+        this.emitMutation({ isShown: { $set: isBetaAllowed } })
     }
 
     clickFeedEntry: EventHandler<'clickFeedEntry'> = async ({
