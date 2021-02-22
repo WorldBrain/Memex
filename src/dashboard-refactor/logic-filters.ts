@@ -513,17 +513,6 @@ export const removeEmptyFilterStringsFromQueryString = (
     return constructQueryString(filteredQuery)
 }
 
-const getCursorPositionQueryPart = (
-    queryString: string,
-    cursorIndex: number,
-): SearchQueryPart => {
-    const parsedQuery: ParsedSearchQuery = parseSearchQuery(queryString)
-    return parsedQuery.find(
-        ({ startIndex, endIndex }) =>
-            cursorIndex >= startIndex && cursorIndex <= endIndex,
-    )
-}
-
 /**
  * Takes in the query string and the cursor's position in it and returns the type of the
  * filter string in which it resides, or false if it does not sit in a filter string
@@ -535,9 +524,10 @@ export const getCursorPositionFilterType = (
     queryString: string,
     cursorIndex: number,
 ): SearchFilterType | false => {
-    const cursorPart: SearchQueryPart = getCursorPositionQueryPart(
-        queryString,
-        cursorIndex,
+    const parsedQuery = parseSearchQuery(queryString)
+    const cursorPart: SearchQueryPart = parsedQuery.find(
+        ({ startIndex, endIndex }) =>
+            cursorIndex >= startIndex && cursorIndex <= endIndex,
     )
     if (!cursorPart ?? cursorPart.type !== 'filter') {
         return false
@@ -565,7 +555,7 @@ export const getCursorPositionFilterType = (
 //     tagsQuery: string
 //     listsIncluded: string[]
 //     listsExcluded: string[]
-//     listsQuery: string[]
+//     listsQuery: string
 //     domainsIncluded: string[]
 //     domainsExcluded: string[]
 //     domainsQuery: string
