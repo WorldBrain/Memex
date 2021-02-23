@@ -28,6 +28,7 @@ export type PageInteractionProps = Omit<
     CommonInteractionProps,
     'onReplyBtnClick' | 'onEditBtnClick' | 'onCommentChange'
 > & {
+    onRemoveFromListBtnClick: React.MouseEventHandler
     onListPickerBtnClick: React.MouseEventHandler
     onNotesBtnClick: React.MouseEventHandler
 }

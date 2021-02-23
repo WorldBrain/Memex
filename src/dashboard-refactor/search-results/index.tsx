@@ -48,6 +48,7 @@ export type Props = RootState &
         'onNotesSearchSwitch' | 'onPagesSearchSwitch'
     > & {
         areAllNotesShown: boolean
+        isSearchFilteredByList: boolean
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
         pagePickerProps: PagePickerAugdProps
@@ -258,6 +259,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             <ResultBox bottom="10px">
                 <PageResult
                     key={pageId + day.toString()}
+                    isSearchFilteredByList={this.props.isSearchFilteredByList}
                     {...interactionProps}
                     {...pickerProps}
                     {...page}

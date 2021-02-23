@@ -332,10 +332,11 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderSearchResults() {
-        const { searchResults } = this.state
+        const { searchResults, listsSidebar } = this.state
 
         return (
             <SearchResultsContainer
+                isSearchFilteredByList={listsSidebar.selectedListId != null}
                 {...searchResults}
                 paginateSearch={() =>
                     this.processEvent('search', { paginate: true })
@@ -435,6 +436,8 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             hover: null,
                         }),
+                    onRemoveFromListBtnClick: (day, pageId) => () =>
+                        __unimplemented,
                 }}
                 pagePickerProps={{
                     onListPickerUpdate: (pageId) => (args) =>
