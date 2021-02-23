@@ -60,6 +60,7 @@ import pick from 'lodash/pick'
 import ActivityIndicatorBackground from 'src/activity-indicator/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
 import { Services } from 'src/services/types'
+import { PDFBackground } from 'src/pdf/background'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -181,6 +182,15 @@ export function createBackgroundModules(options: {
     })
 
     const reader = new ReaderBackground({ storageManager })
+
+    const pdfBg = new PDFBackground({
+        extensionGetURL: options.browserAPIs.extension.getURL,
+    })
+    pdfBg.setupRequestInterceptors({
+            webRequest: options.browserAPIs.webRequest,
+            tabs: options.browserAPIs.tabs,
+    })
+
 
     const notifications = new NotificationBackground({ storageManager })
 

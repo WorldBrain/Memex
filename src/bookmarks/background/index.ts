@@ -54,6 +54,7 @@ export default class BookmarksBackground {
     }) => {
         const fullUrl = params.fullUrl ?? params.url
         if (!isFullUrl(fullUrl)) {
+            console.error('Invalid Bookmark', { params })
             throw new Error(
                 'Tried to create a bookmark with a normalized, instead of a full URL',
             )
