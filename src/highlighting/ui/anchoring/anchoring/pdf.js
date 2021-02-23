@@ -308,7 +308,7 @@ async function anchorByPosition(pageIndex, start, end) {
     if (!placeholder) {
         placeholder = document.createElement('span')
         placeholder.classList.add('annotator-placeholder')
-        placeholder.textContent = 'Loading annotations…'
+        // placeholder.textContent = 'Loading annotations…'
         page.div.appendChild(placeholder)
     }
     const range = document.createRange()
@@ -326,8 +326,6 @@ async function anchorByPosition(pageIndex, start, end) {
  * @return {Promise<Range>} Location of quote
  */
 function findInPages(pageIndexes, quoteSelector, positionHint) {
-    console.log(`pdf findInPages`, { pageIndexes, quoteSelector, positionHint })
-
     if (pageIndexes.length === 0) {
         // We reached the end of the document without finding a match for the quote.
         return Promise.reject(new Error('Quote not found'))
@@ -342,12 +340,6 @@ function findInPages(pageIndexes, quoteSelector, positionHint) {
         const root = document.createElement('div')
         root.textContent = content
         const anchor = TextQuoteAnchor.fromSelector(root, quoteSelector)
-        console.log(`pdf findInPages attempt`, {
-            content,
-            offset,
-            anchor,
-            root,
-        })
 
         if (positionHint) {
             let hint = positionHint.start - offset
@@ -361,7 +353,6 @@ function findInPages(pageIndexes, quoteSelector, positionHint) {
     const next = () => findInPages(rest, quoteSelector, positionHint)
 
     const cacheAndFinish = (anchor) => {
-        console.log('pdf cacheAndFinish', { anchor })
         if (positionHint) {
             if (!quotePositionCache[quoteSelector.exact]) {
                 quotePositionCache[quoteSelector.exact] = {}
@@ -436,15 +427,12 @@ function prioritizePages(position) {
  * @return {Promise<Range>}
  */
 export function anchor(root, selectors) {
-    console.log(`pdf anchor root selectors`, { root, selectors })
-
     const position = /** @type {TextPositionSelector|undefined} */ (selectors.find(
         (s) => s.type === 'TextPositionSelector',
     ))
     const quote = /** @type {TextQuoteSelector|undefined} */ (selectors.find(
         (s) => s.type === 'TextQuoteSelector',
     ))
-    console.log(`pdf anchor position quote`, { position, quote })
 
     /** @type {Promise<Range>} */
     let result = Promise.reject('unable to anchor')
@@ -548,8 +536,6 @@ export async function describe(root, range) {
     }
 
     const quote = TextQuoteAnchor.fromRange(root, range).toSelector()
-
-    console.log(`pdf describe`, { range, root, position, quote })
 
     return [position, quote]
 }

@@ -1,9 +1,12 @@
 import analytics from 'src/analytics'
+import debounce from 'lodash/debounce'
+
 import { getOffsetTop } from 'src/sidebar-overlay/utils'
 import {
     Anchor,
     Highlight,
     HighlightInteractionsInterface,
+    HighlightElement,
 } from 'src/highlighting/types'
 import { AnnotationClickHandler } from 'src/highlighting/ui/types'
 import { retryUntil } from 'src/util/retry-until'
@@ -96,6 +99,8 @@ export type HighlightRendererInterface = HighlightRenderInterface &
     HighlightInteractionsInterface
 
 export class HighlightRenderer implements HighlightRendererInterface {
+    private observer
+
     constructor() {
         document.addEventListener('click', this.handleOutsideHighlightClick)
     }
@@ -188,17 +193,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
         return annotation
     }
 
-    /**
-     * Given an array of highlight objects, highlights all of them.
-     */
-    renderHighlights = async (highlights: Highlight[], onClick) => {
-        await Promise.all(
-            highlights.map(async (highlight) =>
-                this.renderHighlight(highlight, onClick),
-            ),
-        )
-    }
-
     renderHighlight = async (
         highlight: Highlight,
         onClick: AnnotationClickHandler,
@@ -212,6 +206,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
             styles[temporary ? 'memex-highlight-tmp' : 'memex-highlight']
 
         try {
+            let highlightedElements = [] as HighlightElement[]
             await Raven.context(async () => {
                 const descriptor = highlight.selector.descriptor
 
@@ -221,33 +216,76 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     data: highlight,
                 })
 
-                /*const range = await retryUntil(
+                const range = await retryUntil(
                     () => descriptorToRange({ descriptor }),
                     (_range) => _range !== null,
                     {
                         intervalMiliseconds: 200,
                         timeoutMiliseconds: 5000,
                     },
-                )*/
-                const range = await descriptorToRange({ descriptor })
-                // console.log(`highlight-interactions renderHighlight`,{range})
+                )
 
-                highlightRange(range, baseClass)
+                highlightedElements = highlightRange(range, baseClass)
                 // markRange({ range, cssClass: baseClass })
 
                 this.attachEventListenersToNewHighlights(highlight, onClick)
+                highlight.domElements = highlightedElements
             })
+
+            return highlight
         } catch (e) {
-            // Raven.captureException(e)
+            Raven.captureException(e)
             // console.error(
             //     'MEMEX: Error during annotation anchoring/highlighting:',
             //     e,
             // )
             console.error(e)
-            return false
+            return highlight
         }
+    }
 
-        return true
+    /**
+     * Given an array of highlight objects, highlights all of them.
+     */
+    renderHighlights = async (
+        highlights: Highlight[],
+        onClick,
+    ): Promise<Highlight[]> => {
+        await Promise.all(
+            highlights.map(async (highlight) => {
+                await this.renderHighlight(highlight, onClick)
+            }),
+        )
+        this.watchForReanchors(highlights, onClick)
+        return highlights
+    }
+
+    watchForReanchors = (highlights: Highlight[], onClick) => {
+        if (!this.observer) {
+            // @ts-ignore
+            const pdfViewer = window.PDFViewerApplication?.pdfViewer
+
+            if (pdfViewer) {
+                this.observer = new MutationObserver(
+                    debounce(() => this.reanchorer(highlights, onClick), 100),
+                )
+                this.observer.observe(pdfViewer.viewer, {
+                    attributes: true,
+                    attributeFilter: ['data-loaded'],
+                    childList: true,
+                    subtree: true,
+                })
+            }
+        }
+    }
+
+    reanchorer = (highlights: Highlight[], onClick) => {
+        const reanchors = highlights.filter(
+            (h) => !document.body.contains(h.domElements?.pop() ?? null),
+        )
+        if (reanchors.length > 0) {
+            this.renderHighlights(reanchors, onClick)
+        }
     }
 
     /**

@@ -14,18 +14,21 @@ export interface Anchor {
 
 export type Highlight = Pick<Annotation, 'url' | 'selector'> & {
     temporary?: boolean
+    domElements?: HighlightElement[]
 }
+
+export type HighlightElement = HTMLElement
 
 export interface HighlightInteractionsInterface {
     renderHighlights: (
         highlights: Highlight[],
         openSidebar: AnnotationClickHandler,
-    ) => Promise<void>
+    ) => Promise<Highlight[]>
     renderHighlight: (
         highlight: Highlight,
         openSidebar: AnnotationClickHandler,
         temporary?: boolean,
-    ) => Promise<boolean>
+    ) => Promise<Highlight>
     scrollToHighlight: ({ url }: Highlight) => number
     highlightAndScroll: (annotation: Annotation) => number
     attachEventListenersToNewHighlights: (

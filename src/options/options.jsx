@@ -9,7 +9,7 @@ import Router from './router'
 import routes from './routes'
 import { ModalsContainer } from '../overview/modals/components/ModalsContainer'
 import { AuthContextProvider } from 'src/authentication/components/AuthContextProvider'
-import { setRpcConnection } from 'src/util/webextensionRPC'
+import { setupRpcConnection } from 'src/util/webextensionRPC'
 
 // Include development tools if we are not building for production
 const ReduxDevTools = undefined

@@ -100,8 +100,6 @@ class PopupContainer extends PureComponent<Props> {
     }
 
     onSearchClick = () => {
-        console.log('Test')
-
         const queryFilters = extractQueryFilters(this.props.searchValue)
         const queryParams = qs.stringify(queryFilters)
 
