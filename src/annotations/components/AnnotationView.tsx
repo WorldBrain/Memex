@@ -3,6 +3,7 @@ import styled, { ThemeProvider } from 'styled-components'
 
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import { SidebarAnnotationTheme } from '../types'
+import { TagsSegment } from 'src/common-ui/components/result-item-segments'
 
 export interface Props {
     tags: string[]
@@ -15,40 +16,8 @@ export interface Props {
 }
 
 class AnnotationView extends React.Component<Props> {
-    private bindHandleTagPillClick: (tag: string) => React.MouseEventHandler = (
-        tag,
-    ) => (event) => {
-        event.preventDefault()
-        event.stopPropagation()
-
-        if (this.props.onTagClick) {
-            return this.props.onTagClick(tag)
-        }
-    }
-
-    private renderTags() {
-        if (this.props.tags?.length === 0) {
-            return null
-        }
-
-        return (
-            <TagBox onMouseEnter={this.props.onTagsHover}>
-                <TagsContainerStyled comment={this.props.comment}>
-                    {this.props.tags.map((tag) => (
-                        <TagPillStyled
-                            key={tag}
-                            onClick={this.bindHandleTagPillClick(tag)}
-                        >
-                            {tag}
-                        </TagPillStyled>
-                    ))}
-                </TagsContainerStyled>
-            </TagBox>
-        )
-    }
-
     render() {
-        const { comment, theme, onEditIconClick } = this.props
+        const { comment, theme, onEditIconClick, tags } = this.props
 
         return (
             <ThemeProvider theme={theme}>
@@ -61,37 +30,17 @@ class AnnotationView extends React.Component<Props> {
                         />
                     </CommentBox>
                 )}
-                {this.renderTags()}
+                <TagsSegment
+                    tags={tags}
+                    onTagClick={this.props.onTagClick}
+                    onMouseEnter={this.props.onTagsHover}
+                />
             </ThemeProvider>
         )
     }
 }
 
 export default AnnotationView
-
-const TagPillStyled = styled.div`
-    background-color: #83c9f4;
-
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 400;
-    height: auto;
-    color: #284150;
-    margin: 2px 4px 2px 0;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    font-family: 'Poppins', sans-serif;
-`
-
-const TagsContainerStyled = styled.div`
-    height: auto;
-    display: flex;
-    flex-wrap: wrap;
-    margin-left: 15px;
-    padding-bottom: 10px;
-`
 
 const CommentBox = styled.div`
     color: rgb(54, 54, 46);

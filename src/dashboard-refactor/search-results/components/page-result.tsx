@@ -17,6 +17,7 @@ import { PageNotesCopyPaster } from 'src/copy-paster'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import { TagsSegment } from 'src/common-ui/components/result-item-segments'
 
 export interface Props
     extends PageData,
@@ -77,6 +78,21 @@ export default class PageResultView extends PureComponent<Props> {
         }
 
         return null
+    }
+
+    private renderRemoveFromListBtn() {
+        if (
+            !this.props.isSearchFilteredByList ||
+            this.props.hoverState == null
+        ) {
+            return false
+        }
+
+        return (
+            <RemoveFromListBtn onClick={this.props.onRemoveFromListBtnClick}>
+                X
+            </RemoveFromListBtn>
+        )
     }
 
     private calcFooterActions(): ItemBoxBottomAction[] {
@@ -164,21 +180,6 @@ export default class PageResultView extends PureComponent<Props> {
         ]
     }
 
-    private renderRemoveFromListBtn() {
-        if (
-            !this.props.isSearchFilteredByList ||
-            this.props.hoverState == null
-        ) {
-            return false
-        }
-
-        return (
-            <RemoveFromListBtn onClick={this.props.onRemoveFromListBtnClick}>
-                X
-            </RemoveFromListBtn>
-        )
-    }
-
     getDomain() {
         let domain = this.props.fullUrl.split('/')
 
@@ -207,6 +208,11 @@ export default class PageResultView extends PureComponent<Props> {
                             {this.props.fullTitle}
                         </PageTitle>
                     </PageContentBox>
+                    <TagsSegment
+                        showEditBtn={this.props.hoverState === 'tags'}
+                        tags={this.props.tags}
+                        onMouseEnter={this.props.onTagsHover}
+                    />
                     <ItemBoxBottom
                         firstDivProps={{
                             onMouseEnter: this.props.onFooterHover,
