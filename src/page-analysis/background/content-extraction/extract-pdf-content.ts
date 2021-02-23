@@ -6,7 +6,7 @@ import transformPageText from 'src/util/transform-page-text'
 async function extractContent(pdfData: ArrayBuffer) {
     // Point PDF.js to its worker code, a static file in the extension.
     PDFJS.GlobalWorkerOptions.workerSrc = browser.extension.getURL(
-        '/pdfjs/build/pdf.worker.min.js',
+        '/build/pdf.worker.min.js',
     )
 
     // Load PDF document into PDF.js
@@ -42,6 +42,9 @@ async function extractContent(pdfData: ArrayBuffer) {
 export default async function extractPdfContent(
     input: { url: string } | { blob: Blob },
 ) {
+    // TODO: If the PDF is open in a Memex PDF Reader, we should be able to save the content from that tab
+    // instead of re-fetching it.
+
     // Fetch document if only a URL is given.
     let blob = 'blob' in input ? input.blob : undefined
 

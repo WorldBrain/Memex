@@ -2,6 +2,7 @@ import { getMetadata } from 'page-metadata-parser'
 
 import PAGE_METADATA_RULES from '../page-metadata-rules'
 import { ExtractRawPageContent, RawPageContent } from '../types'
+import { getUrl, isFullUrlPDF } from 'src/util/uri-utils'
 
 export const DEF_LANG = 'en'
 
@@ -9,15 +10,18 @@ export const DEF_LANG = 'en'
  * Extracts content from the DOM, both searchable terms and other metadata.
  *
  * @param {Document} [doc=document] A DOM tree's Document instance.
- * @param {string} [url=location.href]
+ * @param {string} [url=null]
  * @returns {any} Object containing `fullText` text and other extracted meta content from the input page.
  */
 
 const extractRawPageContent: ExtractRawPageContent = async (
     doc = document,
-    url = location.href,
+    url = null,
 ) => {
-    if (url.endsWith('.pdf')) {
+    if (url === null) {
+        url = getUrl(location.href)
+    }
+    if (isFullUrlPDF(url)) {
         const rawContent: RawPageContent = {
             type: 'pdf',
             url,

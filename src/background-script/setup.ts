@@ -187,10 +187,9 @@ export function createBackgroundModules(options: {
         extensionGetURL: options.browserAPIs.extension.getURL,
     })
     pdfBg.setupRequestInterceptors({
-            webRequest: options.browserAPIs.webRequest,
-            tabs: options.browserAPIs.tabs,
+        webRequest: options.browserAPIs.webRequest,
+        tabs: options.browserAPIs.tabs,
     })
-
 
     const notifications = new NotificationBackground({ storageManager })
 

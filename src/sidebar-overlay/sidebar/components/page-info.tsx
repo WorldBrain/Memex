@@ -2,6 +2,7 @@ import * as React from 'react'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { Page } from '../types'
 import { browser } from 'webextension-polyfill-ts'
+import { getUrl } from 'src/util/uri-utils'
 
 const styles = require('./page-info.css')
 
@@ -16,7 +17,7 @@ class PageInfo extends React.Component<Props> {
         const { url } = this.props.page
         return (
             url &&
-            url !== normalizeUrl(window.location.href) &&
+            url !== normalizeUrl(getUrl(window.location.href)) &&
             this.props.isCurrentPage
         )
     }
@@ -37,7 +38,7 @@ class PageInfo extends React.Component<Props> {
                             className={styles.goBackBtn}
                             onClick={this.props.resetPage}
                         >
-                            <img src={backImg} className={styles.backButton}/>
+                            <img src={backImg} className={styles.backButton} />
                         </div>
                         <div className={styles.pageInfo}>
                             <a

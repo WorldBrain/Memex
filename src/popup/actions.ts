@@ -31,12 +31,12 @@ const getCurrentTab = async () => {
             currentWindow: true,
         })
     } else {
-        const url = getUrl(window.location.href)
+        const url = window.location.href
         if (url) {
             currentTab = await tabs.fetchTabByUrl(url)
         }
     }
-
+    currentTab.url = getUrl(currentTab.url)
     return currentTab
 }
 
