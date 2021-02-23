@@ -661,6 +661,24 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setPageHover: EventHandler<'setPageHover'> = ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    hoverState: { $set: event.hover },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
     setPageNewNoteTagPickerShown: EventHandler<
         'setPageNewNoteTagPickerShown'
     > = ({ event }) => {
@@ -992,6 +1010,20 @@ export class DashboardLogic extends UILogic<State, Events> {
                     byId: {
                         [event.noteId]: {
                             areRepliesShown: { $set: event.areShown },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setNoteHover: EventHandler<'setNoteHover'> = ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            hoverState: { $set: event.hover },
                         },
                     },
                 },

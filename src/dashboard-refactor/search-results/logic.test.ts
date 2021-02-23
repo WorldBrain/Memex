@@ -6,6 +6,7 @@ import {
 } from '../logic.test.util'
 import * as DATA from '../logic.test.data'
 import * as utils from './util'
+import { NoteResultHoverState, ResultHoverState } from './types'
 
 describe('Dashboard search results logic', () => {
     const it = makeSingleDeviceUILogicTestFactory({
@@ -484,6 +485,40 @@ describe('Dashboard search results logic', () => {
                         pageId
                     ].notesType,
                 ).toEqual('user')
+            })
+
+            it('should be able to set page result hover state', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(),
+                })
+                const day = -1
+                const pageId = DATA.PAGE_1.normalizedUrl
+                const states: ResultHoverState[] = [
+                    'footer',
+                    'main-content',
+                    'tags',
+                    null,
+                ]
+
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].hoverState,
+                ).toEqual(null)
+
+                for (const hover of states) {
+                    await searchResults.processEvent('setPageHover', {
+                        day,
+                        pageId,
+                        hover,
+                    })
+                    expect(
+                        searchResults.state.searchResults.results[day].pages
+                            .byId[pageId].hoverState,
+                    ).toEqual(hover)
+                }
             })
 
             it('should be able to set new note input value', async ({
@@ -989,6 +1024,38 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .areRepliesShown,
                 ).toEqual(false)
+            })
+
+            it('should be able to set note result hover state', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                const noteId = DATA.NOTE_2.url
+                const states: NoteResultHoverState[] = [
+                    'footer',
+                    'main-content',
+                    'note',
+                    'tags',
+                    null,
+                ]
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .hoverState,
+                ).toEqual(null)
+
+                for (const hover of states) {
+                    await searchResults.processEvent('setNoteHover', {
+                        noteId,
+                        hover,
+                    })
+                    expect(
+                        searchResults.state.searchResults.noteData.byId[noteId]
+                            .hoverState,
+                    ).toEqual(hover)
+                }
             })
 
             it('should be able to toggle note tag picker shown state', async ({

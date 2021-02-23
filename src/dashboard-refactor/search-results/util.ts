@@ -101,6 +101,7 @@ export const getInitialPageResultState = (
     loadNotesState: 'pristine',
     newNoteForm: getInitialFormState(),
     noteIds: { user: noteIds, followed: [], search: [] },
+    hoverState: null,
 })
 
 export const getInitialNoteResultState = (): NoteResult => ({
@@ -110,6 +111,7 @@ export const getInitialNoteResultState = (): NoteResult => ({
     isShareMenuShown: false,
     isCopyPasterShown: false,
     editNoteForm: getInitialFormState(),
+    hoverState: null,
 })
 
 const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
@@ -130,15 +132,11 @@ const annotationToNoteData = (
     highlight: annotation.body,
     comment: annotation.comment,
     tags: annotation.tags ?? [],
-    areRepliesShown: false,
-    isTagPickerShown: false,
-    isCopyPasterShown: false,
-    isShareMenuShown: false,
     displayTime: new Date(
         annotation.lastEdited ?? annotation.createdWhen,
     ).getTime(),
-    isEditing: false,
     isEdited: annotation.lastEdited != null,
+    ...getInitialNoteResultState(),
     editNoteForm: {
         inputValue: annotation.comment ?? '',
         tags: annotation.tags ?? [],

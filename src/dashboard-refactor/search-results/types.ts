@@ -117,6 +117,9 @@ export type PageData = Pick<
     hasNotes: boolean
 }
 
+export type ResultHoverState = 'main-content' | 'footer' | 'tags' | null
+export type NoteResultHoverState = ResultHoverState | 'note'
+
 export interface NoteResult {
     isEditing: boolean
     areRepliesShown: boolean
@@ -124,6 +127,7 @@ export interface NoteResult {
     isShareMenuShown: boolean
     isCopyPasterShown: boolean
     editNoteForm: NoteFormState
+    hoverState: NoteResultHoverState
 }
 
 export interface PageResult {
@@ -137,6 +141,7 @@ export interface PageResult {
     sortingFn: AnnotationsSorter
     newNoteForm: NoteFormState
     noteIds: { [key in NotesType]: string[] }
+    hoverState: ResultHoverState
 }
 
 export interface PageResultsByDay {
@@ -214,6 +219,7 @@ export type Events = UIEvent<{
     setPageNotesShown: PageEventArgs & { areShown: boolean }
     setPageNotesSort: PageEventArgs & { sortingFn: AnnotationsSorter }
     setPageNotesType: PageEventArgs & { noteType: NotesType }
+    setPageHover: PageEventArgs & { hover: ResultHoverState }
 
     // New note form state mutations
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }
@@ -229,6 +235,7 @@ export type Events = UIEvent<{
     setNoteCopyPasterShown: NoteEventArgs & { isShown: boolean }
     setNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
+    setNoteHover: NoteEventArgs & { hover: NoteResultHoverState }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
     showNoteShareMenu: NoteEventArgs
