@@ -500,6 +500,5 @@ const CommentBox = styled.div`
         border-top: none;
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;
-        padding: 15px 15px 15px;
     `}
 `

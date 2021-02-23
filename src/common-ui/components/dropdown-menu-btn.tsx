@@ -157,7 +157,7 @@ const MenuItem = styled.li`
 `
 
 const MenuItemName = styled.div`
-    font-weight: 600;
+    font-weight: 500;
     font-size: 14px;
 `
 
