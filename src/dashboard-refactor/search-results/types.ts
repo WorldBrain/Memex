@@ -18,6 +18,10 @@ export interface CommonInteractionProps {
     onTagPickerBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
+    onMainContentHover: React.MouseEventHandler
+    onFooterHover: React.MouseEventHandler
+    onTagsHover: React.MouseEventHandler
+    onUnhover: React.MouseEventHandler
 }
 
 export type PageInteractionProps = Omit<
@@ -44,6 +48,7 @@ export type NoteInteractionProps = Omit<
     copySharedLink: (link: string) => Promise<void>
     updateShareInfo: (info: Partial<AnnotationSharingInfo>) => void
     updateTags: PickerUpdateHandler
+    onNoteHover: React.MouseEventHandler
     onEditCancel: React.MouseEventHandler
     onEditConfirm: React.MouseEventHandler
     onEditBtnClick: React.MouseEventHandler

@@ -92,9 +92,15 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         return (
             <AnnotationEditable
                 key={noteId}
+                tags={noteData.tags}
                 body={noteData.highlight}
                 comment={noteData.comment}
                 createdWhen={new Date(noteData.displayTime)}
+                onHighlightHover={interactionProps.onMainContentHover}
+                onFooterHover={interactionProps.onFooterHover}
+                onNoteHover={interactionProps.onNoteHover}
+                onTagsHover={interactionProps.onTagsHover}
+                onUnhover={interactionProps.onUnhover}
                 lastEdited={
                     noteData.isEdited
                         ? new Date(noteData.displayTime)

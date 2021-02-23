@@ -411,6 +411,30 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                         }),
                     onShareBtnClick: (day, pageId) => () => null, // TODO: figure out share btn
+                    onMainContentHover: (day, pageId) => () =>
+                        this.processEvent('setPageHover', {
+                            day,
+                            pageId,
+                            hover: 'main-content',
+                        }),
+                    onFooterHover: (day, pageId) => () =>
+                        this.processEvent('setPageHover', {
+                            day,
+                            pageId,
+                            hover: 'footer',
+                        }),
+                    onTagsHover: (day, pageId) => () =>
+                        this.processEvent('setPageHover', {
+                            day,
+                            pageId,
+                            hover: 'tags',
+                        }),
+                    onUnhover: (day, pageId) => () =>
+                        this.processEvent('setPageHover', {
+                            day,
+                            pageId,
+                            hover: null,
+                        }),
                 }}
                 pagePickerProps={{
                     onListPickerUpdate: (pageId) => (args) =>
@@ -512,6 +536,31 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('copySharedNoteLink', {
                             noteId,
                             link,
+                        }),
+                    onMainContentHover: (noteId) => () =>
+                        this.processEvent('setNoteHover', {
+                            noteId,
+                            hover: 'main-content',
+                        }),
+                    onFooterHover: (noteId) => () =>
+                        this.processEvent('setNoteHover', {
+                            noteId,
+                            hover: 'footer',
+                        }),
+                    onTagsHover: (noteId) => () =>
+                        this.processEvent('setNoteHover', {
+                            noteId,
+                            hover: 'tags',
+                        }),
+                    onNoteHover: (noteId) => () =>
+                        this.processEvent('setNoteHover', {
+                            noteId,
+                            hover: 'note',
+                        }),
+                    onUnhover: (noteId) => () =>
+                        this.processEvent('setNoteHover', {
+                            noteId,
+                            hover: null,
                         }),
                 }}
                 notePickerProps={{

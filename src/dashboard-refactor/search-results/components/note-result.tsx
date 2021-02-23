@@ -66,7 +66,7 @@ export default class NoteResultView extends PureComponent<Props> {
         }
 
         return (
-            <NoteCommentContainer>
+            <NoteCommentContainer onMouseOver={this.props.onNoteHover}>
                 <NoteComment>{this.props.highlight}</NoteComment>
                 <NoteCommentEditBtn onClick={this.props.onEditBtnClick}>
                     X
@@ -80,7 +80,11 @@ export default class NoteResultView extends PureComponent<Props> {
             return null
         }
 
-        return <NoteHighlight>{this.props.highlight}</NoteHighlight>
+        return (
+            <NoteHighlight onMouseOver={this.props.onMainContentHover}>
+                {this.props.highlight}
+            </NoteHighlight>
+        )
     }
 
     private renderPopouts() {
@@ -135,14 +139,16 @@ export default class NoteResultView extends PureComponent<Props> {
 
     render() {
         return (
-            <ItemBox>
+            <ItemBox firstDivProps={{ onMouseLeave: this.props.onUnhover }}>
                 <StyledNoteResult>
                     <NoteContentBox>
                         {this.renderHighlight()}
                         {this.renderComment()}
                     </NoteContentBox>
-
                     <ItemBoxBottom
+                        firstDivProps={{
+                            onMouseOver: this.props.onFooterHover,
+                        }}
                         creationInfo={{
                             createdWhen: this.props.isEdited
                                 ? undefined

@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+import React, { PureComponent, HTMLProps } from 'react'
 import styled from 'styled-components'
 import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
@@ -84,9 +84,11 @@ export default class PageResultView extends PureComponent<Props> {
 
     render() {
         return (
-            <ItemBox>
+            <ItemBox firstDivProps={{ onMouseLeave: this.props.onUnhover }}>
                 <StyledPageResult>
-                    <PageContentBox>
+                    <PageContentBox
+                        onMouseEnter={this.props.onMainContentHover}
+                    >
                         <ResultContent>
                             <FavIconBox>
                                 {this.props.favIconURI ? (
@@ -102,6 +104,9 @@ export default class PageResultView extends PureComponent<Props> {
                         </PageTitle>
                     </PageContentBox>
                     <ItemBoxBottom
+                        firstDivProps={{
+                            onMouseEnter: this.props.onFooterHover,
+                        }}
                         creationInfo={{ createdWhen: this.props.displayTime }}
                         actions={[
                             {
@@ -176,7 +181,7 @@ const FavIconPlaceholder = styled.div`
 `
 const FavIconImg = styled.img``
 
-const PageContentBox = styled.div`
+const PageContentBox = styled.div<HTMLProps<HTMLDivElement>>`
     display: flex;
     flex-direction: column;
 
