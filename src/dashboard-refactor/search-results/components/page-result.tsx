@@ -183,7 +183,7 @@ export default class PageResultView extends PureComponent<Props> {
     getDomain() {
         let domain = this.props.fullUrl.split('/')
 
-        return domain[0]
+        return domain[2]
     }
 
     render() {
@@ -193,6 +193,8 @@ export default class PageResultView extends PureComponent<Props> {
                     {this.renderRemoveFromListBtn()}
                     <PageContentBox
                         onMouseEnter={this.props.onMainContentHover}
+                        href={this.props.fullUrl}
+                        target="_blank"
                     >
                         <ResultContent>
                             <FavIconBox>
@@ -204,7 +206,7 @@ export default class PageResultView extends PureComponent<Props> {
                             </FavIconBox>
                             <PageUrl>{this.getDomain()}</PageUrl>
                         </ResultContent>
-                        <PageTitle vertical="10px">
+                        <PageTitle top="10px" bottom="5px">
                             {this.props.fullTitle}
                         </PageTitle>
                     </PageContentBox>
@@ -252,12 +254,16 @@ const FavIconPlaceholder = styled.div`
 `
 const FavIconImg = styled.img``
 
-const PageContentBox = styled.div<HTMLProps<HTMLDivElement>>`
+const PageContentBox = styled.a`
     display: flex;
     flex-direction: column;
-
+    cursor: pointer;
     padding: 15px 15px 5px 15px;
-    border-bottom: 1px solid #e0e0e0;
+    text-decoration: none;
+
+    &:hover {
+        background-color: #fafafa;
+    }
 `
 
 const ResultContent = styled(Margin)`
@@ -265,6 +271,7 @@ const ResultContent = styled(Margin)`
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
+    cursor: pointer;
 `
 
 const PageTitle = styled(Margin)`

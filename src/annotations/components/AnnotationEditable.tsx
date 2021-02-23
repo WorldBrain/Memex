@@ -24,6 +24,7 @@ import {
 } from '../sharing-utils'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { TagsSegment } from 'src/common-ui/components/result-item-segments'
+import Margin from 'src/dashboard-refactor/components/Margin'
 
 export interface AnnotationEditableGeneralProps {}
 
@@ -338,25 +339,29 @@ export default class AnnotationEditable extends React.Component<Props> {
     render() {
         return (
             <ThemeProvider theme={this.theme}>
-                <ItemBox firstDivProps={{ onMouseLeave: this.props.onUnhover }}>
-                    <AnnotationStyled
-                        id={this.props.url} // Focusing on annotation relies on this ID.
-                        ref={this.setBoxRef}
-                        onClick={this.handleGoToAnnotation}
+                <Margin top="10px">
+                    <ItemBox
+                        firstDivProps={{ onMouseLeave: this.props.onUnhover }}
                     >
-                        {this.renderHighlightBody()}
-                        {this.renderNote()}
-                        <TagsSegment
-                            tags={this.props.tags}
-                            // onTagClick={this.props.onTagClick}
-                            onMouseEnter={this.props.onTagsHover}
-                        />
-                        {this.renderFooter()}
-                        {this.renderTagsPicker()}
-                        {this.renderCopyPaster()}
-                        {this.renderShareMenu()}
-                    </AnnotationStyled>
-                </ItemBox>
+                        <AnnotationStyled
+                            id={this.props.url} // Focusing on annotation relies on this ID.
+                            ref={this.setBoxRef}
+                            onClick={this.handleGoToAnnotation}
+                        >
+                            {this.renderHighlightBody()}
+                            {this.renderNote()}
+                            <TagsSegment
+                                tags={this.props.tags}
+                                // onTagClick={this.props.onTagClick}
+                                onMouseEnter={this.props.onTagsHover}
+                            />
+                            {this.renderFooter()}
+                            {this.renderTagsPicker()}
+                            {this.renderCopyPaster()}
+                            {this.renderShareMenu()}
+                        </AnnotationStyled>
+                    </ItemBox>
+                </Margin>
             </ThemeProvider>
         )
     }

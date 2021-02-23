@@ -692,4 +692,7 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     width: fill-available;
+    background-color: #f6f8fb;
+    min-height: 100vh;
+    height: 100%;
 `

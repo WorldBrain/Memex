@@ -205,7 +205,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         >(this.props.newNoteInteractionProps, day, normalizedUrl)
 
         return (
-            <PageNotesBox bottom="10px" left="20px">
+            <PageNotesBox bottom="10px" left="10px">
                 <NoteTopBarBox
                     leftSide={
                         <NotesTypeDropdownMenu
@@ -339,7 +339,7 @@ const PageNotesBox = styled(Margin)`
     width: fill-available;
     padding-left: 10px;
     padding-top: 5px;
-    border-left: 3px solid #5cd9a6;
+    border-left: 4px solid #e0e0e0;
 `
 
 const Loader = styled.div`

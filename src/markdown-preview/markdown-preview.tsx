@@ -177,7 +177,6 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    border: solid 1px #e0e0e0;
     border-radius: 3px;
     margin: 5px;
 `

@@ -32,8 +32,8 @@ const TagsContainer = styled.div`
     height: auto;
     display: flex;
     flex-wrap: wrap;
-    margin-left: 15px;
-    padding-bottom: 10px;
+    padding: 5px 15px;
+    border-top: 1px solid #e0e0e0;
 `
 
 const TagPill = styled.div`
