@@ -5,7 +5,6 @@ import ItemBoxBottom from '@worldbrain/memex-common/lib/common-ui/components/ite
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
-import AnnotationView from 'src/annotations/components/AnnotationView'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import AnnotationEdit, {
     AnnotationEditGeneralProps,
@@ -24,6 +23,7 @@ import {
     getShareAnnotationBtnAction,
 } from '../sharing-utils'
 import { ButtonTooltip } from 'src/common-ui/components'
+import { TagsSegment } from 'src/common-ui/components/result-item-segments'
 
 export interface AnnotationEditableGeneralProps {}
 
@@ -167,9 +167,10 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
-    private renderMainAnnotation() {
+    private renderNote() {
         const {
             mode,
+            comment,
             annotationEditDependencies,
             annotationFooterDependencies,
         } = this.props
@@ -185,12 +186,20 @@ export default class AnnotationEditable extends React.Component<Props> {
             )
         }
 
+        if (!comment?.length) {
+            return null
+        }
+
         return (
-            <AnnotationView
-                {...this.props}
-                theme={this.theme}
-                onEditIconClick={annotationFooterDependencies.onEditIconClick}
-            />
+            <CommentBox onMouseEnter={this.props.onNoteHover}>
+                <TextTruncated
+                    isHighlight={false}
+                    text={comment}
+                    onCommentEditClick={
+                        annotationFooterDependencies.onEditIconClick
+                    }
+                />
+            </CommentBox>
         )
     }
 
@@ -336,7 +345,12 @@ export default class AnnotationEditable extends React.Component<Props> {
                         onClick={this.handleGoToAnnotation}
                     >
                         {this.renderHighlightBody()}
-                        {this.renderMainAnnotation()}
+                        {this.renderNote()}
+                        <TagsSegment
+                            tags={this.props.tags}
+                            // onTagClick={this.props.onTagClick}
+                            onMouseEnter={this.props.onTagsHover}
+                        />
                         {this.renderFooter()}
                         {this.renderTagsPicker()}
                         {this.renderCopyPaster()}
@@ -464,4 +478,27 @@ const ActionBtnStyled = styled.button`
     &:focus {
         background-color: #79797945;
     }
+`
+
+const CommentBox = styled.div`
+    color: rgb(54, 54, 46);
+
+    font-size: 14px;
+    font-weight: 400;
+    overflow: hidden;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    margin: 0px;
+    padding: 0 15px 10px 15px;
+    line-height: 1.4;
+    text-align: left;
+
+    ${({ theme }: { theme: SidebarAnnotationTheme }) =>
+        !theme.hasHighlight &&
+        `
+        border-top: none;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        padding: 15px 15px 15px;
+    `}
 `
