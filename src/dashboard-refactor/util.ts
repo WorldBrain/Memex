@@ -1,3 +1,7 @@
+import moment from 'moment'
+import { SearchFilterType } from './header/types'
+import { DatePickerVariant, NewFilterDetail } from './types'
+
 export const updatePickerValues = (event: {
     added?: string
     deleted?: string
@@ -10,4 +14,33 @@ export const updatePickerValues = (event: {
     }
 
     return prevState
+}
+
+export const getFilterDetail = (
+    pickerType: SearchFilterType,
+    filters: string | number | string[],
+    variant?: DatePickerVariant,
+    isExclusion?: boolean,
+): NewFilterDetail => {
+    if (typeof filters === 'number') {
+        if (pickerType === 'date') {
+            filters = moment(filters).format('h:mma, D MMM YYYY')
+        }
+    }
+    const filterDetail: NewFilterDetail = {
+        type: pickerType,
+        filters:
+            typeof filters === 'number'
+                ? [`${filters}`]
+                : typeof filters === 'string'
+                ? [filters]
+                : filters,
+    }
+    if (variant) {
+        filterDetail['variant'] = variant
+    }
+    if (isExclusion) {
+        filterDetail['isExclusion'] = isExclusion
+    }
+    return filterDetail
 }

@@ -90,7 +90,12 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderFiltersBar() {
         const { searchFilters, listsSidebar } = this.state
+        const { searchQuery } = searchFilters
 
+        const toggleShowDatePicker = () =>
+            this.processEvent('setDateFilterActive', {
+                isActive: !searchFilters.isDateFilterActive,
+            })
         const toggleShowTagPicker = () =>
             this.processEvent('setTagFilterActive', {
                 isActive: !searchFilters.isTagFilterActive,
@@ -105,10 +110,7 @@ export class DashboardContainer extends StatefulUIElement<
                 isDisplayed={searchFilters.searchFiltersOpen}
                 dateFilterSelectedState={{
                     isSelected: searchFilters.isDateFilterActive,
-                    onSelection: () =>
-                        this.processEvent('setDateFilterActive', {
-                            isActive: !searchFilters.isDateFilterActive,
-                        }),
+                    onSelection: toggleShowDatePicker,
                 }}
                 domainFilterSelectedState={{
                     isSelected: searchFilters.isDomainFilterActive,
@@ -125,15 +127,25 @@ export class DashboardContainer extends StatefulUIElement<
                         endDate: searchFilters.dateTo,
                         endDateText: searchFilters.dateToInput,
                         onStartDateChange: (value) =>
-                            this.processEvent('setDateFrom', { value }),
+                            this.processEvent('setDateFrom', {
+                                value,
+                                searchQuery,
+                            }),
                         onStartDateTextChange: (value) =>
                             this.processEvent('setDateFromInputValue', {
                                 value,
+                                searchQuery,
                             }),
                         onEndDateChange: (value) =>
-                            this.processEvent('setDateTo', { value }),
+                            this.processEvent('setDateTo', {
+                                value,
+                                searchQuery,
+                            }),
                         onEndDateTextChange: (value) =>
-                            this.processEvent('setDateToInputValue', { value }),
+                            this.processEvent('setDateToInputValue', {
+                                value,
+                                searchQuery,
+                            }),
                     },
                     domainPickerProps: {
                         onToggleShowPicker: toggleShowDomainPicker,
@@ -143,6 +155,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 domains: updatePickerValues(args)(
                                     searchFilters.domainsIncluded,
                                 ),
+                                searchQuery,
                             }),
                     },
                     tagPickerProps: {
@@ -153,6 +166,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 tags: updatePickerValues(args)(
                                     searchFilters.tagsIncluded,
                                 ),
+                                searchQuery,
                             }),
                     },
                 }}

@@ -12,7 +12,12 @@ import {
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { PAGE_SIZE, STORAGE_KEYS } from 'src/dashboard-refactor/constants'
 import { ListData } from './lists-sidebar/types'
-import { updatePickerValues } from './util'
+import { getFilterDetail, updatePickerValues } from './util'
+import {
+    getPickersStateFromQueryString,
+    parseDate,
+    syncQueryStringFilters,
+} from './logic-filters'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -60,12 +65,14 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isSearchBarFocused: false,
                 domainsExcluded: [],
                 domainsIncluded: [],
+                domainPickerQuery: '',
                 isDateFilterActive: false,
                 isDomainFilterActive: false,
                 isTagFilterActive: false,
                 searchFiltersOpen: false,
                 tagsExcluded: [],
                 tagsIncluded: [],
+                tagPickerQuery: '',
                 dateFromInput: '',
                 dateToInput: '',
                 limit: PAGE_SIZE,
@@ -1203,8 +1210,32 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const { tag, domain, date } = getPickersStateFromQueryString(
+            event.query,
+        )
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { searchQuery: { $set: event.query } },
+            searchFilters: {
+                searchQuery: { $set: event.query },
+                tagPickerQuery: { $set: tag.query },
+                tagsIncluded: { $set: tag.included },
+                tagsExcluded: { $set: tag.excluded },
+                domainPickerQuery: { $set: domain.query },
+                domainsIncluded: { $set: domain.included },
+                domainsExcluded: { $set: domain.excluded },
+                dateToInput: {
+                    $set: date.variant === 'to' && date.included[0],
+                },
+                dateFromInput: {
+                    $set: date.variant === 'from' && date.included[0],
+                },
+                dateTo: {
+                    $set: date.variant === 'to' && parseDate(date.included[0]),
+                },
+                dateFrom: {
+                    $set:
+                        date.variant === 'from' && parseDate(date.included[0]),
+                },
+            },
         })
     }
 
@@ -1251,16 +1282,34 @@ export class DashboardLogic extends UILogic<State, Events> {
     setDateFromInputValue: EventHandler<'setDateFromInputValue'> = async ({
         event,
     }) => {
+        const filterDetail = getFilterDetail('date', event.value, 'from')
         this.emitMutation({
-            searchFilters: { dateFromInput: { $set: event.value } },
+            searchFilters: {
+                dateFromInput: { $set: event.value },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
     setDateToInputValue: EventHandler<'setDateToInputValue'> = async ({
         event,
     }) => {
+        const filterDetail = getFilterDetail('date', event.value, 'to')
         this.emitMutation({
-            searchFilters: { dateToInput: { $set: event.value } },
+            searchFilters: {
+                dateToInput: { $set: event.value },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
@@ -1268,14 +1317,32 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const filterDetail = getFilterDetail('date', event.value, 'from')
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { dateFrom: { $set: event.value } },
+            searchFilters: {
+                dateFrom: { $set: event.value },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
     setDateTo: EventHandler<'setDateTo'> = async ({ event, previousState }) => {
+        const filterDetail = getFilterDetail('date', event.value, 'to')
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { dateTo: { $set: event.value } },
+            searchFilters: {
+                dateTo: { $set: event.value },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
@@ -1283,8 +1350,18 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const tags = [...previousState.searchFilters.tagsIncluded, event.tag]
+        const filterDetail = getFilterDetail('tag', tags)
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { tagsIncluded: { $push: [event.tag] } },
+            searchFilters: {
+                tagsIncluded: { $push: [event.tag] },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
@@ -1295,13 +1372,24 @@ export class DashboardLogic extends UILogic<State, Events> {
         const index = previousState.searchFilters.tagsIncluded.findIndex(
             (tag) => tag === event.tag,
         )
-
         if (index === -1) {
             return
         }
 
+        const tags = [...previousState.searchFilters.tagsIncluded]
+        tags.splice(index, 1)
+        const filterDetail = getFilterDetail('tag', tags)
+
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { tagsIncluded: { $splice: [[index, 1]] } },
+            searchFilters: {
+                tagsIncluded: { $splice: [[index, 1]] },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
@@ -1309,8 +1397,18 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const tags = [...previousState.searchFilters.tagsExcluded, event.tag]
+        const filterDetail = getFilterDetail('tag', tags, null, true)
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { tagsExcluded: { $push: [event.tag] } },
+            searchFilters: {
+                tagsExcluded: { $push: [event.tag] },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
@@ -1326,8 +1424,20 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
+        const tags = [...previousState.searchFilters.tagsExcluded]
+        tags.splice(index, 1)
+        const filterDetail = getFilterDetail('tag', tags, null, true)
+
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { tagsExcluded: { $splice: [[index, 1]] } },
+            searchFilters: {
+                tagsExcluded: { $splice: [[index, 1]] },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
@@ -1335,8 +1445,21 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const domains = [
+            ...previousState.searchFilters.tagsIncluded,
+            event.domain,
+        ]
+        const filterDetail = getFilterDetail('domain', domains)
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { domainsIncluded: { $push: [event.domain] } },
+            searchFilters: {
+                domainsIncluded: { $push: [event.domain] },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
@@ -1352,8 +1475,23 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
+        const domains = [
+            ...previousState.searchFilters.tagsIncluded,
+            event.domain,
+        ]
+        domains.splice(index, 1)
+        const filterDetail = getFilterDetail('domain', domains)
+
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { domainsIncluded: { $splice: [[index, 1]] } },
+            searchFilters: {
+                domainsIncluded: { $splice: [[index, 1]] },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
@@ -1361,8 +1499,21 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const domains = [
+            ...previousState.searchFilters.tagsIncluded,
+            event.domain,
+        ]
+        const filterDetail = getFilterDetail('domain', domains, null, true)
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { domainsExcluded: { $push: [event.domain] } },
+            searchFilters: {
+                domainsExcluded: { $push: [event.domain] },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
@@ -1378,8 +1529,23 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
+        const domains = [
+            ...previousState.searchFilters.tagsIncluded,
+            event.domain,
+        ]
+        domains.splice(index, 1)
+        const filterDetail = getFilterDetail('domain', domains, null, true)
+
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { domainsExcluded: { $splice: [[index, 1]] } },
+            searchFilters: {
+                domainsExcluded: { $splice: [[index, 1]] },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
@@ -1387,8 +1553,17 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const filterDetail = getFilterDetail('tag', event.tags)
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { tagsIncluded: { $set: event.tags } },
+            searchFilters: {
+                tagsIncluded: { $set: event.tags },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
@@ -1396,8 +1571,17 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const filterDetail = getFilterDetail('tag', event.tags, null, true)
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { tagsExcluded: { $set: event.tags } },
+            searchFilters: {
+                tagsExcluded: { $set: event.tags },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
@@ -1405,8 +1589,17 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const filterDetail = getFilterDetail('domain', event.domains)
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { domainsIncluded: { $set: event.domains } },
+            searchFilters: {
+                domainsIncluded: { $set: event.domains },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 
@@ -1414,8 +1607,22 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const filterDetail = getFilterDetail(
+            'domain',
+            event.domains,
+            null,
+            true,
+        )
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { domainsExcluded: { $set: event.domains } },
+            searchFilters: {
+                domainsExcluded: { $set: event.domains },
+                searchQuery: {
+                    $set: syncQueryStringFilters(
+                        event.searchQuery,
+                        filterDetail,
+                    ),
+                },
+            },
         })
     }
 

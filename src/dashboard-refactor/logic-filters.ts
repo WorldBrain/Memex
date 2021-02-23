@@ -1,6 +1,10 @@
+import moment, { Moment } from 'moment'
+import chrono from 'chrono-node'
+
 import { SEARCH_QUERY_END_FILTER_KEY_PATTERN } from 'src/dashboard-refactor/constants'
 import { FilterKey, SearchFilterType } from './header/types'
 import {
+    AllPickersState,
     NewFilterDetail,
     ParsedSearchQuery,
     QueryFilterPart,
@@ -57,6 +61,17 @@ const filterKeyMapping: FilterKeyMapping[] = [
 ]
 
 // misc logic
+export const parseDate = (dateStr: string): number => {
+    if (moment(dateStr).isValid()) {
+        return moment(dateStr).valueOf()
+    }
+    const dt = chrono.parseDate(dateStr)
+    if (moment(dt).isValid()) {
+        return moment(dt).valueOf()
+    }
+    return null
+}
+
 const getFilterMappingFromKey = (filterKey: string): FilterKeyMapping => {
     return filterKeyMapping.find((val) => val.key === filterKey)
 }
@@ -282,6 +297,25 @@ export const parseSearchQuery: (queryString: string) => ParsedSearchQuery = (
     }
 
     return parsedQuery
+}
+
+export const getPickersStateFromQueryString = (
+    queryString: string,
+): AllPickersState => {
+    const parsedQuery: ParsedSearchQuery = parseSearchQuery(queryString)
+    const filterParts: SearchQueryPart[] = parsedQuery.filter(
+        (queryPart) => queryPart.type === 'filter',
+    )
+    const pickersState: AllPickersState = (filterParts as QueryFilterPart[]).reduce(
+        (acc, { detail: { rawContent, type, ...rest } }) => {
+            acc[type] = {
+                ...rest,
+            }
+            return acc
+        },
+        {} as AllPickersState,
+    )
+    return pickersState
 }
 
 // string constructing logic

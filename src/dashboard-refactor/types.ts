@@ -121,8 +121,10 @@ export interface SearchFiltersState {
 
     tagsIncluded: string[]
     tagsExcluded: string[]
+    tagPickerQuery: string
     domainsIncluded: string[]
     domainsExcluded: string[]
+    domainPickerQuery: string
 
     limit: number
     skip: number
@@ -137,25 +139,28 @@ export type SearchFilterEvents = UIEvent<{
     setDateFilterActive: { isActive: boolean }
     setDomainFilterActive: { isActive: boolean }
 
-    setDateFromInputValue: { value: string }
-    setDateToInputValue: { value: string }
-    setDateFrom: { value: number }
-    setDateTo: { value: number }
+    setDateFromInputValue: { value: string; searchQuery: string }
+    setDateToInputValue: { value: string; searchQuery: string }
+    setDateFrom: { value: number; searchQuery: string }
+    setDateTo: { value: number; searchQuery: string }
 
-    addIncludedTag: { tag: string }
-    delIncludedTag: { tag: string }
-    addExcludedTag: { tag: string }
-    delExcludedTag: { tag: string }
+    addIncludedTag: { tag: string; searchQuery: string }
+    delIncludedTag: { tag: string; searchQuery: string }
+    addExcludedTag: { tag: string; searchQuery: string }
+    delExcludedTag: { tag: string; searchQuery: string }
 
-    addIncludedDomain: { domain: string }
-    delIncludedDomain: { domain: string }
-    addExcludedDomain: { domain: string }
-    delExcludedDomain: { domain: string }
+    addIncludedDomain: { domain: string; searchQuery: string }
+    delIncludedDomain: { domain: string; searchQuery: string }
+    addExcludedDomain: { domain: string; searchQuery: string }
+    delExcludedDomain: { domain: string; searchQuery: string }
 
-    setTagsIncluded: { tags: string[] }
-    setTagsExcluded: { tags: string[] }
-    setDomainsIncluded: { domains: string[] }
-    setDomainsExcluded: { domains: string[] }
+    setTagsIncluded: { tags: string[]; searchQuery: string }
+    setTagsExcluded: { tags: string[]; searchQuery: string }
+    setDomainsIncluded: { domains: string[]; searchQuery: string }
+    setDomainsExcluded: { domains: string[]; searchQuery: string }
+
+    setTagPickerQuery: { value: string }
+    setDomainPickerQuery: { value: string }
 
     resetFilters: null
 }>
@@ -229,7 +234,23 @@ export interface TextFilterDetail {
     isExclusion?: boolean
 }
 
+export type DatePickerVariant = 'from' | 'to'
+
 type DateFilterDetail = Omit<TextFilterDetail, 'type' | 'variant'> & {
     type: 'date'
-    variant: 'from' | 'to'
+    variant: DatePickerVariant
+}
+
+interface PickerState {
+    included?: string[]
+    excluded?: string[]
+    query?: string
+    variant?: DatePickerVariant
+}
+
+// I want the keys of this object to depend on the SearchFilterType
+export interface AllPickersState {
+    tag: PickerState
+    domain: PickerState
+    date: PickerState
 }
