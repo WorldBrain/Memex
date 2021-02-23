@@ -382,17 +382,14 @@ const HighlightStyled = styled.div`
     font-weight: 400;
     font-size: 14px;
     letter-spacing: 0.5px;
-    margin: 0 0 5px 0;
+    margin: 0;
     padding: 10px 15px 7px 10px;
     line-height: 20px;
     text-align: left;
     line-break: normal;
 `
 
-const DefaultFooterStyled = styled.div`
-    margin-left: 20px;
-    margin-right: 5px;
-`
+const DefaultFooterStyled = styled.div``
 
 const AnnotationStyled = styled.div`
     color: rgb(54, 54, 46);
@@ -408,7 +405,6 @@ const AnnotationStyled = styled.div`
     display: flex;
     flex-direction: column;
     font-size: 14px;
-    padding: 10px;
     cursor: pointer;
     animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
 
@@ -487,16 +483,16 @@ const ActionBtnStyled = styled.button`
 
 const CommentBox = styled.div`
     color: rgb(54, 54, 46);
-
     font-size: 14px;
     font-weight: 400;
     overflow: hidden;
     word-wrap: break-word;
     white-space: pre-wrap;
     margin: 0px;
-    padding: 0 15px 10px 15px;
+    padding: 10px 15px 10px 15px;
     line-height: 1.4;
     text-align: left;
+    border-top: 1px solid #e0e0e0;
 
     ${({ theme }: { theme: SidebarAnnotationTheme }) =>
         !theme.hasHighlight &&

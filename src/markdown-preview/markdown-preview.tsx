@@ -117,6 +117,7 @@ export class MarkdownPreview extends React.Component<Props, State> {
                     onKeyDown={this.handleSecretInputKeyDown}
                 />
                 <Container>
+                    <EditorContainer>{this.renderEditor()}</EditorContainer>
                     <PreviewButtonContainer>
                         {this.props.renderSecondaryBtn()}
                         {this.showPreviewBtn && (
@@ -130,7 +131,6 @@ export class MarkdownPreview extends React.Component<Props, State> {
                             </ButtonTooltip>
                         )}
                     </PreviewButtonContainer>
-                    <EditorContainer>{this.renderEditor()}</EditorContainer>
                 </Container>
             </ThemeProvider>
         )
@@ -141,12 +141,13 @@ const PreviewButtonContainer = styled.div`
     background-color: #f7f7f7;
     width: -webkit-fill-available;
     width: -moz-available;
-    border-bottom: 1px solid #e0e0e0;
+    border-top: 1px solid #e0e0e0;
     height: 30px;
     padding: 0px 2px;
     align-items: center;
     display: flex;
     justify-content: space-between;
+    border-radius: 0 0 5px 5px;
 `
 
 const PreviewBtn = styled.button`
@@ -177,14 +178,14 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    border-radius: 3px;
-    margin: 5px;
+    border-radius: 5px;
+    padding: 0;
 `
 
 const EditorContainer = styled.div`
     width: fill-available;
-    margin-bottom: -3px;
     border-radius: 3px;
+    display: flex;
 
     & > div {
         padding: 10px 7px;
@@ -212,4 +213,5 @@ const SecretInput = styled.input`
     border: none;
     outline: none;
     background: none;
+    display: none;
 `

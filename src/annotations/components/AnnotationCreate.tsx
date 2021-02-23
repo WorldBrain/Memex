@@ -173,14 +173,9 @@ const TextBoxContainerStyled = styled.div`
     display: flex;
     flex-direction: column;
     font-size: 14px;
-    background: white;
     width: 100%;
     border-radius: 5px;
-    box-shadow: rgb(0 0 0 / 10%) 0px 1px 2px 0px;
-
-    &:hover {
-        background: white;
-    }
+    border: 1px solid #e0e0e0;
 
     & * {
         font-family: 'Poppins', sans-serif;
@@ -188,7 +183,7 @@ const TextBoxContainerStyled = styled.div`
 `
 
 const StyledTextArea = styled.textarea`
-    background-color: #f7f7f7;
+    background-color: white;
     box-sizing: border-box;
     resize: vertical;
     font-weight: 400;
@@ -200,6 +195,7 @@ const StyledTextArea = styled.textarea`
     padding: 10px 7px;
     height: ${(props) => (props.value === '' ? '40px' : '150px')};
     width: auto;
+    min-height: 40px;
 
     &::placeholder {
         color: #3a2f45;
