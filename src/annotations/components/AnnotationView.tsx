@@ -10,9 +10,10 @@ export interface Props {
     theme: SidebarAnnotationTheme
     onTagClick?: (tag: string) => void
     onEditIconClick: React.MouseEventHandler
+    onNoteHover?: React.MouseEventHandler
+    onTagsHover?: React.MouseEventHandler
 }
 
-/* tslint:disable-next-line variable-name */
 class AnnotationView extends React.Component<Props> {
     private bindHandleTagPillClick: (tag: string) => React.MouseEventHandler = (
         tag,
@@ -26,27 +27,33 @@ class AnnotationView extends React.Component<Props> {
     }
 
     private renderTags() {
+        if (this.props.tags?.length === 0) {
+            return null
+        }
+
         return (
-            <TagsContainerStyled comment={this.props.comment}>
-                {this.props.tags.map((tag) => (
-                    <TagPillStyled
-                        key={tag}
-                        onClick={this.bindHandleTagPillClick(tag)}
-                    >
-                        {tag}
-                    </TagPillStyled>
-                ))}
-            </TagsContainerStyled>
+            <TagBox onMouseEnter={this.props.onTagsHover}>
+                <TagsContainerStyled comment={this.props.comment}>
+                    {this.props.tags.map((tag) => (
+                        <TagPillStyled
+                            key={tag}
+                            onClick={this.bindHandleTagPillClick(tag)}
+                        >
+                            {tag}
+                        </TagPillStyled>
+                    ))}
+                </TagsContainerStyled>
+            </TagBox>
         )
     }
 
     render() {
-        const { comment, tags, theme, onEditIconClick } = this.props
+        const { comment, theme, onEditIconClick } = this.props
 
         return (
             <ThemeProvider theme={theme}>
                 {comment?.length > 0 && (
-                    <CommentBox>
+                    <CommentBox onMouseEnter={this.props.onNoteHover}>
                         <TextTruncated
                             isHighlight={false}
                             text={comment}
@@ -54,7 +61,7 @@ class AnnotationView extends React.Component<Props> {
                         />
                     </CommentBox>
                 )}
-                {tags?.length > 0 && <TagBox>{this.renderTags()}</TagBox>}
+                {this.renderTags()}
             </ThemeProvider>
         )
     }

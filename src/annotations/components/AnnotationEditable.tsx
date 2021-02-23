@@ -52,6 +52,11 @@ export interface AnnotationEditableProps {
 }
 
 export interface AnnotationEditableEventProps {
+    onHighlightHover?: React.MouseEventHandler
+    onFooterHover?: React.MouseEventHandler
+    onNoteHover?: React.MouseEventHandler
+    onTagsHover?: React.MouseEventHandler
+    onUnhover?: React.MouseEventHandler
     onGoToAnnotation: (url: string) => void
     onMouseEnter?: (url: string) => void
     onMouseLeave?: (url: string) => void
@@ -156,7 +161,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         }
 
         return (
-            <HighlightStyled>
+            <HighlightStyled onMouseEnter={this.props.onHighlightHover}>
                 <TextTruncated isHighlight={true} text={this.props.body} />
             </HighlightStyled>
         )
@@ -195,6 +200,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         return (
             <DefaultFooterStyled>
                 <ItemBoxBottom
+                    firstDivProps={{ onMouseEnter: this.props.onFooterHover }}
                     creationInfo={this.creationInfo}
                     actions={[
                         {
@@ -323,7 +329,7 @@ export default class AnnotationEditable extends React.Component<Props> {
     render() {
         return (
             <ThemeProvider theme={this.theme}>
-                <ItemBox>
+                <ItemBox firstDivProps={{ onMouseLeave: this.props.onUnhover }}>
                     <AnnotationStyled
                         id={this.props.url} // Focusing on annotation relies on this ID.
                         ref={this.setBoxRef}
