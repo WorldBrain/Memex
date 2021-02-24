@@ -126,6 +126,9 @@ export interface SearchFiltersState {
     domainsExcluded: string[]
     domainPickerQuery: string
 
+    cursorPositionStart?: number
+    cursorPositionEnd?: number
+
     limit: number
     skip: number
 }
@@ -158,6 +161,9 @@ export type SearchFilterEvents = UIEvent<{
     setTagsExcluded: { tags: string[]; searchQuery: string }
     setDomainsIncluded: { domains: string[]; searchQuery: string }
     setDomainsExcluded: { domains: string[]; searchQuery: string }
+
+    setCursorStartPosition: { position: number; searchQuery: string }
+    setCursorEndPosition: { position: number; searchQuery: string }
 
     setTagPickerQuery: { value: string }
     setDomainPickerQuery: { value: string }
@@ -197,9 +203,11 @@ export interface SelectedState {
     isSelected: boolean
 }
 
-export interface CursorLocationState {
-    location: number
-    onCursorLocationChange: (event: { location: number }) => void
+export interface CursorPositionState {
+    startPosition: number
+    endPosition: number
+    onCursorStartPositionChange: (position: number) => void
+    onCursorEndPositionChange: (position: number) => void
 }
 
 export type ParsedSearchQuery = SearchQueryPart[]

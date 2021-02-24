@@ -5,7 +5,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 
 import colors from '../../colors'
 import styles, { fonts } from '../../styles'
-import { CursorLocationState } from 'src/dashboard-refactor/types'
+import { CursorPositionState } from 'src/dashboard-refactor/types'
 
 const textStyles = `
     font-family: ${fonts.primary.name};
@@ -55,7 +55,7 @@ const FullWidthMargin = styled(Margin)`
 export interface SearchBarProps {
     placeholder?: string
     searchQuery: string
-    cursorLocationState: CursorLocationState
+    cursorPositionState: CursorPositionState
     isSearchBarFocused: boolean
     searchFiltersOpen: boolean
     onSearchBarFocus(): void
@@ -66,25 +66,44 @@ export interface SearchBarProps {
 export default class SearchBar extends PureComponent<SearchBarProps> {
     inputRef = React.createRef<HTMLInputElement>()
 
-    componentDidMount = () => {
+    componentDidUpdate = () => {
         if (this.props.isSearchBarFocused) {
             this.inputRef.current.focus()
         }
     }
 
-    componentDidUpdate = (prevProps) => {
-        const { selectionStart } = this.inputRef.current
-        if (selectionStart !== prevProps.cursorLocationState.location) {
-            this.props.cursorLocationState.onCursorLocationChange({
-                location: selectionStart,
-            })
+    handleChange: React.KeyboardEventHandler = (evt) => {
+        this.props.onSearchQueryChange((evt.target as HTMLInputElement).value)
+    }
+
+    setCursorPositionStates = (): void => {
+        const { selectionStart, selectionEnd } = this.inputRef.current
+        const { cursorPositionState } = this.props
+        if (selectionStart !== cursorPositionState.startPosition) {
+            cursorPositionState.onCursorStartPositionChange(selectionStart)
+        }
+        if (selectionEnd !== cursorPositionState.endPosition) {
+            cursorPositionState.onCursorStartPositionChange(selectionEnd)
         }
     }
 
-    handleChange: React.KeyboardEventHandler = (evt) => {
-        // need to amend getFilterStrings function to pull through search terms as well, then
-        // bundle them in an object to send with the onSearchQueryChange func
-        this.props.onSearchQueryChange((evt.target as HTMLInputElement).value)
+    handleKeyDown: React.KeyboardEventHandler = (evt) => {
+        const { cursorPositionState } = this.props
+        if (
+            cursorPositionState.startPosition ===
+            cursorPositionState.endPosition
+        ) {
+            if (
+                evt.key === 'ArrowLeft' ||
+                evt.key === 'ArrowRight' ||
+                evt.key === ' ' ||
+                evt.key === '"'
+            ) {
+                this.setCursorPositionStates()
+            }
+        } else {
+            this.setCursorPositionStates()
+        }
     }
 
     render() {

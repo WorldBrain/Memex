@@ -185,11 +185,26 @@ export class DashboardContainer extends StatefulUIElement<
                     searchQuery: searchFilters.searchQuery,
                     searchFiltersOpen: searchFilters.searchFiltersOpen,
                     isSearchBarFocused: searchFilters.isSearchBarFocused,
+                    cursorPositionState: {
+                        startPosition: this.state.searchFilters
+                            .cursorPositionStart,
+                        endPosition: this.state.searchFilters.cursorPositionEnd,
+                        onCursorStartPositionChange: (position: number) =>
+                            this.processEvent('setCursorStartPosition', {
+                                position,
+                                searchQuery: searchFilters.searchQuery,
+                            }),
+                        onCursorEndPositionChange: (position: number) =>
+                            this.processEvent('setCursorEndPosition', {
+                                position,
+                                searchQuery: searchFilters.searchQuery,
+                            }),
+                    },
                     onSearchBarFocus: () =>
                         this.processEvent('setSearchBarFocus', {
                             isFocused: true,
                         }),
-                    onSearchFiltersOpen: () =>
+                    toggleSearchFiltersBar: () =>
                         this.processEvent('setSearchFiltersOpen', {
                             isOpen: !searchFilters.searchFiltersOpen,
                         }),

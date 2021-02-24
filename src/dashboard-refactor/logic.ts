@@ -14,6 +14,7 @@ import { PAGE_SIZE, STORAGE_KEYS } from 'src/dashboard-refactor/constants'
 import { ListData } from './lists-sidebar/types'
 import { getFilterDetail, updatePickerValues } from './util'
 import {
+    getCursorPositionFilterType,
     getPickersStateFromQueryString,
     parseDate,
     syncQueryStringFilters,
@@ -75,6 +76,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 tagPickerQuery: '',
                 dateFromInput: '',
                 dateToInput: '',
+                cursorPositionStart: null,
+                cursorPositionEnd: null,
                 limit: PAGE_SIZE,
                 skip: 0,
             },
@@ -1622,6 +1625,33 @@ export class DashboardLogic extends UILogic<State, Events> {
                         filterDetail,
                     ),
                 },
+            },
+        })
+    }
+
+    setCursorStartPosition: EventHandler<'setCursorStartPosition'> = ({
+        event,
+    }) => {
+        const activeFilter = getCursorPositionFilterType(
+            event.searchQuery,
+            event.position,
+        )
+        this.emitMutation({
+            searchFilters: {
+                cursorPositionStart: { $set: event.position },
+                isTagFilterActive: { $set: activeFilter === 'tag' },
+                isDomainFilterActive: { $set: activeFilter === 'domain' },
+                isDateFilterActive: { $set: activeFilter === 'date' },
+            },
+        })
+    }
+
+    setCursorEndPosition: EventHandler<'setCursorEndPosition'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: {
+                cursorPositionEnd: { $set: event.position },
             },
         })
     }
