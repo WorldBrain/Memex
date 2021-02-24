@@ -102,6 +102,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 onNoteHover={interactionProps.onNoteHover}
                 onTagsHover={interactionProps.onTagsHover}
                 onUnhover={interactionProps.onUnhover}
+                hoverState={noteData.hoverState}
                 lastEdited={
                     noteData.isEdited
                         ? new Date(noteData.displayTime)

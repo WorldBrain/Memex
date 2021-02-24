@@ -25,6 +25,7 @@ import {
 import { ButtonTooltip } from 'src/common-ui/components'
 import { TagsSegment } from 'src/common-ui/components/result-item-segments'
 import Margin from 'src/dashboard-refactor/components/Margin'
+import { NoteResultHoverState } from 'src/dashboard-refactor/search-results/types'
 
 export interface AnnotationEditableGeneralProps {}
 
@@ -44,6 +45,7 @@ export interface AnnotationEditableProps {
     tags: string[]
     isBookmarked?: boolean
     mode: AnnotationMode
+    hoverState: NoteResultHoverState
     annotationFooterDependencies: AnnotationFooterEventProps
     annotationEditDependencies: AnnotationEditGeneralProps &
         AnnotationEditEventProps
@@ -74,6 +76,7 @@ export default class AnnotationEditable extends React.Component<Props> {
 
     static defaultProps: Partial<Props> = {
         mode: 'default',
+        hoverState: null,
     }
 
     componentDidMount() {
@@ -352,8 +355,12 @@ export default class AnnotationEditable extends React.Component<Props> {
                             {this.renderNote()}
                             <TagsSegment
                                 tags={this.props.tags}
-                                // onTagClick={this.props.onTagClick}
                                 onMouseEnter={this.props.onTagsHover}
+                                showEditBtn={this.props.hoverState === 'tags'}
+                                onEditBtnClick={
+                                    this.props.annotationFooterDependencies
+                                        .onTagIconClick
+                                }
                             />
                             {this.renderFooter()}
                             {this.renderTagsPicker()}

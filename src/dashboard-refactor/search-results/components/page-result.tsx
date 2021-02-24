@@ -211,9 +211,10 @@ export default class PageResultView extends PureComponent<Props> {
                         </PageTitle>
                     </PageContentBox>
                     <TagsSegment
-                        showEditBtn={this.props.hoverState === 'tags'}
                         tags={this.props.tags}
                         onMouseEnter={this.props.onTagsHover}
+                        showEditBtn={this.props.hoverState === 'tags'}
+                        onEditBtnClick={this.props.onTagPickerBtnClick}
                     />
                     <ItemBoxBottom
                         firstDivProps={{

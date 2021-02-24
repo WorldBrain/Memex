@@ -1,16 +1,22 @@
 import React, { HTMLProps } from 'react'
 import styled from 'styled-components'
 
+import * as icons from 'src/common-ui/components/design-library/icons'
+
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     tags: string[]
-    showEditBtn?: boolean
+    maxTags?: number
+    showEditBtn: boolean
     onTagClick?: (tag: string) => void
+    onEditBtnClick: React.MouseEventHandler
 }
 
 export function TagsSegment({
     tags,
+    maxTags = 8,
     onTagClick,
     showEditBtn,
+    onEditBtnClick,
     ...props
 }: Props) {
     if (tags.length === 0) {
@@ -18,22 +24,32 @@ export function TagsSegment({
     }
 
     return (
-        <TagsContainer {...props}>
-            {tags.map((tag) => (
-                <TagPill key={tag} onClick={() => onTagClick?.(tag)}>
-                    {tag}
-                </TagPill>
-            ))}
-        </TagsContainer>
+        <Container {...props}>
+            <TagsContainer>
+                {tags.slice(0, maxTags).map((tag) => (
+                    <TagPill
+                        key={tag}
+                        onClick={onTagClick ? () => onTagClick(tag) : undefined}
+                    >
+                        {tag}
+                    </TagPill>
+                ))}
+            </TagsContainer>
+            {showEditBtn && <EditIcon onClick={onEditBtnClick} />}
+        </Container>
     )
 }
 
-const TagsContainer = styled.div`
-    height: auto;
+const Container = styled.div`
     display: flex;
-    flex-wrap: wrap;
-    padding: 5px 15px;
+    align-items: center;
+    justify-content: space-between;
     border-top: 1px solid #e0e0e0;
+    padding: 5px 15px;
+`
+
+const TagsContainer = styled.div`
+    display: flex;
 `
 
 const TagPill = styled.div`
@@ -47,8 +63,22 @@ const TagPill = styled.div`
     color: #284150;
     margin: 2px 4px 2px 0;
     display: flex;
-    cursor: pointer;
+    cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
     align-items: center;
     white-space: nowrap;
     font-family: 'Poppins', sans-serif;
+`
+
+const EditIcon = styled.button`
+    border: none;
+    outline: none;
+    width: 20px;
+    height: 20px;
+    opacity: 0.6;
+    background-color: #3a2f45;
+    mask-image: url(${icons.commentEditFull});
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: 16px;
+    cursor: pointer;
 `
