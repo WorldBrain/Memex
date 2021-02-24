@@ -591,8 +591,9 @@ const CancelBtnStyled = styled.button`
 const BtnContainerStyled = styled.div`
     display: flex;
     flex-direction: row-reverse;
-    justify-content: space-between;
     width: 100%;
+    justify-content: flex-end;
+    padding: 0 5px 5px;
 `
 
 const ActionBtnStyled = styled.button`

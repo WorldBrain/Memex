@@ -174,8 +174,9 @@ const TextBoxContainerStyled = styled.div`
     flex-direction: column;
     font-size: 14px;
     width: 100%;
+    box-shadow: rgb(0 0 0 / 10%) 0px 1px 2px 0px;
     border-radius: 5px;
-    border: 1px solid #e0e0e0;
+    background-color: ${(props) => (props.comment !== '' ? 'white' : 'none')};
 
     & * {
         font-family: 'Poppins', sans-serif;
@@ -217,7 +218,7 @@ const FooterStyled = styled.div`
     flex-direction: row-reverse;
     justify-content: flex-end;
     align-items: center;
-    margin: 0px 12px 4px 12px;
+    margin: 0 5px 3px 5px;
     height: 26px;
     animation: slideIn 0.2s ease-in-out;
     animation-fill-mode: forwards;
@@ -330,4 +331,6 @@ const ImgButtonStyled = styled.img`
 
 const Flex = styled.div`
     display: flex;
+    padding: 0 5px 5px;
+    justify-content: flex-end;
 `
