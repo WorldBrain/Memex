@@ -206,7 +206,7 @@ const IconBox = styled.div`
 `
 
 const SidebarItem = styled.div<Props>`
-    height: 27px;
+    height: 30px;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -282,7 +282,7 @@ const TitleBox = styled.div`
     flex: 1;
     width: 100%;
     height: 100%;
-    padding-left: 10px;
+    padding-left: 15px;
     align-items: center;
 `
 
