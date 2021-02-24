@@ -154,23 +154,46 @@ export default class AnnotationEditable extends React.Component<Props> {
         this.boxRef = ref
     }
 
-    private handleGoToAnnotation = () => {
-        if (!this.props.isClickable) {
-            return
-        }
-
-        this.props.onGoToAnnotation(this.props.url)
-    }
-
     private renderHighlightBody() {
         if (!this.props.body) {
             return
         }
 
+        const actionsBox =
+            this.props.hoverState === 'main-content' ? (
+                <HighlightActionsBox>
+                    <ButtonTooltip tooltipText="Open in Page" position="top">
+                        <HighlightAction>
+                            <GoToHighlightIcon
+                                onClick={
+                                    this.props.annotationFooterDependencies
+                                        .onGoToAnnotation
+                                }
+                            />
+                        </HighlightAction>
+                    </ButtonTooltip>
+                    <ButtonTooltip tooltipText="Add/Edit Note" position="top">
+                        <HighlightAction>
+                            <AddNoteIcon
+                                onClick={
+                                    this.props.annotationFooterDependencies
+                                        .onEditIconClick
+                                }
+                            />
+                        </HighlightAction>
+                    </ButtonTooltip>
+                </HighlightActionsBox>
+            ) : null
+
         return (
             <HighlightStyled onMouseEnter={this.props.onHighlightHover}>
                 <TextTruncated text={this.props.body}>
-                    {({ text }) => <HighlightText>{text}</HighlightText>}
+                    {({ text }) => (
+                        <HighlightTextBox>
+                            <HighlightText>{text}</HighlightText>
+                            {actionsBox}
+                        </HighlightTextBox>
+                    )}
                 </TextTruncated>
             </HighlightStyled>
         )
@@ -360,7 +383,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                         <AnnotationStyled
                             id={this.props.url} // Focusing on annotation relies on this ID.
                             ref={this.setBoxRef}
-                            onClick={this.handleGoToAnnotation}
                         >
                             {this.renderHighlightBody()}
                             {this.renderNote()}
@@ -448,6 +470,52 @@ const NoteTextBox = styled.div`
 const NoteText = styled(Markdown)`
     display: block;
     width: 100%;
+`
+
+const HighlightActionsBox = styled.div`
+    position: absolute;
+    right: 5px;
+    top: 10px;
+    width: 50px;
+    display: flex;
+    justify-content: space-between;
+`
+
+const HighlightAction = styled.div`
+    display: flex;
+    background-color: white;
+    border-radius: 5px;
+    padding: 2px;
+`
+
+const HighlightTextBox = styled.div`
+    position: relative;
+`
+
+const AddNoteIcon = styled.button`
+    border: none;
+    width: 20px;
+    height: 20px;
+    opacity: 0.6;
+    background-color: #3a2f45;
+    mask-image: url(${icons.plus});
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: 16px;
+    cursor: pointer;
+`
+
+const GoToHighlightIcon = styled.button`
+    border: none;
+    width: 20px;
+    height: 20px;
+    opacity: 0.6;
+    background-color: #3a2f45;
+    mask-image: url(${icons.goTo});
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: 16px;
+    cursor: pointer;
 `
 
 const HighlightText = styled.span`

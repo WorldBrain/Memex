@@ -495,6 +495,8 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('saveNoteEdit', {
                             noteId,
                         }),
+                    onGoToHighlightClick: (noteId) => () =>
+                        this.processEvent('goToHighlightInNewTab', { noteId }),
                     onTagPickerBtnClick: (noteId) => () =>
                         this.processEvent('setNoteTagPickerShown', {
                             noteId,

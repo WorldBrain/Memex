@@ -54,6 +54,7 @@ export type NoteInteractionProps = Omit<
     onEditConfirm: React.MouseEventHandler
     onEditBtnClick: React.MouseEventHandler
     onReplyBtnClick: React.MouseEventHandler
+    onGoToHighlightClick: React.MouseEventHandler
     onCommentChange: React.KeyboardEventHandler<HTMLTextAreaElement>
 }
 
@@ -250,6 +251,7 @@ export type Events = UIEvent<{
     updateNoteShareInfo: NoteEventArgs & {
         info: Partial<AnnotationSharingInfo>
     }
+    goToHighlightInNewTab: NoteEventArgs // NOTE: Does not mutate state
     confirmNoteDelete: null
     cancelNoteDelete: null
 

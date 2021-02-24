@@ -1071,6 +1071,17 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    goToHighlightInNewTab: EventHandler<'goToHighlightInNewTab'> = async ({
+        event,
+        previousState,
+    }) => {
+        const note = previousState.searchResults.noteData.byId[event.noteId]
+        await this.options.annotationsBG.goToAnnotationFromSidebar({
+            url: note.pageUrl,
+            annotation: note,
+        })
+    }
+
     copySharedNoteLink: EventHandler<'copySharedNoteLink'> = async ({
         event: { link },
     }) => {
