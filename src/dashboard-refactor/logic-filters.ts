@@ -1,4 +1,4 @@
-import moment, { Moment } from 'moment'
+import moment from 'moment'
 import chrono from 'chrono-node'
 
 import { SEARCH_QUERY_END_FILTER_KEY_PATTERN } from 'src/dashboard-refactor/constants'
@@ -548,6 +548,16 @@ export const removeEmptyFilterStringsFromQueryString = (
 }
 
 /**
+ * Takes a string and returns a string cleaned of any valid filter strings
+ * @param queryString A string which may contain filter strings
+ */
+export const getSearchStringOnly = (queryString: string): string => {
+    const parsedQuery = parseSearchQuery(queryString)
+    const filteredQuery = parsedQuery.filter((obj) => obj.type === 'filter')
+    return constructQueryString(filteredQuery)
+}
+
+/**
  * Takes in the query string and the cursor's position in it and returns the type of the
  * filter string in which it resides, or false if it does not sit in a filter string
  * N.B. this is only for applications where the isExclusion and variant flag are not used
@@ -557,40 +567,15 @@ export const removeEmptyFilterStringsFromQueryString = (
 export const getCursorPositionFilterType = (
     queryString: string,
     cursorIndex: number,
-): SearchFilterType | false => {
+): SearchFilterType => {
+    console.log(cursorIndex)
     const parsedQuery = parseSearchQuery(queryString)
     const cursorPart: SearchQueryPart = parsedQuery.find(
         ({ startIndex, endIndex }) =>
             cursorIndex >= startIndex && cursorIndex <= endIndex,
     )
-    if (!cursorPart ?? cursorPart.type !== 'filter') {
-        return false
+    if (cursorPart.type !== 'filter') {
+        return null
     }
     return cursorPart.detail.type
 }
-
-// filters state shape
-// interface SearchFiltersState {
-//     searchQuery: string
-//     searchQueryCursorPosition: number
-//     isSearchBarFocused: boolean
-//     searchFiltersOpen: boolean
-//     isTagFilterActive: boolean
-//     isDateFilterActive: boolean
-//     isDomainFilterActive: boolean
-
-//     dateFromInput: string
-//     dateToInput: string
-//     dateFrom?: number
-//     dateTo?: number
-
-//     tagsIncluded: string[]
-//     tagsExcluded: string[]
-//     tagsQuery: string
-//     listsIncluded: string[]
-//     listsExcluded: string[]
-//     listsQuery: string
-//     domainsIncluded: string[]
-//     domainsExcluded: string[]
-//     domainsQuery: string
-// }
