@@ -17,7 +17,7 @@ import { PageNotesCopyPaster } from 'src/copy-paster'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import { TagsSegment } from 'src/common-ui/components/result-item-segments'
+import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 
 export interface Props
     extends PageData,

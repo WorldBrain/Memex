@@ -11,7 +11,7 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     onEditBtnClick: React.MouseEventHandler
 }
 
-export function TagsSegment({
+export default function TagsSegment({
     tags,
     maxTags = 8,
     onTagClick,

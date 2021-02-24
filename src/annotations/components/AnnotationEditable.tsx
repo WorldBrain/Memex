@@ -26,7 +26,7 @@ import {
     getShareAnnotationBtnAction,
 } from '../sharing-utils'
 import { ButtonTooltip } from 'src/common-ui/components'
-import { TagsSegment } from 'src/common-ui/components/result-item-segments'
+import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { NoteResultHoverState } from 'src/dashboard-refactor/search-results/types'
 
