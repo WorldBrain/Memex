@@ -1,7 +1,9 @@
 import * as React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
-import ItemBoxBottom from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
+import ItemBoxBottom, {
+    ItemBoxBottomAction,
+} from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
@@ -207,69 +209,84 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
-    private renderDefaultFooter() {
+    private calcFooterActions(): ItemBoxBottomAction[] {
         const { annotationFooterDependencies: footerDeps } = this.props
 
-        return (
-            <DefaultFooterStyled>
-                <ItemBoxBottom
-                    firstDivProps={{ onMouseEnter: this.props.onFooterHover }}
-                    creationInfo={this.creationInfo}
-                    actions={[
-                        {
-                            key: 'delete-note-btn',
-                            image: icons.trash,
-                            onClick: footerDeps.onDeleteIconClick,
-                            tooltipText: 'Delete Note',
-                        },
-                        this.props.body?.length > 0
-                            ? {
-                                  key: 'go-to-to-note-btn',
-                                  image: icons.goTo,
-                                  onClick: () =>
-                                      this.props.onGoToAnnotation(
-                                          this.props.url,
-                                      ),
-                                  tooltipText: 'Open in Page',
-                              }
-                            : null,
-                        {
-                            key: 'tag-note-btn',
-                            image:
-                                this.props.tags?.length > 0
-                                    ? icons.tagFull
-                                    : icons.tagEmpty,
-                            onClick: footerDeps.onTagIconClick,
-                            tooltipText: 'Tag Note',
-                        },
-                        {
-                            key: 'copy-paste-note-btn',
-                            image: icons.copy,
-                            onClick: footerDeps.onCopyPasterBtnClick,
-                            tooltipText: 'Copy Note',
-                        },
-                        {
-                            key: 'share-note-btn',
-                            image: SHARE_BUTTON_ICONS[this.sharingData.state],
-                            onClick: footerDeps.onShareClick,
-                            tooltipText:
-                                SHARE_BUTTON_LABELS[this.sharingData.state],
-                            isDisabled: ['sharing', 'unsharing'].includes(
-                                this.sharingData.state,
-                            ),
-                        },
-                        footerDeps.toggleBookmark && {
-                            key: 'bookmark-note-btn',
-                            image: this.props.isBookmarked
-                                ? icons.heartFull
-                                : icons.heartEmpty,
-                            onClick: footerDeps.toggleBookmark,
-                            tooltipText: 'Favorite Note',
-                        },
-                    ]}
-                />
-            </DefaultFooterStyled>
-        )
+        if (this.props.hoverState === null) {
+            return []
+        }
+
+        if (this.props.hoverState === 'footer') {
+            return [
+                {
+                    key: 'delete-note-btn',
+                    image: icons.trash,
+                    onClick: footerDeps.onDeleteIconClick,
+                    tooltipText: 'Delete Note',
+                },
+                // this.props.body?.length > 0
+                //     ? {
+                //           key: 'go-to-to-note-btn',
+                //           image: icons.goTo,
+                //           onClick: () =>
+                //               this.props.onGoToAnnotation(
+                //                   this.props.url,
+                //               ),
+                //           tooltipText: 'Open in Page',
+                //       }
+                //     : null,
+                {
+                    key: 'copy-paste-note-btn',
+                    image: icons.copy,
+                    onClick: footerDeps.onCopyPasterBtnClick,
+                    tooltipText: 'Copy Note',
+                },
+                {
+                    key: 'tag-note-btn',
+                    image:
+                        this.props.tags?.length > 0
+                            ? icons.tagFull
+                            : icons.tagEmpty,
+                    onClick: footerDeps.onTagIconClick,
+                    tooltipText: 'Tag Note',
+                },
+                {
+                    key: 'share-note-btn',
+                    image: SHARE_BUTTON_ICONS[this.sharingData.state],
+                    onClick: footerDeps.onShareClick,
+                    tooltipText: SHARE_BUTTON_LABELS[this.sharingData.state],
+                    isDisabled: ['sharing', 'unsharing'].includes(
+                        this.sharingData.state,
+                    ),
+                },
+            ]
+        }
+
+        return [
+            {
+                key: 'delete-note-btn',
+                isDisabled: true,
+                image: icons.trash,
+            },
+            {
+                key: 'copy-paste-note-btn',
+                isDisabled: true,
+                image: icons.copy,
+            },
+            {
+                key: 'tag-note-btn',
+                isDisabled: true,
+                image:
+                    this.props.tags?.length > 0
+                        ? icons.tagFull
+                        : icons.tagEmpty,
+            },
+            {
+                key: 'share-note-btn',
+                isDisabled: true,
+                image: SHARE_BUTTON_ICONS[this.sharingData.state],
+            },
+        ]
     }
 
     private renderFooter() {
@@ -288,7 +305,17 @@ export default class AnnotationEditable extends React.Component<Props> {
             actionBtnHandler = footerDeps.onEditConfirm
             cancelBtnHandler = footerDeps.onEditCancel
         } else {
-            return this.renderDefaultFooter()
+            return (
+                <DefaultFooterStyled>
+                    <ItemBoxBottom
+                        firstDivProps={{
+                            onMouseEnter: this.props.onFooterHover,
+                        }}
+                        creationInfo={this.creationInfo}
+                        actions={this.calcFooterActions()}
+                    />
+                </DefaultFooterStyled>
+            )
         }
 
         return (
@@ -312,30 +339,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                     </ButtonTooltip>
                 </BtnContainerStyled>
             </>
-        )
-    }
-
-    private renderShareMenu() {
-        return (
-            <ShareMenuWrapper>
-                {this.props.renderShareMenuForAnnotation(this.props.url)}
-            </ShareMenuWrapper>
-        )
-    }
-
-    private renderCopyPaster() {
-        return (
-            <CopyPasterWrapper>
-                {this.props.renderCopyPasterForAnnotation(this.props.url)}
-            </CopyPasterWrapper>
-        )
-    }
-
-    private renderTagsPicker() {
-        return (
-            <TagPickerWrapper>
-                {this.props.renderTagsPickerForAnnotation(this.props.url)}
-            </TagPickerWrapper>
         )
     }
 
@@ -363,9 +366,21 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 }
                             />
                             {this.renderFooter()}
-                            {this.renderTagsPicker()}
-                            {this.renderCopyPaster()}
-                            {this.renderShareMenu()}
+                            <TagPickerWrapper>
+                                {this.props.renderTagsPickerForAnnotation(
+                                    this.props.url,
+                                )}
+                            </TagPickerWrapper>
+                            <CopyPasterWrapper>
+                                {this.props.renderCopyPasterForAnnotation(
+                                    this.props.url,
+                                )}
+                            </CopyPasterWrapper>
+                            <ShareMenuWrapper>
+                                {this.props.renderShareMenuForAnnotation(
+                                    this.props.url,
+                                )}
+                            </ShareMenuWrapper>
                         </AnnotationStyled>
                     </ItemBox>
                 </Margin>
@@ -401,13 +416,6 @@ const DefaultFooterStyled = styled.div``
 const AnnotationStyled = styled.div`
     color: rgb(54, 54, 46);
 
-    transition: background 120ms ease-in 0s;
-
-    &:hover {
-        transition: background 120ms ease-in 0s;
-        background-color: rgba(55, 53, 47, 0.03);
-    }
-
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -419,12 +427,8 @@ const AnnotationStyled = styled.div`
         ${({ theme }) =>
             theme.isEditing &&
             `
-    background-color: white;
-    cursor: default;
-
-    &:hover {
         background-color: white;
-    }
+        cursor: default;
     `};
 `
 

@@ -114,9 +114,6 @@ class ResultItem extends PureComponent<Props> {
                 pageUrl={this.hrefToPage}
                 annotations={this.props.annotations}
                 goToAnnotation={this.props.goToAnnotation}
-                handleBookmarkToggle={(url) =>
-                    annotationsBG.toggleAnnotBookmark({ url })
-                }
                 handleDeleteAnnotation={(url) =>
                     annotationsBG.deleteAnnotation(url)
                 }

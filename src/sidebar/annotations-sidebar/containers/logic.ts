@@ -158,10 +158,6 @@ export type SidebarContainerEvents = UIEvent<{
         context: AnnotationEventContext
         annotationUrl: string
     }
-    toggleAnnotationBookmark: {
-        context: AnnotationEventContext
-        annotationUrl: string
-    }
     switchAnnotationMode: {
         context: AnnotationEventContext
         annotationUrl: string
@@ -841,21 +837,6 @@ export class SidebarContainerLogic extends UILogic<
 
         this.emitMutation({
             activeShareMenuNoteId: { $set: event.annotationUrl },
-        })
-    }
-
-    toggleAnnotationBookmark: EventHandler<
-        'toggleAnnotationBookmark'
-    > = async ({ previousState, event }) => {
-        const resultIndex = previousState.annotations.findIndex(
-            (annot) => annot.url === event.annotationUrl,
-        )
-        const annotation = previousState.annotations[resultIndex]
-        const isBookmarked = !annotation.isBookmarked
-
-        this.options.annotationsCache.update({
-            ...annotation,
-            isBookmarked,
         })
     }
 

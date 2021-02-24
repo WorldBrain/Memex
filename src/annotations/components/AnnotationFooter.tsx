@@ -10,7 +10,6 @@ export interface Props extends AnnotationFooterEventProps {
     mode: AnnotationMode
     isEdited?: boolean
     timestamp?: string
-    isBookmarked?: boolean
     sharingAccess: AnnotationSharingAccess
     sharingInfo?: AnnotationSharingInfo
 }
@@ -25,7 +24,6 @@ export interface AnnotationFooterEventProps {
     onTagIconClick: React.MouseEventHandler
     onShareClick: React.MouseEventHandler
     onUnshareClick: React.MouseEventHandler
-    toggleBookmark?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler
     onCopyPasterBtnClick: React.MouseEventHandler
 }

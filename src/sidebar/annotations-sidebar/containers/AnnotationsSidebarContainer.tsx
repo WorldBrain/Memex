@@ -113,11 +113,6 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
-            toggleBookmark: () =>
-                this.processEvent('toggleAnnotationBookmark', {
-                    annotationUrl: annotation.url,
-                    ...DEF_CONTEXT,
-                }),
             onDeleteIconClick: () =>
                 this.processEvent('switchAnnotationMode', {
                     annotationUrl: annotation.url,
