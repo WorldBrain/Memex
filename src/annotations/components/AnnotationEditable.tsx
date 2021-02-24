@@ -4,6 +4,7 @@ import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom, {
     ItemBoxBottomAction,
 } from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
+import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
@@ -168,7 +169,9 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <HighlightStyled onMouseEnter={this.props.onHighlightHover}>
-                <TextTruncated isHighlight={true} text={this.props.body} />
+                <TextTruncated text={this.props.body}>
+                    {({ text }) => <HighlightText>{text}</HighlightText>}
+                </TextTruncated>
             </HighlightStyled>
         )
     }
@@ -198,13 +201,18 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <CommentBox onMouseEnter={this.props.onNoteHover}>
-                <TextTruncated
-                    isHighlight={false}
-                    text={comment}
-                    onCommentEditClick={
-                        annotationFooterDependencies.onEditIconClick
-                    }
-                />
+                <TextTruncated text={comment}>
+                    {({ text }) => (
+                        <NoteTextBox>
+                            <NoteText>{text}</NoteText>
+                            <EditNoteIcon
+                                onClick={
+                                    annotationFooterDependencies.onEditIconClick
+                                }
+                            />
+                        </NoteTextBox>
+                    )}
+                </TextTruncated>
             </CommentBox>
         )
     }
@@ -398,6 +406,58 @@ const ShareMenuWrapper = styled.div`
 const CopyPasterWrapper = styled.div`
     position: relative;
     left: 70px;
+`
+
+const EditNoteIcon = styled.button`
+    display: none;
+    border: none;
+    width: 20px;
+    height: 20px;
+    opacity: 0.6;
+    background-color: #3a2f45;
+    mask-image: url(${icons.commentEditFull});
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: 16px;
+    cursor: pointer;
+`
+
+const NoteTextBox = styled.div`
+    position: relative;
+    min-height: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    overflow-x: hidden;
+    line-height: 22px;
+    line-break: anywhere;
+
+    & *:first-child {
+        margin-top: 0px;
+    }
+
+    & *:last-child {
+        margin-bottom: 0px;
+    }
+
+    &: hover ${EditNoteIcon} {
+        display: flex;
+    }
+`
+
+const NoteText = styled(Markdown)`
+    display: block;
+    width: 100%;
+`
+
+const HighlightText = styled.span`
+    box-decoration-break: clone;
+    overflow: hidden;
+    line-height: 25px;
+    font-style: normal;
+    background-color: #d4e8ff;
+    color: #3a2f45;
+    padding: 2px 5px;
 `
 
 const HighlightStyled = styled.div`
