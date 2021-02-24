@@ -21,15 +21,24 @@ const Container = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    background: #f5f5f5;
+    background: #fff;
     z-index: 5000;
+`
+
+const SearchSection = styled(Margin)`
+    flex: 2;
+`
+
+const SettingsSection = styled(Margin)`
+    width: min-content;
 `
 
 const RightHeader = styled.div`
     width: min-content;
     display: flex;
     align-items: center;
-    justify-content: start;
+    justify-content: flex-end;
+    flex: 1;
 `
 
 const SyncStatusIcon = styled.div<{
@@ -47,6 +56,10 @@ const SyncStatusHeaderBox = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: center;
+
+    & > div {
+        width: auto;
+    }
 `
 
 const SyncStatusHeaderText = styled.span<{
@@ -86,7 +99,9 @@ export default class Header extends PureComponent<HeaderProps> {
         return (
             <Container>
                 <SidebarHeader {...sidebarHeaderProps} />
-                <SearchBar {...searchBarProps} />
+                <SearchSection vertical="auto" horizontal="17px">
+                    <SearchBar {...searchBarProps} />
+                </SearchSection>
                 <RightHeader>
                     <SyncStatusHeaderBox
                         onClick={
@@ -104,11 +119,11 @@ export default class Header extends PureComponent<HeaderProps> {
                         </Margin>
                         <SyncStatusHeaderText>Sync Status</SyncStatusHeaderText>
                     </SyncStatusHeaderBox>
-                    <Margin vertical="auto" horizontal="17px">
+                    <SettingsSection vertical="auto" horizontal="17px">
                         <a href={SETTINGS_URL}>
                             <Icon heightAndWidth="18px" path={icons.settings} />
                         </a>
-                    </Margin>
+                    </SettingsSection>
                     <SyncStatusMenu {...syncStatusMenuProps} />
                 </RightHeader>
             </Container>

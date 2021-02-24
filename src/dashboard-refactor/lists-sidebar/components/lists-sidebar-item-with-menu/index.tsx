@@ -109,13 +109,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         }
 
         if (onMoreActionClick) {
-            return (
-                <Icon
-                    onClick={this.handleMoreActionClick}
-                    heightAndWidth="12px"
-                    path="/img/open.svg"
-                />
-            )
+            return <Icon heightAndWidth="12px" path="/img/3dots.svg" />
         }
     }
 
@@ -161,11 +155,18 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             return <ListsSidebarEditableItem {...this.props.editableProps} />
         }
 
+        console.log(this.props.isMenuDisplayed)
+
         return (
             <Container>
-                <SidebarItem {...props} onClick={this.handleSelection}>
-                    <Margin left="19px">{this.renderTitle()}</Margin>
-                    <Margin right="7.5px">{this.renderIcon()}</Margin>
+                <SidebarItem {...props} isMenuDisplayed={isMenuDisplayed}>
+                    <TitleBox onClick={this.handleSelection}>
+                        {' '}
+                        {this.renderTitle()}
+                    </TitleBox>
+                    <IconBox onClick={this.handleMoreActionClick}>
+                        {this.renderIcon()}
+                    </IconBox>
                 </SidebarItem>
                 <MenuContainer isDisplayed={isMenuDisplayed}>
                     {this.renderMenuBtns()}
@@ -182,7 +183,7 @@ const Container = styled.div`
 const MenuContainer = styled.div`
     width: min-content;
     position: absolute;
-    left: 175px;
+    left: 200px;
     top: 0px;
     background-color: ${colors.white};
     box-shadow: ${styles.boxShadow.overlayElement};
@@ -195,27 +196,18 @@ const MenuContainer = styled.div`
         `};
 `
 
-const MenuButton = styled.div`
-    height: 34px;
-    min-width: 102px;
-    font-family: ${fonts.primary.name};
-    font-weight: ${fonts.primary.weight.normal};
-    font-size: 12px;
-    line-height: 18px;
-    display: flex;
-    flex-direction: row;
-    justify-content: start;
+const IconBox = styled.div`
+    display: none;
+    height: 100%;
     align-items: center;
-    cursor: pointer;
-
-    &:hover {
-        background-color: ${colors.onHover};
-    }
+    padding-right: 10px;
+    width: 30px;
+    justify-content: flex-end;
 `
 
 const SidebarItem = styled.div<Props>`
     height: 27px;
-    width: 173px;
+    width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -225,6 +217,18 @@ const SidebarItem = styled.div<Props>`
     &:hover {
         background-color: ${colors.onHover};
     }
+
+    ${(props) =>
+        css`
+            background-color: ${props.isMenuDisplayed
+                ? `${colors.onHover}`
+                : `transparent`};
+        `};
+
+
+    &:hover ${IconBox} {
+            display: flex;
+      }
 
     ${({ selectedState }: Props) =>
         selectedState?.isSelected &&
@@ -244,6 +248,42 @@ const SidebarItem = styled.div<Props>`
             : dropReceivingState?.canReceiveDroppedItems
             ? `default`
             : `not-allowed`};
+`
+
+const MenuButton = styled.div`
+    height: 34px;
+    width: 100%;
+    font-family: ${fonts.primary.name};
+    font-weight: ${fonts.primary.weight.normal};
+    font-size: 12px;
+    line-height: 18px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    cursor: pointer;
+    padding: 0px 10px 0 0;
+
+    &: ${SidebarItem} {
+        background-color: red;
+    }
+
+    &:hover {
+        background-color: ${colors.onHover};
+    }
+
+    & > div {
+        width: auto;
+    }
+`
+
+const TitleBox = styled.div`
+    display: flex;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    padding-left: 10px;
+    align-items: center;
 `
 
 const ListTitle = styled.p<Props>`

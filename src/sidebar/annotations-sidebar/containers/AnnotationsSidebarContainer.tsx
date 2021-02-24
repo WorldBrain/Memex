@@ -584,7 +584,7 @@ const ContainerStyled = styled.div`
     padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
 
     z-index: 999999899; /* This is to combat pages setting high values on certain elements under the sidebar */
-    background: #fff;
+    background: #f6f8fb;
     transition: all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1) 0s;
     box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
@@ -594,7 +594,7 @@ const TopBarContainerStyled = styled.div`
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: #fff;
+    background: #f6f8fb;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -603,7 +603,7 @@ const TopBarContainerStyled = styled.div`
     padding: 5px 15px 5px 5px;
     width: 100%;
     margin-bottom: 2px;
-    box-shadow: 0px 3px 5px -3px #e0e0e0;
+    box-shadow: 0px 3px 5px -3px #c9c9c9;
 `
 
 const TopBarActionBtns = styled.div`

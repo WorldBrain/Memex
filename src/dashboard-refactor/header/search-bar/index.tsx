@@ -39,12 +39,13 @@ const Input = styled.input`
     }
 `
 
-const FilterButton = styled.div`
+const FilterButton = styled(Margin)`
     width: max-content;
     ${textStyles}
     font-size: 12px;
     line-height: 15px;
     cursor: pointer;
+    width: auto;
 `
 
 const FullWidthMargin = styled(Margin)`
@@ -95,11 +96,12 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             autoComplete="off"
                         />
                     </FullWidthMargin>
-                    <Margin horizontal="15px">
-                        <FilterButton onClick={onSearchFiltersOpen}>
-                            {searchFiltersOpen ? 'Remove Filters' : 'Filters'}
-                        </FilterButton>
-                    </Margin>
+                    <FilterButton
+                        horizontal="15px"
+                        onClick={onSearchFiltersOpen}
+                    >
+                        {searchFiltersOpen ? 'Remove Filters' : 'Filters'}
+                    </FilterButton>
                 </SearchBarContainer>
             </Margin>
         )

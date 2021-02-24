@@ -18,6 +18,12 @@ export const SidebarHeaderContainer = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: flex-start;
+    flex: 1;
+
+    & div {
+        justify-content: flex-start;
+    }
 `
 
 export const CollectionTitle = styled.p`
@@ -25,6 +31,12 @@ export const CollectionTitle = styled.p`
     font-family: ${fonts.primary.name};
     font-weight: ${fonts.primary.weight.bold};
     line-height: 21px;
+    width: 100%;
+    display: flex;
+`
+
+export const SidebarToggleBox = styled(Margin)`
+    width: min-content;
 `
 
 export interface SidebarHeaderProps {
@@ -44,17 +56,15 @@ export default class SidebarHeader extends PureComponent<SidebarHeaderProps> {
         } = this.props
         return (
             <SidebarHeaderContainer>
-                <Margin horizontal="12px">
+                <SidebarToggleBox horizontal="12px">
                     <SidebarToggle
                         sidebarLockedState={sidebarLockedState}
                         hoverState={sidebarToggleHoverState}
                     />
-                </Margin>
-                {(sidebarLockedState.isSidebarLocked ||
-                    sidebarPeekState.isSidebarPeeking) &&
-                    selectedList && (
-                        <CollectionTitle>{selectedList}</CollectionTitle>
-                    )}
+                </SidebarToggleBox>
+                {selectedList && (
+                    <CollectionTitle>{selectedList}</CollectionTitle>
+                )}
             </SidebarHeaderContainer>
         )
     }

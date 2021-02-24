@@ -4,6 +4,7 @@ import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom, {
     ItemBoxBottomAction,
 } from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
+import { Icon } from 'src/dashboard-refactor/styled-components'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 import {
@@ -89,8 +90,11 @@ export default class PageResultView extends PureComponent<Props> {
         }
 
         return (
-            <RemoveFromListBtn onClick={this.props.onRemoveFromListBtnClick}>
-                X
+            <RemoveFromListBtn
+                title="Remove from List"
+                onClick={this.props.onRemoveFromListBtnClick}
+            >
+                <Icon heightAndWidth="12px" path={icons.close} />
             </RemoveFromListBtn>
         )
     }
@@ -242,10 +246,19 @@ const StyledPageResult = styled.div`
     position: relative;
 `
 
-const RemoveFromListBtn = styled.button`
+const RemoveFromListBtn = styled.div`
     position: absolute;
     top: 5px;
     right: 5px;
+    background: none;
+    outline: none;
+    border: none;
+    display: flex;
+    height: 20px;
+    width: 20px;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
 `
 
 const FavIconBox = styled.div`

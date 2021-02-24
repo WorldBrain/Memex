@@ -26,11 +26,14 @@ const Sidebar = styled.div<{
     width: ${sizeConstants.listsSidebar.widthPx}px;
     position: fixed;
     top: ${sizeConstants.header.heightPx}px;
+    z-index: 1; 
+
     ${(props) =>
         props.locked &&
         css`
             height: 100%;
-            background-color: ${colors.lightGrey};
+            background-color: ${colors.white};
+            box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
         `}
     ${(props) =>
         props.peeking &&
@@ -40,6 +43,7 @@ const Sidebar = styled.div<{
             box-shadow: 2px 0px 4px rgba(0, 0, 0, 0.25);
             margin-top: 9px;
             margin-bottom: 9px;
+            height: 90vh;
         `}
     ${(props) =>
         !props.peeking &&
@@ -90,7 +94,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                     onDragEnter={this.props.peekState.setSidebarPeekState(true)}
                 />
                 <Sidebar peeking={isSidebarPeeking} locked={isSidebarLocked}>
-                    <Margin vertical="5px" horizontal="5px">
+                    <Margin>
                         <ListsSidebarSearchBar {...searchBarProps} />
                     </Margin>
                     <Margin vertical="10px">

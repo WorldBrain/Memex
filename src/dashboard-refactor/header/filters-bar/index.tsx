@@ -55,7 +55,7 @@ const FilterSelectButton = styled.div<{ selected: boolean }>`
 const TextSpan = styled.span`
     font-family: ${fonts.primary.name};
     font-weight: ${fonts.primary.weight.normal};
-    font-size: 10px;
+    font-size: 12px;
     line-height: 15px;
 `
 

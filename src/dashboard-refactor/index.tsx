@@ -309,23 +309,23 @@ export class DashboardContainer extends StatefulUIElement<
                                 ),
                         ),
                     },
-                    {
-                        title: 'Followed collections',
-                        isExpanded: listsSidebar.followedLists.isExpanded,
-                        onExpandBtnClick: () =>
-                            this.processEvent('setFollowedListsExpanded', {
-                                isExpanded: !listsSidebar.followedLists
-                                    .isExpanded,
-                            }),
-                        loadingState: listsSidebar.followedLists.loadingState,
-                        listsArray: listsSidebar.followedLists.listIds.map(
-                            (listId) =>
-                                this.listStateToProps(
-                                    listsSidebar.listData[listId],
-                                    'followed-list',
-                                ),
-                        ),
-                    },
+                    // {
+                    //     title: 'Followed collections',
+                    //     isExpanded: listsSidebar.followedLists.isExpanded,
+                    //     onExpandBtnClick: () =>
+                    //         this.processEvent('setFollowedListsExpanded', {
+                    //             isExpanded: !listsSidebar.followedLists
+                    //                 .isExpanded,
+                    //         }),
+                    //     loadingState: listsSidebar.followedLists.loadingState,
+                    //     listsArray: listsSidebar.followedLists.listIds.map(
+                    //         (listId) =>
+                    //             this.listStateToProps(
+                    //                 listsSidebar.listData[listId],
+                    //                 'followed-list',
+                    //             ),
+                    //     ),
+                    // },
                 ]}
             />
         )

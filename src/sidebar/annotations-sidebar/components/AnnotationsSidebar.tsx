@@ -159,7 +159,6 @@ class AnnotationsSidebar extends React.Component<
                         ref={(ref) => (this.annotationCreateRef = ref)}
                     />
                 </NewAnnotationBoxStyled>
-                <NewAnnotationSeparator />
             </NewAnnotationSection>
         )
     }
@@ -319,7 +318,7 @@ const CloseButtonStyled = styled.button`
 const TopBarStyled = styled.div`
     position: static;
     top: 0;
-    background: #fff;
+    background: #f6f8fb;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -362,7 +361,7 @@ const annotationCardStyle = css`
 const NewAnnotationSection = styled.section`
     font-family: sans-serif;
     height: auto;
-    background: #fff;
+    background: #f6f8fb;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -379,7 +378,7 @@ const NewAnnotationSeparator = styled.div`
 
 const AnnotationsSectionStyled = styled.section`
     font-family: sans-serif;
-    background: #fff;
+    background: #f6f8fb;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -390,7 +389,7 @@ const AnnotationsSectionStyled = styled.section`
 
 const NewAnnotationBoxStyled = styled.div`
     position: relative;
-    width: 97%;
+    width: 100%;
 
     &:hover {
         background: white;

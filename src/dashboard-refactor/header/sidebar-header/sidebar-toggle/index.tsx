@@ -7,14 +7,14 @@ import { SidebarLockedState } from '../../../lists-sidebar/types'
 import { HoverState } from '../../../types'
 
 const buttonStyles = `
-    height: 26px;
-    width: 26px;
+    height: 20px;
+    width: 20px;
     color: ${colors.iconDefault};
-    padding: 2px;
     border: none;
     cursor: pointer;
     background-repeat: no-repeat;
     background-position: center center;
+    background-size: 20px;
 
     &:active {
         opacity: 1;
@@ -44,10 +44,11 @@ export const Container = styled.div`
 `
 
 export const BtnBackground = styled.div`
-    height: 100%;
-    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background-color: ${colors.midGrey};
-    background-size: 24px;
+    background-size: 20px;
     background-repeat: no-repeat;
     background-position: center center;
     border-radius: 3px;
@@ -55,7 +56,6 @@ export const BtnBackground = styled.div`
 
 export const HamburgerButton = styled.div`
     ${buttonStyles}
-    background-size: 24px;
     opacity: 0.8;
     background-image: url('/img/hamburger.svg');
 `
@@ -64,7 +64,6 @@ export const LeftArrow = styled.div`
     ${buttonStyles}
     ${arrowStyles}
     background-image: url('/img/doubleArrow.svg');
-    background-position-x: 3px;
 `
 
 export const RightArrow = styled.div`
