@@ -110,16 +110,16 @@ export default class PageResultView extends PureComponent<Props> {
         if (this.props.hoverState === 'footer') {
             return [
                 {
-                    key: 'copy-paste-page-btn',
-                    image: icons.copy,
-                    onClick: this.props.onCopyPasterBtnClick,
-                    tooltipText: 'Copy Page',
-                },
-                {
                     key: 'delete-page-btn',
                     image: icons.trash,
                     onClick: this.props.onTrashBtnClick,
                     tooltipText: 'Delete Page & all related content',
+                },
+                {
+                    key: 'copy-paste-page-btn',
+                    image: icons.copy,
+                    onClick: this.props.onCopyPasterBtnClick,
+                    tooltipText: 'Copy Page',
                 },
                 // {
                 //     key: 'share-page-btn',
@@ -156,22 +156,26 @@ export default class PageResultView extends PureComponent<Props> {
 
         return [
             {
-                key: 'copy-paste-page-btn',
-                image: icons.copyFaded,
+                key: 'delete-page-btn',
+                isDisabled: true,
+                image: icons.trash,
             },
             {
-                key: 'delete-page-btn',
-                image: icons.trashFaded,
+                key: 'copy-paste-page-btn',
+                isDisabled: true,
+                image: icons.copy,
             },
             {
                 key: 'tag-page-btn',
-                image: this.hasTags ? icons.tagFullFaded : icons.tagEmptyFaded,
+                isDisabled: true,
+                image: this.hasTags ? icons.tagFull : icons.tagEmpty,
             },
             {
                 key: 'list-page-btn',
+                isDisabled: true,
                 image: this.hasLists
-                    ? icons.collectionsFullFaded
-                    : icons.collectionsEmptyFaded,
+                    ? icons.collectionsFull
+                    : icons.collectionsEmpty,
             },
             {
                 key: 'expand-notes-btn',

@@ -6,8 +6,6 @@ export const check = browser.extension.getURL('/img/check.svg')
 export const close = browser.extension.getURL('/img/close.svg')
 export const tagFull = browser.extension.getURL('/img/tag_full.svg')
 export const tagEmpty = browser.extension.getURL('/img/tag_empty.svg')
-export const tagFullFaded = browser.extension.getURL('/img/tag_full.svg')
-export const tagEmptyFaded = browser.extension.getURL('/img/tag_empty.svg')
 export const heartFull = browser.extension.getURL('/img/star_full.svg')
 export const heartFullGrey = browser.extension.getURL('/img/star_full_grey.svg')
 export const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
@@ -27,19 +25,11 @@ export const collectionsEmpty = browser.extension.getURL(
 export const collectionsFull = browser.extension.getURL(
     '/img/collections_full.svg',
 )
-export const collectionsEmptyFaded = browser.extension.getURL(
-    '/img/collections_add.svg',
-)
-export const collectionsFullFaded = browser.extension.getURL(
-    '/img/collections_full.svg',
-)
 export const triangle = browser.extension.getURL('/img/triangleSmall.svg')
 export const plus = browser.extension.getURL('/img/plus.svg')
 export const trash = browser.extension.getURL('/img/trash.svg')
-export const trashFaded = browser.extension.getURL('/img/trash.svg')
 export const goTo = browser.extension.getURL('/img/open.svg')
 export const copy = browser.extension.getURL('/img/copy.svg')
-export const copyFaded = browser.extension.getURL('/img/copy.svg')
 export const edit = browser.extension.getURL('/img/edit.svg')
 export const remove = browser.extension.getURL('/img/remove.svg')
 export const share = browser.extension.getURL('/img/share.svg')
