@@ -33,7 +33,7 @@ export default class Logic extends UILogic<State, Events> {
 
     getInitialState(): State {
         return {
-            isShown: true,
+            isShown: false,
             hasFeedActivity: false,
         }
     }
