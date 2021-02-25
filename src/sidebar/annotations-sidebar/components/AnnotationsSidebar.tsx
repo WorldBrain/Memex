@@ -9,7 +9,6 @@ import AnnotationCreate, {
     AnnotationCreateEventProps,
 } from 'src/annotations/components/AnnotationCreate'
 import AnnotationEditable, {
-    AnnotationEditableGeneralProps,
     AnnotationEditableEventProps,
 } from 'src/annotations/components/HoverControlledAnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
@@ -33,7 +32,6 @@ export interface AnnotationsSidebarProps {
 
     showCongratsMessage?: boolean
     activeAnnotationUrl?: string | null
-    hoverAnnotationUrl?: string
     needsWaypoint?: boolean
     appendLoader?: boolean
     handleScrollPagination: () => void
@@ -49,8 +47,6 @@ export interface AnnotationsSidebarProps {
     bindAnnotationEditProps: (
         annotation: Annotation,
     ) => AnnotationEditGeneralProps & AnnotationEditEventProps
-    annotationEditableProps: AnnotationEditableGeneralProps &
-        AnnotationEditableEventProps
     annotationCreateProps: AnnotationCreateGeneralProps &
         AnnotationCreateEventProps
 
@@ -189,12 +185,10 @@ class AnnotationsSidebar extends React.Component<
                 key={i}
                 {...annot}
                 {...this.props}
-                {...this.props.annotationEditableProps}
                 sharingAccess={this.props.sharingAccess}
                 mode={this.props.annotationModes[annot.url]}
                 sharingInfo={this.props.annotationSharingInfo[annot.url]}
                 isActive={this.props.activeAnnotationUrl === annot.url}
-                isHovered={this.props.hoverAnnotationUrl === annot.url}
                 annotationEditDependencies={this.props.bindAnnotationEditProps(
                     annot,
                 )}

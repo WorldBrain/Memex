@@ -19,7 +19,7 @@ export default function TagsSegment({
     onEditBtnClick,
     ...props
 }: Props) {
-    if (tags.length === 0) {
+    if (!tags?.length) {
         return null
     }
 

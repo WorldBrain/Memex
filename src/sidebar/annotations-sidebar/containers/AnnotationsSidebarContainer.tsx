@@ -195,24 +195,6 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    protected getEditableProps(): AnnotationsSidebarProps['annotationEditableProps'] {
-        return {
-            onMouseEnter: (url) =>
-                this.processEvent('annotationMouseEnter', {
-                    annotationUrl: url,
-                }),
-            onMouseLeave: (url) =>
-                this.processEvent('annotationMouseLeave', {
-                    annotationUrl: url,
-                }),
-            onGoToAnnotation: (url) =>
-                this.processEvent('goToAnnotation', {
-                    annotationUrl: url,
-                    ...DEF_CONTEXT,
-                }),
-        }
-    }
-
     protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
         return {
             onCommentChange: (comment) =>
@@ -508,9 +490,7 @@ export class AnnotationsSidebarContainer<
                             this.state.annotationModes.pageAnnotations
                         }
                         isAnnotationCreateShown={this.state.showCommentBox}
-                        hoverAnnotationUrl={this.state.hoverAnnotationUrl}
                         annotationCreateProps={this.getCreateProps()}
-                        annotationEditableProps={this.getEditableProps()}
                         bindAnnotationFooterEventProps={(url) =>
                             this.bindAnnotationFooterEventProps(url)
                         }

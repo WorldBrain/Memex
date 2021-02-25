@@ -30,8 +30,6 @@ import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { NoteResultHoverState } from 'src/dashboard-refactor/search-results/types'
 
-export interface AnnotationEditableGeneralProps {}
-
 export interface AnnotationEditableProps {
     /** Required to decide how to go to an annotation when it's clicked. */
     url: string
@@ -63,33 +61,16 @@ export interface AnnotationEditableEventProps {
     onNoteHover?: React.MouseEventHandler
     onTagsHover?: React.MouseEventHandler
     onUnhover?: React.MouseEventHandler
-    onGoToAnnotation: (url: string) => void
-    onMouseEnter?: (url: string) => void
-    onMouseLeave?: (url: string) => void
 }
 
-export type Props = AnnotationEditableGeneralProps &
-    AnnotationEditableProps &
-    AnnotationEditableEventProps
+export type Props = AnnotationEditableProps & AnnotationEditableEventProps
 
 export default class AnnotationEditable extends React.Component<Props> {
     private annotEditRef = React.createRef<AnnotationEdit>()
-    private boxRef: HTMLDivElement = null
-    private removeEventListeners?: () => void
 
     static defaultProps: Partial<Props> = {
         mode: 'default',
         hoverState: null,
-    }
-
-    componentDidMount() {
-        this.setupEventListeners()
-    }
-
-    componentWillUnmount() {
-        if (this.boxRef && this.removeEventListeners) {
-            this.removeEventListeners()
-        }
     }
 
     focus() {
@@ -133,53 +114,31 @@ export default class AnnotationEditable extends React.Component<Props> {
         }
     }
 
-    private setupEventListeners = () => {
-        if (this.boxRef) {
-            const handleMouseEnter = () =>
-                this.props.onMouseEnter?.(this.props.url)
-            const handleMouseLeave = () =>
-                this.props.onMouseLeave?.(this.props.url)
-
-            this.boxRef.addEventListener('mouseenter', handleMouseEnter)
-            this.boxRef.addEventListener('mouseleave', handleMouseLeave)
-
-            this.removeEventListeners = () => {
-                this.boxRef.removeEventListener('mouseenter', handleMouseEnter)
-                this.boxRef.removeEventListener('mouseleave', handleMouseLeave)
-            }
-        }
-    }
-
-    private setBoxRef = (ref: HTMLDivElement) => {
-        this.boxRef = ref
-    }
-
     private renderHighlightBody() {
         if (!this.props.body) {
             return
         }
 
+        const { annotationFooterDependencies: footerDeps } = this.props
+
         const actionsBox =
             this.props.hoverState === 'main-content' ? (
                 <HighlightActionsBox>
-                    <ButtonTooltip tooltipText="Open in Page" position="top">
-                        <HighlightAction>
-                            <GoToHighlightIcon
-                                onClick={
-                                    this.props.annotationFooterDependencies
-                                        .onGoToAnnotation
-                                }
-                            />
-                        </HighlightAction>
-                    </ButtonTooltip>
+                    {footerDeps.onGoToAnnotation && (
+                        <ButtonTooltip
+                            tooltipText="Open in Page"
+                            position="top"
+                        >
+                            <HighlightAction>
+                                <GoToHighlightIcon
+                                    onClick={footerDeps.onGoToAnnotation}
+                                />
+                            </HighlightAction>
+                        </ButtonTooltip>
+                    )}
                     <ButtonTooltip tooltipText="Add/Edit Note" position="top">
                         <HighlightAction>
-                            <AddNoteIcon
-                                onClick={
-                                    this.props.annotationFooterDependencies
-                                        .onEditIconClick
-                                }
-                            />
+                            <AddNoteIcon onClick={footerDeps.onEditIconClick} />
                         </HighlightAction>
                     </ButtonTooltip>
                 </HighlightActionsBox>
@@ -255,17 +214,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                     onClick: footerDeps.onDeleteIconClick,
                     tooltipText: 'Delete Note',
                 },
-                // this.props.body?.length > 0
-                //     ? {
-                //           key: 'go-to-to-note-btn',
-                //           image: icons.goTo,
-                //           onClick: () =>
-                //               this.props.onGoToAnnotation(
-                //                   this.props.url,
-                //               ),
-                //           tooltipText: 'Open in Page',
-                //       }
-                //     : null,
                 {
                     key: 'copy-paste-note-btn',
                     image: icons.copy,
@@ -380,10 +328,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                     <ItemBox
                         firstDivProps={{ onMouseLeave: this.props.onUnhover }}
                     >
-                        <AnnotationStyled
-                            id={this.props.url} // Focusing on annotation relies on this ID.
-                            ref={this.setBoxRef}
-                        >
+                        <AnnotationStyled>
                             {this.renderHighlightBody()}
                             {this.renderNote()}
                             <TagsSegment

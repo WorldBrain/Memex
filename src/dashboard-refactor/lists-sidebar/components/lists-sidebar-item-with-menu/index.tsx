@@ -52,14 +52,12 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
 
         if (this.props.source === 'followed-list') {
             return (
-                <>
-                    <MenuButton onClick={this.props.onUnfollowClick}>
-                        <Margin horizontal="10px">
-                            <Icon heightAndWidth="12px" path={'TODO.svg'} />
-                        </Margin>
-                        Unfollow
-                    </MenuButton>
-                </>
+                <MenuButton onClick={this.props.onUnfollowClick}>
+                    <Margin horizontal="10px">
+                        <Icon heightAndWidth="12px" path={'TODO.svg'} />
+                    </Margin>
+                    Unfollow
+                </MenuButton>
             )
         }
 
@@ -154,8 +152,6 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         if (isEditing) {
             return <ListsSidebarEditableItem {...this.props.editableProps} />
         }
-
-        console.log(this.props.isMenuDisplayed)
 
         return (
             <Container>
