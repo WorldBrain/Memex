@@ -120,6 +120,7 @@ const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
     fullUrl: pageResult.fullUrl,
     fullTitle: pageResult.title,
     normalizedUrl: pageResult.url,
+    favIconURI: pageResult.favIcon,
     displayTime: pageResult.displayTime,
     hasNotes: pageResult.annotsCount > 0,
 })

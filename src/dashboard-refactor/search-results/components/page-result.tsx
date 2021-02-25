@@ -4,8 +4,8 @@ import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom, {
     ItemBoxBottomAction,
 } from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
-import { Icon } from 'src/dashboard-refactor/styled-components'
 
+import { Icon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import {
     PageData,
@@ -262,15 +262,19 @@ const RemoveFromListBtn = styled.div`
 `
 
 const FavIconBox = styled.div`
-    margin-right: 10px;
-`
-const FavIconPlaceholder = styled.div`
     width: 20px;
     height: 20px;
     border: 1px solid #efefef;
     border-radius: 30px;
+    margin-right: 10px;
 `
-const FavIconImg = styled.img``
+
+const FavIconPlaceholder = styled.div``
+
+const FavIconImg = styled.img`
+    width: 100%;
+    height: 100%;
+`
 
 const PageContentBox = styled.a`
     display: flex;
