@@ -48,10 +48,11 @@ export default class PageResultView extends PureComponent<Props> {
     private renderPopouts() {
         if (this.props.isTagPickerShown) {
             return (
-                <HoverBox>
+                <HoverBox right="0" withRelativeContainer>
                     <TagPicker
                         onUpdateEntrySelection={this.props.onTagPickerUpdate}
                         initialSelectedEntries={() => this.props.tags}
+                        onClickOutside={this.props.onTagPickerBtnClick}
                     />
                 </HoverBox>
             )
@@ -59,10 +60,11 @@ export default class PageResultView extends PureComponent<Props> {
 
         if (this.props.isListPickerShown) {
             return (
-                <HoverBox>
+                <HoverBox right="0" withRelativeContainer>
                     <CollectionPicker
                         onUpdateEntrySelection={this.props.onListPickerUpdate}
                         initialSelectedEntries={() => this.props.lists}
+                        onClickOutside={this.props.onListPickerBtnClick}
                     />
                 </HoverBox>
             )
@@ -70,9 +72,10 @@ export default class PageResultView extends PureComponent<Props> {
 
         if (this.props.isCopyPasterShown) {
             return (
-                <HoverBox>
+                <HoverBox right="0" withRelativeContainer>
                     <PageNotesCopyPaster
                         normalizedPageUrls={[this.props.normalizedUrl]}
+                        onClickOutside={this.props.onCopyPasterBtnClick}
                     />
                 </HoverBox>
             )

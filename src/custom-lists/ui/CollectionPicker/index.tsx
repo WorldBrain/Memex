@@ -62,9 +62,9 @@ class ListPicker extends StatefulUIElement<
         }
     }
 
-    handleClickOutside = () => {
+    handleClickOutside = (e) => {
         if (this.props.onClickOutside) {
-            this.props.onClickOutside()
+            this.props.onClickOutside(e)
         }
     }
 

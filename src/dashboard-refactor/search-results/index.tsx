@@ -113,19 +113,25 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 sharingAccess={this.props.sharingAccess}
                 renderCopyPasterForAnnotation={() =>
                     noteData.isCopyPasterShown && (
-                        <HoverBox>
+                        <HoverBox right="0" withRelativeContainer>
                             <PageNotesCopyPaster
                                 annotationUrls={[noteId]}
                                 normalizedPageUrls={[pageId]}
+                                onClickOutside={
+                                    interactionProps.onCopyPasterBtnClick
+                                }
                             />
                         </HoverBox>
                     )
                 }
                 renderTagsPickerForAnnotation={() =>
                     noteData.isTagPickerShown && (
-                        <HoverBox>
+                        <HoverBox right="0" withRelativeContainer>
                             <TagPicker
                                 initialSelectedEntries={() => noteData.tags}
+                                onClickOutside={
+                                    interactionProps.onTagPickerBtnClick
+                                }
                                 onUpdateEntrySelection={
                                     interactionProps.updateTags
                                 }
@@ -135,7 +141,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 }
                 renderShareMenuForAnnotation={() =>
                     noteData.isShareMenuShown && (
-                        <HoverBox>
+                        <HoverBox right="0" withRelativeContainer>
                             <SingleNoteShareMenu
                                 annotationUrl={noteId}
                                 closeShareMenu={() =>
