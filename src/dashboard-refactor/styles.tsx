@@ -29,7 +29,7 @@ const styles = {
             widthPx: 173,
         },
         searchBar: {
-            widthPx: 540,
+            widthPx: 800,
         },
         syncStatusIcon: {
             colors: {

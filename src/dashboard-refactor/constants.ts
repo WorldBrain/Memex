@@ -4,7 +4,7 @@ export const sizeConstants = {
     },
     searchBar: {
         heightPx: 50,
-        widthPx: 540,
+        widthPx: 800,
     },
     listsSidebar: {
         widthPx: 200,
