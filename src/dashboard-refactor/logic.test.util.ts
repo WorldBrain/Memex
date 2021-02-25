@@ -89,8 +89,11 @@ export async function setupTest(
         listsBG: device.backgroundModules.customLists.remoteFunctions,
         searchBG: device.backgroundModules.search.remoteFunctions.search,
         contentShareBG: device.backgroundModules.contentSharing.remoteFunctions,
+        activityIndicatorBG:
+            device.backgroundModules.activityIndicator.remoteFunctions,
         copyToClipboard:
             args.copyToClipboard ?? defaultTestSetupDeps.copyToClipboard,
+        openFeedUrl: () => undefined,
     })
 
     if (args.overrideSearchTrigger) {

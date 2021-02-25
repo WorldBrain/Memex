@@ -26,7 +26,7 @@ const Sidebar = styled.div<{
     width: ${sizeConstants.listsSidebar.widthPx}px;
     position: fixed;
     top: ${sizeConstants.header.heightPx}px;
-    z-index: 1; 
+    z-index: 1;
 
     ${(props) =>
         props.locked &&
@@ -64,7 +64,9 @@ const PeekTrigger = styled.div`
 `
 
 export interface ListsSidebarProps {
+    openFeedUrl: () => void
     onListSelection: (id: number) => void
+    hasFeedActivity?: boolean
     selectedListId?: number
     lockedState: SidebarLockedState
     peekState: SidebarPeekState
@@ -127,6 +129,15 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             this.props.selectedListId ===
                                             SPECIAL_LIST_IDS.INBOX + 1,
                                         onSelection: this.props.onListSelection,
+                                    },
+                                },
+                                {
+                                    name: 'Feed',
+                                    listId: SPECIAL_LIST_IDS.INBOX + 2,
+                                    hasActivity: this.props.hasFeedActivity,
+                                    selectedState: {
+                                        isSelected: false,
+                                        onSelection: this.props.openFeedUrl,
                                     },
                                 },
                             ])}

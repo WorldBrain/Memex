@@ -38,12 +38,20 @@ export class DashboardContainer extends StatefulUIElement<
 > {
     static defaultProps: Partial<Props> = {
         localStorage: browser.storage.local,
+        activityIndicatorBG: runInBackground(),
         contentShareBG: runInBackground(),
         annotationsBG: runInBackground(),
         searchBG: runInBackground(),
         listsBG: runInBackground(),
         tagsBG: runInBackground(),
         authBG: runInBackground(),
+        openFeedUrl: () =>
+            window.open(
+                process.env.NODE_ENV === 'production'
+                    ? 'https://memex.social/feed'
+                    : 'https://staging.memex.social/feed',
+                '_blank',
+            ),
     }
 
     private annotationsCache: AnnotationsCacheInterface
@@ -257,6 +265,8 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <ListsSidebarContainer
                 lockedState={lockedState}
+                openFeedUrl={this.props.openFeedUrl}
+                hasFeedActivity={this.state.listsSidebar.hasFeedActivity}
                 onListSelection={(listId) =>
                     this.processEvent('setSelectedListId', { listId })
                 }

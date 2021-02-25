@@ -28,6 +28,7 @@ let selectedListId: number | undefined
 const template: ListsSidebarProps = {
     lockedState,
     peekState,
+    openFeedUrl: () => undefined,
     onListSelection: (listId) => {
         selectedListId = listId
     },

@@ -19,7 +19,7 @@ import { AnnotationInterface } from 'src/annotations/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { Analytics } from 'src/analytics'
-import { getLocalStorage } from 'src/util/storage'
+import { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 
 export interface RootState {
     loadState: TaskState
@@ -47,8 +47,10 @@ export interface DashboardDependencies {
     listsBG: RemoteCollectionsInterface
     searchBG: SearchInterface
     annotationsBG: AnnotationInterface<'caller'>
+    activityIndicatorBG: ActivityIndicatorInterface
     copyToClipboard: (text: string) => Promise<boolean>
     localStorage: Browser['storage']['local']
+    openFeedUrl: () => void
 }
 
 export interface DropReceivingState {

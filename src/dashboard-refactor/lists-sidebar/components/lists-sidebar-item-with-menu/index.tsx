@@ -24,6 +24,7 @@ export interface Props {
     name: string
     listId: number
     source?: ListSource
+    hasActivity?: boolean
     isMenuDisplayed?: boolean
     nameHighlightIndices?: ListNameHighlightIndices
     onUnfollowClick?: React.MouseEventHandler
@@ -88,9 +89,14 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
     private renderIcon() {
         const {
             dropReceivingState,
-            newItemsCount,
             onMoreActionClick,
+            newItemsCount,
+            hasActivity,
         } = this.props
+
+        if (hasActivity) {
+            return <ActivityBeacon />
+        }
 
         if (newItemsCount) {
             return (
@@ -160,7 +166,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                         {' '}
                         {this.renderTitle()}
                     </TitleBox>
-                    <IconBox onClick={this.handleMoreActionClick}>
+                    <IconBox onClick={this.handleMoreActionClick} {...props}>
                         {this.renderIcon()}
                     </IconBox>
                 </SidebarItem>
@@ -192,8 +198,9 @@ const MenuContainer = styled.div`
         `};
 `
 
-const IconBox = styled.div`
-    display: none;
+const IconBox = styled.div<Props>`
+    display: ${(props) =>
+        !props.hasActivity && !props.newItemsCount ? 'none' : 'flex'};
     height: 100%;
     align-items: center;
     padding-right: 10px;
@@ -297,6 +304,15 @@ const ListTitle = styled.p<Props>`
     text-overflow: ellipsis;
 
     max-width: 100%;
+`
+
+const ActivityBeacon = styled.div`
+    width: 14px;
+    height: 14px;
+    margin-right: 1em;
+    border-radius: 10px;
+    padding: 8px;
+    background-color: #5cd9a6;
 `
 
 const NewItemsCount = styled.div`

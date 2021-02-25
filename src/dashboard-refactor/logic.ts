@@ -78,6 +78,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listEditState: 'pristine',
                 isSidebarPeeking: false,
                 isSidebarLocked: false,
+                hasFeedActivity: false,
                 searchQuery: '',
                 listData: {},
                 followedLists: {
@@ -98,6 +99,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial(this, async () => {
             await this.hydrateStateFromLocalStorage()
+            await this.getFeedActivityStatus()
             await this.getSharingAccess()
             const listsP = this.loadLocalLists()
             const searchP = this.runSearch(previousState)
@@ -107,7 +109,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     /* START - Misc helper methods */
-    async hydrateStateFromLocalStorage() {
+    private async hydrateStateFromLocalStorage() {
         const listsSidebarLocked =
             (
                 await this.options.localStorage.get(
@@ -122,7 +124,17 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    async getSharingAccess() {
+    private async getFeedActivityStatus() {
+        const activityStatus = await this.options.activityIndicatorBG.checkActivityStatus()
+
+        this.emitMutation({
+            listsSidebar: {
+                hasFeedActivity: { $set: activityStatus === 'has-unseen' },
+            },
+        })
+    }
+
+    private async getSharingAccess() {
         const isAllowed = await this.options.authBG.isAuthorizedForFeature(
             'beta',
         )
@@ -136,7 +148,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    async detectSharedNotes({ searchResults }: State) {
+    private async detectSharedNotes({ searchResults }: State) {
         const noteSharingInfo: { [noteId: string]: AnnotationSharingInfo } = {}
         const shareableNoteIds = new Set<string>()
 
@@ -161,7 +173,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
-    async loadLocalLists() {
+    private async loadLocalLists() {
         await executeUITask(
             this,
             (taskState) => ({
@@ -313,6 +325,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             skip: paginate ? searchFilters.skip + PAGE_SIZE : 0,
             lists,
         })
+        console.log('res:', result)
 
         return {
             ...utils.pageSearchResultToState(result),
@@ -771,6 +784,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             previousState.searchResults.results[event.day].pages.byId[
                 event.pageId
             ].newNoteForm
+
+        console.log('yo form state:', formState)
 
         await executeUITask(
             this,
@@ -1807,6 +1822,20 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     unshareList: EventHandler<'unshareList'> = async ({ event }) => {
         console.warn('List unshare not yet implemented')
+    }
+
+    clickFeedActivityIndicator: EventHandler<
+        'clickFeedActivityIndicator'
+    > = async ({ previousState }) => {
+        this.options.openFeedUrl()
+
+        if (previousState.listsSidebar.hasFeedActivity) {
+            this.emitMutation({
+                listsSidebar: { hasFeedActivity: { $set: false } },
+            })
+            this.options.annotationsBG
+            await this.options.activityIndicatorBG.markActivitiesAsSeen()
+        }
     }
     /* END - lists sidebar event handlers */
 
