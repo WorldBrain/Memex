@@ -208,13 +208,11 @@ export default class PageResultView extends PureComponent<Props> {
                         target="_blank"
                     >
                         <ResultContent>
-                            <FavIconBox>
-                                {this.props.favIconURI ? (
+                            {this.props.favIconURI && (
+                                <FavIconBox>
                                     <FavIconImg src={this.props.favIconURI} />
-                                ) : (
-                                    <FavIconPlaceholder />
-                                )}
-                            </FavIconBox>
+                                </FavIconBox>
+                            )}
                             <PageUrl>{this.getDomain()}</PageUrl>
                         </ResultContent>
                         <PageTitle top="10px" bottom="5px">
@@ -269,14 +267,17 @@ const FavIconBox = styled.div`
     height: 20px;
     border: 1px solid #efefef;
     border-radius: 30px;
-    margin-right: 10px;
+    margin-right: 5px;
 `
 
-const FavIconPlaceholder = styled.div``
+const FavIconPlaceholder = styled.div`
+    border-radius: 30px;
+`
 
 const FavIconImg = styled.img`
     width: 100%;
     height: 100%;
+    border-radius: 30px;
 `
 
 const PageContentBox = styled.a`
