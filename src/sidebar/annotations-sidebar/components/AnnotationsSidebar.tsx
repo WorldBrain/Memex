@@ -11,7 +11,7 @@ import AnnotationCreate, {
 import AnnotationEditable, {
     AnnotationEditableGeneralProps,
     AnnotationEditableEventProps,
-} from 'src/annotations/components/AnnotationEditable'
+} from 'src/annotations/components/HoverControlledAnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
 import { Annotation } from 'src/annotations/types'
