@@ -364,16 +364,12 @@ export default class DirectLinkingBackground {
         }
 
         let normalizedPageUrl = this._normalizeUrl(fullPageUrl)
-        toCreate.url = this._normalizeUrl(normalizedPageUrl)
 
         if (toCreate.isSocialPost) {
             normalizedPageUrl = await this.lookupSocialId(normalizedPageUrl)
         }
 
         const pageTitle = toCreate.title == null ? tab.title : toCreate.title
-        const annotationUrl =
-            toCreate.url ??
-            generateUrl({ pageUrl: normalizedPageUrl, now: () => Date.now() })
 
         if (!skipPageIndexing) {
             await this.options.pages.indexPage(
@@ -386,15 +382,12 @@ export default class DirectLinkingBackground {
             )
         }
 
-        if (isFullUrl(normalizedPageUrl) || isFullUrl(annotationUrl)) {
-            console.error(
-                `Tried to create annotation with non-normalised url`,
-                {
-                    normalizedPageUrl,
-                    annotationUrl,
-                },
-            )
-            throw new Error(`Cannot create annotation with non-normalised url`)
+        const annotationUrl =
+            toCreate.url ??
+            generateUrl({ pageUrl: normalizedPageUrl, now: () => Date.now() })
+
+        if (isFullUrl(annotationUrl)) {
+            throw new Error('Annotation ID should not be a full URL')
         }
 
         await this.annotationStorage.createAnnotation({
