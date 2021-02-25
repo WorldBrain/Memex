@@ -15,7 +15,8 @@ const textStyles = `
 
 const SearchBarContainer = styled.div`
     height: 34px;
-    width: ${styles.components.searchBar.widthPx}px;
+    max-width: ${styles.components.searchBar.widthPx}px;
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;

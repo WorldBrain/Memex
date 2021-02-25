@@ -41,6 +41,7 @@ export const shared = browser.extension.getURL('/img/shared.svg')
 export const saveIcon = browser.extension.getURL('/img/saveIcon.svg')
 
 export const longArrow = browser.extension.getURL('/img/longarrow.svg')
+export const link = browser.extension.getURL('/img/link.svg')
 
 export const hamburger = browser.extension.getURL('/img/lock.svg')
 export const doubleArrow = browser.extension.getURL('/img/doubleArrow.svg')
