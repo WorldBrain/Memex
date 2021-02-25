@@ -161,28 +161,27 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         return (
             <ClickAway onClickAway={this.handleClickOutside}>
                 <Menu>
-                    <TopArea>
-                        <SectionTitle>{this.props.linkTitleCopy}</SectionTitle>
-                        <SectionDescription>
-                            {this.props.linkSubtitleCopy}
-                        </SectionDescription>
-                        {/*<ShareAllBox
-                            // tooltipText={this.renderShortcutTip({
-                            //     modifier: 'Alt',
-                            // })}
-                            position="bottom"
-                        >*/}
-                        <LinkCopierBox>
-                            <LinkCopier
-                                state={this.state.loadState}
-                                onClick={this.handleLinkClick}
-                            >
-                                {this.renderLinkContent()}
-                            </LinkCopier>
-                            {/* {this.renderUnshareIcon()} */}
-                        </LinkCopierBox>
-                        {/*</ShareAllBox>*/}
-                    </TopArea>
+                    <SectionTitle>{this.props.linkTitleCopy}</SectionTitle>
+                    <SectionDescription>
+                        {this.props.linkSubtitleCopy}
+                    </SectionDescription>
+                    {/*<ShareAllBox
+                        // tooltipText={this.renderShortcutTip({
+                        //     modifier: 'Alt',
+                        // })}
+                        position="bottom"
+                    >*/}
+                    <LinkCopierBox>
+                        <LinkCopier
+                            state={this.state.loadState}
+                            onClick={this.handleLinkClick}
+                        >
+                            {this.renderLinkContent()}
+                        </LinkCopier>
+                        {/* {this.renderUnshareIcon()} */}
+                    </LinkCopierBox>
+                    {/*</ShareAllBox>*/}
+                    <Spacing />
                     {this.props.children}
                     {/* <SectionTitle>{this.props.checkboxTitleCopy}</SectionTitle>
                     <SectionDescription>
@@ -207,15 +206,18 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 export default ShareAnnotationMenu
 
 const Menu = styled.div`
+    padding: 10px 15px;
+
     & * {
         font-family: 'Poppins', sans-serif;
         line-height: 22px;
     }
 `
 
-const TopArea = styled.div`
-    padding: 10px 15px;
+const Spacing = styled.div`
+    height: 15px;
 `
+
 const SectionTitle = styled.div`
     font-weight: bold;
     font-size: 14px;

@@ -84,7 +84,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         return (
             <Margin vertical="auto">
                 <SearchBarContainer onClick={onSearchBarFocus}>
-                    <FullWidthMargin>
+                    <FullWidthMargin left="15px">
                         <Input
                             ref={this.inputRef}
                             placeholder={
