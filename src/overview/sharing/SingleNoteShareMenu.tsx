@@ -7,6 +7,11 @@ import { contentSharing } from 'src/util/remote-functions-background'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
+import { Icon } from 'src/dashboard-refactor/styled-components'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import Margin from 'src/dashboard-refactor/components/Margin'
+import colors from 'src/dashboard-refactor/colors'
+import { fonts } from 'src/dashboard-refactor/styles'
 
 interface State {
     // readyToRender: boolean
@@ -99,45 +104,110 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                 getLink={this.getLink}
                 onCopyLinkClick={this.props.copyLink}
                 onClickOutside={this.props.closeShareMenu}
+                linkTitleCopy="Link to this note"
                 // checkboxTitleCopy="Share Note"
                 // checkboxCopy="Share Note in all collections this page is in"
             >
-                {unshareState === 'error' ? (
-                    'Error unsharing annotation...'
-                ) : (
-                    <SecondaryAction
-                        label={
-                            unshareState === 'running' ? (
-                                <LoadingIndicator />
-                            ) : (
-                                'Unshare'
-                            )
-                        }
-                        onClick={this.handleUnshare}
-                    />
-                )}
-                <SharedNoteInfo>
-                    <TypographyTextNormal>
-                        {' '}
-                        Shared notes are accessible via the page link and shared
-                        collections <strong>the page is part of</strong>.
-                    </TypographyTextNormal>
-                </SharedNoteInfo>
+                <PrivacyContainer>
+                    <PrivacyTitle>Set privacy for this note</PrivacyTitle>
+                    <PrivacyOptionContainer top="5px">
+                        {this.state.unshareState === 'running' ? (
+                            <LoadingIndicator />
+                        ) : (
+                            <>
+                                <PrivacyOptionItem
+                                    onClick={this.handleUnshare}
+                                    bottom="5px"
+                                >
+                                    <Icon
+                                        heightAndWidth="22px"
+                                        path={icons.lock}
+                                    />
+                                    <PrivacyOptionBox>
+                                        <PrivacyOptionTitle>
+                                            Private
+                                        </PrivacyOptionTitle>
+                                        <PrivacyOptionSubTitle>
+                                            Only locally available to you
+                                        </PrivacyOptionSubTitle>
+                                    </PrivacyOptionBox>
+                                </PrivacyOptionItem>
+                                <PrivacyOptionItem
+                                    onClick={this.getLink}
+                                    bottom="10px"
+                                >
+                                    <Icon
+                                        heightAndWidth="22px"
+                                        path={icons.shared}
+                                    />
+                                    <PrivacyOptionBox>
+                                        <PrivacyOptionTitle>
+                                            Shared
+                                        </PrivacyOptionTitle>
+                                        <PrivacyOptionSubTitle>
+                                            Shared in collections this page is
+                                            in
+                                        </PrivacyOptionSubTitle>
+                                    </PrivacyOptionBox>
+                                </PrivacyOptionItem>
+                            </>
+                        )}
+                    </PrivacyOptionContainer>
+                </PrivacyContainer>
             </ShareAnnotationMenu>
         )
     }
 }
 
-const SharedNoteInfo = styled.div`
+const PrivacyContainer = styled.div`
+    width: 100%;
+
+    & * {
+        color: ${(props) => props.theme.colors.primary};
+    }
+`
+
+const PrivacyTitle = styled.div`
+    font-size: 14px;
+    font-weight: bold;
+    padding: 0px 15px;
+`
+
+const PrivacyOptionContainer = styled(Margin)`
+    min-height: 100px;
     display: flex;
     justify-content: center;
-    text-align: center;
+    flex-direction: column;
     align-items: center;
-    font-size: 1
-    margin: 10px 0px 0;
+`
 
-    & > span {
-        text-align: center;
-        font-size: 12px;
+const PrivacyOptionItem = styled(Margin)`
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+    cursor: pointer;
+    padding: 2px 20px;
+
+    &:hover {
+        background-color: ${colors.onHover};
     }
+`
+
+const PrivacyOptionBox = styled.div`
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: column;
+    padding-left: 10px;
+`
+
+const PrivacyOptionTitle = styled.div`
+    font-size: 13px;
+    font-weight: bold;
+    height: 16px;
+`
+
+const PrivacyOptionSubTitle = styled.div`
+    font-size: 12px;
 `
