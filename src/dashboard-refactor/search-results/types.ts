@@ -31,6 +31,8 @@ export type PageInteractionProps = Omit<
     onRemoveFromListBtnClick: React.MouseEventHandler
     onListPickerBtnClick: React.MouseEventHandler
     onNotesBtnClick: React.MouseEventHandler
+    onPageDrag: React.DragEventHandler
+    onPageDrop: React.DragEventHandler
 }
 
 // NOTE: Derived type - edit the original
@@ -165,6 +167,7 @@ export interface RootState {
     noteSharingInfo: { [noteId: string]: AnnotationSharingInfo }
 
     searchType: SearchType
+    draggedPageId?: string
     shouldFormsAutoFocus: boolean
 
     /** Holds page data specific to each page occurence on a specific day. */
@@ -229,6 +232,8 @@ export type Events = UIEvent<{
     setPageNotesType: PageEventArgs & { noteType: NotesType }
     setPageHover: PageEventArgs & { hover: ResultHoverState }
     removePageFromList: PageEventArgs
+    dragPage: PageEventArgs & { dataTransfer: DataTransfer }
+    dropPage: PageEventArgs
 
     // New note form state mutations
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }

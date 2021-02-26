@@ -75,6 +75,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 noteSharingInfo: {},
                 results: {},
                 areResultsExhausted: false,
+                shouldFormsAutoFocus: false,
                 pageData: {
                     allIds: [],
                     byId: {},
@@ -84,7 +85,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     byId: {},
                 },
                 searchType: 'pages',
-                shouldFormsAutoFocus: false,
                 searchState: 'pristine',
                 noteDeleteState: 'pristine',
                 pageDeleteState: 'pristine',
@@ -542,6 +542,27 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         this.emitMutation({
             modals: { deletingPageArgs: { $set: event } },
+        })
+    }
+
+    dragPage: EventHandler<'dragPage'> = async ({ event, previousState }) => {
+        const crt = this.options.document.getElementById('dragged-element')
+        crt.style.display = 'block'
+        event.dataTransfer.setDragImage(crt, 10, 10)
+
+        const page = previousState.searchResults.pageData.byId[event.pageId]
+        event.dataTransfer.setData(
+            'text/plain',
+            JSON.stringify({ fullPageUrl: page.fullUrl }),
+        )
+        this.emitMutation({
+            searchResults: { draggedPageId: { $set: event.pageId } },
+        })
+    }
+
+    dropPage: EventHandler<'dropPage'> = async () => {
+        this.emitMutation({
+            searchResults: { draggedPageId: { $set: undefined } },
         })
     }
 

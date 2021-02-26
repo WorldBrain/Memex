@@ -355,6 +355,53 @@ describe('Dashboard search results logic', () => {
                 ].pages.allIds.includes(pageId),
             ).toBe(false)
         })
+
+        it('should be able to drag and drop a page result, setting the drag image', async ({
+            device,
+        }) => {
+            const mockElement = { style: { display: undefined } }
+            const mockDocument = { getElementById: () => mockElement }
+
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                mockDocument,
+            })
+            searchResults['options']
+            const page = DATA.PAGE_1
+
+            const dataTransfer = new DataTransfer()
+
+            expect(dataTransfer['img']).toEqual(undefined)
+            expect(dataTransfer.getData('text/plain')).toEqual('')
+            expect(mockElement.style.display).toEqual(undefined)
+            expect(searchResults.state.searchResults.draggedPageId).toEqual(
+                undefined,
+            )
+
+            await searchResults.processEvent('dragPage', {
+                pageId: page.normalizedUrl,
+                day: PAGE_SEARCH_DUMMY_DAY,
+                dataTransfer,
+            })
+
+            expect(dataTransfer['img']).toEqual(mockElement)
+            expect(dataTransfer.getData('text/plain')).toEqual(
+                JSON.stringify({ fullPageUrl: page.fullUrl }),
+            )
+            expect(mockElement.style.display).toEqual('block')
+            expect(searchResults.state.searchResults.draggedPageId).toEqual(
+                page.normalizedUrl,
+            )
+
+            await searchResults.processEvent('dropPage', {
+                pageId: page.normalizedUrl,
+                day: PAGE_SEARCH_DUMMY_DAY,
+            })
+
+            expect(searchResults.state.searchResults.draggedPageId).toEqual(
+                undefined,
+            )
+        })
     })
 
     describe('nested page result state mutations', () => {

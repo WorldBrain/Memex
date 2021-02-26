@@ -200,7 +200,13 @@ export default class PageResultView extends PureComponent<Props> {
 
     render() {
         return (
-            <ItemBox firstDivProps={{ onMouseLeave: this.props.onUnhover }}>
+            <ItemBox
+                firstDivProps={{
+                    onMouseLeave: this.props.onUnhover,
+                    onDragStart: this.props.onPageDrag,
+                    onDragEnd: this.props.onPageDrop,
+                }}
+            >
                 <StyledPageResult>
                     {this.renderRemoveFromListBtn()}
                     <PageContentBox

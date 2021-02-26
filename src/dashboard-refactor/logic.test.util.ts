@@ -96,6 +96,7 @@ export async function setupTest(
         seedData?: DataSeeder
         copyToClipboard?: (text: string) => Promise<boolean>
         overrideSearchTrigger?: boolean
+        mockDocument?: any
     } = {
         copyToClipboard: defaultTestSetupDeps.copyToClipboard,
     },
@@ -112,6 +113,7 @@ export async function setupTest(
         localStorage: browser.storage.local,
         authBG: device.backgroundModules.auth.remoteFunctions,
         tagsBG: device.backgroundModules.tags.remoteFunctions,
+        document: args.mockDocument,
         listsBG: {
             ...device.backgroundModules.customLists.remoteFunctions,
             insertPageToList: (args) =>

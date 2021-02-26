@@ -37,6 +37,7 @@ export class DashboardContainer extends StatefulUIElement<
     Events
 > {
     static defaultProps: Partial<Props> = {
+        document,
         localStorage: browser.storage.local,
         activityIndicatorBG: runInBackground(),
         contentShareBG: runInBackground(),
@@ -466,6 +467,14 @@ export class DashboardContainer extends StatefulUIElement<
                             day,
                             pageId,
                         }),
+                    onPageDrag: (day, pageId) => (e) =>
+                        this.processEvent('dragPage', {
+                            day,
+                            pageId,
+                            dataTransfer: e.dataTransfer,
+                        }),
+                    onPageDrop: (day, pageId) => () =>
+                        this.processEvent('dropPage', { day, pageId }),
                 }}
                 pagePickerProps={{
                     onListPickerUpdate: (pageId) => (args) =>
