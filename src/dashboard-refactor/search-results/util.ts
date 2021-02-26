@@ -91,6 +91,7 @@ export const bindFunctionalProps = <
 export const getInitialPageResultState = (
     id: string,
     noteIds: string[] = [],
+    extra: Partial<PageResult> = {},
 ): PageResult => ({
     id,
     notesType: 'user',
@@ -103,6 +104,7 @@ export const getInitialPageResultState = (
     newNoteForm: getInitialFormState(),
     noteIds: { user: noteIds, followed: [], search: [] },
     hoverState: null,
+    ...extra,
 })
 
 export const getInitialNoteResultState = (): NoteResult => ({
@@ -172,6 +174,7 @@ export const annotationSearchResultToState: SearchResultToState = (
             pageResults.byId[pageUrl] = getInitialPageResultState(
                 pageUrl,
                 noteIds,
+                { areNotesShown: true },
             )
 
             for (const annotation of annotations) {
