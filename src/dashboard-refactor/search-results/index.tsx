@@ -298,7 +298,10 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         if (this.props.searchPaginationState === 'running') {
             days.push(this.renderLoader({ key: 'loader' }))
-        } else if (!this.props.areResultsExhausted) {
+        } else if (
+            !this.props.areResultsExhausted &&
+            this.props.searchState !== 'pristine'
+        ) {
             days.push(
                 <Waypoint
                     key="pagination-waypoint"
