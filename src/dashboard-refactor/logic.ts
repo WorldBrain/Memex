@@ -1729,6 +1729,36 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setDragOverListId: EventHandler<'setDragOverListId'> = async ({
+        event,
+    }) => {
+        await this.emitMutation({
+            listsSidebar: { dragOverListId: { $set: event.listId } },
+        })
+    }
+
+    dropPageOnListItem: EventHandler<'dropPageOnListItem'> = async ({
+        event,
+    }) => {
+        const { fullPageUrl } = JSON.parse(
+            event.dataTransfer.getData('text/plain'),
+        )
+
+        this.options.analytics.trackEvent({
+            category: 'Collections',
+            action: 'addPageViaDragAndDrop',
+        })
+
+        await this.options.listsBG.insertPageToList({
+            id: event.listId,
+            url: fullPageUrl,
+        })
+
+        await this.emitMutation({
+            listsSidebar: { dragOverListId: { $set: undefined } },
+        })
+    }
+
     confirmListEdit: EventHandler<'confirmListEdit'> = async ({
         event,
         previousState,

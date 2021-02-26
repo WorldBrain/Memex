@@ -112,7 +112,13 @@ export async function setupTest(
         localStorage: browser.storage.local,
         authBG: device.backgroundModules.auth.remoteFunctions,
         tagsBG: device.backgroundModules.tags.remoteFunctions,
-        listsBG: device.backgroundModules.customLists.remoteFunctions,
+        listsBG: {
+            ...device.backgroundModules.customLists.remoteFunctions,
+            insertPageToList: (args) =>
+                device.backgroundModules.customLists.remoteFunctions.insertPageToList(
+                    { ...args, skipPageIndexing: true },
+                ),
+        },
         searchBG: device.backgroundModules.search.remoteFunctions.search,
         contentShareBG: device.backgroundModules.contentSharing.remoteFunctions,
         activityIndicatorBG:

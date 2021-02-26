@@ -79,7 +79,7 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.searchQuery).toEqual('again')
     })
 
-    it('should be able to selected lists to filter in search', async ({
+    it('should be able to set selected list to filter in search', async ({
         device,
     }) => {
         const { searchResults } = await setupTest(device, {
@@ -112,6 +112,28 @@ describe('Dashboard search results logic', () => {
 
         expect(searchResults.state.listsSidebar.selectedListId).toEqual(1)
         expect(searchResults.logic['searchTriggeredCount']).toBe(4)
+    })
+
+    it('should be able to set dragged-over list', async ({ device }) => {
+        const { searchResults } = await setupTest(device, {
+            overrideSearchTrigger: true,
+        })
+
+        expect(searchResults.state.listsSidebar.dragOverListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setDragOverListId', { listId: 123 })
+        expect(searchResults.state.listsSidebar.dragOverListId).toEqual(123)
+        await searchResults.processEvent('setDragOverListId', {
+            listId: undefined,
+        })
+        expect(searchResults.state.listsSidebar.dragOverListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setDragOverListId', { listId: 123 })
+        expect(searchResults.state.listsSidebar.dragOverListId).toEqual(123)
+        await searchResults.processEvent('setDragOverListId', { listId: 1 })
+        expect(searchResults.state.listsSidebar.dragOverListId).toEqual(1)
     })
 
     it("should be able set lists' edit state", async ({ device }) => {
@@ -622,5 +644,62 @@ describe('Dashboard search results logic', () => {
         expect(
             searchResults.state.listsSidebar.listData[listId].shareUrl,
         ).toEqual(getListShareUrl({ remoteListId }))
+    })
+
+    it('should be able to add a page to a list via drag-and-drop', async ({
+        device,
+    }) => {
+        const page = DATA.PAGE_1
+        const listId = 123
+        const { searchResults } = await setupTest(device, {
+            seedData: async (logic, { storageManager }) => {
+                await storageManager.collection('pages').createObject({
+                    url: page.normalizedUrl,
+                    title: page.fullTitle,
+                })
+
+                await storageManager.collection('customLists').createObject({
+                    id: listId,
+                })
+            },
+
+            overrideSearchTrigger: true,
+        })
+
+        expect(
+            await device.storageManager
+                .collection('pageListEntries')
+                .findObject({ pageUrl: page.normalizedUrl, listId }),
+        ).toEqual(null)
+
+        searchResults.processMutation({
+            listsSidebar: { dragOverListId: { $set: listId } },
+        })
+        expect(searchResults.state.listsSidebar.dragOverListId).toEqual(listId)
+
+        const dataTransfer = new DataTransfer()
+        dataTransfer.setData(
+            'text/plain',
+            JSON.stringify({ fullPageUrl: page.fullUrl }),
+        )
+        await searchResults.processEvent('dropPageOnListItem', {
+            listId,
+            dataTransfer,
+        })
+
+        expect(searchResults.state.listsSidebar.dragOverListId).toEqual(
+            undefined,
+        )
+        expect(
+            await device.storageManager
+                .collection('pageListEntries')
+                .findObject({ pageUrl: page.normalizedUrl, listId }),
+        ).toEqual(
+            expect.objectContaining({
+                pageUrl: page.normalizedUrl,
+                fullUrl: page.fullUrl,
+                listId,
+            }),
+        )
     })
 })
