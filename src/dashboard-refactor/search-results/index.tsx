@@ -54,6 +54,7 @@ export type Props = RootState &
         pagePickerProps: PagePickerAugdProps
         notePickerProps: NotePickerAugdProps
         onShowAllNotesClick: React.MouseEventHandler
+        filterSearchByTag: (tag: string) => void
         newNoteInteractionProps: {
             [Key in keyof AnnotationCreateEventProps]: (
                 day: number,
@@ -103,6 +104,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 onTagsHover={interactionProps.onTagsHover}
                 onUnhover={interactionProps.onUnhover}
                 hoverState={noteData.hoverState}
+                onTagClick={this.props.filterSearchByTag}
                 lastEdited={
                     noteData.isEdited
                         ? new Date(noteData.displayTime)
@@ -269,6 +271,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 <PageResult
                     key={pageId + day.toString()}
                     isSearchFilteredByList={this.props.isSearchFilteredByList}
+                    onTagClick={this.props.filterSearchByTag}
                     {...interactionProps}
                     {...pickerProps}
                     {...page}

@@ -1373,10 +1373,18 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     setSearchFiltersOpen: EventHandler<'setSearchFiltersOpen'> = async ({
         event,
+        previousState,
     }) => {
         this.emitMutation({
             searchFilters: { searchFiltersOpen: { $set: event.isOpen } },
         })
+
+        if (!event.isOpen) {
+            await this.processUIEvent('resetFilters', {
+                event: null,
+                previousState,
+            })
+        }
     }
 
     setTagFilterActive: EventHandler<'setTagFilterActive'> = async ({
@@ -1439,7 +1447,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { tagsIncluded: { $push: [event.tag] } },
+            searchFilters: {
+                tagsIncluded: { $push: [event.tag] },
+                searchFiltersOpen: { $set: true },
+            },
         })
     }
 

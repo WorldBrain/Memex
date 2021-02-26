@@ -25,6 +25,7 @@ export interface Props
         PageResult,
         PageInteractionProps,
         PagePickerProps {
+    onTagClick?: (tag: string) => void
     isSearchFilteredByList: boolean
     isShared?: boolean
 }
@@ -224,6 +225,7 @@ export default class PageResultView extends PureComponent<Props> {
                         onMouseEnter={this.props.onTagsHover}
                         showEditBtn={this.props.hoverState === 'tags'}
                         onEditBtnClick={this.props.onTagPickerBtnClick}
+                        onTagClick={this.props.onTagClick}
                     />
                     <ItemBoxBottom
                         firstDivProps={{

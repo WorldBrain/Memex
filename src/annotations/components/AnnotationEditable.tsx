@@ -50,6 +50,7 @@ export interface AnnotationEditableProps {
     annotationFooterDependencies: AnnotationFooterEventProps
     annotationEditDependencies: AnnotationEditGeneralProps &
         AnnotationEditEventProps
+    onTagClick?: (tag: string) => void
     renderTagsPickerForAnnotation: (id: string) => JSX.Element
     renderCopyPasterForAnnotation: (id: string) => JSX.Element
     renderShareMenuForAnnotation: (id: string) => JSX.Element
@@ -335,6 +336,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 tags={this.props.tags}
                                 onMouseEnter={this.props.onTagsHover}
                                 showEditBtn={this.props.hoverState === 'tags'}
+                                onTagClick={this.props.onTagClick}
                                 onEditBtnClick={
                                     this.props.annotationFooterDependencies
                                         .onTagIconClick

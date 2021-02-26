@@ -348,6 +348,9 @@ export class DashboardContainer extends StatefulUIElement<
             <SearchResultsContainer
                 isSearchFilteredByList={listsSidebar.selectedListId != null}
                 {...searchResults}
+                filterSearchByTag={(tag) =>
+                    this.processEvent('addIncludedTag', { tag })
+                }
                 paginateSearch={() =>
                     this.processEvent('search', { paginate: true })
                 }
