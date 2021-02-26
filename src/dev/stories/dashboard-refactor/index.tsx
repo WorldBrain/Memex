@@ -32,6 +32,7 @@ async function createDependencies(): Promise<DashboardProps> {
             await navigator.clipboard.writeText(text)
             return true
         },
+        document,
         annotationsBG,
         localStorage: browser.storage.local,
         authBG: backgroundModules.auth.remoteFunctions,

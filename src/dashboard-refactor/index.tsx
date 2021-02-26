@@ -709,6 +709,10 @@ export class DashboardContainer extends StatefulUIElement<
                     }
                 />
                 <HelpBtn />
+                <DragElement id="dragged-element">
+                    {' '}
+                    + Drop into Collection
+                </DragElement>
             </Container>
         )
     }
@@ -734,4 +738,23 @@ const Container = styled.div`
     background-color: #f6f8fb;
     min-height: 100vh;
     height: 100%;
+`
+
+const DragElement = styled.div<{ id: 'dragged-element' }>`
+    text-decoration: none;
+    display: none;
+    border: solid 2px #5cd9a6;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    max-height: 50px;
+    max-width: 330px;
+    text-align: center;
+    font-weight: 500;
+    background: #5cd9a6;
+    color: #fff;
+    top: -90vh;
+    opacity: 1;
+    padding: 5px 10px;
+    position: absolute;
+    margin-left: 25px;
 `

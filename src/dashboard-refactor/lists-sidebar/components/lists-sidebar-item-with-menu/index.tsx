@@ -48,7 +48,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
 
     private handleDrop: React.DragEventHandler = (e) => {
         e.preventDefault()
-        this.props.dropReceivingState.onDrop(this.props.listId, e.dataTransfer)
+        this.props.dropReceivingState?.onDrop(this.props.listId, e.dataTransfer)
     }
 
     private renderMenuBtns() {
@@ -169,8 +169,8 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                 <SidebarItem
                     {...props}
                     isMenuDisplayed={isMenuDisplayed}
-                    onDragEnter={dropReceivingState.onDragEnter}
-                    onDragLeave={dropReceivingState.onDragLeave}
+                    onDragEnter={dropReceivingState?.onDragEnter}
+                    onDragLeave={dropReceivingState?.onDragLeave}
                     onDrop={this.handleDrop}
                 >
                     <TitleBox onClick={this.handleSelection}>
