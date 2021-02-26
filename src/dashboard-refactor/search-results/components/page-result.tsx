@@ -195,7 +195,7 @@ export default class PageResultView extends PureComponent<Props> {
     getDomain() {
         let domain = this.props.fullUrl.split('/')
 
-        return domain[2]
+        return domain[2].replace('www.', '')
     }
 
     render() {

@@ -188,6 +188,7 @@ const PrivacyOptionItem = styled(Margin)`
     flex-direction: row;
     cursor: pointer;
     padding: 2px 20px;
+    width: fill-available;
 
     &:hover {
         background-color: ${colors.onHover};
