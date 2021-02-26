@@ -94,6 +94,18 @@ export class DashboardContainer extends StatefulUIElement<
             this.processEvent('setDeletingListId', { listId: list.id }),
         onShareClick: () =>
             this.processEvent('setShareListId', { listId: list.id }),
+        dropReceivingState: {
+            onDragEnter: (listId) =>
+                this.processEvent('setDragOverListId', { listId }),
+            onDragLeave: () =>
+                this.processEvent('setDragOverListId', { listId: undefined }),
+            onDrop: (listId, dataTransfer) =>
+                this.processEvent('dropPageOnListItem', {
+                    listId,
+                    dataTransfer,
+                }),
+            isDraggedOver: list.id === this.state.listsSidebar.dragOverListId,
+        },
     })
 
     private renderFiltersBar() {

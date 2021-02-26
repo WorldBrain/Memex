@@ -11,7 +11,7 @@ const dropReceivingState: DropReceivingState = {
     canReceiveDroppedItems: true, // this defines whether items can be dropped (not whether there is a state change on drag-over)
     isDraggedOver: false,
     triggerSuccessfulDropAnimation: false,
-    onDragOver: () => {},
+    onDragEnter: () => {},
     onDragLeave: () => {},
     onDrop: () => {},
 }
