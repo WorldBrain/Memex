@@ -7,6 +7,7 @@ import {
 import * as DATA from '../logic.test.data'
 import * as utils from './util'
 import { NoteResultHoverState, ResultHoverState } from './types'
+import { PAGE_SEARCH_DUMMY_DAY } from '../constants'
 
 describe('Dashboard search results logic', () => {
     const it = makeSingleDeviceUILogicTestFactory({
@@ -192,11 +193,11 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent('setDeletingPageArgs', {
                 pageId,
-                day: -1,
+                day: PAGE_SEARCH_DUMMY_DAY,
             })
             expect(searchResults.state.modals.deletingPageArgs).toEqual({
                 pageId,
-                day: -1,
+                day: PAGE_SEARCH_DUMMY_DAY,
             })
 
             await searchResults.processEvent('cancelPageDelete', null)
@@ -258,11 +259,11 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent('setDeletingPageArgs', {
                 pageId,
-                day: -1,
+                day: PAGE_SEARCH_DUMMY_DAY,
             })
             expect(searchResults.state.modals.deletingPageArgs).toEqual({
                 pageId,
-                day: -1,
+                day: PAGE_SEARCH_DUMMY_DAY,
             })
 
             expect(searchResults.state.searchResults.pageDeleteState).toEqual(
@@ -307,7 +308,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_3.normalizedUrl
 
                 expect(
@@ -343,7 +344,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_3.normalizedUrl
 
                 expect(
@@ -379,7 +380,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_3.normalizedUrl
 
                 expect(
@@ -413,7 +414,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_3.normalizedUrl
 
                 expect(
@@ -447,7 +448,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_1.normalizedUrl
 
                 expect(
@@ -493,7 +494,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_1.normalizedUrl
                 const states: ResultHoverState[] = [
                     'footer',
@@ -527,7 +528,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_1.normalizedUrl
 
                 expect(
@@ -576,7 +577,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_1.normalizedUrl
 
                 expect(
@@ -620,7 +621,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_1.normalizedUrl
 
                 expect(
@@ -658,7 +659,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_1.normalizedUrl
                 const newNoteComment = 'test'
                 const newNoteTags = ['test']
@@ -709,7 +710,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_1.normalizedUrl
                 const newNoteComment = 'test'
                 const newNoteTags = ['test']
@@ -1431,12 +1432,12 @@ describe('Dashboard search results logic', () => {
                 await searchResults.processEvent('setDeletingNoteArgs', {
                     noteId,
                     pageId: DATA.PAGE_1.normalizedUrl,
-                    day: -1,
+                    day: PAGE_SEARCH_DUMMY_DAY,
                 })
                 expect(searchResults.state.modals.deletingNoteArgs).toEqual({
                     noteId,
                     pageId: DATA.PAGE_1.normalizedUrl,
-                    day: -1,
+                    day: PAGE_SEARCH_DUMMY_DAY,
                 })
 
                 await searchResults.processEvent('cancelNoteDelete', null)
@@ -1500,12 +1501,12 @@ describe('Dashboard search results logic', () => {
                 await searchResults.processEvent('setDeletingNoteArgs', {
                     noteId,
                     pageId: DATA.PAGE_1.normalizedUrl,
-                    day: -1,
+                    day: PAGE_SEARCH_DUMMY_DAY,
                 })
                 expect(searchResults.state.modals.deletingNoteArgs).toEqual({
                     noteId,
                     pageId: DATA.PAGE_1.normalizedUrl,
-                    day: -1,
+                    day: PAGE_SEARCH_DUMMY_DAY,
                 })
 
                 expect(

@@ -20,6 +20,7 @@ import {
     NotesType,
 } from './types'
 import { Annotation } from 'src/annotations/types'
+import { PAGE_SEARCH_DUMMY_DAY } from '../constants'
 
 export const notesTypeToString = (type: NotesType): string => {
     if (type === 'user') {
@@ -228,7 +229,12 @@ export const pageSearchResultToState: SearchResultToState = (
     return {
         noteData,
         pageData,
-        results: { [-1]: { day: -1, pages: pageResults } },
+        results: {
+            [PAGE_SEARCH_DUMMY_DAY]: {
+                day: PAGE_SEARCH_DUMMY_DAY,
+                pages: pageResults,
+            },
+        },
     }
 }
 

@@ -72,3 +72,10 @@ const KEY_PREFIX = '@Dashboard-'
 export const STORAGE_KEYS = {
     listSidebarLocked: KEY_PREFIX + 'list_sidebar_locked',
 }
+
+/**
+ * Used for page search, where results aren't grouped by day. Internally, to keep a consistent results
+ * data structure for both page and notes search, page search results are still grouped by day though
+ * always under a single key. This is that key.
+ */
+export const PAGE_SEARCH_DUMMY_DAY = -1
