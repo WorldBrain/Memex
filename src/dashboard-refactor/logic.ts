@@ -10,7 +10,11 @@ import {
     setLastSharedAnnotationTimestamp,
 } from 'src/annotations/utils'
 import { getListShareUrl } from 'src/content-sharing/utils'
-import { PAGE_SIZE, STORAGE_KEYS } from 'src/dashboard-refactor/constants'
+import {
+    PAGE_SIZE,
+    STORAGE_KEYS,
+    PAGE_SEARCH_DUMMY_DAY,
+} from 'src/dashboard-refactor/constants'
 import { ListData } from './lists-sidebar/types'
 import { updatePickerValues } from './util'
 
@@ -19,6 +23,40 @@ type EventHandler<EventName extends keyof Events> = UIEventHandler<
     Events,
     EventName
 >
+
+/**
+ * Helper used to build a mutation to remove a page from all results days in which it occurs.
+ */
+export const removeAllResultOccurrencesOfPage = (
+    state: State['searchResults']['results'],
+    pageId: string,
+): UIMutation<State['searchResults']['results']> => {
+    const mutation: UIMutation<State['searchResults']['results']> = {}
+
+    for (const { day, pages } of Object.values(state)) {
+        if (!pages.allIds.includes(pageId)) {
+            continue
+        }
+
+        // If it's the last remaining page for this day, remove the day instead
+        if (pages.allIds.length === 1) {
+            console.log('rmeoving day:', day)
+            mutation['$unset'] = [...(mutation['$unset'] ?? []), day]
+            continue
+        }
+
+        mutation[day] = {
+            pages: {
+                byId: { $unset: [pageId] },
+                allIds: {
+                    $set: state[day].pages.allIds.filter((id) => id !== pageId),
+                },
+            },
+        }
+    }
+
+    return mutation
+}
 
 export class DashboardLogic extends UILogic<State, Events> {
     constructor(private options: DashboardDependencies) {
@@ -506,6 +544,53 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             modals: { deletingPageArgs: { $set: event } },
         })
+    }
+
+    removePageFromList: EventHandler<'removePageFromList'> = async ({
+        event,
+        previousState: {
+            listsSidebar: { selectedListId: listId },
+            searchResults: { results, pageData },
+        },
+    }) => {
+        if (listId == null) {
+            throw new Error('No list is currently filtered to remove page from')
+        }
+        const filterOutPage = (ids: string[]) =>
+            ids.filter((id) => id !== event.pageId)
+
+        const mutation: UIMutation<State['searchResults']> = {
+            pageData: {
+                byId: { $unset: [event.pageId] },
+                allIds: { $set: filterOutPage(pageData.allIds) },
+            },
+        }
+
+        if (event.day === PAGE_SEARCH_DUMMY_DAY) {
+            mutation.results = {
+                [PAGE_SEARCH_DUMMY_DAY]: {
+                    pages: {
+                        byId: { $unset: [event.pageId] },
+                        allIds: {
+                            $set: filterOutPage(
+                                results[PAGE_SEARCH_DUMMY_DAY].pages.allIds,
+                            ),
+                        },
+                    },
+                },
+            }
+        } else {
+            mutation.results = removeAllResultOccurrencesOfPage(
+                results,
+                event.pageId,
+            )
+        }
+
+        await this.options.listsBG.removePageFromList({
+            id: listId,
+            url: event.pageId,
+        })
+        this.emitMutation({ searchResults: mutation })
     }
 
     cancelPageDelete: EventHandler<'cancelPageDelete'> = async ({}) => {

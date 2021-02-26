@@ -447,7 +447,10 @@ export class DashboardContainer extends StatefulUIElement<
                             hover: null,
                         }),
                     onRemoveFromListBtnClick: (day, pageId) => () =>
-                        __unimplemented,
+                        this.processEvent('removePageFromList', {
+                            day,
+                            pageId,
+                        }),
                 }}
                 pagePickerProps={{
                     onListPickerUpdate: (pageId) => (args) =>

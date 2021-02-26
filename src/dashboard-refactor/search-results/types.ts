@@ -227,6 +227,7 @@ export type Events = UIEvent<{
     setPageNotesSort: PageEventArgs & { sortingFn: AnnotationsSorter }
     setPageNotesType: PageEventArgs & { noteType: NotesType }
     setPageHover: PageEventArgs & { hover: ResultHoverState }
+    removePageFromList: PageEventArgs
 
     // New note form state mutations
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }

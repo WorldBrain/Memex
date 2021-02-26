@@ -298,6 +298,43 @@ describe('Dashboard search results logic', () => {
                 searchResults.state.searchResults.pageData.byId[pageId],
             ).toEqual(undefined)
         })
+
+        it('should be able to remove a page from the search filtered list', async ({
+            device,
+        }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+            })
+            const pageId = DATA.PAGE_2.normalizedUrl
+            const list = DATA.LISTS_1[0]
+
+            await searchResults.processEvent('setPageLists', {
+                id: pageId,
+                fullPageUrl: 'https://' + pageId,
+                added: list.name,
+                skipPageIndexing: true,
+            })
+
+            searchResults.processMutation({
+                listsSidebar: { selectedListId: { $set: list.id } },
+            })
+            expect(
+                searchResults.state.searchResults.results[
+                    PAGE_SEARCH_DUMMY_DAY
+                ].pages.allIds.includes(pageId),
+            ).toBe(true)
+
+            await searchResults.processEvent('removePageFromList', {
+                day: PAGE_SEARCH_DUMMY_DAY,
+                pageId,
+            })
+
+            expect(
+                searchResults.state.searchResults.results[
+                    PAGE_SEARCH_DUMMY_DAY
+                ].pages.allIds.includes(pageId),
+            ).toBe(false)
+        })
     })
 
     describe('nested page result state mutations', () => {
@@ -926,6 +963,56 @@ describe('Dashboard search results logic', () => {
                         searchResults.state.searchResults.results[day].pages
                             .byId[pageId].newNoteForm.inputValue,
                     ).toEqual('user')
+                })
+
+                it('should be able to remove a page from the search filtered list, removing results from all days it occurs under', async ({
+                    device,
+                }) => {
+                    const { searchResults } = await setupTest(device, {
+                        seedData: setNoteSearchResult(
+                            DATA.ANNOT_SEARCH_RESULT_2,
+                        ),
+                    })
+                    const pageId = DATA.PAGE_1.normalizedUrl
+                    const list = DATA.LISTS_1[0]
+
+                    await searchResults.processEvent('setPageLists', {
+                        id: pageId,
+                        fullPageUrl: 'https://' + pageId,
+                        added: list.name,
+                        skipPageIndexing: true,
+                    })
+
+                    searchResults.processMutation({
+                        listsSidebar: { selectedListId: { $set: list.id } },
+                    })
+
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_1
+                        ].pages.allIds.includes(pageId),
+                    ).toBe(true)
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_2
+                        ].pages.allIds.includes(pageId),
+                    ).toBe(true)
+
+                    await searchResults.processEvent('removePageFromList', {
+                        day: DATA.DAY_1,
+                        pageId,
+                    })
+
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_1
+                        ].pages.allIds.includes(pageId),
+                    ).toBe(false)
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_2
+                        ].pages.allIds.includes(pageId),
+                    ).toBe(false)
                 })
             })
         })
