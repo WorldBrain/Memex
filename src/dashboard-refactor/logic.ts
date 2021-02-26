@@ -84,6 +84,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     byId: {},
                 },
                 searchType: 'pages',
+                shouldFormsAutoFocus: false,
                 searchState: 'pristine',
                 noteDeleteState: 'pristine',
                 pageDeleteState: 'pristine',
@@ -719,6 +720,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     setPageNotesShown: EventHandler<'setPageNotesShown'> = ({ event }) => {
         this.emitMutation({
             searchResults: {
+                shouldFormsAutoFocus: { $set: event.areShown },
                 results: {
                     [event.day]: {
                         pages: {
@@ -960,6 +962,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         await this.mutateAndTriggerSearch(previousState, {
             searchResults: {
+                shouldFormsAutoFocus: { $set: false },
                 searchType: { $set: event.searchType },
             },
         })

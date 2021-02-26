@@ -236,6 +236,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     }
                 />
                 <AnnotationCreate
+                    autoFocus={this.props.shouldFormsAutoFocus}
                     comment={newNoteForm.inputValue}
                     tags={newNoteForm.tags}
                     {...boundAnnotCreateProps}

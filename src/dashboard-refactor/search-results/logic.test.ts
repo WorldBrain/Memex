@@ -33,6 +33,9 @@ describe('Dashboard search results logic', () => {
             expect(searchResults.state.searchResults.searchType).toEqual(
                 'notes',
             )
+            expect(
+                searchResults.state.searchResults.shouldFormsAutoFocus,
+            ).toEqual(false)
 
             await searchResults.processEvent('setSearchType', {
                 searchType: 'pages',
@@ -42,6 +45,9 @@ describe('Dashboard search results logic', () => {
             expect(searchResults.state.searchResults.searchType).toEqual(
                 'pages',
             )
+            expect(
+                searchResults.state.searchResults.shouldFormsAutoFocus,
+            ).toEqual(false)
         })
 
         it('should be able to set all notes shown', async ({ device }) => {
@@ -473,6 +479,9 @@ describe('Dashboard search results logic', () => {
                         pageId
                     ].areNotesShown,
                 ).toBe(false)
+                expect(
+                    searchResults.state.searchResults.shouldFormsAutoFocus,
+                ).toEqual(false)
                 await searchResults.processEvent('setPageNotesShown', {
                     day,
                     pageId,
@@ -483,6 +492,9 @@ describe('Dashboard search results logic', () => {
                         pageId
                     ].areNotesShown,
                 ).toBe(true)
+                expect(
+                    searchResults.state.searchResults.shouldFormsAutoFocus,
+                ).toEqual(true)
                 await searchResults.processEvent('setPageNotesShown', {
                     day,
                     pageId,
@@ -493,6 +505,9 @@ describe('Dashboard search results logic', () => {
                         pageId
                     ].areNotesShown,
                 ).toBe(false)
+                expect(
+                    searchResults.state.searchResults.shouldFormsAutoFocus,
+                ).toEqual(false)
             })
 
             it('should be able to set note type', async ({ device }) => {
@@ -867,15 +882,6 @@ describe('Dashboard search results logic', () => {
                     expect(
                         searchResults.state.searchResults.results[day].pages
                             .byId[pageId].areNotesShown,
-                    ).toBe(false)
-                    await searchResults.processEvent('setPageNotesShown', {
-                        day,
-                        pageId,
-                        areShown: true,
-                    })
-                    expect(
-                        searchResults.state.searchResults.results[day].pages
-                            .byId[pageId].areNotesShown,
                     ).toBe(true)
                     await searchResults.processEvent('setPageNotesShown', {
                         day,
@@ -886,6 +892,21 @@ describe('Dashboard search results logic', () => {
                         searchResults.state.searchResults.results[day].pages
                             .byId[pageId].areNotesShown,
                     ).toBe(false)
+                    expect(
+                        searchResults.state.searchResults.shouldFormsAutoFocus,
+                    ).toBe(false)
+                    await searchResults.processEvent('setPageNotesShown', {
+                        day,
+                        pageId,
+                        areShown: true,
+                    })
+                    expect(
+                        searchResults.state.searchResults.results[day].pages
+                            .byId[pageId].areNotesShown,
+                    ).toBe(true)
+                    expect(
+                        searchResults.state.searchResults.shouldFormsAutoFocus,
+                    ).toBe(true)
                 })
 
                 it('should be able to set note type', async ({ device }) => {

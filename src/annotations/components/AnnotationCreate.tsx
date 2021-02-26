@@ -23,6 +23,7 @@ export interface AnnotationCreateGeneralProps {
     hide?: () => void
     comment: string
     tags: string[]
+    autoFocus?: boolean
 }
 
 export interface Props
@@ -36,6 +37,12 @@ export class AnnotationCreate extends React.Component<Props, State>
         MarkdownPreviewAnnotationInsertMenu
     >()
     state = { isTagPickerShown: false }
+
+    componentDidMount() {
+        if (this.props.autoFocus) {
+            this.focus()
+        }
+    }
 
     focus() {
         const inputLen = this.props.comment.length
@@ -90,6 +97,7 @@ export class AnnotationCreate extends React.Component<Props, State>
             uninsertTab({ el: this.textAreaRef.current })
         }
     }
+
     private renderTagPicker() {
         return (
             <TagInput

@@ -165,6 +165,7 @@ export interface RootState {
     noteSharingInfo: { [noteId: string]: AnnotationSharingInfo }
 
     searchType: SearchType
+    shouldFormsAutoFocus: boolean
 
     /** Holds page data specific to each page occurence on a specific day. */
     results: NestedResults
