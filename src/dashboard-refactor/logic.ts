@@ -40,7 +40,6 @@ export const removeAllResultOccurrencesOfPage = (
 
         // If it's the last remaining page for this day, remove the day instead
         if (pages.allIds.length === 1) {
-            console.log('rmeoving day:', day)
             mutation['$unset'] = [...(mutation['$unset'] ?? []), day]
             continue
         }
@@ -363,7 +362,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             skip: paginate ? searchFilters.skip + PAGE_SIZE : 0,
             lists,
         })
-        console.log('res:', result)
 
         return {
             ...utils.pageSearchResultToState(result),
@@ -600,19 +598,16 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     confirmPageDelete: EventHandler<'confirmPageDelete'> = async ({
-        previousState: { searchResults, modals },
+        previousState: {
+            searchResults: { pageData, results },
+            modals,
+        },
     }) => {
         if (!modals.deletingPageArgs) {
             throw new Error('No page ID is set for deletion')
         }
 
         const { pageId, day } = modals.deletingPageArgs
-        const pageAllIds = searchResults.pageData.allIds.filter(
-            (id) => id !== pageId,
-        )
-        const pageResultsAllIds = searchResults.results[
-            day
-        ].pages.allIds.filter((id) => id !== pageId)
 
         await executeUITask(
             this,
@@ -620,25 +615,41 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { pageDeleteState: { $set: taskState } },
             }),
             async () => {
-                await this.options.searchBG.delPages([pageId])
-
-                this.emitMutation({
-                    modals: {
-                        deletingPageArgs: { $set: undefined },
+                const resultsMutation: UIMutation<State['searchResults']> = {
+                    pageData: {
+                        byId: { $unset: [pageId] },
+                        allIds: {
+                            $set: pageData.allIds.filter((id) => id !== pageId),
+                        },
                     },
-                    searchResults: {
-                        results: {
-                            [day]: {
-                                pages: {
-                                    allIds: { $set: pageResultsAllIds },
-                                    byId: { $unset: [pageId] },
+                }
+
+                if (day === PAGE_SEARCH_DUMMY_DAY) {
+                    resultsMutation.results = {
+                        [day]: {
+                            pages: {
+                                byId: { $unset: [pageId] },
+                                allIds: {
+                                    $set: results[day].pages.allIds.filter(
+                                        (id) => id !== pageId,
+                                    ),
                                 },
                             },
                         },
-                        pageData: {
-                            byId: { $unset: [pageId] },
-                            allIds: { $set: pageAllIds },
-                        },
+                    }
+                } else {
+                    resultsMutation.results = removeAllResultOccurrencesOfPage(
+                        results,
+                        pageId,
+                    )
+                }
+
+                await this.options.searchBG.delPages([pageId])
+
+                this.emitMutation({
+                    searchResults: resultsMutation,
+                    modals: {
+                        deletingPageArgs: { $set: undefined },
                     },
                 })
             },
@@ -869,8 +880,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             previousState.searchResults.results[event.day].pages.byId[
                 event.pageId
             ].newNoteForm
-
-        console.log('yo form state:', formState)
 
         await executeUITask(
             this,

@@ -22,7 +22,7 @@ type DataSeederCreator<
     T = StandardSearchResponse | AnnotationsSearchResponse
 > = (data?: T) => DataSeeder
 
-export const setPageSearchResult: DataSeederCreator = (
+export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> = (
     result = DATA.PAGE_SEARCH_RESULT_1,
 ) => async (logic, { storageManager }) => {
     for (const page of result.docs) {
@@ -54,9 +54,35 @@ export const setPageSearchResult: DataSeederCreator = (
     logic.processEvent('setPageSearchResult', { result })
 }
 
-export const setNoteSearchResult: DataSeederCreator = (
-    result: any = DATA.ANNOT_SEARCH_RESULT_2,
-) => async (logic) => {
+export const setNoteSearchResult: DataSeederCreator<AnnotationsSearchResponse> = (
+    result = DATA.ANNOT_SEARCH_RESULT_2,
+) => async (logic, { storageManager }) => {
+    for (const page of result.docs) {
+        await storageManager.collection('pages').createObject({
+            url: page.url,
+            title: page.title,
+        })
+
+        for (const annot of page.annotations) {
+            await storageManager.collection('annotations').createObject({
+                ...annot,
+            })
+        }
+
+        for (const tag of page.tags) {
+            await storageManager.collection('tags').createObject({
+                name: tag,
+                url: page.url,
+            })
+        }
+
+        if (page.hasBookmark) {
+            await storageManager.collection('bookmarks').createObject({
+                url: page.url,
+                time: Date.now(),
+            })
+        }
+    }
     logic.processEvent('setAnnotationSearchResult', { result })
 }
 

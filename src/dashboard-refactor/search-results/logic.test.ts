@@ -256,6 +256,11 @@ describe('Dashboard search results logic', () => {
                     ...DATA.PAGE_1,
                 }),
             )
+            expect(
+                searchResults.state.searchResults.results[
+                    PAGE_SEARCH_DUMMY_DAY
+                ].pages.allIds.includes(pageId),
+            ).toEqual(true)
 
             await searchResults.processEvent('setDeletingPageArgs', {
                 pageId,
@@ -297,6 +302,15 @@ describe('Dashboard search results logic', () => {
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId],
             ).toEqual(undefined)
+            expect(
+                searchResults.state.searchResults.results[PAGE_SEARCH_DUMMY_DAY]
+                    .pages.byId[pageId],
+            ).toEqual(undefined)
+            expect(
+                searchResults.state.searchResults.results[
+                    PAGE_SEARCH_DUMMY_DAY
+                ].pages.allIds.includes(pageId),
+            ).toEqual(false)
         })
 
         it('should be able to remove a page from the search filtered list', async ({
@@ -1013,6 +1027,115 @@ describe('Dashboard search results logic', () => {
                             DATA.DAY_2
                         ].pages.allIds.includes(pageId),
                     ).toBe(false)
+                })
+
+                it('should be able to confirm page deletion, removing results from all days it occurs under', async ({
+                    device,
+                }) => {
+                    const { searchResults } = await setupTest(device, {
+                        seedData: setNoteSearchResult(
+                            DATA.ANNOT_SEARCH_RESULT_2,
+                        ),
+                    })
+                    const pageId = DATA.PAGE_1.normalizedUrl
+                    delete DATA.PAGE_1.fullUrl
+
+                    expect(
+                        await device.storageManager
+                            .collection('pages')
+                            .findOneObject({ url: pageId }),
+                    ).toEqual(
+                        expect.objectContaining({
+                            url: pageId,
+                            title: DATA.PAGE_1.fullTitle,
+                        }),
+                    )
+                    expect(searchResults.state.modals.deletingPageArgs).toEqual(
+                        undefined,
+                    )
+                    expect(
+                        searchResults.state.searchResults.pageData.allIds.includes(
+                            pageId,
+                        ),
+                    ).toEqual(true)
+                    expect(
+                        searchResults.state.searchResults.pageData.byId[pageId],
+                    ).toEqual(
+                        expect.objectContaining({
+                            ...DATA.PAGE_1,
+                        }),
+                    )
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_1
+                        ].pages.allIds.includes(pageId),
+                    ).toEqual(true)
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_2
+                        ].pages.allIds.includes(pageId),
+                    ).toEqual(true)
+
+                    await searchResults.processEvent('setDeletingPageArgs', {
+                        pageId,
+                        day: DATA.DAY_1,
+                    })
+                    expect(searchResults.state.modals.deletingPageArgs).toEqual(
+                        {
+                            pageId,
+                            day: DATA.DAY_1,
+                        },
+                    )
+
+                    expect(
+                        searchResults.state.searchResults.pageDeleteState,
+                    ).toEqual('pristine')
+                    const deleteP = searchResults.processEvent(
+                        'confirmPageDelete',
+                        null,
+                    )
+                    expect(
+                        searchResults.state.searchResults.pageDeleteState,
+                    ).toEqual('running')
+                    await deleteP
+                    expect(
+                        searchResults.state.searchResults.pageDeleteState,
+                    ).toEqual('success')
+
+                    expect(
+                        await device.storageManager
+                            .collection('pages')
+                            .findOneObject({ url: pageId }),
+                    ).toEqual(null)
+                    expect(searchResults.state.modals.deletingPageArgs).toEqual(
+                        undefined,
+                    )
+                    expect(
+                        searchResults.state.searchResults.pageData.allIds.includes(
+                            pageId,
+                        ),
+                    ).toEqual(false)
+                    expect(
+                        searchResults.state.searchResults.pageData.byId[pageId],
+                    ).toEqual(undefined)
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_1
+                        ].pages.allIds.includes(pageId),
+                    ).toEqual(false)
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_2
+                        ].pages.allIds.includes(pageId),
+                    ).toEqual(false)
+                    expect(
+                        searchResults.state.searchResults.results[DATA.DAY_1]
+                            .pages.byId[pageId],
+                    ).toEqual(undefined)
+                    expect(
+                        searchResults.state.searchResults.results[DATA.DAY_2]
+                            .pages.byId[pageId],
+                    ).toEqual(undefined)
                 })
             })
         })
