@@ -321,7 +321,7 @@ export default class Ribbon extends Component<Props, State> {
                                             tooltipText={
                                                 'Close Toolbar for session'
                                             }
-                                            position="left"
+                                            position="leftNarrow"
                                         >
                                             <button
                                                 className={cx(
@@ -337,7 +337,7 @@ export default class Ribbon extends Component<Props, State> {
                                             tooltipText={this.getTooltipText(
                                                 'toggleSidebar',
                                             )}
-                                            position="left"
+                                            position="leftNarrow"
                                         >
                                             <div
                                                 className={cx(styles.button, {
@@ -361,7 +361,7 @@ export default class Ribbon extends Component<Props, State> {
                                 )}
                                 <ButtonTooltip
                                     tooltipText="Search Dashboard"
-                                    position="left"
+                                    position="leftNarrow"
                                 >
                                     <div
                                         onClick={() =>
@@ -416,7 +416,7 @@ export default class Ribbon extends Component<Props, State> {
                                     tooltipText={this.getTooltipText(
                                         'createBookmark',
                                     )}
-                                    position="left"
+                                    position="leftNarrow"
                                 >
                                     <div
                                         className={cx(styles.button, {
@@ -434,7 +434,7 @@ export default class Ribbon extends Component<Props, State> {
                                     tooltipText={this.getTooltipText(
                                         'addComment',
                                     )}
-                                    position="left"
+                                    position="leftNarrow"
                                 >
                                     <div
                                         className={cx(
@@ -485,7 +485,7 @@ export default class Ribbon extends Component<Props, State> {
                                 )}
                                 <ButtonTooltip
                                     tooltipText={this.getTooltipText('addTag')}
-                                    position="left"
+                                    position="leftNarrow"
                                 >
                                     <div
                                         className={cx(styles.button, {
@@ -507,7 +507,7 @@ export default class Ribbon extends Component<Props, State> {
                                     tooltipText={this.getTooltipText(
                                         'addToCollection',
                                     )}
-                                    position="left"
+                                    position="leftNarrow"
                                 >
                                     <div
                                         className={cx(styles.button, {
@@ -527,7 +527,7 @@ export default class Ribbon extends Component<Props, State> {
                                 {this.renderCollectionsPicker()}
                                 <ButtonTooltip
                                     tooltipText="Settings"
-                                    position="left"
+                                    position="leftNarrow"
                                 >
                                     <div
                                         className={cx(

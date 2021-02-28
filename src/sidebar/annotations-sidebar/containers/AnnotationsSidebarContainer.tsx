@@ -446,7 +446,7 @@ export class AnnotationsSidebarContainer<
                         />
                         <ButtonTooltip
                             tooltipText="Copy All Notes"
-                            position="bottom"
+                            position="bottomSidebar"
                         >
                             <ActionBtn onClick={this.handleCopyAllNotesClick}>
                                 <ActionIcon src={icons.copy} />
@@ -596,7 +596,6 @@ const TopBarActionBtns = styled.div`
     height: 24px;
 
     & * {
-        height: 24px;
         align-items: center;
         display: flex;
         justify-content: center;

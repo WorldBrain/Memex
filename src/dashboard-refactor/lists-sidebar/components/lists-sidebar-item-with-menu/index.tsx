@@ -82,7 +82,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             <>
                 <MenuButton onClick={this.props.onShareClick}>
                     <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={icons.share} />
+                        <Icon heightAndWidth="12px" path={icons.link} />
                     </Margin>
                     Share
                 </MenuButton>

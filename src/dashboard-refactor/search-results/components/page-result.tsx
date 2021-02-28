@@ -22,6 +22,7 @@ import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import AllNotesShareMenu, {
     Props as ShareMenuProps,
 } from 'src/overview/sharing/AllNotesShareMenu'
+import { ButtonTooltip } from 'src/common-ui/components'
 
 export interface Props
     extends PageData,
@@ -112,11 +113,13 @@ export default class PageResultView extends PureComponent<Props> {
         }
 
         return (
-            <RemoveFromListBtn
-                title="Remove from List"
-                onClick={this.props.onRemoveFromListBtnClick}
-            >
-                <Icon heightAndWidth="12px" path={icons.close} />
+            <RemoveFromListBtn onClick={this.props.onRemoveFromListBtnClick}>
+                <ButtonTooltip
+                    tooltipText={'Remove from \nCollection'}
+                    position="left"
+                >
+                    <Icon heightAndWidth="12px" path={icons.close} />
+                </ButtonTooltip>
             </RemoveFromListBtn>
         )
     }
@@ -149,11 +152,9 @@ export default class PageResultView extends PureComponent<Props> {
                 },
                 {
                     key: 'share-page-btn',
-                    image: this.props.isShared
-                        ? icons.shared
-                        : icons.shareEmpty,
+                    image: this.props.isShared ? icons.shared : icons.link,
                     onClick: this.props.onShareBtnClick,
-                    tooltipText: 'Share All Notes',
+                    tooltipText: 'Share Page and Notes',
                 },
                 {
                     key: 'tag-page-btn',
@@ -194,7 +195,7 @@ export default class PageResultView extends PureComponent<Props> {
             {
                 key: 'share-page-btn',
                 isDisabled: true,
-                image: this.props.isShared ? icons.shared : icons.shareEmpty,
+                image: this.props.isShared ? icons.shared : icons.link,
             },
             {
                 key: 'tag-page-btn',

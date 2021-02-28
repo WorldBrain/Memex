@@ -123,7 +123,7 @@ export class MarkdownPreview extends React.Component<Props, State> {
                         {this.showPreviewBtn && (
                             <ButtonTooltip
                                 tooltipText="alt/option + Enter"
-                                position="bottom"
+                                position="bottomSidebar"
                             >
                                 <PreviewBtn onClick={this.togglePreview}>
                                     Preview Markdown

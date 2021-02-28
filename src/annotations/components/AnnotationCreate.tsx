@@ -124,13 +124,13 @@ export class AnnotationCreate extends React.Component<Props, State>
                 <Flex>
                     <ButtonTooltip
                         tooltipText="ctrl/cmd + Enter"
-                        position="bottom"
+                        position="bottomSidebar"
                     >
                         <SaveBtnStyled onClick={this.handleSave}>
                             Add
                         </SaveBtnStyled>
                     </ButtonTooltip>
-                    <ButtonTooltip tooltipText="esc" position="bottom">
+                    <ButtonTooltip tooltipText="esc" position="bottomSidebar">
                         <CancelBtnStyled onClick={this.handleCancel}>
                             Cancel
                         </CancelBtnStyled>
