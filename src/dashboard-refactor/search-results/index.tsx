@@ -149,8 +149,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                             <SingleNoteShareMenu
                                 annotationUrl={noteId}
                                 copyLink={this.props.onNoteLinkCopy}
-                                closeShareMenu={() =>
-                                    interactionProps.onShareBtnClick(dummyEvent)
+                                closeShareMenu={
+                                    interactionProps.onShareBtnClick
                                 }
                                 postShareHook={() =>
                                     interactionProps.updateShareInfo({

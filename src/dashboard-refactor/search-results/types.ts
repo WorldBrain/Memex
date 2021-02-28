@@ -47,7 +47,6 @@ export type NoteInteractionProps = Omit<
     CommonInteractionProps,
     'onNotesBtnClick' | 'onListPickerBtnClick'
 > & {
-    hideShareMenu: () => void
     updateShareInfo: (info: Partial<AnnotationSharingInfo>) => void
     updateTags: PickerUpdateHandler
     onNoteHover: React.MouseEventHandler
@@ -250,12 +249,11 @@ export type Events = UIEvent<{
     // Note result state mutations
     setNoteCopyPasterShown: NoteEventArgs & { isShown: boolean }
     setNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
+    setNoteShareMenuShown: NoteEventArgs & { isShown: boolean }
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
     setNoteHover: NoteEventArgs & { hover: NoteResultHoverState }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
-    showNoteShareMenu: NoteEventArgs
-    hideNoteShareMenu: NoteEventArgs
     updateNoteShareInfo: NoteEventArgs & {
         info: Partial<AnnotationSharingInfo>
     }

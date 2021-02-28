@@ -22,7 +22,7 @@ interface State {
 export interface Props {
     annotationUrl: string
     copyLink: (link: string) => Promise<void>
-    closeShareMenu: () => void
+    closeShareMenu: React.MouseEventHandler
     postShareHook?: () => void
     postUnshareHook?: () => void
 }
@@ -82,7 +82,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     // }
     // }
 
-    private handleUnshare = async () => {
+    private handleUnshare: React.MouseEventHandler = async (e) => {
         if (this.state.unshareState === 'running') {
             return
         }
@@ -93,7 +93,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         })
         this.setState({ unshareState: 'success' })
         this.props.postUnshareHook?.()
-        this.props.closeShareMenu()
+        this.props.closeShareMenu(e)
     }
 
     render() {

@@ -567,6 +567,12 @@ describe('Dashboard search results logic', () => {
                 const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_3.normalizedUrl
 
+                await searchResults.processMutation({
+                    searchResults: {
+                        sharingAccess: { $set: 'sharing-allowed' },
+                    },
+                })
+
                 expect(
                     searchResults.state.searchResults.results[day].pages.byId[
                         pageId
@@ -1510,8 +1516,9 @@ describe('Dashboard search results logic', () => {
                         .isShareMenuShown,
                 ).toEqual(false)
 
-                await searchResults.processEvent('showNoteShareMenu', {
+                await searchResults.processEvent('setNoteShareMenuShown', {
                     noteId,
+                    isShown: true,
                 })
 
                 expect(searchResults.state.modals.showBetaFeature).toEqual(true)
@@ -1521,7 +1528,9 @@ describe('Dashboard search results logic', () => {
                 ).toEqual(false)
             })
 
-            it('should be able to show note share menu', async ({ device }) => {
+            it('should be able to show and hide note share menu', async ({
+                device,
+            }) => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
                 })
@@ -1538,14 +1547,25 @@ describe('Dashboard search results logic', () => {
                         .isShareMenuShown,
                 ).toEqual(false)
 
-                await searchResults.processEvent('showNoteShareMenu', {
+                await searchResults.processEvent('setNoteShareMenuShown', {
                     noteId,
+                    isShown: true,
                 })
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .isShareMenuShown,
                 ).toEqual(true)
+
+                await searchResults.processEvent('setNoteShareMenuShown', {
+                    noteId,
+                    isShown: false,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isShareMenuShown,
+                ).toEqual(false)
             })
 
             it('should be update note share info', async ({ device }) => {

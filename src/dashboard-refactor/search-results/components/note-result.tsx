@@ -115,7 +115,7 @@ export default class NoteResultView extends PureComponent<Props> {
                 <HoverBox>
                     <SingleNoteShareMenu
                         annotationUrl={this.props.url}
-                        closeShareMenu={this.props.hideShareMenu}
+                        closeShareMenu={this.props.onShareBtnClick}
                         copyLink={() => undefined}
                         postShareHook={() =>
                             this.props.updateShareInfo({

@@ -738,9 +738,23 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageShareMenuShown: EventHandler<'setPageShareMenuShown'> = ({
+    setPageShareMenuShown: EventHandler<'setPageShareMenuShown'> = async ({
         event,
+        previousState,
     }) => {
+        if (event.isShown) {
+            if (
+                previousState.searchResults.sharingAccess === 'feature-disabled'
+            ) {
+                this.emitMutation({
+                    modals: { showBetaFeature: { $set: true } },
+                })
+                return
+            }
+
+            await this.showShareOnboardingIfNeeded()
+        }
+
         this.emitMutation({
             searchResults: {
                 results: {
@@ -1245,31 +1259,21 @@ export class DashboardLogic extends UILogic<State, Events> {
         ])
     }
 
-    hideNoteShareMenu: EventHandler<'showNoteShareMenu'> = async ({
-        event,
-    }) => {
-        this.emitMutation({
-            searchResults: {
-                noteData: {
-                    byId: {
-                        [event.noteId]: {
-                            isShareMenuShown: {
-                                $set: false,
-                            },
-                        },
-                    },
-                },
-            },
-        })
-    }
-
-    showNoteShareMenu: EventHandler<'showNoteShareMenu'> = async ({
+    setNoteShareMenuShown: EventHandler<'setNoteShareMenuShown'> = async ({
         event,
         previousState,
     }) => {
-        if (previousState.searchResults.sharingAccess === 'feature-disabled') {
-            this.emitMutation({ modals: { showBetaFeature: { $set: true } } })
-            return
+        if (event.isShown) {
+            if (
+                previousState.searchResults.sharingAccess === 'feature-disabled'
+            ) {
+                this.emitMutation({
+                    modals: { showBetaFeature: { $set: true } },
+                })
+                return
+            }
+
+            await this.showShareOnboardingIfNeeded()
         }
 
         this.emitMutation({
@@ -1278,18 +1282,16 @@ export class DashboardLogic extends UILogic<State, Events> {
                     byId: {
                         [event.noteId]: {
                             isShareMenuShown: {
-                                $set: true,
+                                $set: event.isShown,
                             },
                         },
                     },
                 },
             },
         })
-
-        await this.getLastSharedNoteTimestamp()
     }
 
-    private async getLastSharedNoteTimestamp() {
+    private async showShareOnboardingIfNeeded() {
         const lastShared = await getLastSharedAnnotationTimestamp()
 
         if (lastShared == null) {
