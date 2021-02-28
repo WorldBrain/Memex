@@ -740,7 +740,7 @@ export class DashboardContainer extends StatefulUIElement<
                 <HelpBtn />
                 <DragElement id="dragged-element">
                     {' '}
-                    + Drop into Collection
+                    Drop into Collection
                 </DragElement>
             </Container>
         )
@@ -772,15 +772,15 @@ const Container = styled.div`
 const DragElement = styled.div<{ id: 'dragged-element' }>`
     text-decoration: none;
     display: none;
-    border: solid 2px #5cd9a6;
+    border: solid 2px ${(props) => props.theme.colors.purple};
     border-radius: 4px;
     font-size: 0.8rem;
     max-height: 50px;
     max-width: 330px;
     text-align: center;
     font-weight: 500;
-    background: #5cd9a6;
-    color: #fff;
+    background: #fff;
+    color: ${(props) => props.theme.colors.purple};
     top: -90vh;
     opacity: 1;
     padding: 5px 10px;
