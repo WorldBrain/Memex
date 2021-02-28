@@ -17,6 +17,7 @@ import {
 } from 'src/dashboard-refactor/constants'
 import { ListData } from './lists-sidebar/types'
 import { updatePickerValues } from './util'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -117,6 +118,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isSidebarPeeking: false,
                 isSidebarLocked: false,
                 hasFeedActivity: false,
+                inboxUnreadCount: 0,
                 searchQuery: '',
                 listData: {},
                 followedLists: {
@@ -140,6 +142,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.hydrateStateFromLocalStorage(),
                 this.runSearch(previousState),
                 this.getFeedActivityStatus(),
+                this.getInboxUnreadCount(),
                 this.getSharingAccess(),
                 this.loadLocalLists(),
             ]),
@@ -181,6 +184,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             searchResults: {
                 sharingAccess: {
                     $set: isAllowed ? 'sharing-allowed' : 'feature-disabled',
+                },
+            },
+        })
+    }
+
+    private async getInboxUnreadCount() {
+        this.emitMutation({
+            listsSidebar: {
+                inboxUnreadCount: {
+                    $set: await this.options.listsBG.getInboxUnreadCount(),
                 },
             },
         })
@@ -610,7 +623,15 @@ export class DashboardLogic extends UILogic<State, Events> {
             id: listId,
             url: event.pageId,
         })
-        this.emitMutation({ searchResults: mutation })
+        this.emitMutation({
+            searchResults: mutation,
+            listsSidebar:
+                listId === SPECIAL_LIST_IDS.INBOX
+                    ? {
+                          inboxUnreadCount: { $apply: (count) => count - 1 },
+                      }
+                    : {},
+        })
     }
 
     cancelPageDelete: EventHandler<'cancelPageDelete'> = async ({}) => {

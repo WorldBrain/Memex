@@ -32,6 +32,7 @@ const template: ListsSidebarProps = {
     onListSelection: (listId) => {
         selectedListId = listId
     },
+    inboxUnreadCount: 2,
     selectedListId,
     searchBarProps: {
         ...listsSidebarSearchBarProps.default,

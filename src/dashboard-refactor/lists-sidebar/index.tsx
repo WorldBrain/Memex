@@ -70,6 +70,7 @@ export interface ListsSidebarProps {
     isAllSavedSelected: boolean
     onAllSavedSelection: () => void
     hasFeedActivity?: boolean
+    inboxUnreadCount: number
     selectedListId?: number
     lockedState: SidebarLockedState
     peekState: SidebarPeekState
@@ -132,6 +133,8 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     {
                                         name: 'Inbox',
                                         listId: SPECIAL_LIST_IDS.INBOX,
+                                        newItemsCount: this.props
+                                            .inboxUnreadCount,
                                         selectedState: {
                                             isSelected:
                                                 this.props.selectedListId ===
