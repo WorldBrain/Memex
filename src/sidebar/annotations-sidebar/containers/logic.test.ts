@@ -32,6 +32,8 @@ const setupLogicHelper = async ({
 
     const annotationsCache = createAnnotationsCache(
         {
+            contentSharing:
+                device.backgroundModules.contentSharing.remoteFunctions,
             tags: device.backgroundModules.tags.remoteFunctions,
             annotations: annotationsBG,
         },

@@ -66,6 +66,7 @@ export class DashboardContainer extends StatefulUIElement<
         super(props, new DashboardLogic(props))
 
         this.annotationsCache = createAnnotationsCache({
+            contentSharing: props.contentShareBG,
             annotations: props.annotationsBG,
             tags: props.tagsBG,
         })
