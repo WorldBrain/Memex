@@ -128,16 +128,19 @@ export default class AnnotationEditable extends React.Component<Props> {
                     {footerDeps.onGoToAnnotation && (
                         <ButtonTooltip
                             tooltipText="Open in Page"
-                            position="top"
+                            position="bottom"
                         >
-                            <HighlightAction>
+                            <HighlightAction right="2px">
                                 <GoToHighlightIcon
                                     onClick={footerDeps.onGoToAnnotation}
                                 />
                             </HighlightAction>
                         </ButtonTooltip>
                     )}
-                    <ButtonTooltip tooltipText="Add/Edit Note" position="top">
+                    <ButtonTooltip
+                        tooltipText="Add/Edit Note"
+                        position="bottom"
+                    >
                         <HighlightAction>
                             <AddNoteIcon onClick={footerDeps.onEditIconClick} />
                         </HighlightAction>
@@ -147,11 +150,11 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <HighlightStyled onMouseEnter={this.props.onHighlightHover}>
+                <ActionBox>{actionsBox}</ActionBox>
                 <TextTruncated text={this.props.body}>
                     {({ text }) => (
                         <HighlightTextBox>
                             <HighlightText>{text}</HighlightText>
-                            {actionsBox}
                         </HighlightTextBox>
                     )}
                 </TextTruncated>
@@ -184,15 +187,19 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <CommentBox onMouseEnter={this.props.onNoteHover}>
+                <EditNoteIconBox tooltipText="Edit Note" position="bottom">
+                    <ButtonTooltip tooltipText="Edit Note" position="bottom">
+                        <EditNoteIcon
+                            onClick={
+                                annotationFooterDependencies.onEditIconClick
+                            }
+                        />
+                    </ButtonTooltip>
+                </EditNoteIconBox>
                 <TextTruncated text={comment}>
                     {({ text }) => (
                         <NoteTextBox>
                             <NoteText>{text}</NoteText>
-                            <EditNoteIcon
-                                onClick={
-                                    annotationFooterDependencies.onEditIconClick
-                                }
-                            />
                         </NoteTextBox>
                     )}
                 </TextTruncated>
@@ -377,8 +384,21 @@ const CopyPasterWrapper = styled.div`
     left: 70px;
 `
 
-const EditNoteIcon = styled.button`
+const EditNoteIconBox = styled.div`
     display: none;
+    position: relative;
+    justify-content: flex-end;
+    top: 0px;
+    right: 0px;
+    float: right;
+    z-index: 1;
+    border: none;
+    outline: none;
+    float: right;
+`
+
+const EditNoteIcon = styled.div`
+    display: flex;
     border: none;
     width: 20px;
     height: 20px;
@@ -389,6 +409,15 @@ const EditNoteIcon = styled.button`
     mask-repeat: no-repeat;
     mask-size: 16px;
     cursor: pointer;
+`
+
+const HighlightActionsBox = styled.div`
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 50px;
+    display: flex;
+    justify-content: flex-end;
 `
 
 const NoteTextBox = styled.div`
@@ -410,10 +439,6 @@ const NoteTextBox = styled.div`
     & *:last-child {
         margin-bottom: 0px;
     }
-
-    &: hover ${EditNoteIcon} {
-        display: flex;
-    }
 `
 
 const NoteText = styled(Markdown)`
@@ -421,16 +446,12 @@ const NoteText = styled(Markdown)`
     width: 100%;
 `
 
-const HighlightActionsBox = styled.div`
-    position: absolute;
-    right: 5px;
-    top: 10px;
-    width: 50px;
-    display: flex;
-    justify-content: space-between;
+const ActionBox = styled.div`
+    position: relative;
+    z-index: 1;
 `
 
-const HighlightAction = styled.div`
+const HighlightAction = styled(Margin)`
     display: flex;
     background-color: white;
     border-radius: 5px;
@@ -486,6 +507,32 @@ const HighlightStyled = styled.div`
     line-height: 20px;
     text-align: left;
     line-break: normal;
+`
+
+const CommentBox = styled.div`
+    color: rgb(54, 54, 46);
+    font-size: 14px;
+    font-weight: 400;
+    overflow: hidden;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    margin: 0px;
+    padding: 10px 15px 10px 15px;
+    line-height: 1.4;
+    text-align: left;
+    border-top: 1px solid #e0e0e0;
+
+    &: hover ${EditNoteIconBox} {
+        display: flex;
+    }
+
+    ${({ theme }: { theme: SidebarAnnotationTheme }) =>
+        !theme.hasHighlight &&
+        `
+        border-top: none;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    `}
 `
 
 const DefaultFooterStyled = styled.div``
@@ -568,26 +615,4 @@ const ActionBtnStyled = styled.button`
     &:focus {
         background-color: #79797945;
     }
-`
-
-const CommentBox = styled.div`
-    color: rgb(54, 54, 46);
-    font-size: 14px;
-    font-weight: 400;
-    overflow: hidden;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    margin: 0px;
-    padding: 10px 15px 10px 15px;
-    line-height: 1.4;
-    text-align: left;
-    border-top: 1px solid #e0e0e0;
-
-    ${({ theme }: { theme: SidebarAnnotationTheme }) =>
-        !theme.hasHighlight &&
-        `
-        border-top: none;
-        border-top-left-radius: 5px;
-        border-top-right-radius: 5px;
-    `}
 `
