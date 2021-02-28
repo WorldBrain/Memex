@@ -399,7 +399,9 @@ const NoteTextBox = styled.div`
     align-items: center;
     overflow-x: hidden;
     line-height: 22px;
-    line-break: anywhere;
+    line-break: normal;
+    word-break: break-word;
+    hyphens: auto;
 
     & *:first-child {
         margin-top: 0px;
