@@ -42,6 +42,7 @@ const template: ListsSidebarProps = {
         listsSidebarGroupProps.myCollectionsExpanded,
         listsSidebarGroupProps.followedCollectionsExpanded,
     ],
+    initDropReceivingState: () => undefined,
 }
 
 export const listsSidebarStoryProps: {

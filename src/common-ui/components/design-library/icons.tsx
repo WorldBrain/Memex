@@ -27,6 +27,7 @@ export const collectionsFull = browser.extension.getURL(
 )
 export const triangle = browser.extension.getURL('/img/triangleSmall.svg')
 export const plus = browser.extension.getURL('/img/plus.svg')
+export const dots = browser.extension.getURL('/img/3dots.svg')
 export const trash = browser.extension.getURL('/img/trash.svg')
 export const goTo = browser.extension.getURL('/img/open.svg')
 export const copy = browser.extension.getURL('/img/copy.svg')

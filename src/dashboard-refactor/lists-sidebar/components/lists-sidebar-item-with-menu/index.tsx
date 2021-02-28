@@ -46,9 +46,20 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         this.props.onMoreActionClick(this.props.listId)
     }
 
+    private handleDragEnter: React.DragEventHandler = (e) => {
+        e.preventDefault()
+        // Needed to push this op back on the event queue, so it fires after the previous
+        //  list item's `onDropLeave` event
+        setTimeout(() => this.props.dropReceivingState?.onDragEnter(), 0)
+    }
+
     private handleDrop: React.DragEventHandler = (e) => {
         e.preventDefault()
-        this.props.dropReceivingState?.onDrop(this.props.listId, e.dataTransfer)
+        if (!this.props.dropReceivingState?.canReceiveDroppedItems) {
+            return
+        }
+
+        this.props.dropReceivingState?.onDrop(e.dataTransfer)
     }
 
     private renderMenuBtns() {
@@ -113,12 +124,15 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             )
         }
 
-        if (dropReceivingState?.isDraggedOver) {
-            return <Icon heightAndWidth="12px" path="/img/plus.svg" />
+        if (
+            dropReceivingState?.canReceiveDroppedItems &&
+            dropReceivingState?.isDraggedOver
+        ) {
+            return <Icon heightAndWidth="12px" path={icons.plus} />
         }
 
         if (onMoreActionClick) {
-            return <Icon heightAndWidth="12px" path="/img/3dots.svg" />
+            return <Icon heightAndWidth="12px" path={icons.dots} />
         }
     }
 
@@ -150,15 +164,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
     }
 
     render() {
-        const {
-            selectedState,
-            dropReceivingState,
-            onMoreActionClick,
-            isMenuDisplayed,
-            isEditing,
-            listId,
-            ...props
-        } = this.props
+        const { dropReceivingState, isMenuDisplayed, isEditing } = this.props
 
         if (isEditing) {
             return <ListsSidebarEditableItem {...this.props.editableProps} />
@@ -167,17 +173,21 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         return (
             <Container>
                 <SidebarItem
-                    {...props}
+                    {...this.props}
                     isMenuDisplayed={isMenuDisplayed}
-                    onDragEnter={dropReceivingState?.onDragEnter}
                     onDragLeave={dropReceivingState?.onDragLeave}
+                    onDragEnter={this.handleDragEnter}
+                    onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
                     onDrop={this.handleDrop}
                 >
                     <TitleBox onClick={this.handleSelection}>
                         {' '}
                         {this.renderTitle()}
                     </TitleBox>
-                    <IconBox onClick={this.handleMoreActionClick} {...props}>
+                    <IconBox
+                        onClick={this.handleMoreActionClick}
+                        {...this.props}
+                    >
                         {this.renderIcon()}
                     </IconBox>
                 </SidebarItem>
@@ -211,7 +221,11 @@ const MenuContainer = styled.div`
 
 const IconBox = styled.div<Props>`
     display: ${(props) =>
-        !props.hasActivity && !props.newItemsCount ? 'none' : 'flex'};
+        props.hasActivity ||
+        props.newItemsCount ||
+        props.dropReceivingState?.isDraggedOver
+            ? 'flex'
+            : 'none'};
     height: 100%;
     align-items: center;
     padding-right: 10px;
@@ -232,17 +246,18 @@ const SidebarItem = styled.div<Props>`
         background-color: ${colors.onHover};
     }
 
-    ${(props) =>
+    ${({ isMenuDisplayed, dropReceivingState }) =>
         css`
-            background-color: ${props.isMenuDisplayed
+            background-color: ${isMenuDisplayed ||
+            (dropReceivingState?.canReceiveDroppedItems &&
+                dropReceivingState?.isDraggedOver)
                 ? `${colors.onHover}`
                 : `transparent`};
         `};
 
-
     &:hover ${IconBox} {
-            display: flex;
-      }
+        display: flex;
+    }
 
     ${({ selectedState }: Props) =>
         selectedState?.isSelected &&
@@ -260,7 +275,7 @@ const SidebarItem = styled.div<Props>`
         !dropReceivingState?.isDraggedOver
             ? `pointer`
             : dropReceivingState?.canReceiveDroppedItems
-            ? `default`
+            ? `pointer`
             : `not-allowed`};
 `
 

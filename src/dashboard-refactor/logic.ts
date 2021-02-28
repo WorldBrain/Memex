@@ -1753,7 +1753,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     setDragOverListId: EventHandler<'setDragOverListId'> = async ({
         event,
     }) => {
-        await this.emitMutation({
+        this.emitMutation({
             listsSidebar: { dragOverListId: { $set: event.listId } },
         })
     }
@@ -1775,7 +1775,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             url: fullPageUrl,
         })
 
-        await this.emitMutation({
+        this.emitMutation({
             listsSidebar: { dragOverListId: { $set: undefined } },
         })
     }

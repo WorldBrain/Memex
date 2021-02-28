@@ -26,6 +26,7 @@ import {
 } from 'src/annotations/annotations-cache'
 import { updatePickerValues } from './util'
 import Margin from './components/Margin'
+import analytics from 'src/analytics'
 
 const __unimplemented = () => undefined
 
@@ -38,6 +39,7 @@ export class DashboardContainer extends StatefulUIElement<
 > {
     static defaultProps: Partial<Props> = {
         document,
+        analytics,
         localStorage: browser.storage.local,
         activityIndicatorBG: runInBackground(),
         contentShareBG: runInBackground(),
@@ -95,18 +97,6 @@ export class DashboardContainer extends StatefulUIElement<
             this.processEvent('setDeletingListId', { listId: list.id }),
         onShareClick: () =>
             this.processEvent('setShareListId', { listId: list.id }),
-        dropReceivingState: {
-            onDragEnter: (listId) =>
-                this.processEvent('setDragOverListId', { listId }),
-            onDragLeave: () =>
-                this.processEvent('setDragOverListId', { listId: undefined }),
-            onDrop: (listId, dataTransfer) =>
-                this.processEvent('dropPageOnListItem', {
-                    listId,
-                    dataTransfer,
-                }),
-            isDraggedOver: list.id === this.state.listsSidebar.dragOverListId,
-        },
     })
 
     private renderFiltersBar() {
@@ -350,6 +340,21 @@ export class DashboardContainer extends StatefulUIElement<
                     //     ),
                     // },
                 ]}
+                initDropReceivingState={(listId) => ({
+                    onDragEnter: () =>
+                        this.processEvent('setDragOverListId', { listId }),
+                    onDragLeave: () =>
+                        this.processEvent('setDragOverListId', {
+                            listId: undefined,
+                        }),
+                    onDrop: (dataTransfer: DataTransfer) =>
+                        this.processEvent('dropPageOnListItem', {
+                            listId,
+                            dataTransfer,
+                        }),
+                    isDraggedOver:
+                        listId === this.state.listsSidebar.dragOverListId,
+                })}
             />
         )
     }

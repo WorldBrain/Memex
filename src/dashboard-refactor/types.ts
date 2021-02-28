@@ -58,8 +58,8 @@ export interface DropReceivingState {
     isDraggedOver?: boolean
     canReceiveDroppedItems?: boolean
     triggerSuccessfulDropAnimation?: boolean
-    onDrop(listId: number, dataTransfer: DataTransfer): void
-    onDragEnter(listId: number): void
+    onDrop(dataTransfer: DataTransfer): void
+    onDragEnter(): void
     onDragLeave(): void
 }
 
