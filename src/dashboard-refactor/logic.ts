@@ -135,15 +135,15 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        await loadInitial(this, async () => {
-            await this.hydrateStateFromLocalStorage()
-            await this.getFeedActivityStatus()
-            await this.getSharingAccess()
-            const listsP = this.loadLocalLists()
-            const searchP = this.runSearch(previousState)
-
-            await Promise.all([listsP, searchP])
-        })
+        await loadInitial(this, () =>
+            Promise.all([
+                this.hydrateStateFromLocalStorage(),
+                this.runSearch(previousState),
+                this.getFeedActivityStatus(),
+                this.getSharingAccess(),
+                this.loadLocalLists(),
+            ]),
+        )
     }
 
     /* START - Misc helper methods */
