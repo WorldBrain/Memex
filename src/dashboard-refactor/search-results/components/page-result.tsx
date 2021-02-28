@@ -34,6 +34,13 @@ export interface Props
 }
 
 export default class PageResultView extends PureComponent<Props> {
+    get domain(): string {
+        return (
+            this.props.fullUrl.split('/')[2]?.replace('www.', '') ??
+            this.props.normalizedUrl
+        )
+    }
+
     private get hasTags(): boolean {
         return this.props.tags.length > 0
     }
@@ -208,12 +215,6 @@ export default class PageResultView extends PureComponent<Props> {
         ]
     }
 
-    getDomain() {
-        let domain = this.props.fullUrl.split('/')
-
-        return domain[2].replace('www.', '')
-    }
-
     render() {
         return (
             <ItemBox
@@ -236,7 +237,7 @@ export default class PageResultView extends PureComponent<Props> {
                                     <FavIconImg src={this.props.favIconURI} />
                                 </FavIconBox>
                             )}
-                            <PageUrl>{this.getDomain()}</PageUrl>
+                            <PageUrl>{this.domain}</PageUrl>
                         </ResultContent>
                         <PageTitle top="10px" bottom="5px">
                             {this.props.fullTitle}
