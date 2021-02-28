@@ -18,7 +18,7 @@ export interface Props {
     // checkboxTitleCopy?: React.ReactNode
     // checkboxSubtitleCopy?: React.ReactNode
     getLink: () => Promise<string>
-    onClickOutside?: () => void
+    onClickOutside?: React.MouseEventHandler
     /** This logic should include handling derendering this share menu view. */
     // onUnshareClick?: () => Promise<void>
     // onShareAllClick: () => Promise<void>
@@ -56,12 +56,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     componentWillUnmount() {
         if (this.copyTimeout) {
             clearTimeout(this.copyTimeout)
-        }
-    }
-
-    handleClickOutside = () => {
-        if (this.props.onClickOutside) {
-            this.props.onClickOutside()
         }
     }
 
@@ -159,7 +153,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
     render() {
         return (
-            <ClickAway onClickAway={this.handleClickOutside}>
+            <ClickAway onClickAway={this.props.onClickOutside}>
                 <Menu>
                     <TopArea>
                         <SectionTitle>{this.props.linkTitleCopy}</SectionTitle>

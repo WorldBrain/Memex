@@ -97,6 +97,7 @@ export const getInitialPageResultState = (
     notesType: 'user',
     areNotesShown: false,
     isTagPickerShown: false,
+    isShareMenuShown: false,
     isCopyPasterShown: false,
     isListPickerShown: false,
     sortingFn: (a, b) => 1,

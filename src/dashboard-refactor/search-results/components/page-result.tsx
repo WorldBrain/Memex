@@ -19,6 +19,9 @@ import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
+import AllNotesShareMenu, {
+    Props as ShareMenuProps,
+} from 'src/overview/sharing/AllNotesShareMenu'
 
 export interface Props
     extends PageData,
@@ -27,7 +30,7 @@ export interface Props
         PagePickerProps {
     onTagClick?: (tag: string) => void
     isSearchFilteredByList: boolean
-    isShared?: boolean
+    shareMenuProps: ShareMenuProps
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -82,6 +85,14 @@ export default class PageResultView extends PureComponent<Props> {
             )
         }
 
+        if (this.props.isShareMenuShown) {
+            return (
+                <HoverBox right="0" withRelativeContainer>
+                    <AllNotesShareMenu {...this.props.shareMenuProps} />
+                </HoverBox>
+            )
+        }
+
         return null
     }
 
@@ -129,14 +140,14 @@ export default class PageResultView extends PureComponent<Props> {
                     onClick: this.props.onCopyPasterBtnClick,
                     tooltipText: 'Copy Page',
                 },
-                // {
-                //     key: 'share-page-btn',
-                //     image: this.props.isShared
-                //         ? icons.shared
-                //         : icons.shareEmpty,
-                //     onClick: this.props.onShareBtnClick,
-                //     tooltipText: 'Share Page',
-                // },
+                {
+                    key: 'share-page-btn',
+                    image: this.props.isShared
+                        ? icons.shared
+                        : icons.shareEmpty,
+                    onClick: this.props.onShareBtnClick,
+                    tooltipText: 'Share All Notes',
+                },
                 {
                     key: 'tag-page-btn',
                     image: this.hasTags ? icons.tagFull : icons.tagEmpty,
@@ -172,6 +183,11 @@ export default class PageResultView extends PureComponent<Props> {
                 key: 'copy-paste-page-btn',
                 isDisabled: true,
                 image: icons.copy,
+            },
+            {
+                key: 'share-page-btn',
+                isDisabled: true,
+                image: this.props.isShared ? icons.shared : icons.shareEmpty,
             },
             {
                 key: 'tag-page-btn',

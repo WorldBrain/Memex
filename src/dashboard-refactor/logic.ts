@@ -738,6 +738,26 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setPageShareMenuShown: EventHandler<'setPageShareMenuShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    isShareMenuShown: { $set: event.isShown },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
     setPageNotesShown: EventHandler<'setPageNotesShown'> = ({ event }) => {
         this.emitMutation({
             searchResults: {
@@ -1215,15 +1235,14 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    copySharedNoteLink: EventHandler<'copySharedNoteLink'> = async ({
-        event: { link },
-    }) => {
-        this.options.analytics.trackEvent({
-            category: 'ContentSharing',
-            action: 'copyNoteLink',
-        })
-
-        await this.options.copyToClipboard(link)
+    copyShareLink: EventHandler<'copyShareLink'> = async ({ event }) => {
+        await Promise.all([
+            this.options.copyToClipboard(event.link),
+            this.options.analytics.trackEvent({
+                category: 'ContentSharing',
+                action: event.analyticsAction,
+            }),
+        ])
     }
 
     hideNoteShareMenu: EventHandler<'showNoteShareMenu'> = async ({

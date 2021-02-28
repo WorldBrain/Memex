@@ -48,7 +48,6 @@ export type NoteInteractionProps = Omit<
     'onNotesBtnClick' | 'onListPickerBtnClick'
 > & {
     hideShareMenu: () => void
-    copySharedLink: (link: string) => Promise<void>
     updateShareInfo: (info: Partial<AnnotationSharingInfo>) => void
     updateTags: PickerUpdateHandler
     onNoteHover: React.MouseEventHandler
@@ -124,6 +123,7 @@ export type PageData = Pick<
     lists: string[]
     displayTime: number
     hasNotes: boolean
+    isShared?: boolean
 }
 
 export type ResultHoverState = 'main-content' | 'footer' | 'tags' | null
@@ -143,6 +143,7 @@ export interface PageResult {
     id: string
     notesType: NotesType
     areNotesShown: boolean
+    isShareMenuShown: boolean
     isTagPickerShown: boolean
     isListPickerShown: boolean
     isCopyPasterShown: boolean
@@ -227,6 +228,7 @@ export type Events = UIEvent<{
     setPageCopyPasterShown: PageEventArgs & { isShown: boolean }
     setPageListPickerShown: PageEventArgs & { isShown: boolean }
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }
+    setPageShareMenuShown: PageEventArgs & { isShown: boolean }
     setPageNotesShown: PageEventArgs & { areShown: boolean }
     setPageNotesSort: PageEventArgs & { sortingFn: AnnotationsSorter }
     setPageNotesType: PageEventArgs & { noteType: NotesType }
@@ -254,11 +256,11 @@ export type Events = UIEvent<{
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
     showNoteShareMenu: NoteEventArgs
     hideNoteShareMenu: NoteEventArgs
-    copySharedNoteLink: NoteEventArgs & { link: string }
     updateNoteShareInfo: NoteEventArgs & {
         info: Partial<AnnotationSharingInfo>
     }
-    goToHighlightInNewTab: NoteEventArgs // NOTE: Does not mutate state
+    /** NOTE: Does not mutate state */
+    goToHighlightInNewTab: NoteEventArgs
     confirmNoteDelete: null
     cancelNoteDelete: null
 
@@ -271,4 +273,9 @@ export type Events = UIEvent<{
     setPageData: { pages: PageData[] }
     setPageSearchResult: { result: StandardSearchResponse }
     setAnnotationSearchResult: { result: AnnotationsSearchResponse }
+    /** NOTE: Does not mutate state */
+    copyShareLink: {
+        link: string
+        analyticsAction: 'copyNoteLink' | 'copyPageLink'
+    }
 }>

@@ -27,6 +27,7 @@ import {
 import { updatePickerValues } from './util'
 import Margin from './components/Margin'
 import analytics from 'src/analytics'
+import { copyToClipboard } from 'src/annotations/content_script/utils'
 
 const __unimplemented = () => undefined
 
@@ -40,6 +41,7 @@ export class DashboardContainer extends StatefulUIElement<
     static defaultProps: Partial<Props> = {
         document,
         analytics,
+        copyToClipboard,
         localStorage: browser.storage.local,
         activityIndicatorBG: runInBackground(),
         contentShareBG: runInBackground(),
@@ -396,6 +398,18 @@ export class DashboardContainer extends StatefulUIElement<
                 onPagesSearchSwitch={() =>
                     this.processEvent('setSearchType', { searchType: 'pages' })
                 }
+                onPageLinkCopy={(link) =>
+                    this.processEvent('copyShareLink', {
+                        link,
+                        analyticsAction: 'copyPageLink',
+                    })
+                }
+                onNoteLinkCopy={(link) =>
+                    this.processEvent('copyShareLink', {
+                        link,
+                        analyticsAction: 'copyNoteLink',
+                    })
+                }
                 pageInteractionProps={{
                     onNotesBtnClick: (day, pageId) => (e) => {
                         if (e.shiftKey) {
@@ -442,7 +456,14 @@ export class DashboardContainer extends StatefulUIElement<
                             day,
                             pageId,
                         }),
-                    onShareBtnClick: (day, pageId) => () => null, // TODO: figure out share btn
+                    onShareBtnClick: (day, pageId) => () =>
+                        this.processEvent('setPageShareMenuShown', {
+                            day,
+                            pageId,
+                            isShown: !searchResults.results[day].pages.byId[
+                                pageId
+                            ].isShareMenuShown,
+                        }),
                     onMainContentHover: (day, pageId) => () =>
                         this.processEvent('setPageHover', {
                             day,
@@ -578,11 +599,6 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('updateNoteShareInfo', {
                             noteId,
                             info,
-                        }),
-                    copySharedLink: (noteId) => (link) =>
-                        this.processEvent('copySharedNoteLink', {
-                            noteId,
-                            link,
                         }),
                     onMainContentHover: (noteId) => () =>
                         this.processEvent('setNoteHover', {

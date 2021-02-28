@@ -27,8 +27,8 @@ interface State {
 
 export interface Props {
     normalizedPageUrl: string
+    closeShareMenu: React.MouseEventHandler
     copyLink: (link: string) => Promise<void>
-    closeShareMenu: () => void
     postShareAllHook?: () => void
     postUnshareAllHook?: () => void
 }
@@ -126,7 +126,6 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                 // })
             },
         )
-        console.log('test')
         this.props.postUnshareAllHook?.()
     }
 

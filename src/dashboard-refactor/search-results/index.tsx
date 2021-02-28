@@ -70,6 +70,8 @@ export type Props = RootState &
             pageId: string,
         ): (sorter: AnnotationsSorter) => void
         paginateSearch(): Promise<void>
+        onPageLinkCopy(link: string): Promise<void>
+        onNoteLinkCopy(link: string): Promise<void>
     }
 
 export default class SearchResultsContainer extends PureComponent<Props> {
@@ -146,10 +148,10 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         <HoverBox right="0" withRelativeContainer>
                             <SingleNoteShareMenu
                                 annotationUrl={noteId}
+                                copyLink={this.props.onNoteLinkCopy}
                                 closeShareMenu={() =>
                                     interactionProps.onShareBtnClick(dummyEvent)
                                 }
-                                copyLink={interactionProps.copySharedLink}
                                 postShareHook={() =>
                                     interactionProps.updateShareInfo({
                                         status: 'shared',
@@ -272,6 +274,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     key={pageId + day.toString()}
                     isSearchFilteredByList={this.props.isSearchFilteredByList}
                     onTagClick={this.props.filterSearchByTag}
+                    shareMenuProps={{
+                        normalizedPageUrl: page.normalizedUrl,
+                        closeShareMenu: interactionProps.onShareBtnClick,
+                        copyLink: this.props.onPageLinkCopy,
+                    }}
                     {...interactionProps}
                     {...pickerProps}
                     {...page}

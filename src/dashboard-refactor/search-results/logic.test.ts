@@ -14,6 +14,50 @@ describe('Dashboard search results logic', () => {
         includePostSyncProcessor: true,
     })
 
+    it('should be able to copy note links', async ({ device }) => {
+        let clipboard = ''
+        const { searchResults, analytics } = await setupTest(device, {
+            copyToClipboard: async (text) => {
+                clipboard = text
+                return true
+            },
+        })
+        const link = 'test'
+
+        expect(clipboard).toEqual('')
+        expect(analytics.popNew()).toEqual([])
+
+        await searchResults.processEvent('copyShareLink', {
+            link,
+            analyticsAction: 'copyPageLink',
+        })
+
+        expect(clipboard).toEqual(link)
+        expect(analytics.popNew()).toEqual([
+            {
+                eventArgs: {
+                    category: 'ContentSharing',
+                    action: 'copyPageLink',
+                },
+            },
+        ])
+
+        await searchResults.processEvent('copyShareLink', {
+            link,
+            analyticsAction: 'copyNoteLink',
+        })
+
+        expect(clipboard).toEqual(link)
+        expect(analytics.popNew()).toEqual([
+            {
+                eventArgs: {
+                    category: 'ContentSharing',
+                    action: 'copyNoteLink',
+                },
+            },
+        ])
+    })
+
     describe('root state mutations', () => {
         it('should be able to set page search type', async ({ device }) => {
             const { searchResults } = await setupTest(device, {
@@ -511,6 +555,42 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.results[day].pages.byId[
                         pageId
                     ].isListPickerShown,
+                ).toBe(false)
+            })
+
+            it('should be able to show and hide page share menu', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(),
+                })
+                const day = PAGE_SEARCH_DUMMY_DAY
+                const pageId = DATA.PAGE_3.normalizedUrl
+
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isShareMenuShown,
+                ).toBe(false)
+                await searchResults.processEvent('setPageShareMenuShown', {
+                    day,
+                    pageId,
+                    isShown: true,
+                })
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isShareMenuShown,
+                ).toBe(true)
+                await searchResults.processEvent('setPageShareMenuShown', {
+                    day,
+                    pageId,
+                    isShown: false,
+                })
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isShareMenuShown,
                 ).toBe(false)
             })
 
@@ -1510,37 +1590,6 @@ describe('Dashboard search results logic', () => {
                     status: 'unshared',
                     taskState: 'error',
                 })
-            })
-
-            it('should be able to copy note links', async ({ device }) => {
-                let clipboard = ''
-                const { searchResults, analytics } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                    copyToClipboard: async (text) => {
-                        clipboard = text
-                        return true
-                    },
-                })
-                const noteId = DATA.NOTE_2.url
-                const link = 'test'
-
-                expect(clipboard).toEqual('')
-                expect(analytics.popNew()).toEqual([])
-
-                await searchResults.processEvent('copySharedNoteLink', {
-                    noteId,
-                    link,
-                })
-
-                expect(clipboard).toEqual(link)
-                expect(analytics.popNew()).toEqual([
-                    {
-                        eventArgs: {
-                            category: 'ContentSharing',
-                            action: 'copyNoteLink',
-                        },
-                    },
-                ])
             })
 
             it('should be able to set note edit comment value state', async ({
