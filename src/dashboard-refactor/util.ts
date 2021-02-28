@@ -1,3 +1,5 @@
+import { RootState } from './types'
+
 export const updatePickerValues = (event: {
     added?: string
     deleted?: string
@@ -11,3 +13,16 @@ export const updatePickerValues = (event: {
 
     return prevState
 }
+
+export const areSearchFiltersEmpty = ({
+    listsSidebar,
+    searchFilters,
+}: RootState): boolean =>
+    !listsSidebar.selectedListId &&
+    !searchFilters.dateFrom &&
+    !searchFilters.dateTo &&
+    !searchFilters.domainsExcluded.length &&
+    !searchFilters.domainsIncluded.length &&
+    !searchFilters.tagsExcluded.length &&
+    !searchFilters.tagsIncluded.length &&
+    !searchFilters.searchQuery.length

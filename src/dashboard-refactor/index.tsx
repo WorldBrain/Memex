@@ -24,7 +24,7 @@ import {
     AnnotationsCacheInterface,
     createAnnotationsCache,
 } from 'src/annotations/annotations-cache'
-import { updatePickerValues } from './util'
+import { updatePickerValues, areSearchFiltersEmpty } from './util'
 import Margin from './components/Margin'
 import analytics from 'src/analytics'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
@@ -273,6 +273,10 @@ export class DashboardContainer extends StatefulUIElement<
                 lockedState={lockedState}
                 openFeedUrl={this.props.openFeedUrl}
                 hasFeedActivity={this.state.listsSidebar.hasFeedActivity}
+                onAllSavedSelection={() =>
+                    this.processEvent('resetFilters', null)
+                }
+                isAllSavedSelected={areSearchFiltersEmpty(this.state)}
                 onListSelection={(listId) =>
                     this.processEvent('setSelectedListId', { listId })
                 }

@@ -43,6 +43,8 @@ const template: ListsSidebarProps = {
         listsSidebarGroupProps.followedCollectionsExpanded,
     ],
     initDropReceivingState: () => undefined,
+    isAllSavedSelected: true,
+    onAllSavedSelection: () => undefined,
 }
 
 export const listsSidebarStoryProps: {

@@ -1633,6 +1633,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { $set: this.getInitialState().searchFilters },
+            listsSidebar: { selectedListId: { $set: undefined } },
         })
     }
     /* END - search filter event handlers */

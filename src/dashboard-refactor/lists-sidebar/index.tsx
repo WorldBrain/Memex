@@ -67,6 +67,8 @@ const PeekTrigger = styled.div`
 export interface ListsSidebarProps {
     openFeedUrl: () => void
     onListSelection: (id: number) => void
+    isAllSavedSelected: boolean
+    onAllSavedSelection: () => void
     hasFeedActivity?: boolean
     selectedListId?: number
     lockedState: SidebarLockedState
@@ -96,7 +98,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         const {
             lockedState: { isSidebarLocked },
             peekState: { isSidebarPeeking },
-            initDropReceivingState,
             searchBarProps,
             listsGroups,
         } = this.props
@@ -122,11 +123,10 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         name: 'All Saved',
                                         listId: -1,
                                         selectedState: {
-                                            isSelected:
-                                                this.props.selectedListId ===
-                                                -1,
+                                            isSelected: this.props
+                                                .isAllSavedSelected,
                                             onSelection: this.props
-                                                .onListSelection,
+                                                .onAllSavedSelection,
                                         },
                                     },
                                     {
