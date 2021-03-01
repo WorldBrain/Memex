@@ -185,11 +185,15 @@ describe('Dashboard search filters logic', () => {
             overrideSearchTrigger: true,
         })
         const dateValue = 1
+        const testQuery = 'test'
 
         expect(searchResults.state.searchFilters.dateFrom).toBeUndefined()
         expect(searchResults.logic['searchTriggeredCount']).toBe(0)
 
-        await searchResults.processEvent('setDateFrom', { value: dateValue })
+        await searchResults.processEvent('setDateFrom', {
+            value: dateValue,
+            searchQuery: testQuery,
+        })
 
         expect(searchResults.state.searchFilters.dateFrom).toEqual(dateValue)
         expect(searchResults.logic['searchTriggeredCount']).toBe(1)
@@ -200,11 +204,15 @@ describe('Dashboard search filters logic', () => {
             overrideSearchTrigger: true,
         })
         const dateValue = 1
+        const testQuery = 'test'
 
         expect(searchResults.state.searchFilters.dateTo).toBeUndefined()
         expect(searchResults.logic['searchTriggeredCount']).toBe(0)
 
-        await searchResults.processEvent('setDateTo', { value: dateValue })
+        await searchResults.processEvent('setDateTo', {
+            value: dateValue,
+            searchQuery: testQuery,
+        })
 
         expect(searchResults.state.searchFilters.dateTo).toEqual(dateValue)
         expect(searchResults.logic['searchTriggeredCount']).toBe(1)
@@ -215,10 +223,12 @@ describe('Dashboard search filters logic', () => {
     }) => {
         const { searchResults } = await setupTest(device)
         const dateValue = 'test'
+        const testQuery = 'test'
 
         expect(searchResults.state.searchFilters.dateFromInput).toEqual('')
         await searchResults.processEvent('setDateFromInputValue', {
             value: dateValue,
+            searchQuery: testQuery,
         })
         expect(searchResults.state.searchFilters.dateFromInput).toEqual(
             dateValue,
@@ -230,10 +240,12 @@ describe('Dashboard search filters logic', () => {
     }) => {
         const { searchResults } = await setupTest(device)
         const dateValue = 'test'
+        const testQuery = 'test'
 
         expect(searchResults.state.searchFilters.dateToInput).toEqual('')
         await searchResults.processEvent('setDateToInputValue', {
             value: dateValue,
+            searchQuery: testQuery,
         })
         expect(searchResults.state.searchFilters.dateToInput).toEqual(dateValue)
     })
@@ -246,12 +258,14 @@ describe('Dashboard search filters logic', () => {
         })
         const tag1 = 'test'
         const tag2 = 'test again'
+        const testQuery = 'test'
 
         expect(searchResults.state.searchFilters.tagsIncluded).toEqual([])
         expect(searchResults.logic['searchTriggeredCount']).toBe(0)
 
         await searchResults.processEvent('addIncludedTag', {
             tag: tag1,
+            searchQuery: testQuery,
         })
 
         expect(searchResults.state.searchFilters.tagsIncluded).toEqual([tag1])
@@ -259,6 +273,7 @@ describe('Dashboard search filters logic', () => {
 
         await searchResults.processEvent('addIncludedTag', {
             tag: tag2,
+            searchQuery: testQuery,
         })
 
         expect(searchResults.state.searchFilters.tagsIncluded).toEqual([
@@ -269,6 +284,7 @@ describe('Dashboard search filters logic', () => {
 
         await searchResults.processEvent('delIncludedTag', {
             tag: tag1,
+            searchQuery: testQuery,
         })
 
         expect(searchResults.state.searchFilters.tagsIncluded).toEqual([tag2])
@@ -278,6 +294,7 @@ describe('Dashboard search filters logic', () => {
 
         await searchResults.processEvent('addExcludedTag', {
             tag: tag1,
+            searchQuery: testQuery,
         })
 
         expect(searchResults.state.searchFilters.tagsExcluded).toEqual([tag1])
@@ -285,6 +302,7 @@ describe('Dashboard search filters logic', () => {
 
         await searchResults.processEvent('addExcludedTag', {
             tag: tag2,
+            searchQuery: testQuery,
         })
 
         expect(searchResults.state.searchFilters.tagsExcluded).toEqual([
@@ -295,6 +313,7 @@ describe('Dashboard search filters logic', () => {
 
         await searchResults.processEvent('delExcludedTag', {
             tag: tag1,
+            searchQuery: testQuery,
         })
 
         expect(searchResults.state.searchFilters.tagsExcluded).toEqual([tag2])
@@ -309,12 +328,14 @@ describe('Dashboard search filters logic', () => {
         })
         const domain1 = 'test.com'
         const domain2 = 'getmemex.com'
+        const testQuery = 'test'
 
         expect(searchResults.state.searchFilters.domainsIncluded).toEqual([])
         expect(searchResults.logic['searchTriggeredCount']).toBe(0)
 
         await searchResults.processEvent('addIncludedDomain', {
             domain: domain1,
+            searchQuery: testQuery,
         })
 
         expect(searchResults.state.searchFilters.domainsIncluded).toEqual([
@@ -324,6 +345,7 @@ describe('Dashboard search filters logic', () => {
 
         await searchResults.processEvent('addIncludedDomain', {
             domain: domain2,
+            searchQuery: testQuery,
         })
 
         expect(searchResults.state.searchFilters.domainsIncluded).toEqual([
@@ -334,6 +356,7 @@ describe('Dashboard search filters logic', () => {
 
         await searchResults.processEvent('delIncludedDomain', {
             domain: domain1,
+            searchQuery: testQuery,
         })
 
         expect(searchResults.state.searchFilters.domainsIncluded).toEqual([
@@ -345,6 +368,7 @@ describe('Dashboard search filters logic', () => {
 
         await searchResults.processEvent('addExcludedDomain', {
             domain: domain1,
+            searchQuery: testQuery,
         })
 
         expect(searchResults.state.searchFilters.domainsExcluded).toEqual([
@@ -354,6 +378,7 @@ describe('Dashboard search filters logic', () => {
 
         await searchResults.processEvent('addExcludedDomain', {
             domain: domain2,
+            searchQuery: testQuery,
         })
 
         expect(searchResults.state.searchFilters.domainsExcluded).toEqual([
@@ -364,6 +389,7 @@ describe('Dashboard search filters logic', () => {
 
         await searchResults.processEvent('delExcludedDomain', {
             domain: domain1,
+            searchQuery: testQuery,
         })
 
         expect(searchResults.state.searchFilters.domainsExcluded).toEqual([
@@ -384,18 +410,33 @@ describe('Dashboard search filters logic', () => {
         const query = 'test'
         const dateTo = 123
         const dateFrom = 123
+        const testQuery = 'test'
 
-        await searchResults.processEvent('addIncludedTag', { tag: tag1 })
-        await searchResults.processEvent('addExcludedTag', { tag: tag2 })
+        await searchResults.processEvent('addIncludedTag', {
+            tag: tag1,
+            searchQuery: testQuery,
+        })
+        await searchResults.processEvent('addExcludedTag', {
+            tag: tag2,
+            searchQuery: testQuery,
+        })
         await searchResults.processEvent('addIncludedDomain', {
             domain: domain1,
+            searchQuery: testQuery,
         })
         await searchResults.processEvent('addExcludedDomain', {
             domain: domain2,
+            searchQuery: testQuery,
         })
         await searchResults.processEvent('setSearchQuery', { query })
-        await searchResults.processEvent('setDateFrom', { value: dateFrom })
-        await searchResults.processEvent('setDateTo', { value: dateTo })
+        await searchResults.processEvent('setDateFrom', {
+            value: dateFrom,
+            searchQuery: testQuery,
+        })
+        await searchResults.processEvent('setDateTo', {
+            value: dateTo,
+            searchQuery: testQuery,
+        })
 
         expect(searchResults.state.searchFilters).toEqual(
             expect.objectContaining({

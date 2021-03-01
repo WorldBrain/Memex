@@ -3,14 +3,25 @@ import { storiesOf } from '@storybook/react'
 import SearchBar, {
     SearchBarProps,
 } from 'src/dashboard-refactor/header/search-bar'
+import { CursorPositionState } from 'src/dashboard-refactor/types'
+
+const defaultQuery = 'Testy McTestface'
+
+const cursorPositionState: CursorPositionState = {
+    startPosition: defaultQuery.length,
+    endPosition: defaultQuery.length,
+    onCursorStartPositionChange: (position) => console.log(position),
+    onCursorEndPositionChange: (position) => console.log(position),
+}
 
 const template: SearchBarProps = {
     onSearchBarFocus: () => {},
     onSearchQueryChange: (queryString) => {},
-    onSearchFiltersOpen: () => {},
+    toggleSearchFiltersBar: () => {},
     isSearchBarFocused: false,
     searchFiltersOpen: false,
-    searchQuery: '',
+    cursorPositionState,
+    searchQuery: defaultQuery,
 }
 
 export const headerSearchBarPropsTemplate: {

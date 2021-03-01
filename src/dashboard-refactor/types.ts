@@ -60,11 +60,6 @@ export interface DropReceivingState {
     onDrop(id: number): void
 }
 
-export interface SearchResultTextPart {
-    text: string
-    match: boolean
-}
-
 export interface HoverState {
     onHoverEnter(id: number): void
     onHoverLeave(id: number): void
@@ -190,17 +185,6 @@ export interface ExpandableState {
 export interface AddableState {
     isAddable: boolean
     onAdd(listSource: ListSource): void
-}
-
-export interface HoverState {
-    onHoverEnter(normalizedPageUrl: string): void
-    onHoverLeave(normalizedPageUrl: string): void
-    isHovered: boolean
-}
-
-export interface SelectedState {
-    onSelection(normalizedPageUrl: string): void
-    isSelected: boolean
 }
 
 export interface CursorPositionState {
