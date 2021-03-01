@@ -6,6 +6,7 @@ import initSentry from '../util/raven'
 import * as imports from './imports'
 import * as blacklist from './blacklist'
 import * as privacy from './privacy'
+import * as pdfs from './PDF'
 import * as settings from './settings'
 import * as overviewPage from '../overview'
 import { reducer as onboarding } from '../overview/onboarding'
@@ -28,6 +29,7 @@ const rootReducer = combineReducers({
     blacklist: blacklist.reducer,
     imports: imports.reducer,
     privacy: privacy.reducer,
+    pdfs: pdfs.reducer,
     settings: settings.reducer,
     onboarding,
     customLists,

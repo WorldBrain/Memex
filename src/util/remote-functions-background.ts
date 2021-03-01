@@ -13,6 +13,7 @@ import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { ReadwiseInterface } from 'src/readwise-integration/background/types/remote-interface'
+import { PDFInterface } from 'src/pdf/background'
 
 export interface RemoteFunctionImplementations<
     Role extends 'provider' | 'caller'
@@ -29,6 +30,7 @@ export interface RemoteFunctionImplementations<
     copyPaster: RemoteCopyPasterInterface
     readablePageArchives: RemoteReaderInterface
     contentSharing: ContentSharingInterface
+    pdf: PDFInterface
 }
 
 // See `src/background.ts` for the concrete remote function bindings
@@ -46,6 +48,7 @@ export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
     copyPaster: runInBackground(),
     readablePageArchives: runInBackground(),
     contentSharing: runInBackground(),
+    pdf: runInBackground(),
 }
 
 export const notifications = remoteFunctions.notifications
@@ -61,3 +64,4 @@ export const copyPaster = remoteFunctions.copyPaster
 export const readable = remoteFunctions.readablePageArchives
 export const contentSharing = remoteFunctions.contentSharing
 export const annotations = runInBackground<AnnotationInterface<'caller'>>()
+export const pdf = remoteFunctions.pdf

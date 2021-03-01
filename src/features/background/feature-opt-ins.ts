@@ -6,17 +6,20 @@ export type UserFeatureOptIn =
     | 'Sync'
     | 'DirectLink'
     | 'SocialIntegration'
+    | 'PDFViewerAutoOpen'
 const allFeatures: UserFeatureOptIn[] = [
     'Auth',
     'Sync',
     'DirectLink',
     'SocialIntegration',
+    'PDFViewerAutoOpen',
 ]
 const featureDefaults = {
     Auth: true,
     Sync: false,
     DirectLink: false,
     SocialIntegration: false,
+    PDFViewerAutoOpen: false,
 }
 const featureDefaultByInstallDate = {
     SocialIntegration: new Date(2020, 1, 11).valueOf(),

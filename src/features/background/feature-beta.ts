@@ -16,7 +16,7 @@ const allFeatures: UserBetaFeature[] = [
             'Annotate PDFs via the Memex extension (no phone support yet)',
         link: undefined,
         enabled: false,
-        available: false,
+        available: true,
     },
     // {
     //     id: 'reader',

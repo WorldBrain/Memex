@@ -71,12 +71,6 @@ export interface Props extends Partial<SocialPage> {
 
 class ResultItem extends PureComponent<Props> {
     get hrefToPage() {
-        if (isFullUrlPDF(this.props.fullUrl)) {
-            return `${getExtURL('/pdfjs/viewer.html')}?file=${
-                this.props.fullUrl
-            }`
-        }
-
         return `${this.props.fullUrl}`
     }
 

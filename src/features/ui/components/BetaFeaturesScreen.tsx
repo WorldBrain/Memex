@@ -28,6 +28,7 @@ import {
     UserBetaFeatureId,
 } from 'src/features/background/feature-beta'
 import { acts as resultsActs } from 'src/overview/results'
+import { default as PDFSetting } from 'src/options/PDF'
 
 interface Props {
     showSubscriptionModal: () => void
@@ -80,7 +81,7 @@ class BetaFeaturesScreen extends React.Component<
         const featureOptions = await featuresBeta.getFeatures()
         const featureEnabled = {
             'sharing-collections': true,
-            'pdf-annotations': false,
+            'pdf-annotations': true,
         }
         Object.values(featureOptions).forEach(
             (f) => (featureEnabled[f.id] = f.enabled),
@@ -261,6 +262,10 @@ class BetaFeaturesScreen extends React.Component<
                         ),
                     )}
                 </section>
+
+                {this.state.isPioneer && this.state.loadState === 'success' && (
+                    <PDFSetting />
+                )}
             </div>
         )
     }

@@ -283,6 +283,8 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
     if (isSidebarEnabled) {
         await inPageUI.loadComponent('ribbon')
     }
+
+    return inPageUI
 }
 
 type ContentScriptLoader = (component: ContentScriptComponent) => Promise<void>

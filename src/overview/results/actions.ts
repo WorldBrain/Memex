@@ -24,6 +24,7 @@ const createSocialBookmarkRPC = remoteFunction('addSocialBookmark')
 const deleteSocialBookmarkRPC = remoteFunction('delSocialBookmark')
 
 export const setBetaFeatures = createAction<boolean>('beta/setBeta')
+export const setOptInFeatures = createAction<boolean>('feature/set')
 
 export const addTag = createAction('results/localAddTag', (tag, index) => ({
     tag,

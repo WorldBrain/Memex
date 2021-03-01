@@ -61,12 +61,14 @@ import ActivityIndicatorBackground from 'src/activity-indicator/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
 import { Services } from 'src/services/types'
 import { PDFBackground } from 'src/pdf/background'
+import { SHOULD_OPEN_STORAGE_KEY } from 'src/options/PDF/constants'
 
 export interface BackgroundModules {
     auth: AuthBackground
     analytics: AnalyticsBackground
     notifications: NotificationBackground
     social: SocialBackground
+    pdfBg: PDFBackground
     connectivityChecker: ConnectivityCheckerBackground
     activityIndicator: ActivityIndicatorBackground
     directLinking: DirectLinkingBackground
@@ -185,10 +187,12 @@ export function createBackgroundModules(options: {
 
     const pdfBg = new PDFBackground({
         extensionGetURL: options.browserAPIs.extension.getURL,
+        localBrowserStorage: options.browserAPIs.storage.local,
+        tabs: options.browserAPIs.tabs,
     })
+
     pdfBg.setupRequestInterceptors({
         webRequest: options.browserAPIs.webRequest,
-        tabs: options.browserAPIs.tabs,
     })
 
     const notifications = new NotificationBackground({ storageManager })
@@ -339,6 +343,7 @@ export function createBackgroundModules(options: {
         notifications,
         connectivityChecker,
         readable: reader,
+        pdfBg,
         directLinking,
         search,
         eventLog: new EventLogBackground({ storageManager }),
