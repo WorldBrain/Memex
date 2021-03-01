@@ -1,7 +1,7 @@
 import { createAction } from 'redux-act'
 
 import { getSidebarState, setSidebarState } from '../../sidebar-overlay/utils'
-import { remoteFunction, runInTab } from 'src/util/webextensionRPC'
+import { remoteFunction, runInTabViaBg } from 'src/util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
@@ -30,7 +30,7 @@ export const toggleSidebarFlag: () => Thunk = () => async (
     }
 
     const tabId = popup.tabId(state)
-    const ribbon = runInTab<InPageUIContentScriptRemoteInterface>(tabId)
+    const ribbon = runInTabViaBg<InPageUIContentScriptRemoteInterface>(tabId)
 
     if (wasEnabled) {
         await ribbon.removeRibbon()
@@ -48,5 +48,7 @@ export const openSideBar: () => Thunk = () => async (dispatch, getState) => {
 
     const tabId = popup.tabId(state)
 
-    await runInTab<InPageUIContentScriptRemoteInterface>(tabId).showSidebar()
+    await runInTabViaBg<InPageUIContentScriptRemoteInterface>(
+        tabId,
+    ).showSidebar()
 }

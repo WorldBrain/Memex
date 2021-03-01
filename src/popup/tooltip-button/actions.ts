@@ -4,7 +4,7 @@ import {
     getTooltipState,
     setTooltipState,
 } from '../../in-page-ui/tooltip/utils'
-import { remoteFunction, runInTab } from '../../util/webextensionRPC'
+import { remoteFunction, runInTabViaBg } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
@@ -51,20 +51,20 @@ export const toggleTooltipFlag: () => Thunk = () => async (
 
     const tabId = popup.tabId(state)
     if (wasEnabled) {
-        await runInTab<InPageUIContentScriptRemoteInterface>(
+        await runInTabViaBg<InPageUIContentScriptRemoteInterface>(
             tabId,
         ).removeTooltip()
-        await runInTab<InPageUIContentScriptRemoteInterface>(
+        await runInTabViaBg<InPageUIContentScriptRemoteInterface>(
             tabId,
         ).updateRibbon()
     } else {
-        await runInTab<InPageUIContentScriptRemoteInterface>(
+        await runInTabViaBg<InPageUIContentScriptRemoteInterface>(
             tabId,
         ).insertTooltip()
-        await runInTab<InPageUIContentScriptRemoteInterface>(
+        await runInTabViaBg<InPageUIContentScriptRemoteInterface>(
             tabId,
         ).showContentTooltip()
-        await runInTab<InPageUIContentScriptRemoteInterface>(
+        await runInTabViaBg<InPageUIContentScriptRemoteInterface>(
             tabId,
         ).updateRibbon()
     }
@@ -80,12 +80,12 @@ export const showTooltip: () => Thunk = () => async (dispatch, getState) => {
 
     const isEnabled = await getTooltipState()
     if (!isEnabled) {
-        await runInTab<InPageUIContentScriptRemoteInterface>(
+        await runInTabViaBg<InPageUIContentScriptRemoteInterface>(
             tabId,
         ).insertTooltip()
     }
 
-    await runInTab<InPageUIContentScriptRemoteInterface>(
+    await runInTabViaBg<InPageUIContentScriptRemoteInterface>(
         tabId,
     ).showContentTooltip()
 }
