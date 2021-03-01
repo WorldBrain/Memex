@@ -149,6 +149,20 @@ export function runInTab<T extends object>(tabId): T {
     })
 }
 
+// Runs a remoteFunction in the content script on a certain tab by asking the background script to do so
+export function runInTabViaBg<T extends object>(tabId): T {
+    return new Proxy<T>({} as T, {
+        get(target, property): any {
+            return (...args) =>
+                rpcConnection.postMessageRequestToTabViaExtension(
+                    tabId,
+                    property.toString(),
+                    args,
+                )
+        },
+    })
+}
+
 // @depreciated - Don't call this function directly. Instead use the above typesafe version runInBackground
 export function remoteFunction(
     funcName: string,
