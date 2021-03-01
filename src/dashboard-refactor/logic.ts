@@ -18,6 +18,7 @@ import {
 import { ListData } from './lists-sidebar/types'
 import { updatePickerValues } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
+import { NoResultsType } from './search-results/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -75,6 +76,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                 sharingAccess: 'feature-disabled',
                 noteSharingInfo: {},
                 results: {},
+                noResultsType: null,
+                showMobileAppAd: false,
+                showOnboardingMsg: false,
                 areResultsExhausted: false,
                 shouldFormsAutoFocus: false,
                 pageData: {
@@ -151,16 +155,23 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     /* START - Misc helper methods */
     private async hydrateStateFromLocalStorage() {
-        const listsSidebarLocked =
-            (
-                await this.options.localStorage.get(
-                    STORAGE_KEYS.listSidebarLocked,
-                )
-            )[STORAGE_KEYS.listSidebarLocked] ?? false
+        const {
+            [STORAGE_KEYS.listSidebarLocked]: listsSidebarLocked,
+            [STORAGE_KEYS.onboardingMsgSeen]: onboardingMsgSeen,
+            [STORAGE_KEYS.mobileAdSeen]: mobileAdSeen,
+        } = await this.options.localStorage.get([
+            STORAGE_KEYS.listSidebarLocked,
+            STORAGE_KEYS.onboardingMsgSeen,
+            STORAGE_KEYS.mobileAdSeen,
+        ])
 
         this.emitMutation({
+            searchResults: {
+                showMobileAppAd: { $set: !mobileAdSeen },
+                showOnboardingMsg: { $set: !onboardingMsgSeen },
+            },
             listsSidebar: {
-                isSidebarLocked: { $set: listsSidebarLocked },
+                isSidebarLocked: { $set: listsSidebarLocked ?? false },
             },
         })
     }
@@ -274,10 +285,35 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             }),
             async () => {
-                const { noteData, pageData, results, resultsExhausted } =
+                const {
+                    noteData,
+                    pageData,
+                    results,
+                    resultsExhausted,
+                    searchTermsInvalid,
+                } =
                     previousState.searchResults.searchType === 'pages'
                         ? await this.searchPages(previousState, event.paginate)
                         : await this.searchNotes(previousState, event.paginate)
+
+                let noResultsType: NoResultsType = null
+                if (resultsExhausted) {
+                    if (
+                        previousState.listsSidebar.selectedListId ===
+                        SPECIAL_LIST_IDS.MOBILE
+                    ) {
+                        noResultsType = previousState.searchResults
+                            .showMobileAppAd
+                            ? 'mobile-list-ad'
+                            : 'mobile-list'
+                    } else if (previousState.searchResults.showOnboardingMsg) {
+                        noResultsType = 'onboarding-msg'
+                    } else {
+                        noResultsType = searchTermsInvalid
+                            ? 'stop-words'
+                            : 'no-results'
+                    }
+                }
 
                 const mutation: UIMutation<State> = event.paginate
                     ? {
@@ -301,6 +337,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                       ),
                               },
                               areResultsExhausted: { $set: resultsExhausted },
+                              noResultsType: { $set: noResultsType },
                           },
                           searchFilters: {
                               skip: { $apply: (skip) => skip + PAGE_SIZE },
@@ -312,6 +349,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                               pageData: { $set: pageData },
                               noteData: { $set: noteData },
                               areResultsExhausted: { $set: resultsExhausted },
+                              noResultsType: { $set: noResultsType },
                           },
                           searchFilters: { skip: { $set: 0 } },
                       }
@@ -355,6 +393,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         return {
             ...utils.pageSearchResultToState(result),
             resultsExhausted: result.resultsExhausted,
+            searchTermsInvalid: result.isBadTerm,
         }
     }
 
@@ -383,6 +422,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         return {
             ...utils.annotationSearchResultToState(result),
             resultsExhausted: result.resultsExhausted,
+            searchTermsInvalid: result.isBadTerm,
         }
     }
 
@@ -1307,6 +1347,24 @@ export class DashboardLogic extends UILogic<State, Events> {
                 action: event.analyticsAction,
             }),
         ])
+    }
+
+    dismissMobileAd: EventHandler<'dismissMobileAd'> = async () => {
+        await this.options.localStorage.set({
+            [STORAGE_KEYS.mobileAdSeen]: true,
+        })
+        this.emitMutation({
+            searchResults: { showMobileAppAd: { $set: false } },
+        })
+    }
+
+    dismissOnboardingMsg: EventHandler<'dismissOnboardingMsg'> = async () => {
+        await this.options.localStorage.set({
+            [STORAGE_KEYS.onboardingMsgSeen]: true,
+        })
+        this.emitMutation({
+            searchResults: { showOnboardingMsg: { $set: false } },
+        })
     }
 
     setNoteShareMenuShown: EventHandler<'setNoteShareMenuShown'> = async ({

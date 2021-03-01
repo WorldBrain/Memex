@@ -126,6 +126,13 @@ export type PageData = Pick<
     isShared?: boolean
 }
 
+export type NoResultsType =
+    | 'onboarding-msg'
+    | 'mobile-list'
+    | 'mobile-list-ad'
+    | 'stop-words'
+    | 'no-results'
+    | null
 export type ResultHoverState = 'main-content' | 'footer' | 'tags' | null
 export type NoteResultHoverState = ResultHoverState | 'note'
 
@@ -170,13 +177,14 @@ export interface RootState {
     searchType: SearchType
     draggedPageId?: string
     shouldFormsAutoFocus: boolean
+    noResultsType: NoResultsType
 
-    /** Holds page data specific to each page occurence on a specific day. */
+    /** Holds page data specific to each page occurrence on a specific day. */
     results: NestedResults
     areResultsExhausted: boolean
 
     // Display data lookups
-    /** Holds page data shared with all page occurences on any day. */
+    /** Holds page data shared with all page occurrences on any day. */
     pageData: NormalizedState<PageData>
     noteData: NormalizedState<NoteData & NoteResult>
 
@@ -188,6 +196,10 @@ export interface RootState {
     paginationState: TaskState
     noteUpdateState: TaskState
     newNoteCreateState: TaskState
+
+    // Misc local storage flags
+    showMobileAppAd: boolean
+    showOnboardingMsg: boolean
 }
 
 export interface PageEventArgs {
@@ -280,4 +292,6 @@ export type Events = UIEvent<{
         link: string
         analyticsAction: 'copyNoteLink' | 'copyPageLink'
     }
+    dismissMobileAd: null
+    dismissOnboardingMsg: null
 }>

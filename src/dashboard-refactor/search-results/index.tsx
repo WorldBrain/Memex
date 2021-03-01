@@ -14,6 +14,7 @@ import {
     PageInteractionProps,
     PagePickerAugdProps,
     NotePickerAugdProps,
+    NoResultsType,
 } from './types'
 import TopBar from './components/result-top-bar'
 import SearchTypeSwitch, {
@@ -22,6 +23,7 @@ import SearchTypeSwitch, {
 import ExpandAllNotes from './components/expand-all-notes'
 import DayResultGroup from './components/day-result-group'
 import PageResult from './components/page-result'
+import NoResults from './components/no-results'
 import { bindFunctionalProps, formatDayGroupTime } from './util'
 import NotesTypeDropdownMenu from './components/notes-type-dropdown-menu'
 import { SortingDropdownMenuBtn } from 'src/sidebar/annotations-sidebar/components/SortingDropdownMenu'
@@ -38,6 +40,9 @@ import { PageNotesCopyPaster } from 'src/copy-paster'
 import TagPicker from 'src/tags/ui/TagPicker'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import Margin from 'src/dashboard-refactor/components/Margin'
+import DismissibleResultsMessage from './components/dismissible-results-message'
+import MobileAppAd from 'src/sync/components/device-list/mobile-app-ad'
+import OnboardingMsg from './components/onboarding-msg'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -54,6 +59,9 @@ export type Props = RootState &
         pagePickerProps: PagePickerAugdProps
         notePickerProps: NotePickerAugdProps
         onShowAllNotesClick: React.MouseEventHandler
+        noResultsType: NoResultsType
+        onDismissMobileAd: React.MouseEventHandler
+        onDismissOnboardingMsg: React.MouseEventHandler
         filterSearchByTag: (tag: string) => void
         newNoteInteractionProps: {
             [Key in keyof AnnotationCreateEventProps]: (
@@ -298,7 +306,54 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         )
     }
 
+    private renderNoResults() {
+        if (this.props.noResultsType === 'onboarding-msg') {
+            return (
+                <NoResults title="You don't have anything saved yet">
+                    <DismissibleResultsMessage
+                        onDismiss={this.props.onDismissOnboardingMsg}
+                    >
+                        <OnboardingMsg />
+                    </DismissibleResultsMessage>
+                </NoResults>
+            )
+        }
+
+        if (this.props.noResultsType === 'mobile-list') {
+            return (
+                <NoResults title="You don't have anything saved from the mobile app yet" />
+            )
+        }
+
+        if (this.props.noResultsType === 'mobile-list-ad') {
+            return (
+                <NoResults title="You don't have anything saved from the mobile app yet">
+                    <DismissibleResultsMessage
+                        onDismiss={this.props.onDismissMobileAd}
+                    >
+                        <MobileAppAd />
+                    </DismissibleResultsMessage>
+                </NoResults>
+            )
+        }
+
+        if (this.props.noResultsType === 'stop-words') {
+            return (
+                <NoResults title="No Results">
+                    Search terms are too common, or have been filtered out to
+                    increase performance.
+                </NoResults>
+            )
+        }
+
+        return <NoResults title="No Results">¯\_(ツ)_/¯</NoResults>
+    }
+
     private renderResultsByDay() {
+        if (this.props.noResultsType != null) {
+            return this.renderNoResults()
+        }
+
         if (this.props.searchState === 'running') {
             return this.renderLoader()
         }

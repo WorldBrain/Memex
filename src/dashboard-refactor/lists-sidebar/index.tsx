@@ -145,11 +145,11 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     },
                                     {
                                         name: 'Saved on Mobile',
-                                        listId: SPECIAL_LIST_IDS.INBOX + 1,
+                                        listId: SPECIAL_LIST_IDS.MOBILE,
                                         selectedState: {
                                             isSelected:
                                                 this.props.selectedListId ===
-                                                SPECIAL_LIST_IDS.INBOX + 1,
+                                                SPECIAL_LIST_IDS.MOBILE,
                                             onSelection: this.props
                                                 .onListSelection,
                                         },

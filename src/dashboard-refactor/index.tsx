@@ -374,6 +374,13 @@ export class DashboardContainer extends StatefulUIElement<
             <SearchResultsContainer
                 isSearchFilteredByList={listsSidebar.selectedListId != null}
                 {...searchResults}
+                onDismissMobileAd={() =>
+                    this.processEvent('dismissMobileAd', null)
+                }
+                onDismissOnboardingMsg={() =>
+                    this.processEvent('dismissOnboardingMsg', null)
+                }
+                noResultsType={this.state.searchResults.noResultsType}
                 filterSearchByTag={(tag) =>
                     this.processEvent('addIncludedTag', { tag })
                 }
