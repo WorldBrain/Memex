@@ -15,7 +15,7 @@ import DatePicker, {
     DateRangeSelectionProps,
 } from 'src/overview/search-bar/components/DateRangeSelection'
 import { FilterPickerProps } from './types'
-import { SearchFilterLabel } from '../types'
+import { SearchFilterLabel, SearchFilterType } from '../types'
 
 const windowWidth: number = window.innerWidth
 const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
@@ -38,6 +38,11 @@ const InnerContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: start;
+`
+
+const PickersContainer = styled(InnerContainer)`
+    position: relative;
+    bottom: 0;
 `
 
 const FilterSelectButton = styled.div<{ selected: boolean }>`
@@ -103,11 +108,16 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     private renderFilterSelectButton = (
         label: SearchFilterLabel,
         selectedState: SelectedState,
+        name: SearchFilterType,
     ): JSX.Element => {
         const { isSelected, onSelection } = selectedState
         return (
             <Margin horizontal="7px" vertical="7px">
-                <FilterSelectButton selected={isSelected} onClick={onSelection}>
+                <FilterSelectButton
+                    selected={isSelected}
+                    onClick={onSelection}
+                    className={`${name}-picker-button`}
+                >
                     <Margin horizontal="7px">
                         <TextSpan>{label}</TextSpan>
                     </Margin>
@@ -128,10 +138,16 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                     tagPickerProps.initialSelectedEntries
                 }
                 onUpdateEntrySelection={tagPickerProps.onUpdateEntrySelection}
-                onEscapeKeyDown={tagPickerProps.onToggleShowPicker}
-                onClickOutside={tagPickerProps.onToggleShowPicker}
+                onEscapeKeyDown={() =>
+                    tagPickerProps.onToggleShowPicker(null, false)
+                }
+                onClickOutside={(e) =>
+                    tagPickerProps.onToggleShowPicker(null, false)
+                }
                 searchInputPlaceholder="Add Tag Filters"
                 removeToolTipText="Remove filter"
+                preventDefault={true}
+                outsideClickIgnoreClass="tag-picker-button"
             />
         )
     }
@@ -146,12 +162,18 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 onUpdateEntrySelection={
                     domainPickerProps.onUpdateEntrySelection
                 }
-                onEscapeKeyDown={domainPickerProps.onToggleShowPicker}
-                onClickOutside={domainPickerProps.onToggleShowPicker}
+                onEscapeKeyDown={() =>
+                    domainPickerProps.onToggleShowPicker(null, false)
+                }
+                onClickOutside={(e) => {
+                    console.log('domain picker click outside')
+                    domainPickerProps.onToggleShowPicker(null, false)
+                }}
                 searchInputPlaceholder="Add Domain Filters"
                 removeToolTipText="Remove filter"
                 queryEntries={this.queryDomains}
                 loadDefaultSuggestions={this.getSuggestedDomains}
+                outsideClickIgnoreClass="domain-picker-button"
             />
         )
     }
@@ -171,18 +193,21 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                         {this.renderFilterSelectButton(
                             'Date',
                             dateFilterSelectedState,
+                            'date',
                         )}
                         {this.renderFilterSelectButton(
                             'Domains',
                             domainFilterSelectedState,
+                            'domain',
                         )}
                         {this.renderFilterSelectButton(
                             'Tags',
                             tagFilterSelectedState,
+                            'tag',
                         )}
                     </InnerContainer>
                 </Container>
-                <InnerContainer>
+                <PickersContainer>
                     <Margin horizontal="7px">
                         {dateFilterSelectedState.isSelected &&
                             this.renderDatePicker()}
@@ -191,7 +216,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                         {domainFilterSelectedState.isSelected &&
                             this.renderDomainPicker()}
                     </Margin>
-                </InnerContainer>
+                </PickersContainer>
             </>
         )
     }

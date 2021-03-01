@@ -53,7 +53,7 @@ class DomainPicker extends StatefulUIElement<
 
     handleClickOutside: React.MouseEventHandler = (e) => {
         if (this.props.onClickOutside) {
-            this.props.onClickOutside(e) // this is defined as type react.MouseEventHandler for the collection picker but as a standard function with no params or return for the tag picker
+            this.props.onClickOutside(e)
         }
     }
 

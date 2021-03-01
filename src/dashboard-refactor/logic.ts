@@ -1252,27 +1252,39 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setTagFilterActive: EventHandler<'setTagFilterActive'> = async ({
+    toggleShowTagPicker: EventHandler<'toggleShowTagPicker'> = async ({
         event,
     }) => {
         this.emitMutation({
-            searchFilters: { isTagFilterActive: { $set: event.isActive } },
+            searchFilters: {
+                isTagFilterActive: { $set: event.isActive },
+                isDomainFilterActive: { $set: false },
+                isDateFilterActive: { $set: false },
+            },
         })
     }
 
-    setDateFilterActive: EventHandler<'setDateFilterActive'> = async ({
+    toggleShowDatePicker: EventHandler<'toggleShowDatePicker'> = async ({
         event,
     }) => {
         this.emitMutation({
-            searchFilters: { isDateFilterActive: { $set: event.isActive } },
+            searchFilters: {
+                isDateFilterActive: { $set: event.isActive },
+                isTagFilterActive: { $set: false },
+                isDomainFilterActive: { $set: false },
+            },
         })
     }
 
-    setDomainFilterActive: EventHandler<'setDomainFilterActive'> = async ({
+    toggleShowDomainPicker: EventHandler<'toggleShowDomainPicker'> = async ({
         event,
     }) => {
         this.emitMutation({
-            searchFilters: { isDomainFilterActive: { $set: event.isActive } },
+            searchFilters: {
+                isDomainFilterActive: { $set: event.isActive },
+                isTagFilterActive: { $set: false },
+                isDateFilterActive: { $set: false },
+            },
         })
     }
 
