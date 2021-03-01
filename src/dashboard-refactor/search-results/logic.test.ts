@@ -446,6 +446,70 @@ describe('Dashboard search results logic', () => {
                 undefined,
             )
         })
+
+        it('should be update note share info for all notes of a page', async ({
+            device,
+        }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+            })
+            const pageId = DATA.PAGE_1.normalizedUrl
+            const day = PAGE_SEARCH_DUMMY_DAY
+
+            const noteIds = searchResults.state.searchResults.noteData.allIds.filter(
+                (noteId) =>
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .pageUrl === pageId,
+            )
+
+            expect(searchResults.state.searchResults.noteSharingInfo).toEqual(
+                {},
+            )
+
+            await searchResults.processEvent('updatePageNotesShareInfo', {
+                day,
+                pageId,
+                info: { status: 'not-yet-shared', taskState: 'pristine' },
+            })
+            for (const noteId of noteIds) {
+                expect(
+                    searchResults.state.searchResults.noteSharingInfo[noteId],
+                ).toEqual({
+                    status: 'not-yet-shared',
+                    taskState: 'pristine',
+                })
+            }
+
+            await searchResults.processEvent('updatePageNotesShareInfo', {
+                day,
+                pageId,
+                info: { status: 'shared', taskState: 'success' },
+            })
+
+            for (const noteId of noteIds) {
+                expect(
+                    searchResults.state.searchResults.noteSharingInfo[noteId],
+                ).toEqual({
+                    status: 'shared',
+                    taskState: 'success',
+                })
+            }
+
+            await searchResults.processEvent('updatePageNotesShareInfo', {
+                day,
+                pageId,
+                info: { status: 'unshared', taskState: 'error' },
+            })
+
+            for (const noteId of noteIds) {
+                expect(
+                    searchResults.state.searchResults.noteSharingInfo[noteId],
+                ).toEqual({
+                    status: 'unshared',
+                    taskState: 'error',
+                })
+            }
+        })
     })
 
     describe('nested page result state mutations', () => {

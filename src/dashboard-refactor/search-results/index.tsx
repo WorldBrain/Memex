@@ -278,6 +278,16 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         normalizedPageUrl: page.normalizedUrl,
                         closeShareMenu: interactionProps.onShareBtnClick,
                         copyLink: this.props.onPageLinkCopy,
+                        postShareAllHook: () =>
+                            interactionProps.updatePageNotesShareInfo({
+                                status: 'shared',
+                                taskState: 'success',
+                            }),
+                        postUnshareAllHook: () =>
+                            interactionProps.updatePageNotesShareInfo({
+                                status: 'unshared',
+                                taskState: 'success',
+                            }),
                     }}
                     {...interactionProps}
                     {...pickerProps}

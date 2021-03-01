@@ -28,6 +28,7 @@ export type PageInteractionProps = Omit<
     CommonInteractionProps,
     'onReplyBtnClick' | 'onEditBtnClick' | 'onCommentChange'
 > & {
+    updatePageNotesShareInfo: (info: Partial<AnnotationSharingInfo>) => void
     onRemoveFromListBtnClick: React.MouseEventHandler
     onListPickerBtnClick: React.MouseEventHandler
     onNotesBtnClick: React.MouseEventHandler
@@ -223,7 +224,7 @@ export type Events = UIEvent<{
     confirmPageDelete: null
     cancelPageDelete: null
 
-    // Page result state mutations (*specific to each* occurence of the page in different days)
+    // Page result state mutations (*specific to each* occurrence of the page in different days)
     setPageCopyPasterShown: PageEventArgs & { isShown: boolean }
     setPageListPickerShown: PageEventArgs & { isShown: boolean }
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }
@@ -235,6 +236,9 @@ export type Events = UIEvent<{
     removePageFromList: PageEventArgs
     dragPage: PageEventArgs & { dataTransfer: DataTransfer }
     dropPage: PageEventArgs
+    updatePageNotesShareInfo: PageEventArgs & {
+        info: Partial<AnnotationSharingInfo>
+    }
 
     // New note form state mutations
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }

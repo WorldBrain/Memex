@@ -580,6 +580,34 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    updatePageNotesShareInfo: EventHandler<
+        'updatePageNotesShareInfo'
+    > = async ({
+        event,
+        previousState: {
+            searchResults: { noteSharingInfo, noteData },
+        },
+    }) => {
+        const noteIds = noteData.allIds.filter(
+            (noteId) => noteData.byId[noteId].pageUrl === event.pageId,
+        )
+        const mutation: UIMutation<State['searchResults']> = {}
+
+        for (const noteId of noteIds) {
+            mutation.noteSharingInfo = {
+                ...mutation.noteSharingInfo,
+                [noteId]: {
+                    $set: {
+                        ...noteSharingInfo[noteId],
+                        ...event.info,
+                    },
+                },
+            }
+        }
+
+        this.emitMutation({ searchResults: mutation })
+    }
+
     removePageFromList: EventHandler<'removePageFromList'> = async ({
         event,
         previousState: {
