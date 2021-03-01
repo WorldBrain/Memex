@@ -33,7 +33,8 @@ class TagPicker extends StatefulUIElement<
 > {
     static defaultProps: Partial<TagPickerDependencies> = {
         queryEntries: (query) => tags.searchForTagSuggestions({ query }),
-        loadDefaultSuggestions: tags.fetchInitialTagSuggestions,
+        loadDefaultSuggestions: () => [],
+        // loadDefaultSuggestions: tags.fetchInitialTagSuggestions,
     }
 
     constructor(props: TagPickerDependencies) {

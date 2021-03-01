@@ -102,7 +102,8 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             // notInclude: domains,
             type: 'domain',
         })
-        return suggestedDomains
+        // return suggestedDomains
+        return []
     }
 
     private renderFilterSelectButton = (

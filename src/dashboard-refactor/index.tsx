@@ -105,7 +105,6 @@ export class DashboardContainer extends StatefulUIElement<
         }
         const toggleShowTagPicker = (id: number, isActive?: boolean) => {
             const value = isActive ?? !searchFilters.isTagFilterActive
-            console.log('toggleShowTagPicker run, new value: ', value)
             this.processEvent('toggleShowTagPicker', {
                 isActive: value,
             })
