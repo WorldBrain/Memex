@@ -199,31 +199,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private async detectSharedNotes({ searchResults }: State) {
-        const noteSharingInfo: { [noteId: string]: AnnotationSharingInfo } = {}
-        const shareableNoteIds = new Set<string>()
-
-        for (const { pages } of Object.values(searchResults.results)) {
-            for (const { noteIds } of Object.values(pages.byId)) {
-                noteIds.search.forEach((id) => shareableNoteIds.add(id))
-                noteIds.user.forEach((id) => shareableNoteIds.add(id))
-            }
-        }
-
-        const remoteIds = await this.options.contentShareBG.getRemoteAnnotationIds(
-            {
-                annotationUrls: [...shareableNoteIds],
-            },
-        )
-
-        for (const localId of Object.keys(remoteIds)) {
-            noteSharingInfo[localId] = {
-                status: 'shared',
-                taskState: 'pristine',
-            }
-        }
-    }
-
     private async loadLocalLists() {
         await executeUITask(
             this,
@@ -347,7 +322,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         )
 
-        await this.detectSharedNotes(nextState)
+        await this.fetchNoteShareStates(nextState)
     }
 
     private searchPages = async (
@@ -409,6 +384,32 @@ export class DashboardLogic extends UILogic<State, Events> {
             ...utils.annotationSearchResultToState(result),
             resultsExhausted: result.resultsExhausted,
         }
+    }
+
+    private async fetchNoteShareStates({
+        searchResults: { noteData, noteSharingInfo },
+    }: State) {
+        const mutation: UIMutation<State['searchResults']> = {}
+        const annotationUrls = noteData.allIds.filter(
+            (noteId) => !noteSharingInfo[noteId],
+        )
+        const remoteIds = await this.options.contentShareBG.getRemoteAnnotationIds(
+            { annotationUrls },
+        )
+
+        for (const noteId of annotationUrls) {
+            mutation.noteSharingInfo = {
+                ...mutation.noteSharingInfo,
+                [noteId]: {
+                    $set: {
+                        taskState: 'pristine',
+                        status: remoteIds[noteId] ? 'shared' : 'not-yet-shared',
+                    },
+                },
+            }
+        }
+
+        this.emitMutation({ searchResults: mutation })
     }
     /* END - Misc event handlers */
 
