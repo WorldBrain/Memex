@@ -19,6 +19,7 @@ import { ListData } from './lists-sidebar/types'
 import { updatePickerValues } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import { NoResultsType } from './search-results/types'
+import { dissectCreateObjectOperation } from '@worldbrain/storex/lib/utils'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -141,20 +142,24 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        await loadInitial(this, () =>
-            Promise.all([
-                this.hydrateStateFromLocalStorage(),
-                this.runSearch(previousState),
+        await loadInitial(this, async () => {
+            const nextState = await this.hydrateStateFromLocalStorage(
+                previousState,
+            )
+            await Promise.all([
+                this.runSearch(nextState),
                 this.getFeedActivityStatus(),
                 this.getInboxUnreadCount(),
                 this.getSharingAccess(),
                 this.loadLocalLists(),
-            ]),
-        )
+            ])
+        })
     }
 
     /* START - Misc helper methods */
-    private async hydrateStateFromLocalStorage() {
+    private async hydrateStateFromLocalStorage(
+        previousState: State,
+    ): Promise<State> {
         const {
             [STORAGE_KEYS.listSidebarLocked]: listsSidebarLocked,
             [STORAGE_KEYS.onboardingMsgSeen]: onboardingMsgSeen,
@@ -165,7 +170,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             STORAGE_KEYS.mobileAdSeen,
         ])
 
-        this.emitMutation({
+        const mutation: UIMutation<State> = {
             searchResults: {
                 showMobileAppAd: { $set: !mobileAdSeen },
                 showOnboardingMsg: { $set: !onboardingMsgSeen },
@@ -173,7 +178,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 isSidebarLocked: { $set: listsSidebarLocked ?? false },
             },
-        })
+        }
+        this.emitMutation(mutation)
+        return this.withMutation(previousState, mutation)
     }
 
     private async getFeedActivityStatus() {
