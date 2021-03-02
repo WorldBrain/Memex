@@ -140,8 +140,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
             syncMenu: {
                 isDisplayed: false,
-                syncState: 'pristine',
-                backupState: 'pristine',
+                syncState: 'disabled',
+                backupState: 'disabled',
                 lastSuccessfulBackupDateTime: new Date(),
                 lastSuccessfulSyncDateTime: new Date(),
                 showUnsyncedItemCount: false,

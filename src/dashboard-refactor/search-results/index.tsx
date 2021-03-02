@@ -52,6 +52,7 @@ export type Props = RootState &
         SearchTypeSwitchProps,
         'onNotesSearchSwitch' | 'onPagesSearchSwitch'
     > & {
+        goToImportRoute: () => void
         areAllNotesShown: boolean
         isSearchFilteredByList: boolean
         pageInteractionProps: PageInteractionAugdProps
@@ -314,7 +315,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     <DismissibleResultsMessage
                         onDismiss={this.props.onDismissOnboardingMsg}
                     >
-                        <OnboardingMsg />
+                        <OnboardingMsg
+                            goToImportRoute={this.props.goToImportRoute}
+                        />
                     </DismissibleResultsMessage>
                 </NoResults>
             )

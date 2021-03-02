@@ -1,13 +1,11 @@
 import React from 'react'
 import styled from 'styled-components'
 
-interface Props {}
+interface Props {
+    goToImportRoute: () => void
+}
 
 export default class OnboardingMsg extends React.PureComponent<Props> {
-    private handleCTAClick: React.MouseEventHandler = (e) => {
-        window.location.hash = '#/import'
-    }
-
     render() {
         return (
             <>
@@ -23,7 +21,9 @@ export default class OnboardingMsg extends React.PureComponent<Props> {
                         </span>
                     </Description>
                 </Container>
-                <CTABtn onClick={this.handleCTAClick}>Get Started</CTABtn>
+                <CTABtn onClick={this.props.goToImportRoute}>
+                    Get Started
+                </CTABtn>
             </>
         )
     }

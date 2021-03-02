@@ -56,9 +56,14 @@ const SyncStatusHeaderBox = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 
     & > div {
         width: auto;
+    }
+
+    &:hover {
+        background-color: #e8e8e8;
     }
 `
 

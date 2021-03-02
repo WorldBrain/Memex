@@ -63,6 +63,10 @@ export class DashboardContainer extends StatefulUIElement<
     private annotationsCache: AnnotationsCacheInterface
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
 
+    private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
+        window.location.hash = '#/' + route
+    }
+
     constructor(props: Props) {
         super(props, new DashboardLogic(props))
 
@@ -225,7 +229,9 @@ export class DashboardContainer extends StatefulUIElement<
                     },
                     selectedListName,
                 }}
-                syncStatusIconState="green"
+                syncStatusIconState={
+                    syncMenu.syncState === 'enabled' ? 'green' : 'red'
+                }
                 syncStatusMenuProps={{
                     ...syncMenu,
                     backupRunHoverState: {
@@ -254,6 +260,8 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('initiateBackup', null),
                     onInitiateSync: () =>
                         this.processEvent('initiateSync', null),
+                    goToBackupRoute: this.bindRouteGoTo('backup'),
+                    goToSyncRoute: this.bindRouteGoTo('sync'),
                 }}
             />
         )
@@ -374,6 +382,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                goToImportRoute={this.bindRouteGoTo('import')}
                 isSearchFilteredByList={listsSidebar.selectedListId != null}
                 {...searchResults}
                 onDismissMobileAd={() =>
