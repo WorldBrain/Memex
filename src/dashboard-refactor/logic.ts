@@ -138,6 +138,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listIds: [],
                 },
             },
+            syncMenu: {
+                isDisplayed: false,
+                syncState: 'pristine',
+                backupState: 'pristine',
+                lastSuccessfulBackupDateTime: new Date(),
+                lastSuccessfulSyncDateTime: new Date(),
+                showUnsyncedItemCount: false,
+                unsyncedItemCount: 0,
+            },
         }
     }
 
@@ -2134,6 +2143,74 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
     /* END - lists sidebar event handlers */
+
+    /* START - sync status menu event handlers */
+    setSyncStatusMenuDisplayState: EventHandler<
+        'setSyncStatusMenuDisplayState'
+    > = async ({ event }) => {
+        this.emitMutation({
+            syncMenu: { isDisplayed: { $set: event.isShown } },
+        })
+    }
+
+    setUnsyncedItemCountShown: EventHandler<
+        'setUnsyncedItemCountShown'
+    > = async ({ event }) => {
+        this.emitMutation({
+            syncMenu: { showUnsyncedItemCount: { $set: event.isShown } },
+        })
+    }
+
+    initiateSync: EventHandler<'initiateSync'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (previousState.syncMenu.syncState === 'disabled') {
+            return
+        }
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                syncMenu: {
+                    syncState: { $set: taskState },
+                },
+            }),
+            async () => {
+                await this.options.syncBG.forceIncrementalSync()
+            },
+        )
+
+        this.emitMutation({
+            syncMenu: { lastSuccessfulSyncDateTime: { $set: new Date() } },
+        })
+    }
+
+    initiateBackup: EventHandler<'initiateBackup'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (previousState.syncMenu.backupState === 'disabled') {
+            return
+        }
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                syncMenu: {
+                    backupState: { $set: taskState },
+                },
+            }),
+            async () => {
+                // TODO: Figure out how to trigger backup
+            },
+        )
+
+        this.emitMutation({
+            syncMenu: { lastSuccessfulBackupDateTime: { $set: new Date() } },
+        })
+    }
+    /* END - sync status menu event handlers */
 
     example: EventHandler<'example'> = ({ event }) => {
         this.emitMutation({})

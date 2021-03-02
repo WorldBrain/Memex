@@ -8,8 +8,8 @@ import colors from 'src/dashboard-refactor/colors'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 
-import { BackupState, SyncState, UnSyncedItemState } from './types'
-import { DisplayState, HoverState } from 'src/dashboard-refactor/types'
+import { DisableableState, RootState } from './types'
+import { HoverState } from 'src/dashboard-refactor/types'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 const Container = styled(HoverBox)<{
@@ -102,17 +102,14 @@ const StyledAnchor = styled.a`
     text-decoration: none;
 `
 
-export interface SyncStatusMenuProps {
-    displayState: DisplayState
-    syncState: SyncState
-    backupState: BackupState
-    lastSuccessfulSyncDateTime: Date
-    lastSuccessfulBackupDateTime: Date
-    unSyncedItemState: UnSyncedItemState
+export interface SyncStatusMenuProps extends RootState {
     syncRunHoverState: HoverState
     backupRunHoverState: HoverState
-    onInitiateSync: () => void
-    onInitiateBackup: () => void
+    onInitiateSync: React.MouseEventHandler
+    onInitiateBackup: React.MouseEventHandler
+    onToggleDisplayState: React.MouseEventHandler
+    onShowUnsyncedItemCount: React.MouseEventHandler
+    onHideUnsyncedItemCount: React.MouseEventHandler
 }
 
 export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
@@ -138,6 +135,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         if (years >= 1) str = dt.format('ll')
         return str
     }
+
     private renderNotificationBox = (
         topSpanContent: JSX.Element | string,
         bottomSpanContent: JSX.Element | string,
@@ -151,44 +149,41 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             </Row>
         )
     }
+
     private renderBackupReminder = () => {
         return this.renderNotificationBox(
             'Memex is an offline app.',
             'Backup your data.',
         )
     }
-    private renderError = (syncType: 'sync' | 'backup') => {
+
+    private renderError = (syncType: 'Sync' | 'Backup') => {
         return this.renderNotificationBox(
-            `Your last ${syncType} failed.`,
+            `Your last ${syncType.toLocaleLowerCase()} failed.`,
             <span>
                 <StyledAnchor href="">Contact Support</StyledAnchor> if retry
                 fails too.
             </span>,
         )
     }
+
     private renderRow = (
-        syncType: 'sync' | 'backup',
-        status: SyncState | BackupState,
-        isSyncRunDisabled: boolean,
-        clickHandler: () => void,
+        syncType: 'Sync' | 'Backup',
+        status: DisableableState,
+        clickHandler: React.MouseEventHandler,
     ) => {
         // this function capitalises the first word of the sentence
-        const string = syncType.replace(/(^\w{1}|\.\s*\w{1})/gi, function (
-            toReplace,
-        ) {
-            return toReplace.toUpperCase()
-        })
         return (
             <div>
                 <Row>
                     <RowContainer>
-                        <TextBlock bold>{`${string} status`}</TextBlock>
+                        <TextBlock bold>{`${syncType} status`}</TextBlock>
                         <TextBlock>
                             {status === 'disabled' &&
-                                (syncType === 'sync'
+                                (syncType === 'Sync'
                                     ? 'No device paired yet'
                                     : 'No backup set yet')}
-                            {status === 'enabled' && `${string} enabled`}
+                            {status === 'enabled' && `${syncType} enabled`}
                             {status === 'running' && `In progress`}
                             {(status === 'success' || status === 'error') &&
                                 `Last ${syncType}: ${this.getTimeSinceNowString(
@@ -200,12 +195,12 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         <LoadingIndicator />
                     ) : (
                         <IconContainer
-                            disabled={isSyncRunDisabled}
-                            heightAndWidth="15px"
                             path={`/img/${
                                 status === 'disabled' ? 'arrowRight' : 'reload'
                             }.svg`}
+                            disabled={status === 'disabled'}
                             onClick={clickHandler}
+                            heightAndWidth="15px"
                         />
                     )}
                 </Row>
@@ -215,7 +210,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     }
     render() {
         const {
-            displayState: { isDisplayed },
+            isDisplayed,
             syncState,
             backupState,
             onInitiateSync,
@@ -229,18 +224,8 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                 left="50px"
                 top="50px"
             >
-                {this.renderRow(
-                    'sync',
-                    syncState,
-                    backupState === 'running',
-                    onInitiateSync,
-                )}
-                {this.renderRow(
-                    'backup',
-                    backupState,
-                    syncState === 'running',
-                    onInitiateBackup,
-                )}
+                {this.renderRow('Sync', syncState, onInitiateSync)}
+                {this.renderRow('Backup', backupState, onInitiateBackup)}
                 {backupState === 'disabled' && this.renderBackupReminder()}
             </Container>
         )

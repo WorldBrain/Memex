@@ -12,6 +12,10 @@ import {
     RootState as ListsSidebarState,
     Events as ListsSidebarEvents,
 } from './lists-sidebar/types'
+import {
+    RootState as SyncModalState,
+    Events as SyncModalEvents,
+} from './header/sync-status-menu/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { SearchInterface } from 'src/search/background/types'
@@ -20,9 +24,11 @@ import { AuthRemoteFunctionsInterface } from 'src/authentication/background/type
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { Analytics } from 'src/analytics'
 import { ActivityIndicatorInterface } from 'src/activity-indicator/background'
+import { PublicSyncInterface } from 'src/sync/background/types'
 
 export interface RootState {
     loadState: TaskState
+    syncMenu: SyncModalState
     searchResults: SearchResultsState
     searchFilters: SearchFiltersState
     listsSidebar: ListsSidebarState
@@ -33,7 +39,8 @@ export type Events = UIEvent<
     DashboardModalsEvents &
         SearchResultEvents &
         SearchFilterEvents &
-        ListsSidebarEvents & {
+        ListsSidebarEvents &
+        SyncModalEvents & {
             search: { paginate?: boolean }
             example: null
         }
@@ -44,6 +51,7 @@ export interface DashboardDependencies {
     analytics: Analytics
     tagsBG: RemoteTagsInterface
     authBG: AuthRemoteFunctionsInterface
+    syncBG: PublicSyncInterface
     contentShareBG: ContentSharingInterface
     listsBG: RemoteCollectionsInterface
     searchBG: SearchInterface
@@ -77,11 +85,6 @@ export interface HoverState {
 export interface SelectedState {
     onSelection(id: number): void
     isSelected: boolean
-}
-
-export interface DisplayState {
-    isDisplayed: boolean
-    toggleDisplayState: () => void
 }
 
 export interface DashboardModalsState {
