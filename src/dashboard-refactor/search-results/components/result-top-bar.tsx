@@ -5,6 +5,7 @@ import colors from 'src/dashboard-refactor/colors'
 export interface Props {
     leftSide?: JSX.Element
     rightSide?: JSX.Element
+    paddingBottom?: string
 }
 
 export default class ResultTopBar extends PureComponent<Props> {
@@ -22,6 +23,7 @@ const TopBarContainer = styled.div`
     display: flex;
     justify-content: space-between;
     width: 100%;
+    align-items: center;
 `
 
 const TopBarSection = styled.div``

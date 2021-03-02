@@ -247,6 +247,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         />
                     }
                 />
+                <Margin bottom="3px" />
                 <AnnotationCreate
                     autoFocus={this.props.shouldFormsAutoFocus}
                     comment={newNoteForm.inputValue}
@@ -412,6 +413,7 @@ const PageTopBarBox = styled(Margin)`
 
 const NoteTopBarBox = styled(TopBar)`
     width: 100%;
+    display: flex;
 `
 
 const ResultBox = styled(Margin)`

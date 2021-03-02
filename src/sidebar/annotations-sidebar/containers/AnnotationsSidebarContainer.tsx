@@ -647,7 +647,6 @@ const ActionBtn = styled.button`
     height: 24px;
     padding: 3px;
     border-radius: 3px;
-    opacity: 0.8;
     background-repeat: no-repeat;
     background-position: center;
     border: none;
@@ -658,12 +657,10 @@ const ActionBtn = styled.button`
     justify-content: center;
 
     &:hover {
-        opacity: 1;
         background-color: #e0e0e0;
     }
 
     &:active {
-        opacity: 1;
     }
 
     &:focus {

@@ -1,4 +1,6 @@
 import React, { PureComponent } from 'react'
+import styled from 'styled-components'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import { NotesType } from '../types'
@@ -18,7 +20,14 @@ export default class NotesTypeDropdownMenu extends PureComponent<Props> {
                 onMenuItemClick={({ name }) =>
                     this.props.onNotesTypeSelection(stringToNotesType(name))
                 }
-                btnChildren={notesTypeToString(this.props.notesTypeSelection)}
+                btnChildren={
+                    <>
+                        <ButtonText>
+                            {notesTypeToString(this.props.notesTypeSelection)}
+                        </ButtonText>
+                        <IconImg src={icons.triangle} />
+                    </>
+                }
                 menuItems={[
                     // {
                     //     name: notesTypeToString('search'),
@@ -30,10 +39,23 @@ export default class NotesTypeDropdownMenu extends PureComponent<Props> {
                     },
                     {
                         name: notesTypeToString('followed'),
-                        info: 'Notes shared with you via collections',
+                        info: 'Notes from collections you follow',
+                        isDisabled: true,
+                        soonAvailable: true,
                     },
                 ]}
             />
         )
     }
 }
+
+const ButtonText = styled.div`
+    font-size: 12px;
+    font-weight: bold;
+`
+
+const IconImg = styled.img`
+    height: 22px;
+    width: 22px;
+    padding: 6px 6px 6px 2px;
+`
