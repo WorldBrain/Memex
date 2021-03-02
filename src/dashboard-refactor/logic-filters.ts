@@ -331,23 +331,23 @@ export const extractMutationsFromSearchQuery = (
     return {
         resultingSearchQuery,
         extractedFilterMutations: {
-            tagPickerQuery: { $set: tag.query },
-            tagsIncluded: { $set: tag.included },
-            tagsExcluded: { $set: tag.excluded },
-            domainPickerQuery: { $set: domain.query },
-            domainsIncluded: { $set: domain.included },
-            domainsExcluded: { $set: domain.excluded },
+            tagPickerQuery: { $set: tag?.query },
+            tagsIncluded: { $set: tag?.included },
+            tagsExcluded: { $set: tag?.excluded },
+            domainPickerQuery: { $set: domain?.query },
+            domainsIncluded: { $set: domain?.included },
+            domainsExcluded: { $set: domain?.excluded },
             dateToInput: {
-                $set: date.variant === 'to' && date.included[0],
+                $set: date?.variant === 'to' && date?.included[0],
             },
             dateFromInput: {
-                $set: date.variant === 'from' && date.included[0],
+                $set: date?.variant === 'from' && date?.included[0],
             },
             dateTo: {
-                $set: date.variant === 'to' && parseDate(date.included[0]),
+                $set: date?.variant === 'to' && parseDate(date?.included[0]),
             },
             dateFrom: {
-                $set: date.variant === 'from' && parseDate(date.included[0]),
+                $set: date?.variant === 'from' && parseDate(date?.included[0]),
             },
         },
     }

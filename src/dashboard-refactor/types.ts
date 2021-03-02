@@ -116,10 +116,10 @@ export interface SearchFiltersState {
 
     tagsIncluded: string[]
     tagsExcluded: string[]
-    tagPickerQuery: string
+    tagPickerQuery?: string
     domainsIncluded: string[]
     domainsExcluded: string[]
-    domainPickerQuery: string
+    domainPickerQuery?: string
 
     cursorPositionStart?: number
     cursorPositionEnd?: number
@@ -242,7 +242,7 @@ interface PickerState {
 
 // I want the keys of this object to depend on the SearchFilterType
 export interface AllPickersState {
-    tag: PickerState
-    domain: PickerState
-    date: PickerState
+    tag?: PickerState
+    domain?: PickerState
+    date?: PickerState
 }
