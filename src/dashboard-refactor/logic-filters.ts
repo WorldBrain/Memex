@@ -2,6 +2,7 @@ import moment from 'moment'
 import chrono from 'chrono-node'
 
 import { SEARCH_QUERY_END_FILTER_KEY_PATTERN } from 'src/dashboard-refactor/constants'
+import { UIMutation } from 'ui-logic-core'
 import { FilterKey, SearchFilterType } from './header/types'
 import {
     AllPickersState,
@@ -10,6 +11,7 @@ import {
     QueryFilterPart,
     QueryStringPart,
     SearchFilterDetail,
+    SearchFiltersState,
     SearchQueryPart,
 } from './types'
 
@@ -299,7 +301,7 @@ export const parseSearchQuery: (queryString: string) => ParsedSearchQuery = (
     return parsedQuery
 }
 
-export const getPickersStateFromQueryString = (
+const getPickersStateFromQueryString = (
     queryString: string,
 ): AllPickersState => {
     const parsedQuery: ParsedSearchQuery = parseSearchQuery(queryString)
@@ -316,6 +318,39 @@ export const getPickersStateFromQueryString = (
         {} as AllPickersState,
     )
     return pickersState
+}
+
+export const extractMutationsFromSearchQuery = (
+    queryString: string,
+): {
+    resultingSearchQuery: string
+    extractedFilterMutations: UIMutation<SearchFiltersState>
+} => {
+    const resultingSearchQuery = getSearchStringOnly(queryString)
+    const { tag, domain, date } = getPickersStateFromQueryString(queryString)
+    return {
+        resultingSearchQuery,
+        extractedFilterMutations: {
+            tagPickerQuery: { $set: tag.query },
+            tagsIncluded: { $set: tag.included },
+            tagsExcluded: { $set: tag.excluded },
+            domainPickerQuery: { $set: domain.query },
+            domainsIncluded: { $set: domain.included },
+            domainsExcluded: { $set: domain.excluded },
+            dateToInput: {
+                $set: date.variant === 'to' && date.included[0],
+            },
+            dateFromInput: {
+                $set: date.variant === 'from' && date.included[0],
+            },
+            dateTo: {
+                $set: date.variant === 'to' && parseDate(date.included[0]),
+            },
+            dateFrom: {
+                $set: date.variant === 'from' && parseDate(date.included[0]),
+            },
+        },
+    }
 }
 
 // string constructing logic

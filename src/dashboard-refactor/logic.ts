@@ -14,8 +14,8 @@ import { PAGE_SIZE, STORAGE_KEYS } from 'src/dashboard-refactor/constants'
 import { ListData } from './lists-sidebar/types'
 import { getFilterDetail, updatePickerValues } from './util'
 import {
+    extractMutationsFromSearchQuery,
     getCursorPositionFilterType,
-    getPickersStateFromQueryString,
     parseDate,
     syncQueryStringFilters,
 } from './logic-filters'
@@ -222,9 +222,24 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState: State,
         mutation: UIMutation<State>,
     ) {
-        this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
-        await this.runSearch(nextState)
+
+        const {
+            extractedFilterMutations,
+            resultingSearchQuery,
+        } = extractMutationsFromSearchQuery(nextState.searchFilters.searchQuery)
+
+        const mutationWithFiltersExtracted: UIMutation<State> = {
+            searchFilters: {
+                searchQuery: { $set: resultingSearchQuery },
+                ...extractedFilterMutations,
+            },
+        }
+
+        this.emitMutation(mutationWithFiltersExtracted)
+        await this.runSearch(
+            this.withMutation(nextState, mutationWithFiltersExtracted),
+        )
     }
 
     private async runSearch(previousState: State, paginate?: boolean) {
@@ -1213,31 +1228,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const { tag, domain, date } = getPickersStateFromQueryString(
-            event.query,
-        )
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: {
                 searchQuery: { $set: event.query },
-                tagPickerQuery: { $set: tag.query },
-                tagsIncluded: { $set: tag.included },
-                tagsExcluded: { $set: tag.excluded },
-                domainPickerQuery: { $set: domain.query },
-                domainsIncluded: { $set: domain.included },
-                domainsExcluded: { $set: domain.excluded },
-                dateToInput: {
-                    $set: date.variant === 'to' && date.included[0],
-                },
-                dateFromInput: {
-                    $set: date.variant === 'from' && date.included[0],
-                },
-                dateTo: {
-                    $set: date.variant === 'to' && parseDate(date.included[0]),
-                },
-                dateFrom: {
-                    $set:
-                        date.variant === 'from' && parseDate(date.included[0]),
-                },
             },
         })
     }
