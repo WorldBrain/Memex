@@ -92,18 +92,24 @@ export class DashboardContainer extends StatefulUIElement<
         const { searchFilters, listsSidebar } = this.state
         const { searchQuery } = searchFilters
 
-        const toggleShowDatePicker = () =>
-            this.processEvent('setDateFilterActive', {
-                isActive: !searchFilters.isDateFilterActive,
+        const toggleShowDatePicker = (id: number, isActive?: boolean) => {
+            const value = isActive ?? !searchFilters.isDateFilterActive
+            this.processEvent('toggleShowDatePicker', {
+                isActive: value,
             })
-        const toggleShowTagPicker = () =>
-            this.processEvent('setTagFilterActive', {
-                isActive: !searchFilters.isTagFilterActive,
+        }
+        const toggleShowDomainPicker = (id: number, isActive?: boolean) => {
+            const value = isActive ?? !searchFilters.isDomainFilterActive
+            this.processEvent('toggleShowDomainPicker', {
+                isActive: value,
             })
-        const toggleShowDomainPicker = () =>
-            this.processEvent('setDomainFilterActive', {
-                isActive: !searchFilters.isDomainFilterActive,
+        }
+        const toggleShowTagPicker = (id: number, isActive?: boolean) => {
+            const value = isActive ?? !searchFilters.isTagFilterActive
+            this.processEvent('toggleShowTagPicker', {
+                isActive: value,
             })
+        }
 
         return (
             <FiltersBar

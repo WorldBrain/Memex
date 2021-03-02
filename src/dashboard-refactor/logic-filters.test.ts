@@ -120,13 +120,13 @@ describe('Dashboard search filters logic', () => {
         expect(searchResults.state.searchFilters.isTagFilterActive).toEqual(
             false,
         )
-        await searchResults.processEvent('setTagFilterActive', {
+        await searchResults.processEvent('toggleShowTagPicker', {
             isActive: true,
         })
         expect(searchResults.state.searchFilters.isTagFilterActive).toEqual(
             true,
         )
-        await searchResults.processEvent('setTagFilterActive', {
+        await searchResults.processEvent('toggleShowTagPicker', {
             isActive: false,
         })
         expect(searchResults.state.searchFilters.isTagFilterActive).toEqual(
@@ -142,13 +142,13 @@ describe('Dashboard search filters logic', () => {
         expect(searchResults.state.searchFilters.isDomainFilterActive).toEqual(
             false,
         )
-        await searchResults.processEvent('setDomainFilterActive', {
+        await searchResults.processEvent('toggleShowDomainPicker', {
             isActive: true,
         })
         expect(searchResults.state.searchFilters.isDomainFilterActive).toEqual(
             true,
         )
-        await searchResults.processEvent('setDomainFilterActive', {
+        await searchResults.processEvent('toggleShowDomainPicker', {
             isActive: false,
         })
         expect(searchResults.state.searchFilters.isDomainFilterActive).toEqual(
@@ -164,13 +164,13 @@ describe('Dashboard search filters logic', () => {
         expect(searchResults.state.searchFilters.isDateFilterActive).toEqual(
             false,
         )
-        await searchResults.processEvent('setDateFilterActive', {
+        await searchResults.processEvent('toggleShowDatePicker', {
             isActive: true,
         })
         expect(searchResults.state.searchFilters.isDateFilterActive).toEqual(
             true,
         )
-        await searchResults.processEvent('setDateFilterActive', {
+        await searchResults.processEvent('toggleShowDatePicker', {
             isActive: false,
         })
         expect(searchResults.state.searchFilters.isDateFilterActive).toEqual(
