@@ -50,6 +50,7 @@ export class DashboardContainer extends StatefulUIElement<
         listsBG: runInBackground(),
         tagsBG: runInBackground(),
         authBG: runInBackground(),
+        syncBG: runInBackground(),
         openFeedUrl: () =>
             window.open(
                 process.env.NODE_ENV === 'production'
@@ -175,7 +176,7 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderHeader() {
-        const { searchFilters, listsSidebar } = this.state
+        const { searchFilters, listsSidebar, syncMenu } = this.state
         const selectedListName =
             listsSidebar.listData[listsSidebar.selectedListId]?.name
 
@@ -226,10 +227,7 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 syncStatusIconState="green"
                 syncStatusMenuProps={{
-                    displayState: {
-                        isDisplayed: false,
-                        toggleDisplayState: __unimplemented,
-                    },
+                    ...syncMenu,
                     backupRunHoverState: {
                         isHovered: false,
                         onHoverEnter: __unimplemented,
@@ -240,18 +238,22 @@ export class DashboardContainer extends StatefulUIElement<
                         onHoverEnter: __unimplemented,
                         onHoverLeave: __unimplemented,
                     },
-                    unSyncedItemState: {
-                        onHideUnSyncedItemCount: __unimplemented,
-                        onShowUnSyncedItemCount: __unimplemented,
-                        showUnSyncedItemCount: false,
-                        unSyncedItemCount: 0,
-                    },
-                    lastSuccessfulBackupDateTime: new Date(),
-                    lastSuccessfulSyncDateTime: new Date(),
-                    onInitiateBackup: __unimplemented,
-                    onInitiateSync: __unimplemented,
-                    backupState: 'disabled',
-                    syncState: 'disabled',
+                    onToggleDisplayState: () =>
+                        this.processEvent('setSyncStatusMenuDisplayState', {
+                            isShown: !syncMenu.isDisplayed,
+                        }),
+                    onHideUnsyncedItemCount: () =>
+                        this.processEvent('setUnsyncedItemCountShown', {
+                            isShown: false,
+                        }),
+                    onShowUnsyncedItemCount: () =>
+                        this.processEvent('setUnsyncedItemCountShown', {
+                            isShown: true,
+                        }),
+                    onInitiateBackup: () =>
+                        this.processEvent('initiateBackup', null),
+                    onInitiateSync: () =>
+                        this.processEvent('initiateSync', null),
                 }}
             />
         )

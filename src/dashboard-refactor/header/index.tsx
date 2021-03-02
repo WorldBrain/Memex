@@ -83,12 +83,6 @@ export interface HeaderProps {
 }
 
 export default class Header extends PureComponent<HeaderProps> {
-    pricingUrl = 'https://worldbrain.io/pricing'
-
-    handleSyncStatusHeaderClick = () => {
-        this.props.syncStatusMenuProps.displayState.toggleDisplayState()
-    }
-
     render() {
         const {
             sidebarHeaderProps,
@@ -104,9 +98,7 @@ export default class Header extends PureComponent<HeaderProps> {
                 </SearchSection>
                 <RightHeader>
                     <SyncStatusHeaderBox
-                        onClick={
-                            syncStatusMenuProps.displayState.toggleDisplayState
-                        }
+                        onClick={syncStatusMenuProps.onToggleDisplayState}
                     >
                         <Margin horizontal="5px">
                             <SyncStatusIcon color={syncStatusIconState}>

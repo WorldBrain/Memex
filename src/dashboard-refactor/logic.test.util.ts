@@ -122,6 +122,7 @@ export async function setupTest(
                 ),
         },
         searchBG: device.backgroundModules.search.remoteFunctions.search,
+        syncBG: device.backgroundModules.sync.remoteFunctions,
         contentShareBG: device.backgroundModules.contentSharing.remoteFunctions,
         activityIndicatorBG:
             device.backgroundModules.activityIndicator.remoteFunctions,
