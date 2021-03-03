@@ -12,19 +12,20 @@ import { DisableableState, RootState } from './types'
 import { HoverState } from 'src/dashboard-refactor/types'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import Margin from 'src/dashboard-refactor/components/Margin'
 
 const Container = styled(HoverBox)<{
     isDisplayed: boolean
 }>`
     height: min-content;
-    width: 183px;
-    padding: 7px;
+    width: 230px;
+    padding: 15px;
     background-color: ${colors.white};
     flex-direction: column;
     box-shadow: ${styles.boxShadow.overlayElement};
 `
 
-const Row = styled.div`
+const Row = styled(Margin)`
     height: min-content;
     display: flex;
     flex-direction: row;
@@ -35,16 +36,12 @@ const Row = styled.div`
 const RowContainer = styled.div`
     height: max-content;
     width: 100%;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-left: 10px;
-    padding-right: 10px;
     display: flex;
     flex-direction: column;
 `
 
 const NotificationBox = styled(RowContainer)`
-    height: 32px;
+    height: 40px;
     padding: 0 !important;
     justify-content: center;
     align-items: center;
@@ -67,6 +64,17 @@ const IconContainer = styled(Icon)<{
         css`
             cursor: pointer;
         `}
+
+    &:hover {
+        background-color: #e8e8e8;
+    }
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 24px;
+    width: 24px;
+    background-size: 16px;
 `
 
 const textStyles = `
@@ -79,7 +87,7 @@ const TextBlock = styled.div<{
 }>`
     height: 18px;
     ${textStyles}
-    font-size: 10px;
+    font-size: 12px;
     line-height: 15px;
     ${(props) =>
         css`
@@ -91,8 +99,8 @@ const TextBlock = styled.div<{
 
 const TextBlockSmall = styled.div`
     ${textStyles}
-    font-weight: ${fonts.primary.weight.bold};
-    font-size: 8px;
+    font-weight: ${fonts.primary.weight.normal};
+    font-size: 10px;
     line-height: 12px;
     text-align: center;
 `
@@ -173,7 +181,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
 
     private renderBackupReminder = () => {
         return this.renderNotificationBox(
-            'Memex is an offline app.',
+            'Memex stores all data locally.',
             'Backup your data.',
         )
     }
@@ -197,7 +205,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     ) => {
         return (
             <>
-                <Row>
+                <Row bottom="10px">
                     <RowContainer>
                         <TextBlock bold>{`${syncType} Status`}</TextBlock>
                         <TextBlock>
@@ -251,7 +259,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         }
 
         return (
-            <Container width="min-content" left="50px" top="50px">
+            <Container width="min-content" right="50px" top="45px">
                 {this.renderRow(
                     'Sync',
                     syncState,

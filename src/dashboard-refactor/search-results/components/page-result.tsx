@@ -328,7 +328,7 @@ const ResultContent = styled(Margin)`
 
 const PageTitle = styled(Margin)`
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 600;
     color: #3a2f45;
     justify-content: flex-start;
 `
