@@ -1621,6 +1621,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     setDateFromInputValue: EventHandler<'setDateFromInputValue'> = async ({
         event,
+        previousState,
     }) => {
         const filterDetail = getFilterDetail('date', event.value, 'from')
         this.emitMutation({
@@ -1628,7 +1629,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 dateFromInput: { $set: event.value },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1638,6 +1639,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     setDateToInputValue: EventHandler<'setDateToInputValue'> = async ({
         event,
+        previousState,
     }) => {
         const filterDetail = getFilterDetail('date', event.value, 'to')
         this.emitMutation({
@@ -1645,7 +1647,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 dateToInput: { $set: event.value },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1663,7 +1665,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 dateFrom: { $set: event.value },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1678,7 +1680,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 dateTo: { $set: event.value },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1697,7 +1699,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 tagsIncluded: { $push: [event.tag] },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1726,7 +1728,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 tagsIncluded: { $splice: [[index, 1]] },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1745,7 +1747,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 tagsExcluded: { $push: [event.tag] },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1774,7 +1776,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 tagsExcluded: { $splice: [[index, 1]] },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1796,7 +1798,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 domainsIncluded: { $push: [event.domain] },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1828,7 +1830,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 domainsIncluded: { $splice: [[index, 1]] },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1850,7 +1852,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 domainsExcluded: { $push: [event.domain] },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1882,7 +1884,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 domainsExcluded: { $splice: [[index, 1]] },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1900,7 +1902,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 tagsIncluded: { $set: event.tags },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1918,7 +1920,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 tagsExcluded: { $set: event.tags },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1936,7 +1938,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 domainsIncluded: { $set: event.domains },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1959,7 +1961,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 domainsExcluded: { $set: event.domains },
                 searchQuery: {
                     $set: syncQueryStringFilters(
-                        event.searchQuery,
+                        previousState.searchFilters.searchQuery,
                         filterDetail,
                     ),
                 },
@@ -1969,9 +1971,10 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     setCursorStartPosition: EventHandler<'setCursorStartPosition'> = ({
         event,
+        previousState,
     }) => {
         const activeFilter = getCursorPositionFilterType(
-            event.searchQuery,
+            previousState.searchFilters.searchQuery,
             event.position,
         )
         this.emitMutation({

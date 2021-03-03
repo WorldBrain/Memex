@@ -144,28 +144,28 @@ export type SearchFilterEvents = UIEvent<{
     toggleShowDatePicker: { isActive: boolean }
     toggleShowDomainPicker: { isActive: boolean }
 
-    setDateFromInputValue: { value: string; searchQuery: string }
-    setDateToInputValue: { value: string; searchQuery: string }
-    setDateFrom: { value: number; searchQuery: string }
-    setDateTo: { value: number; searchQuery: string }
+    setDateFromInputValue: { value: string }
+    setDateToInputValue: { value: string }
+    setDateFrom: { value: number }
+    setDateTo: { value: number }
 
-    addIncludedTag: { tag: string; searchQuery: string }
-    delIncludedTag: { tag: string; searchQuery: string }
-    addExcludedTag: { tag: string; searchQuery: string }
-    delExcludedTag: { tag: string; searchQuery: string }
+    addIncludedTag: { tag: string }
+    delIncludedTag: { tag: string }
+    addExcludedTag: { tag: string }
+    delExcludedTag: { tag: string }
 
-    addIncludedDomain: { domain: string; searchQuery: string }
-    delIncludedDomain: { domain: string; searchQuery: string }
-    addExcludedDomain: { domain: string; searchQuery: string }
-    delExcludedDomain: { domain: string; searchQuery: string }
+    addIncludedDomain: { domain: string }
+    delIncludedDomain: { domain: string }
+    addExcludedDomain: { domain: string }
+    delExcludedDomain: { domain: string }
 
-    setTagsIncluded: { tags: string[]; searchQuery: string }
-    setTagsExcluded: { tags: string[]; searchQuery: string }
-    setDomainsIncluded: { domains: string[]; searchQuery: string }
-    setDomainsExcluded: { domains: string[]; searchQuery: string }
+    setTagsIncluded: { tags: string[] }
+    setTagsExcluded: { tags: string[] }
+    setDomainsIncluded: { domains: string[] }
+    setDomainsExcluded: { domains: string[] }
 
-    setCursorStartPosition: { position: number; searchQuery: string }
-    setCursorEndPosition: { position: number; searchQuery: string }
+    setCursorStartPosition: { position: number }
+    setCursorEndPosition: { position: number }
 
     setTagPickerQuery: { value: string }
     setDomainPickerQuery: { value: string }

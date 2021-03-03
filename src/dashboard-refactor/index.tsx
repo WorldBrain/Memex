@@ -108,8 +108,7 @@ export class DashboardContainer extends StatefulUIElement<
     })
 
     private renderFiltersBar() {
-        const { searchFilters, listsSidebar } = this.state
-        const { searchQuery } = searchFilters
+        const { searchFilters } = this.state
 
         const toggleShowDatePicker = (id: number, isActive?: boolean) => {
             const value = isActive ?? !searchFilters.isDateFilterActive
@@ -154,22 +153,18 @@ export class DashboardContainer extends StatefulUIElement<
                         onStartDateChange: (value) =>
                             this.processEvent('setDateFrom', {
                                 value,
-                                searchQuery,
                             }),
                         onStartDateTextChange: (value) =>
                             this.processEvent('setDateFromInputValue', {
                                 value,
-                                searchQuery,
                             }),
                         onEndDateChange: (value) =>
                             this.processEvent('setDateTo', {
                                 value,
-                                searchQuery,
                             }),
                         onEndDateTextChange: (value) =>
                             this.processEvent('setDateToInputValue', {
                                 value,
-                                searchQuery,
                             }),
                     },
                     domainPickerProps: {
@@ -180,7 +175,6 @@ export class DashboardContainer extends StatefulUIElement<
                                 domains: updatePickerValues(args)(
                                     searchFilters.domainsIncluded,
                                 ),
-                                searchQuery,
                             }),
                     },
                     tagPickerProps: {
@@ -191,7 +185,6 @@ export class DashboardContainer extends StatefulUIElement<
                                 tags: updatePickerValues(args)(
                                     searchFilters.tagsIncluded,
                                 ),
-                                searchQuery,
                             }),
                     },
                 }}
@@ -217,12 +210,10 @@ export class DashboardContainer extends StatefulUIElement<
                         onCursorStartPositionChange: (position: number) =>
                             this.processEvent('setCursorStartPosition', {
                                 position,
-                                searchQuery: searchFilters.searchQuery,
                             }),
                         onCursorEndPositionChange: (position: number) =>
                             this.processEvent('setCursorEndPosition', {
                                 position,
-                                searchQuery: searchFilters.searchQuery,
                             }),
                     },
                     onSearchBarFocus: () =>
