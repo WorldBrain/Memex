@@ -305,6 +305,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     noteData,
                     pageData,
                     results,
+                    noResults,
                     resultsExhausted,
                     searchTermsInvalid,
                 } =
@@ -313,7 +314,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         : await this.searchNotes(previousState, event.paginate)
 
                 let noResultsType: NoResultsType = null
-                if (resultsExhausted) {
+                if (noResults) {
                     if (
                         previousState.listsSidebar.selectedListId ===
                         SPECIAL_LIST_IDS.MOBILE
@@ -410,6 +411,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             ...utils.pageSearchResultToState(result),
             resultsExhausted: result.resultsExhausted,
             searchTermsInvalid: result.isBadTerm,
+            noResults: result.resultsExhausted && searchFilters.skip === 0,
         }
     }
 
@@ -439,6 +441,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             ...utils.annotationSearchResultToState(result),
             resultsExhausted: result.resultsExhausted,
             searchTermsInvalid: result.isBadTerm,
+            noResults: result.resultsExhausted && searchFilters.skip === 0,
         }
     }
 

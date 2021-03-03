@@ -190,12 +190,12 @@ export interface RootState {
 
     // Async operation states
     searchState: TaskState
-    searchPaginationState: TaskState
     noteDeleteState: TaskState
     pageDeleteState: TaskState
     paginationState: TaskState
     noteUpdateState: TaskState
     newNoteCreateState: TaskState
+    searchPaginationState: TaskState
 
     // Misc local storage flags
     showMobileAppAd: boolean
