@@ -102,7 +102,6 @@ async function createDependencies() {
             onDeleteIconClick: action('clickDeleteIcon'),
             onEditIconClick: action('clickEditIcon'),
             toggleBookmark: action('toggleBookmark'),
-            onGoToAnnotation: action('goToAnnotation'),
             onCopyPasterBtnClick: action('clickCopyPaster'),
         }),
         bindAnnotationEditProps: (a) => ({
@@ -117,11 +116,6 @@ async function createDependencies() {
             setTagInputActive: action('activateTagInput'),
             updateTags: action('updateTags') as any,
         }),
-        annotationEditableProps: {
-            onGoToAnnotation: action('clickAnnotation'),
-            onMouseEnter: action('startMouseOver'),
-            onMouseLeave: action('endMouseOver'),
-        },
         handleScrollPagination: () => undefined,
         onClickOutside: action('clickOutside'),
         annotations,

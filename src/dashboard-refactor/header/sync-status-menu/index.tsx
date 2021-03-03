@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import styled, { css } from 'styled-components'
-import moment, { MomentInput } from 'moment'
+import moment from 'moment'
 
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
@@ -8,9 +8,10 @@ import colors from 'src/dashboard-refactor/colors'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 
-import { BackupState, SyncState, UnSyncedItemState } from './types'
-import { DisplayState, HoverState } from 'src/dashboard-refactor/types'
+import { DisableableState, RootState } from './types'
+import { HoverState } from 'src/dashboard-refactor/types'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 const Container = styled(HoverBox)<{
     isDisplayed: boolean
@@ -19,7 +20,6 @@ const Container = styled(HoverBox)<{
     width: 183px;
     padding: 7px;
     background-color: ${colors.white};
-    display: ${(props) => (props.isDisplayed ? 'flex' : 'none')};
     flex-direction: column;
     box-shadow: ${styles.boxShadow.overlayElement};
 `
@@ -102,42 +102,61 @@ const StyledAnchor = styled.a`
     text-decoration: none;
 `
 
-export interface SyncStatusMenuProps {
-    displayState: DisplayState
-    syncState: SyncState
-    backupState: BackupState
-    lastSuccessfulSyncDateTime: Date
-    lastSuccessfulBackupDateTime: Date
-    unSyncedItemState: UnSyncedItemState
+export const timeSinceNowToString = (date: Date): string => {
+    const now = moment(new Date())
+    const dt = moment(date)
+    const seconds = now.diff(dt, 'seconds')
+    const minutes = now.diff(dt, 'minutes')
+    const hours = now.diff(dt, 'hours')
+    const days = now.diff(dt, 'days')
+    const years = now.diff(dt, 'years')
+
+    if (seconds < 60) {
+        return 'Seconds ago'
+    }
+    if (minutes < 2) {
+        return '1 min ago'
+    }
+    if (minutes < 15) {
+        return 'Minutes ago'
+    }
+    if (minutes < 30) {
+        return '15 min ago'
+    }
+    if (hours < 1) {
+        return '30 min ago'
+    }
+    if (hours < 2) {
+        return 'An hour ago'
+    }
+    if (days < 1) {
+        return `${hours} ago`
+    }
+    if (days < 2) {
+        return 'One day ago'
+    }
+    if (days < 30) {
+        return `${days} ago`
+    }
+    if (years < 1) {
+        return dt.format('MMM Do')
+    }
+    return dt.format('ll')
+}
+
+export interface SyncStatusMenuProps extends RootState {
+    goToSyncRoute: () => void
+    goToBackupRoute: () => void
     syncRunHoverState: HoverState
     backupRunHoverState: HoverState
-    onInitiateSync: () => void
-    onInitiateBackup: () => void
+    onInitiateSync: React.MouseEventHandler
+    onInitiateBackup: React.MouseEventHandler
+    onToggleDisplayState: React.MouseEventHandler
+    onShowUnsyncedItemCount: React.MouseEventHandler
+    onHideUnsyncedItemCount: React.MouseEventHandler
 }
 
 export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
-    private getTimeSinceNowString: any = (inputDate: Date) => {
-        const now: MomentInput = moment(new Date())
-        const dt: MomentInput = moment(inputDate)
-        const seconds: number = now.diff(dt, 'seconds')
-        const minutes: number = now.diff(dt, 'minutes')
-        const hours: number = now.diff(dt, 'hours')
-        const days: number = now.diff(dt, 'days')
-        const years: number = now.diff(dt, 'years')
-        let str: string
-        if (seconds < 60) str = 'Seconds ago'
-        if (minutes < 2) str = '1 min ago'
-        if (minutes < 15) str = 'Minutes ago'
-        if (minutes < 30) str = '15 min ago'
-        if (hours < 1) str = '30 min ago'
-        if (hours < 2) str = 'An hour ago'
-        if (days < 1) str = `${hours} ago`
-        if (days < 2) str = 'One day ago'
-        if (days < 30) str = `${days} ago`
-        if (years < 1) str = dt.format('MMM Do')
-        if (years >= 1) str = dt.format('ll')
-        return str
-    }
     private renderNotificationBox = (
         topSpanContent: JSX.Element | string,
         bottomSpanContent: JSX.Element | string,
@@ -151,95 +170,103 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             </Row>
         )
     }
+
     private renderBackupReminder = () => {
         return this.renderNotificationBox(
             'Memex is an offline app.',
             'Backup your data.',
         )
     }
-    private renderError = (syncType: 'sync' | 'backup') => {
+
+    private renderError = (syncType: 'Sync' | 'Backup') => {
         return this.renderNotificationBox(
-            `Your last ${syncType} failed.`,
+            `Your last ${syncType.toLocaleLowerCase()} failed.`,
             <span>
                 <StyledAnchor href="">Contact Support</StyledAnchor> if retry
                 fails too.
             </span>,
         )
     }
+
     private renderRow = (
-        syncType: 'sync' | 'backup',
-        status: SyncState | BackupState,
-        isSyncRunDisabled: boolean,
-        clickHandler: () => void,
+        syncType: 'Sync' | 'Backup',
+        serviceStatus: DisableableState,
+        otherServiceStatus: DisableableState,
+        timeSinceLastRun: Date,
+        clickHandler: React.MouseEventHandler,
     ) => {
-        // this function capitalises the first word of the sentence
-        const string = syncType.replace(/(^\w{1}|\.\s*\w{1})/gi, function (
-            toReplace,
-        ) {
-            return toReplace.toUpperCase()
-        })
         return (
-            <div>
+            <>
                 <Row>
                     <RowContainer>
-                        <TextBlock bold>{`${string} status`}</TextBlock>
+                        <TextBlock bold>{`${syncType} Status`}</TextBlock>
                         <TextBlock>
-                            {status === 'disabled' &&
-                                (syncType === 'sync'
+                            {serviceStatus === 'disabled' &&
+                                (syncType === 'Sync'
                                     ? 'No device paired yet'
                                     : 'No backup set yet')}
-                            {status === 'enabled' && `${string} enabled`}
-                            {status === 'running' && `In progress`}
-                            {(status === 'success' || status === 'error') &&
-                                `Last ${syncType}: ${this.getTimeSinceNowString(
-                                    new Date(),
+                            {serviceStatus === 'enabled' &&
+                                `${syncType} enabled`}
+                            {serviceStatus === 'running' && `In progress`}
+                            {(serviceStatus === 'success' ||
+                                serviceStatus === 'error') &&
+                                `Last ${syncType.toLocaleLowerCase()}: ${timeSinceNowToString(
+                                    timeSinceLastRun,
                                 )}`}
                         </TextBlock>
                     </RowContainer>
-                    {status === 'running' ? (
+                    {serviceStatus === 'running' ? (
                         <LoadingIndicator />
                     ) : (
                         <IconContainer
-                            disabled={isSyncRunDisabled}
-                            heightAndWidth="15px"
-                            path={`/img/${
-                                status === 'disabled' ? 'arrowRight' : 'reload'
-                            }.svg`}
+                            path={
+                                serviceStatus === 'disabled'
+                                    ? icons.arrowRight
+                                    : icons.reload
+                            }
+                            disabled={otherServiceStatus === 'running'}
                             onClick={clickHandler}
+                            heightAndWidth="15px"
                         />
                     )}
                 </Row>
-                {status === 'error' && this.renderError(syncType)}
-            </div>
+                {serviceStatus === 'error' && this.renderError(syncType)}
+            </>
         )
     }
     render() {
         const {
-            displayState: { isDisplayed },
             syncState,
+            isDisplayed,
             backupState,
             onInitiateSync,
+            goToSyncRoute,
+            goToBackupRoute,
             onInitiateBackup,
+            lastSuccessfulSyncDateTime,
+            lastSuccessfulBackupDateTime,
         } = this.props
+        if (!isDisplayed) {
+            return null
+        }
+
         return (
-            <Container
-                isDisplayed={isDisplayed}
-                withRelativeContainer
-                width="min-content"
-                left="50px"
-                top="50px"
-            >
+            <Container width="min-content" left="50px" top="50px">
                 {this.renderRow(
-                    'sync',
+                    'Sync',
                     syncState,
-                    backupState === 'running',
-                    onInitiateSync,
+                    backupState,
+                    lastSuccessfulSyncDateTime,
+                    syncState === 'disabled' ? goToSyncRoute : onInitiateSync,
                 )}
                 {this.renderRow(
-                    'backup',
+                    'Backup',
                     backupState,
-                    syncState === 'running',
-                    onInitiateBackup,
+                    syncState,
+                    lastSuccessfulBackupDateTime,
+                    syncState === 'disabled'
+                        ? goToBackupRoute
+                        : onInitiateBackup,
                 )}
                 {backupState === 'disabled' && this.renderBackupReminder()}
             </Container>

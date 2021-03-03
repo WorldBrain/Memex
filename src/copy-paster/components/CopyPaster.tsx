@@ -8,6 +8,10 @@ import { ClickAway } from 'src/util/click-away-wrapper'
 
 const CopyPasterWrapper = styled.div`
     padding: 0 0 5px 0;
+
+    & * {
+        font-family: 'Poppins', 'Arial';
+    }
 `
 
 interface CopyPasterProps {

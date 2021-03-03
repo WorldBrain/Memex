@@ -39,14 +39,17 @@ const GroupHeaderInnerDiv = styled.div`
 const GroupTitle = styled.div`
     color: ${fonts.primary.colors.secondary};
     font-family: ${fonts.primary.name};
-    font-weight: ${fonts.primary.weight.bold};
-    font-size: 12px;
     line-height: 18px;
+    cursor: pointer;
 
     width: max-content;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 14px;
+    font-weight: 300;
+    padding: 5px 0px 5px 5px;
+    opacity: 0.7;
 `
 
 const IconContainer = styled.div`
@@ -119,18 +122,21 @@ export default class ListsSidebarGroup extends PureComponent<
                             <IconContainer
                                 onClick={this.props.onExpandBtnClick}
                             >
-                                <Margin horizontal="5.5px">
+                                <Margin left="5px">
                                     <Icon
-                                        plus90={this.props.isExpanded}
-                                        minus90={!this.props.isExpanded}
-                                        heightAndWidth="8px"
+                                        rotation={
+                                            this.props.isExpanded ? '0' : '-90'
+                                        }
+                                        heightAndWidth="12px"
                                         path={icons.triangle}
                                     />
                                 </Margin>
                             </IconContainer>
                         )}
                         <GroupHeaderInnerDiv className="inner">
-                            <GroupTitle>{this.props.title}</GroupTitle>
+                            <GroupTitle onClick={this.props.onExpandBtnClick}>
+                                {this.props.title}
+                            </GroupTitle>
                             {this.props.onAddBtnClick && (
                                 <IconContainer
                                     onClick={this.props.onAddBtnClick}

@@ -41,13 +41,13 @@ export const SHARE_BUTTON_ICONS: {
     [Key in SharingState]: string | null
 } = {
     'feature-disabled': icons.lock,
-    'not-shared-yet': icons.lock,
+    'not-shared-yet': icons.link,
     'already-shared': icons.shared,
     sharing: icons.shared,
     'sharing-success': icons.shared,
     'sharing-error': icons.lock,
     unsharing: icons.lock,
-    'unsharing-success': icons.lock,
+    'unsharing-success': icons.link,
     'unsharing-error': icons.shared,
 }
 

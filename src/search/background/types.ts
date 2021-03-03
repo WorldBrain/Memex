@@ -136,6 +136,7 @@ export interface StandardSearchResponse {
     resultsExhausted: boolean
     totalCount?: number
     docs: AnnotPage[]
+    isBadTerm?: boolean
 }
 
 export interface AnnotationsSearchResponse extends StandardSearchResponse {

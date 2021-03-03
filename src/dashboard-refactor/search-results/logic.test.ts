@@ -6,10 +6,56 @@ import {
 } from '../logic.test.util'
 import * as DATA from '../logic.test.data'
 import * as utils from './util'
+import { NoteResultHoverState, ResultHoverState } from './types'
+import { PAGE_SEARCH_DUMMY_DAY } from '../constants'
 
 describe('Dashboard search results logic', () => {
     const it = makeSingleDeviceUILogicTestFactory({
         includePostSyncProcessor: true,
+    })
+
+    it('should be able to copy note links', async ({ device }) => {
+        let clipboard = ''
+        const { searchResults, analytics } = await setupTest(device, {
+            copyToClipboard: async (text) => {
+                clipboard = text
+                return true
+            },
+        })
+        const link = 'test'
+
+        expect(clipboard).toEqual('')
+        expect(analytics.popNew()).toEqual([])
+
+        await searchResults.processEvent('copyShareLink', {
+            link,
+            analyticsAction: 'copyPageLink',
+        })
+
+        expect(clipboard).toEqual(link)
+        expect(analytics.popNew()).toEqual([
+            {
+                eventArgs: {
+                    category: 'ContentSharing',
+                    action: 'copyPageLink',
+                },
+            },
+        ])
+
+        await searchResults.processEvent('copyShareLink', {
+            link,
+            analyticsAction: 'copyNoteLink',
+        })
+
+        expect(clipboard).toEqual(link)
+        expect(analytics.popNew()).toEqual([
+            {
+                eventArgs: {
+                    category: 'ContentSharing',
+                    action: 'copyNoteLink',
+                },
+            },
+        ])
     })
 
     describe('root state mutations', () => {
@@ -31,6 +77,9 @@ describe('Dashboard search results logic', () => {
             expect(searchResults.state.searchResults.searchType).toEqual(
                 'notes',
             )
+            expect(
+                searchResults.state.searchResults.shouldFormsAutoFocus,
+            ).toEqual(false)
 
             await searchResults.processEvent('setSearchType', {
                 searchType: 'pages',
@@ -40,6 +89,9 @@ describe('Dashboard search results logic', () => {
             expect(searchResults.state.searchResults.searchType).toEqual(
                 'pages',
             )
+            expect(
+                searchResults.state.searchResults.shouldFormsAutoFocus,
+            ).toEqual(false)
         })
 
         it('should be able to set all notes shown', async ({ device }) => {
@@ -191,11 +243,11 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent('setDeletingPageArgs', {
                 pageId,
-                day: -1,
+                day: PAGE_SEARCH_DUMMY_DAY,
             })
             expect(searchResults.state.modals.deletingPageArgs).toEqual({
                 pageId,
-                day: -1,
+                day: PAGE_SEARCH_DUMMY_DAY,
             })
 
             await searchResults.processEvent('cancelPageDelete', null)
@@ -254,14 +306,19 @@ describe('Dashboard search results logic', () => {
                     ...DATA.PAGE_1,
                 }),
             )
+            expect(
+                searchResults.state.searchResults.results[
+                    PAGE_SEARCH_DUMMY_DAY
+                ].pages.allIds.includes(pageId),
+            ).toEqual(true)
 
             await searchResults.processEvent('setDeletingPageArgs', {
                 pageId,
-                day: -1,
+                day: PAGE_SEARCH_DUMMY_DAY,
             })
             expect(searchResults.state.modals.deletingPageArgs).toEqual({
                 pageId,
-                day: -1,
+                day: PAGE_SEARCH_DUMMY_DAY,
             })
 
             expect(searchResults.state.searchResults.pageDeleteState).toEqual(
@@ -295,6 +352,163 @@ describe('Dashboard search results logic', () => {
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId],
             ).toEqual(undefined)
+            expect(
+                searchResults.state.searchResults.results[PAGE_SEARCH_DUMMY_DAY]
+                    .pages.byId[pageId],
+            ).toEqual(undefined)
+            expect(
+                searchResults.state.searchResults.results[
+                    PAGE_SEARCH_DUMMY_DAY
+                ].pages.allIds.includes(pageId),
+            ).toEqual(false)
+        })
+
+        it('should be able to remove a page from the search filtered list', async ({
+            device,
+        }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+            })
+            const pageId = DATA.PAGE_2.normalizedUrl
+            const list = DATA.LISTS_1[0]
+
+            await searchResults.processEvent('setPageLists', {
+                id: pageId,
+                fullPageUrl: 'https://' + pageId,
+                added: list.name,
+                skipPageIndexing: true,
+            })
+
+            searchResults.processMutation({
+                listsSidebar: { selectedListId: { $set: list.id } },
+            })
+            expect(
+                searchResults.state.searchResults.results[
+                    PAGE_SEARCH_DUMMY_DAY
+                ].pages.allIds.includes(pageId),
+            ).toBe(true)
+
+            await searchResults.processEvent('removePageFromList', {
+                day: PAGE_SEARCH_DUMMY_DAY,
+                pageId,
+            })
+
+            expect(
+                searchResults.state.searchResults.results[
+                    PAGE_SEARCH_DUMMY_DAY
+                ].pages.allIds.includes(pageId),
+            ).toBe(false)
+        })
+
+        it('should be able to drag and drop a page result, setting the drag image', async ({
+            device,
+        }) => {
+            const mockElement = { style: { display: undefined } }
+            const mockDocument = { getElementById: () => mockElement }
+
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                mockDocument,
+            })
+            searchResults['options']
+            const page = DATA.PAGE_1
+
+            const dataTransfer = new DataTransfer()
+
+            expect(dataTransfer['img']).toEqual(undefined)
+            expect(dataTransfer.getData('text/plain')).toEqual('')
+            expect(mockElement.style.display).toEqual(undefined)
+            expect(searchResults.state.searchResults.draggedPageId).toEqual(
+                undefined,
+            )
+
+            await searchResults.processEvent('dragPage', {
+                pageId: page.normalizedUrl,
+                day: PAGE_SEARCH_DUMMY_DAY,
+                dataTransfer,
+            })
+
+            expect(dataTransfer['img']).toEqual(mockElement)
+            expect(dataTransfer.getData('text/plain')).toEqual(
+                JSON.stringify({ fullPageUrl: page.fullUrl }),
+            )
+            expect(mockElement.style.display).toEqual('block')
+            expect(searchResults.state.searchResults.draggedPageId).toEqual(
+                page.normalizedUrl,
+            )
+
+            await searchResults.processEvent('dropPage', {
+                pageId: page.normalizedUrl,
+                day: PAGE_SEARCH_DUMMY_DAY,
+            })
+
+            expect(searchResults.state.searchResults.draggedPageId).toEqual(
+                undefined,
+            )
+        })
+
+        it('should be update note share info for all notes of a page', async ({
+            device,
+        }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+            })
+            const pageId = DATA.PAGE_1.normalizedUrl
+            const day = PAGE_SEARCH_DUMMY_DAY
+
+            const noteIds = searchResults.state.searchResults.noteData.allIds.filter(
+                (noteId) =>
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .pageUrl === pageId,
+            )
+
+            expect(searchResults.state.searchResults.noteSharingInfo).toEqual(
+                {},
+            )
+
+            await searchResults.processEvent('updatePageNotesShareInfo', {
+                day,
+                pageId,
+                info: { status: 'not-yet-shared', taskState: 'pristine' },
+            })
+            for (const noteId of noteIds) {
+                expect(
+                    searchResults.state.searchResults.noteSharingInfo[noteId],
+                ).toEqual({
+                    status: 'not-yet-shared',
+                    taskState: 'pristine',
+                })
+            }
+
+            await searchResults.processEvent('updatePageNotesShareInfo', {
+                day,
+                pageId,
+                info: { status: 'shared', taskState: 'success' },
+            })
+
+            for (const noteId of noteIds) {
+                expect(
+                    searchResults.state.searchResults.noteSharingInfo[noteId],
+                ).toEqual({
+                    status: 'shared',
+                    taskState: 'success',
+                })
+            }
+
+            await searchResults.processEvent('updatePageNotesShareInfo', {
+                day,
+                pageId,
+                info: { status: 'unshared', taskState: 'error' },
+            })
+
+            for (const noteId of noteIds) {
+                expect(
+                    searchResults.state.searchResults.noteSharingInfo[noteId],
+                ).toEqual({
+                    status: 'unshared',
+                    taskState: 'error',
+                })
+            }
         })
     })
 
@@ -306,7 +520,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_3.normalizedUrl
 
                 expect(
@@ -342,7 +556,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_3.normalizedUrl
 
                 expect(
@@ -378,7 +592,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_3.normalizedUrl
 
                 expect(
@@ -408,11 +622,53 @@ describe('Dashboard search results logic', () => {
                 ).toBe(false)
             })
 
+            it('should be able to show and hide page share menu', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(),
+                })
+                const day = PAGE_SEARCH_DUMMY_DAY
+                const pageId = DATA.PAGE_3.normalizedUrl
+
+                await searchResults.processMutation({
+                    searchResults: {
+                        sharingAccess: { $set: 'sharing-allowed' },
+                    },
+                })
+
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isShareMenuShown,
+                ).toBe(false)
+                await searchResults.processEvent('setPageShareMenuShown', {
+                    day,
+                    pageId,
+                    isShown: true,
+                })
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isShareMenuShown,
+                ).toBe(true)
+                await searchResults.processEvent('setPageShareMenuShown', {
+                    day,
+                    pageId,
+                    isShown: false,
+                })
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].isShareMenuShown,
+                ).toBe(false)
+            })
+
             it('should be able to show and hide notes', async ({ device }) => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_3.normalizedUrl
 
                 expect(
@@ -420,6 +676,9 @@ describe('Dashboard search results logic', () => {
                         pageId
                     ].areNotesShown,
                 ).toBe(false)
+                expect(
+                    searchResults.state.searchResults.shouldFormsAutoFocus,
+                ).toEqual(false)
                 await searchResults.processEvent('setPageNotesShown', {
                     day,
                     pageId,
@@ -430,6 +689,9 @@ describe('Dashboard search results logic', () => {
                         pageId
                     ].areNotesShown,
                 ).toBe(true)
+                expect(
+                    searchResults.state.searchResults.shouldFormsAutoFocus,
+                ).toEqual(true)
                 await searchResults.processEvent('setPageNotesShown', {
                     day,
                     pageId,
@@ -440,13 +702,16 @@ describe('Dashboard search results logic', () => {
                         pageId
                     ].areNotesShown,
                 ).toBe(false)
+                expect(
+                    searchResults.state.searchResults.shouldFormsAutoFocus,
+                ).toEqual(false)
             })
 
             it('should be able to set note type', async ({ device }) => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_1.normalizedUrl
 
                 expect(
@@ -486,13 +751,47 @@ describe('Dashboard search results logic', () => {
                 ).toEqual('user')
             })
 
+            it('should be able to set page result hover state', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(),
+                })
+                const day = PAGE_SEARCH_DUMMY_DAY
+                const pageId = DATA.PAGE_1.normalizedUrl
+                const states: ResultHoverState[] = [
+                    'footer',
+                    'main-content',
+                    'tags',
+                    null,
+                ]
+
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].hoverState,
+                ).toEqual(null)
+
+                for (const hover of states) {
+                    await searchResults.processEvent('setPageHover', {
+                        day,
+                        pageId,
+                        hover,
+                    })
+                    expect(
+                        searchResults.state.searchResults.results[day].pages
+                            .byId[pageId].hoverState,
+                    ).toEqual(hover)
+                }
+            })
+
             it('should be able to set new note input value', async ({
                 device,
             }) => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_1.normalizedUrl
 
                 expect(
@@ -541,7 +840,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_1.normalizedUrl
 
                 expect(
@@ -585,7 +884,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_1.normalizedUrl
 
                 expect(
@@ -623,7 +922,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_1.normalizedUrl
                 const newNoteComment = 'test'
                 const newNoteTags = ['test']
@@ -674,7 +973,7 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
                 })
-                const day = -1
+                const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_1.normalizedUrl
                 const newNoteComment = 'test'
                 const newNoteTags = ['test']
@@ -780,15 +1079,6 @@ describe('Dashboard search results logic', () => {
                     expect(
                         searchResults.state.searchResults.results[day].pages
                             .byId[pageId].areNotesShown,
-                    ).toBe(false)
-                    await searchResults.processEvent('setPageNotesShown', {
-                        day,
-                        pageId,
-                        areShown: true,
-                    })
-                    expect(
-                        searchResults.state.searchResults.results[day].pages
-                            .byId[pageId].areNotesShown,
                     ).toBe(true)
                     await searchResults.processEvent('setPageNotesShown', {
                         day,
@@ -799,6 +1089,21 @@ describe('Dashboard search results logic', () => {
                         searchResults.state.searchResults.results[day].pages
                             .byId[pageId].areNotesShown,
                     ).toBe(false)
+                    expect(
+                        searchResults.state.searchResults.shouldFormsAutoFocus,
+                    ).toBe(false)
+                    await searchResults.processEvent('setPageNotesShown', {
+                        day,
+                        pageId,
+                        areShown: true,
+                    })
+                    expect(
+                        searchResults.state.searchResults.results[day].pages
+                            .byId[pageId].areNotesShown,
+                    ).toBe(true)
+                    expect(
+                        searchResults.state.searchResults.shouldFormsAutoFocus,
+                    ).toBe(true)
                 })
 
                 it('should be able to set note type', async ({ device }) => {
@@ -890,6 +1195,165 @@ describe('Dashboard search results logic', () => {
                         searchResults.state.searchResults.results[day].pages
                             .byId[pageId].newNoteForm.inputValue,
                     ).toEqual('user')
+                })
+
+                it('should be able to remove a page from the search filtered list, removing results from all days it occurs under', async ({
+                    device,
+                }) => {
+                    const { searchResults } = await setupTest(device, {
+                        seedData: setNoteSearchResult(
+                            DATA.ANNOT_SEARCH_RESULT_2,
+                        ),
+                    })
+                    const pageId = DATA.PAGE_1.normalizedUrl
+                    const list = DATA.LISTS_1[0]
+
+                    await searchResults.processEvent('setPageLists', {
+                        id: pageId,
+                        fullPageUrl: 'https://' + pageId,
+                        added: list.name,
+                        skipPageIndexing: true,
+                    })
+
+                    searchResults.processMutation({
+                        listsSidebar: { selectedListId: { $set: list.id } },
+                    })
+
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_1
+                        ].pages.allIds.includes(pageId),
+                    ).toBe(true)
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_2
+                        ].pages.allIds.includes(pageId),
+                    ).toBe(true)
+
+                    await searchResults.processEvent('removePageFromList', {
+                        day: DATA.DAY_1,
+                        pageId,
+                    })
+
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_1
+                        ].pages.allIds.includes(pageId),
+                    ).toBe(false)
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_2
+                        ].pages.allIds.includes(pageId),
+                    ).toBe(false)
+                })
+
+                it('should be able to confirm page deletion, removing results from all days it occurs under', async ({
+                    device,
+                }) => {
+                    const { searchResults } = await setupTest(device, {
+                        seedData: setNoteSearchResult(
+                            DATA.ANNOT_SEARCH_RESULT_2,
+                        ),
+                    })
+                    const pageId = DATA.PAGE_1.normalizedUrl
+                    delete DATA.PAGE_1.fullUrl
+
+                    expect(
+                        await device.storageManager
+                            .collection('pages')
+                            .findOneObject({ url: pageId }),
+                    ).toEqual(
+                        expect.objectContaining({
+                            url: pageId,
+                            title: DATA.PAGE_1.fullTitle,
+                        }),
+                    )
+                    expect(searchResults.state.modals.deletingPageArgs).toEqual(
+                        undefined,
+                    )
+                    expect(
+                        searchResults.state.searchResults.pageData.allIds.includes(
+                            pageId,
+                        ),
+                    ).toEqual(true)
+                    expect(
+                        searchResults.state.searchResults.pageData.byId[pageId],
+                    ).toEqual(
+                        expect.objectContaining({
+                            ...DATA.PAGE_1,
+                        }),
+                    )
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_1
+                        ].pages.allIds.includes(pageId),
+                    ).toEqual(true)
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_2
+                        ].pages.allIds.includes(pageId),
+                    ).toEqual(true)
+
+                    await searchResults.processEvent('setDeletingPageArgs', {
+                        pageId,
+                        day: DATA.DAY_1,
+                    })
+                    expect(searchResults.state.modals.deletingPageArgs).toEqual(
+                        {
+                            pageId,
+                            day: DATA.DAY_1,
+                        },
+                    )
+
+                    expect(
+                        searchResults.state.searchResults.pageDeleteState,
+                    ).toEqual('pristine')
+                    const deleteP = searchResults.processEvent(
+                        'confirmPageDelete',
+                        null,
+                    )
+                    expect(
+                        searchResults.state.searchResults.pageDeleteState,
+                    ).toEqual('running')
+                    await deleteP
+                    expect(
+                        searchResults.state.searchResults.pageDeleteState,
+                    ).toEqual('success')
+
+                    expect(
+                        await device.storageManager
+                            .collection('pages')
+                            .findOneObject({ url: pageId }),
+                    ).toEqual(null)
+                    expect(searchResults.state.modals.deletingPageArgs).toEqual(
+                        undefined,
+                    )
+                    expect(
+                        searchResults.state.searchResults.pageData.allIds.includes(
+                            pageId,
+                        ),
+                    ).toEqual(false)
+                    expect(
+                        searchResults.state.searchResults.pageData.byId[pageId],
+                    ).toEqual(undefined)
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_1
+                        ].pages.allIds.includes(pageId),
+                    ).toEqual(false)
+                    expect(
+                        searchResults.state.searchResults.results[
+                            DATA.DAY_2
+                        ].pages.allIds.includes(pageId),
+                    ).toEqual(false)
+                    expect(
+                        searchResults.state.searchResults.results[DATA.DAY_1]
+                            .pages.byId[pageId],
+                    ).toEqual(undefined)
+                    expect(
+                        searchResults.state.searchResults.results[DATA.DAY_2]
+                            .pages.byId[pageId],
+                    ).toEqual(undefined)
                 })
             })
         })
@@ -991,6 +1455,38 @@ describe('Dashboard search results logic', () => {
                 ).toEqual(false)
             })
 
+            it('should be able to set note result hover state', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                const noteId = DATA.NOTE_2.url
+                const states: NoteResultHoverState[] = [
+                    'footer',
+                    'main-content',
+                    'note',
+                    'tags',
+                    null,
+                ]
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .hoverState,
+                ).toEqual(null)
+
+                for (const hover of states) {
+                    await searchResults.processEvent('setNoteHover', {
+                        noteId,
+                        hover,
+                    })
+                    expect(
+                        searchResults.state.searchResults.noteData.byId[noteId]
+                            .hoverState,
+                    ).toEqual(hover)
+                }
+            })
+
             it('should be able to toggle note tag picker shown state', async ({
                 device,
             }) => {
@@ -1084,8 +1580,9 @@ describe('Dashboard search results logic', () => {
                         .isShareMenuShown,
                 ).toEqual(false)
 
-                await searchResults.processEvent('showNoteShareMenu', {
+                await searchResults.processEvent('setNoteShareMenuShown', {
                     noteId,
+                    isShown: true,
                 })
 
                 expect(searchResults.state.modals.showBetaFeature).toEqual(true)
@@ -1095,7 +1592,9 @@ describe('Dashboard search results logic', () => {
                 ).toEqual(false)
             })
 
-            it('should be able to show note share menu', async ({ device }) => {
+            it('should be able to show and hide note share menu', async ({
+                device,
+            }) => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
                 })
@@ -1112,14 +1611,25 @@ describe('Dashboard search results logic', () => {
                         .isShareMenuShown,
                 ).toEqual(false)
 
-                await searchResults.processEvent('showNoteShareMenu', {
+                await searchResults.processEvent('setNoteShareMenuShown', {
                     noteId,
+                    isShown: true,
                 })
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .isShareMenuShown,
                 ).toEqual(true)
+
+                await searchResults.processEvent('setNoteShareMenuShown', {
+                    noteId,
+                    isShown: false,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .isShareMenuShown,
+                ).toEqual(false)
             })
 
             it('should be update note share info', async ({ device }) => {
@@ -1164,37 +1674,6 @@ describe('Dashboard search results logic', () => {
                     status: 'unshared',
                     taskState: 'error',
                 })
-            })
-
-            it('should be able to copy note links', async ({ device }) => {
-                let clipboard = ''
-                const { searchResults, analytics } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                    copyToClipboard: async (text) => {
-                        clipboard = text
-                        return true
-                    },
-                })
-                const noteId = DATA.NOTE_2.url
-                const link = 'test'
-
-                expect(clipboard).toEqual('')
-                expect(analytics.popNew()).toEqual([])
-
-                await searchResults.processEvent('copySharedNoteLink', {
-                    noteId,
-                    link,
-                })
-
-                expect(clipboard).toEqual(link)
-                expect(analytics.popNew()).toEqual([
-                    {
-                        eventArgs: {
-                            category: 'ContentSharing',
-                            action: 'copyNoteLink',
-                        },
-                    },
-                ])
             })
 
             it('should be able to set note edit comment value state', async ({
@@ -1364,12 +1843,12 @@ describe('Dashboard search results logic', () => {
                 await searchResults.processEvent('setDeletingNoteArgs', {
                     noteId,
                     pageId: DATA.PAGE_1.normalizedUrl,
-                    day: -1,
+                    day: PAGE_SEARCH_DUMMY_DAY,
                 })
                 expect(searchResults.state.modals.deletingNoteArgs).toEqual({
                     noteId,
                     pageId: DATA.PAGE_1.normalizedUrl,
-                    day: -1,
+                    day: PAGE_SEARCH_DUMMY_DAY,
                 })
 
                 await searchResults.processEvent('cancelNoteDelete', null)
@@ -1433,12 +1912,12 @@ describe('Dashboard search results logic', () => {
                 await searchResults.processEvent('setDeletingNoteArgs', {
                     noteId,
                     pageId: DATA.PAGE_1.normalizedUrl,
-                    day: -1,
+                    day: PAGE_SEARCH_DUMMY_DAY,
                 })
                 expect(searchResults.state.modals.deletingNoteArgs).toEqual({
                     noteId,
                     pageId: DATA.PAGE_1.normalizedUrl,
-                    day: -1,
+                    day: PAGE_SEARCH_DUMMY_DAY,
                 })
 
                 expect(

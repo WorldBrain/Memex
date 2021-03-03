@@ -11,7 +11,7 @@ import { SidebarLockedState } from '../../types'
 const textStyles = `
     font-family: ${fonts.primary.name};
     font-weight: ${fonts.primary.weight.normal};
-    font-size: 10px;
+    font-size: 12px;
     line-height: 15px;
     color: ${fonts.primary.colors.primary};
     cursor: text;
@@ -21,22 +21,18 @@ const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
     height: min-content;
     padding-left: 8px;
     padding-right: 8px;
-    ${(props) =>
-        css`
-            background-color: ${props.isSidebarLocked
-                ? colors.white
-                : colors.lightMidGrey};
-        `}
-    border-bottom: 1px solid ${colors.lighterGrey};
+    background-color: ${colors.lightMidGrey};
     border-radius: 3px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    width: 100%;
+    margin: 5px 5px;
 `
 
 const InnerContainer = styled.div<{ displayTopBorder?: boolean }>`
-    height: 24px;
+    height: 30px;
     width: 100%;
     background-color: transparent;
     display: flex;
@@ -60,11 +56,14 @@ const Input = styled.input<{ isFocused: boolean }>`
         return css`&::placeholder {
             ${textStyles}
             color: ${props.isFocused ? secondary : primary};
+            opacity: 0.6;
             `
     }}}
     &:focus {
         outline: none;
     }
+    flex-direction: flex-start;
+    margin: 0;
 `
 
 const TextSpan = styled.span<{ bold?: boolean }>`

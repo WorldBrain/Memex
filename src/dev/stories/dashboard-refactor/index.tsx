@@ -32,13 +32,18 @@ async function createDependencies(): Promise<DashboardProps> {
             await navigator.clipboard.writeText(text)
             return true
         },
+        document,
         annotationsBG,
         localStorage: browser.storage.local,
         authBG: backgroundModules.auth.remoteFunctions,
+        syncBG: backgroundModules.sync.remoteFunctions,
         tagsBG: backgroundModules.tags.remoteFunctions,
         listsBG: backgroundModules.customLists.remoteFunctions,
         searchBG: backgroundModules.search.remoteFunctions.search,
         contentShareBG: backgroundModules.contentSharing.remoteFunctions,
+        activityIndicatorBG:
+            backgroundModules.activityIndicator.remoteFunctions,
+        openFeedUrl: () => undefined,
     }
 }
 

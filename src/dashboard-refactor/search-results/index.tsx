@@ -14,6 +14,7 @@ import {
     PageInteractionProps,
     PagePickerAugdProps,
     NotePickerAugdProps,
+    NoResultsType,
 } from './types'
 import TopBar from './components/result-top-bar'
 import SearchTypeSwitch, {
@@ -22,6 +23,7 @@ import SearchTypeSwitch, {
 import ExpandAllNotes from './components/expand-all-notes'
 import DayResultGroup from './components/day-result-group'
 import PageResult from './components/page-result'
+import NoResults from './components/no-results'
 import { bindFunctionalProps, formatDayGroupTime } from './util'
 import NotesTypeDropdownMenu from './components/notes-type-dropdown-menu'
 import { SortingDropdownMenuBtn } from 'src/sidebar/annotations-sidebar/components/SortingDropdownMenu'
@@ -38,6 +40,9 @@ import { PageNotesCopyPaster } from 'src/copy-paster'
 import TagPicker from 'src/tags/ui/TagPicker'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import Margin from 'src/dashboard-refactor/components/Margin'
+import DismissibleResultsMessage from './components/dismissible-results-message'
+import MobileAppAd from 'src/sync/components/device-list/mobile-app-ad'
+import OnboardingMsg from './components/onboarding-msg'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -47,12 +52,18 @@ export type Props = RootState &
         SearchTypeSwitchProps,
         'onNotesSearchSwitch' | 'onPagesSearchSwitch'
     > & {
+        goToImportRoute: () => void
         areAllNotesShown: boolean
+        isSearchFilteredByList: boolean
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
         pagePickerProps: PagePickerAugdProps
         notePickerProps: NotePickerAugdProps
         onShowAllNotesClick: React.MouseEventHandler
+        noResultsType: NoResultsType
+        onDismissMobileAd: React.MouseEventHandler
+        onDismissOnboardingMsg: React.MouseEventHandler
+        filterSearchByTag: (tag: string) => void
         newNoteInteractionProps: {
             [Key in keyof AnnotationCreateEventProps]: (
                 day: number,
@@ -68,6 +79,8 @@ export type Props = RootState &
             pageId: string,
         ): (sorter: AnnotationsSorter) => void
         paginateSearch(): Promise<void>
+        onPageLinkCopy(link: string): Promise<void>
+        onNoteLinkCopy(link: string): Promise<void>
     }
 
 export default class SearchResultsContainer extends PureComponent<Props> {
@@ -92,9 +105,17 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         return (
             <AnnotationEditable
                 key={noteId}
+                tags={noteData.tags}
                 body={noteData.highlight}
                 comment={noteData.comment}
                 createdWhen={new Date(noteData.displayTime)}
+                onHighlightHover={interactionProps.onMainContentHover}
+                onFooterHover={interactionProps.onFooterHover}
+                onNoteHover={interactionProps.onNoteHover}
+                onTagsHover={interactionProps.onTagsHover}
+                onUnhover={interactionProps.onUnhover}
+                hoverState={noteData.hoverState}
+                onTagClick={this.props.filterSearchByTag}
                 lastEdited={
                     noteData.isEdited
                         ? new Date(noteData.displayTime)
@@ -105,19 +126,25 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 sharingAccess={this.props.sharingAccess}
                 renderCopyPasterForAnnotation={() =>
                     noteData.isCopyPasterShown && (
-                        <HoverBox>
+                        <HoverBox right="0" withRelativeContainer>
                             <PageNotesCopyPaster
                                 annotationUrls={[noteId]}
                                 normalizedPageUrls={[pageId]}
+                                onClickOutside={
+                                    interactionProps.onCopyPasterBtnClick
+                                }
                             />
                         </HoverBox>
                     )
                 }
                 renderTagsPickerForAnnotation={() =>
                     noteData.isTagPickerShown && (
-                        <HoverBox>
+                        <HoverBox right="0" withRelativeContainer>
                             <TagPicker
                                 initialSelectedEntries={() => noteData.tags}
+                                onClickOutside={
+                                    interactionProps.onTagPickerBtnClick
+                                }
                                 onUpdateEntrySelection={
                                     interactionProps.updateTags
                                 }
@@ -127,13 +154,13 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 }
                 renderShareMenuForAnnotation={() =>
                     noteData.isShareMenuShown && (
-                        <HoverBox>
+                        <HoverBox right="0" withRelativeContainer>
                             <SingleNoteShareMenu
                                 annotationUrl={noteId}
-                                closeShareMenu={() =>
-                                    interactionProps.onShareBtnClick(dummyEvent)
+                                copyLink={this.props.onNoteLinkCopy}
+                                closeShareMenu={
+                                    interactionProps.onShareBtnClick
                                 }
-                                copyLink={interactionProps.copySharedLink}
                                 postShareHook={() =>
                                     interactionProps.updateShareInfo({
                                         status: 'shared',
@@ -167,6 +194,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     onTagIconClick: interactionProps.onTagPickerBtnClick,
                     onDeleteIconClick: interactionProps.onTrashBtnClick,
                     onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
+                    onGoToAnnotation: interactionProps.onGoToHighlightClick,
                     onEditCancel: interactionProps.onEditCancel,
                     onEditConfirm: interactionProps.onEditConfirm,
                     onEditIconClick: interactionProps.onEditBtnClick,
@@ -198,7 +226,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         >(this.props.newNoteInteractionProps, day, normalizedUrl)
 
         return (
-            <PageNotesBox bottom="10px" left="20px">
+            <PageNotesBox bottom="10px" left="10px">
                 <NoteTopBarBox
                     leftSide={
                         <NotesTypeDropdownMenu
@@ -220,7 +248,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         />
                     }
                 />
+                <Margin bottom="3px" />
                 <AnnotationCreate
+                    autoFocus={this.props.shouldFormsAutoFocus}
                     comment={newNoteForm.inputValue}
                     tags={newNoteForm.tags}
                     {...boundAnnotCreateProps}
@@ -252,6 +282,23 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             <ResultBox bottom="10px">
                 <PageResult
                     key={pageId + day.toString()}
+                    isSearchFilteredByList={this.props.isSearchFilteredByList}
+                    onTagClick={this.props.filterSearchByTag}
+                    shareMenuProps={{
+                        normalizedPageUrl: page.normalizedUrl,
+                        closeShareMenu: interactionProps.onShareBtnClick,
+                        copyLink: this.props.onPageLinkCopy,
+                        postShareAllHook: () =>
+                            interactionProps.updatePageNotesShareInfo({
+                                status: 'shared',
+                                taskState: 'success',
+                            }),
+                        postUnshareAllHook: () =>
+                            interactionProps.updatePageNotesShareInfo({
+                                status: 'unshared',
+                                taskState: 'success',
+                            }),
+                    }}
                     {...interactionProps}
                     {...pickerProps}
                     {...page}
@@ -261,7 +308,56 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         )
     }
 
+    private renderNoResults() {
+        if (this.props.noResultsType === 'onboarding-msg') {
+            return (
+                <NoResults title="You don't have anything saved yet">
+                    <DismissibleResultsMessage
+                        onDismiss={this.props.onDismissOnboardingMsg}
+                    >
+                        <OnboardingMsg
+                            goToImportRoute={this.props.goToImportRoute}
+                        />
+                    </DismissibleResultsMessage>
+                </NoResults>
+            )
+        }
+
+        if (this.props.noResultsType === 'mobile-list') {
+            return (
+                <NoResults title="You don't have anything saved from the mobile app yet" />
+            )
+        }
+
+        if (this.props.noResultsType === 'mobile-list-ad') {
+            return (
+                <NoResults title="You don't have anything saved from the mobile app yet">
+                    <DismissibleResultsMessage
+                        onDismiss={this.props.onDismissMobileAd}
+                    >
+                        <MobileAppAd />
+                    </DismissibleResultsMessage>
+                </NoResults>
+            )
+        }
+
+        if (this.props.noResultsType === 'stop-words') {
+            return (
+                <NoResults title="No Results">
+                    Search terms are too common, or have been filtered out to
+                    increase performance.
+                </NoResults>
+            )
+        }
+
+        return <NoResults title="No Results">¯\_(ツ)_/¯</NoResults>
+    }
+
     private renderResultsByDay() {
+        if (this.props.noResultsType != null) {
+            return this.renderNoResults()
+        }
+
         if (this.props.searchState === 'running') {
             return this.renderLoader()
         }
@@ -278,7 +374,10 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         if (this.props.searchPaginationState === 'running') {
             days.push(this.renderLoader({ key: 'loader' }))
-        } else if (!this.props.areResultsExhausted) {
+        } else if (
+            !this.props.areResultsExhausted &&
+            this.props.searchState !== 'pristine'
+        ) {
             days.push(
                 <Waypoint
                     key="pagination-waypoint"
@@ -317,6 +416,7 @@ const PageTopBarBox = styled(Margin)`
 
 const NoteTopBarBox = styled(TopBar)`
     width: 100%;
+    display: flex;
 `
 
 const ResultBox = styled(Margin)`
@@ -331,7 +431,7 @@ const PageNotesBox = styled(Margin)`
     width: fill-available;
     padding-left: 10px;
     padding-top: 5px;
-    border-left: 3px solid #5cd9a6;
+    border-left: 4px solid #e0e0e0;
 `
 
 const Loader = styled.div`

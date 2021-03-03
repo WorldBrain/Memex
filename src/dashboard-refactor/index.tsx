@@ -24,8 +24,10 @@ import {
     AnnotationsCacheInterface,
     createAnnotationsCache,
 } from 'src/annotations/annotations-cache'
-import { updatePickerValues } from './util'
+import { updatePickerValues, areSearchFiltersEmpty } from './util'
 import Margin from './components/Margin'
+import analytics from 'src/analytics'
+import { copyToClipboard } from 'src/annotations/content_script/utils'
 
 const __unimplemented = () => undefined
 
@@ -37,22 +39,39 @@ export class DashboardContainer extends StatefulUIElement<
     Events
 > {
     static defaultProps: Partial<Props> = {
+        document,
+        analytics,
+        copyToClipboard,
         localStorage: browser.storage.local,
+        activityIndicatorBG: runInBackground(),
         contentShareBG: runInBackground(),
         annotationsBG: runInBackground(),
         searchBG: runInBackground(),
         listsBG: runInBackground(),
         tagsBG: runInBackground(),
         authBG: runInBackground(),
+        syncBG: runInBackground(),
+        openFeedUrl: () =>
+            window.open(
+                process.env.NODE_ENV === 'production'
+                    ? 'https://memex.social/feed'
+                    : 'https://staging.memex.social/feed',
+                '_blank',
+            ),
     }
 
     private annotationsCache: AnnotationsCacheInterface
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
 
+    private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
+        window.location.hash = '#/' + route
+    }
+
     constructor(props: Props) {
         super(props, new DashboardLogic(props))
 
         this.annotationsCache = createAnnotationsCache({
+            contentSharing: props.contentShareBG,
             annotations: props.annotationsBG,
             tags: props.tagsBG,
         })
@@ -181,7 +200,7 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderHeader() {
-        const { searchFilters, listsSidebar } = this.state
+        const { searchFilters, listsSidebar, syncMenu } = this.state
         const selectedListName =
             listsSidebar.listData[listsSidebar.selectedListId]?.name
 
@@ -245,12 +264,11 @@ export class DashboardContainer extends StatefulUIElement<
                     },
                     selectedListName,
                 }}
-                syncStatusIconState="green"
+                syncStatusIconState={
+                    syncMenu.syncState === 'enabled' ? 'green' : 'red'
+                }
                 syncStatusMenuProps={{
-                    displayState: {
-                        isDisplayed: false,
-                        toggleDisplayState: __unimplemented,
-                    },
+                    ...syncMenu,
                     backupRunHoverState: {
                         isHovered: false,
                         onHoverEnter: __unimplemented,
@@ -261,18 +279,24 @@ export class DashboardContainer extends StatefulUIElement<
                         onHoverEnter: __unimplemented,
                         onHoverLeave: __unimplemented,
                     },
-                    unSyncedItemState: {
-                        onHideUnSyncedItemCount: __unimplemented,
-                        onShowUnSyncedItemCount: __unimplemented,
-                        showUnSyncedItemCount: false,
-                        unSyncedItemCount: 0,
-                    },
-                    lastSuccessfulBackupDateTime: new Date(),
-                    lastSuccessfulSyncDateTime: new Date(),
-                    onInitiateBackup: __unimplemented,
-                    onInitiateSync: __unimplemented,
-                    backupState: 'disabled',
-                    syncState: 'disabled',
+                    onToggleDisplayState: () =>
+                        this.processEvent('setSyncStatusMenuDisplayState', {
+                            isShown: !syncMenu.isDisplayed,
+                        }),
+                    onHideUnsyncedItemCount: () =>
+                        this.processEvent('setUnsyncedItemCountShown', {
+                            isShown: false,
+                        }),
+                    onShowUnsyncedItemCount: () =>
+                        this.processEvent('setUnsyncedItemCountShown', {
+                            isShown: true,
+                        }),
+                    onInitiateBackup: () =>
+                        this.processEvent('initiateBackup', null),
+                    onInitiateSync: () =>
+                        this.processEvent('initiateSync', null),
+                    goToBackupRoute: this.bindRouteGoTo('backup'),
+                    goToSyncRoute: this.bindRouteGoTo('sync'),
                 }}
             />
         )
@@ -292,6 +316,13 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <ListsSidebarContainer
                 lockedState={lockedState}
+                openFeedUrl={this.props.openFeedUrl}
+                hasFeedActivity={this.state.listsSidebar.hasFeedActivity}
+                inboxUnreadCount={this.state.listsSidebar.inboxUnreadCount}
+                onAllSavedSelection={() =>
+                    this.processEvent('resetFilters', null)
+                }
+                isAllSavedSelected={areSearchFiltersEmpty(this.state)}
                 onListSelection={(listId) =>
                     this.processEvent('setSelectedListId', { listId })
                 }
@@ -344,34 +375,61 @@ export class DashboardContainer extends StatefulUIElement<
                                 ),
                         ),
                     },
-                    {
-                        title: 'Followed collections',
-                        isExpanded: listsSidebar.followedLists.isExpanded,
-                        onExpandBtnClick: () =>
-                            this.processEvent('setFollowedListsExpanded', {
-                                isExpanded: !listsSidebar.followedLists
-                                    .isExpanded,
-                            }),
-                        loadingState: listsSidebar.followedLists.loadingState,
-                        listsArray: listsSidebar.followedLists.listIds.map(
-                            (listId) =>
-                                this.listStateToProps(
-                                    listsSidebar.listData[listId],
-                                    'followed-list',
-                                ),
-                        ),
-                    },
+                    // {
+                    //     title: 'Followed collections',
+                    //     isExpanded: listsSidebar.followedLists.isExpanded,
+                    //     onExpandBtnClick: () =>
+                    //         this.processEvent('setFollowedListsExpanded', {
+                    //             isExpanded: !listsSidebar.followedLists
+                    //                 .isExpanded,
+                    //         }),
+                    //     loadingState: listsSidebar.followedLists.loadingState,
+                    //     listsArray: listsSidebar.followedLists.listIds.map(
+                    //         (listId) =>
+                    //             this.listStateToProps(
+                    //                 listsSidebar.listData[listId],
+                    //                 'followed-list',
+                    //             ),
+                    //     ),
+                    // },
                 ]}
+                initDropReceivingState={(listId) => ({
+                    onDragEnter: () =>
+                        this.processEvent('setDragOverListId', { listId }),
+                    onDragLeave: () =>
+                        this.processEvent('setDragOverListId', {
+                            listId: undefined,
+                        }),
+                    onDrop: (dataTransfer: DataTransfer) =>
+                        this.processEvent('dropPageOnListItem', {
+                            listId,
+                            dataTransfer,
+                        }),
+                    isDraggedOver:
+                        listId === this.state.listsSidebar.dragOverListId,
+                })}
             />
         )
     }
 
     private renderSearchResults() {
-        const { searchResults } = this.state
+        const { searchResults, listsSidebar } = this.state
 
         return (
             <SearchResultsContainer
+                goToImportRoute={this.bindRouteGoTo('import')}
+                isSearchFilteredByList={listsSidebar.selectedListId != null}
                 {...searchResults}
+                onDismissMobileAd={() =>
+                    this.processEvent('dismissMobileAd', null)
+                }
+                onDismissOnboardingMsg={() =>
+                    this.processEvent('dismissOnboardingMsg', null)
+                }
+                noResultsType={this.state.searchResults.noResultsType}
+                filterSearchByTag={(tag) =>
+                    this.processEvent('addIncludedTag', { tag })
+                }
                 paginateSearch={() =>
                     this.processEvent('search', { paginate: true })
                 }
@@ -398,6 +456,18 @@ export class DashboardContainer extends StatefulUIElement<
                 }
                 onPagesSearchSwitch={() =>
                     this.processEvent('setSearchType', { searchType: 'pages' })
+                }
+                onPageLinkCopy={(link) =>
+                    this.processEvent('copyShareLink', {
+                        link,
+                        analyticsAction: 'copyPageLink',
+                    })
+                }
+                onNoteLinkCopy={(link) =>
+                    this.processEvent('copyShareLink', {
+                        link,
+                        analyticsAction: 'copyNoteLink',
+                    })
                 }
                 pageInteractionProps={{
                     onNotesBtnClick: (day, pageId) => (e) => {
@@ -445,7 +515,57 @@ export class DashboardContainer extends StatefulUIElement<
                             day,
                             pageId,
                         }),
-                    onShareBtnClick: (day, pageId) => () => null, // TODO: figure out share btn
+                    onShareBtnClick: (day, pageId) => () =>
+                        this.processEvent('setPageShareMenuShown', {
+                            day,
+                            pageId,
+                            isShown: !searchResults.results[day].pages.byId[
+                                pageId
+                            ].isShareMenuShown,
+                        }),
+                    onMainContentHover: (day, pageId) => () =>
+                        this.processEvent('setPageHover', {
+                            day,
+                            pageId,
+                            hover: 'main-content',
+                        }),
+                    onFooterHover: (day, pageId) => () =>
+                        this.processEvent('setPageHover', {
+                            day,
+                            pageId,
+                            hover: 'footer',
+                        }),
+                    onTagsHover: (day, pageId) => () =>
+                        this.processEvent('setPageHover', {
+                            day,
+                            pageId,
+                            hover: 'tags',
+                        }),
+                    onUnhover: (day, pageId) => () =>
+                        this.processEvent('setPageHover', {
+                            day,
+                            pageId,
+                            hover: null,
+                        }),
+                    onRemoveFromListBtnClick: (day, pageId) => () =>
+                        this.processEvent('removePageFromList', {
+                            day,
+                            pageId,
+                        }),
+                    onPageDrag: (day, pageId) => (e) =>
+                        this.processEvent('dragPage', {
+                            day,
+                            pageId,
+                            dataTransfer: e.dataTransfer,
+                        }),
+                    onPageDrop: (day, pageId) => () =>
+                        this.processEvent('dropPage', { day, pageId }),
+                    updatePageNotesShareInfo: (day, pageId) => (info) =>
+                        this.processEvent('updatePageNotesShareInfo', {
+                            day,
+                            pageId,
+                            info,
+                        }),
                 }}
                 pagePickerProps={{
                     onListPickerUpdate: (pageId) => (args) =>
@@ -503,6 +623,8 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('saveNoteEdit', {
                             noteId,
                         }),
+                    onGoToHighlightClick: (noteId) => () =>
+                        this.processEvent('goToHighlightInNewTab', { noteId }),
                     onTagPickerBtnClick: (noteId) => () =>
                         this.processEvent('setNoteTagPickerShown', {
                             noteId,
@@ -535,18 +657,40 @@ export class DashboardContainer extends StatefulUIElement<
                             value: (e.target as HTMLTextAreaElement).value,
                         }),
                     onShareBtnClick: (noteId) => () =>
-                        this.processEvent('showNoteShareMenu', { noteId }),
-                    hideShareMenu: (noteId) => () =>
-                        this.processEvent('hideNoteShareMenu', { noteId }),
+                        this.processEvent('setNoteShareMenuShown', {
+                            noteId,
+                            isShown: !searchResults.noteData.byId[noteId]
+                                .isShareMenuShown,
+                        }),
                     updateShareInfo: (noteId) => (info) =>
                         this.processEvent('updateNoteShareInfo', {
                             noteId,
                             info,
                         }),
-                    copySharedLink: (noteId) => (link) =>
-                        this.processEvent('copySharedNoteLink', {
+                    onMainContentHover: (noteId) => () =>
+                        this.processEvent('setNoteHover', {
                             noteId,
-                            link,
+                            hover: 'main-content',
+                        }),
+                    onFooterHover: (noteId) => () =>
+                        this.processEvent('setNoteHover', {
+                            noteId,
+                            hover: 'footer',
+                        }),
+                    onTagsHover: (noteId) => () =>
+                        this.processEvent('setNoteHover', {
+                            noteId,
+                            hover: 'tags',
+                        }),
+                    onNoteHover: (noteId) => () =>
+                        this.processEvent('setNoteHover', {
+                            noteId,
+                            hover: 'note',
+                        }),
+                    onUnhover: (noteId) => () =>
+                        this.processEvent('setNoteHover', {
+                            noteId,
+                            hover: null,
                         }),
                 }}
                 notePickerProps={{
@@ -653,6 +797,10 @@ export class DashboardContainer extends StatefulUIElement<
                     }
                 />
                 <HelpBtn />
+                <DragElement id="dragged-element">
+                    {' '}
+                    Drop into Collection
+                </DragElement>
             </Container>
         )
     }
@@ -675,4 +823,26 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     width: fill-available;
+    background-color: #f6f8fb;
+    min-height: 100vh;
+    height: 100%;
+`
+
+const DragElement = styled.div<{ id: 'dragged-element' }>`
+    text-decoration: none;
+    display: none;
+    border: solid 2px ${(props) => props.theme.colors.purple};
+    border-radius: 4px;
+    font-size: 0.8rem;
+    max-height: 50px;
+    max-width: 330px;
+    text-align: center;
+    font-weight: 500;
+    background: #fff;
+    color: ${(props) => props.theme.colors.purple};
+    top: -90vh;
+    opacity: 1;
+    padding: 5px 10px;
+    position: absolute;
+    margin-left: 25px;
 `

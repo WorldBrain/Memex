@@ -16,7 +16,8 @@ const textStyles = `
 
 const SearchBarContainer = styled.div`
     height: 34px;
-    width: ${styles.components.searchBar.widthPx}px;
+    max-width: ${styles.components.searchBar.widthPx}px;
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -40,12 +41,13 @@ const Input = styled.input`
     }
 `
 
-const FilterButton = styled.div`
+const FilterButton = styled(Margin)`
     width: max-content;
     ${textStyles}
     font-size: 12px;
     line-height: 15px;
     cursor: pointer;
+    width: auto;
 `
 
 const FullWidthMargin = styled(Margin)`
@@ -116,7 +118,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         return (
             <Margin vertical="auto">
                 <SearchBarContainer onClick={onSearchBarFocus}>
-                    <FullWidthMargin left="15px">
+                    <FullWidthMargin>
                         <Input
                             ref={this.inputRef}
                             placeholder={

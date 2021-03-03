@@ -18,14 +18,22 @@ export interface CommonInteractionProps {
     onTagPickerBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
+    onMainContentHover: React.MouseEventHandler
+    onFooterHover: React.MouseEventHandler
+    onTagsHover: React.MouseEventHandler
+    onUnhover: React.MouseEventHandler
 }
 
 export type PageInteractionProps = Omit<
     CommonInteractionProps,
     'onReplyBtnClick' | 'onEditBtnClick' | 'onCommentChange'
 > & {
+    updatePageNotesShareInfo: (info: Partial<AnnotationSharingInfo>) => void
+    onRemoveFromListBtnClick: React.MouseEventHandler
     onListPickerBtnClick: React.MouseEventHandler
     onNotesBtnClick: React.MouseEventHandler
+    onPageDrag: React.DragEventHandler
+    onPageDrop: React.DragEventHandler
 }
 
 // NOTE: Derived type - edit the original
@@ -40,14 +48,14 @@ export type NoteInteractionProps = Omit<
     CommonInteractionProps,
     'onNotesBtnClick' | 'onListPickerBtnClick'
 > & {
-    hideShareMenu: () => void
-    copySharedLink: (link: string) => Promise<void>
     updateShareInfo: (info: Partial<AnnotationSharingInfo>) => void
     updateTags: PickerUpdateHandler
+    onNoteHover: React.MouseEventHandler
     onEditCancel: React.MouseEventHandler
     onEditConfirm: React.MouseEventHandler
     onEditBtnClick: React.MouseEventHandler
     onReplyBtnClick: React.MouseEventHandler
+    onGoToHighlightClick: React.MouseEventHandler
     onCommentChange: React.KeyboardEventHandler<HTMLTextAreaElement>
 }
 
@@ -115,7 +123,18 @@ export type PageData = Pick<
     lists: string[]
     displayTime: number
     hasNotes: boolean
+    isShared?: boolean
 }
+
+export type NoResultsType =
+    | 'onboarding-msg'
+    | 'mobile-list'
+    | 'mobile-list-ad'
+    | 'stop-words'
+    | 'no-results'
+    | null
+export type ResultHoverState = 'main-content' | 'footer' | 'tags' | null
+export type NoteResultHoverState = ResultHoverState | 'note'
 
 export interface NoteResult {
     isEditing: boolean
@@ -124,12 +143,14 @@ export interface NoteResult {
     isShareMenuShown: boolean
     isCopyPasterShown: boolean
     editNoteForm: NoteFormState
+    hoverState: NoteResultHoverState
 }
 
 export interface PageResult {
     id: string
     notesType: NotesType
     areNotesShown: boolean
+    isShareMenuShown: boolean
     isTagPickerShown: boolean
     isListPickerShown: boolean
     isCopyPasterShown: boolean
@@ -137,6 +158,7 @@ export interface PageResult {
     sortingFn: AnnotationsSorter
     newNoteForm: NoteFormState
     noteIds: { [key in NotesType]: string[] }
+    hoverState: ResultHoverState
 }
 
 export interface PageResultsByDay {
@@ -153,24 +175,31 @@ export interface RootState {
     noteSharingInfo: { [noteId: string]: AnnotationSharingInfo }
 
     searchType: SearchType
+    draggedPageId?: string
+    shouldFormsAutoFocus: boolean
+    noResultsType: NoResultsType
 
-    /** Holds page data specific to each page occurence on a specific day. */
+    /** Holds page data specific to each page occurrence on a specific day. */
     results: NestedResults
     areResultsExhausted: boolean
 
     // Display data lookups
-    /** Holds page data shared with all page occurences on any day. */
+    /** Holds page data shared with all page occurrences on any day. */
     pageData: NormalizedState<PageData>
     noteData: NormalizedState<NoteData & NoteResult>
 
     // Async operation states
     searchState: TaskState
-    searchPaginationState: TaskState
     noteDeleteState: TaskState
     pageDeleteState: TaskState
     paginationState: TaskState
     noteUpdateState: TaskState
     newNoteCreateState: TaskState
+    searchPaginationState: TaskState
+
+    // Misc local storage flags
+    showMobileAppAd: boolean
+    showOnboardingMsg: boolean
 }
 
 export interface PageEventArgs {
@@ -207,13 +236,21 @@ export type Events = UIEvent<{
     confirmPageDelete: null
     cancelPageDelete: null
 
-    // Page result state mutations (*specific to each* occurence of the page in different days)
+    // Page result state mutations (*specific to each* occurrence of the page in different days)
     setPageCopyPasterShown: PageEventArgs & { isShown: boolean }
     setPageListPickerShown: PageEventArgs & { isShown: boolean }
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }
+    setPageShareMenuShown: PageEventArgs & { isShown: boolean }
     setPageNotesShown: PageEventArgs & { areShown: boolean }
     setPageNotesSort: PageEventArgs & { sortingFn: AnnotationsSorter }
     setPageNotesType: PageEventArgs & { noteType: NotesType }
+    setPageHover: PageEventArgs & { hover: ResultHoverState }
+    removePageFromList: PageEventArgs
+    dragPage: PageEventArgs & { dataTransfer: DataTransfer }
+    dropPage: PageEventArgs
+    updatePageNotesShareInfo: PageEventArgs & {
+        info: Partial<AnnotationSharingInfo>
+    }
 
     // New note form state mutations
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }
@@ -228,15 +265,16 @@ export type Events = UIEvent<{
     // Note result state mutations
     setNoteCopyPasterShown: NoteEventArgs & { isShown: boolean }
     setNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
+    setNoteShareMenuShown: NoteEventArgs & { isShown: boolean }
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
+    setNoteHover: NoteEventArgs & { hover: NoteResultHoverState }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
-    showNoteShareMenu: NoteEventArgs
-    hideNoteShareMenu: NoteEventArgs
-    copySharedNoteLink: NoteEventArgs & { link: string }
     updateNoteShareInfo: NoteEventArgs & {
         info: Partial<AnnotationSharingInfo>
     }
+    /** NOTE: Does not mutate state */
+    goToHighlightInNewTab: NoteEventArgs
     confirmNoteDelete: null
     cancelNoteDelete: null
 
@@ -249,4 +287,11 @@ export type Events = UIEvent<{
     setPageData: { pages: PageData[] }
     setPageSearchResult: { result: StandardSearchResponse }
     setAnnotationSearchResult: { result: AnnotationsSearchResponse }
+    /** NOTE: Does not mutate state */
+    copyShareLink: {
+        link: string
+        analyticsAction: 'copyNoteLink' | 'copyPageLink'
+    }
+    dismissMobileAd: null
+    dismissOnboardingMsg: null
 }>

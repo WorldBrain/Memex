@@ -24,6 +24,7 @@ export interface Props {
     name: string
     listId: number
     source?: ListSource
+    hasActivity?: boolean
     isMenuDisplayed?: boolean
     nameHighlightIndices?: ListNameHighlightIndices
     onUnfollowClick?: React.MouseEventHandler
@@ -45,6 +46,22 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         this.props.onMoreActionClick(this.props.listId)
     }
 
+    private handleDragEnter: React.DragEventHandler = (e) => {
+        e.preventDefault()
+        // Needed to push this op back on the event queue, so it fires after the previous
+        //  list item's `onDropLeave` event
+        setTimeout(() => this.props.dropReceivingState?.onDragEnter(), 0)
+    }
+
+    private handleDrop: React.DragEventHandler = (e) => {
+        e.preventDefault()
+        if (!this.props.dropReceivingState?.canReceiveDroppedItems) {
+            return
+        }
+
+        this.props.dropReceivingState?.onDrop(e.dataTransfer)
+    }
+
     private renderMenuBtns() {
         if (!this.props.source) {
             return false
@@ -52,14 +69,12 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
 
         if (this.props.source === 'followed-list') {
             return (
-                <>
-                    <MenuButton onClick={this.props.onUnfollowClick}>
-                        <Margin horizontal="10px">
-                            <Icon heightAndWidth="12px" path={'TODO.svg'} />
-                        </Margin>
-                        Unfollow
-                    </MenuButton>
-                </>
+                <MenuButton onClick={this.props.onUnfollowClick}>
+                    <Margin horizontal="10px">
+                        <Icon heightAndWidth="12px" path={'TODO.svg'} />
+                    </Margin>
+                    Unfollow
+                </MenuButton>
             )
         }
 
@@ -67,7 +82,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             <>
                 <MenuButton onClick={this.props.onShareClick}>
                     <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={icons.share} />
+                        <Icon heightAndWidth="12px" path={icons.link} />
                     </Margin>
                     Share
                 </MenuButton>
@@ -90,9 +105,14 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
     private renderIcon() {
         const {
             dropReceivingState,
-            newItemsCount,
             onMoreActionClick,
+            newItemsCount,
+            hasActivity,
         } = this.props
+
+        if (hasActivity) {
+            return <ActivityBeacon />
+        }
 
         if (newItemsCount) {
             return (
@@ -104,18 +124,15 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             )
         }
 
-        if (dropReceivingState?.isDraggedOver) {
-            return <Icon heightAndWidth="12px" path="/img/plus.svg" />
+        if (
+            dropReceivingState?.canReceiveDroppedItems &&
+            dropReceivingState?.isDraggedOver
+        ) {
+            return <Icon heightAndWidth="12px" path={icons.plus} />
         }
 
         if (onMoreActionClick) {
-            return (
-                <Icon
-                    onClick={this.handleMoreActionClick}
-                    heightAndWidth="12px"
-                    path="/img/open.svg"
-                />
-            )
+            return <Icon heightAndWidth="12px" path={icons.dots} />
         }
     }
 
@@ -147,15 +164,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
     }
 
     render() {
-        const {
-            selectedState,
-            dropReceivingState,
-            onMoreActionClick,
-            isMenuDisplayed,
-            isEditing,
-            listId,
-            ...props
-        } = this.props
+        const { dropReceivingState, isMenuDisplayed, isEditing } = this.props
 
         if (isEditing) {
             return <ListsSidebarEditableItem {...this.props.editableProps} />
@@ -163,9 +172,24 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
 
         return (
             <Container>
-                <SidebarItem {...props} onClick={this.handleSelection}>
-                    <Margin left="19px">{this.renderTitle()}</Margin>
-                    <Margin right="7.5px">{this.renderIcon()}</Margin>
+                <SidebarItem
+                    {...this.props}
+                    isMenuDisplayed={isMenuDisplayed}
+                    onDragLeave={dropReceivingState?.onDragLeave}
+                    onDragEnter={this.handleDragEnter}
+                    onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
+                    onDrop={this.handleDrop}
+                >
+                    <TitleBox onClick={this.handleSelection}>
+                        {' '}
+                        {this.renderTitle()}
+                    </TitleBox>
+                    <IconBox
+                        onClick={this.handleMoreActionClick}
+                        {...this.props}
+                    >
+                        {this.renderIcon()}
+                    </IconBox>
                 </SidebarItem>
                 <MenuContainer isDisplayed={isMenuDisplayed}>
                     {this.renderMenuBtns()}
@@ -182,7 +206,7 @@ const Container = styled.div`
 const MenuContainer = styled.div`
     width: min-content;
     position: absolute;
-    left: 175px;
+    left: 200px;
     top: 0px;
     background-color: ${colors.white};
     box-shadow: ${styles.boxShadow.overlayElement};
@@ -195,27 +219,23 @@ const MenuContainer = styled.div`
         `};
 `
 
-const MenuButton = styled.div`
-    height: 34px;
-    min-width: 102px;
-    font-family: ${fonts.primary.name};
-    font-weight: ${fonts.primary.weight.normal};
-    font-size: 12px;
-    line-height: 18px;
-    display: flex;
-    flex-direction: row;
-    justify-content: start;
+const IconBox = styled.div<Props>`
+    display: ${(props) =>
+        props.hasActivity ||
+        props.newItemsCount ||
+        props.dropReceivingState?.isDraggedOver
+            ? 'flex'
+            : 'none'};
+    height: 100%;
     align-items: center;
-    cursor: pointer;
-
-    &:hover {
-        background-color: ${colors.onHover};
-    }
+    padding-right: 10px;
+    width: 30px;
+    justify-content: flex-end;
 `
 
 const SidebarItem = styled.div<Props>`
-    height: 27px;
-    width: 173px;
+    height: 30px;
+    width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -224,6 +244,19 @@ const SidebarItem = styled.div<Props>`
 
     &:hover {
         background-color: ${colors.onHover};
+    }
+
+    ${({ isMenuDisplayed, dropReceivingState }) =>
+        css`
+            background-color: ${isMenuDisplayed ||
+            (dropReceivingState?.canReceiveDroppedItems &&
+                dropReceivingState?.isDraggedOver)
+                ? `${colors.onHover}`
+                : `transparent`};
+        `};
+
+    &:hover ${IconBox} {
+        display: flex;
     }
 
     ${({ selectedState }: Props) =>
@@ -242,8 +275,44 @@ const SidebarItem = styled.div<Props>`
         !dropReceivingState?.isDraggedOver
             ? `pointer`
             : dropReceivingState?.canReceiveDroppedItems
-            ? `default`
+            ? `pointer`
             : `not-allowed`};
+`
+
+const MenuButton = styled.div`
+    height: 34px;
+    width: 100%;
+    font-family: ${fonts.primary.name};
+    font-weight: ${fonts.primary.weight.normal};
+    font-size: 12px;
+    line-height: 18px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    cursor: pointer;
+    padding: 0px 10px 0 0;
+
+    &: ${SidebarItem} {
+        background-color: red;
+    }
+
+    &:hover {
+        background-color: ${colors.onHover};
+    }
+
+    & > div {
+        width: auto;
+    }
+`
+
+const TitleBox = styled.div`
+    display: flex;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    padding-left: 15px;
+    align-items: center;
 `
 
 const ListTitle = styled.p<Props>`
@@ -261,6 +330,15 @@ const ListTitle = styled.p<Props>`
     text-overflow: ellipsis;
 
     max-width: 100%;
+`
+
+const ActivityBeacon = styled.div`
+    width: 14px;
+    height: 14px;
+    margin-right: 1em;
+    border-radius: 10px;
+    padding: 8px;
+    background-color: #5cd9a6;
 `
 
 const NewItemsCount = styled.div`

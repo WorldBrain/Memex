@@ -1,4 +1,5 @@
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
@@ -10,7 +11,11 @@ import {
     setLastSharedAnnotationTimestamp,
 } from 'src/annotations/utils'
 import { getListShareUrl } from 'src/content-sharing/utils'
-import { PAGE_SIZE, STORAGE_KEYS } from 'src/dashboard-refactor/constants'
+import {
+    PAGE_SIZE,
+    STORAGE_KEYS,
+    PAGE_SEARCH_DUMMY_DAY,
+} from 'src/dashboard-refactor/constants'
 import { ListData } from './lists-sidebar/types'
 import { getFilterDetail, updatePickerValues } from './util'
 import {
@@ -19,12 +24,47 @@ import {
     parseDate,
     syncQueryStringFilters,
 } from './logic-filters'
+import { NoResultsType } from './search-results/types'
+import { dissectCreateObjectOperation } from '@worldbrain/storex/lib/utils'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
     Events,
     EventName
 >
+
+/**
+ * Helper used to build a mutation to remove a page from all results days in which it occurs.
+ */
+export const removeAllResultOccurrencesOfPage = (
+    state: State['searchResults']['results'],
+    pageId: string,
+): UIMutation<State['searchResults']['results']> => {
+    const mutation: UIMutation<State['searchResults']['results']> = {}
+
+    for (const { day, pages } of Object.values(state)) {
+        if (!pages.allIds.includes(pageId)) {
+            continue
+        }
+
+        // If it's the last remaining page for this day, remove the day instead
+        if (pages.allIds.length === 1) {
+            mutation['$unset'] = [...(mutation['$unset'] ?? []), day]
+            continue
+        }
+
+        mutation[day] = {
+            pages: {
+                byId: { $unset: [pageId] },
+                allIds: {
+                    $set: state[day].pages.allIds.filter((id) => id !== pageId),
+                },
+            },
+        }
+    }
+
+    return mutation
+}
 
 export class DashboardLogic extends UILogic<State, Events> {
     constructor(private options: DashboardDependencies) {
@@ -43,7 +83,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                 sharingAccess: 'feature-disabled',
                 noteSharingInfo: {},
                 results: {},
+                noResultsType: null,
+                showMobileAppAd: false,
+                showOnboardingMsg: false,
                 areResultsExhausted: false,
+                shouldFormsAutoFocus: false,
                 pageData: {
                     allIds: [],
                     byId: {},
@@ -88,6 +132,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listEditState: 'pristine',
                 isSidebarPeeking: false,
                 isSidebarLocked: false,
+                hasFeedActivity: false,
+                inboxUnreadCount: 0,
                 searchQuery: '',
                 listData: {},
                 followedLists: {
@@ -102,37 +148,71 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listIds: [],
                 },
             },
+            syncMenu: {
+                isDisplayed: false,
+                syncState: 'disabled',
+                backupState: 'disabled',
+                lastSuccessfulBackupDateTime: new Date(),
+                lastSuccessfulSyncDateTime: new Date(),
+                showUnsyncedItemCount: false,
+                unsyncedItemCount: 0,
+            },
         }
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial(this, async () => {
-            await this.hydrateStateFromLocalStorage()
-            await this.getSharingAccess()
-            const listsP = this.loadLocalLists()
-            const searchP = this.runSearch(previousState)
-
-            await Promise.all([listsP, searchP])
+            const nextState = await this.hydrateStateFromLocalStorage(
+                previousState,
+            )
+            await Promise.all([
+                this.runSearch(nextState),
+                this.getFeedActivityStatus(),
+                this.getInboxUnreadCount(),
+                this.getSharingAccess(),
+                this.loadLocalLists(),
+            ])
         })
     }
 
     /* START - Misc helper methods */
-    async hydrateStateFromLocalStorage() {
-        const listsSidebarLocked =
-            (
-                await this.options.localStorage.get(
-                    STORAGE_KEYS.listSidebarLocked,
-                )
-            )[STORAGE_KEYS.listSidebarLocked] ?? false
+    private async hydrateStateFromLocalStorage(
+        previousState: State,
+    ): Promise<State> {
+        const {
+            [STORAGE_KEYS.listSidebarLocked]: listsSidebarLocked,
+            [STORAGE_KEYS.onboardingMsgSeen]: onboardingMsgSeen,
+            [STORAGE_KEYS.mobileAdSeen]: mobileAdSeen,
+        } = await this.options.localStorage.get([
+            STORAGE_KEYS.listSidebarLocked,
+            STORAGE_KEYS.onboardingMsgSeen,
+            STORAGE_KEYS.mobileAdSeen,
+        ])
+
+        const mutation: UIMutation<State> = {
+            searchResults: {
+                showMobileAppAd: { $set: !mobileAdSeen },
+                showOnboardingMsg: { $set: !onboardingMsgSeen },
+            },
+            listsSidebar: {
+                isSidebarLocked: { $set: listsSidebarLocked ?? false },
+            },
+        }
+        this.emitMutation(mutation)
+        return this.withMutation(previousState, mutation)
+    }
+
+    private async getFeedActivityStatus() {
+        const activityStatus = await this.options.activityIndicatorBG.checkActivityStatus()
 
         this.emitMutation({
             listsSidebar: {
-                isSidebarLocked: { $set: listsSidebarLocked },
+                hasFeedActivity: { $set: activityStatus === 'has-unseen' },
             },
         })
     }
 
-    async getSharingAccess() {
+    private async getSharingAccess() {
         const isAllowed = await this.options.authBG.isAuthorizedForFeature(
             'beta',
         )
@@ -146,32 +226,17 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    async detectSharedNotes({ searchResults }: State) {
-        const noteSharingInfo: { [noteId: string]: AnnotationSharingInfo } = {}
-        const shareableNoteIds = new Set<string>()
-
-        for (const { pages } of Object.values(searchResults.results)) {
-            for (const { noteIds } of Object.values(pages.byId)) {
-                noteIds.search.forEach((id) => shareableNoteIds.add(id))
-                noteIds.user.forEach((id) => shareableNoteIds.add(id))
-            }
-        }
-
-        const remoteIds = await this.options.contentShareBG.getRemoteAnnotationIds(
-            {
-                annotationUrls: [...shareableNoteIds],
+    private async getInboxUnreadCount() {
+        this.emitMutation({
+            listsSidebar: {
+                inboxUnreadCount: {
+                    $set: await this.options.listsBG.getInboxUnreadCount(),
+                },
             },
-        )
-
-        for (const localId of Object.keys(remoteIds)) {
-            noteSharingInfo[localId] = {
-                status: 'shared',
-                taskState: 'pristine',
-            }
-        }
+        })
     }
 
-    async loadLocalLists() {
+    private async loadLocalLists() {
         await executeUITask(
             this,
             (taskState) => ({
@@ -261,10 +326,36 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             }),
             async () => {
-                const { noteData, pageData, results, resultsExhausted } =
+                const {
+                    noteData,
+                    pageData,
+                    results,
+                    noResults,
+                    resultsExhausted,
+                    searchTermsInvalid,
+                } =
                     previousState.searchResults.searchType === 'pages'
                         ? await this.searchPages(previousState, event.paginate)
                         : await this.searchNotes(previousState, event.paginate)
+
+                let noResultsType: NoResultsType = null
+                if (noResults) {
+                    if (
+                        previousState.listsSidebar.selectedListId ===
+                        SPECIAL_LIST_IDS.MOBILE
+                    ) {
+                        noResultsType = previousState.searchResults
+                            .showMobileAppAd
+                            ? 'mobile-list-ad'
+                            : 'mobile-list'
+                    } else if (previousState.searchResults.showOnboardingMsg) {
+                        noResultsType = 'onboarding-msg'
+                    } else {
+                        noResultsType = searchTermsInvalid
+                            ? 'stop-words'
+                            : 'no-results'
+                    }
+                }
 
                 const mutation: UIMutation<State> = event.paginate
                     ? {
@@ -288,6 +379,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                       ),
                               },
                               areResultsExhausted: { $set: resultsExhausted },
+                              noResultsType: { $set: noResultsType },
                           },
                           searchFilters: {
                               skip: { $apply: (skip) => skip + PAGE_SIZE },
@@ -299,6 +391,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                               pageData: { $set: pageData },
                               noteData: { $set: noteData },
                               areResultsExhausted: { $set: resultsExhausted },
+                              noResultsType: { $set: noResultsType },
                           },
                           searchFilters: { skip: { $set: 0 } },
                       }
@@ -309,7 +402,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         )
 
-        await this.detectSharedNotes(nextState)
+        await this.fetchNoteShareStates(nextState)
     }
 
     private searchPages = async (
@@ -342,6 +435,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         return {
             ...utils.pageSearchResultToState(result),
             resultsExhausted: result.resultsExhausted,
+            searchTermsInvalid: result.isBadTerm,
+            noResults: result.resultsExhausted && searchFilters.skip === 0,
         }
     }
 
@@ -370,7 +465,35 @@ export class DashboardLogic extends UILogic<State, Events> {
         return {
             ...utils.annotationSearchResultToState(result),
             resultsExhausted: result.resultsExhausted,
+            searchTermsInvalid: result.isBadTerm,
+            noResults: result.resultsExhausted && searchFilters.skip === 0,
         }
+    }
+
+    private async fetchNoteShareStates({
+        searchResults: { noteData, noteSharingInfo },
+    }: State) {
+        const mutation: UIMutation<State['searchResults']> = {}
+        const annotationUrls = noteData.allIds.filter(
+            (noteId) => !noteSharingInfo[noteId],
+        )
+        const remoteIds = await this.options.contentShareBG.getRemoteAnnotationIds(
+            { annotationUrls },
+        )
+
+        for (const noteId of annotationUrls) {
+            mutation.noteSharingInfo = {
+                ...mutation.noteSharingInfo,
+                [noteId]: {
+                    $set: {
+                        taskState: 'pristine',
+                        status: remoteIds[noteId] ? 'shared' : 'not-yet-shared',
+                    },
+                },
+            }
+        }
+
+        this.emitMutation({ searchResults: mutation })
     }
     /* END - Misc event handlers */
 
@@ -520,6 +643,110 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    dragPage: EventHandler<'dragPage'> = async ({ event, previousState }) => {
+        const crt = this.options.document.getElementById('dragged-element')
+        crt.style.display = 'block'
+        event.dataTransfer.setDragImage(crt, 10, 10)
+
+        const page = previousState.searchResults.pageData.byId[event.pageId]
+        event.dataTransfer.setData(
+            'text/plain',
+            JSON.stringify({ fullPageUrl: page.fullUrl }),
+        )
+        this.emitMutation({
+            searchResults: { draggedPageId: { $set: event.pageId } },
+        })
+    }
+
+    dropPage: EventHandler<'dropPage'> = async () => {
+        this.emitMutation({
+            searchResults: { draggedPageId: { $set: undefined } },
+        })
+    }
+
+    updatePageNotesShareInfo: EventHandler<
+        'updatePageNotesShareInfo'
+    > = async ({
+        event,
+        previousState: {
+            searchResults: { noteSharingInfo, noteData },
+        },
+    }) => {
+        const noteIds = noteData.allIds.filter(
+            (noteId) => noteData.byId[noteId].pageUrl === event.pageId,
+        )
+        const mutation: UIMutation<State['searchResults']> = {}
+
+        for (const noteId of noteIds) {
+            mutation.noteSharingInfo = {
+                ...mutation.noteSharingInfo,
+                [noteId]: {
+                    $set: {
+                        ...noteSharingInfo[noteId],
+                        ...event.info,
+                    },
+                },
+            }
+        }
+
+        this.emitMutation({ searchResults: mutation })
+    }
+
+    removePageFromList: EventHandler<'removePageFromList'> = async ({
+        event,
+        previousState: {
+            listsSidebar: { selectedListId: listId },
+            searchResults: { results, pageData },
+        },
+    }) => {
+        if (listId == null) {
+            throw new Error('No list is currently filtered to remove page from')
+        }
+        const filterOutPage = (ids: string[]) =>
+            ids.filter((id) => id !== event.pageId)
+
+        const mutation: UIMutation<State['searchResults']> = {
+            pageData: {
+                byId: { $unset: [event.pageId] },
+                allIds: { $set: filterOutPage(pageData.allIds) },
+            },
+        }
+
+        if (event.day === PAGE_SEARCH_DUMMY_DAY) {
+            mutation.results = {
+                [PAGE_SEARCH_DUMMY_DAY]: {
+                    pages: {
+                        byId: { $unset: [event.pageId] },
+                        allIds: {
+                            $set: filterOutPage(
+                                results[PAGE_SEARCH_DUMMY_DAY].pages.allIds,
+                            ),
+                        },
+                    },
+                },
+            }
+        } else {
+            mutation.results = removeAllResultOccurrencesOfPage(
+                results,
+                event.pageId,
+            )
+        }
+
+        await this.options.listsBG.removePageFromList({
+            id: listId,
+            url: event.pageId,
+        })
+        this.emitMutation({
+            searchResults: mutation,
+            listsSidebar:
+                listId === SPECIAL_LIST_IDS.INBOX
+                    ? {
+                          inboxUnreadCount: { $apply: (count) => count - 1 },
+                      }
+                    : {},
+        })
+    }
+
     cancelPageDelete: EventHandler<'cancelPageDelete'> = async ({}) => {
         this.emitMutation({
             modals: { deletingPageArgs: { $set: undefined } },
@@ -527,19 +754,16 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     confirmPageDelete: EventHandler<'confirmPageDelete'> = async ({
-        previousState: { searchResults, modals },
+        previousState: {
+            searchResults: { pageData, results },
+            modals,
+        },
     }) => {
         if (!modals.deletingPageArgs) {
             throw new Error('No page ID is set for deletion')
         }
 
         const { pageId, day } = modals.deletingPageArgs
-        const pageAllIds = searchResults.pageData.allIds.filter(
-            (id) => id !== pageId,
-        )
-        const pageResultsAllIds = searchResults.results[
-            day
-        ].pages.allIds.filter((id) => id !== pageId)
 
         await executeUITask(
             this,
@@ -547,25 +771,41 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { pageDeleteState: { $set: taskState } },
             }),
             async () => {
-                await this.options.searchBG.delPages([pageId])
-
-                this.emitMutation({
-                    modals: {
-                        deletingPageArgs: { $set: undefined },
+                const resultsMutation: UIMutation<State['searchResults']> = {
+                    pageData: {
+                        byId: { $unset: [pageId] },
+                        allIds: {
+                            $set: pageData.allIds.filter((id) => id !== pageId),
+                        },
                     },
-                    searchResults: {
-                        results: {
-                            [day]: {
-                                pages: {
-                                    allIds: { $set: pageResultsAllIds },
-                                    byId: { $unset: [pageId] },
+                }
+
+                if (day === PAGE_SEARCH_DUMMY_DAY) {
+                    resultsMutation.results = {
+                        [day]: {
+                            pages: {
+                                byId: { $unset: [pageId] },
+                                allIds: {
+                                    $set: results[day].pages.allIds.filter(
+                                        (id) => id !== pageId,
+                                    ),
                                 },
                             },
                         },
-                        pageData: {
-                            byId: { $unset: [pageId] },
-                            allIds: { $set: pageAllIds },
-                        },
+                    }
+                } else {
+                    resultsMutation.results = removeAllResultOccurrencesOfPage(
+                        results,
+                        pageId,
+                    )
+                }
+
+                await this.options.searchBG.delPages([pageId])
+
+                this.emitMutation({
+                    searchResults: resultsMutation,
+                    modals: {
+                        deletingPageArgs: { $set: undefined },
                     },
                 })
             },
@@ -632,9 +872,44 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setPageShareMenuShown: EventHandler<'setPageShareMenuShown'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (event.isShown) {
+            if (
+                previousState.searchResults.sharingAccess === 'feature-disabled'
+            ) {
+                this.emitMutation({
+                    modals: { showBetaFeature: { $set: true } },
+                })
+                return
+            }
+
+            await this.showShareOnboardingIfNeeded()
+        }
+
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    isShareMenuShown: { $set: event.isShown },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
     setPageNotesShown: EventHandler<'setPageNotesShown'> = ({ event }) => {
         this.emitMutation({
             searchResults: {
+                shouldFormsAutoFocus: { $set: event.areShown },
                 results: {
                     [event.day]: {
                         pages: {
@@ -677,6 +952,24 @@ export class DashboardLogic extends UILogic<State, Events> {
                             byId: {
                                 [event.pageId]: {
                                     notesType: { $set: event.noteType },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setPageHover: EventHandler<'setPageHover'> = ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    hoverState: { $set: event.hover },
                                 },
                             },
                         },
@@ -858,6 +1151,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         await this.mutateAndTriggerSearch(previousState, {
             searchResults: {
+                shouldFormsAutoFocus: { $set: false },
                 searchType: { $set: event.searchType },
             },
         })
@@ -1024,6 +1318,20 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setNoteHover: EventHandler<'setNoteHover'> = ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            hoverState: { $set: event.hover },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
     setNoteTags: EventHandler<'setNoteTags'> = async ({ event }) => {
         this.emitMutation({
             searchResults: {
@@ -1064,42 +1372,60 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    copySharedNoteLink: EventHandler<'copySharedNoteLink'> = async ({
-        event: { link },
-    }) => {
-        this.options.analytics.trackEvent({
-            category: 'ContentSharing',
-            action: 'copyNoteLink',
-        })
-
-        await this.options.copyToClipboard(link)
-    }
-
-    hideNoteShareMenu: EventHandler<'showNoteShareMenu'> = async ({
-        event,
-    }) => {
-        this.emitMutation({
-            searchResults: {
-                noteData: {
-                    byId: {
-                        [event.noteId]: {
-                            isShareMenuShown: {
-                                $set: false,
-                            },
-                        },
-                    },
-                },
-            },
-        })
-    }
-
-    showNoteShareMenu: EventHandler<'showNoteShareMenu'> = async ({
+    goToHighlightInNewTab: EventHandler<'goToHighlightInNewTab'> = async ({
         event,
         previousState,
     }) => {
-        if (previousState.searchResults.sharingAccess === 'feature-disabled') {
-            this.emitMutation({ modals: { showBetaFeature: { $set: true } } })
-            return
+        const note = previousState.searchResults.noteData.byId[event.noteId]
+        await this.options.annotationsBG.goToAnnotationFromSidebar({
+            url: note.pageUrl,
+            annotation: note,
+        })
+    }
+
+    copyShareLink: EventHandler<'copyShareLink'> = async ({ event }) => {
+        await Promise.all([
+            this.options.copyToClipboard(event.link),
+            this.options.analytics.trackEvent({
+                category: 'ContentSharing',
+                action: event.analyticsAction,
+            }),
+        ])
+    }
+
+    dismissMobileAd: EventHandler<'dismissMobileAd'> = async () => {
+        await this.options.localStorage.set({
+            [STORAGE_KEYS.mobileAdSeen]: true,
+        })
+        this.emitMutation({
+            searchResults: { showMobileAppAd: { $set: false } },
+        })
+    }
+
+    dismissOnboardingMsg: EventHandler<'dismissOnboardingMsg'> = async () => {
+        await this.options.localStorage.set({
+            [STORAGE_KEYS.onboardingMsgSeen]: true,
+        })
+        this.emitMutation({
+            searchResults: { showOnboardingMsg: { $set: false } },
+        })
+    }
+
+    setNoteShareMenuShown: EventHandler<'setNoteShareMenuShown'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (event.isShown) {
+            if (
+                previousState.searchResults.sharingAccess === 'feature-disabled'
+            ) {
+                this.emitMutation({
+                    modals: { showBetaFeature: { $set: true } },
+                })
+                return
+            }
+
+            await this.showShareOnboardingIfNeeded()
         }
 
         this.emitMutation({
@@ -1108,18 +1434,16 @@ export class DashboardLogic extends UILogic<State, Events> {
                     byId: {
                         [event.noteId]: {
                             isShareMenuShown: {
-                                $set: true,
+                                $set: event.isShown,
                             },
                         },
                     },
                 },
             },
         })
-
-        await this.getLastSharedNoteTimestamp()
     }
 
-    private async getLastSharedNoteTimestamp() {
+    private async showShareOnboardingIfNeeded() {
         const lastShared = await getLastSharedAnnotationTimestamp()
 
         if (lastShared == null) {
@@ -1245,10 +1569,18 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     setSearchFiltersOpen: EventHandler<'setSearchFiltersOpen'> = async ({
         event,
+        previousState,
     }) => {
         this.emitMutation({
             searchFilters: { searchFiltersOpen: { $set: event.isOpen } },
         })
+
+        if (!event.isOpen) {
+            await this.processUIEvent('resetFilters', {
+                event: null,
+                previousState,
+            })
+        }
     }
 
     toggleShowTagPicker: EventHandler<'toggleShowTagPicker'> = async ({
@@ -1369,6 +1701,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         filterDetail,
                     ),
                 },
+                searchFiltersOpen: { $set: true },
             },
         })
     }
@@ -1667,6 +2000,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { $set: this.getInitialState().searchFilters },
+            listsSidebar: { selectedListId: { $set: undefined } },
         })
     }
     /* END - search filter event handlers */
@@ -1802,6 +2136,36 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         await this.mutateAndTriggerSearch(previousState, {
             listsSidebar: { selectedListId: { $set: listIdToSet } },
+        })
+    }
+
+    setDragOverListId: EventHandler<'setDragOverListId'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: { dragOverListId: { $set: event.listId } },
+        })
+    }
+
+    dropPageOnListItem: EventHandler<'dropPageOnListItem'> = async ({
+        event,
+    }) => {
+        const { fullPageUrl } = JSON.parse(
+            event.dataTransfer.getData('text/plain'),
+        )
+
+        this.options.analytics.trackEvent({
+            category: 'Collections',
+            action: 'addPageViaDragAndDrop',
+        })
+
+        await this.options.listsBG.insertPageToList({
+            id: event.listId,
+            url: fullPageUrl,
+        })
+
+        this.emitMutation({
+            listsSidebar: { dragOverListId: { $set: undefined } },
         })
     }
 
@@ -2007,7 +2371,89 @@ export class DashboardLogic extends UILogic<State, Events> {
     unshareList: EventHandler<'unshareList'> = async ({ event }) => {
         console.warn('List unshare not yet implemented')
     }
+
+    clickFeedActivityIndicator: EventHandler<
+        'clickFeedActivityIndicator'
+    > = async ({ previousState }) => {
+        this.options.openFeedUrl()
+
+        if (previousState.listsSidebar.hasFeedActivity) {
+            this.emitMutation({
+                listsSidebar: { hasFeedActivity: { $set: false } },
+            })
+            this.options.annotationsBG
+            await this.options.activityIndicatorBG.markActivitiesAsSeen()
+        }
+    }
     /* END - lists sidebar event handlers */
+
+    /* START - sync status menu event handlers */
+    setSyncStatusMenuDisplayState: EventHandler<
+        'setSyncStatusMenuDisplayState'
+    > = async ({ event }) => {
+        this.emitMutation({
+            syncMenu: { isDisplayed: { $set: event.isShown } },
+        })
+    }
+
+    setUnsyncedItemCountShown: EventHandler<
+        'setUnsyncedItemCountShown'
+    > = async ({ event }) => {
+        this.emitMutation({
+            syncMenu: { showUnsyncedItemCount: { $set: event.isShown } },
+        })
+    }
+
+    initiateSync: EventHandler<'initiateSync'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (previousState.syncMenu.syncState === 'disabled') {
+            return
+        }
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                syncMenu: {
+                    syncState: { $set: taskState },
+                },
+            }),
+            async () => {
+                await this.options.syncBG.forceIncrementalSync()
+            },
+        )
+
+        this.emitMutation({
+            syncMenu: { lastSuccessfulSyncDateTime: { $set: new Date() } },
+        })
+    }
+
+    initiateBackup: EventHandler<'initiateBackup'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (previousState.syncMenu.backupState === 'disabled') {
+            return
+        }
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                syncMenu: {
+                    backupState: { $set: taskState },
+                },
+            }),
+            async () => {
+                // TODO: Figure out how to trigger backup
+            },
+        )
+
+        this.emitMutation({
+            syncMenu: { lastSuccessfulBackupDateTime: { $set: new Date() } },
+        })
+    }
+    /* END - sync status menu event handlers */
 
     example: EventHandler<'example'> = ({ event }) => {
         this.emitMutation({})

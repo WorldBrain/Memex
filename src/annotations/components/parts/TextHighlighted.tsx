@@ -58,7 +58,7 @@ const HighlightStyled = styled.span`
 `
 
 const HighlightedTextStyled = styled.span`
-    background-color: #65ffc8;
+    background-color: #d4e8ff;
     padding: 2px 0;
     line-height: 25px;
     font-style: normal;

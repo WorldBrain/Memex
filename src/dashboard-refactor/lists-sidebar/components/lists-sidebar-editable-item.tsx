@@ -61,7 +61,7 @@ const Icon = styled.img``
 
 const Container = styled.div<Props>`
     height: 27px;
-    width: 173px;
+    width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;

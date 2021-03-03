@@ -27,6 +27,7 @@ export const collectionsFull = browser.extension.getURL(
 )
 export const triangle = browser.extension.getURL('/img/triangleSmall.svg')
 export const plus = browser.extension.getURL('/img/plus.svg')
+export const dots = browser.extension.getURL('/img/3dots.svg')
 export const trash = browser.extension.getURL('/img/trash.svg')
 export const goTo = browser.extension.getURL('/img/open.svg')
 export const copy = browser.extension.getURL('/img/copy.svg')
@@ -40,7 +41,10 @@ export const sort = browser.extension.getURL('/img/sort.svg')
 export const shared = browser.extension.getURL('/img/shared.svg')
 export const saveIcon = browser.extension.getURL('/img/saveIcon.svg')
 
+export const arrowRight = browser.extension.getURL('/img/arrowRight.svg')
+export const reload = browser.extension.getURL('/img/reload.svg')
 export const longArrow = browser.extension.getURL('/img/longarrow.svg')
+export const link = browser.extension.getURL('/img/link.svg')
 
 export const hamburger = browser.extension.getURL('/img/lock.svg')
 export const doubleArrow = browser.extension.getURL('/img/doubleArrow.svg')

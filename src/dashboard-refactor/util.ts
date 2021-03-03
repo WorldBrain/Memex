@@ -1,6 +1,7 @@
 import moment from 'moment'
+
 import { SearchFilterType } from './header/types'
-import { DatePickerVariant, NewFilterDetail } from './types'
+import { RootState, DatePickerVariant, NewFilterDetail } from './types'
 
 export const updatePickerValues = (event: {
     added?: string
@@ -44,3 +45,16 @@ export const getFilterDetail = (
     }
     return filterDetail
 }
+
+export const areSearchFiltersEmpty = ({
+    listsSidebar,
+    searchFilters,
+}: RootState): boolean =>
+    !listsSidebar.selectedListId &&
+    !searchFilters.dateFrom &&
+    !searchFilters.dateTo &&
+    !searchFilters.domainsExcluded.length &&
+    !searchFilters.domainsIncluded.length &&
+    !searchFilters.tagsExcluded.length &&
+    !searchFilters.tagsIncluded.length &&
+    !searchFilters.searchQuery.length

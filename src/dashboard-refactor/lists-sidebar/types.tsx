@@ -41,10 +41,13 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
         followedLists: FollowedListGroup
         localLists: LocalListGroup
 
+        inboxUnreadCount: number
+        dragOverListId?: number
         editingListId?: number
         selectedListId?: number
         showMoreMenuListId?: number
         isSidebarToggleHovered?: boolean
+        hasFeedActivity: boolean
 
         listDeleteState: TaskState
         listCreateState: TaskState
@@ -69,15 +72,18 @@ export type Events = UIEvent<{
 
     confirmListEdit: { value: string }
     cancelListEdit: null
+    setDragOverListId: { listId?: number }
     setEditingListId: { listId: number }
     setSelectedListId: { listId: number }
     setShowMoreMenuListId: { listId: number }
+    dropPageOnListItem: { listId: number; dataTransfer: DataTransfer }
 
     confirmListDelete: null
     cancelListDelete: null
 
     shareList: null
     unshareList: null
+    clickFeedActivityIndicator: null
 }>
 
 export type ListNameHighlightIndices = [number, number]

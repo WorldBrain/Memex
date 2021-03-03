@@ -254,6 +254,31 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         description: null,
                                     },
                                 ])
+
+                                // It should not fail when trying to update other fields than the title of the list
+                                await setup.storageManager.operation(
+                                    'updateObject',
+                                    'customLists',
+                                    { id: localListId },
+                                    { searchableName: 'something' },
+                                )
+                                await contentSharing.waitForSync()
+                                expect(
+                                    await serverStorage.storageManager.operation(
+                                        'findObjects',
+                                        'sharedList',
+                                        {},
+                                    ),
+                                ).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: TEST_USER.id,
+                                        createdWhen: expect.any(Number),
+                                        updatedWhen: expect.any(Number),
+                                        title: updatedTitle,
+                                        description: null,
+                                    },
+                                ])
                             },
                         },
                     ],

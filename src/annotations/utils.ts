@@ -1,12 +1,13 @@
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TextTruncator } from './types'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 export const LAST_SHARED_ANNOTS =
     '@ContentSharing-last-shared-annotation-timestamp'
 
 export const generateUrl = (params: { pageUrl: string; now: () => number }) => {
     const { pageUrl, now } = params
-    return `${pageUrl}/#${now()}`
+    return `${normalizeUrl(pageUrl)}/#${now()}`
 }
 
 export const isUrlForAnnotation = (url: string): boolean =>

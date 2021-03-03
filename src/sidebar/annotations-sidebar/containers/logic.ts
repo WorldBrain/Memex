@@ -60,7 +60,6 @@ export interface SidebarContainerState {
         }
     }
     activeAnnotationUrl: string | null
-    hoverAnnotationUrl: string | null
 
     showCommentBox: boolean
     commentBox: EditForm
@@ -129,10 +128,6 @@ export type SidebarContainerEvents = UIEvent<{
     }
 
     // Annotation boxes
-    goToAnnotation: {
-        context: AnnotationEventContext
-        annotationUrl: string
-    }
     goToAnnotationInNewTab: {
         context: AnnotationEventContext
         annotationUrl: string
@@ -158,20 +153,10 @@ export type SidebarContainerEvents = UIEvent<{
         context: AnnotationEventContext
         annotationUrl: string
     }
-    toggleAnnotationBookmark: {
-        context: AnnotationEventContext
-        annotationUrl: string
-    }
     switchAnnotationMode: {
         context: AnnotationEventContext
         annotationUrl: string
         mode: AnnotationMode
-    }
-    annotationMouseEnter: {
-        annotationUrl: string
-    }
-    annotationMouseLeave: {
-        annotationUrl: string
     }
 
     copyNoteLink: { link: string }
@@ -281,7 +266,6 @@ export class SidebarContainerLogic extends UILogic<
             isSocialPost: false,
             annotations: [],
             activeAnnotationUrl: null,
-            hoverAnnotationUrl: null,
 
             showCommentBox: false,
             showCongratsMessage: false,
@@ -743,27 +727,6 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    goToAnnotation: EventHandler<'goToAnnotation'> = async ({
-        event,
-        previousState,
-    }) => {
-        this.emitMutation({
-            activeAnnotationUrl: { $set: event.annotationUrl },
-        })
-
-        const annotation = previousState.annotations.find(
-            (annot) => annot.url === event.annotationUrl,
-        )
-
-        if (!annotation?.body?.length) {
-            return
-        }
-
-        this.inPageEvents.emit('highlightAndScroll', {
-            url: event.annotationUrl,
-        })
-    }
-
     editAnnotation: EventHandler<'editAnnotation'> = async ({
         event,
         previousState,
@@ -844,21 +807,6 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    toggleAnnotationBookmark: EventHandler<
-        'toggleAnnotationBookmark'
-    > = async ({ previousState, event }) => {
-        const resultIndex = previousState.annotations.findIndex(
-            (annot) => annot.url === event.annotationUrl,
-        )
-        const annotation = previousState.annotations[resultIndex]
-        const isBookmarked = !annotation.isBookmarked
-
-        this.options.annotationsCache.update({
-            ...annotation,
-            isBookmarked,
-        })
-    }
-
     setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({
         event,
         previousState,
@@ -920,20 +868,6 @@ export class SidebarContainerLogic extends UILogic<
         incoming,
     ) => {
         return { allAnnotationsExpanded: { $apply: (value) => !value } }
-    }
-
-    annotationMouseEnter: EventHandler<'annotationMouseEnter'> = (incoming) => {
-        return {
-            hoverAnnotationUrl: {
-                $set: incoming.event.annotationUrl,
-            },
-        }
-    }
-
-    annotationMouseLeave: EventHandler<'annotationMouseLeave'> = (incoming) => {
-        return {
-            hoverAnnotationUrl: { $set: null },
-        }
     }
 
     setAnnotationShareModalShown: EventHandler<

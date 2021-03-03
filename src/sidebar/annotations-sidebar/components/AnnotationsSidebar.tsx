@@ -9,9 +9,8 @@ import AnnotationCreate, {
     AnnotationCreateEventProps,
 } from 'src/annotations/components/AnnotationCreate'
 import AnnotationEditable, {
-    AnnotationEditableGeneralProps,
     AnnotationEditableEventProps,
-} from 'src/annotations/components/AnnotationEditable'
+} from 'src/annotations/components/HoverControlledAnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
 import { Annotation } from 'src/annotations/types'
@@ -33,7 +32,6 @@ export interface AnnotationsSidebarProps {
 
     showCongratsMessage?: boolean
     activeAnnotationUrl?: string | null
-    hoverAnnotationUrl?: string
     needsWaypoint?: boolean
     appendLoader?: boolean
     handleScrollPagination: () => void
@@ -49,8 +47,6 @@ export interface AnnotationsSidebarProps {
     bindAnnotationEditProps: (
         annotation: Annotation,
     ) => AnnotationEditGeneralProps & AnnotationEditEventProps
-    annotationEditableProps: AnnotationEditableGeneralProps &
-        AnnotationEditableEventProps
     annotationCreateProps: AnnotationCreateGeneralProps &
         AnnotationCreateEventProps
 
@@ -157,9 +153,9 @@ class AnnotationsSidebar extends React.Component<
                     <AnnotationCreate
                         {...this.props.annotationCreateProps}
                         ref={(ref) => (this.annotationCreateRef = ref)}
+                        autoFocus
                     />
                 </NewAnnotationBoxStyled>
-                <NewAnnotationSeparator />
             </NewAnnotationSection>
         )
     }
@@ -190,12 +186,10 @@ class AnnotationsSidebar extends React.Component<
                 key={i}
                 {...annot}
                 {...this.props}
-                {...this.props.annotationEditableProps}
                 sharingAccess={this.props.sharingAccess}
                 mode={this.props.annotationModes[annot.url]}
                 sharingInfo={this.props.annotationSharingInfo[annot.url]}
                 isActive={this.props.activeAnnotationUrl === annot.url}
-                isHovered={this.props.hoverAnnotationUrl === annot.url}
                 annotationEditDependencies={this.props.bindAnnotationEditProps(
                     annot,
                 )}
@@ -319,7 +313,7 @@ const CloseButtonStyled = styled.button`
 const TopBarStyled = styled.div`
     position: static;
     top: 0;
-    background: #fff;
+    background: #f6f8fb;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -362,7 +356,7 @@ const annotationCardStyle = css`
 const NewAnnotationSection = styled.section`
     font-family: sans-serif;
     height: auto;
-    background: #fff;
+    background: #f6f8fb;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -379,7 +373,7 @@ const NewAnnotationSeparator = styled.div`
 
 const AnnotationsSectionStyled = styled.section`
     font-family: sans-serif;
-    background: #fff;
+    background: #f6f8fb;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -390,7 +384,7 @@ const AnnotationsSectionStyled = styled.section`
 
 const NewAnnotationBoxStyled = styled.div`
     position: relative;
-    width: 97%;
+    width: 100%;
 
     &:hover {
         background: white;

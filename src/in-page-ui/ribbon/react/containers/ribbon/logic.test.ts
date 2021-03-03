@@ -82,6 +82,8 @@ describe('Ribbon logic', () => {
             annotationsCache: createAnnotationsCache(
                 {
                     ...backgroundModules,
+                    contentSharing:
+                        backgroundModules.contentSharing.remoteFunctions,
                     annotations,
                 },
                 { skipPageIndexing: true },

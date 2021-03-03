@@ -9,22 +9,42 @@ import {
     sortByPagePosition,
 } from 'src/sidebar/annotations-sidebar/sorting'
 import { haveTagsChanged } from 'src/util/have-tags-changed'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
+
+interface CachedAnnotation extends Annotation {
+    isShared: boolean
+}
 
 export const createAnnotationsCache = (
     bgModules: {
         tags: RemoteTagsInterface
         annotations: AnnotationInterface<'caller'>
+        contentSharing: ContentSharingInterface
     },
     options: { skipPageIndexing?: boolean } = {},
 ): AnnotationsCache =>
     new AnnotationsCache({
         sortingFn: sortByPagePosition,
         backendOperations: {
-            load: async (pageUrl) =>
-                bgModules.annotations.listAnnotationsByPageUrl({
-                    pageUrl,
-                    withTags: true,
-                }),
+            load: async (pageUrl) => {
+                const annotations = await bgModules.annotations.listAnnotationsByPageUrl(
+                    {
+                        pageUrl,
+                        withTags: true,
+                    },
+                )
+
+                const remoteIds = await bgModules.contentSharing.getRemoteAnnotationIds(
+                    {
+                        annotationUrls: annotations.map((a) => a.url),
+                    },
+                )
+
+                return annotations.map((a) => ({
+                    ...a,
+                    isShared: !!remoteIds[a.url],
+                }))
+            },
             create: async (annotation) =>
                 bgModules.annotations.createAnnotation(annotation, {
                     skipPageIndexing: options.skipPageIndexing,
@@ -51,13 +71,13 @@ export const createAnnotationsCache = (
     })
 
 interface AnnotationCacheChanges {
-    rollback: (annotations: Annotation[]) => void
-    newState: (annotation: Annotation[]) => void
-    sorted: (annotations: Annotation[]) => void
-    created: (annotation: Annotation) => void
-    updated: (annotation: Annotation) => void
-    deleted: (annotation: Annotation) => void
-    load: (annotation: Annotation[]) => void
+    rollback: (annotations: CachedAnnotation[]) => void
+    newState: (annotation: CachedAnnotation[]) => void
+    sorted: (annotations: CachedAnnotation[]) => void
+    created: (annotation: CachedAnnotation) => void
+    updated: (annotation: CachedAnnotation) => void
+    deleted: (annotation: CachedAnnotation) => void
+    load: (annotation: CachedAnnotation[]) => void
 }
 
 export type AnnotationCacheChangeEvents = TypedEventEmitter<
@@ -70,14 +90,14 @@ export interface AnnotationsCacheDependencies {
         load: (
             pageUrl: string,
             args?: { limit?: number; skip?: number },
-        ) => Promise<Annotation[]> // url should become one concrete example of a contentFingerprint to load annotations for
-        create: (annotation: Annotation) => Promise<string>
-        update: (annotation: Annotation) => Promise<void>
+        ) => Promise<CachedAnnotation[]> // url should become one concrete example of a contentFingerprint to load annotations for
+        create: (annotation: CachedAnnotation) => Promise<string>
+        update: (annotation: CachedAnnotation) => Promise<void>
         updateTags: (
-            annotationUrl: Annotation['url'],
-            tags: Annotation['tags'],
+            annotationUrl: CachedAnnotation['url'],
+            tags: CachedAnnotation['tags'],
         ) => Promise<void>
-        delete: (annotation: Annotation) => Promise<void>
+        delete: (annotation: CachedAnnotation) => Promise<void>
     }
 }
 
@@ -87,33 +107,42 @@ export interface AnnotationsCacheInterface {
         args?: { limit?: number; skip?: number },
     ) => Promise<void>
     create: (
-        annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>,
+        annotation: Omit<
+            CachedAnnotation,
+            'lastEdited' | 'createdWhen' | 'isShared'
+        >,
     ) => Promise<void>
     update: (
-        annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>,
+        annotation: Omit<
+            CachedAnnotation,
+            'lastEdited' | 'createdWhen' | 'isShared'
+        >,
     ) => Promise<void>
     delete: (
-        annotation: Omit<Annotation, 'lastEdited' | 'createdWhen'>,
+        annotation: Omit<
+            CachedAnnotation,
+            'lastEdited' | 'createdWhen' | 'isShared'
+        >,
     ) => Promise<void>
     sort: (sortingFn?: AnnotationsSorter) => void
-    getAnnotationById: (id: string) => Annotation
+    getAnnotationById: (id: string) => CachedAnnotation
 
-    annotations: Annotation[]
+    annotations: CachedAnnotation[]
     annotationChanges: AnnotationCacheChangeEvents
     isEmpty: boolean
 }
 
 export class AnnotationsCache implements AnnotationsCacheInterface {
-    private _annotations: Annotation[] = []
+    private _annotations: CachedAnnotation[] = []
     public annotationChanges = new EventEmitter() as AnnotationCacheChangeEvents
 
     constructor(private dependencies: AnnotationsCacheDependencies) {}
 
-    set annotations(annotations: Annotation[]) {
+    set annotations(annotations: CachedAnnotation[]) {
         this._annotations = formatAnnotations(annotations)
     }
 
-    get annotations(): Annotation[] {
+    get annotations(): CachedAnnotation[] {
         return this._annotations
     }
 
@@ -121,7 +150,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         return this._annotations.length === 0
     }
 
-    getAnnotationById = (id: string): Annotation =>
+    getAnnotationById = (id: string): CachedAnnotation =>
         this.annotations.find((annot) => annot.url === id)
 
     load = async (url, args = {}) => {
@@ -145,7 +174,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         this.annotationChanges.emit('newState', this._annotations)
     }
 
-    create = async (annotation: Annotation) => {
+    create = async (annotation: CachedAnnotation) => {
         annotation.createdWhen = new Date()
         const { backendOperations } = this.dependencies
         const stateBeforeModifications = this._annotations
@@ -168,7 +197,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         }
     }
 
-    update = async (annotation: Annotation) => {
+    update = async (annotation: CachedAnnotation) => {
         annotation.lastEdited = new Date()
         const stateBeforeModifications = [...this._annotations]
 
@@ -206,7 +235,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         }
     }
 
-    delete = async (annotation: Annotation) => {
+    delete = async (annotation: CachedAnnotation) => {
         const stateBeforeModifications = this._annotations
 
         const resultIndex = this._annotations.findIndex(
@@ -231,7 +260,9 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     }
 }
 
-function formatAnnotations(annotations: Annotation[]): Annotation[] {
+function formatAnnotations(
+    annotations: CachedAnnotation[],
+): CachedAnnotation[] {
     return annotations.map((a) => ({
         ...a,
         tags: a.tags ?? [],

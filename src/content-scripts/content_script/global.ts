@@ -73,6 +73,7 @@ export async function main() {
     const annotationsCache = createAnnotationsCache({
         tags: tagsBG,
         annotations: annotationsBG,
+        contentSharing: runInBackground(),
     })
 
     // 3. Creates an instance of the InPageUI manager class to encapsulate

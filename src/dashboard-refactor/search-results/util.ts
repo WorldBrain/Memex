@@ -20,6 +20,7 @@ import {
     NotesType,
 } from './types'
 import { Annotation } from 'src/annotations/types'
+import { PAGE_SEARCH_DUMMY_DAY } from '../constants'
 
 export const notesTypeToString = (type: NotesType): string => {
     if (type === 'user') {
@@ -90,17 +91,21 @@ export const bindFunctionalProps = <
 export const getInitialPageResultState = (
     id: string,
     noteIds: string[] = [],
+    extra: Partial<PageResult> = {},
 ): PageResult => ({
     id,
     notesType: 'user',
     areNotesShown: false,
     isTagPickerShown: false,
+    isShareMenuShown: false,
     isCopyPasterShown: false,
     isListPickerShown: false,
     sortingFn: (a, b) => 1,
     loadNotesState: 'pristine',
     newNoteForm: getInitialFormState(),
     noteIds: { user: noteIds, followed: [], search: [] },
+    hoverState: null,
+    ...extra,
 })
 
 export const getInitialNoteResultState = (): NoteResult => ({
@@ -110,6 +115,7 @@ export const getInitialNoteResultState = (): NoteResult => ({
     isShareMenuShown: false,
     isCopyPasterShown: false,
     editNoteForm: getInitialFormState(),
+    hoverState: null,
 })
 
 const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
@@ -118,6 +124,7 @@ const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
     fullUrl: pageResult.fullUrl,
     fullTitle: pageResult.title,
     normalizedUrl: pageResult.url,
+    favIconURI: pageResult.favIcon,
     displayTime: pageResult.displayTime,
     hasNotes: pageResult.annotsCount > 0,
 })
@@ -130,15 +137,11 @@ const annotationToNoteData = (
     highlight: annotation.body,
     comment: annotation.comment,
     tags: annotation.tags ?? [],
-    areRepliesShown: false,
-    isTagPickerShown: false,
-    isCopyPasterShown: false,
-    isShareMenuShown: false,
     displayTime: new Date(
         annotation.lastEdited ?? annotation.createdWhen,
     ).getTime(),
-    isEditing: false,
     isEdited: annotation.lastEdited != null,
+    ...getInitialNoteResultState(),
     editNoteForm: {
         inputValue: annotation.comment ?? '',
         tags: annotation.tags ?? [],
@@ -172,6 +175,7 @@ export const annotationSearchResultToState: SearchResultToState = (
             pageResults.byId[pageUrl] = getInitialPageResultState(
                 pageUrl,
                 noteIds,
+                { areNotesShown: true },
             )
 
             for (const annotation of annotations) {
@@ -229,7 +233,12 @@ export const pageSearchResultToState: SearchResultToState = (
     return {
         noteData,
         pageData,
-        results: { [-1]: { day: -1, pages: pageResults } },
+        results: {
+            [PAGE_SEARCH_DUMMY_DAY]: {
+                day: PAGE_SEARCH_DUMMY_DAY,
+                pages: pageResults,
+            },
+        },
     }
 }
 

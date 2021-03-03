@@ -8,6 +8,7 @@ export interface MenuItemProps {
     name: string
     info?: string
     isDisabled?: boolean
+    soonAvailable?: boolean
 }
 
 interface ThemeProps {
@@ -86,7 +87,13 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                         : false,
                 }}
             >
-                {props.name}
+                <MenuItemName>
+                    {props.name}
+                    {props.isDisabled && props.soonAvailable && (
+                        <SoonPill>Coming Soon</SoonPill>
+                    )}
+                </MenuItemName>
+                {props.info && <MenuItemInfo>{props.info}</MenuItemInfo>}
             </MenuItem>
         ))
 
@@ -139,11 +146,8 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
 const MenuContainer = styled.div`
     position: relative;
     flex: 1;
-
-    & img {
-        width: 18px;
-        height: 18px;
-    }
+    align-items: center;
+    display: flex;
 `
 
 const MenuItem = styled.li`
@@ -151,11 +155,36 @@ const MenuItem = styled.li`
         theme.isDisabled
             ? 'color: #97b2b8;'
             : '&:hover { background: #e0e0e0; cursor: pointer; }'};
-    ${({ theme }) => theme.isSelected && 'font-weight: bold;'};
+    ${({ theme }) => theme.isSelected && 'background: #f0f0f0;'};
     padding: 10px 20px;
+    width: 100%;
 `
 
-const MenuBtn = styled.button`
+const SoonPill = styled.span`
+    background: ${(props) => props.theme.colors.purple};
+    color: #fff;
+    padding: 2px 5px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
+    font-size: 10px;
+`
+
+const MenuItemName = styled.div`
+    font-weight: 500;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+`
+
+const MenuItemInfo = styled.div`
+    font-weight: 400;
+    font-size: 12px;
+`
+
+const MenuBtn = styled.div`
     box-sizing: border-box;
     cursor: pointer;
     font-size: 14px;
@@ -178,6 +207,10 @@ const MenuBtn = styled.button`
     &:focus {
         background-color: #79797945;
     }
+
+    & div {
+        padding: 2px 4px;
+    }
 `
 
 const Menu = styled.ul`
@@ -194,4 +227,7 @@ const Menu = styled.ul`
     overflow: hidden;
     overflow-y: scroll;
     z-index: 10;
+    margin-top: 5px;
+    flex-direction: column;
+    top: 25px;
 `

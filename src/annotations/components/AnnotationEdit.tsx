@@ -92,7 +92,7 @@ class AnnotationEdit extends React.Component<Props>
 export default AnnotationEdit
 
 const StyledTextArea = styled.textarea`
-    background-color: #f7f7f7;
+    background-color: #fff;
     box-sizing: border-box;
     resize: vertical;
     font-weight: 400;

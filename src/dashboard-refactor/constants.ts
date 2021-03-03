@@ -4,10 +4,10 @@ export const sizeConstants = {
     },
     searchBar: {
         heightPx: 50,
-        widthPx: 540,
+        widthPx: 800,
     },
     listsSidebar: {
-        widthPx: 150,
+        widthPx: 200,
     },
     syncStatusMenu: {
         widthPx: 150,
@@ -71,4 +71,13 @@ const KEY_PREFIX = '@Dashboard-'
 
 export const STORAGE_KEYS = {
     listSidebarLocked: KEY_PREFIX + 'list_sidebar_locked',
+    onboardingMsgSeen: KEY_PREFIX + 'onboarding_msg_seen',
+    mobileAdSeen: KEY_PREFIX + 'mobile_ad_seen',
 }
+
+/**
+ * Used for page search, where results aren't grouped by day. Internally, to keep a consistent results
+ * data structure for both page and notes search, page search results are still grouped by day though
+ * always under a single key. This is that key.
+ */
+export const PAGE_SEARCH_DUMMY_DAY = -1

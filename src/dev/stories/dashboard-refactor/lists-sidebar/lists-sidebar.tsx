@@ -28,9 +28,11 @@ let selectedListId: number | undefined
 const template: ListsSidebarProps = {
     lockedState,
     peekState,
+    openFeedUrl: () => undefined,
     onListSelection: (listId) => {
         selectedListId = listId
     },
+    inboxUnreadCount: 2,
     selectedListId,
     searchBarProps: {
         ...listsSidebarSearchBarProps.default,
@@ -41,6 +43,9 @@ const template: ListsSidebarProps = {
         listsSidebarGroupProps.myCollectionsExpanded,
         listsSidebarGroupProps.followedCollectionsExpanded,
     ],
+    initDropReceivingState: () => undefined,
+    isAllSavedSelected: true,
+    onAllSavedSelection: () => undefined,
 }
 
 export const listsSidebarStoryProps: {

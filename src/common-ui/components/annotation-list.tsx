@@ -48,7 +48,6 @@ export interface Props {
     goToAnnotation: (annotation: Annotation) => void
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
-    handleBookmarkToggle: (url: string) => void
     setActiveTagPickerNoteId: (id: string) => void
     setActiveShareMenuNoteId?: (id: string) => void
     setActiveCopyPasterAnnotationId?: (id: string) => void
@@ -227,22 +226,6 @@ class AnnotationList extends Component<Props, State> {
         })
     }
 
-    private handleBookmarkToggle = (url: string) => () => {
-        this.props.handleBookmarkToggle(url)
-
-        const { annotations } = this.state
-
-        const index = annotations.findIndex((annot) => annot.url === url)
-        const annotation: Annotation = annotations[index]
-        const newAnnotations: Annotation[] = [
-            ...annotations.slice(0, index),
-            { ...annotation, hasBookmark: !annotation.hasBookmark },
-            ...annotations.slice(index + 1),
-        ]
-
-        this.setState({ annotations: newAnnotations })
-    }
-
     private handleGoToAnnotation = (annotation: Annotation) => () => {
         this.props.goToAnnotation(annotation)
     }
@@ -419,7 +402,6 @@ class AnnotationList extends Component<Props, State> {
                         this.setState({
                             annotationModes: { [annot.url]: 'delete' },
                         }),
-                    toggleBookmark: this.handleBookmarkToggle(annot.url),
                     onTagIconClick: this.handleTagPickerClick(annot.url),
                     onShareClick: this.handleShareClick(annot.url),
                     onUnshareClick: this.handleShareClick(annot.url),

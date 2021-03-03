@@ -32,6 +32,8 @@ const setupLogicHelper = async ({
 
     const annotationsCache = createAnnotationsCache(
         {
+            contentSharing:
+                device.backgroundModules.contentSharing.remoteFunctions,
             tags: device.backgroundModules.tags.remoteFunctions,
             annotations: annotationsBG,
         },
@@ -233,31 +235,6 @@ describe('SidebarContainerLogic', () => {
                 annotationUrl: DATA.ANNOT_1.url,
             })
             expect(sidebar.state.annotations.length).toBe(0)
-        })
-
-        it("should be able to toggle an annotation's bookmark status", async ({
-            device,
-        }) => {
-            const { sidebar } = await setupLogicHelper({ device })
-
-            sidebar.processMutation({
-                annotations: { $set: [DATA.ANNOT_1] },
-                editForms: {
-                    $set: createEditFormsForAnnotations([DATA.ANNOT_1]),
-                },
-            })
-
-            expect(sidebar.state.annotations[0].isBookmarked).toBe(undefined)
-            await sidebar.processEvent('toggleAnnotationBookmark', {
-                context,
-                annotationUrl: DATA.ANNOT_1.url,
-            })
-            expect(sidebar.state.annotations[0].isBookmarked).toBe(true)
-            await sidebar.processEvent('toggleAnnotationBookmark', {
-                context,
-                annotationUrl: DATA.ANNOT_1.url,
-            })
-            expect(sidebar.state.annotations[0].isBookmarked).toBe(false)
         })
 
         it('should be able to change annotation sharing access', async ({
