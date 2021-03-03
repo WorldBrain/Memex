@@ -4,7 +4,6 @@ import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
 import { haveTagsChanged } from 'src/util/have-tags-changed'
-import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 import {
     getLastSharedAnnotationTimestamp,
     setLastSharedAnnotationTimestamp,
@@ -19,7 +18,6 @@ import { ListData } from './lists-sidebar/types'
 import { updatePickerValues } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import { NoResultsType } from './search-results/types'
-import { dissectCreateObjectOperation } from '@worldbrain/storex/lib/utils'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -156,9 +154,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 previousState,
             )
             await Promise.all([
-                this.runSearch(nextState),
                 this.getFeedActivityStatus(),
                 this.getInboxUnreadCount(),
+                this.runSearch(nextState),
+                this.getSyncMenuStatus(),
                 this.getSharingAccess(),
                 this.loadLocalLists(),
             ])
@@ -190,6 +189,25 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
         this.emitMutation(mutation)
         return this.withMutation(previousState, mutation)
+    }
+
+    private async getSyncMenuStatus() {
+        const { syncBG, backupBG } = this.options
+        const syncDevices = await syncBG.listDevices()
+        const backupEnabled = await backupBG.isAutomaticBackupEnabled()
+        const { lastBackup } = await backupBG.getBackupTimes()
+        const lastSuccessfulBackup =
+            typeof lastBackup === 'number' ? new Date(lastBackup) : new Date()
+
+        this.emitMutation({
+            syncMenu: {
+                lastSuccessfulBackupDateTime: { $set: lastSuccessfulBackup },
+                backupState: { $set: backupEnabled ? 'enabled' : 'disabled' },
+                syncState: {
+                    $set: syncDevices.length > 0 ? 'enabled' : 'disabled',
+                },
+            },
+        })
     }
 
     private async getFeedActivityStatus() {

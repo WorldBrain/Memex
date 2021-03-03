@@ -47,6 +47,7 @@ export class DashboardContainer extends StatefulUIElement<
         contentShareBG: runInBackground(),
         annotationsBG: runInBackground(),
         searchBG: runInBackground(),
+        backupBG: runInBackground(),
         listsBG: runInBackground(),
         tagsBG: runInBackground(),
         authBG: runInBackground(),
