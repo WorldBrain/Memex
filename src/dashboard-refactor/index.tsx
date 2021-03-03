@@ -28,6 +28,7 @@ import { updatePickerValues, areSearchFiltersEmpty } from './util'
 import Margin from './components/Margin'
 import analytics from 'src/analytics'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
+import { deriveStatusIconColor } from './header/sync-status-menu/util'
 
 const __unimplemented = () => undefined
 
@@ -230,9 +231,7 @@ export class DashboardContainer extends StatefulUIElement<
                     },
                     selectedListName,
                 }}
-                syncStatusIconState={
-                    syncMenu.syncState === 'enabled' ? 'green' : 'red'
-                }
+                syncStatusIconState={deriveStatusIconColor(syncMenu)}
                 syncStatusMenuProps={{
                     ...syncMenu,
                     backupRunHoverState: {
