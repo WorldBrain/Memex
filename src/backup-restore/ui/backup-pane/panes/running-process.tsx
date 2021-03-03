@@ -12,6 +12,7 @@ import {
     WhiteSpacer20,
     WhiteSpacer30,
 } from 'src/common-ui/components/design-library/typography'
+import { BACKUP_STORAGE_KEY } from 'src/backup-restore/constants'
 
 const overviewStyles = require('src/backup-restore/ui/styles.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
@@ -99,7 +100,7 @@ export default class RunningProcess extends React.Component<Props> {
                 info: event.info || this.state.info,
             })
         } else if (event.type === 'success') {
-            await setLocalStorageTyped('backup-status', {
+            await setLocalStorageTyped(BACKUP_STORAGE_KEY, {
                 state: 'success',
                 backupId: 'success',
             })
@@ -109,7 +110,7 @@ export default class RunningProcess extends React.Component<Props> {
             const errorId = await remoteFunction(
                 this.props.functionNames.sendNotif,
             )('error')
-            await setLocalStorageTyped('backup-status', {
+            await setLocalStorageTyped(BACKUP_STORAGE_KEY, {
                 state: 'fail',
                 backupId:
                     errorId === 'backup_error' ? errorId : 'drive_size_empty',
