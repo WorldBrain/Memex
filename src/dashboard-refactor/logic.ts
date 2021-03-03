@@ -2223,7 +2223,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             }),
             async () => {
-                // TODO: Figure out how to trigger backup
+                await this.options.backupBG.startBackup()
             },
         )
 

@@ -25,6 +25,7 @@ import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { Analytics } from 'src/analytics'
 import { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import { PublicSyncInterface } from 'src/sync/background/types'
+import { BackupInterface } from 'src/backup-restore/background/types'
 
 export interface RootState {
     loadState: TaskState
@@ -52,6 +53,7 @@ export interface DashboardDependencies {
     tagsBG: RemoteTagsInterface
     authBG: AuthRemoteFunctionsInterface
     syncBG: PublicSyncInterface
+    backupBG: BackupInterface<'caller'>
     contentShareBG: ContentSharingInterface
     listsBG: RemoteCollectionsInterface
     searchBG: SearchInterface

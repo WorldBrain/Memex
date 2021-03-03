@@ -30,7 +30,7 @@ export class BackupBackgroundModule {
     backendSelect = new BackendSelect()
     backupProcedure: BackupProcedure
     backupUiCommunication = new ProcedureUiCommunication('backup-event')
-    remoteFunctions: BackupInterface
+    remoteFunctions: BackupInterface<'provider'>
     restoreProcedure: BackupRestoreProcedure
     restoreUiCommunication: ProcedureUiCommunication = new ProcedureUiCommunication(
         'restore-event',
@@ -74,6 +74,20 @@ export class BackupBackgroundModule {
             getBackupTimes: async () => {
                 return this.getBackupTimes()
             },
+            startBackup: async ({ tab }) => {
+                this.backupUiCommunication.registerUiTab(tab)
+                if (this.backupProcedure.running) {
+                    return
+                }
+                if (this.restoreProcedure && this.restoreProcedure.running) {
+                    throw new Error(
+                        "Come on, don't be crazy and run backup and restore at once please",
+                    )
+                }
+
+                await this.doBackup()
+                this.backupUiCommunication.connect(this.backupProcedure.events)
+            },
         }
     }
 
@@ -84,25 +98,6 @@ export class BackupBackgroundModule {
                 getBackupProviderLoginLink: async (info, params) => {
                     const MEMEX_CLOUD_ORIGIN = _getMemexCloudOrigin()
                     return `${MEMEX_CLOUD_ORIGIN}/auth/google?scope=${DEFAULT_AUTH_SCOPE}`
-                },
-                startBackup: async ({ tab }, params) => {
-                    this.backupUiCommunication.registerUiTab(tab)
-                    if (this.backupProcedure.running) {
-                        return
-                    }
-                    if (
-                        this.restoreProcedure &&
-                        this.restoreProcedure.running
-                    ) {
-                        throw new Error(
-                            "Come on, don't be crazy and run backup and restore at once please",
-                        )
-                    }
-
-                    await this.doBackup()
-                    this.backupUiCommunication.connect(
-                        this.backupProcedure.events,
-                    )
                 },
                 initRestoreProcedure: (info, provider) => {
                     return this.initRestoreProcedure(provider)

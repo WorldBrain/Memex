@@ -17,14 +17,11 @@ import {
 import { insertBackgroundFunctionTab } from 'src/tests/ui-logic-tests'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { FakeAnalytics } from 'src/analytics/mock'
+import { BackupInterface } from 'src/backup-restore/background/types'
 
 // TODO: Try to get this working - currently fails due to `browser.runtime.onMessage.addListener` not being defineddddd
 async function createDependencies(): Promise<DashboardProps> {
     const { backgroundModules } = await setupBackgroundIntegrationTest()
-
-    const annotationsBG = insertBackgroundFunctionTab(
-        backgroundModules.directLinking.remoteFunctions,
-    ) as any
 
     return {
         analytics: new FakeAnalytics(),
@@ -33,12 +30,17 @@ async function createDependencies(): Promise<DashboardProps> {
             return true
         },
         document,
-        annotationsBG,
+        annotationsBG: insertBackgroundFunctionTab(
+            backgroundModules.directLinking.remoteFunctions,
+        ) as any,
         localStorage: browser.storage.local,
         authBG: backgroundModules.auth.remoteFunctions,
         syncBG: backgroundModules.sync.remoteFunctions,
         tagsBG: backgroundModules.tags.remoteFunctions,
         listsBG: backgroundModules.customLists.remoteFunctions,
+        backupBG: insertBackgroundFunctionTab(
+            backgroundModules.backupModule.remoteFunctions,
+        ) as any,
         searchBG: backgroundModules.search.remoteFunctions.search,
         contentShareBG: backgroundModules.contentSharing.remoteFunctions,
         activityIndicatorBG:

@@ -1,7 +1,12 @@
+import {
+    RemoteFunctionRole,
+    RemotePositionalFunction,
+} from 'src/util/webextensionRPC'
 import { BackupTimes } from '../types'
 
-export interface BackupInterface {
-    isAutomaticBackupEnabled(): Promise<boolean>
-    isAutomaticBackupAllowed(): Promise<boolean>
-    getBackupTimes(): Promise<BackupTimes>
+export interface BackupInterface<Role extends RemoteFunctionRole> {
+    isAutomaticBackupEnabled: RemotePositionalFunction<Role, [], boolean>
+    isAutomaticBackupAllowed: RemotePositionalFunction<Role, [], boolean>
+    getBackupTimes: RemotePositionalFunction<Role, [], BackupTimes>
+    startBackup: RemotePositionalFunction<Role, [], void>
 }

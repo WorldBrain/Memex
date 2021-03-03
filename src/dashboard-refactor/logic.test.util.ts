@@ -101,15 +101,13 @@ export async function setupTest(
         copyToClipboard: defaultTestSetupDeps.copyToClipboard,
     },
 ) {
-    const annotationsBG = insertBackgroundFunctionTab(
-        device.backgroundModules.directLinking.remoteFunctions,
-    ) as any
-
     const analytics = new FakeAnalytics()
 
     const logic = new DashboardLogic({
         analytics,
-        annotationsBG,
+        annotationsBG: insertBackgroundFunctionTab(
+            device.backgroundModules.directLinking.remoteFunctions,
+        ) as any,
         localStorage: browser.storage.local,
         authBG: device.backgroundModules.auth.remoteFunctions,
         tagsBG: device.backgroundModules.tags.remoteFunctions,
@@ -123,7 +121,9 @@ export async function setupTest(
         },
         searchBG: device.backgroundModules.search.remoteFunctions.search,
         syncBG: device.backgroundModules.sync.remoteFunctions,
-        backupBG: device.backgroundModules.backupModule.remoteFunctions,
+        backupBG: insertBackgroundFunctionTab(
+            device.backgroundModules.backupModule.remoteFunctions,
+        ) as any,
         contentShareBG: device.backgroundModules.contentSharing.remoteFunctions,
         activityIndicatorBG:
             device.backgroundModules.activityIndicator.remoteFunctions,
