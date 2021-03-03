@@ -85,7 +85,7 @@ export interface HoverState {
 }
 
 export interface SelectedState {
-    onSelection(id: number): void
+    onSelection(id: number, isActive?: boolean): void
     isSelected: boolean
 }
 
@@ -141,9 +141,9 @@ export type SearchFilterEvents = UIEvent<{
     setSearchBarFocus: { isFocused: boolean }
 
     setSearchFiltersOpen: { isOpen: boolean }
-    setTagFilterActive: { isActive: boolean }
-    setDateFilterActive: { isActive: boolean }
-    setDomainFilterActive: { isActive: boolean }
+    toggleShowTagPicker: { isActive: boolean }
+    toggleShowDatePicker: { isActive: boolean }
+    toggleShowDomainPicker: { isActive: boolean }
 
     setDateFromInputValue: { value: string }
     setDateToInputValue: { value: string }

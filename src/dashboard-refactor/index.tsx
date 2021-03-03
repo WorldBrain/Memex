@@ -112,24 +112,31 @@ export class DashboardContainer extends StatefulUIElement<
     private renderFiltersBar() {
         const { searchFilters, listsSidebar } = this.state
 
-        const toggleShowTagPicker = () =>
-            this.processEvent('setTagFilterActive', {
-                isActive: !searchFilters.isTagFilterActive,
+        const toggleShowDatePicker = (id: number, isActive?: boolean) => {
+            const value = isActive ?? !searchFilters.isDateFilterActive
+            this.processEvent('toggleShowDatePicker', {
+                isActive: value,
             })
-        const toggleShowDomainPicker = () =>
-            this.processEvent('setDomainFilterActive', {
-                isActive: !searchFilters.isDomainFilterActive,
+        }
+        const toggleShowDomainPicker = (id: number, isActive?: boolean) => {
+            const value = isActive ?? !searchFilters.isDomainFilterActive
+            this.processEvent('toggleShowDomainPicker', {
+                isActive: value,
             })
+        }
+        const toggleShowTagPicker = (id: number, isActive?: boolean) => {
+            const value = isActive ?? !searchFilters.isTagFilterActive
+            this.processEvent('toggleShowTagPicker', {
+                isActive: value,
+            })
+        }
 
         return (
             <FiltersBar
                 isDisplayed={searchFilters.searchFiltersOpen}
                 dateFilterSelectedState={{
                     isSelected: searchFilters.isDateFilterActive,
-                    onSelection: () =>
-                        this.processEvent('setDateFilterActive', {
-                            isActive: !searchFilters.isDateFilterActive,
-                        }),
+                    onSelection: toggleShowDatePicker,
                 }}
                 domainFilterSelectedState={{
                     isSelected: searchFilters.isDomainFilterActive,
