@@ -323,34 +323,43 @@ const getPickersStateFromQueryString = (
 export const extractMutationsFromSearchQuery = (
     queryString: string,
 ): {
-    resultingSearchQuery: string
-    extractedFilterMutations: UIMutation<SearchFiltersState>
+    searchQuery: string
+    filterMutation: UIMutation<SearchFiltersState>
 } => {
-    const resultingSearchQuery = getSearchStringOnly(queryString)
+    const searchQuery = getSearchStringOnly(queryString)
     const { tag, domain, date } = getPickersStateFromQueryString(queryString)
-    return {
-        resultingSearchQuery,
-        extractedFilterMutations: {
-            tagPickerQuery: { $set: tag?.query },
-            tagsIncluded: { $set: tag?.included },
-            tagsExcluded: { $set: tag?.excluded },
-            domainPickerQuery: { $set: domain?.query },
-            domainsIncluded: { $set: domain?.included },
-            domainsExcluded: { $set: domain?.excluded },
-            dateToInput: {
-                $set: date?.variant === 'to' && date?.included[0],
-            },
-            dateFromInput: {
-                $set: date?.variant === 'from' && date?.included[0],
-            },
-            dateTo: {
-                $set: date?.variant === 'to' && parseDate(date?.included[0]),
-            },
-            dateFrom: {
-                $set: date?.variant === 'from' && parseDate(date?.included[0]),
-            },
-        },
+    const filterMutation: UIMutation<SearchFiltersState> = {}
+
+    if (tag?.query) {
+        filterMutation.tagPickerQuery = { $set: tag.query }
     }
+    if (tag?.included) {
+        filterMutation.tagsIncluded = { $set: tag.included }
+    }
+    if (tag?.excluded) {
+        filterMutation.tagsExcluded = { $set: tag.excluded }
+    }
+    if (domain?.query) {
+        filterMutation.domainPickerQuery = { $set: domain.query }
+    }
+    if (domain?.included) {
+        filterMutation.domainsIncluded = { $set: domain.included }
+    }
+    if (domain?.excluded) {
+        filterMutation.domainsExcluded = { $set: domain.excluded }
+    }
+    if (date?.variant === 'to' && date?.included?.[0]) {
+        filterMutation.dateToInput = { $set: date.included[0] }
+        filterMutation.dateTo = { $set: parseDate(date.included[0]) }
+    }
+    if (date?.variant === 'from' && date?.included?.[0]) {
+        filterMutation.dateFromInput = { $set: date.included[0] }
+        filterMutation.dateFrom = {
+            $set: parseDate(date.included[0]),
+        }
+    }
+
+    return { searchQuery, filterMutation }
 }
 
 // string constructing logic

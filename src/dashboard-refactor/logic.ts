@@ -289,15 +289,14 @@ export class DashboardLogic extends UILogic<State, Events> {
     ) {
         const nextState = this.withMutation(previousState, mutation)
 
-        const {
-            extractedFilterMutations,
-            resultingSearchQuery,
-        } = extractMutationsFromSearchQuery(nextState.searchFilters.searchQuery)
+        const { filterMutation, searchQuery } = extractMutationsFromSearchQuery(
+            nextState.searchFilters.searchQuery,
+        )
 
         const mutationWithFiltersExtracted: UIMutation<State> = {
             searchFilters: {
-                searchQuery: { $set: resultingSearchQuery },
-                ...extractedFilterMutations,
+                searchQuery: { $set: searchQuery },
+                ...filterMutation,
             },
         }
 
