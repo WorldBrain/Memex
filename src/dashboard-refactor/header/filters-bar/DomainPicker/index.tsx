@@ -102,9 +102,9 @@ class DomainPicker extends StatefulUIElement<
 
         return (
             <EmptyDomainsView>
-                <strong>No Collections yet</strong>
+                <strong>No Domains yet</strong>
                 <br />
-                Add new collections
+                Add new domains
                 <br />
                 via the search bar
             </EmptyDomainsView>
