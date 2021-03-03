@@ -19,6 +19,8 @@ import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
 import {
     auth,
+    contentSharing,
+    copyPaster,
     featuresBeta,
     subscription,
 } from 'src/util/remote-functions-background'
@@ -251,6 +253,8 @@ class Overview extends PureComponent<Props, State> {
                             handleReaderViewClick={
                                 this.props.handleReaderViewClick
                             }
+                            copyPaster={copyPaster}
+                            contentSharing={contentSharing}
                         />
                         <DeleteConfirmModal message="Delete page and related notes" />
                         <DragElement />

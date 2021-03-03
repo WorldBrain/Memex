@@ -27,6 +27,7 @@ import TagPicker from 'src/tags/ui/TagPicker'
 import { auth, tags, collections } from 'src/util/remote-functions-background'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 const styles = require('./ResultList.css')
 
@@ -88,6 +89,7 @@ export interface OwnProps {
     goToAnnotation: (annotation: any) => void
     toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
     handleReaderViewClick: (fullUrl: string) => void
+    contentSharing: ContentSharingInterface
 }
 
 export type Props = StateProps & DispatchProps & OwnProps
@@ -358,6 +360,7 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                 isSidebarOpen={this.props.activeSidebarIndex !== -1}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
+                contentSharing={this.props.contentSharing}
             />
         )
     }

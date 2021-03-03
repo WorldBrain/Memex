@@ -11,6 +11,7 @@ import * as DATA from './logic.test.data'
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import * as sharingTestData from 'src/content-sharing/background/index.test.data'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 
 function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
     return mapValues(remoteFunctions, (f) => {
@@ -51,8 +52,12 @@ const setupLogicHelper = async ({
         pageUrl,
         auth: backgroundModules.auth.remoteFunctions,
         tags: backgroundModules.tags.remoteFunctions,
+        subscription: backgroundModules.auth.subscriptionService,
+        copyPaster: backgroundModules.copyPaster.remoteFunctions,
         customLists: backgroundModules.customLists.remoteFunctions,
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
+        contentScriptBackground: (backgroundModules.contentScripts
+            .remoteFunctions as unknown) as ContentScriptsInterface<'caller'>,
         annotations: annotationsBG,
         annotationsCache,
         analytics,

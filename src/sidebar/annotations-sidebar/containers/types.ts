@@ -6,6 +6,9 @@ import { SidebarTheme } from '../types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { Analytics } from 'src/analytics'
+import { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -27,11 +30,14 @@ export interface SidebarContainerDependencies {
     customLists: RemoteCollectionsInterface
     contentSharing: ContentSharingInterface
     auth: AuthRemoteFunctionsInterface
+    subscription: SubscriptionsService
     theme?: Partial<SidebarTheme>
     // search: SearchInterface
     // bookmarks: BookmarksInterface
     analytics: Analytics
     copyToClipboard: (text: string) => Promise<boolean>
+    copyPaster: RemoteCopyPasterInterface
+    contentScriptBackground: ContentScriptsInterface<'caller'>
 }
 
 export type SearchType = 'notes' | 'page' | 'social'

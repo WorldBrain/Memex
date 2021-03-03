@@ -16,6 +16,8 @@ import SocialResultItem from './social-result-item'
 import SemiCircularRibbon from './semi-circular-ribbon'
 import { isFullUrlPDF } from 'src/util/uri-utils'
 import { getExtURL } from 'src/in-page-ui/tooltip/utils'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 const styles = require('./result-item.css')
 
@@ -67,6 +69,7 @@ export interface Props extends Partial<SocialPage> {
     setCopyPasterButtonRef: (el: HTMLElement) => void
     setActiveShareMenuNoteId?: (id: string) => void
     setActiveCopyPasterAnnotationId?: (id: string) => void
+    contentSharing: ContentSharingInterface
 }
 
 class ResultItem extends PureComponent<Props> {

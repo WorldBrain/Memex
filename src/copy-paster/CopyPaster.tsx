@@ -3,9 +3,9 @@ import React from 'react'
 import analytics from 'src/analytics'
 import { Template } from './types'
 import CopyPaster from './components/CopyPaster'
-import { copyPaster } from 'src/util/remote-functions-background'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import * as Raven from 'src/util/raven'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 
 interface State {
     isLoading: boolean
@@ -17,6 +17,7 @@ export interface Props {
     initTemplates?: Template[]
     onClickOutside: React.MouseEventHandler
     renderTemplate: (id: number) => Promise<string>
+    copyPaster: RemoteCopyPasterInterface
 }
 
 export default class CopyPasterContainer extends React.PureComponent<
@@ -29,8 +30,12 @@ export default class CopyPasterContainer extends React.PureComponent<
         code: '',
         isFavourite: false,
     }
+    private copyPasterBG: RemoteCopyPasterInterface
 
-    private copyPasterBG = copyPaster
+    constructor(props) {
+        super(props)
+        this.copyPasterBG = this.props.copyPaster
+    }
 
     state: State = {
         isLoading: false,

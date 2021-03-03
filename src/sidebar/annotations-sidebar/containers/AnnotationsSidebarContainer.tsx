@@ -279,6 +279,7 @@ export class AnnotationsSidebarContainer<
             <ShareMenuWrapper>
                 <HoverBox>
                     <SingleNoteShareMenu
+                        contentSharing={this.props.contentSharing}
                         copyLink={(link) =>
                             this.processEvent('copyNoteLink', { link })
                         }
@@ -319,6 +320,8 @@ export class AnnotationsSidebarContainer<
             <ShareMenuWrapperTopBar>
                 <HoverBox>
                     <AllNotesShareMenu
+                        contentSharing={this.props.contentSharing}
+                        annotationsBG={this.props.annotations}
                         copyLink={(link) =>
                             this.processEvent('copyPageLink', { link })
                         }
@@ -354,6 +357,7 @@ export class AnnotationsSidebarContainer<
         return (
             <HoverBox>
                 <PageNotesCopyPaster
+                    copyPaster={this.props.copyPaster}
                     annotationUrls={annotationUrls}
                     normalizedPageUrls={[normalizeUrl(this.state.pageUrl)]}
                     onClickOutside={() =>

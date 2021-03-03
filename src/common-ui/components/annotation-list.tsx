@@ -23,6 +23,7 @@ import {
 } from 'src/sidebar/annotations-sidebar/containers/logic'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 const styles = require('./annotation-list.css')
 
@@ -49,6 +50,7 @@ export interface Props {
     handleBookmarkToggle: (url: string) => void
     setActiveShareMenuNoteId?: (id: string) => void
     setActiveCopyPasterAnnotationId?: (id: string) => void
+    contentSharing: ContentSharingInterface
 }
 
 interface SharingInfo {
@@ -293,6 +295,7 @@ class AnnotationList extends Component<Props, State> {
             <div className={styles.hoverBoxWrapper}>
                 <HoverBox>
                     <SingleNoteShareMenu
+                        contentSharing={this.props.contentSharing}
                         copyLink={async (link) => {
                             analytics.trackEvent({
                                 category: 'ContentSharing',

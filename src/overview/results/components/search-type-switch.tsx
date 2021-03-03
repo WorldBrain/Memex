@@ -17,6 +17,7 @@ import {
     PageSearchCopyPaster,
 } from 'src/copy-paster'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 
 const styles = require('./search-type-switch.css')
 
@@ -42,6 +43,7 @@ export interface DispatchProps {
 
 export interface OwnProps {
     showSocialSearch: boolean
+    copyPaster: RemoteCopyPasterInterface
 }
 
 export type Props = StateProps & DispatchProps & OwnProps
@@ -76,6 +78,7 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
         return (
             <HoverBox withRelativeContainer>
                 <CopyPaster
+                    copyPaster={this.props.copyPaster}
                     searchParams={this.props.searchParams}
                     onClickOutside={this.props.hideCopyPaster}
                 />

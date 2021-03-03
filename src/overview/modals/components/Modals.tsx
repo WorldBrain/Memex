@@ -4,6 +4,7 @@ import SubscribeModal from 'src/authentication/components/Subscription/Subscribe
 import ShareListModal from 'src/overview/sharing/components/ShareListModal'
 import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
 import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
+import { auth } from 'src/util/remote-functions-background'
 
 export interface Props {
     modalId?: ModalIds
@@ -23,6 +24,7 @@ const modalsMap: { [key in ModalIds]: (props: Props) => JSX.Element } = {
     ),
     BetaFeatureNotifModal: ({ modalOptions, onClose }) => (
         <BetaFeatureNotifModal
+            auth={auth}
             onClose={() => {
                 window.location.reload()
             }}

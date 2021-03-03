@@ -1,18 +1,23 @@
 import React from 'react'
 
 import CopyPaster, { Props as CopyPasterProps } from './CopyPaster'
-import { copyPaster } from 'src/util/remote-functions-background'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 
 export interface Props extends Omit<CopyPasterProps, 'renderTemplate'> {
     normalizedPageUrls: string[]
     annotationUrls?: string[]
+    copyPaster: RemoteCopyPasterInterface
 }
 
 export default class PageNotesCopyPaster extends React.PureComponent<Props> {
-    private copyPasterBG = copyPaster
-
     static defaultProps: Partial<Props> = {
         annotationUrls: [],
+    }
+    private copyPasterBG: RemoteCopyPasterInterface
+
+    constructor(props) {
+        super(props)
+        this.copyPasterBG = props.copyPaster
     }
 
     private renderTemplate = (id: number) =>

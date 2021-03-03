@@ -9,15 +9,17 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { getListShareUrl } from 'src/content-sharing/utils'
-import { auth } from 'src/util/remote-functions-background'
+import { auth, subscription } from 'src/util/remote-functions-background'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 interface Props {
     isPioneer: boolean
     auth: AuthRemoteFunctionsInterface
+    subscription: SubscriptionsService
     contentSharing: ContentSharingInterface
     list: PageList
     showSubscriptionModal: () => void
@@ -194,6 +196,7 @@ class ShareListModal extends Component<Props, State> {
             return (
                 <BetaFeatureNotif
                     showSubscriptionModal={this.props.showSubscriptionModal}
+                    subscription={subscription}
                 />
             )
         }

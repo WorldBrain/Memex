@@ -3,10 +3,10 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import styled from 'styled-components'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
-import { contentSharing } from 'src/util/remote-functions-background'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 interface State {
     // readyToRender: boolean
@@ -20,13 +20,19 @@ export interface Props {
     closeShareMenu: () => void
     postShareHook?: () => void
     postUnshareHook?: () => void
+    contentSharing: ContentSharingInterface
 }
 
 export default class SingleNoteShareMenu extends React.PureComponent<
     Props,
     State
 > {
-    private contentSharingBG = contentSharing
+    private contentSharingBG: ContentSharingInterface
+
+    constructor(props) {
+        super(props)
+        this.contentSharingBG = props.contentSharing
+    }
 
     state: State = {
         // readyToRender: false,

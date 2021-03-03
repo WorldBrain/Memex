@@ -40,6 +40,7 @@ import { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUrl } from 'src/util/uri-utils'
 import { browser } from 'webextension-polyfill-ts'
+import { copyPaster, subscription } from 'src/util/remote-functions-background'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -185,6 +186,9 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
                 analytics,
                 copyToClipboard,
                 getPageUrl,
+                copyPaster,
+                subscription,
+                contentScriptBackground: runInBackground(),
             })
             components.sidebar?.resolve()
         },

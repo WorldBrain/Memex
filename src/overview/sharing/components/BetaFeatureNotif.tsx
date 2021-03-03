@@ -2,7 +2,6 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 
-import { auth, subscription } from 'src/util/remote-functions-background'
 import {
     TypographyTextNormal,
     TypographyHeadingBigger,
@@ -13,10 +12,14 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { SignInScreen } from 'src/authentication/components/SignIn'
 import { LoadingIndicator } from 'src/common-ui/components'
-import { runInBackground } from 'src/util/webextensionRPC'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 export interface Props {
+    auth: AuthRemoteFunctionsInterface
+    subscription: SubscriptionsService
+    contentScriptBackground: ContentScriptsInterface<'caller'>
     showSubscriptionModal: () => void
     betaRequestStrategy?: 'go-to-options-page' | 'sign-in'
     initWithAuth?: boolean
@@ -114,9 +117,11 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
     }
 
     async componentDidMount() {
-        const user = await auth.getCurrentUser()
-        const plans = await auth.getAuthorizedPlans()
-        const isBetaAuthorized = await auth.isAuthorizedForFeature('beta')
+        const user = await this.props.auth.getCurrentUser()
+        const plans = await this.props.auth.getAuthorizedPlans()
+        const isBetaAuthorized = await this.props.auth.isAuthorizedForFeature(
+            'beta',
+        )
 
         this.setState({
             loadState: 'success',
@@ -136,16 +141,14 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
 
     private openPortal = async () => {
         this.setState({ chargebeeState: 'running' })
-        const portalLink = await subscription.getManageLink()
+        const portalLink = await this.props.subscription.getManageLink()
         window.open(portalLink['access_url'])
         this.setState({ chargebeeState: 'pristine' })
     }
 
     onRequestAccess = () => {
         if (this.props.betaRequestStrategy === 'go-to-options-page') {
-            runInBackground<
-                ContentScriptsInterface<'caller'>
-            >().openBetaFeatureSettings()
+            this.props.contentScriptBackground.openBetaFeatureSettings()
             return
         }
 
@@ -159,9 +162,11 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
     async activateBeta() {
         this.setState({ betaActivationState: 'running' })
         await new Promise((resolve) => setTimeout(resolve, 1000))
-        const isBetaAuthorized = await auth.isAuthorizedForFeature('beta')
+        const isBetaAuthorized = await this.props.auth.isAuthorizedForFeature(
+            'beta',
+        )
         if (!isBetaAuthorized) {
-            await auth.setBetaEnabled(true)
+            await this.props.auth.setBetaEnabled(true)
         }
         this.setState({ betaActivationState: 'success' })
     }

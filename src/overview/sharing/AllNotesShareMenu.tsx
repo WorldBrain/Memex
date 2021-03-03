@@ -2,10 +2,6 @@ import React from 'react'
 import styled from 'styled-components'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
-import {
-    annotations as annotationsBG,
-    contentSharing,
-} from 'src/util/remote-functions-background'
 import { executeReactStateUITask } from 'src/util/ui-logic'
 import { getPageShareUrl } from 'src/content-sharing/utils'
 import { TaskState } from 'ui-logic-core/lib/types'
@@ -14,6 +10,8 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 import { LoadingIndicator } from 'src/common-ui/components'
 
 import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { AnnotationInterface } from 'src/annotations/background/types'
 
 interface State {
     shareAllState: TaskState
@@ -26,12 +24,20 @@ export interface Props {
     closeShareMenu: () => void
     postShareAllHook?: () => void
     postUnshareAllHook?: () => void
+    contentSharing: ContentSharingInterface
+    annotationsBG: AnnotationInterface<'caller'>
 }
 
 export default class AllNotesShareMenu extends React.Component<Props, State> {
-    private contentSharingBG = contentSharing
-    private annotationsBG = annotationsBG
     private annotationUrls: string[]
+    private contentSharingBG: ContentSharingInterface
+    private annotationsBG: AnnotationInterface<'caller'>
+
+    constructor(props) {
+        super(props)
+        this.contentSharingBG = this.props.contentSharing
+        this.annotationsBG = this.props.annotationsBG
+    }
 
     state: State = {
         shareAllState: 'pristine',

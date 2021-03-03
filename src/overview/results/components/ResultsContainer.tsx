@@ -23,6 +23,8 @@ import { AnnotationInterface } from 'src/annotations/background/types'
 import { Annotation } from 'src/annotations/types'
 import { setLocalStorage } from 'src/util/storage'
 import { DEPRECATED_SEARCH_WARNING_KEY } from 'src/overview/constants'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 
 const styles = require('./ResultList.css')
 
@@ -47,6 +49,8 @@ export interface DispatchProps {
 export interface OwnProps {
     toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
     handleReaderViewClick: (url: string) => void
+    contentSharing: ContentSharingInterface
+    copyPaster: RemoteCopyPasterInterface
 }
 
 export type Props = StateProps & DispatchProps & OwnProps
@@ -185,6 +189,7 @@ class ResultsContainer extends React.Component<Props, State> {
                 ) : (
                     <>
                         <SearchTypeSwitch
+                            copyPaster={this.props.copyPaster}
                             showSocialSearch={this.state.showSocialSearch}
                         />
                         {this.renderDeprecatedSearchWarning()}
