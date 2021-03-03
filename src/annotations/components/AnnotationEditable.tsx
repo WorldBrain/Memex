@@ -211,7 +211,17 @@ export default class AnnotationEditable extends React.Component<Props> {
         const { annotationFooterDependencies: footerDeps } = this.props
 
         if (this.props.hoverState === null) {
-            return []
+            return ['already-shared', 'sharing-success'].includes(
+                this.sharingData.state,
+            )
+                ? [
+                      {
+                          key: 'share-note-btn',
+                          isDisabled: true,
+                          image: SHARE_BUTTON_ICONS[this.sharingData.state],
+                      },
+                  ]
+                : []
         }
 
         if (this.props.hoverState === 'footer') {
