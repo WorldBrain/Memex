@@ -71,7 +71,7 @@
         "immutability-helper": "^3.0.1",
         "jsdom": "^16.2.2",
         "json-date-parser": "^1.0.1",
-        "lodash": "^4.17.4",
+        "lodash": "^4.17.19",
         "moment": "^2.18.1",
         "moment-timezone": "^0.5.14",
         "mousetrap": "^1.6.5",
