@@ -154,7 +154,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
                     getState: tooltipUtils.getHighlightsState,
                     setState: tooltipUtils.setHighlightsState,
                 },
-                getPageUrl: getNormalizedPageUrl,
+                getPageUrl,
             })
             components.ribbon?.resolve()
         },
