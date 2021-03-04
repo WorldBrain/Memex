@@ -49,6 +49,8 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
         showMoreMenuListId?: number
         isSidebarToggleHovered?: boolean
         hasFeedActivity: boolean
+        addListErrorMessage: string | null
+        editListErrorMessage: string | null
 
         listDeleteState: TaskState
         listCreateState: TaskState

@@ -10,8 +10,8 @@ interface State {
 }
 
 export interface Props {
-    errMsg?: string
     initValue?: string
+    errorMessage: string | null
     onCancelClick: (value: string) => void
     onConfirmClick: (value: string) => void
 }
@@ -51,7 +51,9 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
                         </ActionBtn>
                     </Margin>
                 </Container>
-                {this.props.errMsg && <ErrMsg>{this.props.errMsg}</ErrMsg>}
+                {this.props.errorMessage && (
+                    <ErrMsg>{this.props.errorMessage}</ErrMsg>
+                )}
             </>
         )
     }
@@ -66,7 +68,9 @@ const Icon = styled.img`
     width: 15px;
 `
 
-const ErrMsg = styled.span``
+const ErrMsg = styled.span`
+    color: red;
+`
 
 const Container = styled.div<Props>`
     height: 27px;

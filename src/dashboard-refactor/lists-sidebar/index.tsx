@@ -73,6 +73,7 @@ export interface ListsSidebarProps {
     hasFeedActivity?: boolean
     inboxUnreadCount: number
     selectedListId?: number
+    addListErrorMessage: string | null
     lockedState: SidebarLockedState
     peekState: SidebarPeekState
     searchBarProps: ListsSidebarSearchBarProps
@@ -107,6 +108,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         const {
             lockedState: { isSidebarLocked },
             peekState: { isSidebarPeeking },
+            addListErrorMessage,
             searchBarProps,
             listsGroups,
         } = this.props
@@ -183,6 +185,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     <ListsSidebarEditableItem
                                         onConfirmClick={group.confirmAddNewList}
                                         onCancelClick={group.cancelAddNewList}
+                                        errorMessage={addListErrorMessage}
                                     />
                                 )}
                                 {this.renderLists(group.listsArray, true)}

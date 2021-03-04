@@ -13,11 +13,13 @@ import {
     PAGE_SIZE,
     STORAGE_KEYS,
     PAGE_SEARCH_DUMMY_DAY,
+    NON_UNIQ_LIST_NAME_ERR_MSG,
 } from 'src/dashboard-refactor/constants'
 import { ListData } from './lists-sidebar/types'
 import { updatePickerValues } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import { NoResultsType } from './search-results/types'
+import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -114,6 +116,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 skip: 0,
             },
             listsSidebar: {
+                addListErrorMessage: null,
+                editListErrorMessage: null,
                 listShareLoadingState: 'pristine',
                 listCreateState: 'pristine',
                 listDeleteState: 'pristine',
@@ -1833,29 +1837,20 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        this.emitMutation({
-            listsSidebar: { searchQuery: { $set: event.query } },
-        })
-
-        this.filterListsByQuery(event.query, previousState.listsSidebar)
-    }
-
-    private filterListsByQuery = (
-        query: string,
-        { listData, localLists, followedLists }: State['listsSidebar'],
-    ) => {
-        const filterBySearchStr = (listId) =>
-            listData[listId].name.includes(query)
-
-        const localListIds = localLists.allListIds.filter(filterBySearchStr)
-        const followedListIds = followedLists.allListIds.filter(
-            filterBySearchStr,
+        const filteredListIds = filterListsByQuery(
+            event.query,
+            previousState.listsSidebar,
         )
 
         this.emitMutation({
             listsSidebar: {
-                localLists: { filteredListIds: { $set: localListIds } },
-                followedLists: { filteredListIds: { $set: followedListIds } },
+                searchQuery: { $set: event.query },
+                localLists: {
+                    filteredListIds: { $set: filteredListIds.localListIds },
+                },
+                followedLists: {
+                    filteredListIds: { $set: filteredListIds.followedListIds },
+                },
             },
         })
     }
@@ -1873,6 +1868,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     cancelListCreate: EventHandler<'cancelListCreate'> = async ({ event }) => {
         this.emitMutation({
             listsSidebar: {
+                addListErrorMessage: { $set: null },
                 localLists: {
                     isAddInputShown: { $set: false },
                 },
@@ -1882,8 +1878,24 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     confirmListCreate: EventHandler<'confirmListCreate'> = async ({
         event,
+        previousState,
     }) => {
         const newListName = event.value.trim()
+
+        if (!newListName.length) {
+            return
+        }
+
+        if (!isListNameUnique(newListName, previousState.listsSidebar)) {
+            this.emitMutation({
+                listsSidebar: {
+                    addListErrorMessage: {
+                        $set: NON_UNIQ_LIST_NAME_ERR_MSG,
+                    },
+                },
+            })
+            return
+        }
 
         await executeUITask(
             this,
@@ -1910,6 +1922,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                                     listCreationState: 'pristine',
                                 },
                             },
+                        },
+                        addListErrorMessage: {
+                            $set: null,
                         },
                     },
                 })
@@ -1991,7 +2006,36 @@ export class DashboardLogic extends UILogic<State, Events> {
             throw new Error('No list ID is set for editing')
         }
 
-        const { name: oldName } = previousState.listsSidebar.listData[listId]
+        const oldName = previousState.listsSidebar.listData[listId].name
+        const newName = event.value.trim()
+
+        if (!newName.length) {
+            return
+        }
+
+        if (newName === oldName) {
+            this.emitMutation({
+                listsSidebar: {
+                    editingListId: { $set: undefined },
+                },
+            })
+            return
+        }
+
+        if (
+            !isListNameUnique(newName, previousState.listsSidebar, {
+                listIdToSkip: listId,
+            })
+        ) {
+            this.emitMutation({
+                listsSidebar: {
+                    editListErrorMessage: {
+                        $set: NON_UNIQ_LIST_NAME_ERR_MSG,
+                    },
+                },
+            })
+            return
+        }
 
         await executeUITask(
             this,
@@ -2002,7 +2046,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 await this.options.listsBG.updateListName({
                     id: listId,
                     oldName,
-                    newName: event.value,
+                    newName,
                 })
 
                 this.emitMutation({
@@ -2011,6 +2055,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             [listId]: { name: { $set: event.value } },
                         },
                         editingListId: { $set: undefined },
+                        editListErrorMessage: { $set: null },
                     },
                 })
             },
@@ -2020,6 +2065,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     cancelListEdit: EventHandler<'cancelListEdit'> = async ({}) => {
         this.emitMutation({
             listsSidebar: {
+                editListErrorMessage: { $set: null },
                 editingListId: { $set: undefined },
             },
         })

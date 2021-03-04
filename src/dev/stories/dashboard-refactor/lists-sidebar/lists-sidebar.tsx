@@ -34,6 +34,7 @@ const template: ListsSidebarProps = {
     },
     inboxUnreadCount: 2,
     selectedListId,
+    addListErrorMessage: null,
     searchBarProps: {
         ...listsSidebarSearchBarProps.default,
         sidebarLockedState: lockedState,

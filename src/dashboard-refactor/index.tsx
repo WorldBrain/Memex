@@ -98,6 +98,7 @@ export class DashboardContainer extends StatefulUIElement<
             onConfirmClick: (value) =>
                 this.processEvent('confirmListEdit', { value }),
             initValue: list.name,
+            errorMessage: this.state.listsSidebar.editListErrorMessage,
         },
         onRenameClick: () =>
             this.processEvent('setEditingListId', { listId: list.id }),
@@ -280,10 +281,9 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <ListsSidebarContainer
+                {...listsSidebar}
                 lockedState={lockedState}
                 openFeedUrl={this.props.openFeedUrl}
-                hasFeedActivity={this.state.listsSidebar.hasFeedActivity}
-                inboxUnreadCount={this.state.listsSidebar.inboxUnreadCount}
                 onAllSavedSelection={() =>
                     this.processEvent('resetFilters', null)
                 }
@@ -291,7 +291,6 @@ export class DashboardContainer extends StatefulUIElement<
                 onListSelection={(listId) =>
                     this.processEvent('setSelectedListId', { listId })
                 }
-                selectedListId={listsSidebar.selectedListId}
                 peekState={{
                     isSidebarPeeking: listsSidebar.isSidebarPeeking,
                     setSidebarPeekState: (isPeeking) => () =>
@@ -314,6 +313,7 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 listsGroups={[
                     {
+                        ...listsSidebar.localLists,
                         title: 'My collections',
                         onAddBtnClick: () =>
                             this.processEvent('setAddListInputShown', {
@@ -324,14 +324,10 @@ export class DashboardContainer extends StatefulUIElement<
                             this.processEvent('confirmListCreate', { value }),
                         cancelAddNewList: () =>
                             this.processEvent('cancelListCreate', null),
-                        isAddInputShown:
-                            listsSidebar.localLists.isAddInputShown,
-                        isExpanded: listsSidebar.localLists.isExpanded,
                         onExpandBtnClick: () =>
                             this.processEvent('setLocalListsExpanded', {
                                 isExpanded: !listsSidebar.localLists.isExpanded,
                             }),
-                        loadingState: listsSidebar.localLists.loadingState,
                         listsArray: listsSidebar.localLists.filteredListIds.map(
                             (listId) =>
                                 this.listStateToProps(
@@ -341,14 +337,13 @@ export class DashboardContainer extends StatefulUIElement<
                         ),
                     },
                     // {
+                    //     ...listsSidebar.followedLists,
                     //     title: 'Followed collections',
-                    //     isExpanded: listsSidebar.followedLists.isExpanded,
                     //     onExpandBtnClick: () =>
                     //         this.processEvent('setFollowedListsExpanded', {
                     //             isExpanded: !listsSidebar.followedLists
                     //                 .isExpanded,
                     //         }),
-                    //     loadingState: listsSidebar.followedLists.loadingState,
                     //     listsArray: listsSidebar.followedLists.listIds.map(
                     //         (listId) =>
                     //             this.listStateToProps(
