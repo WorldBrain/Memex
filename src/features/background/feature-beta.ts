@@ -13,9 +13,9 @@ const allFeatures: UserBetaFeature[] = [
         id: 'pdf-annotations',
         name: 'PDF Annotations',
         description:
-            'Annotate PDFs via the Memex extension (no phone support yet)',
-        link: undefined,
-        enabled: false,
+            "Annotate PDFs via the Memex extension (no phone support yet). Check 'Read more' for known issues.",
+        link: 'https://worldbrain.io/tutorial/pdf-annotations',
+        enabled: true,
         available: true,
     },
     // {

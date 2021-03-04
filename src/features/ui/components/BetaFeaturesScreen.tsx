@@ -177,9 +177,9 @@ class BetaFeaturesScreen extends React.Component<
                                                 <TypographyHeadingNormal>
                                                     {feature.name}
                                                 </TypographyHeadingNormal>
-                                                <TypographyTextSmall>
+                                                <TypographyTextNormal>
                                                     {feature.description}
-                                                </TypographyTextSmall>
+                                                </TypographyTextNormal>
                                             </div>
                                             <div
                                                 className={
@@ -202,6 +202,10 @@ class BetaFeaturesScreen extends React.Component<
                                                 )}
                                             </div>
                                         </div>
+                                        {feature.id === 'pdf-annotations' &&
+                                            this.state.isPioneer &&
+                                            this.state.loadState ===
+                                                'success' && <PDFSetting />}
                                     </section>
                                 )}
                             </div>
@@ -230,9 +234,9 @@ class BetaFeaturesScreen extends React.Component<
                                                     <TypographyHeadingNormal>
                                                         {feature.name}
                                                     </TypographyHeadingNormal>
-                                                    <TypographyTextSmall>
+                                                    <TypographyTextNormal>
                                                         {feature.description}
-                                                    </TypographyTextSmall>
+                                                    </TypographyTextNormal>
                                                 </div>
                                                 <div
                                                     className={
@@ -262,10 +266,6 @@ class BetaFeaturesScreen extends React.Component<
                         ),
                     )}
                 </section>
-
-                {this.state.isPioneer && this.state.loadState === 'success' && (
-                    <PDFSetting />
-                )}
             </div>
         )
     }

@@ -62,6 +62,20 @@
     margin-top: 20px;
 }
 
+.subSettingsBox {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropdownSelect {
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    padding: 0 10px;
+    font-weight: bold;
+}
+
 .block input {
     margin-right: 10px;
     vertical-align: middle;
@@ -102,7 +116,7 @@
 
 .listItem {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     border-top: 1px solid #e0e0e0;
     align-items: center;
     padding: 20px 10px;
