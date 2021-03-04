@@ -118,9 +118,17 @@ export async function setupBackgroundIntegrationTest(
         runtime: {
             getURL: () => '',
         },
+        extension: {
+            getURL: () => '',
+        },
         windows: {
             WINDOW_ID_CURRENT: 'currentWindow:testValue',
             TAB_ID_NONE: 'noneTab:testValue',
+        },
+        webRequest: {
+            onBeforeRequest: {
+                addListener: () => {},
+            },
         },
     } as any) as Browser
 
