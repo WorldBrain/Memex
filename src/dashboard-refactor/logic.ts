@@ -140,8 +140,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isDisplayed: false,
                 syncState: 'disabled',
                 backupState: 'disabled',
-                lastSuccessfulBackupDateTime: new Date(),
-                lastSuccessfulSyncDateTime: new Date(),
+                lastSuccessfulBackupDate: null,
+                lastSuccessfulSyncDate: null,
                 showUnsyncedItemCount: false,
                 unsyncedItemCount: 0,
             },
@@ -197,11 +197,18 @@ export class DashboardLogic extends UILogic<State, Events> {
         const backupEnabled = await backupBG.isAutomaticBackupEnabled()
         const { lastBackup } = await backupBG.getBackupTimes()
         const lastSuccessfulBackup =
-            typeof lastBackup === 'number' ? new Date(lastBackup) : new Date()
+            typeof lastBackup === 'number' ? new Date(lastBackup) : null
+        let lastSuccessfulSync: Date = null
+        try {
+            lastSuccessfulSync = new Date(
+                await syncBG.retrieveLastSyncTimestamp(),
+            )
+        } catch (err) {}
 
         this.emitMutation({
             syncMenu: {
-                lastSuccessfulBackupDateTime: { $set: lastSuccessfulBackup },
+                lastSuccessfulBackupDate: { $set: lastSuccessfulBackup },
+                lastSuccessfulSyncDate: { $set: lastSuccessfulSync },
                 backupState: { $set: backupEnabled ? 'enabled' : 'disabled' },
                 syncState: {
                     $set: syncDevices.length > 0 ? 'enabled' : 'disabled',
@@ -2201,7 +2208,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
 
         this.emitMutation({
-            syncMenu: { lastSuccessfulSyncDateTime: { $set: new Date() } },
+            syncMenu: { lastSuccessfulSyncDate: { $set: new Date() } },
         })
     }
 
@@ -2226,7 +2233,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
 
         this.emitMutation({
-            syncMenu: { lastSuccessfulBackupDateTime: { $set: new Date() } },
+            syncMenu: { lastSuccessfulBackupDate: { $set: new Date() } },
         })
     }
     /* END - sync status menu event handlers */

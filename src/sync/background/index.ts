@@ -25,6 +25,7 @@ import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initi
 import { bindMethod } from 'src/util/functions'
 import { Analytics } from 'src/analytics/types'
 import { captureException } from 'src/util/raven'
+
 export default class SyncBackground extends SyncService {
     private analytics: Analytics
     initialSync: MemexInitialSync
@@ -91,12 +92,16 @@ export default class SyncBackground extends SyncService {
             forceIncrementalSync: bindMethod(
                 this.continuousSync,
                 'forceIncrementalSync',
-            ) as () => Promise<void>,
+            ),
             listDevices: bindMethod(this.syncInfoStorage, 'listDevices'),
             removeDevice: bindMethod(this.syncInfoStorage, 'removeDevice'),
             removeAllDevices: bindMethod(
                 this.syncInfoStorage,
                 'removeAllDevices',
+            ),
+            retrieveLastSyncTimestamp: bindMethod(
+                this,
+                'retrieveLastSyncTimestamp',
             ),
         }
 
@@ -177,8 +182,11 @@ export default class SyncBackground extends SyncService {
             captureException(`InitialSyncError - ${args.error}`)
             return remoteEmitter.emit('error', args)
         })
-        this.initialSync.events.on('finished', (args) => {
-            return remoteEmitter.emit('finished', args)
+        this.initialSync.events.on('finished', async (args) => {
+            return Promise.all([
+                this.storeLastSyncTimestamp(),
+                remoteEmitter.emit('finished', args),
+            ])
         })
         this.initialSync.events.on('channelTimeout', () => {
             captureException(`InitialSyncError - channelTimeout`)
@@ -188,5 +196,21 @@ export default class SyncBackground extends SyncService {
             captureException(`InitialSyncError - packageStalled`)
             return remoteEmitter.emit('packageStalled', {})
         })
+    }
+
+    private storeLastSyncTimestamp = async (timestamp = Date.now()) => {
+        await this.settingStore.storeSetting('lastSyncTimestamp', timestamp)
+    }
+
+    retrieveLastSyncTimestamp = async (): Promise<number> => {
+        const timestamp = await this.settingStore.retrieveSetting(
+            'lastSyncTimestamp',
+        )
+
+        if (!timestamp) {
+            throw new Error('No last sync timestamp exists')
+        }
+
+        return timestamp as number
     }
 }

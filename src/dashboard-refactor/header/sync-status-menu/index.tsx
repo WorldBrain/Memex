@@ -110,7 +110,11 @@ const StyledAnchor = styled.a`
     text-decoration: none;
 `
 
-export const timeSinceNowToString = (date: Date): string => {
+export const timeSinceNowToString = (date: Date | null): string => {
+    if (date === null) {
+        return 'Never'
+    }
+
     const now = moment(new Date())
     const dt = moment(date)
     const seconds = now.diff(dt, 'seconds')
@@ -200,7 +204,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         syncType: 'Sync' | 'Backup',
         serviceStatus: DisableableState,
         otherServiceStatus: DisableableState,
-        timeSinceLastRun: Date,
+        lastRunDate: Date | null,
         clickHandler: React.MouseEventHandler,
     ) => {
         return (
@@ -219,7 +223,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                             {(serviceStatus === 'success' ||
                                 serviceStatus === 'error') &&
                                 `Last ${syncType.toLocaleLowerCase()}: ${timeSinceNowToString(
-                                    timeSinceLastRun,
+                                    lastRunDate,
                                 )}`}
                         </TextBlock>
                     </RowContainer>
@@ -245,14 +249,14 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     render() {
         const {
             syncState,
-            isDisplayed,
             backupState,
+            isDisplayed,
             onInitiateSync,
             goToSyncRoute,
             goToBackupRoute,
             onInitiateBackup,
-            lastSuccessfulSyncDateTime,
-            lastSuccessfulBackupDateTime,
+            lastSuccessfulSyncDate,
+            lastSuccessfulBackupDate,
         } = this.props
         if (!isDisplayed) {
             return null
@@ -264,14 +268,14 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                     'Sync',
                     syncState,
                     backupState,
-                    lastSuccessfulSyncDateTime,
+                    lastSuccessfulSyncDate,
                     syncState === 'disabled' ? goToSyncRoute : onInitiateSync,
                 )}
                 {this.renderRow(
                     'Backup',
                     backupState,
                     syncState,
-                    lastSuccessfulBackupDateTime,
+                    lastSuccessfulBackupDate,
                     syncState === 'disabled'
                         ? goToBackupRoute
                         : onInitiateBackup,
