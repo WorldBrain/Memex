@@ -56,4 +56,10 @@ export const shortcuts: ShortcutElData[] = [
         children: 'Add comment to current page',
         tooltip: 'Add notes to page',
     },
+    {
+        id: 'open-search',
+        name: 'openSearch',
+        children: 'Open Search Dashboard',
+        tooltip: 'Open Search Dashboard',
+    },
 ]

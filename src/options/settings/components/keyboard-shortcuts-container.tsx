@@ -43,6 +43,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         addComment: { shortcut: 'c', enabled: true },
         addToCollection: { shortcut: 'u', enabled: true },
         createBookmark: { shortcut: 'b', enabled: true },
+        openSearch: { shortcut: 's', enabled: true },
     }
 
     async componentDidMount() {

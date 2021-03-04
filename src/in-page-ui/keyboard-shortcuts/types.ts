@@ -14,4 +14,5 @@ export interface KeyboardShortcuts {
     addComment: Shortcut
     addTag: Shortcut
     link: Shortcut
+    openSearch: Shortcut
 }

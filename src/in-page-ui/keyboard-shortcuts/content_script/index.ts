@@ -59,6 +59,7 @@ function getShortcutHandlers({
         toggleHighlights: () => inPageUI.toggleHighlights(),
         createHighlight: annotationFunctions.createHighlight,
         createAnnotation: annotationFunctions.createAnnotation,
+        openSearch: () => inPageUI.toggleSidebar(),
         link: async () => {
             if (userSelectedText()) {
                 await createAndCopyDirectLink()
