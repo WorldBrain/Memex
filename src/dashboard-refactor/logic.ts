@@ -309,6 +309,13 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* START - Misc event handlers */
     search: EventHandler<'search'> = async ({ previousState, event }) => {
         let nextState: State
+
+        const skipMutation: UIMutation<State['searchFilters']> = {
+            skip: event.paginate
+                ? { $apply: (skip) => skip + PAGE_SIZE }
+                : { $set: 0 },
+        }
+
         await executeUITask(
             this,
             (taskState) => ({
@@ -319,20 +326,22 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             }),
             async () => {
+                const searchState = this.withMutation(previousState, {
+                    searchFilters: skipMutation,
+                })
                 const {
                     noteData,
                     pageData,
                     results,
-                    noResults,
                     resultsExhausted,
                     searchTermsInvalid,
                 } =
                     previousState.searchResults.searchType === 'pages'
-                        ? await this.searchPages(previousState, event.paginate)
-                        : await this.searchNotes(previousState, event.paginate)
+                        ? await this.searchPages(searchState)
+                        : await this.searchNotes(searchState)
 
                 let noResultsType: NoResultsType = null
-                if (noResults) {
+                if (resultsExhausted && searchState.searchFilters.skip === 0) {
                     if (
                         previousState.listsSidebar.selectedListId ===
                         SPECIAL_LIST_IDS.MOBILE
@@ -352,6 +361,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
                 const mutation: UIMutation<State> = event.paginate
                     ? {
+                          searchFilters: skipMutation,
                           searchResults: {
                               results: {
                                   $apply: (prev) =>
@@ -374,11 +384,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                               areResultsExhausted: { $set: resultsExhausted },
                               noResultsType: { $set: noResultsType },
                           },
-                          searchFilters: {
-                              skip: { $apply: (skip) => skip + PAGE_SIZE },
-                          },
                       }
                     : {
+                          searchFilters: skipMutation,
                           searchResults: {
                               results: { $set: results },
                               pageData: { $set: pageData },
@@ -386,11 +394,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                               areResultsExhausted: { $set: resultsExhausted },
                               noResultsType: { $set: noResultsType },
                           },
-                          searchFilters: { skip: { $set: 0 } },
                       }
 
                 nextState = this.withMutation(previousState, mutation)
-
                 this.emitMutation(mutation)
             },
         )
@@ -398,10 +404,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         await this.fetchNoteShareStates(nextState)
     }
 
-    private searchPages = async (
-        { searchFilters, listsSidebar }: State,
-        paginate?: boolean,
-    ) => {
+    private searchPages = async ({ searchFilters, listsSidebar }: State) => {
         const lists =
             listsSidebar.selectedListId != null
                 ? [listsSidebar.selectedListId]
@@ -421,7 +424,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             tagsInc: searchFilters.tagsIncluded,
             tagsExc: searchFilters.tagsExcluded,
             limit: searchFilters.limit,
-            skip: paginate ? searchFilters.skip + PAGE_SIZE : 0,
+            skip: searchFilters.skip,
             lists,
         })
 
@@ -429,14 +432,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             ...utils.pageSearchResultToState(result),
             resultsExhausted: result.resultsExhausted,
             searchTermsInvalid: result.isBadTerm,
-            noResults: result.resultsExhausted && searchFilters.skip === 0,
         }
     }
 
-    private searchNotes = async (
-        { searchFilters, listsSidebar }: State,
-        paginate?: boolean,
-    ) => {
+    private searchNotes = async ({ searchFilters, listsSidebar }: State) => {
         const collections =
             listsSidebar.selectedListId != null
                 ? [listsSidebar.selectedListId]
@@ -451,7 +450,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             tagsInc: searchFilters.tagsIncluded,
             tagsExc: searchFilters.tagsExcluded,
             limit: searchFilters.limit,
-            skip: paginate ? searchFilters.skip + PAGE_SIZE : 0,
+            skip: searchFilters.skip,
             collections,
         })
 
@@ -459,7 +458,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             ...utils.annotationSearchResultToState(result),
             resultsExhausted: result.resultsExhausted,
             searchTermsInvalid: result.isBadTerm,
-            noResults: result.resultsExhausted && searchFilters.skip === 0,
         }
     }
 
