@@ -11,6 +11,7 @@ interface RPCObject {
         tabId?: string
     }
     payload: any
+    error?: any
 }
 
 interface PendingRequest {
@@ -28,13 +29,18 @@ export class PortBasedRPCManager {
     private ports = new Map<string, Runtime.Port>()
     private pendingRequests = new Map<string, PendingRequest>()
 
-    static createRPCResponseObject = ({ packet, payload }): RPCObject => ({
+    static createRPCResponseObject = ({
+        packet,
+        payload,
+        error = null,
+    }): RPCObject => ({
         headers: {
             type: 'RPC_RESPONSE',
             id: packet.headers.id,
             name: packet.headers.name,
         },
         payload,
+        error,
     })
 
     static createRPCRequestObject = ({ name, payload }): RPCObject => ({
@@ -202,6 +208,7 @@ export class PortBasedRPCManager {
             `RPC::messageRequester::to-PortName(${port.name}):: Requested for [${name}]`,
             { request },
         )
+
         const ret = await pendingRequest
         this.log(
             `RPC::messageRequester::to-PortName(${port.name}):: Response for [${name}]`,
@@ -215,14 +222,14 @@ export class PortBasedRPCManager {
     }
 
     private messageResponder = (packet, port) => {
-        const { headers, payload } = packet
+        const { headers, payload, error } = packet
         const { id, name, type } = headers
 
         if (type === 'RPC_RESPONSE') {
             this.log(
                 `RPC::messageResponder::PortName(${port.name}):: RESPONSE received for [${name}]`,
             )
-            this.resolvePendingRequest(id, payload)
+            this.resolvePendingRequest(id, payload, error)
         } else if (type === 'RPC_REQUEST') {
             this.log(
                 `RPC::messageResponder::PortName(${port.name}):: REQUEST received for [${name}]`,
@@ -249,26 +256,39 @@ export class PortBasedRPCManager {
                 this.log(
                     `RPC::messageResponder::PortName(${port.name}):: RUNNING Function [${name}]`,
                 )
-                returnPromise = Promise.resolve(
-                    f({ tab: port?.sender?.tab }, ...payload),
-                )
-            }
 
-            returnPromise.then((value) => {
-                port.postMessage(
-                    PortBasedRPCManager.createRPCResponseObject({
-                        packet,
-                        payload: value,
-                    }),
-                )
-                this.log(
-                    `RPC::messageResponder::PortName(${port.name}):: RETURNED Function [${name}]`,
-                )
-            })
+                    const tab = filterTabUrl(port?.sender?.tab)
+                    const functionReturn = f({ tab }, ...payload)
+                    Promise.resolve(functionReturn).then((promiseReturn) => {
+                        port.postMessage(
+                            PortBasedRPCManager.createRPCResponseObject({
+                                packet,
+                                payload: promiseReturn,
+                            }),
+                        )
+                        this.log(
+                            `RPC::messageResponder::PortName(${port.name}):: RETURNED Function [${name}]`,
+                        )
+                    })
+                    .catch((e) => {
+                        console.error(e.mesage)
+                        port.postMessage(
+                            PortBasedRPCManager.createRPCResponseObject({
+                                packet,
+                                payload: null,
+                                error: e.message,
+                            }),
+                        )
+                        this.log(
+                            `RPC::messageResponder::PortName(${port.name}):: ERRORED Function [${name}]`,
+                        )
+                        throw e
+                    })
+            }
         }
     }
 
-    private resolvePendingRequest = (id, payload) => {
+    private resolvePendingRequest = (id, payload, error) => {
         const request = this.pendingRequests.get(id)
 
         if (!request) {
@@ -277,8 +297,15 @@ export class PortBasedRPCManager {
                 `Tried to resolve a request that does not exist (may have already been resolved) id:${id}`,
             )
         }
-
-        request.promise.resolve(payload)
+        if (error) {
+            console.error(
+                `Calling ${request.request.headers.name} errored`,
+                error,
+            )
+            request.promise.reject(error)
+        } else {
+            request.promise.resolve(payload)
+        }
         this.pendingRequests.delete(id)
     }
 }
