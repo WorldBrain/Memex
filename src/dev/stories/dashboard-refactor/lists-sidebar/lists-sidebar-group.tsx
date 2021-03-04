@@ -4,7 +4,7 @@ import styled from 'styled-components'
 
 import ListsSidebarGroup, {
     ListsSidebarGroupProps,
-} from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-group'
+} from 'src/dashboard-refactor/lists-sidebar/components/sidebar-group'
 
 import {
     listsSidebarItemProps,
@@ -12,7 +12,7 @@ import {
     listsSidebarItemWithShortMenuProps,
 } from './list-item'
 import { TaskState } from 'ui-logic-core/lib/types'
-import { Props } from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item-with-menu'
+import { Props } from 'src/dashboard-refactor/lists-sidebar/components/sidebar-item-with-menu'
 
 export const sidebarWrapperFunc = (ChildComponent) => {
     const Wrapper = styled.div`

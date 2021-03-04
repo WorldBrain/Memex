@@ -1,7 +1,7 @@
 import { UIEvent } from 'ui-logic-core'
 
-import { ListsSidebarSearchBarProps } from './components/lists-search-bar'
-import { ListsSidebarGroupProps } from './components/lists-sidebar-group'
+import { ListsSidebarSearchBarProps } from './components/search-bar'
+import { ListsSidebarGroupProps } from './components/sidebar-group'
 import { TaskState } from 'ui-logic-core/lib/types'
 
 export interface SidebarLockedState {

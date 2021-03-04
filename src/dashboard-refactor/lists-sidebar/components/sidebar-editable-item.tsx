@@ -10,6 +10,7 @@ interface State {
 }
 
 export interface Props {
+    errMsg?: string
     initValue?: string
     onCancelClick: (value: string) => void
     onConfirmClick: (value: string) => void
@@ -33,22 +34,25 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
 
     render() {
         return (
-            <Container>
-                <Margin left="19px">
-                    <EditableListTitle
-                        onChange={this.handleChange}
-                        value={this.state.value}
-                    />
-                </Margin>
-                <Margin right="7.5px">
-                    <ActionBtn onClick={this.handleConfirm}>
-                        <Icon src={icons.check} />
-                    </ActionBtn>
-                    <ActionBtn onClick={this.handleCancel}>
-                        <Icon src={icons.close} />
-                    </ActionBtn>
-                </Margin>
-            </Container>
+            <>
+                <Container>
+                    <Margin left="19px">
+                        <EditableListTitle
+                            onChange={this.handleChange}
+                            value={this.state.value}
+                        />
+                    </Margin>
+                    <Margin right="7.5px">
+                        <ActionBtn onClick={this.handleConfirm}>
+                            <Icon src={icons.check} />
+                        </ActionBtn>
+                        <ActionBtn onClick={this.handleCancel}>
+                            <Icon src={icons.close} />
+                        </ActionBtn>
+                    </Margin>
+                </Container>
+                {this.props.errMsg && <ErrMsg>{this.props.errMsg}</ErrMsg>}
+            </>
         )
     }
 }
@@ -57,7 +61,12 @@ const EditableListTitle = styled.input<Props>``
 
 const ActionBtn = styled.button``
 
-const Icon = styled.img``
+const Icon = styled.img`
+    height: 15px;
+    width: 15px;
+`
+
+const ErrMsg = styled.span``
 
 const Container = styled.div<Props>`
     height: 27px;

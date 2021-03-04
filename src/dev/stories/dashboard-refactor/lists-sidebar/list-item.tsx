@@ -3,7 +3,7 @@ import { storiesOf } from '@storybook/react'
 
 import ListsSidebarItem, {
     Props,
-} from 'src/dashboard-refactor/lists-sidebar/components/lists-sidebar-item-with-menu'
+} from 'src/dashboard-refactor/lists-sidebar/components/sidebar-item-with-menu'
 import { DropReceivingState } from 'src/dashboard-refactor/types'
 import { ListNameHighlightIndices } from 'src/dashboard-refactor/lists-sidebar/types'
 

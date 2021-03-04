@@ -11,10 +11,8 @@ import {
     DropReceivingState,
     SelectedState,
 } from 'src/dashboard-refactor/types'
-import ListsSidebarEditableItem, {
-    Props as EditableItemProps,
-} from '../lists-sidebar-editable-item'
-import { ListNameHighlightIndices } from '../../types'
+import { Props as EditableItemProps } from './sidebar-editable-item'
+import { ListNameHighlightIndices } from '../types'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface Props {
@@ -164,11 +162,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
     }
 
     render() {
-        const { dropReceivingState, isMenuDisplayed, isEditing } = this.props
-
-        if (isEditing) {
-            return <ListsSidebarEditableItem {...this.props.editableProps} />
-        }
+        const { dropReceivingState, isMenuDisplayed } = this.props
 
         return (
             <Container>
