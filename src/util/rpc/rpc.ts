@@ -1,6 +1,7 @@
 import uuid from 'uuid/v1'
 import { Events } from 'webextension-polyfill-ts/src/generated/events'
 import { Runtime } from 'webextension-polyfill-ts'
+import { filterTabUrl } from 'src/util/uri-utils'
 
 interface RPCObject {
     headers: {
@@ -257,9 +258,10 @@ export class PortBasedRPCManager {
                     `RPC::messageResponder::PortName(${port.name}):: RUNNING Function [${name}]`,
                 )
 
-                    const tab = filterTabUrl(port?.sender?.tab)
-                    const functionReturn = f({ tab }, ...payload)
-                    Promise.resolve(functionReturn).then((promiseReturn) => {
+                const tab = filterTabUrl(port?.sender?.tab)
+                const functionReturn = f({ tab }, ...payload)
+                Promise.resolve(functionReturn)
+                    .then((promiseReturn) => {
                         port.postMessage(
                             PortBasedRPCManager.createRPCResponseObject({
                                 packet,
