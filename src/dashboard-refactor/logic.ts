@@ -127,13 +127,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                 followedLists: {
                     loadingState: 'pristine',
                     isExpanded: true,
-                    listIds: [],
+                    allListIds: [],
+                    filteredListIds: [],
                 },
                 localLists: {
                     isAddInputShown: false,
                     loadingState: 'pristine',
                     isExpanded: true,
-                    listIds: [],
+                    allListIds: [],
+                    filteredListIds: [],
                 },
             },
             syncMenu: {
@@ -288,7 +290,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.emitMutation({
                     listsSidebar: {
                         listData: { $set: listData },
-                        localLists: { listIds: { $set: listIds } },
+                        localLists: {
+                            allListIds: { $set: listIds },
+                            filteredListIds: { $set: listIds },
+                        },
                     },
                 })
             },
@@ -1826,9 +1831,32 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     setListQueryValue: EventHandler<'setListQueryValue'> = async ({
         event,
+        previousState,
     }) => {
         this.emitMutation({
             listsSidebar: { searchQuery: { $set: event.query } },
+        })
+
+        this.filterListsByQuery(event.query, previousState.listsSidebar)
+    }
+
+    private filterListsByQuery = (
+        query: string,
+        { listData, localLists, followedLists }: State['listsSidebar'],
+    ) => {
+        const filterBySearchStr = (listId) =>
+            listData[listId].name.includes(query)
+
+        const localListIds = localLists.allListIds.filter(filterBySearchStr)
+        const followedListIds = followedLists.allListIds.filter(
+            filterBySearchStr,
+        )
+
+        this.emitMutation({
+            listsSidebar: {
+                localLists: { filteredListIds: { $set: localListIds } },
+                followedLists: { filteredListIds: { $set: followedListIds } },
+            },
         })
     }
 
@@ -1871,7 +1899,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listsSidebar: {
                         localLists: {
                             isAddInputShown: { $set: false },
-                            listIds: { $push: [listId] },
+                            filteredListIds: { $push: [listId] },
+                            allListIds: { $push: [listId] },
                         },
                         listData: {
                             [listId]: {
@@ -2039,7 +2068,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             listsSidebar: {
                 listData: { $merge: listDataById },
-                localLists: { listIds: { $set: listIds } },
+                localLists: {
+                    filteredListIds: { $set: listIds },
+                    allListIds: { $set: listIds },
+                },
             },
         })
     }
@@ -2056,7 +2088,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             listsSidebar: {
                 listData: { $merge: listDataById },
-                followedLists: { listIds: { $set: listIds } },
+                followedLists: {
+                    filteredListIds: { $set: listIds },
+                    allListIds: { $set: listIds },
+                },
             },
         })
     }
@@ -2085,7 +2120,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         const listId = previousState.modals.deletingListId
         // TODO: support for non-local lists
-        const localListIds = previousState.listsSidebar.localLists.listIds.filter(
+        const localListIds = previousState.listsSidebar.localLists.filteredListIds.filter(
             (id) => id !== listId,
         )
 
@@ -2106,7 +2141,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                         deletingListId: { $set: undefined },
                     },
                     listsSidebar: {
-                        localLists: { listIds: { $set: localListIds } },
+                        localLists: {
+                            filteredListIds: { $set: localListIds },
+                            allListIds: { $set: localListIds },
+                        },
                         listData: { $unset: [listId] },
                     },
                 })

@@ -332,7 +332,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 isExpanded: !listsSidebar.localLists.isExpanded,
                             }),
                         loadingState: listsSidebar.localLists.loadingState,
-                        listsArray: listsSidebar.localLists.listIds.map(
+                        listsArray: listsSidebar.localLists.filteredListIds.map(
                             (listId) =>
                                 this.listStateToProps(
                                     listsSidebar.listData[listId],

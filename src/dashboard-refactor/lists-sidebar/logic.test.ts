@@ -395,7 +395,7 @@ describe('Dashboard search results logic', () => {
         )
         expect(searchResults.state.listsSidebar.listData).toEqual({})
         expect(
-            searchResults.state.listsSidebar.localLists.listIds.length,
+            searchResults.state.listsSidebar.localLists.filteredListIds.length,
         ).toEqual(0)
 
         await searchResults.processEvent('setAddListInputShown', {
@@ -428,7 +428,7 @@ describe('Dashboard search results logic', () => {
                 .findAllObjects({}),
         ).toEqual([expect.objectContaining({ name: listName })])
         expect(
-            searchResults.state.listsSidebar.localLists.listIds.length,
+            searchResults.state.listsSidebar.localLists.filteredListIds.length,
         ).toEqual(1)
     })
 
@@ -443,7 +443,7 @@ describe('Dashboard search results logic', () => {
         ).toEqual([])
         expect(searchResults.state.listsSidebar.listData).toEqual({})
         expect(
-            searchResults.state.listsSidebar.localLists.listIds.length,
+            searchResults.state.listsSidebar.localLists.filteredListIds.length,
         ).toEqual(0)
 
         await searchResults.processEvent('setAddListInputShown', {
@@ -465,7 +465,7 @@ describe('Dashboard search results logic', () => {
         ).toEqual([])
         expect(searchResults.state.listsSidebar.listData).toEqual({})
         expect(
-            searchResults.state.listsSidebar.localLists.listIds.length,
+            searchResults.state.listsSidebar.localLists.filteredListIds.length,
         ).toEqual(0)
     })
 
@@ -492,7 +492,7 @@ describe('Dashboard search results logic', () => {
             }),
         )
         expect(
-            searchResults.state.listsSidebar.localLists.listIds.includes(
+            searchResults.state.listsSidebar.localLists.filteredListIds.includes(
                 listId,
             ),
         ).toEqual(true)
@@ -520,7 +520,7 @@ describe('Dashboard search results logic', () => {
             }),
         )
         expect(
-            searchResults.state.listsSidebar.localLists.listIds.includes(
+            searchResults.state.listsSidebar.localLists.filteredListIds.includes(
                 listId,
             ),
         ).toEqual(true)
@@ -555,7 +555,7 @@ describe('Dashboard search results logic', () => {
             }),
         )
         expect(
-            searchResults.state.listsSidebar.localLists.listIds.includes(
+            searchResults.state.listsSidebar.localLists.filteredListIds.includes(
                 listId,
             ),
         ).toEqual(true)
@@ -591,7 +591,7 @@ describe('Dashboard search results logic', () => {
                 .findOneObject({ id: listId }),
         ).toEqual(null)
         expect(
-            searchResults.state.listsSidebar.localLists.listIds.includes(
+            searchResults.state.listsSidebar.localLists.filteredListIds.includes(
                 listId,
             ),
         ).toEqual(false)

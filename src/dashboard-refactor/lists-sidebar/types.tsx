@@ -25,7 +25,8 @@ export interface ListData {
 export interface ListGroupCommon
     extends Pick<ListsSidebarGroupProps, 'loadingState'> {
     isExpanded: boolean
-    listIds: number[]
+    allListIds: number[]
+    filteredListIds: number[]
 }
 
 export interface FollowedListGroup extends ListGroupCommon {}
