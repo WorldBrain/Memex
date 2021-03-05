@@ -66,7 +66,7 @@ export class MarkdownPreviewAnnotationInsertMenu extends React.PureComponent<
 }
 
 const DropdownMenuContainer = styled.div`
-    & button {
-        padding: 3px 5px;
+    & #DropdownMenuBtn {
+        padding: 2px 6px;
     }
 `
