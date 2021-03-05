@@ -99,7 +99,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
 
     private renderMenuBtn = () => {
         const btn = (
-            <MenuBtn onClick={this.toggleMenu}>
+            <MenuBtn id="DropdownMenuBtn" onClick={this.toggleMenu}>
                 {this.props.btnChildren}
             </MenuBtn>
         )
@@ -148,6 +148,8 @@ const MenuContainer = styled.div`
     flex: 1;
     align-items: center;
     display: flex;
+    width: 100%;
+    height: 100%;
 `
 
 const MenuItem = styled.li`
@@ -195,6 +197,8 @@ const MenuBtn = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 100%;
+    width: 100%;
 
     &:focus {
         background-color: grey;
