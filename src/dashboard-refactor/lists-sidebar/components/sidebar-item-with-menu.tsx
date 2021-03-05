@@ -342,13 +342,12 @@ const NewItemsCount = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: ${colors.midGrey};
 `
 
 const NewItemsCountInnerDiv = styled.div`
     font-family: ${fonts.primary.name};
     font-weight: ${fonts.primary.weight.bold};
-    font-size: 10px;
+    font-size: 14px;
     line-height: 14px;
 `
 

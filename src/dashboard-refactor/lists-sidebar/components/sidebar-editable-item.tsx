@@ -36,20 +36,18 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
         return (
             <>
                 <Container>
-                    <Margin left="19px">
-                        <EditableListTitle
-                            onChange={this.handleChange}
-                            value={this.state.value}
-                        />
-                    </Margin>
-                    <Margin right="7.5px">
+                    <EditableListTitle
+                        onChange={this.handleChange}
+                        value={this.state.value}
+                    />
+                    <ActionButtonBox left="5px">
                         <ActionBtn onClick={this.handleConfirm}>
                             <Icon src={icons.check} />
                         </ActionBtn>
                         <ActionBtn onClick={this.handleCancel}>
                             <Icon src={icons.close} />
                         </ActionBtn>
-                    </Margin>
+                    </ActionButtonBox>
                 </Container>
                 {this.props.errorMessage && (
                     <ErrMsg>{this.props.errorMessage}</ErrMsg>
@@ -59,9 +57,45 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
     }
 }
 
-const EditableListTitle = styled.input<Props>``
+const EditableListTitle = styled.input<Props>`
+    border: 1px solid #e0e0e0;
+    padding: 2px 5px;
+    border-radius: 3px;
+    outline: none;
+    background: white;
+    flex: 2;
+    display: flex;
+    min-width: 50px;
+    margin-right: 0px;
+    font-size: 12px;
+`
 
-const ActionBtn = styled.button``
+const ActionButtonBox = styled(Margin)`
+    display: flex;
+    flex: 1;
+`
+
+const ActionBtn = styled.div`
+    border: none;
+    background: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    outline: none;
+    height: 24px;
+    width: 24px;
+
+    > img {
+        height: 12px;
+        width: auto;
+        outline: none;
+    }
+
+    &:hover {
+        background: #e0e0e0;
+    }
+`
 
 const Icon = styled.img`
     height: 15px;
@@ -73,7 +107,7 @@ const ErrMsg = styled.span`
 `
 
 const Container = styled.div<Props>`
-    height: 27px;
+    height: 30px;
     width: 100%;
     display: flex;
     flex-direction: row;
