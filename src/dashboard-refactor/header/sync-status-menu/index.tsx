@@ -31,6 +31,10 @@ const Row = styled(Margin)`
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+
+    &:last-child {
+        margin-bottom: 0px;
+    }
 `
 
 const RowContainer = styled.div`
@@ -89,6 +93,9 @@ const TextBlock = styled.div<{
     ${textStyles}
     font-size: 12px;
     line-height: 15px;
+    display: flex;
+    align-items: center;
+
     ${(props) =>
         css`
             font-weight: ${props.bold
@@ -124,25 +131,19 @@ export const timeSinceNowToString = (date: Date | null): string => {
     const years = now.diff(dt, 'years')
 
     if (seconds < 60) {
-        return 'Seconds ago'
+        return `${seconds} seconds ago`
     }
     if (minutes < 2) {
         return '1 min ago'
     }
-    if (minutes < 15) {
-        return 'Minutes ago'
-    }
-    if (minutes < 30) {
-        return '15 min ago'
-    }
     if (hours < 1) {
-        return '30 min ago'
+        return `${minutes} minutes ago`
     }
     if (hours < 2) {
-        return 'An hour ago'
+        return `${hours} hours ago`
     }
     if (days < 1) {
-        return `${hours} ago`
+        return `${hours} hours ago`
     }
     if (days < 2) {
         return 'One day ago'
@@ -190,7 +191,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         )
     }
 
-    private renderError = (syncType: 'Sync' | 'Backup') => {
+    private renderError = (syncType: 'Device Sync' | 'Backup') => {
         return this.renderNotificationBox(
             `Your last ${syncType.toLocaleLowerCase()} failed.`,
             <span>
@@ -201,7 +202,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     }
 
     private renderRow = (
-        syncType: 'Sync' | 'Backup',
+        syncType: 'Device Sync' | 'Backup',
         serviceStatus: DisableableState,
         otherServiceStatus: DisableableState,
         lastRunDate: Date | null,
@@ -214,11 +215,13 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         <TextBlock bold>{`${syncType} Status`}</TextBlock>
                         <TextBlock>
                             {serviceStatus === 'disabled' &&
-                                (syncType === 'Sync'
+                                (syncType === 'Device Sync'
                                     ? 'No device paired yet'
                                     : 'No backup set yet')}
                             {serviceStatus === 'enabled' &&
-                                `${syncType} enabled`}
+                                `Last ${syncType.toLocaleLowerCase()}: ${timeSinceNowToString(
+                                    lastRunDate,
+                                )}`.replace('device ', '')}
                             {serviceStatus === 'running' && `In progress`}
                             {(serviceStatus === 'success' ||
                                 serviceStatus === 'error') &&
@@ -265,7 +268,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         return (
             <Container width="min-content" right="50px" top="45px">
                 {this.renderRow(
-                    'Sync',
+                    'Device Sync',
                     syncState,
                     backupState,
                     lastSuccessfulSyncDate,
@@ -276,7 +279,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                     backupState,
                     syncState,
                     lastSuccessfulBackupDate,
-                    syncState === 'disabled'
+                    backupState === 'disabled'
                         ? goToBackupRoute
                         : onInitiateBackup,
                 )}
