@@ -14,6 +14,11 @@ export const shortcuts: ShortcutElData[] = [
         children: 'Highlight selected text',
     },
     {
+        id: 'open-dashboard-shortcut',
+        name: 'openDashboard',
+        children: 'Open Dashboard',
+    },
+    {
         id: 'show-highlights-shortcut',
         name: 'toggleHighlights',
         children: 'Toggle visibility of highlights (with no text selected)',

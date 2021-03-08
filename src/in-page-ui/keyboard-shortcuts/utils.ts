@@ -7,7 +7,7 @@ import { setLocalStorage } from 'src/util/storage'
 
 export function shortcutStorageToState(storage): KeyboardShortcuts {
     const defaults = KEYBOARDSHORTCUTS_DEFAULT_STATE
-    const keys = [
+    const keys: (keyof KeyboardShortcuts)[] = [
         'addToCollection',
         'addComment',
         'addTag',
@@ -17,6 +17,7 @@ export function shortcutStorageToState(storage): KeyboardShortcuts {
         'createHighlight',
         'link',
         'createBookmark',
+        'openDashboard',
         'shortcutsEnabled',
     ]
 

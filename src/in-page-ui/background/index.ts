@@ -1,9 +1,10 @@
-import { Tabs, ContextMenus } from 'webextension-polyfill-ts'
+import { Tabs, ContextMenus, browser } from 'webextension-polyfill-ts'
 import { bindMethod } from 'src/util/functions'
 import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from './types'
 import { InPageUIContentScriptRemoteInterface } from '../content_script/types'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import { OVERVIEW_URL } from 'src/constants'
 
 export const CONTEXT_MENU_ID_PREFIX = '@memexContextMenu:'
 export const CONTEXT_MENU_HIGHLIGHT_ID =
@@ -20,6 +21,7 @@ export class InPageUIBackground {
     constructor(private options: Props) {
         this.remoteFunctions = {
             showSidebar: bindMethod(this, 'showSidebar'),
+            openDashboard: bindMethod(this, 'openDashboard'),
             updateContextMenuEntries: bindMethod(
                 this,
                 'updateContextMenuEntries',
@@ -62,6 +64,10 @@ export class InPageUIBackground {
         await this.options.contextMenuAPI.update(CONTEXT_MENU_HIGHLIGHT_ID, {
             title: await this.getHighlightContextMenuTitle(),
         })
+    }
+
+    async openDashboard() {
+        await browser.tabs.create({ url: OVERVIEW_URL })
     }
 
     async showSidebar() {
