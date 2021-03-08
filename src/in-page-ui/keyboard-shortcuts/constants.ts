@@ -3,7 +3,7 @@ export const KEYBOARDSHORTCUTS_STORAGE_NAME = 'memex-keyboardshortcuts'
 export const KEYBOARDSHORTCUTS_DEFAULT_STATE = {
     shortcutsEnabled: true,
     linkShortcut: 'shift+l',
-    openDashboard: checkOperatingSystem() + '+d',
+    openDashboardShortcut: checkOperatingSystem() + '+f',
     toggleSidebarShortcut: checkOperatingSystem() + '+q',
     toggleHighlightsShortcut: checkOperatingSystem() + '+r',
     createAnnotationShortcut: checkOperatingSystem() + '+w',
@@ -21,6 +21,7 @@ export const KEYBOARDSHORTCUTS_DEFAULT_STATE = {
     addTagShortcutEnabled: true,
     addToCollectionShortcutEnabled: true,
     addCommentShortcutEnabled: true,
+    openDashboardShortcutEnabled: true,
 }
 
 function checkOperatingSystem() {
