@@ -357,7 +357,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                         : await this.searchNotes(searchState)
 
                 let noResultsType: NoResultsType = null
-                if (resultsExhausted && searchState.searchFilters.skip === 0) {
+                if (
+                    resultsExhausted &&
+                    searchState.searchFilters.skip === 0 &&
+                    !pageData.allIds.length
+                ) {
                     if (
                         previousState.listsSidebar.selectedListId ===
                         SPECIAL_LIST_IDS.MOBILE
