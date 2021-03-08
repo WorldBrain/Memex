@@ -5,7 +5,6 @@ import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 
 import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
 import SyncService, {
-    MemexInitialSync,
     SignalTransportFactory,
 } from '@worldbrain/memex-common/lib/sync'
 import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
@@ -28,7 +27,6 @@ import { captureException } from 'src/util/raven'
 
 export default class SyncBackground extends SyncService {
     private analytics: Analytics
-    initialSync: MemexInitialSync
     remoteFunctions: PublicSyncInterface
     firstContinuousSyncPromise?: Promise<void>
     getSharedSyncLog: () => Promise<SharedSyncLog>
@@ -106,6 +104,7 @@ export default class SyncBackground extends SyncService {
         }
 
         this.initialSync.debug = true
+        this.setupLastSyncTimestampStoring()
     }
 
     async waitForInitialSync() {
@@ -183,10 +182,7 @@ export default class SyncBackground extends SyncService {
             return remoteEmitter.emit('error', args)
         })
         this.initialSync.events.on('finished', async (args) => {
-            return Promise.all([
-                this.storeLastSyncTimestamp(),
-                remoteEmitter.emit('finished', args),
-            ])
+            return remoteEmitter.emit('finished', args)
         })
         this.initialSync.events.on('channelTimeout', () => {
             captureException(`InitialSyncError - channelTimeout`)
@@ -195,6 +191,18 @@ export default class SyncBackground extends SyncService {
         this.initialSync.events.on('packageStalled', () => {
             captureException(`InitialSyncError - packageStalled`)
             return remoteEmitter.emit('packageStalled', {})
+        })
+    }
+
+    private setupLastSyncTimestampStoring = () => {
+        this.continuousSync.events.on('syncFinished', async (event) => {
+            if (!event.error) {
+                await this.storeLastSyncTimestamp()
+            }
+        })
+
+        this.initialSync.events.on('finished', async (event) => {
+            await this.storeLastSyncTimestamp()
         })
     }
 
