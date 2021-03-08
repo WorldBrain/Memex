@@ -13,15 +13,9 @@ export default class PageNotesCopyPaster extends React.PureComponent<Props> {
     static defaultProps: Partial<Props> = {
         annotationUrls: [],
     }
-    private copyPasterBG: RemoteCopyPasterInterface
-
-    constructor(props) {
-        super(props)
-        this.copyPasterBG = props.copyPaster
-    }
 
     private renderTemplate = (id: number) =>
-        this.copyPasterBG.renderTemplate({
+        this.props.copyPaster.renderTemplate({
             id,
             annotationUrls: this.props.annotationUrls,
             normalizedPageUrls: this.props.normalizedPageUrls,

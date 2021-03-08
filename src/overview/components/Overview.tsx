@@ -19,8 +19,6 @@ import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
 import {
     auth,
-    contentSharing,
-    copyPaster,
     featuresBeta,
     subscription,
 } from 'src/util/remote-functions-background'
@@ -40,6 +38,8 @@ import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import { PageNotesCopyPaster } from 'src/copy-paster'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -70,6 +70,7 @@ class Overview extends PureComponent<Props, State> {
     private tagsBG = runInBackground<RemoteTagsInterface>()
     private authBG = runInBackground<AuthRemoteFunctionsInterface>()
     private featuresBetaBG = runInBackground<FeaturesBetaInterface>()
+    private copyPasterBG = runInBackground<RemoteCopyPasterInterface>()
 
     private annotationsSidebarRef = React.createRef<
         AnnotationsSidebarContainer
@@ -157,9 +158,9 @@ class Overview extends PureComponent<Props, State> {
     }
 
     async upgradeState() {
-        const plans = await auth.getAuthorizedPlans()
+        const plans = await this.authBG.getAuthorizedPlans()
 
-        if (await auth.isAuthorizedForFeature('beta')) {
+        if (await this.authBG.isAuthorizedForFeature('beta')) {
             this.setState({ showPioneer: true, showUpgrade: false })
         }
         if (plans.length === 0) {
@@ -253,8 +254,8 @@ class Overview extends PureComponent<Props, State> {
                             handleReaderViewClick={
                                 this.props.handleReaderViewClick
                             }
-                            copyPaster={copyPaster}
-                            contentSharing={contentSharing}
+                            copyPaster={this.copyPasterBG}
+                            contentSharing={this.contentSharingBG}
                         />
                         <DeleteConfirmModal message="Delete page and related notes" />
                         <DragElement />
@@ -286,6 +287,7 @@ class Overview extends PureComponent<Props, State> {
                             showBetaFeatureNotifModal={
                                 this.props.showBetaFeatureNotifModal
                             }
+                            copyPaster={this.copyPasterBG}
                         />
 
                         <Tooltip />

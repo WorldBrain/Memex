@@ -70,6 +70,7 @@ export interface Props extends Partial<SocialPage> {
     setActiveShareMenuNoteId?: (id: string) => void
     setActiveCopyPasterAnnotationId?: (id: string) => void
     contentSharing: ContentSharingInterface
+    copyPaster: RemoteCopyPasterInterface
 }
 
 class ResultItem extends PureComponent<Props> {

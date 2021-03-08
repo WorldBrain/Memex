@@ -28,6 +28,7 @@ import { auth, tags, collections } from 'src/util/remote-functions-background'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 
 const styles = require('./ResultList.css')
 
@@ -90,6 +91,7 @@ export interface OwnProps {
     toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
     handleReaderViewClick: (fullUrl: string) => void
     contentSharing: ContentSharingInterface
+    copyPaster: RemoteCopyPasterInterface
 }
 
 export type Props = StateProps & DispatchProps & OwnProps
@@ -260,6 +262,7 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                 <PageNotesCopyPaster
                     normalizedPageUrls={[doc.url]}
                     onClickOutside={this.props.resetActiveCopyPasterIndex}
+                    copyPaster={this.props.copyPaster}
                 />
             </HoverBox>
         )
@@ -361,6 +364,7 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
                 contentSharing={this.props.contentSharing}
+                copyPaster={this.props.copyPaster}
             />
         )
     }
