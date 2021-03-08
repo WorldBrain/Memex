@@ -17,12 +17,7 @@ import DragElement from './DragElement'
 import TrialExpiryWarning from './TrialExpiryWarning'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
-import {
-    auth,
-    featuresBeta,
-    subscription,
-} from 'src/util/remote-functions-background'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import { auth, subscription } from 'src/util/remote-functions-background'
 import { AnnotationsSidebarInDashboardResults } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { AnnotationInterface } from 'src/annotations/background/types'
@@ -38,7 +33,7 @@ import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
-import { DashboardContainer as NewDash } from 'src/dashboard-refactor'
+import { DashboardContainer } from 'src/dashboard-refactor'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -316,16 +311,15 @@ class Overview extends PureComponent<Props, State> {
     }
 
     render() {
-        // TODO: properly integrate new dashboard
-        if (location.href.indexOf('new-dash') > -1) {
-            return <NewDash />
+        if (location.href.indexOf('old-dash') > -1) {
+            return this.renderOverview()
         }
 
         if (isDuringInstall()) {
             return this.renderOnboarding()
         }
 
-        return this.renderOverview()
+        return <DashboardContainer />
     }
 }
 
