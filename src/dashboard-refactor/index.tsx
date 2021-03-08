@@ -29,6 +29,7 @@ import Margin from './components/Margin'
 import analytics from 'src/analytics'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { deriveStatusIconColor } from './header/sync-status-menu/util'
+import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 const __unimplemented = () => undefined
 
@@ -169,19 +170,21 @@ export class DashboardContainer extends StatefulUIElement<
                         onUpdateEntrySelection: (args) =>
                             this.processEvent('setDomainsIncluded', {
                                 domains: updatePickerValues(args)(
-                                    searchFilters.domainsIncluded,
+                                    args.selected,
                                 ),
                             }),
                     },
                     tagPickerProps: {
                         onToggleShowPicker: toggleShowTagPicker,
                         initialSelectedEntries: searchFilters.tagsIncluded,
-                        onUpdateEntrySelection: (args) =>
+                        onUpdateEntrySelection: async (args) => {
+                            const updatedValues = updatePickerValues(args)(
+                                args.selected,
+                            )
                             this.processEvent('setTagsIncluded', {
-                                tags: updatePickerValues(args)(
-                                    searchFilters.tagsIncluded,
-                                ),
-                            }),
+                                tags: updatedValues,
+                            })
+                        },
                     },
                 }}
             />
