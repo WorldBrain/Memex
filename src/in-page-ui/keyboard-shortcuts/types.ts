@@ -11,6 +11,7 @@ export interface KeyboardShortcuts {
     addToCollection: Shortcut
     createBookmark: Shortcut
     toggleSidebar: Shortcut
+    openDashboard: Shortcut
     addComment: Shortcut
     addTag: Shortcut
     link: Shortcut

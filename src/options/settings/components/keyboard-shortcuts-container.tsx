@@ -35,6 +35,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
     state: State = {
         shortcutsEnabled: true,
         link: { shortcut: 'l', enabled: true },
+        openDashboard: { shortcut: 'd', enabled: true },
         toggleSidebar: { shortcut: 'r', enabled: true },
         toggleHighlights: { shortcut: 'h', enabled: true },
         createAnnotation: { shortcut: 'a', enabled: true },

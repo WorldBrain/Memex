@@ -5,7 +5,13 @@ import { createAndCopyDirectLink } from 'src/annotations/content_script/interact
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { KeyboardShortcuts } from '../types'
 import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
-import { RpcError } from 'src/util/webextensionRPC'
+import { RpcError, runInBackground } from 'src/util/webextensionRPC'
+import { remoteFunction } from 'src/util/webextensionRPC'
+
+import { browser } from 'webextension-polyfill-ts'
+
+import { OVERVIEW_URL } from 'src/constants'
+import { InPageUIInterface } from 'src/in-page-ui/background/types'
 
 type HandleInterface = {
     [key in keyof KeyboardShortcuts]: () => Promise<void>
@@ -55,6 +61,8 @@ function getShortcutHandlers({
         addTag: () => inPageUI.showRibbon({ action: 'tag' }),
         addToCollection: () => inPageUI.showRibbon({ action: 'list' }),
         createBookmark: () => inPageUI.showRibbon({ action: 'bookmark' }),
+        openDashboard: () =>
+            runInBackground<InPageUIInterface<'caller'>>().openDashboard(),
         toggleSidebar: () => inPageUI.toggleSidebar(),
         toggleHighlights: () => inPageUI.toggleHighlights(),
         createHighlight: annotationFunctions.createHighlight,
