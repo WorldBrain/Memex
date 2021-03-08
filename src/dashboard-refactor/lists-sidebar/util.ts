@@ -1,8 +1,13 @@
 import { RootState } from './types'
 
+export type ListsState = Pick<
+    RootState,
+    'listData' | 'localLists' | 'followedLists'
+>
+
 export const isListNameUnique = (
     name: string,
-    { listData, localLists }: RootState,
+    { listData, localLists }: ListsState,
     args: { listIdToSkip?: number } = {},
 ): boolean =>
     localLists.allListIds.reduce((acc, listId) => {
@@ -15,12 +20,14 @@ export const isListNameUnique = (
 
 export const filterListsByQuery = (
     query: string,
-    { listData, localLists, followedLists }: RootState,
+    { listData, localLists, followedLists }: ListsState,
 ): {
     localListIds: number[]
     followedListIds: number[]
 } => {
-    const filterBySearchStr = (listId) => listData[listId].name.includes(query)
+    const normalizedQuery = query.toLocaleLowerCase()
+    const filterBySearchStr = (listId: number) =>
+        listData[listId].name.toLocaleLowerCase().includes(normalizedQuery)
 
     return {
         localListIds: localLists.allListIds.filter(filterBySearchStr),
