@@ -289,8 +289,8 @@ const RemoveFromListBtn = styled.div`
 `
 
 const FavIconBox = styled.div`
-    width: 20px;
-    height: 20px;
+    width: 21px;
+    height: 21px;
     border: 1px solid #efefef;
     border-radius: 30px;
     margin-right: 5px;
@@ -328,7 +328,7 @@ const ResultContent = styled(Margin)`
 
 const PageTitle = styled(Margin)`
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 600;
     color: #3a2f45;
     justify-content: flex-start;
 `

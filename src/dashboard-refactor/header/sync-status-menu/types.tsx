@@ -9,8 +9,8 @@ export interface RootState {
     unsyncedItemCount: number
     syncState: DisableableState
     backupState: DisableableState
-    lastSuccessfulSyncDateTime: Date
-    lastSuccessfulBackupDateTime: Date
+    lastSuccessfulSyncDate: Date | null
+    lastSuccessfulBackupDate: Date | null
 }
 
 export type Events = UIEvent<{

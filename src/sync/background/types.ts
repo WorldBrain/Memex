@@ -13,6 +13,8 @@ export interface PublicSyncInterface {
     enableContinuousSync(): Promise<void>
     forceIncrementalSync(): Promise<void | SyncReturnValue>
 
+    retrieveLastSyncTimestamp(): Promise<number>
+
     listDevices(): Promise<SyncDevice[]>
     removeDevice(deviceId: string): Promise<any>
     removeAllDevices(): Promise<void>

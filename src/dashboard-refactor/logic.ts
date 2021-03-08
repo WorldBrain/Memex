@@ -13,11 +13,13 @@ import {
     PAGE_SIZE,
     STORAGE_KEYS,
     PAGE_SEARCH_DUMMY_DAY,
+    NON_UNIQ_LIST_NAME_ERR_MSG,
 } from 'src/dashboard-refactor/constants'
 import { ListData } from './lists-sidebar/types'
 import { updatePickerValues } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import { NoResultsType } from './search-results/types'
+import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -114,6 +116,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 skip: 0,
             },
             listsSidebar: {
+                addListErrorMessage: null,
+                editListErrorMessage: null,
                 listShareLoadingState: 'pristine',
                 listCreateState: 'pristine',
                 listDeleteState: 'pristine',
@@ -127,21 +131,23 @@ export class DashboardLogic extends UILogic<State, Events> {
                 followedLists: {
                     loadingState: 'pristine',
                     isExpanded: true,
-                    listIds: [],
+                    allListIds: [],
+                    filteredListIds: [],
                 },
                 localLists: {
                     isAddInputShown: false,
                     loadingState: 'pristine',
                     isExpanded: true,
-                    listIds: [],
+                    allListIds: [],
+                    filteredListIds: [],
                 },
             },
             syncMenu: {
                 isDisplayed: false,
                 syncState: 'disabled',
                 backupState: 'disabled',
-                lastSuccessfulBackupDateTime: new Date(),
-                lastSuccessfulSyncDateTime: new Date(),
+                lastSuccessfulBackupDate: null,
+                lastSuccessfulSyncDate: null,
                 showUnsyncedItemCount: false,
                 unsyncedItemCount: 0,
             },
@@ -197,11 +203,18 @@ export class DashboardLogic extends UILogic<State, Events> {
         const backupEnabled = await backupBG.isAutomaticBackupEnabled()
         const { lastBackup } = await backupBG.getBackupTimes()
         const lastSuccessfulBackup =
-            typeof lastBackup === 'number' ? new Date(lastBackup) : new Date()
+            typeof lastBackup === 'number' ? new Date(lastBackup) : null
+        let lastSuccessfulSync: Date = null
+        try {
+            lastSuccessfulSync = new Date(
+                await syncBG.retrieveLastSyncTimestamp(),
+            )
+        } catch (err) {}
 
         this.emitMutation({
             syncMenu: {
-                lastSuccessfulBackupDateTime: { $set: lastSuccessfulBackup },
+                lastSuccessfulBackupDate: { $set: lastSuccessfulBackup },
+                lastSuccessfulSyncDate: { $set: lastSuccessfulSync },
                 backupState: { $set: backupEnabled ? 'enabled' : 'disabled' },
                 syncState: {
                     $set: syncDevices.length > 0 ? 'enabled' : 'disabled',
@@ -281,7 +294,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.emitMutation({
                     listsSidebar: {
                         listData: { $set: listData },
-                        localLists: { listIds: { $set: listIds } },
+                        localLists: {
+                            allListIds: { $set: listIds },
+                            filteredListIds: { $set: listIds },
+                        },
                     },
                 })
             },
@@ -309,6 +325,13 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* START - Misc event handlers */
     search: EventHandler<'search'> = async ({ previousState, event }) => {
         let nextState: State
+
+        const skipMutation: UIMutation<State['searchFilters']> = {
+            skip: event.paginate
+                ? { $apply: (skip) => skip + PAGE_SIZE }
+                : { $set: 0 },
+        }
+
         await executeUITask(
             this,
             (taskState) => ({
@@ -319,20 +342,26 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             }),
             async () => {
+                const searchState = this.withMutation(previousState, {
+                    searchFilters: skipMutation,
+                })
                 const {
                     noteData,
                     pageData,
                     results,
-                    noResults,
                     resultsExhausted,
                     searchTermsInvalid,
                 } =
                     previousState.searchResults.searchType === 'pages'
-                        ? await this.searchPages(previousState, event.paginate)
-                        : await this.searchNotes(previousState, event.paginate)
+                        ? await this.searchPages(searchState)
+                        : await this.searchNotes(searchState)
 
                 let noResultsType: NoResultsType = null
-                if (noResults) {
+                if (
+                    resultsExhausted &&
+                    searchState.searchFilters.skip === 0 &&
+                    !pageData.allIds.length
+                ) {
                     if (
                         previousState.listsSidebar.selectedListId ===
                         SPECIAL_LIST_IDS.MOBILE
@@ -352,6 +381,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
                 const mutation: UIMutation<State> = event.paginate
                     ? {
+                          searchFilters: skipMutation,
                           searchResults: {
                               results: {
                                   $apply: (prev) =>
@@ -374,11 +404,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                               areResultsExhausted: { $set: resultsExhausted },
                               noResultsType: { $set: noResultsType },
                           },
-                          searchFilters: {
-                              skip: { $apply: (skip) => skip + PAGE_SIZE },
-                          },
                       }
                     : {
+                          searchFilters: skipMutation,
                           searchResults: {
                               results: { $set: results },
                               pageData: { $set: pageData },
@@ -386,11 +414,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                               areResultsExhausted: { $set: resultsExhausted },
                               noResultsType: { $set: noResultsType },
                           },
-                          searchFilters: { skip: { $set: 0 } },
                       }
 
                 nextState = this.withMutation(previousState, mutation)
-
                 this.emitMutation(mutation)
             },
         )
@@ -398,10 +424,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         await this.fetchNoteShareStates(nextState)
     }
 
-    private searchPages = async (
-        { searchFilters, listsSidebar }: State,
-        paginate?: boolean,
-    ) => {
+    private searchPages = async ({ searchFilters, listsSidebar }: State) => {
         const lists =
             listsSidebar.selectedListId != null
                 ? [listsSidebar.selectedListId]
@@ -421,7 +444,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             tagsInc: searchFilters.tagsIncluded,
             tagsExc: searchFilters.tagsExcluded,
             limit: searchFilters.limit,
-            skip: paginate ? searchFilters.skip + PAGE_SIZE : 0,
+            skip: searchFilters.skip,
             lists,
         })
 
@@ -429,14 +452,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             ...utils.pageSearchResultToState(result),
             resultsExhausted: result.resultsExhausted,
             searchTermsInvalid: result.isBadTerm,
-            noResults: result.resultsExhausted && searchFilters.skip === 0,
         }
     }
 
-    private searchNotes = async (
-        { searchFilters, listsSidebar }: State,
-        paginate?: boolean,
-    ) => {
+    private searchNotes = async ({ searchFilters, listsSidebar }: State) => {
         const collections =
             listsSidebar.selectedListId != null
                 ? [listsSidebar.selectedListId]
@@ -451,7 +470,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             tagsInc: searchFilters.tagsIncluded,
             tagsExc: searchFilters.tagsExcluded,
             limit: searchFilters.limit,
-            skip: paginate ? searchFilters.skip + PAGE_SIZE : 0,
+            skip: searchFilters.skip,
             collections,
         })
 
@@ -459,7 +478,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             ...utils.annotationSearchResultToState(result),
             resultsExhausted: result.resultsExhausted,
             searchTermsInvalid: result.isBadTerm,
-            noResults: result.resultsExhausted && searchFilters.skip === 0,
         }
     }
 
@@ -1833,9 +1851,23 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     setListQueryValue: EventHandler<'setListQueryValue'> = async ({
         event,
+        previousState,
     }) => {
+        const filteredListIds = filterListsByQuery(
+            event.query,
+            previousState.listsSidebar,
+        )
+
         this.emitMutation({
-            listsSidebar: { searchQuery: { $set: event.query } },
+            listsSidebar: {
+                searchQuery: { $set: event.query },
+                localLists: {
+                    filteredListIds: { $set: filteredListIds.localListIds },
+                },
+                followedLists: {
+                    filteredListIds: { $set: filteredListIds.followedListIds },
+                },
+            },
         })
     }
 
@@ -1852,6 +1884,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     cancelListCreate: EventHandler<'cancelListCreate'> = async ({ event }) => {
         this.emitMutation({
             listsSidebar: {
+                addListErrorMessage: { $set: null },
                 localLists: {
                     isAddInputShown: { $set: false },
                 },
@@ -1861,8 +1894,24 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     confirmListCreate: EventHandler<'confirmListCreate'> = async ({
         event,
+        previousState,
     }) => {
         const newListName = event.value.trim()
+
+        if (!newListName.length) {
+            return
+        }
+
+        if (!isListNameUnique(newListName, previousState.listsSidebar)) {
+            this.emitMutation({
+                listsSidebar: {
+                    addListErrorMessage: {
+                        $set: NON_UNIQ_LIST_NAME_ERR_MSG,
+                    },
+                },
+            })
+            return
+        }
 
         await executeUITask(
             this,
@@ -1878,7 +1927,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listsSidebar: {
                         localLists: {
                             isAddInputShown: { $set: false },
-                            listIds: { $push: [listId] },
+                            filteredListIds: { $push: [listId] },
+                            allListIds: { $push: [listId] },
                         },
                         listData: {
                             [listId]: {
@@ -1888,6 +1938,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                                     listCreationState: 'pristine',
                                 },
                             },
+                        },
+                        addListErrorMessage: {
+                            $set: null,
                         },
                     },
                 })
@@ -1969,7 +2022,36 @@ export class DashboardLogic extends UILogic<State, Events> {
             throw new Error('No list ID is set for editing')
         }
 
-        const { name: oldName } = previousState.listsSidebar.listData[listId]
+        const oldName = previousState.listsSidebar.listData[listId].name
+        const newName = event.value.trim()
+
+        if (!newName.length) {
+            return
+        }
+
+        if (newName === oldName) {
+            this.emitMutation({
+                listsSidebar: {
+                    editingListId: { $set: undefined },
+                },
+            })
+            return
+        }
+
+        if (
+            !isListNameUnique(newName, previousState.listsSidebar, {
+                listIdToSkip: listId,
+            })
+        ) {
+            this.emitMutation({
+                listsSidebar: {
+                    editListErrorMessage: {
+                        $set: NON_UNIQ_LIST_NAME_ERR_MSG,
+                    },
+                },
+            })
+            return
+        }
 
         await executeUITask(
             this,
@@ -1980,7 +2062,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 await this.options.listsBG.updateListName({
                     id: listId,
                     oldName,
-                    newName: event.value,
+                    newName,
                 })
 
                 this.emitMutation({
@@ -1989,6 +2071,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             [listId]: { name: { $set: event.value } },
                         },
                         editingListId: { $set: undefined },
+                        editListErrorMessage: { $set: null },
                     },
                 })
             },
@@ -1998,6 +2081,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     cancelListEdit: EventHandler<'cancelListEdit'> = async ({}) => {
         this.emitMutation({
             listsSidebar: {
+                editListErrorMessage: { $set: null },
                 editingListId: { $set: undefined },
             },
         })
@@ -2046,7 +2130,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             listsSidebar: {
                 listData: { $merge: listDataById },
-                localLists: { listIds: { $set: listIds } },
+                localLists: {
+                    filteredListIds: { $set: listIds },
+                    allListIds: { $set: listIds },
+                },
             },
         })
     }
@@ -2063,7 +2150,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             listsSidebar: {
                 listData: { $merge: listDataById },
-                followedLists: { listIds: { $set: listIds } },
+                followedLists: {
+                    filteredListIds: { $set: listIds },
+                    allListIds: { $set: listIds },
+                },
             },
         })
     }
@@ -2092,7 +2182,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         const listId = previousState.modals.deletingListId
         // TODO: support for non-local lists
-        const localListIds = previousState.listsSidebar.localLists.listIds.filter(
+        const localListIds = previousState.listsSidebar.localLists.filteredListIds.filter(
             (id) => id !== listId,
         )
 
@@ -2113,7 +2203,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                         deletingListId: { $set: undefined },
                     },
                     listsSidebar: {
-                        localLists: { listIds: { $set: localListIds } },
+                        localLists: {
+                            filteredListIds: { $set: localListIds },
+                            allListIds: { $set: localListIds },
+                        },
                         listData: { $unset: [listId] },
                     },
                 })
@@ -2215,7 +2308,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
 
         this.emitMutation({
-            syncMenu: { lastSuccessfulSyncDateTime: { $set: new Date() } },
+            syncMenu: { lastSuccessfulSyncDate: { $set: new Date() } },
         })
     }
 
@@ -2240,7 +2333,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
 
         this.emitMutation({
-            syncMenu: { lastSuccessfulBackupDateTime: { $set: new Date() } },
+            syncMenu: { lastSuccessfulBackupDate: { $set: new Date() } },
         })
     }
     /* END - sync status menu event handlers */

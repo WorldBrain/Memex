@@ -1,7 +1,7 @@
 import { UIEvent } from 'ui-logic-core'
 
-import { ListsSidebarSearchBarProps } from './components/lists-search-bar'
-import { ListsSidebarGroupProps } from './components/lists-sidebar-group'
+import { ListsSidebarSearchBarProps } from './components/search-bar'
+import { ListsSidebarGroupProps } from './components/sidebar-group'
 import { TaskState } from 'ui-logic-core/lib/types'
 
 export interface SidebarLockedState {
@@ -25,7 +25,8 @@ export interface ListData {
 export interface ListGroupCommon
     extends Pick<ListsSidebarGroupProps, 'loadingState'> {
     isExpanded: boolean
-    listIds: number[]
+    allListIds: number[]
+    filteredListIds: number[]
 }
 
 export interface FollowedListGroup extends ListGroupCommon {}
@@ -48,6 +49,8 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
         showMoreMenuListId?: number
         isSidebarToggleHovered?: boolean
         hasFeedActivity: boolean
+        addListErrorMessage: string | null
+        editListErrorMessage: string | null
 
         listDeleteState: TaskState
         listCreateState: TaskState

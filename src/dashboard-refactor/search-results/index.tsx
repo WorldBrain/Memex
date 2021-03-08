@@ -43,6 +43,8 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import DismissibleResultsMessage from './components/dismissible-results-message'
 import MobileAppAd from 'src/sync/components/device-list/mobile-app-ad'
 import OnboardingMsg from './components/onboarding-msg'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -208,12 +210,14 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     private renderPageNotes(
         {
             areNotesShown,
-            notesType,
             normalizedUrl,
             newNoteForm,
+            notesType,
+            isShared,
             noteIds,
         }: PageResultData & PageData,
         day: number,
+        { onShareBtnClick }: PageInteractionProps,
     ) {
         if (!areNotesShown) {
             return null
@@ -238,14 +242,28 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         />
                     }
                     rightSide={
-                        <SortingDropdownMenuBtn
-                            onMenuItemClick={({ sortingFn }) =>
-                                this.props.onPageNotesSortSelection(
-                                    day,
-                                    normalizedUrl,
-                                )(sortingFn)
-                            }
-                        />
+                        <TopBarRightSideWrapper>
+                            <ButtonTooltip
+                                tooltipText="Share Page and Notes"
+                                position="bottom"
+                            >
+                                <ShareBtn onClick={onShareBtnClick}>
+                                    <IconImg
+                                        src={
+                                            isShared ? icons.shared : icons.link
+                                        }
+                                    />
+                                </ShareBtn>
+                            </ButtonTooltip>
+                            <SortingDropdownMenuBtn
+                                onMenuItemClick={({ sortingFn }) =>
+                                    this.props.onPageNotesSortSelection(
+                                        day,
+                                        normalizedUrl,
+                                    )(sortingFn)
+                                }
+                            />
+                        </TopBarRightSideWrapper>
                     }
                 />
                 <Margin bottom="3px" />
@@ -303,7 +321,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     {...pickerProps}
                     {...page}
                 />
-                {this.renderPageNotes(page, day)}
+                {this.renderPageNotes(page, day, interactionProps)}
             </ResultBox>
         )
     }
@@ -448,4 +466,30 @@ const ResultsContainer = styled(Margin)`
     max-width: ${sizeConstants.searchResults.widthPx}px;
     margin-bottom: 100px;
     width: fill-available;
+`
+
+const TopBarRightSideWrapper = styled.div`
+    display: flex;
+    flex-direction: row;
+`
+
+const ShareBtn = styled.button`
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    width: 17px;
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
+
+    &:focus {
+        background-color: #79797945;
+    }
+`
+
+const IconImg = styled.img`
+    height: 22px;
+    width: 22px;
 `

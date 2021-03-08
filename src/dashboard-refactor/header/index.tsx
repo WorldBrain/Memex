@@ -31,6 +31,17 @@ const SearchSection = styled(Margin)`
 
 const SettingsSection = styled(Margin)`
     width: min-content;
+    cursor: pointer;
+    height: 24px;
+    width: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3px;
+
+    &:hover {
+        background-color: #e8e8e8;
+    }
 `
 
 const RightHeader = styled.div`
@@ -57,6 +68,9 @@ const SyncStatusHeaderBox = styled.div`
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 3px;
+    height: 24px;
 
     & > div {
         width: auto;
@@ -105,7 +119,7 @@ export default class Header extends PureComponent<HeaderProps> {
                     <SyncStatusHeaderBox
                         onClick={syncStatusMenuProps.onToggleDisplayState}
                     >
-                        <Margin horizontal="5px">
+                        <Margin right="5px">
                             <SyncStatusIcon color={syncStatusIconState}>
                                 {syncStatusIconState === 'red' && (
                                     <SyncStatusHeaderText textCentered>

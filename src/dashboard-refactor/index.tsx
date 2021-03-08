@@ -9,7 +9,7 @@ import ListsSidebarContainer from './lists-sidebar'
 import SearchResultsContainer from './search-results'
 import HeaderContainer from './header'
 import { runInBackground } from 'src/util/webextensionRPC'
-import { Props as ListSidebarItemProps } from './lists-sidebar/components/lists-sidebar-item-with-menu'
+import { Props as ListSidebarItemProps } from './lists-sidebar/components/sidebar-item-with-menu'
 import { ListData } from './lists-sidebar/types'
 import * as searchResultUtils from './search-results/util'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
@@ -99,6 +99,7 @@ export class DashboardContainer extends StatefulUIElement<
             onConfirmClick: (value) =>
                 this.processEvent('confirmListEdit', { value }),
             initValue: list.name,
+            errorMessage: this.state.listsSidebar.editListErrorMessage,
         },
         onRenameClick: () =>
             this.processEvent('setEditingListId', { listId: list.id }),
@@ -290,10 +291,9 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <ListsSidebarContainer
+                {...listsSidebar}
                 lockedState={lockedState}
                 openFeedUrl={this.props.openFeedUrl}
-                hasFeedActivity={this.state.listsSidebar.hasFeedActivity}
-                inboxUnreadCount={this.state.listsSidebar.inboxUnreadCount}
                 onAllSavedSelection={() =>
                     this.processEvent('resetFilters', null)
                 }
@@ -301,7 +301,6 @@ export class DashboardContainer extends StatefulUIElement<
                 onListSelection={(listId) =>
                     this.processEvent('setSelectedListId', { listId })
                 }
-                selectedListId={listsSidebar.selectedListId}
                 peekState={{
                     isSidebarPeeking: listsSidebar.isSidebarPeeking,
                     setSidebarPeekState: (isPeeking) => () =>
@@ -324,6 +323,7 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 listsGroups={[
                     {
+                        ...listsSidebar.localLists,
                         title: 'My collections',
                         onAddBtnClick: () =>
                             this.processEvent('setAddListInputShown', {
@@ -334,15 +334,11 @@ export class DashboardContainer extends StatefulUIElement<
                             this.processEvent('confirmListCreate', { value }),
                         cancelAddNewList: () =>
                             this.processEvent('cancelListCreate', null),
-                        isAddInputShown:
-                            listsSidebar.localLists.isAddInputShown,
-                        isExpanded: listsSidebar.localLists.isExpanded,
                         onExpandBtnClick: () =>
                             this.processEvent('setLocalListsExpanded', {
                                 isExpanded: !listsSidebar.localLists.isExpanded,
                             }),
-                        loadingState: listsSidebar.localLists.loadingState,
-                        listsArray: listsSidebar.localLists.listIds.map(
+                        listsArray: listsSidebar.localLists.filteredListIds.map(
                             (listId) =>
                                 this.listStateToProps(
                                     listsSidebar.listData[listId],
@@ -351,14 +347,13 @@ export class DashboardContainer extends StatefulUIElement<
                         ),
                     },
                     // {
+                    //     ...listsSidebar.followedLists,
                     //     title: 'Followed collections',
-                    //     isExpanded: listsSidebar.followedLists.isExpanded,
                     //     onExpandBtnClick: () =>
                     //         this.processEvent('setFollowedListsExpanded', {
                     //             isExpanded: !listsSidebar.followedLists
                     //                 .isExpanded,
                     //         }),
-                    //     loadingState: listsSidebar.followedLists.loadingState,
                     //     listsArray: listsSidebar.followedLists.listIds.map(
                     //         (listId) =>
                     //             this.listStateToProps(

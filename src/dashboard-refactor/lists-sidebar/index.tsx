@@ -6,16 +6,17 @@ import colors from 'src/dashboard-refactor/colors'
 import { SidebarLockedState, SidebarPeekState } from './types'
 import ListsSidebarGroup, {
     ListsSidebarGroupProps,
-} from './components/lists-sidebar-group'
+} from './components/sidebar-group'
 import ListsSidebarSearchBar, {
     ListsSidebarSearchBarProps,
-} from './components/lists-search-bar'
+} from './components/search-bar'
 import Margin from '../components/Margin'
 import ListsSidebarItem, {
     Props as ListsSidebarItemProps,
-} from './components/lists-sidebar-item-with-menu'
+} from './components/sidebar-item-with-menu'
 import { sizeConstants } from '../constants'
 import { DropReceivingState } from '../types'
+import ListsSidebarEditableItem from './components/sidebar-editable-item'
 
 const Sidebar = styled.div<{
     locked: boolean
@@ -72,6 +73,7 @@ export interface ListsSidebarProps {
     hasFeedActivity?: boolean
     inboxUnreadCount: number
     selectedListId?: number
+    addListErrorMessage: string | null
     lockedState: SidebarLockedState
     peekState: SidebarPeekState
     searchBarProps: ListsSidebarSearchBarProps
@@ -84,21 +86,29 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         lists: ListsSidebarItemProps[],
         canReceiveDroppedItems: boolean,
     ) =>
-        lists.map((listObj, idx) => (
-            <ListsSidebarItem
-                key={idx}
-                dropReceivingState={{
-                    ...this.props.initDropReceivingState(listObj.listId),
-                    canReceiveDroppedItems,
-                }}
-                {...listObj}
-            />
-        ))
+        lists.map((listObj, idx) =>
+            listObj.isEditing ? (
+                <ListsSidebarEditableItem
+                    key={idx}
+                    {...listObj.editableProps}
+                />
+            ) : (
+                <ListsSidebarItem
+                    key={idx}
+                    dropReceivingState={{
+                        ...this.props.initDropReceivingState(listObj.listId),
+                        canReceiveDroppedItems,
+                    }}
+                    {...listObj}
+                />
+            ),
+        )
 
     render() {
         const {
             lockedState: { isSidebarLocked },
             peekState: { isSidebarPeeking },
+            addListErrorMessage,
             searchBarProps,
             listsGroups,
         } = this.props
@@ -171,6 +181,13 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                     {listsGroups.map((group, i) => (
                         <Margin key={i} vertical="10px">
                             <ListsSidebarGroup {...group}>
+                                {group.isAddInputShown && (
+                                    <ListsSidebarEditableItem
+                                        onConfirmClick={group.confirmAddNewList}
+                                        onCancelClick={group.cancelAddNewList}
+                                        errorMessage={addListErrorMessage}
+                                    />
+                                )}
                                 {this.renderLists(group.listsArray, true)}
                             </ListsSidebarGroup>
                         </Margin>

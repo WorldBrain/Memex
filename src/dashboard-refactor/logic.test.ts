@@ -29,7 +29,9 @@ describe('Dashboard Refactor misc logic', () => {
             searchResults.state.listsSidebar.localLists.loadingState,
         ).toEqual('pristine')
         expect(searchResults.state.listsSidebar.listData).toEqual({})
-        expect(searchResults.state.listsSidebar.localLists.listIds).toEqual([])
+        expect(
+            searchResults.state.listsSidebar.localLists.filteredListIds,
+        ).toEqual([])
 
         await searchResults.processEvent('init', null)
 
@@ -39,9 +41,9 @@ describe('Dashboard Refactor misc logic', () => {
         expect(searchResults.state.listsSidebar.listData).toEqual(
             expectedListData,
         )
-        expect(searchResults.state.listsSidebar.localLists.listIds).toEqual(
-            listIds,
-        )
+        expect(
+            searchResults.state.listsSidebar.localLists.filteredListIds,
+        ).toEqual(listIds)
     })
 
     it('should trigger search during init logic', async ({ device }) => {

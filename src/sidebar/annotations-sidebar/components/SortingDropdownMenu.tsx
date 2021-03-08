@@ -58,10 +58,20 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
     }
 }
 
-const DropdownMenuContainer = styled.div``
+const DropdownMenuContainer = styled.div`
+    & > div {
+        height: 24px;
+        width: 24px;
+        padding: 2px;
+    }
+
+    & #DropdownMenuBtn {
+        height: 24px;
+        width: 24px;
+    }
+`
 
 const IconImg = styled.img`
-    height: 24px;
-    width: 24px;
+    width: 100%;
     padding: 4px;
 `

@@ -81,3 +81,5 @@ export const STORAGE_KEYS = {
  * always under a single key. This is that key.
  */
 export const PAGE_SEARCH_DUMMY_DAY = -1
+
+export const NON_UNIQ_LIST_NAME_ERR_MSG = 'List name already taken.'

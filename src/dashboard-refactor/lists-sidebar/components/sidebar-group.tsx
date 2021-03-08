@@ -9,9 +9,8 @@ import {
 import styled from 'styled-components'
 
 import { TaskState } from 'ui-logic-core/lib/types'
-import { Props as ListsSidebarItemProps } from '../lists-sidebar-item-with-menu'
+import { Props as ListsSidebarItemProps } from './sidebar-item-with-menu'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import ListsSidebarEditableItem from '../lists-sidebar-editable-item'
 
 const { fonts } = styles
 
@@ -99,15 +98,6 @@ export default class ListsSidebarGroup extends PureComponent<
 
         if (this.props.loadingState === 'error') {
             return this.renderErrorState()
-        }
-
-        if (this.props.isAddInputShown) {
-            return (
-                <ListsSidebarEditableItem
-                    onCancelClick={this.props.cancelAddNewList!}
-                    onConfirmClick={this.props.confirmAddNewList!}
-                />
-            )
         }
 
         return this.props.children

@@ -6,7 +6,7 @@ import { Icon } from 'src/dashboard-refactor/styled-components'
 
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
-import { SidebarLockedState } from '../../types'
+import { SidebarLockedState } from '../types'
 
 const textStyles = `
     font-family: ${fonts.primary.name};

@@ -12,39 +12,40 @@ import { DisableableState, RootState } from './types'
 import { HoverState } from 'src/dashboard-refactor/types'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import Margin from 'src/dashboard-refactor/components/Margin'
 
 const Container = styled(HoverBox)<{
     isDisplayed: boolean
 }>`
     height: min-content;
-    width: 183px;
-    padding: 7px;
+    width: 230px;
+    padding: 15px;
     background-color: ${colors.white};
     flex-direction: column;
     box-shadow: ${styles.boxShadow.overlayElement};
 `
 
-const Row = styled.div`
+const Row = styled(Margin)`
     height: min-content;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+
+    &:last-child {
+        margin-bottom: 0px;
+    }
 `
 
 const RowContainer = styled.div`
     height: max-content;
     width: 100%;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-left: 10px;
-    padding-right: 10px;
     display: flex;
     flex-direction: column;
 `
 
 const NotificationBox = styled(RowContainer)`
-    height: 32px;
+    height: 40px;
     padding: 0 !important;
     justify-content: center;
     align-items: center;
@@ -67,6 +68,17 @@ const IconContainer = styled(Icon)<{
         css`
             cursor: pointer;
         `}
+
+    &:hover {
+        background-color: #e8e8e8;
+    }
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 24px;
+    width: 24px;
+    background-size: 16px;
 `
 
 const textStyles = `
@@ -79,8 +91,11 @@ const TextBlock = styled.div<{
 }>`
     height: 18px;
     ${textStyles}
-    font-size: 10px;
+    font-size: 12px;
     line-height: 15px;
+    display: flex;
+    align-items: center;
+
     ${(props) =>
         css`
             font-weight: ${props.bold
@@ -91,8 +106,8 @@ const TextBlock = styled.div<{
 
 const TextBlockSmall = styled.div`
     ${textStyles}
-    font-weight: ${fonts.primary.weight.bold};
-    font-size: 8px;
+    font-weight: ${fonts.primary.weight.normal};
+    font-size: 10px;
     line-height: 12px;
     text-align: center;
 `
@@ -102,7 +117,11 @@ const StyledAnchor = styled.a`
     text-decoration: none;
 `
 
-export const timeSinceNowToString = (date: Date): string => {
+export const timeSinceNowToString = (date: Date | null): string => {
+    if (date === null) {
+        return 'Never'
+    }
+
     const now = moment(new Date())
     const dt = moment(date)
     const seconds = now.diff(dt, 'seconds')
@@ -112,25 +131,19 @@ export const timeSinceNowToString = (date: Date): string => {
     const years = now.diff(dt, 'years')
 
     if (seconds < 60) {
-        return 'Seconds ago'
+        return `${seconds} seconds ago`
     }
     if (minutes < 2) {
         return '1 min ago'
     }
-    if (minutes < 15) {
-        return 'Minutes ago'
-    }
-    if (minutes < 30) {
-        return '15 min ago'
-    }
     if (hours < 1) {
-        return '30 min ago'
+        return `${minutes} minutes ago`
     }
     if (hours < 2) {
-        return 'An hour ago'
+        return `${hours} hours ago`
     }
     if (days < 1) {
-        return `${hours} ago`
+        return `${hours} hours ago`
     }
     if (days < 2) {
         return 'One day ago'
@@ -173,12 +186,12 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
 
     private renderBackupReminder = () => {
         return this.renderNotificationBox(
-            'Memex is an offline app.',
+            'Memex stores all data locally.',
             'Backup your data.',
         )
     }
 
-    private renderError = (syncType: 'Sync' | 'Backup') => {
+    private renderError = (syncType: 'Device Sync' | 'Backup') => {
         return this.renderNotificationBox(
             `Your last ${syncType.toLocaleLowerCase()} failed.`,
             <span>
@@ -189,29 +202,31 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     }
 
     private renderRow = (
-        syncType: 'Sync' | 'Backup',
+        syncType: 'Device Sync' | 'Backup',
         serviceStatus: DisableableState,
         otherServiceStatus: DisableableState,
-        timeSinceLastRun: Date,
+        lastRunDate: Date | null,
         clickHandler: React.MouseEventHandler,
     ) => {
         return (
             <>
-                <Row>
+                <Row bottom="10px">
                     <RowContainer>
                         <TextBlock bold>{`${syncType} Status`}</TextBlock>
                         <TextBlock>
                             {serviceStatus === 'disabled' &&
-                                (syncType === 'Sync'
+                                (syncType === 'Device Sync'
                                     ? 'No device paired yet'
                                     : 'No backup set yet')}
                             {serviceStatus === 'enabled' &&
-                                `${syncType} enabled`}
+                                `Last ${syncType.toLocaleLowerCase()}: ${timeSinceNowToString(
+                                    lastRunDate,
+                                )}`.replace('device ', '')}
                             {serviceStatus === 'running' && `In progress`}
                             {(serviceStatus === 'success' ||
                                 serviceStatus === 'error') &&
                                 `Last ${syncType.toLocaleLowerCase()}: ${timeSinceNowToString(
-                                    timeSinceLastRun,
+                                    lastRunDate,
                                 )}`}
                         </TextBlock>
                     </RowContainer>
@@ -237,34 +252,34 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     render() {
         const {
             syncState,
-            isDisplayed,
             backupState,
+            isDisplayed,
             onInitiateSync,
             goToSyncRoute,
             goToBackupRoute,
             onInitiateBackup,
-            lastSuccessfulSyncDateTime,
-            lastSuccessfulBackupDateTime,
+            lastSuccessfulSyncDate,
+            lastSuccessfulBackupDate,
         } = this.props
         if (!isDisplayed) {
             return null
         }
 
         return (
-            <Container width="min-content" left="50px" top="50px">
+            <Container width="min-content" right="50px" top="45px">
                 {this.renderRow(
-                    'Sync',
+                    'Device Sync',
                     syncState,
                     backupState,
-                    lastSuccessfulSyncDateTime,
+                    lastSuccessfulSyncDate,
                     syncState === 'disabled' ? goToSyncRoute : onInitiateSync,
                 )}
                 {this.renderRow(
                     'Backup',
                     backupState,
                     syncState,
-                    lastSuccessfulBackupDateTime,
-                    syncState === 'disabled'
+                    lastSuccessfulBackupDate,
+                    backupState === 'disabled'
                         ? goToBackupRoute
                         : onInitiateBackup,
                 )}
