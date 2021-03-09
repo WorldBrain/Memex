@@ -336,7 +336,8 @@ describe('Dashboard search results logic', () => {
             loadingState: 'pristine',
             isAddInputShown: false,
             isExpanded: true,
-            listIds: [],
+            allListIds: [],
+            filteredListIds: [],
         })
 
         await searchResults.processEvent('setLocalLists', {
@@ -350,7 +351,8 @@ describe('Dashboard search results logic', () => {
             loadingState: 'pristine',
             isAddInputShown: false,
             isExpanded: true,
-            listIds,
+            allListIds: listIds,
+            filteredListIds: listIds,
         })
     })
 
@@ -364,7 +366,8 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.followedLists).toEqual({
             loadingState: 'pristine',
             isExpanded: true,
-            listIds: [],
+            allListIds: [],
+            filteredListIds: [],
         })
 
         await searchResults.processEvent('setFollowedLists', {
@@ -377,7 +380,8 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.followedLists).toEqual({
             loadingState: 'pristine',
             isExpanded: true,
-            listIds,
+            allListIds: listIds,
+            filteredListIds: listIds,
         })
     })
 
