@@ -147,6 +147,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isDisplayed: false,
                 syncState: 'disabled',
                 backupState: 'disabled',
+                isAutoBackupEnabled: false,
                 lastSuccessfulBackupDate: null,
                 lastSuccessfulSyncDate: null,
                 showUnsyncedItemCount: false,
