@@ -138,6 +138,8 @@ export class DashboardContainer extends StatefulUIElement<
                 toggleDatesFilter={toggleDatesFilter}
                 toggleDomainsFilter={toggleDomainsFilter}
                 datePickerProps={{
+                    onClickOutside: toggleDatesFilter,
+                    onEscapeKeyDown: toggleDatesFilter,
                     startDate: searchFilters.dateFrom,
                     startDateText: searchFilters.dateFromInput,
                     endDate: searchFilters.dateTo,

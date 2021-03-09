@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import onClickOutside from 'react-onclickoutside'
 import moment from 'moment'
 import chrono from 'chrono-node'
 import classnames from 'classnames'
@@ -22,6 +23,8 @@ export interface DateRangeSelectionProps {
     endDate: number
     endDateText: string
     disabled?: boolean
+    onClickOutside?: React.MouseEventHandler
+    onEscapeKeyDown?: () => void | Promise<void>
     onStartDateChange: (...args) => void
     onStartDateTextChange: (...args) => void
     onEndDateChange: (...args) => void
@@ -58,6 +61,12 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
         })
     }
 
+    handleClickOutside = (e) => {
+        if (this.props.onClickOutside) {
+            this.props.onClickOutside(e)
+        }
+    }
+
     /**
      * Overrides react-date-picker's clear input handler to also clear our local input value states.
      */
@@ -79,6 +88,11 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
      * Overrides react-date-picker's input keydown handler to search on Enter key press.
      */
     handleKeydown = ({ isStartDate }) => (event) => {
+        if (event.key === 'Escape' && this.props.onEscapeKeyDown) {
+            this.props.onEscapeKeyDown()
+            return
+        }
+
         if (
             this.props.env === 'inpage' &&
             !(event.ctrlKey || event.metaKey) &&
@@ -278,6 +292,7 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                     <div className={styles.dateTitleContainer}>
                         <span className={styles.dateTitle}>From</span>
                         <DatePickerInput
+                            autoFocus
                             value={this.state.startDateText || startDateText}
                             name="from"
                             onChange={this.handleRawInputChange({
@@ -358,4 +373,4 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
     }
 }
 
-export default DateRangeSelection
+export default onClickOutside(DateRangeSelection)

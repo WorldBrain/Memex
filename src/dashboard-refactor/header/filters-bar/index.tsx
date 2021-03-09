@@ -54,6 +54,7 @@ const FilterSelectButton = styled.div<{ selected: boolean }>`
     `}
     border: 1px solid ${colors.lightGrey};
     border-radius: ${styles.borderRadius.medium};
+    cursor: pointer;
 `
 
 const TextSpan = styled.span`
@@ -105,7 +106,10 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
 
         return (
             <HoverBox width="auto" top="0" left="0">
-                <DatePicker {...this.props.datePickerProps} />
+                <DatePicker
+                    {...this.props.datePickerProps}
+                    outsideClickIgnoreClass="date-picker-button"
+                />
             </HoverBox>
         )
     }
