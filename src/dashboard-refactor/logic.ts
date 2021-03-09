@@ -20,6 +20,7 @@ import { updatePickerValues } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import { NoResultsType } from './search-results/types'
 import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
+import { DisableableState } from './header/sync-status-menu/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -200,10 +201,18 @@ export class DashboardLogic extends UILogic<State, Events> {
     private async getSyncMenuStatus() {
         const { syncBG, backupBG } = this.options
         const syncDevices = await syncBG.listDevices()
-        const backupEnabled = await backupBG.isAutomaticBackupEnabled()
+
+        const autoBackupEnabled = await backupBG.isAutomaticBackupEnabled()
         const { lastBackup } = await backupBG.getBackupTimes()
         const lastSuccessfulBackup =
             typeof lastBackup === 'number' ? new Date(lastBackup) : null
+
+        const backupState: DisableableState = autoBackupEnabled
+            ? 'enabled'
+            : lastSuccessfulBackup == null
+            ? 'disabled'
+            : 'free-tier'
+
         let lastSuccessfulSync: Date = null
         try {
             lastSuccessfulSync = new Date(
@@ -215,7 +224,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             syncMenu: {
                 lastSuccessfulBackupDate: { $set: lastSuccessfulBackup },
                 lastSuccessfulSyncDate: { $set: lastSuccessfulSync },
-                backupState: { $set: backupEnabled ? 'enabled' : 'disabled' },
+                backupState: { $set: backupState },
+                isAutoBackupEnabled: { $set: autoBackupEnabled },
                 syncState: {
                     $set: syncDevices.length > 0 ? 'enabled' : 'disabled',
                 },
@@ -2335,6 +2345,32 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             syncMenu: { lastSuccessfulBackupDate: { $set: new Date() } },
         })
+    }
+
+    toggleAutoBackup: EventHandler<'toggleAutoBackup'> = async ({
+        event,
+        previousState,
+    }) => {
+        const { backupBG } = this.options
+        if (!(await backupBG.isAutomaticBackupAllowed())) {
+            this.emitMutation({
+                modals: { showSubscription: { $set: true } },
+                syncMenu: { isDisplayed: { $set: false } },
+            })
+            return
+        }
+
+        if (previousState.syncMenu.isAutoBackupEnabled) {
+            this.emitMutation({
+                syncMenu: { isAutoBackupEnabled: { $set: false } },
+            })
+            await backupBG.disableAutomaticBackup()
+        } else {
+            this.emitMutation({
+                syncMenu: { isAutoBackupEnabled: { $set: true } },
+            })
+            await backupBG.enableAutomaticBackup()
+        }
     }
     /* END - sync status menu event handlers */
 

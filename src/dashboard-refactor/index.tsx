@@ -270,6 +270,8 @@ export class DashboardContainer extends StatefulUIElement<
                         onHoverEnter: __unimplemented,
                         onHoverLeave: __unimplemented,
                     },
+                    onToggleAutoBackup: () =>
+                        this.processEvent('toggleAutoBackup', null),
                     onToggleDisplayState: () =>
                         this.processEvent('setSyncStatusMenuDisplayState', {
                             isShown: !syncMenu.isDisplayed,

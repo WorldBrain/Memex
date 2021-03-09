@@ -5,7 +5,7 @@ import moment from 'moment'
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
 
-import { LoadingIndicator } from 'src/common-ui/components'
+import { LoadingIndicator, ToggleSwitch } from 'src/common-ui/components'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 
 import { DisableableState, RootState } from './types'
@@ -164,6 +164,7 @@ export interface SyncStatusMenuProps extends RootState {
     backupRunHoverState: HoverState
     onInitiateSync: React.MouseEventHandler
     onInitiateBackup: React.MouseEventHandler
+    onToggleAutoBackup: React.MouseEventHandler
     onToggleDisplayState: React.MouseEventHandler
     onShowUnsyncedItemCount: React.MouseEventHandler
     onHideUnsyncedItemCount: React.MouseEventHandler
@@ -218,10 +219,11 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                                 (syncType === 'Device Sync'
                                     ? 'No device paired yet'
                                     : 'No backup set yet')}
-                            {serviceStatus === 'enabled' &&
-                                `Last ${syncType.toLocaleLowerCase()}: ${timeSinceNowToString(
-                                    lastRunDate,
-                                )}`.replace('device ', '')}
+                            {serviceStatus === 'enabled' ||
+                                (serviceStatus === 'free-tier' &&
+                                    `Last ${syncType.toLocaleLowerCase()}: ${timeSinceNowToString(
+                                        lastRunDate,
+                                    )}`.replace('device ', ''))}
                             {serviceStatus === 'running' && `In progress`}
                             {(serviceStatus === 'success' ||
                                 serviceStatus === 'error') &&
@@ -249,6 +251,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             </>
         )
     }
+
     render() {
         const {
             syncState,
@@ -284,6 +287,15 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         : onInitiateBackup,
                 )}
                 {backupState === 'disabled' && this.renderBackupReminder()}
+                {backupState === 'free-tier' && (
+                    <>
+                        <span>Enable auto-backup: </span>
+                        <ToggleSwitch
+                            isChecked={this.props.isAutoBackupEnabled}
+                            onChange={this.props.onToggleAutoBackup}
+                        />
+                    </>
+                )}
             </Container>
         )
     }

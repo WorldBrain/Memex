@@ -69,6 +69,8 @@ export class BackupBackgroundModule {
         this.checkAuthorizedForAutoBackup = options.checkAuthorizedForAutoBackup
 
         this.remoteFunctions = {
+            enableAutomaticBackup: this.enableAutomaticBackup,
+            disableAutomaticBackup: this.disableAutomaticBackup,
             isAutomaticBackupEnabled: this.isAutomaticBackupEnabled,
             isAutomaticBackupAllowed: this.isAutomaticBackupAllowed,
             getBackupTimes: async () => {
@@ -174,8 +176,6 @@ export class BackupBackgroundModule {
                 },
                 scheduleAutomaticBackupIfEnabled: this
                     .scheduleAutomaticBackupIfEnabled,
-                enableAutomaticBackup: this.enableAutomaticBackup,
-                disableAutomaticBackup: this.disableAutomaticBackup,
                 sendNotification: async (id: string) => {
                     const errorId = await this.backend.sendNotificationOnFailure(
                         id,
@@ -279,11 +279,11 @@ export class BackupBackgroundModule {
         )
     }
 
-    enableAutomaticBackup() {
+    async enableAutomaticBackup() {
         localStorage.setItem('backup.automatic-backups-enabled', 'true')
     }
 
-    disableAutomaticBackup() {
+    async disableAutomaticBackup() {
         localStorage.setItem('backup.automatic-backups-enabled', 'false')
     }
 
