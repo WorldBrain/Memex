@@ -172,11 +172,13 @@ export interface SearchBackend {
 export interface SearchInterface {
     search: SearchIndex['search']
     searchAnnotations: (
-        params: AnnotSearchParams,
+        params: BackgroundSearchParams,
     ) => Promise<StandardSearchResponse | AnnotationsSearchResponse>
-    searchPages: (params: PageSearchParams) => Promise<StandardSearchResponse>
+    searchPages: (
+        params: BackgroundSearchParams,
+    ) => Promise<StandardSearchResponse>
     searchSocial: (
-        params: SocialSearchParams,
+        params: BackgroundSearchParams,
     ) => Promise<StandardSearchResponse>
 
     suggest: SearchStorage['suggest']

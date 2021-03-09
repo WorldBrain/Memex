@@ -439,8 +439,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             endDate: searchFilters.dateTo,
             startDate: searchFilters.dateFrom,
             query: searchFilters.searchQuery,
-            domainsInc: searchFilters.domainsIncluded,
-            domainsExc: searchFilters.domainsExcluded,
+            domains: searchFilters.domainsIncluded,
+            domainsExclude: searchFilters.domainsExcluded,
             tagsInc: searchFilters.tagsIncluded,
             tagsExc: searchFilters.tagsExcluded,
             limit: searchFilters.limit,
@@ -456,7 +456,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     private searchNotes = async ({ searchFilters, listsSidebar }: State) => {
-        const collections =
+        const lists =
             listsSidebar.selectedListId != null
                 ? [listsSidebar.selectedListId]
                 : undefined
@@ -465,13 +465,13 @@ export class DashboardLogic extends UILogic<State, Events> {
             endDate: searchFilters.dateTo,
             startDate: searchFilters.dateFrom,
             query: searchFilters.searchQuery,
-            domainsInc: searchFilters.domainsIncluded,
-            domainsExc: searchFilters.domainsExcluded,
+            domains: searchFilters.domainsIncluded,
+            domainsExclude: searchFilters.domainsExcluded,
             tagsInc: searchFilters.tagsIncluded,
             tagsExc: searchFilters.tagsExcluded,
             limit: searchFilters.limit,
             skip: searchFilters.skip,
-            collections,
+            lists,
         })
 
         return {
