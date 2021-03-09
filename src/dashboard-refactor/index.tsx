@@ -112,81 +112,84 @@ export class DashboardContainer extends StatefulUIElement<
     })
 
     private renderFiltersBar() {
-        const { searchFilters, listsSidebar } = this.state
+        const { searchBG } = this.props
+        const { searchFilters } = this.state
 
-        const toggleShowDatePicker = (id: number, isActive?: boolean) => {
-            const value = isActive ?? !searchFilters.isDateFilterActive
-            this.processEvent('toggleShowDatePicker', {
-                isActive: value,
-            })
-        }
-        const toggleShowDomainPicker = (id: number, isActive?: boolean) => {
-            const value = isActive ?? !searchFilters.isDomainFilterActive
-            this.processEvent('toggleShowDomainPicker', {
-                isActive: value,
-            })
-        }
-        const toggleShowTagPicker = (id: number, isActive?: boolean) => {
-            const value = isActive ?? !searchFilters.isTagFilterActive
+        const toggleTagsFilter = () =>
             this.processEvent('toggleShowTagPicker', {
-                isActive: value,
+                isActive: !searchFilters.isTagFilterActive,
             })
-        }
+        const toggleDatesFilter = () =>
+            this.processEvent('toggleShowDatePicker', {
+                isActive: !searchFilters.isDateFilterActive,
+            })
+        const toggleDomainsFilter = () =>
+            this.processEvent('toggleShowDomainPicker', {
+                isActive: !searchFilters.isDomainFilterActive,
+            })
 
         return (
             <FiltersBar
                 isDisplayed={searchFilters.searchFiltersOpen}
-                dateFilterSelectedState={{
-                    isSelected: searchFilters.isDateFilterActive,
-                    onSelection: toggleShowDatePicker,
+                showTagsFilter={searchFilters.isTagFilterActive}
+                showDatesFilter={searchFilters.isDateFilterActive}
+                showDomainsFilter={searchFilters.isDomainFilterActive}
+                toggleTagsFilter={toggleTagsFilter}
+                toggleDatesFilter={toggleDatesFilter}
+                toggleDomainsFilter={toggleDomainsFilter}
+                datePickerProps={{
+                    startDate: searchFilters.dateFrom,
+                    startDateText: searchFilters.dateFromInput,
+                    endDate: searchFilters.dateTo,
+                    endDateText: searchFilters.dateToInput,
+                    onStartDateChange: (value) =>
+                        this.processEvent('setDateFrom', { value }),
+                    onStartDateTextChange: (value) =>
+                        this.processEvent('setDateFromInputValue', {
+                            value,
+                        }),
+                    onEndDateChange: (value) =>
+                        this.processEvent('setDateTo', { value }),
+                    onEndDateTextChange: (value) =>
+                        this.processEvent('setDateToInputValue', { value }),
                 }}
-                domainFilterSelectedState={{
-                    isSelected: searchFilters.isDomainFilterActive,
-                    onSelection: toggleShowDomainPicker,
+                domainPickerProps={{
+                    onClickOutside: toggleDomainsFilter,
+                    onEscapeKeyDown: toggleDomainsFilter,
+                    initialSelectedEntries: () => searchFilters.domainsIncluded,
+                    queryEntries: (query) =>
+                        searchBG.suggest({ query, type: 'domain' }),
+                    loadDefaultSuggestions: () =>
+                        searchBG.extendedSuggest({
+                            type: 'domain',
+                            notInclude: [
+                                ...searchFilters.domainsIncluded,
+                                ...searchFilters.domainsExcluded,
+                            ],
+                        }),
+                    onUpdateEntrySelection: (args) =>
+                        this.processEvent('setDomainsIncluded', {
+                            domains: updatePickerValues(args)(args.selected),
+                        }),
                 }}
-                tagFilterSelectedState={{
-                    isSelected: searchFilters.isTagFilterActive,
-                    onSelection: toggleShowTagPicker,
-                }}
-                pickerProps={{
-                    datePickerProps: {
-                        startDate: searchFilters.dateFrom,
-                        startDateText: searchFilters.dateFromInput,
-                        endDate: searchFilters.dateTo,
-                        endDateText: searchFilters.dateToInput,
-                        onStartDateChange: (value) =>
-                            this.processEvent('setDateFrom', { value }),
-                        onStartDateTextChange: (value) =>
-                            this.processEvent('setDateFromInputValue', {
-                                value,
-                            }),
-                        onEndDateChange: (value) =>
-                            this.processEvent('setDateTo', { value }),
-                        onEndDateTextChange: (value) =>
-                            this.processEvent('setDateToInputValue', { value }),
-                    },
-                    domainPickerProps: {
-                        onToggleShowPicker: toggleShowDomainPicker,
-                        initialSelectedEntries: searchFilters.domainsIncluded,
-                        onUpdateEntrySelection: (args) =>
-                            this.processEvent('setDomainsIncluded', {
-                                domains: updatePickerValues(args)(
-                                    args.selected,
-                                ),
-                            }),
-                    },
-                    tagPickerProps: {
-                        onToggleShowPicker: toggleShowTagPicker,
-                        initialSelectedEntries: searchFilters.tagsIncluded,
-                        onUpdateEntrySelection: async (args) => {
-                            const updatedValues = updatePickerValues(args)(
-                                args.selected,
-                            )
-                            this.processEvent('setTagsIncluded', {
-                                tags: updatedValues,
-                            })
-                        },
-                    },
+                tagPickerProps={{
+                    onClickOutside: toggleTagsFilter,
+                    onEscapeKeyDown: toggleTagsFilter,
+                    initialSelectedEntries: () => searchFilters.tagsIncluded,
+                    queryEntries: (query) =>
+                        searchBG.suggest({ query, type: 'tag' }),
+                    loadDefaultSuggestions: () =>
+                        searchBG.extendedSuggest({
+                            type: 'tag',
+                            notInclude: [
+                                ...searchFilters.tagsIncluded,
+                                ...searchFilters.tagsExcluded,
+                            ],
+                        }),
+                    onUpdateEntrySelection: (args) =>
+                        this.processEvent('setTagsIncluded', {
+                            tags: updatePickerValues(args)(args.selected),
+                        }),
                 }}
             />
         )

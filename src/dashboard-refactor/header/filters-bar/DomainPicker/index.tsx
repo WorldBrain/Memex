@@ -57,32 +57,30 @@ class DomainPicker extends StatefulUIElement<
         }
     }
 
-    handleSetSearchInputRef = (ref: HTMLInputElement) =>
+    private handleSetSearchInputRef = (ref: HTMLInputElement) =>
         this.processEvent('setSearchInputRef', { ref })
 
-    handleOuterSearchBoxClick: React.MouseEventHandler = () =>
+    private handleOuterSearchBoxClick: React.MouseEventHandler = () =>
         this.processEvent('focusInput', {})
 
-    handleSearchInputChanged = (query: string) => {
+    private handleSearchInputChanged = (query: string) => {
         this.props.onSearchInputChange?.({ query })
         return this.processEvent('searchInputChanged', { query })
     }
 
-    handleSelectedDomainPress = (domain: string) =>
+    private handleSelectedDomainPress = (domain: string) =>
         this.processEvent('selectedEntryPress', { entry: domain })
 
-    handleResultDomainPress = (domain: DisplayEntry) =>
+    private handleResultDomainPress = (domain: DisplayEntry) =>
         this.processEvent('resultEntryPress', { entry: domain })
 
-    handleResultDomainFocus = (domain: DisplayEntry, index?: number) =>
+    private handleResultDomainFocus = (domain: DisplayEntry, index?: number) =>
         this.processEvent('resultEntryFocus', { entry: domain, index })
 
-    handleNewDomainPress = () =>
-        this.processEvent('newEntryPress', { entry: this.state.newEntryName })
+    private handleKeyPress = (key: KeyEvent) =>
+        this.processEvent('keyPress', { key })
 
-    handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
-
-    renderDomainRow = (domain: DisplayEntry, index: number) => (
+    private renderDomainRow = (domain: DisplayEntry, index: number) => (
         <EntryRow
             onPress={this.handleResultDomainPress}
             onFocus={this.handleResultDomainFocus}
@@ -95,23 +93,16 @@ class DomainPicker extends StatefulUIElement<
             removeTooltipText="Remove filter"
         />
     )
-    renderEmptyDomain() {
-        if (this.state.newEntryName !== '') {
-            return
-        }
 
+    private renderEmptyDomain() {
         return (
             <EmptyDomainsView>
-                <strong>No Domains yet</strong>
-                <br />
-                Add new domains
-                <br />
-                via the search bar
+                <strong>No domains found</strong>
             </EmptyDomainsView>
         )
     }
 
-    renderMainContent() {
+    private renderMainContent() {
         if (this.state.loadingSuggestions) {
             return (
                 <LoadingBox>
@@ -138,18 +129,6 @@ class DomainPicker extends StatefulUIElement<
                         />
                     }
                 />
-                {this.state.newEntryName !== '' && (
-                    <AddNewEntry
-                        resultItem={
-                            <DomainResultItem>
-                                {this.state.newEntryName}
-                            </DomainResultItem>
-                        }
-                        onPress={this.handleNewDomainPress}
-                    >
-                        {/* {this.renderNewDomainAllTabsButton()} */}
-                    </AddNewEntry>
-                )}
                 <EntryResultsList
                     entries={this.state.displayEntries}
                     renderEntryRow={this.renderDomainRow}

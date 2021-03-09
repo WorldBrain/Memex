@@ -69,6 +69,10 @@ class TagPicker extends StatefulUIElement<
     }
 
     get shouldShowAddNew(): boolean {
+        if (this.props.filterMode) {
+            return false
+        }
+
         const { newEntryName } = this.state
         return newEntryName !== '' && VALID_TAG_PATTERN.test(newEntryName)
     }

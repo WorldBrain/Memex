@@ -4,18 +4,17 @@ import styled, { css } from 'styled-components'
 import colors from 'src/dashboard-refactor/colors'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import styles, { fonts } from 'src/dashboard-refactor/styles'
-import { remoteFunction } from 'src/util/webextensionRPC'
 
 import TagPickerUnstyled from 'src/tags/ui/TagPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import DomainPickerUnstyled from './DomainPicker/'
 
-import { SelectedState } from '../../types'
 import DatePicker, {
     DateRangeSelectionProps,
 } from 'src/overview/search-bar/components/DateRangeSelection'
-import { FilterPickerProps } from './types'
 import { SearchFilterLabel, SearchFilterType } from '../types'
+import { DomainPickerDependencies } from './DomainPicker/logic'
+import { TagPickerDependencies } from 'src/tags/ui/TagPicker/logic'
 
 const windowWidth: number = window.innerWidth
 const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
@@ -74,49 +73,29 @@ const DomainPicker = styled(DomainPickerUnstyled)`
 
 export interface FiltersBarProps {
     isDisplayed: boolean
-    dateFilterSelectedState: SelectedState
-    domainFilterSelectedState: SelectedState
-    tagFilterSelectedState: SelectedState
-    pickerProps: {
-        datePickerProps?: DateRangeSelectionProps
-        tagPickerProps?: FilterPickerProps
-        domainPickerProps?: FilterPickerProps
-    }
+    showTagsFilter: boolean
+    showDatesFilter: boolean
+    showDomainsFilter: boolean
+    toggleTagsFilter: () => void
+    toggleDatesFilter: () => void
+    toggleDomainsFilter: () => void
+    tagPickerProps: TagPickerDependencies
+    datePickerProps: DateRangeSelectionProps
+    domainPickerProps: DomainPickerDependencies
 }
 
 export default class FiltersBar extends PureComponent<FiltersBarProps> {
-    private queryDomains: (query: string) => Promise<string[]> = async (
-        query,
-    ) => {
-        const domainList: string[] = await this.getSuggestedDomains()
-        const filteredDomains: string[] = domainList.filter((domain) =>
-            domain.startsWith(query),
-        )
-        return filteredDomains
-    }
-
-    private getSuggestedDomains = async (): Promise<string[]> => {
-        const suggestedDomains: Promise<string[]> = await remoteFunction(
-            'extendedSuggest',
-        )({
-            // notInclude: domains,
-            type: 'domain',
-        })
-        // return suggestedDomains
-        return []
-    }
-
     private renderFilterSelectButton = (
         label: SearchFilterLabel,
-        selectedState: SelectedState,
         name: SearchFilterType,
+        selected: boolean,
+        onToggle: () => void,
     ): JSX.Element => {
-        const { isSelected, onSelection } = selectedState
         return (
             <Margin horizontal="7px" vertical="7px">
                 <FilterSelectButton
-                    selected={isSelected}
-                    onClick={onSelection}
+                    selected={selected}
+                    onClick={onToggle}
                     className={`${name}-picker-button`}
                 >
                     <Margin horizontal="7px">
@@ -128,94 +107,74 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     }
 
     private renderDatePicker = () => {
-        return <DatePicker {...this.props.pickerProps.datePickerProps} />
+        if (!this.props.showDatesFilter) {
+            return false
+        }
+
+        return <DatePicker {...this.props.datePickerProps} />
     }
 
     private renderTagPicker = () => {
-        const { tagPickerProps } = this.props.pickerProps
+        if (!this.props.showTagsFilter) {
+            return false
+        }
+
         return (
             <TagPicker
-                initialSelectedEntries={async () =>
-                    tagPickerProps.initialSelectedEntries
-                }
-                onUpdateEntrySelection={tagPickerProps.onUpdateEntrySelection}
-                onEscapeKeyDown={() =>
-                    tagPickerProps.onToggleShowPicker(null, false)
-                }
-                onClickOutside={(e) =>
-                    tagPickerProps.onToggleShowPicker(null, false)
-                }
+                {...this.props.tagPickerProps}
                 searchInputPlaceholder="Add Tag Filters"
                 removeToolTipText="Remove filter"
-                preventDefault={true}
                 outsideClickIgnoreClass="tag-picker-button"
+                filterMode
             />
         )
     }
 
     private renderDomainPicker = () => {
-        const { domainPickerProps } = this.props.pickerProps
+        if (!this.props.showDomainsFilter) {
+            return false
+        }
+
         return (
             <DomainPicker
-                initialSelectedEntries={async () =>
-                    domainPickerProps.initialSelectedEntries
-                }
-                onUpdateEntrySelection={
-                    domainPickerProps.onUpdateEntrySelection
-                }
-                onEscapeKeyDown={() =>
-                    domainPickerProps.onToggleShowPicker(null, false)
-                }
-                onClickOutside={(e) => {
-                    console.log('domain picker click outside')
-                    domainPickerProps.onToggleShowPicker(null, false)
-                }}
+                {...this.props.domainPickerProps}
                 searchInputPlaceholder="Add Domain Filters"
                 removeToolTipText="Remove filter"
-                queryEntries={this.queryDomains}
-                loadDefaultSuggestions={this.getSuggestedDomains}
                 outsideClickIgnoreClass="domain-picker-button"
             />
         )
     }
 
     render() {
-        const {
-            isDisplayed,
-            dateFilterSelectedState,
-            tagFilterSelectedState,
-            domainFilterSelectedState,
-        } = this.props
-
         return (
             <>
-                <Container hidden={!isDisplayed}>
+                <Container hidden={!this.props.isDisplayed}>
                     <InnerContainer>
                         {this.renderFilterSelectButton(
                             'Date',
-                            dateFilterSelectedState,
                             'date',
+                            this.props.showDatesFilter,
+                            this.props.toggleDatesFilter,
                         )}
                         {this.renderFilterSelectButton(
                             'Domains',
-                            domainFilterSelectedState,
                             'domain',
+                            this.props.showDomainsFilter,
+                            this.props.toggleDomainsFilter,
                         )}
                         {this.renderFilterSelectButton(
                             'Tags',
-                            tagFilterSelectedState,
                             'tag',
+                            this.props.showTagsFilter,
+                            this.props.toggleTagsFilter,
                         )}
                     </InnerContainer>
                 </Container>
                 <PickersContainer>
                     <Margin horizontal="7px">
-                        {dateFilterSelectedState.isSelected &&
-                            this.renderDatePicker()}
-                        {tagFilterSelectedState.isSelected &&
-                            this.renderTagPicker()}
-                        {domainFilterSelectedState.isSelected &&
-                            this.renderDomainPicker()}
+                        {this.renderDatePicker()}
+                        {this.renderTagPicker()}
+                        {this.renderDomainPicker()}
                     </Margin>
                 </PickersContainer>
             </>

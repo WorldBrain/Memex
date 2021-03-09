@@ -37,12 +37,6 @@ export const SEARCH_QUERY_END_FILTER_KEY_PATTERN = /(from|to|(-?)[dtc]):$/
 export const VALID_FILTER_STRING_PATTERN = /(,|:)("(.+?)"|[^" ]+?) ?$/
 
 /**
- * Pattern to match entire string to match `domain.tld`-like format + optional subdomain
- * prefix, ccTLD postfix, `site:` prefix, and excluded `-` prefix.
- */
-export const DOMAIN_TLD_PATTERN = /^-?(site:)?(\w+\.)?[\w-]{2,}\.\w{2,3}(\.\w{2})?$/
-
-/**
  * Pattern to match against individual terms to determine whether or not they are excluded
  * (prefixed with hyphen: -). Also supports site exclusion, which may be prefixed with
  * `site:` syntax.
