@@ -29,7 +29,7 @@ import Margin from './components/Margin'
 import analytics from 'src/analytics'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { deriveStatusIconColor } from './header/sync-status-menu/util'
-import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
+import { FILTER_PICKERS_LIMIT } from './constants'
 
 const __unimplemented = () => undefined
 
@@ -158,10 +158,15 @@ export class DashboardContainer extends StatefulUIElement<
                     onEscapeKeyDown: toggleDomainsFilter,
                     initialSelectedEntries: () => searchFilters.domainsIncluded,
                     queryEntries: (query) =>
-                        searchBG.suggest({ query, type: 'domain' }),
+                        searchBG.suggest({
+                            query,
+                            type: 'domain',
+                            limit: FILTER_PICKERS_LIMIT,
+                        }),
                     loadDefaultSuggestions: () =>
                         searchBG.extendedSuggest({
                             type: 'domain',
+                            limit: FILTER_PICKERS_LIMIT,
                             notInclude: [
                                 ...searchFilters.domainsIncluded,
                                 ...searchFilters.domainsExcluded,
@@ -177,10 +182,15 @@ export class DashboardContainer extends StatefulUIElement<
                     onEscapeKeyDown: toggleTagsFilter,
                     initialSelectedEntries: () => searchFilters.tagsIncluded,
                     queryEntries: (query) =>
-                        searchBG.suggest({ query, type: 'tag' }),
+                        searchBG.suggest({
+                            query,
+                            type: 'tag',
+                            limit: FILTER_PICKERS_LIMIT,
+                        }),
                     loadDefaultSuggestions: () =>
                         searchBG.extendedSuggest({
                             type: 'tag',
+                            limit: FILTER_PICKERS_LIMIT,
                             notInclude: [
                                 ...searchFilters.tagsIncluded,
                                 ...searchFilters.tagsExcluded,

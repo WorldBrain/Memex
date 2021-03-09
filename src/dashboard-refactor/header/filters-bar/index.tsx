@@ -5,16 +5,16 @@ import colors from 'src/dashboard-refactor/colors'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 
-import TagPickerUnstyled from 'src/tags/ui/TagPicker'
+import TagPicker from 'src/tags/ui/TagPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import DomainPickerUnstyled from './DomainPicker/'
-
+import DomainPicker from './DomainPicker/'
 import DatePicker, {
     DateRangeSelectionProps,
 } from 'src/overview/search-bar/components/DateRangeSelection'
 import { SearchFilterLabel, SearchFilterType } from '../types'
 import { DomainPickerDependencies } from './DomainPicker/logic'
 import { TagPickerDependencies } from 'src/tags/ui/TagPicker/logic'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 const windowWidth: number = window.innerWidth
 const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
@@ -63,14 +63,6 @@ const TextSpan = styled.span`
     line-height: 15px;
 `
 
-const TagPicker = styled(TagPickerUnstyled)`
-    width: 200px;
-`
-
-const DomainPicker = styled(DomainPickerUnstyled)`
-    width: 200px;
-`
-
 export interface FiltersBarProps {
     isDisplayed: boolean
     showTagsFilter: boolean
@@ -111,7 +103,11 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             return false
         }
 
-        return <DatePicker {...this.props.datePickerProps} />
+        return (
+            <HoverBox width="auto" top="0" left="0">
+                <DatePicker {...this.props.datePickerProps} />
+            </HoverBox>
+        )
     }
 
     private renderTagPicker = () => {
@@ -120,13 +116,15 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         }
 
         return (
-            <TagPicker
-                {...this.props.tagPickerProps}
-                searchInputPlaceholder="Add Tag Filters"
-                removeToolTipText="Remove filter"
-                outsideClickIgnoreClass="tag-picker-button"
-                filterMode
-            />
+            <HoverBox top="0" right="0">
+                <TagPicker
+                    {...this.props.tagPickerProps}
+                    searchInputPlaceholder="Add Tag Filters"
+                    removeToolTipText="Remove filter"
+                    outsideClickIgnoreClass="tag-picker-button"
+                    filterMode
+                />
+            </HoverBox>
         )
     }
 
@@ -136,12 +134,14 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         }
 
         return (
-            <DomainPicker
-                {...this.props.domainPickerProps}
-                searchInputPlaceholder="Add Domain Filters"
-                removeToolTipText="Remove filter"
-                outsideClickIgnoreClass="domain-picker-button"
-            />
+            <HoverBox top="0">
+                <DomainPicker
+                    {...this.props.domainPickerProps}
+                    searchInputPlaceholder="Add Domain Filters"
+                    removeToolTipText="Remove filter"
+                    outsideClickIgnoreClass="domain-picker-button"
+                />
+            </HoverBox>
         )
     }
 

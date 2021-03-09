@@ -77,3 +77,5 @@ export const STORAGE_KEYS = {
 export const PAGE_SEARCH_DUMMY_DAY = -1
 
 export const NON_UNIQ_LIST_NAME_ERR_MSG = 'List name already taken.'
+
+export const FILTER_PICKERS_LIMIT = 20
