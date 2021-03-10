@@ -14,7 +14,6 @@ import { initErrHandler } from 'src/search/storage'
 import { Page, PageCreationProps, PageCreationOpts } from 'src/search'
 import { DexieUtilsPlugin } from 'src/search/plugins'
 import analysePage from 'src/page-analysis/background/analyse-page'
-import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import TabManagementBackground from 'src/tab-management/background'
 
 export class PageIndexingBackground {
@@ -27,7 +26,6 @@ export class PageIndexingBackground {
         private options: {
             tabManagement: TabManagementBackground
             storageManager: StorageManager
-            fetchPageData?: FetchPageProcessor
             createInboxEntry: (normalizedPageUrl: string) => Promise<void>
             getNow: () => number
         },
@@ -223,41 +221,21 @@ export class PageIndexingBackground {
         return pageData
     }
 
-    private async processPageDataFromUrl(
-        props: PageCreationProps,
-    ): Promise<PipelineRes | null> {
-        if (!this.options.fetchPageData) {
-            throw new Error(
-                'Instantiation error: fetch-page-data implementation was not given to constructor',
-            )
-        }
-
-        const pageData = await this.options.fetchPageData.process(props.fullUrl)
-
-        if (props.stubOnly && pageData.text && pageData.terms?.length) {
-            delete pageData.text
-            delete pageData.terms
-        }
-
-        return pageData
-    }
-
     indexPage = async (
         props: PageCreationProps,
         opts: PageCreationOpts = {},
     ) => {
-        const foundTabId = await this.options.tabManagement.findTabIdByFullUrl(
-            props.fullUrl,
-        )
-        if (foundTabId) {
+        if (!props.tabId) {
+            const foundTabId = await this.options.tabManagement.findTabIdByFullUrl(
+                props.fullUrl,
+            )
+            if (!foundTabId) {
+                return // Don't attempt index if unable to get page data from a browser tab
+            }
             props.tabId = foundTabId
-        } else {
-            delete props.tabId
         }
 
-        const pageData = props.tabId
-            ? await this.processPageDataFromTab(props)
-            : await this.processPageDataFromUrl(props)
+        const pageData = await this.processPageDataFromTab(props)
 
         if (pageData === null) {
             return

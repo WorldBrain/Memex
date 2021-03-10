@@ -107,9 +107,14 @@ export default class TabManagementBackground {
         return fetchFavIcon(tab.favIconUrl)
     }
 
-    async findTabIdByFullUrl(fullUrl: string) {
+    async findTabIdByFullUrl(fullUrl: string): Promise<number> {
         const tabs = await this.options.browserAPIs.tabs.query({ url: fullUrl })
-        return tabs.length ? tabs[0].id : null
+
+        if (!tabs.length) {
+            return this.options.tabManager.getTabStateByUrl(fullUrl)?.id ?? null
+        }
+
+        return tabs[0].id
     }
 
     async trackExistingTabs() {

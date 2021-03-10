@@ -146,7 +146,6 @@ export function createBackgroundModules(options: {
 
     const pages = new PageIndexingBackground({
         storageManager,
-        fetchPageData: options.fetchPageDataProcessor,
         createInboxEntry,
         tabManagement,
         getNow,
