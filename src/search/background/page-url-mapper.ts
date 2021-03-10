@@ -218,15 +218,28 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         pageUrls: string[],
         annotMap: Map<string, Annotation[]>,
     ) {
+        const annotTagMap = new Map<string, string[]>()
         const annots = (await this.backend.dexieInstance
             .table('annotations')
             .where('pageUrl')
             .anyOf(pageUrls)
             .toArray()) as Annotation[]
 
+        await this.backend.dexieInstance
+            .table('tags')
+            .where('url')
+            .anyOf(annots.map((annot) => annot.url))
+            .eachPrimaryKey(([name, url]: [string, string]) => {
+                const prev = annotTagMap.get(url) ?? []
+                annotTagMap.set(url, [...prev, name])
+            })
+
         annots.forEach((annot) => {
             const prev = annotMap.get(annot.pageUrl) ?? []
-            annotMap.set(annot.pageUrl, [...prev, annot])
+            annotMap.set(annot.pageUrl, [
+                ...prev,
+                { ...annot, tags: annotTagMap.get(annot.url) ?? [] },
+            ])
         })
     }
 
