@@ -90,7 +90,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         sharedList: convertRemoteId(
                                             listShareResult.remoteListId,
                                         ),
-                                        createdWhen: localListEntries[1].createdAt.getTime(),
+                                        createdWhen: localListEntries[0].createdAt.getTime(),
                                         updatedWhen: expect.any(Number),
                                         originalUrl: 'https://www.eggs.com/foo',
                                         normalizedUrl: 'eggs.com/foo',
@@ -102,7 +102,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         sharedList: convertRemoteId(
                                             listShareResult.remoteListId,
                                         ),
-                                        createdWhen: localListEntries[2].createdAt.getTime(),
+                                        createdWhen: localListEntries[1].createdAt.getTime(),
                                         updatedWhen: expect.any(Number),
                                         originalUrl: 'https://www.spam.com/foo',
                                         normalizedUrl: 'spam.com/foo',

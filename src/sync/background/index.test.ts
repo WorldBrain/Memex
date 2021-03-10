@@ -711,12 +711,14 @@ function extensionSyncTests(suiteOptions: {
         it('should consider pages included in custom lists as active data', async (setup: TestSetup) => {
             const { customLists } = await setup({ enablePostProcessing: true })
 
+            let listId
+
             await runPassiveDataTest({
                 setup,
                 insertDefaultPages: true,
                 enablePostProcessing: true,
                 insertData: async ({ device }) => {
-                    const listId = await customLists(device).createCustomList({
+                    listId = await customLists(device).createCustomList({
                         name: 'My list',
                     })
                     await customLists(device).insertPageToList({
@@ -736,28 +738,17 @@ function extensionSyncTests(suiteOptions: {
                                 expect.objectContaining({
                                     fullUrl: 'http://www.bla.com/',
                                 }),
-                                expect.objectContaining({
-                                    fullUrl: 'http://test.com',
-                                }),
                             ],
                             customLists: [
                                 expect.objectContaining({
-                                    id: SPECIAL_LIST_IDS.INBOX,
-                                    name: SPECIAL_LIST_NAMES.INBOX,
-                                    isDeletable: false,
-                                    isNestable: false,
-                                }),
-                                expect.objectContaining({
                                     name: 'My list',
+                                    id: listId,
                                 }),
                             ],
                             pageListEntries: [
                                 expect.objectContaining({
-                                    fullUrl: 'http://test.com',
-                                    listId: SPECIAL_LIST_IDS.INBOX,
-                                }),
-                                expect.objectContaining({
                                     pageUrl: 'bla.com',
+                                    listId,
                                 }),
                             ],
                         },
@@ -786,9 +777,6 @@ function extensionSyncTests(suiteOptions: {
                             pages: [
                                 expect.objectContaining({
                                     fullUrl: 'http://www.bla.com/',
-                                }),
-                                expect.objectContaining({
-                                    fullUrl: 'http://test.com',
                                 }),
                             ],
                             tags: [

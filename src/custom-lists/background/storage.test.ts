@@ -97,9 +97,17 @@ describe('Custom List Integrations', () => {
         })
 
         test('list entry creates for non-existing pages should create page', async () => {
-            const { searchIndex, customLists } = await setupTest()
+            const { searchIndex, customLists, pages } = await setupTest()
 
             const url = 'http://www.test.com'
+
+            await pages.createOrUpdatePage(
+                {
+                    fullUrl: url,
+                    url: normalizeUrl(url),
+                } as any,
+                { addInboxEntryOnCreate: true },
+            )
 
             await customLists.insertPageToList({ id: 1, url })
 
@@ -224,6 +232,7 @@ describe('Custom List Integrations', () => {
         test('should not be able to create inbox list entries for pages once already read', async () => {
             const {
                 tags,
+                pages,
                 bookmarks,
                 customLists,
                 directLinking,
@@ -244,6 +253,16 @@ describe('Custom List Integrations', () => {
                 url: string,
                 args: { shouldExist: boolean },
             ) => {
+                if (args.shouldExist) {
+                    await pages.createOrUpdatePage(
+                        {
+                            fullUrl: url,
+                            url: normalizeUrl(url),
+                        } as any,
+                        { addInboxEntryOnCreate: true },
+                    )
+                }
+
                 checkInboxEntryCalls++
                 const listEntries = await customLists.fetchListPagesById({
                     id: SPECIAL_LIST_IDS.INBOX,
@@ -343,7 +362,7 @@ describe('Custom List Integrations', () => {
             })
 
             checkDefined(lists)
-            expect(lists.length).toBe(4)
+            expect(lists.length).toBe(3)
         })
 
         test('fetch all lists, skipping mobile list', async () => {
