@@ -16,9 +16,42 @@ function convertRemoteId(id: string) {
     return parseInt(id, 10)
 }
 
-async function setupTest({ setup }: BackgroundIntegrationTestContext) {
+async function setupPreTest({ setup }: BackgroundIntegrationTestContext) {
     setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
     setup.injectCallFirebaseFunction(async <Returns>() => null as Returns)
+}
+
+interface TestData {
+    localListId?: number
+    remoteListId?: string
+}
+
+async function setupTest(options: {
+    setup: BackgroundIntegrationTestContext['setup']
+    testData: TestData
+    createTestList?: boolean
+}) {
+    const { setup, testData } = options
+    const { contentSharing } = setup.backgroundModules
+    setup.authService.setUser(TEST_USER)
+
+    if (options.createTestList) {
+        testData.localListId = await data.createContentSharingTestList(setup)
+    }
+
+    const shareTestList = async (options: { shareEntries: boolean }) => {
+        const listShareResult = await contentSharing.shareList({
+            listId: testData.localListId,
+        })
+        if (options.shareEntries) {
+            await contentSharing.shareListEntries({
+                listId: testData.localListId,
+            })
+        }
+        testData.remoteListId = listShareResult.remoteListId
+    }
+
+    return { contentSharing, shareTestList }
 }
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
@@ -28,22 +61,22 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should share a new list with its entries',
             { skipConflictTests: true },
             () => {
-                let localListId: number
-                let remoteListId: string
+                const testData: TestData = {}
 
                 return {
-                    setup: setupTest,
+                    setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
-                                } = setup.backgroundModules
-                                setup.authService.setUser(TEST_USER)
-
-                                localListId = await data.createContentSharingTestList(
+                                    shareTestList,
+                                } = await setupTest({
                                     setup,
-                                )
+                                    testData,
+                                    createTestList: true,
+                                })
+
                                 const localListEntries = await setup.storageManager.operation(
                                     'findObjects',
                                     'pageListEntries',
@@ -52,13 +85,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 )
 
-                                const listShareResult = await contentSharing.shareList(
-                                    { listId: localListId },
-                                )
-                                await contentSharing.shareListEntries({
-                                    listId: localListId,
-                                })
-                                remoteListId = listShareResult.remoteListId
+                                await shareTestList({ shareEntries: true })
 
                                 const serverStorage = await setup.getServerStorage()
                                 expect(
@@ -88,7 +115,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
                                         sharedList: convertRemoteId(
-                                            listShareResult.remoteListId,
+                                            testData.remoteListId,
                                         ),
                                         createdWhen: localListEntries[1].createdAt.getTime(),
                                         updatedWhen: expect.any(Number),
@@ -100,7 +127,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
                                         sharedList: convertRemoteId(
-                                            listShareResult.remoteListId,
+                                            testData.remoteListId,
                                         ),
                                         createdWhen: localListEntries[2].createdAt.getTime(),
                                         updatedWhen: expect.any(Number),
@@ -118,8 +145,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 expect(listMetadata).toEqual([
                                     {
-                                        localId: localListId,
-                                        remoteId: remoteListId,
+                                        localId: testData.localListId,
+                                        remoteId: testData.remoteListId,
                                     },
                                 ])
                             },
@@ -132,27 +159,22 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should share new entries to an already shared list',
             { skipConflictTests: true },
             () => {
-                let localListId: number
+                const testData: TestData = {}
 
                 return {
-                    setup: setupTest,
+                    setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
-                                } = setup.backgroundModules
-                                setup.authService.setUser(TEST_USER)
-
-                                localListId = await data.createContentSharingTestList(
+                                    shareTestList,
+                                } = await setupTest({
                                     setup,
-                                )
-                                await contentSharing.shareList({
-                                    listId: localListId,
+                                    testData,
+                                    createTestList: true,
                                 })
-                                await contentSharing.shareListEntries({
-                                    listId: localListId,
-                                })
+                                await shareTestList({ shareEntries: true })
 
                                 // Add new entry
                                 await setup.backgroundModules.pages.addPage({
@@ -167,7 +189,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await setup.backgroundModules.customLists.insertPageToList(
                                     {
-                                        id: localListId,
+                                        id: testData.localListId,
                                         url: 'https://www.fish.com/cheese',
                                     },
                                 )
@@ -204,34 +226,29 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should sync the title when changing the title of an already shared list',
             { skipConflictTests: true },
             () => {
-                let localListId: number
+                const testData: TestData = {}
 
                 return {
-                    setup: setupTest,
+                    setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
-                                } = setup.backgroundModules
-                                setup.authService.setUser(TEST_USER)
-
-                                const initialTitle = 'My shared list'
-                                localListId = await setup.backgroundModules.customLists.createCustomList(
-                                    {
-                                        name: initialTitle,
-                                    },
-                                )
-                                await contentSharing.shareList({
-                                    listId: localListId,
+                                    shareTestList,
+                                } = await setupTest({
+                                    setup,
+                                    testData,
+                                    createTestList: true,
                                 })
+                                await shareTestList({ shareEntries: false })
 
                                 const updatedTitle =
                                     'My shared list (updated title)'
                                 await setup.backgroundModules.customLists.updateList(
                                     {
-                                        id: localListId,
-                                        oldName: initialTitle,
+                                        id: testData.localListId,
+                                        oldName: data.LIST_DATA.name,
                                         newName: updatedTitle,
                                     },
                                 )
@@ -259,7 +276,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await setup.storageManager.operation(
                                     'updateObject',
                                     'customLists',
-                                    { id: localListId },
+                                    { id: testData.localListId },
                                     { searchableName: 'something' },
                                 )
                                 await contentSharing.waitForSync()
@@ -289,31 +306,26 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should delete list entries of an already shared list',
             { skipConflictTests: true },
             () => {
-                let localListId: number
+                const testData: TestData = {}
 
                 return {
-                    setup: setupTest,
+                    setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
-                                } = setup.backgroundModules
-                                setup.authService.setUser(TEST_USER)
-
-                                localListId = await data.createContentSharingTestList(
+                                    shareTestList,
+                                } = await setupTest({
                                     setup,
-                                )
-                                await contentSharing.shareList({
-                                    listId: localListId,
+                                    testData,
+                                    createTestList: true,
                                 })
-                                await contentSharing.shareListEntries({
-                                    listId: localListId,
-                                })
+                                await shareTestList({ shareEntries: true })
 
                                 await setup.backgroundModules.customLists.removePageFromList(
                                     {
-                                        id: localListId,
+                                        id: testData.localListId,
                                         url: 'https://www.spam.com/foo',
                                     },
                                 )
@@ -341,24 +353,22 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             `should schedule a retry when we cannot upload list entries`,
             { skipConflictTests: true },
             () => {
-                let localListId: number
+                const testData: TestData = {}
 
                 return {
-                    setup: setupTest,
+                    setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
-                                } = setup.backgroundModules
-                                setup.authService.setUser(TEST_USER)
-
-                                localListId = await data.createContentSharingTestList(
+                                    shareTestList,
+                                } = await setupTest({
                                     setup,
-                                )
-                                await contentSharing.shareList({
-                                    listId: localListId,
+                                    testData,
+                                    createTestList: true,
                                 })
+                                await shareTestList({ shareEntries: false })
 
                                 const serverStorage = await setup.getServerStorage()
                                 const sharingStorage =
@@ -376,7 +386,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 try {
                                     await expect(
                                         contentSharing.shareListEntries({
-                                            listId: localListId,
+                                            listId: testData.localListId,
                                             queueInteraction: 'queue-and-await',
                                         }),
                                     ).rejects.toThrow(
@@ -414,27 +424,22 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             `should schedule a retry when we cannot upload changes`,
             { skipConflictTests: true },
             () => {
-                let localListId: number
+                const testData: TestData = {}
 
                 return {
-                    setup: setupTest,
+                    setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
-                                } = setup.backgroundModules
-                                setup.authService.setUser(TEST_USER)
-
-                                localListId = await data.createContentSharingTestList(
+                                    shareTestList,
+                                } = await setupTest({
                                     setup,
-                                )
-                                await contentSharing.shareList({
-                                    listId: localListId,
+                                    testData,
+                                    createTestList: true,
                                 })
-                                await contentSharing.shareListEntries({
-                                    listId: localListId,
-                                })
+                                await shareTestList({ shareEntries: true })
 
                                 const serverStorage = await setup.getServerStorage()
                                 const sharingStorage =
@@ -451,7 +456,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 await setup.backgroundModules.customLists.removePageFromList(
                                     {
-                                        id: localListId,
+                                        id: testData.localListId,
                                         url: 'https://www.spam.com/foo',
                                     },
                                 )
@@ -521,27 +526,22 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should unshare annotations from lists',
             { skipConflictTests: true },
             () => {
-                let localListId: number
+                const testData: TestData = {}
 
                 return {
-                    setup: setupTest,
+                    setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
-                                } = setup.backgroundModules
-                                setup.authService.setUser(TEST_USER)
-
-                                localListId = await data.createContentSharingTestList(
+                                    shareTestList,
+                                } = await setupTest({
                                     setup,
-                                )
-                                await contentSharing.shareList({
-                                    listId: localListId,
+                                    testData,
+                                    createTestList: true,
                                 })
-                                await contentSharing.shareListEntries({
-                                    listId: localListId,
-                                })
+                                await shareTestList({ shareEntries: true })
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
                                     data.ANNOTATION_1_1_DATA,
@@ -626,18 +626,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should share already shared annotations adding a page to another shared list',
             { skipConflictTests: true },
             () => {
+                const testData: TestData = {}
                 let firstLocalListId: number
                 let secondLocalListId: number
 
                 return {
-                    setup: setupTest,
+                    setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                } = setup.backgroundModules
-                                setup.authService.setUser(TEST_USER)
+                                const { contentSharing } = await setupTest({
+                                    setup,
+                                    testData,
+                                })
 
                                 firstLocalListId = await data.createContentSharingTestList(
                                     setup,
@@ -785,27 +786,22 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should update the body of a shared annotation',
             { skipConflictTests: true },
             () => {
-                let localListId: number
+                const testData: TestData = {}
 
                 return {
-                    setup: setupTest,
+                    setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
-                                } = setup.backgroundModules
-                                setup.authService.setUser(TEST_USER)
-
-                                localListId = await data.createContentSharingTestList(
+                                    shareTestList,
+                                } = await setupTest({
                                     setup,
-                                )
-                                await contentSharing.shareList({
-                                    listId: localListId,
+                                    testData,
+                                    createTestList: true,
                                 })
-                                await contentSharing.shareListEntries({
-                                    listId: localListId,
-                                })
+                                await shareTestList({ shareEntries: true })
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
                                     data.ANNOTATION_1_1_DATA,
@@ -849,18 +845,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should share already shared annotations when sharing a list containing already shared pages',
             { skipConflictTests: true },
             () => {
+                const testData: TestData = {}
                 let firstLocalListId: number
                 let secondLocalListId: number
 
                 return {
-                    setup: setupTest,
+                    setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
-                                } = setup.backgroundModules
-                                setup.authService.setUser(TEST_USER)
+                                    shareTestList,
+                                } = await setupTest({ setup, testData })
 
                                 firstLocalListId = await data.createContentSharingTestList(
                                     setup,
@@ -995,17 +992,18 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should unshare an annotation',
             { skipConflictTests: true },
             () => {
+                const testData: TestData = {}
                 let localListIds: number[]
 
                 return {
-                    setup: setupTest,
+                    setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
-                                } = setup.backgroundModules
-                                setup.authService.setUser(TEST_USER)
+                                    shareTestList,
+                                } = await setupTest({ setup, testData })
 
                                 localListIds = [
                                     await data.createContentSharingTestList(
@@ -1092,17 +1090,18 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should unshare annotations when removing a page from a shared list',
             { skipConflictTests: true },
             () => {
+                const testData: TestData = {}
                 let localListIds: number[]
 
                 return {
-                    setup: setupTest,
+                    setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
-                                } = setup.backgroundModules
-                                setup.authService.setUser(TEST_USER)
+                                    shareTestList,
+                                } = await setupTest({ setup, testData })
 
                                 localListIds = [
                                     await data.createContentSharingTestList(
@@ -1197,17 +1196,18 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should unshare annotation and remove list entries when removed locally',
             { skipConflictTests: true },
             () => {
+                const testData: TestData = {}
                 let localListIds: number[]
 
                 return {
-                    setup: setupTest,
+                    setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
-                                } = setup.backgroundModules
-                                setup.authService.setUser(TEST_USER)
+                                    shareTestList,
+                                } = await setupTest({ setup, testData })
 
                                 localListIds = [
                                     await data.createContentSharingTestList(
@@ -1296,16 +1296,17 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should add a list to local lists and store its metadata when the user joined a new list',
             { skipConflictTests: true },
             () => {
+                const testData: TestData = {}
+
                 return {
-                    setup: setupTest,
+                    setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    userMessages,
-                                } = setup.backgroundModules
-                                setup.authService.setUser(TEST_USER)
+                                const { contentSharing } = await setupTest({
+                                    setup,
+                                    testData,
+                                })
 
                                 const serverStorage = await setup.getServerStorage()
                                 const listReference = await serverStorage.storageModules.contentSharing.createSharedList(
