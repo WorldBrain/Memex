@@ -62,6 +62,9 @@ import ActivityStreamsBackground from 'src/activity-streams/background'
 import { Services } from 'src/services/types'
 import { PDFBackground } from 'src/pdf/background'
 import { SHOULD_OPEN_STORAGE_KEY } from 'src/options/PDF/constants'
+import { MemoryUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/memory'
+import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
+import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -94,6 +97,7 @@ export interface BackgroundModules {
     tabManagement: TabManagementBackground
     readwise: ReadwiseBackground
     activityStreams: ActivityStreamsBackground
+    userMessages: UserMessageService
 }
 
 const globalFetch: typeof fetch =
@@ -114,6 +118,7 @@ export function createBackgroundModules(options: {
     tabManager?: TabManager
     auth?: AuthBackground
     analyticsManager: Analytics
+    userMessageService?: UserMessageService
     disableSyncEnryption?: boolean
     getIceServers?: () => Promise<string[]>
     getNow?: () => number
@@ -254,6 +259,34 @@ export function createBackgroundModules(options: {
         storageManager,
         callFirebaseFunction,
     })
+
+    if (!options.userMessageService) {
+        const userMessagesService = new FirebaseUserMessageService({
+            firebase: getFirebase,
+            auth: {
+                getCurrentUserId: async () =>
+                    (await auth.authService.getCurrentUser())?.id,
+            },
+        })
+        options.userMessageService = userMessagesService
+        userMessagesService.startListening({
+            auth: { events: auth.authService.events },
+            lastSeen: {
+                get: async () =>
+                    (
+                        await options.browserAPIs.storage.local.get(
+                            'userMessages.lastSeen',
+                        )
+                    ).lastUserMessageSeen,
+                set: async (value) => {
+                    await options.browserAPIs.storage.local.get({
+                        'userMessages.lastSeen': value,
+                    })
+                },
+            },
+        })
+    }
+    const userMessages = options.userMessageService
     const contentSharing = new ContentSharingBackground({
         activityStreams,
         storageManager,
@@ -261,6 +294,7 @@ export function createBackgroundModules(options: {
         annotationStorage: directLinking.annotationStorage,
         auth,
         analytics: options.analyticsManager,
+        userMessages,
         getContentSharing: async () =>
             (await options.getServerStorage()).storageModules.contentSharing,
     })
@@ -444,6 +478,7 @@ export function createBackgroundModules(options: {
         copyPaster,
         activityStreams,
         contentSharing,
+        userMessages,
     }
 }
 

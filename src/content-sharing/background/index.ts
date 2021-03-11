@@ -25,6 +25,11 @@ import {
     RemoteEventEmitter,
 } from 'src/util/webextensionRPC'
 import ActivityStreamsBackground from 'src/activity-streams/background'
+import {
+    UserMessageService,
+    UserMessageEvents,
+} from '@worldbrain/memex-common/lib/user-messages/service/types'
+import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 // interface ListPush {
 //     actionsPending: number
@@ -40,6 +45,7 @@ export default class ContentSharingBackground {
     _hasPendingActions = false
     _queingAction?: Resolvable<void>
     _executingPendingActions?: Resolvable<{ result: 'success' | 'error' }>
+    _processingUserMessage?: Resolvable<void>
 
     _pendingActionsRetry?: Resolvable<void>
     _scheduledRetry: () => Promise<void>
@@ -62,6 +68,7 @@ export default class ContentSharingBackground {
             analytics: Analytics
             activityStreams: Pick<ActivityStreamsBackground, 'backend'>
             getContentSharing: () => Promise<ContentSharingStorage>
+            userMessages: UserMessageService
         },
     ) {
         this.storage = new ContentSharingClientStorage({
@@ -104,6 +111,7 @@ export default class ContentSharingBackground {
             },
             waitForSync: this.waitForSync,
         }
+        options.userMessages.events.on('message', this._processUserMessage)
     }
 
     async setup() {
@@ -524,6 +532,7 @@ export default class ContentSharingBackground {
 
     waitForSync: ContentSharingInterface['waitForSync'] = async () => {
         await this._executingPendingActions
+        await this._processingUserMessage
     }
 
     async scheduleAction(
@@ -1029,5 +1038,48 @@ export default class ContentSharingBackground {
                 }
             }
         }
+    }
+
+    _processUserMessage: UserMessageEvents['message'] = async (event) => {
+        await this._processingUserMessage
+        const processingUserMessage = createResolvable()
+        this._processingUserMessage = processingUserMessage
+
+        try {
+            const { message } = event
+            if (message.type === 'joined-collection') {
+                await this._processJoinedCollection({
+                    type: 'shared-list-reference',
+                    id: message.sharedListId,
+                })
+            }
+        } catch (e) {
+            processingUserMessage.reject(e)
+            throw e
+        } finally {
+            processingUserMessage.resolve()
+            delete this._processUserMessage
+        }
+    }
+
+    async _processJoinedCollection(listReference: SharedListReference) {
+        const contentSharing = await this.options.getContentSharing()
+        const sharedList = await contentSharing.getListByReference(
+            listReference,
+        )
+        if (!sharedList) {
+            return // assume the list was deleted after the user joined it
+        }
+        const localId = Date.now()
+        await this.storage.storeListId({
+            localId,
+            remoteId: listReference.id.toString(),
+        })
+
+        // TODO: What if there already exists a list with this name?
+        await this.options.customLists.insertCustomList({
+            id: localId,
+            name: sharedList.title,
+        })
     }
 }
