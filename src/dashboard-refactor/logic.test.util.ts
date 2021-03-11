@@ -93,10 +93,11 @@ const defaultTestSetupDeps = {
 export async function setupTest(
     device: UILogicTestDevice,
     args: {
-        seedData?: DataSeeder
-        copyToClipboard?: (text: string) => Promise<boolean>
-        overrideSearchTrigger?: boolean
         mockDocument?: any
+        seedData?: DataSeeder
+        overrideSearchTrigger?: boolean
+        openFeedUrl?: () => void
+        copyToClipboard?: (text: string) => Promise<boolean>
     } = {
         copyToClipboard: defaultTestSetupDeps.copyToClipboard,
     },
@@ -129,7 +130,7 @@ export async function setupTest(
             device.backgroundModules.activityIndicator.remoteFunctions,
         copyToClipboard:
             args.copyToClipboard ?? defaultTestSetupDeps.copyToClipboard,
-        openFeedUrl: () => undefined,
+        openFeedUrl: args.openFeedUrl ?? (() => undefined),
     })
 
     if (args.overrideSearchTrigger) {

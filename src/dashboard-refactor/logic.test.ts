@@ -8,6 +8,12 @@ describe('Dashboard Refactor misc logic', () => {
     it('should be able to load local lists during init logic', async ({
         device,
     }) => {
+        device.backgroundModules.backupModule.isAutomaticBackupEnabled = async () =>
+            false
+        device.backgroundModules.backupModule.getBackupTimes = async () => ({
+            lastBackup: null,
+            nextBackup: null,
+        })
         const { searchResults } = await setupTest(device)
 
         const listNames = ['testA', 'testB']
@@ -114,5 +120,69 @@ describe('Dashboard Refactor misc logic', () => {
         expect(searchResultsB.state.searchResults.sharingAccess).toEqual(
             'feature-disabled',
         )
+    })
+
+    it('should get feed activity status during init logic', async ({
+        device,
+    }) => {
+        device.backgroundModules.backupModule.isAutomaticBackupEnabled = async () =>
+            false
+        device.backgroundModules.backupModule.getBackupTimes = async () => ({
+            lastBackup: null,
+            nextBackup: null,
+        })
+        device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus = async () =>
+            'has-unseen'
+
+        const { searchResults: logicA } = await setupTest(device)
+        expect(logicA.state.listsSidebar.hasFeedActivity).toBe(false)
+        await logicA.init()
+        expect(logicA.state.listsSidebar.hasFeedActivity).toBe(true)
+
+        device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus = async () =>
+            'all-seen'
+        const { searchResults: logicB } = await setupTest(device)
+        expect(logicB.state.listsSidebar.hasFeedActivity).toBe(false)
+        await logicB.init()
+        expect(logicB.state.listsSidebar.hasFeedActivity).toBe(false)
+
+        device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus = async () =>
+            'error'
+        const { searchResults: logicC } = await setupTest(device)
+        expect(logicC.state.listsSidebar.hasFeedActivity).toBe(false)
+        await logicC.init()
+        expect(logicC.state.listsSidebar.hasFeedActivity).toBe(false)
+
+        device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus = async () =>
+            'not-logged-in'
+        const { searchResults: logicD } = await setupTest(device)
+        expect(logicD.state.listsSidebar.hasFeedActivity).toBe(false)
+        await logicD.init()
+        expect(logicD.state.listsSidebar.hasFeedActivity).toBe(false)
+    })
+
+    it('should get feed activity status during init logic', async ({
+        device,
+    }) => {
+        let activitiesMarkedAsSeen = false
+        let feedUrlOpened = false
+        device.backgroundModules.activityIndicator.remoteFunctions.markActivitiesAsSeen = async () => {
+            activitiesMarkedAsSeen = true
+        }
+        const { searchResults } = await setupTest(device, {
+            openFeedUrl: () => {
+                feedUrlOpened = true
+            },
+        })
+        searchResults.processMutation({
+            listsSidebar: { hasFeedActivity: { $set: true } },
+        })
+        expect(searchResults.state.listsSidebar.hasFeedActivity).toBe(true)
+        expect(feedUrlOpened).toBe(false)
+        expect(activitiesMarkedAsSeen).toBe(false)
+        await searchResults.processEvent('clickFeedActivityIndicator', null)
+        expect(searchResults.state.listsSidebar.hasFeedActivity).toBe(false)
+        expect(feedUrlOpened).toBe(true)
+        expect(activitiesMarkedAsSeen).toBe(true)
     })
 })
