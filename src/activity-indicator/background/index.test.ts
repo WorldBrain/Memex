@@ -73,13 +73,21 @@ describe('Activity indicator background tests', () => {
             userBReference,
         )
 
-        await storageModules.contentSharing.createPageInfo({
-            creatorReference: userAReference,
-            pageInfo: {
-                fullTitle: 'AAAA',
-                originalUrl: 'https://test.com',
-                normalizedUrl: 'test.com',
+        const pageInfoReference = await storageModules.contentSharing.createPageInfo(
+            {
+                creatorReference: userAReference,
+                pageInfo: {
+                    fullTitle: 'AAAA',
+                    originalUrl: 'https://test.com',
+                    normalizedUrl: 'test.com',
+                },
             },
+        )
+
+        await activityStreams.followEntity({
+            entityType: 'sharedPageInfo',
+            entity: pageInfoReference,
+            feeds: { home: true },
         })
 
         const {
@@ -98,18 +106,9 @@ describe('Activity indicator background tests', () => {
             },
         })
 
-        // Ensure the annot author follows their own annot
-        await activityStreams.followEntity({
-            entityType: 'conversationThread',
-            entity: {
-                id: sharedAnnotationReferences['test.com#123'].id,
-                type: 'conversation-thread-reference',
-            },
-            feeds: { home: true },
-        })
-
         const {
             reference: replyReference,
+            threadReference,
         } = await storageModules.contentConversations.createReply({
             previousReplyReference: null,
             annotationReference: sharedAnnotationReferences['test.com#123'],
@@ -123,17 +122,11 @@ describe('Activity indicator background tests', () => {
         await loginTestUser(userBReference)
 
         await activityStreams.addActivity({
-            activityType: 'conversationReply',
             entityType: 'conversationThread',
-            entity: {
-                id: sharedAnnotationReferences['test.com#123'].id,
-                type: 'conversation-thread-reference',
-            },
+            entity: threadReference,
+            activityType: 'conversationReply',
             activity: {
-                annotationReference: {
-                    id: sharedAnnotationReferences['test.com#123'].id,
-                    type: 'shared-annotation-reference',
-                },
+                annotationReference: sharedAnnotationReferences['test.com#123'],
                 replyReference,
             },
         })
