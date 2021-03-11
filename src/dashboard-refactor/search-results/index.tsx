@@ -297,9 +297,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         >(this.props.pagePickerProps, pageId)
 
         return (
-            <ResultBox bottom="10px">
+            <ResultBox bottom="10px" key={day.toString() + pageId}>
                 <PageResult
-                    key={pageId + day.toString()}
                     isSearchFilteredByList={this.props.isSearchFilteredByList}
                     onTagClick={this.props.filterSearchByTag}
                     shareMenuProps={{

@@ -162,13 +162,20 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
     }
 
     render() {
-        const { dropReceivingState, isMenuDisplayed } = this.props
+        const {
+            dropReceivingState,
+            isMenuDisplayed,
+            selectedState,
+            newItemsCount,
+            hasActivity,
+        } = this.props
 
         return (
             <Container>
                 <SidebarItem
-                    {...this.props}
+                    dropReceivingState={dropReceivingState}
                     isMenuDisplayed={isMenuDisplayed}
+                    selectedState={selectedState}
                     onDragLeave={dropReceivingState?.onDragLeave}
                     onDragEnter={this.handleDragEnter}
                     onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
@@ -179,8 +186,10 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                         {this.renderTitle()}
                     </TitleBox>
                     <IconBox
+                        dropReceivingState={dropReceivingState}
+                        newItemsCount={newItemsCount}
+                        hasActivity={hasActivity}
                         onClick={this.handleMoreActionClick}
-                        {...this.props}
                     >
                         {this.renderIcon()}
                     </IconBox>
