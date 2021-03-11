@@ -1292,6 +1292,73 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }
             },
         ),
+        backgroundIntegrationTest(
+            'should add a list to local lists and store its metadata when the user joined a new list',
+            { skipConflictTests: true },
+            () => {
+                return {
+                    setup: setupTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const {
+                                    contentSharing,
+                                    userMessages,
+                                } = setup.backgroundModules
+                                setup.authService.setUser(TEST_USER)
+
+                                const serverStorage = await setup.getServerStorage()
+                                const listReference = await serverStorage.storageModules.contentSharing.createSharedList(
+                                    {
+                                        listData: {
+                                            title: 'Test list',
+                                        },
+                                        localListId: 55,
+                                        userReference: {
+                                            type: 'user-reference',
+                                            id: 'someone-else',
+                                        },
+                                    },
+                                )
+                                setup.backgroundModules.userMessages.events.emit(
+                                    'message',
+                                    {
+                                        timestamp: 555,
+                                        message: {
+                                            type: 'joined-collection',
+                                            sharedListId: listReference.id,
+                                        },
+                                    },
+                                )
+                                await contentSharing.waitForSync()
+                                const customLists = await setup.storageManager.operation(
+                                    'findObjects',
+                                    'customLists',
+                                    {},
+                                )
+                                expect(customLists).toEqual([
+                                    expect.objectContaining({
+                                        name: 'Test list',
+                                    }),
+                                ])
+                                expect(
+                                    await setup.storageManager.operation(
+                                        'findObjects',
+                                        'sharedListMetadata',
+                                        {},
+                                    ),
+                                ).toEqual([
+                                    {
+                                        localId: customLists[0].id,
+                                        remoteId: listReference.id.toString(),
+                                    },
+                                ])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
     ],
     { includePostSyncProcessor: true },
 )
