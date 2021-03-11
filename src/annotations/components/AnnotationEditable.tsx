@@ -99,9 +99,12 @@ export default class AnnotationEditable extends React.Component<Props> {
                 ? new Date(date).getTime()
                 : date?.getTime()
 
+        const createdWhen = handleDateData(this.props.createdWhen)
+        const lastEdited = handleDateData(this.props.lastEdited)
+
         return {
-            createdWhen: handleDateData(this.props.createdWhen),
-            lastEdited: handleDateData(this.props.lastEdited),
+            createdWhen,
+            lastEdited: lastEdited !== createdWhen ? lastEdited : undefined,
         }
     }
 
