@@ -37,6 +37,7 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
             <>
                 <Container>
                     <EditableListTitle
+                        autoFocus
                         onChange={this.handleChange}
                         value={this.state.value}
                     />
@@ -57,7 +58,7 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
     }
 }
 
-const EditableListTitle = styled.input<Props>`
+const EditableListTitle = styled.input`
     border: 1px solid #e0e0e0;
     padding: 2px 5px;
     border-radius: 3px;
