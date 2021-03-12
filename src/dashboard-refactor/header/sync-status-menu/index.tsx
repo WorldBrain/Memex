@@ -150,7 +150,7 @@ export const timeSinceNowToString = (date: Date | null): string => {
         return 'One day ago'
     }
     if (days < 30) {
-        return `${days} ago`
+        return `${days} days ago`
     }
     if (years < 1) {
         return dt.format('MMM Do')
@@ -314,16 +314,14 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         ? goToBackupRoute
                         : onInitiateBackup,
                 )}
+                <>
+                    <span>Enable auto-backup: </span>
+                    <ToggleSwitch
+                        isChecked={this.props.isAutoBackupEnabled}
+                        onChange={this.props.onToggleAutoBackup}
+                    />
+                </>
                 {backupState === 'disabled' && this.renderBackupReminder()}
-                {backupState === 'free-tier' && (
-                    <>
-                        <span>Enable auto-backup: </span>
-                        <ToggleSwitch
-                            isChecked={this.props.isAutoBackupEnabled}
-                            onChange={this.props.onToggleAutoBackup}
-                        />
-                    </>
-                )}
             </Container>
         )
     }
