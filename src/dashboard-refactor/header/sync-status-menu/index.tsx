@@ -170,6 +170,8 @@ export interface SyncStatusMenuProps extends RootState {
     onHideUnsyncedItemCount: React.MouseEventHandler
 }
 
+type ServiceType = 'Sync' | 'Backup'
+
 export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     private renderNotificationBox = (
         topSpanContent: JSX.Element | string,
@@ -192,9 +194,16 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         )
     }
 
-    private renderError = (syncType: 'Device Sync' | 'Backup') => {
+    private renderError = (
+        serviceType: ServiceType,
+        serviceStatus: DisableableState,
+    ) => {
+        if (serviceStatus !== 'error') {
+            return null
+        }
+
         return this.renderNotificationBox(
-            `Your last ${syncType.toLocaleLowerCase()} failed.`,
+            `Your last ${serviceType.toLocaleLowerCase()} failed.`,
             <span>
                 <StyledAnchor href="">Contact Support</StyledAnchor> if retry
                 fails too.
@@ -202,8 +211,31 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         )
     }
 
+    private renderRowTextBlock = (
+        serviceType: ServiceType,
+        serviceStatus: DisableableState,
+        lastRunDate: Date | null,
+    ) => {
+        if (serviceStatus === 'disabled') {
+            return serviceType === 'Sync'
+                ? 'No device paired yet'
+                : 'No backup set yet'
+        }
+
+        if (serviceStatus === 'running') {
+            return 'In progress'
+        }
+
+        return (
+            'Last ' +
+            serviceType.toLocaleLowerCase() +
+            ': ' +
+            timeSinceNowToString(lastRunDate)
+        )
+    }
+
     private renderRow = (
-        syncType: 'Device Sync' | 'Backup',
+        serviceType: ServiceType,
         serviceStatus: DisableableState,
         otherServiceStatus: DisableableState,
         lastRunDate: Date | null,
@@ -213,23 +245,13 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             <>
                 <Row bottom="10px">
                     <RowContainer>
-                        <TextBlock bold>{`${syncType} Status`}</TextBlock>
+                        <TextBlock bold>{`${serviceType} Status`}</TextBlock>
                         <TextBlock>
-                            {serviceStatus === 'disabled' &&
-                                (syncType === 'Device Sync'
-                                    ? 'No device paired yet'
-                                    : 'No backup set yet')}
-                            {serviceStatus === 'enabled' ||
-                                (serviceStatus === 'free-tier' &&
-                                    `Last ${syncType.toLocaleLowerCase()}: ${timeSinceNowToString(
-                                        lastRunDate,
-                                    )}`.replace('device ', ''))}
-                            {serviceStatus === 'running' && `In progress`}
-                            {(serviceStatus === 'success' ||
-                                serviceStatus === 'error') &&
-                                `Last ${syncType.toLocaleLowerCase()}: ${timeSinceNowToString(
-                                    lastRunDate,
-                                )}`}
+                            {this.renderRowTextBlock(
+                                serviceType,
+                                serviceStatus,
+                                lastRunDate,
+                            )}
                         </TextBlock>
                     </RowContainer>
                     {serviceStatus === 'running' ? (
@@ -247,7 +269,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         />
                     )}
                 </Row>
-                {serviceStatus === 'error' && this.renderError(syncType)}
+                {this.renderError(serviceType, serviceStatus)}
             </>
         )
     }
@@ -264,6 +286,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             lastSuccessfulSyncDate,
             lastSuccessfulBackupDate,
         } = this.props
+
         if (!isDisplayed) {
             return null
         }
@@ -271,7 +294,7 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         return (
             <Container width="min-content" right="50px" top="45px">
                 {this.renderRow(
-                    'Device Sync',
+                    'Sync',
                     syncState,
                     backupState,
                     lastSuccessfulSyncDate,
