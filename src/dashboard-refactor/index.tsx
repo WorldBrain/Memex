@@ -31,6 +31,7 @@ import analytics from 'src/analytics'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { deriveStatusIconColor } from './header/sync-status-menu/util'
 import { FILTER_PICKERS_LIMIT } from './constants'
+import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 
 const __unimplemented = () => undefined
 
@@ -753,6 +754,23 @@ export class DashboardContainer extends StatefulUIElement<
                 <SubscribeModal
                     onClose={() =>
                         this.processEvent('setShowSubscriptionModal', {
+                            isShown: false,
+                        })
+                    }
+                />
+            )
+        }
+
+        if (modalsState.showBetaFeature) {
+            return (
+                <BetaFeatureNotifModal
+                    showSubscriptionModal={() =>
+                        this.processEvent('setShowSubscriptionModal', {
+                            isShown: true,
+                        })
+                    }
+                    onClose={() =>
+                        this.processEvent('setShowBetaFeatureModal', {
                             isShown: false,
                         })
                     }
