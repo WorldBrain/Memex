@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import onClickOutside from 'react-onclickoutside'
 import styled, { css } from 'styled-components'
 import moment from 'moment'
 
@@ -158,11 +159,13 @@ export const timeSinceNowToString = (date: Date | null): string => {
 }
 
 export interface SyncStatusMenuProps extends RootState {
+    outsideClickIgnoreClass?: string
     goToSyncRoute: () => void
     goToBackupRoute: () => void
     syncRunHoverState: HoverState
     backupRunHoverState: HoverState
     onInitiateSync: React.MouseEventHandler
+    onClickOutside: React.MouseEventHandler
     onInitiateBackup: React.MouseEventHandler
     onToggleAutoBackup: React.MouseEventHandler
     onToggleDisplayState: React.MouseEventHandler
@@ -172,7 +175,9 @@ export interface SyncStatusMenuProps extends RootState {
 
 type ServiceType = 'Sync' | 'Backup'
 
-export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
+class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
+    handleClickOutside = this.props.onClickOutside
+
     private renderNotificationBox = (
         topSpanContent: JSX.Element | string,
         bottomSpanContent: JSX.Element | string,
@@ -323,3 +328,5 @@ export default class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         )
     }
 }
+
+export default onClickOutside(SyncStatusMenu)

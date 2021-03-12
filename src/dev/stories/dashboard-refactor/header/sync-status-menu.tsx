@@ -29,6 +29,7 @@ const template: SyncStatusMenuProps = {
     onHideUnsyncedItemCount: () => {},
     onInitiateSync: () => console.log('sync initiated'),
     onInitiateBackup: () => console.log('backup initiated'),
+    onClickOutside: () => {},
     goToBackupRoute: () => {},
     goToSyncRoute: () => {},
     syncRunHoverState: hoverState,

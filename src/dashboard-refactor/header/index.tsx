@@ -102,6 +102,8 @@ export interface HeaderProps {
 }
 
 export default class Header extends PureComponent<HeaderProps> {
+    static SYNC_MENU_TOGGLE_BTN_CLASS = 'sync-menu-toggle-btn'
+
     render() {
         const {
             sidebarHeaderProps,
@@ -117,6 +119,7 @@ export default class Header extends PureComponent<HeaderProps> {
                 </SearchSection>
                 <RightHeader>
                     <SyncStatusHeaderBox
+                        className={Header.SYNC_MENU_TOGGLE_BTN_CLASS}
                         onClick={syncStatusMenuProps.onToggleDisplayState}
                     >
                         <Margin right="5px">

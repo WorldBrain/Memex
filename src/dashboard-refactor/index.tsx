@@ -262,6 +262,8 @@ export class DashboardContainer extends StatefulUIElement<
                 syncStatusIconState={deriveStatusIconColor(syncMenu)}
                 syncStatusMenuProps={{
                     ...syncMenu,
+                    outsideClickIgnoreClass:
+                        HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
                     backupRunHoverState: {
                         isHovered: false,
                         onHoverEnter: __unimplemented,
@@ -272,6 +274,10 @@ export class DashboardContainer extends StatefulUIElement<
                         onHoverEnter: __unimplemented,
                         onHoverLeave: __unimplemented,
                     },
+                    onClickOutside: () =>
+                        this.processEvent('setSyncStatusMenuDisplayState', {
+                            isShown: false,
+                        }),
                     onToggleAutoBackup: () =>
                         this.processEvent('toggleAutoBackup', null),
                     onToggleDisplayState: () =>
