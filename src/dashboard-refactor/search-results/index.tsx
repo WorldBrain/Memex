@@ -87,8 +87,8 @@ export type Props = RootState &
 
 export default class SearchResultsContainer extends PureComponent<Props> {
     private renderLoader = (props: { key?: string } = {}) => (
-        <Loader>
-            <LoadingIndicator {...props} />
+        <Loader {...props}>
+            <LoadingIndicator />
         </Loader>
     )
 
@@ -390,7 +390,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         }
 
         if (this.props.searchPaginationState === 'running') {
-            days.push(this.renderLoader({ key: 'loader' }))
+            days.push(this.renderLoader({ key: 'pagination-loader' }))
         } else if (
             !this.props.areResultsExhausted &&
             this.props.searchState !== 'pristine'
