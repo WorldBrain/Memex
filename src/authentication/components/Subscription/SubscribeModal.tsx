@@ -8,7 +8,7 @@ type Props = {
     onClose: () => void
 } & AuthContextInterface
 
-class SubscribeModal extends React.PureComponent<Props & AuthContextInterface> {
+class SubscribeModal extends React.PureComponent<Props> {
     render() {
         return (
             <Modal onClose={this.props.onClose} large>

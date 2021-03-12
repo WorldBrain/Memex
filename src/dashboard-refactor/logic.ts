@@ -2349,7 +2349,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     toggleAutoBackup: EventHandler<'toggleAutoBackup'> = async ({
-        event,
         previousState,
     }) => {
         const { backupBG } = this.options

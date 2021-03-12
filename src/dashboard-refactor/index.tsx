@@ -14,6 +14,7 @@ import { ListData } from './lists-sidebar/types'
 import * as searchResultUtils from './search-results/util'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import ShareListModalContent from 'src/overview/sharing/components/ShareListModalContent'
+import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
 import { isDuringInstall } from 'src/overview/onboarding/utils'
 import Onboarding from 'src/overview/onboarding'
 import { HelpBtn } from 'src/overview/help-btn'
@@ -689,14 +690,9 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderModals() {
-        const {
-            deletingListId,
-            deletingNoteArgs,
-            deletingPageArgs,
-            shareListId,
-        } = this.state.modals
+        const { modals: modalsState, listsSidebar } = this.state
 
-        if (deletingListId) {
+        if (modalsState.deletingListId) {
             return (
                 <DeleteConfirmModal
                     isShown
@@ -709,7 +705,7 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (deletingNoteArgs) {
+        if (modalsState.deletingNoteArgs) {
             return (
                 <DeleteConfirmModal
                     isShown
@@ -722,7 +718,7 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (deletingPageArgs) {
+        if (modalsState.deletingPageArgs) {
             return (
                 <DeleteConfirmModal
                     isShown
@@ -735,8 +731,8 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (shareListId) {
-            const listData = this.state.listsSidebar.listData[shareListId]
+        if (modalsState.shareListId) {
+            const listData = listsSidebar.listData[modalsState.shareListId]
 
             return (
                 <ShareListModalContent
@@ -747,6 +743,18 @@ export class DashboardContainer extends StatefulUIElement<
                     shareUrl={listData.shareUrl}
                     onGenerateLinkClick={() =>
                         this.processEvent('shareList', null)
+                    }
+                />
+            )
+        }
+
+        if (modalsState.showSubscription) {
+            return (
+                <SubscribeModal
+                    onClose={() =>
+                        this.processEvent('setShowSubscriptionModal', {
+                            isShown: false,
+                        })
                     }
                 />
             )
