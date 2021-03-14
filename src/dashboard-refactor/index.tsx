@@ -26,12 +26,13 @@ import {
     createAnnotationsCache,
 } from 'src/annotations/annotations-cache'
 import { updatePickerValues, areSearchFiltersEmpty } from './util'
-import Margin from './components/Margin'
 import analytics from 'src/analytics'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { deriveStatusIconColor } from './header/sync-status-menu/util'
 import { FILTER_PICKERS_LIMIT } from './constants'
 import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
+import DragElement from './components/DragElement'
+import Margin from './components/Margin'
 
 export interface Props extends DashboardDependencies {}
 
@@ -41,9 +42,10 @@ export class DashboardContainer extends StatefulUIElement<
     Events
 > {
     static defaultProps: Partial<Props> = {
-        document,
         analytics,
         copyToClipboard,
+        document: window.document,
+        location: window.location,
         localStorage: browser.storage.local,
         activityIndicatorBG: runInBackground(),
         contentShareBG: runInBackground(),
@@ -83,33 +85,37 @@ export class DashboardContainer extends StatefulUIElement<
     private listStateToProps = (
         list: ListData,
         source: ListSource,
-    ): ListSidebarItemProps => ({
-        source,
-        listId: list.id,
-        name: list.name,
-        isEditing: this.state.listsSidebar.editingListId === list.id,
-        isMenuDisplayed: this.state.listsSidebar.showMoreMenuListId === list.id,
-        selectedState: {
-            isSelected: this.state.listsSidebar.selectedListId === list.id,
-            onSelection: (listId) =>
-                this.processEvent('setSelectedListId', { listId }),
-        },
-        editableProps: {
-            onCancelClick: () => this.processEvent('cancelListEdit', null),
-            onConfirmClick: (value) =>
-                this.processEvent('confirmListEdit', { value }),
-            initValue: list.name,
-            errorMessage: this.state.listsSidebar.editListErrorMessage,
-        },
-        onRenameClick: () =>
-            this.processEvent('setEditingListId', { listId: list.id }),
-        onMoreActionClick: () =>
-            this.processEvent('setShowMoreMenuListId', { listId: list.id }),
-        onDeleteClick: () =>
-            this.processEvent('setDeletingListId', { listId: list.id }),
-        onShareClick: () =>
-            this.processEvent('setShareListId', { listId: list.id }),
-    })
+    ): ListSidebarItemProps => {
+        const { listsSidebar } = this.state
+
+        return {
+            source,
+            listId: list.id,
+            name: list.name,
+            isEditing: listsSidebar.editingListId === list.id,
+            isMenuDisplayed: listsSidebar.showMoreMenuListId === list.id,
+            selectedState: {
+                isSelected: listsSidebar.selectedListId === list.id,
+                onSelection: (listId) =>
+                    this.processEvent('setSelectedListId', { listId }),
+            },
+            editableProps: {
+                onCancelClick: () => this.processEvent('cancelListEdit', null),
+                onConfirmClick: (value) =>
+                    this.processEvent('confirmListEdit', { value }),
+                initValue: list.name,
+                errorMessage: listsSidebar.editListErrorMessage,
+            },
+            onRenameClick: () =>
+                this.processEvent('setEditingListId', { listId: list.id }),
+            onMoreActionClick: () =>
+                this.processEvent('setShowMoreMenuListId', { listId: list.id }),
+            onDeleteClick: () =>
+                this.processEvent('setDeletingListId', { listId: list.id }),
+            onShareClick: () =>
+                this.processEvent('setShareListId', { listId: list.id }),
+        }
+    }
 
     private renderFiltersBar() {
         const { searchBG } = this.props
@@ -209,8 +215,6 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderHeader() {
         const { searchFilters, listsSidebar, syncMenu } = this.state
-        const selectedListName =
-            listsSidebar.listData[listsSidebar.selectedListId]?.name
 
         return (
             <HeaderContainer
@@ -255,7 +259,9 @@ export class DashboardContainer extends StatefulUIElement<
                                 isHovered: false,
                             }),
                     },
-                    selectedListName,
+                    selectedListName:
+                        listsSidebar.listData[listsSidebar.selectedListId]
+                            ?.name,
                 }}
                 syncStatusIconState={deriveStatusIconColor(syncMenu)}
                 syncStatusMenuProps={{
@@ -388,8 +394,7 @@ export class DashboardContainer extends StatefulUIElement<
                             listId,
                             dataTransfer,
                         }),
-                    isDraggedOver:
-                        listId === this.state.listsSidebar.dragOverListId,
+                    isDraggedOver: listId === listsSidebar.dragOverListId,
                 })}
             />
         )
@@ -409,7 +414,7 @@ export class DashboardContainer extends StatefulUIElement<
                 onDismissOnboardingMsg={() =>
                     this.processEvent('dismissOnboardingMsg', null)
                 }
-                noResultsType={this.state.searchResults.noResultsType}
+                noResultsType={searchResults.noResultsType}
                 filterSearchByTag={(tag) =>
                     this.processEvent('addIncludedTag', { tag })
                 }
@@ -676,10 +681,6 @@ export class DashboardContainer extends StatefulUIElement<
                             hover: null,
                         }),
                 }}
-                notePickerProps={{
-                    onTagPickerUpdate: (noteId) => (args) =>
-                        this.processEvent('setNoteTags', { noteId, ...args }),
-                }}
             />
         )
     }
@@ -775,7 +776,16 @@ export class DashboardContainer extends StatefulUIElement<
         return null
     }
 
-    private renderDashboard() {
+    render() {
+        if (isDuringInstall(this.props.location)) {
+            return (
+                <>
+                    <Onboarding />
+                    <HelpBtn />
+                </>
+            )
+        }
+
         return (
             <Container>
                 {this.renderHeader()}
@@ -804,25 +814,9 @@ export class DashboardContainer extends StatefulUIElement<
                     }
                 />
                 <HelpBtn />
-                <DragElement id="dragged-element">
-                    {' '}
-                    Drop into Collection
-                </DragElement>
+                <DragElement />
             </Container>
         )
-    }
-
-    render() {
-        if (isDuringInstall()) {
-            return (
-                <>
-                    <Onboarding />
-                    <HelpBtn />
-                </>
-            )
-        }
-
-        return this.renderDashboard()
     }
 }
 
@@ -833,23 +827,4 @@ const Container = styled.div`
     background-color: #f6f8fb;
     min-height: 100vh;
     height: 100%;
-`
-
-const DragElement = styled.div<{ id: 'dragged-element' }>`
-    text-decoration: none;
-    display: none;
-    border: solid 2px ${(props) => props.theme.colors.purple};
-    border-radius: 4px;
-    font-size: 0.8rem;
-    max-height: 50px;
-    max-width: 330px;
-    text-align: center;
-    font-weight: 500;
-    background: #fff;
-    color: ${(props) => props.theme.colors.purple};
-    top: -90vh;
-    opacity: 1;
-    padding: 5px 10px;
-    position: absolute;
-    margin-left: 25px;
 `

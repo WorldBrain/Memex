@@ -13,7 +13,6 @@ import {
     PagePickerProps,
     PageInteractionProps,
     PagePickerAugdProps,
-    NotePickerAugdProps,
     NoResultsType,
 } from './types'
 import TopBar from './components/result-top-bar'
@@ -60,7 +59,6 @@ export type Props = RootState &
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
         pagePickerProps: PagePickerAugdProps
-        notePickerProps: NotePickerAugdProps
         onShowAllNotesClick: React.MouseEventHandler
         noResultsType: NoResultsType
         onDismissMobileAd: React.MouseEventHandler

@@ -4,7 +4,6 @@ import styled, { css } from 'styled-components'
 import colors from 'src/dashboard-refactor/colors'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import styles, { fonts } from 'src/dashboard-refactor/styles'
-
 import TagPicker from 'src/tags/ui/TagPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import DomainPicker from './DomainPicker/'
@@ -30,7 +29,7 @@ const Container = styled.div<{ hidden: boolean }>`
         `};
 `
 
-const InnerContainer = styled.div`
+const FilterBtnsContainer = styled.div`
     width: ${searchBarWidthPx}px;
     position: absolute;
     left: ${innerContainerIndent}px;
@@ -39,7 +38,7 @@ const InnerContainer = styled.div`
     justify-content: start;
 `
 
-const PickersContainer = styled(InnerContainer)`
+const PickersContainer = styled(FilterBtnsContainer)`
     position: relative;
     bottom: 0;
 `
@@ -81,23 +80,21 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     private renderFilterSelectButton = (
         label: SearchFilterLabel,
         name: SearchFilterType,
+        onToggle: React.MouseEventHandler,
         selected: boolean,
-        onToggle: () => void,
-    ): JSX.Element => {
-        return (
-            <Margin horizontal="7px" vertical="7px">
-                <FilterSelectButton
-                    selected={selected}
-                    onClick={onToggle}
-                    className={`${name}-picker-button`}
-                >
-                    <Margin horizontal="7px">
-                        <TextSpan>{label}</TextSpan>
-                    </Margin>
-                </FilterSelectButton>
-            </Margin>
-        )
-    }
+    ) => (
+        <Margin horizontal="7px" vertical="7px">
+            <FilterSelectButton
+                selected={selected}
+                onClick={onToggle}
+                className={`${name}-picker-button`}
+            >
+                <Margin horizontal="7px">
+                    <TextSpan>{label}</TextSpan>
+                </Margin>
+            </FilterSelectButton>
+        </Margin>
+    )
 
     private renderDatePicker = () => {
         if (!this.props.showDatesFilter) {
@@ -153,26 +150,26 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         return (
             <>
                 <Container hidden={!this.props.isDisplayed}>
-                    <InnerContainer>
+                    <FilterBtnsContainer>
                         {this.renderFilterSelectButton(
                             'Date',
                             'date',
-                            this.props.showDatesFilter,
                             this.props.toggleDatesFilter,
+                            this.props.showDatesFilter,
                         )}
                         {this.renderFilterSelectButton(
                             'Domains',
                             'domain',
-                            this.props.showDomainsFilter,
                             this.props.toggleDomainsFilter,
+                            this.props.showDomainsFilter,
                         )}
                         {this.renderFilterSelectButton(
                             'Tags',
                             'tag',
-                            this.props.showTagsFilter,
                             this.props.toggleTagsFilter,
+                            this.props.showTagsFilter,
                         )}
-                    </InnerContainer>
+                    </FilterBtnsContainer>
                 </Container>
                 <PickersContainer>
                     <Margin horizontal="7px">

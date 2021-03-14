@@ -17,7 +17,6 @@ import {
 import { insertBackgroundFunctionTab } from 'src/tests/ui-logic-tests'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { FakeAnalytics } from 'src/analytics/mock'
-import { BackupInterface } from 'src/backup-restore/background/types'
 
 // TODO: Try to get this working - currently fails due to `browser.runtime.onMessage.addListener` not being defineddddd
 async function createDependencies(): Promise<DashboardProps> {
@@ -30,6 +29,7 @@ async function createDependencies(): Promise<DashboardProps> {
             return true
         },
         document,
+        location,
         annotationsBG: insertBackgroundFunctionTab(
             backgroundModules.directLinking.remoteFunctions,
         ) as any,

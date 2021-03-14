@@ -1,4 +1,3 @@
-import SyncStatusMenu from '.'
 import { RootState } from './types'
 
 export const deriveStatusIconColor = ({

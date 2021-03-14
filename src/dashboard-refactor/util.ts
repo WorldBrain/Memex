@@ -17,7 +17,7 @@ export const updatePickerValues = (event: {
 export const areSearchFiltersEmpty = ({
     listsSidebar,
     searchFilters,
-}: RootState): boolean =>
+}: Pick<RootState, 'listsSidebar' | 'searchFilters'>): boolean =>
     !listsSidebar.selectedListId &&
     !searchFilters.dateFrom &&
     !searchFilters.dateTo &&

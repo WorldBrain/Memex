@@ -105,6 +105,7 @@ export async function setupTest(
     const analytics = new FakeAnalytics()
 
     const logic = new DashboardLogic({
+        location,
         analytics,
         annotationsBG: insertBackgroundFunctionTab(
             device.backgroundModules.directLinking.remoteFunctions,

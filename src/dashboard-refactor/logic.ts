@@ -21,6 +21,7 @@ import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import { NoResultsType } from './search-results/types'
 import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
 import { DisableableState } from './header/sync-status-menu/types'
+import { DRAG_EL_ID } from './components/DragElement'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -665,7 +666,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     dragPage: EventHandler<'dragPage'> = async ({ event, previousState }) => {
-        const crt = this.options.document.getElementById('dragged-element')
+        const crt = this.options.document.getElementById(DRAG_EL_ID)
         crt.style.display = 'block'
         event.dataTransfer.setDragImage(crt, 10, 10)
 

@@ -49,6 +49,7 @@ export type Events = UIEvent<
 
 export interface DashboardDependencies {
     document: Document
+    location: Location
     analytics: Analytics
     tagsBG: RemoteTagsInterface
     authBG: AuthRemoteFunctionsInterface

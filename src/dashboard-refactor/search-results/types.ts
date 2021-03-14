@@ -68,15 +68,6 @@ export type NoteInteractionAugdProps = {
     ) => NoteInteractionProps[Key]
 }
 
-export interface NotePickerProps {
-    onTagPickerUpdate: PickerUpdateHandler
-}
-
-// NOTE: Derived type - edit the original
-export type NotePickerAugdProps = {
-    [Key in keyof NotePickerProps]: (noteId: string) => NotePickerProps[Key]
-}
-
 export interface PagePickerProps {
     onListPickerUpdate: PickerUpdateHandler
     onTagPickerUpdate: PickerUpdateHandler
