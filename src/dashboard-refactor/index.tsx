@@ -233,36 +233,27 @@ export class DashboardContainer extends StatefulUIElement<
                     onSearchQueryChange: (query) =>
                         this.processEvent('setSearchQuery', { query }),
                 }}
-                sidebarHeaderProps={{
-                    sidebarLockedState: {
-                        isSidebarLocked: listsSidebar.isSidebarLocked,
-                        toggleSidebarLockedState: () =>
-                            this.processEvent('setSidebarLocked', {
-                                isLocked: !listsSidebar.isSidebarLocked,
-                            }),
-                    },
-                    sidebarPeekState: {
-                        isSidebarPeeking: listsSidebar.isSidebarPeeking,
-                        setSidebarPeekState: (isPeeking) => () =>
-                            this.processEvent('setSidebarPeeking', {
-                                isPeeking,
-                            }),
-                    },
-                    sidebarToggleHoverState: {
-                        isHovered: listsSidebar.isSidebarToggleHovered,
-                        onHoverEnter: () =>
-                            this.processEvent('setSidebarToggleHovered', {
-                                isHovered: true,
-                            }),
-                        onHoverLeave: () =>
-                            this.processEvent('setSidebarToggleHovered', {
-                                isHovered: false,
-                            }),
-                    },
-                    selectedListName:
-                        listsSidebar.listData[listsSidebar.selectedListId]
-                            ?.name,
+                sidebarLockedState={{
+                    isSidebarLocked: listsSidebar.isSidebarLocked,
+                    toggleSidebarLockedState: () =>
+                        this.processEvent('setSidebarLocked', {
+                            isLocked: !listsSidebar.isSidebarLocked,
+                        }),
                 }}
+                sidebarToggleHoverState={{
+                    isHovered: listsSidebar.isSidebarToggleHovered,
+                    onHoverEnter: () =>
+                        this.processEvent('setSidebarToggleHovered', {
+                            isHovered: true,
+                        }),
+                    onHoverLeave: () =>
+                        this.processEvent('setSidebarToggleHovered', {
+                            isHovered: false,
+                        }),
+                }}
+                selectedListName={
+                    listsSidebar.listData[listsSidebar.selectedListId]?.name
+                }
                 syncStatusIconState={deriveStatusIconColor(syncMenu)}
                 syncStatusMenuProps={{
                     ...syncMenu,

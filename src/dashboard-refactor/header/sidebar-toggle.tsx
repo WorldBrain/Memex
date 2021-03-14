@@ -1,10 +1,9 @@
 import React, { PureComponent } from 'react'
+import styled from 'styled-components'
 
-import styled, { css } from 'styled-components'
-import colors from '../../../colors'
-
-import { SidebarLockedState } from '../../../lists-sidebar/types'
-import { HoverState } from '../../../types'
+import colors from '../colors'
+import { SidebarLockedState } from '../lists-sidebar/types'
+import { HoverState } from '../types'
 
 const buttonStyles = `
     height: 20px;
@@ -80,22 +79,12 @@ export interface SidebarToggleProps {
 }
 
 export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
-    private renderHoveredState() {
-        // if Sidebar is locked (i.e. if SidebarToggle has been clicked), render left-facing arrows
-        // else render right-facing
-        if (this.props.sidebarLockedState.isSidebarLocked) return <LeftArrow />
-        return <RightArrow />
-    }
-    private renderButton() {
-        const { isHovered } = this.props.hoverState
-        if (!isHovered) return <HamburgerButton />
-        return <BtnBackground>{this.renderHoveredState()}</BtnBackground>
-    }
     render() {
         const {
             hoverState: { onHoverEnter, onHoverLeave, isHovered },
-            sidebarLockedState: { toggleSidebarLockedState },
+            sidebarLockedState: { toggleSidebarLockedState, isSidebarLocked },
         } = this.props
+
         return (
             <Container
                 isHovered={isHovered}
@@ -103,7 +92,13 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
                 onMouseLeave={onHoverLeave}
                 onClick={toggleSidebarLockedState}
             >
-                {this.renderButton()}
+                {isHovered ? (
+                    <BtnBackground>
+                        {isSidebarLocked ? <LeftArrow /> : <RightArrow />}
+                    </BtnBackground>
+                ) : (
+                    <HamburgerButton />
+                )}
             </Container>
         )
     }

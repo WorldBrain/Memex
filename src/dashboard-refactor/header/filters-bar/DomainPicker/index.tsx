@@ -16,9 +16,11 @@ import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResult
 import EntryRow from 'src/common-ui/GenericPicker/components/EntryRow' // ActOnAllTabsButton, // IconStyleWrapper,
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
-import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
-import { EntrySelectedList } from './components/EntrySelectedList'
-import { DomainResultItem } from './components/DomainResultItem'
+import {
+    fontSizeNormal,
+    fontSizeSmall,
+} from 'src/common-ui/components/design-library/typography'
+import { EntrySelectedList } from 'src/custom-lists/ui/CollectionPicker/components/EntrySelectedList'
 
 class DomainPicker extends StatefulUIElement<
     DomainPickerDependencies,
@@ -175,6 +177,22 @@ const EmptyDomainsView = styled.div`
     font-weight: 400;
     font-size: ${fontSizeNormal}px;
     text-align: center;
+`
+
+const DomainResultItem = styled.div`
+    display: flex;
+    border-radius: 4px;
+    color: ${(props) => props.theme.tag.text};
+    padding: 0 8px;
+    margin: 2px 4px 2px 0;
+    font-weight: 400;
+    font-size: ${fontSizeSmall}px;
+    transition: all 0.1s;
+    word-break: break-word;
+
+    &:hover {
+        cursor: pointer;
+    }
 `
 
 export default onClickOutside(DomainPicker)
