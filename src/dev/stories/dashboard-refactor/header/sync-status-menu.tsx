@@ -4,15 +4,8 @@ import { storiesOf } from '@storybook/react'
 import SyncStatusMenu, {
     SyncStatusMenuProps,
 } from 'src/dashboard-refactor/header/sync-status-menu'
-import { HoverState } from 'src/dashboard-refactor/types'
 
 const stories = storiesOf('Dashboard Refactor|Header/Sync Status Menu', module)
-
-const hoverState: HoverState = {
-    isHovered: false,
-    onHoverEnter: () => {},
-    onHoverLeave: () => {},
-}
 
 const template: SyncStatusMenuProps = {
     isDisplayed: true,
@@ -32,8 +25,6 @@ const template: SyncStatusMenuProps = {
     onClickOutside: () => {},
     goToBackupRoute: () => {},
     goToSyncRoute: () => {},
-    syncRunHoverState: hoverState,
-    backupRunHoverState: hoverState,
 }
 
 export const syncStatusMenuStoryProps: {
@@ -42,8 +33,6 @@ export const syncStatusMenuStoryProps: {
     allSuccessful: SyncStatusMenuProps
     allDisabled: SyncStatusMenuProps
     showUnsyncedItemCount: SyncStatusMenuProps
-    syncToolTipShowing: SyncStatusMenuProps
-    backupToolTipShowing: SyncStatusMenuProps
     syncRunning: SyncStatusMenuProps
     backupRunning: SyncStatusMenuProps
     syncError: SyncStatusMenuProps
@@ -66,20 +55,6 @@ export const syncStatusMenuStoryProps: {
     showUnsyncedItemCount: {
         ...template,
         showUnsyncedItemCount: true,
-    },
-    syncToolTipShowing: {
-        ...template,
-        syncRunHoverState: {
-            ...hoverState,
-            isHovered: true,
-        },
-    },
-    backupToolTipShowing: {
-        ...template,
-        backupRunHoverState: {
-            ...hoverState,
-            isHovered: true,
-        },
     },
     syncRunning: {
         ...template,
@@ -107,12 +82,6 @@ stories.add('Sync and Backup Successful', () => (
 ))
 stories.add('Sync and Backup Disabled', () => (
     <SyncStatusMenu {...syncStatusMenuStoryProps.allDisabled} />
-))
-stories.add('Sync Tooltip', () => (
-    <SyncStatusMenu {...syncStatusMenuStoryProps.syncToolTipShowing} />
-))
-stories.add('Backup Tooltip', () => (
-    <SyncStatusMenu {...syncStatusMenuStoryProps.backupToolTipShowing} />
 ))
 stories.add('Sync Running', () => (
     <SyncStatusMenu {...syncStatusMenuStoryProps.syncRunning} />

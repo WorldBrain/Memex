@@ -15,9 +15,7 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Margin from 'src/dashboard-refactor/components/Margin'
 
-const Container = styled(HoverBox)<{
-    isDisplayed: boolean
-}>`
+const StyledHoverBox = styled(HoverBox)`
     height: min-content;
     width: 230px;
     padding: 15px;
@@ -162,10 +160,8 @@ export interface SyncStatusMenuProps extends RootState {
     outsideClickIgnoreClass?: string
     goToSyncRoute: () => void
     goToBackupRoute: () => void
-    syncRunHoverState: HoverState
-    backupRunHoverState: HoverState
-    onInitiateSync: React.MouseEventHandler
     onClickOutside: React.MouseEventHandler
+    onInitiateSync: React.MouseEventHandler
     onInitiateBackup: React.MouseEventHandler
     onToggleAutoBackup: React.MouseEventHandler
     onToggleDisplayState: React.MouseEventHandler
@@ -297,7 +293,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         }
 
         return (
-            <Container width="min-content" right="50px" top="45px">
+            <StyledHoverBox width="min-content" right="50px" top="45px">
                 {this.renderRow(
                     'Sync',
                     syncState,
@@ -314,15 +310,13 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         ? goToBackupRoute
                         : onInitiateBackup,
                 )}
-                <>
-                    <span>Enable auto-backup: </span>
-                    <ToggleSwitch
-                        isChecked={this.props.isAutoBackupEnabled}
-                        onChange={this.props.onToggleAutoBackup}
-                    />
-                </>
+                <span>Enable auto-backup: </span>
+                <ToggleSwitch
+                    isChecked={this.props.isAutoBackupEnabled}
+                    onChange={this.props.onToggleAutoBackup}
+                />
                 {backupState === 'disabled' && this.renderBackupReminder()}
-            </Container>
+            </StyledHoverBox>
         )
     }
 }

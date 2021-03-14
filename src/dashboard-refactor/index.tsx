@@ -264,16 +264,6 @@ export class DashboardContainer extends StatefulUIElement<
                     ...syncMenu,
                     outsideClickIgnoreClass:
                         HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
-                    backupRunHoverState: {
-                        isHovered: false,
-                        onHoverEnter: __unimplemented,
-                        onHoverLeave: __unimplemented,
-                    },
-                    syncRunHoverState: {
-                        isHovered: false,
-                        onHoverEnter: __unimplemented,
-                        onHoverLeave: __unimplemented,
-                    },
                     onClickOutside: () =>
                         this.processEvent('setSyncStatusMenuDisplayState', {
                             isShown: false,
