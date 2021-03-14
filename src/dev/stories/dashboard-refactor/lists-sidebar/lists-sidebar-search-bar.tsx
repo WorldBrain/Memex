@@ -23,7 +23,7 @@ const template: ListsSidebarSearchBarProps = {
     onSearchQueryChange: (inputString) => console.log(inputString),
     onInputClear: () => {},
     onCreateNew: (newListName) => console.log(newListName),
-    sidebarLockedState: sidebarLockedState,
+    sidebarLockedState,
 }
 
 export const listsSidebarSearchBarProps: {

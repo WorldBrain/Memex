@@ -116,9 +116,9 @@ export async function setupTest(
         document: args.mockDocument,
         listsBG: {
             ...device.backgroundModules.customLists.remoteFunctions,
-            insertPageToList: (args) =>
+            insertPageToList: (fnArgs) =>
                 device.backgroundModules.customLists.remoteFunctions.insertPageToList(
-                    { ...args, skipPageIndexing: true },
+                    { ...fnArgs, skipPageIndexing: true },
                 ),
         },
         searchBG: device.backgroundModules.search.remoteFunctions.search,

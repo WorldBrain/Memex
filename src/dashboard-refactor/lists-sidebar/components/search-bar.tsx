@@ -99,20 +99,27 @@ export interface ListsSidebarSearchBarProps {
 export default class ListsSidebarSearchBar extends PureComponent<
     ListsSidebarSearchBarProps
 > {
-    inputRef = React.createRef<HTMLInputElement>()
-    componentDidMount = () => {
-        if (this.props.isSearchBarFocused) this.inputRef.current.focus()
+    private inputRef = React.createRef<HTMLInputElement>()
+
+    componentDidMount() {
+        if (this.props.isSearchBarFocused) {
+            this.inputRef.current.focus()
+        }
     }
-    handleInputChange: React.ChangeEventHandler = (
-        evt: React.ChangeEvent<HTMLInputElement>,
+
+    private handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (
+        evt,
     ) => {
         this.props.onSearchQueryChange(evt.currentTarget.value)
     }
-    handleCreateNewClick: React.MouseEventHandler = (evt: React.MouseEvent) => {
+
+    private handleCreateNewClick: React.MouseEventHandler = (
+        evt: React.MouseEvent,
+    ) => {
         this.props.onCreateNew(this.props.searchQuery)
     }
-    renderCreateNew = () => {
-        const { searchQuery } = this.props
+
+    private renderCreateNew = () => {
         return (
             <InnerContainer
                 horizontal="8px"
@@ -122,10 +129,11 @@ export default class ListsSidebarSearchBar extends PureComponent<
                 <Margin right="8px">
                     <TextSpan>Create New:</TextSpan>
                 </Margin>
-                <TextSpan bold>{searchQuery}</TextSpan>
+                <TextSpan bold>{this.props.searchQuery}</TextSpan>
             </InnerContainer>
         )
     }
+
     render(): JSX.Element {
         const {
             searchQuery,

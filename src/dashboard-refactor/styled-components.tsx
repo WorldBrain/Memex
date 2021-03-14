@@ -2,7 +2,7 @@ import React from 'react'
 import styled, { css, keyframes } from 'styled-components'
 import { LoadingIndicator as Spinner } from 'src/common-ui/components'
 
-const rotate = (rotation: Number) => {
+const rotate = (rotation: number) => {
     return keyframes`0% {
         transform: rotate(0deg);
     }
