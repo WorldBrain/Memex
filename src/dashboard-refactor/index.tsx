@@ -33,8 +33,6 @@ import { deriveStatusIconColor } from './header/sync-status-menu/util'
 import { FILTER_PICKERS_LIMIT } from './constants'
 import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 
-const __unimplemented = () => undefined
-
 export interface Props extends DashboardDependencies {}
 
 export class DashboardContainer extends StatefulUIElement<

@@ -208,11 +208,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         const lastSuccessfulBackup =
             typeof lastBackup === 'number' ? new Date(lastBackup) : null
 
-        const backupState: DisableableState = autoBackupEnabled
-            ? 'enabled'
-            : lastSuccessfulBackup == null
-            ? 'disabled'
-            : 'free-tier'
+        const backupState: DisableableState =
+            autoBackupEnabled || lastSuccessfulBackup != null
+                ? 'enabled'
+                : 'disabled'
 
         let lastSuccessfulSync: Date = null
         try {
