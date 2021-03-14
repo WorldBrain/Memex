@@ -2373,8 +2373,4 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
     /* END - sync status menu event handlers */
-
-    example: EventHandler<'example'> = ({ event }) => {
-        this.emitMutation({})
-    }
 }

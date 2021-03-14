@@ -26,6 +26,7 @@ import { Analytics } from 'src/analytics'
 import { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import { PublicSyncInterface } from 'src/sync/background/types'
 import { BackupInterface } from 'src/backup-restore/background/types'
+import { SearchFiltersState, SearchFilterEvents } from './header/types'
 
 export interface RootState {
     loadState: TaskState
@@ -43,7 +44,6 @@ export type Events = UIEvent<
         ListsSidebarEvents &
         SyncModalEvents & {
             search: { paginate?: boolean }
-            example: null
         }
 >
 
@@ -113,58 +113,3 @@ export type DashboardModalsEvents = UIEvent<{
 }>
 
 export type ListSource = 'local-lists' | 'followed-list'
-
-// TODO: move this into the filter's dir once merged in
-export interface SearchFiltersState {
-    searchQuery: string
-    isSearchBarFocused: boolean
-    searchFiltersOpen: boolean
-    isTagFilterActive: boolean
-    isDateFilterActive: boolean
-    isDomainFilterActive: boolean
-
-    dateFromInput: string
-    dateToInput: string
-    dateFrom?: number
-    dateTo?: number
-
-    tagsIncluded: string[]
-    tagsExcluded: string[]
-    domainsIncluded: string[]
-    domainsExcluded: string[]
-
-    limit: number
-    skip: number
-}
-
-export type SearchFilterEvents = UIEvent<{
-    setSearchQuery: { query: string }
-    setSearchBarFocus: { isFocused: boolean }
-
-    setSearchFiltersOpen: { isOpen: boolean }
-    toggleShowTagPicker: { isActive: boolean }
-    toggleShowDatePicker: { isActive: boolean }
-    toggleShowDomainPicker: { isActive: boolean }
-
-    setDateFromInputValue: { value: string }
-    setDateToInputValue: { value: string }
-    setDateFrom: { value: number }
-    setDateTo: { value: number }
-
-    addIncludedTag: { tag: string }
-    delIncludedTag: { tag: string }
-    addExcludedTag: { tag: string }
-    delExcludedTag: { tag: string }
-
-    addIncludedDomain: { domain: string }
-    delIncludedDomain: { domain: string }
-    addExcludedDomain: { domain: string }
-    delExcludedDomain: { domain: string }
-
-    setTagsIncluded: { tags: string[] }
-    setTagsExcluded: { tags: string[] }
-    setDomainsIncluded: { domains: string[] }
-    setDomainsExcluded: { domains: string[] }
-
-    resetFilters: null
-}>
