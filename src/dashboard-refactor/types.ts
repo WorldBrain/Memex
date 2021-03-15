@@ -27,6 +27,7 @@ import { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import { PublicSyncInterface } from 'src/sync/background/types'
 import { BackupInterface } from 'src/backup-restore/background/types'
 import { SearchFiltersState, SearchFilterEvents } from './header/types'
+import { MemoVoidIterator } from 'lodash'
 
 export interface RootState {
     loadState: TaskState
@@ -63,6 +64,7 @@ export interface DashboardDependencies {
     copyToClipboard: (text: string) => Promise<boolean>
     localStorage: Browser['storage']['local']
     openFeedUrl: () => void
+    renderDashboardSwitcherLink: () => JSX.Element
 }
 
 export interface DropReceivingState {

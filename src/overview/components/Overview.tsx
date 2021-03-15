@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
+import styled from 'styled-components'
 import classNames from 'classnames'
 
 import { OVERVIEW_URL } from 'src/constants'
@@ -34,6 +35,7 @@ import { AuthRemoteFunctionsInterface } from 'src/authentication/background/type
 import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { DashboardContainer } from 'src/dashboard-refactor'
+import colors from 'src/dashboard-refactor/colors'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -54,6 +56,7 @@ interface State {
     trialExpiry: boolean
     expiryDate: number
     loadingPortal: boolean
+    useOldDash: boolean
 }
 
 class Overview extends PureComponent<Props, State> {
@@ -78,6 +81,7 @@ class Overview extends PureComponent<Props, State> {
         trialExpiry: false,
         expiryDate: undefined,
         loadingPortal: false,
+        useOldDash: localStorage.getItem('useOldDash') === 'true',
     }
 
     constructor(props: Props) {
@@ -87,6 +91,15 @@ class Overview extends PureComponent<Props, State> {
             contentSharing: this.contentSharingBG,
             annotations: this.annotationsBG,
             tags: this.tagsBG,
+        })
+    }
+
+    toggleDashVersion = () => {
+        const oldState = this.state.useOldDash
+        localStorage.setItem('useOldDash', `${!oldState}`)
+        console.log(localStorage.getItem('useOldDash'))
+        this.setState({
+            useOldDash: !oldState,
         })
     }
 
@@ -196,6 +209,14 @@ class Overview extends PureComponent<Props, State> {
         }
     }
 
+    renderSwitcherLink(dashVersion: 'old' | 'new') {
+        return (
+            <SwitcherLink onClick={this.toggleDashVersion}>
+                {`Switch to ${dashVersion} dashboard`}
+            </SwitcherLink>
+        )
+    }
+
     handleOnboardingComplete = () => {
         window.location.href = OVERVIEW_URL
         this.props.setShowOnboardingMessage()
@@ -226,6 +247,7 @@ class Overview extends PureComponent<Props, State> {
                         <Head />
                         <CollectionsButton />
                         <Header />
+                        {this.renderSwitcherLink('new')}
                         <SidebarLeft />
 
                         <Results
@@ -311,7 +333,7 @@ class Overview extends PureComponent<Props, State> {
     }
 
     render() {
-        if (location.href.indexOf('old-dash') > -1) {
+        if (this.state.useOldDash) {
             return this.renderOverview()
         }
 
@@ -319,7 +341,13 @@ class Overview extends PureComponent<Props, State> {
             return this.renderOnboarding()
         }
 
-        return <DashboardContainer />
+        return (
+            <DashboardContainer
+                renderDashboardSwitcherLink={() =>
+                    this.renderSwitcherLink('old')
+                }
+            />
+        )
     }
 }
 
@@ -339,3 +367,13 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Overview)
+
+const SwitcherLink = styled.div`
+    width: min-content;
+    height: min-content;
+    position: absolute;
+    right: 0;
+    top: 60px;
+    color: ${colors.midGrey};
+    cursor: pointer;
+`
