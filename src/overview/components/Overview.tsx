@@ -372,8 +372,13 @@ const SwitcherLink = styled.div`
     width: min-content;
     height: min-content;
     position: absolute;
-    right: 0;
+    right: 10px;
     top: 60px;
-    color: ${colors.midGrey};
+    color: ${colors.onSelect};
     cursor: pointer;
+    white-space: nowrap;
+
+    @media (max-width: 1000px) {
+        display: none;
+    }
 `
