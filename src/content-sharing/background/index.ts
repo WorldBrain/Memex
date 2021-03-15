@@ -1078,10 +1078,15 @@ export default class ContentSharingBackground {
         if (!sharedList) {
             return // assume the list was deleted after the user joined it
         }
+        const remoteId = listReference.id.toString()
+        if (await this.storage.getLocalListId({ remoteId })) {
+            return
+        }
+
         const localId = Date.now()
         await this.storage.storeListId({
             localId,
-            remoteId: listReference.id.toString(),
+            remoteId: remoteId,
         })
 
         // TODO: What if there already exists a list with this name?

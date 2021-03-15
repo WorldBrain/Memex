@@ -1321,39 +1321,49 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         },
                                     },
                                 )
-                                setup.backgroundModules.userMessages.events.emit(
-                                    'message',
-                                    {
-                                        timestamp: 555,
-                                        message: {
-                                            type: 'joined-collection',
-                                            sharedListId: listReference.id,
+                                const sendMessage = () =>
+                                    setup.backgroundModules.userMessages.events.emit(
+                                        'message',
+                                        {
+                                            timestamp: 555,
+                                            message: {
+                                                type: 'joined-collection',
+                                                sharedListId: listReference.id,
+                                            },
                                         },
-                                    },
-                                )
-                                await contentSharing.waitForSync()
-                                const customLists = await setup.storageManager.operation(
-                                    'findObjects',
-                                    'customLists',
-                                    {},
-                                )
-                                expect(customLists).toEqual([
-                                    expect.objectContaining({
-                                        name: 'Test list',
-                                    }),
-                                ])
-                                expect(
-                                    await setup.storageManager.operation(
+                                    )
+                                const verify = async () => {
+                                    await contentSharing.waitForSync()
+                                    const customLists = await setup.storageManager.operation(
                                         'findObjects',
-                                        'sharedListMetadata',
+                                        'customLists',
                                         {},
-                                    ),
-                                ).toEqual([
-                                    {
-                                        localId: customLists[0].id,
-                                        remoteId: listReference.id.toString(),
-                                    },
-                                ])
+                                    )
+                                    expect(customLists).toEqual([
+                                        expect.objectContaining({
+                                            name: 'Test list',
+                                        }),
+                                    ])
+                                    expect(
+                                        await setup.storageManager.operation(
+                                            'findObjects',
+                                            'sharedListMetadata',
+                                            {},
+                                        ),
+                                    ).toEqual([
+                                        {
+                                            localId: customLists[0].id,
+                                            remoteId: listReference.id.toString(),
+                                        },
+                                    ])
+                                }
+
+                                sendMessage()
+                                await verify()
+
+                                // and it should not add the same remote list to local twice
+                                sendMessage()
+                                await verify()
                             },
                         },
                     ],
