@@ -475,7 +475,13 @@ const ShareBtn = styled.button`
     background: none;
     cursor: pointer;
     padding: 0;
-    width: 17px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    border-radius: 3px;
 
     &:hover {
         background-color: #e0e0e0;
@@ -487,6 +493,6 @@ const ShareBtn = styled.button`
 `
 
 const IconImg = styled.img`
-    height: 22px;
-    width: 22px;
+    height: 20px;
+    width: 20px;
 `

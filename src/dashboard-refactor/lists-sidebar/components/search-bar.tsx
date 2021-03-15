@@ -154,7 +154,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
                         </Margin>
                     </IconContainer>
                     <Input
-                        placeholder="Search or add collection"
+                        placeholder="Search collections"
                         isFocused={isSearchBarFocused}
                         ref={this.inputRef}
                         onChange={this.handleInputChange}
