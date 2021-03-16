@@ -15,7 +15,7 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 import { Modal } from 'src/common-ui/components'
 
 const Text = styled.div`
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;

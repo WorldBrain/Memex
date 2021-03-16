@@ -71,7 +71,7 @@ export const TypographyLink = styled.span`
 export const TypographyHeadingPage = styled.span`
     font-size: ${fontSizeBig}px;
     font-weight: 600;
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     line-height: 1.4;
     text-align: left;
@@ -86,7 +86,7 @@ export const TypographyHeadingPage = styled.span`
 export const TypographySubHeading = styled.span`
     font-size: ${fontSizeNormal}px;
     font-weight: 600;
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     line-height: 1.4;
     text-align: left;
@@ -101,7 +101,7 @@ export const TypographySubHeading = styled.span`
 export const TypographyTextNormal = styled.span`
     font-size: ${fontSizeNormal}px;
     font-weight: 400;
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     line-height: 1.4;
     text-align: left;
@@ -116,7 +116,7 @@ export const TypographyTextNormal = styled.span`
 export const TypographySubTextNormal = styled.span`
     font-size: ${fontSizeNormal}px;
     font-weight: 400;
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     line-height: 1.4;
     text-align: left;
@@ -131,7 +131,7 @@ export const TypographySubTextNormal = styled.span`
 export const TypographyTextSmall = styled.span`
     font-size: ${fontSizeSmall}px;
     font-weight: 400;
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     line-height: 1.4;
     text-align: left;
@@ -164,7 +164,7 @@ export const TypographyButtonLabel = styled.span`
 export const TypographyActionText = styled.span`
     line-height: 1.4;
     text-align: center;
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     font-weight: 600;
     font-size: 1em;

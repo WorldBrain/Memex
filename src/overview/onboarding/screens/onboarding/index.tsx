@@ -317,7 +317,7 @@ export default class OnboardingScreen extends StatefulUIElement<
         }
 
         if (OperatingSystem.startsWith('Linux')) {
-            return 'alt'
+            return 'Win'
         }
     }
 
