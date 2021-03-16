@@ -63,6 +63,8 @@ export interface DashboardDependencies {
     copyToClipboard: (text: string) => Promise<boolean>
     localStorage: Browser['storage']['local']
     openFeedUrl: () => void
+    renderDashboardSwitcherLink: () => JSX.Element
+    renderUpdateNotifBanner: () => JSX.Element
 }
 
 export interface DropReceivingState {
