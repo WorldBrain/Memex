@@ -16,7 +16,7 @@ import {
     NON_UNIQ_LIST_NAME_ERR_MSG,
 } from 'src/dashboard-refactor/constants'
 import { ListData } from './lists-sidebar/types'
-import { updatePickerValues } from './util'
+import { updatePickerValues, stateToSearchParams } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import { NoResultsType } from './search-results/types'
 import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
@@ -84,6 +84,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 showOnboardingMsg: false,
                 areResultsExhausted: false,
                 shouldFormsAutoFocus: false,
+                isSearchCopyPasterShown: false,
                 pageData: {
                     allIds: [],
                     byId: {},
@@ -435,29 +436,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         await this.fetchNoteShareStates(nextState)
     }
 
-    private searchPages = async ({ searchFilters, listsSidebar }: State) => {
-        const lists =
-            listsSidebar.selectedListId != null
-                ? [listsSidebar.selectedListId]
-                : undefined
-
-        const result = await this.options.searchBG.searchPages({
-            contentTypes: {
-                pages: true,
-                highlights: false,
-                notes: false,
-            },
-            endDate: searchFilters.dateTo,
-            startDate: searchFilters.dateFrom,
-            query: searchFilters.searchQuery,
-            domains: searchFilters.domainsIncluded,
-            domainsExclude: searchFilters.domainsExcluded,
-            tagsInc: searchFilters.tagsIncluded,
-            tagsExc: searchFilters.tagsExcluded,
-            limit: searchFilters.limit,
-            skip: searchFilters.skip,
-            lists,
-        })
+    private searchPages = async (state: State) => {
+        const result = await this.options.searchBG.searchPages(
+            stateToSearchParams(state),
+        )
 
         return {
             ...utils.pageSearchResultToState(result),
@@ -466,24 +448,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
-    private searchNotes = async ({ searchFilters, listsSidebar }: State) => {
-        const lists =
-            listsSidebar.selectedListId != null
-                ? [listsSidebar.selectedListId]
-                : undefined
-
-        const result = await this.options.searchBG.searchAnnotations({
-            endDate: searchFilters.dateTo,
-            startDate: searchFilters.dateFrom,
-            query: searchFilters.searchQuery,
-            domains: searchFilters.domainsIncluded,
-            domainsExclude: searchFilters.domainsExcluded,
-            tagsInc: searchFilters.tagsIncluded,
-            tagsExc: searchFilters.tagsExcluded,
-            limit: searchFilters.limit,
-            skip: searchFilters.skip,
-            lists,
-        })
+    private searchNotes = async (state: State) => {
+        const result = await this.options.searchBG.searchAnnotations(
+            stateToSearchParams(state),
+        )
 
         return {
             ...utils.annotationSearchResultToState(result),
@@ -1210,6 +1178,14 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             })
         }
+    }
+
+    setSearchCopyPasterShown: EventHandler<'setSearchCopyPasterShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: { isSearchCopyPasterShown: { $set: event.isShown } },
+        })
     }
 
     setDeletingNoteArgs: EventHandler<'setDeletingNoteArgs'> = async ({

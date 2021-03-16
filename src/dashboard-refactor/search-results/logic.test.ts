@@ -113,6 +113,32 @@ describe('Dashboard search results logic', () => {
                 'pages',
             )
         })
+
+        it('should be able to set search copy paster shown state', async ({
+            device,
+        }) => {
+            const { searchResults } = await setupTest(device)
+
+            expect(
+                searchResults.state.searchResults.isSearchCopyPasterShown,
+            ).toEqual(false)
+
+            await searchResults.processEvent('setSearchCopyPasterShown', {
+                isShown: true,
+            })
+
+            expect(
+                searchResults.state.searchResults.isSearchCopyPasterShown,
+            ).toEqual(true)
+
+            await searchResults.processEvent('setSearchCopyPasterShown', {
+                isShown: false,
+            })
+
+            expect(
+                searchResults.state.searchResults.isSearchCopyPasterShown,
+            ).toEqual(false)
+        })
     })
 
     describe('page data state mutations', () => {

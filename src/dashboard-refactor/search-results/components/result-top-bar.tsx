@@ -26,4 +26,7 @@ const TopBarContainer = styled.div`
     align-items: center;
 `
 
-const TopBarSection = styled.div``
+const TopBarSection = styled.div`
+    display: flex;
+    flex-direction: row;
+`

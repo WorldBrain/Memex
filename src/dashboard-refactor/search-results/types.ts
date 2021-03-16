@@ -168,8 +168,9 @@ export interface RootState {
 
     searchType: SearchType
     draggedPageId?: string
-    shouldFormsAutoFocus: boolean
     noResultsType: NoResultsType
+    shouldFormsAutoFocus: boolean
+    isSearchCopyPasterShown: boolean
 
     /** Holds page data specific to each page occurrence on a specific day. */
     results: NestedResults
@@ -210,6 +211,17 @@ export type Events = UIEvent<{
     // Root state mutations
     setSearchType: { searchType: SearchType }
     setAllNotesShown: { areShown: boolean }
+    setSearchCopyPasterShown: { isShown: boolean }
+    setPageData: { pages: PageData[] }
+    setPageSearchResult: { result: StandardSearchResponse }
+    setAnnotationSearchResult: { result: AnnotationsSearchResponse }
+    /** NOTE: Does not mutate state */
+    copyShareLink: {
+        link: string
+        analyticsAction: 'copyNoteLink' | 'copyPageLink'
+    }
+    dismissMobileAd: null
+    dismissOnboardingMsg: null
 
     // Page data state mutations (*shared with all* occurences of the page in different days)
     setPageTags: {
@@ -274,16 +286,4 @@ export type Events = UIEvent<{
     setNoteEditCommentValue: NoteEventArgs & { value: string }
     cancelNoteEdit: NoteEventArgs
     saveNoteEdit: NoteEventArgs
-
-    // Misc data setters
-    setPageData: { pages: PageData[] }
-    setPageSearchResult: { result: StandardSearchResponse }
-    setAnnotationSearchResult: { result: AnnotationsSearchResponse }
-    /** NOTE: Does not mutate state */
-    copyShareLink: {
-        link: string
-        analyticsAction: 'copyNoteLink' | 'copyPageLink'
-    }
-    dismissMobileAd: null
-    dismissOnboardingMsg: null
 }>

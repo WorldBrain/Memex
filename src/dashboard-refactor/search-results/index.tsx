@@ -19,6 +19,9 @@ import TopBar from './components/result-top-bar'
 import SearchTypeSwitch, {
     Props as SearchTypeSwitchProps,
 } from './components/search-type-switch'
+import SearchCopyPaster, {
+    Props as SearchCopyPasterProps,
+} from './components/search-copy-paster'
 import ExpandAllNotes from './components/expand-all-notes'
 import DayResultGroup from './components/day-result-group'
 import PageResult from './components/page-result'
@@ -58,6 +61,7 @@ export type Props = RootState &
         isSearchFilteredByList: boolean
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
+        searchCopyPasterProps: SearchCopyPasterProps
         pagePickerProps: PagePickerAugdProps
         onShowAllNotesClick: React.MouseEventHandler
         noResultsType: NoResultsType
@@ -411,10 +415,15 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     <TopBar
                         leftSide={<SearchTypeSwitch {...this.props} />}
                         rightSide={
-                            <ExpandAllNotes
-                                isEnabled={this.props.areAllNotesShown}
-                                onClick={this.props.onShowAllNotesClick}
-                            />
+                            <>
+                                <SearchCopyPaster
+                                    {...this.props.searchCopyPasterProps}
+                                />
+                                <ExpandAllNotes
+                                    isEnabled={this.props.areAllNotesShown}
+                                    onClick={this.props.onShowAllNotesClick}
+                                />
+                            </>
                         }
                     />
                 </PageTopBarBox>

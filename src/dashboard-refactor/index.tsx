@@ -25,7 +25,11 @@ import {
     AnnotationsCacheInterface,
     createAnnotationsCache,
 } from 'src/annotations/annotations-cache'
-import { updatePickerValues, areSearchFiltersEmpty } from './util'
+import {
+    updatePickerValues,
+    areSearchFiltersEmpty,
+    stateToSearchParams,
+} from './util'
 import analytics from 'src/analytics'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { deriveStatusIconColor } from './header/sync-status-menu/util'
@@ -33,7 +37,6 @@ import { FILTER_PICKERS_LIMIT } from './constants'
 import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 import DragElement from './components/DragElement'
 import Margin from './components/Margin'
-import colors from './colors'
 
 export interface Props extends DashboardDependencies {
     renderDashboardSwitcherLink: () => JSX.Element
@@ -673,6 +676,20 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setNoteHover', {
                             noteId,
                             hover: null,
+                        }),
+                }}
+                searchCopyPasterProps={{
+                    searchType: searchResults.searchType,
+                    searchParams: stateToSearchParams(this.state),
+                    isCopyPasterShown: searchResults.isSearchCopyPasterShown,
+                    isCopyPasterBtnShown: !areSearchFiltersEmpty(this.state),
+                    hideCopyPaster: () =>
+                        this.processEvent('setSearchCopyPasterShown', {
+                            isShown: false,
+                        }),
+                    toggleCopyPaster: () =>
+                        this.processEvent('setSearchCopyPasterShown', {
+                            isShown: !searchResults.isSearchCopyPasterShown,
                         }),
                 }}
             />
