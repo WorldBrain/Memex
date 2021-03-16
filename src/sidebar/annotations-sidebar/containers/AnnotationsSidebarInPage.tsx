@@ -223,7 +223,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 {this.state.showBetaFeatureNotifModal && (
                     <BetaFeatureNotifModal
                         auth={this.props.auth}
-                        subscription={this.props.subscription}
                         contentScriptBackground={
                             this.props.contentScriptBackground
                         }

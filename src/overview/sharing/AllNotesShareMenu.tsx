@@ -17,6 +17,7 @@ import { fonts } from 'src/dashboard-refactor/styles'
 import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
+import { runInBackground } from 'src/util/webextensionRPC'
 
 interface State {
     shareAllState: TaskState
@@ -29,11 +30,16 @@ export interface Props {
     copyLink: (link: string) => Promise<void>
     postShareAllHook?: () => void
     postUnshareAllHook?: () => void
-    contentSharing: ContentSharingInterface
-    annotationsBG: AnnotationInterface<'caller'>
+    contentSharing?: ContentSharingInterface
+    annotationsBG?: AnnotationInterface<'caller'>
 }
 
 export default class AllNotesShareMenu extends React.Component<Props, State> {
+    static defaultProps: Partial<Props> = {
+        contentSharing: runInBackground(),
+        annotationsBG: runInBackground(),
+    }
+
     private annotationUrls: string[]
     private contentSharingBG: ContentSharingInterface
     private annotationsBG: AnnotationInterface<'caller'>

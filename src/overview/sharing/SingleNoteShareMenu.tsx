@@ -11,6 +11,7 @@ import { Icon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import colors from 'src/dashboard-refactor/colors'
+import { runInBackground } from 'src/util/webextensionRPC'
 
 interface State {
     // readyToRender: boolean
@@ -24,13 +25,15 @@ export interface Props {
     closeShareMenu: React.MouseEventHandler
     postShareHook?: () => void
     postUnshareHook?: () => void
-    contentSharing: ContentSharingInterface
+    contentSharing?: ContentSharingInterface
 }
 
 export default class SingleNoteShareMenu extends React.PureComponent<
     Props,
     State
 > {
+    static defaultProps: Partial<Props> = { contentSharing: runInBackground() }
+
     private contentSharingBG: ContentSharingInterface
 
     constructor(props) {
