@@ -98,7 +98,6 @@ export async function setupTest(
         overrideSearchTrigger?: boolean
         openFeedUrl?: () => void
         copyToClipboard?: (text: string) => Promise<boolean>
-        renderDashboardSwitcherLink?: () => JSX.Element
     } = {
         copyToClipboard: defaultTestSetupDeps.copyToClipboard,
     },
@@ -133,8 +132,6 @@ export async function setupTest(
         copyToClipboard:
             args.copyToClipboard ?? defaultTestSetupDeps.copyToClipboard,
         openFeedUrl: args.openFeedUrl ?? (() => undefined),
-        renderDashboardSwitcherLink:
-            args.renderDashboardSwitcherLink ?? (() => null),
     })
 
     if (args.overrideSearchTrigger) {

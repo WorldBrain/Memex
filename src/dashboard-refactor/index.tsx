@@ -33,10 +33,11 @@ import { FILTER_PICKERS_LIMIT } from './constants'
 import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 import DragElement from './components/DragElement'
 import Margin from './components/Margin'
-import { Link } from 'src/common-ui/components/design-library/actions/Link'
 import colors from './colors'
 
-export interface Props extends DashboardDependencies {}
+export interface Props extends DashboardDependencies {
+    renderDashboardSwitcherLink: () => JSX.Element
+}
 
 export class DashboardContainer extends StatefulUIElement<
     Props,
