@@ -130,7 +130,7 @@ const Title = styled.div`
     cursor: pointer;
     text-align: left;
 
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     font-weight: ${(props) => (props.fullWidth ? 'bold' : 'normal')};
     font-size: 14px;

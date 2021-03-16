@@ -13,7 +13,7 @@ const Header = styled.div`
 `
 
 const HeaderText = styled.div`
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     font-weight: bold;
     font-size: 14px;
@@ -21,7 +21,7 @@ const HeaderText = styled.div`
 `
 
 const CreateNewButton = styled.button`
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;
@@ -36,7 +36,7 @@ const CreateNewButton = styled.button`
 
 const NoResults = styled.p`
     text-align: center
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     font-size: 12px;
     padding: 0 15px;
@@ -45,7 +45,7 @@ const NoResults = styled.p`
 
 const NoResultsBox = styled.div`
     text-align: center
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     font-size: 12px;
     padding: 0 15px;
