@@ -15,7 +15,8 @@ const textStyles = `
 
 const SearchBarContainer = styled.div`
     height: 34px;
-    width: ${styles.components.searchBar.widthPx}px;
+    max-width: ${styles.components.searchBar.widthPx}px;
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -25,7 +26,6 @@ const SearchBarContainer = styled.div`
 
 const Input = styled.input`
     width: inherit;
-    ${textStyles}
     font-size: 12px;
     line-height: 18px;
     border: none;
@@ -40,12 +40,13 @@ const Input = styled.input`
     }
 `
 
-const FilterButton = styled.div`
+const FilterButton = styled(Margin)`
     width: max-content;
     ${textStyles}
-    font-size: 10px;
+    font-size: 12px;
     line-height: 15px;
     cursor: pointer;
+    width: auto;
 `
 
 const FullWidthMargin = styled(Margin)`
@@ -57,7 +58,6 @@ export interface SearchBarProps {
     searchQuery: string
     isSearchBarFocused: boolean
     searchFiltersOpen: boolean
-    searchFiltersActive: []
     onSearchBarFocus(): void
     onSearchQueryChange(queryString: string): void
     onSearchFiltersOpen(): void
@@ -70,10 +70,10 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
             this.inputRef.current.focus()
         }
     }
-    handleChange: React.FormEventHandler = (evt) => {
+    handleChange: React.KeyboardEventHandler = (evt) => {
         // need to amend getFilterStrings function to pull through search terms as well, then
         // bundle them in an object to send with the onSearchQueryChange func
-        this.props.onSearchQueryChange(evt.currentTarget.textContent)
+        this.props.onSearchQueryChange((evt.target as HTMLInputElement).value)
     }
     render() {
         const {
@@ -85,24 +85,24 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         return (
             <Margin vertical="auto">
                 <SearchBarContainer onClick={onSearchBarFocus}>
-                    <FullWidthMargin left="27px">
+                    <FullWidthMargin>
                         <Input
                             ref={this.inputRef}
                             placeholder={
-                                !searchQuery &&
-                                (this.props.placeholder ??
-                                    'Search your saved pages and notes')
+                                this.props.placeholder ??
+                                'Search your saved pages and notes'
                             }
                             value={searchQuery}
                             onChange={this.handleChange}
                             autoComplete="off"
                         />
                     </FullWidthMargin>
-                    <Margin horizontal="23px">
-                        <FilterButton onClick={onSearchFiltersOpen}>
-                            {searchFiltersOpen ? 'Remove Filters' : 'Filters'}
-                        </FilterButton>
-                    </Margin>
+                    <FilterButton
+                        horizontal="15px"
+                        onClick={onSearchFiltersOpen}
+                    >
+                        {searchFiltersOpen ? 'Remove Filters' : 'Filters'}
+                    </FilterButton>
                 </SearchBarContainer>
             </Margin>
         )

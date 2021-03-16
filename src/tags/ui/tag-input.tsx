@@ -7,12 +7,10 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { ClickAway } from 'src/util/click-away-wrapper'
 
 export interface Props {
-    queryTagSuggestions: (query: string) => Promise<string[]>
-    fetchInitialTagSuggestions: () => string[] | Promise<string[]>
     setTagInputActive: (isTagInputActive: boolean) => void
     deleteTag: (tag: string) => void
     updateTags: PickerUpdateHandler
-    onKeyDown?: React.KeyboardEventHandler
+    onKeyDown?: React.KeyboardEventHandler<HTMLDivElement>
     isTagInputActive: boolean
     tags: string[]
 }
@@ -30,10 +28,6 @@ class TagInput extends React.Component<Props> {
                 >
                     <TagPicker
                         onUpdateEntrySelection={this.props.updateTags}
-                        queryEntries={this.props.queryTagSuggestions}
-                        loadDefaultSuggestions={
-                            this.props.fetchInitialTagSuggestions
-                        }
                         initialSelectedEntries={async () => this.props.tags}
                         onEscapeKeyDown={() =>
                             this.props.setTagInputActive(false)
@@ -50,7 +44,7 @@ class TagInput extends React.Component<Props> {
 
     render() {
         return (
-            <div onKeyDown={(e) => this.props.onKeyDown?.(e)}>
+            <div onKeyDown={this.props.onKeyDown}>
                 <TagHolder
                     clickHandler={this.handleTagHolderClick}
                     {...this.props}

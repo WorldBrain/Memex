@@ -1,5 +1,7 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
+import { browser, Browser } from 'webextension-polyfill-ts'
+import styled from 'styled-components'
 import classNames from 'classnames'
 
 import { OVERVIEW_URL } from 'src/constants'
@@ -17,12 +19,7 @@ import DragElement from './DragElement'
 import TrialExpiryWarning from './TrialExpiryWarning'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
-import {
-    auth,
-    featuresBeta,
-    subscription,
-} from 'src/util/remote-functions-background'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import { auth, subscription } from 'src/util/remote-functions-background'
 import { AnnotationsSidebarInDashboardResults } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { AnnotationInterface } from 'src/annotations/background/types'
@@ -36,10 +33,12 @@ import {
 import { show } from 'src/overview/modals/actions'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { PageNotesCopyPaster } from 'src/copy-paster'
+import { DashboardContainer } from 'src/dashboard-refactor'
+import colors from 'src/dashboard-refactor/colors'
+import { STORAGE_KEYS } from 'src/dashboard-refactor/constants'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -52,6 +51,7 @@ export interface Props {
     showAnnotationShareModal: () => void
     showBetaFeatureNotifModal: () => void
     resetActiveSidebarIndex: () => void
+    localStorage?: Browser['storage']['local']
 }
 
 interface State {
@@ -60,16 +60,20 @@ interface State {
     trialExpiry: boolean
     expiryDate: number
     loadingPortal: boolean
+    useOldDash: boolean
 }
 
 class Overview extends PureComponent<Props, State> {
+    static defaultProps: Partial<Props> = {
+        localStorage: browser.storage.local,
+    }
+
     private annotationsCache: AnnotationsCacheInterface
     private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     private customListsBG = runInBackground<RemoteCollectionsInterface>()
     private contentSharingBG = runInBackground<ContentSharingInterface>()
     private tagsBG = runInBackground<RemoteTagsInterface>()
     private authBG = runInBackground<AuthRemoteFunctionsInterface>()
-    private featuresBetaBG = runInBackground<FeaturesBetaInterface>()
     private copyPasterBG = runInBackground<RemoteCopyPasterInterface>()
 
     private annotationsSidebarRef = React.createRef<
@@ -85,14 +89,24 @@ class Overview extends PureComponent<Props, State> {
         trialExpiry: false,
         expiryDate: undefined,
         loadingPortal: false,
+        useOldDash: false,
     }
 
     constructor(props: Props) {
         super(props)
 
         this.annotationsCache = createAnnotationsCache({
+            contentSharing: this.contentSharingBG,
             annotations: this.annotationsBG,
             tags: this.tagsBG,
+        })
+    }
+
+    private toggleDashVersion = async () => {
+        const nextState = !this.state.useOldDash
+        this.setState({ useOldDash: nextState })
+        await this.props.localStorage.set({
+            [STORAGE_KEYS.useOldDash]: nextState,
         })
     }
 
@@ -114,10 +128,18 @@ class Overview extends PureComponent<Props, State> {
         localStorage.setItem('trialOverClosed', 'true')
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         auth.refreshUserInfo()
         this.upgradeState()
         this.expiryDate()
+
+        const {
+            [STORAGE_KEYS.useOldDash]: useOldDash,
+        } = await this.props.localStorage.get(STORAGE_KEYS.useOldDash)
+
+        if (useOldDash) {
+            this.setState({ useOldDash })
+        }
     }
 
     async expiryDate() {
@@ -183,23 +205,10 @@ class Overview extends PureComponent<Props, State> {
         window.open(portalLink['access_url'])
     }
 
-    private handleAnnotationSidebarToggle = async (args?: {
+    private handleAnnotationSidebarToggle = (args?: {
         pageUrl: string
         pageTitle?: string
-    }) => {
-        const isAlreadyOpenForOtherPage =
-            args.pageUrl !== this.annotationsSidebar.state.pageUrl
-
-        if (
-            this.annotationsSidebar.state.showState === 'hidden' ||
-            isAlreadyOpenForOtherPage
-        ) {
-            this.annotationsSidebar.setPageUrl(args.pageUrl)
-            this.annotationsSidebar.showSidebar()
-        } else if (this.annotationsSidebar.state.showState === 'visible') {
-            this.annotationsSidebar.hideSidebar()
-        }
-    }
+    }) => this.annotationsSidebar.toggleSidebarShowForPageId(args.pageUrl)
 
     private handleClickOutsideSidebar: React.MouseEventHandler = (e) => {
         const wasResultAnnotBtnClicked = (e.target as HTMLElement)?.classList?.contains(
@@ -213,6 +222,14 @@ class Overview extends PureComponent<Props, State> {
             this.annotationsSidebar.hideSidebar()
             setTimeout(() => this.props.resetActiveSidebarIndex(), 200)
         }
+    }
+
+    private renderSwitcherLink(dashVersion: 'old' | 'new') {
+        return (
+            <SwitcherLink onClick={this.toggleDashVersion}>
+                {`Switch to ${dashVersion} dashboard`}
+            </SwitcherLink>
+        )
     }
 
     handleOnboardingComplete = () => {
@@ -245,6 +262,7 @@ class Overview extends PureComponent<Props, State> {
                         <Head />
                         <CollectionsButton />
                         <Header />
+                        {this.renderSwitcherLink('new')}
                         <SidebarLeft />
 
                         <Results
@@ -333,11 +351,21 @@ class Overview extends PureComponent<Props, State> {
     }
 
     render() {
+        if (this.state.useOldDash) {
+            return this.renderOverview()
+        }
+
         if (isDuringInstall()) {
             return this.renderOnboarding()
         }
 
-        return this.renderOverview()
+        return (
+            <DashboardContainer
+                renderDashboardSwitcherLink={() =>
+                    this.renderSwitcherLink('old')
+                }
+            />
+        )
     }
 }
 
@@ -357,3 +385,18 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Overview)
+
+const SwitcherLink = styled.div`
+    width: min-content;
+    height: min-content;
+    position: absolute;
+    right: 10px;
+    top: 60px;
+    color: ${colors.onSelect};
+    cursor: pointer;
+    white-space: nowrap;
+
+    @media (max-width: 1000px) {
+        display: none;
+    }
+`

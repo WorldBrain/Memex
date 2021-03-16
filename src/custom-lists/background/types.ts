@@ -26,6 +26,8 @@ export interface RemoteCollectionsInterface {
         id: number
         url: string
         tabId?: number
+        skipPageIndexing?: boolean
+        suppressVisitCreation?: boolean
     }): Promise<{ object: PageListEntry }>
     updateListName(args: {
         id: number
@@ -66,6 +68,7 @@ export interface RemoteCollectionsInterface {
         deleted?: string
         url: string
         tabId?: number
+        skipPageIndexing?: boolean
     }): Promise<void>
     getInboxUnreadCount(): Promise<number>
 }

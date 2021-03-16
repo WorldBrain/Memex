@@ -128,7 +128,6 @@ class PopupContainer extends PureComponent<Props> {
 
     handleTagAllTabs = (tagName: string) =>
         tags.addTagsToOpenTabs({ name: tagName })
-    handleTagQuery = (query: string) => tags.searchForTagSuggestions({ query })
     fetchTagsForPage = async () => tags.fetchPageTags({ url: this.props.url })
 
     handleListUpdate = async ({ added, deleted }) => {
@@ -149,8 +148,6 @@ class PopupContainer extends PureComponent<Props> {
 
     handleListAllTabs = (listName: string) =>
         collections.addOpenTabsToList({ name: listName })
-    handleListQuery = (query: string) =>
-        collections.searchForListSuggestions({ query })
     fetchListsForPage = async () =>
         collections.fetchPageLists({ url: this.props.url })
 
@@ -158,11 +155,9 @@ class PopupContainer extends PureComponent<Props> {
         if (this.props.showTagsPicker) {
             return (
                 <TagPicker
-                    queryEntries={this.handleTagQuery}
                     onUpdateEntrySelection={this.handleTagUpdate}
                     initialSelectedEntries={this.fetchTagsForPage}
                     actOnAllTabs={this.handleTagAllTabs}
-                    loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
                 >
                     <BackContainer onClick={this.props.toggleShowTagsPicker} />
                 </TagPicker>
@@ -172,13 +167,9 @@ class PopupContainer extends PureComponent<Props> {
         if (this.props.showCollectionsPicker) {
             return (
                 <CollectionPicker
-                    queryEntries={this.handleListQuery}
                     onUpdateEntrySelection={this.handleListUpdate}
                     initialSelectedEntries={this.fetchListsForPage}
                     actOnAllTabs={this.handleListAllTabs}
-                    loadDefaultSuggestions={
-                        collections.fetchInitialListSuggestions
-                    }
                 >
                     <BackContainer
                         onClick={this.props.toggleShowCollectionsPicker}

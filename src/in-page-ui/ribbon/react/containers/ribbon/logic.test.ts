@@ -1,7 +1,7 @@
-import mapValues from 'lodash/mapValues'
 import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
+    insertBackgroundFunctionTab,
 } from 'src/tests/ui-logic-tests'
 import {
     RibbonContainerLogic,
@@ -12,14 +12,6 @@ import { Annotation } from 'src/annotations/types'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { FakeAnalytics } from 'src/analytics/mock'
-
-function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
-    return mapValues(remoteFunctions, (f) => {
-        return (...args: any[]) => {
-            return f({ tab }, ...args)
-        }
-    })
-}
 
 describe('Ribbon logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -91,6 +83,8 @@ describe('Ribbon logic', () => {
             annotationsCache: createAnnotationsCache(
                 {
                     ...backgroundModules,
+                    contentSharing:
+                        backgroundModules.contentSharing.remoteFunctions,
                     annotations,
                 },
                 { skipPageIndexing: true },

@@ -4,13 +4,14 @@ DOM manipulation helper functions
 import { browser } from 'webextension-polyfill-ts'
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { StyleSheetManager } from 'styled-components'
+import { StyleSheetManager, ThemeProvider } from 'styled-components'
 
 import Container from './components/container'
 import * as utils from './utils'
 import * as constants from './constants'
 import { injectCSS } from '../util/content-injection'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import { theme } from 'src/common-ui/components/design-library/theme'
 
 export const handleRender = async (
     { docs, totalCount, requiresMigration },
@@ -60,13 +61,15 @@ export const handleRender = async (
 
         ReactDOM.render(
             <StyleSheetManager target={target}>
-                <Container
-                    results={docs.slice(0, limit)}
-                    len={totalCount}
-                    rerender={renderComponent}
-                    searchEngine={searchEngine}
-                    requiresMigration={requiresMigration}
-                />
+                <ThemeProvider theme={theme}>
+                    <Container
+                        results={docs.slice(0, limit)}
+                        len={totalCount}
+                        rerender={renderComponent}
+                        searchEngine={searchEngine}
+                        requiresMigration={requiresMigration}
+                    />
+                </ThemeProvider>
             </StyleSheetManager>,
             target,
         )
@@ -105,9 +108,11 @@ export const handleRender = async (
         // Render the React component on the target element
         // Passing this same function so that it can change position
         ReactDOM.render(
-            <div>
-                <LoadingIndicator />
-            </div>,
+            <ThemeProvider theme={theme}>
+                <div>
+                    <LoadingIndicator />
+                </div>
+            </ThemeProvider>,
             target,
         )
     }

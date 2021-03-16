@@ -1,5 +1,6 @@
+import merge from 'lodash/merge'
 import fromPairs from 'lodash/fromPairs'
-import { UILogic } from 'ui-logic-core'
+import { UILogic, UIMutation } from 'ui-logic-core'
 import { TaskState as UITaskState } from 'ui-logic-core/lib/types'
 import { UIElement } from 'ui-logic-react'
 
@@ -174,37 +175,44 @@ export async function loadInitial<State extends { loadState: UITaskState }>(
     return (await executeUITask(logic, 'loadState', loader))[0]
 }
 
-export async function executeUITask<
-    State,
-    Key extends keyof State,
-    ReturnValue
->(
+export async function executeUITask<State extends {}>(
     logic: UILogic<State, any>,
-    key: Key,
-    loader: (context: { emitError: () => void }) => Promise<ReturnValue>,
-): Promise<[false] | [true, ReturnValue]> {
-    const emit = (state: UITaskState) =>
-        logic.emitMutation({ [key]: { $set: state } } as any)
-    emit('running')
+    keyOrMutation:
+        | keyof State
+        | ((taskState: UITaskState) => UIMutation<State>),
+    loader: () => Promise<void | {
+        mutation?: UIMutation<State>
+        status?: UITaskState
+    }>,
+): Promise<{ success: boolean }> {
+    const taskStateMutation = (taskState: UITaskState): UIMutation<State> => {
+        if (typeof keyOrMutation === 'function') {
+            return keyOrMutation(taskState)
+        }
+        return { [keyOrMutation]: { $set: taskState } } as any
+    }
+    logic.emitMutation(taskStateMutation('running'))
 
     try {
-        let errored = false
-        const returned = await loader({
-            emitError: () => {
-                errored = true
-            },
-        })
-        if (!errored) {
-            emit('success')
-            return [true, returned]
-        } else {
-            emit('error')
-            return [false]
+        const result = await loader()
+        let newTaskState: UITaskState = 'success'
+        let resultMutation: UIMutation<State> = {} as any
+        if (result) {
+            if (result.status) {
+                newTaskState = result.status
+            }
+            if (result.mutation) {
+                resultMutation = result.mutation
+            }
         }
+        logic.emitMutation(
+            merge(taskStateMutation(newTaskState), resultMutation),
+        )
+        return { success: newTaskState !== 'error' }
     } catch (e) {
-        emit('error')
         console.error(e)
-        return [false]
+        logic.emitMutation(taskStateMutation('error'))
+        return { success: false }
     }
 }
 

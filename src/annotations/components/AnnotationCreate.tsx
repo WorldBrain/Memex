@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
 
 import { ButtonTooltip } from 'src/common-ui/components'
-import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
 import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
 import TagInput from 'src/tags/ui/tag-input'
 import { FocusableComponent } from './types'
@@ -24,13 +23,12 @@ export interface AnnotationCreateGeneralProps {
     hide?: () => void
     comment: string
     tags: string[]
+    autoFocus?: boolean
 }
 
 export interface Props
     extends AnnotationCreateGeneralProps,
-        AnnotationCreateEventProps {
-    tagPickerDependencies: GenericPickerDependenciesMinusSave
-}
+        AnnotationCreateEventProps {}
 
 export class AnnotationCreate extends React.Component<Props, State>
     implements FocusableComponent {
@@ -39,6 +37,12 @@ export class AnnotationCreate extends React.Component<Props, State>
         MarkdownPreviewAnnotationInsertMenu
     >()
     state = { isTagPickerShown: false }
+
+    componentDidMount() {
+        if (this.props.autoFocus) {
+            this.focus()
+        }
+    }
 
     focus() {
         const inputLen = this.props.comment.length
@@ -93,12 +97,10 @@ export class AnnotationCreate extends React.Component<Props, State>
             uninsertTab({ el: this.textAreaRef.current })
         }
     }
-    private renderTagPicker() {
-        const { tagPickerDependencies } = this.props
 
+    private renderTagPicker() {
         return (
             <TagInput
-                queryTagSuggestions={tagPickerDependencies.queryEntries}
                 updateTags={async ({ selected }) =>
                     this.props.onTagsUpdate(selected)
                 }
@@ -107,9 +109,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                     this.setState({ isTagPickerShown })
                 }
                 tags={this.props.tags}
-                fetchInitialTagSuggestions={
-                    tagPickerDependencies.loadDefaultSuggestions
-                }
                 deleteTag={(tag) =>
                     this.props.onTagsUpdate(
                         this.props.tags.filter((_tag) => _tag !== tag),
@@ -125,13 +124,13 @@ export class AnnotationCreate extends React.Component<Props, State>
                 <Flex>
                     <ButtonTooltip
                         tooltipText="ctrl/cmd + Enter"
-                        position="bottom"
+                        position="bottomSidebar"
                     >
                         <SaveBtnStyled onClick={this.handleSave}>
                             Add
                         </SaveBtnStyled>
                     </ButtonTooltip>
-                    <ButtonTooltip tooltipText="esc" position="bottom">
+                    <ButtonTooltip tooltipText="esc" position="bottomSidebar">
                         <CancelBtnStyled onClick={this.handleCancel}>
                             Cancel
                         </CancelBtnStyled>
@@ -182,15 +181,10 @@ const TextBoxContainerStyled = styled.div`
     display: flex;
     flex-direction: column;
     font-size: 14px;
-    background: white;
     width: 100%;
+    box-shadow: rgb(0 0 0 / 10%) 0px 1px 2px 0px;
     border-radius: 5px;
-    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
-        rgba(15, 15, 15, 0.1) 0px 2px 4px;
-
-    &:hover {
-        background: white;
-    }
+    background-color: ${(props) => (props.comment !== '' ? 'white' : 'none')};
 
     & * {
         font-family: 'Poppins', sans-serif;
@@ -198,7 +192,7 @@ const TextBoxContainerStyled = styled.div`
 `
 
 const StyledTextArea = styled.textarea`
-    background-color: #f7f7f7;
+    background-color: white;
     box-sizing: border-box;
     resize: vertical;
     font-weight: 400;
@@ -210,6 +204,7 @@ const StyledTextArea = styled.textarea`
     padding: 10px 7px;
     height: ${(props) => (props.value === '' ? '40px' : '150px')};
     width: auto;
+    min-height: 40px;
 
     &::placeholder {
         color: #3a2f45;
@@ -231,7 +226,7 @@ const FooterStyled = styled.div`
     flex-direction: row-reverse;
     justify-content: flex-end;
     align-items: center;
-    margin: 0px 12px 4px 12px;
+    margin: 0 5px 3px 5px;
     height: 26px;
     animation: slideIn 0.2s ease-in-out;
     animation-fill-mode: forwards;
@@ -344,4 +339,6 @@ const ImgButtonStyled = styled.img`
 
 const Flex = styled.div`
     display: flex;
+    padding: 0 5px 5px;
+    justify-content: flex-end;
 `

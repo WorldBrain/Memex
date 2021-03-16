@@ -6,20 +6,13 @@ import { SidebarContainerLogic, createEditFormsForAnnotations } from './logic'
 import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
+    insertBackgroundFunctionTab,
 } from 'src/tests/ui-logic-tests'
 import * as DATA from './logic.test.data'
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import * as sharingTestData from 'src/content-sharing/background/index.test.data'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
-
-function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
-    return mapValues(remoteFunctions, (f) => {
-        return (...args: any[]) => {
-            return f({ tab }, ...args)
-        }
-    })
-}
 
 const setupLogicHelper = async ({
     device,
@@ -36,11 +29,12 @@ const setupLogicHelper = async ({
 
     const annotationsBG = insertBackgroundFunctionTab(
         device.backgroundModules.directLinking.remoteFunctions,
-        {},
     ) as any
 
     const annotationsCache = createAnnotationsCache(
         {
+            contentSharing:
+                device.backgroundModules.contentSharing.remoteFunctions,
             tags: device.backgroundModules.tags.remoteFunctions,
             annotations: annotationsBG,
         },
@@ -247,31 +241,6 @@ describe('SidebarContainerLogic', () => {
                 annotationUrl: DATA.ANNOT_1.url,
             })
             expect(sidebar.state.annotations.length).toBe(0)
-        })
-
-        it("should be able to toggle an annotation's bookmark status", async ({
-            device,
-        }) => {
-            const { sidebar } = await setupLogicHelper({ device })
-
-            sidebar.processMutation({
-                annotations: { $set: [DATA.ANNOT_1] },
-                editForms: {
-                    $set: createEditFormsForAnnotations([DATA.ANNOT_1]),
-                },
-            })
-
-            expect(sidebar.state.annotations[0].isBookmarked).toBe(undefined)
-            await sidebar.processEvent('toggleAnnotationBookmark', {
-                context,
-                annotationUrl: DATA.ANNOT_1.url,
-            })
-            expect(sidebar.state.annotations[0].isBookmarked).toBe(true)
-            await sidebar.processEvent('toggleAnnotationBookmark', {
-                context,
-                annotationUrl: DATA.ANNOT_1.url,
-            })
-            expect(sidebar.state.annotations[0].isBookmarked).toBe(false)
         })
 
         it('should be able to change annotation sharing access', async ({
@@ -508,8 +477,24 @@ describe('SidebarContainerLogic', () => {
         expect(sidebar.state.activeCopyPasterAnnotationId).toEqual(id1)
         sidebar.processEvent('setCopyPasterAnnotationId', { id: id2 })
         expect(sidebar.state.activeCopyPasterAnnotationId).toEqual(id2)
-        sidebar.processEvent('resetCopyPasterAnnotationId', null)
+        sidebar.processEvent('setCopyPasterAnnotationId', { id: undefined })
         expect(sidebar.state.activeCopyPasterAnnotationId).toBeUndefined()
+    })
+
+    it('should be able to set active annotation tag picker', async ({
+        device,
+    }) => {
+        const { sidebar } = await setupLogicHelper({ device })
+        const id1 = 'test1'
+        const id2 = 'test2'
+
+        expect(sidebar.state.activeTagPickerAnnotationId).toBeUndefined()
+        sidebar.processEvent('setTagPickerAnnotationId', { id: id1 })
+        expect(sidebar.state.activeTagPickerAnnotationId).toEqual(id1)
+        sidebar.processEvent('setTagPickerAnnotationId', { id: id2 })
+        expect(sidebar.state.activeTagPickerAnnotationId).toEqual(id2)
+        sidebar.processEvent('resetTagPickerAnnotationId', null)
+        expect(sidebar.state.activeTagPickerAnnotationId).toBeUndefined()
     })
 
     it('should be able to trigger annotation sorting', async ({ device }) => {

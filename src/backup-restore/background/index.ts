@@ -15,6 +15,7 @@ import NotificationBackground from 'src/notifications/background'
 import { DEFAULT_AUTH_SCOPE } from './backend/google-drive'
 import { SearchIndex } from 'src/search'
 import * as Raven from 'src/util/raven'
+import { BackupInterface } from './types'
 
 export * from './backend'
 
@@ -29,6 +30,7 @@ export class BackupBackgroundModule {
     backendSelect = new BackendSelect()
     backupProcedure: BackupProcedure
     backupUiCommunication = new ProcedureUiCommunication('backup-event')
+    remoteFunctions: BackupInterface<'provider'>
     restoreProcedure: BackupRestoreProcedure
     restoreUiCommunication: ProcedureUiCommunication = new ProcedureUiCommunication(
         'restore-event',
@@ -65,33 +67,39 @@ export class BackupBackgroundModule {
         this.changeTrackingQueue = options.createQueue(options.queueOpts)
         this.notifications = options.notifications
         this.checkAuthorizedForAutoBackup = options.checkAuthorizedForAutoBackup
+
+        this.remoteFunctions = {
+            enableAutomaticBackup: this.enableAutomaticBackup,
+            disableAutomaticBackup: this.disableAutomaticBackup,
+            isAutomaticBackupEnabled: this.isAutomaticBackupEnabled,
+            isAutomaticBackupAllowed: this.isAutomaticBackupAllowed,
+            getBackupTimes: async () => {
+                return this.getBackupTimes()
+            },
+            startBackup: async ({ tab }) => {
+                this.backupUiCommunication.registerUiTab(tab)
+                if (this.backupProcedure.running) {
+                    return
+                }
+                if (this.restoreProcedure && this.restoreProcedure.running) {
+                    throw new Error(
+                        "Come on, don't be crazy and run backup and restore at once please",
+                    )
+                }
+
+                await this.doBackup()
+                this.backupUiCommunication.connect(this.backupProcedure.events)
+            },
+        }
     }
 
     setupRemoteFunctions() {
         makeRemotelyCallable(
             {
+                ...this.remoteFunctions,
                 getBackupProviderLoginLink: async (info, params) => {
                     const MEMEX_CLOUD_ORIGIN = _getMemexCloudOrigin()
                     return `${MEMEX_CLOUD_ORIGIN}/auth/google?scope=${DEFAULT_AUTH_SCOPE}`
-                },
-                startBackup: async ({ tab }, params) => {
-                    this.backupUiCommunication.registerUiTab(tab)
-                    if (this.backupProcedure.running) {
-                        return
-                    }
-                    if (
-                        this.restoreProcedure &&
-                        this.restoreProcedure.running
-                    ) {
-                        throw new Error(
-                            "Come on, don't be crazy and run backup and restore at once please",
-                        )
-                    }
-
-                    await this.doBackup()
-                    this.backupUiCommunication.connect(
-                        this.backupProcedure.events,
-                    )
                 },
                 initRestoreProcedure: (info, provider) => {
                     return this.initRestoreProcedure(provider)
@@ -166,12 +174,8 @@ export class BackupBackgroundModule {
                         return false
                     }
                 },
-                isAutomaticBackupEnabled: this.isAutomaticBackupEnabled,
-                isAutomaticBackupAllowed: this.isAutomaticBackupAllowed,
                 scheduleAutomaticBackupIfEnabled: this
                     .scheduleAutomaticBackupIfEnabled,
-                enableAutomaticBackup: this.enableAutomaticBackup,
-                disableAutomaticBackup: this.disableAutomaticBackup,
                 sendNotification: async (id: string) => {
                     const errorId = await this.backend.sendNotificationOnFailure(
                         id,
@@ -186,9 +190,7 @@ export class BackupBackgroundModule {
                 setBackupBlobs: (info, saveBlobs) => {
                     localStorage.setItem('backup.save-blobs', saveBlobs)
                 },
-                getBackupTimes: async () => {
-                    return this.getBackupTimes()
-                },
+
                 forgetAllChanges: async () => {
                     return this.forgetAllChanges()
                 },
@@ -271,17 +273,17 @@ export class BackupBackgroundModule {
         return this.checkAuthorizedForAutoBackup()
     }
 
-    isAutomaticBackupEnabled() {
+    async isAutomaticBackupEnabled() {
         return (
             localStorage.getItem('backup.automatic-backups-enabled') === 'true'
         )
     }
 
-    enableAutomaticBackup() {
+    async enableAutomaticBackup() {
         localStorage.setItem('backup.automatic-backups-enabled', 'true')
     }
 
-    disableAutomaticBackup() {
+    async disableAutomaticBackup() {
         localStorage.setItem('backup.automatic-backups-enabled', 'false')
     }
 

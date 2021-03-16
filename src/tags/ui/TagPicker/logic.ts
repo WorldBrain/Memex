@@ -13,6 +13,7 @@ export interface TagPickerDependencies extends GenericPickerDependencies {
     onSelectedEntriesChange?: (evt: { selectedEntries: string[] }) => void
     searchInputPlaceholder?: string
     removeToolTipText?: string
+    filterMode?: boolean
 }
 
 export type TagPickerEvent = GenericPickerEvent

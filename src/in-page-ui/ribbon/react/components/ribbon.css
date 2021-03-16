@@ -38,7 +38,7 @@
 
 .ribbonSidebarOpen {
     box-shadow: none;
-    background: white;
+    background: #f6f8fb;
     display: flex;
     justify-content: flex-end;
     height: 105vh;
@@ -69,7 +69,7 @@
 .innerRibbonExpanded {
     border-radius: 20px;
     box-shadow: -1px 1px 7px 2px #13131321;
-    background: white;
+    background: #f6f8fb;
     display: flex;
 }
 

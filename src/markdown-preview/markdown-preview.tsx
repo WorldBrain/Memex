@@ -117,20 +117,20 @@ export class MarkdownPreview extends React.Component<Props, State> {
                     onKeyDown={this.handleSecretInputKeyDown}
                 />
                 <Container>
+                    <EditorContainer>{this.renderEditor()}</EditorContainer>
                     <PreviewButtonContainer>
                         {this.props.renderSecondaryBtn()}
                         {this.showPreviewBtn && (
                             <ButtonTooltip
                                 tooltipText="alt/option + Enter"
-                                position="bottom"
+                                position="bottomSidebar"
                             >
                                 <PreviewBtn onClick={this.togglePreview}>
-                                    Preview
+                                    Preview Markdown
                                 </PreviewBtn>
                             </ButtonTooltip>
                         )}
                     </PreviewButtonContainer>
-                    <EditorContainer>{this.renderEditor()}</EditorContainer>
                 </Container>
             </ThemeProvider>
         )
@@ -141,12 +141,13 @@ const PreviewButtonContainer = styled.div`
     background-color: #f7f7f7;
     width: -webkit-fill-available;
     width: -moz-available;
-    border-bottom: 1px solid #e0e0e0;
+    border-top: 1px solid #e0e0e0;
     height: 30px;
     padding: 0px 2px;
     align-items: center;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
+    border-radius: 0 0 5px 5px;
 `
 
 const PreviewBtn = styled.button`
@@ -177,15 +178,16 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    border: solid 1px #e0e0e0;
-    border-radius: 3px;
+    border-radius: 5px;
+    padding: 0;
+    border: 1px solid #e0e0e0;
     margin: 5px;
 `
 
 const EditorContainer = styled.div`
     width: fill-available;
-    margin-bottom: -3px;
     border-radius: 3px;
+    display: flex;
 
     & > div {
         padding: 10px 7px;

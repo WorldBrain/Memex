@@ -1,13 +1,13 @@
 @value colors: '../../../common-ui/colors.css';
-@value color1, color 2, color4, color7 from colors;
+@value color1, color2, color4, color7 from colors;
 
 /* stylelint-disable  declaration-no-important, selector-pseudo-class-no-unknown */
 
 :global .react-datepicker__day--selected,
 :global .react-datepicker__day--in-selecting-range,
 :global .react-datepicker__day--in-range {
-            color: color4;
-        }
+    color: color4;
+}
 
 :global .react-datepicker__close-icon::after {
     background-color: #3eb995 !important;
@@ -148,9 +148,21 @@
     border-bottom-right-radius: 3px !important;
 }
 
-:global
+:global .react-datepicker__day--selected {
+    font-weight: bold;
+    background: color1;
+    color: white;
+}
+
+:global .react-datepicker__day--selected:hover {
+    font-weight: bold;
+    background: color2;
+    color: white;
+}
+
+/* :global
     .react-datepicker__day--today {
     font-weight: bold;
     background: #5cd9a6;
     color: white;
-}
+} */

@@ -1,12 +1,14 @@
 const colors = {
     white: '#FFF',
-    onHover: '#BABABA',
+    onHover: '#E0E0E0',
     onSelect: '#B6B6B6', // used for sidebar list item in selected state
     midGrey: '#C4C4C4', // used for Sidebar Toggle hovered/selected state and new items count background
+    lightMintGreen: '#8fffd7',
     lightMidGrey: '#DDD',
-    lightGrey: '#E1E1E1', // used for Header Search Bar background
+    lightGrey: '#f0f0f0', // used for Header Search Bar background
     lighterGrey: '#CCC', // used for divider on white background
     iconDefault: '#3A2F45',
+    darkBlue: '#1A2F58',
     error: {
         pink: '#F2AFB0',
     },

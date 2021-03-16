@@ -1,9 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
-import { GenericPickerDependenciesMinusSave } from 'src/common-ui/GenericPicker/logic'
-import TagInput from 'src/tags/ui/tag-input'
 import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
 import { FocusableComponent } from './types'
 import { uninsertTab, insertTab } from 'src/common-ui/utils'
@@ -12,21 +9,15 @@ export interface AnnotationEditEventProps {
     onEditConfirm: (url: string) => void
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
-    setTagInputActive: (active: boolean) => void
-    updateTags: PickerUpdateHandler
-    deleteSingleTag: (tag: string) => void
 }
 
 export interface AnnotationEditGeneralProps {
-    isTagInputActive: boolean
     comment: string
-    tags: string[]
 }
 
 export interface Props
     extends AnnotationEditEventProps,
         AnnotationEditGeneralProps {
-    tagPickerDependencies: GenericPickerDependenciesMinusSave
     url: string
     rows: number
 }
@@ -47,13 +38,6 @@ class AnnotationEdit extends React.Component<Props>
         const inputLen = this.props.comment.length
         this.textAreaRef.current.setSelectionRange(inputLen, inputLen)
         this.focus()
-    }
-
-    private handleTagInputKeyDown: React.KeyboardEventHandler = (e) => {
-        // Only check for `Tab` and `Shift + Tab`, handle rest of the events normally.
-        if (e.key === 'Tab') {
-            this.props.setTagInputActive(false)
-        }
     }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
@@ -81,11 +65,6 @@ class AnnotationEdit extends React.Component<Props>
     }
 
     render() {
-        const {
-            loadDefaultSuggestions,
-            queryEntries,
-        } = this.props.tagPickerDependencies
-
         return (
             <>
                 <MarkdownPreviewAnnotationInsertMenu
@@ -98,20 +77,12 @@ class AnnotationEdit extends React.Component<Props>
                         <StyledTextArea
                             {...inputProps}
                             value={this.props.comment}
-                            onClick={() => this.props.setTagInputActive(false)}
                             placeholder="Add private note (save with cmd/ctrl+enter)"
                             onChange={(e) =>
                                 this.props.onCommentChange(e.target.value)
                             }
                         />
                     )}
-                />
-                <TagInput
-                    deleteTag={this.props.deleteSingleTag}
-                    queryTagSuggestions={queryEntries}
-                    fetchInitialTagSuggestions={loadDefaultSuggestions}
-                    onKeyDown={this.handleTagInputKeyDown}
-                    {...this.props}
                 />
             </>
         )
@@ -121,7 +92,7 @@ class AnnotationEdit extends React.Component<Props>
 export default AnnotationEdit
 
 const StyledTextArea = styled.textarea`
-    background-color: #f7f7f7;
+    background-color: #fff;
     box-sizing: border-box;
     resize: vertical;
     font-weight: 400;

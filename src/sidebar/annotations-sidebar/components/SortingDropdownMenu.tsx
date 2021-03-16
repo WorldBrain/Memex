@@ -50,7 +50,7 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
                     keepSelectedState
                     tooltipProps={{
                         tooltipText: 'Sort notes',
-                        position: 'bottom',
+                        position: 'bottomSidebar',
                     }}
                 />
             </DropdownMenuContainer>
@@ -59,13 +59,19 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
 }
 
 const DropdownMenuContainer = styled.div`
-    & button {
-        width: 24px;
+    & > div {
         height: 24px;
+        width: 24px;
+        padding: 2px;
+    }
+
+    & #DropdownMenuBtn {
+        height: 24px;
+        width: 24px;
     }
 `
 
 const IconImg = styled.img`
-    height: 100%;
-    width: auto;
+    width: 100%;
+    padding: 4px;
 `

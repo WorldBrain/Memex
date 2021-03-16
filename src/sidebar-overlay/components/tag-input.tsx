@@ -2,7 +2,6 @@ import * as React from 'react'
 
 import TagHolder from './tag-holder'
 import TagPicker from 'src/tags/ui/TagPicker'
-import { tags } from 'src/util/remote-functions-background'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 interface Props {
@@ -39,10 +38,6 @@ const TagInput = ({
         tagPicker = (
             <HoverBox>
                 <TagPicker
-                    loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
-                    queryEntries={(query: string) =>
-                        tags.searchForTagSuggestions({ query })
-                    }
                     onUpdateEntrySelection={handleTagsUpdate}
                     initialSelectedEntries={async () => initialSelectedEntries}
                     onClickOutside={() => setTagInputActive(false)}

@@ -13,7 +13,7 @@ import {
     TRACKING_STORAGE_NAME,
     TOOLTIP_STORAGE_NAME,
 } from 'src/in-page-ui/tooltip/constants'
-import { OPTIONS_URL } from 'src/constants'
+import { OPTIONS_URL, OVERVIEW_URL } from 'src/constants'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { OnboardingAction } from 'src/common-ui/components/design-library/actions/OnboardingAction'
@@ -38,6 +38,10 @@ export default class OnboardingScreen extends StatefulUIElement<
     static TOTAL_STEPS = 7
     static defaultProps: Partial<Props> = {
         storage: browser.storage.local,
+        navToOverview: () => {
+            window.location.href = OVERVIEW_URL
+            window.location.reload()
+        },
     }
 
     constructor(props: Props) {
@@ -450,7 +454,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                             </div>
 
                             {/*<div className={styles.shortcutContainer}>
-                            </div>    
+                            </div>
 
 
                             <div className={styles.shortcutContainer}>

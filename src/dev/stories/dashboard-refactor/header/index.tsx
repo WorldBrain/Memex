@@ -1,12 +1,48 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 import Header, { HeaderProps } from 'src/dashboard-refactor/header'
-import { sidebarHeaderPropsTemplate } from './sidebar-header'
 import { headerSearchBarPropsTemplate } from './search-bar'
 import { syncStatusMenuStoryProps } from './sync-status-menu'
+import { sidebarToggleProps } from './sidebar-toggle'
+
+const { lockedHover, noHover } = sidebarToggleProps
+
+const sidebarTogglePropsRenamed = {
+    lockedHover: {
+        ...lockedHover,
+        sidebarToggleHoverState: lockedHover.hoverState,
+    },
+    noHover: {
+        ...noHover,
+        sidebarToggleHoverState: noHover.hoverState,
+    },
+}
+
+type SidebarHeaderProps = Pick<
+    HeaderProps,
+    'sidebarLockedState' | 'sidebarToggleHoverState' | 'selectedListName'
+>
+
+export const sidebarHeaderPropsTemplate: {
+    open: SidebarHeaderProps
+    closed: SidebarHeaderProps
+    closedSelected: SidebarHeaderProps
+} = {
+    open: {
+        selectedListName: 'Inbox',
+        ...sidebarTogglePropsRenamed.lockedHover,
+    },
+    closed: {
+        ...sidebarTogglePropsRenamed.noHover,
+    },
+    closedSelected: {
+        ...sidebarTogglePropsRenamed.noHover,
+        selectedListName: 'Inbox',
+    },
+}
 
 const template: HeaderProps = {
-    sidebarHeaderProps: sidebarHeaderPropsTemplate.open,
+    ...sidebarHeaderPropsTemplate.open,
     searchBarProps: headerSearchBarPropsTemplate.default,
     syncStatusMenuProps: syncStatusMenuStoryProps.hidden,
     syncStatusIconState: 'green',
@@ -23,9 +59,7 @@ const props: {
     default: template,
     sidebarToggled: {
         ...template,
-        sidebarHeaderProps: {
-            ...sidebarHeaderPropsTemplate.closed,
-        },
+        ...sidebarHeaderPropsTemplate.closed,
     },
     searchBarWithInput: {
         ...template,

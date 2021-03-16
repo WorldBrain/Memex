@@ -1,5 +1,7 @@
 import { UILogic } from 'ui-logic-core'
 import { TestLogicContainer } from 'ui-logic-core/lib/testing'
+import mapValues from 'lodash/mapValues'
+
 import {
     setupBackgroundIntegrationTest,
     BackgroundIntegrationTestSetupOpts,
@@ -56,4 +58,12 @@ export function makeMultiDeviceUILogicTestFactory(
             })
         })
     }
+}
+
+export function insertBackgroundFunctionTab(remoteFunctions, tab: any = {}) {
+    return mapValues(remoteFunctions, (f) => {
+        return (...args: any[]) => {
+            return f({ tab }, ...args)
+        }
+    })
 }
