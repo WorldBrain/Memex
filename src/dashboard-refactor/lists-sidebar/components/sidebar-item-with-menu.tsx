@@ -236,6 +236,15 @@ const IconBox = styled.div<Props>`
     justify-content: flex-end;
 `
 
+const TitleBox = styled.div`
+    display: flex;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    padding-left: 15px;
+    align-items: center;
+`
+
 const SidebarItem = styled.div<Props>`
     height: 30px;
     width: 100%;
@@ -260,6 +269,10 @@ const SidebarItem = styled.div<Props>`
 
     &:hover ${IconBox} {
         display: flex;
+    }
+
+    &:hover ${TitleBox} {
+        width: 90%;
     }
 
     ${({ selectedState }: Props) =>
@@ -309,15 +322,6 @@ const MenuButton = styled.div`
     }
 `
 
-const TitleBox = styled.div`
-    display: flex;
-    flex: 1;
-    width: 100%;
-    height: 100%;
-    padding-left: 15px;
-    align-items: center;
-`
-
 const ListTitle = styled.p<Props>`
     margin: 0;
     font-family: ${fonts.primary.name};
@@ -331,6 +335,7 @@ const ListTitle = styled.p<Props>`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    padding-right: 10px;
 
     max-width: 100%;
 `
