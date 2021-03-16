@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
+import { browser, Browser } from 'webextension-polyfill-ts'
 import styled from 'styled-components'
 import classNames from 'classnames'
 
@@ -32,10 +33,10 @@ import {
 import { show } from 'src/overview/modals/actions'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { DashboardContainer } from 'src/dashboard-refactor'
 import colors from 'src/dashboard-refactor/colors'
+import { STORAGE_KEYS } from 'src/dashboard-refactor/constants'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -48,6 +49,7 @@ export interface Props {
     showAnnotationShareModal: () => void
     showBetaFeatureNotifModal: () => void
     resetActiveSidebarIndex: () => void
+    localStorage?: Browser['storage']['local']
 }
 
 interface State {
@@ -60,13 +62,16 @@ interface State {
 }
 
 class Overview extends PureComponent<Props, State> {
+    static defaultProps: Partial<Props> = {
+        localStorage: browser.storage.local,
+    }
+
     private annotationsCache: AnnotationsCacheInterface
     private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     private customListsBG = runInBackground<RemoteCollectionsInterface>()
     private contentSharingBG = runInBackground<ContentSharingInterface>()
     private tagsBG = runInBackground<RemoteTagsInterface>()
     private authBG = runInBackground<AuthRemoteFunctionsInterface>()
-    private featuresBetaBG = runInBackground<FeaturesBetaInterface>()
 
     private annotationsSidebarRef = React.createRef<
         AnnotationsSidebarContainer
@@ -81,7 +86,7 @@ class Overview extends PureComponent<Props, State> {
         trialExpiry: false,
         expiryDate: undefined,
         loadingPortal: false,
-        useOldDash: localStorage.getItem('useOldDash') === 'true',
+        useOldDash: false,
     }
 
     constructor(props: Props) {
@@ -94,12 +99,11 @@ class Overview extends PureComponent<Props, State> {
         })
     }
 
-    toggleDashVersion = () => {
-        const oldState = this.state.useOldDash
-        localStorage.setItem('useOldDash', `${!oldState}`)
-        console.log(localStorage.getItem('useOldDash'))
-        this.setState({
-            useOldDash: !oldState,
+    private toggleDashVersion = async () => {
+        const nextState = !this.state.useOldDash
+        this.setState({ useOldDash: nextState })
+        await this.props.localStorage.set({
+            [STORAGE_KEYS.useOldDash]: nextState,
         })
     }
 
@@ -121,10 +125,18 @@ class Overview extends PureComponent<Props, State> {
         localStorage.setItem('trialOverClosed', 'true')
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         auth.refreshUserInfo()
         this.upgradeState()
         this.expiryDate()
+
+        const {
+            [STORAGE_KEYS.useOldDash]: useOldDash,
+        } = await this.props.localStorage.get(STORAGE_KEYS.useOldDash)
+
+        if (useOldDash) {
+            this.setState({ useOldDash })
+        }
     }
 
     async expiryDate() {
@@ -209,7 +221,7 @@ class Overview extends PureComponent<Props, State> {
         }
     }
 
-    renderSwitcherLink(dashVersion: 'old' | 'new') {
+    private renderSwitcherLink(dashVersion: 'old' | 'new') {
         return (
             <SwitcherLink onClick={this.toggleDashVersion}>
                 {`Switch to ${dashVersion} dashboard`}
