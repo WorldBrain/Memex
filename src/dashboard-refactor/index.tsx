@@ -33,8 +33,11 @@ import { FILTER_PICKERS_LIMIT } from './constants'
 import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 import DragElement from './components/DragElement'
 import Margin from './components/Margin'
+import colors from './colors'
 
-export interface Props extends DashboardDependencies {}
+export interface Props extends DashboardDependencies {
+    renderDashboardSwitcherLink: () => JSX.Element
+}
 
 export class DashboardContainer extends StatefulUIElement<
     Props,
@@ -781,6 +784,7 @@ export class DashboardContainer extends StatefulUIElement<
             <Container>
                 {this.renderHeader()}
                 {this.renderFiltersBar()}
+                {this.props.renderDashboardSwitcherLink()}
                 <Margin bottom="10px" />
                 {this.renderListsSidebar()}
                 {this.renderSearchResults()}

@@ -46,6 +46,7 @@ async function createDependencies(): Promise<DashboardProps> {
         activityIndicatorBG:
             backgroundModules.activityIndicator.remoteFunctions,
         openFeedUrl: () => undefined,
+        renderDashboardSwitcherLink: () => null,
     }
 }
 
