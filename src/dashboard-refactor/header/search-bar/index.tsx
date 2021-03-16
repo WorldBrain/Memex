@@ -5,6 +5,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 
 import colors from '../../colors'
 import styles, { fonts } from '../../styles'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 const textStyles = `
     font-family: ${fonts.primary.name};
@@ -22,6 +23,7 @@ const SearchBarContainer = styled.div`
     align-items: center;
     background-color: ${colors.lightGrey};
     border-radius: 5px;
+    padding: 0px 15px;
 `
 
 const Input = styled.input`
@@ -30,13 +32,10 @@ const Input = styled.input`
     line-height: 18px;
     border: none;
     background-color: transparent;
+    padding-left: 10px;
 
     &:focus {
         outline: none;
-    }
-
-    &::placeholder {
-        ${textStyles}
     }
 `
 
@@ -47,10 +46,19 @@ const FilterButton = styled(Margin)`
     line-height: 15px;
     cursor: pointer;
     width: auto;
+    white-space: nowrap;
 `
 
 const FullWidthMargin = styled(Margin)`
     width: 100%;
+`
+
+const SearchIcon = styled.img`
+    width: 16px;
+    height: 17px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `
 
 export interface SearchBarProps {
@@ -86,6 +94,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
             <Margin vertical="auto">
                 <SearchBarContainer onClick={onSearchBarFocus}>
                     <FullWidthMargin>
+                        <SearchIcon src={icons.searchIcon} />
                         <Input
                             ref={this.inputRef}
                             placeholder={
@@ -97,10 +106,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             autoComplete="off"
                         />
                     </FullWidthMargin>
-                    <FilterButton
-                        horizontal="15px"
-                        onClick={onSearchFiltersOpen}
-                    >
+                    <FilterButton left="15px" onClick={onSearchFiltersOpen}>
                         {searchFiltersOpen ? 'Remove Filters' : 'Filters'}
                     </FilterButton>
                 </SearchBarContainer>

@@ -116,6 +116,13 @@ const StyledAnchor = styled.a`
     text-decoration: none;
 `
 
+const AutoBackupBox = styled(Margin)`
+    display: flex;
+    justify-content: space-between;
+`
+
+const BackupReminderBox = styled(Margin)``
+
 export const timeSinceNowToString = (date: Date | null): string => {
     if (date === null) {
         return 'Never'
@@ -292,6 +299,8 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             return null
         }
 
+        console.log(this.props)
+
         return (
             <StyledHoverBox width="min-content" right="50px" top="45px">
                 {this.renderRow(
@@ -310,12 +319,22 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         ? goToBackupRoute
                         : onInitiateBackup,
                 )}
-                <span>Enable auto-backup: </span>
-                <ToggleSwitch
-                    isChecked={this.props.isAutoBackupEnabled}
-                    onChange={this.props.onToggleAutoBackup}
-                />
-                {backupState === 'disabled' && this.renderBackupReminder()}
+                <AutoBackupBox>
+                    <TextBlock bold>Auto Backup</TextBlock>
+                    <ToggleSwitch
+                        isChecked={this.props.isAutoBackupEnabled}
+                        onChange={
+                            !lastSuccessfulBackupDate
+                                ? this.props.goToBackupRoute
+                                : this.props.onToggleAutoBackup
+                        }
+                    />
+                </AutoBackupBox>
+                {backupState === 'disabled' && (
+                    <BackupReminderBox top="10px">
+                        {this.renderBackupReminder()}
+                    </BackupReminderBox>
+                )}
             </StyledHoverBox>
         )
     }

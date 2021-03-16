@@ -180,6 +180,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     onDragEnter={this.handleDragEnter}
                     onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
                     onDrop={this.handleDrop}
+                    title={this.props.name}
                 >
                     <TitleBox onClick={this.handleSelection}>
                         {' '}

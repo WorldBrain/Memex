@@ -502,6 +502,6 @@ const ShareBtn = styled.button`
 `
 
 const IconImg = styled.img`
-    height: 20px;
-    width: 20px;
+    height: 18px;
+    width: 18px;
 `

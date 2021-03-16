@@ -164,13 +164,7 @@ export default class Header extends PureComponent<HeaderProps> {
                         onClick={syncStatusMenuProps.onToggleDisplayState}
                     >
                         <Margin right="5px">
-                            <SyncStatusIcon color={syncStatusIconState}>
-                                {syncStatusIconState === 'red' && (
-                                    <SyncStatusHeaderText textCentered>
-                                        !
-                                    </SyncStatusHeaderText>
-                                )}
-                            </SyncStatusIcon>
+                            <SyncStatusIcon color={syncStatusIconState} />
                         </Margin>
                         <SyncStatusHeaderText>Sync Status</SyncStatusHeaderText>
                     </SyncStatusHeaderBox>
