@@ -8,6 +8,7 @@ interface MarginProps {
     right?: string
     top?: string
     bottom?: string
+    width?: string
 }
 
 const MarginDiv = styled.div`
@@ -32,7 +33,13 @@ const MarginDiv = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
+    ${(props) => {
+        if (props.width) {
+            return `width: ${props.width};`
+        } else {
+            return `width: 100%;`
+        }
+    }};
 `
 
 export default class Margin extends PureComponent<MarginProps> {

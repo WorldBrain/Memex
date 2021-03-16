@@ -23,6 +23,7 @@ const Container = styled.div<{ hidden: boolean }>`
     height: 30px;
     width: 100%;
     border-bottom: 1px solid ${colors.lighterGrey};
+    justify-content: center;
     ${(props) =>
         css`
             display: ${props.hidden ? 'none' : 'flex'};
@@ -31,23 +32,24 @@ const Container = styled.div<{ hidden: boolean }>`
 
 const FilterBtnsContainer = styled.div`
     width: ${searchBarWidthPx}px;
-    position: absolute;
-    left: ${innerContainerIndent}px;
+    position: relative;
+    height: 100%;
     display: flex;
     align-items: center;
-    justify-content: start;
+    justify-content: flex-end;
 `
 
-const PickersContainer = styled(FilterBtnsContainer)`
+const PickersContainer = styled.div`
     position: relative;
-    bottom: 0;
+    top: 30px;
 `
 
 const FilterSelectButton = styled.div<{ selected: boolean }>`
-    height: 16px;
     width: min-content;
     display: flex;
     align-items: center;
+    padding: 3px 6px;
+
     ${(props) => css`
         background-color: ${props.selected ? colors.lightGrey : colors.white};
     `}
@@ -83,7 +85,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         onToggle: React.MouseEventHandler,
         selected: boolean,
     ) => (
-        <Margin horizontal="7px" vertical="7px">
+        <Margin horizontal="7px" vertical="7px" width="auto">
             <FilterSelectButton
                 selected={selected}
                 onClick={onToggle}
@@ -102,7 +104,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         }
 
         return (
-            <HoverBox width="auto" top="0" left="0">
+            <HoverBox width="auto" top="0" right="0">
                 <DatePicker
                     {...this.props.datePickerProps}
                     outsideClickIgnoreClass="date-picker-button"
@@ -135,7 +137,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         }
 
         return (
-            <HoverBox top="0">
+            <HoverBox top="0" right="0px">
                 <DomainPicker
                     {...this.props.domainPickerProps}
                     searchInputPlaceholder="Add Domain Filters"
@@ -170,14 +172,14 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             this.props.showTagsFilter,
                         )}
                     </FilterBtnsContainer>
+                    <PickersContainer>
+                        <Margin horizontal="7px">
+                            {this.renderDatePicker()}
+                            {this.renderTagPicker()}
+                            {this.renderDomainPicker()}
+                        </Margin>
+                    </PickersContainer>
                 </Container>
-                <PickersContainer>
-                    <Margin horizontal="7px">
-                        {this.renderDatePicker()}
-                        {this.renderTagPicker()}
-                        {this.renderDomainPicker()}
-                    </Margin>
-                </PickersContainer>
             </>
         )
     }
