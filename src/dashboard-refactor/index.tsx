@@ -809,6 +809,7 @@ export class DashboardContainer extends StatefulUIElement<
                 />
                 <HelpBtn />
                 <DragElement />
+                {this.props.renderUpdateNotifBanner()}
             </Container>
         )
     }

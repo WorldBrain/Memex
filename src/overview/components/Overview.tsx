@@ -234,10 +234,14 @@ class Overview extends PureComponent<Props, State> {
         )
     }
 
+    renderUpdateNotifBanner() {
+        return <UpdateNotifBanner theme={{ position: 'fixed' }} />
+    }
+
     renderOverview() {
         return (
             <>
-                <UpdateNotifBanner theme={{ position: 'fixed' }} />
+                {this.renderUpdateNotifBanner()}
                 <div className={styles.mainWindow}>
                     <div
                         className={classNames(styles.Overview, {
@@ -346,6 +350,7 @@ class Overview extends PureComponent<Props, State> {
                 renderDashboardSwitcherLink={() =>
                     this.renderSwitcherLink('old')
                 }
+                renderUpdateNotifBanner={() => this.renderUpdateNotifBanner()}
             />
         )
     }

@@ -65,6 +65,7 @@ export interface DashboardDependencies {
     localStorage: Browser['storage']['local']
     openFeedUrl: () => void
     renderDashboardSwitcherLink: () => JSX.Element
+    renderUpdateNotifBanner: () => JSX.Element
 }
 
 export interface DropReceivingState {

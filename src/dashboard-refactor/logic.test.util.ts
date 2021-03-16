@@ -99,6 +99,7 @@ export async function setupTest(
         openFeedUrl?: () => void
         copyToClipboard?: (text: string) => Promise<boolean>
         renderDashboardSwitcherLink?: () => JSX.Element
+        renderUpdateNotifBanner?: () => JSX.Element
     } = {
         copyToClipboard: defaultTestSetupDeps.copyToClipboard,
     },
@@ -135,6 +136,7 @@ export async function setupTest(
         openFeedUrl: args.openFeedUrl ?? (() => undefined),
         renderDashboardSwitcherLink:
             args.renderDashboardSwitcherLink ?? (() => null),
+        renderUpdateNotifBanner: args.renderUpdateNotifBanner ?? (() => null),
     })
 
     if (args.overrideSearchTrigger) {
