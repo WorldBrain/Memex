@@ -27,12 +27,12 @@ const ExpandAllNotesBtn = styled.button`
     font-weight: 600;
     cursor: pointer;
     outline: none;
-    margin-right: 5px;
     padding: 2px 8px 2px 8px;
     display: flex;
     border: none;
     align-items: center;
     background-color: transparent;
+    justify-content: center;
 
     &:focus {
         background-color: ${colors.lightMintGreen};

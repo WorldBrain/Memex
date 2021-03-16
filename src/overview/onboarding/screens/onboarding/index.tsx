@@ -22,6 +22,15 @@ import {
     KEYBOARDSHORTCUTS_DEFAULT_STATE,
 } from 'src/in-page-ui/keyboard-shortcuts/constants'
 
+import Margin from 'src/dashboard-refactor/components/Margin'
+import styled from 'styled-components'
+
+const ButtonBar = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
 const styles = require('../../components/onboarding-box.css')
 const searchSettingsStyles = require('../../components/search-settings.css')
 
@@ -439,16 +448,55 @@ export default class OnboardingScreen extends StatefulUIElement<
 
                                 <div className={styles.shortcutBox}>
                                     <div className={styles.shortcutDescription}>
-                                        Search via address bar
+                                        Search Saved Pages & Notes
                                     </div>
                                     <div className={styles.shortcutName}>
-                                        <span className={styles.keyboardButton}>
-                                            m
-                                        </span>
-                                        then
-                                        <span className={styles.keyboardButton}>
-                                            space
-                                        </span>
+                                        {OperatingSystem === 'Win' && (
+                                            <>
+                                                <span
+                                                    className={
+                                                        styles.keyboardButton
+                                                    }
+                                                >
+                                                    alt
+                                                </span>
+                                                +
+                                                <span
+                                                    className={
+                                                        styles.keyboardButton
+                                                    }
+                                                >
+                                                    f
+                                                </span>
+                                            </>
+                                        )}
+                                        {OperatingSystem === 'Mac' && (
+                                            <>
+                                                <span
+                                                    className={
+                                                        styles.keyboardButton
+                                                    }
+                                                >
+                                                    option
+                                                    <img
+                                                        className={
+                                                            styles.macOptionIcon
+                                                        }
+                                                        src={
+                                                            './img/macOptionDark.svg'
+                                                        }
+                                                    />
+                                                </span>
+                                                +
+                                                <span
+                                                    className={
+                                                        styles.keyboardButton
+                                                    }
+                                                >
+                                                    f
+                                                </span>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -481,7 +529,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     </div>
                                 </div>
                             </div>*/}
-                            <div className={styles.tryOutButton}>
+                            <ButtonBar>
                                 <PrimaryAction
                                     label={'Try it out'}
                                     onClick={() =>
@@ -490,7 +538,12 @@ export default class OnboardingScreen extends StatefulUIElement<
                                         )
                                     }
                                 />
-                            </div>
+                                <Margin horizontal="5px" />
+                                <SecondaryAction
+                                    label={'Go to Dashboard'}
+                                    onClick={this.props.navToOverview}
+                                />
+                            </ButtonBar>
                         </div>
 
                         {/*<OnboardingStep
