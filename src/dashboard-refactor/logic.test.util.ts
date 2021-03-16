@@ -137,9 +137,9 @@ export async function setupTest(
     if (args.overrideSearchTrigger) {
         logic['searchTriggeredCount'] = 0
 
-        logic['runSearch'] = async () => {
+        logic['runSearch'] = (async () => {
             logic['searchTriggeredCount']++
-        }
+        }) as any
     }
 
     const searchResults = device.createElement<RootState, Events>(logic)

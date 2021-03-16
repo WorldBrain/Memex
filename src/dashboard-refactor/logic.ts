@@ -1,4 +1,5 @@
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
+import debounce from 'lodash/debounce'
 
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
@@ -328,9 +329,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         await this.runSearch(nextState)
     }
 
-    private async runSearch(previousState: State, paginate?: boolean) {
-        await this.search({ previousState, event: { paginate } })
-    }
+    private runSearch = debounce(
+        (previousState: State, paginate?: boolean) =>
+            this.search({ previousState, event: { paginate } }),
+        300,
+    )
 
     /* END - Misc helper methods */
 
