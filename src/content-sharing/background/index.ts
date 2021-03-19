@@ -621,7 +621,10 @@ export default class ContentSharingBackground {
                 listReference: contentSharing.getSharedListReferenceFromLinkID(
                     action.remoteListId,
                 ),
-                listEntries: action.data,
+                listEntries: action.data.map((entry) => ({
+                    ...entry,
+                    entryTitle: entry.entryTitle ?? null,
+                })),
                 userReference,
             })
 
@@ -742,7 +745,10 @@ export default class ContentSharingBackground {
                     return
                 }
                 const pageReference = await contentSharing.ensurePageInfo({
-                    pageInfo,
+                    pageInfo: {
+                        ...pageInfo,
+                        fullTitle: pageInfo.fullTitle ?? null,
+                    },
                     creatorReference: userReference,
                 })
                 this._ensuredPages[
