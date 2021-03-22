@@ -3,6 +3,8 @@ export interface PageList {
     name: string
     description?: string
     pages?: string[]
+    isFollowed?: boolean
+    isCollaborative?: boolean
     isNestable?: boolean
     isDeletable?: boolean
     active?: boolean
@@ -18,6 +20,16 @@ export interface PageListEntry {
 export interface Tab {
     tabId: number
     url: string
+}
+
+export interface CollectionStatus {
+    isOwn: boolean
+    isCollaborative: boolean
+}
+
+export interface CollectionCache {
+    getCollectionStatus: (id: number) => CollectionStatus | null
+    getCollectionsByStatus: (status: CollectionStatus) => PageList[]
 }
 
 export interface RemoteCollectionsInterface {
