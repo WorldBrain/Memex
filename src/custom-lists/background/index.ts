@@ -11,6 +11,7 @@ import {
     CollectionsSettings,
     PageList,
     PageListEntry,
+    CollectionsCacheInterface,
 } from './types'
 import { maybeIndexTabs } from 'src/page-indexing/utils'
 import { Analytics } from 'src/analytics/types'
@@ -18,11 +19,13 @@ import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from 'src/tags/utils'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import TabManagementBackground from 'src/tab-management/background'
+import CollectionsCache from './collections-cache'
 
 const limitSuggestionsReturnLength = 10
 const limitSuggestionsStorageLength = 20
 
 export default class CustomListBackground {
+    private cache: CollectionsCacheInterface
     storage: CustomListStorage
     remoteFunctions: RemoteCollectionsInterface
 
@@ -40,6 +43,8 @@ export default class CustomListBackground {
             localBrowserStorage: Storage.LocalStorageArea
         },
     ) {
+        this.cache = new CollectionsCache()
+
         // Makes the custom list Table in indexed DB.
         this.storage = new CustomListStorage({
             storageManager: options.storageManager,

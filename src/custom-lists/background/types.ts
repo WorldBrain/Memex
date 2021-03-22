@@ -27,7 +27,10 @@ export interface CollectionStatus {
     isCollaborative: boolean
 }
 
-export interface CollectionCache {
+export interface CollectionsCacheInterface {
+    addCollection: (collection: PageList) => void
+    addCollections: (collections: PageList[]) => void
+    removeCollection: (id: number) => void
     getCollectionStatus: (id: number) => CollectionStatus | null
     getCollectionsByStatus: (status: CollectionStatus) => PageList[]
 }

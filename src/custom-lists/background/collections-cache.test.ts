@@ -1,4 +1,5 @@
-import { CollectionCache, PageList, CollectionStatus } from './types'
+import CollectionCache from './collections-cache'
+import { CollectionsCacheInterface, PageList } from './types'
 
 const TEST_DATA: PageList[] = [
     {
@@ -33,8 +34,12 @@ const TEST_DATA: PageList[] = [
     },
 ]
 
-function setupTest(): { cache: CollectionCache } {
-    return { cache: {} as CollectionCache }
+function setupTest(
+    params: { testData: PageList[] } = { testData: TEST_DATA },
+): { cache: CollectionsCacheInterface } {
+    const cache = new CollectionCache()
+    cache.addCollections(params.testData)
+    return { cache }
 }
 
 describe('collections cache tests', () => {
@@ -66,15 +71,56 @@ describe('collections cache tests', () => {
         ).toEqual([...TEST_DATA.slice(2, 3)])
         expect(
             cache.getCollectionsByStatus({
-                isOwn: true,
+                isOwn: false,
                 isCollaborative: false,
             }),
-        ).toEqual([TEST_DATA.slice(3, 4)])
+        ).toEqual([...TEST_DATA.slice(3, 4)])
         expect(
             cache.getCollectionsByStatus({
                 isOwn: false,
                 isCollaborative: true,
             }),
-        ).toEqual([TEST_DATA.slice(4, 5)])
+        ).toEqual([...TEST_DATA.slice(4, 5)])
+    })
+
+    it('should be able to add new collections to cache', () => {
+        const { cache } = setupTest()
+
+        cache.addCollection({
+            id: 100,
+            name: 'test-100',
+        })
+
+        expect(
+            cache.getCollectionsByStatus({
+                isOwn: true,
+                isCollaborative: false,
+            }),
+        ).toEqual([...TEST_DATA.slice(0, 2), { id: 100, name: 'test-100' }])
+    })
+
+    it('should be able to remove collections from cache', () => {
+        const { cache } = setupTest()
+
+        cache.addCollection({
+            id: 100,
+            name: 'test-100',
+        })
+
+        expect(
+            cache.getCollectionsByStatus({
+                isOwn: true,
+                isCollaborative: false,
+            }),
+        ).toEqual([...TEST_DATA.slice(0, 2), { id: 100, name: 'test-100' }])
+
+        cache.removeCollection(100)
+
+        expect(
+            cache.getCollectionsByStatus({
+                isOwn: true,
+                isCollaborative: false,
+            }),
+        ).toEqual([...TEST_DATA.slice(0, 2)])
     })
 })
