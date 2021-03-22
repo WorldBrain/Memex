@@ -16,6 +16,10 @@ export function getNoteShareUrl(options: { remoteAnnotationId: string }) {
     return `${getBaseUrl()}/a/${options.remoteAnnotationId}`
 }
 
+export function getFeedUrl() {
+    return `${getBaseUrl()}/feed`
+}
+
 export function isShareUrl(url: string) {
     return url.startsWith(getBaseUrl())
 }

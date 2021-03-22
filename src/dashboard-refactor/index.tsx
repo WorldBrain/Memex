@@ -37,6 +37,7 @@ import { FILTER_PICKERS_LIMIT } from './constants'
 import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 import DragElement from './components/DragElement'
 import Margin from './components/Margin'
+import { getFeedUrl, getListShareUrl } from 'src/content-sharing/utils'
 
 export interface Props extends DashboardDependencies {
     renderDashboardSwitcherLink: () => JSX.Element
@@ -47,6 +48,11 @@ export class DashboardContainer extends StatefulUIElement<
     RootState,
     Events
 > {
+    static MEMEX_SOCIAL_URL =
+        process.env.NODE_ENV === 'production'
+            ? 'https://memex.social'
+            : 'https://staging.memex.social'
+
     static defaultProps: Partial<Props> = {
         analytics,
         copyToClipboard,
@@ -62,13 +68,9 @@ export class DashboardContainer extends StatefulUIElement<
         tagsBG: runInBackground(),
         authBG: runInBackground(),
         syncBG: runInBackground(),
-        openFeedUrl: () =>
-            window.open(
-                process.env.NODE_ENV === 'production'
-                    ? 'https://memex.social/feed'
-                    : 'https://staging.memex.social/feed',
-                '_blank',
-            ),
+        openFeed: () => window.open(getFeedUrl(), '_blank'),
+        openCollectionPage: (remoteListId) =>
+            window.open(getListShareUrl({ remoteListId }), '_blank'),
     }
 
     private annotationsCache: AnnotationsCacheInterface
@@ -310,7 +312,7 @@ export class DashboardContainer extends StatefulUIElement<
             <ListsSidebarContainer
                 {...listsSidebar}
                 lockedState={lockedState}
-                openFeedUrl={this.props.openFeedUrl}
+                openFeedUrl={this.props.openFeed}
                 onAllSavedSelection={() =>
                     this.processEvent('resetFilters', null)
                 }
@@ -745,10 +747,15 @@ export class DashboardContainer extends StatefulUIElement<
             return (
                 <ShareListModalContent
                     onClose={() => this.processEvent('setShareListId', {})}
-                    isShared={listData.isShared}
                     listCreationState={listData.listCreationState}
                     listName={listData.name}
-                    shareUrl={listData.shareUrl}
+                    shareUrl={
+                        listData.remoteId
+                            ? getListShareUrl({
+                                  remoteListId: listData.remoteId,
+                              })
+                            : undefined
+                    }
                     onGenerateLinkClick={() =>
                         this.processEvent('shareList', null)
                     }

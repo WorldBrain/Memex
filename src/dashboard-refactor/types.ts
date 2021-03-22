@@ -62,7 +62,8 @@ export interface DashboardDependencies {
     activityIndicatorBG: ActivityIndicatorInterface
     copyToClipboard: (text: string) => Promise<boolean>
     localStorage: Browser['storage']['local']
-    openFeedUrl: () => void
+    openFeed: () => void
+    openCollectionPage: (remoteCollectionId: string) => void
     renderDashboardSwitcherLink: () => JSX.Element
     renderUpdateNotifBanner: () => JSX.Element
 }

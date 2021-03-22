@@ -133,7 +133,8 @@ export async function setupTest(
             device.backgroundModules.activityIndicator.remoteFunctions,
         copyToClipboard:
             args.copyToClipboard ?? defaultTestSetupDeps.copyToClipboard,
-        openFeedUrl: args.openFeedUrl ?? (() => undefined),
+        openFeed: args.openFeedUrl ?? (() => undefined),
+        openCollectionPage: () => {},
         renderDashboardSwitcherLink:
             args.renderDashboardSwitcherLink ?? (() => null),
         renderUpdateNotifBanner: args.renderUpdateNotifBanner ?? (() => null),

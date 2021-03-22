@@ -108,7 +108,6 @@ const BlockHeading = styled(TypographyHeadingNormal)`
 `
 
 interface Props {
-    isShared: boolean
     listName: string
     shareUrl?: string
     listCreationState: TaskState
@@ -168,7 +167,7 @@ export default class ShareListModalContent extends PureComponent<Props> {
                                 Anyone with this link can view your collection
                             </TypographyTextNormal>
                         </InstructionsBox>
-                        {!this.props.isShared && (
+                        {!this.props.shareUrl == null && (
                             <PrimaryAction
                                 label="Generate Link"
                                 onClick={this.props.onGenerateLinkClick}
@@ -186,7 +185,7 @@ export default class ShareListModalContent extends PureComponent<Props> {
 
                     <LinkContainer>
                         <LinkBox>
-                            {this.props.isShared && (
+                            {this.props.shareUrl != null && (
                                 <ShareUrlBox onClick={() => this.onClickCopy()}>
                                     <ShareUrl>
                                         {this.props.shareUrl}

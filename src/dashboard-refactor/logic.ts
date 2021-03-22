@@ -9,7 +9,6 @@ import {
     getLastSharedAnnotationTimestamp,
     setLastSharedAnnotationTimestamp,
 } from 'src/annotations/utils'
-import { getListShareUrl } from 'src/content-sharing/utils'
 import {
     PAGE_SIZE,
     STORAGE_KEYS,
@@ -287,20 +286,19 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const listIds: number[] = []
                 const listData: { [id: number]: ListData } = {}
 
-                for (const { id, name } of lists) {
+                for (const list of lists) {
                     const remoteListId = await this.options.contentShareBG.getRemoteListId(
-                        { localListId: id },
+                        { localListId: list.id },
                     )
 
-                    listIds.push(id)
-                    listData[id] = {
-                        id,
-                        name,
+                    listIds.push(list.id)
+                    listData[list.id] = {
+                        id: list.id,
+                        name: list.name,
                         listCreationState: 'pristine',
-                        isShared: !!remoteListId,
-                        shareUrl: remoteListId
-                            ? getListShareUrl({ remoteListId })
-                            : undefined,
+                        remoteId: remoteListId ?? undefined,
+                        isFollowed: list.isFollowed,
+                        isCollaborative: list.isCollaborative,
                     }
                 }
 
@@ -510,9 +508,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const remoteListId = await this.options.contentShareBG.getRemoteListId(
                     { localListId: listId },
                 )
-                const shareUrl = remoteListId
-                    ? getListShareUrl({ remoteListId })
-                    : undefined
 
                 this.emitMutation({
                     modals: {
@@ -521,8 +516,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listsSidebar: {
                         listData: {
                             [listId]: {
-                                isShared: { $set: !!remoteListId },
-                                shareUrl: { $set: shareUrl },
+                                remoteId: { $set: remoteListId ?? undefined },
                             },
                         },
                     },
@@ -1962,6 +1956,17 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const listData = previousState.listsSidebar.listData[event.listId]
+
+        if (
+            listData.isFollowed &&
+            listData.remoteId &&
+            !listData.isCollaborative
+        ) {
+            this.options.openCollectionPage(listData.remoteId)
+            return
+        }
+
         const listIdToSet =
             previousState.listsSidebar.selectedListId === event.listId
                 ? undefined
@@ -2230,8 +2235,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listsSidebar: {
                         listData: {
                             [listId]: {
-                                shareUrl: {
-                                    $set: getListShareUrl({ remoteListId }),
+                                remoteId: {
+                                    $set: remoteListId ?? undefined,
                                 },
                             },
                         },
@@ -2248,7 +2253,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     clickFeedActivityIndicator: EventHandler<
         'clickFeedActivityIndicator'
     > = async ({ previousState }) => {
-        this.options.openFeedUrl()
+        this.options.openFeed()
 
         if (previousState.listsSidebar.hasFeedActivity) {
             this.emitMutation({

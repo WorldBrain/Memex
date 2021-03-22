@@ -45,7 +45,8 @@ async function createDependencies(): Promise<DashboardProps> {
         contentShareBG: backgroundModules.contentSharing.remoteFunctions,
         activityIndicatorBG:
             backgroundModules.activityIndicator.remoteFunctions,
-        openFeedUrl: () => undefined,
+        openFeed: () => undefined,
+        openCollectionPage: () => undefined,
         renderDashboardSwitcherLink: () => null,
         renderUpdateNotifBanner: () => null,
     }

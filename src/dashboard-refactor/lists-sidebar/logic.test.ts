@@ -631,7 +631,7 @@ describe('Dashboard search results logic', () => {
             searchResults.state.listsSidebar.listData[listId].listCreationState,
         ).toEqual('pristine')
         expect(
-            searchResults.state.listsSidebar.listData[listId].shareUrl,
+            searchResults.state.listsSidebar.listData[listId].remoteId,
         ).toBeUndefined()
 
         await searchResults.processEvent('setShareListId', { listId })
@@ -646,7 +646,7 @@ describe('Dashboard search results logic', () => {
             searchResults.state.listsSidebar.listData[listId].listCreationState,
         ).toEqual('success')
         expect(
-            searchResults.state.listsSidebar.listData[listId].shareUrl,
+            searchResults.state.listsSidebar.listData[listId].remoteId,
         ).toEqual(getListShareUrl({ remoteListId }))
     })
 

@@ -33,8 +33,7 @@ interface State {
 
     displayName?: string
     newDisplayName?: string
-    isShared?: boolean
-    shareUrl?: string
+    remoteListId?: string
     showBetaNotif: boolean
     hasSubscription: boolean
 }
@@ -82,13 +81,11 @@ class ShareListModal extends Component<Props, State> {
                     localListId: this.props.list.id,
                 },
             )
-            const isShared = !!remoteListId
             const profile = await this.props.auth.getUserProfile()
             this.setState({
                 loadState: 'success',
-                isShared,
                 displayName: profile?.displayName ?? undefined,
-                shareUrl: remoteListId && getListShareUrl({ remoteListId }),
+                remoteListId,
             })
         } catch (e) {
             this.setState({ loadState: 'error' })
@@ -98,20 +95,16 @@ class ShareListModal extends Component<Props, State> {
 
     shareList = async () => {
         this.setState({
-            isShared: true,
             listCreationState: 'running',
             entriesUploadState: 'running',
         })
         try {
-            // const { remoteListId } = await new Promise((resolve) => {
-            //     setTimeout(() => resolve({ remoteListId: 'test' }), 2000)
-            // })
             const { remoteListId } = await this.props.contentSharing.shareList({
                 listId: this.props.list.id,
             })
             this.setState({
                 listCreationState: 'success',
-                shareUrl: getListShareUrl({ remoteListId }),
+                remoteListId,
             })
         } catch (e) {
             this.setState({
@@ -203,8 +196,9 @@ class ShareListModal extends Component<Props, State> {
         return (
             <ShareListModalContent
                 onClose={this.props.onClose}
-                isShared={this.state.isShared}
-                shareUrl={this.state.shareUrl}
+                shareUrl={getListShareUrl({
+                    remoteListId: this.state.remoteListId,
+                })}
                 listName={this.props.list.name}
                 onGenerateLinkClick={this.shareList}
                 listCreationState={this.state.listCreationState}
