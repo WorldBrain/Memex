@@ -362,22 +362,22 @@ export class DashboardContainer extends StatefulUIElement<
                                 ),
                         ),
                     },
-                    // {
-                    //     ...listsSidebar.followedLists,
-                    //     title: 'Followed collections',
-                    //     onExpandBtnClick: () =>
-                    //         this.processEvent('setFollowedListsExpanded', {
-                    //             isExpanded: !listsSidebar.followedLists
-                    //                 .isExpanded,
-                    //         }),
-                    //     listsArray: listsSidebar.followedLists.listIds.map(
-                    //         (listId) =>
-                    //             this.listStateToProps(
-                    //                 listsSidebar.listData[listId],
-                    //                 'followed-list',
-                    //             ),
-                    //     ),
-                    // },
+                    {
+                        ...listsSidebar.followedLists,
+                        title: 'Followed collections',
+                        onExpandBtnClick: () =>
+                            this.processEvent('setFollowedListsExpanded', {
+                                isExpanded: !listsSidebar.followedLists
+                                    .isExpanded,
+                            }),
+                        listsArray: listsSidebar.followedLists.filteredListIds.map(
+                            (listId) =>
+                                this.listStateToProps(
+                                    listsSidebar.listData[listId],
+                                    'followed-lists',
+                                ),
+                        ),
+                    },
                 ]}
                 initDropReceivingState={(listId) => ({
                     onDragEnter: () =>

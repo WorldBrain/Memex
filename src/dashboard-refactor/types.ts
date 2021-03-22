@@ -114,4 +114,4 @@ export type DashboardModalsEvents = UIEvent<{
     setDeletingNoteArgs: NoteDataEventArgs
 }>
 
-export type ListSource = 'local-lists' | 'followed-list'
+export type ListSource = 'local-lists' | 'followed-lists'

@@ -65,7 +65,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             return false
         }
 
-        if (this.props.source === 'followed-list') {
+        if (this.props.source === 'followed-lists') {
             return (
                 <MenuButton onClick={this.props.onUnfollowClick}>
                     <Margin horizontal="10px">
