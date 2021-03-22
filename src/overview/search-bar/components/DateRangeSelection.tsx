@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import onClickOutside from 'react-onclickoutside'
 import moment from 'moment'
 import chrono from 'chrono-node'
 import classnames from 'classnames'
@@ -16,19 +17,28 @@ const styles = require('./DateRangeSelection.css')
 // const stylesPro = require('../../tooltips/components/tooltip.css')
 
 export interface DateRangeSelectionProps {
-    env: 'inpage' | 'overview'
+    env?: 'inpage' | 'overview'
     startDate: number
     startDateText: string
     endDate: number
     endDateText: string
-    disabled: boolean
+    disabled?: boolean
+    onClickOutside?: React.MouseEventHandler
+    onEscapeKeyDown?: () => void | Promise<void>
     onStartDateChange: (...args) => void
     onStartDateTextChange: (...args) => void
     onEndDateChange: (...args) => void
     onEndDateTextChange: (...args) => void
-    changeTooltip: (...args) => void
+    changeTooltip?: (...args) => void
 }
+
 class DateRangeSelection extends Component<DateRangeSelectionProps> {
+    static defaultProps: Partial<DateRangeSelectionProps> = {
+        changeTooltip: () => {},
+        env: 'overview',
+        disabled: false,
+    }
+
     startDatePicker: any
     endDatePicker: any
 
@@ -49,6 +59,12 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
         this.endDatePicker.onClearClick = this.handleClearClick({
             isStartDate: false,
         })
+    }
+
+    handleClickOutside = (e) => {
+        if (this.props.onClickOutside) {
+            this.props.onClickOutside(e)
+        }
     }
 
     /**
@@ -72,6 +88,11 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
      * Overrides react-date-picker's input keydown handler to search on Enter key press.
      */
     handleKeydown = ({ isStartDate }) => (event) => {
+        if (event.key === 'Escape' && this.props.onEscapeKeyDown) {
+            this.props.onEscapeKeyDown()
+            return
+        }
+
         if (
             this.props.env === 'inpage' &&
             !(event.ctrlKey || event.metaKey) &&
@@ -271,6 +292,7 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                     <div className={styles.dateTitleContainer}>
                         <span className={styles.dateTitle}>From</span>
                         <DatePickerInput
+                            autoFocus
                             value={this.state.startDateText || startDateText}
                             name="from"
                             onChange={this.handleRawInputChange({
@@ -351,4 +373,4 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
     }
 }
 
-export default DateRangeSelection
+export default onClickOutside(DateRangeSelection)

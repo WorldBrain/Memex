@@ -34,6 +34,7 @@ const styles = require('./ResultList.css')
 
 interface LocalState {
     tagSuggestions: string[]
+    activeTagPickerNoteId: string | undefined
     activeShareMenuNoteId: string | undefined
     activeCopyPasterAnnotationId: string | undefined
 }
@@ -117,6 +118,7 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
 
     state: LocalState = {
         tagSuggestions: [],
+        activeTagPickerNoteId: undefined,
         activeShareMenuNoteId: undefined,
         activeCopyPasterAnnotationId: undefined,
     }
@@ -209,12 +211,6 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                 <div ref={(ref) => this.setListDivRef(ref)}>
                     <CollectionPicker
                         onUpdateEntrySelection={this.handleListUpdate(index)}
-                        queryEntries={(query) =>
-                            collections.searchForListSuggestions({ query })
-                        }
-                        loadDefaultSuggestions={
-                            collections.fetchInitialListSuggestions
-                        }
                         initialSelectedEntries={async () => selectedLists}
                         onEscapeKeyDown={
                             this.props.handleListBtnClick(index) as any
@@ -238,10 +234,6 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                 <div ref={(ref) => this.setTagDivRef(ref)}>
                     <TagPicker
                         onUpdateEntrySelection={this.handleTagUpdate(index)}
-                        queryEntries={(query) =>
-                            tags.searchForTagSuggestions({ query })
-                        }
-                        loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
                         initialSelectedEntries={async () => selectedTags}
                         onEscapeKeyDown={
                             this.props.handleTagBtnClick(index) as any
@@ -325,6 +317,10 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                 onReaderBtnClick={this.handleReaderBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
                 activeShareMenuNoteId={this.state.activeShareMenuNoteId}
+                setActiveTagPickerNoteId={(id) =>
+                    this.setState({ activeTagPickerNoteId: id })
+                }
+                activeTagPickerNoteId={this.state.activeTagPickerNoteId}
                 setActiveShareMenuNoteId={
                     this.props.isBetaEnabled
                         ? (id) =>

@@ -79,7 +79,7 @@ export default class TemplateRow extends Component<Props, State> {
                 <ActionsContainer>
                     <ResultItemActionBtn
                         onClick={this.handleSingleCopy}
-                        tooltipPosition="left"
+                        tooltipPosition="bottom"
                         imgSrc={icons.copy}
                         tooltipText="Copy"
                     />
@@ -100,7 +100,7 @@ export default class TemplateRow extends Component<Props, State> {
                         imgSrc={icons.edit}
                         onClick={this.props.onClickEdit}
                         tooltipText="Edit"
-                        tooltipPosition="left"
+                        tooltipPosition="bottom"
                     />
                 </ActionsContainer>
             </>
@@ -130,7 +130,7 @@ const Title = styled.div`
     cursor: pointer;
     text-align: left;
 
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     font-weight: ${(props) => (props.fullWidth ? 'bold' : 'normal')};
     font-size: 14px;

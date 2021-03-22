@@ -49,8 +49,8 @@ export class NotifBanner extends React.PureComponent<Props> {
 const Banner = styled.div`
     display: flex;
     flex-direction: row;
-    background: #5cd9a6;
-    height: 57px;
+    background: #bed0f7;
+    height: 45px;
     width: ${({ theme }) => theme.width};
     position: ${({ theme }) => theme.position};
     padding: 0 20px;
@@ -65,7 +65,7 @@ const MainContent = styled.div`
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
 `
 const MainText = styled.span`
     font-size: 16px;
@@ -84,9 +84,10 @@ const MainBtn = styled.button`
     background: none;
     font-size: 14px;
     outline: none;
+    background: white;
 
     &:hover {
-        background-color: white;
+        opacity: 0.8;
     }
 `
 const CloseBtn = styled.img`

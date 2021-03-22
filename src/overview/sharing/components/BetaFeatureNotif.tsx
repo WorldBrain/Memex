@@ -14,12 +14,11 @@ import { SignInScreen } from 'src/authentication/components/SignIn'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
+import { runInBackground } from 'src/util/webextensionRPC'
 
 export interface Props {
-    auth: AuthRemoteFunctionsInterface
-    subscription: SubscriptionsService
-    contentScriptBackground: ContentScriptsInterface<'caller'>
+    auth?: AuthRemoteFunctionsInterface
+    contentScriptBackground?: ContentScriptsInterface<'caller'>
     showSubscriptionModal: () => void
     betaRequestStrategy?: 'go-to-options-page' | 'sign-in'
     initWithAuth?: boolean
@@ -103,6 +102,8 @@ const SuccessBox = styled.div`
 export default class BetaFeatureNotif extends PureComponent<Props, State> {
     static defaultProps: Partial<Props> = {
         betaRequestStrategy: 'sign-in',
+        contentScriptBackground: runInBackground(),
+        auth: runInBackground(),
     }
 
     state: State = {
@@ -139,12 +140,12 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
         }
     }
 
-    private openPortal = async () => {
-        this.setState({ chargebeeState: 'running' })
-        const portalLink = await this.props.subscription.getManageLink()
-        window.open(portalLink['access_url'])
-        this.setState({ chargebeeState: 'pristine' })
-    }
+    // private openPortal = async () => {
+    //     this.setState({ chargebeeState: 'running' })
+    //     const portalLink = await this.props.subscription.getManageLink()
+    //     window.open(portalLink['access_url'])
+    //     this.setState({ chargebeeState: 'pristine' })
+    // }
 
     onRequestAccess = () => {
         if (this.props.betaRequestStrategy === 'go-to-options-page') {

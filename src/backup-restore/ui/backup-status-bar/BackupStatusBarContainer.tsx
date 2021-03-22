@@ -9,6 +9,7 @@ import {
     BackupStatusType,
     BackupTimes,
 } from 'src/backup-restore/types'
+import { BACKUP_STORAGE_KEY } from 'src/backup-restore/constants'
 
 interface Props {
     checkedIcon: string
@@ -67,7 +68,7 @@ class BackupStatusBar extends Component<Props, State> {
             backupTimes: await remoteFunction('getBackupTimes')(),
             backupLocation: await remoteFunction('getBackendLocation')(),
             hasInitialBackup: await remoteFunction('hasInitialBackup')(),
-            backupStatus: await getLocalStorageTyped('backup-status', {
+            backupStatus: await getLocalStorageTyped(BACKUP_STORAGE_KEY, {
                 state: 'no_backup',
                 backupId: 'no_backup',
             }),

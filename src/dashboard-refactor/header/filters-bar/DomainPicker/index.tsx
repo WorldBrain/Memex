@@ -16,9 +16,11 @@ import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResult
 import EntryRow from 'src/common-ui/GenericPicker/components/EntryRow' // ActOnAllTabsButton, // IconStyleWrapper,
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
-import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
-import { EntrySelectedList } from './components/EntrySelectedList'
-import { DomainResultItem } from './components/DomainResultItem'
+import {
+    fontSizeNormal,
+    fontSizeSmall,
+} from 'src/common-ui/components/design-library/typography'
+import { EntrySelectedList } from 'src/custom-lists/ui/CollectionPicker/components/EntrySelectedList'
 
 class DomainPicker extends StatefulUIElement<
     DomainPickerDependencies,
@@ -53,36 +55,34 @@ class DomainPicker extends StatefulUIElement<
 
     handleClickOutside: React.MouseEventHandler = (e) => {
         if (this.props.onClickOutside) {
-            this.props.onClickOutside(e) // this is defined as type react.MouseEventHandler for the collection picker but as a standard function with no params or return for the tag picker
+            this.props.onClickOutside(e)
         }
     }
 
-    handleSetSearchInputRef = (ref: HTMLInputElement) =>
+    private handleSetSearchInputRef = (ref: HTMLInputElement) =>
         this.processEvent('setSearchInputRef', { ref })
 
-    handleOuterSearchBoxClick: React.MouseEventHandler = () =>
+    private handleOuterSearchBoxClick: React.MouseEventHandler = () =>
         this.processEvent('focusInput', {})
 
-    handleSearchInputChanged = (query: string) => {
+    private handleSearchInputChanged = (query: string) => {
         this.props.onSearchInputChange?.({ query })
         return this.processEvent('searchInputChanged', { query })
     }
 
-    handleSelectedDomainPress = (domain: string) =>
+    private handleSelectedDomainPress = (domain: string) =>
         this.processEvent('selectedEntryPress', { entry: domain })
 
-    handleResultDomainPress = (domain: DisplayEntry) =>
+    private handleResultDomainPress = (domain: DisplayEntry) =>
         this.processEvent('resultEntryPress', { entry: domain })
 
-    handleResultDomainFocus = (domain: DisplayEntry, index?: number) =>
+    private handleResultDomainFocus = (domain: DisplayEntry, index?: number) =>
         this.processEvent('resultEntryFocus', { entry: domain, index })
 
-    handleNewDomainPress = () =>
-        this.processEvent('newEntryPress', { entry: this.state.newEntryName })
+    private handleKeyPress = (key: KeyEvent) =>
+        this.processEvent('keyPress', { key })
 
-    handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
-
-    renderDomainRow = (domain: DisplayEntry, index: number) => (
+    private renderDomainRow = (domain: DisplayEntry, index: number) => (
         <EntryRow
             onPress={this.handleResultDomainPress}
             onFocus={this.handleResultDomainFocus}
@@ -95,23 +95,16 @@ class DomainPicker extends StatefulUIElement<
             removeTooltipText="Remove filter"
         />
     )
-    renderEmptyDomain() {
-        if (this.state.newEntryName !== '') {
-            return
-        }
 
+    private renderEmptyDomain() {
         return (
             <EmptyDomainsView>
-                <strong>No Collections yet</strong>
-                <br />
-                Add new collections
-                <br />
-                via the search bar
+                <strong>No domains found</strong>
             </EmptyDomainsView>
         )
     }
 
-    renderMainContent() {
+    private renderMainContent() {
         if (this.state.loadingSuggestions) {
             return (
                 <LoadingBox>
@@ -138,18 +131,6 @@ class DomainPicker extends StatefulUIElement<
                         />
                     }
                 />
-                {this.state.newEntryName !== '' && (
-                    <AddNewEntry
-                        resultItem={
-                            <DomainResultItem>
-                                {this.state.newEntryName}
-                            </DomainResultItem>
-                        }
-                        onPress={this.handleNewDomainPress}
-                    >
-                        {/* {this.renderNewDomainAllTabsButton()} */}
-                    </AddNewEntry>
-                )}
                 <EntryResultsList
                     entries={this.state.displayEntries}
                     renderEntryRow={this.renderDomainRow}
@@ -196,6 +177,22 @@ const EmptyDomainsView = styled.div`
     font-weight: 400;
     font-size: ${fontSizeNormal}px;
     text-align: center;
+`
+
+const DomainResultItem = styled.div`
+    display: flex;
+    border-radius: 4px;
+    color: ${(props) => props.theme.tag.text};
+    padding: 0 8px;
+    margin: 2px 4px 2px 0;
+    font-weight: 400;
+    font-size: ${fontSizeSmall}px;
+    transition: all 0.1s;
+    word-break: break-word;
+
+    &:hover {
+        cursor: pointer;
+    }
 `
 
 export default onClickOutside(DomainPicker)

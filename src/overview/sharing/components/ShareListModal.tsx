@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { Modal } from 'src/common-ui/components'
 import { PageList } from 'src/custom-lists/background/types'
 import ShareNonPioneerInfo from './ShareNonPioneerInfo'
 import ShareListModalContent from './ShareListModalContent'
@@ -9,7 +8,7 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { getListShareUrl } from 'src/content-sharing/utils'
-import { auth, subscription } from 'src/util/remote-functions-background'
+import { auth } from 'src/util/remote-functions-background'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
@@ -97,7 +96,7 @@ class ShareListModal extends Component<Props, State> {
         }
     }
 
-    async shareList() {
+    shareList = async () => {
         this.setState({
             isShared: true,
             listCreationState: 'running',
@@ -196,7 +195,6 @@ class ShareListModal extends Component<Props, State> {
             return (
                 <BetaFeatureNotif
                     showSubscriptionModal={this.props.showSubscriptionModal}
-                    subscription={subscription}
                 />
             )
         }
@@ -204,27 +202,12 @@ class ShareListModal extends Component<Props, State> {
         // otherwise -  show the main modal content
         return (
             <ShareListModalContent
+                onClose={this.props.onClose}
                 isShared={this.state.isShared}
                 shareUrl={this.state.shareUrl}
+                listName={this.props.list.name}
+                onGenerateLinkClick={this.shareList}
                 listCreationState={this.state.listCreationState}
-                entriesUploadState={this.state.entriesUploadState}
-                collectionName={this.props.list.name}
-                onClickToggle={async () => {
-                    if (!this.state.isShared) {
-                        await this.shareList()
-                    } else {
-                        await this.unshareList()
-                    }
-                }}
-                onClickLetUsKnow={() => {
-                    window.open('https://worldbrain.io/feedback')
-                }}
-                onClickViewRoadmap={() => {
-                    window.open('https://worldbrain.io/roadmap')
-                }}
-                onClickSharingTutorial={() => {
-                    window.open('https://worldbrain.io/tutorials/memex-social')
-                }}
             />
         )
     }
@@ -237,11 +220,7 @@ class ShareListModal extends Component<Props, State> {
             return <LoadingIndicator />
         }
 
-        return (
-            <Modal large onClose={this.props.onClose}>
-                {this.renderContent()}
-            </Modal>
-        )
+        return this.renderContent()
     }
 }
 

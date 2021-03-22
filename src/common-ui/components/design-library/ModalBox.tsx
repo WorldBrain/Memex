@@ -11,7 +11,7 @@ const StyledModalBox = styled.div`
     overflow-y: hidden;
 `
 const HeaderText = styled.h2`
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     font-weight: 600;
     font-size: 20px;

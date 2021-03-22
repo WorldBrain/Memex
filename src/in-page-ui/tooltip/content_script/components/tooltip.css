@@ -17,7 +17,7 @@
     transition: all 1s ease-in-out;
 
     & > * {
-        font-family: 'Poppins';
+        font-family: 'Poppins', sans-serif;
     }
 }
 

@@ -23,7 +23,7 @@ const TextArea = styled.textarea`
 `
 
 const HeaderText = styled.div`
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     font-weight: bold;
     font-size: 14px;
@@ -36,7 +36,7 @@ const ButtonContainer = styled.div`
 `
 
 const Button = styled.button`
-    font-family: Poppins;
+    font-family: 'Poppins', sans-serif;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;

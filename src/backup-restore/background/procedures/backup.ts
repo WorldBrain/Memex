@@ -10,6 +10,7 @@ import { isExcludedFromBackup } from '../utils'
 import { getLocalStorageTyped, setLocalStorageTyped } from 'src/util/storage'
 import { DexieUtilsPlugin, BackupPlugin } from 'src/search/plugins'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
+import { BACKUP_STORAGE_KEY } from 'src/backup-restore/constants'
 
 const pickBy = require('lodash/pickBy')
 
@@ -152,7 +153,7 @@ export default class BackupProcedure {
                         this.events.emit('success')
                     }
                     // Set backup status for notification in search bar
-                    await setLocalStorageTyped('backup-status', {
+                    await setLocalStorageTyped(BACKUP_STORAGE_KEY, {
                         state: 'success',
                         backupId: 'success',
                     })
@@ -170,12 +171,14 @@ export default class BackupProcedure {
                     console.error(e.stack)
 
                     // Set backup status for notification in search bar
-                    const getState = await getLocalStorageTyped('backup-status')
+                    const getState = await getLocalStorageTyped(
+                        BACKUP_STORAGE_KEY,
+                    )
                     if (
                         getState.state === 'success' ||
                         getState.state === 'no_backup'
                     ) {
-                        await setLocalStorageTyped('backup-status', {
+                        await setLocalStorageTyped(BACKUP_STORAGE_KEY, {
                             state: 'fail',
                             backupId: 'backup_error',
                         })

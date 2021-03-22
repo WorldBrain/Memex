@@ -10,42 +10,33 @@ const stories = storiesOf('Sharing', module)
 
 stories.add('Modal content - private', () => (
     <ShareListModalContent
-        collectionName={'Reading List'}
+        onClose={() => {}}
+        listName={'Reading List'}
         isShared={false}
         listCreationState="pristine"
-        entriesUploadState="pristine"
-        onClickToggle={() => {}}
-        onClickLetUsKnow={() => {}}
-        onClickViewRoadmap={() => {}}
-        onClickSharingTutorial={() => {}}
+        onGenerateLinkClick={() => {}}
     />
 ))
 
 stories.add('Modal content - public', () => (
     <ShareListModalContent
-        collectionName={'Reading List'}
+        onClose={() => {}}
+        listName={'Reading List'}
         isShared={boolean('isShared', true)}
         listCreationState="pristine"
-        entriesUploadState="pristine"
         shareUrl={'https://memex.social/collections/jdfjf81d'}
-        onClickToggle={() => {}}
-        onClickLetUsKnow={() => {}}
-        onClickViewRoadmap={() => {}}
-        onClickSharingTutorial={() => {}}
+        onGenerateLinkClick={() => {}}
     />
 ))
 
 stories.add('Modal content - public & uploading', () => (
     <ShareListModalContent
-        collectionName={'Reading List'}
+        onClose={() => {}}
+        listName={'Reading List'}
         isShared={boolean('isShared', true)}
         listCreationState="running"
-        entriesUploadState="running"
         shareUrl={'https://memex.social/collections/jdfjf81d'}
-        onClickToggle={() => {}}
-        onClickLetUsKnow={() => {}}
-        onClickViewRoadmap={() => {}}
-        onClickSharingTutorial={() => {}}
+        onGenerateLinkClick={() => {}}
     />
 ))
 

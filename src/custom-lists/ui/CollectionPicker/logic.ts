@@ -5,7 +5,7 @@ import GenericPickerLogic, {
 } from 'src/common-ui/GenericPicker/logic'
 
 export interface ListPickerDependencies extends GenericPickerDependencies {
-    onClickOutside?: () => void
+    onClickOutside?: React.MouseEventHandler
     query?: string
     onSearchInputChange?: (evt: { query: string }) => void
     onSelectedEntriesChange?: (evt: { selectedEntries: string[] }) => void

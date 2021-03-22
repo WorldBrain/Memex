@@ -3,7 +3,7 @@ import { storiesOf } from '@storybook/react'
 
 import ListsSidebarSearchBar, {
     ListsSidebarSearchBarProps,
-} from '../../../../dashboard-refactor/lists-sidebar/components/lists-search-bar/'
+} from '../../../../dashboard-refactor/lists-sidebar/components/search-bar'
 
 import { sidebarWrapperFunc } from './lists-sidebar-group'
 import { SidebarLockedState } from 'src/dashboard-refactor/lists-sidebar/types'
@@ -23,7 +23,7 @@ const template: ListsSidebarSearchBarProps = {
     onSearchQueryChange: (inputString) => console.log(inputString),
     onInputClear: () => {},
     onCreateNew: (newListName) => console.log(newListName),
-    sidebarLockedState: sidebarLockedState,
+    sidebarLockedState,
 }
 
 export const listsSidebarSearchBarProps: {

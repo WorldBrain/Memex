@@ -18,7 +18,7 @@ export interface Props {
     // checkboxTitleCopy?: React.ReactNode
     // checkboxSubtitleCopy?: React.ReactNode
     getLink: () => Promise<string>
-    onClickOutside?: () => void
+    onClickOutside?: React.MouseEventHandler
     /** This logic should include handling derendering this share menu view. */
     // onUnshareClick?: () => Promise<void>
     // onShareAllClick: () => Promise<void>
@@ -56,12 +56,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     componentWillUnmount() {
         if (this.copyTimeout) {
             clearTimeout(this.copyTimeout)
-        }
-    }
-
-    handleClickOutside = () => {
-        if (this.props.onClickOutside) {
-            this.props.onClickOutside()
         }
     }
 
@@ -159,29 +153,30 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
     render() {
         return (
-            <ClickAway onClickAway={this.handleClickOutside}>
+            <ClickAway onClickAway={this.props.onClickOutside}>
                 <Menu>
-                    <SectionTitle>{this.props.linkTitleCopy}</SectionTitle>
-                    <SectionDescription>
-                        {this.props.linkSubtitleCopy}
-                    </SectionDescription>
-                    {/*<ShareAllBox
-                        // tooltipText={this.renderShortcutTip({
-                        //     modifier: 'Alt',
-                        // })}
-                        position="bottom"
-                    >*/}
-                    <LinkCopierBox>
-                        <LinkCopier
-                            state={this.state.loadState}
-                            onClick={this.handleLinkClick}
-                        >
-                            {this.renderLinkContent()}
-                        </LinkCopier>
-                        {/* {this.renderUnshareIcon()} */}
-                    </LinkCopierBox>
-                    {/*</ShareAllBox>*/}
-                    <Spacing />
+                    <TopArea>
+                        <SectionTitle>{this.props.linkTitleCopy}</SectionTitle>
+                        <SectionDescription>
+                            {this.props.linkSubtitleCopy}
+                        </SectionDescription>
+                        {/*<ShareAllBox
+                            // tooltipText={this.renderShortcutTip({
+                            //     modifier: 'Alt',
+                            // })}
+                            position="bottom"
+                        >*/}
+                        <LinkCopierBox>
+                            <LinkCopier
+                                state={this.state.loadState}
+                                onClick={this.handleLinkClick}
+                            >
+                                {this.renderLinkContent()}
+                            </LinkCopier>
+                            {/* {this.renderUnshareIcon()} */}
+                        </LinkCopierBox>
+                        {/*</ShareAllBox>*/}
+                    </TopArea>
                     {this.props.children}
                     {/* <SectionTitle>{this.props.checkboxTitleCopy}</SectionTitle>
                     <SectionDescription>
@@ -206,13 +201,15 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 export default ShareAnnotationMenu
 
 const Menu = styled.div`
+    & * {
+        font-family: 'Poppins', sans-serif;
+        line-height: 22px;
+    }
+`
+
+const TopArea = styled.div`
     padding: 10px 15px;
 `
-
-const Spacing = styled.div`
-    height: 15px;
-`
-
 const SectionTitle = styled.div`
     font-weight: bold;
     font-size: 14px;
@@ -222,6 +219,7 @@ const SectionTitle = styled.div`
 const SectionDescription = styled.div`
     font-size: 12px;
     color: #3a2f45;
+    padding-bottom: 5px;
 `
 
 const LinkCopierBox = styled.div`

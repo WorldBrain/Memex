@@ -24,12 +24,18 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { TagResultItem } from './components/TagResultItem'
 import { EntrySelectedTag } from './components/EntrySelectedTag'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
+import { tags } from 'src/util/remote-functions-background'
 
 class TagPicker extends StatefulUIElement<
     TagPickerDependencies,
     TagPickerState,
     TagPickerEvent
 > {
+    static defaultProps: Partial<TagPickerDependencies> = {
+        queryEntries: (query) => tags.searchForTagSuggestions({ query }),
+        loadDefaultSuggestions: tags.fetchInitialTagSuggestions,
+    }
+
     constructor(props: TagPickerDependencies) {
         super(props, new TagPickerLogic(props))
     }
@@ -62,6 +68,10 @@ class TagPicker extends StatefulUIElement<
     }
 
     get shouldShowAddNew(): boolean {
+        if (this.props.filterMode) {
+            return false
+        }
+
         const { newEntryName } = this.state
         return newEntryName !== '' && VALID_TAG_PATTERN.test(newEntryName)
     }

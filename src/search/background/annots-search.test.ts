@@ -124,14 +124,6 @@ describe('Annotations search', () => {
             DATA.tag2,
             DATA.annotation.object.url,
         )
-
-        // I don't know why this happens: seemingly only in jest,
-        //  `getTagsByAnnotationUrl` returns one less result than it's meant to.
-        //  The best fix I can find for now is adding a dummy tag...
-        await annotsStorage.modifyTags(true)(
-            'dummy',
-            DATA.annotation.object.url,
-        )
     }
 
     async function setupTest() {
@@ -541,5 +533,19 @@ describe('Annotations search', () => {
             expect(resultsExhausted).toBe(true)
             expect(resUrls).toEqual([DATA.annotation.object.url])
         })
+    })
+
+    test('annotations on page search results should have tags attached', async () => {
+        const { searchBg } = await setupTest()
+
+        const resA = await searchBg.searchAnnotations({ query: 'comment' })
+
+        expect(resA.docs[0].annotations[0].tags).toEqual([DATA.tag1, DATA.tag2])
+        expect(resA.docs[0].annotations[1].tags).toEqual([])
+
+        const resB = await searchBg.searchAnnotations({ query: 'comment' })
+
+        expect(resB.docs[0].annotations[0].tags).toEqual([DATA.tag1, DATA.tag2])
+        expect(resB.docs[0].annotations[1].tags).toEqual([])
     })
 })

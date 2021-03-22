@@ -410,7 +410,7 @@ class TextInputControlled extends React.Component<
 
         return type === 'textarea' ? (
             <textarea
-                {...props}
+                {...(props as any)}
                 ref={this.updateRef}
                 value={this.state.text}
                 onChange={this.handleOnChange}
@@ -418,7 +418,7 @@ class TextInputControlled extends React.Component<
         ) : (
             <input
                 type={'text'}
-                {...props}
+                {...(props as any)}
                 ref={this.updateRef}
                 value={this.state.text}
                 onChange={this.handleOnChange}

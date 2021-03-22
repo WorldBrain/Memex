@@ -110,12 +110,12 @@ describe('Activity indicator background tests', () => {
             reference: replyReference,
             threadReference,
         } = await storageModules.contentConversations.createReply({
+            previousReplyReference: null,
             annotationReference: sharedAnnotationReferences['test.com#123'],
             normalizedPageUrl: 'test.com',
             pageCreatorReference: userAReference,
             userReference: userBReference,
             reply: { content: 'TEST' },
-            previousReplyReference: null,
         })
 
         // Login as other user so that reply activity gets assoc. with them (they are the replier)

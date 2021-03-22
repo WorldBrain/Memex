@@ -185,8 +185,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 
         return {
             ...boundProps,
-            onDeleteConfirm: () => {
-                boundProps.onDeleteConfirm()
+            onDeleteConfirm: (e) => {
+                boundProps.onDeleteConfirm(e)
                 this.props.highlighter.removeAnnotationHighlights(
                     annotation.url,
                 )
@@ -223,7 +223,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 {this.state.showBetaFeatureNotifModal && (
                     <BetaFeatureNotifModal
                         auth={this.props.auth}
-                        subscription={this.props.subscription}
                         contentScriptBackground={
                             this.props.contentScriptBackground
                         }

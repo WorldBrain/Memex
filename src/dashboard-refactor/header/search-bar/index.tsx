@@ -5,6 +5,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 
 import colors from '../../colors'
 import styles, { fonts } from '../../styles'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 const textStyles = `
     font-family: ${fonts.primary.name};
@@ -15,41 +16,49 @@ const textStyles = `
 
 const SearchBarContainer = styled.div`
     height: 34px;
-    width: ${styles.components.searchBar.widthPx}px;
+    max-width: ${styles.components.searchBar.widthPx}px;
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
     background-color: ${colors.lightGrey};
     border-radius: 5px;
+    padding: 0px 15px;
 `
 
 const Input = styled.input`
     width: inherit;
-    ${textStyles}
     font-size: 12px;
     line-height: 18px;
     border: none;
     background-color: transparent;
+    padding-left: 10px;
 
     &:focus {
         outline: none;
     }
-
-    &::placeholder {
-        ${textStyles}
-    }
 `
 
-const FilterButton = styled.div`
+const FilterButton = styled(Margin)`
     width: max-content;
     ${textStyles}
-    font-size: 10px;
+    font-size: 12px;
     line-height: 15px;
     cursor: pointer;
+    width: auto;
+    white-space: nowrap;
 `
 
 const FullWidthMargin = styled(Margin)`
     width: 100%;
+`
+
+const SearchIcon = styled.img`
+    width: 16px;
+    height: 17px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `
 
 export interface SearchBarProps {
@@ -57,7 +66,6 @@ export interface SearchBarProps {
     searchQuery: string
     isSearchBarFocused: boolean
     searchFiltersOpen: boolean
-    searchFiltersActive: []
     onSearchBarFocus(): void
     onSearchQueryChange(queryString: string): void
     onSearchFiltersOpen(): void
@@ -70,10 +78,10 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
             this.inputRef.current.focus()
         }
     }
-    handleChange: React.FormEventHandler = (evt) => {
+    handleChange: React.KeyboardEventHandler = (evt) => {
         // need to amend getFilterStrings function to pull through search terms as well, then
         // bundle them in an object to send with the onSearchQueryChange func
-        this.props.onSearchQueryChange(evt.currentTarget.textContent)
+        this.props.onSearchQueryChange((evt.target as HTMLInputElement).value)
     }
     render() {
         const {
@@ -85,24 +93,22 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         return (
             <Margin vertical="auto">
                 <SearchBarContainer onClick={onSearchBarFocus}>
-                    <FullWidthMargin left="27px">
+                    <FullWidthMargin>
+                        <SearchIcon src={icons.searchIcon} />
                         <Input
                             ref={this.inputRef}
                             placeholder={
-                                !searchQuery &&
-                                (this.props.placeholder ??
-                                    'Search your saved pages and notes')
+                                this.props.placeholder ??
+                                'Search your saved pages and notes'
                             }
                             value={searchQuery}
                             onChange={this.handleChange}
                             autoComplete="off"
                         />
                     </FullWidthMargin>
-                    <Margin horizontal="23px">
-                        <FilterButton onClick={onSearchFiltersOpen}>
-                            {searchFiltersOpen ? 'Remove Filters' : 'Filters'}
-                        </FilterButton>
-                    </Margin>
+                    <FilterButton left="15px" onClick={onSearchFiltersOpen}>
+                        {searchFiltersOpen ? 'Remove Filters' : 'Filters'}
+                    </FilterButton>
                 </SearchBarContainer>
             </Margin>
         )
