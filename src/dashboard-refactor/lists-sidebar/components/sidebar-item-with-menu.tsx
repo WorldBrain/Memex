@@ -24,6 +24,7 @@ export interface Props {
     source?: ListSource
     hasActivity?: boolean
     isMenuDisplayed?: boolean
+    isCollaborative?: boolean
     nameHighlightIndices?: ListNameHighlightIndices
     onUnfollowClick?: React.MouseEventHandler
     onRenameClick?: React.MouseEventHandler
@@ -135,10 +136,15 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
     }
 
     private renderTitle() {
+        const collaborationIcon = this.props.isCollaborative && (
+            <Icon heightAndWidth="12px" path={icons.shared} />
+        )
+
         if (!this.props.nameHighlightIndices) {
             return (
                 <ListTitle selectedState={this.props.selectedState}>
                     {this.props.name}
+                    {collaborationIcon}
                 </ListTitle>
             )
         }
@@ -157,6 +163,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     {nameHighlighted}
                 </span>
                 {namePost.length > 0 && <span>{namePost}</span>}
+                {collaborationIcon}
             </ListTitle>
         )
     }
@@ -323,7 +330,9 @@ const MenuButton = styled.div`
     }
 `
 
-const ListTitle = styled.p<Props>`
+const ListTitle = styled.span<Props>`
+    display: flex;
+    align-items: center;
     margin: 0;
     font-family: ${fonts.primary.name};
     font-style: normal;

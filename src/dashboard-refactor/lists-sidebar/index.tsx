@@ -62,7 +62,6 @@ const PeekTrigger = styled.div`
     width: 10px;
     position: absolute;
     background: transparent;
-    /* z-index: 3000; */
 `
 
 export interface ListsSidebarProps {

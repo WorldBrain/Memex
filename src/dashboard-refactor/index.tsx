@@ -98,6 +98,7 @@ export class DashboardContainer extends StatefulUIElement<
             source,
             listId: list.id,
             name: list.name,
+            isCollaborative: list.isCollaborative,
             isEditing: listsSidebar.editingListId === list.id,
             isMenuDisplayed: listsSidebar.showMoreMenuListId === list.id,
             selectedState: {

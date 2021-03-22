@@ -19,6 +19,7 @@ export interface ListData {
     name: string
     shareUrl?: string
     isShared?: boolean
+    isCollaborative?: boolean
     listCreationState: TaskState
 }
 
