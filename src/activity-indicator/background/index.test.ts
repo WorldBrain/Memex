@@ -100,14 +100,18 @@ describe('Activity indicator background tests', () => {
 
         // Ensure the annot author follows their own annot
         await activityStreams.followEntity({
-            entityType: 'sharedAnnotation',
-            entity: sharedAnnotationReferences['test.com#123'],
+            entityType: 'conversationThread',
+            entity: {
+                id: sharedAnnotationReferences['test.com#123'].id,
+                type: 'conversation-thread-reference',
+            },
             feeds: { home: true },
         })
 
         const {
             reference: replyReference,
         } = await storageModules.contentConversations.createReply({
+            previousReplyReference: null,
             annotationReference: sharedAnnotationReferences['test.com#123'],
             normalizedPageUrl: 'test.com',
             pageCreatorReference: userAReference,
@@ -120,10 +124,16 @@ describe('Activity indicator background tests', () => {
 
         await activityStreams.addActivity({
             activityType: 'conversationReply',
-            entityType: 'sharedAnnotation',
-            entity: sharedAnnotationReferences['test.com#123'],
+            entityType: 'conversationThread',
+            entity: {
+                id: sharedAnnotationReferences['test.com#123'].id,
+                type: 'conversation-thread-reference',
+            },
             activity: {
-                isFirstReply: true,
+                annotationReference: {
+                    id: sharedAnnotationReferences['test.com#123'].id,
+                    type: 'shared-annotation-reference',
+                },
                 replyReference,
             },
         })
