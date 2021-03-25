@@ -98,7 +98,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         this.props.inPageUI.events.removeAllListeners('sidebarAction')
 
         for (const event of this.props.events?.eventNames?.() ?? []) {
-            this.props.events.removeAllListeners(event)
+            this.props.events.removeAllListeners(event as any)
         }
     }
 
