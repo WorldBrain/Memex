@@ -1,6 +1,8 @@
 export * from '@worldbrain/memex-common/lib/content-sharing/client-storage/types'
+import { ContentSharingServiceInterface } from '@worldbrain/memex-common/lib/content-sharing/service/types'
 
-export interface ContentSharingInterface {
+export interface ContentSharingInterface
+    extends ContentSharingServiceInterface {
     shareList(options: { listId: number }): Promise<{ remoteListId: string }>
     shareListEntries(options: {
         listId: number

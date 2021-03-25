@@ -10,27 +10,22 @@ import {
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
 import { ServerStorage } from 'src/storage/types'
 import { Services } from './types'
+import ContentSharingService from './content-sharing'
 
-interface InMemoryDeps {
-    backend: 'memory'
+export async function createServices(options: {
+    backend: 'firebase' | 'memory'
     firebase?: typeof firebaseModule
     getServerStorage: () => Promise<ServerStorage>
-}
-
-interface ProductionDeps {
-    backend: 'firebase'
-    firebase?: typeof firebaseModule
-}
-
-export async function createServices(
-    options: InMemoryDeps | ProductionDeps,
-): Promise<Services> {
+}): Promise<Services> {
+    const { storageModules } = await options.getServerStorage()
     if (options.backend === 'memory') {
-        const { storageModules } = await options.getServerStorage()
         const auth = new MemoryAuthService()
 
         return {
             auth,
+            contentSharing: new ContentSharingService({
+                storage: { contentSharing: storageModules.contentSharing },
+            }),
             subscriptions: new MemorySubscriptionsService(),
             activityStreams: new MemoryStreamsService({
                 storage: {
@@ -49,8 +44,11 @@ export async function createServices(
     })
 
     return {
-        subscriptions: authDeps.subscriptionService,
         auth: authDeps.authService,
+        contentSharing: new ContentSharingService({
+            storage: { contentSharing: storageModules.contentSharing },
+        }),
+        subscriptions: authDeps.subscriptionService,
         activityStreams: new FirebaseFunctionsActivityStreamsService({
             executeCall: async (name, params) => {
                 const functions = (
