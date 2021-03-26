@@ -683,7 +683,7 @@ export class DashboardContainer extends StatefulUIElement<
                     searchType: searchResults.searchType,
                     searchParams: stateToSearchParams(this.state),
                     isCopyPasterShown: searchResults.isSearchCopyPasterShown,
-                    isCopyPasterBtnShown: !areSearchFiltersEmpty(this.state),
+                    isCopyPasterBtnShown: true,
                     hideCopyPaster: () =>
                         this.processEvent('setSearchCopyPasterShown', {
                             isShown: false,
