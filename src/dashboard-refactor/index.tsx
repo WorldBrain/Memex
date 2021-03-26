@@ -744,6 +744,7 @@ export class DashboardContainer extends StatefulUIElement<
 
             return (
                 <ListShareModal
+                    useExtImgDir
                     listID={listData.id.toString()}
                     onCloseRequested={() =>
                         this.processEvent('setShareListId', {})

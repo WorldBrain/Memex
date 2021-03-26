@@ -1,5 +1,5 @@
 import { exec } from 'child_process'
-import { EnvironmentPlugin } from 'webpack'
+import { EnvironmentPlugin, ContextReplacementPlugin } from 'webpack'
 import ForkTsPlugin from 'fork-ts-checker-webpack-plugin'
 import CopyPlugin from 'copy-webpack-plugin'
 import HtmlPlugin from 'html-webpack-plugin'
@@ -69,6 +69,8 @@ export default function ({
             preload: /\.(css|js)$/,
             prefetch: /\.(svg|png)$/,
         }),
+        // This stops the memex-common images being pulled in, when we just need to copy them over as static files
+        new ContextReplacementPlugin(/memex-common\/ts\/assets\/img/, /aaaaa/),
     ]
 
     if (mode === 'development') {

@@ -42,6 +42,7 @@ export const copyPatterns = [
         to: '.',
         transform: transformManifestVersion,
     },
+    { from: 'external/@worldbrain/memex-common/ts/assets/img', to: 'img' },
     { from: 'img', to: 'img' },
     {
         from: 'node_modules/webextension-polyfill/dist/browser-polyfill.js',
