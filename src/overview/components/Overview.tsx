@@ -35,10 +35,12 @@ import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
-import { PageNotesCopyPaster } from 'src/copy-paster'
 import { DashboardContainer } from 'src/dashboard-refactor'
 import colors from 'src/dashboard-refactor/colors'
 import { STORAGE_KEYS } from 'src/dashboard-refactor/constants'
+import { createServices } from 'src/services/ui'
+import type { UIServices } from 'src/services/ui/types'
+import { OverlayContainer } from '@worldbrain/memex-common/lib/main-ui/containers/overlay'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -68,6 +70,7 @@ class Overview extends PureComponent<Props, State> {
         localStorage: browser.storage.local,
     }
 
+    private services: UIServices
     private annotationsCache: AnnotationsCacheInterface
     private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     private customListsBG = runInBackground<RemoteCollectionsInterface>()
@@ -95,6 +98,7 @@ class Overview extends PureComponent<Props, State> {
     constructor(props: Props) {
         super(props)
 
+        this.services = createServices()
         this.annotationsCache = createAnnotationsCache({
             contentSharing: this.contentSharingBG,
             annotations: this.annotationsBG,
@@ -256,6 +260,7 @@ class Overview extends PureComponent<Props, State> {
     renderOverview() {
         return (
             <>
+                <OverlayContainer services={this.services} />
                 {this.renderUpdateNotifBanner()}
                 <div className={styles.mainWindow}>
                     <div
@@ -364,12 +369,18 @@ class Overview extends PureComponent<Props, State> {
         }
 
         return (
-            <DashboardContainer
-                renderDashboardSwitcherLink={() =>
-                    this.renderSwitcherLink('old')
-                }
-                renderUpdateNotifBanner={() => this.renderUpdateNotifBanner()}
-            />
+            <>
+                <OverlayContainer services={this.services} />
+                <DashboardContainer
+                    services={this.services}
+                    renderDashboardSwitcherLink={() =>
+                        this.renderSwitcherLink('old')
+                    }
+                    renderUpdateNotifBanner={() =>
+                        this.renderUpdateNotifBanner()
+                    }
+                />
+            </>
         )
     }
 }

@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { browser } from 'webextension-polyfill-ts'
+import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
@@ -742,15 +743,15 @@ export class DashboardContainer extends StatefulUIElement<
             const listData = listsSidebar.listData[modalsState.shareListId]
 
             return (
-                <ShareListModalContent
-                    onClose={() => this.processEvent('setShareListId', {})}
-                    isShared={listData.isShared}
-                    listCreationState={listData.listCreationState}
-                    listName={listData.name}
-                    shareUrl={listData.shareUrl}
-                    onGenerateLinkClick={() =>
-                        this.processEvent('shareList', null)
+                <ListShareModal
+                    listID={listData.id.toString()}
+                    onCloseRequested={() =>
+                        this.processEvent('setShareListId', {})
                     }
+                    services={{
+                        ...this.props.services,
+                        contentSharing: this.props.contentShareBG,
+                    }}
                 />
             )
         }

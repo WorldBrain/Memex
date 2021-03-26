@@ -25,6 +25,7 @@ import {
     RemoteEventEmitter,
 } from 'src/util/webextensionRPC'
 import ActivityStreamsBackground from 'src/activity-streams/background'
+import { Services } from 'src/services/types'
 
 // interface ListPush {
 //     actionsPending: number
@@ -62,6 +63,7 @@ export default class ContentSharingBackground {
             analytics: Analytics
             activityStreams: Pick<ActivityStreamsBackground, 'backend'>
             getContentSharing: () => Promise<ContentSharingStorage>
+            services: Pick<Services, 'contentSharing'>
         },
     ) {
         this.storage = new ContentSharingClientStorage({
@@ -73,6 +75,7 @@ export default class ContentSharingBackground {
         })
 
         this.remoteFunctions = {
+            ...options.services.contentSharing,
             shareList: this.shareList,
             shareListEntries: this.shareListEntries,
             shareAnnotation: this.shareAnnotation,
