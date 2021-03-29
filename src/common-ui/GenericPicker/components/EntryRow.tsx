@@ -3,6 +3,8 @@ import styled from 'styled-components'
 import { Layers, X as XIcon } from '@styled-icons/feather'
 import { StyledIconBase } from '@styled-icons/styled-icon'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import { Icon } from 'src/dashboard-refactor/styled-components'
 import { opacify } from 'polished'
 import { DisplayEntry } from '../types'
 
@@ -15,6 +17,7 @@ export interface Props {
     removeTooltipText?: string
     actOnAllTooltipText?: string
     resultItem: React.ReactNode
+    collaborative?: boolean
     selected?: boolean
     focused?: boolean
 }
@@ -48,7 +51,13 @@ class EntryRow extends React.Component<Props> {
     }
 
     render() {
-        const { selected, focused, onPressActOnAll, resultItem } = this.props
+        const {
+            collaborative,
+            selected,
+            focused,
+            onPressActOnAll,
+            resultItem,
+        } = this.props
 
         return (
             <Row
@@ -57,7 +66,12 @@ class EntryRow extends React.Component<Props> {
                 onMouseOut={this.handleMouseOut}
                 isFocused={focused}
             >
-                {resultItem}
+                <NameWrapper>
+                    {resultItem}
+                    {collaborative && (
+                        <Icon heightAndWidth="16px" path={icons.shared} faded />
+                    )}
+                </NameWrapper>
                 <IconStyleWrapper show={focused}>
                     {selected && (
                         <ButtonTooltip
@@ -118,6 +132,12 @@ const Row = styled.div`
     transition: background 0.3s;
     cursor: pointer;
     background: ${(props) => props.isFocused && props.theme.border};
+`
+
+const NameWrapper = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 `
 
 export default EntryRow

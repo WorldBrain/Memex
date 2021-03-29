@@ -63,6 +63,9 @@ class ListPicker extends StatefulUIElement<
         }
     }
 
+    private isListCollaborative = (name: string): boolean =>
+        this.state.collaborativeLists.has(name)
+
     handleClickOutside = (e) => {
         if (this.props.onClickOutside) {
             this.props.onClickOutside(e)
@@ -114,6 +117,7 @@ class ListPicker extends StatefulUIElement<
             name={list.name}
             selected={list.selected}
             focused={list.focused}
+            collaborative={this.isListCollaborative(list.name)}
             resultItem={<ListResultItem>{list.name}</ListResultItem>}
             removeTooltipText={this.removeToolTipText}
             actOnAllTooltipText="Add all tabs in window to list"

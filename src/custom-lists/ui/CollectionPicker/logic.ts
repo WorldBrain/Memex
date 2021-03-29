@@ -16,7 +16,7 @@ export interface ListPickerDependencies extends GenericPickerDependencies {
 
 export type ListPickerEvent = GenericPickerEvent
 export type ListPickerState = GenericPickerState & {
-    collaborativeLists: string[]
+    collaborativeLists: Set<string>
 }
 
 export default class CollectionPickerLogic extends GenericPickerLogic<
@@ -31,7 +31,7 @@ export default class CollectionPickerLogic extends GenericPickerLogic<
     getInitialState(): ListPickerState {
         return {
             ...super.getInitialState(),
-            collaborativeLists: [],
+            collaborativeLists: new Set(),
         }
     }
 
@@ -39,6 +39,6 @@ export default class CollectionPickerLogic extends GenericPickerLogic<
         await super.init()
 
         const lists = await this.dependencies.loadCollaborativeListNames()
-        this.emitMutation({ collaborativeLists: { $set: lists } })
+        this.emitMutation({ collaborativeLists: { $set: new Set(lists) } })
     }
 }
