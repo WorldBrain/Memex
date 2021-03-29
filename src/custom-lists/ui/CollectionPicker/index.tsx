@@ -34,6 +34,7 @@ class ListPicker extends StatefulUIElement<
         queryEntries: (query) =>
             collections.searchForListSuggestions({ query }),
         loadDefaultSuggestions: collections.fetchInitialListSuggestions,
+        loadCollaborativeListNames: collections.fetchCollaborativeListNames,
     }
 
     constructor(props: ListPickerDependencies) {

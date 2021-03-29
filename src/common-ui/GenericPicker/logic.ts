@@ -62,12 +62,13 @@ interface GenericPickerUIEvent<T extends keyof GenericPickerEvent> {
 //  `this.emitMutations` to use the `$apply` operator on the entire state instead of a per-state-key mutation
 //  gets passed them. Extended classes of this should work fine.
 export default abstract class GenericPickerLogic<
+    Dependencies extends GenericPickerDependencies = GenericPickerDependencies,
     State extends GenericPickerState = GenericPickerState,
     Event extends GenericPickerEvent = GenericPickerEvent
 > extends UILogic<State, Event> {
     private searchInputRef?: HTMLInputElement
 
-    constructor(protected dependencies: GenericPickerDependencies) {
+    constructor(protected dependencies: Dependencies) {
         super()
     }
 
@@ -96,7 +97,7 @@ export default abstract class GenericPickerLogic<
         } as State
     }
 
-    init = async () => {
+    async init() {
         this.emitMutation({
             $apply: (state) => ({ ...state, loadingSuggestions: true }),
         })
