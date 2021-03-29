@@ -412,20 +412,6 @@ describe('Custom List Integrations', () => {
             ])
         })
 
-        test('fetch lists with some urls excluded', async () => {
-            const { customLists } = await setupTest()
-
-            const lists = await customLists.fetchAllLists({
-                excludeIds: [1, 2] as any[],
-                skipMobileList: true,
-            })
-
-            checkDefined(lists)
-            expect(lists.length).toBe(1)
-            expect(lists[0].id).not.toBe(1)
-            expect(lists[0].id).not.toBe(2)
-        })
-
         test('fetch lists with limits', async () => {
             const { customLists } = await setupTest()
 

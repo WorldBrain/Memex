@@ -90,13 +90,11 @@ export default class CustomListBackground {
     }
 
     fetchAllLists = async ({
-        excludeIds = [],
         skip = 0,
         limit = 20,
         skipMobileList = false,
     }): Promise<PageList[]> => {
         return this.storage.fetchAllLists({
-            excludedIds: excludeIds,
             skipMobileList,
             limit,
             skip,

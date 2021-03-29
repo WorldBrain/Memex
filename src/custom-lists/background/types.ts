@@ -56,7 +56,6 @@ export interface RemoteCollectionsInterface {
     removeList(args: { id: number }): Promise<any>
     removePageFromList(args: { id: number; url: string }): Promise<void>
     fetchAllLists(args: {
-        excludeIds?: number[]
         skip?: number
         limit?: number
         skipMobileList?: boolean
