@@ -618,7 +618,6 @@ describe('Dashboard search results logic', () => {
                     [listId]: {
                         $set: {
                             id: listId,
-                            listCreationState: 'pristine',
                             name: 'test',
                         },
                     },
@@ -626,9 +625,9 @@ describe('Dashboard search results logic', () => {
             },
         })
 
-        expect(
-            searchResults.state.listsSidebar.listData[listId].listCreationState,
-        ).toEqual('pristine')
+        expect(searchResults.state.listsSidebar.listShareLoadingState).toEqual(
+            'pristine',
+        )
         expect(
             searchResults.state.listsSidebar.listData[listId].remoteId,
         ).toBeUndefined()
@@ -636,14 +635,14 @@ describe('Dashboard search results logic', () => {
         await searchResults.processEvent('setShareListId', { listId })
         const shareP = searchResults.processEvent('shareList', null)
 
-        expect(
-            searchResults.state.listsSidebar.listData[listId].listCreationState,
-        ).toEqual('running')
+        expect(searchResults.state.listsSidebar.listShareLoadingState).toEqual(
+            'running',
+        )
         await shareP
 
-        expect(
-            searchResults.state.listsSidebar.listData[listId].listCreationState,
-        ).toEqual('success')
+        expect(searchResults.state.listsSidebar.listShareLoadingState).toEqual(
+            'success',
+        )
         expect(
             searchResults.state.listsSidebar.listData[listId].remoteId,
         ).toEqual(remoteListId)

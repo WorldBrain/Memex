@@ -15,7 +15,6 @@ describe('Dashboard Refactor modals logic', () => {
                     [listId]: {
                         $set: {
                             id: listId,
-                            listCreationState: 'pristine',
                             name: 'test',
                         },
                     },
@@ -58,7 +57,6 @@ describe('Dashboard Refactor modals logic', () => {
                     [listId]: {
                         $set: {
                             id: listId,
-                            listCreationState: 'pristine',
                             name: 'test',
                         },
                     },

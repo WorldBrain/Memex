@@ -18,7 +18,6 @@ export interface ListData {
     id: number
     name: string
     remoteId?: string
-    listCreationState: TaskState
 }
 
 export interface ListGroupCommon

@@ -143,9 +143,9 @@ class DashboardWrapper extends React.PureComponent<WrapperProps> {
         })
         await this.dashboardRef.current.processEvent('setLocalLists', {
             lists: [
-                { id: 1, name: 'test', listCreationState: 'pristine' },
-                { id: 2, name: 'another test', listCreationState: 'pristine' },
-                { id: 3, name: 'third test', listCreationState: 'pristine' },
+                { id: 1, name: 'test' },
+                { id: 2, name: 'another test' },
+                { id: 3, name: 'third test' },
             ],
         })
     }

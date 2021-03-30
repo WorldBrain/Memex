@@ -295,7 +295,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listData[id] = {
                         id,
                         name,
-                        listCreationState: 'pristine',
                         remoteId: remoteListId ?? undefined,
                     }
                 }
@@ -503,9 +502,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listShareLoadingState: { $set: taskState } },
             }),
             async () => {
-                const remoteListId = await this.options.contentShareBG.getRemoteListId(
+                let remoteListId = await this.options.contentShareBG.getRemoteListId(
                     { localListId: listId },
                 )
+
+                if (!remoteListId) {
+                    remoteListId = await this.shareListAndAllEntries(listId)
+                }
 
                 this.emitMutation({
                     modals: {
@@ -514,7 +517,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listsSidebar: {
                         listData: {
                             [listId]: {
-                                remoteId: { $set: remoteListId ?? undefined },
+                                remoteId: { $set: remoteListId },
                             },
                         },
                     },
@@ -1917,7 +1920,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                                 $set: {
                                     id: listId,
                                     name: newListName,
-                                    listCreationState: 'pristine',
                                 },
                             },
                         },
@@ -2206,31 +2208,29 @@ export class DashboardLogic extends UILogic<State, Events> {
         await executeUITask(
             this,
             (taskState) => ({
-                listsSidebar: {
-                    listData: {
-                        [listId]: { listCreationState: { $set: taskState } },
-                    },
-                },
+                listsSidebar: { listShareLoadingState: { $set: taskState } },
             }),
             async () => {
-                const {
-                    remoteListId,
-                } = await this.options.contentShareBG.shareList({ listId })
-                await this.options.contentShareBG.shareListEntries({ listId })
+                const remoteId = await this.shareListAndAllEntries(listId)
 
                 this.emitMutation({
                     listsSidebar: {
                         listData: {
-                            [listId]: {
-                                remoteId: {
-                                    $set: remoteListId ?? undefined,
-                                },
-                            },
+                            [listId]: { remoteId: { $set: remoteId } },
                         },
                     },
                 })
             },
         )
+    }
+
+    private async shareListAndAllEntries(listId: number): Promise<string> {
+        const { remoteListId } = await this.options.contentShareBG.shareList({
+            listId,
+        })
+        await this.options.contentShareBG.shareListEntries({ listId })
+
+        return remoteListId
     }
 
     unshareList: EventHandler<'unshareList'> = async ({ event }) => {
