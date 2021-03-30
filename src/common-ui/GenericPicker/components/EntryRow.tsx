@@ -69,7 +69,13 @@ class EntryRow extends React.Component<Props> {
                 <NameWrapper>
                     {resultItem}
                     {collaborative && (
-                        <Icon heightAndWidth="16px" path={icons.shared} faded />
+                        <ButtonTooltip tooltipText={'shared'} position="bottom">
+                            <Icon
+                                heightAndWidth="14px"
+                                path={icons.shared}
+                                faded
+                            />
+                        </ButtonTooltip>
                     )}
                 </NameWrapper>
                 <IconStyleWrapper show={focused}>
@@ -138,6 +144,7 @@ const NameWrapper = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
+    width: 80%;
 `
 
 export default EntryRow

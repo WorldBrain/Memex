@@ -14,7 +14,7 @@ const backgroundHoverSelected = (props) => {
 }
 
 export const ListResultItem = styled.div`
-    display: flex;
+    display: block;
     border-radius: 4px;
     color: ${(props) => props.theme.tag.text};
     padding: 0 8px;
@@ -23,6 +23,10 @@ export const ListResultItem = styled.div`
     font-size: ${fontSizeSmall}px;
     transition: all 0.1s;
     word-break: break-word;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    max-width: 90%;
 
     &:hover {
         cursor: pointer;
