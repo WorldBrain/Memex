@@ -502,13 +502,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listShareLoadingState: { $set: taskState } },
             }),
             async () => {
-                let remoteListId = await this.options.contentShareBG.getRemoteListId(
+                const remoteListId = await this.options.contentShareBG.getRemoteListId(
                     { localListId: listId },
                 )
-
-                if (!remoteListId) {
-                    remoteListId = await this.shareListAndAllEntries(listId)
-                }
 
                 this.emitMutation({
                     modals: {
@@ -517,7 +513,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listsSidebar: {
                         listData: {
                             [listId]: {
-                                remoteId: { $set: remoteListId },
+                                remoteId: { $set: remoteListId ?? undefined },
                             },
                         },
                     },
@@ -2196,45 +2192,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 })
             },
         )
-    }
-
-    shareList: EventHandler<'shareList'> = async ({ previousState }) => {
-        const { shareListId: listId } = previousState.modals
-
-        if (!listId) {
-            throw new Error('No list ID is set for sharing')
-        }
-
-        await executeUITask(
-            this,
-            (taskState) => ({
-                listsSidebar: { listShareLoadingState: { $set: taskState } },
-            }),
-            async () => {
-                const remoteId = await this.shareListAndAllEntries(listId)
-
-                this.emitMutation({
-                    listsSidebar: {
-                        listData: {
-                            [listId]: { remoteId: { $set: remoteId } },
-                        },
-                    },
-                })
-            },
-        )
-    }
-
-    private async shareListAndAllEntries(listId: number): Promise<string> {
-        const { remoteListId } = await this.options.contentShareBG.shareList({
-            listId,
-        })
-        await this.options.contentShareBG.shareListEntries({ listId })
-
-        return remoteListId
-    }
-
-    unshareList: EventHandler<'unshareList'> = async ({ event }) => {
-        console.warn('List unshare not yet implemented')
     }
 
     clickFeedActivityIndicator: EventHandler<

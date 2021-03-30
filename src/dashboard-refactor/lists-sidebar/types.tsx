@@ -82,8 +82,6 @@ export type Events = UIEvent<{
     confirmListDelete: null
     cancelListDelete: null
 
-    shareList: null
-    unshareList: null
     clickFeedActivityIndicator: null
 }>
 

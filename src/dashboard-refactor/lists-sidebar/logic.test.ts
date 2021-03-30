@@ -603,51 +603,6 @@ describe('Dashboard search results logic', () => {
         )
     })
 
-    it('should be able to share list', async ({ device }) => {
-        const listId = 123
-        const remoteListId = 'test'
-        device.backgroundModules.contentSharing.remoteFunctions.shareListEntries = async () => {}
-        device.backgroundModules.contentSharing.remoteFunctions.shareList = async () => ({
-            remoteListId,
-        })
-
-        const { searchResults } = await setupTest(device)
-        searchResults.processMutation({
-            listsSidebar: {
-                listData: {
-                    [listId]: {
-                        $set: {
-                            id: listId,
-                            name: 'test',
-                        },
-                    },
-                },
-            },
-        })
-
-        expect(searchResults.state.listsSidebar.listShareLoadingState).toEqual(
-            'pristine',
-        )
-        expect(
-            searchResults.state.listsSidebar.listData[listId].remoteId,
-        ).toBeUndefined()
-
-        await searchResults.processEvent('setShareListId', { listId })
-        const shareP = searchResults.processEvent('shareList', null)
-
-        expect(searchResults.state.listsSidebar.listShareLoadingState).toEqual(
-            'running',
-        )
-        await shareP
-
-        expect(searchResults.state.listsSidebar.listShareLoadingState).toEqual(
-            'success',
-        )
-        expect(
-            searchResults.state.listsSidebar.listData[listId].remoteId,
-        ).toEqual(remoteListId)
-    })
-
     it('should be able to add a page to a list via drag-and-drop', async ({
         device,
     }) => {
