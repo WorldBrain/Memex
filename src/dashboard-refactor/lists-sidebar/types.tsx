@@ -17,8 +17,7 @@ export interface SidebarPeekState {
 export interface ListData {
     id: number
     name: string
-    shareUrl?: string
-    isShared?: boolean
+    remoteId?: string
     listCreationState: TaskState
 }
 

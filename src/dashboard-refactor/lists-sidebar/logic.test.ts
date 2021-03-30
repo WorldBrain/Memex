@@ -1,7 +1,6 @@
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest, setPageSearchResult } from '../logic.test.util'
 import * as DATA from '../logic.test.data'
-import { getListShareUrl } from 'src/content-sharing/utils'
 
 describe('Dashboard search results logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -631,7 +630,7 @@ describe('Dashboard search results logic', () => {
             searchResults.state.listsSidebar.listData[listId].listCreationState,
         ).toEqual('pristine')
         expect(
-            searchResults.state.listsSidebar.listData[listId].shareUrl,
+            searchResults.state.listsSidebar.listData[listId].remoteId,
         ).toBeUndefined()
 
         await searchResults.processEvent('setShareListId', { listId })
@@ -646,8 +645,8 @@ describe('Dashboard search results logic', () => {
             searchResults.state.listsSidebar.listData[listId].listCreationState,
         ).toEqual('success')
         expect(
-            searchResults.state.listsSidebar.listData[listId].shareUrl,
-        ).toEqual(getListShareUrl({ remoteListId }))
+            searchResults.state.listsSidebar.listData[listId].remoteId,
+        ).toEqual(remoteListId)
     })
 
     it('should be able to add a page to a list via drag-and-drop', async ({

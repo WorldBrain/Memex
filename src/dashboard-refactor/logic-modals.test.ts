@@ -1,6 +1,5 @@
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest } from './logic.test.util'
-import { getListShareUrl } from 'src/content-sharing/utils'
 
 describe('Dashboard Refactor modals logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -72,10 +71,7 @@ describe('Dashboard Refactor modals logic', () => {
             'pristine',
         )
         expect(
-            searchResults.state.listsSidebar.listData[listId].isShared,
-        ).toBeFalsy()
-        expect(
-            searchResults.state.listsSidebar.listData[listId].shareUrl,
+            searchResults.state.listsSidebar.listData[listId].remoteId,
         ).toBeUndefined()
 
         await searchResults.processEvent('setShareListId', {
@@ -87,11 +83,8 @@ describe('Dashboard Refactor modals logic', () => {
             'success',
         )
         expect(
-            searchResults.state.listsSidebar.listData[listId].isShared,
-        ).toEqual(true)
-        expect(
-            searchResults.state.listsSidebar.listData[listId].shareUrl,
-        ).toEqual(getListShareUrl({ remoteListId }))
+            searchResults.state.listsSidebar.listData[listId].remoteId,
+        ).toEqual(remoteListId)
     })
 
     it('should be able to set the Beta Feature modal visibility', async ({

@@ -9,7 +9,6 @@ import {
     getLastSharedAnnotationTimestamp,
     setLastSharedAnnotationTimestamp,
 } from 'src/annotations/utils'
-import { getListShareUrl } from 'src/content-sharing/utils'
 import {
     PAGE_SIZE,
     STORAGE_KEYS,
@@ -297,10 +296,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         id,
                         name,
                         listCreationState: 'pristine',
-                        isShared: !!remoteListId,
-                        shareUrl: remoteListId
-                            ? getListShareUrl({ remoteListId })
-                            : undefined,
+                        remoteId: remoteListId ?? undefined,
                     }
                 }
 
@@ -510,9 +506,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const remoteListId = await this.options.contentShareBG.getRemoteListId(
                     { localListId: listId },
                 )
-                const shareUrl = remoteListId
-                    ? getListShareUrl({ remoteListId })
-                    : undefined
 
                 this.emitMutation({
                     modals: {
@@ -521,8 +514,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listsSidebar: {
                         listData: {
                             [listId]: {
-                                isShared: { $set: !!remoteListId },
-                                shareUrl: { $set: shareUrl },
+                                remoteId: { $set: remoteListId ?? undefined },
                             },
                         },
                     },
@@ -2230,8 +2222,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listsSidebar: {
                         listData: {
                             [listId]: {
-                                shareUrl: {
-                                    $set: getListShareUrl({ remoteListId }),
+                                remoteId: {
+                                    $set: remoteListId ?? undefined,
                                 },
                             },
                         },
