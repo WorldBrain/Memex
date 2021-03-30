@@ -745,7 +745,6 @@ export class DashboardContainer extends StatefulUIElement<
 
             return (
                 <ListShareModal
-                    useExtImgDir
                     listId={listData.remoteId}
                     shareList={shareListAndAllEntries(
                         this.props.contentShareBG,
