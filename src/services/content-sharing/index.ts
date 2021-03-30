@@ -75,6 +75,7 @@ export default class ContentSharingService
         params,
     ) => {
         await this.dependencies.storage.contentSharing.deleteListKey({
+            listReference: params.listReference,
             keyString: this.getKeyStringFromLink(params),
         })
     }
