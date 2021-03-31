@@ -117,7 +117,6 @@ export class MarkdownPreview extends React.Component<Props, State> {
                     onKeyDown={this.handleSecretInputKeyDown}
                 />
                 <Container>
-                    <EditorContainer>{this.renderEditor()}</EditorContainer>
                     <PreviewButtonContainer>
                         {this.props.renderSecondaryBtn()}
                         {this.showPreviewBtn && (
@@ -131,6 +130,7 @@ export class MarkdownPreview extends React.Component<Props, State> {
                             </ButtonTooltip>
                         )}
                     </PreviewButtonContainer>
+                    <EditorContainer>{this.renderEditor()}</EditorContainer>
                 </Container>
             </ThemeProvider>
         )
