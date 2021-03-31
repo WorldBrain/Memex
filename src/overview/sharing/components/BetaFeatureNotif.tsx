@@ -101,7 +101,7 @@ const SuccessBox = styled.div`
 `
 
 const SurveyFrame = styled.iframe`
-    width: 70%;
+    width: 100%;
     height: 400px;
     border: 1px solid #f0f0f0;
 `
