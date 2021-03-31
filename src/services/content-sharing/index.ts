@@ -1,5 +1,8 @@
 import { ContentSharingServiceInterface } from '@worldbrain/memex-common/lib/content-sharing/service/types'
-import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import {
+    SharedListReference,
+    SharedListRoleID,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
 import { ContentSharingStorage } from 'src/content-sharing/background/storage'
 import { getListShareUrl } from 'src/content-sharing/utils'
 
@@ -13,15 +16,13 @@ export default class ContentSharingService
 
     private getKeyLink(params: {
         listReference: SharedListReference
-        keyString: string
+        keyString?: string
     }): string {
-        return (
-            getListShareUrl({
-                remoteListId: params.listReference.id as string,
-            }) +
-            '?key=' +
-            params.keyString
-        )
+        const link = getListShareUrl({
+            remoteListId: params.listReference.id as string,
+        })
+
+        return params.keyString ? `${link}?key=${params.keyString}` : link
     }
 
     private getKeyStringFromLink(params: { link: string }): string {
@@ -59,11 +60,16 @@ export default class ContentSharingService
     generateKeyLink: ContentSharingServiceInterface['generateKeyLink'] = async (
         params,
     ) => {
-        const {
-            keyString,
-        } = await this.dependencies.storage.contentSharing.createListKey(params)
+        let keyString: string | undefined
+
+        if (params.key.roleID !== SharedListRoleID.Reader) {
+            const createListResult = await this.dependencies.storage.contentSharing.createListKey(
+                params,
+            )
+            keyString = createListResult.keyString
+        }
+
         return {
-            keyString,
             link: this.getKeyLink({
                 listReference: params.listReference,
                 keyString,
