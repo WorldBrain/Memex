@@ -301,12 +301,31 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
                 }
 
+                // TODO: Remove this test data
+                listData[10] = {
+                    id: 10,
+                    name: 'test follow 1',
+                    isFollowed: true,
+                    remoteId: 'testest1',
+                }
+                listData[11] = {
+                    id: 11,
+                    name: 'test follow + collab',
+                    isFollowed: true,
+                    isCollaborative: true,
+                    remoteId: 'testest2',
+                }
+
                 this.emitMutation({
                     listsSidebar: {
                         listData: { $set: listData },
                         localLists: {
                             allListIds: { $set: listIds },
                             filteredListIds: { $set: listIds },
+                        },
+                        followedLists: {
+                            allListIds: { $set: [10, 11] },
+                            filteredListIds: { $set: [10, 11] },
                         },
                     },
                 })

@@ -127,17 +127,33 @@ export class DashboardContainer extends StatefulUIElement<
     ): ListSidebarItemProps => {
         const { listsSidebar } = this.state
 
+        const onSelection =
+            list.isFollowed && !list.isCollaborative
+                ? () => this.props.openCollectionPage(list.remoteId)
+                : () =>
+                      this.processEvent('setSelectedListId', {
+                          listId: list.id,
+                      })
+
+        const onMoreActionClick = !list.isFollowed
+            ? () =>
+                  this.processEvent('setShowMoreMenuListId', {
+                      listId: list.id,
+                  })
+            : undefined
+
         return {
             source,
             listId: list.id,
             name: list.name,
             isCollaborative: list.isCollaborative,
             isEditing: listsSidebar.editingListId === list.id,
-            isMenuDisplayed: listsSidebar.showMoreMenuListId === list.id,
+            isMenuDisplayed: list.isFollowed
+                ? false
+                : listsSidebar.showMoreMenuListId === list.id,
             selectedState: {
                 isSelected: listsSidebar.selectedListId === list.id,
-                onSelection: (listId) =>
-                    this.processEvent('setSelectedListId', { listId }),
+                onSelection,
             },
             editableProps: {
                 onCancelClick: () => this.processEvent('cancelListEdit', null),
@@ -146,10 +162,9 @@ export class DashboardContainer extends StatefulUIElement<
                 initValue: list.name,
                 errorMessage: listsSidebar.editListErrorMessage,
             },
+            onMoreActionClick,
             onRenameClick: () =>
                 this.processEvent('setEditingListId', { listId: list.id }),
-            onMoreActionClick: () =>
-                this.processEvent('setShowMoreMenuListId', { listId: list.id }),
             onDeleteClick: () =>
                 this.processEvent('setDeletingListId', { listId: list.id }),
             onShareClick: () =>

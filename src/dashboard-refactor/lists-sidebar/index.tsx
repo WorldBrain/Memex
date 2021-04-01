@@ -85,15 +85,12 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         lists: ListsSidebarItemProps[],
         canReceiveDroppedItems: boolean,
     ) =>
-        lists.map((listObj, idx) =>
+        lists.map((listObj, i) =>
             listObj.isEditing ? (
-                <ListsSidebarEditableItem
-                    key={idx}
-                    {...listObj.editableProps}
-                />
+                <ListsSidebarEditableItem key={i} {...listObj.editableProps} />
             ) : (
                 <ListsSidebarItem
-                    key={idx}
+                    key={i}
                     dropReceivingState={{
                         ...this.props.initDropReceivingState(listObj.listId),
                         canReceiveDroppedItems,
