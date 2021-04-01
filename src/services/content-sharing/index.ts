@@ -42,18 +42,28 @@ export default class ContentSharingService
             { listReference: params.listReference },
         )
 
-        return {
-            links: sharedListKeys.map((key) => {
-                const keyString = key.reference.id as string
-                return {
+        const foundLinks = sharedListKeys.map((key) => {
+            const keyString = key.reference.id as string
+            return {
+                keyString,
+                roleID: key.roleID,
+                link: this.getKeyLink({
+                    listReference: params.listReference,
                     keyString,
-                    roleID: key.roleID,
-                    link: this.getKeyLink({
-                        listReference: params.listReference,
-                        keyString,
-                    }),
-                }
-            }),
+                }),
+            }
+        })
+
+        // There will always be a static reader link for collections that
+        //  are already shared. In Memex ext, that would be the case if this service
+        //  method is called.
+        const readerLink = {
+            link: this.getKeyLink({ listReference: params.listReference }),
+            roleID: SharedListRoleID.Reader,
+        }
+
+        return {
+            links: [readerLink, ...foundLinks],
         }
     }
 
