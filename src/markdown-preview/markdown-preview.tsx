@@ -141,13 +141,13 @@ const PreviewButtonContainer = styled.div`
     background-color: #f7f7f7;
     width: -webkit-fill-available;
     width: -moz-available;
-    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
     height: 30px;
     padding: 0px 2px;
     align-items: center;
     display: flex;
     justify-content: flex-start;
-    border-radius: 0 0 5px 5px;
+    border-radius: 4px 4px 0 0;
 `
 
 const PreviewBtn = styled.button`

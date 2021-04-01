@@ -33,8 +33,4 @@ const ExpandAllNotesBtn = styled.button`
     align-items: center;
     background-color: transparent;
     justify-content: center;
-
-    &:focus {
-        background-color: ${colors.lightMintGreen};
-    }
 `

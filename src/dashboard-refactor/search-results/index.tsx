@@ -442,7 +442,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
 const PageTopBarBox = styled(Margin)`
     width: 100%;
-    position: st;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 2px;
 `
 
 const NoteTopBarBox = styled(TopBar)`

@@ -13,7 +13,7 @@ const colors = {
         pink: '#F2AFB0',
     },
     fonts: {
-        primary: '#000',
+        primary: '#3A2F45',
         secondary: '#535353',
     },
 }
