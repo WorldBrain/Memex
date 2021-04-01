@@ -87,7 +87,7 @@ export function joinTemplateDocs(
 ): string {
     return templateDocs
         .map((templateDoc) => renderTemplate(template, templateDoc))
-        .join('\n\n')
+        .join('\n')
 }
 
 export function analyzeTemplate(

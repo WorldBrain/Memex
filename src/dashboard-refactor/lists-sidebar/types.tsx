@@ -20,7 +20,6 @@ export interface ListData {
     remoteId?: string
     isFollowed?: boolean
     isCollaborative?: boolean
-    listCreationState: TaskState
 }
 
 export interface ListGroupCommon
@@ -85,8 +84,6 @@ export type Events = UIEvent<{
     confirmListDelete: null
     cancelListDelete: null
 
-    shareList: null
-    unshareList: null
     clickFeedActivityIndicator: null
 }>
 

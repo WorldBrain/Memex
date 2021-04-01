@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { browser } from 'webextension-polyfill-ts'
+import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
@@ -11,6 +12,7 @@ import HeaderContainer from './header'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { Props as ListSidebarItemProps } from './lists-sidebar/components/sidebar-item-with-menu'
 import { ListData } from './lists-sidebar/types'
+import { shareListAndAllEntries } from './lists-sidebar/util'
 import * as searchResultUtils from './search-results/util'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import ShareListModalContent from 'src/overview/sharing/components/ShareListModalContent'
@@ -38,6 +40,7 @@ import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNo
 import DragElement from './components/DragElement'
 import Margin from './components/Margin'
 import { getFeedUrl, getListShareUrl } from 'src/content-sharing/utils'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 export interface Props extends DashboardDependencies {
     renderDashboardSwitcherLink: () => JSX.Element
@@ -685,7 +688,7 @@ export class DashboardContainer extends StatefulUIElement<
                     searchType: searchResults.searchType,
                     searchParams: stateToSearchParams(this.state),
                     isCopyPasterShown: searchResults.isSearchCopyPasterShown,
-                    isCopyPasterBtnShown: !areSearchFiltersEmpty(this.state),
+                    isCopyPasterBtnShown: true,
                     hideCopyPaster: () =>
                         this.processEvent('setSearchCopyPasterShown', {
                             isShown: false,
@@ -745,20 +748,24 @@ export class DashboardContainer extends StatefulUIElement<
             const listData = listsSidebar.listData[modalsState.shareListId]
 
             return (
-                <ShareListModalContent
-                    onClose={() => this.processEvent('setShareListId', {})}
-                    listCreationState={listData.listCreationState}
-                    listName={listData.name}
-                    shareUrl={
+                <ListShareModal
+                    defaultAddLinkRole={
                         listData.remoteId
-                            ? getListShareUrl({
-                                  remoteListId: listData.remoteId,
-                              })
-                            : undefined
+                            ? SharedListRoleID.ReadWrite
+                            : SharedListRoleID.Reader
                     }
-                    onGenerateLinkClick={() =>
-                        this.processEvent('shareList', null)
+                    listId={listData.remoteId}
+                    shareList={shareListAndAllEntries(
+                        this.props.contentShareBG,
+                        listData.id,
+                    )}
+                    onCloseRequested={() =>
+                        this.processEvent('setShareListId', {})
                     }
+                    services={{
+                        ...this.props.services,
+                        contentSharing: this.props.contentShareBG,
+                    }}
                 />
             )
         }

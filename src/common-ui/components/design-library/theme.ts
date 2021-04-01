@@ -1,4 +1,5 @@
 import { MemexTheme as Theme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 export const theme: Theme = {
     spacing: {
@@ -15,7 +16,7 @@ export const theme: Theme = {
         primary: '#3a2f45',
         subText: '#aeaeae',
         purple: '#5671cf',
-        lightgrey: 'lightgrey',
+        lightgrey: '#f0f0f0',
         darkgrey: '#545454',
         secondary: '#5cd9a6',
         grey: '#e0e0e0',
@@ -56,5 +57,19 @@ export const theme: Theme = {
     },
     zIndices: {
         overlay: 50,
+    },
+    icons: {
+        copy: icons.copy,
+        removeX: icons.removeX,
+        hamburger: icons.hamburger,
+        addPeople: icons.addPeople,
+        checkRound: icons.checkRound,
+        alertRound: icons.alertRound,
+        webLogo: icons.webLogo,
+        mediumLogo: icons.mediumLogo,
+        twitterLogo: icons.twitterLogo,
+        substackLogo: icons.substackLogo,
+        webMonetizationLogo: icons.webMonetizationLogo,
+        webMonetizationLogoConfirmed: icons.webMonetizationLogoConfirmed,
     },
 }

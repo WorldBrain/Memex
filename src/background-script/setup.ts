@@ -297,6 +297,7 @@ export function createBackgroundModules(options: {
         userMessages,
         getContentSharing: async () =>
             (await options.getServerStorage()).storageModules.contentSharing,
+        services: options.services,
     })
 
     const readwise = new ReadwiseBackground({

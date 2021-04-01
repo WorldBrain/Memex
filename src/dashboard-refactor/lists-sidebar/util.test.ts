@@ -4,43 +4,35 @@ const testData: ListsState = {
     listData: {
         [0]: {
             id: 0,
-            listCreationState: 'pristine',
             name: 'test-0',
         },
         [1]: {
             id: 1,
-            listCreationState: 'pristine',
             name: 'test-1',
         },
         [2]: {
             id: 2,
-            listCreationState: 'pristine',
             name: 'test-2',
         },
         [3]: {
             id: 3,
-            listCreationState: 'pristine',
             name: 'test-3',
         },
         [4]: {
             id: 4,
-            listCreationState: 'pristine',
             name: 'test-4',
         },
         [5]: {
             id: 5,
-            listCreationState: 'pristine',
             name: 'test-5',
         },
 
         [6]: {
             id: 6,
-            listCreationState: 'pristine',
             name: 'elephant',
         },
         [7]: {
             id: 7,
-            listCreationState: 'pristine',
             name: 'elevator',
         },
     },

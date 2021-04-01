@@ -1,7 +1,6 @@
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest, setPageSearchResult } from '../logic.test.util'
 import * as DATA from '../logic.test.data'
-import { getListShareUrl } from 'src/content-sharing/utils'
 
 describe('Dashboard search results logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -602,52 +601,6 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.listData[listId]).toEqual(
             undefined,
         )
-    })
-
-    it('should be able to share list', async ({ device }) => {
-        const listId = 123
-        const remoteListId = 'test'
-        device.backgroundModules.contentSharing.remoteFunctions.shareListEntries = async () => {}
-        device.backgroundModules.contentSharing.remoteFunctions.shareList = async () => ({
-            remoteListId,
-        })
-
-        const { searchResults } = await setupTest(device)
-        searchResults.processMutation({
-            listsSidebar: {
-                listData: {
-                    [listId]: {
-                        $set: {
-                            id: listId,
-                            listCreationState: 'pristine',
-                            name: 'test',
-                        },
-                    },
-                },
-            },
-        })
-
-        expect(
-            searchResults.state.listsSidebar.listData[listId].listCreationState,
-        ).toEqual('pristine')
-        expect(
-            searchResults.state.listsSidebar.listData[listId].remoteId,
-        ).toBeUndefined()
-
-        await searchResults.processEvent('setShareListId', { listId })
-        const shareP = searchResults.processEvent('shareList', null)
-
-        expect(
-            searchResults.state.listsSidebar.listData[listId].listCreationState,
-        ).toEqual('running')
-        await shareP
-
-        expect(
-            searchResults.state.listsSidebar.listData[listId].listCreationState,
-        ).toEqual('success')
-        expect(
-            searchResults.state.listsSidebar.listData[listId].remoteId,
-        ).toEqual(getListShareUrl({ remoteListId }))
     })
 
     it('should be able to add a page to a list via drag-and-drop', async ({

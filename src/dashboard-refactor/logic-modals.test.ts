@@ -15,7 +15,6 @@ describe('Dashboard Refactor modals logic', () => {
                     [listId]: {
                         $set: {
                             id: listId,
-                            listCreationState: 'pristine',
                             name: 'test',
                         },
                     },
@@ -58,7 +57,6 @@ describe('Dashboard Refactor modals logic', () => {
                     [listId]: {
                         $set: {
                             id: listId,
-                            listCreationState: 'pristine',
                             name: 'test',
                         },
                     },
@@ -72,7 +70,7 @@ describe('Dashboard Refactor modals logic', () => {
         )
         expect(
             searchResults.state.listsSidebar.listData[listId].remoteId,
-        ).toBeNull()
+        ).toBeUndefined()
 
         await searchResults.processEvent('setShareListId', {
             listId,

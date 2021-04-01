@@ -295,7 +295,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listData[list.id] = {
                         id: list.id,
                         name: list.name,
-                        listCreationState: 'pristine',
                         remoteId: remoteListId ?? undefined,
                         isFollowed: list.isFollowed,
                         isCollaborative: list.isCollaborative,
@@ -1919,7 +1918,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                                 $set: {
                                     id: listId,
                                     name: newListName,
-                                    listCreationState: 'pristine',
                                 },
                             },
                         },
@@ -2207,47 +2205,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 })
             },
         )
-    }
-
-    shareList: EventHandler<'shareList'> = async ({ previousState }) => {
-        const { shareListId: listId } = previousState.modals
-
-        if (!listId) {
-            throw new Error('No list ID is set for sharing')
-        }
-
-        await executeUITask(
-            this,
-            (taskState) => ({
-                listsSidebar: {
-                    listData: {
-                        [listId]: { listCreationState: { $set: taskState } },
-                    },
-                },
-            }),
-            async () => {
-                const {
-                    remoteListId,
-                } = await this.options.contentShareBG.shareList({ listId })
-                await this.options.contentShareBG.shareListEntries({ listId })
-
-                this.emitMutation({
-                    listsSidebar: {
-                        listData: {
-                            [listId]: {
-                                remoteId: {
-                                    $set: remoteListId ?? undefined,
-                                },
-                            },
-                        },
-                    },
-                })
-            },
-        )
-    }
-
-    unshareList: EventHandler<'unshareList'> = async ({ event }) => {
-        console.warn('List unshare not yet implemented')
     }
 
     clickFeedActivityIndicator: EventHandler<

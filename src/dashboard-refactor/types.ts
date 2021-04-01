@@ -27,6 +27,7 @@ import { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import { PublicSyncInterface } from 'src/sync/background/types'
 import { BackupInterface } from 'src/backup-restore/background/types'
 import { SearchFiltersState, SearchFilterEvents } from './header/types'
+import { UIServices } from 'src/services/ui/types'
 
 export interface RootState {
     loadState: TaskState
@@ -66,6 +67,10 @@ export interface DashboardDependencies {
     openCollectionPage: (remoteCollectionId: string) => void
     renderDashboardSwitcherLink: () => JSX.Element
     renderUpdateNotifBanner: () => JSX.Element
+    services: Pick<
+        UIServices,
+        'logicRegistry' | 'overlay' | 'clipboard' | 'device'
+    >
 }
 
 export interface DropReceivingState {

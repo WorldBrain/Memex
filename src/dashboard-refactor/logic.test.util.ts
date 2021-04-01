@@ -13,6 +13,7 @@ import {
     AnnotationsSearchResponse,
 } from 'src/search/background/types'
 import { FakeAnalytics } from 'src/analytics/mock'
+import { createServices } from 'src/services/ui'
 
 type DataSeeder = (
     logic: TestLogicContainer<RootState, Events>,
@@ -138,6 +139,7 @@ export async function setupTest(
         renderDashboardSwitcherLink:
             args.renderDashboardSwitcherLink ?? (() => null),
         renderUpdateNotifBanner: args.renderUpdateNotifBanner ?? (() => null),
+        services: createServices(),
     })
 
     if (args.overrideSearchTrigger) {

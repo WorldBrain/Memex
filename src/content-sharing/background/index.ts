@@ -35,6 +35,7 @@ import {
     UserMessageEvents,
 } from '@worldbrain/memex-common/lib/user-messages/service/types'
 import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { Services } from 'src/services/types'
 
 // interface ListPush {
 //     actionsPending: number
@@ -74,6 +75,7 @@ export default class ContentSharingBackground {
             activityStreams: Pick<ActivityStreamsBackground, 'backend'>
             getContentSharing: () => Promise<ContentSharingStorage>
             userMessages: UserMessageService
+            services: Pick<Services, 'contentSharing'>
         },
     ) {
         this.storage = new ContentSharingClientStorage({
@@ -85,6 +87,7 @@ export default class ContentSharingBackground {
         })
 
         this.remoteFunctions = {
+            ...options.services.contentSharing,
             shareList: this.shareList,
             shareListEntries: this.shareListEntries,
             shareAnnotation: this.shareAnnotation,
