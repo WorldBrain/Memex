@@ -47,6 +47,9 @@ import MobileAppAd from 'src/sync/components/device-list/mobile-app-ad'
 import OnboardingMsg from './components/onboarding-msg'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import ListDetails, {
+    Props as ListDetailsProps,
+} from './components/list-details'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -62,6 +65,7 @@ export type Props = RootState &
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
         searchCopyPasterProps: SearchCopyPasterProps
+        listDetailsProps: ListDetailsProps
         pagePickerProps: PagePickerAugdProps
         onShowAllNotesClick: React.MouseEventHandler
         noResultsType: NoResultsType
@@ -411,6 +415,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     render() {
         return (
             <ResultsContainer bottom="100px">
+                {this.props.isSearchFilteredByList && (
+                    <ListDetails {...this.props.listDetailsProps} />
+                )}
                 <PageTopBarBox bottom="5px">
                     <TopBar
                         leftSide={<SearchTypeSwitch {...this.props} />}

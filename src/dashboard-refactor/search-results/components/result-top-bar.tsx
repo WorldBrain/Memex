@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
-import colors from 'src/dashboard-refactor/colors'
 
 export interface Props {
     leftSide?: JSX.Element

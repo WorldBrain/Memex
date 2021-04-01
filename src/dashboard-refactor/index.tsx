@@ -41,6 +41,7 @@ import DragElement from './components/DragElement'
 import Margin from './components/Margin'
 import { getFeedUrl, getListShareUrl } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { Props as ListDetailsProps } from './search-results/components/list-details'
 
 export interface Props extends DashboardDependencies {
     renderDashboardSwitcherLink: () => JSX.Element
@@ -91,6 +92,33 @@ export class DashboardContainer extends StatefulUIElement<
             annotations: props.annotationsBG,
             tags: props.tagsBG,
         })
+    }
+
+    private getListDetailsProps = (): ListDetailsProps | null => {
+        const { listsSidebar } = this.state
+
+        if (!listsSidebar.selectedListId) {
+            return null
+        }
+
+        const listData = listsSidebar.listData[listsSidebar.selectedListId]
+        const remoteLink = listData.remoteId
+            ? getListShareUrl({ remoteListId: listData.remoteId })
+            : undefined // TODO: ensure this comes with key for collab'd lists
+
+        const onAddContributorsClick = !listData.isFollowed
+            ? () =>
+                  this.processEvent('setShareListId', {
+                      listId: listData.id,
+                  })
+            : undefined
+
+        return {
+            remoteLink,
+            onAddContributorsClick,
+            listName: listData.name,
+            isCollaborative: listData.isCollaborative,
+        }
     }
 
     private listStateToProps = (
@@ -410,6 +438,7 @@ export class DashboardContainer extends StatefulUIElement<
             <SearchResultsContainer
                 goToImportRoute={this.bindRouteGoTo('import')}
                 isSearchFilteredByList={listsSidebar.selectedListId != null}
+                listDetailsProps={this.getListDetailsProps()}
                 {...searchResults}
                 onDismissMobileAd={() =>
                     this.processEvent('dismissMobileAd', null)
