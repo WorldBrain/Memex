@@ -39,6 +39,7 @@ import { FILTER_PICKERS_LIMIT } from './constants'
 import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 import DragElement from './components/DragElement'
 import Margin from './components/Margin'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 export interface Props extends DashboardDependencies {
     renderDashboardSwitcherLink: () => JSX.Element
@@ -745,6 +746,11 @@ export class DashboardContainer extends StatefulUIElement<
 
             return (
                 <ListShareModal
+                    defaultAddLinkRole={
+                        listData.remoteId
+                            ? SharedListRoleID.ReadWrite
+                            : SharedListRoleID.Reader
+                    }
                     listId={listData.remoteId}
                     shareList={shareListAndAllEntries(
                         this.props.contentShareBG,
