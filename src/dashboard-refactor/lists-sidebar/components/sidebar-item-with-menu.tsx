@@ -223,11 +223,13 @@ const Name = styled.div`
 const MenuContainer = styled.div`
     width: min-content;
     position: absolute;
-    left: 200px;
-    top: 0px;
     background-color: ${colors.white};
     box-shadow: ${styles.boxShadow.overlayElement};
     border-radius: ${styles.boxShadow.overlayElement};
+    left: 105px;
+    top: 30px;
+    z-index: 1;
+
     ${(props) =>
         css`
             display: ${props.isDisplayed

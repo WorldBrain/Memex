@@ -66,7 +66,8 @@ const PeekTrigger = styled.div`
 
 const TopGroup = styled.div``
 const BottomGroup = styled.div`
-    overflow: scroll;
+    overflow-y: scroll;
+    overflow-x: visible;
     padding-bottom: 100px;
 `
 

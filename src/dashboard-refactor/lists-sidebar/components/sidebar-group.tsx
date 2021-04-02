@@ -58,12 +58,6 @@ const IconContainer = styled.div`
     align-items: center;
 `
 
-const GroupContent = styled.div`
-    display: flex;
-    flex-direction: column;
-    overflow-y: scroll;
-`
-
 export interface ListsSidebarGroupProps {
     title?: string
     isExpanded: boolean
@@ -148,7 +142,7 @@ export default class ListsSidebarGroup extends PureComponent<
                         </GroupHeaderInnerDiv>
                     </GroupHeaderContainer>
                 )}
-                <GroupContent>{this.renderGroupContent()}</GroupContent>
+                {this.renderGroupContent()}
             </Container>
         )
     }
