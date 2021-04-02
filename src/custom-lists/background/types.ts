@@ -56,6 +56,9 @@ export interface RemoteCollectionsInterface {
     }): Promise<void>
     removeList(args: { id: number }): Promise<any>
     removePageFromList(args: { id: number; url: string }): Promise<void>
+    fetchContributorStateForRemoteLists(args: {
+        remoteListIds: string[]
+    }): Promise<{ [remoteListId: string]: boolean }>
     fetchAllFollowedLists(args: {
         skip?: number
         limit?: number

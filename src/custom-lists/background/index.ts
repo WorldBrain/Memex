@@ -20,6 +20,7 @@ import { PageIndexingBackground } from 'src/page-indexing/background'
 import TabManagementBackground from 'src/tab-management/background'
 import { ServerStorageModules } from 'src/storage/types'
 import { Services } from 'src/services/types'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 const limitSuggestionsReturnLength = 10
 const limitSuggestionsStorageLength = 20
@@ -67,6 +68,8 @@ export default class CustomListBackground {
             removePageFromList: this.removePageFromList,
             fetchAllLists: this.fetchAllLists,
             fetchAllFollowedLists: this.fetchAllFollowedLists,
+            fetchContributorStateForRemoteLists: this
+                .fetchContributorStateForRemoteLists,
             fetchListById: this.fetchListById,
             fetchListPagesByUrl: this.fetchListPagesByUrl,
             fetchListIdsByUrl: this.fetchListIdsByUrl,
@@ -89,6 +92,30 @@ export default class CustomListBackground {
 
     generateListId() {
         return Date.now()
+    }
+
+    fetchContributorStateForRemoteLists: RemoteCollectionsInterface['fetchContributorStateForRemoteLists'] = async ({
+        remoteListIds,
+    }) => {
+        const { contentSharing } = await this.options.getServerStorage()
+
+        const listKeysMap = await contentSharing.getKeysForLists({
+            listReferences: remoteListIds.map((id) => ({
+                id,
+                type: 'shared-list-reference',
+            })),
+        })
+        const contribState: { [remoteListId: string]: boolean } = {}
+
+        for (const remoteListId of remoteListIds) {
+            const keys = listKeysMap.get(remoteListId)
+            contribState[remoteListId] =
+                keys?.find(
+                    (key) => key.roleID === SharedListRoleID.ReadWrite,
+                ) != null
+        }
+
+        return contribState
     }
 
     fetchAllFollowedLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async ({
