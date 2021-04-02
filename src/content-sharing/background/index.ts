@@ -1089,7 +1089,7 @@ export default class ContentSharingBackground {
         const localId = Date.now()
         await this.storage.storeListId({
             localId,
-            remoteId: remoteId,
+            remoteId,
         })
 
         // TODO: What if there already exists a list with this name?
