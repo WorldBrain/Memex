@@ -17,9 +17,9 @@ export interface Props {
     removeTooltipText?: string
     actOnAllTooltipText?: string
     resultItem: React.ReactNode
-    collaborative?: boolean
     selected?: boolean
     focused?: boolean
+    remote?: boolean
 }
 
 class EntryRow extends React.Component<Props> {
@@ -52,7 +52,7 @@ class EntryRow extends React.Component<Props> {
 
     render() {
         const {
-            collaborative,
+            remote,
             selected,
             focused,
             onPressActOnAll,
@@ -68,7 +68,7 @@ class EntryRow extends React.Component<Props> {
             >
                 <NameWrapper>
                     {resultItem}
-                    {collaborative && (
+                    {remote && (
                         <ButtonTooltip tooltipText={'shared'} position="bottom">
                             <Icon
                                 heightAndWidth="14px"

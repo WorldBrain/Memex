@@ -65,7 +65,6 @@ export default class CustomListBackground {
             fetchListPagesByUrl: this.fetchListPagesByUrl,
             fetchListIdsByUrl: this.fetchListIdsByUrl,
             fetchInitialListSuggestions: this.fetchInitialListSuggestions,
-            fetchCollaborativeListNames: this.fetchInitialListSuggestions, // TODO: Implement
             fetchListPagesById: this.fetchListPagesById,
             fetchPageLists: this.fetchPageLists,
             fetchListIgnoreCase: this.fetchListIgnoreCase,

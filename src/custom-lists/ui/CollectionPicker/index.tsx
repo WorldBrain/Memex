@@ -23,7 +23,10 @@ import { fontSizeNormal } from 'src/common-ui/components/design-library/typograp
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { EntrySelectedList } from './components/EntrySelectedList'
 import { ListResultItem } from './components/ListResultItem'
-import { collections } from 'src/util/remote-functions-background'
+import {
+    collections,
+    contentSharing,
+} from 'src/util/remote-functions-background'
 
 class ListPicker extends StatefulUIElement<
     ListPickerDependencies,
@@ -34,7 +37,10 @@ class ListPicker extends StatefulUIElement<
         queryEntries: (query) =>
             collections.searchForListSuggestions({ query }),
         loadDefaultSuggestions: collections.fetchInitialListSuggestions,
-        loadCollaborativeListNames: collections.fetchCollaborativeListNames,
+        loadRemoteListNames: async () => {
+            const remoteLists = await contentSharing.getAllRemoteLists()
+            return remoteLists.map((list) => list.name)
+        },
     }
 
     constructor(props: ListPickerDependencies) {
@@ -63,8 +69,8 @@ class ListPicker extends StatefulUIElement<
         }
     }
 
-    private isListCollaborative = (name: string): boolean =>
-        this.state.collaborativeLists.has(name)
+    private isListRemote = (name: string): boolean =>
+        this.state.remoteLists.has(name)
 
     handleClickOutside = (e) => {
         if (this.props.onClickOutside) {
@@ -117,7 +123,7 @@ class ListPicker extends StatefulUIElement<
             name={list.name}
             selected={list.selected}
             focused={list.focused}
-            collaborative={this.isListCollaborative(list.name)}
+            remote={this.isListRemote(list.name)}
             resultItem={<ListResultItem>{list.name}</ListResultItem>}
             removeTooltipText={this.removeToolTipText}
             actOnAllTooltipText="Add all tabs in window to list"

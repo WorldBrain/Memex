@@ -7,7 +7,7 @@ import GenericPickerLogic, {
 export interface ListPickerDependencies extends GenericPickerDependencies {
     onSelectedEntriesChange?: (evt: { selectedEntries: string[] }) => void
     onSearchInputChange?: (evt: { query: string }) => void
-    loadCollaborativeListNames: () => Promise<string[]>
+    loadRemoteListNames: () => Promise<string[]>
     onClickOutside?: React.MouseEventHandler
     searchInputPlaceholder?: string
     removeToolTipText?: string
@@ -16,7 +16,7 @@ export interface ListPickerDependencies extends GenericPickerDependencies {
 
 export type ListPickerEvent = GenericPickerEvent
 export type ListPickerState = GenericPickerState & {
-    collaborativeLists: Set<string>
+    remoteLists: Set<string>
 }
 
 export default class CollectionPickerLogic extends GenericPickerLogic<
@@ -31,14 +31,14 @@ export default class CollectionPickerLogic extends GenericPickerLogic<
     getInitialState(): ListPickerState {
         return {
             ...super.getInitialState(),
-            collaborativeLists: new Set(),
+            remoteLists: new Set(),
         }
     }
 
     async init() {
         await super.init()
 
-        const lists = await this.dependencies.loadCollaborativeListNames()
-        this.emitMutation({ collaborativeLists: { $set: new Set(lists) } })
+        const lists = await this.dependencies.loadRemoteListNames()
+        this.emitMutation({ remoteLists: { $set: new Set(lists) } })
     }
 }

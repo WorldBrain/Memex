@@ -117,6 +117,7 @@ export default class ContentSharingBackground {
                     localIds: callOptions.localListIds,
                 })
             },
+            getAllRemoteLists: this.getAllRemoteLists,
             waitForSync: this.waitForSync,
         }
         options.userMessages.events.on('message', this._processUserMessage)
@@ -145,6 +146,26 @@ export default class ContentSharingBackground {
         }
 
         return getNoteShareUrl({ remoteAnnotationId })
+    }
+
+    getAllRemoteLists: ContentSharingInterface['getAllRemoteLists'] = async () => {
+        const remoteListIdsDict = await this.storage.getAllRemoteListIds()
+        const remoteListData: Array<{
+            localId: number
+            remoteId: string
+            name: string
+        }> = []
+
+        for (const localId of Object.keys(remoteListIdsDict).map(Number)) {
+            const list = await this.options.customLists.fetchListById(localId)
+            remoteListData.push({
+                localId,
+                remoteId: remoteListIdsDict[localId],
+                name: list.name,
+            })
+        }
+
+        return remoteListData
     }
 
     shareList: ContentSharingInterface['shareList'] = async (options) => {
