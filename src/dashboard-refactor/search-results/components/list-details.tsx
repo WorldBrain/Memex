@@ -5,6 +5,7 @@ import Button from '@worldbrain/memex-common/lib/common-ui/components/button'
 import colors from '../../colors'
 import styles, { fonts } from '../../styles'
 import Margin from 'src/dashboard-refactor/components/Margin'
+import { ButtonTooltip } from 'src/common-ui/components'
 
 export interface Props {
     listName: string
@@ -30,15 +31,22 @@ export default class ListDetails extends PureComponent<Props> {
                         )}
                     </DetailsContainer>
                     <BtnsContainer>
-                        <Margin right="10px">
-                            {this.props.onAddContributorsClick && (
-                                <Icon
-                                    height="18px"
-                                    icon="addPeople"
-                                    onClick={this.props.onAddContributorsClick}
-                                />
-                            )}
-                        </Margin>
+                        {this.props.onAddContributorsClick && (
+                            <Margin right="10px">
+                                <ButtonTooltip
+                                    tooltipText="Invite people to this collection"
+                                    position="bottom"
+                                >
+                                    <Icon
+                                        height="18px"
+                                        icon="addPeople"
+                                        onClick={
+                                            this.props.onAddContributorsClick
+                                        }
+                                    />
+                                </ButtonTooltip>
+                            </Margin>
+                        )}
                         {this.props.remoteLink && (
                             <Button
                                 type="primary-action"
@@ -59,7 +67,7 @@ const Container = styled.div`
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
-    align-items: flex-start;
+    align-items: ${(props) => (props.remotLink ? 'flex-start' : 'center')};
 `
 
 const DetailsContainer = styled.div`
