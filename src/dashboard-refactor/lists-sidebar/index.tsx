@@ -64,6 +64,12 @@ const PeekTrigger = styled.div`
     background: transparent;
 `
 
+const TopGroup = styled.div``
+const BottomGroup = styled.div`
+    overflow: scroll;
+    padding-bottom: 100px;
+`
+
 export interface ListsSidebarProps {
     openFeedUrl: () => void
     onListSelection: (id: number) => void
@@ -119,75 +125,90 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                     onDragEnter={this.props.peekState.setSidebarPeekState(true)}
                 />
                 <Sidebar peeking={isSidebarPeeking} locked={isSidebarLocked}>
-                    <Margin>
-                        <ListsSidebarSearchBar {...searchBarProps} />
-                    </Margin>
-                    <Margin vertical="10px">
-                        <ListsSidebarGroup isExpanded loadingState="success">
-                            {this.renderLists(
-                                [
-                                    {
-                                        name: 'All Saved',
-                                        listId: -1,
-                                        selectedState: {
-                                            isSelected: this.props
-                                                .isAllSavedSelected,
-                                            onSelection: this.props
-                                                .onAllSavedSelection,
+                    <TopGroup>
+                        <Margin>
+                            <ListsSidebarSearchBar {...searchBarProps} />
+                        </Margin>
+                    </TopGroup>
+                    <BottomGroup>
+                        <Margin vertical="10px">
+                            <ListsSidebarGroup
+                                isExpanded
+                                loadingState="success"
+                            >
+                                {this.renderLists(
+                                    [
+                                        {
+                                            name: 'All Saved',
+                                            listId: -1,
+                                            selectedState: {
+                                                isSelected: this.props
+                                                    .isAllSavedSelected,
+                                                onSelection: this.props
+                                                    .onAllSavedSelection,
+                                            },
                                         },
-                                    },
-                                    {
-                                        name: 'Inbox',
-                                        listId: SPECIAL_LIST_IDS.INBOX,
-                                        newItemsCount: this.props
-                                            .inboxUnreadCount,
-                                        selectedState: {
-                                            isSelected:
-                                                this.props.selectedListId ===
-                                                SPECIAL_LIST_IDS.INBOX,
-                                            onSelection: this.props
-                                                .onListSelection,
+                                        {
+                                            name: 'Inbox',
+                                            listId: SPECIAL_LIST_IDS.INBOX,
+                                            newItemsCount: this.props
+                                                .inboxUnreadCount,
+                                            selectedState: {
+                                                isSelected:
+                                                    this.props
+                                                        .selectedListId ===
+                                                    SPECIAL_LIST_IDS.INBOX,
+                                                onSelection: this.props
+                                                    .onListSelection,
+                                            },
                                         },
-                                    },
-                                    {
-                                        name: 'Saved on Mobile',
-                                        listId: SPECIAL_LIST_IDS.MOBILE,
-                                        selectedState: {
-                                            isSelected:
-                                                this.props.selectedListId ===
-                                                SPECIAL_LIST_IDS.MOBILE,
-                                            onSelection: this.props
-                                                .onListSelection,
+                                        {
+                                            name: 'Saved on Mobile',
+                                            listId: SPECIAL_LIST_IDS.MOBILE,
+                                            selectedState: {
+                                                isSelected:
+                                                    this.props
+                                                        .selectedListId ===
+                                                    SPECIAL_LIST_IDS.MOBILE,
+                                                onSelection: this.props
+                                                    .onListSelection,
+                                            },
                                         },
-                                    },
-                                    {
-                                        name: 'Feed',
-                                        listId: SPECIAL_LIST_IDS.INBOX + 2,
-                                        hasActivity: this.props.hasFeedActivity,
-                                        selectedState: {
-                                            isSelected: false,
-                                            onSelection: this.props.openFeedUrl,
+                                        {
+                                            name: 'Feed',
+                                            listId: SPECIAL_LIST_IDS.INBOX + 2,
+                                            hasActivity: this.props
+                                                .hasFeedActivity,
+                                            selectedState: {
+                                                isSelected: false,
+                                                onSelection: this.props
+                                                    .openFeedUrl,
+                                            },
                                         },
-                                    },
-                                ],
-                                false,
-                            )}
-                        </ListsSidebarGroup>
-                    </Margin>
-                    {listsGroups.map((group, i) => (
-                        <Margin key={i} vertical="10px">
-                            <ListsSidebarGroup {...group}>
-                                {group.isAddInputShown && (
-                                    <ListsSidebarEditableItem
-                                        onConfirmClick={group.confirmAddNewList}
-                                        onCancelClick={group.cancelAddNewList}
-                                        errorMessage={addListErrorMessage}
-                                    />
+                                    ],
+                                    false,
                                 )}
-                                {this.renderLists(group.listsArray, true)}
                             </ListsSidebarGroup>
                         </Margin>
-                    ))}
+                        {listsGroups.map((group, i) => (
+                            <Margin key={i} vertical="10px">
+                                <ListsSidebarGroup {...group}>
+                                    {group.isAddInputShown && (
+                                        <ListsSidebarEditableItem
+                                            onConfirmClick={
+                                                group.confirmAddNewList
+                                            }
+                                            onCancelClick={
+                                                group.cancelAddNewList
+                                            }
+                                            errorMessage={addListErrorMessage}
+                                        />
+                                    )}
+                                    {this.renderLists(group.listsArray, true)}
+                                </ListsSidebarGroup>
+                            </Margin>
+                        ))}
+                    </BottomGroup>
                 </Sidebar>
             </Container>
         )
