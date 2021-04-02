@@ -11,7 +11,6 @@ import {
     CollectionsSettings,
     PageList,
     PageListEntry,
-    CollectionsCacheInterface,
 } from './types'
 import { maybeIndexTabs } from 'src/page-indexing/utils'
 import { Analytics } from 'src/analytics/types'
@@ -19,6 +18,8 @@ import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from 'src/tags/utils'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import TabManagementBackground from 'src/tab-management/background'
+import { ServerStorageModules } from 'src/storage/types'
+import { Services } from 'src/services/types'
 
 const limitSuggestionsReturnLength = 10
 const limitSuggestionsStorageLength = 20
@@ -39,6 +40,10 @@ export default class CustomListBackground {
             queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
             localBrowserStorage: Storage.LocalStorageArea
+            services: Pick<Services, 'auth'>
+            getServerStorage: () => Promise<
+                Pick<ServerStorageModules, 'activityFollows' | 'contentSharing'>
+            >
         },
     ) {
         // Makes the custom list Table in indexed DB.
@@ -61,6 +66,7 @@ export default class CustomListBackground {
             removeList: this.removeList,
             removePageFromList: this.removePageFromList,
             fetchAllLists: this.fetchAllLists,
+            fetchAllFollowedLists: this.fetchAllFollowedLists,
             fetchListById: this.fetchListById,
             fetchListPagesByUrl: this.fetchListPagesByUrl,
             fetchListIdsByUrl: this.fetchListIdsByUrl,
@@ -83,6 +89,44 @@ export default class CustomListBackground {
 
     generateListId() {
         return Date.now()
+    }
+
+    fetchAllFollowedLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async ({
+        skip = 0,
+        limit = 20,
+    }) => {
+        const { auth } = this.options.services
+        const {
+            activityFollows,
+            contentSharing,
+        } = await this.options.getServerStorage()
+
+        const currentUser = await auth.getCurrentUser()
+        if (!currentUser) {
+            return []
+        }
+
+        const follows = await activityFollows.getAllFollowsByCollection({
+            collection: 'sharedList',
+            userReference: {
+                type: 'user-reference',
+                id: currentUser.id,
+            },
+        })
+
+        const sharedLists = await contentSharing.getListsByReferences(
+            follows.map((follow) => ({
+                id: follow.objectId,
+                type: 'shared-list-reference',
+            })),
+        )
+
+        return sharedLists.map((sharedList) => ({
+            remoteId: sharedList.reference.id as string,
+            id: sharedList.createdWhen,
+            name: sharedList.title,
+            isFollowed: true,
+        }))
     }
 
     fetchAllLists = async ({

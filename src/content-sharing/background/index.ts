@@ -36,6 +36,7 @@ import {
 } from '@worldbrain/memex-common/lib/user-messages/service/types'
 import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { Services } from 'src/services/types'
+import { ServerStorageModules } from 'src/storage/types'
 
 // interface ListPush {
 //     actionsPending: number
@@ -73,9 +74,11 @@ export default class ContentSharingBackground {
             auth: AuthBackground
             analytics: Analytics
             activityStreams: Pick<ActivityStreamsBackground, 'backend'>
-            getContentSharing: () => Promise<ContentSharingStorage>
             userMessages: UserMessageService
             services: Pick<Services, 'contentSharing'>
+            getServerStorage: () => Promise<
+                Pick<ServerStorageModules, 'contentSharing'>
+            >
         },
     ) {
         this.storage = new ContentSharingClientStorage({
@@ -183,7 +186,7 @@ export default class ContentSharingBackground {
             throw new Error(`Tried to share list without being authenticated`)
         }
 
-        const contentSharing = await this.options.getContentSharing()
+        const { contentSharing } = await this.options.getServerStorage()
         const listReference = await contentSharing.createSharedList({
             listData: {
                 title: localList.name,
@@ -480,7 +483,7 @@ export default class ContentSharingBackground {
                 normalizedPageUrls: [normalizedPageUrl],
             })
         )[normalizedPageUrl]
-        const contentSharing = await this.options.getContentSharing()
+        const { contentSharing } = await this.options.getServerStorage()
         const reference = await contentSharing.ensurePageInfo({
             pageInfo: pick(page, 'fullTitle', 'originalUrl', 'normalizedUrl'),
             creatorReference: userReference,
@@ -641,7 +644,7 @@ export default class ContentSharingBackground {
     }
 
     async executeAction(action: ContentSharingAction) {
-        const contentSharing = await this.options.getContentSharing()
+        const { contentSharing } = await this.options.getServerStorage()
         const userId = (await this.options.auth.authService.getCurrentUser())
             ?.id
         if (!userId) {
@@ -1095,7 +1098,7 @@ export default class ContentSharingBackground {
     }
 
     async _processJoinedCollection(listReference: SharedListReference) {
-        const contentSharing = await this.options.getContentSharing()
+        const { contentSharing } = await this.options.getServerStorage()
         const sharedList = await contentSharing.getListByReference(
             listReference,
         )

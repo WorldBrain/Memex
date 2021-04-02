@@ -1,6 +1,7 @@
 export interface PageList {
     id: number
     name: string
+    remoteId?: string
     description?: string
     pages?: string[]
     isFollowed?: boolean
@@ -55,6 +56,10 @@ export interface RemoteCollectionsInterface {
     }): Promise<void>
     removeList(args: { id: number }): Promise<any>
     removePageFromList(args: { id: number; url: string }): Promise<void>
+    fetchAllFollowedLists(args: {
+        skip?: number
+        limit?: number
+    }): Promise<PageList[]>
     fetchAllLists(args: {
         skip?: number
         limit?: number

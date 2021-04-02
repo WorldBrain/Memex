@@ -170,6 +170,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.getSyncMenuStatus(),
                 this.getSharingAccess(),
                 this.loadLocalLists(),
+                this.loadFollowedLists(),
             ])
         })
     }
@@ -301,31 +302,52 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
                 }
 
-                // TODO: Remove this test data
-                listData[10] = {
-                    id: 10,
-                    name: 'test follow 1',
-                    isFollowed: true,
-                    remoteId: 'testest1',
-                }
-                listData[11] = {
-                    id: 11,
-                    name: 'test follow + collab',
-                    isFollowed: true,
-                    isCollaborative: true,
-                    remoteId: 'testest2',
-                }
-
                 this.emitMutation({
                     listsSidebar: {
-                        listData: { $set: listData },
+                        listData: { $merge: listData },
                         localLists: {
                             allListIds: { $set: listIds },
                             filteredListIds: { $set: listIds },
                         },
+                    },
+                })
+            },
+        )
+    }
+
+    private async loadFollowedLists() {
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listsSidebar: {
+                    followedLists: { loadingState: { $set: taskState } },
+                },
+            }),
+            async () => {
+                const lists = await this.options.listsBG.fetchAllFollowedLists({
+                    limit: 1000,
+                })
+
+                const listIds: number[] = []
+                const listData: { [id: number]: ListData } = {}
+
+                for (const list of lists) {
+                    listIds.push(list.id)
+                    listData[list.id] = {
+                        id: list.id,
+                        name: list.name,
+                        remoteId: list.remoteId,
+                        isFollowed: list.isFollowed,
+                        isCollaborative: list.isCollaborative,
+                    }
+                }
+
+                this.emitMutation({
+                    listsSidebar: {
+                        listData: { $merge: listData },
                         followedLists: {
-                            allListIds: { $set: [10, 11] },
-                            filteredListIds: { $set: [10, 11] },
+                            allListIds: { $set: listIds },
+                            filteredListIds: { $set: listIds },
                         },
                     },
                 })

@@ -61,8 +61,6 @@ import ActivityIndicatorBackground from 'src/activity-indicator/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
 import { Services } from 'src/services/types'
 import { PDFBackground } from 'src/pdf/background'
-import { SHOULD_OPEN_STORAGE_KEY } from 'src/options/PDF/constants'
-import { MemoryUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/memory'
 import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
 import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
 
@@ -128,6 +126,9 @@ export function createBackgroundModules(options: {
     const fetch = options.fetch ?? globalFetch
 
     const { storageManager } = options
+    const getServerStorage = async () =>
+        (await options.getServerStorage()).storageModules
+
     const tabManager = options.tabManager || new TabManager()
     const tabManagement = new TabManagementBackground({
         tabManager,
@@ -227,6 +228,8 @@ export function createBackgroundModules(options: {
         searchIndex: search.searchIndex,
         pages,
         localBrowserStorage: options.browserAPIs.storage.local,
+        getServerStorage,
+        services: options.services,
     })
 
     const directLinking = new DirectLinkingBackground({
@@ -295,8 +298,7 @@ export function createBackgroundModules(options: {
         auth,
         analytics: options.analyticsManager,
         userMessages,
-        getContentSharing: async () =>
-            (await options.getServerStorage()).storageModules.contentSharing,
+        getServerStorage,
         services: options.services,
     })
 

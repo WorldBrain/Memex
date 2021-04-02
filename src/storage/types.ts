@@ -6,14 +6,16 @@ import ContentConversationStorage from '@worldbrain/memex-common/lib/content-con
 import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
 import ActivityFollowsStorage from '@worldbrain/memex-common/lib/activity-follows/storage'
 
+export type ServerStorageModules = {
+    contentConversations: ContentConversationStorage
+    activityFollows: ActivityFollowsStorage
+    activityStreams: ActivityStreamsStorage
+    contentSharing: ContentSharingStorage
+    sharedSyncLog: SharedSyncLogStorage
+    userManagement: UserStorage
+}
+
 export interface ServerStorage {
     storageManager: StorageManager
-    storageModules: {
-        contentConversations: ContentConversationStorage
-        activityFollows: ActivityFollowsStorage
-        activityStreams: ActivityStreamsStorage
-        contentSharing: ContentSharingStorage
-        sharedSyncLog: SharedSyncLogStorage
-        userManagement: UserStorage
-    }
+    storageModules: ServerStorageModules
 }
