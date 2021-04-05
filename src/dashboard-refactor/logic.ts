@@ -164,13 +164,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                 previousState,
             )
             await Promise.all([
+                this.loadListsData(nextState),
                 this.getFeedActivityStatus(),
                 this.getInboxUnreadCount(),
                 this.runSearch(nextState),
                 this.getSyncMenuStatus(),
                 this.getSharingAccess(),
-                this.loadLocalLists(),
-                this.loadFollowedLists(),
             ])
         })
     }
@@ -270,7 +269,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private async loadLocalLists() {
+    private async loadLocalLists(): Promise<UIMutation<State['listsSidebar']>> {
+        const mutation: UIMutation<State['listsSidebar']> = {}
         await executeUITask(
             this,
             (taskState) => ({
@@ -302,20 +302,22 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
                 }
 
-                this.emitMutation({
-                    listsSidebar: {
-                        listData: { $merge: listData },
-                        localLists: {
-                            allListIds: { $set: listIds },
-                            filteredListIds: { $set: listIds },
-                        },
-                    },
-                })
+                mutation.listData = { $merge: listData }
+                mutation.localLists = {
+                    allListIds: { $set: listIds },
+                    filteredListIds: { $set: listIds },
+                }
+
+                this.emitMutation({ listsSidebar: mutation })
             },
         )
+        return mutation
     }
 
-    private async loadFollowedLists() {
+    private async loadFollowedLists(): Promise<
+        UIMutation<State['listsSidebar']>
+    > {
+        const mutation: UIMutation<State['listsSidebar']> = {}
         await executeUITask(
             this,
             (taskState) => ({
@@ -342,17 +344,51 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
                 }
 
-                this.emitMutation({
-                    listsSidebar: {
-                        listData: { $merge: listData },
-                        followedLists: {
-                            allListIds: { $set: listIds },
-                            filteredListIds: { $set: listIds },
-                        },
-                    },
-                })
+                mutation.listData = { $merge: listData }
+                mutation.followedLists = {
+                    allListIds: { $set: listIds },
+                    filteredListIds: { $set: listIds },
+                }
+
+                this.emitMutation({ listsSidebar: mutation })
             },
         )
+        return mutation
+    }
+
+    private async loadListsData(previousState: State) {
+        // Load base-list data first, both personal and followed
+        const mutations = await Promise.all([
+            this.loadLocalLists(),
+            this.loadFollowedLists(),
+        ])
+
+        let nextState = previousState
+        for (const mutation of mutations) {
+            nextState = this.withMutation(nextState, { listsSidebar: mutation })
+        }
+
+        const remoteListsData = Object.values(
+            nextState.listsSidebar.listData,
+        ).filter((data) => !!data.remoteId)
+
+        // Then load contributor states, to know whether or not each list is shared for contrib
+        const listContribStates = await this.options.listsBG.fetchContributorStateForRemoteLists(
+            { remoteListIds: remoteListsData.map((data) => data.remoteId) },
+        )
+        const listsDataMutation: UIMutation<
+            State['listsSidebar']['listData']
+        > = {}
+
+        for (const listData of remoteListsData) {
+            listsDataMutation[listData.id] = {
+                isCollaborative: {
+                    $set: !!listContribStates[listData.remoteId],
+                },
+            }
+        }
+
+        this.emitMutation({ listsSidebar: { listData: listsDataMutation } })
     }
 
     /**
