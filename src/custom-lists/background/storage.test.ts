@@ -8,6 +8,7 @@ import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,
 } from '@worldbrain/memex-storage/lib/lists/constants'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 async function insertTestData({
     customLists,
@@ -470,6 +471,36 @@ describe('Custom List Integrations', () => {
             // No of pages deleted
             expect(pagesBefore.length - pagesAfter.length).toBe(1)
         })
+    })
+
+    test('should be able to fetch contributor state for remote lists', async () => {
+        const { customLists } = await setupTest()
+        const remoteListAId = 'a'
+        const remoteListBId = 'b'
+
+        const dummyListKeysMap = new Map([
+            [remoteListBId, [{ roleID: SharedListRoleID.Reader }]],
+            [
+                remoteListAId,
+                [
+                    { roleID: SharedListRoleID.Reader },
+                    { roleID: SharedListRoleID.ReadWrite },
+                ],
+            ],
+        ])
+
+        // Mock out server storage method, as that's tested in storage layer tests
+        customLists['options'].getServerStorage = async () =>
+            ({
+                contentSharing: { getKeysForLists: () => dummyListKeysMap },
+            } as any)
+
+        const listsContribStateInfo = await customLists.fetchContributorStateForRemoteLists(
+            { remoteListIds: [remoteListAId, remoteListBId] },
+        )
+
+        expect(listsContribStateInfo[remoteListAId]).toEqual(true)
+        expect(listsContribStateInfo[remoteListBId]).toEqual(false)
     })
 })
 
