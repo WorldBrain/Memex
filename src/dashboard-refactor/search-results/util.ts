@@ -62,9 +62,14 @@ export const getInitialFormState = (): NoteFormState => ({
 })
 
 export const areAllNotesShown = ({ results }: RootState): boolean => {
-    for (const { pages } of Object.values(results)) {
-        for (const { areNotesShown } of Object.values(pages.byId)) {
-            if (!areNotesShown) {
+    for (const { pages, day } of Object.values(results)) {
+        const pageIdsWithNotes = pages.allIds.filter((pageId) => {
+            const page = results[day].pages.byId[pageId]
+            return page.noteIds[page.notesType].length > 0
+        })
+
+        for (const pageId of pageIdsWithNotes) {
+            if (!results[day].pages.byId[pageId].areNotesShown) {
                 return false
             }
         }

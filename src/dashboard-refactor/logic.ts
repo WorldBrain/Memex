@@ -1223,11 +1223,18 @@ export class DashboardLogic extends UILogic<State, Events> {
     setAllNotesShown: EventHandler<'setAllNotesShown'> = ({
         previousState,
     }) => {
-        const applyChangeTooAll = (newState: boolean) => (results) => {
+        const applyChangeTooAll = (newState: boolean) => (
+            results: State['searchResults']['results'],
+        ) => {
             for (const { day, pages } of Object.values(
                 previousState.searchResults.results,
             )) {
-                for (const pageId of Object.values(pages.allIds)) {
+                const pageIdsWithNotes = pages.allIds.filter((pageId) => {
+                    const page = results[day].pages.byId[pageId]
+                    return page.noteIds[page.notesType].length > 0
+                })
+
+                for (const pageId of pageIdsWithNotes) {
                     results[day].pages.byId[pageId].areNotesShown = newState
                 }
             }
