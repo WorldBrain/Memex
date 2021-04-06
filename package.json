@@ -13,6 +13,7 @@
         "build:clean": "rimraf ./extension",
         "watch": "npm run build:clean && webpack --watch",
         "watch:notif": "webpack --watch --env.notifs",
+        "watch:clean": "npm run cache:clean && npm run watch:notif",
         "cache:clean": "rimraf ./node_modules/.cache",
         "stats": "webpack --profile --json > stats.json",
         "publish-chrome": "node publish --chrome",
