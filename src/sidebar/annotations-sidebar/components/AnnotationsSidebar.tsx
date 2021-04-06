@@ -8,9 +8,7 @@ import AnnotationCreate, {
     AnnotationCreateGeneralProps,
     AnnotationCreateEventProps,
 } from 'src/annotations/components/AnnotationCreate'
-import AnnotationEditable, {
-    AnnotationEditableEventProps,
-} from 'src/annotations/components/HoverControlledAnnotationEditable'
+import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
 import { Annotation } from 'src/annotations/types'
@@ -32,6 +30,7 @@ export interface AnnotationsSidebarProps {
 
     showCongratsMessage?: boolean
     activeAnnotationUrl?: string | null
+    setActiveAnnotationUrl?: (url: string) => React.MouseEventHandler
     needsWaypoint?: boolean
     appendLoader?: boolean
     handleScrollPagination: () => void
@@ -190,6 +189,7 @@ class AnnotationsSidebar extends React.Component<
                 mode={this.props.annotationModes[annot.url]}
                 sharingInfo={this.props.annotationSharingInfo[annot.url]}
                 isActive={this.props.activeAnnotationUrl === annot.url}
+                onHighlightClick={this.props.setActiveAnnotationUrl(annot.url)}
                 annotationEditDependencies={this.props.bindAnnotationEditProps(
                     annot,
                 )}

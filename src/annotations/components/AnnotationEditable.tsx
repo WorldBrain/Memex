@@ -51,6 +51,7 @@ export interface AnnotationEditableProps {
     annotationEditDependencies: AnnotationEditGeneralProps &
         AnnotationEditEventProps
     onTagClick?: (tag: string) => void
+    onHighlightClick: React.MouseEventHandler
     renderTagsPickerForAnnotation: (id: string) => JSX.Element
     renderCopyPasterForAnnotation: (id: string) => JSX.Element
     renderShareMenuForAnnotation: (id: string) => JSX.Element
@@ -152,7 +153,14 @@ export default class AnnotationEditable extends React.Component<Props> {
             ) : null
 
         return (
-            <HighlightStyled onMouseEnter={this.props.onHighlightHover}>
+            <HighlightStyled
+                onMouseEnter={this.props.onHighlightHover}
+                onClick={
+                    this.props.isClickable
+                        ? this.props.onHighlightClick
+                        : undefined
+                }
+            >
                 <ActionBox>{actionsBox}</ActionBox>
                 <TextTruncated text={this.props.body}>
                     {({ text }) => (
@@ -347,7 +355,10 @@ export default class AnnotationEditable extends React.Component<Props> {
             <ThemeProvider theme={this.theme}>
                 <Margin top="10px">
                     <ItemBox
-                        firstDivProps={{ onMouseLeave: this.props.onUnhover }}
+                        firstDivProps={{
+                            id: this.props.url,
+                            onMouseLeave: this.props.onUnhover,
+                        }}
                     >
                         <AnnotationStyled>
                             {this.renderHighlightBody()}
@@ -559,6 +570,7 @@ const AnnotationStyled = styled.div`
     font-size: 14px;
     cursor: pointer;
     animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+    border-radius: inherit;
 
     cursor: ${({ theme }) => theme.cursor}
         ${({ theme }) =>
@@ -566,6 +578,12 @@ const AnnotationStyled = styled.div`
             `
         background-color: white;
         cursor: default;
+    `};
+
+    ${({ theme }) =>
+        theme.isActive &&
+        `
+        box-shadow: 0px 0px 5px 1px #00000080;
     `};
 `
 

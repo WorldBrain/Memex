@@ -493,6 +493,10 @@ export class AnnotationsSidebarContainer<
                         annotationModes={
                             this.state.annotationModes.pageAnnotations
                         }
+                        setActiveAnnotationUrl={(annotationUrl) => () =>
+                            this.processEvent('setActiveAnnotationUrl', {
+                                annotationUrl,
+                            })}
                         isAnnotationCreateShown={this.state.showCommentBox}
                         annotationCreateProps={this.getCreateProps()}
                         bindAnnotationFooterEventProps={(url) =>
