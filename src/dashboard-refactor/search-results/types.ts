@@ -263,7 +263,6 @@ export type Events = UIEvent<{
     cancelPageNewNote: PageEventArgs
     savePageNewNote: PageEventArgs & {
         fullPageUrl: string
-        skipPageIndexing?: boolean
     }
 
     // Note result state mutations

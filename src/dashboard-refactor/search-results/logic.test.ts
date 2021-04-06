@@ -1043,7 +1043,6 @@ describe('Dashboard search results logic', () => {
                         day,
                         pageId,
                         fullPageUrl: 'https://' + pageId,
-                        skipPageIndexing: true,
                     },
                 )
                 expect(

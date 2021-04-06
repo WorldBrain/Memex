@@ -694,7 +694,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             url: event.fullPageUrl,
             added: event.added,
             deleted: event.deleted,
-            skipPageIndexing: event.skipPageIndexing,
+            skipPageIndexing: true,
         })
     }
 
@@ -1146,7 +1146,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         pageUrl: event.fullPageUrl,
                         comment: formState.inputValue,
                     },
-                    { skipPageIndexing: event.skipPageIndexing },
+                    { skipPageIndexing: true },
                 )
                 if (formState.tags.length) {
                     await this.options.annotationsBG.updateAnnotationTags({
