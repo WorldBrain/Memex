@@ -242,11 +242,6 @@ const ButtonStyled = styled.button`
     outline: none;
 `
 
-const NewAnnotationStyled = styled.div`
-    font-weight: 600;
-    color: #3a2f45;
-`
-
 const SearchIcon = styled.span`
     background-image: url('/img/searchIcon.svg');
     background-size: 15px;

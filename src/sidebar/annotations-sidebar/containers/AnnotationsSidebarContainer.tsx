@@ -505,7 +505,8 @@ export class AnnotationsSidebarContainer<
                             this.processEvent('paginateSearch', null)
                         }
                         isSearchLoading={
-                            this.state.primarySearchState === 'running'
+                            this.state.primarySearchState === 'running' ||
+                            this.state.loadState === 'running'
                         }
                         onClickOutside={this.handleClickOutside}
                         theme={this.props.theme}
