@@ -1,6 +1,11 @@
 import { Annotation } from 'src/annotations/types'
 
-export type AnnotationsSorter = (a: Annotation, b: Annotation) => number
+type SortableAnnotation = Pick<Annotation, 'selector' | 'createdWhen'>
+
+export type AnnotationsSorter = (
+    a: SortableAnnotation,
+    b: SortableAnnotation,
+) => number
 
 export const sortByPagePosition: AnnotationsSorter = (a, b) => {
     if (!a.selector && !b.selector) {

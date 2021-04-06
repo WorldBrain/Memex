@@ -988,7 +988,20 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageNotesSort: EventHandler<'setPageNotesSort'> = ({ event }) => {
+    setPageNotesSort: EventHandler<'setPageNotesSort'> = ({
+        event,
+        previousState,
+    }) => {
+        const { searchResults } = previousState
+        const page = searchResults.results[event.day].pages.byId[event.pageId]
+
+        const sortedNoteIds = page.noteIds[page.notesType].sort((a, b) =>
+            event.sortingFn(
+                searchResults.noteData.byId[a],
+                searchResults.noteData.byId[b],
+            ),
+        )
+
         this.emitMutation({
             searchResults: {
                 results: {
@@ -996,7 +1009,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                         pages: {
                             byId: {
                                 [event.pageId]: {
-                                    sortingFn: { $set: event.sortingFn },
+                                    noteIds: {
+                                        [page.notesType]: {
+                                            $set: sortedNoteIds,
+                                        },
+                                    },
                                 },
                             },
                         },
