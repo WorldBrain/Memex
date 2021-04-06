@@ -21,8 +21,14 @@ const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
 const Container = styled.div<{ hidden: boolean }>`
     height: 30px;
     width: 100%;
-    border-bottom: 1px solid ${colors.lighterGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
     justify-content: center;
+    position: sticky;
+    top: 45px;
+    background: white;
+    z-index: 1;
+    border-top: 1px solid ${(props) => props.theme.colors.lightgrey};
+
     ${(props) =>
         css`
             display: ${props.hidden ? 'none' : 'flex'};
@@ -43,16 +49,20 @@ const PickersContainer = styled.div`
     top: 30px;
 `
 
-const FilterSelectButton = styled.div<{ isShown: boolean }>`
+const FilterSelectButton = styled.div<{ filterActive: boolean }>`
     width: min-content;
     display: flex;
     align-items: center;
     padding: 3px 6px;
 
     ${(props) => css`
-        background-color: ${props.isShown ? colors.lightGrey : colors.white};
+        background-color: ${props.filterActive
+            ? props.theme.colors.purple
+            : 'white'};
+        color: ${props.filterActive ? 'white' : props.theme.colors.primary};
+        border: 1px solid
+            ${props.filterActive ? props.theme.colors.purple : 'lightGrey'};
     `}
-    border: 1px solid ${colors.lightGrey};
     border-radius: ${styles.borderRadius.medium};
     cursor: pointer;
 `
@@ -93,11 +103,10 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 selected={isShown}
                 onClick={onToggle}
                 className={`${name}-picker-button`}
+                filterActive={isFiltered}
             >
                 <Margin horizontal="7px">
-                    <TextSpan>
-                        {label} {isFiltered && 'X'}
-                    </TextSpan>
+                    <TextSpan>{label}</TextSpan>
                 </Margin>
             </FilterSelectButton>
         </Margin>
