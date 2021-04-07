@@ -33,7 +33,6 @@ const Input = styled.input`
     line-height: 18px;
     border: none;
     background-color: transparent;
-    padding-left: 10px;
     color: fonts.primary.colors;
     font-weight: ${fonts.primary.weight.normal};
 
@@ -78,6 +77,7 @@ const IconContainer = styled.div`
 const StyledIcon = styled(Icon)`
     color: #3a2f45;
     opacity: 0.7;
+    cursor: pointer;
 `
 
 export interface SearchBarProps {
@@ -122,8 +122,8 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                     <FullWidthMargin>
                         {!!searchQuery ? (
                             <IconContainer>
-                                <Margin>
-                                    <Icon
+                                <Margin right="5px">
+                                    <StyledIcon
                                         heightAndWidth="12px"
                                         path="/img/cross_grey.svg"
                                         onClick={() => this.handleClearSearch()}
@@ -132,9 +132,9 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             </IconContainer>
                         ) : (
                             <IconContainer>
-                                <Margin right="8px">
-                                    <StyledIcon
-                                        heightAndWidth="18px"
+                                <Margin right="5px">
+                                    <Icon
+                                        heightAndWidth="16px"
                                         path="/img/searchIcon.svg"
                                     />
                                 </Margin>

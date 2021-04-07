@@ -81,7 +81,9 @@ const IconContainer = styled.div`
 const StyledIcon = styled(Icon)`
     color: #3a2f45;
     opacity: 0.7;
+    cursor: pointer;
 `
+
 export interface ListsSidebarSearchBarProps {
     isSearchBarFocused: boolean
     hasPerfectMatch: boolean
@@ -149,8 +151,8 @@ export default class ListsSidebarSearchBar extends PureComponent<
                 <InnerContainer onClick={onFocus} horizontal="8px">
                     {!!searchQuery ? (
                         <IconContainer>
-                            <Margin right="8px">
-                                <Icon
+                            <Margin right="5px">
+                                <StyledIcon
                                     heightAndWidth="12px"
                                     path="/img/cross_grey.svg"
                                     onClick={() => this.handleClearSearch()}
@@ -159,9 +161,9 @@ export default class ListsSidebarSearchBar extends PureComponent<
                         </IconContainer>
                     ) : (
                         <IconContainer>
-                            <Margin right="8px">
-                                <StyledIcon
-                                    heightAndWidth="18px"
+                            <Margin right="5px">
+                                <Icon
+                                    heightAndWidth="16px"
                                     path="/img/searchIcon.svg"
                                 />
                             </Margin>
