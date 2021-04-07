@@ -149,6 +149,10 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.props.tags.fetchPageTags({
                             url: this.props.currentTab.url,
                         }),
+                    queryEntries: (query) =>
+                        this.props.tags.searchForTagSuggestions({ query }),
+                    loadDefaultSuggestions: this.props.tags
+                        .fetchInitialTagSuggestions,
                 }}
                 lists={{
                     ...this.state.lists,
@@ -164,6 +168,16 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.props.customLists.fetchPageLists({
                             url: this.props.currentTab.url,
                         }),
+                    queryEntries: (query) =>
+                        this.props.customLists.searchForListSuggestions({
+                            query,
+                        }),
+                    loadDefaultSuggestions: this.props.customLists
+                        .fetchInitialListSuggestions,
+                    loadRemoteListNames: async () => {
+                        const remoteLists = await this.props.contentSharing.getAllRemoteLists()
+                        return remoteLists.map((list) => list.name)
+                    },
                 }}
                 search={{
                     ...this.state.search,

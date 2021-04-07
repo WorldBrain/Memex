@@ -146,6 +146,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
                 annotationsCache,
                 tags: tagsBG,
                 customLists: runInBackground(),
+                contentSharing: runInBackground(),
                 bookmarks: runInBackground(),
                 tooltip: {
                     getState: tooltipUtils.getTooltipState,

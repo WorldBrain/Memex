@@ -6,6 +6,7 @@ import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 interface FlagSetterInterface {
     getState(): Promise<boolean>
@@ -23,6 +24,7 @@ export interface RibbonContainerDependencies {
     bookmarks: BookmarksInterface
     customLists: RemoteCollectionsInterface
     tags: RemoteTagsInterface
+    contentSharing: ContentSharingInterface
     annotations: AnnotationInterface<'caller'>
     annotationsCache: AnnotationsCacheInterface
     tooltip: FlagSetterInterface

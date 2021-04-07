@@ -1,6 +1,4 @@
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
-import { Anchor } from 'src/highlighting/types'
-import { NewAnnotationOptions } from 'src/annotations/types'
 
 export interface RibbonSubcomponentProps {
     highlights: RibbonHighlightsProps
@@ -55,6 +53,8 @@ export interface RibbonTaggingProps {
     updateTags: PickerUpdateHandler
     tagAllTabs: (value: string) => Promise<void>
     setShowTagsPicker: (value: boolean) => void
+    loadDefaultSuggestions: () => Promise<string[]>
+    queryEntries: (query: string) => Promise<string[]>
     fetchInitialTagSelections: () => Promise<string[]>
 }
 
@@ -70,6 +70,9 @@ export interface RibbonListsProps {
     listAllTabs: (value: string) => Promise<void>
     setShowListsPicker: (value: boolean) => void
     fetchInitialListSelections: () => Promise<string[]>
+    loadDefaultSuggestions: () => Promise<string[]>
+    queryEntries: (query: string) => Promise<string[]>
+    loadRemoteListNames: () => Promise<string[]>
 }
 
 export interface RibbonSearchProps {

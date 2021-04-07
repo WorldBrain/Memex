@@ -132,6 +132,7 @@ export default class Ribbon extends Component<Props, State> {
                     skipRendering={!this.props.sidebar.isSidebarOpen}
                 >
                     <TagPicker
+                        {...this.props.tagging}
                         onUpdateEntrySelection={this.props.tagging.updateTags}
                         actOnAllTabs={this.props.tagging.tagAllTabs}
                         initialSelectedEntries={
@@ -157,6 +158,7 @@ export default class Ribbon extends Component<Props, State> {
                     skipRendering={!this.props.sidebar.isSidebarOpen}
                 >
                     <CollectionPicker
+                        {...this.props.lists}
                         onUpdateEntrySelection={this.props.lists.updateLists}
                         actOnAllTabs={this.props.lists.listAllTabs}
                         initialSelectedEntries={
