@@ -472,36 +472,6 @@ describe('Custom List Integrations', () => {
             expect(pagesBefore.length - pagesAfter.length).toBe(1)
         })
     })
-
-    test('should be able to fetch contributor state for remote lists', async () => {
-        const { customLists } = await setupTest()
-        const remoteListAId = 'a'
-        const remoteListBId = 'b'
-
-        const dummyListKeysMap = new Map([
-            [remoteListBId, [{ roleID: SharedListRoleID.Commenter }]],
-            [
-                remoteListAId,
-                [
-                    { roleID: SharedListRoleID.Commenter },
-                    { roleID: SharedListRoleID.ReadWrite },
-                ],
-            ],
-        ])
-
-        // Mock out server storage method, as that's tested in storage layer tests
-        customLists['options'].getServerStorage = async () =>
-            ({
-                contentSharing: { getKeysForLists: () => dummyListKeysMap },
-            } as any)
-
-        const listsContribStateInfo = await customLists.fetchContributorStateForRemoteLists(
-            { remoteListIds: [remoteListAId, remoteListBId] },
-        )
-
-        expect(listsContribStateInfo[remoteListAId]).toEqual(true)
-        expect(listsContribStateInfo[remoteListBId]).toEqual(false)
-    })
 })
 
 describe('Collection Cache', () => {
