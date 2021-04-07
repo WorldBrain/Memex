@@ -42,6 +42,7 @@ import Margin from './components/Margin'
 import { getFeedUrl, getListShareUrl } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { Props as ListDetailsProps } from './search-results/components/list-details'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 
 export interface Props extends DashboardDependencies {
     renderDashboardSwitcherLink: () => JSX.Element
@@ -97,7 +98,12 @@ export class DashboardContainer extends StatefulUIElement<
     private getListDetailsProps = (): ListDetailsProps | null => {
         const { listsSidebar } = this.state
 
-        if (!listsSidebar.selectedListId) {
+        if (
+            !listsSidebar.selectedListId ||
+            Object.values(SPECIAL_LIST_IDS).includes(
+                listsSidebar.selectedListId,
+            )
+        ) {
             return null
         }
 
