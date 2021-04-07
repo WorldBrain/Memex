@@ -34,6 +34,9 @@ export interface ContentSharingInterface
         annotationUrl: string
     }): Promise<string | null>
     getRemoteListId(options: { localListId: number }): Promise<string | null>
+    getRemoteListIds(options: {
+        localListIds: number[]
+    }): Promise<{ [localListId: string]: string | null }>
     getAllRemoteLists(): Promise<
         Array<{ localId: number; remoteId: string; name: string }>
     >

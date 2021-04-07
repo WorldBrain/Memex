@@ -269,7 +269,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private async loadLocalLists(): Promise<UIMutation<State['listsSidebar']>> {
+    private async loadListsData(previousState: State) {
+        const { listsBG, contentShareBG } = this.options
         const mutation: UIMutation<State['listsSidebar']> = {}
         await executeUITask(
             this,
@@ -279,26 +280,24 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             }),
             async () => {
-                const lists = await this.options.listsBG.fetchAllLists({
+                const localLists = await listsBG.fetchAllLists({
                     limit: 1000,
                     skipMobileList: true,
                 })
 
+                const localToRemoteIdDict = await contentShareBG.getRemoteListIds(
+                    { localListIds: localLists.map((list) => list.id) },
+                )
+
                 const listIds: number[] = []
                 const listData: { [id: number]: ListData } = {}
 
-                for (const list of lists) {
-                    const remoteListId = await this.options.contentShareBG.getRemoteListId(
-                        { localListId: list.id },
-                    )
-
+                for (const list of localLists) {
                     listIds.push(list.id)
                     listData[list.id] = {
                         id: list.id,
                         name: list.name,
-                        remoteId: remoteListId ?? undefined,
-                        isFollowed: list.isFollowed,
-                        isCollaborative: list.isCollaborative,
+                        remoteId: localToRemoteIdDict[list.id] ?? undefined,
                     }
                 }
 
@@ -311,13 +310,21 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.emitMutation({ listsSidebar: mutation })
             },
         )
-        return mutation
-    }
 
-    private async loadFollowedLists(): Promise<
-        UIMutation<State['listsSidebar']>
-    > {
-        const mutation: UIMutation<State['listsSidebar']> = {}
+        const nextState = this.withMutation(previousState, {
+            listsSidebar: mutation,
+        })
+
+        // Collect a set of all remote IDs for local lists that are shared/collaborative
+        const sharedLocalListRemoteIds = new Set<string>()
+        for (const list of nextState.listsSidebar.localLists.allListIds.map(
+            (listId) => nextState.listsSidebar.listData[listId],
+        )) {
+            if (list.remoteId) {
+                sharedLocalListRemoteIds.add(list.remoteId)
+            }
+        }
+
         await executeUITask(
             this,
             (taskState) => ({
@@ -326,69 +333,37 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             }),
             async () => {
-                const lists = await this.options.listsBG.fetchAllFollowedLists({
+                const followedLists = await listsBG.fetchAllFollowedLists({
                     limit: 1000,
                 })
+                // We don't want duped lists that appear in both local and followed sections
+                const filteredLists = followedLists.filter(
+                    (list) => !sharedLocalListRemoteIds.has(list.remoteId),
+                )
 
                 const listIds: number[] = []
                 const listData: { [id: number]: ListData } = {}
 
-                for (const list of lists) {
+                for (const list of filteredLists) {
                     listIds.push(list.id)
                     listData[list.id] = {
                         id: list.id,
                         name: list.name,
                         remoteId: list.remoteId,
-                        isFollowed: list.isFollowed,
-                        isCollaborative: list.isCollaborative,
                     }
                 }
 
-                mutation.listData = { $merge: listData }
-                mutation.followedLists = {
-                    allListIds: { $set: listIds },
-                    filteredListIds: { $set: listIds },
-                }
-
-                this.emitMutation({ listsSidebar: mutation })
+                this.emitMutation({
+                    listsSidebar: {
+                        listData: { $merge: listData },
+                        followedLists: {
+                            allListIds: { $set: listIds },
+                            filteredListIds: { $set: listIds },
+                        },
+                    },
+                })
             },
         )
-        return mutation
-    }
-
-    private async loadListsData(previousState: State) {
-        // Load base-list data first, both personal and followed
-        const mutations = await Promise.all([
-            this.loadLocalLists(),
-            this.loadFollowedLists(),
-        ])
-
-        let nextState = previousState
-        for (const mutation of mutations) {
-            nextState = this.withMutation(nextState, { listsSidebar: mutation })
-        }
-
-        const remoteListsData = Object.values(
-            nextState.listsSidebar.listData,
-        ).filter((data) => !!data.remoteId)
-
-        // Then load contributor states, to know whether or not each list is shared for contrib
-        const listContribStates = await this.options.listsBG.fetchContributorStateForRemoteLists(
-            { remoteListIds: remoteListsData.map((data) => data.remoteId) },
-        )
-        const listsDataMutation: UIMutation<
-            State['listsSidebar']['listData']
-        > = {}
-
-        for (const listData of remoteListsData) {
-            listsDataMutation[listData.id] = {
-                isCollaborative: {
-                    $set: !!listContribStates[listData.remoteId],
-                },
-            }
-        }
-
-        this.emitMutation({ listsSidebar: { listData: listsDataMutation } })
     }
 
     /**
@@ -2055,17 +2030,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const listData = previousState.listsSidebar.listData[event.listId]
-
-        if (
-            listData.isFollowed &&
-            listData.remoteId &&
-            !listData.isCollaborative
-        ) {
-            this.options.openCollectionPage(listData.remoteId)
-            return
-        }
-
         const listIdToSet =
             previousState.listsSidebar.selectedListId === event.listId
                 ? undefined

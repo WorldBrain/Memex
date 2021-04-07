@@ -96,6 +96,10 @@ export default class ContentSharingService
         })
     }
 
+    hasCurrentKey: ContentSharingServiceInterface['hasCurrentKey'] = () => {
+        throw new Error('TODO: Implement me')
+    }
+
     processCurrentKey: ContentSharingServiceInterface['processCurrentKey'] = async () => {
         throw new Error('TODO: Implement me')
     }

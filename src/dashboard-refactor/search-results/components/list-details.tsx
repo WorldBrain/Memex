@@ -10,7 +10,6 @@ import { ButtonTooltip } from 'src/common-ui/components'
 export interface Props {
     listName: string
     remoteLink?: string
-    isCollaborative: boolean
     onAddContributorsClick?: React.MouseEventHandler
 }
 
@@ -21,7 +20,7 @@ export default class ListDetails extends PureComponent<Props> {
                 <Container>
                     <DetailsContainer>
                         <Name>{this.props.listName}</Name>
-                        {this.props.isCollaborative && (
+                        {this.props.remoteLink && (
                             <Note>
                                 You can only see and search your own
                                 contributions to this collection.

@@ -18,8 +18,6 @@ export interface ListData {
     id: number
     name: string
     remoteId?: string
-    isFollowed?: boolean
-    isCollaborative?: boolean
 }
 
 export interface ListGroupCommon

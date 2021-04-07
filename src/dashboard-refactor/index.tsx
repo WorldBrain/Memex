@@ -106,18 +106,13 @@ export class DashboardContainer extends StatefulUIElement<
             ? getListShareUrl({ remoteListId: listData.remoteId })
             : undefined // TODO: ensure this comes with key for collab'd lists
 
-        const onAddContributorsClick = !listData.isFollowed
-            ? () =>
-                  this.processEvent('setShareListId', {
-                      listId: listData.id,
-                  })
-            : undefined
-
         return {
             remoteLink,
-            onAddContributorsClick,
             listName: listData.name,
-            isCollaborative: listData.isCollaborative,
+            onAddContributorsClick: () =>
+                this.processEvent('setShareListId', {
+                    listId: listData.id,
+                }),
         }
     }
 
@@ -128,29 +123,32 @@ export class DashboardContainer extends StatefulUIElement<
         const { listsSidebar } = this.state
 
         const onSelection =
-            list.isFollowed && !list.isCollaborative
+            source === 'followed-lists'
                 ? () => this.props.openCollectionPage(list.remoteId)
                 : () =>
                       this.processEvent('setSelectedListId', {
                           listId: list.id,
                       })
 
-        const onMoreActionClick = !list.isFollowed
-            ? () =>
-                  this.processEvent('setShowMoreMenuListId', {
-                      listId: list.id,
-                  })
-            : undefined
+        const onMoreActionClick =
+            source !== 'followed-lists'
+                ? () =>
+                      this.processEvent('setShowMoreMenuListId', {
+                          listId: list.id,
+                      })
+                : undefined
 
         return {
             source,
             listId: list.id,
             name: list.name,
-            isCollaborative: list.isCollaborative,
+            isCollaborative:
+                source === 'followed-lists' ? false : list.remoteId != null,
             isEditing: listsSidebar.editingListId === list.id,
-            isMenuDisplayed: list.isFollowed
-                ? false
-                : listsSidebar.showMoreMenuListId === list.id,
+            isMenuDisplayed:
+                source === 'followed-lists'
+                    ? false
+                    : listsSidebar.showMoreMenuListId === list.id,
             selectedState: {
                 isSelected: listsSidebar.selectedListId === list.id,
                 onSelection,

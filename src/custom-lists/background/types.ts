@@ -4,8 +4,6 @@ export interface PageList {
     remoteId?: string
     description?: string
     pages?: string[]
-    isFollowed?: boolean
-    isCollaborative?: boolean
     isNestable?: boolean
     isDeletable?: boolean
     active?: boolean
