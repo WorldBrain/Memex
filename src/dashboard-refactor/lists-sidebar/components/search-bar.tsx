@@ -21,7 +21,7 @@ const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
     height: min-content;
     padding-left: 8px;
     padding-right: 8px;
-    background-color: ${colors.lightMidGrey};
+    background-color: ${colors.lightGrey};
     border-radius: 3px;
     display: flex;
     flex-direction: column;
@@ -51,14 +51,10 @@ const Input = styled.input<{ isFocused: boolean }>`
     width: 100%;
     border: none;
     background: inherit;
-    ${(props) => {
-        const { primary, secondary } = fonts.primary.colors
-        return css`&::placeholder {
-            ${textStyles}
-            color: ${props.isFocused ? secondary : primary};
-            opacity: 0.6;
-            `
-    }}}
+    &::placeholder {
+        opacity: 0.6;
+    }
+
     &:focus {
         outline: none;
     }
@@ -84,6 +80,7 @@ const IconContainer = styled.div`
 
 const StyledIcon = styled(Icon)`
     color: #3a2f45;
+    opacity: 0.7;
 `
 export interface ListsSidebarSearchBarProps {
     isSearchBarFocused: boolean
@@ -134,6 +131,11 @@ export default class ListsSidebarSearchBar extends PureComponent<
         )
     }
 
+    handleClearSearch() {
+        this.props.onInputClear()
+        this.inputRef.current.focus()
+    }
+
     render(): JSX.Element {
         const {
             searchQuery,
@@ -145,14 +147,26 @@ export default class ListsSidebarSearchBar extends PureComponent<
         return (
             <OuterContainer isSidebarLocked={isSidebarLocked}>
                 <InnerContainer onClick={onFocus} horizontal="8px">
-                    <IconContainer>
-                        <Margin right="8px">
-                            <StyledIcon
-                                heightAndWidth="12px"
-                                path="/img/searchIcon.svg"
-                            />
-                        </Margin>
-                    </IconContainer>
+                    {!!searchQuery ? (
+                        <IconContainer>
+                            <Margin right="8px">
+                                <Icon
+                                    heightAndWidth="12px"
+                                    path="/img/cross_grey.svg"
+                                    onClick={() => this.handleClearSearch()}
+                                />
+                            </Margin>
+                        </IconContainer>
+                    ) : (
+                        <IconContainer>
+                            <Margin right="8px">
+                                <StyledIcon
+                                    heightAndWidth="18px"
+                                    path="/img/searchIcon.svg"
+                                />
+                            </Margin>
+                        </IconContainer>
+                    )}
                     <Input
                         placeholder="Search collections"
                         isFocused={isSearchBarFocused}
@@ -160,17 +174,6 @@ export default class ListsSidebarSearchBar extends PureComponent<
                         onChange={this.handleInputChange}
                         value={searchQuery}
                     />
-                    {!!searchQuery && (
-                        <IconContainer>
-                            <Margin left="12px">
-                                <Icon
-                                    heightAndWidth="12px"
-                                    path="/img/cross_grey.svg"
-                                    onClick={onInputClear}
-                                />
-                            </Margin>
-                        </IconContainer>
-                    )}
                 </InnerContainer>
                 {!!this.props.searchQuery &&
                     !this.props.hasPerfectMatch &&

@@ -297,6 +297,8 @@ export class DashboardContainer extends StatefulUIElement<
                         }),
                     onSearchQueryChange: (query) =>
                         this.processEvent('setSearchQuery', { query }),
+                    onInputClear: () =>
+                        this.processEvent('setSearchQuery', { query: '' }),
                 }}
                 sidebarLockedState={{
                     isSidebarLocked: listsSidebar.isSidebarLocked,

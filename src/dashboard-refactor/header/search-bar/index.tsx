@@ -6,6 +6,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import colors from '../../colors'
 import styles, { fonts } from '../../styles'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { Icon } from 'src/dashboard-refactor/styled-components'
 
 const textStyles = `
     font-family: ${fonts.primary.name};
@@ -33,6 +34,12 @@ const Input = styled.input`
     border: none;
     background-color: transparent;
     padding-left: 10px;
+    color: fonts.primary.colors;
+    font-weight: ${fonts.primary.weight.normal};
+
+    &::placeholder {
+        opacity: 0.6;
+    }
 
     &:focus {
         outline: none;
@@ -61,6 +68,18 @@ const SearchIcon = styled.img`
     align-items: center;
 `
 
+const IconContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-items: start;
+`
+
+const StyledIcon = styled(Icon)`
+    color: #3a2f45;
+    opacity: 0.7;
+`
+
 export interface SearchBarProps {
     placeholder?: string
     searchQuery: string
@@ -69,6 +88,7 @@ export interface SearchBarProps {
     onSearchBarFocus(): void
     onSearchQueryChange(queryString: string): void
     onSearchFiltersOpen(): void
+    onInputClear(): void
 }
 
 export default class SearchBar extends PureComponent<SearchBarProps> {
@@ -83,6 +103,12 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         // bundle them in an object to send with the onSearchQueryChange func
         this.props.onSearchQueryChange((evt.target as HTMLInputElement).value)
     }
+
+    handleClearSearch() {
+        this.props.onInputClear()
+        this.inputRef.current.focus()
+    }
+
     render() {
         const {
             searchFiltersOpen,
@@ -94,7 +120,26 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
             <Margin vertical="auto">
                 <SearchBarContainer onClick={onSearchBarFocus}>
                     <FullWidthMargin>
-                        <SearchIcon src={icons.searchIcon} />
+                        {!!searchQuery ? (
+                            <IconContainer>
+                                <Margin>
+                                    <Icon
+                                        heightAndWidth="12px"
+                                        path="/img/cross_grey.svg"
+                                        onClick={() => this.handleClearSearch()}
+                                    />
+                                </Margin>
+                            </IconContainer>
+                        ) : (
+                            <IconContainer>
+                                <Margin right="8px">
+                                    <StyledIcon
+                                        heightAndWidth="18px"
+                                        path="/img/searchIcon.svg"
+                                    />
+                                </Margin>
+                            </IconContainer>
+                        )}
                         <Input
                             ref={this.inputRef}
                             placeholder={
