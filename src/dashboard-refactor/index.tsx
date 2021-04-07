@@ -871,7 +871,7 @@ export class DashboardContainer extends StatefulUIElement<
                 {this.renderHeader()}
                 {this.renderFiltersBar()}
                 {this.props.renderDashboardSwitcherLink()}
-                <Margin bottom="10px" />
+                <Margin bottom="5px" />
                 {this.renderListsSidebar()}
                 {this.renderSearchResults()}
                 {this.renderModals()}

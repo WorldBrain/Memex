@@ -16,47 +16,52 @@ export interface Props {
 export default class ListDetails extends PureComponent<Props> {
     render() {
         return (
-            <Margin bottom="20px">
-                <Container>
-                    <DetailsContainer>
-                        <Name>{this.props.listName}</Name>
-                        {this.props.remoteLink && (
-                            <Note>
-                                You can only see and search your own
-                                contributions to this collection.
-                                <br /> Open the collection in the web view to
-                                see all entries.
-                            </Note>
-                        )}
-                    </DetailsContainer>
-                    <BtnsContainer>
-                        {this.props.onAddContributorsClick && (
-                            <Margin right="10px">
-                                <ButtonTooltip
-                                    tooltipText="Invite people to this collection"
-                                    position="bottom"
-                                >
-                                    <Icon
-                                        height="18px"
-                                        icon="addPeople"
-                                        onClick={
-                                            this.props.onAddContributorsClick
-                                        }
-                                    />
-                                </ButtonTooltip>
-                            </Margin>
-                        )}
-                        {this.props.remoteLink && (
-                            <Button
-                                type="primary-action"
-                                externalHref={this.props.remoteLink}
-                            >
-                                Open
-                            </Button>
-                        )}
-                    </BtnsContainer>
-                </Container>
-            </Margin>
+            <>
+                {this.props.listName && (
+                    <Margin bottom="20px">
+                        <Container>
+                            <DetailsContainer>
+                                <Name>{this.props.listName}</Name>
+                                {this.props.remoteLink && (
+                                    <Note>
+                                        You can only see and search your own
+                                        contributions to this collection.
+                                        <br /> Open the collection in the web
+                                        view to see all entries.
+                                    </Note>
+                                )}
+                            </DetailsContainer>
+                            <BtnsContainer>
+                                {this.props.onAddContributorsClick && (
+                                    <Margin right="10px">
+                                        <ButtonTooltip
+                                            tooltipText="Invite people to this collection"
+                                            position="bottom"
+                                        >
+                                            <Icon
+                                                height="18px"
+                                                icon="addPeople"
+                                                onClick={
+                                                    this.props
+                                                        .onAddContributorsClick
+                                                }
+                                            />
+                                        </ButtonTooltip>
+                                    </Margin>
+                                )}
+                                {this.props.remoteLink && (
+                                    <Button
+                                        type="primary-action"
+                                        externalHref={this.props.remoteLink}
+                                    >
+                                        Open
+                                    </Button>
+                                )}
+                            </BtnsContainer>
+                        </Container>
+                    </Margin>
+                )}{' '}
+            </>
         )
     }
 }
