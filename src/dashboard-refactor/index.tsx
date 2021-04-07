@@ -802,7 +802,7 @@ export class DashboardContainer extends StatefulUIElement<
                     defaultAddLinkRole={
                         listData.remoteId
                             ? SharedListRoleID.ReadWrite
-                            : SharedListRoleID.Reader
+                            : SharedListRoleID.Commenter
                     }
                     listId={listData.remoteId}
                     shareList={shareListAndAllEntries(

@@ -479,11 +479,11 @@ describe('Custom List Integrations', () => {
         const remoteListBId = 'b'
 
         const dummyListKeysMap = new Map([
-            [remoteListBId, [{ roleID: SharedListRoleID.Reader }]],
+            [remoteListBId, [{ roleID: SharedListRoleID.Commenter }]],
             [
                 remoteListAId,
                 [
-                    { roleID: SharedListRoleID.Reader },
+                    { roleID: SharedListRoleID.Commenter },
                     { roleID: SharedListRoleID.ReadWrite },
                 ],
             ],

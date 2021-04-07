@@ -59,7 +59,7 @@ export default class ContentSharingService
         //  method is called.
         const readerLink = {
             link: this.getKeyLink({ listReference: params.listReference }),
-            roleID: SharedListRoleID.Reader,
+            roleID: SharedListRoleID.Commenter,
         }
 
         return {
@@ -72,7 +72,7 @@ export default class ContentSharingService
     ) => {
         let keyString: string | undefined
 
-        if (params.key.roleID !== SharedListRoleID.Reader) {
+        if (params.key.roleID !== SharedListRoleID.Commenter) {
             const createListResult = await this.dependencies.storage.contentSharing.createListKey(
                 params,
             )
