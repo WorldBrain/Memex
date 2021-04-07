@@ -25,28 +25,28 @@ const buttonStyles = `
 `
 
 const arrowStyles = `
-    position: absolute;
     left: 2px;
     opacity: 1;
     background-size: 18px;
 `
 
 export const Container = styled.div`
-    height: 30px;
-    width: 30px;
+    height: 80px;
+    width: 60px;
     border: none;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    z-index: 1;
+    padding-left: 12px;
 `
 
 export const BtnBackground = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: ${colors.midGrey};
     background-size: 20px;
     background-repeat: no-repeat;
     background-position: center center;
@@ -88,7 +88,6 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
         return (
             <Container
                 isHovered={isHovered}
-                onMouseEnter={onHoverEnter}
                 onMouseLeave={onHoverLeave}
                 onClick={toggleSidebarLockedState}
             >
@@ -97,7 +96,7 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
                         {isSidebarLocked ? <LeftArrow /> : <RightArrow />}
                     </BtnBackground>
                 ) : (
-                    <HamburgerButton />
+                    <HamburgerButton onMouseEnter={onHoverEnter} />
                 )}
             </Container>
         )

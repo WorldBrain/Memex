@@ -27,8 +27,7 @@ const Sidebar = styled.div<{
     justify-content: start;
     width: ${sizeConstants.listsSidebar.widthPx}px;
     position: fixed;
-    top: ${sizeConstants.header.heightPx}px;
-    z-index: 1;
+    z-index: 10;
 
     ${(props) =>
         props.locked &&
@@ -36,6 +35,7 @@ const Sidebar = styled.div<{
             height: 100%;
             background-color: ${colors.white};
             box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
+            top: ${sizeConstants.header.heightPx}px;
         `}
     ${(props) =>
         props.peeking &&
@@ -43,9 +43,10 @@ const Sidebar = styled.div<{
             height: max-content;
             background-color: ${colors.white};
             box-shadow: 2px 0px 4px rgba(0, 0, 0, 0.25);
-            margin-top: 9px;
+            margin-top: 50px;
             margin-bottom: 9px;
             height: 90vh;
+            top: 5px;
         `}
     ${(props) =>
         !props.peeking &&
@@ -125,7 +126,14 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                     )}
                     onDragEnter={this.props.peekState.setSidebarPeekState(true)}
                 />
-                <Sidebar peeking={isSidebarPeeking} locked={isSidebarLocked}>
+                <Sidebar
+                    peeking={isSidebarPeeking}
+                    locked={isSidebarLocked}
+                    onMouseEnter={
+                        isSidebarPeeking &&
+                        this.props.peekState.setSidebarPeekState(true)
+                    }
+                >
                     <TopGroup>
                         <Margin>
                             <ListsSidebarSearchBar {...searchBarProps} />
