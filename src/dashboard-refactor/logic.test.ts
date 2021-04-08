@@ -38,6 +38,9 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResults.state.listsSidebar.localLists.filteredListIds,
         ).toEqual([])
+        expect(searchResults.state.listsSidebar.localLists.allListIds).toEqual(
+            [],
+        )
 
         await searchResults.processEvent('init', null)
 
@@ -50,6 +53,9 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResults.state.listsSidebar.localLists.filteredListIds,
         ).toEqual(listIds)
+        expect(searchResults.state.listsSidebar.localLists.allListIds).toEqual(
+            listIds,
+        )
     })
 
     it('should trigger search during init logic', async ({ device }) => {

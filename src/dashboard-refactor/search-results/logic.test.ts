@@ -456,7 +456,7 @@ describe('Dashboard search results logic', () => {
 
             expect(dataTransfer['img']).toEqual(mockElement)
             expect(dataTransfer.getData('text/plain')).toEqual(
-                JSON.stringify({ fullPageUrl: page.fullUrl }),
+                `{"fullPageUrl":"https://test.com"}`,
             )
             expect(mockElement.style.display).toEqual('block')
             expect(searchResults.state.searchResults.draggedPageId).toEqual(

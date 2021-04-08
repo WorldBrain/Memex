@@ -163,18 +163,11 @@ export default class CustomListBackground {
 
         const missing = names.filter((name) => !existingLists.has(name))
 
-        const missingEntries = await Promise.all(
-            missing.map(async (name) => {
-                let id: number
-                try {
-                    id = await this.createCustomList({ name })
-                } catch (err) {
-                    const list = await this.fetchListByName({ name })
-                    id = list.id
-                }
-                return [name, id] as [string, number]
-            }),
-        )
+        const missingEntries = new Map<string, number>()
+        for (const name of missing) {
+            const id = await this.createCustomList({ name })
+            missingEntries.set(name, id)
+        }
 
         const listIds = new Map([...existingLists, ...missingEntries])
 
