@@ -122,58 +122,73 @@ export class DashboardContainer extends StatefulUIElement<
         }
     }
 
-    private listStateToProps = (
-        list: ListData,
+    private listsStateToProps = (
+        listIds: number[],
         source: ListSource,
-    ): ListSidebarItemProps => {
+    ): ListSidebarItemProps[] => {
         const { listsSidebar } = this.state
 
-        const onSelection =
-            source === 'followed-lists'
-                ? () => this.props.openCollectionPage(list.remoteId)
-                : () =>
-                      this.processEvent('setSelectedListId', {
-                          listId: list.id,
-                      })
+        return listIds
+            .sort((idA, idB) => {
+                const listDataA = listsSidebar.listData[idA]
+                const listDataB = listsSidebar.listData[idB]
 
-        const onMoreActionClick =
-            source !== 'followed-lists'
-                ? () =>
-                      this.processEvent('setShowMoreMenuListId', {
-                          listId: list.id,
-                      })
-                : undefined
-
-        return {
-            source,
-            listId: list.id,
-            name: list.name,
-            isCollaborative:
-                source === 'followed-lists' ? false : list.remoteId != null,
-            isEditing: listsSidebar.editingListId === list.id,
-            isMenuDisplayed:
-                source === 'followed-lists'
-                    ? false
-                    : listsSidebar.showMoreMenuListId === list.id,
-            selectedState: {
-                isSelected: listsSidebar.selectedListId === list.id,
-                onSelection,
-            },
-            editableProps: {
-                onCancelClick: () => this.processEvent('cancelListEdit', null),
-                onConfirmClick: (value) =>
-                    this.processEvent('confirmListEdit', { value }),
-                initValue: list.name,
-                errorMessage: listsSidebar.editListErrorMessage,
-            },
-            onMoreActionClick,
-            onRenameClick: () =>
-                this.processEvent('setEditingListId', { listId: list.id }),
-            onDeleteClick: () =>
-                this.processEvent('setDeletingListId', { listId: list.id }),
-            onShareClick: () =>
-                this.processEvent('setShareListId', { listId: list.id }),
-        }
+                if (listDataA.name < listDataB.name) {
+                    return -1
+                }
+                if (listDataA.name > listDataB.name) {
+                    return 1
+                }
+                return 0
+            })
+            .map((listId) => ({
+                source,
+                listId,
+                name: listsSidebar.listData[listId].name,
+                isEditing: listsSidebar.editingListId === listId,
+                isCollaborative:
+                    source === 'followed-lists'
+                        ? false
+                        : listsSidebar.listData[listId].remoteId != null,
+                isMenuDisplayed:
+                    source === 'followed-lists'
+                        ? false
+                        : listsSidebar.showMoreMenuListId === listId,
+                selectedState: {
+                    isSelected: listsSidebar.selectedListId === listId,
+                    onSelection:
+                        source === 'followed-lists'
+                            ? () =>
+                                  this.props.openCollectionPage(
+                                      listsSidebar.listData[listId].remoteId,
+                                  )
+                            : () =>
+                                  this.processEvent('setSelectedListId', {
+                                      listId: listsSidebar.listData[listId].id,
+                                  }),
+                },
+                editableProps: {
+                    onCancelClick: () =>
+                        this.processEvent('cancelListEdit', null),
+                    onConfirmClick: (value) =>
+                        this.processEvent('confirmListEdit', { value }),
+                    initValue: listsSidebar.listData[listId].name,
+                    errorMessage: listsSidebar.editListErrorMessage,
+                },
+                onMoreActionClick:
+                    source !== 'followed-lists'
+                        ? () =>
+                              this.processEvent('setShowMoreMenuListId', {
+                                  listId: listsSidebar.listData[listId].id,
+                              })
+                        : undefined,
+                onRenameClick: () =>
+                    this.processEvent('setEditingListId', { listId }),
+                onDeleteClick: () =>
+                    this.processEvent('setDeletingListId', { listId }),
+                onShareClick: () =>
+                    this.processEvent('setShareListId', { listId }),
+            }))
     }
 
     private renderFiltersBar() {
@@ -415,12 +430,9 @@ export class DashboardContainer extends StatefulUIElement<
                             this.processEvent('setLocalListsExpanded', {
                                 isExpanded: !listsSidebar.localLists.isExpanded,
                             }),
-                        listsArray: listsSidebar.localLists.filteredListIds.map(
-                            (listId) =>
-                                this.listStateToProps(
-                                    listsSidebar.listData[listId],
-                                    'local-lists',
-                                ),
+                        listsArray: this.listsStateToProps(
+                            listsSidebar.localLists.filteredListIds,
+                            'local-lists',
                         ),
                     },
                     {
@@ -431,12 +443,9 @@ export class DashboardContainer extends StatefulUIElement<
                                 isExpanded: !listsSidebar.followedLists
                                     .isExpanded,
                             }),
-                        listsArray: listsSidebar.followedLists.filteredListIds.map(
-                            (listId) =>
-                                this.listStateToProps(
-                                    listsSidebar.listData[listId],
-                                    'followed-lists',
-                                ),
+                        listsArray: this.listsStateToProps(
+                            listsSidebar.followedLists.filteredListIds,
+                            'followed-lists',
                         ),
                     },
                 ]}
