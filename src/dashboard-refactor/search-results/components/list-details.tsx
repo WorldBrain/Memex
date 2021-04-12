@@ -6,6 +6,11 @@ import colors from '../../colors'
 import styles, { fonts } from '../../styles'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { ButtonTooltip } from 'src/common-ui/components'
+import {
+    contentSharing,
+    auth,
+    tags,
+} from 'src/util/remote-functions-background'
 
 export interface Props {
     listName: string
@@ -14,11 +19,31 @@ export interface Props {
 }
 
 export default class ListDetails extends PureComponent<Props> {
+
+    componentDidMount() {
+        this.BetaStatus()
+    }
+
+    private authBG = auth
+
+    state = {
+        sharingAccess: 'feature-disabled',
+    }
+
+    private async BetaStatus() {
+        const isAllowed = await this.authBG.isAuthorizedForFeature('beta')
+        this.setState({
+            sharingAccess: isAllowed ? 'sharing-allowed' : 'feature-disabled',
+        })
+    }
+
+
     render() {
+
         return (
             <>
                 {this.props.listName && (
-                    <Margin bottom="20px">
+                    <Margin top="10px" bottom="20px">
                         <Container>
                             <DetailsContainer>
                                 <Name>{this.props.listName}</Name>
@@ -32,7 +57,7 @@ export default class ListDetails extends PureComponent<Props> {
                                 )}
                             </DetailsContainer>
                             <BtnsContainer>
-                                {this.props.onAddContributorsClick && (
+                                {this.props.onAddContributorsClick && this.state.sharingAccess === 'sharing-allowed' && (
                                     <Margin right="10px">
                                         <ButtonTooltip
                                             tooltipText="Invite people to this collection"
@@ -71,7 +96,7 @@ const Container = styled.div`
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
-    align-items: ${(props) => (props.remotLink ? 'flex-start' : 'center')};
+    align-items: flex-start;
 `
 
 const DetailsContainer = styled.div`
@@ -82,6 +107,7 @@ const DetailsContainer = styled.div`
 const BtnsContainer = styled.div`
     display: flex;
     align-items: center;
+    padding-top: 5px;
 `
 
 const Name = styled.div`
