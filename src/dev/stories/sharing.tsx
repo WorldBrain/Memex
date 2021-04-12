@@ -12,7 +12,6 @@ stories.add('Modal content - private', () => (
     <ShareListModalContent
         onClose={() => {}}
         listName={'Reading List'}
-        isShared={false}
         listCreationState="pristine"
         onGenerateLinkClick={() => {}}
     />
@@ -22,7 +21,6 @@ stories.add('Modal content - public', () => (
     <ShareListModalContent
         onClose={() => {}}
         listName={'Reading List'}
-        isShared={boolean('isShared', true)}
         listCreationState="pristine"
         shareUrl={'https://memex.social/collections/jdfjf81d'}
         onGenerateLinkClick={() => {}}
@@ -33,7 +31,6 @@ stories.add('Modal content - public & uploading', () => (
     <ShareListModalContent
         onClose={() => {}}
         listName={'Reading List'}
-        isShared={boolean('isShared', true)}
         listCreationState="running"
         shareUrl={'https://memex.social/collections/jdfjf81d'}
         onGenerateLinkClick={() => {}}

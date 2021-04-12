@@ -27,6 +27,7 @@ import { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import { PublicSyncInterface } from 'src/sync/background/types'
 import { BackupInterface } from 'src/backup-restore/background/types'
 import { SearchFiltersState, SearchFilterEvents } from './header/types'
+import { UIServices } from 'src/services/ui/types'
 
 export interface RootState {
     loadState: TaskState
@@ -62,9 +63,14 @@ export interface DashboardDependencies {
     activityIndicatorBG: ActivityIndicatorInterface
     copyToClipboard: (text: string) => Promise<boolean>
     localStorage: Browser['storage']['local']
-    openFeedUrl: () => void
+    openFeed: () => void
+    openCollectionPage: (remoteCollectionId: string) => void
     renderDashboardSwitcherLink: () => JSX.Element
     renderUpdateNotifBanner: () => JSX.Element
+    services: Pick<
+        UIServices,
+        'logicRegistry' | 'overlay' | 'clipboard' | 'device'
+    >
 }
 
 export interface DropReceivingState {
@@ -114,4 +120,4 @@ export type DashboardModalsEvents = UIEvent<{
     setDeletingNoteArgs: NoteDataEventArgs
 }>
 
-export type ListSource = 'local-lists' | 'followed-list'
+export type ListSource = 'local-lists' | 'followed-lists'

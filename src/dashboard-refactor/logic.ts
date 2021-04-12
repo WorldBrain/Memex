@@ -9,7 +9,6 @@ import {
     getLastSharedAnnotationTimestamp,
     setLastSharedAnnotationTimestamp,
 } from 'src/annotations/utils'
-import { getListShareUrl } from 'src/content-sharing/utils'
 import {
     PAGE_SIZE,
     STORAGE_KEYS,
@@ -165,12 +164,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                 previousState,
             )
             await Promise.all([
+                this.loadListsData(nextState),
                 this.getFeedActivityStatus(),
                 this.getInboxUnreadCount(),
                 this.runSearch(nextState),
                 this.getSyncMenuStatus(),
                 this.getSharingAccess(),
-                this.loadLocalLists(),
             ])
         })
     }
@@ -270,7 +269,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private async loadLocalLists() {
+    private async loadListsData(previousState: State) {
+        const { listsBG, contentShareBG } = this.options
+        const mutation: UIMutation<State['listsSidebar']> = {}
         await executeUITask(
             this,
             (taskState) => ({
@@ -279,35 +280,83 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             }),
             async () => {
-                const lists = await this.options.listsBG.fetchAllLists({
+                const localLists = await listsBG.fetchAllLists({
                     limit: 1000,
                     skipMobileList: true,
                 })
 
+                const localToRemoteIdDict = await contentShareBG.getRemoteListIds(
+                    { localListIds: localLists.map((list) => list.id) },
+                )
+
                 const listIds: number[] = []
                 const listData: { [id: number]: ListData } = {}
 
-                for (const { id, name } of lists) {
-                    const remoteListId = await this.options.contentShareBG.getRemoteListId(
-                        { localListId: id },
-                    )
+                for (const list of localLists) {
+                    listIds.push(list.id)
+                    listData[list.id] = {
+                        id: list.id,
+                        name: list.name,
+                        remoteId: localToRemoteIdDict[list.id] ?? undefined,
+                    }
+                }
 
-                    listIds.push(id)
-                    listData[id] = {
-                        id,
-                        name,
-                        listCreationState: 'pristine',
-                        isShared: !!remoteListId,
-                        shareUrl: remoteListId
-                            ? getListShareUrl({ remoteListId })
-                            : undefined,
+                mutation.listData = { $merge: listData }
+                mutation.localLists = {
+                    allListIds: { $set: listIds },
+                    filteredListIds: { $set: listIds },
+                }
+
+                this.emitMutation({ listsSidebar: mutation })
+            },
+        )
+
+        const nextState = this.withMutation(previousState, {
+            listsSidebar: mutation,
+        })
+
+        // Collect a set of all remote IDs for local lists that are shared/collaborative
+        const sharedLocalListRemoteIds = new Set<string>()
+        for (const list of nextState.listsSidebar.localLists.allListIds.map(
+            (listId) => nextState.listsSidebar.listData[listId],
+        )) {
+            if (list.remoteId) {
+                sharedLocalListRemoteIds.add(list.remoteId)
+            }
+        }
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listsSidebar: {
+                    followedLists: { loadingState: { $set: taskState } },
+                },
+            }),
+            async () => {
+                const followedLists = await listsBG.fetchAllFollowedLists({
+                    limit: 1000,
+                })
+                // We don't want duped lists that appear in both local and followed sections
+                const filteredLists = followedLists.filter(
+                    (list) => !sharedLocalListRemoteIds.has(list.remoteId),
+                )
+
+                const listIds: number[] = []
+                const listData: { [id: number]: ListData } = {}
+
+                for (const list of filteredLists) {
+                    listIds.push(list.id)
+                    listData[list.id] = {
+                        id: list.id,
+                        name: list.name,
+                        remoteId: list.remoteId,
                     }
                 }
 
                 this.emitMutation({
                     listsSidebar: {
-                        listData: { $set: listData },
-                        localLists: {
+                        listData: { $merge: listData },
+                        followedLists: {
                             allListIds: { $set: listIds },
                             filteredListIds: { $set: listIds },
                         },
@@ -510,9 +559,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const remoteListId = await this.options.contentShareBG.getRemoteListId(
                     { localListId: listId },
                 )
-                const shareUrl = remoteListId
-                    ? getListShareUrl({ remoteListId })
-                    : undefined
 
                 this.emitMutation({
                     modals: {
@@ -521,8 +567,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listsSidebar: {
                         listData: {
                             [listId]: {
-                                isShared: { $set: !!remoteListId },
-                                shareUrl: { $set: shareUrl },
+                                remoteId: { $set: remoteListId ?? undefined },
                             },
                         },
                     },
@@ -624,7 +669,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             url: event.fullPageUrl,
             added: event.added,
             deleted: event.deleted,
-            skipPageIndexing: event.skipPageIndexing,
+            skipPageIndexing: true,
         })
     }
 
@@ -918,7 +963,20 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageNotesSort: EventHandler<'setPageNotesSort'> = ({ event }) => {
+    setPageNotesSort: EventHandler<'setPageNotesSort'> = ({
+        event,
+        previousState,
+    }) => {
+        const { searchResults } = previousState
+        const page = searchResults.results[event.day].pages.byId[event.pageId]
+
+        const sortedNoteIds = page.noteIds[page.notesType].sort((a, b) =>
+            event.sortingFn(
+                searchResults.noteData.byId[a],
+                searchResults.noteData.byId[b],
+            ),
+        )
+
         this.emitMutation({
             searchResults: {
                 results: {
@@ -926,7 +984,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                         pages: {
                             byId: {
                                 [event.pageId]: {
-                                    sortingFn: { $set: event.sortingFn },
+                                    noteIds: {
+                                        [page.notesType]: {
+                                            $set: sortedNoteIds,
+                                        },
+                                    },
                                 },
                             },
                         },
@@ -1076,7 +1138,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         pageUrl: event.fullPageUrl,
                         comment: formState.inputValue,
                     },
-                    { skipPageIndexing: event.skipPageIndexing },
+                    { skipPageIndexing: true },
                 )
                 if (formState.tags.length) {
                     await this.options.annotationsBG.updateAnnotationTags({
@@ -1153,11 +1215,18 @@ export class DashboardLogic extends UILogic<State, Events> {
     setAllNotesShown: EventHandler<'setAllNotesShown'> = ({
         previousState,
     }) => {
-        const applyChangeTooAll = (newState: boolean) => (results) => {
+        const applyChangeTooAll = (newState: boolean) => (
+            results: State['searchResults']['results'],
+        ) => {
             for (const { day, pages } of Object.values(
                 previousState.searchResults.results,
             )) {
-                for (const pageId of Object.values(pages.allIds)) {
+                const pageIdsWithNotes = pages.allIds.filter((pageId) => {
+                    const page = results[day].pages.byId[pageId]
+                    return page.noteIds[page.notesType].length > 0
+                })
+
+                for (const pageId of pageIdsWithNotes) {
                     results[day].pages.byId[pageId].areNotesShown = newState
                 }
             }
@@ -1925,7 +1994,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                                 $set: {
                                     id: listId,
                                     name: newListName,
-                                    listCreationState: 'pristine',
                                 },
                             },
                         },
@@ -2204,51 +2272,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
-    shareList: EventHandler<'shareList'> = async ({ previousState }) => {
-        const { shareListId: listId } = previousState.modals
-
-        if (!listId) {
-            throw new Error('No list ID is set for sharing')
-        }
-
-        await executeUITask(
-            this,
-            (taskState) => ({
-                listsSidebar: {
-                    listData: {
-                        [listId]: { listCreationState: { $set: taskState } },
-                    },
-                },
-            }),
-            async () => {
-                const {
-                    remoteListId,
-                } = await this.options.contentShareBG.shareList({ listId })
-                await this.options.contentShareBG.shareListEntries({ listId })
-
-                this.emitMutation({
-                    listsSidebar: {
-                        listData: {
-                            [listId]: {
-                                shareUrl: {
-                                    $set: getListShareUrl({ remoteListId }),
-                                },
-                            },
-                        },
-                    },
-                })
-            },
-        )
-    }
-
-    unshareList: EventHandler<'unshareList'> = async ({ event }) => {
-        console.warn('List unshare not yet implemented')
-    }
-
     clickFeedActivityIndicator: EventHandler<
         'clickFeedActivityIndicator'
     > = async ({ previousState }) => {
-        this.options.openFeedUrl()
+        this.options.openFeed()
 
         if (previousState.listsSidebar.hasFeedActivity) {
             this.emitMutation({

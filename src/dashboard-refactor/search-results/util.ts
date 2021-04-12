@@ -21,6 +21,7 @@ import {
 } from './types'
 import { Annotation } from 'src/annotations/types'
 import { PAGE_SEARCH_DUMMY_DAY } from '../constants'
+import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
 
 export const notesTypeToString = (type: NotesType): string => {
     if (type === 'user') {
@@ -62,9 +63,14 @@ export const getInitialFormState = (): NoteFormState => ({
 })
 
 export const areAllNotesShown = ({ results }: RootState): boolean => {
-    for (const { pages } of Object.values(results)) {
-        for (const { areNotesShown } of Object.values(pages.byId)) {
-            if (!areNotesShown) {
+    for (const { pages, day } of Object.values(results)) {
+        const pageIdsWithNotes = pages.allIds.filter((pageId) => {
+            const page = results[day].pages.byId[pageId]
+            return page.noteIds[page.notesType].length > 0
+        })
+
+        for (const pageId of pageIdsWithNotes) {
+            if (!results[day].pages.byId[pageId].areNotesShown) {
                 return false
             }
         }
@@ -100,7 +106,6 @@ export const getInitialPageResultState = (
     isShareMenuShown: false,
     isCopyPasterShown: false,
     isListPickerShown: false,
-    sortingFn: (a, b) => 1,
     loadNotesState: 'pristine',
     newNoteForm: getInitialFormState(),
     noteIds: { user: noteIds, followed: [], search: [] },
@@ -137,6 +142,8 @@ const annotationToNoteData = (
     highlight: annotation.body,
     comment: annotation.comment,
     tags: annotation.tags ?? [],
+    selector: annotation.selector,
+    createdWhen: annotation.createdWhen,
     displayTime: new Date(
         annotation.lastEdited ?? annotation.createdWhen,
     ).getTime(),
@@ -169,7 +176,8 @@ export const annotationSearchResultToState: SearchResultToState = (
         const pageResults = initNormalizedState<PageResult>()
 
         for (const [pageUrl, annotations] of Object.entries(annotsByPageUrl)) {
-            const noteIds = annotations.map((a) => a.url)
+            const sortedAnnots = annotations.sort(sortByPagePosition)
+            const noteIds = sortedAnnots.map((a) => a.url)
 
             pageResults.allIds.push(pageUrl)
             pageResults.byId[pageUrl] = getInitialPageResultState(
@@ -178,9 +186,7 @@ export const annotationSearchResultToState: SearchResultToState = (
                 { areNotesShown: true },
             )
 
-            for (const annotation of annotations) {
-                pageResults.byId[pageUrl].noteIds.search.push(annotation.url)
-
+            for (const annotation of sortedAnnots) {
                 noteData.allIds.push(annotation.url)
                 noteData.byId[annotation.url] = annotationToNoteData(annotation)
             }
@@ -211,7 +217,8 @@ export const pageSearchResultToState: SearchResultToState = (
 
     for (const pageResult of result.docs) {
         const id = pageResult.url
-        const noteIds = pageResult.annotations.map((a) => a.url)
+        const sortedAnnots = pageResult.annotations.sort(sortByPagePosition)
+        const noteIds = sortedAnnots.map((a) => a.url)
 
         pageData.byId[id] = pageResultToPageData(pageResult)
         pageResults.byId[id] = getInitialPageResultState(
@@ -222,9 +229,7 @@ export const pageSearchResultToState: SearchResultToState = (
         pageData.allIds.push(id)
         pageResults.allIds.push(id)
 
-        for (const annotation of pageResult.annotations) {
-            pageResults.byId[id].noteIds.search.push(annotation.url)
-
+        for (const annotation of sortedAnnots) {
             noteData.allIds.push(annotation.url)
             noteData.byId[annotation.url] = annotationToNoteData(annotation)
         }

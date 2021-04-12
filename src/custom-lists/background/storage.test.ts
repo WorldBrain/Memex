@@ -8,6 +8,7 @@ import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,
 } from '@worldbrain/memex-storage/lib/lists/constants'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 async function insertTestData({
     customLists,
@@ -410,20 +411,6 @@ describe('Custom List Integrations', () => {
                 DATA.LIST_1.name,
                 DATA.LIST_2.name,
             ])
-        })
-
-        test('fetch lists with some urls excluded', async () => {
-            const { customLists } = await setupTest()
-
-            const lists = await customLists.fetchAllLists({
-                excludeIds: [1, 2] as any[],
-                skipMobileList: true,
-            })
-
-            checkDefined(lists)
-            expect(lists.length).toBe(1)
-            expect(lists[0].id).not.toBe(1)
-            expect(lists[0].id).not.toBe(2)
         })
 
         test('fetch lists with limits', async () => {

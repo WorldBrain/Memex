@@ -1487,6 +1487,7 @@ describe('SyncBackground', () => {
                                     contentSharing: null,
                                     userManagement: null,
                                     activityStreams: null,
+                                    activityFollows: null,
                                     contentConversations: null,
                                 },
                             }),

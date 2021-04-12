@@ -12,6 +12,7 @@ import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
+import { Anchor } from 'src/highlighting/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -104,6 +105,8 @@ export interface NoteData {
     highlight?: string
     isEdited?: boolean
     displayTime: number
+    createdWhen?: Date
+    selector?: Anchor
 }
 
 export type PageData = Pick<
@@ -146,7 +149,6 @@ export interface PageResult {
     isListPickerShown: boolean
     isCopyPasterShown: boolean
     loadNotesState: TaskState
-    sortingFn: AnnotationsSorter
     newNoteForm: NoteFormState
     noteIds: { [key in NotesType]: string[] }
     hoverState: ResultHoverState
@@ -263,7 +265,6 @@ export type Events = UIEvent<{
     cancelPageNewNote: PageEventArgs
     savePageNewNote: PageEventArgs & {
         fullPageUrl: string
-        skipPageIndexing?: boolean
     }
 
     // Note result state mutations

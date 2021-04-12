@@ -132,7 +132,7 @@ export type SidebarContainerEvents = UIEvent<{
         context: AnnotationEventContext
         annotationUrl: string
     }
-    setActiveAnnotationUrl: string
+    setActiveAnnotationUrl: { annotationUrl: string }
     setAnnotationEditMode: {
         context: AnnotationEventContext
         annotationUrl: string
@@ -706,8 +706,16 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    setActiveAnnotationUrl = async ({ event }) =>
-        this.emitMutation({ activeAnnotationUrl: { $set: event } })
+    setActiveAnnotationUrl: EventHandler<'setActiveAnnotationUrl'> = async ({
+        event,
+    }) => {
+        this.options.events?.emit('highlightAndScroll', {
+            url: event.annotationUrl,
+        })
+        this.emitMutation({
+            activeAnnotationUrl: { $set: event.annotationUrl },
+        })
+    }
 
     goToAnnotationInNewTab: EventHandler<'goToAnnotationInNewTab'> = async ({
         event,

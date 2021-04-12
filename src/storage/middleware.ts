@@ -112,16 +112,26 @@ export function createOperationLoggingMiddleware(options: {
             console.groupCollapsed('operation', ...info)
             console.time('operation execution time')
 
-            const result = await next()
+            try {
+                const result = await next()
 
-            console.timeEnd('operation execution time')
-            console['log']({
-                operation: context.operation,
-                result,
-            })
-            console['trace']()
-            console.groupEnd()
-            return result
+                console.timeEnd('operation execution time')
+                console['log']({
+                    operation: context.operation,
+                    result,
+                })
+                console['trace']()
+                console.groupEnd()
+                return result
+            } catch (e) {
+                console.timeEnd('operation execution time')
+                console['log']({
+                    operation: context.operation,
+                    result: 'error',
+                })
+                console.groupEnd()
+                throw e
+            }
         },
     }
 }

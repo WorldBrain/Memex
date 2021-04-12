@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import Button from '@worldbrain/memex-common/lib/common-ui/components/button'
 
 interface Props {
     goToImportRoute: () => void
@@ -21,9 +22,12 @@ export default class OnboardingMsg extends React.PureComponent<Props> {
                         </span>
                     </Description>
                 </Container>
-                <CTABtn onClick={this.props.goToImportRoute}>
+                <Button
+                    type="primary-action"
+                    onClick={this.props.goToImportRoute}
+                >
                     Get Started
-                </CTABtn>
+                </Button>
             </>
         )
     }

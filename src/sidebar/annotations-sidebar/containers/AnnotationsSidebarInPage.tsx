@@ -98,7 +98,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         this.props.inPageUI.events.removeAllListeners('sidebarAction')
 
         for (const event of this.props.events?.eventNames?.() ?? []) {
-            this.props.events.removeAllListeners(event)
+            this.props.events.removeAllListeners(event as any)
         }
     }
 
@@ -115,7 +115,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             context: 'pageAnnotations',
             mode: 'default',
         })
-        this.processEvent('setActiveAnnotationUrl', url)
+        this.processEvent('setActiveAnnotationUrl', { annotationUrl: url })
         const annotationBoxNode = this.getDocument()?.getElementById(url)
 
         if (!annotationBoxNode) {

@@ -44,7 +44,7 @@ const baseStyles = {
 
 const menuStyles = (env, isOpen) => {
     if (env === 'overview') {
-        ;((baseStyles.bmMenu.top as unknown) as string) = '55px'
+        ;((baseStyles.bmMenu.top as unknown) as string) = '45px'
         ;((baseStyles.bmMenuWrap.top as unknown) as string) = '0px'
         ;((baseStyles.bmMenu.right as unknown) as string) = '0px'
         ;((baseStyles.bmMenuWrap.zIndex as unknown) as string) = '999'

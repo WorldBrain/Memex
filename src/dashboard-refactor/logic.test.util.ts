@@ -13,6 +13,7 @@ import {
     AnnotationsSearchResponse,
 } from 'src/search/background/types'
 import { FakeAnalytics } from 'src/analytics/mock'
+import { createServices } from 'src/services/ui'
 
 type DataSeeder = (
     logic: TestLogicContainer<RootState, Events>,
@@ -133,10 +134,12 @@ export async function setupTest(
             device.backgroundModules.activityIndicator.remoteFunctions,
         copyToClipboard:
             args.copyToClipboard ?? defaultTestSetupDeps.copyToClipboard,
-        openFeedUrl: args.openFeedUrl ?? (() => undefined),
+        openFeed: args.openFeedUrl ?? (() => undefined),
+        openCollectionPage: () => {},
         renderDashboardSwitcherLink:
             args.renderDashboardSwitcherLink ?? (() => null),
         renderUpdateNotifBanner: args.renderUpdateNotifBanner ?? (() => null),
+        services: createServices(),
     })
 
     if (args.overrideSearchTrigger) {

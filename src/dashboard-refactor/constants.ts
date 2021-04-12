@@ -1,6 +1,6 @@
 export const sizeConstants = {
     header: {
-        heightPx: 55,
+        heightPx: 45,
     },
     searchBar: {
         heightPx: 50,

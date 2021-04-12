@@ -13,6 +13,7 @@ import { ContentSharingStorage } from 'src/content-sharing/background/storage'
 import { ServerStorage } from './types'
 import ContentConversationStorage from '@worldbrain/memex-common/lib/content-conversations/storage'
 import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
+import ActivityFollowsStorage from '@worldbrain/memex-common/lib/activity-follows/storage'
 
 let shouldLogOperations = false
 
@@ -79,6 +80,9 @@ export function createLazyServerStorage(
             const activityStreams = new ActivityStreamsStorage({
                 storageManager,
             })
+            const activityFollows = new ActivityFollowsStorage({
+                storageManager,
+            })
             const serverStorage: ServerStorage = {
                 storageManager,
                 storageModules: {
@@ -86,6 +90,7 @@ export function createLazyServerStorage(
                     userManagement,
                     contentSharing,
                     activityStreams,
+                    activityFollows,
                     contentConversations,
                 },
             }

@@ -35,6 +35,8 @@ import {
     UserMessageEvents,
 } from '@worldbrain/memex-common/lib/user-messages/service/types'
 import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { Services } from 'src/services/types'
+import { ServerStorageModules } from 'src/storage/types'
 
 // interface ListPush {
 //     actionsPending: number
@@ -72,8 +74,11 @@ export default class ContentSharingBackground {
             auth: AuthBackground
             analytics: Analytics
             activityStreams: Pick<ActivityStreamsBackground, 'backend'>
-            getContentSharing: () => Promise<ContentSharingStorage>
             userMessages: UserMessageService
+            services: Pick<Services, 'contentSharing'>
+            getServerStorage: () => Promise<
+                Pick<ServerStorageModules, 'contentSharing'>
+            >
         },
     ) {
         this.storage = new ContentSharingClientStorage({
@@ -85,6 +90,7 @@ export default class ContentSharingBackground {
         })
 
         this.remoteFunctions = {
+            ...options.services.contentSharing,
             shareList: this.shareList,
             shareListEntries: this.shareListEntries,
             shareAnnotation: this.shareAnnotation,
@@ -97,6 +103,11 @@ export default class ContentSharingBackground {
             getRemoteListId: async (callOptions) => {
                 return this.storage.getRemoteListId({
                     localId: callOptions.localListId,
+                })
+            },
+            getRemoteListIds: async (callOptions) => {
+                return this.storage.getRemoteListIds({
+                    localIds: callOptions.localListIds,
                 })
             },
             getRemoteAnnotationIds: async (callOptions) => {
@@ -114,6 +125,7 @@ export default class ContentSharingBackground {
                     localIds: callOptions.localListIds,
                 })
             },
+            getAllRemoteLists: this.getAllRemoteLists,
             waitForSync: this.waitForSync,
         }
         options.userMessages.events.on('message', this._processUserMessage)
@@ -144,6 +156,26 @@ export default class ContentSharingBackground {
         return getNoteShareUrl({ remoteAnnotationId })
     }
 
+    getAllRemoteLists: ContentSharingInterface['getAllRemoteLists'] = async () => {
+        const remoteListIdsDict = await this.storage.getAllRemoteListIds()
+        const remoteListData: Array<{
+            localId: number
+            remoteId: string
+            name: string
+        }> = []
+
+        for (const localId of Object.keys(remoteListIdsDict).map(Number)) {
+            const list = await this.options.customLists.fetchListById(localId)
+            remoteListData.push({
+                localId,
+                remoteId: remoteListIdsDict[localId],
+                name: list.name,
+            })
+        }
+
+        return remoteListData
+    }
+
     shareList: ContentSharingInterface['shareList'] = async (options) => {
         const localList = await this.options.customLists.fetchListById(
             options.listId,
@@ -159,7 +191,7 @@ export default class ContentSharingBackground {
             throw new Error(`Tried to share list without being authenticated`)
         }
 
-        const contentSharing = await this.options.getContentSharing()
+        const { contentSharing } = await this.options.getServerStorage()
         const listReference = await contentSharing.createSharedList({
             listData: {
                 title: localList.name,
@@ -456,7 +488,7 @@ export default class ContentSharingBackground {
                 normalizedPageUrls: [normalizedPageUrl],
             })
         )[normalizedPageUrl]
-        const contentSharing = await this.options.getContentSharing()
+        const { contentSharing } = await this.options.getServerStorage()
         const reference = await contentSharing.ensurePageInfo({
             pageInfo: pick(page, 'fullTitle', 'originalUrl', 'normalizedUrl'),
             creatorReference: userReference,
@@ -617,7 +649,7 @@ export default class ContentSharingBackground {
     }
 
     async executeAction(action: ContentSharingAction) {
-        const contentSharing = await this.options.getContentSharing()
+        const { contentSharing } = await this.options.getServerStorage()
         const userId = (await this.options.auth.authService.getCurrentUser())
             ?.id
         if (!userId) {
@@ -1071,7 +1103,7 @@ export default class ContentSharingBackground {
     }
 
     async _processJoinedCollection(listReference: SharedListReference) {
-        const contentSharing = await this.options.getContentSharing()
+        const { contentSharing } = await this.options.getServerStorage()
         const sharedList = await contentSharing.getListByReference(
             listReference,
         )
@@ -1086,7 +1118,7 @@ export default class ContentSharingBackground {
         const localId = Date.now()
         await this.storage.storeListId({
             localId,
-            remoteId: remoteId,
+            remoteId,
         })
 
         // TODO: What if there already exists a list with this name?

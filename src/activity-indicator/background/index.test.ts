@@ -105,7 +105,15 @@ describe('Activity indicator background tests', () => {
                 ],
             },
         })
-
+        // Ensure the annot author follows their own annot
+        await activityStreams.followEntity({
+            entityType: 'conversationThread',
+            entity: {
+                id: sharedAnnotationReferences['test.com#123'].id,
+                type: 'conversation-thread-reference',
+            },
+            feeds: { home: true },
+        })
         const {
             reference: replyReference,
             threadReference,

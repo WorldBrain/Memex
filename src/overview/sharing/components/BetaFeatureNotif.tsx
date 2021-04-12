@@ -97,6 +97,13 @@ const SuccessBox = styled.div`
     justify-content: center;
     flex-direction: column;
     text-align: center;
+    width: 100%;
+`
+
+const SurveyFrame = styled.iframe`
+    width: 100%;
+    height: 400px;
+    border: 1px solid #f0f0f0;
 `
 
 export default class BetaFeatureNotif extends PureComponent<Props, State> {
@@ -198,6 +205,9 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
                     <TypographyTextNormal>
                         You can now use Memex beta features.
                     </TypographyTextNormal>
+                    <Margin />
+                    <Margin />
+                    <SurveyFrame src="https://airtable.com/embed/shrF9gmmYuL74XyIg?backgroundColor=cyan" />
                 </SuccessBox>
             )
         }

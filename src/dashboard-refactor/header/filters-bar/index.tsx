@@ -17,13 +17,18 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 const windowWidth: number = window.innerWidth
 const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
-const innerContainerIndent: number = (windowWidth - searchBarWidthPx) / 2
 
 const Container = styled.div<{ hidden: boolean }>`
     height: 30px;
     width: 100%;
-    border-bottom: 1px solid ${colors.lighterGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
     justify-content: center;
+    position: sticky;
+    top: 45px;
+    background: white;
+    z-index: 1;
+    border-top: 1px solid ${(props) => props.theme.colors.lightgrey};
+
     ${(props) =>
         css`
             display: ${props.hidden ? 'none' : 'flex'};
@@ -44,16 +49,21 @@ const PickersContainer = styled.div`
     top: 30px;
 `
 
-const FilterSelectButton = styled.div<{ selected: boolean }>`
+
+const FilterSelectButton = styled.div<{ filterActive: boolean }>`
     width: min-content;
     display: flex;
     align-items: center;
     padding: 3px 6px;
 
     ${(props) => css`
-        background-color: ${props.selected ? colors.lightGrey : colors.white};
+        background-color: ${props.filterActive
+            ? props.theme.colors.purple
+            : 'white'};
+        color: ${props.filterActive ? 'white' : props.theme.colors.primary};
+        border: 1px solid
+            ${props.filterActive ? props.theme.colors.purple : 'lightGrey'};
     `}
-    border: 1px solid ${colors.lightGrey};
     border-radius: ${styles.borderRadius.medium};
     cursor: pointer;
 `
@@ -69,7 +79,10 @@ export interface FiltersBarProps {
     isDisplayed: boolean
     showTagsFilter: boolean
     showDatesFilter: boolean
+    areTagsFiltered: boolean
+    areDatesFiltered: boolean
     showDomainsFilter: boolean
+    areDomainsFiltered: boolean
     toggleTagsFilter: () => void
     toggleDatesFilter: () => void
     toggleDomainsFilter: () => void
@@ -83,13 +96,15 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         label: SearchFilterLabel,
         name: SearchFilterType,
         onToggle: React.MouseEventHandler,
-        selected: boolean,
+        isShown: boolean,
+        isFiltered: boolean,
     ) => (
         <Margin horizontal="7px" vertical="7px" width="auto">
             <FilterSelectButton
-                selected={selected}
+                selected={isShown}
                 onClick={onToggle}
                 className={`${name}-picker-button`}
+                filterActive={isFiltered}
             >
                 <Margin horizontal="7px">
                     <TextSpan>{label}</TextSpan>
@@ -158,18 +173,21 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             'date',
                             this.props.toggleDatesFilter,
                             this.props.showDatesFilter,
+                            this.props.areDatesFiltered,
                         )}
                         {this.renderFilterSelectButton(
                             'Domains',
                             'domain',
                             this.props.toggleDomainsFilter,
                             this.props.showDomainsFilter,
+                            this.props.areDomainsFiltered,
                         )}
                         {this.renderFilterSelectButton(
                             'Tags',
                             'tag',
                             this.props.toggleTagsFilter,
                             this.props.showTagsFilter,
+                            this.props.areTagsFiltered,
                         )}
                     </FilterBtnsContainer>
                     <PickersContainer>

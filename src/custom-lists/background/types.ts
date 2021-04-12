@@ -1,6 +1,7 @@
 export interface PageList {
     id: number
     name: string
+    remoteId?: string
     description?: string
     pages?: string[]
     isNestable?: boolean
@@ -18,6 +19,19 @@ export interface PageListEntry {
 export interface Tab {
     tabId: number
     url: string
+}
+
+export interface CollectionStatus {
+    isOwn: boolean
+    isCollaborative: boolean
+}
+
+export interface CollectionsCacheInterface {
+    addCollection: (collection: PageList) => void
+    addCollections: (collections: PageList[]) => void
+    removeCollection: (id: number) => void
+    getCollectionStatus: (id: number) => CollectionStatus | null
+    getCollectionsByStatus: (status: CollectionStatus) => PageList[]
 }
 
 export interface RemoteCollectionsInterface {
@@ -40,8 +54,11 @@ export interface RemoteCollectionsInterface {
     }): Promise<void>
     removeList(args: { id: number }): Promise<any>
     removePageFromList(args: { id: number; url: string }): Promise<void>
+    fetchAllFollowedLists(args: {
+        skip?: number
+        limit?: number
+    }): Promise<PageList[]>
     fetchAllLists(args: {
-        excludeIds?: number[]
         skip?: number
         limit?: number
         skipMobileList?: boolean

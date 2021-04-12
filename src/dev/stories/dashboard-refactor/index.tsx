@@ -17,6 +17,7 @@ import {
 import { insertBackgroundFunctionTab } from 'src/tests/ui-logic-tests'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { FakeAnalytics } from 'src/analytics/mock'
+import { createServices } from 'src/services/ui'
 
 // TODO: Try to get this working - currently fails due to `browser.runtime.onMessage.addListener` not being defineddddd
 async function createDependencies(): Promise<DashboardProps> {
@@ -45,9 +46,11 @@ async function createDependencies(): Promise<DashboardProps> {
         contentShareBG: backgroundModules.contentSharing.remoteFunctions,
         activityIndicatorBG:
             backgroundModules.activityIndicator.remoteFunctions,
-        openFeedUrl: () => undefined,
+        openFeed: () => undefined,
+        openCollectionPage: () => undefined,
         renderDashboardSwitcherLink: () => null,
         renderUpdateNotifBanner: () => null,
+        services: createServices(),
     }
 }
 
@@ -141,9 +144,9 @@ class DashboardWrapper extends React.PureComponent<WrapperProps> {
         })
         await this.dashboardRef.current.processEvent('setLocalLists', {
             lists: [
-                { id: 1, name: 'test', listCreationState: 'pristine' },
-                { id: 2, name: 'another test', listCreationState: 'pristine' },
-                { id: 3, name: 'third test', listCreationState: 'pristine' },
+                { id: 1, name: 'test' },
+                { id: 2, name: 'another test' },
+                { id: 3, name: 'third test' },
             ],
         })
     }

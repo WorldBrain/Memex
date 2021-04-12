@@ -40,7 +40,7 @@ export default function SearchCopyPaster(props: Props) {
                 <ActionIcon src={icons.copy} />
             </ActionBtn>
             {props.isCopyPasterShown && (
-                <HoverBox withRelativeContainer>
+                <HoverBox withRelativeContainer top="25px" left="-155px">
                     <CopyPaster
                         searchParams={props.searchParams}
                         onClickOutside={props.hideCopyPaster}

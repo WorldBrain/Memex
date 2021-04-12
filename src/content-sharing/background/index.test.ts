@@ -4,7 +4,6 @@ import sinon from 'sinon'
 import {
     backgroundIntegrationTestSuite,
     backgroundIntegrationTest,
-    BackgroundIntegrationTestSetup,
     BackgroundIntegrationTestInstance,
     BackgroundIntegrationTestContext,
 } from 'src/tests/integration-tests'
@@ -981,6 +980,21 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         ),
                                         sharedAnnotation: sharedAnnotationId,
                                     }),
+                                ])
+
+                                expect(
+                                    await contentSharing.getAllRemoteLists(),
+                                ).toEqual([
+                                    {
+                                        localId: firstLocalListId,
+                                        remoteId: remoteListIds[0],
+                                        name: 'My shared list',
+                                    },
+                                    {
+                                        localId: secondLocalListId,
+                                        remoteId: remoteListIds[1],
+                                        name: 'Second list',
+                                    },
                                 ])
                             },
                         },

@@ -56,13 +56,11 @@ export default class CustomListStorage extends StorageModule {
                         id: { $in: '$includedIds:array' },
                     },
                 },
-                findListsExcluding: {
+                findLists: {
                     collection: CustomListStorage.CUSTOM_LISTS_COLL,
                     operation: 'findObjects',
                     args: [
-                        {
-                            id: { $nin: '$excludedIds:array' },
-                        },
+                        {},
                         {
                             limit: '$limit:int',
                             skip: '$skip:int',
@@ -191,18 +189,15 @@ export default class CustomListStorage extends StorageModule {
     }
 
     async fetchAllLists({
-        excludedIds = [],
         limit,
         skip,
         skipMobileList,
     }: {
-        excludedIds?: string[]
         limit: number
         skip: number
         skipMobileList?: boolean
     }) {
-        const lists = await this.operation('findListsExcluding', {
-            excludedIds,
+        const lists = await this.operation('findLists', {
             limit,
             skip,
         })

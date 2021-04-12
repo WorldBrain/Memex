@@ -24,6 +24,7 @@ export interface Props {
     source?: ListSource
     hasActivity?: boolean
     isMenuDisplayed?: boolean
+    isCollaborative?: boolean
     nameHighlightIndices?: ListNameHighlightIndices
     onUnfollowClick?: React.MouseEventHandler
     onRenameClick?: React.MouseEventHandler
@@ -65,7 +66,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             return false
         }
 
-        if (this.props.source === 'followed-list') {
+        if (this.props.source === 'followed-lists') {
             return (
                 <MenuButton onClick={this.props.onUnfollowClick}>
                     <Margin horizontal="10px">
@@ -135,10 +136,15 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
     }
 
     private renderTitle() {
+        const collaborationIcon = this.props.isCollaborative && (
+            <Icon heightAndWidth="12px" path={icons.shared} />
+        )
+
         if (!this.props.nameHighlightIndices) {
             return (
                 <ListTitle selectedState={this.props.selectedState}>
-                    {this.props.name}
+                    <Name>{this.props.name}</Name>
+                    {collaborationIcon}
                 </ListTitle>
             )
         }
@@ -157,6 +163,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     {nameHighlighted}
                 </span>
                 {namePost.length > 0 && <span>{namePost}</span>}
+                {collaborationIcon}
             </ListTitle>
         )
     }
@@ -207,14 +214,22 @@ const Container = styled.div`
     position: relative;
 `
 
+const Name = styled.div`
+    display: block;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+`
+
 const MenuContainer = styled.div`
     width: min-content;
     position: absolute;
-    left: 200px;
-    top: 0px;
     background-color: ${colors.white};
     box-shadow: ${styles.boxShadow.overlayElement};
     border-radius: ${styles.boxShadow.overlayElement};
+    left: 105px;
+    top: 30px;
+    z-index: 1;
+
     ${(props) =>
         css`
             display: ${props.isDisplayed
@@ -232,8 +247,6 @@ const IconBox = styled.div<Props>`
             : 'none'};
     height: 100%;
     align-items: center;
-    padding-right: 10px;
-    width: 30px;
     justify-content: flex-end;
 `
 
@@ -254,6 +267,7 @@ const SidebarItem = styled.div<Props>`
     justify-content: space-between;
     align-items: center;
     background-color: transparent;
+    padding-right: 10px;
 
     &:hover {
         background-color: ${colors.onHover};
@@ -269,7 +283,14 @@ const SidebarItem = styled.div<Props>`
         `};
 
     &:hover ${IconBox} {
-        display: flex;
+        display: ${(props) =>
+            !(
+                props.hasActivity &&
+                props.newItemsCount &&
+                props.dropReceivingState?.isDraggedOver
+            )
+                ? 'flex'
+                : 'none'};
     }
 
     &:hover ${TitleBox} {
@@ -323,7 +344,9 @@ const MenuButton = styled.div`
     }
 `
 
-const ListTitle = styled.p<Props>`
+const ListTitle = styled.span<Props>`
+    display: flex;
+    align-items: center;
     margin: 0;
     font-family: ${fonts.primary.name};
     font-style: normal;
@@ -336,15 +359,14 @@ const ListTitle = styled.p<Props>`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding-right: 10px;
-
-    max-width: 100%;
+    padding-right: 5px;
+    justify-content: space-between;
+    width: 100%;
 `
 
 const ActivityBeacon = styled.div`
     width: 14px;
     height: 14px;
-    margin-right: 1em;
     border-radius: 10px;
     padding: 8px;
     background-color: #5cd9a6;

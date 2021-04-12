@@ -65,6 +65,7 @@ describe('Ribbon logic', () => {
             getRemoteFunction: () => async () => {},
             bookmarks: backgroundModules.bookmarks.remoteFunctions,
             tags: backgroundModules.tags.remoteFunctions,
+            contentSharing: backgroundModules.contentSharing.remoteFunctions,
             customLists: backgroundModules.customLists.remoteFunctions,
             annotations,
             ...(options?.dependencies ?? {}),

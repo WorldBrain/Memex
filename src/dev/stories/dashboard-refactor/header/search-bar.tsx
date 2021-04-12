@@ -11,6 +11,7 @@ const template: SearchBarProps = {
     isSearchBarFocused: false,
     searchFiltersOpen: false,
     searchQuery: '',
+    onInputClear: () => {},
 }
 
 export const headerSearchBarPropsTemplate: {

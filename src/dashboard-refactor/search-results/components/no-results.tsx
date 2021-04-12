@@ -21,6 +21,7 @@ const Title = styled.div`
     font-weight: 700;
     padding-top: 30px;
     margin-bottom: 20px;
+    text-align center;
 `
 
 const Subtitle = styled.div`

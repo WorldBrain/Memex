@@ -110,6 +110,7 @@ const ErrMsg = styled.span`
 const Container = styled.div<Props>`
     height: 30px;
     width: 100%;
+    padding-left: 15px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;

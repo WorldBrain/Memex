@@ -493,6 +493,10 @@ export class AnnotationsSidebarContainer<
                         annotationModes={
                             this.state.annotationModes.pageAnnotations
                         }
+                        setActiveAnnotationUrl={(annotationUrl) => () =>
+                            this.processEvent('setActiveAnnotationUrl', {
+                                annotationUrl,
+                            })}
                         isAnnotationCreateShown={this.state.showCommentBox}
                         annotationCreateProps={this.getCreateProps()}
                         bindAnnotationFooterEventProps={(url) =>
@@ -505,7 +509,8 @@ export class AnnotationsSidebarContainer<
                             this.processEvent('paginateSearch', null)
                         }
                         isSearchLoading={
-                            this.state.primarySearchState === 'running'
+                            this.state.primarySearchState === 'running' ||
+                            this.state.loadState === 'running'
                         }
                         onClickOutside={this.handleClickOutside}
                         theme={this.props.theme}

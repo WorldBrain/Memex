@@ -17,9 +17,7 @@ export interface SidebarPeekState {
 export interface ListData {
     id: number
     name: string
-    shareUrl?: string
-    isShared?: boolean
-    listCreationState: TaskState
+    remoteId?: string
 }
 
 export interface ListGroupCommon
@@ -84,8 +82,6 @@ export type Events = UIEvent<{
     confirmListDelete: null
     cancelListDelete: null
 
-    shareList: null
-    unshareList: null
     clickFeedActivityIndicator: null
 }>
 
