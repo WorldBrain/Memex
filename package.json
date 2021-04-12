@@ -210,7 +210,7 @@
         "firebase-tools": "^7.3.2",
         "fork-ts-checker-webpack-plugin": "^4.1.1",
         "geckodriver": "^1.19.1",
-        "hard-source-webpack-plugin": "^0.12.0",
+        "hard-source-webpack-plugin": "^0.13.1",
         "html-webpack-include-assets-plugin": "^1.0.4",
         "html-webpack-plugin": "^3.2.0",
         "husky": "^1.0.0-rc.13",
