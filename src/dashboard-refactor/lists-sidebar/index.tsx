@@ -65,7 +65,10 @@ const PeekTrigger = styled.div`
     background: transparent;
 `
 
-const TopGroup = styled.div``
+const TopGroup = styled.div`
+    border-top: 1px solid ${colors.lightGrey};
+
+`
 const BottomGroup = styled.div`
     overflow-y: scroll;
     overflow-x: visible;
@@ -134,11 +137,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                         this.props.peekState.setSidebarPeekState(true)
                     }
                 >
-                    <TopGroup>
-                        <Margin>
-                            <ListsSidebarSearchBar {...searchBarProps} />
-                        </Margin>
-                    </TopGroup>
                     <BottomGroup>
                         <Margin vertical="10px">
                             <ListsSidebarGroup
@@ -199,6 +197,11 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 )}
                             </ListsSidebarGroup>
                         </Margin>
+                        <TopGroup>
+                            <Margin top="5px">
+                                <ListsSidebarSearchBar {...searchBarProps} />
+                            </Margin>
+                        </TopGroup>
                         {listsGroups.map((group, i) => (
                             <Margin key={i} vertical="10px">
                                 <ListsSidebarGroup {...group}>

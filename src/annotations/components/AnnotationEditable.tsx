@@ -327,7 +327,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         }
 
         return (
-            <>
+            <DeletionBox>
                 {mode === 'delete' && (
                     <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
                 )}
@@ -346,7 +346,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                         </ActionBtnStyled>
                     </ButtonTooltip>
                 </BtnContainerStyled>
-            </>
+            </DeletionBox>
         )
     }
 
@@ -646,4 +646,10 @@ const ActionBtnStyled = styled.button`
     &:focus {
         background-color: #79797945;
     }
+`
+
+const DeletionBox = styled.div`
+    display: flex;
+    justify-content: space-between;
+    padding-left: 10px;
 `

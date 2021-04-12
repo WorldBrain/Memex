@@ -11,7 +11,7 @@ export class AnnotationsSidebarInDashboardResults extends React.Component<
     Props
 > {
     static defaultProps: Partial<Props> = {
-        theme: { topOffsetPx: 55 },
+        theme: { topOffsetPx: 45 },
         showGoToAnnotationBtn: true,
     }
 

@@ -145,7 +145,7 @@ export default class Header extends PureComponent<HeaderProps> {
         return (
             <Container>
                 <SidebarHeaderContainer>
-                    <SidebarToggleBox right="12px">
+                    <SidebarToggleBox>
                         <SidebarToggle
                             sidebarLockedState={this.props.sidebarLockedState}
                             hoverState={this.props.sidebarToggleHoverState}
