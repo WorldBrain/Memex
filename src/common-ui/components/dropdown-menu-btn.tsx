@@ -23,6 +23,7 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     keepSelectedState?: boolean
     tooltipProps?: ButtonTooltipProps
     initSelectedIndex?: number
+    btnId?: string
 }
 
 interface State {
@@ -99,7 +100,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
 
     private renderMenuBtn = () => {
         const btn = (
-            <MenuBtn id="DropdownMenuBtn" onClick={this.toggleMenu}>
+            <MenuBtn id={this.props.btnId} onClick={this.toggleMenu}>
                 {this.props.btnChildren}
             </MenuBtn>
         )
