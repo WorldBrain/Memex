@@ -6,6 +6,7 @@ import ButtonTooltip, { Props as ButtonTooltipProps } from './button-tooltip'
 
 export interface MenuItemProps {
     name: string
+    id?: string | number
     info?: string
     isDisabled?: boolean
     soonAvailable?: boolean

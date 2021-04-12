@@ -7,9 +7,14 @@ import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdo
 import TagInput from 'src/tags/ui/tag-input'
 import { FocusableComponent } from './types'
 import { insertTab, uninsertTab } from 'src/common-ui/utils'
+import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
+import { AnnotationPrivacyLevel } from '../types'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 interface State {
     isTagPickerShown: boolean
+    areSavePrivacyLevelsShown: boolean
+    savePrivacyLevel: AnnotationPrivacyLevel
 }
 
 export interface AnnotationCreateEventProps {
@@ -36,7 +41,12 @@ export class AnnotationCreate extends React.Component<Props, State>
     private markdownPreviewRef = React.createRef<
         MarkdownPreviewAnnotationInsertMenu
     >()
-    state = { isTagPickerShown: false }
+
+    state: State = {
+        isTagPickerShown: false,
+        areSavePrivacyLevelsShown: false,
+        savePrivacyLevel: AnnotationPrivacyLevel.PRIVATE,
+    }
 
     componentDidMount() {
         if (this.props.autoFocus) {
@@ -118,18 +128,62 @@ export class AnnotationCreate extends React.Component<Props, State>
         )
     }
 
+    private renderSaveBtn() {
+        return (
+            <SaveBtn>
+                <SaveBtnText onClick={this.handleSave}>
+                    <Icon
+                        icon={
+                            this.state.savePrivacyLevel ===
+                            AnnotationPrivacyLevel.PROTECTED
+                                ? 'lock'
+                                : this.state.savePrivacyLevel ===
+                                  AnnotationPrivacyLevel.PRIVATE
+                                ? 'person'
+                                : 'shared'
+                        }
+                        height="10px"
+                    />{' '}
+                    Save
+                </SaveBtnText>
+                <SaveBtnArrow>
+                    <DropdownMenuBtn
+                        btnChildren={<Icon icon="triangle" height="10px" />}
+                        menuItems={[
+                            {
+                                id: AnnotationPrivacyLevel.PROTECTED,
+                                name: 'Protected',
+                                info:
+                                    'Sharing status will not change in bulk actions',
+                            },
+                            {
+                                id: AnnotationPrivacyLevel.PRIVATE,
+                                name: 'Private',
+                                info: 'Private to you, until shared',
+                            },
+                            {
+                                id: AnnotationPrivacyLevel.SHARED,
+                                name: 'Shared',
+                                info:
+                                    'Added to shared collections & page links',
+                            },
+                        ]}
+                        onMenuItemClick={(props) =>
+                            this.setState({
+                                savePrivacyLevel: props.id as AnnotationPrivacyLevel,
+                            })
+                        }
+                    />
+                </SaveBtnArrow>
+            </SaveBtn>
+        )
+    }
+
     private renderActionButtons() {
         return (
             <FooterStyled>
                 <Flex>
-                    <ButtonTooltip
-                        tooltipText="ctrl/cmd + Enter"
-                        position="bottomSidebar"
-                    >
-                        <SaveBtnStyled onClick={this.handleSave}>
-                            Add
-                        </SaveBtnStyled>
-                    </ButtonTooltip>
+                    {this.renderSaveBtn()}
                     <ButtonTooltip tooltipText="esc" position="bottomSidebar">
                         <CancelBtnStyled onClick={this.handleCancel}>
                             Cancel
@@ -232,7 +286,10 @@ const FooterStyled = styled.div`
     animation-fill-mode: forwards;
 `
 
-const SaveBtnStyled = styled.div`
+const SaveBtn = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-item: center;
     box-sizing: border-box;
     cursor: pointer;
     font-size: 14px;
@@ -256,6 +313,14 @@ const SaveBtnStyled = styled.div`
         background-color: #79797945;
     }
 `
+
+const SaveBtnText = styled.span`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+`
+
+const SaveBtnArrow = styled.span``
 
 const CancelBtnStyled = styled.div`
     box-sizing: border-box;

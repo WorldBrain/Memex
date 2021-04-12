@@ -101,3 +101,9 @@ export type TextTruncator = (
 ) => { text: string; isTooLong: boolean }
 
 export type SelectionIndices = [number, number]
+
+export enum AnnotationPrivacyLevel {
+    PRIVATE = 0,
+    PROTECTED = 100,
+    SHARED = 200,
+}
