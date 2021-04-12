@@ -3,11 +3,6 @@
     vertical-align: middle;
 }
 
-input {
-    margin-right: 15px;
-    margin-left: 10px;
-}
-
 .selectionTitle {
     composes: providerTitle from 'src/backup-restore/ui/backup-pane/components/provider-list.css';
     cursor: pointer;

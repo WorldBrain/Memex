@@ -25,6 +25,7 @@ import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import TagPicker from 'src/tags/ui/TagPicker'
 
 const styles = require('./annotation-list.css')
 
@@ -36,6 +37,7 @@ type Annotation = Omit<AnnotationFlawed, 'isBookmarked'> & {
 
 export interface Props {
     activeShareMenuNoteId: string | undefined
+    activeTagPickerNoteId: string | undefined
     activeCopyPasterAnnotationId: string | undefined
     /** Override for expanding annotations by default */
     isExpandedOverride: boolean
@@ -48,7 +50,7 @@ export interface Props {
     goToAnnotation: (annotation: Annotation) => void
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
-    handleBookmarkToggle: (url: string) => void
+    setActiveTagPickerNoteId: (id: string) => void
     setActiveShareMenuNoteId?: (id: string) => void
     setActiveCopyPasterAnnotationId?: (id: string) => void
     contentSharing: ContentSharingInterface
@@ -228,24 +230,12 @@ class AnnotationList extends Component<Props, State> {
         })
     }
 
-    private handleBookmarkToggle = (url: string) => () => {
-        this.props.handleBookmarkToggle(url)
-
-        const { annotations } = this.state
-
-        const index = annotations.findIndex((annot) => annot.url === url)
-        const annotation: Annotation = annotations[index]
-        const newAnnotations: Annotation[] = [
-            ...annotations.slice(0, index),
-            { ...annotation, hasBookmark: !annotation.hasBookmark },
-            ...annotations.slice(index + 1),
-        ]
-
-        this.setState({ annotations: newAnnotations })
-    }
-
     private handleGoToAnnotation = (annotation: Annotation) => () => {
         this.props.goToAnnotation(annotation)
+    }
+
+    private handleTagPickerClick = (url: string) => () => {
+        this.props.setActiveTagPickerNoteId(url)
     }
 
     private handleEditCancel = (url: string, commentText: string) => () =>
@@ -266,6 +256,30 @@ class AnnotationList extends Component<Props, State> {
         }
     }
 
+    private renderTagPicker(annot: Annotation) {
+        if (this.props.activeTagPickerNoteId !== annot.url) {
+            return null
+        }
+
+        return (
+            <div className={styles.hoverBoxWrapper}>
+                <HoverBox>
+                    <TagPicker
+                        onUpdateEntrySelection={(args) =>
+                            this.tagsBG.updateTagForPage({
+                                ...args,
+                                url: annot.url,
+                            })
+                        }
+                        initialSelectedEntries={() => annot.tags}
+                        onClickOutside={() =>
+                            this.props.setActiveTagPickerNoteId(undefined)
+                        }
+                    />
+                </HoverBox>
+            </div>
+        )
+    }
     private renderCopyPasterManager(annot: Annotation) {
         if (this.props.activeCopyPasterAnnotationId !== annot.url) {
             return null
@@ -358,28 +372,14 @@ class AnnotationList extends Component<Props, State> {
                 renderCopyPasterForAnnotation={() =>
                     this.renderCopyPasterManager(annot)
                 }
+                renderTagsPickerForAnnotation={() =>
+                    this.renderTagPicker(annot)
+                }
                 annotationEditDependencies={{
                     comment: this.state.editForms[annot.url].commentText,
-                    tags: this.state.editForms[annot.url].tags,
-                    isTagInputActive: this.state.editForms[annot.url]
-                        .isTagInputActive,
                     onCommentChange: (commentText) =>
                         this.handleEditFormUpdate(annot.url, () => ({
                             commentText,
-                        })),
-                    updateTags: async ({ selected }) =>
-                        this.handleEditFormUpdate(annot.url, () => ({
-                            tags: selected,
-                        })),
-                    deleteSingleTag: (tagName) =>
-                        this.handleEditFormUpdate(annot.url, (state) => ({
-                            tags: state.editForms[annot.url].tags.filter(
-                                (tag) => tag !== tagName,
-                            ),
-                        })),
-                    setTagInputActive: (isTagInputActive) =>
-                        this.handleEditFormUpdate(annot.url, () => ({
-                            isTagInputActive,
                         })),
                     onEditCancel: this.handleEditCancel(
                         annot.url,
@@ -408,7 +408,7 @@ class AnnotationList extends Component<Props, State> {
                         this.setState({
                             annotationModes: { [annot.url]: 'delete' },
                         }),
-                    toggleBookmark: this.handleBookmarkToggle(annot.url),
+                    onTagIconClick: this.handleTagPickerClick(annot.url),
                     onShareClick: this.handleShareClick(annot.url),
                     onUnshareClick: this.handleShareClick(annot.url),
                     onGoToAnnotation: this.handleGoToAnnotation(annot),
@@ -419,12 +419,6 @@ class AnnotationList extends Component<Props, State> {
                                       annot.url,
                                   )
                             : undefined,
-                }}
-                tagPickerDependencies={{
-                    loadDefaultSuggestions: () =>
-                        this.tagsBG.fetchInitialTagSuggestions(),
-                    queryEntries: (query) =>
-                        this.tagsBG.searchForTagSuggestions({ query }),
                 }}
             />
         ))

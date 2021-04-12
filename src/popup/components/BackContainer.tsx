@@ -17,12 +17,21 @@ export const BackContainer = (props: Props) => (
         {props.children}
         <Container>
             <BackButton onClick={props.onClick}>Back</BackButton>
+            <AutoSaveNote>Autosaved</AutoSaveNote>
         </Container>
     </div>
 )
 
 const Container = styled.div`
-    margin: 8px 0 0 8px;
+    margin: 8px 8px 0px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`
+
+const AutoSaveNote = styled.div`
+    font-weight: bold;
+    font-size: 12px;
 `
 
 const BackButton = styled.button`

@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { Modal } from 'src/common-ui/components'
 import { PageList } from 'src/custom-lists/background/types'
 import ShareNonPioneerInfo from './ShareNonPioneerInfo'
 import ShareListModalContent from './ShareListModalContent'
@@ -9,7 +8,7 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { getListShareUrl } from 'src/content-sharing/utils'
-import { auth, subscription } from 'src/util/remote-functions-background'
+import { auth } from 'src/util/remote-functions-background'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
@@ -34,8 +33,7 @@ interface State {
 
     displayName?: string
     newDisplayName?: string
-    isShared?: boolean
-    shareUrl?: string
+    remoteListId?: string
     showBetaNotif: boolean
     hasSubscription: boolean
 }
@@ -83,13 +81,11 @@ class ShareListModal extends Component<Props, State> {
                     localListId: this.props.list.id,
                 },
             )
-            const isShared = !!remoteListId
             const profile = await this.props.auth.getUserProfile()
             this.setState({
                 loadState: 'success',
-                isShared,
                 displayName: profile?.displayName ?? undefined,
-                shareUrl: remoteListId && getListShareUrl({ remoteListId }),
+                remoteListId,
             })
         } catch (e) {
             this.setState({ loadState: 'error' })
@@ -97,22 +93,18 @@ class ShareListModal extends Component<Props, State> {
         }
     }
 
-    async shareList() {
+    shareList = async () => {
         this.setState({
-            isShared: true,
             listCreationState: 'running',
             entriesUploadState: 'running',
         })
         try {
-            // const { remoteListId } = await new Promise((resolve) => {
-            //     setTimeout(() => resolve({ remoteListId: 'test' }), 2000)
-            // })
             const { remoteListId } = await this.props.contentSharing.shareList({
                 listId: this.props.list.id,
             })
             this.setState({
                 listCreationState: 'success',
-                shareUrl: getListShareUrl({ remoteListId }),
+                remoteListId,
             })
         } catch (e) {
             this.setState({
@@ -196,7 +188,6 @@ class ShareListModal extends Component<Props, State> {
             return (
                 <BetaFeatureNotif
                     showSubscriptionModal={this.props.showSubscriptionModal}
-                    subscription={subscription}
                 />
             )
         }
@@ -204,27 +195,13 @@ class ShareListModal extends Component<Props, State> {
         // otherwise -  show the main modal content
         return (
             <ShareListModalContent
-                isShared={this.state.isShared}
-                shareUrl={this.state.shareUrl}
+                onClose={this.props.onClose}
+                shareUrl={getListShareUrl({
+                    remoteListId: this.state.remoteListId,
+                })}
+                listName={this.props.list.name}
+                onGenerateLinkClick={this.shareList}
                 listCreationState={this.state.listCreationState}
-                entriesUploadState={this.state.entriesUploadState}
-                collectionName={this.props.list.name}
-                onClickToggle={async () => {
-                    if (!this.state.isShared) {
-                        await this.shareList()
-                    } else {
-                        await this.unshareList()
-                    }
-                }}
-                onClickLetUsKnow={() => {
-                    window.open('https://worldbrain.io/feedback')
-                }}
-                onClickViewRoadmap={() => {
-                    window.open('https://worldbrain.io/roadmap')
-                }}
-                onClickSharingTutorial={() => {
-                    window.open('https://worldbrain.io/tutorials/memex-social')
-                }}
             />
         )
     }
@@ -237,11 +214,7 @@ class ShareListModal extends Component<Props, State> {
             return <LoadingIndicator />
         }
 
-        return (
-            <Modal large onClose={this.props.onClose}>
-                {this.renderContent()}
-            </Modal>
-        )
+        return this.renderContent()
     }
 }
 

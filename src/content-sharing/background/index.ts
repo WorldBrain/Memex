@@ -12,7 +12,12 @@ import {
 import { ContentSharingStorage, ContentSharingClientStorage } from './storage'
 import CustomListStorage from 'src/custom-lists/background/storage'
 import { AuthBackground } from 'src/authentication/background'
-import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import {
+    StorageOperationEvent,
+    DeletionStorageChange,
+    ModificationStorageChange,
+    CreationStorageChange,
+} from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { PageListEntry } from 'src/custom-lists/background/types'
 import createResolvable, { Resolvable } from '@josephg/resolvable'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
@@ -25,6 +30,13 @@ import {
     RemoteEventEmitter,
 } from 'src/util/webextensionRPC'
 import ActivityStreamsBackground from 'src/activity-streams/background'
+import {
+    UserMessageService,
+    UserMessageEvents,
+} from '@worldbrain/memex-common/lib/user-messages/service/types'
+import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { Services } from 'src/services/types'
+import { ServerStorageModules } from 'src/storage/types'
 
 // interface ListPush {
 //     actionsPending: number
@@ -40,6 +52,7 @@ export default class ContentSharingBackground {
     _hasPendingActions = false
     _queingAction?: Resolvable<void>
     _executingPendingActions?: Resolvable<{ result: 'success' | 'error' }>
+    _processingUserMessage?: Resolvable<void>
 
     _pendingActionsRetry?: Resolvable<void>
     _scheduledRetry: () => Promise<void>
@@ -61,7 +74,11 @@ export default class ContentSharingBackground {
             auth: AuthBackground
             analytics: Analytics
             activityStreams: Pick<ActivityStreamsBackground, 'backend'>
-            getContentSharing: () => Promise<ContentSharingStorage>
+            userMessages: UserMessageService
+            services: Pick<Services, 'contentSharing'>
+            getServerStorage: () => Promise<
+                Pick<ServerStorageModules, 'contentSharing'>
+            >
         },
     ) {
         this.storage = new ContentSharingClientStorage({
@@ -73,6 +90,7 @@ export default class ContentSharingBackground {
         })
 
         this.remoteFunctions = {
+            ...options.services.contentSharing,
             shareList: this.shareList,
             shareListEntries: this.shareListEntries,
             shareAnnotation: this.shareAnnotation,
@@ -85,6 +103,11 @@ export default class ContentSharingBackground {
             getRemoteListId: async (callOptions) => {
                 return this.storage.getRemoteListId({
                     localId: callOptions.localListId,
+                })
+            },
+            getRemoteListIds: async (callOptions) => {
+                return this.storage.getRemoteListIds({
+                    localIds: callOptions.localListIds,
                 })
             },
             getRemoteAnnotationIds: async (callOptions) => {
@@ -102,8 +125,10 @@ export default class ContentSharingBackground {
                     localIds: callOptions.localListIds,
                 })
             },
+            getAllRemoteLists: this.getAllRemoteLists,
             waitForSync: this.waitForSync,
         }
+        options.userMessages.events.on('message', this._processUserMessage)
     }
 
     async setup() {
@@ -131,6 +156,26 @@ export default class ContentSharingBackground {
         return getNoteShareUrl({ remoteAnnotationId })
     }
 
+    getAllRemoteLists: ContentSharingInterface['getAllRemoteLists'] = async () => {
+        const remoteListIdsDict = await this.storage.getAllRemoteListIds()
+        const remoteListData: Array<{
+            localId: number
+            remoteId: string
+            name: string
+        }> = []
+
+        for (const localId of Object.keys(remoteListIdsDict).map(Number)) {
+            const list = await this.options.customLists.fetchListById(localId)
+            remoteListData.push({
+                localId,
+                remoteId: remoteListIdsDict[localId],
+                name: list.name,
+            })
+        }
+
+        return remoteListData
+    }
+
     shareList: ContentSharingInterface['shareList'] = async (options) => {
         const localList = await this.options.customLists.fetchListById(
             options.listId,
@@ -146,7 +191,7 @@ export default class ContentSharingBackground {
             throw new Error(`Tried to share list without being authenticated`)
         }
 
-        const contentSharing = await this.options.getContentSharing()
+        const { contentSharing } = await this.options.getServerStorage()
         const listReference = await contentSharing.createSharedList({
             listData: {
                 title: localList.name,
@@ -443,7 +488,7 @@ export default class ContentSharingBackground {
                 normalizedPageUrls: [normalizedPageUrl],
             })
         )[normalizedPageUrl]
-        const contentSharing = await this.options.getContentSharing()
+        const { contentSharing } = await this.options.getServerStorage()
         const reference = await contentSharing.ensurePageInfo({
             pageInfo: pick(page, 'fullTitle', 'originalUrl', 'normalizedUrl'),
             creatorReference: userReference,
@@ -524,6 +569,7 @@ export default class ContentSharingBackground {
 
     waitForSync: ContentSharingInterface['waitForSync'] = async () => {
         await this._executingPendingActions
+        await this._processingUserMessage
     }
 
     async scheduleAction(
@@ -603,7 +649,7 @@ export default class ContentSharingBackground {
     }
 
     async executeAction(action: ContentSharingAction) {
-        const contentSharing = await this.options.getContentSharing()
+        const { contentSharing } = await this.options.getServerStorage()
         const userId = (await this.options.auth.authService.getCurrentUser())
             ?.id
         if (!userId) {
@@ -820,214 +866,265 @@ export default class ContentSharingBackground {
         for (const change of event.info.changes) {
             if (change.type === 'create') {
                 if (change.collection === 'pageListEntries') {
-                    const listEntry = change.values as Pick<
-                        PageListEntry,
-                        'fullUrl'
-                    >
-                    const [localListId, pageUrl] = change.pk as [number, string]
-                    const remoteListId = await this.storage.getRemoteListId({
-                        localId: localListId,
-                    })
-                    if (!remoteListId) {
-                        continue
-                    }
-
-                    const pageTitles = await this.storage.getPageTitles({
-                        normalizedPageUrls: [pageUrl],
-                    })
-                    const pageTitle = pageTitles[pageUrl]
-
-                    const originalUrl =
-                        'https://' + normalizeUrl(listEntry.fullUrl)
-                    await this.scheduleAction(
-                        {
-                            type: 'ensure-page-info',
-                            data: [
-                                {
-                                    createdWhen: '$now',
-                                    normalizedUrl: pageUrl,
-                                    originalUrl,
-                                    fullTitle: pageTitle,
-                                },
-                            ],
-                        },
-                        {
-                            queueInteraction: 'queue-and-return',
-                        },
-                    )
-                    await this.scheduleAction(
-                        {
-                            type: 'add-shared-list-entries',
-                            localListId,
-                            remoteListId,
-                            data: [
-                                {
-                                    createdWhen: Date.now(),
-                                    entryTitle: pageTitle,
-                                    normalizedUrl: pageUrl,
-                                    originalUrl,
-                                },
-                            ],
-                        },
-                        { queueInteraction: 'queue-and-return' },
-                    )
-
-                    const annotationEntries = await this.options.annotationStorage.listAnnotationsByPageUrl(
-                        {
-                            pageUrl,
-                        },
-                    )
-
-                    await this._scheduleAddAnnotationEntries({
-                        annotations: annotationEntries,
-                        remoteListIds: [remoteListId],
-                        queueInteraction: 'queue-and-return',
-                    })
-
-                    this.remoteEmitter.emit('pageAddedToSharedList', {
-                        pageUrl,
-                    })
+                    await this._processCreatedListEntry(change)
                 }
             } else if (change.type === 'modify') {
                 if (change.collection === 'customLists') {
-                    for (const pk of change.pks) {
-                        if (!change.updates.name) {
-                            continue
-                        }
-
-                        const localListId = pk as number
-                        const remoteListId = await this.storage.getRemoteListId(
-                            {
-                                localId: localListId,
-                            },
-                        )
-                        if (!remoteListId) {
-                            continue
-                        }
-
-                        await this.scheduleAction(
-                            {
-                                type: 'change-shared-list-title',
-                                localListId,
-                                remoteListId,
-                                newTitle: change.updates.name,
-                            },
-                            {
-                                queueInteraction: 'queue-and-return',
-                            },
-                        )
-                    }
+                    await this._processModifiedList(change)
                 } else if (change.collection === 'annotations') {
-                    if (!change.updates.comment) {
-                        continue
-                    }
-
-                    const remoteAnnotationIds = await this.storage.getRemoteAnnotationIds(
-                        {
-                            localIds: change.pks as string[],
-                        },
-                    )
-                    if (!Object.keys(remoteAnnotationIds).length) {
-                        return
-                    }
-                    for (const [
-                        localAnnotationId,
-                        remoteAnnotationId,
-                    ] of Object.entries(remoteAnnotationIds)) {
-                        await this.scheduleAction(
-                            {
-                                type: 'update-annotation-comment',
-                                localAnnotationId,
-                                remoteAnnotationId: remoteAnnotationId as string,
-                                updatedComment: change.updates.comment,
-                            },
-                            {
-                                queueInteraction: 'queue-and-return',
-                            },
-                        )
-                    }
+                    await this._processModifiedAnnotation(change)
                 }
             } else if (change.type === 'delete') {
                 if (change.collection === 'pageListEntries') {
-                    for (const pk of change.pks) {
-                        const [localListId, pageUrl] = pk as [number, string]
-                        const remoteListId = await this.storage.getRemoteListId(
-                            {
-                                localId: localListId,
-                            },
-                        )
-                        if (!remoteListId) {
-                            continue
-                        }
-
-                        await this.scheduleAction(
-                            {
-                                type: 'remove-shared-list-entry',
-                                localListId,
-                                remoteListId,
-                                normalizedUrl: pageUrl,
-                            },
-                            {
-                                queueInteraction: 'queue-and-return',
-                            },
-                        )
-
-                        const annotations = await this.options.annotationStorage.listAnnotationsByPageUrl(
-                            { pageUrl },
-                        )
-                        if (!annotations.length) {
-                            continue
-                        }
-
-                        const localAnnotationIds = annotations.map(
-                            (annot) => annot.url,
-                        )
-
-                        const remoteAnnotationIdMap = await this.storage.getRemoteAnnotationIds(
-                            { localIds: localAnnotationIds },
-                        )
-
-                        await this.scheduleAction(
-                            {
-                                type: 'remove-shared-annotation-list-entries',
-                                remoteListId,
-                                remoteAnnotationIds: Object.values(
-                                    remoteAnnotationIdMap,
-                                ),
-                            },
-                            {
-                                queueInteraction: 'queue-and-return',
-                            },
-                        )
-
-                        this.remoteEmitter.emit('pageRemovedFromSharedList', {
-                            pageUrl,
-                        })
-                    }
+                    await this._processDeletedListEntryies(change)
                 } else if (change.collection === 'annotations') {
-                    const localAnnotationIds = change.pks.map((pk) =>
-                        pk.toString(),
-                    )
-                    const remoteAnnotationIdMap = await this.storage.getRemoteAnnotationIds(
-                        { localIds: localAnnotationIds },
-                    )
-                    if (!Object.keys(remoteAnnotationIdMap).length) {
-                        return
-                    }
-
-                    await this.scheduleAction(
-                        {
-                            type: 'unshare-annotations',
-                            remoteAnnotationIds: Object.values(
-                                remoteAnnotationIdMap,
-                            ),
-                        },
-                        {
-                            queueInteraction: 'queue-and-return',
-                        },
-                    )
+                    await this._processDeletedAnnotation(change)
                 }
             }
         }
+    }
+
+    async _processCreatedListEntry(change: CreationStorageChange<'post'>) {
+        const listEntry = change.values as Pick<PageListEntry, 'fullUrl'>
+        const [localListId, pageUrl] = change.pk as [number, string]
+        const remoteListId = await this.storage.getRemoteListId({
+            localId: localListId,
+        })
+        if (!remoteListId) {
+            return
+        }
+
+        const pageTitles = await this.storage.getPageTitles({
+            normalizedPageUrls: [pageUrl],
+        })
+        const pageTitle = pageTitles[pageUrl]
+
+        const originalUrl = 'https://' + normalizeUrl(listEntry.fullUrl)
+        await this.scheduleAction(
+            {
+                type: 'ensure-page-info',
+                data: [
+                    {
+                        createdWhen: '$now',
+                        normalizedUrl: pageUrl,
+                        originalUrl,
+                        fullTitle: pageTitle,
+                    },
+                ],
+            },
+            {
+                queueInteraction: 'queue-and-return',
+            },
+        )
+        await this.scheduleAction(
+            {
+                type: 'add-shared-list-entries',
+                localListId,
+                remoteListId,
+                data: [
+                    {
+                        createdWhen: Date.now(),
+                        entryTitle: pageTitle,
+                        normalizedUrl: pageUrl,
+                        originalUrl,
+                    },
+                ],
+            },
+            { queueInteraction: 'queue-and-return' },
+        )
+
+        const annotationEntries = await this.options.annotationStorage.listAnnotationsByPageUrl(
+            {
+                pageUrl,
+            },
+        )
+
+        await this._scheduleAddAnnotationEntries({
+            annotations: annotationEntries,
+            remoteListIds: [remoteListId],
+            queueInteraction: 'queue-and-return',
+        })
+
+        this.remoteEmitter.emit('pageAddedToSharedList', {
+            pageUrl,
+        })
+    }
+
+    async _processModifiedList(change: ModificationStorageChange<'post'>) {
+        for (const pk of change.pks) {
+            if (!change.updates.name) {
+                continue
+            }
+
+            const localListId = pk as number
+            const remoteListId = await this.storage.getRemoteListId({
+                localId: localListId,
+            })
+            if (!remoteListId) {
+                continue
+            }
+
+            await this.scheduleAction(
+                {
+                    type: 'change-shared-list-title',
+                    localListId,
+                    remoteListId,
+                    newTitle: change.updates.name,
+                },
+                {
+                    queueInteraction: 'queue-and-return',
+                },
+            )
+        }
+    }
+
+    async _processModifiedAnnotation(
+        change: ModificationStorageChange<'post'>,
+    ) {
+        if (!change.updates.comment) {
+            return
+        }
+
+        const remoteAnnotationIds = await this.storage.getRemoteAnnotationIds({
+            localIds: change.pks as string[],
+        })
+        if (!Object.keys(remoteAnnotationIds).length) {
+            return
+        }
+        for (const [localAnnotationId, remoteAnnotationId] of Object.entries(
+            remoteAnnotationIds,
+        )) {
+            await this.scheduleAction(
+                {
+                    type: 'update-annotation-comment',
+                    localAnnotationId,
+                    remoteAnnotationId: remoteAnnotationId as string,
+                    updatedComment: change.updates.comment,
+                },
+                {
+                    queueInteraction: 'queue-and-return',
+                },
+            )
+        }
+    }
+
+    async _processDeletedListEntryies(change: DeletionStorageChange<'post'>) {
+        for (const pk of change.pks) {
+            const [localListId, pageUrl] = pk as [number, string]
+            const remoteListId = await this.storage.getRemoteListId({
+                localId: localListId,
+            })
+            if (!remoteListId) {
+                continue
+            }
+
+            await this.scheduleAction(
+                {
+                    type: 'remove-shared-list-entry',
+                    localListId,
+                    remoteListId,
+                    normalizedUrl: pageUrl,
+                },
+                {
+                    queueInteraction: 'queue-and-return',
+                },
+            )
+
+            const annotations = await this.options.annotationStorage.listAnnotationsByPageUrl(
+                { pageUrl },
+            )
+            if (!annotations.length) {
+                continue
+            }
+
+            const localAnnotationIds = annotations.map((annot) => annot.url)
+
+            const remoteAnnotationIdMap = await this.storage.getRemoteAnnotationIds(
+                { localIds: localAnnotationIds },
+            )
+
+            await this.scheduleAction(
+                {
+                    type: 'remove-shared-annotation-list-entries',
+                    remoteListId,
+                    remoteAnnotationIds: Object.values(remoteAnnotationIdMap),
+                },
+                {
+                    queueInteraction: 'queue-and-return',
+                },
+            )
+
+            this.remoteEmitter.emit('pageRemovedFromSharedList', {
+                pageUrl,
+            })
+        }
+    }
+
+    async _processDeletedAnnotation(change: DeletionStorageChange<'post'>) {
+        const localAnnotationIds = change.pks.map((pk) => pk.toString())
+        const remoteAnnotationIdMap = await this.storage.getRemoteAnnotationIds(
+            { localIds: localAnnotationIds },
+        )
+        if (!Object.keys(remoteAnnotationIdMap).length) {
+            return
+        }
+
+        await this.scheduleAction(
+            {
+                type: 'unshare-annotations',
+                remoteAnnotationIds: Object.values(remoteAnnotationIdMap),
+            },
+            {
+                queueInteraction: 'queue-and-return',
+            },
+        )
+    }
+
+    _processUserMessage: UserMessageEvents['message'] = async (event) => {
+        await this._processingUserMessage
+        const processingUserMessage = createResolvable()
+        this._processingUserMessage = processingUserMessage
+
+        try {
+            const { message } = event
+            if (message.type === 'joined-collection') {
+                await this._processJoinedCollection({
+                    type: 'shared-list-reference',
+                    id: message.sharedListId,
+                })
+            }
+        } catch (e) {
+            processingUserMessage.reject(e)
+            throw e
+        } finally {
+            processingUserMessage.resolve()
+            delete this._processUserMessage
+        }
+    }
+
+    async _processJoinedCollection(listReference: SharedListReference) {
+        const { contentSharing } = await this.options.getServerStorage()
+        const sharedList = await contentSharing.getListByReference(
+            listReference,
+        )
+        if (!sharedList) {
+            return // assume the list was deleted after the user joined it
+        }
+        const remoteId = listReference.id.toString()
+        if (await this.storage.getLocalListId({ remoteId })) {
+            return
+        }
+
+        const localId = Date.now()
+        await this.storage.storeListId({
+            localId,
+            remoteId,
+        })
+
+        // TODO: What if there already exists a list with this name?
+        await this.options.customLists.insertCustomList({
+            id: localId,
+            name: sharedList.title,
+        })
     }
 }

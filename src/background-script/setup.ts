@@ -61,7 +61,8 @@ import ActivityIndicatorBackground from 'src/activity-indicator/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
 import { Services } from 'src/services/types'
 import { PDFBackground } from 'src/pdf/background'
-import { SHOULD_OPEN_STORAGE_KEY } from 'src/options/PDF/constants'
+import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
+import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -94,6 +95,7 @@ export interface BackgroundModules {
     tabManagement: TabManagementBackground
     readwise: ReadwiseBackground
     activityStreams: ActivityStreamsBackground
+    userMessages: UserMessageService
 }
 
 const globalFetch: typeof fetch =
@@ -114,6 +116,7 @@ export function createBackgroundModules(options: {
     tabManager?: TabManager
     auth?: AuthBackground
     analyticsManager: Analytics
+    userMessageService?: UserMessageService
     disableSyncEnryption?: boolean
     getIceServers?: () => Promise<string[]>
     getNow?: () => number
@@ -123,6 +126,9 @@ export function createBackgroundModules(options: {
     const fetch = options.fetch ?? globalFetch
 
     const { storageManager } = options
+    const getServerStorage = async () =>
+        (await options.getServerStorage()).storageModules
+
     const tabManager = options.tabManager || new TabManager()
     const tabManagement = new TabManagementBackground({
         tabManager,
@@ -222,6 +228,8 @@ export function createBackgroundModules(options: {
         searchIndex: search.searchIndex,
         pages,
         localBrowserStorage: options.browserAPIs.storage.local,
+        getServerStorage,
+        services: options.services,
     })
 
     const directLinking = new DirectLinkingBackground({
@@ -254,6 +262,34 @@ export function createBackgroundModules(options: {
         storageManager,
         callFirebaseFunction,
     })
+
+    if (!options.userMessageService) {
+        const userMessagesService = new FirebaseUserMessageService({
+            firebase: getFirebase,
+            auth: {
+                getCurrentUserId: async () =>
+                    (await auth.authService.getCurrentUser())?.id,
+            },
+        })
+        options.userMessageService = userMessagesService
+        userMessagesService.startListening({
+            auth: { events: auth.authService.events },
+            lastSeen: {
+                get: async () =>
+                    (
+                        await options.browserAPIs.storage.local.get(
+                            'userMessages.lastSeen',
+                        )
+                    ).lastUserMessageSeen,
+                set: async (value) => {
+                    await options.browserAPIs.storage.local.get({
+                        'userMessages.lastSeen': value,
+                    })
+                },
+            },
+        })
+    }
+    const userMessages = options.userMessageService
     const contentSharing = new ContentSharingBackground({
         activityStreams,
         storageManager,
@@ -261,8 +297,9 @@ export function createBackgroundModules(options: {
         annotationStorage: directLinking.annotationStorage,
         auth,
         analytics: options.analyticsManager,
-        getContentSharing: async () =>
-            (await options.getServerStorage()).storageModules.contentSharing,
+        userMessages,
+        getServerStorage,
+        services: options.services,
     })
 
     const readwise = new ReadwiseBackground({
@@ -444,6 +481,7 @@ export function createBackgroundModules(options: {
         copyPaster,
         activityStreams,
         contentSharing,
+        userMessages,
     }
 }
 

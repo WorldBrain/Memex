@@ -438,7 +438,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 },
                                 docs: [
                                     {
-                                        annotations: [],
+                                        annotations: [expect.anything()],
                                         annotsCount: 1,
                                         displayTime: expect.any(Number),
                                         favIcon: undefined,
@@ -553,7 +553,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 },
                                 docs: [
                                     {
-                                        annotations: [],
+                                        annotations: [expect.anything()],
                                         annotsCount: 1,
                                         displayTime: expect.any(Number),
                                         favIcon: undefined,

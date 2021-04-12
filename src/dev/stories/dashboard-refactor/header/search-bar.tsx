@@ -8,10 +8,10 @@ const template: SearchBarProps = {
     onSearchBarFocus: () => {},
     onSearchQueryChange: (queryString) => {},
     onSearchFiltersOpen: () => {},
-    searchFiltersActive: [],
     isSearchBarFocused: false,
     searchFiltersOpen: false,
     searchQuery: '',
+    onInputClear: () => {},
 }
 
 export const headerSearchBarPropsTemplate: {

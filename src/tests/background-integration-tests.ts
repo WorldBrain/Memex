@@ -32,6 +32,7 @@ import { ServerStorage } from 'src/storage/types'
 import { Browser } from 'webextension-polyfill-ts'
 import { TabManager } from 'src/tab-management/background/tab-manager'
 import { createServices } from 'src/services'
+import { MemoryUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/memory'
 
 fetchMock.restore()
 
@@ -155,6 +156,7 @@ export async function setupBackgroundIntegrationTest(
         disableSyncEnryption: !options?.enableSyncEncyption,
         services,
         fetch,
+        userMessageService: new MemoryUserMessageService(),
         callFirebaseFunction: (name, ...args) => {
             return callFirebaseFunction(name, ...args)
         },

@@ -30,7 +30,7 @@ export class EntrySelectedList extends React.PureComponent<Props> {
                         onClick={this.handleSelectedTabPress}
                         {...{ [this.dataAttribute]: entry }} // Need to set a dynamic prop here
                     >
-                        {entry}
+                        <Entry>{entry}</Entry>
                         <StyledXIcon size={12} />
                     </StyledActiveEntry>
                 ))}
@@ -44,6 +44,14 @@ const createStyledActiveEntry = (ActiveEntry: typeof React.Component) => styled(
 )`
     display: inline-flex;
     cursor: pointer;
+`
+
+const Entry = styled.div`
+    display: block;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
 `
 
 const StyledXIcon = styled(XIcon)`

@@ -1,5 +1,6 @@
 export const INSTALL_TIME_KEY = 'extension_install_time'
 export const OPTIONS_URL = '/options.html'
+export const SETTINGS_URL = `${OPTIONS_URL}#/settings`
 export const OVERVIEW_URL = `${OPTIONS_URL}#/overview`
 export const LOGIN_URL = `${OPTIONS_URL}#/account`
 export const LEARN_MORE_URL = 'https://worldbrain.io/pricing'

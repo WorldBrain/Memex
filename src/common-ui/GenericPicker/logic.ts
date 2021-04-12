@@ -57,13 +57,18 @@ interface GenericPickerUIEvent<T extends keyof GenericPickerEvent> {
     previousState: GenericPickerState
 }
 
-export default abstract class GenericPickerLogic extends UILogic<
-    GenericPickerState,
-    GenericPickerEvent
-> {
+// NOTE: Generic typing of this class resulted in an issue where interacting with the underlying `UILogic`
+//  class methods result in lots of complex type errors. I could not figure these out, but changing all the
+//  `this.emitMutations` to use the `$apply` operator on the entire state instead of a per-state-key mutation
+//  gets passed them. Extended classes of this should work fine.
+export default abstract class GenericPickerLogic<
+    Dependencies extends GenericPickerDependencies = GenericPickerDependencies,
+    State extends GenericPickerState = GenericPickerState,
+    Event extends GenericPickerEvent = GenericPickerEvent
+> extends UILogic<State, Event> {
     private searchInputRef?: HTMLInputElement
 
-    constructor(protected dependencies: GenericPickerDependencies) {
+    constructor(protected dependencies: Dependencies) {
         super()
     }
 
@@ -84,16 +89,18 @@ export default abstract class GenericPickerLogic extends UILogic<
         this._processingUpstreamOperation = val
     }
 
-    getInitialState(): GenericPickerState {
+    getInitialState(): State {
         return {
             ...INITIAL_STATE,
             selectedEntries: [],
             displayEntries: [],
-        }
+        } as State
     }
 
-    init = async () => {
-        this.emitMutation({ loadingSuggestions: { $set: true } })
+    async init() {
+        this.emitMutation({
+            $apply: (state) => ({ ...state, loadingSuggestions: true }),
+        })
 
         const initialSelectedEntries = this.dependencies.initialSelectedEntries
             ? await this.dependencies.initialSelectedEntries()
@@ -110,9 +117,12 @@ export default abstract class GenericPickerLogic extends UILogic<
         )
 
         this.emitMutation({
-            loadingSuggestions: { $set: false },
-            displayEntries: { $set: this.defaultEntries },
-            selectedEntries: { $set: initialSelectedEntries },
+            $apply: (state) => ({
+                ...state,
+                loadingSuggestions: false,
+                displayEntries: this.defaultEntries,
+                selectedEntries: initialSelectedEntries,
+            }),
         })
     }
 
@@ -178,15 +188,21 @@ export default abstract class GenericPickerLogic extends UILogic<
         previousState,
     }: GenericPickerUIEvent<'searchInputChanged'>) => {
         this.emitMutation({
-            query: { $set: query },
-            newEntryName: { $set: query },
+            $apply: (state) => ({
+                ...state,
+                query,
+                newEntryName: query,
+            }),
         })
 
         if (!query || query === '') {
             this.emitMutation({
-                displayEntries: { $set: this.defaultEntries },
-                query: { $set: '' },
-                newEntryName: { $set: '' },
+                $apply: (state) => ({
+                    ...state,
+                    displayEntries: this.defaultEntries,
+                    newEntryName: '',
+                    query: '',
+                }),
             })
         } else {
             return this._query(query, previousState.selectedEntries)
@@ -215,7 +231,9 @@ export default abstract class GenericPickerLogic extends UILogic<
      * Searches for the term via the `queryEntries` function provided to the component
      */
     _queryRemote = async (term: string, selectedEntries: string[]) => {
-        this.emitMutation({ loadingQueryResults: { $set: true } })
+        this.emitMutation({
+            $apply: (state) => ({ ...state, loadingQueryResults: true }),
+        })
         const results = await this.dependencies.queryEntries(
             term.toLocaleLowerCase(),
         )
@@ -225,10 +243,11 @@ export default abstract class GenericPickerLogic extends UILogic<
             selectedEntries,
         )
         this.emitMutation({
-            loadingQueryResults: { $set: false },
-            displayEntries: {
-                $set: displayEntries,
-            },
+            $apply: (state) => ({
+                ...state,
+                loadingQueryResults: false,
+                displayEntries,
+            }),
         })
         this._setCreateEntryDisplay(results, displayEntries, term)
     }
@@ -246,7 +265,10 @@ export default abstract class GenericPickerLogic extends UILogic<
     ) => {
         if (this._isTermInEntryList(list, term)) {
             this.emitMutation({
-                newEntryName: { $set: '' },
+                $apply: (state) => ({
+                    ...state,
+                    newEntryName: '',
+                }),
             })
             // N.B. We update this focus index to this found entry, so that
             // enter keys will action it. But we don't emit that focus
@@ -261,7 +283,10 @@ export default abstract class GenericPickerLogic extends UILogic<
                 return
             }
             this.emitMutation({
-                newEntryName: { $set: entry },
+                $apply: (state) => ({
+                    ...state,
+                    newEntryName: entry,
+                }),
             })
             this._updateFocus(-1, displayEntries)
         }
@@ -283,7 +308,10 @@ export default abstract class GenericPickerLogic extends UILogic<
 
         emit &&
             this.emitMutation({
-                displayEntries: { $set: displayEntries },
+                $apply: (state) => ({
+                    ...state,
+                    displayEntries,
+                }),
             })
     }
 
@@ -429,10 +457,13 @@ export default abstract class GenericPickerLogic extends UILogic<
         skipUpdateCallback?: boolean
     }) => {
         this.emitMutation({
-            query: { $set: '' },
-            newEntryName: { $set: '' },
-            displayEntries: { $set: displayEntries },
-            selectedEntries: { $set: selectedEntries },
+            $apply: (state) => ({
+                ...state,
+                query: '',
+                newEntryName: '',
+                displayEntries,
+                selectedEntries,
+            }),
         })
 
         if (skipUpdateCallback === true) {

@@ -69,6 +69,7 @@ async function createDependencies() {
     const sidebarDependencies: AnnotationsSidebarProps = {
         renderShareMenuForAnnotation: () => null,
         renderCopyPasterForAnnotation: () => null,
+        renderTagsPickerForAnnotation: () => null,
         sharingAccess: 'sharing-allowed',
         isAnnotationCreateShown: true,
         isSearchLoading: false,
@@ -93,6 +94,7 @@ async function createDependencies() {
         bindAnnotationFooterEventProps: (a) => ({
             onDeleteConfirm: action('confirmDelete'),
             onDeleteCancel: action('cancelDelete'),
+            onTagIconClick: action('clickTagIcon'),
             onEditConfirm: action('confirmEdit'),
             onEditCancel: action('cancelEdit'),
             onShareClick: action('share'),
@@ -100,7 +102,6 @@ async function createDependencies() {
             onDeleteIconClick: action('clickDeleteIcon'),
             onEditIconClick: action('clickEditIcon'),
             toggleBookmark: action('toggleBookmark'),
-            onGoToAnnotation: action('goToAnnotation'),
             onCopyPasterBtnClick: action('clickCopyPaster'),
         }),
         bindAnnotationEditProps: (a) => ({
@@ -115,16 +116,6 @@ async function createDependencies() {
             setTagInputActive: action('activateTagInput'),
             updateTags: action('updateTags') as any,
         }),
-        annotationEditableProps: {
-            onGoToAnnotation: action('clickAnnotation'),
-            onMouseEnter: action('startMouseOver'),
-            onMouseLeave: action('endMouseOver'),
-        },
-        annotationTagProps: {
-            loadDefaultSuggestions: async () => TAGS,
-            queryEntries: async (query) =>
-                TAGS.filter((tag) => tag.startsWith(query)),
-        },
         handleScrollPagination: () => undefined,
         onClickOutside: action('clickOutside'),
         annotations,

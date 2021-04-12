@@ -1,7 +1,8 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { StyleSheetManager } from 'styled-components'
+import { StyleSheetManager, ThemeProvider } from 'styled-components'
 
+import { theme } from 'src/common-ui/components/design-library/theme'
 import {
     AnnotationsSidebarInPage,
     Props as AnnotationsSidebarDependencies,
@@ -14,7 +15,9 @@ export function setupInPageSidebarUI(
 ) {
     ReactDOM.render(
         <StyleSheetManager target={mount.shadowRoot as any}>
-            <AnnotationsSidebarInPage {...dependencies} />
+            <ThemeProvider theme={theme}>
+                <AnnotationsSidebarInPage {...dependencies} />
+            </ThemeProvider>
         </StyleSheetManager>,
         mount.rootElement,
     )

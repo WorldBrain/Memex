@@ -1,13 +1,19 @@
 export const sizeConstants = {
+    header: {
+        heightPx: 45,
+    },
     searchBar: {
         heightPx: 50,
-        widthPx: 650,
+        widthPx: 800,
     },
     listsSidebar: {
-        widthPx: 173,
+        widthPx: 200,
     },
     syncStatusMenu: {
-        WidthPx: 183,
+        widthPx: 150,
+    },
+    searchResults: {
+        widthPx: 800,
     },
 }
 
@@ -31,12 +37,6 @@ export const SEARCH_QUERY_END_FILTER_KEY_PATTERN = /(from|to|(-?)[dtc]):$/
 export const VALID_FILTER_STRING_PATTERN = /(,|:)("(.+?)"|[^" ]+?) ?$/
 
 /**
- * Pattern to match entire string to match `domain.tld`-like format + optional subdomain
- * prefix, ccTLD postfix, `site:` prefix, and excluded `-` prefix.
- */
-export const DOMAIN_TLD_PATTERN = /^-?(site:)?(\w+\.)?[\w-]{2,}\.\w{2,3}(\.\w{2})?$/
-
-/**
  * Pattern to match against individual terms to determine whether or not they are excluded
  * (prefixed with hyphen: -). Also supports site exclusion, which may be prefixed with
  * `site:` syntax.
@@ -51,7 +51,6 @@ export const TERM_CLEAN_PATTERN = /^-?(site:)?-?(?=\w+)/
 
 export const DATE_PICKER_DATE_FORMAT = 'DD-MM-YYYY'
 
-// unsure if this is required?
 export const PAGE_SIZE = 10
 
 export const SEARCH_INPUT_SPLIT_PATTERN = /-?#\"([-.\w]+ ?)+\"|\S+/g
@@ -61,3 +60,23 @@ export const SEARCH_INPUT_SPLIT_PATTERN = /-?#\"([-.\w]+ ?)+\"|\S+/g
  * eg: #tag #"tag tag" -#tag
  */
 export const TAG_CLEAN_PATTERN = /[#"]/g
+
+const KEY_PREFIX = '@Dashboard-'
+
+export const STORAGE_KEYS = {
+    listSidebarLocked: KEY_PREFIX + 'list_sidebar_locked',
+    onboardingMsgSeen: KEY_PREFIX + 'onboarding_msg_seen',
+    mobileAdSeen: KEY_PREFIX + 'mobile_ad_seen',
+    useOldDash: KEY_PREFIX + 'use_old_dashboard',
+}
+
+/**
+ * Used for page search, where results aren't grouped by day. Internally, to keep a consistent results
+ * data structure for both page and notes search, page search results are still grouped by day though
+ * always under a single key. This is that key.
+ */
+export const PAGE_SEARCH_DUMMY_DAY = -1
+
+export const NON_UNIQ_LIST_NAME_ERR_MSG = 'List name already taken.'
+
+export const FILTER_PICKERS_LIMIT = 20

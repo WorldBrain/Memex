@@ -17,7 +17,7 @@ export interface Props {
     initTemplates?: Template[]
     onClickOutside: React.MouseEventHandler
     renderTemplate: (id: number) => Promise<string>
-    copyPaster: RemoteCopyPasterInterface
+    copyPaster?: RemoteCopyPasterInterface
 }
 
 export default class CopyPasterContainer extends React.PureComponent<
@@ -30,11 +30,12 @@ export default class CopyPasterContainer extends React.PureComponent<
         code: '',
         isFavourite: false,
     }
+
     private copyPasterBG: RemoteCopyPasterInterface
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props)
-        this.copyPasterBG = this.props.copyPaster
+        this.copyPasterBG = props.copyPaster
     }
 
     state: State = {

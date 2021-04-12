@@ -51,8 +51,8 @@ export const conditionallySkipToTimeFilter = async () => {
 /**
  * Check if the URL has the parameter install set to true
  */
-export const isDuringInstall = (): boolean =>
-    location.href.indexOf('install=true') > -1
+export const isDuringInstall = (loc = window.location): boolean =>
+    loc.href.indexOf('install=true') > -1
 
 /**
  * Find the page center of the current page.

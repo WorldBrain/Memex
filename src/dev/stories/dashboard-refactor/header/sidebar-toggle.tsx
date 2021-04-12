@@ -3,7 +3,7 @@ import { storiesOf } from '@storybook/react'
 
 import SidebarToggle, {
     SidebarToggleProps,
-} from 'src/dashboard-refactor/header/sidebar-header/sidebar-toggle/'
+} from 'src/dashboard-refactor/header/sidebar-toggle'
 import { SidebarLockedState } from 'src/dashboard-refactor/lists-sidebar/types'
 import { HoverState } from 'src/dashboard-refactor/types'
 
@@ -21,8 +21,8 @@ const hoverState: HoverState = {
 }
 
 const template: SidebarToggleProps = {
-    sidebarLockedState: sidebarLockedState,
-    hoverState: hoverState,
+    sidebarLockedState,
+    hoverState,
 }
 
 export const sidebarToggleProps = {

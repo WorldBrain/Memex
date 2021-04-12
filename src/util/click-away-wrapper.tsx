@@ -41,7 +41,7 @@ export class ClickAway extends React.Component<Props> {
 
         // console.log(domNode, event.target)
         if (!domNode.contains(event.target)) {
-            this.props.onClickAway(event)
+            this.props.onClickAway?.(event)
         }
     }
 

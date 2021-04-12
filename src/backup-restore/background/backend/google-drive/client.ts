@@ -1,5 +1,6 @@
 import { DriveTokenManager } from './token-manager'
 import { setLocalStorage, setLocalStorageTyped } from 'src/util/storage'
+import { BACKUP_STORAGE_KEY } from 'src/backup-restore/constants'
 
 export class GoogleDriveClient {
     private idCache: {
@@ -216,7 +217,7 @@ export class GoogleDriveClient {
                 'Something went wrong making a request to Drive:',
                 response,
             )
-            await setLocalStorageTyped('backup-status', {
+            await setLocalStorageTyped(BACKUP_STORAGE_KEY, {
                 state: 'fail',
                 backupId: 'drive_size_empty',
             })

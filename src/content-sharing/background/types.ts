@@ -1,6 +1,8 @@
 export * from '@worldbrain/memex-common/lib/content-sharing/client-storage/types'
+import { ContentSharingServiceInterface } from '@worldbrain/memex-common/lib/content-sharing/service/types'
 
-export interface ContentSharingInterface {
+export interface ContentSharingInterface
+    extends ContentSharingServiceInterface {
     shareList(options: { listId: number }): Promise<{ remoteListId: string }>
     shareListEntries(options: {
         listId: number
@@ -32,6 +34,12 @@ export interface ContentSharingInterface {
         annotationUrl: string
     }): Promise<string | null>
     getRemoteListId(options: { localListId: number }): Promise<string | null>
+    getRemoteListIds(options: {
+        localListIds: number[]
+    }): Promise<{ [localListId: string]: string | null }>
+    getAllRemoteLists(): Promise<
+        Array<{ localId: number; remoteId: string; name: string }>
+    >
     getRemoteAnnotationIds(params: {
         annotationUrls: string[]
     }): Promise<{ [localId: string]: string | number }>

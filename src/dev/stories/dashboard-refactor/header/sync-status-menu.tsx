@@ -4,40 +4,27 @@ import { storiesOf } from '@storybook/react'
 import SyncStatusMenu, {
     SyncStatusMenuProps,
 } from 'src/dashboard-refactor/header/sync-status-menu'
-import { DisplayState, HoverState } from 'src/dashboard-refactor/types'
-import { UnSyncedItemState } from 'src/dashboard-refactor/header/sync-status-menu/types'
 
 const stories = storiesOf('Dashboard Refactor|Header/Sync Status Menu', module)
 
-const hoverState: HoverState = {
-    isHovered: false,
-    onHoverEnter: () => {},
-    onHoverLeave: () => {},
-}
-
-const displayState: DisplayState = {
-    isDisplayed: true,
-    toggleDisplayState: () => {},
-}
-
-const unSyncedItemState: UnSyncedItemState = {
-    showUnSyncedItemCount: false,
-    unSyncedItemCount: Math.floor(Math.random() * 100),
-    onShowUnSyncedItemCount: () => {},
-    onHideUnSyncedItemCount: () => {},
-}
-
 const template: SyncStatusMenuProps = {
-    displayState: displayState,
+    isDisplayed: true,
+    onToggleDisplayState: () => {},
     syncState: 'enabled',
     backupState: 'enabled',
-    lastSuccessfulSyncDateTime: new Date(),
-    lastSuccessfulBackupDateTime: new Date(),
-    unSyncedItemState,
+    lastSuccessfulSyncDate: new Date(),
+    lastSuccessfulBackupDate: new Date(),
+    showUnsyncedItemCount: false,
+    isAutoBackupEnabled: false,
+    unsyncedItemCount: Math.floor(Math.random() * 100),
+    onToggleAutoBackup: () => {},
+    onShowUnsyncedItemCount: () => {},
+    onHideUnsyncedItemCount: () => {},
     onInitiateSync: () => console.log('sync initiated'),
     onInitiateBackup: () => console.log('backup initiated'),
-    syncRunHoverState: hoverState,
-    backupRunHoverState: hoverState,
+    onClickOutside: () => {},
+    goToBackupRoute: () => {},
+    goToSyncRoute: () => {},
 }
 
 export const syncStatusMenuStoryProps: {
@@ -46,8 +33,6 @@ export const syncStatusMenuStoryProps: {
     allSuccessful: SyncStatusMenuProps
     allDisabled: SyncStatusMenuProps
     showUnsyncedItemCount: SyncStatusMenuProps
-    syncToolTipShowing: SyncStatusMenuProps
-    backupToolTipShowing: SyncStatusMenuProps
     syncRunning: SyncStatusMenuProps
     backupRunning: SyncStatusMenuProps
     syncError: SyncStatusMenuProps
@@ -55,10 +40,6 @@ export const syncStatusMenuStoryProps: {
 } = {
     hidden: {
         ...template,
-        displayState: {
-            ...displayState,
-            isDisplayed: false,
-        },
     },
     allEnabled: template,
     allSuccessful: {
@@ -73,24 +54,7 @@ export const syncStatusMenuStoryProps: {
     },
     showUnsyncedItemCount: {
         ...template,
-        unSyncedItemState: {
-            ...unSyncedItemState,
-            showUnSyncedItemCount: true,
-        },
-    },
-    syncToolTipShowing: {
-        ...template,
-        syncRunHoverState: {
-            ...hoverState,
-            isHovered: true,
-        },
-    },
-    backupToolTipShowing: {
-        ...template,
-        backupRunHoverState: {
-            ...hoverState,
-            isHovered: true,
-        },
+        showUnsyncedItemCount: true,
     },
     syncRunning: {
         ...template,
@@ -118,12 +82,6 @@ stories.add('Sync and Backup Successful', () => (
 ))
 stories.add('Sync and Backup Disabled', () => (
     <SyncStatusMenu {...syncStatusMenuStoryProps.allDisabled} />
-))
-stories.add('Sync Tooltip', () => (
-    <SyncStatusMenu {...syncStatusMenuStoryProps.syncToolTipShowing} />
-))
-stories.add('Backup Tooltip', () => (
-    <SyncStatusMenu {...syncStatusMenuStoryProps.backupToolTipShowing} />
 ))
 stories.add('Sync Running', () => (
     <SyncStatusMenu {...syncStatusMenuStoryProps.syncRunning} />

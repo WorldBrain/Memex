@@ -1,8 +1,7 @@
 import React from 'react'
 import styled, { css, keyframes } from 'styled-components'
-import { LoadingIndicator as Spinner } from 'src/common-ui/components'
 
-const rotate = (rotation: Number) => {
+const rotate = (rotation: number) => {
     return keyframes`0% {
         transform: rotate(0deg);
     }
@@ -14,8 +13,8 @@ const rotate = (rotation: Number) => {
 interface IconProps {
     heightAndWidth: string
     path: string
-    plus90: boolean
-    minus90: boolean
+    rotation: string
+    faded: boolean
 }
 
 export const Icon = styled.div<IconProps>`
@@ -33,14 +32,14 @@ export const Icon = styled.div<IconProps>`
             background-position: center;`}
         `}
     ${(props) =>
-        props.plus90 &&
+        props.rotation &&
         css`
-            animation: ${rotate(90)} 1s ease-in 1;
+            animation: ${rotate(props.rotation)} 0.2s ease-in-out forwards;
         `}
     ${(props) =>
-        props.minus90 &&
+        props.faded &&
         css`
-            animation: ${rotate(-90)} 1s ease-in 1;
+            opacity: 0.5;
         `}
 `
 

@@ -1,2 +1,0 @@
-SidebarToggle component:
-- Color of svg doesn't come through

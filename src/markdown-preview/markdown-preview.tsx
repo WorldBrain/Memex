@@ -122,10 +122,10 @@ export class MarkdownPreview extends React.Component<Props, State> {
                         {this.showPreviewBtn && (
                             <ButtonTooltip
                                 tooltipText="alt/option + Enter"
-                                position="bottom"
+                                position="bottomSidebar"
                             >
                                 <PreviewBtn onClick={this.togglePreview}>
-                                    Preview
+                                    Preview Markdown
                                 </PreviewBtn>
                             </ButtonTooltip>
                         )}
@@ -146,7 +146,8 @@ const PreviewButtonContainer = styled.div`
     padding: 0px 2px;
     align-items: center;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
+    border-radius: 4px 4px 0 0;
 `
 
 const PreviewBtn = styled.button`
@@ -177,15 +178,16 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    border: solid 1px #e0e0e0;
-    border-radius: 3px;
+    border-radius: 5px;
+    padding: 0;
+    border: 1px solid #e0e0e0;
     margin: 5px;
 `
 
 const EditorContainer = styled.div`
     width: fill-available;
-    margin-bottom: -3px;
     border-radius: 3px;
+    display: flex;
 
     & > div {
         padding: 10px 7px;

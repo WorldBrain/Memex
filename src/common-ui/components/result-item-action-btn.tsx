@@ -1,14 +1,14 @@
 import React, { MouseEventHandler } from 'react'
 import cx from 'classnames'
 
-import ButtonTooltip from './button-tooltip'
+import ButtonTooltip, { TooltipPosition } from './button-tooltip'
 
 const styles = require('./result-item.css')
 
 export interface Props {
     tooltipText: string
-    tooltipPosition?: string
-    onClick: MouseEventHandler
+    tooltipPosition?: TooltipPosition
+    onClick: MouseEventHandler<HTMLButtonElement>
     imgSrc: string
     className?: string
     refHandler?: (el: HTMLElement) => void
@@ -17,7 +17,7 @@ export interface Props {
 
 const ResultItemActionBtn: React.SFC<Props> = (props) => (
     <ButtonTooltip
-        position={props.tooltipPosition || 'bottom'}
+        position={props.tooltipPosition ?? 'bottom'}
         tooltipText={props.tooltipText}
     >
         <button

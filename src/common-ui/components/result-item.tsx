@@ -44,6 +44,7 @@ export interface Props extends Partial<SocialPage> {
     areAnnotationsExpanded?: boolean
     isResponsibleForSidebar?: boolean
     activeShareMenuNoteId: string | undefined
+    activeTagPickerNoteId: string | undefined
     activeCopyPasterAnnotationId: string | undefined
     isOverview?: boolean
     isSocial?: boolean
@@ -67,6 +68,7 @@ export interface Props extends Partial<SocialPage> {
     setTagButtonRef: (el: HTMLElement) => void
     setListButtonRef: (el: HTMLElement) => void
     setCopyPasterButtonRef: (el: HTMLElement) => void
+    setActiveTagPickerNoteId: (id: string) => void
     setActiveShareMenuNoteId?: (id: string) => void
     setActiveCopyPasterAnnotationId?: (id: string) => void
     contentSharing: ContentSharingInterface
@@ -78,7 +80,7 @@ class ResultItem extends PureComponent<Props> {
         return `${this.props.fullUrl}`
     }
 
-    dragStart: DragEventHandler = (e) => {
+    dragStart: DragEventHandler<HTMLAnchorElement> = (e) => {
         const { fullUrl, setUrlDragged, isSocial } = this.props
 
         setUrlDragged(fullUrl)
@@ -118,9 +120,6 @@ class ResultItem extends PureComponent<Props> {
                 pageUrl={this.hrefToPage}
                 annotations={this.props.annotations}
                 goToAnnotation={this.props.goToAnnotation}
-                handleBookmarkToggle={(url) =>
-                    annotationsBG.toggleAnnotBookmark({ url })
-                }
                 handleDeleteAnnotation={(url) =>
                     annotationsBG.deleteAnnotation(url)
                 }

@@ -98,7 +98,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         this.props.inPageUI.events.removeAllListeners('sidebarAction')
 
         for (const event of this.props.events?.eventNames?.() ?? []) {
-            this.props.events.removeAllListeners(event)
+            this.props.events.removeAllListeners(event as any)
         }
     }
 
@@ -115,7 +115,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             context: 'pageAnnotations',
             mode: 'default',
         })
-        this.processEvent('setActiveAnnotationUrl', url)
+        this.processEvent('setActiveAnnotationUrl', { annotationUrl: url })
         const annotationBoxNode = this.getDocument()?.getElementById(url)
 
         if (!annotationBoxNode) {
@@ -185,8 +185,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 
         return {
             ...boundProps,
-            onDeleteConfirm: () => {
-                boundProps.onDeleteConfirm()
+            onDeleteConfirm: (e) => {
+                boundProps.onDeleteConfirm(e)
                 this.props.highlighter.removeAnnotationHighlights(
                     annotation.url,
                 )
@@ -223,7 +223,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 {this.state.showBetaFeatureNotifModal && (
                     <BetaFeatureNotifModal
                         auth={this.props.auth}
-                        subscription={this.props.subscription}
                         contentScriptBackground={
                             this.props.contentScriptBackground
                         }
