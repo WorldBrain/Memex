@@ -3,7 +3,7 @@ import {
     RemotePositionalFunction,
     RemoteFunction,
 } from 'src/util/webextensionRPC'
-import { Annotation } from 'src/annotations/types'
+import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
 
@@ -83,4 +83,5 @@ export interface CreateAnnotationParams {
     isBookmarked?: boolean
     isSocialPost?: boolean
     createdWhen?: Date
+    privacyLevel?: AnnotationPrivacyLevels
 }

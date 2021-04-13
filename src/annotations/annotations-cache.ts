@@ -1,7 +1,7 @@
 import TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
 
-import { Annotation } from 'src/annotations/types'
+import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import {
@@ -110,7 +110,7 @@ export interface AnnotationsCacheInterface {
         annotation: Omit<
             CachedAnnotation,
             'lastEdited' | 'createdWhen' | 'isShared'
-        >,
+        > & { privacyLevel?: AnnotationPrivacyLevels },
     ) => Promise<void>
     update: (
         annotation: Omit<

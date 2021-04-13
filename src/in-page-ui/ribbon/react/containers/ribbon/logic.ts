@@ -305,6 +305,7 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     saveComment: EventHandler<'saveComment'> = async ({
+        event,
         previousState: { pageUrl, commentBox },
     }) => {
         const comment = commentBox.commentText.trim()
@@ -321,6 +322,7 @@ export class RibbonContainerLogic extends UILogic<
             pageUrl,
             comment,
             tags: commentBox.tags,
+            privacyLevel: event.value,
         })
 
         this.emitMutation({

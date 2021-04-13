@@ -29,6 +29,7 @@ export interface Annotation {
     _body_terms?: string[]
     _comment_terms?: string[]
     isBookmarked?: boolean
+    privacyLevel?: AnnotationPrivacyLevels
     tags: string[]
     isSocialPost?: boolean
 }

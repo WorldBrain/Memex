@@ -13,6 +13,7 @@ import {
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 import { Anchor } from 'src/highlighting/types'
+import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -107,6 +108,7 @@ export interface NoteData {
     displayTime: number
     createdWhen?: Date
     selector?: Anchor
+    privacyLevel: AnnotationPrivacyLevels
 }
 
 export type PageData = Pick<
@@ -265,6 +267,7 @@ export type Events = UIEvent<{
     cancelPageNewNote: PageEventArgs
     savePageNewNote: PageEventArgs & {
         fullPageUrl: string
+        privacyLevel: AnnotationPrivacyLevels
     }
 
     // Note result state mutations

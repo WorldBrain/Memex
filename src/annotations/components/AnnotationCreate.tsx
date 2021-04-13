@@ -13,12 +13,11 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 interface State {
     isTagPickerShown: boolean
-    areSavePrivacyLevelsShown: boolean
     savePrivacyLevel: AnnotationPrivacyLevels
 }
 
 export interface AnnotationCreateEventProps {
-    onSave: () => Promise<void>
+    onSave: (privacyLevel: AnnotationPrivacyLevels) => Promise<void>
     onCancel: () => void
     onTagsUpdate: (tags: string[]) => void
     onCommentChange: (text: string) => void
@@ -44,7 +43,6 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     state: State = {
         isTagPickerShown: false,
-        areSavePrivacyLevelsShown: false,
         savePrivacyLevel: AnnotationPrivacyLevels.PRIVATE,
     }
 
@@ -68,8 +66,8 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
     private handleCancel = () => this.props.onCancel()
-    private handleSave = () => {
-        this.props.onSave()
+    private handleSave = async () => {
+        const saveP = this.props.onSave(this.state.savePrivacyLevel)
 
         if (
             this.markdownPreviewRef?.current?.markdownPreviewRef.current?.state
@@ -77,6 +75,8 @@ export class AnnotationCreate extends React.Component<Props, State>
         ) {
             this.markdownPreviewRef.current.markdownPreviewRef.current.togglePreview()
         }
+
+        await saveP
     }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {

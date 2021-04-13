@@ -3,7 +3,7 @@ import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { EventEmitter } from 'events'
 
-import { Annotation } from 'src/annotations/types'
+import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
 import { Anchor } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
 import { SidebarContainerDependencies } from './types'
@@ -109,7 +109,7 @@ export type SidebarContainerEvents = UIEvent<{
     changeNewPageCommentText: { comment: string }
     cancelEdit: { annotationUrl: string }
     changeEditCommentText: { annotationUrl: string; comment: string }
-    saveNewPageComment: null
+    saveNewPageComment: { privacyLevel: AnnotationPrivacyLevels }
     cancelNewPageComment: null
     updateNewPageCommentTags: { tags: string[] }
 
@@ -587,6 +587,7 @@ export class SidebarContainerLogic extends UILogic<
 
     // TODO (sidebar-refactor) reconcile this duplicate code with ribbon notes save
     saveNewPageComment: EventHandler<'saveNewPageComment'> = async ({
+        event,
         previousState: { commentBox, pageUrl },
     }) => {
         const comment = commentBox.commentText.trim()
@@ -601,6 +602,7 @@ export class SidebarContainerLogic extends UILogic<
             pageUrl,
             comment,
             tags: commentBox.tags,
+            privacyLevel: event.privacyLevel,
         })
 
         this.emitMutation({

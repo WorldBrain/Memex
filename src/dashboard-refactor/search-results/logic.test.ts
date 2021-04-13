@@ -1043,6 +1043,7 @@ describe('Dashboard search results logic', () => {
                         day,
                         pageId,
                         fullPageUrl: 'https://' + pageId,
+                        privacyLevel: 0,
                     },
                 )
                 expect(
@@ -1083,6 +1084,7 @@ describe('Dashboard search results logic', () => {
                         url: latestNoteId,
                         isEditing: false,
                         editNoteForm: utils.getInitialFormState(),
+                        privacyLevel: 0,
                     }),
                 )
 

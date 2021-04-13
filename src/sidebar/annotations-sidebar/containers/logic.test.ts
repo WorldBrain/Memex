@@ -356,7 +356,9 @@ describe('SidebarContainerLogic', () => {
             })
             expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
 
-            await sidebar.processEvent('saveNewPageComment', null)
+            await sidebar.processEvent('saveNewPageComment', {
+                privacyLevel: 0,
+            })
             expect(sidebar.state.annotations.length).toBe(1)
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining({
@@ -391,7 +393,9 @@ describe('SidebarContainerLogic', () => {
             })
             expect(sidebar.state.commentBox.tags).toEqual([DATA.TAG_2])
 
-            await sidebar.processEvent('saveNewPageComment', null)
+            await sidebar.processEvent('saveNewPageComment', {
+                privacyLevel: 0,
+            })
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining({
                     comment: DATA.COMMENT_1,

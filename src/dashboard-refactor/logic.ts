@@ -1137,6 +1137,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     {
                         pageUrl: event.fullPageUrl,
                         comment: formState.inputValue,
+                        privacyLevel: event.privacyLevel,
                     },
                     { skipPageIndexing: true },
                 )
@@ -1159,6 +1160,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         displayTime: Date.now(),
                                         comment: formState.inputValue,
                                         tags: formState.tags,
+                                        privacyLevel: event.privacyLevel,
                                         ...utils.getInitialNoteResultState(),
                                     },
                                 }),

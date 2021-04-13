@@ -202,7 +202,8 @@ export class AnnotationsSidebarContainer<
             onTagsUpdate: (tags) =>
                 this.processEvent('updateNewPageCommentTags', { tags }),
             onCancel: () => this.processEvent('cancelNewPageComment', null),
-            onSave: () => this.processEvent('saveNewPageComment', null),
+            onSave: (privacyLevel) =>
+                this.processEvent('saveNewPageComment', { privacyLevel }),
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
         }

@@ -401,6 +401,13 @@ export default class DirectLinkingBackground {
             createdWhen: new Date(toCreate.createdWhen ?? Date.now()),
         })
 
+        if (toCreate.privacyLevel != null) {
+            await this.annotationStorage.createAnnotationPrivacyLevel({
+                annotationId: annotationUrl,
+                privacyLevel: toCreate.privacyLevel,
+            })
+        }
+
         if (toCreate.isBookmarked) {
             await this.toggleAnnotBookmark({ tab }, { url: annotationUrl })
         }
