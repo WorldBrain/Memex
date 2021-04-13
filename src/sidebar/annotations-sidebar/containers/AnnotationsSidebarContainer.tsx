@@ -330,7 +330,7 @@ export class AnnotationsSidebarContainer<
             <ShareMenuWrapperTopBar>
                 <HoverBox>
                     <AllNotesShareMenu
-                        contentSharing={this.props.contentSharing}
+                        contentSharingBG={this.props.contentSharing}
                         annotationsBG={this.props.annotations}
                         copyLink={(link) =>
                             this.processEvent('copyPageLink', { link })
