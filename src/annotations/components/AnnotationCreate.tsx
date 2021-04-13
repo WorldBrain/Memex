@@ -8,13 +8,13 @@ import TagInput from 'src/tags/ui/tag-input'
 import { FocusableComponent } from './types'
 import { insertTab, uninsertTab } from 'src/common-ui/utils'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
-import { AnnotationPrivacyLevel } from '../types'
+import { AnnotationPrivacyLevels } from '../types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 interface State {
     isTagPickerShown: boolean
     areSavePrivacyLevelsShown: boolean
-    savePrivacyLevel: AnnotationPrivacyLevel
+    savePrivacyLevel: AnnotationPrivacyLevels
 }
 
 export interface AnnotationCreateEventProps {
@@ -45,7 +45,7 @@ export class AnnotationCreate extends React.Component<Props, State>
     state: State = {
         isTagPickerShown: false,
         areSavePrivacyLevelsShown: false,
-        savePrivacyLevel: AnnotationPrivacyLevel.PRIVATE,
+        savePrivacyLevel: AnnotationPrivacyLevels.PRIVATE,
     }
 
     componentDidMount() {
@@ -135,10 +135,10 @@ export class AnnotationCreate extends React.Component<Props, State>
                     <Icon
                         icon={
                             this.state.savePrivacyLevel ===
-                            AnnotationPrivacyLevel.PROTECTED
+                            AnnotationPrivacyLevels.PROTECTED
                                 ? 'lock'
                                 : this.state.savePrivacyLevel ===
-                                  AnnotationPrivacyLevel.PRIVATE
+                                  AnnotationPrivacyLevels.PRIVATE
                                 ? 'person'
                                 : 'shared'
                         }
@@ -151,18 +151,18 @@ export class AnnotationCreate extends React.Component<Props, State>
                         btnChildren={<Icon icon="triangle" height="10px" />}
                         menuItems={[
                             {
-                                id: AnnotationPrivacyLevel.PROTECTED,
+                                id: AnnotationPrivacyLevels.PROTECTED,
                                 name: 'Protected',
                                 info:
                                     'Sharing status will not change in bulk actions',
                             },
                             {
-                                id: AnnotationPrivacyLevel.PRIVATE,
+                                id: AnnotationPrivacyLevels.PRIVATE,
                                 name: 'Private',
                                 info: 'Private to you, until shared',
                             },
                             {
-                                id: AnnotationPrivacyLevel.SHARED,
+                                id: AnnotationPrivacyLevels.SHARED,
                                 name: 'Shared',
                                 info:
                                     'Added to shared collections & page links',
@@ -170,7 +170,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                         ]}
                         onMenuItemClick={(props) =>
                             this.setState({
-                                savePrivacyLevel: props.id as AnnotationPrivacyLevel,
+                                savePrivacyLevel: props.id as AnnotationPrivacyLevels,
                             })
                         }
                     />

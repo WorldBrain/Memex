@@ -35,6 +35,11 @@ async function insertTestData({
             ...annot,
             url: annot.url,
         } as any)
+
+        await annotationStorage.createAnnotationPrivacyLevel({
+            annotationId: annot.url,
+            privacyLevel: 100,
+        })
     }
 
     // Insert bookmarks
@@ -85,6 +90,21 @@ describe('Annotations storage', () => {
             expect(tags).not.toBeNull()
             expect(tags.length).toBe(2)
             assertTag(tags[0], DATA.tag1)
+        })
+
+        test('fetch privacy level for an annotation', async () => {
+            const { annotationStorage } = await setupTest()
+
+            const url = DATA.annotation.url
+            expect(
+                await annotationStorage.findAnnotationPrivacyLevel({
+                    annotationId: url,
+                }),
+            ).toEqual({
+                annotationId: url,
+                privacyLevel: 100,
+                createdWhen: expect.any(Date),
+            })
         })
 
         describe('Update operations: ', () => {
@@ -145,6 +165,37 @@ describe('Annotations storage', () => {
                     'Adding a comment to the highlight.',
                 )
             })
+
+            test('update annotation privacy level', async () => {
+                const { annotationStorage } = await setupTest()
+
+                const url = DATA.annotation.url
+                const origPrivacyLevel = await annotationStorage.findAnnotationPrivacyLevel(
+                    { annotationId: url },
+                )
+                expect(origPrivacyLevel).toEqual({
+                    annotationId: url,
+                    privacyLevel: 100,
+                    createdWhen: expect.any(Date),
+                })
+                const updatedWhen = new Date()
+                await annotationStorage.createOrUpdateAnnotationPrivacyLevel({
+                    annotationId: url,
+                    privacyLevel: 0,
+                    updatedWhen,
+                })
+
+                expect(
+                    await annotationStorage.findAnnotationPrivacyLevel({
+                        annotationId: url,
+                    }),
+                ).toEqual({
+                    annotationId: url,
+                    privacyLevel: 0,
+                    createdWhen: origPrivacyLevel.createdWhen,
+                    updatedWhen,
+                })
+            })
         })
 
         describe('Delete operations: ', () => {
@@ -164,6 +215,28 @@ describe('Annotations storage', () => {
                 expect(directLink).not.toBeNull()
 
                 expect(afterDeletion).toBeNull()
+            })
+
+            test('delete annotation should result in delete of any privacy level', async () => {
+                const { annotationStorage } = await setupTest()
+
+                const url = DATA.directLink.url
+                expect(
+                    await annotationStorage.findAnnotationPrivacyLevel({
+                        annotationId: url,
+                    }),
+                ).toEqual({
+                    annotationId: url,
+                    privacyLevel: 100,
+                    createdWhen: expect.any(Date),
+                })
+
+                await annotationStorage.deleteAnnotation(url)
+                expect(
+                    await annotationStorage.findAnnotationPrivacyLevel({
+                        annotationId: url,
+                    }),
+                ).toEqual(null)
             })
 
             test('delete tags', async () => {
@@ -248,6 +321,31 @@ describe('Annotations storage', () => {
                     url,
                 })
                 expect(after.length).toBe(0)
+            })
+
+            test('delete annotation privacy level', async () => {
+                const { annotationStorage } = await setupTest()
+
+                const url = DATA.directLink.url
+                expect(
+                    await annotationStorage.findAnnotationPrivacyLevel({
+                        annotationId: url,
+                    }),
+                ).toEqual({
+                    annotationId: url,
+                    privacyLevel: 100,
+                    createdWhen: expect.any(Date),
+                })
+
+                await annotationStorage.deleteAnnotationPrivacyLevel({
+                    annotationId: url,
+                })
+
+                expect(
+                    await annotationStorage.findAnnotationPrivacyLevel({
+                        annotationId: url,
+                    }),
+                ).toEqual(null)
             })
         })
     })

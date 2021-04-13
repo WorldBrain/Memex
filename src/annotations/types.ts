@@ -33,6 +33,13 @@ export interface Annotation {
     isSocialPost?: boolean
 }
 
+export interface AnnotationPrivacyLevel {
+    annotationId: string
+    privacyLevel: AnnotationPrivacyLevels
+    createdWhen: Date
+    updatedWhen?: Date
+}
+
 export interface NewAnnotationOptions {
     anchor?: Anchor
     text: string
@@ -102,7 +109,7 @@ export type TextTruncator = (
 
 export type SelectionIndices = [number, number]
 
-export enum AnnotationPrivacyLevel {
+export enum AnnotationPrivacyLevels {
     PRIVATE = 0,
     PROTECTED = 100,
     SHARED = 200,
