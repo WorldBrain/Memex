@@ -26,6 +26,7 @@ import {
     Annotation,
     AnnotationSender,
     AnnotListEntry,
+    AnnotationPrivacyLevels,
 } from 'src/annotations/types'
 import { AnnotationInterface, CreateAnnotationParams } from './types'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
@@ -89,6 +90,9 @@ export default class DirectLinkingBackground {
             getAllAnnotationsByUrl: this.getAllAnnotationsByUrl.bind(this),
             listAnnotationsByPageUrl: this.listAnnotationsByPageUrl.bind(this),
             createAnnotation: this.createAnnotation.bind(this),
+            updateAnnotationPrivacyLevel: this.updateAnnotationPrivacyLevel.bind(
+                this,
+            ),
             editAnnotation: this.editAnnotation.bind(this),
             editAnnotationTags: this.editAnnotationTags.bind(this),
             updateAnnotationTags: this.updateAnnotationTags.bind(this),
@@ -427,6 +431,15 @@ export default class DirectLinkingBackground {
         }
 
         return annotationUrl
+    }
+
+    async updateAnnotationPrivacyLevel(
+        _,
+        params: { annotationId: string; privacyLevel: AnnotationPrivacyLevels },
+    ) {
+        await this.annotationStorage.createOrUpdateAnnotationPrivacyLevel(
+            params,
+        )
     }
 
     async insertAnnotToList(_, params: AnnotListEntry) {

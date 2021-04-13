@@ -289,7 +289,7 @@ export class AnnotationsSidebarContainer<
             <ShareMenuWrapper>
                 <HoverBox>
                     <SingleNoteShareMenu
-                        contentSharing={this.props.contentSharing}
+                        contentSharingBG={this.props.contentSharing}
                         copyLink={(link) =>
                             this.processEvent('copyNoteLink', { link })
                         }

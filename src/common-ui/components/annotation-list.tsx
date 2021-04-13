@@ -312,7 +312,7 @@ class AnnotationList extends Component<Props, State> {
             <div className={styles.hoverBoxWrapper}>
                 <HoverBox>
                     <SingleNoteShareMenu
-                        contentSharing={this.props.contentSharing}
+                        contentSharingBG={this.props.contentSharing}
                         copyLink={async (link) => {
                             analytics.trackEvent({
                                 category: 'ContentSharing',

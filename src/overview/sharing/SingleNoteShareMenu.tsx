@@ -2,21 +2,20 @@ import React from 'react'
 import { TaskState } from 'ui-logic-core/lib/types'
 import styled from 'styled-components'
 
+import { executeReactStateUITask } from 'src/util/ui-logic'
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
-import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { LoadingIndicator } from 'src/common-ui/components'
-import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { AnnotationInterface } from 'src/annotations/background/types'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import colors from 'src/dashboard-refactor/colors'
 import { runInBackground } from 'src/util/webextensionRPC'
+import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
 interface State {
-    // readyToRender: boolean
-    // hasAnnotationBeenShared?: boolean
-    unshareState: TaskState
+    shareState: TaskState
 }
 
 export interface Props {
@@ -25,106 +24,102 @@ export interface Props {
     closeShareMenu: React.MouseEventHandler
     postShareHook?: () => void
     postUnshareHook?: () => void
-    contentSharing?: ContentSharingInterface
+    annotationsBG?: AnnotationInterface<'caller'>
+    contentSharingBG?: ContentSharingInterface
 }
 
 export default class SingleNoteShareMenu extends React.PureComponent<
     Props,
     State
 > {
-    static defaultProps: Partial<Props> = { contentSharing: runInBackground() }
-
-    private contentSharingBG: ContentSharingInterface
-
-    constructor(props) {
-        super(props)
-        this.contentSharingBG = props.contentSharing
+    static defaultProps: Partial<Props> = {
+        contentSharingBG: runInBackground(),
+        annotationsBG: runInBackground(),
     }
 
     state: State = {
-        // readyToRender: false,
-        unshareState: 'pristine',
+        shareState: 'pristine',
     }
 
-    // async componentDidMount() {
-    // const metadataForAll = await this.contentSharingBG.getRemoteAnnotationMetadata(
-    //     { annotationUrls: [this.props.annotationUrl] },
-    // )
-    // const metadata = metadataForAll[this.props.annotationUrl]
-
-    // this.setState({
-    // hasAnnotationBeenShared: !!metadata,
-    // isSharedToLists: metadata?.excludeFromLists,
-    // readyToRender: true,
-    // })
-    // }
-
-    private getLink = async () => {
-        const { annotationUrl } = this.props
-        await this.contentSharingBG.shareAnnotation({ annotationUrl })
-        await this.contentSharingBG.shareAnnotationsToLists({
+    private shareAnnotation = async (): Promise<string> => {
+        const { annotationUrl, contentSharingBG } = this.props
+        await contentSharingBG.shareAnnotation({ annotationUrl })
+        await contentSharingBG.shareAnnotationsToLists({
             annotationUrls: [annotationUrl],
             queueInteraction: 'skip-queue',
         })
         this.props.postShareHook?.()
-        return this.contentSharingBG.getRemoteAnnotationLink({ annotationUrl })
+        return contentSharingBG.getRemoteAnnotationLink({ annotationUrl })
     }
 
-    // private handleSetAllShareStatus = async () => {
-    // const annotationUrls = [this.props.annotationUrl]
-
-    // if (this.state.shareStatusState === 'unchecked') {
-    //     this.setState({ shareStatusState: 'running' })
-    //     await this.contentSharingBG.shareAnnotationsToLists({
-    //         annotationUrls,
-    //     })
-    //     this.props.postShareHook?.()
-    //     this.setState({ shareStatusState: 'checked' })
-    // } else {
-    //     this.setState({ shareStatusState: 'running' })
-    //     await this.contentSharingBG.unshareAnnotationsFromLists({
-    //         annotationUrls,
-    //     })
-    //     this.props.postUnshareHook?.()
-    //     this.setState({ shareStatusState: 'unchecked' })
-    // }
-    // }
-
-    private handleUnshare: React.MouseEventHandler = async (e) => {
-        if (this.state.unshareState === 'running') {
-            return
-        }
-
-        this.setState({ unshareState: 'running' })
-        await this.contentSharingBG.unshareAnnotation({
-            annotationUrl: this.props.annotationUrl,
-        })
-        this.setState({ unshareState: 'success' })
+    private unshareAnnotation = async () => {
+        const { annotationUrl, contentSharingBG } = this.props
+        await contentSharingBG.unshareAnnotation({ annotationUrl })
         this.props.postUnshareHook?.()
-        this.props.closeShareMenu(e)
+    }
+
+    private handleSetShared: React.MouseEventHandler = async (e) => {
+        const { annotationUrl, annotationsBG } = this.props
+        await executeReactStateUITask<State, 'shareState'>(
+            this,
+            'shareState',
+            async () => {
+                await this.shareAnnotation()
+                await annotationsBG.updateAnnotationPrivacyLevel({
+                    annotationId: annotationUrl,
+                    privacyLevel: AnnotationPrivacyLevels.SHARED,
+                })
+            },
+        )
+    }
+
+    private handleSetProtected: React.MouseEventHandler = async (e) => {
+        const { annotationUrl, annotationsBG } = this.props
+        await executeReactStateUITask<State, 'shareState'>(
+            this,
+            'shareState',
+            async () => {
+                await this.unshareAnnotation()
+                await annotationsBG.updateAnnotationPrivacyLevel({
+                    annotationId: annotationUrl,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                })
+            },
+        )
+    }
+
+    private handleSetPrivate: React.MouseEventHandler = async (e) => {
+        const { annotationUrl, annotationsBG } = this.props
+        await executeReactStateUITask<State, 'shareState'>(
+            this,
+            'shareState',
+            async () => {
+                await this.unshareAnnotation()
+                await annotationsBG.updateAnnotationPrivacyLevel({
+                    annotationId: annotationUrl,
+                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                })
+            },
+        )
     }
 
     render() {
-        const { unshareState } = this.state
         return (
             <ShareAnnotationMenu
-                // shareAllState={this.state.shareStatusState}
-                getLink={this.getLink}
+                getLink={this.shareAnnotation}
                 onCopyLinkClick={this.props.copyLink}
                 onClickOutside={this.props.closeShareMenu}
                 linkTitleCopy="Link to this note"
-                // checkboxTitleCopy="Share Note"
-                // checkboxCopy="Share Note in all collections this page is in"
             >
                 <PrivacyContainer>
                     <PrivacyTitle>Set privacy for this note</PrivacyTitle>
                     <PrivacyOptionContainer top="5px">
-                        {this.state.unshareState === 'running' ? (
+                        {this.state.shareState === 'running' ? (
                             <LoadingIndicator />
                         ) : (
                             <>
                                 <PrivacyOptionItem
-                                    onClick={this.handleUnshare}
+                                    onClick={this.handleSetProtected}
                                     bottom="5px"
                                 >
                                     <Icon
@@ -133,15 +128,33 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                     />
                                     <PrivacyOptionBox>
                                         <PrivacyOptionTitle>
-                                            Private
+                                            Protected
                                         </PrivacyOptionTitle>
                                         <PrivacyOptionSubTitle>
-                                            Only locally available to you
+                                            Private & never shared
                                         </PrivacyOptionSubTitle>
                                     </PrivacyOptionBox>
                                 </PrivacyOptionItem>
                                 <PrivacyOptionItem
-                                    onClick={this.getLink}
+                                    onClick={this.handleSetPrivate}
+                                    bottom="10px"
+                                >
+                                    <Icon
+                                        heightAndWidth="22px"
+                                        path={icons.link}
+                                    />
+                                    <PrivacyOptionBox>
+                                        <PrivacyOptionTitle>
+                                            Private
+                                        </PrivacyOptionTitle>
+                                        <PrivacyOptionSubTitle>
+                                            Private to you, until shared (in
+                                            bulk)
+                                        </PrivacyOptionSubTitle>
+                                    </PrivacyOptionBox>
+                                </PrivacyOptionItem>
+                                <PrivacyOptionItem
+                                    onClick={this.handleSetShared}
                                     bottom="10px"
                                 >
                                     <Icon
@@ -153,8 +166,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                             Shared
                                         </PrivacyOptionTitle>
                                         <PrivacyOptionSubTitle>
-                                            Shared in collections this page is
-                                            in
+                                            Added to shared collections & page
+                                            links
                                         </PrivacyOptionSubTitle>
                                     </PrivacyOptionBox>
                                 </PrivacyOptionItem>
