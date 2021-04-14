@@ -1,6 +1,7 @@
 import React from 'react'
 import { TaskState } from 'ui-logic-core/lib/types'
 import styled from 'styled-components'
+import Mousetrap from 'mousetrap'
 
 import { executeReactStateUITask } from 'src/util/ui-logic'
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
@@ -37,8 +38,28 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         annotationsBG: runInBackground(),
     }
 
+    private getShortcutHandlerDict = () => ({
+        'mod+shift+enter': this.handleSetProtected,
+        'mod+alt+enter': this.handleSetShared,
+        'mod+enter': this.handleSetPrivate,
+    })
+
     state: State = {
         shareState: 'pristine',
+    }
+
+    componentDidMount() {
+        for (const [shortcut, handler] of Object.entries(
+            this.getShortcutHandlerDict(),
+        )) {
+            Mousetrap.bind(shortcut, handler)
+        }
+    }
+
+    componentWillUnmount() {
+        for (const shortcut of Object.keys(this.getShortcutHandlerDict())) {
+            Mousetrap.unbind(shortcut)
+        }
     }
 
     private shareAnnotation = async (): Promise<string> => {
