@@ -183,6 +183,11 @@ export default class AnnotationStorage extends StorageModule {
                 operation: 'findObject',
                 args: { annotation: '$annotation:pk' },
             },
+            findAnnotationPrivacyLevels: {
+                collection: AnnotationStorage.ANNOTS_PRIVACY_COLL,
+                operation: 'findObjects',
+                args: { annotation: { $in: '$annotations:pk' } },
+            },
             deleteAnnotationPrivacyLevel: {
                 collection: AnnotationStorage.ANNOTS_PRIVACY_COLL,
                 operation: 'deleteObjects',
@@ -222,6 +227,25 @@ export default class AnnotationStorage extends StorageModule {
         return this.operation('findAnnotationPrivacyLevel', {
             annotation: params.annotation,
         })
+    }
+
+    async getPrivacyLevelsByAnnotation(params: {
+        annotations: string[]
+    }): Promise<{ [annotationId: string]: AnnotationPrivacyLevel }> {
+        const privacyLevels: AnnotationPrivacyLevel[] = await this.operation(
+            'findAnnotationPrivacyLevels',
+            {
+                annotations: params.annotations,
+            },
+        )
+
+        return privacyLevels.reduce(
+            (acc, privacyLevel) => ({
+                ...acc,
+                [privacyLevel.annotation]: privacyLevel,
+            }),
+            {},
+        )
     }
 
     async deleteAnnotationPrivacyLevel(params: {

@@ -111,7 +111,7 @@ export type TextTruncator = (
 export type SelectionIndices = [number, number]
 
 export enum AnnotationPrivacyLevels {
-    PRIVATE = 0,
-    PROTECTED = 100,
+    PROTECTED = 0,
+    PRIVATE = 100,
     SHARED = 200,
 }

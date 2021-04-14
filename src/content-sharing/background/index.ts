@@ -23,7 +23,7 @@ import createResolvable, { Resolvable } from '@josephg/resolvable'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { Analytics } from 'src/analytics/types'
 import AnnotationStorage from 'src/annotations/background/storage'
-import { Annotation } from 'src/annotations/types'
+import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
 import { getNoteShareUrl } from 'src/content-sharing/utils'
 import {
     remoteEventEmitter,
@@ -350,8 +350,18 @@ export default class ContentSharingBackground {
         const allAnnotations = await this.options.annotationStorage.getAnnotations(
             options.annotationUrls,
         )
+
+        const annotPrivacyLevels = await this.options.annotationStorage.getPrivacyLevelsByAnnotation(
+            {
+                annotations: options.annotationUrls,
+            },
+        )
+
         const annotations = allAnnotations.filter(
-            (annotation) => !remoteIds[annotation.url],
+            (annotation) =>
+                !remoteIds[annotation.url] &&
+                annotPrivacyLevels[annotation.url]?.privacyLevel >
+                    AnnotationPrivacyLevels.PROTECTED,
         )
 
         const allPageUrls = new Set(
