@@ -127,9 +127,14 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                         path={icons.lock}
                                     />
                                     <PrivacyOptionBox>
-                                        <PrivacyOptionTitle>
-                                            Protected
-                                        </PrivacyOptionTitle>
+                                        <PrivacyOptionTitleBox>
+                                            <PrivacyOptionTitle>
+                                                Protected
+                                            </PrivacyOptionTitle>
+                                            <PrivacyOptionShortcut>
+                                                shift+cmd+enter
+                                            </PrivacyOptionShortcut>
+                                        </PrivacyOptionTitleBox>
                                         <PrivacyOptionSubTitle>
                                             Private & never shared
                                         </PrivacyOptionSubTitle>
@@ -144,9 +149,14 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                         path={icons.link}
                                     />
                                     <PrivacyOptionBox>
-                                        <PrivacyOptionTitle>
-                                            Private
-                                        </PrivacyOptionTitle>
+                                        <PrivacyOptionTitleBox>
+                                            <PrivacyOptionTitle>
+                                                Private
+                                            </PrivacyOptionTitle>
+                                            <PrivacyOptionShortcut>
+                                                cmd+enter
+                                            </PrivacyOptionShortcut>
+                                        </PrivacyOptionTitleBox>
                                         <PrivacyOptionSubTitle>
                                             Private to you, until shared (in
                                             bulk)
@@ -162,9 +172,14 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                         path={icons.shared}
                                     />
                                     <PrivacyOptionBox>
-                                        <PrivacyOptionTitle>
-                                            Shared
-                                        </PrivacyOptionTitle>
+                                        <PrivacyOptionTitleBox>
+                                            <PrivacyOptionTitle>
+                                                Shared
+                                            </PrivacyOptionTitle>
+                                            <PrivacyOptionShortcut>
+                                                option+cmd+enter
+                                            </PrivacyOptionShortcut>
+                                        </PrivacyOptionTitleBox>
                                         <PrivacyOptionSubTitle>
                                             Added to shared collections & page
                                             links
@@ -224,10 +239,23 @@ const PrivacyOptionBox = styled.div`
     padding-left: 10px;
 `
 
+const PrivacyOptionTitleBox = styled.div`
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: row;
+    height: 16px;
+`
+
 const PrivacyOptionTitle = styled.div`
     font-size: 13px;
     font-weight: bold;
-    height: 16px;
+`
+
+const PrivacyOptionShortcut = styled.div`
+    font-size: 9px;
+    font-weight: bold;
+    padding-left: 5px;
 `
 
 const PrivacyOptionSubTitle = styled.div`
