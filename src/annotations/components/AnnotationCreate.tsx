@@ -66,8 +66,8 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
     private handleCancel = () => this.props.onCancel()
-    private handleSave = async () => {
-        const saveP = this.props.onSave(this.state.savePrivacyLevel)
+    private handleSave = async (privacyLevel: AnnotationPrivacyLevels) => {
+        const saveP = this.props.onSave(privacyLevel)
 
         if (
             this.markdownPreviewRef?.current?.markdownPreviewRef.current?.state
@@ -92,9 +92,13 @@ export class AnnotationCreate extends React.Component<Props, State>
         // If we don't have this, events will bubble up into the page!
         e.stopPropagation()
 
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            this.handleSave()
-            return
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+            const privacyLevel = e.shiftKey
+                ? AnnotationPrivacyLevels.PROTECTED
+                : e.altKey
+                ? AnnotationPrivacyLevels.SHARED
+                : AnnotationPrivacyLevels.PRIVATE
+            return this.handleSave(privacyLevel)
         }
 
         if (e.key === 'Tab' && !e.shiftKey) {
@@ -131,7 +135,9 @@ export class AnnotationCreate extends React.Component<Props, State>
     private renderSaveBtn() {
         return (
             <SaveBtn>
-                <SaveBtnText onClick={this.handleSave}>
+                <SaveBtnText
+                    onClick={() => this.handleSave(this.state.savePrivacyLevel)}
+                >
                     <Icon
                         icon={
                             this.state.savePrivacyLevel ===
