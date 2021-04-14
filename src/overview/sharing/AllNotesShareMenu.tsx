@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import Mousetrap from 'mousetrap'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { executeReactStateUITask } from 'src/util/ui-logic'
@@ -39,6 +40,11 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
 
     private annotationUrls: string[]
 
+    private getShortcutHandlerDict = () => ({
+        'mod+alt+enter': this.handleSetShared,
+        'mod+enter': this.handleSetPrivate,
+    })
+
     state: State = {
         shareAllState: 'pristine',
         unshareAllState: 'pristine',
@@ -51,6 +57,18 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
             },
         )
         this.annotationUrls = annotations.map((a) => a.url)
+
+        for (const [shortcut, handler] of Object.entries(
+            this.getShortcutHandlerDict(),
+        )) {
+            Mousetrap.bind(shortcut, handler)
+        }
+    }
+
+    componentWillUnmount() {
+        for (const shortcut of Object.keys(this.getShortcutHandlerDict())) {
+            Mousetrap.unbind(shortcut)
+        }
     }
 
     private forAllAnnotations = (
@@ -148,9 +166,14 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                                         path={icons.lock}
                                     />
                                     <PrivacyOptionBox>
-                                        <PrivacyOptionTitle>
-                                            Private
-                                        </PrivacyOptionTitle>
+                                        <PrivacyOptionTitleBox>
+                                            <PrivacyOptionTitle>
+                                                Private
+                                            </PrivacyOptionTitle>
+                                            <PrivacyOptionShortcut>
+                                                cmd+enter
+                                            </PrivacyOptionShortcut>
+                                        </PrivacyOptionTitleBox>
                                         <PrivacyOptionSubTitle>
                                             Only locally available to you
                                         </PrivacyOptionSubTitle>
@@ -165,9 +188,15 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                                         path={icons.shared}
                                     />
                                     <PrivacyOptionBox>
-                                        <PrivacyOptionTitle>
-                                            Shared
-                                        </PrivacyOptionTitle>
+                                        <PrivacyOptionTitleBox>
+                                            <PrivacyOptionTitle>
+                                                Shared
+                                            </PrivacyOptionTitle>
+                                            <PrivacyOptionShortcut>
+                                                option+cmd+enter
+                                            </PrivacyOptionShortcut>
+                                        </PrivacyOptionTitleBox>
+
                                         <PrivacyOptionSubTitle>
                                             Shared in collections this page is
                                             in
@@ -227,10 +256,23 @@ const PrivacyOptionBox = styled.div`
     padding-left: 10px;
 `
 
+const PrivacyOptionTitleBox = styled.div`
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: row;
+    height: 16px;
+`
+
 const PrivacyOptionTitle = styled.div`
     font-size: 13px;
     font-weight: bold;
-    height: 16px;
+`
+
+const PrivacyOptionShortcut = styled.div`
+    font-size: 9px;
+    font-weight: bold;
+    padding-left: 5px;
 `
 
 const PrivacyOptionSubTitle = styled.div`
