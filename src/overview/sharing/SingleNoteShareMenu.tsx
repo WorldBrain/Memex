@@ -87,7 +87,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             async () => {
                 await this.shareAnnotation()
                 await annotationsBG.updateAnnotationPrivacyLevel({
-                    annotationId: annotationUrl,
+                    annotation: annotationUrl,
                     privacyLevel: AnnotationPrivacyLevels.SHARED,
                 })
             },
@@ -102,7 +102,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             async () => {
                 await this.unshareAnnotation()
                 await annotationsBG.updateAnnotationPrivacyLevel({
-                    annotationId: annotationUrl,
+                    annotation: annotationUrl,
                     privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                 })
             },
@@ -117,7 +117,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             async () => {
                 await this.unshareAnnotation()
                 await annotationsBG.updateAnnotationPrivacyLevel({
-                    annotationId: annotationUrl,
+                    annotation: annotationUrl,
                     privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                 })
             },

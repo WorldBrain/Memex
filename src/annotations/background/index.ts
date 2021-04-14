@@ -407,7 +407,7 @@ export default class DirectLinkingBackground {
 
         if (toCreate.privacyLevel != null) {
             await this.annotationStorage.createAnnotationPrivacyLevel({
-                annotationId: annotationUrl,
+                annotation: annotationUrl,
                 privacyLevel: toCreate.privacyLevel,
             })
         }
@@ -435,7 +435,7 @@ export default class DirectLinkingBackground {
 
     async updateAnnotationPrivacyLevel(
         _,
-        params: { annotationId: string; privacyLevel: AnnotationPrivacyLevels },
+        params: { annotation: string; privacyLevel: AnnotationPrivacyLevels },
     ) {
         await this.annotationStorage.createOrUpdateAnnotationPrivacyLevel(
             params,

@@ -37,7 +37,7 @@ async function insertTestData({
         } as any)
 
         await annotationStorage.createAnnotationPrivacyLevel({
-            annotationId: annot.url,
+            annotation: annot.url,
             privacyLevel: 100,
         })
     }
@@ -98,10 +98,10 @@ describe('Annotations storage', () => {
             const url = DATA.annotation.url
             expect(
                 await annotationStorage.findAnnotationPrivacyLevel({
-                    annotationId: url,
+                    annotation: url,
                 }),
             ).toEqual({
-                annotationId: url,
+                annotation: url,
                 privacyLevel: 100,
                 createdWhen: expect.any(Date),
             })
@@ -171,26 +171,26 @@ describe('Annotations storage', () => {
 
                 const url = DATA.annotation.url
                 const origPrivacyLevel = await annotationStorage.findAnnotationPrivacyLevel(
-                    { annotationId: url },
+                    { annotation: url },
                 )
                 expect(origPrivacyLevel).toEqual({
-                    annotationId: url,
+                    annotation: url,
                     privacyLevel: 100,
                     createdWhen: expect.any(Date),
                 })
                 const updatedWhen = new Date()
                 await annotationStorage.createOrUpdateAnnotationPrivacyLevel({
-                    annotationId: url,
+                    annotation: url,
                     privacyLevel: 0,
                     updatedWhen,
                 })
 
                 expect(
                     await annotationStorage.findAnnotationPrivacyLevel({
-                        annotationId: url,
+                        annotation: url,
                     }),
                 ).toEqual({
-                    annotationId: url,
+                    annotation: url,
                     privacyLevel: 0,
                     createdWhen: origPrivacyLevel.createdWhen,
                     updatedWhen,
@@ -223,10 +223,10 @@ describe('Annotations storage', () => {
                 const url = DATA.directLink.url
                 expect(
                     await annotationStorage.findAnnotationPrivacyLevel({
-                        annotationId: url,
+                        annotation: url,
                     }),
                 ).toEqual({
-                    annotationId: url,
+                    annotation: url,
                     privacyLevel: 100,
                     createdWhen: expect.any(Date),
                 })
@@ -234,7 +234,7 @@ describe('Annotations storage', () => {
                 await annotationStorage.deleteAnnotation(url)
                 expect(
                     await annotationStorage.findAnnotationPrivacyLevel({
-                        annotationId: url,
+                        annotation: url,
                     }),
                 ).toEqual(null)
             })
@@ -329,21 +329,21 @@ describe('Annotations storage', () => {
                 const url = DATA.directLink.url
                 expect(
                     await annotationStorage.findAnnotationPrivacyLevel({
-                        annotationId: url,
+                        annotation: url,
                     }),
                 ).toEqual({
-                    annotationId: url,
+                    annotation: url,
                     privacyLevel: 100,
                     createdWhen: expect.any(Date),
                 })
 
                 await annotationStorage.deleteAnnotationPrivacyLevel({
-                    annotationId: url,
+                    annotation: url,
                 })
 
                 expect(
                     await annotationStorage.findAnnotationPrivacyLevel({
-                        annotationId: url,
+                        annotation: url,
                     }),
                 ).toEqual(null)
             })

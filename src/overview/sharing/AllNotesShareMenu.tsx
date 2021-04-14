@@ -111,9 +111,9 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
             'shareAllState',
             async () => {
                 await this.shareAllAnnotations()
-                await this.forAllAnnotations((annotationId) =>
+                await this.forAllAnnotations((annotation) =>
                     annotationsBG.updateAnnotationPrivacyLevel({
-                        annotationId,
+                        annotation,
                         privacyLevel: AnnotationPrivacyLevels.SHARED,
                     }),
                 )
@@ -128,9 +128,9 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
             'unshareAllState',
             async () => {
                 await this.unshareAllAnnotations()
-                await this.forAllAnnotations((annotationId) =>
+                await this.forAllAnnotations((annotation) =>
                     annotationsBG.updateAnnotationPrivacyLevel({
-                        annotationId,
+                        annotation,
                         privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                     }),
                 )

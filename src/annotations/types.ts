@@ -35,7 +35,7 @@ export interface Annotation {
 }
 
 export interface AnnotationPrivacyLevel {
-    annotationId: string
+    annotation: string
     privacyLevel: AnnotationPrivacyLevels
     createdWhen: Date
     updatedWhen?: Date
