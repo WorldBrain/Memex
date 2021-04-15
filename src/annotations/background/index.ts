@@ -93,6 +93,9 @@ export default class DirectLinkingBackground {
             updateAnnotationPrivacyLevel: this.updateAnnotationPrivacyLevel.bind(
                 this,
             ),
+            updateAnnotationPrivacyLevels: this.updateAnnotationPrivacyLevels.bind(
+                this,
+            ),
             editAnnotation: this.editAnnotation.bind(this),
             editAnnotationTags: this.editAnnotationTags.bind(this),
             updateAnnotationTags: this.updateAnnotationTags.bind(this),
@@ -440,6 +443,24 @@ export default class DirectLinkingBackground {
         await this.annotationStorage.createOrUpdateAnnotationPrivacyLevel(
             params,
         )
+    }
+
+    async updateAnnotationPrivacyLevels(
+        _,
+        params: {
+            annotationPrivacyLevels: {
+                [annotation: string]: AnnotationPrivacyLevels
+            }
+        },
+    ) {
+        for (const [annotation, privacyLevel] of Object.entries(
+            params.annotationPrivacyLevels,
+        )) {
+            await this.annotationStorage.createOrUpdateAnnotationPrivacyLevel({
+                annotation,
+                privacyLevel,
+            })
+        }
     }
 
     async insertAnnotToList(_, params: AnnotListEntry) {

@@ -47,9 +47,16 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
         this.annotationUrls = annotations.map((a) => a.url)
     }
 
-    private forAllAnnotations = (
-        fn: (annotationUrl: string) => Promise<void>,
-    ) => Promise.all(this.annotationUrls.map(fn))
+    private createAnnotationPrivacyLevels = (
+        privacyLevel: AnnotationPrivacyLevels,
+    ) =>
+        this.annotationUrls.reduce(
+            (acc, annotation) => ({
+                ...acc,
+                [annotation]: privacyLevel,
+            }),
+            {},
+        )
 
     private getCreatedLink = async () => {
         const remotePageInfoId = await this.props.contentSharingBG.ensureRemotePageId(
@@ -71,45 +78,49 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
     }
 
     private unshareAllAnnotations = async () => {
-        await this.forAllAnnotations((annotationUrl) =>
-            this.props.contentSharingBG.unshareAnnotation({
-                annotationUrl,
-                queueInteraction: 'skip-queue',
-            }),
+        await Promise.all(
+            this.annotationUrls.map((annotationUrl) =>
+                this.props.contentSharingBG.unshareAnnotation({
+                    annotationUrl,
+                    queueInteraction: 'skip-queue',
+                }),
+            ),
         )
         this.props.postUnshareAllHook?.()
     }
 
     private handleSetShared: React.MouseEventHandler = async (e) => {
         const { annotationsBG } = this.props
+        const annotationPrivacyLevels = this.createAnnotationPrivacyLevels(
+            AnnotationPrivacyLevels.SHARED,
+        )
+
         await executeReactStateUITask<State, 'shareAllState'>(
             this,
             'shareAllState',
             async () => {
                 await this.shareAllAnnotations()
-                await this.forAllAnnotations((annotation) =>
-                    annotationsBG.updateAnnotationPrivacyLevel({
-                        annotation,
-                        privacyLevel: AnnotationPrivacyLevels.SHARED,
-                    }),
-                )
+                await annotationsBG.updateAnnotationPrivacyLevels({
+                    annotationPrivacyLevels,
+                })
             },
         )
     }
 
     private handleSetPrivate: React.MouseEventHandler = async (e) => {
         const { annotationsBG } = this.props
+        const annotationPrivacyLevels = this.createAnnotationPrivacyLevels(
+            AnnotationPrivacyLevels.PRIVATE,
+        )
+
         await executeReactStateUITask<State, 'unshareAllState'>(
             this,
             'unshareAllState',
             async () => {
                 await this.unshareAllAnnotations()
-                await this.forAllAnnotations((annotation) =>
-                    annotationsBG.updateAnnotationPrivacyLevel({
-                        annotation,
-                        privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                    }),
-                )
+                await annotationsBG.updateAnnotationPrivacyLevels({
+                    annotationPrivacyLevels,
+                })
             },
         )
     }
