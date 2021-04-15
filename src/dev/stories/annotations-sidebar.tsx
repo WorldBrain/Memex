@@ -98,7 +98,6 @@ async function createDependencies() {
             onEditConfirm: action('confirmEdit'),
             onEditCancel: action('cancelEdit'),
             onShareClick: action('share'),
-            onUnshareClick: action('unshare'),
             onDeleteIconClick: action('clickDeleteIcon'),
             onEditIconClick: action('clickEditIcon'),
             toggleBookmark: action('toggleBookmark'),

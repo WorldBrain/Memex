@@ -544,22 +544,6 @@ describe('SidebarContainerLogic', () => {
     })
 
     describe('sharing', () => {
-        it('should be able to set active annotation share menu', async ({
-            device,
-        }) => {
-            const { sidebar } = await setupLogicHelper({ device })
-            const id1 = 'test1'
-            const id2 = 'test2'
-
-            expect(sidebar.state.activeShareMenuNoteId).toBeUndefined()
-            sidebar.processEvent('setShareMenuNoteId', { id: id1 })
-            expect(sidebar.state.activeShareMenuNoteId).toEqual(id1)
-            sidebar.processEvent('setShareMenuNoteId', { id: id2 })
-            expect(sidebar.state.activeShareMenuNoteId).toEqual(id2)
-            sidebar.processEvent('resetShareMenuNoteId', null)
-            expect(sidebar.state.activeShareMenuNoteId).toBeUndefined()
-        })
-
         it('should be able to update annotation sharing info', async ({
             device,
         }) => {
@@ -657,6 +641,7 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('shareAnnotation', {
                 context: 'pageAnnotations',
                 annotationUrl,
+                mouseEvent: {} as any,
             })
             expect(sidebar.state.activeShareMenuNoteId).toEqual(annotationUrl)
 
@@ -686,6 +671,60 @@ describe('SidebarContainerLogic', () => {
                     }),
                 }),
             ])
+        })
+
+        it('should not immediately share annotation on click unless shortcut keys held', async ({
+            device,
+        }) => {
+            const { directLinking } = device.backgroundModules
+
+            const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
+            const annotationUrl = await directLinking.createAnnotation(
+                {} as any,
+                {
+                    pageUrl,
+                    title: 'Page title',
+                    body: 'Annot body',
+                    comment: 'Annot comment',
+                    selector: {
+                        descriptor: {
+                            content: [{ foo: 5 }],
+                            strategy: 'eedwdwq',
+                        },
+                        quote: 'dawadawd',
+                    },
+                },
+                { skipPageIndexing: true },
+            )
+
+            const { sidebar } = await setupLogicHelper({ device, pageUrl })
+            await sidebar.processEvent('receiveSharingAccessChange', {
+                sharingAccess: 'sharing-allowed',
+            })
+
+            // Triggers share menu opening
+            await sidebar.processEvent('shareAnnotation', {
+                context: 'pageAnnotations',
+                annotationUrl,
+                mouseEvent: {} as any,
+            })
+            expect(sidebar.state.activeShareMenuNoteId).toEqual(annotationUrl)
+            expect(sidebar.state.immediatelyShareNotes).toEqual(false)
+
+            await sidebar.processEvent('resetShareMenuNoteId', null)
+            expect(sidebar.state.activeShareMenuNoteId).toEqual(undefined)
+
+            await sidebar.processEvent('shareAnnotation', {
+                context: 'pageAnnotations',
+                annotationUrl,
+                mouseEvent: { metaKey: true, altKey: true } as any,
+            })
+            expect(sidebar.state.activeShareMenuNoteId).toEqual(annotationUrl)
+            expect(sidebar.state.immediatelyShareNotes).toEqual(true)
+
+            await sidebar.processEvent('resetShareMenuNoteId', null)
+            expect(sidebar.state.activeShareMenuNoteId).toEqual(undefined)
+            expect(sidebar.state.immediatelyShareNotes).toEqual(false)
         })
 
         it('should detect shared annotations on initialization', async ({

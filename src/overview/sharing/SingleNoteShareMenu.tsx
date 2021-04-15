@@ -101,7 +101,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     }
 
     render() {
-        console.log('imm share:', this.props.shareImmediately)
         return (
             <ShareAnnotationMenu
                 getLink={this.shareAnnotation}

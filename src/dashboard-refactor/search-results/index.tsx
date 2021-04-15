@@ -211,7 +211,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     onEditConfirm: interactionProps.onEditConfirm,
                     onEditIconClick: interactionProps.onEditBtnClick,
                     onShareClick: interactionProps.onShareBtnClick,
-                    onUnshareClick: interactionProps.onShareBtnClick,
                 }}
             />
         )

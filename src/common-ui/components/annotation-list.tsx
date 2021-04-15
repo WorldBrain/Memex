@@ -410,7 +410,6 @@ class AnnotationList extends Component<Props, State> {
                         }),
                     onTagIconClick: this.handleTagPickerClick(annot.url),
                     onShareClick: this.handleShareClick(annot.url),
-                    onUnshareClick: this.handleShareClick(annot.url),
                     onGoToAnnotation: this.handleGoToAnnotation(annot),
                     onCopyPasterBtnClick:
                         this.props.setActiveCopyPasterAnnotationId != null

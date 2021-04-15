@@ -93,6 +93,7 @@ export interface SidebarContainerState {
 
     showAllNotesShareMenu: boolean
     activeShareMenuNoteId: string | undefined
+    immediatelyShareNotes: boolean
 }
 
 export type SidebarContainerEvents = UIEvent<{
@@ -148,10 +149,7 @@ export type SidebarContainerEvents = UIEvent<{
     shareAnnotation: {
         context: AnnotationEventContext
         annotationUrl: string
-    }
-    unshareAnnotation: {
-        context: AnnotationEventContext
-        annotationUrl: string
+        mouseEvent: React.MouseEvent
     }
     switchAnnotationMode: {
         context: AnnotationEventContext
@@ -189,7 +187,6 @@ export type SidebarContainerEvents = UIEvent<{
     resetCopyPasterAnnotationId: null
 
     setAllNotesShareMenuShown: { shown: boolean }
-    setShareMenuNoteId: { id: string }
     resetShareMenuNoteId: null
 }>
 export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
@@ -287,6 +284,7 @@ export class SidebarContainerLogic extends UILogic<
             showBetaFeatureNotifModal: false,
             showAllNotesShareMenu: false,
             activeShareMenuNoteId: undefined,
+            immediatelyShareNotes: false,
         }
     }
 
@@ -426,19 +424,10 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     resetShareMenuNoteId: EventHandler<'resetShareMenuNoteId'> = ({}) => {
-        this.emitMutation({ activeShareMenuNoteId: { $set: undefined } })
-    }
-
-    setShareMenuNoteId: EventHandler<'setShareMenuNoteId'> = ({
-        event,
-        previousState,
-    }) => {
-        const newId =
-            previousState.activeShareMenuNoteId === event.id
-                ? undefined
-                : event.id
-
-        this.emitMutation({ activeShareMenuNoteId: { $set: newId } })
+        this.emitMutation({
+            activeShareMenuNoteId: { $set: undefined },
+            immediatelyShareNotes: { $set: false },
+        })
     }
 
     setAllNotesShareMenuShown: EventHandler<'setAllNotesShareMenuShown'> = ({
@@ -797,24 +786,14 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
+        const immediateShare =
+            event.mouseEvent.metaKey && event.mouseEvent.altKey
+
         this.emitMutation({
             activeShareMenuNoteId: { $set: event.annotationUrl },
+            immediatelyShareNotes: { $set: !!immediateShare },
         })
         await this.setLastSharedAnnotationTimestamp()
-    }
-
-    unshareAnnotation: EventHandler<'unshareAnnotation'> = async ({
-        event,
-        previousState,
-    }) => {
-        if (previousState.annotationSharingAccess === 'feature-disabled') {
-            this.options.showBetaFeatureNotifModal?.()
-            return
-        }
-
-        this.emitMutation({
-            activeShareMenuNoteId: { $set: event.annotationUrl },
-        })
     }
 
     setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({

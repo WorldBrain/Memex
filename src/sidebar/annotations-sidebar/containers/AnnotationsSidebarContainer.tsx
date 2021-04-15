@@ -139,15 +139,11 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
-            onShareClick: (e) =>
+            onShareClick: (mouseEvent) =>
                 this.processEvent('shareAnnotation', {
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
-                }),
-            onUnshareClick: (e) =>
-                this.processEvent('unshareAnnotation', {
-                    annotationUrl: annotation.url,
-                    ...DEF_CONTEXT,
+                    mouseEvent,
                 }),
             onGoToAnnotation:
                 this.props.showGoToAnnotationBtn && annotation.body?.length > 0
@@ -289,6 +285,7 @@ export class AnnotationsSidebarContainer<
             <ShareMenuWrapper>
                 <HoverBox>
                     <SingleNoteShareMenu
+                        shareImmediately={this.state.immediatelyShareNotes}
                         contentSharingBG={this.props.contentSharing}
                         annotationsBG={this.props.annotations}
                         copyLink={(link) =>
