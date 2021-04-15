@@ -1,28 +1,38 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
+import Mousetrap from 'mousetrap'
 import { TaskState } from 'ui-logic-core/lib/types'
+
 import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
 import { LoadingIndicator } from 'src/common-ui/components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { ClickAway } from 'src/util/click-away-wrapper'
+import Margin from 'src/dashboard-refactor/components/Margin'
+import colors from 'src/dashboard-refactor/colors'
+import { Icon } from 'src/dashboard-refactor/styled-components'
 
 const COPY_TIMEOUT = 2000
 
+export interface ShorcutHandlerDict {
+    [shortcut: string]: React.MouseEventHandler | (() => Promise<void>)
+}
+
+export interface PrivacyOption {
+    title: string
+    shortcut: string
+    description: string
+    icon: string
+    onClick: React.MouseEventHandler
+}
+
 export interface Props {
-    children: React.ReactNode
-    // shareAllState: TaskState
-    // unshareAllState: TaskState
-    // checkboxCopy: React.ReactNode
+    privacyOptionsTitleCopy: React.ReactNode
+    privacyOptionsLoading: boolean
+    privacyOptions: PrivacyOption[]
+    shortcutHandlerDict?: ShorcutHandlerDict
     linkTitleCopy?: React.ReactNode
-    linkSubtitleCopy?: React.ReactNode
-    // checkboxTitleCopy?: React.ReactNode
-    // checkboxSubtitleCopy?: React.ReactNode
     getLink: () => Promise<string>
     onClickOutside?: React.MouseEventHandler
-    /** This logic should include handling derendering this share menu view. */
-    // onUnshareClick?: () => Promise<void>
-    // onShareAllClick: () => Promise<void>
-    // onUnshareAllClick: () => Promise<void>
     onCopyLinkClick: (createdLink: string) => Promise<void>
 }
 
@@ -51,32 +61,29 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         } catch (e) {
             this.setState({ loadState: 'error' })
         }
+
+        if (this.props.shortcutHandlerDict) {
+            for (const [shortcut, handler] of Object.entries(
+                this.props.shortcutHandlerDict,
+            )) {
+                Mousetrap.bind(shortcut, handler)
+            }
+        }
     }
 
     componentWillUnmount() {
         if (this.copyTimeout) {
             clearTimeout(this.copyTimeout)
         }
+
+        if (this.props.shortcutHandlerDict) {
+            for (const shortcut of Object.keys(
+                this.props.shortcutHandlerDict,
+            )) {
+                Mousetrap.unbind(shortcut)
+            }
+        }
     }
-
-    // private renderShortcutTip({ modifier }: { modifier: 'Shift' | 'Alt' }) {
-    //     return (
-    //         <ShortcutTip>
-    //             <TypographyTextSmall css="font-weight: 'bold'; margin-right: '10px'">
-    //                 <strong>Tip:</strong>
-    //                 {'\xa0'}
-    //             </TypographyTextSmall>
-    //             <TypographyTextSmall>{modifier} + click </TypographyTextSmall>
-    //             <TipShareIcon src={icons.shareWhite} />
-    //         </ShortcutTip>
-    //     )
-    // }
-
-    // private handleUnshareClick = async () => {
-    //     if (this.props.unshareAllState === 'pristine') {
-    //         await this.props.onUnshareClick()
-    //     }
-    // }
 
     private handleLinkClick = async () => {
         if (this.state.copyState === 'pristine') {
@@ -94,41 +101,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
             }
         }
     }
-
-    // private renderUnshareIcon() {
-    //     if (!this.props.onUnshareClick) {
-    //         return null
-    //     }
-
-    //     if (this.props.unshareAllState === 'running') {
-    //         return <LoadingIndicator />
-    //     }
-
-    //     return (
-    //         <RemoveIcon src={icons.trash} onClick={this.handleUnshareClick} />
-    //     )
-    // }
-
-    // private renderShareAllContent() {
-    //     const { shareAllState: shareAllBtn } = this.props
-
-    //     return (
-    //         <>
-    //             <CheckBoxBox>
-    //                 {shareAllBtn === 'pristine' || shareAllBtn === 'running' ? (
-    //                     <LoadingIndicator />
-    //                 ) : (
-    //                     <Checkbox>
-    //                         <CheckboxInner
-    //                             isChecked={shareAllBtn === 'checked'}
-    //                         />
-    //                     </Checkbox>
-    //                 )}
-    //             </CheckBoxBox>
-    //             <ShareAllText>{this.props.checkboxCopy}</ShareAllText>
-    //         </>
-    //     )
-    // }
 
     private renderLinkContent() {
         const { loadState, copyState } = this.state
@@ -151,21 +123,27 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         }
     }
 
+    private renderPrivacyOption = (opt: PrivacyOption, key: number) => (
+        <PrivacyOptionItem key={key} onClick={opt.onClick} bottom="10px">
+            <Icon heightAndWidth="22px" path={opt.icon} />
+            <PrivacyOptionBox>
+                <PrivacyOptionTitleBox>
+                    <PrivacyOptionTitle>{opt.title}</PrivacyOptionTitle>
+                    <PrivacyOptionShortcut>
+                        {opt.shortcut}
+                    </PrivacyOptionShortcut>
+                </PrivacyOptionTitleBox>
+                <PrivacyOptionSubTitle>{opt.description}</PrivacyOptionSubTitle>
+            </PrivacyOptionBox>
+        </PrivacyOptionItem>
+    )
+
     render() {
         return (
             <ClickAway onClickAway={this.props.onClickOutside}>
                 <Menu>
                     <TopArea>
                         <SectionTitle>{this.props.linkTitleCopy}</SectionTitle>
-                        <SectionDescription>
-                            {this.props.linkSubtitleCopy}
-                        </SectionDescription>
-                        {/*<ShareAllBox
-                            // tooltipText={this.renderShortcutTip({
-                            //     modifier: 'Alt',
-                            // })}
-                            position="bottom"
-                        >*/}
                         <LinkCopierBox>
                             <LinkCopier
                                 state={this.state.loadState}
@@ -173,25 +151,22 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                             >
                                 {this.renderLinkContent()}
                             </LinkCopier>
-                            {/* {this.renderUnshareIcon()} */}
                         </LinkCopierBox>
-                        {/*</ShareAllBox>*/}
                     </TopArea>
-                    {this.props.children}
-                    {/* <SectionTitle>{this.props.checkboxTitleCopy}</SectionTitle>
-                    <SectionDescription>
-                        {this.props.checkboxSubtitleCopy}
-                    </SectionDescription>
-                    <ShareAllBox
-                        tooltipText={this.renderShortcutTip({
-                            modifier: 'Shift',
-                        })}
-                        position="bottom"
-                    >
-                        <ShareAllBtn onClick={this.props.onShareAllClick}>
-                            {this.renderShareAllContent()}
-                        </ShareAllBtn>
-                    </ShareAllBox> */}
+                    <PrivacyContainer>
+                        <PrivacyTitle>
+                            {this.props.privacyOptionsTitleCopy}
+                        </PrivacyTitle>
+                        <PrivacyOptionContainer top="5px">
+                            {this.props.privacyOptionsLoading ? (
+                                <LoadingIndicator />
+                            ) : (
+                                this.props.privacyOptions.map(
+                                    this.renderPrivacyOption,
+                                )
+                            )}
+                        </PrivacyOptionContainer>
+                    </PrivacyContainer>
                 </Menu>
             </ClickAway>
         )
@@ -214,12 +189,6 @@ const SectionTitle = styled.div`
     font-weight: bold;
     font-size: 14px;
     color: #3a2f45;
-`
-
-const SectionDescription = styled.div`
-    font-size: 12px;
-    color: #3a2f45;
-    padding-bottom: 5px;
 `
 
 const LinkCopierBox = styled.div`
@@ -263,75 +232,70 @@ const LinkCopier = styled.button`
         white-space: nowrap;
     }
 `
-const LinkText = styled.span`
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 90%;
-    font-size: 8px;
-    color: black;
+
+const PrivacyContainer = styled.div`
+    width: 100%;
+
+    & * {
+        color: ${(props) => props.theme.colors.primary};
+    }
 `
 
-const ShareAllBtn = styled.button`
-    width: 100%
+const PrivacyTitle = styled.div`
+    font-size: 14px;
+    font-weight: bold;
+    padding: 0px 15px;
+`
+
+const PrivacyOptionContainer = styled(Margin)`
+    min-height: 100px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+`
+
+const PrivacyOptionItem = styled(Margin)`
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    border: 0;
-    border-radius: 3px;
-    height: 34px;
-    padding: 0 10px;
-    outline: none;
-    background: none;
+    flex-direction: row;
     cursor: pointer;
+    padding: 2px 20px;
+    width: fill-available;
 
     &:hover {
-        background-color: #e0e0e0;
+        background-color: ${colors.onHover};
     }
 `
 
-const CheckBoxBox = styled.div`
-    width: 34px;
-    height: 34px;
-    align-items: center;
+const PrivacyOptionBox = styled.div`
     display: flex;
+    align-items: flex-start;
     justify-content: center;
+    flex-direction: column;
+    padding-left: 10px;
 `
 
-const Checkbox = styled.div`
-    border: 1px solid red;
-    width: 14px;
-    height: 14px;
-    outline: none;
-`
-const CheckboxInner = styled.div`
-    border: 1px solid black;
-    width: 14px;
-    height: 14px;
-    outline: none;
-`
-
-const ShareAllText = styled(TypographyTextNormal)`
-    margin-left: 10px;
-`
-
-const TipShareIcon = styled.img`
-    height: 15px;
-    width: auto;
-    margin-left: 5px;
-`
-const ShortcutTip = styled.div`
+const PrivacyOptionTitleBox = styled.div`
     display: flex;
-    align-items: center;
-    width: 100%;
+    align-items: flex-start;
     justify-content: center;
-    font-size: 8px;
+    flex-direction: row;
+    height: 16px;
+`
 
-    & span {
-        color: #fff;
-    }
+const PrivacyOptionTitle = styled.div`
+    font-size: 13px;
+    font-weight: bold;
+`
 
-    & div {
-        color: #fff;
-    }
+const PrivacyOptionShortcut = styled.div`
+    font-size: 9px;
+    font-weight: bold;
+    padding-left: 5px;
+`
+
+const PrivacyOptionSubTitle = styled.div`
+    font-size: 12px;
 `
