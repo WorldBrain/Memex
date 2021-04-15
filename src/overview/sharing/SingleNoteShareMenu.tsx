@@ -5,7 +5,6 @@ import { executeReactStateUITask } from 'src/util/ui-logic'
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
-import * as icons from 'src/common-ui/components/design-library/icons'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
@@ -114,21 +113,21 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         title: 'Protected',
                         shortcut: 'shift+cmd+enter',
                         description: 'Private & never shared',
-                        icon: icons.lock,
+                        icon: 'lock',
                         onClick: this.handleSetProtected,
                     },
                     {
                         title: 'Private',
                         shortcut: 'cmd+enter',
                         description: 'Private to you, until shared (in bulk)',
-                        icon: icons.link,
+                        icon: 'person',
                         onClick: this.handleSetPrivate,
                     },
                     {
                         title: 'Shared',
                         shortcut: 'option+cmd+enter',
                         description: 'Added to shared collections & page links',
-                        icon: icons.shared,
+                        icon: 'shared',
                         onClick: this.handleSetShared,
                     },
                 ]}

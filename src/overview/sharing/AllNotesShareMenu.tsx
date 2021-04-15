@@ -4,7 +4,6 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { executeReactStateUITask } from 'src/util/ui-logic'
 import { getPageShareUrl } from 'src/content-sharing/utils'
-import * as icons from 'src/common-ui/components/design-library/icons'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import { runInBackground } from 'src/util/webextensionRPC'
@@ -142,14 +141,14 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                         title: 'Private',
                         shortcut: 'cmd+enter',
                         description: 'Only locally available to you',
-                        icon: icons.link,
+                        icon: 'person',
                         onClick: this.handleSetPrivate,
                     },
                     {
                         title: 'Shared',
                         shortcut: 'option+cmd+enter',
                         description: 'Shared in collections this page is in',
-                        icon: icons.shared,
+                        icon: 'shared',
                         onClick: this.handleSetShared,
                     },
                 ]}

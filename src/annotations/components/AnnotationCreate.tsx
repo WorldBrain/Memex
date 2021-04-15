@@ -10,9 +10,11 @@ import { insertTab, uninsertTab } from 'src/common-ui/utils'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import { AnnotationPrivacyLevels } from '../types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import SharePrivacyOption from 'src/overview/sharing/components/SharePrivacyOption'
 
 interface State {
     isTagPickerShown: boolean
+    isPrivacyLevelShown: boolean
     savePrivacyLevel: AnnotationPrivacyLevels
 }
 
@@ -43,6 +45,7 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     state: State = {
         isTagPickerShown: false,
+        isPrivacyLevelShown: false,
         savePrivacyLevel: AnnotationPrivacyLevels.PRIVATE,
     }
 
@@ -112,6 +115,14 @@ export class AnnotationCreate extends React.Component<Props, State>
         }
     }
 
+    private setSavePrivacyLevel = (
+        savePrivacyLevel: AnnotationPrivacyLevels,
+    ) => () =>
+        this.setState({
+            isPrivacyLevelShown: false,
+            savePrivacyLevel,
+        })
+
     private renderTagPicker() {
         return (
             <TagInput
@@ -155,31 +166,41 @@ export class AnnotationCreate extends React.Component<Props, State>
                 <SaveBtnArrow>
                     <DropdownMenuBtn
                         btnChildren={<Icon icon="triangle" height="10px" />}
-                        menuItems={[
-                            {
-                                id: AnnotationPrivacyLevels.PROTECTED,
-                                name: 'Protected',
-                                info:
-                                    'Sharing status will not change in bulk actions',
-                            },
-                            {
-                                id: AnnotationPrivacyLevels.PRIVATE,
-                                name: 'Private',
-                                info: 'Private to you, until shared',
-                            },
-                            {
-                                id: AnnotationPrivacyLevels.SHARED,
-                                name: 'Shared',
-                                info:
-                                    'Added to shared collections & page links',
-                            },
-                        ]}
-                        onMenuItemClick={(props) =>
-                            this.setState({
-                                savePrivacyLevel: props.id as AnnotationPrivacyLevels,
-                            })
+                        isOpen={this.state.isPrivacyLevelShown}
+                        toggleOpen={() =>
+                            this.setState((state) => ({
+                                isPrivacyLevelShown: !state.isPrivacyLevelShown,
+                            }))
                         }
-                    />
+                    >
+                        <SharePrivacyOption
+                            title="Protected"
+                            shortcut="shift+cmd+enter"
+                            description="Sharing status will not change in bulk actions"
+                            icon="lock"
+                            onClick={this.setSavePrivacyLevel(
+                                AnnotationPrivacyLevels.PROTECTED,
+                            )}
+                        />
+                        <SharePrivacyOption
+                            title="Private"
+                            shortcut="cmd+enter"
+                            description="Private to you, until shared (in bulk)"
+                            icon="person"
+                            onClick={this.setSavePrivacyLevel(
+                                AnnotationPrivacyLevels.PRIVATE,
+                            )}
+                        />
+                        <SharePrivacyOption
+                            title="Shared"
+                            shortcut="option+cmd+enter"
+                            description="Added to shared collections & page links"
+                            icon="shared"
+                            onClick={this.setSavePrivacyLevel(
+                                AnnotationPrivacyLevels.SHARED,
+                            )}
+                        />
+                    </DropdownMenuBtn>
                 </SaveBtnArrow>
             </SaveBtn>
         )

@@ -3,13 +3,14 @@ import styled from 'styled-components'
 import Mousetrap from 'mousetrap'
 import { TaskState } from 'ui-logic-core/lib/types'
 
+import SharePrivacyOption, {
+    Props as PrivacyOptionProps,
+} from './SharePrivacyOption'
 import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
 import { LoadingIndicator } from 'src/common-ui/components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import colors from 'src/dashboard-refactor/colors'
-import { Icon } from 'src/dashboard-refactor/styled-components'
 
 const COPY_TIMEOUT = 2000
 
@@ -17,18 +18,10 @@ export interface ShorcutHandlerDict {
     [shortcut: string]: React.MouseEventHandler | (() => Promise<void>)
 }
 
-export interface PrivacyOption {
-    title: string
-    shortcut: string
-    description: string
-    icon: string
-    onClick: React.MouseEventHandler
-}
-
 export interface Props {
     privacyOptionsTitleCopy: React.ReactNode
     privacyOptionsLoading: boolean
-    privacyOptions: PrivacyOption[]
+    privacyOptions: PrivacyOptionProps[]
     shortcutHandlerDict?: ShorcutHandlerDict
     linkTitleCopy?: React.ReactNode
     getLink: () => Promise<string>
@@ -123,21 +116,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         }
     }
 
-    private renderPrivacyOption = (opt: PrivacyOption, key: number) => (
-        <PrivacyOptionItem key={key} onClick={opt.onClick} bottom="10px">
-            <Icon heightAndWidth="22px" path={opt.icon} />
-            <PrivacyOptionBox>
-                <PrivacyOptionTitleBox>
-                    <PrivacyOptionTitle>{opt.title}</PrivacyOptionTitle>
-                    <PrivacyOptionShortcut>
-                        {opt.shortcut}
-                    </PrivacyOptionShortcut>
-                </PrivacyOptionTitleBox>
-                <PrivacyOptionSubTitle>{opt.description}</PrivacyOptionSubTitle>
-            </PrivacyOptionBox>
-        </PrivacyOptionItem>
-    )
-
     render() {
         return (
             <ClickAway onClickAway={this.props.onClickOutside}>
@@ -161,9 +139,9 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                             {this.props.privacyOptionsLoading ? (
                                 <LoadingIndicator />
                             ) : (
-                                this.props.privacyOptions.map(
-                                    this.renderPrivacyOption,
-                                )
+                                this.props.privacyOptions.map((props, i) => (
+                                    <SharePrivacyOption key={i} {...props} />
+                                ))
                             )}
                         </PrivacyOptionContainer>
                     </PrivacyContainer>
@@ -253,49 +231,4 @@ const PrivacyOptionContainer = styled(Margin)`
     justify-content: center;
     flex-direction: column;
     align-items: center;
-`
-
-const PrivacyOptionItem = styled(Margin)`
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    flex-direction: row;
-    cursor: pointer;
-    padding: 2px 20px;
-    width: fill-available;
-
-    &:hover {
-        background-color: ${colors.onHover};
-    }
-`
-
-const PrivacyOptionBox = styled.div`
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    flex-direction: column;
-    padding-left: 10px;
-`
-
-const PrivacyOptionTitleBox = styled.div`
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    flex-direction: row;
-    height: 16px;
-`
-
-const PrivacyOptionTitle = styled.div`
-    font-size: 13px;
-    font-weight: bold;
-`
-
-const PrivacyOptionShortcut = styled.div`
-    font-size: 9px;
-    font-weight: bold;
-    padding-left: 5px;
-`
-
-const PrivacyOptionSubTitle = styled.div`
-    font-size: 12px;
 `
