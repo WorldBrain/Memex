@@ -360,8 +360,9 @@ export default class ContentSharingBackground {
         const annotations = allAnnotations.filter(
             (annotation) =>
                 !remoteIds[annotation.url] &&
-                annotPrivacyLevels[annotation.url]?.privacyLevel >
-                    AnnotationPrivacyLevels.PROTECTED,
+                (!annotPrivacyLevels[annotation.url] ||
+                    annotPrivacyLevels[annotation.url]?.privacyLevel >
+                        AnnotationPrivacyLevels.PROTECTED),
         )
 
         const allPageUrls = new Set(
