@@ -161,9 +161,13 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     )
                 }
                 renderShareMenuForAnnotation={() =>
-                    noteData.isShareMenuShown && (
+                    noteData.shareMenuShowStatus !== 'hide' && (
                         <HoverBox right="0" withRelativeContainer>
                             <SingleNoteShareMenu
+                                shareImmediately={
+                                    noteData.shareMenuShowStatus ===
+                                    'show-n-share'
+                                }
                                 annotationUrl={noteId}
                                 copyLink={this.props.onNoteLinkCopy}
                                 closeShareMenu={

@@ -1604,19 +1604,20 @@ describe('Dashboard search results logic', () => {
                 expect(searchResults.state.modals.showBetaFeature).toBeFalsy()
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
-                        .isShareMenuShown,
-                ).toEqual(false)
+                        .shareMenuShowStatus,
+                ).toEqual('hide')
 
                 await searchResults.processEvent('setNoteShareMenuShown', {
                     noteId,
-                    isShown: true,
+                    shouldShow: true,
+                    mouseEvent: {} as any,
                 })
 
                 expect(searchResults.state.modals.showBetaFeature).toEqual(true)
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
-                        .isShareMenuShown,
-                ).toEqual(false)
+                        .shareMenuShowStatus,
+                ).toEqual('hide')
             })
 
             it('should be able to show and hide note share menu', async ({
@@ -1635,28 +1636,61 @@ describe('Dashboard search results logic', () => {
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
-                        .isShareMenuShown,
-                ).toEqual(false)
+                        .shareMenuShowStatus,
+                ).toEqual('hide')
 
                 await searchResults.processEvent('setNoteShareMenuShown', {
                     noteId,
-                    isShown: true,
+                    shouldShow: true,
+                    mouseEvent: {} as any,
                 })
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
-                        .isShareMenuShown,
-                ).toEqual(true)
+                        .shareMenuShowStatus,
+                ).toEqual('show')
 
                 await searchResults.processEvent('setNoteShareMenuShown', {
                     noteId,
-                    isShown: false,
+                    shouldShow: false,
+                    mouseEvent: {} as any,
                 })
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
-                        .isShareMenuShown,
-                ).toEqual(false)
+                        .shareMenuShowStatus,
+                ).toEqual('hide')
+            })
+
+            it('should be able to click note share holding meta + alt to share immediately', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                const noteId = DATA.NOTE_2.url
+
+                await searchResults.processMutation({
+                    searchResults: {
+                        sharingAccess: { $set: 'sharing-allowed' },
+                    },
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .shareMenuShowStatus,
+                ).toEqual('hide')
+
+                await searchResults.processEvent('setNoteShareMenuShown', {
+                    noteId,
+                    shouldShow: true,
+                    mouseEvent: { altKey: true, metaKey: true } as any,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .shareMenuShowStatus,
+                ).toEqual('show-n-share')
             })
 
             it('should be update note share info', async ({ device }) => {

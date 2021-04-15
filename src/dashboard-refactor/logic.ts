@@ -1487,7 +1487,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        if (event.isShown) {
+        if (event.shouldShow) {
             if (
                 previousState.searchResults.sharingAccess === 'feature-disabled'
             ) {
@@ -1500,13 +1500,20 @@ export class DashboardLogic extends UILogic<State, Events> {
             await this.showShareOnboardingIfNeeded()
         }
 
+        const immediateShare =
+            event.mouseEvent.metaKey && event.mouseEvent.altKey
+
         this.emitMutation({
             searchResults: {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            isShareMenuShown: {
-                                $set: event.isShown,
+                            shareMenuShowStatus: {
+                                $set: event.shouldShow
+                                    ? immediateShare
+                                        ? 'show-n-share'
+                                        : 'show'
+                                    : 'hide',
                             },
                         },
                     },

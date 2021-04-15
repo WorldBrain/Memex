@@ -136,7 +136,7 @@ export interface NoteResult {
     isEditing: boolean
     areRepliesShown: boolean
     isTagPickerShown: boolean
-    isShareMenuShown: boolean
+    shareMenuShowStatus: 'show' | 'hide' | 'show-n-share'
     isCopyPasterShown: boolean
     editNoteForm: NoteFormState
     hoverState: NoteResultHoverState
@@ -273,7 +273,10 @@ export type Events = UIEvent<{
     // Note result state mutations
     setNoteCopyPasterShown: NoteEventArgs & { isShown: boolean }
     setNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
-    setNoteShareMenuShown: NoteEventArgs & { isShown: boolean }
+    setNoteShareMenuShown: NoteEventArgs & {
+        shouldShow: boolean
+        mouseEvent: React.MouseEvent
+    }
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
     setNoteHover: NoteEventArgs & { hover: NoteResultHoverState }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }

@@ -14,6 +14,8 @@ interface State {
 }
 
 export interface Props {
+    /** TODO: Implement this properly */
+    shareImmediately: boolean
     annotationUrl: string
     copyLink: (link: string) => Promise<void>
     closeShareMenu: React.MouseEventHandler
@@ -99,6 +101,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     }
 
     render() {
+        console.log('imm share:', this.props.shareImmediately)
         return (
             <ShareAnnotationMenu
                 getLink={this.shareAnnotation}

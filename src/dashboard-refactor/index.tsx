@@ -713,11 +713,13 @@ export class DashboardContainer extends StatefulUIElement<
                             noteId,
                             value: (e.target as HTMLTextAreaElement).value,
                         }),
-                    onShareBtnClick: (noteId) => () =>
+                    onShareBtnClick: (noteId) => (mouseEvent) =>
                         this.processEvent('setNoteShareMenuShown', {
+                            mouseEvent,
                             noteId,
-                            isShown: !searchResults.noteData.byId[noteId]
-                                .isShareMenuShown,
+                            shouldShow:
+                                searchResults.noteData.byId[noteId]
+                                    .shareMenuShowStatus === 'hide',
                         }),
                     updateShareInfo: (noteId) => (info) =>
                         this.processEvent('updateNoteShareInfo', {
