@@ -12,6 +12,7 @@ export interface ContentScriptRegistry {
     registerSidebarScript(main: SidebarScriptMain): Promise<void>
     registerHighlightingScript(main: HighlightsScriptMain): Promise<void>
     registerTooltipScript(main: TooltipScriptMain): Promise<void>
+    registerSearchInjectionScript(main: SearchInjectionMain): Promise<void>
 }
 
 export type SidebarScriptMain = (
@@ -35,10 +36,18 @@ export interface HighlightDependencies {
     annotationsCache: AnnotationsCacheInterface
 }
 
+export interface SearchInjectionDependencies {
+    requestSearcher: any
+}
+
 export type HighlightsScriptMain = (
     options: HighlightDependencies,
 ) => Promise<void>
 
 export type TooltipScriptMain = (
     dependencies: TooltipDependencies,
+) => Promise<void>
+
+export type SearchInjectionMain = (
+    dependencies: SearchInjectionDependencies,
 ) => Promise<void>

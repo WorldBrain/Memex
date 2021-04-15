@@ -36,6 +36,7 @@ import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { AnalyticsEvent } from 'src/analytics/types'
 import analytics from 'src/analytics'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
+import { main as searchInjectionMain } from 'src/content-scripts/content_script/search-injection'
 import { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUrl } from 'src/util/uri-utils'
@@ -209,6 +210,11 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
             })
             components.tooltip?.resolve()
         },
+        async registerSearchInjectionScript(execute): Promise<void> {
+            await execute({
+                requestSearcher: remoteFunction('search'),
+            })
+        },
     }
 
     window['contentScriptRegistry'] = contentScriptRegistry
@@ -268,7 +274,9 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
     })
     const loadContentScript = createContentScriptLoader({ loadRemotely })
     if (shouldIncludeSearchInjection(window.location.hostname)) {
-        loadContentScript('search_injection')
+        await contentScriptRegistry.registerSearchInjectionScript(
+            searchInjectionMain,
+        )
     }
 
     // 7. Load components and associated content scripts if they are set to autoload
