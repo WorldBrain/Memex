@@ -173,14 +173,16 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 closeShareMenu={
                                     interactionProps.onShareBtnClick
                                 }
-                                postShareHook={() =>
+                                postShareHook={(privacyLevel) =>
                                     interactionProps.updateShareInfo({
+                                        privacyLevel,
                                         status: 'shared',
                                         taskState: 'success',
                                     })
                                 }
-                                postUnshareHook={() =>
+                                postUnshareHook={(privacyLevel) =>
                                     interactionProps.updateShareInfo({
+                                        privacyLevel,
                                         status: 'unshared',
                                         taskState: 'success',
                                     })

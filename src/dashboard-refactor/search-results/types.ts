@@ -108,7 +108,6 @@ export interface NoteData {
     displayTime: number
     createdWhen?: Date
     selector?: Anchor
-    privacyLevel: AnnotationPrivacyLevels
 }
 
 export type PageData = Pick<

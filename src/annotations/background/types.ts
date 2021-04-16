@@ -30,6 +30,13 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
         [{ url: string; isBookmarked: boolean }],
         string
     >
+    findAnnotationPrivacyLevels: RemotePositionalFunction<
+        Role,
+        [{ annotationUrls: string[] }],
+        {
+            [annotationUrl: string]: AnnotationPrivacyLevels
+        }
+    >
     updateAnnotationPrivacyLevel: RemotePositionalFunction<
         Role,
         [{ annotation: string; privacyLevel: AnnotationPrivacyLevels }],

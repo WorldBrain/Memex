@@ -14,14 +14,14 @@ import AnnotationEdit, {
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
-import { SidebarAnnotationTheme } from '../types'
+import { SidebarAnnotationTheme, AnnotationPrivacyLevels } from '../types'
 import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 import {
-    SHARE_BUTTON_ICONS,
     SHARE_BUTTON_LABELS,
+    getShareButtonIcon,
     getShareAnnotationBtnState,
     getShareAnnotationBtnAction,
 } from '../sharing-utils'
@@ -224,12 +224,17 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (this.props.hoverState === null) {
             return ['already-shared', 'sharing-success'].includes(
                 this.sharingData.state,
-            )
+            ) &&
+                this.props.sharingInfo.privacyLevel !==
+                    AnnotationPrivacyLevels.PRIVATE
                 ? [
                       {
                           key: 'share-note-btn',
                           isDisabled: true,
-                          image: SHARE_BUTTON_ICONS[this.sharingData.state],
+                          image: getShareButtonIcon(
+                              this.sharingData.state,
+                              this.props.sharingInfo.privacyLevel,
+                          ),
                       },
                   ]
                 : []
@@ -260,7 +265,10 @@ export default class AnnotationEditable extends React.Component<Props> {
                 },
                 {
                     key: 'share-note-btn',
-                    image: SHARE_BUTTON_ICONS[this.sharingData.state],
+                    image: getShareButtonIcon(
+                        this.sharingData.state,
+                        this.props.sharingInfo.privacyLevel,
+                    ),
                     onClick: footerDeps.onShareClick,
                     tooltipText: SHARE_BUTTON_LABELS[this.sharingData.state],
                     isDisabled: ['sharing', 'unsharing'].includes(
@@ -292,7 +300,10 @@ export default class AnnotationEditable extends React.Component<Props> {
             {
                 key: 'share-note-btn',
                 isDisabled: true,
-                image: SHARE_BUTTON_ICONS[this.sharingData.state],
+                image: getShareButtonIcon(
+                    this.sharingData.state,
+                    this.props.sharingInfo.privacyLevel,
+                ),
             },
         ]
     }

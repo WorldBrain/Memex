@@ -20,8 +20,8 @@ export interface Props {
     annotationUrl: string
     copyLink: (link: string) => Promise<void>
     closeShareMenu: React.MouseEventHandler
-    postShareHook?: () => void
-    postUnshareHook?: () => void
+    postShareHook?: (privacyLevel?: AnnotationPrivacyLevels) => void
+    postUnshareHook?: (privacyLevel?: AnnotationPrivacyLevels) => void
     annotationsBG?: AnnotationInterface<'caller'>
     contentSharingBG?: ContentSharingInterface
 }
@@ -69,22 +69,26 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         return true
     }
 
-    private shareAnnotation = async () => {
+    private shareAnnotation = async (
+        privacyLevel?: AnnotationPrivacyLevels,
+    ) => {
         const { annotationUrl, contentSharingBG } = this.props
         await contentSharingBG.shareAnnotation({ annotationUrl })
         await contentSharingBG.shareAnnotationsToLists({
             annotationUrls: [annotationUrl],
             queueInteraction: 'skip-queue',
         })
-        this.props.postShareHook?.()
+        this.props.postShareHook?.(privacyLevel)
         this.setRemoteLinkIfExists()
     }
 
-    private unshareAnnotation = async () => {
+    private unshareAnnotation = async (
+        privacyLevel?: AnnotationPrivacyLevels,
+    ) => {
         const { annotationUrl, contentSharingBG } = this.props
         try {
             await contentSharingBG.unshareAnnotation({ annotationUrl })
-            this.props.postUnshareHook?.()
+            this.props.postUnshareHook?.(privacyLevel)
             this.setState({ showLink: false })
         } catch (err) {}
     }
@@ -95,7 +99,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             this,
             'shareState',
             async () => {
-                await this.shareAnnotation()
+                await this.shareAnnotation(AnnotationPrivacyLevels.SHARED)
                 await annotationsBG.updateAnnotationPrivacyLevel({
                     annotation: annotationUrl,
                     privacyLevel: AnnotationPrivacyLevels.SHARED,
@@ -110,7 +114,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             this,
             'shareState',
             async () => {
-                await this.unshareAnnotation()
+                await this.unshareAnnotation(AnnotationPrivacyLevels.PROTECTED)
                 await annotationsBG.updateAnnotationPrivacyLevel({
                     annotation: annotationUrl,
                     privacyLevel: AnnotationPrivacyLevels.PROTECTED,
@@ -125,7 +129,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             this,
             'shareState',
             async () => {
-                await this.unshareAnnotation()
+                await this.unshareAnnotation(AnnotationPrivacyLevels.PRIVATE)
                 await annotationsBG.updateAnnotationPrivacyLevel({
                     annotation: annotationUrl,
                     privacyLevel: AnnotationPrivacyLevels.PRIVATE,

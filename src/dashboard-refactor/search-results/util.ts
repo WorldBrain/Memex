@@ -148,7 +148,6 @@ const annotationToNoteData = (
         annotation.lastEdited ?? annotation.createdWhen,
     ).getTime(),
     isEdited: annotation.lastEdited != null,
-    privacyLevel: annotation.privacyLevel ?? 0,
     ...getInitialNoteResultState(),
     editNoteForm: {
         inputValue: annotation.comment ?? '',

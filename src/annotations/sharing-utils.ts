@@ -4,6 +4,7 @@ import {
 } from 'src/content-sharing/ui/types'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { AnnotationPrivacyLevels } from './types'
 
 export interface SharingProps {
     sharingAccess: AnnotationSharingAccess
@@ -37,18 +38,32 @@ export const SHARE_BUTTON_LABELS: {
     'unsharing-error': 'Error Un-sharing Note',
 }
 
-export const SHARE_BUTTON_ICONS: {
-    [Key in SharingState]: string | null
-} = {
-    'feature-disabled': icons.lock,
-    'not-shared-yet': icons.link,
-    'already-shared': icons.shared,
-    sharing: icons.shared,
-    'sharing-success': icons.shared,
-    'sharing-error': icons.lock,
-    unsharing: icons.lock,
-    'unsharing-success': icons.link,
-    'unsharing-error': icons.shared,
+export const getShareButtonIcon = (
+    state: SharingState,
+    privacyLevel?: AnnotationPrivacyLevels,
+): string => {
+    const successIcon =
+        privacyLevel == null || privacyLevel === AnnotationPrivacyLevels.PRIVATE
+            ? icons.person
+            : privacyLevel === AnnotationPrivacyLevels.PROTECTED
+            ? icons.lock
+            : icons.shared
+
+    const SHARE_BUTTON_ICONS: {
+        [Key in SharingState]: string
+    } = {
+        sharing: successIcon,
+        'already-shared': successIcon,
+        'sharing-success': successIcon,
+        'unsharing-error': successIcon,
+        'feature-disabled': icons.lock,
+        'sharing-error': icons.lock,
+        unsharing: icons.lock,
+        'not-shared-yet': icons.link,
+        'unsharing-success': icons.link,
+    }
+
+    return SHARE_BUTTON_ICONS[state]
 }
 
 export function getShareAnnotationBtnState({

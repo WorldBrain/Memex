@@ -523,6 +523,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             { annotationUrls },
         )
 
+        const privacyLevels = await this.options.annotationsBG.findAnnotationPrivacyLevels(
+            { annotationUrls },
+        )
+
         for (const noteId of annotationUrls) {
             mutation.noteSharingInfo = {
                 ...mutation.noteSharingInfo,
@@ -530,6 +534,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     $set: {
                         taskState: 'pristine',
                         status: remoteIds[noteId] ? 'shared' : 'not-yet-shared',
+                        privacyLevel: privacyLevels[noteId],
                     },
                 },
             }
@@ -1437,6 +1442,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                         [event.noteId]: {
                             ...noteSharingInfo[event.noteId],
                             ...event.info,
+                            privacyLevel:
+                                event.info.privacyLevel ??
+                                noteSharingInfo[event.noteId].privacyLevel,
                         },
                     },
                 },

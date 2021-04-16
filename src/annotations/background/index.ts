@@ -90,6 +90,9 @@ export default class DirectLinkingBackground {
             getAllAnnotationsByUrl: this.getAllAnnotationsByUrl.bind(this),
             listAnnotationsByPageUrl: this.listAnnotationsByPageUrl.bind(this),
             createAnnotation: this.createAnnotation.bind(this),
+            findAnnotationPrivacyLevels: this.findAnnotationPrivacyLevels.bind(
+                this,
+            ),
             updateAnnotationPrivacyLevel: this.updateAnnotationPrivacyLevel.bind(
                 this,
             ),
@@ -434,6 +437,20 @@ export default class DirectLinkingBackground {
         }
 
         return annotationUrl
+    }
+
+    async findAnnotationPrivacyLevels(_, params: { annotationUrls: string[] }) {
+        const storedLevels = await this.annotationStorage.getPrivacyLevelsByAnnotation(
+            { annotations: params.annotationUrls },
+        )
+
+        const privacyLevels = {}
+        for (const annotationUrl of params.annotationUrls) {
+            privacyLevels[annotationUrl] =
+                storedLevels[annotationUrl]?.privacyLevel ??
+                AnnotationPrivacyLevels.PRIVATE
+        }
+        return privacyLevels
     }
 
     async updateAnnotationPrivacyLevel(
