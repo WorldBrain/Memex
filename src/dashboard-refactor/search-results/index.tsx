@@ -173,18 +173,28 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 closeShareMenu={
                                     interactionProps.onShareBtnClick
                                 }
-                                postShareHook={(privacyLevel) =>
+                                postShareHook={({
+                                    privacyLevel,
+                                    shareStateChanged,
+                                }) =>
                                     interactionProps.updateShareInfo({
                                         privacyLevel,
-                                        status: 'shared',
                                         taskState: 'success',
+                                        status: shareStateChanged
+                                            ? 'shared'
+                                            : undefined,
                                     })
                                 }
-                                postUnshareHook={(privacyLevel) =>
+                                postUnshareHook={({
+                                    privacyLevel,
+                                    shareStateChanged,
+                                }) =>
                                     interactionProps.updateShareInfo({
                                         privacyLevel,
-                                        status: 'unshared',
                                         taskState: 'success',
+                                        status: shareStateChanged
+                                            ? 'unshared'
+                                            : undefined,
                                     })
                                 }
                             />
@@ -316,15 +326,24 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         normalizedPageUrl: page.normalizedUrl,
                         closeShareMenu: interactionProps.onShareBtnClick,
                         copyLink: this.props.onPageLinkCopy,
-                        postShareAllHook: () =>
+                        postShareHook: ({ privacyLevel, shareStateChanged }) =>
                             interactionProps.updatePageNotesShareInfo({
-                                status: 'shared',
+                                status: shareStateChanged
+                                    ? 'shared'
+                                    : undefined,
                                 taskState: 'success',
+                                privacyLevel,
                             }),
-                        postUnshareAllHook: () =>
+                        postUnshareHook: ({
+                            privacyLevel,
+                            shareStateChanged,
+                        }) =>
                             interactionProps.updatePageNotesShareInfo({
-                                status: 'unshared',
+                                status: shareStateChanged
+                                    ? 'unshared'
+                                    : undefined,
                                 taskState: 'success',
+                                privacyLevel,
                             }),
                     }}
                     {...interactionProps}

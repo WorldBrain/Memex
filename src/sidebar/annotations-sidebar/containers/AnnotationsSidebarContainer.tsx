@@ -334,7 +334,7 @@ export class AnnotationsSidebarContainer<
                             this.processEvent('copyPageLink', { link })
                         }
                         normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
-                        postShareAllHook={() =>
+                        postShareHook={() =>
                             this.processEvent('updateAllAnnotationsShareInfo', {
                                 info: {
                                     status: 'shared',
@@ -342,7 +342,7 @@ export class AnnotationsSidebarContainer<
                                 },
                             })
                         }
-                        postUnshareAllHook={() =>
+                        postUnshareHook={() =>
                             this.processEvent('updateAllAnnotationsShareInfo', {
                                 info: {
                                     status: 'unshared',

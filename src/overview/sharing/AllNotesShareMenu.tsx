@@ -1,28 +1,16 @@
 import React from 'react'
-import { TaskState } from 'ui-logic-core/lib/types'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { executeReactStateUITask } from 'src/util/ui-logic'
 import { getPageShareUrl } from 'src/content-sharing/utils'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
-import { AnnotationInterface } from 'src/annotations/background/types'
-import { runInBackground } from 'src/util/webextensionRPC'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { ShareMenuCommonProps, ShareMenuCommonState } from './types'
+import { runInBackground } from 'src/util/webextensionRPC'
 
-interface State {
-    link: string
-    loadState: TaskState
-    shareState: TaskState
-}
+interface State extends ShareMenuCommonState {}
 
-export interface Props {
+export interface Props extends ShareMenuCommonProps {
     normalizedPageUrl: string
-    closeShareMenu: React.MouseEventHandler
-    copyLink: (link: string) => Promise<void>
-    postShareAllHook?: () => void
-    postUnshareAllHook?: () => void
-    contentSharingBG?: ContentSharingInterface
-    annotationsBG?: AnnotationInterface<'caller'>
 }
 
 export default class AllNotesShareMenu extends React.Component<Props, State> {
@@ -77,29 +65,44 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
     }
 
     private shareAllAnnotations = async () => {
-        await this.props.contentSharingBG.shareAnnotations({
-            annotationUrls: this.annotationUrls,
-            queueInteraction: 'skip-queue',
+        let success = false
+        try {
+            await this.props.contentSharingBG.shareAnnotations({
+                annotationUrls: this.annotationUrls,
+                queueInteraction: 'skip-queue',
+            })
+            await this.props.contentSharingBG.shareAnnotationsToLists({
+                annotationUrls: this.annotationUrls,
+                queueInteraction: 'skip-queue',
+            })
+            success = true
+        } catch (err) {}
+        this.props.postShareHook?.({
+            privacyLevel: AnnotationPrivacyLevels.SHARED,
+            shareStateChanged: success,
         })
-        await this.props.contentSharingBG.shareAnnotationsToLists({
-            annotationUrls: this.annotationUrls,
-            queueInteraction: 'skip-queue',
-        })
-        this.props.postShareAllHook?.()
     }
 
     private unshareAllAnnotations = async () => {
-        await Promise.all(
-            this.annotationUrls.map((annotationUrl) =>
-                this.props.contentSharingBG
-                    .unshareAnnotation({
-                        annotationUrl,
-                        queueInteraction: 'skip-queue',
-                    })
-                    .catch(),
-            ),
-        )
-        this.props.postUnshareAllHook?.()
+        let success = false
+        try {
+            await Promise.all(
+                this.annotationUrls.map((annotationUrl) =>
+                    this.props.contentSharingBG
+                        .unshareAnnotation({
+                            annotationUrl,
+                            queueInteraction: 'skip-queue',
+                        })
+                        .catch(),
+                ),
+            )
+            success = true
+        } catch (err) {}
+
+        this.props.postUnshareHook?.({
+            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            shareStateChanged: success,
+        })
     }
 
     private handleSetShared: React.MouseEventHandler = async (e) => {

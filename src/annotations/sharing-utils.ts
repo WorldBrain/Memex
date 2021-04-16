@@ -42,25 +42,23 @@ export const getShareButtonIcon = (
     state: SharingState,
     privacyLevel?: AnnotationPrivacyLevels,
 ): string => {
-    const successIcon =
+    const unsharedIcon =
         privacyLevel == null || privacyLevel === AnnotationPrivacyLevels.PRIVATE
             ? icons.person
-            : privacyLevel === AnnotationPrivacyLevels.PROTECTED
-            ? icons.lock
-            : icons.shared
+            : icons.lock
 
     const SHARE_BUTTON_ICONS: {
         [Key in SharingState]: string
     } = {
-        sharing: successIcon,
-        'already-shared': successIcon,
-        'sharing-success': successIcon,
-        'unsharing-error': successIcon,
+        sharing: icons.shared,
+        'already-shared': icons.shared,
+        'sharing-success': icons.shared,
+        'unsharing-error': icons.shared,
         'feature-disabled': icons.lock,
-        'sharing-error': icons.lock,
-        unsharing: icons.lock,
-        'not-shared-yet': icons.link,
-        'unsharing-success': icons.link,
+        'sharing-error': unsharedIcon,
+        unsharing: unsharedIcon,
+        'not-shared-yet': unsharedIcon,
+        'unsharing-success': unsharedIcon,
     }
 
     return SHARE_BUTTON_ICONS[state]

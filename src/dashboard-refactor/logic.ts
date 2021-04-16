@@ -1445,6 +1445,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                             privacyLevel:
                                 event.info.privacyLevel ??
                                 noteSharingInfo[event.noteId].privacyLevel,
+                            status:
+                                event.info.status ??
+                                noteSharingInfo[event.noteId].status,
                         },
                     },
                 },

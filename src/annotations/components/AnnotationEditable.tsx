@@ -224,9 +224,9 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (this.props.hoverState === null) {
             return ['already-shared', 'sharing-success'].includes(
                 this.sharingData.state,
-            ) &&
-                this.props.sharingInfo.privacyLevel !==
-                    AnnotationPrivacyLevels.PRIVATE
+            ) ||
+                this.props.sharingInfo.privacyLevel ===
+                    AnnotationPrivacyLevels.PROTECTED
                 ? [
                       {
                           key: 'share-note-btn',
