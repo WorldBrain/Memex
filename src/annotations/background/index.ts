@@ -468,11 +468,25 @@ export default class DirectLinkingBackground {
             annotationPrivacyLevels: {
                 [annotation: string]: AnnotationPrivacyLevels
             }
+            respectProtected?: boolean
         },
     ) {
+        const existingLevels = params.respectProtected
+            ? await this.annotationStorage.getPrivacyLevelsByAnnotation({
+                  annotations: Object.keys(params.annotationPrivacyLevels),
+              })
+            : {}
+
         for (const [annotation, privacyLevel] of Object.entries(
             params.annotationPrivacyLevels,
         )) {
+            if (
+                existingLevels[annotation]?.privacyLevel ===
+                AnnotationPrivacyLevels.PROTECTED
+            ) {
+                continue
+            }
+
             await this.annotationStorage.createOrUpdateAnnotationPrivacyLevel({
                 annotation,
                 privacyLevel,

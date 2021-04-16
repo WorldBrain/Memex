@@ -366,7 +366,7 @@ export default class ContentSharingBackground {
         )
 
         const allPageUrls = new Set(
-            allAnnotations.map((annotation) => annotation.pageUrl),
+            annotations.map((annotation) => annotation.pageUrl),
         )
         const pageUrls = new Set(
             annotations.map((annotation) => annotation.pageUrl),

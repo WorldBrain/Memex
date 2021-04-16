@@ -4,6 +4,6 @@ import { AnnotationPrivacyLevels } from 'src/annotations/types'
 export interface AnnotationSharingInfo {
     status: 'not-yet-shared' | 'shared' | 'unshared'
     taskState: TaskState
-    privacyLevel?: AnnotationPrivacyLevels
+    privacyLevel: AnnotationPrivacyLevels
 }
 export type AnnotationSharingAccess = 'feature-disabled' | 'sharing-allowed'

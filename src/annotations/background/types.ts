@@ -49,6 +49,7 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
                 annotationPrivacyLevels: {
                     [annotation: string]: AnnotationPrivacyLevels
                 }
+                respectProtected?: boolean
             },
         ],
         void

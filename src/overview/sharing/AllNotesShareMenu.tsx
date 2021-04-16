@@ -118,6 +118,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                 await this.shareAllAnnotations()
                 await annotationsBG.updateAnnotationPrivacyLevels({
                     annotationPrivacyLevels,
+                    respectProtected: true,
                 })
             },
         )
@@ -136,6 +137,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                 await this.unshareAllAnnotations()
                 await annotationsBG.updateAnnotationPrivacyLevels({
                     annotationPrivacyLevels,
+                    respectProtected: true,
                 })
             },
         )
