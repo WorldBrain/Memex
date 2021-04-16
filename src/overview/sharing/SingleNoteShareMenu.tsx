@@ -9,11 +9,13 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
 interface State {
+    link: string
+    showLink: boolean
+    loadState: TaskState
     shareState: TaskState
 }
 
 export interface Props {
-    /** TODO: Implement this properly */
     shareImmediately: boolean
     annotationUrl: string
     copyLink: (link: string) => Promise<void>
@@ -34,10 +36,40 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     }
 
     state: State = {
+        link: '',
+        showLink: false,
+        loadState: 'pristine',
         shareState: 'pristine',
     }
 
-    private shareAnnotation = async (): Promise<string> => {
+    async componentDidMount() {
+        const linkExists = await this.setRemoteLinkIfExists()
+        if (!linkExists && this.props.shareImmediately) {
+            await executeReactStateUITask<State, 'loadState'>(
+                this,
+                'loadState',
+                async () => {
+                    await this.shareAnnotation()
+                },
+            )
+        }
+    }
+
+    private handleLinkCopy = () => this.props.copyLink(this.state.link)
+
+    private setRemoteLinkIfExists = async (): Promise<boolean> => {
+        const { annotationUrl, contentSharingBG } = this.props
+        const link = await contentSharingBG.getRemoteAnnotationLink({
+            annotationUrl,
+        })
+        if (!link) {
+            return false
+        }
+        this.setState({ link, showLink: true })
+        return true
+    }
+
+    private shareAnnotation = async () => {
         const { annotationUrl, contentSharingBG } = this.props
         await contentSharingBG.shareAnnotation({ annotationUrl })
         await contentSharingBG.shareAnnotationsToLists({
@@ -45,13 +77,16 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             queueInteraction: 'skip-queue',
         })
         this.props.postShareHook?.()
-        return contentSharingBG.getRemoteAnnotationLink({ annotationUrl })
+        this.setRemoteLinkIfExists()
     }
 
     private unshareAnnotation = async () => {
         const { annotationUrl, contentSharingBG } = this.props
-        await contentSharingBG.unshareAnnotation({ annotationUrl })
-        this.props.postUnshareHook?.()
+        try {
+            await contentSharingBG.unshareAnnotation({ annotationUrl })
+            this.props.postUnshareHook?.()
+            this.setState({ showLink: false })
+        } catch (err) {}
     }
 
     private handleSetShared: React.MouseEventHandler = async (e) => {
@@ -102,12 +137,16 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     render() {
         return (
             <ShareAnnotationMenu
-                getLink={this.shareAnnotation}
-                onCopyLinkClick={this.props.copyLink}
+                link={this.state.link}
+                showLink={this.state.showLink}
+                onCopyLinkClick={this.handleLinkCopy}
                 onClickOutside={this.props.closeShareMenu}
                 linkTitleCopy="Link to this note"
                 privacyOptionsTitleCopy="Set privacy for this note"
-                privacyOptionsLoading={this.state.shareState === 'running'}
+                isLoading={
+                    this.state.shareState === 'running' ||
+                    this.state.loadState === 'running'
+                }
                 privacyOptions={[
                     {
                         title: 'Protected',

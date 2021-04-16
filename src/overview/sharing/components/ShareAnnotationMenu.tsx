@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import Mousetrap from 'mousetrap'
 import { TaskState } from 'ui-logic-core/lib/types'
 
+import { executeReactStateUITask } from 'src/util/ui-logic'
 import SharePrivacyOption, {
     Props as PrivacyOptionProps,
 } from './SharePrivacyOption'
@@ -19,42 +20,26 @@ export interface ShorcutHandlerDict {
 }
 
 export interface Props {
+    onCopyLinkClick: () => Promise<void>
     privacyOptionsTitleCopy: React.ReactNode
-    privacyOptionsLoading: boolean
-    privacyOptions: PrivacyOptionProps[]
     shortcutHandlerDict?: ShorcutHandlerDict
-    linkTitleCopy?: React.ReactNode
-    getLink: () => Promise<string>
     onClickOutside?: React.MouseEventHandler
-    onCopyLinkClick: (createdLink: string) => Promise<void>
+    privacyOptions: PrivacyOptionProps[]
+    linkTitleCopy: React.ReactNode
+    isLoading: boolean
+    showLink: boolean
+    link: string
 }
 
-export interface State {
-    loadState: TaskState
+interface State {
     copyState: TaskState
-    showCopySuccess: boolean
-    link?: string
 }
 
 class ShareAnnotationMenu extends PureComponent<Props, State> {
     copyTimeout?: ReturnType<typeof setTimeout>
-    state: State = {
-        loadState: 'running',
-        copyState: 'pristine',
-        showCopySuccess: false,
-    }
+    state: State = { copyState: 'pristine' }
 
-    async componentDidMount() {
-        try {
-            const createdLink = await this.props.getLink()
-            this.setState({
-                link: createdLink,
-                loadState: 'success',
-            })
-        } catch (e) {
-            this.setState({ loadState: 'error' })
-        }
-
+    componentDidMount() {
         if (this.props.shortcutHandlerDict) {
             for (const [shortcut, handler] of Object.entries(
                 this.props.shortcutHandlerDict,
@@ -78,27 +63,22 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         }
     }
 
-    private handleLinkClick = async () => {
-        if (this.state.copyState === 'pristine') {
-            this.setState({ copyState: 'running' })
-            try {
-                await this.props.onCopyLinkClick(this.state.link)
-                this.setState({ copyState: 'success' })
-
-                this.copyTimeout = setTimeout(() => {
-                    this.setState({ loadState: 'pristine' })
-                }, COPY_TIMEOUT)
-            } catch (e) {
-                this.setState({ copyState: 'error' })
-                throw e
-            }
-        }
+    private handleLinkCopy = async () => {
+        await executeReactStateUITask<State, 'copyState'>(
+            this,
+            'copyState',
+            () => this.props.onCopyLinkClick(),
+        )
+        this.copyTimeout = setTimeout(
+            () => this.setState({ copyState: 'pristine' }),
+            COPY_TIMEOUT,
+        )
     }
 
     private renderLinkContent() {
-        const { loadState, copyState } = this.state
+        const { copyState } = this.state
 
-        if (loadState === 'running') {
+        if (copyState === 'running' || this.props.isLoading) {
             return <LoadingIndicator />
         } else if (copyState === 'success') {
             return (
@@ -108,7 +88,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
             return (
                 <>
                     <TypographyTextNormal>
-                        {this.state.link}
+                        {this.props.link}
                     </TypographyTextNormal>
                     <img src={icons.copy} />
                 </>
@@ -120,30 +100,41 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         return (
             <ClickAway onClickAway={this.props.onClickOutside}>
                 <Menu>
-                    <TopArea>
-                        <SectionTitle>{this.props.linkTitleCopy}</SectionTitle>
-                        <LinkCopierBox>
-                            <LinkCopier
-                                state={this.state.loadState}
-                                onClick={this.handleLinkClick}
-                            >
-                                {this.renderLinkContent()}
-                            </LinkCopier>
-                        </LinkCopierBox>
-                    </TopArea>
+                    {this.props.showLink && (
+                        <TopArea>
+                            <SectionTitle>
+                                {this.props.linkTitleCopy}
+                            </SectionTitle>
+                            <LinkCopierBox>
+                                <LinkCopier
+                                    state={this.state.copyState}
+                                    onClick={this.handleLinkCopy}
+                                >
+                                    {this.renderLinkContent()}
+                                </LinkCopier>
+                            </LinkCopierBox>
+                        </TopArea>
+                    )}
                     <PrivacyContainer>
-                        <PrivacyTitle>
-                            {this.props.privacyOptionsTitleCopy}
-                        </PrivacyTitle>
-                        <PrivacyOptionContainer top="5px">
-                            {this.props.privacyOptionsLoading ? (
-                                <LoadingIndicator />
-                            ) : (
-                                this.props.privacyOptions.map((props, i) => (
-                                    <SharePrivacyOption key={i} {...props} />
-                                ))
-                            )}
-                        </PrivacyOptionContainer>
+                        {this.props.isLoading ? (
+                            <LoadingIndicator />
+                        ) : (
+                            <>
+                                <PrivacyTitle>
+                                    {this.props.privacyOptionsTitleCopy}
+                                </PrivacyTitle>
+                                <PrivacyOptionContainer top="5px">
+                                    {this.props.privacyOptions.map(
+                                        (props, i) => (
+                                            <SharePrivacyOption
+                                                key={i}
+                                                {...props}
+                                            />
+                                        ),
+                                    )}
+                                </PrivacyOptionContainer>
+                            </>
+                        )}
                     </PrivacyContainer>
                 </Menu>
             </ClickAway>
@@ -175,19 +166,6 @@ const LinkCopierBox = styled.div`
     align-items: center;
     cursor: pointer;
     margin: 5px 0;
-`
-
-const RemoveIcon = styled.img`
-    width: 24px;
-    height: 24px;
-    margin-left: 10px;
-    border-radius: 3px;
-    padding: 3px;
-    cursor: pointer;
-
-    &:hover {
-        background-color: #e0e0e0;
-    }
 `
 
 const LinkCopier = styled.button`

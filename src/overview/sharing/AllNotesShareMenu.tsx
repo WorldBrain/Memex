@@ -10,8 +10,9 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
 interface State {
-    shareAllState: TaskState
-    unshareAllState: TaskState
+    link: string
+    loadState: TaskState
+    shareState: TaskState
 }
 
 export interface Props {
@@ -33,17 +34,26 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
     private annotationUrls: string[]
 
     state: State = {
-        shareAllState: 'pristine',
-        unshareAllState: 'pristine',
+        link: '',
+        loadState: 'pristine',
+        shareState: 'pristine',
     }
 
     async componentDidMount() {
-        const annotations = await this.props.annotationsBG.listAnnotationsByPageUrl(
-            {
-                pageUrl: this.props.normalizedPageUrl,
+        await executeReactStateUITask<State, 'loadState'>(
+            this,
+            'loadState',
+            async () => {
+                await this.setRemoteLink()
+
+                const annotations = await this.props.annotationsBG.listAnnotationsByPageUrl(
+                    {
+                        pageUrl: this.props.normalizedPageUrl,
+                    },
+                )
+                this.annotationUrls = annotations.map((a) => a.url)
             },
         )
-        this.annotationUrls = annotations.map((a) => a.url)
     }
 
     private createAnnotationPrivacyLevels = (
@@ -57,11 +67,13 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
             {},
         )
 
-    private getCreatedLink = async () => {
+    private handleLinkCopy = () => this.props.copyLink(this.state.link)
+
+    private setRemoteLink = async () => {
         const remotePageInfoId = await this.props.contentSharingBG.ensureRemotePageId(
             this.props.normalizedPageUrl,
         )
-        return getPageShareUrl({ remotePageInfoId })
+        this.setState({ link: getPageShareUrl({ remotePageInfoId }) })
     }
 
     private shareAllAnnotations = async () => {
@@ -79,10 +91,12 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
     private unshareAllAnnotations = async () => {
         await Promise.all(
             this.annotationUrls.map((annotationUrl) =>
-                this.props.contentSharingBG.unshareAnnotation({
-                    annotationUrl,
-                    queueInteraction: 'skip-queue',
-                }),
+                this.props.contentSharingBG
+                    .unshareAnnotation({
+                        annotationUrl,
+                        queueInteraction: 'skip-queue',
+                    })
+                    .catch(),
             ),
         )
         this.props.postUnshareAllHook?.()
@@ -94,9 +108,9 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
             AnnotationPrivacyLevels.SHARED,
         )
 
-        await executeReactStateUITask<State, 'shareAllState'>(
+        await executeReactStateUITask<State, 'shareState'>(
             this,
-            'shareAllState',
+            'shareState',
             async () => {
                 await this.shareAllAnnotations()
                 await annotationsBG.updateAnnotationPrivacyLevels({
@@ -112,9 +126,9 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
             AnnotationPrivacyLevels.PRIVATE,
         )
 
-        await executeReactStateUITask<State, 'unshareAllState'>(
+        await executeReactStateUITask<State, 'shareState'>(
             this,
-            'unshareAllState',
+            'shareState',
             async () => {
                 await this.unshareAllAnnotations()
                 await annotationsBG.updateAnnotationPrivacyLevels({
@@ -127,14 +141,15 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
     render() {
         return (
             <ShareAnnotationMenu
-                getLink={this.getCreatedLink}
-                onCopyLinkClick={this.props.copyLink}
+                showLink
+                link={this.state.link}
+                onCopyLinkClick={this.handleLinkCopy}
                 onClickOutside={this.props.closeShareMenu}
                 linkTitleCopy="Link to page and shared notes"
                 privacyOptionsTitleCopy="Set privacy for all notes on this page"
-                privacyOptionsLoading={
-                    this.state.shareAllState === 'running' ||
-                    this.state.unshareAllState === 'running'
+                isLoading={
+                    this.state.shareState === 'running' ||
+                    this.state.loadState === 'running'
                 }
                 privacyOptions={[
                     {
