@@ -879,11 +879,16 @@ export class SidebarContainerLogic extends UILogic<
             { annotationUrls },
         )
 
-        for (const localId of Object.keys(remoteIds)) {
+        const privacyLevels = await this.options.annotations.findAnnotationPrivacyLevels(
+            { annotationUrls },
+        )
+
+        for (const localId of annotationUrls) {
             annotationSharingInfo[localId] = {
                 $set: {
-                    status: 'shared',
                     taskState: 'pristine',
+                    status: remoteIds[localId] ? 'shared' : 'not-yet-shared',
+                    privacyLevel: privacyLevels[localId],
                 },
             }
         }
@@ -893,11 +898,23 @@ export class SidebarContainerLogic extends UILogic<
 
     updateAllAnnotationsShareInfo: EventHandler<
         'updateAllAnnotationsShareInfo'
-    > = ({ previousState: { annotations }, event }) => {
+    > = ({ previousState: { annotations, annotationSharingInfo }, event }) => {
         const sharingInfo = {}
 
         for (const { url } of annotations) {
-            sharingInfo[url] = { ...event.info }
+            const prev = annotationSharingInfo[url]
+            if (prev?.privacyLevel === AnnotationPrivacyLevels.PROTECTED) {
+                sharingInfo[url] = prev
+                continue
+            }
+
+            sharingInfo[url] = {
+                ...event.info,
+                privacyLevel:
+                    event.info.privacyLevel ??
+                    annotationSharingInfo[url].privacyLevel,
+                status: event.info.status ?? annotationSharingInfo[url].status,
+            }
         }
 
         this.emitMutation({ annotationSharingInfo: { $set: sharingInfo } })

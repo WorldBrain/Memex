@@ -2,7 +2,10 @@ import React, { Component, MouseEventHandler } from 'react'
 import cx from 'classnames'
 
 import analytics from 'src/analytics'
-import { Annotation as AnnotationFlawed } from 'src/annotations/types'
+import {
+    Annotation as AnnotationFlawed,
+    AnnotationPrivacyLevels,
+} from 'src/annotations/types'
 import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
@@ -144,6 +147,7 @@ class AnnotationList extends Component<Props, State> {
             annotationSharingInfo[localId] = {
                 status: 'shared',
                 taskState: 'pristine',
+                privacyLevel: AnnotationPrivacyLevels.SHARED,
             }
         }
         this.setState(() => ({
@@ -322,16 +326,25 @@ class AnnotationList extends Component<Props, State> {
                             await copyToClipboard(link)
                         }}
                         annotationUrl={annot.url}
-                        postShareHook={() =>
+                        postShareHook={({ privacyLevel, shareStateChanged }) =>
                             this.updateAnnotationShareState(annot.url)({
-                                status: 'shared',
+                                status: shareStateChanged
+                                    ? 'shared'
+                                    : undefined,
                                 taskState: 'success',
+                                privacyLevel,
                             })
                         }
-                        postUnshareHook={() =>
+                        postUnshareHook={({
+                            privacyLevel,
+                            shareStateChanged,
+                        }) =>
                             this.updateAnnotationShareState(annot.url)({
-                                status: 'unshared',
+                                status: shareStateChanged
+                                    ? 'unshared'
+                                    : undefined,
                                 taskState: 'success',
+                                privacyLevel,
                             })
                         }
                         closeShareMenu={() =>

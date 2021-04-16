@@ -33,7 +33,7 @@ import { NoteResultHoverState } from 'src/dashboard-refactor/search-results/type
 export interface AnnotationEditableProps {
     /** Required to decide how to go to an annotation when it's clicked. */
     url: string
-    sharingInfo: AnnotationSharingInfo
+    sharingInfo?: AnnotationSharingInfo
     sharingAccess: AnnotationSharingAccess
     className?: string
     isActive?: boolean
@@ -225,7 +225,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             return ['already-shared', 'sharing-success'].includes(
                 this.sharingData.state,
             ) ||
-                this.props.sharingInfo.privacyLevel ===
+                this.props.sharingInfo?.privacyLevel ===
                     AnnotationPrivacyLevels.PROTECTED
                 ? [
                       {
@@ -233,7 +233,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                           isDisabled: true,
                           image: getShareButtonIcon(
                               this.sharingData.state,
-                              this.props.sharingInfo.privacyLevel,
+                              this.props.sharingInfo?.privacyLevel,
                           ),
                       },
                   ]
@@ -267,7 +267,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                     key: 'share-note-btn',
                     image: getShareButtonIcon(
                         this.sharingData.state,
-                        this.props.sharingInfo.privacyLevel,
+                        this.props.sharingInfo?.privacyLevel,
                     ),
                     onClick: footerDeps.onShareClick,
                     tooltipText: SHARE_BUTTON_LABELS[this.sharingData.state],
@@ -302,7 +302,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                 isDisabled: true,
                 image: getShareButtonIcon(
                     this.sharingData.state,
-                    this.props.sharingInfo.privacyLevel,
+                    this.props.sharingInfo?.privacyLevel,
                 ),
             },
         ]
