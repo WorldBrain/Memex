@@ -1,6 +1,7 @@
 import debounce from 'lodash/debounce'
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
+import { isFullUrl } from '@worldbrain/memex-url-utils'
 import { EventEmitter } from 'events'
 
 import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
@@ -414,6 +415,12 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     setPageUrl: EventHandler<'setPageUrl'> = ({ previousState, event }) => {
+        if (!isFullUrl(event.pageUrl)) {
+            throw new Error(
+                'Tried to set annotation sidebar with a normalized page URL',
+            )
+        }
+
         const mutation: UIMutation<SidebarContainerState> = {
             pageUrl: { $set: event.pageUrl },
         }

@@ -527,9 +527,10 @@ export class DashboardContainer extends StatefulUIElement<
                 }
                 pageInteractionProps={{
                     onNotesBtnClick: (day, pageId) => (e) => {
+                        const pageData = searchResults.pageData.byId[pageId]
                         if (e.shiftKey) {
                             this.notesSidebarRef.current.toggleSidebarShowForPageId(
-                                pageId,
+                                pageData.fullUrl,
                             )
                             return
                         }
