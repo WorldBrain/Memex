@@ -29,6 +29,7 @@ import { ButtonTooltip } from 'src/common-ui/components'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { NoteResultHoverState } from 'src/dashboard-refactor/search-results/types'
+import { getKeyName } from 'src/util/os-specific-key-names'
 
 export interface AnnotationEditableProps {
     /** Required to decide how to go to an annotation when it's clicked. */
@@ -70,6 +71,7 @@ export type Props = AnnotationEditableProps & AnnotationEditableEventProps
 export default class AnnotationEditable extends React.Component<Props> {
     private annotEditRef = React.createRef<AnnotationEdit>()
 
+    static MOD_KEY = getKeyName({ key: 'mod' })
     static defaultProps: Partial<Props> = {
         mode: 'default',
         hoverState: null,
@@ -349,7 +351,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                         </CancelBtnStyled>
                     </ButtonTooltip>
                     <ButtonTooltip
-                        tooltipText="ctrl/cmd + Enter"
+                        tooltipText={`${AnnotationEditable.MOD_KEY} + Enter`}
                         position="bottom"
                     >
                         <ActionBtnStyled onClick={actionBtnHandler}>

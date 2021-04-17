@@ -307,22 +307,22 @@ export default class OnboardingScreen extends StatefulUIElement<
     }
 
     checkOperatingSystem() {
-        let OperatingSystem = navigator.platform
+        let os = navigator.platform
 
-        if (OperatingSystem.startsWith('Mac')) {
+        if (os.startsWith('Mac')) {
             return 'Mac'
         }
-        if (OperatingSystem.startsWith('Win')) {
+        if (os.startsWith('Win')) {
             return 'Win'
         }
 
-        if (OperatingSystem.startsWith('Linux')) {
+        if (os.startsWith('Linux')) {
             return 'Win'
         }
     }
 
     private renderCurrentStep() {
-        let OperatingSystem = this.checkOperatingSystem()
+        let os = this.checkOperatingSystem()
 
         switch (this.state.currentStep) {
             default:
@@ -343,7 +343,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                         Save current page
                                     </div>
                                     <div className={styles.shortcutName}>
-                                        {OperatingSystem === 'Win' && (
+                                        {os === 'Win' && (
                                             <>
                                                 <span
                                                     className={
@@ -362,7 +362,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                                 </span>
                                             </>
                                         )}
-                                        {OperatingSystem === 'Mac' && (
+                                        {os === 'Mac' && (
                                             <>
                                                 <span
                                                     className={
@@ -397,7 +397,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                         Annotate highlighted text
                                     </div>
                                     <div className={styles.shortcutName}>
-                                        {OperatingSystem === 'Win' && (
+                                        {os === 'Win' && (
                                             <>
                                                 <span
                                                     className={
@@ -416,7 +416,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                                 </span>
                                             </>
                                         )}
-                                        {OperatingSystem === 'Mac' && (
+                                        {os === 'Mac' && (
                                             <>
                                                 <span
                                                     className={
@@ -451,7 +451,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                         Search Saved Pages & Notes
                                     </div>
                                     <div className={styles.shortcutName}>
-                                        {OperatingSystem === 'Win' && (
+                                        {os === 'Win' && (
                                             <>
                                                 <span
                                                     className={
@@ -470,7 +470,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                                 </span>
                                             </>
                                         )}
-                                        {OperatingSystem === 'Mac' && (
+                                        {os === 'Mac' && (
                                             <>
                                                 <span
                                                     className={
@@ -765,8 +765,6 @@ export default class OnboardingScreen extends StatefulUIElement<
     }
 
     render() {
-        this.checkOperatingSystem()
-
         return (
             <OnboardingBox {...this.props}>
                 {this.renderCurrentStep()}

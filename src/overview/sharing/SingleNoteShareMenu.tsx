@@ -5,6 +5,7 @@ import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { ShareMenuCommonProps, ShareMenuCommonState } from './types'
+import { getKeyName } from 'src/util/os-specific-key-names'
 
 interface State extends ShareMenuCommonState {
     showLink: boolean
@@ -19,6 +20,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     Props,
     State
 > {
+    static MOD_KEY = getKeyName({ key: 'mod' })
+    static ALT_KEY = getKeyName({ key: 'alt' })
     static defaultProps: Partial<Props> = {
         contentSharingBG: runInBackground(),
         annotationsBG: runInBackground(),
@@ -156,21 +159,21 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                 privacyOptions={[
                     {
                         title: 'Protected',
-                        shortcut: 'shift+cmd+enter',
+                        shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
                         description: 'Private & never shared',
                         icon: 'lock',
                         onClick: this.handleSetProtected,
                     },
                     {
                         title: 'Private',
-                        shortcut: 'cmd+enter',
+                        shortcut: `${SingleNoteShareMenu.MOD_KEY}+enter`,
                         description: 'Private to you, until shared (in bulk)',
                         icon: 'person',
                         onClick: this.handleSetPrivate,
                     },
                     {
                         title: 'Shared',
-                        shortcut: 'option+cmd+enter',
+                        shortcut: `${SingleNoteShareMenu.ALT_KEY}+${SingleNoteShareMenu.MOD_KEY}+enter`,
                         description: 'Added to shared collections & page links',
                         icon: 'shared',
                         onClick: this.handleSetShared,

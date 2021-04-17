@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
 import { FocusableComponent } from './types'
 import { uninsertTab, insertTab } from 'src/common-ui/utils'
+import { getKeyName } from 'src/util/os-specific-key-names'
 
 export interface AnnotationEditEventProps {
     onEditConfirm: (url: string) => void
@@ -24,6 +25,7 @@ export interface Props
 
 class AnnotationEdit extends React.Component<Props>
     implements FocusableComponent {
+    static MOD_KEY = getKeyName({ key: 'mod' })
     private textAreaRef = React.createRef<HTMLTextAreaElement>()
 
     componentDidMount() {
@@ -77,7 +79,7 @@ class AnnotationEdit extends React.Component<Props>
                         <StyledTextArea
                             {...inputProps}
                             value={this.props.comment}
-                            placeholder="Add private note (save with cmd/ctrl+enter)"
+                            placeholder={`Add private note (save with ${AnnotationEdit.MOD_KEY}+enter)`}
                             onChange={(e) =>
                                 this.props.onCommentChange(e.target.value)
                             }

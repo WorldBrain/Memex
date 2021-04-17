@@ -6,6 +6,7 @@ import { getPageShareUrl } from 'src/content-sharing/utils'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { runInBackground } from 'src/util/webextensionRPC'
+import { getKeyName } from 'src/util/os-specific-key-names'
 
 interface State extends ShareMenuCommonState {}
 
@@ -14,6 +15,8 @@ export interface Props extends ShareMenuCommonProps {
 }
 
 export default class AllNotesShareMenu extends React.Component<Props, State> {
+    static MOD_KEY = getKeyName({ key: 'mod' })
+    static ALT_KEY = getKeyName({ key: 'alt' })
     static defaultProps: Partial<Props> = {
         contentSharingBG: runInBackground(),
         annotationsBG: runInBackground(),
@@ -159,14 +162,14 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                 privacyOptions={[
                     {
                         title: 'Private',
-                        shortcut: 'cmd+enter',
+                        shortcut: `${AllNotesShareMenu.MOD_KEY}+enter`,
                         description: 'Only locally available to you',
                         icon: 'person',
                         onClick: this.handleSetPrivate,
                     },
                     {
                         title: 'Shared',
-                        shortcut: 'option+cmd+enter',
+                        shortcut: `${AllNotesShareMenu.ALT_KEY}+${AllNotesShareMenu.MOD_KEY}+enter`,
                         description: 'Shared in collections this page is in',
                         icon: 'shared',
                         onClick: this.handleSetShared,

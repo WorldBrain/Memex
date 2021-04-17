@@ -1,17 +1,21 @@
+import { getKeyName } from 'src/util/os-specific-key-names'
+
 export const KEYBOARDSHORTCUTS_STORAGE_NAME = 'memex-keyboardshortcuts'
+
+const altKey = getKeyName({ key: 'alt' })
 
 export const KEYBOARDSHORTCUTS_DEFAULT_STATE = {
     shortcutsEnabled: true,
     linkShortcut: 'shift+l',
-    openDashboardShortcut: checkOperatingSystem() + '+f',
-    toggleSidebarShortcut: checkOperatingSystem() + '+q',
-    toggleHighlightsShortcut: checkOperatingSystem() + '+r',
-    createAnnotationShortcut: checkOperatingSystem() + '+w',
-    createHighlightShortcut: checkOperatingSystem() + '+a',
-    createBookmarkShortcut: checkOperatingSystem() + '+s',
-    addTagShortcut: checkOperatingSystem() + '+x',
-    addToCollectionShortcut: checkOperatingSystem() + '+c',
-    addCommentShortcut: checkOperatingSystem() + '+e',
+    openDashboardShortcut: altKey + '+f',
+    toggleSidebarShortcut: altKey + '+q',
+    toggleHighlightsShortcut: altKey + '+r',
+    createAnnotationShortcut: altKey + '+w',
+    createHighlightShortcut: altKey + '+a',
+    createBookmarkShortcut: altKey + '+s',
+    addTagShortcut: altKey + '+x',
+    addToCollectionShortcut: altKey + '+c',
+    addCommentShortcut: altKey + '+e',
     linkShortcutEnabled: false,
     toggleSidebarShortcutEnabled: true,
     toggleHighlightsShortcutEnabled: true,
@@ -22,19 +26,4 @@ export const KEYBOARDSHORTCUTS_DEFAULT_STATE = {
     addToCollectionShortcutEnabled: true,
     addCommentShortcutEnabled: true,
     openDashboardShortcutEnabled: true,
-}
-
-function checkOperatingSystem() {
-    let OperatingSystem = navigator.platform
-
-    if (OperatingSystem.startsWith('Linux')) {
-        return 'alt'
-    }
-
-    if (OperatingSystem.startsWith('Mac')) {
-        return 'option'
-    }
-    if (OperatingSystem.startsWith('Win')) {
-        return 'alt'
-    }
 }

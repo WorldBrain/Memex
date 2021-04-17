@@ -11,6 +11,7 @@ import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import { AnnotationPrivacyLevels } from '../types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import SharePrivacyOption from 'src/overview/sharing/components/SharePrivacyOption'
+import { getKeyName } from 'src/util/os-specific-key-names'
 
 interface State {
     isTagPickerShown: boolean
@@ -38,6 +39,8 @@ export interface Props
 
 export class AnnotationCreate extends React.Component<Props, State>
     implements FocusableComponent {
+    static ALT_KEY = getKeyName({ key: 'alt' })
+    static MOD_KEY = getKeyName({ key: 'mod' })
     private textAreaRef = React.createRef<HTMLTextAreaElement>()
     private markdownPreviewRef = React.createRef<
         MarkdownPreviewAnnotationInsertMenu
@@ -175,7 +178,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                     >
                         <SharePrivacyOption
                             title="Protected"
-                            shortcut="shift+cmd+enter"
+                            shortcut={`shift+${AnnotationCreate.MOD_KEY}+enter`}
                             description="Sharing status will not change in bulk actions"
                             icon="lock"
                             onClick={this.setSavePrivacyLevel(
@@ -184,7 +187,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                         />
                         <SharePrivacyOption
                             title="Private"
-                            shortcut="cmd+enter"
+                            shortcut={`${AnnotationCreate.MOD_KEY}+enter`}
                             description="Private to you, until shared (in bulk)"
                             icon="person"
                             onClick={this.setSavePrivacyLevel(
@@ -193,7 +196,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                         />
                         <SharePrivacyOption
                             title="Shared"
-                            shortcut="option+cmd+enter"
+                            shortcut={`${AnnotationCreate.ALT_KEY}+${AnnotationCreate.MOD_KEY}+enter`}
                             description="Added to shared collections & page links"
                             icon="shared"
                             onClick={this.setSavePrivacyLevel(
@@ -235,7 +238,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             {...inputProps}
                             value={this.props.comment}
                             onClick={this.hideTagPicker}
-                            placeholder="Add private note (save with cmd/ctrl+enter)"
+                            placeholder={`Add private note (save with ${AnnotationCreate.MOD_KEY}+enter)`}
                             onChange={(e) =>
                                 this.props.onCommentChange(e.target.value)
                             }
