@@ -1138,6 +1138,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const { annotationsBG, contentShareBG } = this.options
         const formState =
             previousState.searchResults.results[event.day].pages.byId[
                 event.pageId
@@ -1149,7 +1150,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { newNoteCreateState: { $set: taskState } },
             }),
             async () => {
-                const newNoteId = await this.options.annotationsBG.createAnnotation(
+                const newNoteId = await annotationsBG.createAnnotation(
                     {
                         pageUrl: event.fullPageUrl,
                         comment: formState.inputValue,
@@ -1158,7 +1159,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     { skipPageIndexing: true },
                 )
                 if (formState.tags.length) {
-                    await this.options.annotationsBG.updateAnnotationTags({
+                    await annotationsBG.updateAnnotationTags({
                         url: newNoteId,
                         tags: formState.tags,
                     })
@@ -1176,7 +1177,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         displayTime: Date.now(),
                                         comment: formState.inputValue,
                                         tags: formState.tags,
-                                        privacyLevel: event.privacyLevel,
                                         pageUrl: event.pageId,
                                         ...utils.getInitialNoteResultState(),
                                     },
@@ -1199,8 +1199,31 @@ export class DashboardLogic extends UILogic<State, Events> {
                                 },
                             },
                         },
+                        noteSharingInfo: {
+                            [newNoteId]: {
+                                $set: {
+                                    privacyLevel: event.privacyLevel,
+                                    status:
+                                        event.privacyLevel ===
+                                        AnnotationPrivacyLevels.SHARED
+                                            ? 'shared'
+                                            : 'not-yet-shared',
+                                    taskState: 'pristine',
+                                },
+                            },
+                        },
                     },
                 })
+
+                if (event.privacyLevel === AnnotationPrivacyLevels.SHARED) {
+                    await contentShareBG.shareAnnotation({
+                        annotationUrl: newNoteId,
+                    })
+                    await contentShareBG.shareAnnotationsToLists({
+                        annotationUrls: [newNoteId],
+                        queueInteraction: 'skip-queue',
+                    })
+                }
             },
         )
     }

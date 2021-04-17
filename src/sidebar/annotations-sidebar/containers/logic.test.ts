@@ -796,7 +796,7 @@ describe('SidebarContainerLogic', () => {
                 expect.objectContaining({ url: annotationUrl1 }),
                 expect.objectContaining({ url: annotationUrl2 }),
             ])
-            await sidebarLogic._detectSharedAnnotations([
+            await sidebarLogic['_detectSharedAnnotations']([
                 annotationUrl1,
                 annotationUrl2,
             ])

@@ -11,8 +11,9 @@ import {
 import { haveTagsChanged } from 'src/util/have-tags-changed'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
-interface CachedAnnotation extends Annotation {
+export interface CachedAnnotation extends Annotation {
     isShared: boolean
+    privacyLevel: AnnotationPrivacyLevels
 }
 
 export const createAnnotationsCache = (
@@ -33,16 +34,19 @@ export const createAnnotationsCache = (
                         withTags: true,
                     },
                 )
+                const annotationUrls = annotations.map((a) => a.url)
 
                 const remoteIds = await bgModules.contentSharing.getRemoteAnnotationIds(
-                    {
-                        annotationUrls: annotations.map((a) => a.url),
-                    },
+                    { annotationUrls },
+                )
+                const privacyLevels = await bgModules.annotations.findAnnotationPrivacyLevels(
+                    { annotationUrls },
                 )
 
                 return annotations.map((a) => ({
                     ...a,
                     isShared: !!remoteIds[a.url],
+                    privacyLevel: privacyLevels[a.url],
                 }))
             },
             create: async (annotation) =>
@@ -110,18 +114,18 @@ export interface AnnotationsCacheInterface {
         annotation: Omit<
             CachedAnnotation,
             'lastEdited' | 'createdWhen' | 'isShared'
-        > & { privacyLevel?: AnnotationPrivacyLevels },
+        >,
     ) => Promise<void>
     update: (
         annotation: Omit<
             CachedAnnotation,
-            'lastEdited' | 'createdWhen' | 'isShared'
+            'lastEdited' | 'createdWhen' | 'isShared' | 'privacyLevel'
         >,
     ) => Promise<void>
     delete: (
         annotation: Omit<
             CachedAnnotation,
-            'lastEdited' | 'createdWhen' | 'isShared'
+            'lastEdited' | 'createdWhen' | 'isShared' | 'privacyLevel'
         >,
     ) => Promise<void>
     sort: (sortingFn?: AnnotationsSorter) => void
@@ -182,7 +186,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         this.annotations = [annotation, ...stateBeforeModifications]
 
         this.annotationChanges.emit('created', annotation)
-        this.annotationChanges.emit('newState', this._annotations)
+        this.annotationChanges.emit('newState', this.annotations)
 
         try {
             const annotUrl = await backendOperations.create(annotation)

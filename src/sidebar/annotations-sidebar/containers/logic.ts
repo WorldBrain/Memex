@@ -24,6 +24,7 @@ import {
 import { areTagsEquivalent } from 'src/tags/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { AnnotationsSorter } from '../sorting'
+import { CachedAnnotation } from 'src/annotations/annotations-cache'
 
 export interface EditForm {
     isBookmarked: boolean
@@ -315,8 +316,8 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    private annotationSubscription = (annotations: Annotation[]) => {
-        this.emitMutation({
+    private annotationSubscription = (annotations: CachedAnnotation[]) => {
+        const mutation: UIMutation<SidebarContainerState> = {
             annotations: { $set: annotations },
             editForms: {
                 $apply: (editForms: EditForms) => {
@@ -328,10 +329,25 @@ export class SidebarContainerLogic extends UILogic<
                     return editForms
                 },
             },
-        })
-        this._detectSharedAnnotations(
-            annotations.map((annotation) => annotation.url),
-        )
+        }
+
+        for (const { privacyLevel, url } of annotations) {
+            mutation.annotationSharingInfo = {
+                ...(mutation.annotationSharingInfo || {}),
+                [url]: {
+                    $set: {
+                        status:
+                            privacyLevel === AnnotationPrivacyLevels.SHARED
+                                ? 'shared'
+                                : 'not-yet-shared',
+                        taskState: 'pristine',
+                        privacyLevel,
+                    },
+                },
+            }
+        }
+
+        this.emitMutation(mutation)
     }
 
     sortAnnotations: EventHandler<'sortAnnotations'> = ({
@@ -586,6 +602,7 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState: { commentBox, pageUrl },
     }) => {
+        const { annotationsCache, contentSharing } = this.options
         const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
             return
@@ -593,13 +610,21 @@ export class SidebarContainerLogic extends UILogic<
 
         const annotationUrl = generateUrl({ pageUrl, now: () => Date.now() })
 
-        this.options.annotationsCache.create({
+        await annotationsCache.create({
             url: annotationUrl,
             pageUrl,
             comment,
             tags: commentBox.tags,
             privacyLevel: event.privacyLevel,
         })
+
+        if (event.privacyLevel === AnnotationPrivacyLevels.SHARED) {
+            await contentSharing.shareAnnotation({ annotationUrl })
+            await contentSharing.shareAnnotationsToLists({
+                annotationUrls: [annotationUrl],
+                queueInteraction: 'skip-queue',
+            })
+        }
 
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },
@@ -878,7 +903,7 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ showBetaFeatureNotifModal: { $set: event.shown } })
     }
 
-    async _detectSharedAnnotations(annotationUrls: string[]) {
+    private async _detectSharedAnnotations(annotationUrls: string[]) {
         const annotationSharingInfo: UIMutation<
             SidebarContainerState['annotationSharingInfo']
         > = {}
@@ -894,8 +919,13 @@ export class SidebarContainerLogic extends UILogic<
             annotationSharingInfo[localId] = {
                 $set: {
                     taskState: 'pristine',
-                    status: remoteIds[localId] ? 'shared' : 'not-yet-shared',
                     privacyLevel: privacyLevels[localId],
+                    status:
+                        remoteIds[localId] ||
+                        privacyLevels[localId] ===
+                            AnnotationPrivacyLevels.SHARED
+                            ? 'shared'
+                            : 'not-yet-shared',
                 },
             }
         }
