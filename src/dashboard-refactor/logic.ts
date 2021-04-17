@@ -23,6 +23,7 @@ import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
 import { DisableableState } from './header/sync-status-menu/types'
 import { DRAG_EL_ID } from './components/DragElement'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -722,7 +723,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         const mutation: UIMutation<State['searchResults']> = {}
 
         for (const noteId of noteIds) {
-            const prev = noteSharingInfo[noteId]
+            const prev: AnnotationSharingInfo =
+                noteSharingInfo[noteId] ?? ({} as any)
             if (prev?.privacyLevel === AnnotationPrivacyLevels.PROTECTED) {
                 continue
             }
@@ -1175,6 +1177,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         comment: formState.inputValue,
                                         tags: formState.tags,
                                         privacyLevel: event.privacyLevel,
+                                        pageUrl: event.pageId,
                                         ...utils.getInitialNoteResultState(),
                                     },
                                 }),

@@ -80,6 +80,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
             })
             success = true
         } catch (err) {}
+
         this.props.postShareHook?.({
             privacyLevel: AnnotationPrivacyLevels.SHARED,
             shareStateChanged: success,
@@ -96,7 +97,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                             annotationUrl,
                             queueInteraction: 'skip-queue',
                         })
-                        .catch(),
+                        .catch((err) => {}),
                 ),
             )
             success = true
