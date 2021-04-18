@@ -2,44 +2,44 @@ import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import Button from '@worldbrain/memex-common/lib/common-ui/components/button'
-import colors from '../../colors'
-import styles, { fonts } from '../../styles'
+import { fonts } from '../../styles'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { ButtonTooltip } from 'src/common-ui/components'
-import {
-    contentSharing,
-    auth,
-    tags,
-} from 'src/util/remote-functions-background'
+import { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 
 export interface Props {
     listName: string
     remoteLink?: string
+    sharingAccess: AnnotationSharingAccess
     onAddContributorsClick?: React.MouseEventHandler
 }
 
 export default class ListDetails extends PureComponent<Props> {
+    private renderAddContributorsBtn() {
+        if (
+            !this.props.onAddContributorsClick ||
+            this.props.sharingAccess === 'feature-disabled'
+        ) {
+            return
+        }
 
-    componentDidMount() {
-        this.BetaStatus()
+        return (
+            <Margin right="10px">
+                <ButtonTooltip
+                    tooltipText="Invite people to this collection"
+                    position="bottom"
+                >
+                    <Icon
+                        height="18px"
+                        icon="addPeople"
+                        onClick={this.props.onAddContributorsClick}
+                    />
+                </ButtonTooltip>
+            </Margin>
+        )
     }
-
-    private authBG = auth
-
-    state = {
-        sharingAccess: 'feature-disabled',
-    }
-
-    private async BetaStatus() {
-        const isAllowed = await this.authBG.isAuthorizedForFeature('beta')
-        this.setState({
-            sharingAccess: isAllowed ? 'sharing-allowed' : 'feature-disabled',
-        })
-    }
-
 
     render() {
-
         return (
             <>
                 {this.props.listName && (
@@ -57,23 +57,7 @@ export default class ListDetails extends PureComponent<Props> {
                                 )}
                             </DetailsContainer>
                             <BtnsContainer>
-                                {this.props.onAddContributorsClick && this.state.sharingAccess === 'sharing-allowed' && (
-                                    <Margin right="10px">
-                                        <ButtonTooltip
-                                            tooltipText="Invite people to this collection"
-                                            position="bottom"
-                                        >
-                                            <Icon
-                                                height="18px"
-                                                icon="addPeople"
-                                                onClick={
-                                                    this.props
-                                                        .onAddContributorsClick
-                                                }
-                                            />
-                                        </ButtonTooltip>
-                                    </Margin>
-                                )}
+                                {this.renderAddContributorsBtn()}
                                 {this.props.remoteLink && (
                                     <Button
                                         type="primary-action"

@@ -96,7 +96,7 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private getListDetailsProps = (): ListDetailsProps | null => {
-        const { listsSidebar } = this.state
+        const { listsSidebar, searchResults } = this.state
 
         if (
             !listsSidebar.selectedListId ||
@@ -115,6 +115,7 @@ export class DashboardContainer extends StatefulUIElement<
         return {
             remoteLink,
             listName: listData.name,
+            sharingAccess: searchResults.sharingAccess,
             onAddContributorsClick: () =>
                 this.processEvent('setShareListId', {
                     listId: listData.id,
