@@ -21,8 +21,10 @@ export class SignInScreen extends React.Component<Props> {
                 className={styles.firebaseAuth}
                 uiConfig={{
                     signInFlow: 'popup',
-                    signInOptions: [
-                        getFirebase().auth.EmailAuthProvider.PROVIDER_ID,
+                    signInOptions: [{
+                        provider: getFirebase().auth.EmailAuthProvider.PROVIDER_ID,
+                        requireDisplayName: false,
+                    },    
                     ],
                     callbacks: {
                         signInSuccessWithAuthResult: () => {
@@ -46,11 +48,12 @@ export class SignInScreen extends React.Component<Props> {
 }
 
 const StyledFirebaseAuth = styled(FirebaseAuth)`
-    margin-top: 20px;
     width: 450px;
 
     .firebaseui-id-submit {
         background-color: ${colorPrimary};
+        border-radius: 3px;
+        box-shadow: none;
     }
 
     .mdl-button--raised.mdl-button--colored {
@@ -62,12 +65,52 @@ const StyledFirebaseAuth = styled(FirebaseAuth)`
     }
 
     .firebaseui-input {
-        border-color: rgba(0, 0, 0, 0.12);
+        border-radius: 3px;
+        background-color: #f0f0f0;
+        height: 34px;
+        padding: 0 15px;
+    }
+
+    .mdl-textfield.is-invalid .mdl-textfield__input {
+        border-radius: 3px;
+        background-color: #f0f0f0;
+        height: 34px;
+        padding: 0 15px;
+    }
+
+    .mdl-textfield--floating-label .mdl-textfield__label {
+            padding: 0 15px;
+    }
+
+    .firebaseui-textfield.mdl-textfield .firebaseui-label::after {
+        background: none;
+    }
+
+    .firebaseui-error-wrapper {
+        min-height: unset;
+    }
+
+    .mdl-textfield__label:after {
+        background: none;
+    }
+
+    input.firebaseui-input, input.firebaseui-input-invalid {
+        border-radius: 3px;
+        background-color: #f0f0f0;
+        height: 34px;
+        padding: 0 15px;
+    }
+
+    .mdl-textfield__input {
+        border: none;
+        border-bottom: none;
+        box-shadow: none;
     }
 
     .firebaseui-container {
         margin: 0 auto;
         max-width: none;
+        box-shadow: none;
     }
 
     .firebaseui-card-header {
@@ -75,6 +118,7 @@ const StyledFirebaseAuth = styled(FirebaseAuth)`
         font-weight: 600;
         color: #000000;
         margin-bottom: 0.5em;
+        display: none;
     }
 
     .firebaseui-link {
@@ -84,4 +128,10 @@ const StyledFirebaseAuth = styled(FirebaseAuth)`
     .firebaseui-id-secondary-link {
         color: ${colorPrimary};
     }
+
+    .firebaseui-input-floating-button {
+        height: 34px;
+        width: 44px;
+    }
+
 `

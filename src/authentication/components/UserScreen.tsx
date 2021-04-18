@@ -32,11 +32,11 @@ class UserScreen extends React.Component<Props & AuthContextInterface> {
                 {this.props.currentUser === null ? (
                     <div>
                         <p className={styles.instructionsTitle}>
-                            {' Login or Create an Account'}
+                            {' Login or Create Account'}
                         </p>
                         <p className={styles.instructions}>
                             {
-                                ' To create an account just type in a new email address'
+                                ' To create an account, type in a new email address'
                             }
                         </p>
                         <SignInScreen redirectTo={LOGIN_URL} />
