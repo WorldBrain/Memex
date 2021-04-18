@@ -12,7 +12,6 @@ import { haveTagsChanged } from 'src/util/have-tags-changed'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 export interface CachedAnnotation extends Annotation {
-    isShared: boolean
     privacyLevel: AnnotationPrivacyLevels
 }
 
@@ -34,18 +33,12 @@ export const createAnnotationsCache = (
                         withTags: true,
                     },
                 )
-                const annotationUrls = annotations.map((a) => a.url)
-
-                const remoteIds = await bgModules.contentSharing.getRemoteAnnotationIds(
-                    { annotationUrls },
-                )
                 const privacyLevels = await bgModules.annotations.findAnnotationPrivacyLevels(
-                    { annotationUrls },
+                    { annotationUrls: annotations.map((a) => a.url) },
                 )
 
                 return annotations.map((a) => ({
                     ...a,
-                    isShared: !!remoteIds[a.url],
                     privacyLevel: privacyLevels[a.url],
                 }))
             },
@@ -111,21 +104,18 @@ export interface AnnotationsCacheInterface {
         args?: { limit?: number; skip?: number },
     ) => Promise<void>
     create: (
-        annotation: Omit<
-            CachedAnnotation,
-            'lastEdited' | 'createdWhen' | 'isShared'
-        >,
+        annotation: Omit<CachedAnnotation, 'lastEdited' | 'createdWhen'>,
     ) => Promise<void>
     update: (
         annotation: Omit<
             CachedAnnotation,
-            'lastEdited' | 'createdWhen' | 'isShared' | 'privacyLevel'
+            'lastEdited' | 'createdWhen' | 'privacyLevel'
         >,
     ) => Promise<void>
     delete: (
         annotation: Omit<
             CachedAnnotation,
-            'lastEdited' | 'createdWhen' | 'isShared' | 'privacyLevel'
+            'lastEdited' | 'createdWhen' | 'privacyLevel'
         >,
     ) => Promise<void>
     sort: (sortingFn?: AnnotationsSorter) => void
@@ -165,7 +155,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         this.annotations = annotations.sort(this.dependencies.sortingFn)
         this.annotationChanges.emit('load', this._annotations)
-        this.annotationChanges.emit('newState', this._annotations)
+        this.annotationChanges.emit('newState', this.annotations)
     }
 
     sort = (sortingFn?: AnnotationsSorter) => {
@@ -175,7 +165,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         this._annotations = this._annotations.sort(this.dependencies.sortingFn)
         this.annotationChanges.emit('sorted', this._annotations)
-        this.annotationChanges.emit('newState', this._annotations)
+        this.annotationChanges.emit('newState', this.annotations)
     }
 
     create = async (annotation: CachedAnnotation) => {
@@ -216,7 +206,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         ]
 
         this.annotationChanges.emit('updated', annotation)
-        this.annotationChanges.emit('newState', this._annotations)
+        this.annotationChanges.emit('newState', this.annotations)
 
         try {
             await this.dependencies.backendOperations.update(annotation)
@@ -252,7 +242,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         ]
 
         this.annotationChanges.emit('deleted', annotation)
-        this.annotationChanges.emit('newState', this._annotations)
+        this.annotationChanges.emit('newState', this.annotations)
 
         try {
             await this.dependencies.backendOperations.delete(annotation)

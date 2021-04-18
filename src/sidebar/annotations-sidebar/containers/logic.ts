@@ -610,6 +610,11 @@ export class SidebarContainerLogic extends UILogic<
 
         const annotationUrl = generateUrl({ pageUrl, now: () => Date.now() })
 
+        this.emitMutation({
+            commentBox: { $set: INIT_FORM_STATE },
+            showCommentBox: { $set: false },
+        })
+
         await annotationsCache.create({
             url: annotationUrl,
             pageUrl,
@@ -625,11 +630,6 @@ export class SidebarContainerLogic extends UILogic<
                 queueInteraction: 'skip-queue',
             })
         }
-
-        this.emitMutation({
-            commentBox: { $set: INIT_FORM_STATE },
-            showCommentBox: { $set: false },
-        })
     }
 
     cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
