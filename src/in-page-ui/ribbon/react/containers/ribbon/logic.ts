@@ -4,7 +4,10 @@ import * as componentTypes from '../../components/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { loadInitial } from 'src/util/ui-logic'
-import { NewAnnotationOptions } from 'src/annotations/types'
+import {
+    NewAnnotationOptions,
+    AnnotationPrivacyLevels,
+} from 'src/annotations/types'
 import { generateUrl } from 'src/annotations/utils'
 import { resolvablePromise } from 'src/util/resolvable'
 import { FocusableComponent } from 'src/annotations/components/types'
@@ -308,6 +311,7 @@ export class RibbonContainerLogic extends UILogic<
         event,
         previousState: { pageUrl, commentBox },
     }) => {
+        const { annotationsCache, contentSharing } = this.dependencies
         const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
             return
@@ -317,14 +321,6 @@ export class RibbonContainerLogic extends UILogic<
 
         const annotationUrl = generateUrl({ pageUrl, now: () => Date.now() })
 
-        await this.dependencies.annotationsCache.create({
-            url: annotationUrl,
-            pageUrl,
-            comment,
-            tags: commentBox.tags,
-            privacyLevel: event.value,
-        })
-
         this.emitMutation({
             commentBox: {
                 $set: {
@@ -333,12 +329,29 @@ export class RibbonContainerLogic extends UILogic<
                 },
             },
         })
+
+        await annotationsCache.create({
+            url: annotationUrl,
+            pageUrl,
+            comment,
+            tags: commentBox.tags,
+            privacyLevel: event.value,
+        })
+
         this.dependencies.setRibbonShouldAutoHide(true)
 
         await new Promise((resolve) =>
             setTimeout(resolve, this.commentSavedTimeout),
         )
         this.emitMutation({ commentBox: { isCommentSaved: { $set: false } } })
+
+        if (event.value === AnnotationPrivacyLevels.SHARED) {
+            await contentSharing.shareAnnotation({ annotationUrl })
+            await contentSharing.shareAnnotationsToLists({
+                annotationUrls: [annotationUrl],
+                queueInteraction: 'skip-queue',
+            })
+        }
     }
 
     cancelComment: EventHandler<'cancelComment'> = () => {
