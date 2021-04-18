@@ -69,6 +69,7 @@ export const theme: Theme = {
         lock: icons.lock,
         person: icons.person,
         shared: icons.shared,
+        shareEmpty: icons.shareEmpty,
         webLogo: icons.webLogo,
         mediumLogo: icons.mediumLogo,
         twitterLogo: icons.twitterLogo,

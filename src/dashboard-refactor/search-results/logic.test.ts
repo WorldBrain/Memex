@@ -139,6 +139,32 @@ describe('Dashboard search results logic', () => {
                 searchResults.state.searchResults.isSearchCopyPasterShown,
             ).toEqual(false)
         })
+
+        it('should be able to set list search share menu shown state', async ({
+            device,
+        }) => {
+            const { searchResults } = await setupTest(device)
+
+            expect(
+                searchResults.state.searchResults.isListShareMenuShown,
+            ).toEqual(false)
+
+            await searchResults.processEvent('setListShareMenuShown', {
+                isShown: true,
+            })
+
+            expect(
+                searchResults.state.searchResults.isListShareMenuShown,
+            ).toEqual(true)
+
+            await searchResults.processEvent('setListShareMenuShown', {
+                isShown: false,
+            })
+
+            expect(
+                searchResults.state.searchResults.isListShareMenuShown,
+            ).toEqual(false)
+        })
     })
 
     describe('page data state mutations', () => {

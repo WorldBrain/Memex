@@ -172,6 +172,7 @@ export interface RootState {
     searchType: SearchType
     draggedPageId?: string
     noResultsType: NoResultsType
+    isListShareMenuShown: boolean
     shouldFormsAutoFocus: boolean
     isSearchCopyPasterShown: boolean
 
@@ -214,6 +215,7 @@ export type Events = UIEvent<{
     // Root state mutations
     setSearchType: { searchType: SearchType }
     setAllNotesShown: { areShown: boolean }
+    setListShareMenuShown: { isShown: boolean }
     setSearchCopyPasterShown: { isShown: boolean }
     setPageData: { pages: PageData[] }
     setPageSearchResult: { result: StandardSearchResponse }

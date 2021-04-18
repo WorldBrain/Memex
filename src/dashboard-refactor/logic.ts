@@ -86,6 +86,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 showOnboardingMsg: false,
                 areResultsExhausted: false,
                 shouldFormsAutoFocus: false,
+                isListShareMenuShown: false,
                 isSearchCopyPasterShown: false,
                 pageData: {
                     allIds: [],
@@ -1299,6 +1300,14 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         this.emitMutation({
             searchResults: { isSearchCopyPasterShown: { $set: event.isShown } },
+        })
+    }
+
+    setListShareMenuShown: EventHandler<'setListShareMenuShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: { isListShareMenuShown: { $set: event.isShown } },
         })
     }
 
