@@ -3,6 +3,7 @@ import styled, { ThemeProvider } from 'styled-components'
 import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 
 import { ButtonTooltip } from 'src/common-ui/components'
+import { getKeyName } from 'src/util/os-specific-key-names'
 
 export interface MainInputProps<T = HTMLInputElement | HTMLTextAreaElement> {
     onKeyDown: React.KeyboardEventHandler
@@ -27,8 +28,10 @@ interface State {
 }
 
 export class MarkdownPreview extends React.Component<Props, State> {
+    static ALT_KEY = getKeyName({ key: 'alt' })
     static defaultProps: Partial<Props> = {
-        isToggleKBShortcutKeyed: (e) => e.key === 'Enter' && e.altKey,
+        isToggleKBShortcutKeyed: (e) =>
+            e.key === 'Enter' && e.altKey && !e.metaKey,
         renderSecondaryBtn: () => null,
     }
 
@@ -121,7 +124,7 @@ export class MarkdownPreview extends React.Component<Props, State> {
                         {this.props.renderSecondaryBtn()}
                         {this.showPreviewBtn && (
                             <ButtonTooltip
-                                tooltipText="alt/option + Enter"
+                                tooltipText={`${MarkdownPreview.ALT_KEY} + Enter`}
                                 position="bottomSidebar"
                             >
                                 <PreviewBtn onClick={this.togglePreview}>
