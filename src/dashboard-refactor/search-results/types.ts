@@ -13,6 +13,7 @@ import {
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 import { Anchor } from 'src/highlighting/types'
+import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -134,7 +135,7 @@ export interface NoteResult {
     isEditing: boolean
     areRepliesShown: boolean
     isTagPickerShown: boolean
-    isShareMenuShown: boolean
+    shareMenuShowStatus: 'show' | 'hide' | 'show-n-share'
     isCopyPasterShown: boolean
     editNoteForm: NoteFormState
     hoverState: NoteResultHoverState
@@ -265,12 +266,16 @@ export type Events = UIEvent<{
     cancelPageNewNote: PageEventArgs
     savePageNewNote: PageEventArgs & {
         fullPageUrl: string
+        privacyLevel: AnnotationPrivacyLevels
     }
 
     // Note result state mutations
     setNoteCopyPasterShown: NoteEventArgs & { isShown: boolean }
     setNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
-    setNoteShareMenuShown: NoteEventArgs & { isShown: boolean }
+    setNoteShareMenuShown: NoteEventArgs & {
+        shouldShow: boolean
+        mouseEvent: React.MouseEvent
+    }
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
     setNoteHover: NoteEventArgs & { hover: NoteResultHoverState }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }

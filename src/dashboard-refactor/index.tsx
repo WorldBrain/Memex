@@ -527,9 +527,10 @@ export class DashboardContainer extends StatefulUIElement<
                 }
                 pageInteractionProps={{
                     onNotesBtnClick: (day, pageId) => (e) => {
+                        const pageData = searchResults.pageData.byId[pageId]
                         if (e.shiftKey) {
                             this.notesSidebarRef.current.toggleSidebarShowForPageId(
-                                pageId,
+                                pageData.fullUrl,
                             )
                             return
                         }
@@ -657,10 +658,11 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             tags,
                         }),
-                    onSave: (day, pageId) => () =>
+                    onSave: (day, pageId) => (privacyLevel) =>
                         this.processEvent('savePageNewNote', {
                             day,
                             pageId,
+                            privacyLevel,
                             fullPageUrl:
                                 searchResults.pageData.byId[pageId].fullUrl,
                         }),
@@ -712,11 +714,13 @@ export class DashboardContainer extends StatefulUIElement<
                             noteId,
                             value: (e.target as HTMLTextAreaElement).value,
                         }),
-                    onShareBtnClick: (noteId) => () =>
+                    onShareBtnClick: (noteId) => (mouseEvent) =>
                         this.processEvent('setNoteShareMenuShown', {
+                            mouseEvent,
                             noteId,
-                            isShown: !searchResults.noteData.byId[noteId]
-                                .isShareMenuShown,
+                            shouldShow:
+                                searchResults.noteData.byId[noteId]
+                                    .shareMenuShowStatus === 'hide',
                         }),
                     updateShareInfo: (noteId) => (info) =>
                         this.processEvent('updateNoteShareInfo', {

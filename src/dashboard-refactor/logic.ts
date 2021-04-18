@@ -22,6 +22,8 @@ import { NoResultsType } from './search-results/types'
 import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
 import { DisableableState } from './header/sync-status-menu/types'
 import { DRAG_EL_ID } from './components/DragElement'
+import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -523,6 +525,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             { annotationUrls },
         )
 
+        const privacyLevels = await this.options.annotationsBG.findAnnotationPrivacyLevels(
+            { annotationUrls },
+        )
+
         for (const noteId of annotationUrls) {
             mutation.noteSharingInfo = {
                 ...mutation.noteSharingInfo,
@@ -530,6 +536,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     $set: {
                         taskState: 'pristine',
                         status: remoteIds[noteId] ? 'shared' : 'not-yet-shared',
+                        privacyLevel: privacyLevels[noteId],
                     },
                 },
             }
@@ -716,12 +723,21 @@ export class DashboardLogic extends UILogic<State, Events> {
         const mutation: UIMutation<State['searchResults']> = {}
 
         for (const noteId of noteIds) {
+            const prev: AnnotationSharingInfo =
+                noteSharingInfo[noteId] ?? ({} as any)
+            if (prev?.privacyLevel === AnnotationPrivacyLevels.PROTECTED) {
+                continue
+            }
+
             mutation.noteSharingInfo = {
                 ...mutation.noteSharingInfo,
                 [noteId]: {
                     $set: {
-                        ...noteSharingInfo[noteId],
+                        ...prev,
                         ...event.info,
+                        privacyLevel:
+                            event.info.privacyLevel ?? prev.privacyLevel,
+                        status: event.info.status ?? prev.status,
                     },
                 },
             }
@@ -1122,6 +1138,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const { annotationsBG, contentShareBG } = this.options
         const formState =
             previousState.searchResults.results[event.day].pages.byId[
                 event.pageId
@@ -1133,15 +1150,16 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { newNoteCreateState: { $set: taskState } },
             }),
             async () => {
-                const newNoteId = await this.options.annotationsBG.createAnnotation(
+                const newNoteId = await annotationsBG.createAnnotation(
                     {
                         pageUrl: event.fullPageUrl,
                         comment: formState.inputValue,
+                        privacyLevel: event.privacyLevel,
                     },
                     { skipPageIndexing: true },
                 )
                 if (formState.tags.length) {
-                    await this.options.annotationsBG.updateAnnotationTags({
+                    await annotationsBG.updateAnnotationTags({
                         url: newNoteId,
                         tags: formState.tags,
                     })
@@ -1159,6 +1177,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         displayTime: Date.now(),
                                         comment: formState.inputValue,
                                         tags: formState.tags,
+                                        pageUrl: event.pageId,
                                         ...utils.getInitialNoteResultState(),
                                     },
                                 }),
@@ -1180,8 +1199,31 @@ export class DashboardLogic extends UILogic<State, Events> {
                                 },
                             },
                         },
+                        noteSharingInfo: {
+                            [newNoteId]: {
+                                $set: {
+                                    privacyLevel: event.privacyLevel,
+                                    status:
+                                        event.privacyLevel ===
+                                        AnnotationPrivacyLevels.SHARED
+                                            ? 'shared'
+                                            : 'not-yet-shared',
+                                    taskState: 'pristine',
+                                },
+                            },
+                        },
                     },
                 })
+
+                if (event.privacyLevel === AnnotationPrivacyLevels.SHARED) {
+                    await contentShareBG.shareAnnotation({
+                        annotationUrl: newNoteId,
+                    })
+                    await contentShareBG.shareAnnotationsToLists({
+                        annotationUrls: [newNoteId],
+                        queueInteraction: 'skip-queue',
+                    })
+                }
             },
         )
     }
@@ -1435,6 +1477,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                         [event.noteId]: {
                             ...noteSharingInfo[event.noteId],
                             ...event.info,
+                            privacyLevel:
+                                event.info.privacyLevel ??
+                                noteSharingInfo[event.noteId].privacyLevel,
+                            status:
+                                event.info.status ??
+                                noteSharingInfo[event.noteId].status,
                         },
                     },
                 },
@@ -1485,7 +1533,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        if (event.isShown) {
+        if (event.shouldShow) {
             if (
                 previousState.searchResults.sharingAccess === 'feature-disabled'
             ) {
@@ -1498,13 +1546,20 @@ export class DashboardLogic extends UILogic<State, Events> {
             await this.showShareOnboardingIfNeeded()
         }
 
+        const immediateShare =
+            event.mouseEvent.metaKey && event.mouseEvent.altKey
+
         this.emitMutation({
             searchResults: {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            isShareMenuShown: {
-                                $set: event.isShown,
+                            shareMenuShowStatus: {
+                                $set: event.shouldShow
+                                    ? immediateShare
+                                        ? 'show-n-share'
+                                        : 'show'
+                                    : 'hide',
                             },
                         },
                     },

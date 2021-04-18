@@ -14,14 +14,14 @@ import AnnotationEdit, {
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
-import { SidebarAnnotationTheme } from '../types'
+import { SidebarAnnotationTheme, AnnotationPrivacyLevels } from '../types'
 import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 import {
-    SHARE_BUTTON_ICONS,
     SHARE_BUTTON_LABELS,
+    getShareButtonIcon,
     getShareAnnotationBtnState,
     getShareAnnotationBtnAction,
 } from '../sharing-utils'
@@ -29,11 +29,12 @@ import { ButtonTooltip } from 'src/common-ui/components'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { NoteResultHoverState } from 'src/dashboard-refactor/search-results/types'
+import { getKeyName } from 'src/util/os-specific-key-names'
 
 export interface AnnotationEditableProps {
     /** Required to decide how to go to an annotation when it's clicked. */
     url: string
-    sharingInfo: AnnotationSharingInfo
+    sharingInfo?: AnnotationSharingInfo
     sharingAccess: AnnotationSharingAccess
     className?: string
     isActive?: boolean
@@ -70,6 +71,7 @@ export type Props = AnnotationEditableProps & AnnotationEditableEventProps
 export default class AnnotationEditable extends React.Component<Props> {
     private annotEditRef = React.createRef<AnnotationEdit>()
 
+    static MOD_KEY = getKeyName({ key: 'mod' })
     static defaultProps: Partial<Props> = {
         mode: 'default',
         hoverState: null,
@@ -224,12 +226,17 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (this.props.hoverState === null) {
             return ['already-shared', 'sharing-success'].includes(
                 this.sharingData.state,
-            )
+            ) ||
+                this.props.sharingInfo?.privacyLevel ===
+                    AnnotationPrivacyLevels.PROTECTED
                 ? [
                       {
                           key: 'share-note-btn',
                           isDisabled: true,
-                          image: SHARE_BUTTON_ICONS[this.sharingData.state],
+                          image: getShareButtonIcon(
+                              this.sharingData.state,
+                              this.props.sharingInfo?.privacyLevel,
+                          ),
                       },
                   ]
                 : []
@@ -260,7 +267,10 @@ export default class AnnotationEditable extends React.Component<Props> {
                 },
                 {
                     key: 'share-note-btn',
-                    image: SHARE_BUTTON_ICONS[this.sharingData.state],
+                    image: getShareButtonIcon(
+                        this.sharingData.state,
+                        this.props.sharingInfo?.privacyLevel,
+                    ),
                     onClick: footerDeps.onShareClick,
                     tooltipText: SHARE_BUTTON_LABELS[this.sharingData.state],
                     isDisabled: ['sharing', 'unsharing'].includes(
@@ -292,7 +302,10 @@ export default class AnnotationEditable extends React.Component<Props> {
             {
                 key: 'share-note-btn',
                 isDisabled: true,
-                image: SHARE_BUTTON_ICONS[this.sharingData.state],
+                image: getShareButtonIcon(
+                    this.sharingData.state,
+                    this.props.sharingInfo?.privacyLevel,
+                ),
             },
         ]
     }
@@ -338,7 +351,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                         </CancelBtnStyled>
                     </ButtonTooltip>
                     <ButtonTooltip
-                        tooltipText="ctrl/cmd + Enter"
+                        tooltipText={`${AnnotationEditable.MOD_KEY} + Enter`}
                         position="bottom"
                     >
                         <ActionBtnStyled onClick={actionBtnHandler}>
@@ -410,15 +423,21 @@ const CopyPasterWrapper = styled.div`
 
 const EditNoteIconBox = styled.div`
     display: none;
-    position: relative;
-    justify-content: flex-end;
-    top: 0px;
-    right: 0px;
-    float: right;
-    z-index: 1;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
     border: none;
     outline: none;
-    float: right;
+    background: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+    border: 1px solid #f0f0f0;
+
+    &:hover{
+        background-color: #f0f0f0;
+    }
 `
 
 const EditNoteIcon = styled.div`
@@ -442,6 +461,7 @@ const HighlightActionsBox = styled.div`
     width: 50px;
     display: flex;
     justify-content: flex-end;
+
 `
 
 const NoteTextBox = styled.div`
@@ -455,6 +475,7 @@ const NoteTextBox = styled.div`
     line-break: normal;
     word-break: break-word;
     hyphens: auto;
+    width: 100%;
 
     & *:first-child {
         margin-top: 0px;
@@ -478,8 +499,13 @@ const ActionBox = styled.div`
 const HighlightAction = styled(Margin)`
     display: flex;
     background-color: white;
-    border-radius: 5px;
+    border-radius: 3px;
     padding: 2px;
+    border: 1px solid #f0f0f0;
+
+    &:hover{
+        background-color: #f0f0f0;
+    }
 `
 
 const HighlightTextBox = styled.div`
@@ -545,6 +571,9 @@ const CommentBox = styled.div`
     line-height: 1.4;
     text-align: left;
     border-top: 1px solid #e0e0e0;
+    overflow: visible;
+    flex-direction: row-reverse;
+    display: flex;
 
     &: hover ${EditNoteIconBox} {
         display: flex;
@@ -634,6 +663,7 @@ const ActionBtnStyled = styled.button`
     background: transparent;
     border-radius: 3px;
     font-weight: 700;
+    border: 1px solid #f0f0f0;
 
     &:focus {
         background-color: grey;

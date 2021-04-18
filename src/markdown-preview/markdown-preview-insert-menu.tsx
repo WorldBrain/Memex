@@ -50,6 +50,7 @@ export class MarkdownPreviewAnnotationInsertMenu extends React.PureComponent<
                 onMenuItemClick={this.handleItemClick}
                 menuItems={this.props.menuItems}
                 btnChildren="Insert"
+                btnId="DropdownMenuBtn"
             />
         </DropdownMenuContainer>
     )

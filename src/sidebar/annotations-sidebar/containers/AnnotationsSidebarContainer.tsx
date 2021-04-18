@@ -139,15 +139,11 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
-            onShareClick: (e) =>
+            onShareClick: (mouseEvent) =>
                 this.processEvent('shareAnnotation', {
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
-                }),
-            onUnshareClick: (e) =>
-                this.processEvent('unshareAnnotation', {
-                    annotationUrl: annotation.url,
-                    ...DEF_CONTEXT,
+                    mouseEvent,
                 }),
             onGoToAnnotation:
                 this.props.showGoToAnnotationBtn && annotation.body?.length > 0
@@ -202,7 +198,8 @@ export class AnnotationsSidebarContainer<
             onTagsUpdate: (tags) =>
                 this.processEvent('updateNewPageCommentTags', { tags }),
             onCancel: () => this.processEvent('cancelNewPageComment', null),
-            onSave: () => this.processEvent('saveNewPageComment', null),
+            onSave: (privacyLevel) =>
+                this.processEvent('saveNewPageComment', { privacyLevel }),
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
         }
@@ -288,26 +285,37 @@ export class AnnotationsSidebarContainer<
             <ShareMenuWrapper>
                 <HoverBox>
                     <SingleNoteShareMenu
-                        contentSharing={this.props.contentSharing}
+                        shareImmediately={this.state.immediatelyShareNotes}
+                        contentSharingBG={this.props.contentSharing}
+                        annotationsBG={this.props.annotations}
                         copyLink={(link) =>
                             this.processEvent('copyNoteLink', { link })
                         }
                         annotationUrl={currentAnnotationId}
-                        postShareHook={() =>
+                        postShareHook={({ shareStateChanged, privacyLevel }) =>
                             this.processEvent('updateAnnotationShareInfo', {
                                 annotationUrl: currentAnnotationId,
                                 info: {
-                                    status: 'shared',
+                                    status: shareStateChanged
+                                        ? 'shared'
+                                        : undefined,
                                     taskState: 'success',
+                                    privacyLevel,
                                 },
                             })
                         }
-                        postUnshareHook={() =>
+                        postUnshareHook={({
+                            shareStateChanged,
+                            privacyLevel,
+                        }) =>
                             this.processEvent('updateAnnotationShareInfo', {
                                 annotationUrl: currentAnnotationId,
                                 info: {
-                                    status: 'unshared',
+                                    status: shareStateChanged
+                                        ? 'unshared'
+                                        : undefined,
                                     taskState: 'success',
+                                    privacyLevel,
                                 },
                             })
                         }
@@ -329,25 +337,34 @@ export class AnnotationsSidebarContainer<
             <ShareMenuWrapperTopBar>
                 <HoverBox>
                     <AllNotesShareMenu
-                        contentSharing={this.props.contentSharing}
+                        contentSharingBG={this.props.contentSharing}
                         annotationsBG={this.props.annotations}
                         copyLink={(link) =>
                             this.processEvent('copyPageLink', { link })
                         }
                         normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
-                        postShareAllHook={() =>
+                        postShareHook={({ shareStateChanged, privacyLevel }) =>
                             this.processEvent('updateAllAnnotationsShareInfo', {
                                 info: {
-                                    status: 'shared',
+                                    status: shareStateChanged
+                                        ? 'shared'
+                                        : undefined,
                                     taskState: 'success',
+                                    privacyLevel,
                                 },
                             })
                         }
-                        postUnshareAllHook={() =>
+                        postUnshareHook={({
+                            shareStateChanged,
+                            privacyLevel,
+                        }) =>
                             this.processEvent('updateAllAnnotationsShareInfo', {
                                 info: {
-                                    status: 'unshared',
+                                    status: shareStateChanged
+                                        ? 'unshared'
+                                        : undefined,
                                     taskState: 'success',
+                                    privacyLevel,
                                 },
                             })
                         }

@@ -1,9 +1,10 @@
 import debounce from 'lodash/debounce'
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
+import { isFullUrl } from '@worldbrain/memex-url-utils'
 import { EventEmitter } from 'events'
 
-import { Annotation } from 'src/annotations/types'
+import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
 import { Anchor } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
 import { SidebarContainerDependencies } from './types'
@@ -23,6 +24,7 @@ import {
 import { areTagsEquivalent } from 'src/tags/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { AnnotationsSorter } from '../sorting'
+import { CachedAnnotation } from 'src/annotations/annotations-cache'
 
 export interface EditForm {
     isBookmarked: boolean
@@ -93,6 +95,7 @@ export interface SidebarContainerState {
 
     showAllNotesShareMenu: boolean
     activeShareMenuNoteId: string | undefined
+    immediatelyShareNotes: boolean
 }
 
 export type SidebarContainerEvents = UIEvent<{
@@ -109,7 +112,7 @@ export type SidebarContainerEvents = UIEvent<{
     changeNewPageCommentText: { comment: string }
     cancelEdit: { annotationUrl: string }
     changeEditCommentText: { annotationUrl: string; comment: string }
-    saveNewPageComment: null
+    saveNewPageComment: { privacyLevel: AnnotationPrivacyLevels }
     cancelNewPageComment: null
     updateNewPageCommentTags: { tags: string[] }
 
@@ -148,10 +151,7 @@ export type SidebarContainerEvents = UIEvent<{
     shareAnnotation: {
         context: AnnotationEventContext
         annotationUrl: string
-    }
-    unshareAnnotation: {
-        context: AnnotationEventContext
-        annotationUrl: string
+        mouseEvent: React.MouseEvent
     }
     switchAnnotationMode: {
         context: AnnotationEventContext
@@ -189,7 +189,6 @@ export type SidebarContainerEvents = UIEvent<{
     resetCopyPasterAnnotationId: null
 
     setAllNotesShareMenuShown: { shown: boolean }
-    setShareMenuNoteId: { id: string }
     resetShareMenuNoteId: null
 }>
 export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
@@ -287,6 +286,7 @@ export class SidebarContainerLogic extends UILogic<
             showBetaFeatureNotifModal: false,
             showAllNotesShareMenu: false,
             activeShareMenuNoteId: undefined,
+            immediatelyShareNotes: false,
         }
     }
 
@@ -316,8 +316,8 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    private annotationSubscription = (annotations: Annotation[]) => {
-        this.emitMutation({
+    private annotationSubscription = (annotations: CachedAnnotation[]) => {
+        const mutation: UIMutation<SidebarContainerState> = {
             annotations: { $set: annotations },
             editForms: {
                 $apply: (editForms: EditForms) => {
@@ -329,10 +329,25 @@ export class SidebarContainerLogic extends UILogic<
                     return editForms
                 },
             },
-        })
-        this._detectSharedAnnotations(
-            annotations.map((annotation) => annotation.url),
-        )
+        }
+
+        for (const { privacyLevel, url } of annotations) {
+            mutation.annotationSharingInfo = {
+                ...(mutation.annotationSharingInfo || {}),
+                [url]: {
+                    $set: {
+                        status:
+                            privacyLevel === AnnotationPrivacyLevels.SHARED
+                                ? 'shared'
+                                : 'not-yet-shared',
+                        taskState: 'pristine',
+                        privacyLevel,
+                    },
+                },
+            }
+        }
+
+        this.emitMutation(mutation)
     }
 
     sortAnnotations: EventHandler<'sortAnnotations'> = ({
@@ -416,6 +431,12 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     setPageUrl: EventHandler<'setPageUrl'> = ({ previousState, event }) => {
+        if (!isFullUrl(event.pageUrl)) {
+            throw new Error(
+                'Tried to set annotation sidebar with a normalized page URL',
+            )
+        }
+
         const mutation: UIMutation<SidebarContainerState> = {
             pageUrl: { $set: event.pageUrl },
         }
@@ -426,19 +447,10 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     resetShareMenuNoteId: EventHandler<'resetShareMenuNoteId'> = ({}) => {
-        this.emitMutation({ activeShareMenuNoteId: { $set: undefined } })
-    }
-
-    setShareMenuNoteId: EventHandler<'setShareMenuNoteId'> = ({
-        event,
-        previousState,
-    }) => {
-        const newId =
-            previousState.activeShareMenuNoteId === event.id
-                ? undefined
-                : event.id
-
-        this.emitMutation({ activeShareMenuNoteId: { $set: newId } })
+        this.emitMutation({
+            activeShareMenuNoteId: { $set: undefined },
+            immediatelyShareNotes: { $set: false },
+        })
     }
 
     setAllNotesShareMenuShown: EventHandler<'setAllNotesShareMenuShown'> = ({
@@ -587,8 +599,10 @@ export class SidebarContainerLogic extends UILogic<
 
     // TODO (sidebar-refactor) reconcile this duplicate code with ribbon notes save
     saveNewPageComment: EventHandler<'saveNewPageComment'> = async ({
+        event,
         previousState: { commentBox, pageUrl },
     }) => {
+        const { annotationsCache, contentSharing } = this.options
         const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
             return
@@ -596,17 +610,26 @@ export class SidebarContainerLogic extends UILogic<
 
         const annotationUrl = generateUrl({ pageUrl, now: () => Date.now() })
 
-        this.options.annotationsCache.create({
-            url: annotationUrl,
-            pageUrl,
-            comment,
-            tags: commentBox.tags,
-        })
-
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },
             showCommentBox: { $set: false },
         })
+
+        await annotationsCache.create({
+            url: annotationUrl,
+            pageUrl,
+            comment,
+            tags: commentBox.tags,
+            privacyLevel: event.privacyLevel,
+        })
+
+        if (event.privacyLevel === AnnotationPrivacyLevels.SHARED) {
+            await contentSharing.shareAnnotation({ annotationUrl })
+            await contentSharing.shareAnnotationsToLists({
+                annotationUrls: [annotationUrl],
+                queueInteraction: 'skip-queue',
+            })
+        }
     }
 
     cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
@@ -795,24 +818,14 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
+        const immediateShare =
+            event.mouseEvent.metaKey && event.mouseEvent.altKey
+
         this.emitMutation({
             activeShareMenuNoteId: { $set: event.annotationUrl },
+            immediatelyShareNotes: { $set: !!immediateShare },
         })
         await this.setLastSharedAnnotationTimestamp()
-    }
-
-    unshareAnnotation: EventHandler<'unshareAnnotation'> = async ({
-        event,
-        previousState,
-    }) => {
-        if (previousState.annotationSharingAccess === 'feature-disabled') {
-            this.options.showBetaFeatureNotifModal?.()
-            return
-        }
-
-        this.emitMutation({
-            activeShareMenuNoteId: { $set: event.annotationUrl },
-        })
     }
 
     setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({
@@ -890,7 +903,7 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ showBetaFeatureNotifModal: { $set: event.shown } })
     }
 
-    async _detectSharedAnnotations(annotationUrls: string[]) {
+    private async _detectSharedAnnotations(annotationUrls: string[]) {
         const annotationSharingInfo: UIMutation<
             SidebarContainerState['annotationSharingInfo']
         > = {}
@@ -898,11 +911,21 @@ export class SidebarContainerLogic extends UILogic<
             { annotationUrls },
         )
 
-        for (const localId of Object.keys(remoteIds)) {
+        const privacyLevels = await this.options.annotations.findAnnotationPrivacyLevels(
+            { annotationUrls },
+        )
+
+        for (const localId of annotationUrls) {
             annotationSharingInfo[localId] = {
                 $set: {
-                    status: 'shared',
                     taskState: 'pristine',
+                    privacyLevel: privacyLevels[localId],
+                    status:
+                        remoteIds[localId] ||
+                        privacyLevels[localId] ===
+                            AnnotationPrivacyLevels.SHARED
+                            ? 'shared'
+                            : 'not-yet-shared',
                 },
             }
         }
@@ -912,11 +935,23 @@ export class SidebarContainerLogic extends UILogic<
 
     updateAllAnnotationsShareInfo: EventHandler<
         'updateAllAnnotationsShareInfo'
-    > = ({ previousState: { annotations }, event }) => {
+    > = ({ previousState: { annotations, annotationSharingInfo }, event }) => {
         const sharingInfo = {}
 
         for (const { url } of annotations) {
-            sharingInfo[url] = { ...event.info }
+            const prev = annotationSharingInfo[url]
+            if (prev?.privacyLevel === AnnotationPrivacyLevels.PROTECTED) {
+                sharingInfo[url] = prev
+                continue
+            }
+
+            sharingInfo[url] = {
+                ...event.info,
+                privacyLevel:
+                    event.info.privacyLevel ??
+                    annotationSharingInfo[url].privacyLevel,
+                status: event.info.status ?? annotationSharingInfo[url].status,
+            }
         }
 
         this.emitMutation({ annotationSharingInfo: { $set: sharingInfo } })

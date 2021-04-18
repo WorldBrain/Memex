@@ -1,289 +1,186 @@
 import React from 'react'
-import styled from 'styled-components'
 
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { executeReactStateUITask } from 'src/util/ui-logic'
 import { getPageShareUrl } from 'src/content-sharing/utils'
-import { TaskState } from 'ui-logic-core/lib/types'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import { LoadingIndicator } from 'src/common-ui/components'
-import { Icon } from 'src/dashboard-refactor/styled-components'
-import * as icons from 'src/common-ui/components/design-library/icons'
-import Margin from 'src/dashboard-refactor/components/Margin'
-import colors from 'src/dashboard-refactor/colors'
-import { fonts } from 'src/dashboard-refactor/styles'
-
-import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
-import { AnnotationInterface } from 'src/annotations/background/types'
+import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { runInBackground } from 'src/util/webextensionRPC'
+import { getKeyName } from 'src/util/os-specific-key-names'
 
-interface State {
-    shareAllState: TaskState
-    unshareAllState: TaskState
-}
+interface State extends ShareMenuCommonState {}
 
-export interface Props {
+export interface Props extends ShareMenuCommonProps {
     normalizedPageUrl: string
-    closeShareMenu: React.MouseEventHandler
-    copyLink: (link: string) => Promise<void>
-    postShareAllHook?: () => void
-    postUnshareAllHook?: () => void
-    contentSharing?: ContentSharingInterface
-    annotationsBG?: AnnotationInterface<'caller'>
 }
 
 export default class AllNotesShareMenu extends React.Component<Props, State> {
+    static MOD_KEY = getKeyName({ key: 'mod' })
+    static ALT_KEY = getKeyName({ key: 'alt' })
     static defaultProps: Partial<Props> = {
-        contentSharing: runInBackground(),
+        contentSharingBG: runInBackground(),
         annotationsBG: runInBackground(),
     }
 
     private annotationUrls: string[]
-    private contentSharingBG: ContentSharingInterface
-    private annotationsBG: AnnotationInterface<'caller'>
-
-    constructor(props) {
-        super(props)
-        this.contentSharingBG = this.props.contentSharing
-        this.annotationsBG = this.props.annotationsBG
-    }
 
     state: State = {
-        shareAllState: 'pristine',
-        unshareAllState: 'pristine',
+        link: '',
+        loadState: 'pristine',
+        shareState: 'pristine',
     }
 
     async componentDidMount() {
-        const annotations = await this.annotationsBG.listAnnotationsByPageUrl({
-            pageUrl: this.props.normalizedPageUrl,
-        })
-        this.annotationUrls = annotations.map((a) => a.url)
+        await executeReactStateUITask<State, 'loadState'>(
+            this,
+            'loadState',
+            async () => {
+                await this.setRemoteLink()
 
-        // const shareAllBtn = await this.getAllSharedBtnState()
-
-        // this.setState({ shareAllBtn })
+                const annotations = await this.props.annotationsBG.listAnnotationsByPageUrl(
+                    {
+                        pageUrl: this.props.normalizedPageUrl,
+                    },
+                )
+                this.annotationUrls = annotations.map((a) => a.url)
+            },
+        )
     }
 
-    private async getAllSharedBtnState(): Promise<'checked' | 'unchecked'> {
-        const annotsMetadata = await this.contentSharingBG.getRemoteAnnotationMetadata(
-            { annotationUrls: this.annotationUrls },
+    private createAnnotationPrivacyLevels = (
+        privacyLevel: AnnotationPrivacyLevels,
+    ) =>
+        this.annotationUrls.reduce(
+            (acc, annotation) => ({
+                ...acc,
+                [annotation]: privacyLevel,
+            }),
+            {},
         )
 
-        for (const url of this.annotationUrls) {
-            if (!annotsMetadata[url]) {
-                return 'unchecked'
-            }
-        }
+    private handleLinkCopy = () => this.props.copyLink(this.state.link)
 
-        return 'checked'
-    }
-
-    private getCreatedLink = async () => {
-        const remotePageInfoId = await this.contentSharingBG.ensureRemotePageId(
+    private setRemoteLink = async () => {
+        const remotePageInfoId = await this.props.contentSharingBG.ensureRemotePageId(
             this.props.normalizedPageUrl,
         )
-        return getPageShareUrl({ remotePageInfoId })
+        this.setState({ link: getPageShareUrl({ remotePageInfoId }) })
     }
 
-    private handleShareAll = async () => {
-        await executeReactStateUITask<State, 'shareAllState'>(
-            this,
-            'shareAllState',
-            async () => {
-                await this.contentSharingBG.shareAnnotations({
-                    annotationUrls: this.annotationUrls,
-                    queueInteraction: 'skip-queue',
-                })
-                await this.contentSharingBG.shareAnnotationsToLists({
-                    annotationUrls: this.annotationUrls,
-                    queueInteraction: 'skip-queue',
-                })
-            },
-        )
-        this.props.postShareAllHook?.()
+    private shareAllAnnotations = async () => {
+        let success = false
+        try {
+            await this.props.contentSharingBG.shareAnnotations({
+                annotationUrls: this.annotationUrls,
+                queueInteraction: 'skip-queue',
+            })
+            await this.props.contentSharingBG.shareAnnotationsToLists({
+                annotationUrls: this.annotationUrls,
+                queueInteraction: 'skip-queue',
+            })
+            success = true
+        } catch (err) {}
 
-        // if (this.state.shareAllBtn === 'unchecked') {
-        //     this.setState({ shareAllBtn: 'running' })
-        //     await this.contentSharingBG.shareAnnotations({
-        //         annotationUrls: this.annotationUrls,
-        //     })
-        //     this.props.postShareAllHook?.()
-        //     this.setState({ shareAllBtn: 'checked' })
-        // } else {
-        //     this.setState({ shareAllBtn: 'running' })
-        //     await delay(1000)
-        //     this.props.postUnshareAllHook?.()
-        //     this.setState({ shareAllBtn: 'unchecked' })
-        // }
+        this.props.postShareHook?.({
+            privacyLevel: AnnotationPrivacyLevels.SHARED,
+            shareStateChanged: success,
+        })
     }
 
-    private handleUnshareAll = async () => {
-        await executeReactStateUITask<State, 'unshareAllState'>(
-            this,
-            'unshareAllState',
-            async () => {
-                await Promise.all(
-                    this.annotationUrls.map((annotationUrl) =>
-                        this.contentSharingBG.unshareAnnotation({
+    private unshareAllAnnotations = async () => {
+        let success = false
+        try {
+            await Promise.all(
+                this.annotationUrls.map((annotationUrl) =>
+                    this.props.contentSharingBG
+                        .unshareAnnotation({
                             annotationUrl,
                             queueInteraction: 'skip-queue',
-                        }),
-                    ),
-                )
-                // await this.contentSharingBG.unshareAnnotations({
-                //     annotationUrls: this.annotationUrls,
-                //     queueInteraction: 'skip-queue',
-                // })
-            },
-        )
-        this.props.postUnshareAllHook?.()
+                        })
+                        .catch((err) => {}),
+                ),
+            )
+            success = true
+        } catch (err) {}
+
+        this.props.postUnshareHook?.({
+            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            shareStateChanged: success,
+        })
     }
 
-    // TODO: implement in milestone 3.
-    //   It should: "remove the link of that page, so it deletes the shared-page object and all the associated annotation entries"
-    //
-    // private handleUnshare = async () => {
-    //     // TODO: Call BG method
-    //     await delay(1000)
+    private handleSetShared: React.MouseEventHandler = async (e) => {
+        const { annotationsBG } = this.props
+        const annotationPrivacyLevels = this.createAnnotationPrivacyLevels(
+            AnnotationPrivacyLevels.SHARED,
+        )
 
-    //     this.props.closeShareMenu()
-    // }
+        await executeReactStateUITask<State, 'shareState'>(
+            this,
+            'shareState',
+            async () => {
+                await this.shareAllAnnotations()
+                await annotationsBG.updateAnnotationPrivacyLevels({
+                    annotationPrivacyLevels,
+                    respectProtected: true,
+                })
+            },
+        )
+    }
+
+    private handleSetPrivate: React.MouseEventHandler = async (e) => {
+        const { annotationsBG } = this.props
+        const annotationPrivacyLevels = this.createAnnotationPrivacyLevels(
+            AnnotationPrivacyLevels.PRIVATE,
+        )
+
+        await executeReactStateUITask<State, 'shareState'>(
+            this,
+            'shareState',
+            async () => {
+                await this.unshareAllAnnotations()
+                await annotationsBG.updateAnnotationPrivacyLevels({
+                    annotationPrivacyLevels,
+                    respectProtected: true,
+                })
+            },
+        )
+    }
 
     render() {
         return (
             <ShareAnnotationMenu
-                // shareAllState={this.state.shareAllBtn}
-                // onUnshareAllClick={this.handleUnshareAll}
-                // onShareAllClick={this.handleShareAll}
-                getLink={this.getCreatedLink}
-                onCopyLinkClick={this.props.copyLink}
+                showLink
+                link={this.state.link}
+                onCopyLinkClick={this.handleLinkCopy}
                 onClickOutside={this.props.closeShareMenu}
-                // checkboxCopy="Share all Notes on this page"
-                // checkboxTitleCopy="Share all Notes"
-                // checkboxSubtitleCopy="Add all notes on page to shared collections"
                 linkTitleCopy="Link to page and shared notes"
-                linkSubtitleCopy=""
-            >
-                <PrivacyContainer>
-                    <PrivacyTitle>
-                        Set privacy for all notes on this page
-                    </PrivacyTitle>
-                    <PrivacyOptionContainer top="5px">
-                        {this.state.shareAllState === 'running' ||
-                        this.state.unshareAllState === 'running' ? (
-                            <LoadingIndicator />
-                        ) : (
-                            <>
-                                <PrivacyOptionItem
-                                    onClick={this.handleUnshareAll}
-                                    bottom="5px"
-                                >
-                                    <Icon
-                                        heightAndWidth="22px"
-                                        path={icons.lock}
-                                    />
-                                    <PrivacyOptionBox>
-                                        <PrivacyOptionTitle>
-                                            Private
-                                        </PrivacyOptionTitle>
-                                        <PrivacyOptionSubTitle>
-                                            Only locally available to you
-                                        </PrivacyOptionSubTitle>
-                                    </PrivacyOptionBox>
-                                </PrivacyOptionItem>
-                                <PrivacyOptionItem
-                                    onClick={this.handleShareAll}
-                                    bottom="10px"
-                                >
-                                    <Icon
-                                        heightAndWidth="22px"
-                                        path={icons.shared}
-                                    />
-                                    <PrivacyOptionBox>
-                                        <PrivacyOptionTitle>
-                                            Shared
-                                        </PrivacyOptionTitle>
-                                        <PrivacyOptionSubTitle>
-                                            Shared in collections this page is
-                                            in
-                                        </PrivacyOptionSubTitle>
-                                    </PrivacyOptionBox>
-                                </PrivacyOptionItem>
-                            </>
-                        )}
-                    </PrivacyOptionContainer>
-                </PrivacyContainer>
-            </ShareAnnotationMenu>
+                privacyOptionsTitleCopy="Set privacy for all notes on this page"
+                isLoading={
+                    this.state.shareState === 'running' ||
+                    this.state.loadState === 'running'
+                }
+                privacyOptions={[
+                    {
+                        title: 'Private',
+                        shortcut: `${AllNotesShareMenu.MOD_KEY}+enter`,
+                        description: 'Only locally available to you',
+                        icon: 'person',
+                        onClick: this.handleSetPrivate,
+                    },
+                    {
+                        title: 'Shared',
+                        shortcut: `${AllNotesShareMenu.ALT_KEY}+${AllNotesShareMenu.MOD_KEY}+enter`,
+                        description: 'Shared in collections this page is in',
+                        icon: 'shared',
+                        onClick: this.handleSetShared,
+                    },
+                ]}
+                shortcutHandlerDict={{
+                    'mod+alt+enter': this.handleSetShared,
+                    'mod+enter': this.handleSetPrivate,
+                }}
+            />
         )
     }
 }
-
-const PrivacyContainer = styled.div`
-    width: 100%;
-
-    & * {
-        color: ${(props) => props.theme.colors.primary};
-    }
-`
-
-const PrivacyTitle = styled.div`
-    font-size: 14px;
-    font-weight: bold;
-    padding: 0px 15px;
-`
-
-const PrivacyOptionContainer = styled(Margin)`
-    min-height: 100px;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-`
-
-const PrivacyOptionItem = styled(Margin)`
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    flex-direction: row;
-    cursor: pointer;
-    padding: 2px 20px;
-    width: fill-available;
-
-    &:hover {
-        background-color: ${colors.onHover};
-    }
-`
-
-const PrivacyOptionBox = styled.div`
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    flex-direction: column;
-    padding-left: 10px;
-`
-
-const PrivacyOptionTitle = styled.div`
-    font-size: 13px;
-    font-weight: bold;
-    height: 16px;
-`
-
-const PrivacyOptionSubTitle = styled.div`
-    font-size: 12px;
-`
-
-const SharedNoteInfo = styled.div`
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    align-items: center;
-    margin: 10px 0 0;
-    line-height: 16px;
-
-    & > span {
-        text-align: center;
-        font-size: 12px;
-    }
-`

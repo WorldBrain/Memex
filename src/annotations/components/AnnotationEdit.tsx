@@ -4,11 +4,26 @@ import styled from 'styled-components'
 import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
 import { FocusableComponent } from './types'
 import { uninsertTab, insertTab } from 'src/common-ui/utils'
+import { getKeyName } from 'src/util/os-specific-key-names'
+import { AnnotationPrivacyLevels } from '../types'
+import Margin from 'src/dashboard-refactor/components/Margin'
+import SharePrivacyOption from 'src/overview/sharing/components/SharePrivacyOption'
+import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { ButtonTooltip } from 'src/common-ui/components'
+
+
 
 export interface AnnotationEditEventProps {
     onEditConfirm: (url: string) => void
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
+}
+
+interface State {
+    isTagPickerShown: boolean
+    isPrivacyLevelShown: boolean
+    savePrivacyLevel: AnnotationPrivacyLevels
 }
 
 export interface AnnotationEditGeneralProps {
@@ -24,7 +39,18 @@ export interface Props
 
 class AnnotationEdit extends React.Component<Props>
     implements FocusableComponent {
+    static MOD_KEY = getKeyName({ key: 'mod' })
     private textAreaRef = React.createRef<HTMLTextAreaElement>()
+    static ALT_KEY = getKeyName({ key: 'alt' })
+    private markdownPreviewRef = React.createRef<
+        MarkdownPreviewAnnotationInsertMenu
+    >()
+
+    state: State = {
+        isTagPickerShown: false,
+        isPrivacyLevelShown: false,
+        savePrivacyLevel: AnnotationPrivacyLevels.PRIVATE,
+    }
 
     componentDidMount() {
         this.focusOnInputEnd()
@@ -34,10 +60,24 @@ class AnnotationEdit extends React.Component<Props>
         this.textAreaRef.current.focus()
     }
 
+
     focusOnInputEnd() {
         const inputLen = this.props.comment.length
         this.textAreaRef.current.setSelectionRange(inputLen, inputLen)
         this.focus()
+    }
+
+    private handleSave = async (privacyLevel: AnnotationPrivacyLevels) => {
+        const saveP = this.props.onSave(privacyLevel)
+
+        if (
+            this.markdownPreviewRef?.current?.markdownPreviewRef.current?.state
+                .showPreview
+        ) {
+            this.markdownPreviewRef.current.markdownPreviewRef.current.togglePreview()
+        }
+
+        await saveP
     }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
@@ -48,12 +88,25 @@ class AnnotationEdit extends React.Component<Props>
             return
         }
 
+        if (e.key === 'Enter' && e.shiftKey && e.metaKey) {
+            return this.handleSave(AnnotationPrivacyLevels.PROTECTED)
+        }
+
+        if (e.key === 'Enter' && e.altKey && e.shiftKey) {
+            return this.handleSave(AnnotationPrivacyLevels.SHARED)
+        }
+
+        if (e.key === 'Enter' && e.metaKey) {
+            return this.handleSave(AnnotationPrivacyLevels.PRIVATE)
+        }
+
         if (e.key === 'Escape') {
             this.props.onEditCancel()
             return
         }
 
         if (e.key === 'Tab' && !e.shiftKey) {
+            console.log("test")
             e.preventDefault()
             insertTab({ el: this.textAreaRef.current })
         }
@@ -64,12 +117,101 @@ class AnnotationEdit extends React.Component<Props>
         }
     }
 
+    private setSavePrivacyLevel = (
+        savePrivacyLevel: AnnotationPrivacyLevels,
+    ) => () =>
+        this.setState({
+            isPrivacyLevelShown: false,
+            savePrivacyLevel,
+        })
+
+    private renderSaveBtn() {
+        return (
+            <SaveBtn>
+                <SaveBtnText
+                    onClick={() => this.handleSave(this.state.savePrivacyLevel)}
+                >
+                    <Icon
+                        icon={
+                            this.state.savePrivacyLevel ===
+                            AnnotationPrivacyLevels.PROTECTED
+                                ? 'lock'
+                                : this.state.savePrivacyLevel ===
+                                  AnnotationPrivacyLevels.PRIVATE
+                                ? 'person'
+                                : 'shared'
+                        }
+                        height="14px"
+                    />{' '}
+                    Save
+                </SaveBtnText>
+                <SaveBtnArrow
+                    horizontal="1px"
+                >
+                    <DropdownMenuBtn
+                        btnChildren={<Icon icon="triangle" height="10px" />}
+                        isOpen={this.state.isPrivacyLevelShown}
+                        toggleOpen={() =>
+                            this.setState((state) => ({
+                                isPrivacyLevelShown: !state.isPrivacyLevelShown,
+                            }))
+                        }
+                    >
+                        <SharePrivacyOption
+                            title="Protected"
+                            shortcut={`shift+${AnnotationEdit.MOD_KEY}+enter`}
+                            description="Sharing status will not change in bulk actions"
+                            icon="lock"
+                            onClick={this.setSavePrivacyLevel(
+                                AnnotationPrivacyLevels.PROTECTED,
+                            )}
+                        />
+                        <SharePrivacyOption
+                            title="Private"
+                            shortcut={`${AnnotationEdit.MOD_KEY}+enter`}
+                            description="Private to you, until shared (in bulk)"
+                            icon="person"
+                            onClick={this.setSavePrivacyLevel(
+                                AnnotationPrivacyLevels.PRIVATE,
+                            )}
+                        />
+                        <SharePrivacyOption
+                            title="Shared"
+                            shortcut={`shift+${AnnotationEdit.ALT_KEY}+enter`}
+                            description="Added to shared collections this page is in"
+                            icon="shared"
+                            onClick={this.setSavePrivacyLevel(
+                                AnnotationPrivacyLevels.SHARED,
+                            )}
+                        />
+                    </DropdownMenuBtn>
+                </SaveBtnArrow>
+            </SaveBtn>
+        )
+    }
+
+    private renderActionButtons() {
+        return (
+            <FooterStyled>
+                <Flex>
+                    {this.renderSaveBtn()}
+                    <ButtonTooltip tooltipText="esc" position="bottomSidebar">
+                        <CancelBtnStyled onClick={}>
+                            Cancel
+                        </CancelBtnStyled>
+                    </ButtonTooltip>
+                </Flex>
+            </FooterStyled>
+        )
+    }
+
     render() {
         return (
             <>
                 <MarkdownPreviewAnnotationInsertMenu
                     showPreviewBtnOnEmptyInput
                     customRef={this.textAreaRef}
+                    ref={this.markdownPreviewRef}
                     onKeyDown={this.handleInputKeyDown}
                     value={this.props.comment}
                     updateInputValue={this.props.onCommentChange}
@@ -77,13 +219,18 @@ class AnnotationEdit extends React.Component<Props>
                         <StyledTextArea
                             {...inputProps}
                             value={this.props.comment}
-                            placeholder="Add private note (save with cmd/ctrl+enter)"
+                            placeholder={`Add private note (save with ${AnnotationEdit.MOD_KEY}+enter)`}
                             onChange={(e) =>
                                 this.props.onCommentChange(e.target.value)
                             }
                         />
                     )}
                 />
+                {this.props.comment !== '' && (
+                    <>
+                        {this.renderActionButtons()}
+                    </>
+                )}
             </>
         )
     }
@@ -114,4 +261,161 @@ const StyledTextArea = styled.textarea`
     }
 
     min-height: 300px;
+`
+
+const TextBoxContainerStyled = styled.div`
+    box-shadow: none;
+    cursor: default;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    width: 100%;
+    box-shadow: rgb(0 0 0 / 10%) 0px 1px 2px 0px;
+    border-radius: 5px;
+    background-color: ${(props) => (props.comment !== '' ? 'white' : 'none')};
+
+    & * {
+        font-family: 'Poppins', sans-serif;
+    }
+`
+
+const FooterStyled = styled.div`
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    align-items: center;
+    margin: 0 5px 3px 5px;
+    height: 26px;
+    animation: slideIn 0.2s ease-in-out;
+    animation-fill-mode: forwards;
+`
+
+const SaveBtn = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-item: center;
+    box-sizing: border-box;
+    cursor: pointer;
+    font-size: 14px;
+    border: none;
+    outline: none;
+    padding: 3px 0 3px 5px;
+    margin-right: 5px;
+    background: transparent;
+    border-radius: 3px;
+    font-weight: 700;
+    border 1px solid #f0f0f0;
+
+    &:focus {
+        background-color: grey;
+    }
+
+    &:focus {
+        background-color: #79797945;
+    }
+`
+
+const SaveBtnText = styled.span`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 55px;
+    justify-content: space-between;
+    display: flex;
+`
+
+const SaveBtnArrow = styled(Margin)`
+    width: 24px;
+    border-radius: 3px;
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
+`
+
+const CancelBtnStyled = styled.div`
+    box-sizing: border-box;
+    cursor: pointer;
+    font-size: 14px;
+    border: none;
+    outline: none;
+    padding: 3px 5px;
+    background: transparent;
+    border-radius: 3px;
+    color: red;
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
+
+    &:focus {
+        background-color: #79797945;
+    }
+`
+const ConfirmBtnStyled = styled.div`
+    box-sizing: border-box;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 3px 5px;
+    border: none;
+    outline: none;
+    margin-right: -6px;
+    background: transparent;
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
+
+    &:focus {
+        background-color: #79797945;
+    }
+`
+
+const InteractionsImgContainerStyled = styled.button`
+    border: none;
+    background: none;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 3px;
+    outline: none;
+
+    &:hover {
+        opacity: 0.8;
+        background-color: #e0e0e0;
+    }
+`
+const InteractionItemsBox = styled.div`
+    display: grid;
+    grid-template-columns: repeat(2, 24px);
+    grid-gap: 3px;
+    justify-content: center;
+    align-items: center;
+    direction: rtl;
+`
+
+const ImgButtonStyled = styled.img`
+    width: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 16px;
+    opacity: 0.6;
+    background-color: transparent;
+    cursor: pointer;
+    outline: none;
+
+    &:active {
+        opacity: 1;
+    }
+`
+
+const Flex = styled.div`
+    display: flex;
+    padding: 0 5px 5px;
+    justify-content: flex-end;
 `

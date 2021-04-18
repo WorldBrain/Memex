@@ -24,6 +24,7 @@ describe('Backup feature', () => {
             annotations: { backup: true, watch: true },
             annotBookmarks: { backup: true, watch: true },
             annotListEntries: { backup: true, watch: true },
+            annotationPrivacyLevels: { backup: true, watch: true },
             directLinks: { backup: true, watch: true },
             notifications: { backup: true, watch: true },
             customLists: { backup: true, watch: true },

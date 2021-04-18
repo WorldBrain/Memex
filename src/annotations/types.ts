@@ -29,8 +29,16 @@ export interface Annotation {
     _body_terms?: string[]
     _comment_terms?: string[]
     isBookmarked?: boolean
+    privacyLevel?: AnnotationPrivacyLevels
     tags: string[]
     isSocialPost?: boolean
+}
+
+export interface AnnotationPrivacyLevel {
+    annotation: string
+    privacyLevel: AnnotationPrivacyLevels
+    createdWhen: Date
+    updatedWhen?: Date
 }
 
 export interface NewAnnotationOptions {
@@ -101,3 +109,9 @@ export type TextTruncator = (
 ) => { text: string; isTooLong: boolean }
 
 export type SelectionIndices = [number, number]
+
+export enum AnnotationPrivacyLevels {
+    PROTECTED = 0,
+    PRIVATE = 100,
+    SHARED = 200,
+}

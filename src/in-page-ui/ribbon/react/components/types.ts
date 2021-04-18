@@ -1,4 +1,5 @@
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
+import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
 export interface RibbonSubcomponentProps {
     highlights: RibbonHighlightsProps
@@ -34,7 +35,7 @@ export interface RibbonCommentBoxProps {
     commentText: string
     showCommentBox: boolean
     isCommentSaved: boolean
-    saveComment: () => Promise<void>
+    saveComment: (privacyLevel: AnnotationPrivacyLevels) => Promise<void>
     cancelComment: () => void
     setShowCommentBox: (value: boolean) => void
     updateCommentBoxTags: (tags: string[]) => void

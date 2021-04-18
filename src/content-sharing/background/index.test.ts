@@ -10,6 +10,7 @@ import {
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import * as data from './index.test.data'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
 function convertRemoteId(id: string) {
     return parseInt(id, 10)
@@ -518,6 +519,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             () =>
                 makeShareAnnotationTest({
                     annotationSharingMethod: 'shareAnnotations',
+                    testDuplicateSharing: true,
+                }),
+        ),
+        backgroundIntegrationTest(
+            `should skip sharing protected annotations in an already shared list using the 'shareAnnotations' method'`,
+            { skipConflictTests: true },
+            () =>
+                makeShareAnnotationTest({
+                    annotationSharingMethod: 'shareAnnotations',
+                    testProtectedBulkShare: true,
                     testDuplicateSharing: true,
                 }),
         ),
@@ -1391,6 +1402,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 function makeShareAnnotationTest(options: {
     annotationSharingMethod: 'shareAnnotation' | 'shareAnnotations'
     testDuplicateSharing: boolean
+    testProtectedBulkShare?: boolean
 }): BackgroundIntegrationTestInstance {
     let localListId: number
 
@@ -1418,7 +1430,12 @@ function makeShareAnnotationTest(options: {
                     )
                     const secondAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                         {} as any,
-                        data.ANNOTATION_1_2_DATA,
+                        {
+                            ...data.ANNOTATION_1_2_DATA,
+                            privacyLevel: options.testProtectedBulkShare
+                                ? AnnotationPrivacyLevels.PROTECTED
+                                : AnnotationPrivacyLevels.PRIVATE,
+                        },
                         { skipPageIndexing: true },
                     )
                     if (options.annotationSharingMethod === 'shareAnnotation') {
@@ -1454,40 +1471,38 @@ function makeShareAnnotationTest(options: {
                     }
                     await contentSharing.waitForSync()
 
-                    // It should not try to upload the same annotation twice
-                    await contentSharing.shareAnnotation({
-                        annotationUrl: secondAnnotationUrl,
-                    })
-                    await contentSharing.waitForSync()
-
-                    const sharedAnnotationMetadata = await setup.storageManager.operation(
+                    const sharedAnnotationMetadataPre = await setup.storageManager.operation(
                         'findObjects',
                         'sharedAnnotationMetadata',
                         {},
                     )
-                    expect(sharedAnnotationMetadata).toEqual([
-                        {
-                            localId: firstAnnotationUrl,
-                            remoteId: expect.anything(),
-                            excludeFromLists: true,
-                        },
-                        {
-                            localId: secondAnnotationUrl,
-                            remoteId: expect.anything(),
-                            excludeFromLists: true,
-                        },
-                    ])
+                    expect(sharedAnnotationMetadataPre[0]).toEqual({
+                        localId: firstAnnotationUrl,
+                        remoteId: expect.anything(),
+                        excludeFromLists: true,
+                    })
+                    expect(sharedAnnotationMetadataPre[1]).toEqual(
+                        options.testProtectedBulkShare
+                            ? undefined
+                            : {
+                                  localId: secondAnnotationUrl,
+                                  remoteId: expect.anything(),
+                                  excludeFromLists: true,
+                              },
+                    )
                     const remoteAnnotationIds = await contentSharing.storage.getRemoteAnnotationIds(
                         {
                             localIds: [firstAnnotationUrl, secondAnnotationUrl],
                         },
                     )
-                    expect(remoteAnnotationIds).toEqual({
-                        [firstAnnotationUrl]:
-                            sharedAnnotationMetadata[0].remoteId,
-                        [secondAnnotationUrl]:
-                            sharedAnnotationMetadata[1].remoteId,
-                    })
+                    expect(remoteAnnotationIds[firstAnnotationUrl]).toEqual(
+                        sharedAnnotationMetadataPre[0].remoteId,
+                    )
+                    expect(remoteAnnotationIds[secondAnnotationUrl]).toEqual(
+                        options.testProtectedBulkShare
+                            ? undefined
+                            : sharedAnnotationMetadataPre[1].remoteId,
+                    )
 
                     const serverStorage = await setup.getServerStorage()
                     const getShared = (collection: string) =>
@@ -1499,31 +1514,33 @@ function makeShareAnnotationTest(options: {
                     const sharedAnnotations = await getShared(
                         'sharedAnnotation',
                     )
-                    expect(sharedAnnotations).toEqual([
-                        {
-                            id:
-                                convertRemoteId(
-                                    remoteAnnotationIds[
-                                        firstAnnotationUrl
-                                    ] as string,
-                                ) || remoteAnnotationIds[firstAnnotationUrl],
-                            creator: TEST_USER.id,
-                            normalizedPageUrl: normalizeUrl(
-                                data.ANNOTATION_1_1_DATA.pageUrl,
-                            ),
-                            createdWhen: expect.any(Number),
-                            uploadedWhen: expect.any(Number),
-                            updatedWhen: expect.any(Number),
-                            comment: data.ANNOTATION_1_1_DATA.comment,
-                            body: data.ANNOTATION_1_1_DATA.body,
-                            selector: JSON.stringify(
-                                data.ANNOTATION_1_1_DATA.selector,
-                            ),
-                        },
-                        expect.objectContaining({
-                            body: data.ANNOTATION_1_2_DATA.body,
-                        }),
-                    ])
+                    expect(sharedAnnotations[0]).toEqual({
+                        id:
+                            convertRemoteId(
+                                remoteAnnotationIds[
+                                    firstAnnotationUrl
+                                ] as string,
+                            ) || remoteAnnotationIds[firstAnnotationUrl],
+                        creator: TEST_USER.id,
+                        normalizedPageUrl: normalizeUrl(
+                            data.ANNOTATION_1_1_DATA.pageUrl,
+                        ),
+                        createdWhen: expect.any(Number),
+                        uploadedWhen: expect.any(Number),
+                        updatedWhen: expect.any(Number),
+                        comment: data.ANNOTATION_1_1_DATA.comment,
+                        body: data.ANNOTATION_1_1_DATA.body,
+                        selector: JSON.stringify(
+                            data.ANNOTATION_1_1_DATA.selector,
+                        ),
+                    })
+                    expect(sharedAnnotations[1]).toEqual(
+                        options.testProtectedBulkShare
+                            ? undefined
+                            : expect.objectContaining({
+                                  body: data.ANNOTATION_1_2_DATA.body,
+                              }),
+                    )
                     expect(
                         await getShared('sharedAnnotationListEntry'),
                     ).toEqual([])
@@ -1572,24 +1589,25 @@ function makeShareAnnotationTest(options: {
                             originalUrl: data.ENTRY_1_DATA.url,
                         },
                     ])
-                    expect(
-                        await setup.storageManager.operation(
-                            'findObjects',
-                            'sharedAnnotationMetadata',
-                            {},
-                        ),
-                    ).toEqual([
-                        {
-                            localId: firstAnnotationUrl,
-                            remoteId: expect.anything(),
-                            excludeFromLists: false,
-                        },
-                        {
-                            localId: secondAnnotationUrl,
-                            remoteId: expect.anything(),
-                            excludeFromLists: true,
-                        },
-                    ])
+                    const sharedAnnotationMetadataPost = await setup.storageManager.operation(
+                        'findObjects',
+                        'sharedAnnotationMetadata',
+                        {},
+                    )
+                    expect(sharedAnnotationMetadataPost[0]).toEqual({
+                        localId: firstAnnotationUrl,
+                        remoteId: expect.anything(),
+                        excludeFromLists: false,
+                    })
+                    expect(sharedAnnotationMetadataPost[1]).toEqual(
+                        options.testProtectedBulkShare
+                            ? undefined
+                            : {
+                                  localId: secondAnnotationUrl,
+                                  remoteId: expect.anything(),
+                                  excludeFromLists: true,
+                              },
+                    )
                 },
             },
         ],

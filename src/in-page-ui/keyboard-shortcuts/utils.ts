@@ -4,6 +4,7 @@ import {
     KEYBOARDSHORTCUTS_STORAGE_NAME,
 } from './constants'
 import { setLocalStorage } from 'src/util/storage'
+import { getKeyName } from 'src/util/os-specific-key-names'
 
 export function shortcutStorageToState(storage): KeyboardShortcuts {
     const defaults = KEYBOARDSHORTCUTS_DEFAULT_STATE
@@ -83,20 +84,6 @@ function isAlpha(e: React.KeyboardEvent): boolean {
     return e.keyCode >= 65 && e.keyCode <= 90
 }
 
-function checkOperatingSystem() {
-    let OperatingSystem = navigator.platform
-
-    if (OperatingSystem.startsWith('Mac')) {
-        return 'Mac'
-    }
-    if (OperatingSystem.startsWith('Win')) {
-        return 'Win'
-    }
-    if (OperatingSystem.startsWith('Linux')) {
-        return 'alt'
-    }
-}
-
 export const convertKeyboardEventToKeyString = (
     e: React.KeyboardEvent,
     getKeyVal = (event: React.KeyboardEvent) =>
@@ -106,23 +93,13 @@ export const convertKeyboardEventToKeyString = (
         return ''
     }
 
-    if (checkOperatingSystem() === 'Mac') {
-        return (
-            (e.altKey ? 'option+' : '') +
-            (e.ctrlKey ? 'ctrl+' : '') +
-            (e.metaKey ? 'meta+' : '') +
-            (e.shiftKey ? 'shift+' : '') +
-            getKeyVal(e).toLowerCase()
-        )
-    }
+    const altKey = getKeyName({ key: 'alt' })
 
-    if (checkOperatingSystem() === 'Win') {
-        return (
-            (e.altKey ? 'alt+' : '') +
-            (e.ctrlKey ? 'ctrl+' : '') +
-            (e.metaKey ? 'meta+' : '') +
-            (e.shiftKey ? 'shift+' : '') +
-            getKeyVal(e).toLowerCase()
-        )
-    }
+    return (
+        (e.altKey ? altKey + '+' : '') +
+        (e.ctrlKey ? 'ctrl+' : '') +
+        (e.metaKey ? 'meta+' : '') +
+        (e.shiftKey ? 'shift+' : '') +
+        getKeyVal(e).toLowerCase()
+    )
 }

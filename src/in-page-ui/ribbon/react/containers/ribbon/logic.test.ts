@@ -235,7 +235,7 @@ describe('Ribbon logic', () => {
         expect(ribbon.state.commentBox.commentText).toEqual(COMMENT_TEXT)
 
         ribbonLogic.commentSavedTimeout = 1
-        await ribbon.processEvent('saveComment', null)
+        await ribbon.processEvent('saveComment', { value: 0 })
 
         expect(ribbon.state.commentBox).toEqual({
             ...INITIAL_RIBBON_COMMENT_BOX_STATE,
@@ -279,7 +279,7 @@ describe('Ribbon logic', () => {
         expect(ribbon.state.commentBox.tags).toEqual(TAGS)
 
         ribbonLogic.commentSavedTimeout = 1
-        await ribbon.processEvent('saveComment', null)
+        await ribbon.processEvent('saveComment', { value: 0 })
 
         expect(ribbon.state.commentBox).toEqual({
             ...INITIAL_RIBBON_COMMENT_BOX_STATE,

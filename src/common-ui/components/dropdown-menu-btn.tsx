@@ -6,6 +6,7 @@ import ButtonTooltip, { Props as ButtonTooltipProps } from './button-tooltip'
 
 export interface MenuItemProps {
     name: string
+    id?: string | number
     info?: string
     isDisabled?: boolean
     soonAvailable?: boolean
@@ -16,13 +17,16 @@ interface ThemeProps {
 }
 
 export interface Props<T extends MenuItemProps = MenuItemProps> {
+    isOpen?: boolean
+    toggleOpen?: () => void
     menuItems: T[]
     btnChildren: React.ReactNode
-    onMenuItemClick: (itemProps: T) => void
+    onMenuItemClick?: (itemProps: T) => void
     theme?: ThemeProps
     keepSelectedState?: boolean
     tooltipProps?: ButtonTooltipProps
     initSelectedIndex?: number
+    btnId?: string
 }
 
 interface State {
@@ -49,6 +53,10 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
         }
     }
 
+    private get isOpen(): boolean {
+        return this.props.isOpen ?? this.state.isOpen
+    }
+
     private toggleMenu = () => {
         // This check covers the case when the menu is open and you click the button to close it:
         //  This case triggers the "ClickAway" event calling this method AND the btn's call,
@@ -59,7 +67,11 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
         }
         this.lastToggleCall = now
 
-        this.setState((state) => ({ isOpen: !state.isOpen }))
+        if (this.props.toggleOpen) {
+            this.props.toggleOpen()
+        } else {
+            this.setState((state) => ({ isOpen: !state.isOpen }))
+        }
     }
 
     private handleItemClick: (
@@ -99,7 +111,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
 
     private renderMenuBtn = () => {
         const btn = (
-            <MenuBtn id="DropdownMenuBtn" onClick={this.toggleMenu}>
+            <MenuBtn id={this.props.btnId} onClick={this.toggleMenu}>
                 {this.props.btnChildren}
             </MenuBtn>
         )
@@ -120,7 +132,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
             <ThemeProvider theme={this.theme}>
                 <MenuContainer>
                     {this.renderMenuBtn()}
-                    {this.state.isOpen && (
+                    {this.isOpen && (
                         <ClickAway onClickAway={this.toggleMenu}>
                             <Menu
                                 onMouseEnter={(e) => {
@@ -132,8 +144,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                                     e.stopPropagation
                                 }}
                             >
-                                {' '}
-                                {this.renderMenuItems()}
+                                {this.props.children ?? this.renderMenuItems()}
                             </Menu>
                         </ClickAway>
                     )}

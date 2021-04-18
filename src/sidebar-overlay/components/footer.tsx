@@ -1,7 +1,10 @@
 import * as React from 'react'
 import { ButtonTooltip } from 'src/common-ui/components/'
+import { getKeyName } from 'src/util/os-specific-key-names'
 
 const styles = require('./footer.css')
+
+const MOD_KEY = getKeyName({ key: 'mod' })
 
 interface Props {
     dialogText?: string
@@ -30,23 +33,20 @@ const Footer = ({
             )}
         </div>
         <div className={styles.savecancel}>
-            <ButtonTooltip
-                tooltipText={'ctr/cmd + Enter'}
-                position="top"
-            >
-            <button
-                className={actionBtnClassName}
-                onClick={e => {
-                    e.stopPropagation()
-                    actionBtnClickHandler()
-                }}
-            >
-                {actionBtnText}
-            </button>
+            <ButtonTooltip tooltipText={`${MOD_KEY} + Enter`} position="top">
+                <button
+                    className={actionBtnClassName}
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        actionBtnClickHandler()
+                    }}
+                >
+                    {actionBtnText}
+                </button>
             </ButtonTooltip>
             <button
                 className={cancelBtnClassName}
-                onClick={e => {
+                onClick={(e) => {
                     e.stopPropagation()
                     cancelBtnClickHandler()
                 }}
