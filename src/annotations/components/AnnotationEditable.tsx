@@ -423,15 +423,21 @@ const CopyPasterWrapper = styled.div`
 
 const EditNoteIconBox = styled.div`
     display: none;
-    position: relative;
-    justify-content: flex-end;
-    top: 0px;
-    right: 0px;
-    float: right;
-    z-index: 1;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
     border: none;
     outline: none;
-    float: right;
+    background: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+    border: 1px solid #f0f0f0;
+
+    &:hover{
+        background-color: #f0f0f0;
+    }
 `
 
 const EditNoteIcon = styled.div`
@@ -455,6 +461,7 @@ const HighlightActionsBox = styled.div`
     width: 50px;
     display: flex;
     justify-content: flex-end;
+
 `
 
 const NoteTextBox = styled.div`
@@ -468,6 +475,7 @@ const NoteTextBox = styled.div`
     line-break: normal;
     word-break: break-word;
     hyphens: auto;
+    width: 100%;
 
     & *:first-child {
         margin-top: 0px;
@@ -491,8 +499,13 @@ const ActionBox = styled.div`
 const HighlightAction = styled(Margin)`
     display: flex;
     background-color: white;
-    border-radius: 5px;
+    border-radius: 3px;
     padding: 2px;
+    border: 1px solid #f0f0f0;
+
+    &:hover{
+        background-color: #f0f0f0;
+    }
 `
 
 const HighlightTextBox = styled.div`
@@ -558,6 +571,9 @@ const CommentBox = styled.div`
     line-height: 1.4;
     text-align: left;
     border-top: 1px solid #e0e0e0;
+    overflow: visible;
+    flex-direction: row-reverse;
+    display: flex;
 
     &: hover ${EditNoteIconBox} {
         display: flex;
@@ -647,6 +663,7 @@ const ActionBtnStyled = styled.button`
     background: transparent;
     border-radius: 3px;
     font-weight: 700;
+    border: 1px solid #f0f0f0;
 
     &:focus {
         background-color: grey;

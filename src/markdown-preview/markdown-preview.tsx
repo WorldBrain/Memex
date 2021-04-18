@@ -31,7 +31,7 @@ export class MarkdownPreview extends React.Component<Props, State> {
     static ALT_KEY = getKeyName({ key: 'alt' })
     static defaultProps: Partial<Props> = {
         isToggleKBShortcutKeyed: (e) =>
-            e.key === 'Enter' && e.altKey && !e.metaKey,
+            e.key === 'Enter' && e.altKey && !e.metaKey && !e.shiftKey,
         renderSecondaryBtn: () => null,
     }
 

@@ -15,8 +15,8 @@ export interface Props {
 }
 
 const SharePrivacyOption = (props: Props) => (
-    <PrivacyOptionItem onClick={props.onClick} bottom="10px">
-        <Icon height="22px" icon={props.icon} />
+    <PrivacyOptionItem onClick={props.onClick}>
+        <Icon height="18px" icon={props.icon} />
         <PrivacyOptionBox>
             <PrivacyOptionTitleBox>
                 <PrivacyOptionTitle>{props.title}</PrivacyOptionTitle>
@@ -37,9 +37,14 @@ const PrivacyOptionItem = styled(Margin)`
     cursor: pointer;
     padding: 2px 20px;
     width: fill-available;
+    margin-bottom: 10px;
 
     &:hover {
         background-color: ${colors.onHover};
+    }
+
+    &:last-child {
+        margin-bottom: 0px;
     }
 `
 
