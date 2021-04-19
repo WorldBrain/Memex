@@ -282,7 +282,7 @@ export function createBackgroundModules(options: {
                         )
                     ).lastUserMessageSeen,
                 set: async (value) => {
-                    await options.browserAPIs.storage.local.get({
+                    await options.browserAPIs.storage.local.set({
                         'userMessages.lastSeen': value,
                     })
                 },
