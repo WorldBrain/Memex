@@ -181,7 +181,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                 ]}
                 shortcutHandlerDict={{
                     'mod+shift+enter': this.handleSetProtected,
-                    'mod+alt+enter': this.handleSetShared,
+                    'alt+shift+enter': this.handleSetShared,
                     'mod+enter': this.handleSetPrivate,
                 }}
             />

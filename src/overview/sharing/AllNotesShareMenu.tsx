@@ -170,14 +170,14 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                     },
                     {
                         title: 'Shared',
-                        shortcut: `${AllNotesShareMenu.ALT_KEY}+${AllNotesShareMenu.MOD_KEY}+enter`,
+                        shortcut: `shift+${AllNotesShareMenu.ALT_KEY}+enter`,
                         description: 'Shared in collections this page is in',
                         icon: 'shared',
                         onClick: this.handleSetShared,
                     },
                 ]}
                 shortcutHandlerDict={{
-                    'mod+alt+enter': this.handleSetShared,
+                    'alt+shift+enter': this.handleSetShared,
                     'mod+enter': this.handleSetPrivate,
                 }}
             />

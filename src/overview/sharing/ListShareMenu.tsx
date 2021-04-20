@@ -233,14 +233,14 @@ export default class ListShareMenu extends React.Component<Props, State> {
                     },
                     {
                         title: 'Shared',
-                        shortcut: `${ListShareMenu.ALT_KEY}+${ListShareMenu.MOD_KEY}+enter`,
+                        shortcut: `shift+${ListShareMenu.ALT_KEY}+enter`,
                         description: 'Shared in collections this page is in',
                         icon: 'shared',
                         onClick: this.handleSetShared,
                     },
                 ]}
                 shortcutHandlerDict={{
-                    'mod+alt+enter': this.handleSetShared,
+                    'alt+shift+enter': this.handleSetShared,
                     'mod+enter': this.handleSetPrivate,
                 }}
             />
