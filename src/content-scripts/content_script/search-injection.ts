@@ -1,7 +1,6 @@
 import { initSearchInjection } from 'src/search-injection/content_script'
+import { SearchInjectionMain } from 'src/content-scripts/content_script/types'
 
-export async function main() {
-    initSearchInjection()
+export const main: SearchInjectionMain = async (options) => {
+    initSearchInjection(options)
 }
-
-main()

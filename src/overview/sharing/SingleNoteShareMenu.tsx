@@ -160,7 +160,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                     {
                         title: 'Protected',
                         shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
-                        description: 'Private & never shared',
+                        description: 'Private & not shared in bulk actions',
                         icon: 'lock',
                         onClick: this.handleSetProtected,
                     },
@@ -173,7 +173,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                     },
                     {
                         title: 'Shared',
-                        shortcut: `${SingleNoteShareMenu.ALT_KEY}+${SingleNoteShareMenu.MOD_KEY}+enter`,
+                        shortcut: `shift+${SingleNoteShareMenu.ALT_KEY}+enter`,
                         description: 'Added to shared collections & page links',
                         icon: 'shared',
                         onClick: this.handleSetShared,

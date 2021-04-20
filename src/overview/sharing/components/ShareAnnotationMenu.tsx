@@ -128,7 +128,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                     )}
                     <PrivacyContainer>
                         {this.props.isLoading ? (
-                            <LoadingIndicator />
+                            <LoadingBox><LoadingIndicator /></LoadingBox>
                         ) : (
                             <>
                                 <PrivacyTitle>
@@ -156,6 +156,8 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 export default ShareAnnotationMenu
 
 const Menu = styled.div`
+    padding-bottom: 10px;
+
     & * {
         font-family: 'Poppins', sans-serif;
         line-height: 22px;
@@ -187,6 +189,14 @@ const LinkCopierBox = styled.div`
     margin: 5px 0;
 `
 
+const LoadingBox = styled.div`
+    width: 100%;
+    display: flex;
+    height: 60px;
+    align-items: center;
+    justify-content: center;
+`
+
 const LinkCopier = styled.button`
     width: 100%;
     display: flex;
@@ -213,6 +223,10 @@ const PrivacyContainer = styled.div`
 
     & * {
         color: ${(props) => props.theme.colors.primary};
+    }
+
+    &:first-child {
+        padding-top: 15px;
     }
 `
 

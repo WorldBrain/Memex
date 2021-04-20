@@ -12,6 +12,8 @@ import { AnnotationPrivacyLevels } from '../types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import SharePrivacyOption from 'src/overview/sharing/components/SharePrivacyOption'
 import { getKeyName } from 'src/util/os-specific-key-names'
+import Margin from 'src/dashboard-refactor/components/Margin'
+
 
 interface State {
     isTagPickerShown: boolean
@@ -98,13 +100,16 @@ export class AnnotationCreate extends React.Component<Props, State>
         // If we don't have this, events will bubble up into the page!
         e.stopPropagation()
 
-        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-            const privacyLevel = e.shiftKey
-                ? AnnotationPrivacyLevels.PROTECTED
-                : e.altKey
-                ? AnnotationPrivacyLevels.SHARED
-                : AnnotationPrivacyLevels.PRIVATE
-            return this.handleSave(privacyLevel)
+        if (e.key === 'Enter' && e.shiftKey && e.metaKey) {
+            return this.handleSave(AnnotationPrivacyLevels.PROTECTED)
+        }
+
+        if (e.key === 'Enter' && e.altKey && e.shiftKey) {
+            return this.handleSave(AnnotationPrivacyLevels.SHARED)
+        }
+
+        if (e.key === 'Enter' && e.metaKey) {
+            return this.handleSave(AnnotationPrivacyLevels.PRIVATE)
         }
 
         if (e.key === 'Tab' && !e.shiftKey) {
@@ -162,11 +167,13 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 ? 'person'
                                 : 'shared'
                         }
-                        height="10px"
+                        height="14px"
                     />{' '}
                     Save
                 </SaveBtnText>
-                <SaveBtnArrow>
+                <SaveBtnArrow
+                    horizontal="1px"
+                >
                     <DropdownMenuBtn
                         btnChildren={<Icon icon="triangle" height="10px" />}
                         isOpen={this.state.isPrivacyLevelShown}
@@ -196,8 +203,8 @@ export class AnnotationCreate extends React.Component<Props, State>
                         />
                         <SharePrivacyOption
                             title="Shared"
-                            shortcut={`${AnnotationCreate.ALT_KEY}+${AnnotationCreate.MOD_KEY}+enter`}
-                            description="Added to shared collections & page links"
+                            shortcut={`shift+${AnnotationCreate.ALT_KEY}+enter`}
+                            description="Added to shared collections this page is in"
                             icon="shared"
                             onClick={this.setSavePrivacyLevel(
                                 AnnotationPrivacyLevels.SHARED,
@@ -325,18 +332,15 @@ const SaveBtn = styled.div`
     font-size: 14px;
     border: none;
     outline: none;
-    padding: 3px 5px;
+    padding: 3px 0 3px 5px;
     margin-right: 5px;
     background: transparent;
     border-radius: 3px;
     font-weight: 700;
+    border 1px solid #f0f0f0;
 
     &:focus {
         background-color: grey;
-    }
-
-    &:hover {
-        background-color: #e0e0e0;
     }
 
     &:focus {
@@ -348,9 +352,19 @@ const SaveBtnText = styled.span`
     display: flex;
     flex-direction: row;
     align-items: center;
+    width: 55px;
+    justify-content: space-between;
+    display: flex;
 `
 
-const SaveBtnArrow = styled.span``
+const SaveBtnArrow = styled(Margin)`
+    width: 24px;
+    border-radius: 3px;
+
+    &:hover {
+        background-color: #e0e0e0;
+    }
+`
 
 const CancelBtnStyled = styled.div`
     box-sizing: border-box;

@@ -111,12 +111,13 @@
     color: #3a2f45;
     width: 450px;
     text-align: center;
+    margin-bottom: 0.5em;
 }
 
 .instructions {
     font-size: 15px;
     text-align: center;
-    margin: 10px 0 30px 0;
+    margin: 0 0 20px 0;
 }
 
 .lineEditBox {
