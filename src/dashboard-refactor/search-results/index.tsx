@@ -50,9 +50,9 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import ListDetails, {
     Props as ListDetailsProps,
 } from './components/list-details'
-import Button from '@worldbrain/memex-common/lib/common-ui/components/button'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import ListShareMenu from 'src/overview/sharing/ListShareMenu'
+import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -94,6 +94,9 @@ export type Props = RootState &
         onPageLinkCopy(link: string): Promise<void>
         onNoteLinkCopy(link: string): Promise<void>
         onListLinkCopy(link: string): Promise<void>
+        updateAllResultNotesShareInfo: (
+            info: Partial<AnnotationSharingInfo>,
+        ) => void
     }
 
 export default class SearchResultsContainer extends PureComponent<Props> {
@@ -462,6 +465,30 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                             closeShareMenu={this.props.toggleListShareMenu}
                             listId={this.props.listDetailsProps.localListId}
                             shareImmediately={false}
+                            postShareHook={({
+                                shareStateChanged,
+                                privacyLevel,
+                            }) =>
+                                this.props.updateAllResultNotesShareInfo({
+                                    status: shareStateChanged
+                                        ? 'shared'
+                                        : undefined,
+                                    taskState: 'success',
+                                    privacyLevel,
+                                })
+                            }
+                            postUnshareHook={({
+                                shareStateChanged,
+                                privacyLevel,
+                            }) =>
+                                this.props.updateAllResultNotesShareInfo({
+                                    status: shareStateChanged
+                                        ? 'unshared'
+                                        : undefined,
+                                    taskState: 'success',
+                                    privacyLevel,
+                                })
+                            }
                         />
                     </HoverBox>
                 )}

@@ -562,6 +562,67 @@ describe('Dashboard search results logic', () => {
                 })
             }
         })
+
+        it('should be update note share info for all result notes', async ({
+            device,
+        }) => {
+            const { searchResults } = await setupTest(device, {
+                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+            })
+
+            const noteIds = searchResults.state.searchResults.noteData.allIds
+
+            expect(searchResults.state.searchResults.noteSharingInfo).toEqual(
+                {},
+            )
+
+            await searchResults.processEvent(
+                'updateAllPageResultNotesShareInfo',
+                {
+                    info: { status: 'not-yet-shared', taskState: 'pristine' },
+                },
+            )
+            for (const noteId of noteIds) {
+                expect(
+                    searchResults.state.searchResults.noteSharingInfo[noteId],
+                ).toEqual({
+                    status: 'not-yet-shared',
+                    taskState: 'pristine',
+                })
+            }
+
+            await searchResults.processEvent(
+                'updateAllPageResultNotesShareInfo',
+                {
+                    info: { status: 'shared', taskState: 'success' },
+                },
+            )
+
+            for (const noteId of noteIds) {
+                expect(
+                    searchResults.state.searchResults.noteSharingInfo[noteId],
+                ).toEqual({
+                    status: 'shared',
+                    taskState: 'success',
+                })
+            }
+
+            await searchResults.processEvent(
+                'updateAllPageResultNotesShareInfo',
+                {
+                    info: { status: 'unshared', taskState: 'error' },
+                },
+            )
+
+            for (const noteId of noteIds) {
+                expect(
+                    searchResults.state.searchResults.noteSharingInfo[noteId],
+                ).toEqual({
+                    status: 'unshared',
+                    taskState: 'error',
+                })
+            }
+        })
     })
 
     describe('nested page result state mutations', () => {

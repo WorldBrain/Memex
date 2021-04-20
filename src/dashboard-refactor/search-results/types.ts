@@ -261,6 +261,7 @@ export type Events = UIEvent<{
     updatePageNotesShareInfo: PageEventArgs & {
         info: Partial<AnnotationSharingInfo>
     }
+    updateAllPageResultNotesShareInfo: { info: Partial<AnnotationSharingInfo> }
 
     // New note form state mutations
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }

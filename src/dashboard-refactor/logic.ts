@@ -710,20 +710,17 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    updatePageNotesShareInfo: EventHandler<
-        'updatePageNotesShareInfo'
-    > = async ({
-        event,
-        previousState: {
-            searchResults: { noteSharingInfo, noteData },
-        },
+    private updateShareInfoForNoteIds = (params: {
+        noteIds: string[]
+        previousState: State
+        info: Partial<AnnotationSharingInfo>
     }) => {
-        const noteIds = noteData.allIds.filter(
-            (noteId) => noteData.byId[noteId].pageUrl === event.pageId,
-        )
+        const {
+            searchResults: { noteSharingInfo },
+        } = params.previousState
         const mutation: UIMutation<State['searchResults']> = {}
 
-        for (const noteId of noteIds) {
+        for (const noteId of params.noteIds) {
             const prev: AnnotationSharingInfo =
                 noteSharingInfo[noteId] ?? ({} as any)
             if (prev?.privacyLevel === AnnotationPrivacyLevels.PROTECTED) {
@@ -735,16 +732,40 @@ export class DashboardLogic extends UILogic<State, Events> {
                 [noteId]: {
                     $set: {
                         ...prev,
-                        ...event.info,
+                        ...params.info,
                         privacyLevel:
-                            event.info.privacyLevel ?? prev.privacyLevel,
-                        status: event.info.status ?? prev.status,
+                            params.info.privacyLevel ?? prev.privacyLevel,
+                        status: params.info.status ?? prev.status,
                     },
                 },
             }
         }
 
         this.emitMutation({ searchResults: mutation })
+    }
+
+    updateAllPageResultNotesShareInfo: EventHandler<
+        'updateAllPageResultNotesShareInfo'
+    > = async ({ event, previousState }) => {
+        this.updateShareInfoForNoteIds({
+            previousState,
+            info: event.info,
+            noteIds: previousState.searchResults.noteData.allIds,
+        })
+    }
+
+    updatePageNotesShareInfo: EventHandler<
+        'updatePageNotesShareInfo'
+    > = async ({ event, previousState }) => {
+        const { noteData } = previousState.searchResults
+
+        this.updateShareInfoForNoteIds({
+            previousState,
+            info: event.info,
+            noteIds: noteData.allIds.filter(
+                (noteId) => noteData.byId[noteId].pageUrl === event.pageId,
+            ),
+        })
     }
 
     removePageFromList: EventHandler<'removePageFromList'> = async ({

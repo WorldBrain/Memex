@@ -480,6 +480,11 @@ export class DashboardContainer extends StatefulUIElement<
                         isShown: !searchResults.isListShareMenuShown,
                     })
                 }
+                updateAllResultNotesShareInfo={(info) =>
+                    this.processEvent('updateAllPageResultNotesShareInfo', {
+                        info,
+                    })
+                }
                 isSearchFilteredByList={listsSidebar.selectedListId != null}
                 listDetailsProps={this.getListDetailsProps()}
                 {...searchResults}
