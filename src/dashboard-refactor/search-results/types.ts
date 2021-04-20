@@ -14,6 +14,7 @@ import {
 } from 'src/content-sharing/ui/types'
 import { Anchor } from 'src/highlighting/types'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import type { AnalyticsEvents } from 'src/analytics/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -223,7 +224,7 @@ export type Events = UIEvent<{
     /** NOTE: Does not mutate state */
     copyShareLink: {
         link: string
-        analyticsAction: 'copyNoteLink' | 'copyPageLink'
+        analyticsAction: AnalyticsEvents['ContentSharing']
     }
     dismissMobileAd: null
     dismissOnboardingMsg: null

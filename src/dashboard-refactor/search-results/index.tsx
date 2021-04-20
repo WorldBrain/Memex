@@ -50,6 +50,9 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import ListDetails, {
     Props as ListDetailsProps,
 } from './components/list-details'
+import Button from '@worldbrain/memex-common/lib/common-ui/components/button'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import ListShareMenu from 'src/overview/sharing/ListShareMenu'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -60,6 +63,7 @@ export type Props = RootState &
         'onNotesSearchSwitch' | 'onPagesSearchSwitch'
     > & {
         goToImportRoute: () => void
+        toggleListShareMenu: () => void
         areAllNotesShown: boolean
         isSearchFilteredByList: boolean
         pageInteractionProps: PageInteractionAugdProps
@@ -89,6 +93,7 @@ export type Props = RootState &
         paginateSearch(): Promise<void>
         onPageLinkCopy(link: string): Promise<void>
         onNoteLinkCopy(link: string): Promise<void>
+        onListLinkCopy(link: string): Promise<void>
     }
 
 export default class SearchResultsContainer extends PureComponent<Props> {
@@ -436,6 +441,34 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         return days
     }
 
+    private renderListShareBtn() {
+        if (!this.props.isSearchFilteredByList) {
+            return
+        }
+
+        return (
+            <>
+                <ButtonTooltip tooltipText="Share Collection" position="top">
+                    <Icon
+                        icon="shareEmpty"
+                        height="18px"
+                        onClick={this.props.toggleListShareMenu}
+                    />
+                </ButtonTooltip>
+                {this.props.isListShareMenuShown && (
+                    <HoverBox top="25px" right="-150px" withRelativeContainer>
+                        <ListShareMenu
+                            copyLink={this.props.onListLinkCopy}
+                            closeShareMenu={this.props.toggleListShareMenu}
+                            listId={this.props.listDetailsProps.localListId}
+                            shareImmediately={false}
+                        />
+                    </HoverBox>
+                )}
+            </>
+        )
+    }
+
     render() {
         return (
             <ResultsContainer bottom="100px">
@@ -450,6 +483,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 <SearchCopyPaster
                                     {...this.props.searchCopyPasterProps}
                                 />
+                                {this.renderListShareBtn()}
                                 <ExpandAllNotes
                                     isEnabled={this.props.areAllNotesShown}
                                     onClick={this.props.onShowAllNotesClick}

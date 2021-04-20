@@ -74,6 +74,7 @@ export interface AnalyticsEvents {
         | 'shareListEntryBatch'
         | 'unshareListEntry'
         | 'shareAnnotation'
+        | 'copyListLink'
         | 'copyNoteLink'
         | 'copyPageLink'
         | 'copyCollectionLink'

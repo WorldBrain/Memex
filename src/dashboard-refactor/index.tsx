@@ -115,6 +115,7 @@ export class DashboardContainer extends StatefulUIElement<
         return {
             remoteLink,
             listName: listData.name,
+            localListId: listData.id,
             sharingAccess: searchResults.sharingAccess,
             onAddContributorsClick: () =>
                 this.processEvent('setShareListId', {
@@ -474,6 +475,11 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <SearchResultsContainer
                 goToImportRoute={this.bindRouteGoTo('import')}
+                toggleListShareMenu={() =>
+                    this.processEvent('setListShareMenuShown', {
+                        isShown: !searchResults.isListShareMenuShown,
+                    })
+                }
                 isSearchFilteredByList={listsSidebar.selectedListId != null}
                 listDetailsProps={this.getListDetailsProps()}
                 {...searchResults}
@@ -524,6 +530,12 @@ export class DashboardContainer extends StatefulUIElement<
                     this.processEvent('copyShareLink', {
                         link,
                         analyticsAction: 'copyNoteLink',
+                    })
+                }
+                onListLinkCopy={(link) =>
+                    this.processEvent('copyShareLink', {
+                        link,
+                        analyticsAction: 'copyListLink',
                     })
                 }
                 pageInteractionProps={{

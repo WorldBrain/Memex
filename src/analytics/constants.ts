@@ -107,6 +107,9 @@ export const ANALYTICS_EVENTS: {
         copyNoteLink: {
             description: 'Copied NoteLink to clipboard',
         },
+        copyListLink: {
+            description: 'Copied ListLink to clipboard',
+        },
         copyPageLink: {
             description: 'Copied PageLink to clipboard',
         },
