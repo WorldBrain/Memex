@@ -12,6 +12,7 @@ import { LoadingIndicator } from 'src/common-ui/components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import Margin from 'src/dashboard-refactor/components/Margin'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 const COPY_TIMEOUT = 2000
 
@@ -24,6 +25,7 @@ export interface Props {
     privacyOptionsTitleCopy: React.ReactNode
     shortcutHandlerDict?: ShorcutHandlerDict
     onClickOutside?: React.MouseEventHandler
+    onPlusBtnClick?: React.MouseEventHandler
     privacyOptions: PrivacyOptionProps[]
     linkTitleCopy: React.ReactNode
     isLoading: boolean
@@ -102,9 +104,18 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                 <Menu>
                     {this.props.showLink && (
                         <TopArea>
-                            <SectionTitle>
-                                {this.props.linkTitleCopy}
-                            </SectionTitle>
+                            <TitleContainer>
+                                <SectionTitle>
+                                    {this.props.linkTitleCopy}
+                                </SectionTitle>
+                                {this.props.onPlusBtnClick && (
+                                    <Icon
+                                        icon="plus"
+                                        height="18px"
+                                        onClick={this.props.onPlusBtnClick}
+                                    />
+                                )}
+                            </TitleContainer>
                             <LinkCopierBox>
                                 <LinkCopier
                                     state={this.state.copyState}
@@ -154,6 +165,14 @@ const Menu = styled.div`
 const TopArea = styled.div`
     padding: 10px 15px;
 `
+
+const TitleContainer = styled.div`
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+`
+
 const SectionTitle = styled.div`
     font-weight: bold;
     font-size: 14px;

@@ -67,6 +67,7 @@ export const theme: Theme = {
         alertRound: icons.alertRound,
         triangle: icons.triangle,
         lock: icons.lock,
+        plus: icons.plus,
         person: icons.person,
         shared: icons.shared,
         shareEmpty: icons.shareEmpty,

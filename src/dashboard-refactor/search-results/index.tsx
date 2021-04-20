@@ -76,6 +76,7 @@ export type Props = RootState &
         onDismissMobileAd: React.MouseEventHandler
         onDismissOnboardingMsg: React.MouseEventHandler
         filterSearchByTag: (tag: string) => void
+        openListShareModal: () => void
         newNoteInteractionProps: {
             [Key in keyof AnnotationCreateEventProps]: (
                 day: number,
@@ -461,6 +462,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 {this.props.isListShareMenuShown && (
                     <HoverBox top="25px" right="-150px" withRelativeContainer>
                         <ListShareMenu
+                            openListShareModal={this.props.openListShareModal}
                             copyLink={this.props.onListLinkCopy}
                             closeShareMenu={this.props.toggleListShareMenu}
                             listId={this.props.listDetailsProps.localListId}

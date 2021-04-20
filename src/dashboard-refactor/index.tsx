@@ -480,6 +480,11 @@ export class DashboardContainer extends StatefulUIElement<
                         isShown: !searchResults.isListShareMenuShown,
                     })
                 }
+                openListShareModal={() =>
+                    this.processEvent('setShareListId', {
+                        listId: listsSidebar.selectedListId,
+                    })
+                }
                 updateAllResultNotesShareInfo={(info) =>
                     this.processEvent('updateAllPageResultNotesShareInfo', {
                         info,

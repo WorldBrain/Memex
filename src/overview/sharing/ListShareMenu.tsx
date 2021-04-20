@@ -14,6 +14,7 @@ interface State extends ShareMenuCommonState {
 }
 
 export interface Props extends ShareMenuCommonProps {
+    openListShareModal: () => void
     customListsBG?: RemoteCollectionsInterface
     shareImmediately: boolean
     listId: number
@@ -52,6 +53,10 @@ export default class ListShareMenu extends React.Component<Props, State> {
                 }
             },
         )
+    }
+
+    private handlePlusBtnClick: React.MouseEventHandler = (e) => {
+        this.props.openListShareModal()
     }
 
     private shareList = async () => {
@@ -210,6 +215,7 @@ export default class ListShareMenu extends React.Component<Props, State> {
                 link={this.state.link}
                 showLink={this.state.showLink}
                 onCopyLinkClick={this.handleLinkCopy}
+                onPlusBtnClick={this.handlePlusBtnClick}
                 onClickOutside={this.props.closeShareMenu}
                 linkTitleCopy="Link to collection and shared notes"
                 privacyOptionsTitleCopy="Set privacy for all notes in this collection"
