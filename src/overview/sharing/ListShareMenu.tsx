@@ -8,6 +8,7 @@ import { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 
 interface State extends ShareMenuCommonState {
     showLink: boolean
@@ -39,6 +40,10 @@ export default class ListShareMenu extends React.Component<Props, State> {
         showLink: false,
         loadState: 'pristine',
         shareState: 'pristine',
+    }
+
+    private get isListSharable(): boolean {
+        return !Object.values(SPECIAL_LIST_IDS).includes(this.props.listId)
     }
 
     async componentDidMount() {
@@ -106,12 +111,19 @@ export default class ListShareMenu extends React.Component<Props, State> {
 
     private setRemoteLinkIfExists = async (): Promise<boolean> => {
         const { listId, contentSharingBG } = this.props
+
+        if (!this.isListSharable) {
+            return false
+        }
+
         const remoteListId = await contentSharingBG.getRemoteListId({
             localListId: listId,
         })
+
         if (!remoteListId) {
             return false
         }
+
         this.setState({
             link: getListShareUrl({ remoteListId }),
             showLink: true,
@@ -127,7 +139,7 @@ export default class ListShareMenu extends React.Component<Props, State> {
         let success = false
         try {
             // Share list if it hasn't been shared already
-            if (!this.state.showLink) {
+            if (!this.state.showLink && this.isListSharable) {
                 await this.shareList()
                 await this.setRemoteLinkIfExists()
             }

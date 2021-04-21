@@ -493,7 +493,7 @@ export class DashboardContainer extends StatefulUIElement<
                         info,
                     })
                 }
-                isSearchFilteredByList={listsSidebar.selectedListId != null}
+                selectedListId={listsSidebar.selectedListId}
                 listDetailsProps={this.getListDetailsProps()}
                 {...searchResults}
                 onDismissMobileAd={() =>

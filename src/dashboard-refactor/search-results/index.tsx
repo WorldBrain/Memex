@@ -64,8 +64,8 @@ export type Props = RootState &
     > & {
         goToImportRoute: () => void
         toggleListShareMenu: () => void
+        selectedListId?: number
         areAllNotesShown: boolean
-        isSearchFilteredByList: boolean
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
         searchCopyPasterProps: SearchCopyPasterProps
@@ -329,7 +329,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         return (
             <ResultBox bottom="10px" key={day.toString() + pageId}>
                 <PageResult
-                    isSearchFilteredByList={this.props.isSearchFilteredByList}
+                    isSearchFilteredByList={this.props.selectedListId != null}
                     onTagClick={this.props.filterSearchByTag}
                     shareMenuProps={{
                         normalizedPageUrl: page.normalizedUrl,
@@ -446,7 +446,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     }
 
     private renderListShareBtn() {
-        if (!this.props.isSearchFilteredByList) {
+        if (this.props.selectedListId == null) {
             return
         }
 
@@ -465,7 +465,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                             openListShareModal={this.props.openListShareModal}
                             copyLink={this.props.onListLinkCopy}
                             closeShareMenu={this.props.toggleListShareMenu}
-                            listId={this.props.listDetailsProps.localListId}
+                            listId={this.props.selectedListId}
                             shareImmediately={false}
                             postShareHook={({
                                 shareStateChanged,
@@ -501,7 +501,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     render() {
         return (
             <ResultsContainer bottom="100px">
-                {this.props.isSearchFilteredByList && (
+                {this.props.selectedListId != null && (
                     <ListDetails {...this.props.listDetailsProps} />
                 )}
                 <PageTopBarBox bottom="5px">
