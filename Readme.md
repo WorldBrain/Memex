@@ -15,7 +15,7 @@
 # Memex Features
 
 A browser extension to eliminate time spent bookmarking, retracing steps to recall an old webpage, or copy-pasting notes into scattered documents.
-Its name and functionalities are heavily inspired by [Vannevar Bush's vision of a Memex](http://memex.link/S1zVMgKzX/en.wikipedia.org/wiki/Memex).
+Its name and functionalities are heavily inspired by [Vannevar Bush's vision of a Memex](https://en.wikipedia.org/wiki/Memex).
 <img width="1025" alt="main_screen_new" src="https://user-images.githubusercontent.com/7870039/75159434-0bf63700-5710-11ea-9179-2d49b8810400.png">
 
 ## Full-Text Search in Bookmarks:
