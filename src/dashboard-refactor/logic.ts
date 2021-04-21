@@ -274,6 +274,8 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     private async loadListsData(previousState: State) {
         const { listsBG, contentShareBG } = this.options
+
+        const remoteToLocalIdDict: { [remoteId: string]: number } = {}
         const mutation: UIMutation<State['listsSidebar']> = {}
         await executeUITask(
             this,
@@ -296,11 +298,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const listData: { [id: number]: ListData } = {}
 
                 for (const list of localLists) {
+                    const remoteId = localToRemoteIdDict[list.id]
+                    if (remoteId) {
+                        remoteToLocalIdDict[remoteId] = list.id
+                    }
                     listIds.push(list.id)
                     listData[list.id] = {
                         id: list.id,
                         name: list.name,
-                        remoteId: localToRemoteIdDict[list.id] ?? undefined,
+                        remoteId,
                     }
                 }
 
@@ -339,20 +345,26 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const followedLists = await listsBG.fetchAllFollowedLists({
                     limit: 1000,
                 })
-                // We don't want duped lists that appear in both local and followed sections
-                const filteredLists = followedLists.filter(
-                    (list) => !sharedLocalListRemoteIds.has(list.remoteId),
-                )
-
-                const listIds: number[] = []
+                const followedListIds: number[] = []
                 const listData: { [id: number]: ListData } = {}
 
-                for (const list of filteredLists) {
-                    listIds.push(list.id)
-                    listData[list.id] = {
-                        id: list.id,
+                for (const list of followedLists) {
+                    const isJoinedList = sharedLocalListRemoteIds.has(
+                        list.remoteId,
+                    )
+                    const localId =
+                        remoteToLocalIdDict[list.remoteId] ?? list.id
+
+                    // Joined lists appear in "Local lists" section, so don't include them here
+                    if (!isJoinedList) {
+                        followedListIds.push(localId)
+                    }
+
+                    listData[localId] = {
+                        id: localId,
                         name: list.name,
                         remoteId: list.remoteId,
+                        isJoinedList,
                     }
                 }
 
@@ -360,8 +372,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listsSidebar: {
                         listData: { $merge: listData },
                         followedLists: {
-                            allListIds: { $set: listIds },
-                            filteredListIds: { $set: listIds },
+                            allListIds: { $set: followedListIds },
+                            filteredListIds: { $set: followedListIds },
                         },
                     },
                 })

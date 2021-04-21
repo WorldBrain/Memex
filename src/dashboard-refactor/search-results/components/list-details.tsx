@@ -9,8 +9,8 @@ import { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 
 export interface Props {
     listName: string
-    localListId: number
     remoteLink?: string
+    localListId: number
     sharingAccess: AnnotationSharingAccess
     onAddContributorsClick?: React.MouseEventHandler
 }
