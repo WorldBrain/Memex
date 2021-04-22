@@ -181,24 +181,24 @@ export default class AnnotationStorage extends StorageModule {
             findAnnotationPrivacyLevel: {
                 collection: AnnotationStorage.ANNOTS_PRIVACY_COLL,
                 operation: 'findObject',
-                args: { annotation: '$annotation:pk' },
+                args: { annotation: '$annotation:string' },
             },
             findAnnotationPrivacyLevels: {
                 collection: AnnotationStorage.ANNOTS_PRIVACY_COLL,
                 operation: 'findObjects',
-                args: { annotation: { $in: '$annotations:pk' } },
+                args: { annotation: { $in: '$annotations:string' } },
             },
             deleteAnnotationPrivacyLevel: {
                 collection: AnnotationStorage.ANNOTS_PRIVACY_COLL,
                 operation: 'deleteObjects',
-                args: { annotation: '$annotation:pk' },
+                args: { annotation: '$annotation:string' },
             },
             updateAnnotationPrivacyLevel: {
                 collection: AnnotationStorage.ANNOTS_PRIVACY_COLL,
                 operation: 'updateObjects',
                 args: [
                     {
-                        annotation: '$annotation:pk',
+                        annotation: '$annotation:string',
                     },
                     {
                         privacyLevel: '$privacyLevel:int',
