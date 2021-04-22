@@ -140,13 +140,29 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
     }
 
     private renderTitle() {
+
+        const {
+            dropReceivingState,
+            isMenuDisplayed,
+            selectedState,
+            newItemsCount,
+            hasActivity,
+        } = this.props
+
         const collaborationIcon = this.props.isCollaborative && (
             <Icon heightAndWidth="12px" path={icons.shared} />
         )
 
         if (!this.props.nameHighlightIndices) {
             return (
-                <ListTitle selectedState={this.props.selectedState}>
+                <ListTitle 
+                    selectedState={this.props.selectedState}
+                    dropReceivingState={dropReceivingState}
+                    onDragLeave={dropReceivingState?.onDragLeave}
+                    onDragEnter={this.handleDragEnter}
+                    onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
+                    onDrop={this.handleDrop}
+                >
                     <Name>{this.props.name}</Name>
                     {collaborationIcon}
                 </ListTitle>
@@ -184,16 +200,20 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         return (
             <Container>
                 <SidebarItem
-                    dropReceivingState={dropReceivingState}
                     isMenuDisplayed={isMenuDisplayed}
                     selectedState={selectedState}
-                    onDragLeave={dropReceivingState?.onDragLeave}
-                    onDragEnter={this.handleDragEnter}
-                    onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
-                    onDrop={this.handleDrop}
+                    dropReceivingState={dropReceivingState}
                     title={this.props.name}
                 >
-                    <TitleBox onClick={this.handleSelection}>
+                    <DropZoneMask
+                        dropReceivingState={dropReceivingState}
+                        onDragLeave={dropReceivingState?.onDragLeave}
+                        onDragEnter={this.handleDragEnter}
+                        onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
+                        onDrop={this.handleDrop}
+                        onClick={this.handleSelection}
+                    />
+                    <TitleBox>
                         {' '}
                         {this.renderTitle()}
                     </TitleBox>
@@ -255,6 +275,12 @@ const IconBox = styled.div<Props>`
     justify-content: flex-end;
 `
 
+const DropZoneMask = styled.div`
+    height: inherit;
+    width: inherit;
+    position: absolute;
+`
+
 const TitleBox = styled.div`
     display: flex;
     flex: 1;
@@ -311,7 +337,7 @@ const SidebarItem = styled.div<Props>`
     ${({ dropReceivingState }: Props) =>
         dropReceivingState?.wasPageDropped &&
         css`
-            animation: ${blinkingAnimation} 0.5s 2;
+            animation: ${blinkingAnimation} 0.2s 2;
         `}
 
     cursor: ${({ dropReceivingState }: Props) =>
@@ -367,6 +393,7 @@ const ListTitle = styled.span<Props>`
     padding-right: 5px;
     justify-content: space-between;
     width: 100%;
+    pointer-events: none;
 `
 
 const ActivityBeacon = styled.div`
