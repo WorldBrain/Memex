@@ -228,7 +228,7 @@ export default class PageResultView extends PureComponent<Props> {
                 <StyledPageResult>
                     {this.renderRemoveFromListBtn()}
                     <PageContentBox
-                        onMouseEnter={this.props.onMainContentHover}
+                        onMouseOver={this.props.onMainContentHover}
                         href={this.props.fullUrl}
                         target="_blank"
                     >
