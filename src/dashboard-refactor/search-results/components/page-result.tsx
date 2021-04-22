@@ -241,7 +241,7 @@ export default class PageResultView extends PureComponent<Props> {
                             <PageUrl>{this.domain}</PageUrl>
                         </ResultContent>
                         <PageTitle top="10px" bottom="5px">
-                            {this.props.fullTitle}
+                            {this.props.fullTitle ?? this.props.fullUrl}
                         </PageTitle>
                     </PageContentBox>
                     <TagsSegment
