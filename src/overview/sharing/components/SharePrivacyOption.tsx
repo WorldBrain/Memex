@@ -16,7 +16,11 @@ export interface Props {
 
 const SharePrivacyOption = (props: Props) => (
     <PrivacyOptionItem onClick={props.onClick}>
-        <Icon height="18px" icon={props.icon} />
+        <Icon 
+            height="18px" 
+            icon={props.icon}
+            color="primary"
+        />
         <PrivacyOptionBox>
             <PrivacyOptionTitleBox>
                 <PrivacyOptionTitle>{props.title}</PrivacyOptionTitle>

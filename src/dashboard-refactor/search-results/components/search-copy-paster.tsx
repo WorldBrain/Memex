@@ -35,10 +35,11 @@ export default function SearchCopyPaster(props: Props) {
             <ButtonTooltip
                 tooltipText="Copy Search Results"
                 position="bottom"
-            />
+            >
             <ActionBtn onClick={props.toggleCopyPaster}>
                 <ActionIcon src={icons.copy} />
             </ActionBtn>
+            </ButtonTooltip>
             {props.isCopyPasterShown && (
                 <HoverBox withRelativeContainer top="25px" left="-155px">
                     <CopyPaster

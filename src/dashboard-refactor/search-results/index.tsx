@@ -452,15 +452,18 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <>
-                <ButtonTooltip tooltipText="Share Collection" position="top">
-                    <Icon
-                        icon="shareEmpty"
-                        height="18px"
-                        onClick={this.props.toggleListShareMenu}
-                    />
+                <ButtonTooltip tooltipText="Share Collection" position="bottom">
+                    <IconBox>
+                        <Icon
+                            icon="shareEmpty"
+                            height="16px"
+                            color="primary"
+                            onClick={this.props.toggleListShareMenu}
+                        />
+                    </IconBox>
                 </ButtonTooltip>
                 {this.props.isListShareMenuShown && (
-                    <HoverBox top="25px" right="-150px" withRelativeContainer>
+                    <HoverBox width="320px" top="20px" right="-150px" withRelativeContainer>
                         <ListShareMenu
                             openListShareModal={this.props.openListShareModal}
                             copyLink={this.props.onListLinkCopy}
@@ -508,7 +511,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     <TopBar
                         leftSide={<SearchTypeSwitch {...this.props} />}
                         rightSide={
-                            <>
+                            <RightSideButton>
                                 <SearchCopyPaster
                                     {...this.props.searchCopyPasterProps}
                                 />
@@ -517,7 +520,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                     isEnabled={this.props.areAllNotesShown}
                                     onClick={this.props.onShowAllNotesClick}
                                 />
-                            </>
+                            </RightSideButton>
                         }
                     />
                 </PageTopBarBox>
@@ -531,6 +534,23 @@ const PageTopBarBox = styled(Margin)`
     width: 100%;
     border-bottom: 1px solid #e0e0e0;
     padding-bottom: 2px;
+`
+
+const IconBox = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3px;
+    padding: 4px;
+
+    &:hover {
+       background-color: ${(props) => props.theme.colors.grey}
+    }
+`
+
+const RightSideButton = styled.div`
+    display: flex;
+    align-items: center;
 `
 
 const NoteTopBarBox = styled(TopBar)`

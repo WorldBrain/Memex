@@ -112,6 +112,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                     <Icon
                                         icon="plus"
                                         height="18px"
+                                        color="primary"
                                         onClick={this.props.onPlusBtnClick}
                                     />
                                 )}

@@ -47,6 +47,8 @@ const Sidebar = styled.div<{
             margin-bottom: 9px;
             height: 90vh;
             top: 5px;
+            border-top-right-radius: 3px;
+            border-bottom-right-radius: 3px;
         `}
     ${(props) =>
         !props.peeking &&
