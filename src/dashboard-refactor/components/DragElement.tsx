@@ -3,14 +3,29 @@ import styled from 'styled-components'
 
 export const DRAG_EL_ID = 'dragged-element'
 
-export default () => (
-    <DragElement id={DRAG_EL_ID}> Drop into Collection</DragElement>
-)
+export interface Props {
+    isHoveringOverListItem: boolean
+}
 
-const DragElement = styled.div<{ id: 'dragged-element' }>`
+export default (props: Props) => {
+    return (
+        <DragElement
+            id={DRAG_EL_ID}
+            isHoveringOverListItem={props.isHoveringOverListItem}
+        >
+            {' '}
+            Drop into Collection
+        </DragElement>
+    )
+}
+
+const DragElement = styled.div<{ id: 'dragged-element' } & Props>`
     text-decoration: none;
     display: none;
-    border: solid 2px ${(props) => props.theme.colors.purple};
+    border: ${(props) =>
+        props.isHoveringOverListItem
+            ? 'none'
+            : `solid 2px ${props.theme.colors.purple}`};
     border-radius: 4px;
     font-size: 0.8rem;
     max-height: 50px;

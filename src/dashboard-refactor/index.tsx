@@ -467,6 +467,8 @@ export class DashboardContainer extends StatefulUIElement<
                             dataTransfer,
                         }),
                     isDraggedOver: listId === listsSidebar.dragOverListId,
+                    wasPageDropped:
+                        listsSidebar.listData[listId]?.wasPageDropped,
                 })}
             />
         )
@@ -898,6 +900,7 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     render() {
+        const { listsSidebar } = this.state
         if (isDuringInstall(this.props.location)) {
             return (
                 <>
@@ -936,7 +939,9 @@ export class DashboardContainer extends StatefulUIElement<
                     }
                 />
                 <HelpBtn />
-                <DragElement />
+                <DragElement
+                    isHoveringOverListItem={listsSidebar.dragOverListId != null}
+                />
                 {this.props.renderUpdateNotifBanner()}
             </Container>
         )

@@ -123,6 +123,10 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             )
         }
 
+        if (dropReceivingState?.wasPageDropped) {
+            return <Icon heightAndWidth="12px" path={icons.check} />
+        }
+
         if (
             dropReceivingState?.canReceiveDroppedItems &&
             dropReceivingState?.isDraggedOver
@@ -242,7 +246,8 @@ const IconBox = styled.div<Props>`
     display: ${(props) =>
         props.hasActivity ||
         props.newItemsCount ||
-        props.dropReceivingState?.isDraggedOver
+        props.dropReceivingState?.isDraggedOver ||
+        props.dropReceivingState?.wasPageDropped
             ? 'flex'
             : 'none'};
     height: 100%;
@@ -304,9 +309,9 @@ const SidebarItem = styled.div<Props>`
         `}
 
     ${({ dropReceivingState }: Props) =>
-        dropReceivingState?.triggerSuccessfulDropAnimation &&
+        dropReceivingState?.wasPageDropped &&
         css`
-            animation: ${blinkingAnimation} 0.4s 2;
+            animation: ${blinkingAnimation} 0.5s 2;
         `}
 
     cursor: ${({ dropReceivingState }: Props) =>
@@ -393,7 +398,7 @@ const blinkingAnimation = keyframes`
     0% {
         background-color: ${colors.onHover};
     }
-    70% {
+    50% {
         background-color: transparent;
     }
     100% {

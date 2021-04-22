@@ -19,6 +19,7 @@ export interface ListData {
     name: string
     remoteId?: string
     isJoinedList?: boolean
+    wasPageDropped?: boolean
 }
 
 export interface ListGroupCommon

@@ -2163,8 +2163,29 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
 
         this.emitMutation({
-            listsSidebar: { dragOverListId: { $set: undefined } },
+            listsSidebar: {
+                dragOverListId: { $set: undefined },
+                listData: {
+                    [event.listId]: {
+                        wasPageDropped: { $set: true },
+                    },
+                },
+            },
         })
+
+        setTimeout(
+            () =>
+                this.emitMutation({
+                    listsSidebar: {
+                        listData: {
+                            [event.listId]: {
+                                wasPageDropped: { $set: false },
+                            },
+                        },
+                    },
+                }),
+            2000,
+        )
     }
 
     confirmListEdit: EventHandler<'confirmListEdit'> = async ({
