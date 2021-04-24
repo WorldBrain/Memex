@@ -630,7 +630,17 @@ describe('Dashboard search results logic', () => {
         ).toEqual(null)
 
         searchResults.processMutation({
-            listsSidebar: { dragOverListId: { $set: listId } },
+            listsSidebar: {
+                dragOverListId: { $set: listId },
+                listData: {
+                    [listId]: {
+                        $set: {
+                            id: listId,
+                            name: 'testList',
+                        },
+                    },
+                },
+            },
         })
         expect(searchResults.state.listsSidebar.dragOverListId).toEqual(listId)
 
@@ -644,6 +654,9 @@ describe('Dashboard search results logic', () => {
             dataTransfer,
         })
 
+        expect(
+            searchResults.state.listsSidebar.listData[listId]?.wasPageDropped,
+        ).toEqual(true)
         expect(searchResults.state.listsSidebar.dragOverListId).toEqual(
             undefined,
         )

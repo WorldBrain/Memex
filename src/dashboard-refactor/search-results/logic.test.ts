@@ -1202,7 +1202,6 @@ describe('Dashboard search results logic', () => {
                         url: latestNoteId,
                         isEditing: false,
                         editNoteForm: utils.getInitialFormState(),
-                        privacyLevel: 0,
                     }),
                 )
 

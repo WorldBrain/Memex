@@ -67,6 +67,17 @@ const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext
                 },
             },
         }),
+        annotationPrivacyLevels: (): StorageCollectionDiff => ({
+            ['1']: {
+                type: 'create',
+                object: {
+                    annotation: annotUrl,
+                    createdWhen: expect.any(Date),
+                    id: 1,
+                    privacyLevel: 100,
+                },
+            },
+        }),
         pages: (): StorageCollectionDiff => PAGE_1_CREATION,
         visits: (): StorageCollectionDiff => expect.anything(),
         customLists: (): StorageCollectionDiff => ({
@@ -128,6 +139,17 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
                                         lastEdited: expect.any(Date),
+                                    },
+                                },
+                            }),
+                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
+                                ['1']: {
+                                    type: 'create',
+                                    object: {
+                                        annotation: annotUrl,
+                                        createdWhen: expect.any(Date),
+                                        id: 1,
+                                        privacyLevel: 100,
                                     },
                                 },
                             }),
@@ -640,6 +662,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     },
                                 },
                             }),
+
                             customLists: (): StorageCollectionDiff => ({
                                 [listId]: {
                                     type: 'create',
@@ -671,6 +694,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                             }),
                             annotBookmarks: (): StorageCollectionDiff => ({
                                 [annotUrl]: {
+                                    type: 'delete',
+                                },
+                            }),
+                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
+                                ['1']: {
                                     type: 'delete',
                                 },
                             }),
@@ -763,6 +791,26 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     },
                                 },
                             }),
+                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
+                                ['1']: {
+                                    type: 'create',
+                                    object: {
+                                        annotation: annotAUrl,
+                                        createdWhen: expect.any(Date),
+                                        id: 1,
+                                        privacyLevel: 100,
+                                    },
+                                },
+                                ['2']: {
+                                    type: 'create',
+                                    object: {
+                                        annotation: annotBUrl,
+                                        createdWhen: expect.any(Date),
+                                        id: 2,
+                                        privacyLevel: 100,
+                                    },
+                                },
+                            }),
                             customLists: (): StorageCollectionDiff => ({
                                 [SPECIAL_LIST_IDS.INBOX]: {
                                     type: 'create',
@@ -806,6 +854,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                         expectedStorageChanges: {
                             annotations: (): StorageCollectionDiff => ({
                                 [annotAUrl]: {
+                                    type: 'delete',
+                                },
+                            }),
+                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
+                                ['1']: {
                                     type: 'delete',
                                 },
                             }),
@@ -982,6 +1035,26 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
                                         lastEdited: expect.any(Date),
+                                    },
+                                },
+                            }),
+                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
+                                ['1']: {
+                                    type: 'create',
+                                    object: {
+                                        annotation: annotUrlA,
+                                        createdWhen: expect.any(Date),
+                                        id: 1,
+                                        privacyLevel: 100,
+                                    },
+                                },
+                                ['2']: {
+                                    type: 'create',
+                                    object: {
+                                        annotation: annotUrlB,
+                                        createdWhen: expect.any(Date),
+                                        id: 2,
+                                        privacyLevel: 100,
                                     },
                                 },
                             }),
@@ -1211,6 +1284,26 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
                                         lastEdited: expect.any(Date),
+                                    },
+                                },
+                            }),
+                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
+                                ['1']: {
+                                    type: 'create',
+                                    object: {
+                                        annotation: annotUrlA,
+                                        createdWhen: expect.any(Date),
+                                        id: 1,
+                                        privacyLevel: 100,
+                                    },
+                                },
+                                ['2']: {
+                                    type: 'create',
+                                    object: {
+                                        annotation: annotUrlB,
+                                        createdWhen: expect.any(Date),
+                                        id: 2,
+                                        privacyLevel: 100,
                                     },
                                 },
                             }),

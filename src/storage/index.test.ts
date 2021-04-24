@@ -671,7 +671,7 @@ describe('Storage initialization', () => {
                     schema: {
                         annotBookmarks: 'url, createdAt',
                         annotListEntries: '[listId+url], listId, url',
-                        annotationPrivacyLevels: 'annotation',
+                        annotationPrivacyLevels: '++id, annotation',
                         annotations:
                             'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
                         backupChanges: 'timestamp, collection',

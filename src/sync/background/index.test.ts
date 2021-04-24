@@ -597,11 +597,17 @@ function extensionSyncTests(suiteOptions: {
         )
         await removeTermFieldsFromStorageContents(storageContents)
         delete storageContents['clientSyncLogEntry']
+        delete storageContents['annotationPrivacyLevels']
 
         const getTargetStorageContents = async () => {
             const contents = await getStorageContents(
                 devices[1].storageManager,
-                { exclude: new Set(['clientSyncLogEntry']) },
+                {
+                    exclude: new Set([
+                        'clientSyncLogEntry',
+                        'annotationPrivacyLevels',
+                    ]),
+                },
             )
             for (const page of contents['pages'] || []) {
                 delete page['screenshot']

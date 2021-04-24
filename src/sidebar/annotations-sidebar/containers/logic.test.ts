@@ -801,10 +801,15 @@ describe('SidebarContainerLogic', () => {
                 annotationUrl2,
             ])
 
-            // Only the shared annot should show up in sharing info
             expect(sidebar.state.annotationSharingInfo).toEqual({
                 [annotationUrl1]: {
                     status: 'shared',
+                    privacyLevel: 100,
+                    taskState: 'pristine',
+                },
+                [annotationUrl2]: {
+                    status: 'not-yet-shared',
+                    privacyLevel: 100,
                     taskState: 'pristine',
                 },
             })
