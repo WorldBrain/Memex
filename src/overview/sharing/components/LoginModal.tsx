@@ -12,7 +12,7 @@ export interface Props
             ModalProps,
             'onClose' | 'requiresExplicitStyles' | 'ignoreReactPortal'
         >,
-        Pick<SignInProps, 'onFail' | 'redirectTo'> {}
+        Pick<SignInProps, 'onSuccess' | 'onFail' | 'redirectTo'> {}
 
 export default class LoginModal extends React.PureComponent<Props> {
     render() {
@@ -21,7 +21,10 @@ export default class LoginModal extends React.PureComponent<Props> {
                 <TitleText>You've been logged out</TitleText>
                 <SignInScreen
                     {...this.props}
-                    onSuccess={() => this.props.onClose({} as any)}
+                    onSuccess={() => {
+                        this.props.onSuccess?.()
+                        this.props.onClose?.({} as any)
+                    }}
                 />
             </Modal>
         )

@@ -120,6 +120,7 @@ export type DashboardModalsEvents = UIEvent<{
     setDeletingListId: { listId: number }
     setDeletingPageArgs: PageEventArgs
     setDeletingNoteArgs: NoteDataEventArgs
+    checkSharingAccess: null
 }>
 
 export type ListSource = 'local-lists' | 'followed-lists'

@@ -847,7 +847,17 @@ export class DashboardContainer extends StatefulUIElement<
         if (modalsState.showLogin) {
             const closeLoginModal = () =>
                 this.processEvent('setShowLoginModal', { isShown: false })
-            return <LoginModal onClose={closeLoginModal} />
+            return (
+                <LoginModal
+                    onClose={closeLoginModal}
+                    onSuccess={() =>
+                        setTimeout(
+                            () => this.processEvent('checkSharingAccess', null),
+                            1000,
+                        )
+                    }
+                />
+            )
         }
 
         if (modalsState.shareListId) {

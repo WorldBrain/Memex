@@ -249,6 +249,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    checkSharingAccess: EventHandler<'checkSharingAccess'> = () =>
+        this.getSharingAccess()
+
     private async getSharingAccess() {
         const isAllowed = await this.options.authBG.isAuthorizedForFeature(
             'beta',
