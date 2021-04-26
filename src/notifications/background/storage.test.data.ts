@@ -3,19 +3,19 @@ export const READ = [
         id: 'test-a',
         title: 'this is a test',
         message: 'this is a test',
-        readTime: new Date('2019-08-21'),
+        readTime: new Date('2019-08-21').valueOf(),
     },
     {
         id: 'test-b',
         title: 'this is a test',
         message: 'this is a test',
-        readTime: new Date('2019-08-21'),
+        readTime: new Date('2019-08-21').valueOf(),
     },
     {
         id: 'test-c',
         title: 'this is a test',
         message: 'this is a test',
-        readTime: new Date('2019-08-21'),
+        readTime: new Date('2019-08-21').valueOf(),
     },
 ]
 

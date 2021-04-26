@@ -25,7 +25,7 @@ export default class NotificationStorage extends StorageModule {
                 collection: NotificationStorage.NOTIFS_COLL,
                 operation: 'findObjects',
                 args: [
-                    { readTime: { $eq: undefined } },
+                    { readTime: { $eq: null } },
                     {
                         reverse: true,
                     },
@@ -35,7 +35,7 @@ export default class NotificationStorage extends StorageModule {
                 collection: NotificationStorage.NOTIFS_COLL,
                 operation: 'findObjects',
                 args: [
-                    { readTime: { $ne: undefined } },
+                    { readTime: { $ne: null } },
                     {
                         reverse: true,
                         limit: '$limit:int',
@@ -70,6 +70,7 @@ export default class NotificationStorage extends StorageModule {
                 id: notification.id,
             }))
         ) {
+            notification.readTime = notification.readTime ?? null
             return this.operation('createNotification', notification)
         }
     }

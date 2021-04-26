@@ -14,8 +14,10 @@ describe('notification storage tests', () => {
         })
         await storageManager.finishInitialization()
 
-        await Promise.all(READ.map(notif => storage.storeNotification(notif)))
-        await Promise.all(UNREAD.map(notif => storage.storeNotification(notif)))
+        await Promise.all(READ.map((notif) => storage.storeNotification(notif)))
+        await Promise.all(
+            UNREAD.map((notif) => storage.storeNotification(notif)),
+        )
 
         return { storage }
     }
@@ -46,7 +48,7 @@ describe('notification storage tests', () => {
         await storage.readNotification(id)
         const after = await storage.fetchNotifById(id)
 
-        expect(before.readTime).not.toBeDefined()
+        expect(before.readTime).toBeNull()
         expect(after.readTime).toBeDefined()
     })
 })
