@@ -92,6 +92,10 @@ const StyledFirebaseAuth = styled(FirebaseAuth)`
         background: none;
     }
 
+    .mdl-card {
+        min-height: unset;
+    }
+
     input.firebaseui-input, input.firebaseui-input-invalid {
         border-radius: 3px;
         background-color: #f0f0f0;
