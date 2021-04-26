@@ -279,6 +279,7 @@ const DropZoneMask = styled.div`
     height: inherit;
     width: inherit;
     position: absolute;
+    pointer-events: none;
 `
 
 const TitleBox = styled.div`

@@ -21,10 +21,8 @@ export class SignInScreen extends React.Component<Props> {
                 className={styles.firebaseAuth}
                 uiConfig={{
                     signInFlow: 'popup',
-                    signInOptions: [{
-                        provider: getFirebase().auth.EmailAuthProvider.PROVIDER_ID,
-                        requireDisplayName: false,
-                    },    
+                    signInOptions: [
+                        getFirebase().auth.EmailAuthProvider.PROVIDER_ID,   
                     ],
                     callbacks: {
                         signInSuccessWithAuthResult: () => {
