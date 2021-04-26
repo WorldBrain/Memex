@@ -349,7 +349,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const listData: { [id: number]: ListData } = {}
 
                 for (const list of followedLists) {
-                    const isJoinedList = false
+                    const isJoinedList = sharedLocalListRemoteIds.has(
+                        list.remoteId,
+                    )
                     const localId =
                         remoteToLocalIdDict[list.remoteId] ?? list.id
 
