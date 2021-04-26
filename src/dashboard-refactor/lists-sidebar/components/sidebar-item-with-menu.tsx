@@ -197,8 +197,6 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             hasActivity,
         } = this.props
 
-        console.log(dropReceivingState)
-
         return (
             <Container>
                 <SidebarItem
