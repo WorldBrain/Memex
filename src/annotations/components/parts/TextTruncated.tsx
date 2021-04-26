@@ -52,7 +52,7 @@ class TextTruncated extends React.Component<Props, State> {
             : this.props.text
 
         return (
-            <>
+            <TruncatedBox>
                 {this.props.children({ text })}
                 <ToggleMoreBox>
                     {this.state.needsTruncation && (
@@ -63,10 +63,16 @@ class TextTruncated extends React.Component<Props, State> {
                         </ToggleMoreButtonStyled>
                     )}
                 </ToggleMoreBox>
-            </>
+            </TruncatedBox>
         )
     }
 }
+
+const TruncatedBox = styled.div`
+    display: flex;
+    flex-direction: column; 
+    width: 100%;
+`
 
 const ToggleMoreButtonStyled = styled.div`
     margin: 2px 0 0 -3px;
