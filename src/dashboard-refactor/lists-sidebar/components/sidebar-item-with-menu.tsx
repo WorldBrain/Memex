@@ -197,6 +197,8 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             hasActivity,
         } = this.props
 
+        console.log(dropReceivingState)
+
         return (
             <Container>
                 <SidebarItem
@@ -204,15 +206,19 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     selectedState={selectedState}
                     dropReceivingState={dropReceivingState}
                     title={this.props.name}
+                    onClick={this.handleSelection}
+                    onDragEnter={this.handleDragEnter}
                 >
-                    <DropZoneMask
-                        dropReceivingState={dropReceivingState}
-                        onDragLeave={dropReceivingState?.onDragLeave}
-                        onDragEnter={this.handleDragEnter}
-                        onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
-                        onDrop={this.handleDrop}
-                        onClick={this.handleSelection}
-                    />
+                    {dropReceivingState?.isDraggedOver &&
+                        <DropZoneMask
+                            dropReceivingState={dropReceivingState}
+                            onDragLeave={dropReceivingState?.onDragLeave}
+                            onDragEnter={this.handleDragEnter}
+                            onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
+                            onDrop={this.handleDrop}
+                            onClick={this.handleSelection}
+                        />
+                    }
                     <TitleBox>
                         {' '}
                         {this.renderTitle()}
@@ -279,7 +285,6 @@ const DropZoneMask = styled.div`
     height: inherit;
     width: inherit;
     position: absolute;
-    pointer-events: none;
 `
 
 const TitleBox = styled.div`
