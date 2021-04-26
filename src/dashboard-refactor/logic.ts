@@ -596,6 +596,14 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
+    setShowLoginModal: EventHandler<'setShowLoginModal'> = ({ event }) => {
+        this.emitMutation({
+            modals: {
+                showLogin: { $set: event.isShown },
+            },
+        })
+    }
+
     setShowBetaFeatureModal: EventHandler<'setShowBetaFeatureModal'> = ({
         event,
     }) => {

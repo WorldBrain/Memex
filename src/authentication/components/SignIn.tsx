@@ -8,7 +8,7 @@ import { auth } from 'src/util/remote-functions-background'
 
 const styles = require('src/authentication/components/styles.css')
 
-interface Props {
+export interface Props {
     onSuccess?(): void
     onFail?(): void
     redirectTo?: string
@@ -21,10 +21,12 @@ export class SignInScreen extends React.Component<Props> {
                 className={styles.firebaseAuth}
                 uiConfig={{
                     signInFlow: 'popup',
-                    signInOptions: [{
-                        provider: getFirebase().auth.EmailAuthProvider.PROVIDER_ID,
-                        requireDisplayName: false,
-                    },    
+                    signInOptions: [
+                        {
+                            provider: getFirebase().auth.EmailAuthProvider
+                                .PROVIDER_ID,
+                            requireDisplayName: false,
+                        },
                     ],
                     callbacks: {
                         signInSuccessWithAuthResult: () => {
@@ -79,7 +81,7 @@ const StyledFirebaseAuth = styled(FirebaseAuth)`
     }
 
     .mdl-textfield--floating-label .mdl-textfield__label {
-            padding: 0 15px;
+        padding: 0 15px;
     }
 
     .firebaseui-textfield.mdl-textfield .firebaseui-label::after {
@@ -94,7 +96,8 @@ const StyledFirebaseAuth = styled(FirebaseAuth)`
         background: none;
     }
 
-    input.firebaseui-input, input.firebaseui-input-invalid {
+    input.firebaseui-input,
+    input.firebaseui-input-invalid {
         border-radius: 3px;
         background-color: #f0f0f0;
         height: 34px;
@@ -133,5 +136,4 @@ const StyledFirebaseAuth = styled(FirebaseAuth)`
         height: 34px;
         width: 44px;
     }
-
 `

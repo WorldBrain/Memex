@@ -43,6 +43,7 @@ import { getFeedUrl, getListShareUrl } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { Props as ListDetailsProps } from './search-results/components/list-details'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
+import LoginModal from 'src/overview/sharing/components/LoginModal'
 
 export interface Props extends DashboardDependencies {
     renderDashboardSwitcherLink: () => JSX.Element
@@ -841,6 +842,12 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
+        if (modalsState.showLogin) {
+            const closeLoginModal = () =>
+                this.processEvent('setShowLoginModal', { isShown: false })
+            return <LoginModal onClose={closeLoginModal} />
+        }
+
         if (modalsState.shareListId) {
             const listData = listsSidebar.listData[modalsState.shareListId]
 
@@ -927,6 +934,11 @@ export class DashboardContainer extends StatefulUIElement<
                     annotations={this.props.annotationsBG}
                     annotationsCache={this.annotationsCache}
                     contentSharing={this.props.contentShareBG}
+                    showLoginModal={() =>
+                        this.processEvent('setShowLoginModal', {
+                            isShown: true,
+                        })
+                    }
                     showAnnotationShareModal={() =>
                         this.processEvent('setShowNoteShareOnboardingModal', {
                             isShown: true,

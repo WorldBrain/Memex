@@ -16,6 +16,7 @@ import { Annotation } from 'src/annotations/types'
 import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
 import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
+import LoginModal from 'src/overview/sharing/components/LoginModal'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -38,6 +39,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     constructor(props: Props) {
         super({
             ...props,
+            showLoginModal: () =>
+                this.processEvent('setLoginModalShown', { shown: true }),
             showBetaFeatureNotifModal: () =>
                 this.processEvent('setBetaFeatureNotifModalShown', {
                     shown: true,
@@ -197,6 +200,15 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     protected renderModals() {
         return (
             <>
+                {this.state.showLoginModal && (
+                    <LoginModal
+                        onClose={() =>
+                            this.processEvent('setLoginModalShown', {
+                                shown: false,
+                            })
+                        }
+                    />
+                )}
                 {this.state.showAnnotationsShareModal && (
                     <ShareAnnotationOnboardingModal
                         ignoreReactPortal

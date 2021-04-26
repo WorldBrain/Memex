@@ -90,6 +90,7 @@ export interface SidebarContainerState {
 
     isListFilterActive: boolean
     isSocialSearch: boolean
+    showLoginModal: boolean
     showAnnotationsShareModal: boolean
     showBetaFeatureNotifModal: boolean
 
@@ -179,6 +180,7 @@ export type SidebarContainerEvents = UIEvent<{
         info: AnnotationSharingInfo
     }
 
+    setLoginModalShown: { shown: boolean }
     setAnnotationShareModalShown: { shown: boolean }
     setBetaFeatureNotifModalShown: { shown: boolean }
 
@@ -282,6 +284,7 @@ export class SidebarContainerLogic extends UILogic<
             isSocialSearch: false,
             searchResultSkip: 0,
 
+            showLoginModal: false,
             showAnnotationsShareModal: false,
             showBetaFeatureNotifModal: false,
             showAllNotesShareMenu: false,
@@ -465,6 +468,10 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             showAllNotesShareMenu: { $set: event.shown },
         })
+    }
+
+    setLoginModalShown: EventHandler<'setLoginModalShown'> = ({ event }) => {
+        this.emitMutation({ showLoginModal: { $set: event.shown } })
     }
 
     setAllNotesCopyPasterShown: EventHandler<'setAllNotesCopyPasterShown'> = ({

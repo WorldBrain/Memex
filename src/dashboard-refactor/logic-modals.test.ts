@@ -85,6 +85,22 @@ describe('Dashboard Refactor modals logic', () => {
         ).toEqual(remoteListId)
     })
 
+    it('should be able to set the Login modal visibility', async ({
+        device,
+    }) => {
+        const { searchResults } = await setupTest(device)
+
+        expect(searchResults.state.modals.showLogin).toEqual(false)
+        await searchResults.processEvent('setShowLoginModal', {
+            isShown: true,
+        })
+        expect(searchResults.state.modals.showLogin).toEqual(true)
+        await searchResults.processEvent('setShowLoginModal', {
+            isShown: false,
+        })
+        expect(searchResults.state.modals.showLogin).toEqual(false)
+    })
+
     it('should be able to set the Beta Feature modal visibility', async ({
         device,
     }) => {
