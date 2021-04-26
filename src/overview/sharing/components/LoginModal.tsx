@@ -17,7 +17,7 @@ export interface Props
 export default class LoginModal extends React.PureComponent<Props> {
     render() {
         return (
-            <Modal large {...this.props}>
+            <Modal {...this.props}>
                 <TitleText>You've been logged out</TitleText>
                 <SignInScreen
                     {...this.props}

@@ -391,7 +391,9 @@ export class DashboardContainer extends StatefulUIElement<
             <ListsSidebarContainer
                 {...listsSidebar}
                 lockedState={lockedState}
-                openFeedUrl={this.props.openFeed}
+                openFeedUrl={() =>
+                    this.processEvent('clickFeedActivityIndicator', null)
+                }
                 onAllSavedSelection={() =>
                     this.processEvent('resetFilters', null)
                 }

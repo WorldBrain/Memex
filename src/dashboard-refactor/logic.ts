@@ -72,6 +72,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     getInitialState(): State {
         return {
             modals: {
+                showLogin: false,
                 showBetaFeature: false,
                 showSubscription: false,
                 showNoteShareOnboarding: false,
@@ -556,6 +557,31 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         this.emitMutation({ searchResults: mutation })
+    }
+
+    private async ensureLoggedIn(): Promise<boolean> {
+        const { authBG } = this.options
+
+        const user = await authBG.getCurrentUser()
+        if (user != null) {
+            const isBetaAuthd = await authBG.isAuthorizedForFeature('beta')
+
+            this.emitMutation({
+                searchResults: {
+                    sharingAccess: {
+                        $set: isBetaAuthd
+                            ? 'sharing-allowed'
+                            : 'feature-disabled',
+                    },
+                },
+            })
+            return true
+        }
+
+        this.emitMutation({
+            modals: { showLogin: { $set: true } },
+        })
+        return false
     }
     /* END - Misc event handlers */
 
@@ -2401,6 +2427,12 @@ export class DashboardLogic extends UILogic<State, Events> {
     clickFeedActivityIndicator: EventHandler<
         'clickFeedActivityIndicator'
     > = async ({ previousState }) => {
+        const isLoggedIn = await this.ensureLoggedIn()
+
+        if (!isLoggedIn) {
+            return
+        }
+
         this.options.openFeed()
 
         if (previousState.listsSidebar.hasFeedActivity) {

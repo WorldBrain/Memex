@@ -175,6 +175,8 @@ describe('Dashboard Refactor misc logic', () => {
         device.backgroundModules.activityIndicator.remoteFunctions.markActivitiesAsSeen = async () => {
             activitiesMarkedAsSeen = true
         }
+        device.backgroundModules.auth.remoteFunctions.getCurrentUser = async () =>
+            ({ id: 1 } as any)
         const { searchResults } = await setupTest(device, {
             openFeedUrl: () => {
                 feedUrlOpened = true

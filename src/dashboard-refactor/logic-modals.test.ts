@@ -152,4 +152,17 @@ describe('Dashboard Refactor modals logic', () => {
             false,
         )
     })
+
+    it('clicking activity feed while logged out should display login modal', async ({
+        device,
+    }) => {
+        device.backgroundModules.auth.remoteFunctions.getCurrentUser = async () =>
+            null
+        const { searchResults } = await setupTest(device, {
+            openFeedUrl: () => {},
+        })
+        expect(searchResults.state.modals.showLogin).not.toBe(true)
+        await searchResults.processEvent('clickFeedActivityIndicator', null)
+        expect(searchResults.state.modals.showLogin).toBe(true)
+    })
 })
