@@ -62,6 +62,7 @@ export type Props = RootState &
         SearchTypeSwitchProps,
         'onNotesSearchSwitch' | 'onPagesSearchSwitch'
     > & {
+        ensureLoggedIn: () => void
         goToImportRoute: () => void
         toggleListShareMenu: () => void
         selectedListId?: number
@@ -182,6 +183,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 closeShareMenu={
                                     interactionProps.onShareBtnClick
                                 }
+                                preShareHook={this.props.ensureLoggedIn}
                                 postShareHook={({
                                     privacyLevel,
                                     shareStateChanged,
@@ -335,6 +337,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         normalizedPageUrl: page.normalizedUrl,
                         closeShareMenu: interactionProps.onShareBtnClick,
                         copyLink: this.props.onPageLinkCopy,
+                        preShareHook: this.props.ensureLoggedIn,
                         postShareHook: ({ privacyLevel, shareStateChanged }) =>
                             interactionProps.updatePageNotesShareInfo({
                                 status: shareStateChanged
@@ -463,13 +466,19 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     </IconBox>
                 </ButtonTooltip>
                 {this.props.isListShareMenuShown && (
-                    <HoverBox width="320px" top="20px" right="-150px" withRelativeContainer>
+                    <HoverBox
+                        width="320px"
+                        top="20px"
+                        right="-150px"
+                        withRelativeContainer
+                    >
                         <ListShareMenu
                             openListShareModal={this.props.openListShareModal}
                             copyLink={this.props.onListLinkCopy}
                             closeShareMenu={this.props.toggleListShareMenu}
                             listId={this.props.selectedListId}
                             shareImmediately={false}
+                            preShareHook={this.props.ensureLoggedIn}
                             postShareHook={({
                                 shareStateChanged,
                                 privacyLevel,
@@ -544,7 +553,7 @@ const IconBox = styled.div`
     padding: 4px;
 
     &:hover {
-       background-color: ${(props) => props.theme.colors.grey}
+        background-color: ${(props) => props.theme.colors.grey};
     }
 `
 

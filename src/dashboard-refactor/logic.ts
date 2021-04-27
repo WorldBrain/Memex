@@ -562,7 +562,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({ searchResults: mutation })
     }
 
-    private async ensureLoggedIn(): Promise<boolean> {
+    ensureLoggedIn: EventHandler<'ensureLoggedIn'> = async () => {
+        await this._ensureLoggedIn()
+    }
+
+    private async _ensureLoggedIn(): Promise<boolean> {
         const { authBG } = this.options
 
         const user = await authBG.getCurrentUser()
@@ -999,18 +1003,8 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     setPageShareMenuShown: EventHandler<'setPageShareMenuShown'> = async ({
         event,
-        previousState,
     }) => {
         if (event.isShown) {
-            if (
-                previousState.searchResults.sharingAccess === 'feature-disabled'
-            ) {
-                this.emitMutation({
-                    modals: { showBetaFeature: { $set: true } },
-                })
-                return
-            }
-
             await this.showShareOnboardingIfNeeded()
         }
 
@@ -1610,18 +1604,8 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     setNoteShareMenuShown: EventHandler<'setNoteShareMenuShown'> = async ({
         event,
-        previousState,
     }) => {
         if (event.shouldShow) {
-            if (
-                previousState.searchResults.sharingAccess === 'feature-disabled'
-            ) {
-                this.emitMutation({
-                    modals: { showBetaFeature: { $set: true } },
-                })
-                return
-            }
-
             await this.showShareOnboardingIfNeeded()
         }
 
@@ -2430,7 +2414,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     clickFeedActivityIndicator: EventHandler<
         'clickFeedActivityIndicator'
     > = async ({ previousState }) => {
-        const isLoggedIn = await this.ensureLoggedIn()
+        const isLoggedIn = await this._ensureLoggedIn()
 
         if (!isLoggedIn) {
             return

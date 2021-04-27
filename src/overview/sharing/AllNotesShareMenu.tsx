@@ -61,6 +61,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
     private handleLinkCopy = () => this.props.copyLink(this.state.link)
 
     private setRemoteLink = async () => {
+        this.props.preShareHook?.()
         const remotePageInfoId = await this.props.contentSharingBG.ensureRemotePageId(
             this.props.normalizedPageUrl,
         )
@@ -68,6 +69,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
     }
 
     private shareAllAnnotations = async () => {
+        this.props.preShareHook?.()
         let success = false
         try {
             await this.props.contentSharingBG.shareAnnotations({
@@ -88,6 +90,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
     }
 
     private unshareAllAnnotations = async () => {
+        this.props.preShareHook?.()
         let success = false
         try {
             await Promise.all(

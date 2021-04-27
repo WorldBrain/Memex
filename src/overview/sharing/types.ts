@@ -14,6 +14,7 @@ export interface ShareMenuCommonProps {
     annotationsBG?: AnnotationInterface<'caller'>
     closeShareMenu: React.MouseEventHandler
     copyLink: (link: string) => Promise<void>
+    preShareHook?: () => void
     postShareHook?: (changes: PostShareChanges) => void
     postUnshareHook?: (changes: PostShareChanges) => void
 }
