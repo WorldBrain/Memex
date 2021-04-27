@@ -367,6 +367,39 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    private async ensureLoggedIn(
+        params: {
+            ensureBetaAccess?: boolean
+        } = {},
+    ): Promise<boolean> {
+        const { auth } = this.options
+
+        const user = await auth.getCurrentUser()
+        if (user != null) {
+            const isBetaAuthd = await auth.isAuthorizedForFeature('beta')
+
+            const mutation: UIMutation<SidebarContainerState> = {
+                annotationSharingAccess: {
+                    $set: isBetaAuthd ? 'sharing-allowed' : 'feature-disabled',
+                },
+            }
+
+            if (params.ensureBetaAccess && !isBetaAuthd) {
+                this.emitMutation({
+                    ...mutation,
+                    showBetaFeatureNotifModal: { $set: true },
+                })
+                return false
+            }
+
+            this.emitMutation(mutation)
+            return true
+        }
+
+        this.emitMutation({ showLoginModal: { $set: true } })
+        return false
+    }
+
     show: EventHandler<'show'> = async () => {
         this.emitMutation({ showState: { $set: 'visible' } })
     }
@@ -456,10 +489,13 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    setAllNotesShareMenuShown: EventHandler<'setAllNotesShareMenuShown'> = ({
-        previousState,
-        event,
-    }) => {
+    setAllNotesShareMenuShown: EventHandler<
+        'setAllNotesShareMenuShown'
+    > = async ({ previousState, event }) => {
+        if (!(await this.ensureLoggedIn())) {
+            return
+        }
+
         if (previousState.annotationSharingAccess === 'feature-disabled') {
             this.options.showBetaFeatureNotifModal?.()
             return
@@ -631,11 +667,19 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         if (event.privacyLevel === AnnotationPrivacyLevels.SHARED) {
-            await contentSharing.shareAnnotation({ annotationUrl })
-            await contentSharing.shareAnnotationsToLists({
-                annotationUrls: [annotationUrl],
-                queueInteraction: 'skip-queue',
-            })
+            await contentSharing
+                .shareAnnotation({
+                    annotationUrl,
+                    queueInteraction: 'queue-and-return',
+                })
+                .catch(() => {})
+            await contentSharing
+                .shareAnnotationsToLists({
+                    annotationUrls: [annotationUrl],
+                    queueInteraction: 'queue-and-return',
+                })
+                .catch(() => {})
+            await this.ensureLoggedIn()
         }
     }
 
@@ -820,6 +864,10 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        if (!(await this.ensureLoggedIn())) {
+            return
+        }
+
         if (previousState.annotationSharingAccess === 'feature-disabled') {
             this.options.showBetaFeatureNotifModal?.()
             return
