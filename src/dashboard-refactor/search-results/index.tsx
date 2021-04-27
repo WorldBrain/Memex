@@ -62,7 +62,6 @@ export type Props = RootState &
         SearchTypeSwitchProps,
         'onNotesSearchSwitch' | 'onPagesSearchSwitch'
     > & {
-        ensureLoggedIn: () => void
         goToImportRoute: () => void
         toggleListShareMenu: () => void
         selectedListId?: number
@@ -183,7 +182,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 closeShareMenu={
                                     interactionProps.onShareBtnClick
                                 }
-                                preShareHook={this.props.ensureLoggedIn}
                                 postShareHook={({
                                     privacyLevel,
                                     shareStateChanged,
@@ -337,7 +335,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         normalizedPageUrl: page.normalizedUrl,
                         closeShareMenu: interactionProps.onShareBtnClick,
                         copyLink: this.props.onPageLinkCopy,
-                        preShareHook: this.props.ensureLoggedIn,
                         postShareHook: ({ privacyLevel, shareStateChanged }) =>
                             interactionProps.updatePageNotesShareInfo({
                                 status: shareStateChanged
@@ -478,7 +475,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                             closeShareMenu={this.props.toggleListShareMenu}
                             listId={this.props.selectedListId}
                             shareImmediately={false}
-                            preShareHook={this.props.ensureLoggedIn}
                             postShareHook={({
                                 shareStateChanged,
                                 privacyLevel,

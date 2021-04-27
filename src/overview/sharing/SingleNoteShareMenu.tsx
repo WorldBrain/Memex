@@ -62,7 +62,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     }
 
     private shareAnnotation = async () => {
-        this.props.preShareHook?.()
         const { annotationUrl, contentSharingBG } = this.props
 
         let success = false
@@ -84,7 +83,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     private unshareAnnotation = async (
         privacyLevel: AnnotationPrivacyLevels,
     ) => {
-        this.props.preShareHook?.()
         const { annotationUrl, contentSharingBG } = this.props
 
         let success = false

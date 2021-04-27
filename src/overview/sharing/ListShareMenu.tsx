@@ -65,7 +65,6 @@ export default class ListShareMenu extends React.Component<Props, State> {
     }
 
     private shareList = async () => {
-        this.props.preShareHook?.()
         const { contentSharingBG, listId } = this.props
 
         const { remoteListId } = await contentSharingBG.shareList({ listId })
@@ -136,7 +135,6 @@ export default class ListShareMenu extends React.Component<Props, State> {
         if (this.state.loadState !== 'success') {
             throw new Error('Share attempted before dependencies have loaded')
         }
-        this.props.preShareHook?.()
 
         let success = false
         try {
@@ -164,7 +162,6 @@ export default class ListShareMenu extends React.Component<Props, State> {
     }
 
     private unshareAllAnnotations = async () => {
-        this.props.preShareHook?.()
         let success = false
         try {
             await Promise.all(

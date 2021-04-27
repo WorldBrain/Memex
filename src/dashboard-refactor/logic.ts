@@ -562,11 +562,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({ searchResults: mutation })
     }
 
-    ensureLoggedIn: EventHandler<'ensureLoggedIn'> = async ({ event }) => {
-        await this._ensureLoggedIn(event)
-    }
-
-    private async _ensureLoggedIn(
+    private async ensureLoggedIn(
         params: {
             ensureBetaAccess?: boolean
         } = {},
@@ -623,10 +619,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listShareLoadingState: { $set: taskState } },
             }),
             async () => {
-                const loggedIn = await this._ensureLoggedIn({
-                    ensureBetaAccess: true,
-                })
-                if (!loggedIn) {
+                if (!(await this.ensureLoggedIn({ ensureBetaAccess: true }))) {
                     return
                 }
 
@@ -1025,6 +1018,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     setPageShareMenuShown: EventHandler<'setPageShareMenuShown'> = async ({
         event,
     }) => {
+        if (!(await this.ensureLoggedIn())) {
+            return
+        }
+
         if (event.isShown) {
             await this.showShareOnboardingIfNeeded()
         }
@@ -1314,7 +1311,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             queueInteraction: 'queue-and-return',
                         })
                         .catch(() => {})
-                    await this._ensureLoggedIn()
+                    await this.ensureLoggedIn()
                 }
             },
         )
@@ -1394,9 +1391,13 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setListShareMenuShown: EventHandler<'setListShareMenuShown'> = ({
+    setListShareMenuShown: EventHandler<'setListShareMenuShown'> = async ({
         event,
     }) => {
+        if (!(await this.ensureLoggedIn())) {
+            return
+        }
+
         this.emitMutation({
             searchResults: { isListShareMenuShown: { $set: event.isShown } },
         })
@@ -1632,6 +1633,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     setNoteShareMenuShown: EventHandler<'setNoteShareMenuShown'> = async ({
         event,
     }) => {
+        if (!(await this.ensureLoggedIn())) {
+            return
+        }
+
         if (event.shouldShow) {
             await this.showShareOnboardingIfNeeded()
         }
@@ -2441,9 +2446,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     clickFeedActivityIndicator: EventHandler<
         'clickFeedActivityIndicator'
     > = async ({ previousState }) => {
-        const isLoggedIn = await this._ensureLoggedIn()
-
-        if (!isLoggedIn) {
+        if (!(await this.ensureLoggedIn())) {
             return
         }
 

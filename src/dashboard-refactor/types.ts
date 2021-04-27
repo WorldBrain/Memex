@@ -121,7 +121,6 @@ export type DashboardModalsEvents = UIEvent<{
     setDeletingPageArgs: PageEventArgs
     setDeletingNoteArgs: NoteDataEventArgs
     checkSharingAccess: null
-    ensureLoggedIn: { ensureBetaAccess?: boolean }
 }>
 
 export type ListSource = 'local-lists' | 'followed-lists'
