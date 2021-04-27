@@ -8,4 +8,5 @@ export interface ContentScriptsInterface<Role extends 'provider' | 'caller'> {
     >
     getCurrentTab: RemoteFunction<Role, void, { id: number; url: string }>
     openBetaFeatureSettings: RemoteFunction<Role, void>
+    openAuthSettings: RemoteFunction<Role, void>
 }

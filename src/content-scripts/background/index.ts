@@ -29,6 +29,10 @@ export class ContentScriptsBackground {
                 const optionsPageUrl = this.options.getURL('options.html')
                 window.open(optionsPageUrl + '#/features')
             },
+            openAuthSettings: async () => {
+                const optionsPageUrl = this.options.getURL('options.html')
+                window.open(optionsPageUrl + '#/account')
+            },
         }
 
         this.options.webNavigation.onHistoryStateUpdated.addListener(
