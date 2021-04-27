@@ -1302,13 +1302,19 @@ export class DashboardLogic extends UILogic<State, Events> {
                 })
 
                 if (event.privacyLevel === AnnotationPrivacyLevels.SHARED) {
-                    await contentShareBG.shareAnnotation({
-                        annotationUrl: newNoteId,
-                    })
-                    await contentShareBG.shareAnnotationsToLists({
-                        annotationUrls: [newNoteId],
-                        queueInteraction: 'skip-queue',
-                    })
+                    await contentShareBG
+                        .shareAnnotation({
+                            annotationUrl: newNoteId,
+                            queueInteraction: 'queue-and-return',
+                        })
+                        .catch(() => {})
+                    await contentShareBG
+                        .shareAnnotationsToLists({
+                            annotationUrls: [newNoteId],
+                            queueInteraction: 'queue-and-return',
+                        })
+                        .catch(() => {})
+                    await this._ensureLoggedIn()
                 }
             },
         )
