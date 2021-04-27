@@ -562,18 +562,22 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({ searchResults: mutation })
     }
 
-    ensureLoggedIn: EventHandler<'ensureLoggedIn'> = async () => {
-        await this._ensureLoggedIn()
+    ensureLoggedIn: EventHandler<'ensureLoggedIn'> = async ({ event }) => {
+        await this._ensureLoggedIn(event)
     }
 
-    private async _ensureLoggedIn(): Promise<boolean> {
+    private async _ensureLoggedIn(
+        params: {
+            ensureBetaAccess?: boolean
+        } = {},
+    ): Promise<boolean> {
         const { authBG } = this.options
 
         const user = await authBG.getCurrentUser()
         if (user != null) {
             const isBetaAuthd = await authBG.isAuthorizedForFeature('beta')
 
-            this.emitMutation({
+            const mutation: UIMutation<State> = {
                 searchResults: {
                     sharingAccess: {
                         $set: isBetaAuthd
@@ -581,7 +585,17 @@ export class DashboardLogic extends UILogic<State, Events> {
                             : 'feature-disabled',
                     },
                 },
-            })
+            }
+
+            if (params.ensureBetaAccess && !isBetaAuthd) {
+                this.emitMutation({
+                    ...mutation,
+                    modals: { showBetaFeature: { $set: true } },
+                })
+                return false
+            }
+
+            this.emitMutation(mutation)
             return true
         }
 
@@ -609,6 +623,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listShareLoadingState: { $set: taskState } },
             }),
             async () => {
+                const loggedIn = await this._ensureLoggedIn({
+                    ensureBetaAccess: true,
+                })
+                if (!loggedIn) {
+                    return
+                }
+
                 const remoteListId = await this.options.contentShareBG.getRemoteListId(
                     { localListId: listId },
                 )

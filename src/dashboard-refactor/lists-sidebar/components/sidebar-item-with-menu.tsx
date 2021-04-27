@@ -140,7 +140,6 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
     }
 
     private renderTitle() {
-
         const {
             dropReceivingState,
             isMenuDisplayed,
@@ -155,7 +154,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
 
         if (!this.props.nameHighlightIndices) {
             return (
-                <ListTitle 
+                <ListTitle
                     selectedState={this.props.selectedState}
                     dropReceivingState={dropReceivingState}
                     onDragLeave={dropReceivingState?.onDragLeave}
@@ -213,10 +212,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                         onDrop={this.handleDrop}
                         onClick={this.handleSelection}
                     />
-                    <TitleBox>
-                        {' '}
-                        {this.renderTitle()}
-                    </TitleBox>
+                    <TitleBox> {this.renderTitle()}</TitleBox>
                     <IconBox
                         dropReceivingState={dropReceivingState}
                         newItemsCount={newItemsCount}
