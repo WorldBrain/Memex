@@ -65,7 +65,7 @@ const DeviceSelection = styled.div`
 const PricingPlanTitle = styled(TypographyBigTitle)`
     box-sizing: border-box;
     font-weight: 700;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     margin: 0 0 20px;
     text-align: center;
     display: flex;
@@ -98,7 +98,7 @@ const LoginButton = styled.div`
 const PricingHead = styled.div`
     display: flex;
     justify-content: center;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     font-weight: 700;
 `
 
@@ -109,7 +109,7 @@ const WhiteSpacer30 = styled.div`
 const PricingHeadTitle = styled.h2`
     font-size: 1.5rem;
     font-weight: 700;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     text-align: center;
 `
 
@@ -339,7 +339,7 @@ const PricingGridPlanTitle = styled(TypographyHeadingPage)`
     display: flex;
     justify-content: center;
     align-items: center;
-    color: ${(props) => (props.active ? '#5cd9a6' : '#3a2f45')};
+    color: ${(props) => (props.active ? '#5cd9a6' : '${(props) => props.theme.colors.primary}')};
 `
 
 const PricingGridFeatureTitle = styled(TypographyBodyBold)`
@@ -367,7 +367,7 @@ const PricingGridCheck = styled.div`
     mask-repeat: no-repeat;
     mask-position: center;
     mask-image: url('/img/check.svg');
-    background-color: ${(props) => (props.active ? '#5cd9a6' : '#3a2f45')};
+    background-color: ${(props) => (props.active ? '#5cd9a6' : '${(props) => props.theme.colors.primary}')};
     color: #2f2f2f;
 
     @media (max-width: 700px) {

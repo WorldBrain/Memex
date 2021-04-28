@@ -13,7 +13,7 @@ const textStyles = `
     font-weight: ${fonts.primary.weight.normal};
     font-size: 12px;
     line-height: 15px;
-    color: ${fonts.primary.colors.primary};
+    color: ${(props) => props.theme.colors.primary};
     cursor: text;
 `
 
@@ -79,7 +79,7 @@ const IconContainer = styled.div`
 `
 
 const StyledIcon = styled(Icon)`
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     opacity: 0.7;
     cursor: pointer;
 `

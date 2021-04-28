@@ -253,7 +253,7 @@ const SuccessMessage = styled.div`
     border-radius: 3px;
     border: none;
     justify-content: flex-start;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     flex-direction: column;
 `
 

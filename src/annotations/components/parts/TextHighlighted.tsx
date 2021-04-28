@@ -62,7 +62,7 @@ const HighlightedTextStyled = styled.span`
     padding: 2px 0;
     line-height: 25px;
     font-style: normal;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     font-size: 14px;
 `
 

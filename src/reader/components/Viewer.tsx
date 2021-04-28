@@ -86,7 +86,7 @@ export default class Viewer extends React.Component<Props, State> {
 }
 
 const Content = styled.div`
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
 
     & img {
         max-width: 800px !important;

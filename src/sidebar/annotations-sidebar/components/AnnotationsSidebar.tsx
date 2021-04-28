@@ -255,7 +255,7 @@ const SearchIcon = styled.span`
 `
 
 const SearchInputStyled = styled(TextInputControlled)`
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     border-radius: 3px;
     font-size: 14px;
     font-weight: 400;
@@ -267,7 +267,7 @@ const SearchInputStyled = styled(TextInputControlled)`
     background-color: transparent;
 
     &::placeholder {
-        color: #3a2f45;
+        color: ${(props) => props.theme.colors.primary};
         font-weight: 500;
         opacity: 0.7;
     }
@@ -284,7 +284,7 @@ const CloseIconStyled = styled.div`
     mask-position: center;
     mask-repeat: no-repeat;
     mask-size: 100%;
-    background-color: #3a2f45;
+    background-color: ${(props) => props.theme.colors.primary};
     mask-image: url('/img/close.svg');
     background-size: 12px;
     display: block;

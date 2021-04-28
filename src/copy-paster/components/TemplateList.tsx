@@ -17,7 +17,7 @@ const HeaderText = styled.div`
     font-style: normal;
     font-weight: bold;
     font-size: 14px;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
 `
 
 const CreateNewButton = styled.button`
@@ -25,7 +25,7 @@ const CreateNewButton = styled.button`
     font-style: normal;
     font-weight: normal;
     font-size: 14px;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     cursor: pointer;
     padding: 0px;
 
@@ -40,7 +40,7 @@ const NoResults = styled.p`
     font-style: normal;
     font-size: 12px;
     padding: 0 15px;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
 `
 
 const NoResultsBox = styled.div`
@@ -49,7 +49,7 @@ const NoResultsBox = styled.div`
     font-style: normal;
     font-size: 12px;
     padding: 0 15px;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     display:flex;
     justify-content: center;
     align-items: center;

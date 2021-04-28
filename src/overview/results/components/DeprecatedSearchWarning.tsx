@@ -83,7 +83,7 @@ const ContentText = styled.p`
 const InfoBtn = styled.button`
     background: white;
     border-radius: 3px;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     padding: 8px 16px;
     font-weight: bold;
     font-size: 14px;

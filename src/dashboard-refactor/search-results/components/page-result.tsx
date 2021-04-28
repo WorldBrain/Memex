@@ -329,7 +329,7 @@ const ResultContent = styled(Margin)`
 const PageTitle = styled(Margin)`
     font-size: 14px;
     font-weight: 600;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     justify-content: flex-start;
 `
 const PageUrl = styled.span`

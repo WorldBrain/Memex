@@ -69,7 +69,7 @@ const DismissButton = styled.button`
     height: 20px;
     width: 20px;
     mask-size: 16px;
-    background-color: #3a2f45;
+    background-color: ${(props) => props.theme.colors.primary};
     mask-position: center;
     mask-repeat: no-repeat;
     mask-image: url('/img/close.svg');

@@ -16,7 +16,7 @@ export default function NoResults(props: Props) {
 }
 
 const Title = styled.div`
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     font-size: 18px;
     font-weight: 700;
     padding-top: 30px;
@@ -25,7 +25,7 @@ const Title = styled.div`
 `
 
 const Subtitle = styled.div`
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     font-size: 15px;
     font-weight: 300;
     display: flex;

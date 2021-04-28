@@ -179,7 +179,7 @@ const TitleContainer = styled.div`
 const SectionTitle = styled.div`
     font-weight: bold;
     font-size: 14px;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
 `
 
 const LinkCopierBox = styled.div`

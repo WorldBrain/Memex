@@ -134,7 +134,7 @@ const Title = styled.div`
     font-style: normal;
     font-weight: ${(props) => (props.fullWidth ? 'bold' : 'normal')};
     font-size: 14px;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
 
     padding: 4px 10px;
 

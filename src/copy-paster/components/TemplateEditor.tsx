@@ -27,7 +27,7 @@ const HeaderText = styled.div`
     font-style: normal;
     font-weight: bold;
     font-size: 14px;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
 `
 
 const ButtonContainer = styled.div`
@@ -40,7 +40,7 @@ const Button = styled.button`
     font-style: normal;
     font-weight: normal;
     font-size: 14px;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     cursor: pointer;
     padding: 0 0 0 5px;
 

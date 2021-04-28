@@ -19,10 +19,10 @@ const HeaderText = styled.h2`
     text-align: center;
 
     /* Website - Text Colour */
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
 `
 const Header = styled.div`
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     font-weight: 600;
     flex: 1;
 `

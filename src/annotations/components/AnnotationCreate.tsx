@@ -298,7 +298,7 @@ const StyledTextArea = styled.textarea`
     min-height: 40px;
 
     &::placeholder {
-        color: #3a2f45;
+        color: ${(props) => props.theme.colors.primary};
     }
 
     &:focus {

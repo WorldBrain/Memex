@@ -446,7 +446,7 @@ const EditNoteIcon = styled.div`
     width: 20px;
     height: 20px;
     opacity: 0.6;
-    background-color: #3a2f45;
+    background-color: ${(props) => props.theme.colors.primary};
     mask-image: url(${icons.commentEditFull});
     mask-position: center;
     mask-repeat: no-repeat;
@@ -517,7 +517,7 @@ const AddNoteIcon = styled.button`
     width: 20px;
     height: 20px;
     opacity: 0.6;
-    background-color: #3a2f45;
+    background-color: ${(props) => props.theme.colors.primary};
     mask-image: url(${icons.plus});
     mask-position: center;
     mask-repeat: no-repeat;
@@ -530,7 +530,7 @@ const GoToHighlightIcon = styled.button`
     width: 20px;
     height: 20px;
     opacity: 0.6;
-    background-color: #3a2f45;
+    background-color: ${(props) => props.theme.colors.primary};
     mask-image: url(${icons.goTo});
     mask-position: center;
     mask-repeat: no-repeat;
@@ -544,7 +544,7 @@ const HighlightText = styled.span`
     line-height: 25px;
     font-style: normal;
     background-color: #d4e8ff;
-    color: #3a2f45;
+    color: ${(props) => props.theme.colors.primary};
     padding: 2px 5px;
 `
 

@@ -85,7 +85,7 @@ const ToggleMoreButtonStyled = styled.div`
 
     &: hover {
         background-color: #e0e0e0;
-        color: #3a2f45;
+        color: ${(props) => props.theme.colors.primary};
     }
 `
 

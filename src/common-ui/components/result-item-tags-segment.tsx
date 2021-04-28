@@ -75,7 +75,7 @@ const EditIcon = styled.button`
     width: 20px;
     height: 20px;
     opacity: 0.6;
-    background-color: #3a2f45;
+    background-color: ${(props) => props.theme.colors.primary};
     mask-image: url(${icons.commentEditFull});
     mask-position: center;
     mask-repeat: no-repeat;
