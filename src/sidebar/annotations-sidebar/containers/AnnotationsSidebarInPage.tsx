@@ -16,7 +16,7 @@ import { Annotation } from 'src/annotations/types'
 import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
 import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
-import LoginModal from 'src/overview/sharing/components/LoginRouteGoToModal'
+import LoginModal from 'src/overview/sharing/components/LoginModal'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -202,6 +202,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             <>
                 {this.state.showLoginModal && (
                     <LoginModal
+                        routeToLoginBtn
                         ignoreReactPortal
                         contentScriptBG={this.props.contentScriptBackground}
                         onClose={() =>
