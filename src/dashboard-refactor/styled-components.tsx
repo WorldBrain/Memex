@@ -15,6 +15,7 @@ interface IconProps {
     path: string
     rotation: string
     faded: boolean
+    paddingHorizontal?: string
 }
 
 export const Icon = styled.div<IconProps>`
@@ -40,6 +41,12 @@ export const Icon = styled.div<IconProps>`
         props.faded &&
         css`
             opacity: 0.5;
+        `}
+    ${(props) =>
+        props.paddingHorizontal &&
+        css`
+            padding-left: ${props.paddingHorizontal};
+            padding-right: ${props.paddingHorizontal};
         `}
 `
 

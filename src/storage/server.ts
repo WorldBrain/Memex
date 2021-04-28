@@ -3,9 +3,15 @@ import 'firebase/database'
 import 'firebase/firestore'
 import StorageManager from '@worldbrain/storex'
 import { FirestoreStorageBackend } from '@worldbrain/storex-backend-firestore'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+import {
+    registerModuleMapCollections,
+    _defaultOperationExecutor,
+    StorageOperationExecuter,
+} from '@worldbrain/storex-pattern-modules'
 import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-log/storex'
 import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
+import { ALLOWED_STORAGE_MODULE_OPERATIONS } from '@worldbrain/memex-common/lib/firebase-backend/app-layer/allowed-operations'
+import { createClientApplicationLayer } from '@worldbrain/memex-common/lib/firebase-backend/app-layer/client'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import { createOperationLoggingMiddleware } from 'src/storage/middleware'
@@ -59,6 +65,37 @@ export function createLazyServerStorage(
 
         serverStoragePromise = (async () => {
             const storageManager = createStorageManager()
+            const firebase = getFirebase()
+
+            const applicationLayer = createClientApplicationLayer(
+                async (name, params) => {
+                    const functions = firebase.functions()
+                    const result = await functions.httpsCallable(name)(params)
+                    return result.data
+                },
+            )
+
+            const defaultOperationExecutor = _defaultOperationExecutor(
+                storageManager,
+            )
+            const operationExecuter: (
+                storageModuleName: keyof typeof ALLOWED_STORAGE_MODULE_OPERATIONS,
+            ) => StorageOperationExecuter = (storageModuleName) => async (
+                params,
+            ) => {
+                const allowModuleOperations = ALLOWED_STORAGE_MODULE_OPERATIONS[
+                    storageModuleName
+                ] as any
+                if (!allowModuleOperations?.[params.name]) {
+                    return defaultOperationExecutor(params)
+                }
+                return applicationLayer.executeStorageModuleOperation({
+                    storageModule: storageModuleName,
+                    operationName: params.name,
+                    operationArgs: params.context,
+                })
+            }
+
             const sharedSyncLog =
                 options.sharedSyncLog ??
                 new SharedSyncLogStorage({
@@ -67,11 +104,13 @@ export function createLazyServerStorage(
                 })
             const contentSharing = new ContentSharingStorage({
                 storageManager,
+                operationExecuter: operationExecuter('contentSharing'),
                 ...options,
             })
             const contentConversations = new ContentConversationStorage({
                 storageManager,
                 contentSharing,
+                operationExecuter: operationExecuter('contentConversations'),
                 ...options,
             })
             const userManagement = new UserStorage({
@@ -82,6 +121,7 @@ export function createLazyServerStorage(
             })
             const activityFollows = new ActivityFollowsStorage({
                 storageManager,
+                operationExecuter: operationExecuter('activityFollows'),
             })
             const serverStorage: ServerStorage = {
                 storageManager,

@@ -123,6 +123,7 @@ export default class CustomListBackground {
         )
 
         return sharedLists.map((sharedList) => ({
+            isOwned: sharedList.creator.id === currentUser.id,
             remoteId: sharedList.reference.id as string,
             id: sharedList.createdWhen,
             name: sharedList.title,

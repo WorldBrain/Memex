@@ -135,7 +135,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         }
 
         if (onMoreActionClick) {
-            return <Icon heightAndWidth="12px" path={icons.dots} />
+            return <Icon paddingHorizontal="10px" heightAndWidth="12px" path={icons.dots} />
         }
     }
 
@@ -143,7 +143,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         const { dropReceivingState } = this.props
 
         const collaborationIcon = this.props.isCollaborative && (
-            <Icon heightAndWidth="12px" path={icons.shared} />
+            <Icon faded="0.7" heightAndWidth="12px" path={icons.shared} />
         )
 
         if (!this.props.nameHighlightIndices) {
@@ -216,6 +216,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                         newItemsCount={newItemsCount}
                         hasActivity={hasActivity}
                         onClick={this.handleMoreActionClick}
+                        right="10px"
                     >
                         {this.renderIcon()}
                     </IconBox>
@@ -236,6 +237,7 @@ const Name = styled.div`
     display: block;
     overflow-x: hidden;
     text-overflow: ellipsis;
+    padding-right: 10px;
 `
 
 const MenuContainer = styled.div`
@@ -263,10 +265,11 @@ const IconBox = styled.div<Props>`
         props.dropReceivingState?.isDraggedOver ||
         props.dropReceivingState?.wasPageDropped
             ? 'flex'
-            : 'none'};
+            : 'None'};
     height: 100%;
     align-items: center;
     justify-content: flex-end;
+    padding-right: 10px;
 `
 
 const DropZoneMask = styled.div`
@@ -292,7 +295,6 @@ const SidebarItem = styled.div<Props>`
     justify-content: space-between;
     align-items: center;
     background-color: transparent;
-    padding-right: 10px;
 
     &:hover {
         background-color: ${colors.onHover};
@@ -310,12 +312,12 @@ const SidebarItem = styled.div<Props>`
     &:hover ${IconBox} {
         display: ${(props) =>
             !(
-                props.hasActivity &&
-                props.newItemsCount &&
+                props.hasActivity ||
+                props.newItemsCount ||
                 props.dropReceivingState?.isDraggedOver
             )
                 ? 'flex'
-                : 'none'};
+                : 'None'};
     }
 
     &:hover ${TitleBox} {
@@ -385,9 +387,10 @@ const ListTitle = styled.span<Props>`
     overflow: hidden;
     text-overflow: ellipsis;
     padding-right: 5px;
-    justify-content: space-between;
+    justify-content: flex-start;
     width: 100%;
     pointer-events: none;
+
 `
 
 const ActivityBeacon = styled.div`
@@ -403,7 +406,7 @@ const NewItemsCount = styled.div`
     height: 14px;
     border-radius: 10px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
 `
 

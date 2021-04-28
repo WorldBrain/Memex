@@ -6,6 +6,7 @@ export interface PageList {
     pages?: string[]
     isNestable?: boolean
     isDeletable?: boolean
+    isOwned?: boolean
     active?: boolean
 }
 
