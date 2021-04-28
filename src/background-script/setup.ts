@@ -527,12 +527,14 @@ export async function setupBackgroundModules(
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()
 
-    await backgroundModules.auth.refreshUserInfo()
     await backgroundModules.sync.setup()
     await backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
-    backgroundModules.contentSharing.setup()
     backgroundModules.sync.registerRemoteEmitter()
+
+    // Ensure log-in state gotten from FB + trigger share queue processing, but don't wait for it
+    await backgroundModules.auth.authService.refreshUserInfo()
+    backgroundModules.contentSharing.setup()
 }
 
 export function getBackgroundStorageModules(
