@@ -29,28 +29,6 @@ const NameInput = styled.input`
     margin: 0 0 20px 0;
     text-align: center;
 `
-const InstructionsContainer = styled.div`
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 30px;
-`
-
-const InstructionsBox = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    & div {
-        display: flex;
-        justify-content: center;
-    }
-
-    & span {
-        text-align: center;
-    }
-`
 
 const InputContainer = styled.div`
     display: flex;
@@ -58,43 +36,40 @@ const InputContainer = styled.div`
     align-items: center;
 `
 
-const TypographyTextNormalAlert = styled(TypographyTextNormal)`
-    color: red;
-`
 
 export default class DisplayNameSetup extends PureComponent<
     DisplayNameSetupProps
 > {
+    state = {
+        buttonLabel: 'Update'
+    }
+
+    private ChangeInput = (e) => {
+        this.setState({
+            buttonLabel: 'Update'
+        })
+        this.props.onChange(e.target.value)
+    }
+
+    private confirmSave = () => {
+        this.setState({
+            buttonLabel: 'Saved!'
+        })
+        this.props.onClickNext()
+    }
+
     render() {
         return (
             <div>
-                <InstructionsContainer>
-                    <InstructionsBox>
-                        <TypographyHeadingBigger>
-                            What's your name?
-                        </TypographyHeadingBigger>
-                        <TypographyTextNormal>
-                            This is how people know who the shared content is
-                            from.
-                            <br />
-                        </TypographyTextNormal>
-                        <TypographyTextNormalAlert>
-                            <strong>
-                                You can't edit this name in the next 2 weeks
-                            </strong>
-                        </TypographyTextNormalAlert>
-                    </InstructionsBox>
-                </InstructionsContainer>
-
                 <InputContainer>
                     <NameInput
                         value={this.props.name || ''}
-                        onChange={(e) => this.props.onChange(e.target.value)}
+                        onChange={(e) => this.ChangeInput(e)}
                     />
 
                     <PrimaryAction
-                        label={'Save'}
-                        onClick={this.props.onClickNext}
+                        label={this.state.buttonLabel}
+                        onClick={() => this.confirmSave()}
                     />
                 </InputContainer>
             </div>

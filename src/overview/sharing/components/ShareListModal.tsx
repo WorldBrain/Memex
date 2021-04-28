@@ -172,7 +172,7 @@ class ShareListModal extends Component<Props, State> {
         }
 
         // if display name is not set - prompt to set
-        if (!this.state.displayName && !this.state.showBetaNotif) {
+        if (!this.state.displayName) {
             return (
                 <DisplayNameSetup
                     name={this.state.newDisplayName}

@@ -1,7 +1,9 @@
 import * as React from 'react'
+import styled, { css } from 'styled-components'
+
 import { TypographyInputTitle } from 'src/common-ui/components/design-library/typography'
 import { FullPage } from 'src/common-ui/components/design-library/FullPage'
-import { PrimaryButton } from 'src/common-ui/components/primary-button'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { InputTextField } from 'src/common-ui/components/design-library/form/InputTextField'
 import { AuthContextInterface } from 'src/authentication/background/types'
 import { auth, subscription } from 'src/util/remote-functions-background'
@@ -10,12 +12,33 @@ import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { TaskState } from 'ui-logic-core/lib/types'
+import DisplayNameSetup from 'src/overview/sharing/components/DisplayNameSetup'
 
 const styles = require('./styles.css')
 
 const hiddenInProduction =
     process.env.NODE_ENV === 'production' ? 'hidden' : 'text'
 const dev = process.env.NODE_ENV !== 'production'
+
+const DisplayNameBox = styled.div`
+    & > div {
+
+
+        & > div {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+
+            & > input {
+                margin: 0 10px 0 0;
+                width: 100%;
+                text-align: left;
+                padding: 10px 20px;
+            }
+        }
+    }
+`
 
 interface Props {
     showSubscriptionModal: () => void
@@ -25,6 +48,9 @@ interface Props {
 interface State {
     isPioneer?: boolean
     loadState: TaskState
+    displayName?: string
+    newDisplayName?: string
+    updateProfileState: TaskState
 }
 
 export class AccountInfo extends React.Component<Props & AuthContextInterface> {
@@ -34,6 +60,8 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
         features: [],
         loadState: 'running',
         isPioneer: false,
+        updateProfileState: 'pristine',
+        newDisplayName: ''
     }
 
     openPortal = async () => {
@@ -49,6 +77,42 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
 
     async componentDidMount() {
         this.handleRefresh()
+        this.getDisplayName()
+    }
+
+    async getDisplayName() {
+        this.setState({ loadState: 'running' })
+        try {
+            const profile = await auth.getUserProfile()
+            this.setState({
+                loadState: 'success',
+                newDisplayName: profile?.displayName ?? undefined,
+            })
+        } catch (e) {
+            this.setState({ loadState: 'error' })
+            throw e
+        }
+    }
+
+    updateDisplayName = async () => {
+        this.setState({
+            updateProfileState: 'running',
+        })
+        try {
+            await auth.updateUserProfile({
+                displayName: this.state.newDisplayName,
+            })
+            this.setState({
+                updateProfileState: 'success',
+                displayName: this.state.newDisplayName,
+                newDisplayName: this.state.newDisplayName,
+            })
+        } catch (e) {
+            this.setState({
+                updateProfileState: 'error',
+            })
+            throw e
+        }
     }
 
     handleRefresh = async () => {
@@ -91,7 +155,24 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                     </div>
                                 </div>
                             )}
-
+                        {this.state.isPioneer && (
+                            <>
+                                <TypographyInputTitle>
+                                        {' '}
+                                        Display Name{' '}
+                                </TypographyInputTitle>
+                                <DisplayNameBox>
+                                    <DisplayNameSetup
+                                        name={this.state.newDisplayName}
+                                        onChange={(newDisplayName) => {
+                                            this.setState({ newDisplayName })
+                                            console.log(newDisplayName)
+                                        }}
+                                        onClickNext={this.updateDisplayName}
+                                    />
+                                </DisplayNameBox>
+                            </>
+                        )}
                         <div className={styles.section}>
                             <TypographyInputTitle>
                                 {' '}
@@ -117,13 +198,12 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                         defaultValue={'Free Tier'}
                                         readOnly
                                     />
-                                    <PrimaryButton
+                                    <PrimaryAction
                                         onClick={
                                             this.props.showSubscriptionModal
                                         }
-                                    >
-                                        {'Upgrade'}
-                                    </PrimaryButton>
+                                        label={'Upgrade'}
+                                    />
                                 </div>
                             </div>
                         )}
@@ -142,15 +222,12 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                     />
                                     {this.state.loadingChargebee ||
                                     this.props.loadingUser ? (
-                                        <PrimaryButton onClick={() => null}>
-                                            <LoadingIndicator />
-                                        </PrimaryButton>
+                                        <PrimaryAction label={<LoadingIndicator />} onClick={() => null}/>
                                     ) : (
-                                        <PrimaryButton
+                                        <PrimaryAction
                                             onClick={this.openPortal}
-                                        >
-                                            {'Edit Subscriptions'}
-                                        </PrimaryButton>
+                                            label={'Edit Subscriptions'}
+                                        />
                                     )}
                                 </div>
                             </div>
@@ -171,11 +248,10 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                             }
                                             readOnly
                                         />
-                                        <PrimaryButton
+                                        <PrimaryAction
                                             onClick={this.openPortal}
-                                        >
-                                            {'Reactivate'}
-                                        </PrimaryButton>
+                                            label={'Reactivate'}
+                                        />
                                     </div>
                                 </div>
                             )}
@@ -192,9 +268,9 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                         defaultValue={user.subscriptionStatus}
                                         readOnly
                                     />
-                                    <PrimaryButton onClick={this.openPortal}>
-                                        {'Add Payment Methods'}
-                                    </PrimaryButton>
+                                    <PrimaryAction onClick={this.openPortal}
+                                        label={'Add Payment Methods'}
+                                    />
                                 </div>
                             </div>
                         )}
@@ -251,13 +327,9 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                         <div className={styles.buttonBox}>
                             {this.state.loadingChargebee ||
                             this.props.loadingUser ? (
-                                <PrimaryButton onClick={() => null}>
-                                    <LoadingIndicator />
-                                </PrimaryButton>
+                                <PrimaryAction label={<LoadingIndicator />} onClick={() => null}/>
                             ) : (
-                                <PrimaryButton onClick={this.handleRefresh}>
-                                    Refresh Subscription Status
-                                </PrimaryButton>
+                                <PrimaryAction label={'Refresh Subscription Status'} onClick={this.handleRefresh}/>
                             )}
                         </div>
                         {dev === true && (

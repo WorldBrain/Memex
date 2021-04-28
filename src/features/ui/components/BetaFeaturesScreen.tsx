@@ -17,6 +17,8 @@ import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import { auth, subscription } from 'src/util/remote-functions-background'
+import DisplayNameSetup from 'src/overview/sharing/components/DisplayNameSetup'
+
 
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
@@ -42,6 +44,9 @@ interface State {
     loadingChargebee: boolean
     isPioneer?: boolean
     loadState: TaskState
+    displayName?: string
+    newDisplayName?: string
+    updateProfileState: TaskState
 }
 
 class BetaFeaturesScreen extends React.Component<
@@ -54,16 +59,53 @@ class BetaFeaturesScreen extends React.Component<
         featureEnabled: {},
         loadingChargebee: false,
         isPioneer: false,
+        updateProfileState: 'pristine',
     } as State
 
     componentDidMount = async () => {
         await this.refreshFeatures()
         const isBetaAuthorized = await auth.isAuthorizedForFeature('beta')
+        this.getDisplayName()
 
         this.setState({
             loadState: 'success',
             isPioneer: isBetaAuthorized,
         })
+    }
+
+    async getDisplayName() {
+        this.setState({ loadState: 'running' })
+        try {
+            const profile = await auth.getUserProfile()
+            this.setState({
+                loadState: 'success',
+                displayName: profile?.displayName ?? undefined,
+            })
+        } catch (e) {
+            this.setState({ loadState: 'error' })
+            throw e
+        }
+    }
+
+    updateDisplayName = async () => {
+        this.setState({
+            updateProfileState: 'running',
+        })
+        try {
+            await auth.updateUserProfile({
+                displayName: this.state.newDisplayName,
+            })
+            this.setState({
+                updateProfileState: 'success',
+                displayName: this.state.newDisplayName,
+                newDisplayName: undefined,
+            })
+        } catch (e) {
+            this.setState({
+                updateProfileState: 'error',
+            })
+            throw e
+        }
     }
 
     openPortal = async () => {

@@ -11,15 +11,14 @@ import {
 
 const StyledPrimaryAction = styled.div`
     padding: 8px 20px;
-    border: 1px solid ${colorPrimary};
-    height: 35px;
+    height: 36px;
     overflow: visible;
     white-space: nowrap;
     display: flex;
     justify-content: center;
-    align-items: center
+    align-items: center;
     vertical-align: middle;
-    background: ${(props) => (props.disabled ? colorDisabled : colorPrimary)};
+    background: ${(props) => props.disabled ? colorDisabled : props.theme.colors.purple};
 
     box-sizing: border-box;
     border-radius: 5px;
@@ -36,7 +35,7 @@ const StyledPrimaryAction = styled.div`
 
 const StyledPrimaryActionLinkText = styled(TypographyActionText)`
     font-size: ${fontSizeSmall}px;
-    color: #2f2f2f;
+    color: white;
 `
 export const PrimaryAction = ({
     label,

@@ -168,10 +168,12 @@ export default class Header extends PureComponent<HeaderProps> {
                         </Margin>
                         <SyncStatusHeaderText>Sync Status</SyncStatusHeaderText>
                     </SyncStatusHeaderBox>
-                    <SettingsSection vertical="auto" horizontal="17px">
-                        <a href={SETTINGS_URL}>
+                    <SettingsSection 
+                        vertical="auto" 
+                        horizontal="17px"
+                        onClick={()=> window.open(SETTINGS_URL, '_self')}
+                    >
                             <Icon heightAndWidth="18px" path={icons.settings} />
-                        </a>
                     </SettingsSection>
                     <SyncStatusMenu {...syncStatusMenuProps} />
                 </RightHeader>

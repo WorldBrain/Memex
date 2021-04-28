@@ -162,7 +162,6 @@ export const TypographyButtonLabel = styled.span`
     font-family: 'Poppins', sans-serif;
 `
 export const TypographyActionText = styled.span`
-    line-height: 1.4;
     text-align: center;
     font-family: 'Poppins', sans-serif;
     font-style: normal;
