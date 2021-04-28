@@ -95,6 +95,7 @@ export default class ContentSharingBackground {
             shareListEntries: this.shareListEntries,
             shareAnnotation: this.shareAnnotation,
             shareAnnotations: this.shareAnnotations,
+            executePendingActions: this.executePendingActions.bind(this),
             shareAnnotationsToLists: this.shareAnnotationsToLists,
             unshareAnnotationsFromLists: this.unshareAnnotationsFromLists,
             unshareAnnotation: this.unshareAnnotation,
@@ -614,7 +615,7 @@ export default class ContentSharingBackground {
         })
     }
 
-    async executePendingActions() {
+    executePendingActions = async () => {
         await this._executingPendingActions
 
         const executingPendingActions = (this._executingPendingActions = createResolvable())

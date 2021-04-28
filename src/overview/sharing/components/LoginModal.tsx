@@ -8,6 +8,8 @@ import {
     Props as SignInProps,
 } from 'src/authentication/components/SignIn'
 import { runInBackground } from 'src/util/webextensionRPC'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 
 export interface Props
     extends Pick<
@@ -16,12 +18,26 @@ export interface Props
         >,
         Pick<SignInProps, 'onSuccess' | 'onFail' | 'redirectTo'> {
     contentScriptBG?: ContentScriptsInterface<'caller'>
+    contentSharingBG?: ContentSharingInterface
+    authBG?: AuthRemoteFunctionsInterface
     routeToLoginBtn?: boolean
 }
 
 export default class LoginModal extends React.PureComponent<Props> {
-    static defaultProps: Pick<Props, 'contentScriptBG'> = {
+    static defaultProps: Pick<
+        Props,
+        'contentScriptBG' | 'contentSharingBG' | 'authBG'
+    > = {
+        contentSharingBG: runInBackground(),
         contentScriptBG: runInBackground(),
+        authBG: runInBackground(),
+    }
+
+    private handleLoginSuccess = async () => {
+        this.props.onSuccess?.()
+        this.props.onClose?.({} as any)
+        await this.props.authBG.refreshUserInfo()
+        this.props.contentSharingBG.executePendingActions()
     }
 
     private handleGoToClick: React.MouseEventHandler = (e) => {
@@ -41,10 +57,7 @@ export default class LoginModal extends React.PureComponent<Props> {
                 ) : (
                     <SignInScreen
                         {...this.props}
-                        onSuccess={() => {
-                            this.props.onSuccess?.()
-                            this.props.onClose?.({} as any)
-                        }}
+                        onSuccess={this.handleLoginSuccess}
                     />
                 )}
             </Modal>

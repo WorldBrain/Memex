@@ -850,6 +850,8 @@ export class DashboardContainer extends StatefulUIElement<
             return (
                 <LoginModal
                     onClose={closeLoginModal}
+                    authBG={this.props.authBG}
+                    contentSharingBG={this.props.contentShareBG}
                     onSuccess={() =>
                         setTimeout(
                             () => this.processEvent('checkSharingAccess', null),

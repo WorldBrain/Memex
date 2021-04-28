@@ -56,6 +56,7 @@ export interface ContentSharingInterface
         localListIds: number[]
     }): Promise<{ [listId: number]: boolean }>
     waitForSync(): Promise<void>
+    executePendingActions(): Promise<void>
 }
 
 export interface ContentSharingEvents {

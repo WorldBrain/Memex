@@ -204,6 +204,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                     <LoginModal
                         routeToLoginBtn
                         ignoreReactPortal
+                        contentSharingBG={this.props.contentSharing}
                         contentScriptBG={this.props.contentScriptBackground}
                         onClose={() =>
                             this.processEvent('setLoginModalShown', {
