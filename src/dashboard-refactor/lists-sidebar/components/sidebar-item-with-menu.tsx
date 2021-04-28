@@ -140,13 +140,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
     }
 
     private renderTitle() {
-        const {
-            dropReceivingState,
-            isMenuDisplayed,
-            selectedState,
-            newItemsCount,
-            hasActivity,
-        } = this.props
+        const { dropReceivingState } = this.props
 
         const collaborationIcon = this.props.isCollaborative && (
             <Icon heightAndWidth="12px" path={icons.shared} />
@@ -203,15 +197,19 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     selectedState={selectedState}
                     dropReceivingState={dropReceivingState}
                     title={this.props.name}
+                    onClick={this.handleSelection}
+                    onDragEnter={this.handleDragEnter}
                 >
-                    <DropZoneMask
-                        dropReceivingState={dropReceivingState}
-                        onDragLeave={dropReceivingState?.onDragLeave}
-                        onDragEnter={this.handleDragEnter}
-                        onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
-                        onDrop={this.handleDrop}
-                        onClick={this.handleSelection}
-                    />
+                    {dropReceivingState?.isDraggedOver && (
+                        <DropZoneMask
+                            dropReceivingState={dropReceivingState}
+                            onDragLeave={dropReceivingState?.onDragLeave}
+                            onDragEnter={this.handleDragEnter}
+                            onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
+                            onDrop={this.handleDrop}
+                            onClick={this.handleSelection}
+                        />
+                    )}
                     <TitleBox> {this.renderTitle()}</TitleBox>
                     <IconBox
                         dropReceivingState={dropReceivingState}

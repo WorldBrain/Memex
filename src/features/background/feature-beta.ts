@@ -29,9 +29,10 @@ const allFeatures: UserBetaFeature[] = [
     // },
     {
         id: 'sharing-collections',
-        name: 'Sharing Collections & Annotations',
+        name:
+            'Co-curating and discussing collections of pages, PDFs and annotations',
         description:
-            'Easily share timeless repositories of quality content, feedback on articles, and create references to important text passages.',
+            'Easily share and collaborate with peers on timeless repositories of quality content, feedback on articles, and create references to important text passages.',
         link: 'https://worldbrain.io/tutorials/share-research',
         enabled: true,
         available: true,

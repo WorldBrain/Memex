@@ -22,11 +22,7 @@ export class SignInScreen extends React.Component<Props> {
                 uiConfig={{
                     signInFlow: 'popup',
                     signInOptions: [
-                        {
-                            provider: getFirebase().auth.EmailAuthProvider
-                                .PROVIDER_ID,
-                            requireDisplayName: false,
-                        },
+                        getFirebase().auth.EmailAuthProvider.PROVIDER_ID,
                     ],
                     callbacks: {
                         signInSuccessWithAuthResult: () => {
@@ -94,6 +90,10 @@ const StyledFirebaseAuth = styled(FirebaseAuth)`
 
     .mdl-textfield__label:after {
         background: none;
+    }
+
+    .mdl-card {
+        min-height: unset;
     }
 
     input.firebaseui-input,

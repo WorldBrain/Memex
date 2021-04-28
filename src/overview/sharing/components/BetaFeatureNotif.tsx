@@ -106,6 +106,17 @@ const SurveyFrame = styled.iframe`
     border: 1px solid #f0f0f0;
 `
 
+const LoginScreenContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    & > span {
+        text-align: center;
+    }
+`
+
 export default class BetaFeatureNotif extends PureComponent<Props, State> {
     static defaultProps: Partial<Props> = {
         betaRequestStrategy: 'sign-in',
@@ -214,10 +225,16 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
 
         if (this.state.isAuthenticating) {
             return (
-                <SignInScreen
-                    onSuccess={this.onSignInSucces}
-                    onFail={this.onSignInFail}
-                />
+                <LoginScreenContainer>
+                    <TypographyHeadingBigger>
+                        Login or Create an Account
+                    </TypographyHeadingBigger>
+                    <TypographyTextNormal>
+                        To create an account just type in a new email address
+                    </TypographyTextNormal>
+                    <Margin />
+                    <SignInScreen />
+                </LoginScreenContainer>
             )
         }
 

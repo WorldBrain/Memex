@@ -26,6 +26,24 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
     private handleChange: React.MouseEventHandler<HTMLInputElement> = (event) =>
         this.setState({ value: (event.target as HTMLInputElement).value })
 
+    private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
+        // Allow escape keydown to bubble up to close the sidebar only if no input state
+        if (e.key === 'Escape') {
+            if (this.state.value.length) {
+                e.stopPropagation()
+            }
+            this.props.onCancelClick(this.state.value)
+            return
+        }
+
+        if (e.key === 'Enter') {
+            this.props.onConfirmClick(this.state.value)
+        }
+
+        // If we don't have this, events will bubble up into the page!
+        e.stopPropagation()
+    }
+
     private handleConfirm: React.MouseEventHandler = () =>
         this.props.onConfirmClick(this.state.value)
 
@@ -40,6 +58,7 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
                         autoFocus
                         onChange={this.handleChange}
                         value={this.state.value}
+                        onKeyDown={this.handleInputKeyDown}
                     />
                     <ActionButtonBox left="5px">
                         <ActionBtn onClick={this.handleConfirm}>
