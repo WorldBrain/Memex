@@ -58,6 +58,10 @@ const IconContainer = styled.div`
     align-items: center;
 `
 
+const ErrorMsg = styled.div`
+    padding: 0 10px;
+`
+
 export interface ListsSidebarGroupProps {
     title?: string
     isExpanded: boolean
@@ -74,7 +78,9 @@ export default class ListsSidebarGroup extends PureComponent<
     ListsSidebarGroupProps
 > {
     private renderErrorState = function () {
-        return <div>Error! Oh Noes!</div>
+        return (
+            <ErrorMsg>Collections could not be loaded at this time...</ErrorMsg>
+        )
     }
 
     private renderLoadingState = function () {
