@@ -398,7 +398,7 @@ const ActivityBeacon = styled.div`
     height: 14px;
     border-radius: 10px;
     padding: 8px;
-    background-color: #5cd9a6;
+    background-color: ${(props) => props.theme.colors.secondary};
 `
 
 const NewItemsCount = styled.div`

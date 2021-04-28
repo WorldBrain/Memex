@@ -72,7 +72,7 @@ const LearnMoreStyled = styled.div`
     transition: all 200ms ease-in-out;
 
     &:hover {
-        background: #5cd9a6;
+        background: ${(props) => props.theme.colors.secondary};
         color: #222222;
     }
 

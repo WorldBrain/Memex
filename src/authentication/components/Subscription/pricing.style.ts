@@ -117,7 +117,7 @@ const PricingPrice = styled.div`
     margin-bottom: 20px;
     display: flex;
     font-size: 25px;
-    color: #5cd9a6;
+    color: ${(props) => props.theme.colors.secondary};
     text-align: center;
     justify-content: center;
 `
@@ -339,7 +339,7 @@ const PricingGridPlanTitle = styled(TypographyHeadingPage)`
     display: flex;
     justify-content: center;
     align-items: center;
-    color: ${(props) => (props.active ? '#5cd9a6' : '${(props) => props.theme.colors.primary}')};
+    color: ${(props) => (props.active ? '${(props) => props.theme.colors.secondary}' : '${(props) => props.theme.colors.primary}')};
 `
 
 const PricingGridFeatureTitle = styled(TypographyBodyBold)`
@@ -367,7 +367,7 @@ const PricingGridCheck = styled.div`
     mask-repeat: no-repeat;
     mask-position: center;
     mask-image: url('/img/check.svg');
-    background-color: ${(props) => (props.active ? '#5cd9a6' : '${(props) => props.theme.colors.primary}')};
+    background-color: ${(props) => (props.active ? '${(props) => props.theme.colors.secondary}' : '${(props) => props.theme.colors.primary}')};
     color: #2f2f2f;
 
     @media (max-width: 700px) {

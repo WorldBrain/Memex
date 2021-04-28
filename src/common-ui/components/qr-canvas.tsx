@@ -37,5 +37,5 @@ const Canvas = styled.canvas`
     border-radius: 10px;
     height: 150px;
     width: 150px;
-    color: #5cd9a6;
+    color: ${(props) => props.theme.colors.secondary};
 `
