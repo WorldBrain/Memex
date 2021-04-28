@@ -7,9 +7,11 @@ import {
     SignInScreen,
     Props as SignInProps,
 } from 'src/authentication/components/SignIn'
+import styles, { fonts } from 'src/dashboard-refactor/styles'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import Button from '@worldbrain/memex-common/lib/common-ui/components/button'
 
 export interface Props
     extends Pick<
@@ -40,7 +42,7 @@ export default class LoginModal extends React.PureComponent<Props> {
         this.props.contentSharingBG.executePendingActions()
     }
 
-    private handleGoToClick: React.MouseEventHandler = (e) => {
+    private handleGoToClick = () => {
         this.props.contentScriptBG.openAuthSettings()
     }
 
@@ -48,23 +50,50 @@ export default class LoginModal extends React.PureComponent<Props> {
         return (
             <Modal {...this.props}>
                 <TitleText>
-                    You need to be logged in to use sharing features
+                    Login or Sign Up
                 </TitleText>
                 {this.props.routeToLoginBtn ? (
-                    <AuthRouteLink onClick={this.handleGoToClick}>
-                        Go to Memex Login page >
-                    </AuthRouteLink>
+                    <>
+                        <Margin/>
+                        <Button
+                            type="primary-action"
+                            onClick={() => this.handleGoToClick()}
+                        >
+                            Next
+                        </Button>
+                    </>
                 ) : (
-                    <SignInScreen
-                        {...this.props}
-                        onSuccess={this.handleLoginSuccess}
-                    />
+                    <>
+                        <SubTitleText>
+                            To sign up enter a new email address
+                        </SubTitleText>
+                        <SignInScreen
+                            {...this.props}
+                            onSuccess={this.handleLoginSuccess}
+                        />
+                    </>
                 )}
             </Modal>
         )
     }
 }
 
-const TitleText = styled.div``
+const TitleText = styled.div`
+    font-family: ${(props) => props.theme.fonts.primary};
+    color: ${(props) => props.theme.colors.primary};
+    font-size: 18px;
+    font-weight: 600;
 
-const AuthRouteLink = styled.button``
+    padding-bottom: ${(props) => props.routeToLoginBtn ? '20px' : '0px'}
+`
+
+const SubTitleText = styled.div`
+    font-family: ${(props) => props.theme.fonts.primary};
+    color: ${(props) => props.theme.colors.darkGrey};
+    font-size: 14px;
+    padding-bottom: 20px;
+`
+
+const Margin = styled.div`
+    height: 20px;
+`
