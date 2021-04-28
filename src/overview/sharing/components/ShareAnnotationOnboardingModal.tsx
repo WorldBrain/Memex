@@ -119,7 +119,7 @@ const Text = styled.div`
     line-height: 21px;
     text-align: center;
     margin-bottom: 30px;
-    font-family: 'Poppins', sans-serif;
+    font-family: ${(props) => props.theme.fonts.primary};
 `
 
 export default class ShareAnnotationOnboardingModal extends Component<Props> {

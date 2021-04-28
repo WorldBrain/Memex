@@ -160,7 +160,7 @@ const Menu = styled.div`
     padding-bottom: 10px;
 
     & * {
-        font-family: 'Poppins', sans-serif;
+        font-family: ${(props) => props.theme.fonts.primary};
         line-height: 22px;
     }
 `

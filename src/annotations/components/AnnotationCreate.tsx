@@ -278,7 +278,7 @@ const TextBoxContainerStyled = styled.div`
     background-color: ${(props) => (props.comment !== '' ? 'white' : 'none')};
 
     & * {
-        font-family: 'Poppins', sans-serif;
+        font-family: ${(props) => props.theme.fonts.primary};
     }
 `
 
@@ -289,7 +289,7 @@ const StyledTextArea = styled.textarea`
     font-weight: 400;
     font-size: 14px;
     color: #222;
-    font-family: 'Poppins', sans-serif;
+    font-family: ${(props) => props.theme.fonts.primary};
     border-radius: 3px;
     border: none;
     padding: 10px 7px;

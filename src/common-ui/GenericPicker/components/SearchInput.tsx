@@ -101,7 +101,7 @@ const SearchInput = styled(TextInputControlled)`
     display: flex;
     flex: 1;
     color: ${(props) => props.theme.text};
-    font-family: 'Poppins', sans-serif;
+    font-family: ${(props) => props.theme.fonts.primary};
     font-size: ${fontSizeSmall}px;
     min-height: 24px;
 

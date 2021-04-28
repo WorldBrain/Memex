@@ -26,7 +26,7 @@ const SubscriptionOptionsContainer = styled.div`
 const PricingTable = styled.div`
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
-    font-family: 'Poppins', sans-serif;
+    font-family: ${(props) => props.theme.fonts.primary};
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -426,7 +426,7 @@ const PriceText = styled(TypographySubHeading)`
 
 const PriceInputBox = styled.select`
     display: inline-block;
-    font-family: 'Poppins', sans-serif;
+    font-family: ${(props) => props.theme.fonts.primary};
     font-size: ${TypographyTextNormal}px;
     box-sizing: border-box;
     margin: 0 2px 0 5px;
