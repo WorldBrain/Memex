@@ -323,7 +323,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     private renderLoginStep() {
         return (
             <div className={styles.welcomeScreen}>
-                <div className={styles.titleText}>Welcome to Memex</div>
+                <div className={styles.welcomeText}>Welcome to Memex</div>
                 <SignInScreen onSuccess={this.goToMainStep} />
                 <button className={styles.skipBtn} onClick={this.goToMainStep}>
                     Skip
