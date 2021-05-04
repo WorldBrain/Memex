@@ -18,7 +18,7 @@ import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 import TrialExpiryWarning from './TrialExpiryWarning'
 import { Tooltip } from '../tooltips'
-import { isDuringInstall } from '../onboarding/utils'
+import { isDuringInstall, isExistingUserOnboarding } from '../onboarding/utils'
 import { auth, subscription } from 'src/util/remote-functions-background'
 import { AnnotationsSidebarInDashboardResults } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { runInBackground } from 'src/util/webextensionRPC'
@@ -247,7 +247,10 @@ class Overview extends PureComponent<Props, State> {
     renderOnboarding() {
         return (
             <div>
-                <Onboarding navToOverview={this.handleOnboardingComplete} />
+                <Onboarding
+                    navToOverview={this.handleOnboardingComplete}
+                    startOnLoginStep={isExistingUserOnboarding()}
+                />
                 <HelpBtn />
             </div>
         )

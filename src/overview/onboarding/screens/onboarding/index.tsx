@@ -21,6 +21,7 @@ import {
     KEYBOARDSHORTCUTS_STORAGE_NAME,
     KEYBOARDSHORTCUTS_DEFAULT_STATE,
 } from 'src/in-page-ui/keyboard-shortcuts/constants'
+import { SignInScreen } from 'src/authentication/components/SignIn'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 import styled from 'styled-components'
@@ -32,9 +33,9 @@ const ButtonBar = styled.div`
 `
 
 const styles = require('../../components/onboarding-box.css')
-const searchSettingsStyles = require('../../components/search-settings.css')
 
 export interface Props {
+    startOnLoginStep?: boolean
     storage: Storage.LocalStorageArea
     navToOverview: () => void
 }
@@ -45,7 +46,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     Event
 > {
     static TOTAL_STEPS = 7
-    static defaultProps: Partial<Props> = {
+    static defaultProps: Pick<Props, 'navToOverview' | 'storage'> = {
         storage: browser.storage.local,
         navToOverview: () => {
             window.location.href = OVERVIEW_URL
@@ -57,7 +58,19 @@ export default class OnboardingScreen extends StatefulUIElement<
         super(props, new Logic())
     }
 
+    private get os(): 'Win' | 'Mac' {
+        if (navigator.platform.startsWith('Mac')) {
+            return 'Mac'
+        }
+
+        return 'Win'
+    }
+
     componentDidMount() {
+        if (this.props.startOnLoginStep) {
+            this.processEvent('setStep', { step: -1 })
+        }
+
         this.hydrateStateFromStorage()
     }
 
@@ -305,263 +318,147 @@ export default class OnboardingScreen extends StatefulUIElement<
             />
         )
     }
+    private goToMainStep = () => this.processEvent('setStep', { step: 0 })
 
-    checkOperatingSystem() {
-        let os = navigator.platform
+    private renderLoginStep() {
+        return (
+            <div className={styles.welcomeScreen}>
+                <div className={styles.titleText}>Welcome to Memex</div>
+                <SignInScreen onSuccess={this.goToMainStep} />
+                <button className={styles.skipBtn} onClick={this.goToMainStep}>
+                    Skip
+                </button>
+            </div>
+        )
+    }
 
-        if (os.startsWith('Mac')) {
-            return 'Mac'
-        }
-        if (os.startsWith('Win')) {
-            return 'Win'
-        }
+    private renderMainStep() {
+        return (
+            <div className={styles.welcomeScreen}>
+                <img src={'/img/onlyIconLogo.svg'} className={styles.logoImg} />
+                <div className={styles.titleText}>
+                    All you need to know to get started
+                </div>
+                <div className={styles.shortcutContainer}>
+                    <div className={styles.shortcutBox}>
+                        <div className={styles.shortcutDescription}>
+                            Save current page
+                        </div>
+                        <div className={styles.shortcutName}>
+                            <span className={styles.keyboardButton}>
+                                {this.os === 'Win' ? (
+                                    'alt'
+                                ) : (
+                                    <>
+                                        option
+                                        <img
+                                            className={styles.macOptionIcon}
+                                            src="./img/macOptionDark.svg"
+                                        />
+                                    </>
+                                )}
+                            </span>
+                            +<span className={styles.keyboardButton}>s</span>
+                        </div>
+                    </div>
 
-        if (os.startsWith('Linux')) {
-            return 'Win'
-        }
+                    <div className={styles.shortcutBox}>
+                        <div className={styles.shortcutDescription}>
+                            Annotate highlighted text
+                        </div>
+                        <div className={styles.shortcutName}>
+                            <span className={styles.keyboardButton}>
+                                {this.os === 'Win' ? (
+                                    'alt'
+                                ) : (
+                                    <>
+                                        option
+                                        <img
+                                            className={styles.macOptionIcon}
+                                            src={'./img/macOptionDark.svg'}
+                                        />
+                                    </>
+                                )}
+                            </span>
+                            +<span className={styles.keyboardButton}>a</span>
+                        </div>
+                    </div>
+
+                    <div className={styles.shortcutBox}>
+                        <div className={styles.shortcutDescription}>
+                            Search Saved Pages & Notes
+                        </div>
+                        <div className={styles.shortcutName}>
+                            <span className={styles.keyboardButton}>
+                                {this.os === 'Win' ? (
+                                    'alt'
+                                ) : (
+                                    <>
+                                        option
+                                        <img
+                                            className={styles.macOptionIcon}
+                                            src={'./img/macOptionDark.svg'}
+                                        />
+                                    </>
+                                )}
+                            </span>
+                            +<span className={styles.keyboardButton}>f</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/*<div className={styles.shortcutContainer}>
+                </div>
+
+
+                <div className={styles.shortcutContainer}>
+                    <div className={styles.shortcutDescriptionBox}>
+                        <div className={styles.shortcutDescription}>
+                            Save current page
+                        </div>
+                        <div className={styles.shortcutDescription}>
+                            Annotate highlighted text
+                        </div>
+                        <div className={styles.shortcutDescription}>
+                            Full-Text search pages and highlights
+                        </div>
+                    </div>
+                    <div className={styles.shortcutNameBox}>
+                        <div className={styles.shortcutName}>
+                            alt+s
+                        </div>
+                        <div className={styles.shortcutName}>
+                            alt+a
+                        </div>
+                        <div className={styles.shortcutName}>
+                            alt+d
+                        </div>
+                    </div>
+                </div>*/}
+                <ButtonBar>
+                    <PrimaryAction
+                        label={'Try it out'}
+                        onClick={() =>
+                            window.open('https://worldbrain.io/actionTutorial')
+                        }
+                    />
+                    <Margin horizontal="5px" />
+                    <SecondaryAction
+                        label={'Go to Dashboard'}
+                        onClick={this.props.navToOverview}
+                    />
+                </ButtonBar>
+            </div>
+        )
     }
 
     private renderCurrentStep() {
-        let os = this.checkOperatingSystem()
-
         switch (this.state.currentStep) {
             default:
+            case -1:
+                return this.renderLoginStep()
             case 0:
-                return (
-                    <div>
-                        <div className={styles.welcomeScreen}>
-                            <img
-                                src={'/img/onlyIconLogo.svg'}
-                                className={styles.logoImg}
-                            />
-                            <div className={styles.titleText}>
-                                All you need to know to get started
-                            </div>
-                            <div className={styles.shortcutContainer}>
-                                <div className={styles.shortcutBox}>
-                                    <div className={styles.shortcutDescription}>
-                                        Save current page
-                                    </div>
-                                    <div className={styles.shortcutName}>
-                                        {os === 'Win' && (
-                                            <>
-                                                <span
-                                                    className={
-                                                        styles.keyboardButton
-                                                    }
-                                                >
-                                                    alt
-                                                </span>
-                                                +
-                                                <span
-                                                    className={
-                                                        styles.keyboardButton
-                                                    }
-                                                >
-                                                    s
-                                                </span>
-                                            </>
-                                        )}
-                                        {os === 'Mac' && (
-                                            <>
-                                                <span
-                                                    className={
-                                                        styles.keyboardButton
-                                                    }
-                                                >
-                                                    option
-                                                    <img
-                                                        className={
-                                                            styles.macOptionIcon
-                                                        }
-                                                        src={
-                                                            './img/macOptionDark.svg'
-                                                        }
-                                                    />
-                                                </span>
-                                                +
-                                                <span
-                                                    className={
-                                                        styles.keyboardButton
-                                                    }
-                                                >
-                                                    s
-                                                </span>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className={styles.shortcutBox}>
-                                    <div className={styles.shortcutDescription}>
-                                        Annotate highlighted text
-                                    </div>
-                                    <div className={styles.shortcutName}>
-                                        {os === 'Win' && (
-                                            <>
-                                                <span
-                                                    className={
-                                                        styles.keyboardButton
-                                                    }
-                                                >
-                                                    alt
-                                                </span>
-                                                +
-                                                <span
-                                                    className={
-                                                        styles.keyboardButton
-                                                    }
-                                                >
-                                                    a
-                                                </span>
-                                            </>
-                                        )}
-                                        {os === 'Mac' && (
-                                            <>
-                                                <span
-                                                    className={
-                                                        styles.keyboardButton
-                                                    }
-                                                >
-                                                    option
-                                                    <img
-                                                        className={
-                                                            styles.macOptionIcon
-                                                        }
-                                                        src={
-                                                            './img/macOptionDark.svg'
-                                                        }
-                                                    />
-                                                </span>
-                                                +
-                                                <span
-                                                    className={
-                                                        styles.keyboardButton
-                                                    }
-                                                >
-                                                    a
-                                                </span>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className={styles.shortcutBox}>
-                                    <div className={styles.shortcutDescription}>
-                                        Search Saved Pages & Notes
-                                    </div>
-                                    <div className={styles.shortcutName}>
-                                        {os === 'Win' && (
-                                            <>
-                                                <span
-                                                    className={
-                                                        styles.keyboardButton
-                                                    }
-                                                >
-                                                    alt
-                                                </span>
-                                                +
-                                                <span
-                                                    className={
-                                                        styles.keyboardButton
-                                                    }
-                                                >
-                                                    f
-                                                </span>
-                                            </>
-                                        )}
-                                        {os === 'Mac' && (
-                                            <>
-                                                <span
-                                                    className={
-                                                        styles.keyboardButton
-                                                    }
-                                                >
-                                                    option
-                                                    <img
-                                                        className={
-                                                            styles.macOptionIcon
-                                                        }
-                                                        src={
-                                                            './img/macOptionDark.svg'
-                                                        }
-                                                    />
-                                                </span>
-                                                +
-                                                <span
-                                                    className={
-                                                        styles.keyboardButton
-                                                    }
-                                                >
-                                                    f
-                                                </span>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/*<div className={styles.shortcutContainer}>
-                            </div>
-
-
-                            <div className={styles.shortcutContainer}>
-                                <div className={styles.shortcutDescriptionBox}>
-                                    <div className={styles.shortcutDescription}>
-                                        Save current page
-                                    </div>
-                                    <div className={styles.shortcutDescription}>
-                                        Annotate highlighted text
-                                    </div>
-                                    <div className={styles.shortcutDescription}>
-                                        Full-Text search pages and highlights
-                                    </div>
-                                </div>
-                                <div className={styles.shortcutNameBox}>
-                                    <div className={styles.shortcutName}>
-                                        alt+s
-                                    </div>
-                                    <div className={styles.shortcutName}>
-                                        alt+a
-                                    </div>
-                                    <div className={styles.shortcutName}>
-                                        alt+d
-                                    </div>
-                                </div>
-                            </div>*/}
-                            <ButtonBar>
-                                <PrimaryAction
-                                    label={'Try it out'}
-                                    onClick={() =>
-                                        window.open(
-                                            'https://worldbrain.io/actionTutorial',
-                                        )
-                                    }
-                                />
-                                <Margin horizontal="5px" />
-                                <SecondaryAction
-                                    label={'Go to Dashboard'}
-                                    onClick={this.props.navToOverview}
-                                />
-                            </ButtonBar>
-                        </div>
-
-                        {/*<OnboardingStep
-                            isInitStep
-                            titleText="Welcome to your Memex"
-                            subtitleText="Let's get started with a quick setup"
-                            totalSteps={OnboardingScreen.TOTAL_STEPS}
-                            renderButton={() => (
-                                <OnboardingAction
-                                    onClick={this.handleNextStepClick}
-                                    label={'Get Started'}
-                                />
-                            )}
-                            renderImage={this.logoImage}
-                            navToOverview={this.props.navToOverview}
-                        />*/}
-                    </div>
-                )
+                return this.renderMainStep()
             case 1:
                 return (
                     <OnboardingStep
