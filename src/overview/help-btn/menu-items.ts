@@ -1,4 +1,5 @@
 import { MenuOptions } from './types'
+import { ONBOARDING_QUERY_PARAMS } from '../onboarding/constants'
 
 export const menuItems: MenuOptions = [
     {
@@ -8,7 +9,7 @@ export const menuItems: MenuOptions = [
     '-',
     {
         text: 'Onboarding Wizard',
-        link: '#/overview?install=true',
+        link: '#/overview?' + ONBOARDING_QUERY_PARAMS.NEW_USER,
     },
     '-',
     {

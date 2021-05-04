@@ -1,6 +1,11 @@
 export const ANNOTATION_DEMO_URL = 'https://en.wikipedia.org/wiki/Memex'
 export const BACKUP_URL = '/options.html#/backup'
 
+export const ONBOARDING_QUERY_PARAMS = {
+    EXISTING_USER: 'existing',
+    NEW_USER: 'install',
+}
+
 /**
  * Constant to store the names of different onboarding workflows.
  */
