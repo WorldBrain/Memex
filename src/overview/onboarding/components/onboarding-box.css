@@ -339,6 +339,10 @@
     }
 }
 
+.videoBox {
+    margin-bottom: 30px;
+}
+
 .welcomeScreen {
     display: flex;
     justify-content: center;
