@@ -1395,6 +1395,108 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }
             },
         ),
+        backgroundIntegrationTest(
+            'should add an annotation and store its metadata when the user creates a new annotation via the web UI',
+            { skipConflictTests: true },
+            () => {
+                const testData: TestData = {}
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const { contentSharing } = await setupTest({
+                                    setup,
+                                    testData,
+                                })
+
+                                const serverStorage = await setup.getServerStorage()
+                                const createdWhen = Date.now()
+                                const dummyLocalId = 'aaa'
+                                const {
+                                    sharedAnnotationReferences,
+                                } = await serverStorage.storageModules.contentSharing.createAnnotations(
+                                    {
+                                        annotationsByPage: {
+                                            [normalizeUrl(
+                                                data.ANNOTATION_1_1_DATA
+                                                    .pageUrl,
+                                            )]: [
+                                                {
+                                                    localId: dummyLocalId,
+                                                    createdWhen,
+                                                    comment:
+                                                        data.ANNOTATION_1_1_DATA
+                                                            .comment,
+                                                },
+                                            ],
+                                        },
+                                        creator: {
+                                            type: 'user-reference',
+                                            id: 'someone-else',
+                                        },
+                                        listReferences: [],
+                                    },
+                                )
+                                const sendMessage = () =>
+                                    setup.backgroundModules.userMessages.events.emit(
+                                        'message',
+                                        {
+                                            timestamp: 555,
+                                            message: {
+                                                type: 'created-annotation',
+                                                sharedAnnotationId:
+                                                    sharedAnnotationReferences[
+                                                        dummyLocalId
+                                                    ].id,
+                                            },
+                                        },
+                                    )
+                                const verify = async () => {
+                                    await contentSharing.waitForSync()
+                                    const annotations = await setup.storageManager.operation(
+                                        'findObjects',
+                                        'annotations',
+                                        {},
+                                    )
+                                    expect(annotations).toEqual([
+                                        expect.objectContaining({
+                                            comment:
+                                                data.ANNOTATION_1_1_DATA
+                                                    .comment,
+                                        }),
+                                    ])
+                                    expect(
+                                        await setup.storageManager.operation(
+                                            'findObjects',
+                                            'sharedAnnotationMetadata',
+                                            {},
+                                        ),
+                                    ).toEqual([
+                                        {
+                                            localId: annotations[0].url,
+                                            remoteId:
+                                                sharedAnnotationReferences[
+                                                    dummyLocalId
+                                                ].id,
+                                            excludeFromLists: false,
+                                        },
+                                    ])
+                                }
+
+                                sendMessage()
+                                await verify()
+
+                                // and it should not add the same remote annotation to local twice
+                                sendMessage()
+                                await verify()
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
     ],
     { includePostSyncProcessor: true },
 )
