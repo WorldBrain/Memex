@@ -3,7 +3,10 @@ import Storex from '@worldbrain/storex'
 import { Storage } from 'webextension-polyfill-ts'
 import textStemmer from '@worldbrain/memex-stemmer'
 import { URLNormalizer } from '@worldbrain/memex-url-utils'
-import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
+import {
+    SPECIAL_LIST_NAMES,
+    SPECIAL_LIST_IDS,
+} from '@worldbrain/memex-storage/lib/lists/constants'
 
 import { STORAGE_KEYS as IDXING_STORAGE_KEYS } from 'src/options/settings/constants'
 
@@ -19,6 +22,32 @@ export interface Migrations {
 }
 
 export const migrations: Migrations = {
+    /*
+     * A long time ago we made the decision to make the "Saved from Mobile" list's ID static
+     * to simplify references to it. However this was after we'd already rolled the feature out.
+     * Anyone who had the extension before then would have the list set with a dynamic ID. To
+     * avoid needing to support both cases, here we are migrating everyone over to the static ID.
+     */
+    'staticize-mobile-list-id': async ({ db }) => {
+        let oldListId: number
+        await db
+            .table('customLists')
+            .where('name')
+            .equals(SPECIAL_LIST_NAMES.MOBILE)
+            .modify((list) => {
+                oldListId = list.id
+                if (list.id !== SPECIAL_LIST_IDS.MOBILE) {
+                    list.id = SPECIAL_LIST_IDS.MOBILE
+                }
+            })
+        await db
+            .table('pageListEntries')
+            .where('listId')
+            .equals(oldListId)
+            .modify((entry) => {
+                entry.listId = SPECIAL_LIST_IDS.MOBILE
+            })
+    },
     /*
      * There was a bug in some annotation refactoring (due to url normalisation)
      * that meant some annotations are created with a full url as the prefixed key
