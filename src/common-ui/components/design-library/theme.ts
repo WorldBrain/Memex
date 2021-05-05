@@ -16,6 +16,7 @@ export const theme: Theme = {
         primary: '#3a2f45',
         subText: '#aeaeae',
         purple: '#5671cf',
+        white: '#fff',
         lightgrey: '#f0f0f0',
         darkgrey: '#545454',
         secondary: '#5cd9a6',
