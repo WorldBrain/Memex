@@ -94,6 +94,8 @@ const defaultTestSetupDeps = {
 export async function setupTest(
     device: UILogicTestDevice,
     args: {
+        withAuth?: boolean
+        withBeta?: boolean
         mockDocument?: any
         seedData?: DataSeeder
         overrideSearchTrigger?: boolean
@@ -106,6 +108,21 @@ export async function setupTest(
     },
 ) {
     const analytics = new FakeAnalytics()
+
+    if (args.withAuth) {
+        device.backgroundModules.auth.remoteFunctions.getCurrentUser = async () => ({
+            id: 'test-user',
+            displayName: 'test',
+            email: 'test@test.com',
+            emailVerified: true,
+        })
+    }
+
+    if (args.withBeta) {
+        device.backgroundModules.auth.remoteFunctions.isAuthorizedForFeature = async (
+            feature,
+        ) => feature === 'beta'
+    }
 
     const logic = new DashboardLogic({
         location,

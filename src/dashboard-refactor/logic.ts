@@ -198,7 +198,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 showOnboardingMsg: { $set: !onboardingMsgSeen },
             },
             listsSidebar: {
-                isSidebarLocked: { $set: listsSidebarLocked ?? false },
+                isSidebarLocked: { $set: listsSidebarLocked ?? true },
             },
         }
         this.emitMutation(mutation)

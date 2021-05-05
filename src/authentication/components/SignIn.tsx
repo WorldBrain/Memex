@@ -67,6 +67,7 @@ const StyledFirebaseAuth = styled(FirebaseAuth)`
         background-color: #f0f0f0;
         height: 34px;
         padding: 0 15px;
+        font-size: 14px;
     }
 
     .mdl-textfield.is-invalid .mdl-textfield__input {
@@ -114,6 +115,7 @@ const StyledFirebaseAuth = styled(FirebaseAuth)`
         margin: 0 auto;
         max-width: none;
         box-shadow: none;
+        background: none;
     }
 
     .firebaseui-card-header {
@@ -135,5 +137,37 @@ const StyledFirebaseAuth = styled(FirebaseAuth)`
     .firebaseui-input-floating-button {
         height: 34px;
         width: 44px;
+    }
+
+    .firebaseui-card-actions {
+        flex-direction: column-reverse;
+        justify-content: center;
+        align-items: center;
+        display: flex;
+        padding-bottom: 0px;
+    }
+
+    .firebaseui-form-actions {
+        display: flex;
+        text-align: unset;
+        width: unset;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+    .firebaseui-form-links {
+        display: flex;
+        width: unset;
+        vertical-align: unset;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .firebaseui-button {
+        margin-left: unset;
+    }
+
+    .mdl-textfield {
+        margin-top: -20px;
     }
 `

@@ -237,7 +237,7 @@ const Name = styled.div`
     display: block;
     overflow-x: hidden;
     text-overflow: ellipsis;
-    padding-right: 10px;
+    padding-right: 5px;
 `
 
 const MenuContainer = styled.div`
@@ -270,6 +270,7 @@ const IconBox = styled.div<Props>`
     align-items: center;
     justify-content: flex-end;
     padding-right: 10px;
+    padding-left: 5px;
 `
 
 const DropZoneMask = styled.div`
@@ -285,6 +286,7 @@ const TitleBox = styled.div`
     height: 100%;
     padding-left: 15px;
     align-items: center;
+    padding-right: 10px;
 `
 
 const SidebarItem = styled.div<Props>`
@@ -321,7 +323,7 @@ const SidebarItem = styled.div<Props>`
     }
 
     &:hover ${TitleBox} {
-        width: 90%;
+        width: 70%;
     }
 
     ${({ selectedState }: Props) =>

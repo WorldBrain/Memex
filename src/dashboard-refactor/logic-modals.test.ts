@@ -7,7 +7,10 @@ describe('Dashboard Refactor modals logic', () => {
     it('should be able to set the Share List modal visibility state', async ({
         device,
     }) => {
-        const { searchResults } = await setupTest(device)
+        const { searchResults } = await setupTest(device, {
+            withAuth: true,
+            withBeta: true,
+        })
         const listId = 123
         searchResults.processMutation({
             listsSidebar: {
@@ -49,7 +52,10 @@ describe('Dashboard Refactor modals logic', () => {
         device.backgroundModules.contentSharing.remoteFunctions.getRemoteListId = async () =>
             remoteListId
 
-        const { searchResults } = await setupTest(device)
+        const { searchResults } = await setupTest(device, {
+            withAuth: true,
+            withBeta: true,
+        })
 
         searchResults.processMutation({
             listsSidebar: {

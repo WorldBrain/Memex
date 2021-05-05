@@ -34,8 +34,12 @@ import {
     UserMessageService,
     UserMessageEvents,
 } from '@worldbrain/memex-common/lib/user-messages/service/types'
-import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import {
+    SharedListReference,
+    SharedAnnotationReference,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
 import { Services } from 'src/services/types'
+import * as annotationUtils from 'src/annotations/utils'
 import { ServerStorageModules } from 'src/storage/types'
 
 // interface ListPush {
@@ -1104,6 +1108,11 @@ export default class ContentSharingBackground {
                     type: 'shared-list-reference',
                     id: message.sharedListId,
                 })
+            } else if (message.type === 'created-annotation') {
+                await this._processCreatedAnnotation({
+                    type: 'shared-annotation-reference',
+                    id: message.sharedAnnotationId,
+                })
             }
         } catch (e) {
             processingUserMessage.reject(e)
@@ -1114,7 +1123,7 @@ export default class ContentSharingBackground {
         }
     }
 
-    async _processJoinedCollection(listReference: SharedListReference) {
+    private async _processJoinedCollection(listReference: SharedListReference) {
         const { contentSharing } = await this.options.getServerStorage()
         const sharedList = await contentSharing.getListByReference(
             listReference,
@@ -1137,6 +1146,40 @@ export default class ContentSharingBackground {
         await this.options.customLists.insertCustomList({
             id: localId,
             name: sharedList.title,
+        })
+    }
+
+    private async _processCreatedAnnotation(
+        reference: SharedAnnotationReference,
+    ) {
+        const { contentSharing } = await this.options.getServerStorage()
+        const annotationDetails = await contentSharing.getAnnotation({
+            reference,
+        })
+        if (!annotationDetails) {
+            return // assume the annotation was deleted after the user created it
+        }
+        const { annotation } = annotationDetails
+
+        const localId = annotationUtils.generateUrl({
+            pageUrl: annotation.normalizedPageUrl,
+            now: () => annotation.createdWhen,
+        })
+
+        await this.storage.storeAnnotationMetadata([
+            {
+                localId,
+                remoteId: reference.id as string,
+                excludeFromLists: false,
+            },
+        ])
+
+        await this.options.annotationStorage.createAnnotation({
+            url: localId,
+            body: annotation.body,
+            comment: annotation.comment,
+            pageUrl: annotation.normalizedPageUrl,
+            createdWhen: new Date(annotation.createdWhen),
         })
     }
 }

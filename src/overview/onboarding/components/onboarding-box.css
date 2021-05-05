@@ -291,6 +291,15 @@
     }
 }
 
+.skipBtn {
+    font-weight: bold;
+    color: #3a2f45;
+    font-size: 14px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
 .skipButton {
     font-weight: bold;
     color: #3a2f45;
@@ -335,6 +344,14 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
+}
+
+.welcomeText {
+    font-size: 24px;
+    color: #3a2f45;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 30px;
 }
 
 .titleText {

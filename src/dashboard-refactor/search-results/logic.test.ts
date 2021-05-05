@@ -144,7 +144,9 @@ describe('Dashboard search results logic', () => {
         it('should be able to set list search share menu shown state', async ({
             device,
         }) => {
-            const { searchResults } = await setupTest(device)
+            const { searchResults } = await setupTest(device, {
+                withAuth: true,
+            })
 
             expect(
                 searchResults.state.searchResults.isListShareMenuShown,
@@ -771,6 +773,7 @@ describe('Dashboard search results logic', () => {
             }) => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(),
+                    withAuth: true,
                 })
                 const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_3.normalizedUrl
@@ -1710,38 +1713,12 @@ describe('Dashboard search results logic', () => {
                 ).toEqual([])
             })
 
-            it('should show beta feature modal on note share when account feature disabled', async ({
-                device,
-            }) => {
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                })
-                const noteId = DATA.NOTE_2.url
-
-                expect(searchResults.state.modals.showBetaFeature).toBeFalsy()
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId]
-                        .shareMenuShowStatus,
-                ).toEqual('hide')
-
-                await searchResults.processEvent('setNoteShareMenuShown', {
-                    noteId,
-                    shouldShow: true,
-                    mouseEvent: {} as any,
-                })
-
-                expect(searchResults.state.modals.showBetaFeature).toEqual(true)
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId]
-                        .shareMenuShowStatus,
-                ).toEqual('hide')
-            })
-
             it('should be able to show and hide note share menu', async ({
                 device,
             }) => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                    withAuth: true,
                 })
                 const noteId = DATA.NOTE_2.url
 
@@ -1784,6 +1761,7 @@ describe('Dashboard search results logic', () => {
             }) => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                    withAuth: true,
                 })
                 const noteId = DATA.NOTE_2.url
 

@@ -4,6 +4,7 @@ import {
     Alarms,
     Runtime,
     Commands,
+    History,
     Storage,
     Tabs,
 } from 'webextension-polyfill-ts'
@@ -31,6 +32,7 @@ import {
 import analytics from 'src/analytics'
 import TabManagementBackground from 'src/tab-management/background'
 import CustomListBackground from 'src/custom-lists/background'
+import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
 
 class BackgroundScript {
     private utils: typeof utils
@@ -42,6 +44,7 @@ class BackgroundScript {
     private storageManager: Storex
     private urlNormalizer: URLNormalizer
     private storageAPI: Storage.Static
+    private historyAPI: History.Static
     private runtimeAPI: Runtime.Static
     private commandsAPI: Commands.Static
     private alarmsAPI: Alarms.Static
@@ -58,6 +61,7 @@ class BackgroundScript {
         storageChangesMan,
         urlNormalizer = normalizeUrl,
         storageAPI = browser.storage,
+        historyAPI = browser.history,
         runtimeAPI = browser.runtime,
         commandsAPI = browser.commands,
         alarmsAPI = browser.alarms,
@@ -72,6 +76,7 @@ class BackgroundScript {
         utilFns?: typeof utils
         storageChangesMan: StorageChangesManager
         storageAPI?: Storage.Static
+        historyAPI?: History.Static
         runtimeAPI?: Runtime.Static
         commandsAPI?: Commands.Static
         alarmsAPI?: Alarms.Static
@@ -85,6 +90,7 @@ class BackgroundScript {
         this.utils = utilFns
         this.storageChangesMan = storageChangesMan
         this.storageAPI = storageAPI
+        this.historyAPI = historyAPI
         this.runtimeAPI = runtimeAPI
         this.commandsAPI = commandsAPI
         this.alarmsAPI = alarmsAPI
@@ -112,17 +118,37 @@ class BackgroundScript {
         })
     }
 
-    private async handleInstallLogic(now = Date.now()) {
+    private async runOnboarding() {
+        const aWeekBack = new Date()
+        aWeekBack.setDate(aWeekBack.getDate() - 7)
+
+        // Determine whether the user should be shown Memex log in screen based on whether they've visited Memex Social links recently
+        const historyItems = await this.historyAPI.search({
+            startTime: aWeekBack.getTime(),
+            text: 'memex.social/c/',
+            maxResults: 1,
+        })
+
+        const onboardingQueryParam =
+            historyItems.length > 0
+                ? ONBOARDING_QUERY_PARAMS.EXISTING_USER
+                : ONBOARDING_QUERY_PARAMS.NEW_USER
+
+        await this.tabsAPI.create({
+            url: `${OVERVIEW_URL}?${onboardingQueryParam}`,
+        })
+    }
+
+    private async handleInstallLogic() {
         // Ensure default blacklist entries are stored (before doing anything else)
         await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
 
         analytics.trackEvent({ category: 'Global', action: 'installExtension' })
 
-        // Open onboarding page
-        this.tabsAPI.create({ url: `${OVERVIEW_URL}?install=true` })
+        await this.runOnboarding()
 
         // Store the timestamp of when the extension was installed
-        this.storageAPI.local.set({ [INSTALL_TIME_KEY]: now })
+        this.storageAPI.local.set({ [INSTALL_TIME_KEY]: Date.now() })
         await insertDefaultTemplates({
             copyPaster: this.copyPasterBackground,
             localStorage: this.storageAPI.local,
