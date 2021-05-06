@@ -40,7 +40,7 @@ export const ANNOTATION_1_1_DATA = {
     body: 'Annot body',
     comment: 'Annot comment',
     selector: {
-        descriptor: { content: { foo: 5 }, strategy: 'eedwdwq' },
+        descriptor: { content: [{ foo: 5 }], strategy: 'eedwdwq' },
         quote: 'dawadawd',
     },
 }
@@ -51,7 +51,7 @@ export const ANNOTATION_1_2_DATA = {
     body: 'Annot body 2',
     comment: 'Annot comment 2',
     selector: {
-        descriptor: { content: { foo: 10 }, strategy: 'eedwdwq 2' },
+        descriptor: { content: [{ foo: 10 }], strategy: 'eedwdwq 2' },
         quote: 'dawadawd 2',
     },
 }

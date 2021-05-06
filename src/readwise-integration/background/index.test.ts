@@ -159,6 +159,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     { tab: DATA.TEST_TAB_2 },
                                     DATA.ANNOT_2,
                                 )
+                                const thirdAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: DATA.TEST_TAB_2 },
+                                    DATA.ANNOT_3,
+                                )
                                 await setup.backgroundModules.readwise.actionQueue.waitForSync()
 
                                 expectFetchCalls(
@@ -182,6 +186,17 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                 highlights: [
                                                     DATA.UPLOADED_HIGHLIGHT_2(
                                                         secondAnnotationUrl,
+                                                    ),
+                                                ],
+                                            }),
+                                        },
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    DATA.UPLOADED_HIGHLIGHT_3(
+                                                        thirdAnnotationUrl,
                                                     ),
                                                 ],
                                             }),
@@ -238,6 +253,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     omitTitle(DATA.ANNOT_2),
                                     { skipPageIndexing: true },
                                 )
+                                const thirdAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: omitTitle(DATA.TEST_TAB_2) },
+                                    omitTitle(DATA.ANNOT_3),
+                                    { skipPageIndexing: true },
+                                )
                                 await setup.backgroundModules.readwise.setAPIKey(
                                     {
                                         validatedKey: 'my key',
@@ -278,6 +298,22 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...DATA.UPLOADED_HIGHLIGHT_2(
                                                             secondAnnotationUrl,
+                                                        ),
+                                                        title:
+                                                            DATA.TEST_TAB_2
+                                                                .normalized,
+                                                    },
+                                                ],
+                                            }),
+                                        },
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    {
+                                                        ...DATA.UPLOADED_HIGHLIGHT_3(
+                                                            thirdAnnotationUrl,
                                                         ),
                                                         title:
                                                             DATA.TEST_TAB_2
@@ -344,6 +380,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     omitTitle(DATA.ANNOT_2),
                                     { skipPageIndexing: true },
                                 )
+                                const thirdAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: omitTitle(DATA.TEST_TAB_2) },
+                                    omitTitle(DATA.ANNOT_3),
+                                    { skipPageIndexing: true },
+                                )
 
                                 await setup.backgroundModules.readwise.actionQueue.waitForSync()
 
@@ -374,6 +415,22 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...DATA.UPLOADED_HIGHLIGHT_2(
                                                             secondAnnotationUrl,
+                                                        ),
+                                                        title:
+                                                            DATA.TEST_TAB_2
+                                                                .normalized,
+                                                    },
+                                                ],
+                                            }),
+                                        },
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    {
+                                                        ...DATA.UPLOADED_HIGHLIGHT_3(
+                                                            thirdAnnotationUrl,
                                                         ),
                                                         title:
                                                             DATA.TEST_TAB_2
@@ -1024,6 +1081,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     { tab: DATA.TEST_TAB_2 },
                                     DATA.ANNOT_2,
                                 )
+                                const thirdAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: DATA.TEST_TAB_2 },
+                                    DATA.ANNOT_3,
+                                )
                                 await setup.backgroundModules.readwise.setAPIKey(
                                     {
                                         validatedKey: 'my key',
@@ -1058,6 +1119,17 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                 highlights: [
                                                     DATA.UPLOADED_HIGHLIGHT_2(
                                                         secondAnnotationUrl,
+                                                    ),
+                                                ],
+                                            }),
+                                        },
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    DATA.UPLOADED_HIGHLIGHT_3(
+                                                        thirdAnnotationUrl,
                                                     ),
                                                 ],
                                             }),

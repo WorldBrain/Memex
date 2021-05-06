@@ -2,9 +2,14 @@ import { Annotation } from 'src/annotations/types'
 import { SaveAndRenderHighlightDeps } from 'src/highlighting/ui/highlight-interactions'
 import { AnnotationClickHandler } from './ui/types'
 
+export type SelectorDescriptorType =
+    | 'TextPositionSelector'
+    | 'RangeSelector'
+    | 'TextQuoteSelector'
+
 export interface Descriptor {
     strategy: string
-    content: any
+    content: any[]
 }
 
 export interface Anchor {

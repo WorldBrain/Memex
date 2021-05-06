@@ -1,4 +1,5 @@
 import { Annotation } from 'src/annotations/types'
+import { getAnchorSelector } from 'src/highlighting/utils'
 
 type SortableAnnotation = Pick<Annotation, 'selector' | 'createdWhen'>
 
@@ -18,14 +19,9 @@ export const sortByPagePosition: AnnotationsSorter = (a, b) => {
         return 100000
     }
 
-    const getTextPosSelector = (contentTypes = []): { start: number } =>
-        contentTypes.find(
-            (content) => content.type === 'TextPositionSelector',
-        ) ?? { start: 0 }
-
     return (
-        getTextPosSelector(a.selector.descriptor.content).start -
-        getTextPosSelector(b.selector.descriptor.content).start
+        getAnchorSelector(a.selector, 'TextPositionSelector').start -
+        getAnchorSelector(b.selector, 'TextPositionSelector').start
     )
 }
 

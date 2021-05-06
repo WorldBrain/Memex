@@ -26,6 +26,7 @@ import {
 } from 'src/util/webextensionRPC'
 import { Page } from 'src/search'
 import { isUrlForAnnotation } from 'src/annotations/utils'
+import { getAnchorSelector } from 'src/highlighting/utils'
 
 type ReadwiseInterfaceMethod<
     Method extends keyof ReadwiseInterface<'provider'>
@@ -354,12 +355,22 @@ function annotationToReadwise(
         return text
     }
 
+    let location = annotation.createdWhen.getTime()
+    if (annotation.selector) {
+        const selector = getAnchorSelector(
+            annotation.selector,
+            'TextPositionSelector',
+        )
+        location = selector.start
+    }
+
     return {
         title: options.pageData.fullTitle ?? options.pageData.url,
         source_url: options.pageData.fullUrl,
         source_type: 'article',
         note: formatNote(annotation),
-        location_type: 'time_offset',
+        location_type: 'page',
+        location,
         highlighted_at: annotation.createdWhen,
         text: annotation?.body?.length
             ? annotation.body
