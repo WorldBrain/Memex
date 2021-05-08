@@ -259,7 +259,7 @@
         "tslint": "^5.11.0",
         "tslint-config-prettier": "^1.14.0",
         "tslint-react": "^3.6.0",
-        "typeorm": "0.2.17",
+        "typeorm": "0.2.25",
         "typescript": "^3.8.3",
         "uglifyjs-webpack-plugin": "^1.2.7",
         "url-loader": "^1.0.1",
