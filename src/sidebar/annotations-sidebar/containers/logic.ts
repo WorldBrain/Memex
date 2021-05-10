@@ -70,6 +70,7 @@ export class SidebarContainerLogic extends UILogic<
 
     getInitialState(): SidebarContainerState {
         return {
+            notesType: 'private',
             loadState: 'pristine',
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',
@@ -226,6 +227,10 @@ export class SidebarContainerLogic extends UILogic<
 
         this.emitMutation({ showLoginModal: { $set: true } })
         return false
+    }
+
+    setNotesType: EventHandler<'setNotesType'> = ({ event }) => {
+        this.emitMutation({ notesType: { $set: event.notesType } })
     }
 
     show: EventHandler<'show'> = async () => {

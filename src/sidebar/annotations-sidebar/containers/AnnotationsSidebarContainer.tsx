@@ -14,6 +14,7 @@ import type {
     SidebarContainerState,
     SidebarContainerEvents,
     AnnotationEventContext,
+    SidebarNotesType,
 } from './types'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
@@ -33,6 +34,9 @@ import analytics from 'src/analytics'
 import { SortingDropdownMenuBtn } from '../components/SortingDropdownMenu'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
+import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { sidebarNotesTypeToString } from '../utils'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -458,6 +462,34 @@ export class AnnotationsSidebarContainer<
                                     </CloseBtn>
                                 </ButtonTooltip>
                             ))}
+                        <DropdownMenuBtn
+                            onMenuItemClick={(item) =>
+                                this.processEvent('setNotesType', {
+                                    notesType: item.id as SidebarNotesType,
+                                })
+                            }
+                            btnChildren={
+                                <NoteTypesWrapper>
+                                    {sidebarNotesTypeToString(
+                                        this.state.notesType,
+                                    )}{' '}
+                                    <Icon icon="triangle" height="10px" />
+                                </NoteTypesWrapper>
+                            }
+                            menuItems={[
+                                {
+                                    id: 'private',
+                                    name: sidebarNotesTypeToString('private'),
+                                    info: 'The notes you made on this page',
+                                },
+                                {
+                                    id: 'shared',
+                                    name: sidebarNotesTypeToString('shared'),
+                                    info:
+                                        'Notes shared with you via collections',
+                                },
+                            ]}
+                        />
                     </TopBarActionBtns>
                     <TopBarActionBtns>
                         <SortingDropdownMenuBtn
@@ -550,6 +582,12 @@ export class AnnotationsSidebarContainer<
     }
 }
 
+const NoteTypesWrapper = styled.div`
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+`
+
 const ShareMenuWrapper = styled.div`
     position: relative;
     left: 105px;
@@ -622,12 +660,6 @@ const TopBarActionBtns = styled.div`
     grid-auto-flow: column;
     grid-gap: 8px;
     height: 24px;
-
-    & * {
-        align-items: center;
-        display: flex;
-        justify-content: center;
-    }
 `
 
 const CloseBtn = styled.button`

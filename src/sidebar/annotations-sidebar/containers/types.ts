@@ -65,6 +65,7 @@ export interface EditForms {
 export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
 export type SearchType = 'notes' | 'page' | 'social'
 export type PageType = 'page' | 'all'
+export type SidebarNotesType = 'private' | 'shared'
 export interface SearchTypeChange {
     searchType?: 'notes' | 'page' | 'social'
     resultsSearchType?: 'notes' | 'page' | 'social'
@@ -77,6 +78,8 @@ export interface SidebarContainerState {
     secondarySearchState: TaskState
 
     showState: 'visible' | 'hidden'
+    notesType: SidebarNotesType
+    isLocked: boolean
 
     annotationSharingAccess: AnnotationSharingAccess
     annotationSharingInfo: {
@@ -139,6 +142,9 @@ export type SidebarContainerEvents = UIEvent<{
     unlock: null
 
     sortAnnotations: { sortingFn: AnnotationsSorter }
+
+    setNotesType: { notesType: SidebarNotesType }
+
     // Adding a new page comment
     addNewPageComment: { comment?: string; tags?: string[] }
     setNewPageCommentAnchor: { anchor: Anchor }
