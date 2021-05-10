@@ -19,11 +19,11 @@ import {
     tags,
 } from 'src/util/remote-functions-background'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
-import {
+import { INIT_FORM_STATE } from 'src/sidebar/annotations-sidebar/containers/logic'
+import type {
     EditForm,
     EditForms,
-    INIT_FORM_STATE,
-} from 'src/sidebar/annotations-sidebar/containers/logic'
+} from 'src/sidebar/annotations-sidebar/containers/types'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'

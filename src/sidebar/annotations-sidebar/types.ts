@@ -2,7 +2,6 @@ import TypedEventEmitter from 'typed-emitter'
 
 import { Highlight } from 'src/highlighting/types'
 import { ResultWithIndex } from 'src/overview/types'
-import { SidebarContainerState } from 'src/sidebar/annotations-sidebar/containers/logic'
 
 export interface Page {
     url?: string
@@ -21,12 +20,6 @@ export interface ResultsByUrl {
 }
 
 export { ResultWithIndex }
-
-export type StateSelector<ReturnType> = (
-    state: SidebarContainerState,
-) => ReturnType
-
-///
 
 export interface HighlighterEvents {
     renderHighlight: (args: { highlight: Highlight }) => void

@@ -7,12 +7,14 @@ import AnnotationsSidebar, {
 } from '../components/AnnotationsSidebar'
 import {
     SidebarContainerLogic,
-    SidebarContainerState,
-    SidebarContainerEvents,
     SidebarContainerOptions,
-    AnnotationEventContext,
     INIT_FORM_STATE,
 } from './logic'
+import type {
+    SidebarContainerState,
+    SidebarContainerEvents,
+    AnnotationEventContext,
+} from './types'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import { Annotation } from 'src/annotations/types'
