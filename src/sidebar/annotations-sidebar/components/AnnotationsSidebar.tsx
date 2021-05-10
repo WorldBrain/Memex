@@ -23,6 +23,7 @@ import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
+import { SidebarNotesType } from '../containers/types'
 
 export interface AnnotationsSidebarProps {
     annotationModes: { [url: string]: AnnotationMode }
@@ -55,6 +56,7 @@ export interface AnnotationsSidebarProps {
     activeCopyPasterAnnotationId?: string
     annotations: Annotation[]
     theme: Partial<SidebarTheme>
+    notesType: SidebarNotesType
 }
 
 interface AnnotationsSidebarState {
@@ -135,17 +137,11 @@ class AnnotationsSidebar extends React.Component<
         }
     }
 
-    render() {
-        return (
-            <>
-                {/* {this.renderSearchSection()} */}
-                {this.renderNewAnnotation()}
-                {this.renderResultsBody()}
-            </>
-        )
-    }
-
     private renderNewAnnotation() {
+        if (this.props.notesType === 'shared') {
+            return null
+        }
+
         return (
             <NewAnnotationSection>
                 <NewAnnotationBoxStyled>
@@ -159,19 +155,27 @@ class AnnotationsSidebar extends React.Component<
         )
     }
 
+    private renderSharedNotes() {
+        return null
+    }
+
     private renderResultsBody() {
+        if (this.props.isSearchLoading) {
+            return (
+                <LoadingIndicatorContainer>
+                    <LoadingIndicatorStyled />
+                </LoadingIndicatorContainer>
+            )
+        }
+
+        if (this.props.notesType === 'shared') {
+            return this.renderSharedNotes()
+        }
+
         return (
-            <>
-                {this.props.isSearchLoading ? (
-                    <LoadingIndicatorContainer>
-                        <LoadingIndicatorStyled />
-                    </LoadingIndicatorContainer>
-                ) : (
-                    <AnnotationsSectionStyled>
-                        {this.renderAnnotationsEditable()}
-                    </AnnotationsSectionStyled>
-                )}
-            </>
+            <AnnotationsSectionStyled>
+                {this.renderAnnotationsEditable()}
+            </AnnotationsSectionStyled>
         )
     }
 
@@ -225,6 +229,16 @@ class AnnotationsSidebar extends React.Component<
         }
 
         return annots
+    }
+
+    render() {
+        return (
+            <>
+                {/* {this.renderSearchSection()} */}
+                {this.renderNewAnnotation()}
+                {this.renderResultsBody()}
+            </>
+        )
     }
 }
 

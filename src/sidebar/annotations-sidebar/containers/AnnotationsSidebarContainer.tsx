@@ -491,31 +491,37 @@ export class AnnotationsSidebarContainer<
                             ]}
                         />
                     </TopBarActionBtns>
-                    <TopBarActionBtns>
-                        <SortingDropdownMenuBtn
-                            onMenuItemClick={({ sortingFn }) =>
-                                this.processEvent('sortAnnotations', {
-                                    sortingFn,
-                                })
-                            }
-                        />
-                        <ButtonTooltip
-                            tooltipText="Copy All Notes"
-                            position="bottomSidebar"
-                        >
-                            <ActionBtn onClick={this.handleCopyAllNotesClick}>
-                                <ActionIcon src={icons.copy} />
-                            </ActionBtn>
-                        </ButtonTooltip>
-                        <ButtonTooltip
-                            tooltipText="Share All Notes"
-                            position="bottomRightEdge"
-                        >
-                            <ActionBtn onClick={this.handleShareAllNotesClick}>
-                                <ActionIcon src={icons.shareEmpty} />
-                            </ActionBtn>
-                        </ButtonTooltip>
-                    </TopBarActionBtns>
+                    {this.state.notesType === 'private' && (
+                        <TopBarActionBtns>
+                            <SortingDropdownMenuBtn
+                                onMenuItemClick={({ sortingFn }) =>
+                                    this.processEvent('sortAnnotations', {
+                                        sortingFn,
+                                    })
+                                }
+                            />
+                            <ButtonTooltip
+                                tooltipText="Copy All Notes"
+                                position="bottomSidebar"
+                            >
+                                <ActionBtn
+                                    onClick={this.handleCopyAllNotesClick}
+                                >
+                                    <ActionIcon src={icons.copy} />
+                                </ActionBtn>
+                            </ButtonTooltip>
+                            <ButtonTooltip
+                                tooltipText="Share All Notes"
+                                position="bottomRightEdge"
+                            >
+                                <ActionBtn
+                                    onClick={this.handleShareAllNotesClick}
+                                >
+                                    <ActionIcon src={icons.shareEmpty} />
+                                </ActionBtn>
+                            </ButtonTooltip>
+                        </TopBarActionBtns>
+                    )}
                 </TopBarContainerStyled>
                 {this.renderAllNotesCopyPaster()}
                 {this.renderAllNotesShareMenu()}

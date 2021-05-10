@@ -117,6 +117,7 @@ async function createDependencies() {
         }),
         handleScrollPagination: () => undefined,
         onClickOutside: action('clickOutside'),
+        notesType: 'private',
         annotations,
         theme: {},
     }
