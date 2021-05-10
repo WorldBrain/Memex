@@ -2,6 +2,7 @@ import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import styled, { css } from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import AnnotationCreate, {
@@ -23,14 +24,13 @@ import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
-import { SidebarNotesType } from '../containers/types'
+import { SidebarContainerState } from '../containers/types'
 
-export interface AnnotationsSidebarProps {
+export interface AnnotationsSidebarProps
+    extends Omit<SidebarContainerState, 'annotationModes'> {
     annotationModes: { [url: string]: AnnotationMode }
     annotationSharingInfo: { [annotationUrl: string]: AnnotationSharingInfo }
 
-    showCongratsMessage?: boolean
-    activeAnnotationUrl?: string | null
     setActiveAnnotationUrl?: (url: string) => React.MouseEventHandler
     needsWaypoint?: boolean
     appendLoader?: boolean
@@ -53,10 +53,8 @@ export interface AnnotationsSidebarProps {
     sharingAccess: AnnotationSharingAccess
     isSearchLoading: boolean
     isAnnotationCreateShown: boolean
-    activeCopyPasterAnnotationId?: string
     annotations: Annotation[]
     theme: Partial<SidebarTheme>
-    notesType: SidebarNotesType
 }
 
 interface AnnotationsSidebarState {
@@ -155,21 +153,55 @@ class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderSharedNotes() {
+    private renderLoader = (key?: string) => (
+        <LoadingIndicatorContainer key={key}>
+            <LoadingIndicatorStyled />
+        </LoadingIndicatorContainer>
+    )
+
+    private renderFollowedListNotes(listId: string) {
+        if (this.props.listNoteLoadStates[listId] === 'running') {
+            return this.renderLoader()
+        }
+
         return null
+    }
+
+    private renderSharedNotesByList() {
+        if (this.props.followedListLoadState === 'running') {
+            return this.renderLoader()
+        }
+
+        return (
+            <FollowedListsContainer>
+                {this.props.followedLists.map((list) => (
+                    <React.Fragment key={list.id}>
+                        <FollowedListRow>
+                            <FollowedListTitleContainer>
+                                <FollowedListTitle>
+                                    {list.name}
+                                </FollowedListTitle>
+                                <FollowedListNoteCount>
+                                    {list.notesCount}
+                                </FollowedListNoteCount>
+                                <Icon icon="triangle" height="10px" />
+                            </FollowedListTitleContainer>
+                            <Icon icon="goTo" height="10px" />
+                        </FollowedListRow>
+                        {this.renderFollowedListNotes(list.id)}
+                    </React.Fragment>
+                ))}
+            </FollowedListsContainer>
+        )
     }
 
     private renderResultsBody() {
         if (this.props.isSearchLoading) {
-            return (
-                <LoadingIndicatorContainer>
-                    <LoadingIndicatorStyled />
-                </LoadingIndicatorContainer>
-            )
+            return this.renderLoader()
         }
 
         if (this.props.notesType === 'shared') {
-            return this.renderSharedNotes()
+            return this.renderSharedNotesByList()
         }
 
         return (
@@ -217,11 +249,7 @@ class AnnotationsSidebar extends React.Component<
         }
 
         if (this.props.appendLoader) {
-            annots.push(
-                <LoadingIndicatorContainer key="sidebar-pagination-spinner">
-                    <LoadingIndicator />
-                </LoadingIndicatorContainer>,
-            )
+            annots.push(this.renderLoader('sidebar-pagination-spinner'))
         }
 
         if (this.props.showCongratsMessage) {
@@ -292,6 +320,33 @@ const SearchInputStyled = styled(TextInputControlled)`
         box-shadow: none;
     }
     padding: 5px 0px;
+`
+
+const FollowedListsContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+`
+
+const FollowedListRow = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+`
+
+const FollowedListTitleContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+`
+
+const FollowedListTitle = styled.span`
+    font-weight: bold;
+`
+
+const FollowedListNoteCount = styled.span`
+    font-weight: bold;
 `
 
 const CloseIconStyled = styled.div`

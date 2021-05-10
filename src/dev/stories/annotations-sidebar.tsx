@@ -66,7 +66,7 @@ async function createDependencies() {
         },
     ]
 
-    const sidebarDependencies: AnnotationsSidebarProps = {
+    const sidebarDependencies: any = {
         renderShareMenuForAnnotation: () => null,
         renderCopyPasterForAnnotation: () => null,
         renderTagsPickerForAnnotation: () => null,
