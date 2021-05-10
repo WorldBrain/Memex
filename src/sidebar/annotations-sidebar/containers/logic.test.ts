@@ -815,4 +815,32 @@ describe('SidebarContainerLogic', () => {
             })
         })
     })
+
+    describe('followed lists + annotations', () => {
+        it('should be able to set notes type + trigger followed list load', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({ device })
+
+            device.backgroundModules.customLists.remoteFunctions.fetchAllFollowedLists = async () =>
+                DATA.FOLLOWED_LISTS
+
+            expect(sidebar.state.notesType).toEqual('private')
+            expect(sidebar.state.followedListLoadState).toEqual('pristine')
+            expect(sidebar.state.followedLists).toEqual([])
+
+            await sidebar.processEvent('setNotesType', { notesType: 'shared' })
+
+            expect(sidebar.state.notesType).toEqual('shared')
+            expect(sidebar.state.followedListLoadState).toEqual('success')
+            expect(sidebar.state.followedLists).toEqual(
+                DATA.FOLLOWED_LISTS.map((list) => ({
+                    id: list.remoteId,
+                    name: list.name,
+                    notesCount: 0, // TODO: implement this
+                    isExpanded: false,
+                })),
+            )
+        })
+    })
 })

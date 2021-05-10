@@ -74,6 +74,11 @@ export class SidebarContainerLogic extends UILogic<
             loadState: 'pristine',
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',
+            followedListLoadState: 'pristine',
+            listNoteLoadStates: {},
+
+            followedLists: [],
+            listNotes: {},
 
             isLocked: false,
             pageUrl: this.options.pageUrl,
@@ -229,8 +234,21 @@ export class SidebarContainerLogic extends UILogic<
         return false
     }
 
-    setNotesType: EventHandler<'setNotesType'> = ({ event }) => {
+    setNotesType: EventHandler<'setNotesType'> = async ({
+        event,
+        previousState,
+    }) => {
         this.emitMutation({ notesType: { $set: event.notesType } })
+
+        if (
+            event.notesType === 'shared' &&
+            previousState.followedListLoadState === 'pristine'
+        ) {
+            await this.processUIEvent('loadFollowedLists', {
+                previousState,
+                event: null,
+            })
+        }
     }
 
     show: EventHandler<'show'> = async () => {
@@ -772,6 +790,51 @@ export class SidebarContainerLogic extends UILogic<
     fetchSuggestedDomains: EventHandler<'fetchSuggestedDomains'> = (
         incoming,
     ) => {}
+
+    loadFollowedLists: EventHandler<'loadFollowedLists'> = async () => {
+        const { customLists } = this.options
+
+        await executeUITask(this, 'followedListLoadState', async () => {
+            const followedLists = await customLists.fetchAllFollowedLists({
+                limit: 1000,
+            })
+
+            this.emitMutation({
+                followedLists: {
+                    $set: followedLists.map((list) => ({
+                        id: list.remoteId,
+                        name: list.name,
+                        notesCount: 0, // TODO: implement this
+                        isExpanded: false,
+                    })),
+                },
+            })
+        })
+    }
+
+    loadFollowedListNotes: EventHandler<'loadFollowedListNotes'> = async ({
+        event,
+    }) => {
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listNoteLoadStates: {
+                    [event.listId]: { $set: taskState },
+                },
+            }),
+            async () => {
+                const notes = [] // TODO: implement this
+
+                this.emitMutation({
+                    listNotes: {
+                        [event.listId]: {
+                            $set: notes,
+                        },
+                    },
+                })
+            },
+        )
+    }
 
     toggleAllAnnotationsFold: EventHandler<'toggleAllAnnotationsFold'> = (
         incoming,

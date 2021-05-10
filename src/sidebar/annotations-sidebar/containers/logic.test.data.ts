@@ -1,4 +1,5 @@
-import { Annotation } from 'src/annotations/types'
+import type { Annotation } from 'src/annotations/types'
+import type { PageList } from 'src/custom-lists/background/types'
 
 export const PAGE_URL_1 = 'https://test.com'
 export const COMMENT_1 = 'This is a test comment'
@@ -17,3 +18,21 @@ export const ANNOT_1: Annotation = {
     selector: {} as any,
     tags: [],
 }
+
+export const FOLLOWED_LISTS: PageList[] = [
+    {
+        id: 1,
+        name: 'test a',
+        remoteId: 'test a',
+    },
+    {
+        id: 2,
+        name: 'test b',
+        remoteId: 'test b',
+    },
+    {
+        id: 3,
+        name: 'test c',
+        remoteId: 'test c',
+    },
+]

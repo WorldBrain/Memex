@@ -72,7 +72,23 @@ export interface SearchTypeChange {
     pageType?: 'page' | 'all'
 }
 
-export interface SidebarContainerState {
+interface SidebarFollowedListsState {
+    followedListLoadState: TaskState
+    listNoteLoadStates: { [listId: string]: TaskState }
+
+    followedLists: Array<{
+        id: string
+        name: string
+        notesCount: number
+        isExpanded: boolean
+    }>
+
+    listNotes: {
+        [listId: string]: any[]
+    }
+}
+
+export interface SidebarContainerState extends SidebarFollowedListsState {
     loadState: TaskState
     primarySearchState: TaskState
     secondarySearchState: TaskState
@@ -209,6 +225,10 @@ export type SidebarContainerEvents = UIEvent<{
     toggleAllAnnotationsFold: null
     fetchSuggestedTags: null
     fetchSuggestedDomains: null
+
+    // Followed lists
+    loadFollowedLists: null
+    loadFollowedListNotes: { listId: string }
 
     updateAnnotationShareInfo: {
         annotationUrl: string
