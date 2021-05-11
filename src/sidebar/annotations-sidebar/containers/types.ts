@@ -19,6 +19,7 @@ import type { AnnotationsSorter } from '../sorting'
 import type { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
 import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import type { Anchor } from 'src/highlighting/types'
+import { NormalizedState } from 'src/common-ui/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -74,17 +75,33 @@ export interface SearchTypeChange {
 
 interface SidebarFollowedListsState {
     followedListLoadState: TaskState
-    listNoteLoadStates: { [listId: string]: TaskState }
 
-    followedLists: Array<{
+    followedLists: NormalizedState<{
         id: string
         name: string
+        noteIds: string[]
         notesCount: number
         isExpanded: boolean
+        loadState: TaskState
     }>
 
-    listNotes: {
-        [listId: string]: any[]
+    followedNotes: {
+        [noteId: string]: {
+            id: string
+            body?: string
+            comment?: string
+            selector?: Anchor
+            createdWhen: number
+            updatedWhen?: number
+            creatorId: string
+        }
+    }
+
+    users: {
+        [userId: string]: {
+            name: string
+            profileImgSrc: string
+        }
     }
 }
 
@@ -229,6 +246,7 @@ export type SidebarContainerEvents = UIEvent<{
     // Followed lists
     loadFollowedLists: null
     loadFollowedListNotes: { listId: string }
+    expandFollowedListNotes: { listId: string }
 
     updateAnnotationShareInfo: {
         annotationUrl: string

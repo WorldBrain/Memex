@@ -1,3 +1,4 @@
+import fromPairs from 'lodash/fromPairs'
 import debounce from 'lodash/debounce'
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { isFullUrl } from '@worldbrain/memex-url-utils'
@@ -22,6 +23,7 @@ import {
 import { areTagsEquivalent } from 'src/tags/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { CachedAnnotation } from 'src/annotations/annotations-cache'
+import { initNormalizedState } from 'src/common-ui/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -75,10 +77,10 @@ export class SidebarContainerLogic extends UILogic<
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',
             followedListLoadState: 'pristine',
-            listNoteLoadStates: {},
 
-            followedLists: [],
-            listNotes: {},
+            followedLists: initNormalizedState(),
+            followedNotes: {},
+            users: {},
 
             isLocked: false,
             pageUrl: this.options.pageUrl,
@@ -238,14 +240,18 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        this.emitMutation({ notesType: { $set: event.notesType } })
+        const mutation: UIMutation<SidebarContainerState> = {
+            notesType: { $set: event.notesType },
+        }
+
+        this.emitMutation(mutation)
 
         if (
             event.notesType === 'shared' &&
             previousState.followedListLoadState === 'pristine'
         ) {
             await this.processUIEvent('loadFollowedLists', {
-                previousState,
+                previousState: this.withMutation(previousState, mutation),
                 event: null,
             })
         }
@@ -801,12 +807,22 @@ export class SidebarContainerLogic extends UILogic<
 
             this.emitMutation({
                 followedLists: {
-                    $set: followedLists.map((list) => ({
-                        id: list.remoteId,
-                        name: list.name,
-                        notesCount: 0, // TODO: implement this
-                        isExpanded: false,
-                    })),
+                    allIds: {
+                        $set: followedLists.map((list) => list.remoteId),
+                    },
+                    byId: {
+                        $set: fromPairs(
+                            followedLists.map((list) => [
+                                list.remoteId,
+                                {
+                                    id: list.remoteId,
+                                    name: list.name,
+                                    notesCount: 0, // TODO: implement this
+                                    isExpanded: false,
+                                },
+                            ]),
+                        ),
+                    },
                 },
             })
         })
@@ -818,17 +834,21 @@ export class SidebarContainerLogic extends UILogic<
         await executeUITask(
             this,
             (taskState) => ({
-                listNoteLoadStates: {
-                    [event.listId]: { $set: taskState },
+                followedLists: {
+                    byId: {
+                        [event.listId]: { loadState: { $set: taskState } },
+                    },
                 },
             }),
             async () => {
                 const notes = [] // TODO: implement this
 
                 this.emitMutation({
-                    listNotes: {
-                        [event.listId]: {
-                            $set: notes,
+                    followedLists: {
+                        byId: {
+                            [event.listId]: {
+                                noteIds: { $set: notes.map((note) => note.id) },
+                            },
                         },
                     },
                 })

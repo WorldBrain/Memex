@@ -40,6 +40,8 @@ export interface AnnotationsSidebarProps
     renderTagsPickerForAnnotation: (id: string) => JSX.Element
     renderShareMenuForAnnotation: (id: string) => JSX.Element
 
+    expandFollowedListNotes: (listId: string) => void
+
     onClickOutside: React.MouseEventHandler
     bindAnnotationFooterEventProps: (
         annotation: Annotation,
@@ -160,11 +162,16 @@ class AnnotationsSidebar extends React.Component<
     )
 
     private renderFollowedListNotes(listId: string) {
-        if (this.props.listNoteLoadStates[listId] === 'running') {
+        const list = this.props.followedLists.byId[listId]
+        if (!list.isExpanded) {
+            return null
+        }
+
+        if (list.loadState === 'running') {
             return this.renderLoader()
         }
 
-        return null
+        return 'TODO: add notes here'
     }
 
     private renderSharedNotesByList() {
@@ -174,23 +181,34 @@ class AnnotationsSidebar extends React.Component<
 
         return (
             <FollowedListsContainer>
-                {this.props.followedLists.map((list) => (
-                    <React.Fragment key={list.id}>
-                        <FollowedListRow>
-                            <FollowedListTitleContainer>
-                                <FollowedListTitle>
-                                    {list.name}
-                                </FollowedListTitle>
-                                <FollowedListNoteCount>
-                                    {list.notesCount}
-                                </FollowedListNoteCount>
-                                <Icon icon="triangle" height="10px" />
-                            </FollowedListTitleContainer>
-                            <Icon icon="goTo" height="10px" />
-                        </FollowedListRow>
-                        {this.renderFollowedListNotes(list.id)}
-                    </React.Fragment>
-                ))}
+                {this.props.followedLists.allIds.map((listId) => {
+                    const list = this.props.followedLists.byId[listId]
+                    return (
+                        <React.Fragment key={listId}>
+                            <FollowedListRow>
+                                <FollowedListTitleContainer>
+                                    <FollowedListTitle>
+                                        {list.name}
+                                    </FollowedListTitle>
+                                    <FollowedListNoteCount>
+                                        {list.notesCount}
+                                    </FollowedListNoteCount>
+                                    <Icon
+                                        icon="triangle"
+                                        height="10px"
+                                        onClick={() =>
+                                            this.props.expandFollowedListNotes(
+                                                listId,
+                                            )
+                                        }
+                                    />
+                                </FollowedListTitleContainer>
+                                <Icon icon="goTo" height="10px" />
+                            </FollowedListRow>
+                            {this.renderFollowedListNotes(listId)}
+                        </React.Fragment>
+                    )
+                })}
             </FollowedListsContainer>
         )
     }

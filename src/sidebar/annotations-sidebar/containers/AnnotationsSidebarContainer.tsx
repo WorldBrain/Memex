@@ -580,6 +580,11 @@ export class AnnotationsSidebarContainer<
                         renderTagsPickerForAnnotation={
                             this.renderTagPickerForAnnotation
                         }
+                        expandFollowedListNotes={(listId) =>
+                            this.processEvent('expandFollowedListNotes', {
+                                listId,
+                            })
+                        }
                     />
                 </ContainerStyled>
                 {this.renderModals()}
