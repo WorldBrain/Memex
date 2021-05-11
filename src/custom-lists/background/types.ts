@@ -1,3 +1,9 @@
+import {
+    SharedAnnotation,
+    SharedAnnotationReference,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
+import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+
 export interface PageList {
     id: number
     name: string
@@ -55,6 +61,17 @@ export interface RemoteCollectionsInterface {
     }): Promise<void>
     removeList(args: { id: number }): Promise<any>
     removePageFromList(args: { id: number; url: string }): Promise<void>
+    fetchAnnotationsInFollowedListForPage(args: {
+        sharedList: string
+        normalizedPageUrl: string
+    }): Promise<
+        Array<
+            SharedAnnotation & {
+                reference: SharedAnnotationReference
+                creatorReference: UserReference
+            }
+        >
+    >
     fetchAllFollowedLists(args: {
         skip?: number
         limit?: number

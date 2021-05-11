@@ -817,8 +817,10 @@ export class SidebarContainerLogic extends UILogic<
                                 {
                                     id: list.remoteId,
                                     name: list.name,
+                                    noteIds: [],
                                     notesCount: 0, // TODO: implement this
                                     isExpanded: false,
+                                    loadState: 'pristine',
                                 },
                             ]),
                         ),
@@ -828,9 +830,40 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    expandFollowedListNotes: EventHandler<'expandFollowedListNotes'> = async ({
+        event,
+        previousState,
+    }) => {
+        const {
+            isExpanded: wasExpanded,
+            loadState,
+        } = previousState.followedLists.byId[event.listId]
+
+        const mutation: UIMutation<SidebarContainerState> = {
+            followedLists: {
+                byId: {
+                    [event.listId]: {
+                        isExpanded: { $set: !wasExpanded },
+                    },
+                },
+            },
+        }
+        this.emitMutation(mutation)
+
+        if (!wasExpanded && loadState === 'pristine') {
+            await this.processUIEvent('loadFollowedListNotes', {
+                event,
+                previousState: this.withMutation(previousState, mutation),
+            })
+        }
+    }
+
     loadFollowedListNotes: EventHandler<'loadFollowedListNotes'> = async ({
         event,
+        previousState,
     }) => {
+        const { customLists } = this.options
+
         await executeUITask(
             this,
             (taskState) => ({
@@ -841,15 +874,40 @@ export class SidebarContainerLogic extends UILogic<
                 },
             }),
             async () => {
-                const notes = [] // TODO: implement this
+                const notes = await customLists.fetchAnnotationsInFollowedListForPage(
+                    {
+                        sharedList: event.listId,
+                        normalizedPageUrl: previousState.pageUrl,
+                    },
+                )
 
                 this.emitMutation({
                     followedLists: {
                         byId: {
                             [event.listId]: {
-                                noteIds: { $set: notes.map((note) => note.id) },
+                                noteIds: {
+                                    $set: notes.map(
+                                        (note) => note.reference.id as string,
+                                    ),
+                                },
                             },
                         },
+                    },
+                    followedNotes: {
+                        $merge: fromPairs(
+                            notes.map((note) => [
+                                note.reference.id,
+                                {
+                                    id: note.reference.id,
+                                    body: note.body,
+                                    comment: note.comment,
+                                    selector: note.selector,
+                                    createdWhen: note.createdWhen,
+                                    updatedWhen: note.updatedWhen,
+                                    creatorId: note.creatorReference.id,
+                                },
+                            ]),
+                        ),
                     },
                 })
             },

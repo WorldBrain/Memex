@@ -69,6 +69,8 @@ export default class CustomListBackground {
             fetchAllLists: this.fetchAllLists,
             fetchAllFollowedLists: this.fetchAllFollowedLists,
             fetchListById: this.fetchListById,
+            fetchAnnotationsInFollowedListForPage: this
+                .fetchAnnotationsInFollowedListForPage,
             fetchListPagesByUrl: this.fetchListPagesByUrl,
             fetchListIdsByUrl: this.fetchListIdsByUrl,
             fetchInitialListSuggestions: this.fetchInitialListSuggestions,
@@ -90,6 +92,26 @@ export default class CustomListBackground {
 
     generateListId() {
         return Date.now()
+    }
+
+    fetchAnnotationsInFollowedListForPage: RemoteCollectionsInterface['fetchAnnotationsInFollowedListForPage'] = async ({
+        normalizedPageUrl,
+        sharedList,
+    }) => {
+        const { auth } = this.options.services
+        const { contentSharing } = await this.options.getServerStorage()
+
+        const currentUser = await auth.getCurrentUser()
+        if (!currentUser) {
+            return []
+        }
+
+        const annotations = await contentSharing.getAnnotationsForPagesInList({
+            listReference: { type: 'shared-list-reference', id: sharedList },
+            normalizedPageUrls: [normalizedPageUrl],
+        })
+
+        return annotations[normalizedPageUrl].map((obj) => obj.annotation)
     }
 
     fetchAllFollowedLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async ({

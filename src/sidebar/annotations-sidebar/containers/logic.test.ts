@@ -1,5 +1,5 @@
 // tslint:disable:forin
-import mapValues from 'lodash/mapValues'
+import fromPairs from 'lodash/fromPairs'
 
 import { FakeAnalytics } from 'src/analytics/mock'
 import { SidebarContainerLogic, createEditFormsForAnnotations } from './logic'
@@ -827,19 +827,82 @@ describe('SidebarContainerLogic', () => {
 
             expect(sidebar.state.notesType).toEqual('private')
             expect(sidebar.state.followedListLoadState).toEqual('pristine')
-            expect(sidebar.state.followedLists).toEqual([])
+            expect(sidebar.state.followedLists).toEqual({
+                allIds: [],
+                byId: {},
+            })
 
             await sidebar.processEvent('setNotesType', { notesType: 'shared' })
 
             expect(sidebar.state.notesType).toEqual('shared')
             expect(sidebar.state.followedListLoadState).toEqual('success')
-            expect(sidebar.state.followedLists).toEqual(
-                DATA.FOLLOWED_LISTS.map((list) => ({
-                    id: list.remoteId,
-                    name: list.name,
-                    notesCount: 0, // TODO: implement this
-                    isExpanded: false,
-                })),
+            expect(sidebar.state.followedLists).toEqual({
+                allIds: DATA.FOLLOWED_LISTS.map((list) => list.remoteId),
+                byId: fromPairs(
+                    DATA.FOLLOWED_LISTS.map((list) => [
+                        list.remoteId,
+                        {
+                            id: list.remoteId,
+                            name: list.name,
+                            notesCount: 0, // TODO: implement this
+                            noteIds: [],
+                            loadState: 'pristine',
+                            isExpanded: false,
+                        },
+                    ]),
+                ),
+            })
+        })
+
+        it('should be able to expand notes for a followed list + trigger notes load', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({ device })
+
+            device.backgroundModules.customLists.remoteFunctions.fetchAllFollowedLists = async () =>
+                DATA.FOLLOWED_LISTS
+            device.backgroundModules.customLists.remoteFunctions.fetchAnnotationsInFollowedListForPage = async () =>
+                DATA.SHARED_ANNOTATIONS
+
+            await sidebar.processEvent('setNotesType', { notesType: 'shared' })
+
+            const listId = DATA.FOLLOWED_LISTS[0].remoteId
+            expect(sidebar.state.followedLists.byId[listId].isExpanded).toEqual(
+                false,
+            )
+            expect(sidebar.state.followedLists.byId[listId].loadState).toEqual(
+                'pristine',
+            )
+            expect(sidebar.state.followedLists.byId[listId].noteIds).toEqual([])
+
+            await sidebar.processEvent('expandFollowedListNotes', {
+                listId: DATA.FOLLOWED_LISTS[0].remoteId,
+            })
+
+            expect(sidebar.state.followedLists.byId[listId].isExpanded).toEqual(
+                true,
+            )
+            expect(sidebar.state.followedLists.byId[listId].loadState).toEqual(
+                'success',
+            )
+            expect(sidebar.state.followedLists.byId[listId].noteIds).toEqual(
+                DATA.SHARED_ANNOTATIONS.map((a) => a.reference.id),
+            )
+            expect(sidebar.state.followedNotes).toEqual(
+                fromPairs(
+                    DATA.SHARED_ANNOTATIONS.map((note) => [
+                        note.reference.id,
+                        {
+                            id: note.reference.id,
+                            body: note.body,
+                            comment: note.comment,
+                            selector: note.selector,
+                            createdWhen: note.createdWhen,
+                            updatedWhen: note.updatedWhen,
+                            creatorId: note.creatorReference.id,
+                        },
+                    ]),
+                ),
             )
         })
     })

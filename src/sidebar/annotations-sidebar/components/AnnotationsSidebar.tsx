@@ -171,7 +171,25 @@ class AnnotationsSidebar extends React.Component<
             return this.renderLoader()
         }
 
-        return 'TODO: add notes here'
+        if (!list.noteIds.length) {
+            return 'No notes exist in this list for this page'
+        }
+
+        return (
+            <FollowedNotesContainer>
+                {list.noteIds.map((noteId) => {
+                    const noteData = this.props.followedNotes[noteId]
+
+                    return (
+                        <div>
+                            <div>{noteData.body}</div>
+                            <div>{noteData.comment}</div>
+                            <div>created: {noteData.createdWhen}</div>
+                        </div>
+                    )
+                })}
+            </FollowedNotesContainer>
+        )
     }
 
     private renderSharedNotesByList() {
@@ -182,16 +200,16 @@ class AnnotationsSidebar extends React.Component<
         return (
             <FollowedListsContainer>
                 {this.props.followedLists.allIds.map((listId) => {
-                    const list = this.props.followedLists.byId[listId]
+                    const listData = this.props.followedLists.byId[listId]
                     return (
                         <React.Fragment key={listId}>
                             <FollowedListRow>
                                 <FollowedListTitleContainer>
                                     <FollowedListTitle>
-                                        {list.name}
+                                        {listData.name}
                                     </FollowedListTitle>
                                     <FollowedListNoteCount>
-                                        {list.notesCount}
+                                        {listData.notesCount}
                                     </FollowedListNoteCount>
                                     <Icon
                                         icon="triangle"
@@ -338,6 +356,11 @@ const SearchInputStyled = styled(TextInputControlled)`
         box-shadow: none;
     }
     padding: 5px 0px;
+`
+
+const FollowedNotesContainer = styled.div`
+    display: flex;
+    flex-direction: column;
 `
 
 const FollowedListsContainer = styled.div`
