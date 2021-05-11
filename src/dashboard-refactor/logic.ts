@@ -24,6 +24,7 @@ import { DisableableState } from './header/sync-status-menu/types'
 import { DRAG_EL_ID } from './components/DragElement'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
+import { mergeNormalizedStates } from 'src/common-ui/utils'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -472,17 +473,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                               },
                               pageData: {
                                   $apply: (prev) =>
-                                      utils.mergeNormalizedStates(
-                                          prev,
-                                          pageData,
-                                      ),
+                                      mergeNormalizedStates(prev, pageData),
                               },
                               noteData: {
                                   $apply: (prev) =>
-                                      utils.mergeNormalizedStates(
-                                          prev,
-                                          noteData,
-                                      ),
+                                      mergeNormalizedStates(prev, noteData),
                               },
                               areResultsExhausted: { $set: resultsExhausted },
                               noResultsType: { $set: noResultsType },

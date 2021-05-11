@@ -15,6 +15,7 @@ import {
 import { Anchor } from 'src/highlighting/types'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import type { AnalyticsEvents } from 'src/analytics/types'
+import { NormalizedState } from 'src/common-ui/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -87,11 +88,6 @@ export type SearchResultToState = (
 
 export type SearchType = 'pages' | 'notes'
 export type NotesType = 'search' | 'user' | 'followed'
-
-export interface NormalizedState<T> {
-    allIds: string[]
-    byId: { [id: string]: T }
-}
 
 export interface NoteFormState {
     isTagPickerShown: boolean
