@@ -1,7 +1,7 @@
 import fromPairs from 'lodash/fromPairs'
 import debounce from 'lodash/debounce'
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
-import { isFullUrl } from '@worldbrain/memex-url-utils'
+import { isFullUrl, normalizeUrl } from '@worldbrain/memex-url-utils'
 import { EventEmitter } from 'events'
 
 import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
@@ -79,7 +79,7 @@ export class SidebarContainerLogic extends UILogic<
             followedListLoadState: 'pristine',
 
             followedLists: initNormalizedState(),
-            followedNotes: {},
+            followedAnnotations: {},
             users: {},
 
             isLocked: false,
@@ -797,28 +797,32 @@ export class SidebarContainerLogic extends UILogic<
         incoming,
     ) => {}
 
-    loadFollowedLists: EventHandler<'loadFollowedLists'> = async () => {
-        const { customLists } = this.options
+    loadFollowedLists: EventHandler<'loadFollowedLists'> = async ({
+        previousState,
+    }) => {
+        const { customLists, pageUrl } = this.options
 
         await executeUITask(this, 'followedListLoadState', async () => {
-            const followedLists = await customLists.fetchAllFollowedLists({
-                limit: 1000,
-            })
+            const followedLists = await customLists.fetchFollowedListsWithAnnotations(
+                {
+                    normalizedPageUrl: normalizeUrl(
+                        previousState.pageUrl ?? pageUrl,
+                    ),
+                },
+            )
 
             this.emitMutation({
                 followedLists: {
                     allIds: {
-                        $set: followedLists.map((list) => list.remoteId),
+                        $set: followedLists.map((list) => list.id),
                     },
                     byId: {
                         $set: fromPairs(
                             followedLists.map((list) => [
-                                list.remoteId,
+                                list.id,
                                 {
-                                    id: list.remoteId,
-                                    name: list.name,
-                                    noteIds: [],
-                                    notesCount: 0, // TODO: implement this
+                                    ...list,
+                                    annotationIds: [],
                                     isExpanded: false,
                                     loadState: 'pristine',
                                 },
@@ -885,7 +889,7 @@ export class SidebarContainerLogic extends UILogic<
                     followedLists: {
                         byId: {
                             [event.listId]: {
-                                noteIds: {
+                                annotationIds: {
                                     $set: notes.map(
                                         (note) => note.reference.id as string,
                                     ),
@@ -893,7 +897,7 @@ export class SidebarContainerLogic extends UILogic<
                             },
                         },
                     },
-                    followedNotes: {
+                    followedAnnotations: {
                         $merge: fromPairs(
                             notes.map((note) => [
                                 note.reference.id,

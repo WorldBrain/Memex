@@ -171,14 +171,14 @@ class AnnotationsSidebar extends React.Component<
             return this.renderLoader()
         }
 
-        if (!list.noteIds.length) {
+        if (!list.annotationIds.length) {
             return 'No notes exist in this list for this page'
         }
 
         return (
             <FollowedNotesContainer>
-                {list.noteIds.map((noteId) => {
-                    const noteData = this.props.followedNotes[noteId]
+                {list.annotationIds.map((noteId) => {
+                    const noteData = this.props.followedAnnotations[noteId]
 
                     return (
                         <div>
@@ -209,7 +209,7 @@ class AnnotationsSidebar extends React.Component<
                                         {listData.name}
                                     </FollowedListTitle>
                                     <FollowedListNoteCount>
-                                        {listData.notesCount}
+                                        {listData.annotationsCount}
                                     </FollowedListNoteCount>
                                     <Icon
                                         icon="triangle"

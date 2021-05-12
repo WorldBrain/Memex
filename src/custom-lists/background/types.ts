@@ -23,6 +23,12 @@ export interface PageListEntry {
     fullUrl: string
 }
 
+export interface FollowedSharedList {
+    id: string
+    name: string
+    annotationsCount: number
+}
+
 export interface Tab {
     tabId: number
     url: string
@@ -76,6 +82,9 @@ export interface RemoteCollectionsInterface {
         skip?: number
         limit?: number
     }): Promise<PageList[]>
+    fetchFollowedListsWithAnnotations(args: {
+        normalizedPageUrl: string
+    }): Promise<FollowedSharedList[]>
     fetchAllLists(args: {
         skip?: number
         limit?: number

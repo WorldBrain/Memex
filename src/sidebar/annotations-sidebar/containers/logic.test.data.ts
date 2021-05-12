@@ -1,5 +1,5 @@
 import type { Annotation } from 'src/annotations/types'
-import type { PageList } from 'src/custom-lists/background/types'
+import type { FollowedSharedList } from 'src/custom-lists/background/types'
 import {
     SharedAnnotation,
     SharedAnnotationReference,
@@ -24,21 +24,21 @@ export const ANNOT_1: Annotation = {
     tags: [],
 }
 
-export const FOLLOWED_LISTS: PageList[] = [
+export const FOLLOWED_LISTS: FollowedSharedList[] = [
     {
-        id: 1,
+        id: 'test a',
         name: 'test a',
-        remoteId: 'test a',
+        annotationsCount: 3,
     },
     {
-        id: 2,
+        id: 'test b',
         name: 'test b',
-        remoteId: 'test b',
+        annotationsCount: 3,
     },
     {
-        id: 3,
+        id: 'test c',
         name: 'test c',
-        remoteId: 'test c',
+        annotationsCount: 3,
     },
 ]
 

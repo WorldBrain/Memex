@@ -1,7 +1,10 @@
 import { UIEvent } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import {
+    RemoteCollectionsInterface,
+    FollowedSharedList,
+} from 'src/custom-lists/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 import { SidebarTheme } from '../types'
@@ -76,17 +79,16 @@ export interface SearchTypeChange {
 interface SidebarFollowedListsState {
     followedListLoadState: TaskState
 
-    followedLists: NormalizedState<{
-        id: string
-        name: string
-        noteIds: string[]
-        notesCount: number
-        isExpanded: boolean
-        loadState: TaskState
-    }>
+    followedLists: NormalizedState<
+        FollowedSharedList & {
+            isExpanded: boolean
+            loadState: TaskState
+            annotationIds: string[]
+        }
+    >
 
-    followedNotes: {
-        [noteId: string]: {
+    followedAnnotations: {
+        [annotationId: string]: {
             id: string
             body?: string
             comment?: string
