@@ -368,9 +368,9 @@ export default class AnnotationEditable extends React.Component<Props> {
                 <DefaultFooterStyled>
                     {creatorDeps && (
                         <CreatorContainer>
-                            <CreatorProfileImg
+                            {/*<CreatorProfileImg
                                 src={creatorDeps.profileImgSrc}
-                            />
+                            />*/}
                             <CreatorName>{creatorDeps.name}</CreatorName>
                         </CreatorContainer>
                     )}
@@ -652,7 +652,6 @@ const CreatorContainer = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding-right: 10px;
 `
 
 const CreatorProfileImg = styled.img`
@@ -663,6 +662,8 @@ const CreatorProfileImg = styled.img`
 
 const CreatorName = styled.span`
     font-weight: bold;
+    font-size: 12px;
+    white-space: nowrap;
 `
 
 const AnnotationStyled = styled.div`

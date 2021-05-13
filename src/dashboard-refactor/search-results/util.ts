@@ -28,7 +28,7 @@ export const notesTypeToString = (type: NotesType): string => {
         return 'Your notes'
     }
     if (type === 'followed') {
-        return 'Shared with you'
+        return 'Shared with me'
     }
     return 'Results'
 }
@@ -37,7 +37,7 @@ export const stringToNotesType = (str: string): NotesType => {
     if (str === 'Your notes') {
         return 'user'
     }
-    if (str === 'Shared with you') {
+    if (str === 'Shared with me') {
         return 'followed'
     }
     return 'search'

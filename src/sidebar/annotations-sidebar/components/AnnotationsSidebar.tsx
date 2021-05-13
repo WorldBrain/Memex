@@ -25,6 +25,8 @@ import {
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 import { SidebarContainerState } from '../containers/types'
+import Margin from 'src/dashboard-refactor/components/Margin'
+
 
 export interface AnnotationsSidebarProps
     extends Omit<SidebarContainerState, 'annotationModes'> {
@@ -212,30 +214,39 @@ class AnnotationsSidebar extends React.Component<
                     const listData = this.props.followedLists.byId[listId]
                     return (
                         <React.Fragment key={listId}>
-                            <FollowedListRow>
-                                <FollowedListTitleContainer>
-                                    <FollowedListTitle>
-                                        {listData.name}
-                                    </FollowedListTitle>
-                                    <FollowedListNoteCount>
-                                        {
-                                            listData.sharedAnnotationReferences
-                                                .length
-                                        }
-                                    </FollowedListNoteCount>
-                                    <Icon
-                                        icon="triangle"
-                                        height="10px"
+                            <FollowedListNotesContainer
+                                bottom="10px"
+                            >
+                                <FollowedListRow>
+                                    <FollowedListTitleContainer
                                         onClick={() =>
-                                            this.props.expandFollowedListNotes(
-                                                listId,
-                                            )
-                                        }
-                                    />
-                                </FollowedListTitleContainer>
-                                <Icon icon="goTo" height="10px" />
-                            </FollowedListRow>
-                            {this.renderFollowedListNotes(listId)}
+                                                this.props.expandFollowedListNotes(
+                                                    listId,
+                                                )
+                                            }
+                                    >
+                                        <FollowedListTitle
+                                            title={listData.name}
+                                        >
+                                            {listData.name}
+                                        </FollowedListTitle>
+                                        <FollowedListNoteCount
+                                            left="10px" right="5px"
+                                        >
+                                            {
+                                                listData.sharedAnnotationReferences
+                                                    .length
+                                            }
+                                        </FollowedListNoteCount>
+                                        <Icon
+                                            icon="triangle"
+                                            height="12px"
+                                        />
+                                    </FollowedListTitleContainer>
+                                    <Icon icon="goTo" height="16px" />
+                                </FollowedListRow>
+                                {this.renderFollowedListNotes(listId)}
+                            </FollowedListNotesContainer>
                         </React.Fragment>
                     )
                 })}
@@ -377,6 +388,13 @@ const SearchInputStyled = styled(TextInputControlled)`
     padding: 5px 0px;
 `
 
+const FollowedListNotesContainer = styled(Margin)`
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+`
+
 const FollowedNotesContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -385,28 +403,39 @@ const FollowedNotesContainer = styled.div`
 const FollowedListsContainer = styled.div`
     display: flex;
     flex-direction: column;
+    padding: 10px 10px 100px 10px;
 `
 
-const FollowedListRow = styled.div`
+const FollowedListRow = styled(Margin)`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
 `
 
 const FollowedListTitleContainer = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
+    cursor: pointer;
+    width: 90%;
 `
 
 const FollowedListTitle = styled.span`
     font-weight: bold;
+    font-size: 14px;
+    white-space: nowrap;
+    max-width: 85%;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
 `
 
-const FollowedListNoteCount = styled.span`
+const FollowedListNoteCount = styled(Margin)`
     font-weight: bold;
+    border-radius: 30px;
+    background-color: ${(props) => props.theme.colors.grey};
+    width: 30px;
+    font-size: 12px;
 `
 
 const CloseIconStyled = styled.div`

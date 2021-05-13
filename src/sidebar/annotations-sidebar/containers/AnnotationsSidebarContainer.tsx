@@ -472,10 +472,12 @@ export class AnnotationsSidebarContainer<
                             }
                             btnChildren={
                                 <NoteTypesWrapper>
-                                    {sidebarNotesTypeToString(
+                                    <NotesTypeName>
+                                        {sidebarNotesTypeToString(
                                         this.state.notesType,
                                     )}{' '}
-                                    <Icon icon="triangle" height="10px" />
+                                    </NotesTypeName>
+                                    <Icon icon="triangle" height="12px" />
                                 </NoteTypesWrapper>
                             }
                             menuItems={[
@@ -629,6 +631,10 @@ const TagPickerWrapper = styled.div`
     position: sticky;
     left: 75px;
     z-index: 5;
+`
+
+const NotesTypeName = styled.span`
+    font-weight: bold;
 `
 
 const ContainerStyled = styled.div`
