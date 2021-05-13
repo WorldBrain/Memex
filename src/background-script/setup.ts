@@ -527,7 +527,6 @@ export async function setupBackgroundModules(
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()
 
-    await backgroundModules.sync.setup()
     await backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
     backgroundModules.sync.registerRemoteEmitter()
