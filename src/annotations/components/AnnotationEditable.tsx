@@ -57,6 +57,10 @@ export interface AnnotationProps {
     annotationFooterDependencies?: AnnotationFooterEventProps
     annotationEditDependencies?: AnnotationEditGeneralProps &
         AnnotationEditEventProps
+    creatorDependencies?: {
+        name: string
+        profileImgSrc: string
+    }
     onHighlightClick?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler
     onTagClick?: (tag: string) => void
@@ -341,7 +345,11 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     private renderFooter() {
-        const { mode, annotationFooterDependencies: footerDeps } = this.props
+        const {
+            mode,
+            annotationFooterDependencies: footerDeps,
+            creatorDependencies: creatorDeps,
+        } = this.props
 
         let actionBtnText: string
         let actionBtnHandler: React.MouseEventHandler
@@ -358,6 +366,14 @@ export default class AnnotationEditable extends React.Component<Props> {
         } else {
             return (
                 <DefaultFooterStyled>
+                    {creatorDeps && (
+                        <CreatorContainer>
+                            <CreatorProfileImg
+                                src={creatorDeps.profileImgSrc}
+                            />
+                            <CreatorName>{creatorDeps.name}</CreatorName>
+                        </CreatorContainer>
+                    )}
                     <ItemBoxBottom
                         firstDivProps={{
                             onMouseEnter: this.props.onFooterHover,
@@ -623,7 +639,31 @@ const CommentBox = styled.div`
     `}
 `
 
-const DefaultFooterStyled = styled.div``
+const DefaultFooterStyled = styled.div`
+    display: flex;
+    border-top: 1px solid #e0e0e0;
+
+    & div {
+        border-top: none;
+    }
+`
+
+const CreatorContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-right: 10px;
+`
+
+const CreatorProfileImg = styled.img`
+    border-radius: 50%;
+    height: 25px;
+    margin: 0 10px;
+`
+
+const CreatorName = styled.span`
+    font-weight: bold;
+`
 
 const AnnotationStyled = styled.div`
     color: rgb(54, 54, 46);
