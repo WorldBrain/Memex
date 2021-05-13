@@ -112,7 +112,9 @@ export class AnnotationsSidebarContainer<
 
     protected bindAnnotationFooterEventProps(
         annotation: Annotation,
-    ): AnnotationFooterEventProps {
+    ): AnnotationFooterEventProps & {
+        onGoToAnnotation?: React.MouseEventHandler
+    } {
         return {
             onEditIconClick: () =>
                 this.processEvent('setAnnotationEditMode', {
@@ -556,11 +558,11 @@ export class AnnotationsSidebarContainer<
                             })}
                         isAnnotationCreateShown={this.state.showCommentBox}
                         annotationCreateProps={this.getCreateProps()}
-                        bindAnnotationFooterEventProps={(url) =>
-                            this.bindAnnotationFooterEventProps(url)
+                        bindAnnotationFooterEventProps={(annot) =>
+                            this.bindAnnotationFooterEventProps(annot)
                         }
-                        bindAnnotationEditProps={(url) =>
-                            this.bindAnnotationEditProps(url)
+                        bindAnnotationEditProps={(annot) =>
+                            this.bindAnnotationEditProps(annot)
                         }
                         handleScrollPagination={() =>
                             this.processEvent('paginateSearch', null)

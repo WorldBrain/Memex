@@ -45,7 +45,9 @@ export interface AnnotationsSidebarProps
     onClickOutside: React.MouseEventHandler
     bindAnnotationFooterEventProps: (
         annotation: Annotation,
-    ) => AnnotationFooterEventProps
+    ) => AnnotationFooterEventProps & {
+        onGoToAnnotation?: React.MouseEventHandler
+    }
     bindAnnotationEditProps: (
         annotation: Annotation,
     ) => AnnotationEditGeneralProps & AnnotationEditEventProps
@@ -181,12 +183,14 @@ class AnnotationsSidebar extends React.Component<
 
         return (
             <FollowedNotesContainer>
-                {annotationsData.map((noteData) => (
-                    <div>
-                        <div>{noteData.body}</div>
-                        <div>{noteData.comment}</div>
-                        <div>created: {noteData.createdWhen}</div>
-                    </div>
+                {annotationsData.map((noteData, i) => (
+                    <AnnotationEditable
+                        key={i}
+                        body={noteData.body}
+                        comment={noteData.comment}
+                        lastEdited={noteData.updatedWhen}
+                        createdWhen={noteData.createdWhen}
+                    />
                 ))}
             </FollowedNotesContainer>
         )
@@ -255,28 +259,35 @@ class AnnotationsSidebar extends React.Component<
             return <EmptyMessage />
         }
 
-        const annots = this.props.annotations.map((annot, i) => (
-            <AnnotationEditable
-                key={i}
-                {...annot}
-                {...this.props}
-                sharingAccess={this.props.sharingAccess}
-                mode={this.props.annotationModes[annot.url]}
-                sharingInfo={this.props.annotationSharingInfo[annot.url]}
-                isActive={this.props.activeAnnotationUrl === annot.url}
-                onHighlightClick={this.props.setActiveAnnotationUrl(annot.url)}
-                annotationEditDependencies={this.props.bindAnnotationEditProps(
-                    annot,
-                )}
-                annotationFooterDependencies={this.props.bindAnnotationFooterEventProps(
-                    annot,
-                )}
-                isClickable={
-                    this.props.theme.canClickAnnotations &&
-                    annot.body?.length > 0
-                }
-            />
-        ))
+        const annots = this.props.annotations.map((annot, i) => {
+            const footerDeps = this.props.bindAnnotationFooterEventProps(annot)
+            return (
+                <AnnotationEditable
+                    key={i}
+                    {...annot}
+                    {...this.props}
+                    body={annot.body}
+                    comment={annot.comment}
+                    createdWhen={annot.createdWhen!}
+                    sharingAccess={this.props.sharingAccess}
+                    mode={this.props.annotationModes[annot.url]}
+                    sharingInfo={this.props.annotationSharingInfo[annot.url]}
+                    isActive={this.props.activeAnnotationUrl === annot.url}
+                    onHighlightClick={this.props.setActiveAnnotationUrl(
+                        annot.url,
+                    )}
+                    onGoToAnnotation={footerDeps.onGoToAnnotation}
+                    annotationEditDependencies={this.props.bindAnnotationEditProps(
+                        annot,
+                    )}
+                    annotationFooterDependencies={footerDeps}
+                    isClickable={
+                        this.props.theme.canClickAnnotations &&
+                        annot.body?.length > 0
+                    }
+                />
+            )
+        })
 
         if (this.props.needsWaypoint) {
             annots.push(

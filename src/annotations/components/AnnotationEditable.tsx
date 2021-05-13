@@ -20,6 +20,7 @@ import {
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 import {
+    SharingProps,
     SHARE_BUTTON_LABELS,
     getShareButtonIcon,
     getShareAnnotationBtnState,
@@ -31,31 +32,37 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import { NoteResultHoverState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
 
-export interface AnnotationEditableProps {
-    /** Required to decide how to go to an annotation when it's clicked. */
-    url: string
-    sharingInfo?: AnnotationSharingInfo
-    sharingAccess: AnnotationSharingAccess
-    className?: string
-    isActive?: boolean
-    isHovered?: boolean
-    isClickable?: boolean
-    createdWhen: Date
-    lastEdited: Date
-    body?: string
+export interface HighlightProps extends AnnotationProps {
+    body: string
     comment?: string
+}
+export interface NoteProps extends AnnotationProps {
+    body?: string
+    comment: string
+}
+
+export interface AnnotationProps {
     tags: string[]
-    isBookmarked?: boolean
+    createdWhen: Date | number
     mode: AnnotationMode
     hoverState: NoteResultHoverState
-    annotationFooterDependencies: AnnotationFooterEventProps
-    annotationEditDependencies: AnnotationEditGeneralProps &
+    sharingAccess: AnnotationSharingAccess
+    sharingInfo?: AnnotationSharingInfo
+    /** Required to decide how to go to an annotation when it's clicked. */
+    url?: string
+    lastEdited?: Date | number
+    className?: string
+    isActive?: boolean
+    isClickable?: boolean
+    annotationFooterDependencies?: AnnotationFooterEventProps
+    annotationEditDependencies?: AnnotationEditGeneralProps &
         AnnotationEditEventProps
+    onHighlightClick?: React.MouseEventHandler
+    onGoToAnnotation?: React.MouseEventHandler
     onTagClick?: (tag: string) => void
-    onHighlightClick: React.MouseEventHandler
-    renderTagsPickerForAnnotation: (id: string) => JSX.Element
-    renderCopyPasterForAnnotation: (id: string) => JSX.Element
-    renderShareMenuForAnnotation: (id: string) => JSX.Element
+    renderTagsPickerForAnnotation?: (id: string) => JSX.Element
+    renderCopyPasterForAnnotation?: (id: string) => JSX.Element
+    renderShareMenuForAnnotation?: (id: string) => JSX.Element
 }
 
 export interface AnnotationEditableEventProps {
@@ -66,15 +73,20 @@ export interface AnnotationEditableEventProps {
     onUnhover?: React.MouseEventHandler
 }
 
-export type Props = AnnotationEditableProps & AnnotationEditableEventProps
+export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
 
 export default class AnnotationEditable extends React.Component<Props> {
     private annotEditRef = React.createRef<AnnotationEdit>()
 
     static MOD_KEY = getKeyName({ key: 'mod' })
-    static defaultProps: Partial<Props> = {
+    static defaultProps: Pick<
+        Props,
+        'mode' | 'hoverState' | 'sharingAccess' | 'tags'
+    > = {
+        tags: [],
         mode: 'default',
         hoverState: null,
+        sharingAccess: 'feature-disabled',
     }
 
     focus() {
@@ -82,8 +94,9 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     private get sharingData() {
-        const sharingProps = {
-            ...this.props,
+        const sharingProps: SharingProps = {
+            sharingInfo: this.props.sharingInfo,
+            sharingAccess: this.props.sharingAccess,
             onShare: this.props.annotationFooterDependencies.onShareClick,
             onUnshare: this.props.annotationFooterDependencies.onShareClick,
         }
@@ -103,7 +116,9 @@ export default class AnnotationEditable extends React.Component<Props> {
                 : date?.getTime()
 
         const createdWhen = handleDateData(this.props.createdWhen)
-        const lastEdited = handleDateData(this.props.lastEdited)
+        const lastEdited = handleDateData(
+            this.props.lastEdited ?? this.props.createdWhen,
+        )
 
         return {
             createdWhen,
@@ -126,31 +141,36 @@ export default class AnnotationEditable extends React.Component<Props> {
             return
         }
 
-        const { annotationFooterDependencies: footerDeps } = this.props
+        const {
+            annotationFooterDependencies: footerDeps,
+            onGoToAnnotation,
+        } = this.props
 
         const actionsBox =
             this.props.hoverState === 'main-content' ? (
                 <HighlightActionsBox>
-                    {footerDeps.onGoToAnnotation && (
+                    {onGoToAnnotation && (
                         <ButtonTooltip
                             tooltipText="Open in Page"
                             position="bottom"
                         >
                             <HighlightAction right="2px">
-                                <GoToHighlightIcon
-                                    onClick={footerDeps.onGoToAnnotation}
+                                <GoToHighlightIcon onClick={onGoToAnnotation} />
+                            </HighlightAction>
+                        </ButtonTooltip>
+                    )}
+                    {footerDeps?.onEditIconClick && (
+                        <ButtonTooltip
+                            tooltipText="Add/Edit Note"
+                            position="bottom"
+                        >
+                            <HighlightAction>
+                                <AddNoteIcon
+                                    onClick={footerDeps.onEditIconClick}
                                 />
                             </HighlightAction>
                         </ButtonTooltip>
                     )}
-                    <ButtonTooltip
-                        tooltipText="Add/Edit Note"
-                        position="bottom"
-                    >
-                        <HighlightAction>
-                            <AddNoteIcon onClick={footerDeps.onEditIconClick} />
-                        </HighlightAction>
-                    </ButtonTooltip>
                 </HighlightActionsBox>
             ) : null
 
@@ -177,6 +197,7 @@ export default class AnnotationEditable extends React.Component<Props> {
 
     private renderNote() {
         const {
+            url,
             mode,
             comment,
             annotationEditDependencies,
@@ -186,8 +207,8 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (mode === 'edit') {
             return (
                 <AnnotationEdit
+                    url={url}
                     ref={this.annotEditRef}
-                    {...this.props}
                     {...annotationEditDependencies}
                     rows={2}
                 />
@@ -200,15 +221,20 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <CommentBox onMouseEnter={this.props.onNoteHover}>
-                <EditNoteIconBox tooltipText="Edit Note" position="bottom">
-                    <ButtonTooltip tooltipText="Edit Note" position="bottom">
-                        <EditNoteIcon
-                            onClick={
-                                annotationFooterDependencies.onEditIconClick
-                            }
-                        />
-                    </ButtonTooltip>
-                </EditNoteIconBox>
+                {annotationFooterDependencies?.onEditIconClick && (
+                    <EditNoteIconBox tooltipText="Edit Note" position="bottom">
+                        <ButtonTooltip
+                            tooltipText="Edit Note"
+                            position="bottom"
+                        >
+                            <EditNoteIcon
+                                onClick={
+                                    annotationFooterDependencies.onEditIconClick
+                                }
+                            />
+                        </ButtonTooltip>
+                    </EditNoteIconBox>
+                )}
                 <TextTruncated text={comment}>
                     {({ text }) => (
                         <NoteTextBox>
@@ -222,6 +248,10 @@ export default class AnnotationEditable extends React.Component<Props> {
 
     private calcFooterActions(): ItemBoxBottomAction[] {
         const { annotationFooterDependencies: footerDeps } = this.props
+
+        if (!footerDeps) {
+            return []
+        }
 
         if (this.props.hoverState === null) {
             return ['already-shared', 'sharing-success'].includes(
@@ -317,11 +347,11 @@ export default class AnnotationEditable extends React.Component<Props> {
         let actionBtnHandler: React.MouseEventHandler
         let cancelBtnHandler: React.MouseEventHandler
 
-        if (mode === 'delete') {
+        if (mode === 'delete' && footerDeps != null) {
             actionBtnText = 'Delete'
             actionBtnHandler = footerDeps.onDeleteConfirm
             cancelBtnHandler = footerDeps.onDeleteCancel
-        } else if (mode === 'edit') {
+        } else if (mode === 'edit' && footerDeps != null) {
             actionBtnText = 'Save'
             actionBtnHandler = footerDeps.onEditConfirm
             cancelBtnHandler = footerDeps.onEditCancel
@@ -383,25 +413,31 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 onTagClick={this.props.onTagClick}
                                 onEditBtnClick={
                                     this.props.annotationFooterDependencies
-                                        .onTagIconClick
+                                        ?.onTagIconClick
                                 }
                             />
                             {this.renderFooter()}
-                            <TagPickerWrapper>
-                                {this.props.renderTagsPickerForAnnotation(
-                                    this.props.url,
-                                )}
-                            </TagPickerWrapper>
-                            <CopyPasterWrapper>
-                                {this.props.renderCopyPasterForAnnotation(
-                                    this.props.url,
-                                )}
-                            </CopyPasterWrapper>
-                            <ShareMenuWrapper>
-                                {this.props.renderShareMenuForAnnotation(
-                                    this.props.url,
-                                )}
-                            </ShareMenuWrapper>
+                            {this.props.renderTagsPickerForAnnotation && (
+                                <TagPickerWrapper>
+                                    {this.props.renderTagsPickerForAnnotation(
+                                        this.props.url,
+                                    )}
+                                </TagPickerWrapper>
+                            )}
+                            {this.props.renderCopyPasterForAnnotation && (
+                                <CopyPasterWrapper>
+                                    {this.props.renderCopyPasterForAnnotation(
+                                        this.props.url,
+                                    )}
+                                </CopyPasterWrapper>
+                            )}
+                            {this.props.renderShareMenuForAnnotation && (
+                                <ShareMenuWrapper>
+                                    {this.props.renderShareMenuForAnnotation(
+                                        this.props.url,
+                                    )}
+                                </ShareMenuWrapper>
+                            )}
                         </AnnotationStyled>
                     </ItemBox>
                 </Margin>

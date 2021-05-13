@@ -376,11 +376,14 @@ class AnnotationList extends Component<Props, State> {
             <AnnotationEditable
                 key={annot.url}
                 {...annot}
+                body={annot.body}
+                comment={annot.comment}
                 className={styles.annotation}
-                isBookmarked={annot.hasBookmark}
+                createdWhen={annot.createdWhen!}
                 mode={this.state.annotationModes[annot.url]}
                 sharingAccess={this.state.sharingAccess}
                 sharingInfo={this.state.annotationsSharingInfo[annot.url]}
+                onGoToAnnotation={this.handleGoToAnnotation(annot)}
                 renderShareMenuForAnnotation={() => this.renderShareMenu(annot)}
                 renderCopyPasterForAnnotation={() =>
                     this.renderCopyPasterManager(annot)
@@ -423,7 +426,6 @@ class AnnotationList extends Component<Props, State> {
                         }),
                     onTagIconClick: this.handleTagPickerClick(annot.url),
                     onShareClick: this.handleShareClick(annot.url),
-                    onGoToAnnotation: this.handleGoToAnnotation(annot),
                     onCopyPasterBtnClick:
                         this.props.setActiveCopyPasterAnnotationId != null
                             ? () =>
