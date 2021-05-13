@@ -22,7 +22,6 @@ import { ServerStorageModules } from 'src/storage/types'
 import { Services } from 'src/services/types'
 import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
-import { SHARED_ANNOTATIONS } from 'src/sidebar/annotations-sidebar/containers/logic.test.data'
 
 const limitSuggestionsReturnLength = 10
 const limitSuggestionsStorageLength = 20
@@ -128,29 +127,24 @@ export default class CustomListBackground {
         normalizedPageUrl,
     }) => {
         const { contentSharing } = await this.options.getServerStorage()
-        const listReferences = await this.fetchFollowedListReferences()
+        const sharedListReferences = await this.fetchFollowedListReferences()
         const annotListEntriesByList = new Map<
             string | number,
             GetAnnotationListEntriesElement[]
         >()
 
-        const listEntriesByPageByList = await contentSharing.getAnnotationListEntriesForLists(
-            { listReferences },
-        )
-
-        for (const listReference of listReferences) {
-            if (
-                !listEntriesByPageByList[listReference.id]?.[normalizedPageUrl]
-                    ?.length
-            ) {
+        for (const listReference of sharedListReferences) {
+            const listEntriesByPage = await contentSharing.getAnnotationListEntries(
+                { listReference },
+            )
+            if (!listEntriesByPage[normalizedPageUrl]?.length) {
                 continue
             }
             annotListEntriesByList.set(
                 listReference.id,
-                listEntriesByPageByList[listReference.id][normalizedPageUrl],
+                listEntriesByPage[normalizedPageUrl],
             )
         }
-
         const sharedLists = await contentSharing.getListsByReferences(
             [...annotListEntriesByList.keys()].map((id) => ({
                 id,
