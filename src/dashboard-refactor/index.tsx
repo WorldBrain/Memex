@@ -759,31 +759,6 @@ export class DashboardContainer extends StatefulUIElement<
                             noteId,
                             info,
                         }),
-                    onMainContentHover: (noteId) => () =>
-                        this.processEvent('setNoteHover', {
-                            noteId,
-                            hover: 'main-content',
-                        }),
-                    onFooterHover: (noteId) => () =>
-                        this.processEvent('setNoteHover', {
-                            noteId,
-                            hover: 'footer',
-                        }),
-                    onTagsHover: (noteId) => () =>
-                        this.processEvent('setNoteHover', {
-                            noteId,
-                            hover: 'tags',
-                        }),
-                    onNoteHover: (noteId) => () =>
-                        this.processEvent('setNoteHover', {
-                            noteId,
-                            hover: 'note',
-                        }),
-                    onUnhover: (noteId) => () =>
-                        this.processEvent('setNoteHover', {
-                            noteId,
-                            hover: null,
-                        }),
                 }}
                 searchCopyPasterProps={{
                     searchType: searchResults.searchType,

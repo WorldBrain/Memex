@@ -28,7 +28,7 @@ import {
 import { ButtonTooltip } from 'src/common-ui/components'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { NoteResultHoverState } from 'src/dashboard-refactor/search-results/types'
+import { NoteResultHoverState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
 
 export interface AnnotationEditableProps {
@@ -435,7 +435,7 @@ const EditNoteIconBox = styled.div`
     border-radius: 3px;
     border: 1px solid #f0f0f0;
 
-    &:hover{
+    &:hover {
         background-color: #f0f0f0;
     }
 `
@@ -461,7 +461,6 @@ const HighlightActionsBox = styled.div`
     width: 50px;
     display: flex;
     justify-content: flex-end;
-
 `
 
 const NoteTextBox = styled.div`
@@ -503,7 +502,7 @@ const HighlightAction = styled(Margin)`
     padding: 2px;
     border: 1px solid #f0f0f0;
 
-    &:hover{
+    &:hover {
         background-color: #f0f0f0;
     }
 `

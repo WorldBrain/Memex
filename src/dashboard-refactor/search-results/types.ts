@@ -22,10 +22,6 @@ export interface CommonInteractionProps {
     onTagPickerBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
-    onMainContentHover: React.MouseEventHandler
-    onFooterHover: React.MouseEventHandler
-    onTagsHover: React.MouseEventHandler
-    onUnhover: React.MouseEventHandler
 }
 
 export type PageInteractionProps = Omit<
@@ -38,6 +34,10 @@ export type PageInteractionProps = Omit<
     onNotesBtnClick: React.MouseEventHandler
     onPageDrag: React.DragEventHandler
     onPageDrop: React.DragEventHandler
+    onMainContentHover: React.MouseEventHandler
+    onFooterHover: React.MouseEventHandler
+    onTagsHover: React.MouseEventHandler
+    onUnhover: React.MouseEventHandler
 }
 
 // NOTE: Derived type - edit the original
@@ -54,7 +54,6 @@ export type NoteInteractionProps = Omit<
 > & {
     updateShareInfo: (info: Partial<AnnotationSharingInfo>) => void
     updateTags: PickerUpdateHandler
-    onNoteHover: React.MouseEventHandler
     onEditCancel: React.MouseEventHandler
     onEditConfirm: React.MouseEventHandler
     onEditBtnClick: React.MouseEventHandler
@@ -126,7 +125,6 @@ export type NoResultsType =
     | 'no-results'
     | null
 export type ResultHoverState = 'main-content' | 'footer' | 'tags' | null
-export type NoteResultHoverState = ResultHoverState | 'note'
 
 export interface NoteResult {
     isEditing: boolean
@@ -135,7 +133,6 @@ export interface NoteResult {
     shareMenuShowStatus: 'show' | 'hide' | 'show-n-share'
     isCopyPasterShown: boolean
     editNoteForm: NoteFormState
-    hoverState: NoteResultHoverState
 }
 
 export interface PageResult {
@@ -277,7 +274,6 @@ export type Events = UIEvent<{
         mouseEvent: React.MouseEvent
     }
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
-    setNoteHover: NoteEventArgs & { hover: NoteResultHoverState }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
     updateNoteShareInfo: NoteEventArgs & {

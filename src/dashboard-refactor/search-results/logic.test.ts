@@ -6,7 +6,7 @@ import {
 } from '../logic.test.util'
 import * as DATA from '../logic.test.data'
 import * as utils from './util'
-import { NoteResultHoverState, ResultHoverState } from './types'
+import { ResultHoverState } from './types'
 import { PAGE_SEARCH_DUMMY_DAY } from '../constants'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
@@ -1600,38 +1600,6 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .areRepliesShown,
                 ).toEqual(false)
-            })
-
-            it('should be able to set note result hover state', async ({
-                device,
-            }) => {
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                })
-                const noteId = DATA.NOTE_2.url
-                const states: NoteResultHoverState[] = [
-                    'footer',
-                    'main-content',
-                    'note',
-                    'tags',
-                    null,
-                ]
-
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId]
-                        .hoverState,
-                ).toEqual(null)
-
-                for (const hover of states) {
-                    await searchResults.processEvent('setNoteHover', {
-                        noteId,
-                        hover,
-                    })
-                    expect(
-                        searchResults.state.searchResults.noteData.byId[noteId]
-                            .hoverState,
-                    ).toEqual(hover)
-                }
             })
 
             it('should be able to toggle note tag picker shown state', async ({

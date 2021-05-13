@@ -1526,20 +1526,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setNoteHover: EventHandler<'setNoteHover'> = ({ event }) => {
-        this.emitMutation({
-            searchResults: {
-                noteData: {
-                    byId: {
-                        [event.noteId]: {
-                            hoverState: { $set: event.hover },
-                        },
-                    },
-                },
-            },
-        })
-    }
-
     setNoteTags: EventHandler<'setNoteTags'> = async ({ event }) => {
         this.emitMutation({
             searchResults: {

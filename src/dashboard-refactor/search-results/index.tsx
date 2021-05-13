@@ -35,7 +35,7 @@ import {
     AnnotationCreateEventProps,
 } from 'src/annotations/components/AnnotationCreate'
 import { sizeConstants } from '../constants'
-import AnnotationEditable from 'src/annotations/components/AnnotationEditable'
+import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
@@ -126,12 +126,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 body={noteData.highlight}
                 comment={noteData.comment}
                 createdWhen={new Date(noteData.displayTime)}
-                onHighlightHover={interactionProps.onMainContentHover}
-                onFooterHover={interactionProps.onFooterHover}
-                onNoteHover={interactionProps.onNoteHover}
-                onTagsHover={interactionProps.onTagsHover}
-                onUnhover={interactionProps.onUnhover}
-                hoverState={noteData.hoverState}
                 onTagClick={this.props.filterSearchByTag}
                 lastEdited={
                     noteData.isEdited

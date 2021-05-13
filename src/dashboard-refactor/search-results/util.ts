@@ -115,7 +115,6 @@ export const getInitialNoteResultState = (): NoteResult => ({
     shareMenuShowStatus: 'hide',
     isCopyPasterShown: false,
     editNoteForm: getInitialFormState(),
-    hoverState: null,
 })
 
 const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
