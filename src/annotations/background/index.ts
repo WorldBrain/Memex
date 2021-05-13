@@ -20,8 +20,6 @@ import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import SocialBG from 'src/social-integration/background'
 import { buildPostUrlId } from 'src/social-integration/util'
-import { SearchIndex } from 'src/search'
-import PageStorage from 'src/page-indexing/background/storage'
 import {
     Annotation,
     AnnotationSender,
@@ -39,6 +37,7 @@ import { generateUrl } from 'src/annotations/utils'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import { Analytics } from 'src/analytics/types'
 import { getUrl } from 'src/util/uri-utils'
+import { ServerStorageModules } from 'src/storage/types'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -62,6 +61,9 @@ export default class DirectLinkingBackground {
             socialBg: SocialBG
             normalizeUrl?: URLNormalizer
             analytics: Analytics
+            getServerStorage: () => Promise<
+                Pick<ServerStorageModules, 'contentSharing'>
+            >
         },
     ) {
         this.socialBg = options.socialBg
@@ -116,6 +118,7 @@ export default class DirectLinkingBackground {
             goToAnnotationFromSidebar: this.goToAnnotationFromDashboardSidebar.bind(
                 this,
             ),
+            getSharedAnnotations: this.getSharedAnnotations,
         }
 
         this.localStorage = new BrowserSettingsStore<TagsSettings>(
@@ -508,9 +511,21 @@ export default class DirectLinkingBackground {
     async toggleAnnotBookmark(_, { url }: { url: string }) {
         return this.annotationStorage.toggleAnnotBookmark({ url })
     }
+
     async getAnnotBookmark(_, { url }: { url: string }) {
         return this.annotationStorage.annotHasBookmark({ url })
     }
+
+    getSharedAnnotations: AnnotationInterface<
+        'provider'
+    >['getSharedAnnotations'] = async (_, { sharedAnnotationReferences }) => {
+        const { contentSharing } = await this.options.getServerStorage()
+        const annotationsById = await contentSharing.getAnnotations({
+            references: sharedAnnotationReferences,
+        })
+        return sharedAnnotationReferences.map((ref) => annotationsById[ref.id])
+    }
+
     async updateAnnotationBookmark(
         _,
         { url, isBookmarked }: { url: string; isBookmarked: boolean },

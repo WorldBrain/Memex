@@ -163,7 +163,7 @@ class AnnotationsSidebar extends React.Component<
 
     private renderFollowedListNotes(listId: string) {
         const list = this.props.followedLists.byId[listId]
-        if (!list.isExpanded) {
+        if (!list.isExpanded || list.loadState === 'pristine') {
             return null
         }
 
@@ -171,23 +171,23 @@ class AnnotationsSidebar extends React.Component<
             return this.renderLoader()
         }
 
-        if (!list.annotationIds.length) {
+        const annotationsData = list.sharedAnnotationReferences
+            .map((ref) => this.props.followedAnnotations[ref.id])
+            .filter((a) => !!a)
+
+        if (!annotationsData.length) {
             return 'No notes exist in this list for this page'
         }
 
         return (
             <FollowedNotesContainer>
-                {list.annotationIds.map((noteId) => {
-                    const noteData = this.props.followedAnnotations[noteId]
-
-                    return (
-                        <div>
-                            <div>{noteData.body}</div>
-                            <div>{noteData.comment}</div>
-                            <div>created: {noteData.createdWhen}</div>
-                        </div>
-                    )
-                })}
+                {annotationsData.map((noteData) => (
+                    <div>
+                        <div>{noteData.body}</div>
+                        <div>{noteData.comment}</div>
+                        <div>created: {noteData.createdWhen}</div>
+                    </div>
+                ))}
             </FollowedNotesContainer>
         )
     }
@@ -209,7 +209,10 @@ class AnnotationsSidebar extends React.Component<
                                         {listData.name}
                                     </FollowedListTitle>
                                     <FollowedListNoteCount>
-                                        {listData.annotationsCount}
+                                        {
+                                            listData.sharedAnnotationReferences
+                                                .length
+                                        }
                                     </FollowedListNoteCount>
                                     <Icon
                                         icon="triangle"

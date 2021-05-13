@@ -1,5 +1,5 @@
 import type { Annotation } from 'src/annotations/types'
-import type { FollowedSharedList } from 'src/custom-lists/background/types'
+import type { SharedAnnotationList } from 'src/custom-lists/background/types'
 import {
     SharedAnnotation,
     SharedAnnotationReference,
@@ -24,33 +24,15 @@ export const ANNOT_1: Annotation = {
     tags: [],
 }
 
-export const FOLLOWED_LISTS: FollowedSharedList[] = [
-    {
-        id: 'test a',
-        name: 'test a',
-        annotationsCount: 3,
-    },
-    {
-        id: 'test b',
-        name: 'test b',
-        annotationsCount: 3,
-    },
-    {
-        id: 'test c',
-        name: 'test c',
-        annotationsCount: 3,
-    },
-]
-
 export const SHARED_ANNOTATIONS: Array<
     SharedAnnotation & {
         reference: SharedAnnotationReference
-        creatorReference: UserReference
+        creator: UserReference
     }
 > = [
     {
         reference: { type: 'shared-annotation-reference', id: 1 },
-        creatorReference: { type: 'user-reference', id: 123 },
+        creator: { type: 'user-reference', id: 123 },
         normalizedPageUrl: 'test.com',
         body: 'test highlight 1',
         createdWhen: 11111,
@@ -59,7 +41,7 @@ export const SHARED_ANNOTATIONS: Array<
     },
     {
         reference: { type: 'shared-annotation-reference', id: 2 },
-        creatorReference: { type: 'user-reference', id: 123 },
+        creator: { type: 'user-reference', id: 123 },
         normalizedPageUrl: 'test.com',
         body: 'test highlight 2',
         comment: 'test comment 1',
@@ -69,11 +51,35 @@ export const SHARED_ANNOTATIONS: Array<
     },
     {
         reference: { type: 'shared-annotation-reference', id: 3 },
-        creatorReference: { type: 'user-reference', id: 123 },
+        creator: { type: 'user-reference', id: 123 },
         normalizedPageUrl: 'test.com',
         comment: 'test comment 2',
         createdWhen: 11111,
         updatedWhen: 11111,
         uploadedWhen: 11111,
+    },
+]
+
+export const FOLLOWED_LISTS: SharedAnnotationList[] = [
+    {
+        id: 'test a',
+        name: 'test a',
+        sharedAnnotationReferences: [SHARED_ANNOTATIONS[0].reference],
+    },
+    {
+        id: 'test b',
+        name: 'test b',
+        sharedAnnotationReferences: [
+            SHARED_ANNOTATIONS[0].reference,
+            SHARED_ANNOTATIONS[1].reference,
+        ],
+    },
+    {
+        id: 'test c',
+        name: 'test c',
+        sharedAnnotationReferences: [
+            SHARED_ANNOTATIONS[0].reference,
+            SHARED_ANNOTATIONS[2].reference,
+        ],
     },
 ]

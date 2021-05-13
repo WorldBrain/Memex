@@ -822,7 +822,6 @@ export class SidebarContainerLogic extends UILogic<
                                 list.id,
                                 {
                                     ...list,
-                                    annotationIds: [],
                                     isExpanded: false,
                                     loadState: 'pristine',
                                 },
@@ -866,7 +865,10 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const { customLists } = this.options
+        const { annotations } = this.options
+        const { sharedAnnotationReferences } = previousState.followedLists.byId[
+            event.listId
+        ]
 
         await executeUITask(
             this,
@@ -878,37 +880,25 @@ export class SidebarContainerLogic extends UILogic<
                 },
             }),
             async () => {
-                const notes = await customLists.fetchAnnotationsInFollowedListForPage(
+                const sharedAnnotations = await annotations.getSharedAnnotations(
                     {
-                        sharedList: event.listId,
-                        normalizedPageUrl: previousState.pageUrl,
+                        sharedAnnotationReferences,
                     },
                 )
 
                 this.emitMutation({
-                    followedLists: {
-                        byId: {
-                            [event.listId]: {
-                                annotationIds: {
-                                    $set: notes.map(
-                                        (note) => note.reference.id as string,
-                                    ),
-                                },
-                            },
-                        },
-                    },
                     followedAnnotations: {
                         $merge: fromPairs(
-                            notes.map((note) => [
-                                note.reference.id,
+                            sharedAnnotations.map((annot) => [
+                                annot.reference.id,
                                 {
-                                    id: note.reference.id,
-                                    body: note.body,
-                                    comment: note.comment,
-                                    selector: note.selector,
-                                    createdWhen: note.createdWhen,
-                                    updatedWhen: note.updatedWhen,
-                                    creatorId: note.creatorReference.id,
+                                    id: annot.reference.id,
+                                    body: annot.body,
+                                    comment: annot.comment,
+                                    selector: annot.selector,
+                                    createdWhen: annot.createdWhen,
+                                    updatedWhen: annot.updatedWhen,
+                                    creatorId: annot.creator.id,
                                 },
                             ]),
                         ),

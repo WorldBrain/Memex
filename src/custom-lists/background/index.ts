@@ -70,8 +70,6 @@ export default class CustomListBackground {
             fetchAllLists: this.fetchAllLists,
             fetchAllFollowedLists: this.fetchAllFollowedLists,
             fetchListById: this.fetchListById,
-            fetchAnnotationsInFollowedListForPage: this
-                .fetchAnnotationsInFollowedListForPage,
             fetchFollowedListsWithAnnotations: this
                 .fetchFollowedListsWithAnnotations,
             fetchListPagesByUrl: this.fetchListPagesByUrl,
@@ -95,26 +93,6 @@ export default class CustomListBackground {
 
     generateListId() {
         return Date.now()
-    }
-
-    fetchAnnotationsInFollowedListForPage: RemoteCollectionsInterface['fetchAnnotationsInFollowedListForPage'] = async ({
-        normalizedPageUrl,
-        sharedList,
-    }) => {
-        const { auth } = this.options.services
-        const { contentSharing } = await this.options.getServerStorage()
-
-        const currentUser = await auth.getCurrentUser()
-        if (!currentUser) {
-            return []
-        }
-
-        const annotations = await contentSharing.getAnnotationsForPagesInList({
-            listReference: { type: 'shared-list-reference', id: sharedList },
-            normalizedPageUrls: [normalizedPageUrl],
-        })
-
-        return annotations[normalizedPageUrl].map((obj) => obj.annotation)
     }
 
     private fetchFollowedListReferences = async (): Promise<
@@ -177,8 +155,9 @@ export default class CustomListBackground {
         return sharedLists.map((list) => ({
             id: list.reference.id as string,
             name: list.title,
-            annotationsCount: annotListEntriesByList.get(list.reference.id)
-                .length,
+            sharedAnnotationReferences: annotListEntriesByList
+                .get(list.reference.id)
+                .map((entry) => entry.sharedAnnotation),
         }))
     }
 

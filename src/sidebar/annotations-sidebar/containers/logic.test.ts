@@ -820,10 +820,9 @@ describe('SidebarContainerLogic', () => {
         it('should be able to set notes type + trigger followed list load', async ({
             device,
         }) => {
-            const { sidebar } = await setupLogicHelper({ device })
-
             device.backgroundModules.customLists.remoteFunctions.fetchFollowedListsWithAnnotations = async () =>
                 DATA.FOLLOWED_LISTS
+            const { sidebar } = await setupLogicHelper({ device })
 
             expect(sidebar.state.notesType).toEqual('private')
             expect(sidebar.state.followedListLoadState).toEqual('pristine')
@@ -843,7 +842,6 @@ describe('SidebarContainerLogic', () => {
                         list.id,
                         {
                             ...list,
-                            annotationIds: [],
                             loadState: 'pristine',
                             isExpanded: false,
                         },
@@ -855,12 +853,11 @@ describe('SidebarContainerLogic', () => {
         it('should be able to expand notes for a followed list + trigger notes load', async ({
             device,
         }) => {
-            const { sidebar } = await setupLogicHelper({ device })
-
             device.backgroundModules.customLists.remoteFunctions.fetchFollowedListsWithAnnotations = async () =>
                 DATA.FOLLOWED_LISTS
-            device.backgroundModules.customLists.remoteFunctions.fetchAnnotationsInFollowedListForPage = async () =>
+            device.backgroundModules.directLinking.remoteFunctions.getSharedAnnotations = async () =>
                 DATA.SHARED_ANNOTATIONS
+            const { sidebar } = await setupLogicHelper({ device })
 
             await sidebar.processEvent('setNotesType', { notesType: 'shared' })
 
@@ -871,9 +868,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.followedLists.byId[listId].loadState).toEqual(
                 'pristine',
             )
-            expect(
-                sidebar.state.followedLists.byId[listId].annotationIds,
-            ).toEqual([])
+            expect(sidebar.state.followedAnnotations).toEqual({})
 
             await sidebar.processEvent('expandFollowedListNotes', { listId })
 
@@ -883,9 +878,6 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.followedLists.byId[listId].loadState).toEqual(
                 'success',
             )
-            expect(
-                sidebar.state.followedLists.byId[listId].annotationIds,
-            ).toEqual(DATA.SHARED_ANNOTATIONS.map((a) => a.reference.id))
             expect(sidebar.state.followedAnnotations).toEqual(
                 fromPairs(
                     DATA.SHARED_ANNOTATIONS.map((note) => [
@@ -897,7 +889,7 @@ describe('SidebarContainerLogic', () => {
                             selector: note.selector,
                             createdWhen: note.createdWhen,
                             updatedWhen: note.updatedWhen,
-                            creatorId: note.creatorReference.id,
+                            creatorId: note.creator.id,
                         },
                     ]),
                 ),

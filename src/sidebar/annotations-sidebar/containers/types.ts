@@ -3,7 +3,7 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import {
     RemoteCollectionsInterface,
-    FollowedSharedList,
+    SharedAnnotationList,
 } from 'src/custom-lists/background/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
@@ -80,10 +80,9 @@ interface SidebarFollowedListsState {
     followedListLoadState: TaskState
 
     followedLists: NormalizedState<
-        FollowedSharedList & {
+        SharedAnnotationList & {
             isExpanded: boolean
             loadState: TaskState
-            annotationIds: string[]
         }
     >
 

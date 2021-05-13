@@ -238,6 +238,7 @@ export function createBackgroundModules(options: {
         socialBg: social,
         pages,
         analytics,
+        getServerStorage,
     })
 
     const auth =

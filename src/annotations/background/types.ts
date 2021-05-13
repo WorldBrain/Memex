@@ -6,6 +6,11 @@ import {
 import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
+import {
+    SharedAnnotationReference,
+    SharedAnnotation,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
+import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 
 export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     createDirectLink: RemotePositionalFunction<Role, any[], any>
@@ -85,6 +90,16 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     toggleSidebarOverlay: RemoteFunction<Role, { activeUrl: string }, any>
     toggleAnnotBookmark: RemotePositionalFunction<Role, any[], any>
     getAnnotBookmark: RemotePositionalFunction<Role, any[], any>
+    getSharedAnnotations: RemotePositionalFunction<
+        Role,
+        [{ sharedAnnotationReferences: SharedAnnotationReference[] }],
+        Array<
+            SharedAnnotation & {
+                reference: SharedAnnotationReference
+                creator: UserReference
+            }
+        >
+    >
     insertAnnotToList: RemotePositionalFunction<Role, any[], any>
     removeAnnotFromList: RemotePositionalFunction<Role, any[], any>
     goToAnnotationFromSidebar: RemoteFunction<
