@@ -261,7 +261,11 @@ class AnnotationsSidebar extends React.Component<
                                 <FollowedListNoteCount left="10px" right="5px">
                                     {listData.sharedAnnotationReferences.length}
                                 </FollowedListNoteCount>
-                                <Icon icon="triangle" height="12px" />
+                                <FollowedListDropdownIcon
+                                    icon="triangle"
+                                    height="12px"
+                                    isExpanded={listData.isExpanded}
+                                />
                             </FollowedListTitleContainer>
                             <Icon
                                 icon="goTo"
@@ -468,6 +472,10 @@ const FollowedListNoteCount = styled(Margin)`
     background-color: ${(props) => props.theme.colors.grey};
     width: 30px;
     font-size: 12px;
+`
+
+const FollowedListDropdownIcon = styled(Icon)<{ isExpanded: boolean }>`
+    transform: ${(props) => (props.isExpanded ? 'none' : 'rotate(-90deg)')};
 `
 
 const CloseIconStyled = styled.div`
