@@ -27,7 +27,6 @@ import {
 import { SidebarContainerState } from '../containers/types'
 import Margin from 'src/dashboard-refactor/components/Margin'
 
-
 export interface AnnotationsSidebarProps
     extends Omit<SidebarContainerState, 'annotationModes'> {
     annotationModes: { [url: string]: AnnotationMode }
@@ -61,6 +60,7 @@ export interface AnnotationsSidebarProps
     isAnnotationCreateShown: boolean
     annotations: Annotation[]
     theme: Partial<SidebarTheme>
+    openCollectionPage: (remoteListId: string) => void
 }
 
 interface AnnotationsSidebarState {
@@ -214,16 +214,14 @@ class AnnotationsSidebar extends React.Component<
                     const listData = this.props.followedLists.byId[listId]
                     return (
                         <React.Fragment key={listId}>
-                            <FollowedListNotesContainer
-                                bottom="10px"
-                            >
+                            <FollowedListNotesContainer bottom="10px">
                                 <FollowedListRow>
                                     <FollowedListTitleContainer
                                         onClick={() =>
-                                                this.props.expandFollowedListNotes(
-                                                    listId,
-                                                )
-                                            }
+                                            this.props.expandFollowedListNotes(
+                                                listId,
+                                            )
+                                        }
                                     >
                                         <FollowedListTitle
                                             title={listData.name}
@@ -231,19 +229,26 @@ class AnnotationsSidebar extends React.Component<
                                             {listData.name}
                                         </FollowedListTitle>
                                         <FollowedListNoteCount
-                                            left="10px" right="5px"
+                                            left="10px"
+                                            right="5px"
                                         >
                                             {
-                                                listData.sharedAnnotationReferences
+                                                listData
+                                                    .sharedAnnotationReferences
                                                     .length
                                             }
                                         </FollowedListNoteCount>
-                                        <Icon
-                                            icon="triangle"
-                                            height="12px"
-                                        />
+                                        <Icon icon="triangle" height="12px" />
                                     </FollowedListTitleContainer>
-                                    <Icon icon="goTo" height="16px" />
+                                    <Icon
+                                        icon="goTo"
+                                        height="16px"
+                                        onClick={() =>
+                                            this.props.openCollectionPage(
+                                                listId,
+                                            )
+                                        }
+                                    />
                                 </FollowedListRow>
                                 {this.renderFollowedListNotes(listId)}
                             </FollowedListNotesContainer>

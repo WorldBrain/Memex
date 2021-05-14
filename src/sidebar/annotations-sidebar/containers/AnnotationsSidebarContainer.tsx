@@ -37,6 +37,7 @@ import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { sidebarNotesTypeToString } from '../utils'
+import { getListShareUrl } from 'src/content-sharing/utils'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -474,8 +475,8 @@ export class AnnotationsSidebarContainer<
                                 <NoteTypesWrapper>
                                     <NotesTypeName>
                                         {sidebarNotesTypeToString(
-                                        this.state.notesType,
-                                    )}{' '}
+                                            this.state.notesType,
+                                        )}{' '}
                                     </NotesTypeName>
                                     <Icon icon="triangle" height="12px" />
                                 </NoteTypesWrapper>
@@ -546,6 +547,12 @@ export class AnnotationsSidebarContainer<
                     <AnnotationsSidebar
                         {...this.state}
                         ref={(ref) => (this.sidebarRef = ref)}
+                        openCollectionPage={(remoteListId) =>
+                            window.open(
+                                getListShareUrl({ remoteListId }),
+                                '_blank',
+                            )
+                        }
                         sharingAccess={this.state.annotationSharingAccess}
                         needsWaypoint={!this.state.noResults}
                         appendLoader={
