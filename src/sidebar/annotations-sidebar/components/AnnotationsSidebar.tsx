@@ -206,6 +206,9 @@ class AnnotationsSidebar extends React.Component<
                         comment={noteData.comment}
                         lastEdited={noteData.updatedWhen}
                         createdWhen={noteData.createdWhen}
+                        creatorDependencies={
+                            this.props.users[noteData.creatorId]
+                        }
                     />
                 ))}
             </FollowedNotesContainer>

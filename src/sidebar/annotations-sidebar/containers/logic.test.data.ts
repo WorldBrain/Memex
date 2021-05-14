@@ -5,6 +5,7 @@ import {
     SharedAnnotationReference,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
 
 export const PAGE_URL_1 = 'https://test.com'
 export const COMMENT_1 = 'This is a test comment'
@@ -24,15 +25,22 @@ export const ANNOT_1: Annotation = {
     tags: [],
 }
 
+export const CREATOR_1: UserPublicDetails = {
+    user: { displayName: 'Tester A' },
+    profile: { avatarURL: 'https://worldbrain.io/test.jpg' },
+}
+
 export const SHARED_ANNOTATIONS: Array<
     SharedAnnotation & {
         reference: SharedAnnotationReference
-        creator: UserReference
+        creatorReference: UserReference
+        creator: UserPublicDetails
     }
 > = [
     {
         reference: { type: 'shared-annotation-reference', id: 1 },
-        creator: { type: 'user-reference', id: 123 },
+        creatorReference: { type: 'user-reference', id: 123 },
+        creator: CREATOR_1,
         normalizedPageUrl: 'test.com',
         body: 'test highlight 1',
         createdWhen: 11111,
@@ -41,7 +49,9 @@ export const SHARED_ANNOTATIONS: Array<
     },
     {
         reference: { type: 'shared-annotation-reference', id: 2 },
-        creator: { type: 'user-reference', id: 123 },
+        creatorReference: { type: 'user-reference', id: 123 },
+        creator: CREATOR_1,
+
         normalizedPageUrl: 'test.com',
         body: 'test highlight 2',
         comment: 'test comment 1',
@@ -51,7 +61,8 @@ export const SHARED_ANNOTATIONS: Array<
     },
     {
         reference: { type: 'shared-annotation-reference', id: 3 },
-        creator: { type: 'user-reference', id: 123 },
+        creatorReference: { type: 'user-reference', id: 123 },
+        creator: CREATOR_1,
         normalizedPageUrl: 'test.com',
         comment: 'test comment 2',
         createdWhen: 11111,

@@ -869,6 +869,7 @@ describe('SidebarContainerLogic', () => {
                 'pristine',
             )
             expect(sidebar.state.followedAnnotations).toEqual({})
+            expect(sidebar.state.users).toEqual({})
 
             await sidebar.processEvent('expandFollowedListNotes', { listId })
 
@@ -889,11 +890,17 @@ describe('SidebarContainerLogic', () => {
                             selector: note.selector,
                             createdWhen: note.createdWhen,
                             updatedWhen: note.updatedWhen,
-                            creatorId: note.creator.id,
+                            creatorId: note.creatorReference.id,
                         },
                     ]),
                 ),
             )
+            expect(sidebar.state.users).toEqual({
+                [DATA.SHARED_ANNOTATIONS[0].creatorReference.id]: {
+                    name: DATA.CREATOR_1.user.displayName,
+                    profileImgSrc: DATA.CREATOR_1.profile.avatarURL,
+                },
+            })
         })
     })
 })

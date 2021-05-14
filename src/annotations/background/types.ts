@@ -11,6 +11,7 @@ import {
     SharedAnnotation,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
 
 export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     createDirectLink: RemotePositionalFunction<Role, any[], any>
@@ -92,11 +93,17 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     getAnnotBookmark: RemotePositionalFunction<Role, any[], any>
     getSharedAnnotations: RemotePositionalFunction<
         Role,
-        [{ sharedAnnotationReferences: SharedAnnotationReference[] }],
+        [
+            {
+                sharedAnnotationReferences: SharedAnnotationReference[]
+                withCreatorData?: boolean
+            },
+        ],
         Array<
             SharedAnnotation & {
                 reference: SharedAnnotationReference
-                creator: UserReference
+                creatorReference: UserReference
+                creator?: UserPublicDetails
             }
         >
     >

@@ -883,6 +883,7 @@ export class SidebarContainerLogic extends UILogic<
                 const sharedAnnotations = await annotations.getSharedAnnotations(
                     {
                         sharedAnnotationReferences,
+                        withCreatorData: true,
                     },
                 )
 
@@ -898,9 +899,23 @@ export class SidebarContainerLogic extends UILogic<
                                     selector: annot.selector,
                                     createdWhen: annot.createdWhen,
                                     updatedWhen: annot.updatedWhen,
-                                    creatorId: annot.creator.id,
+                                    creatorId: annot.creatorReference.id,
                                 },
                             ]),
+                        ),
+                    },
+                    users: {
+                        $merge: fromPairs(
+                            sharedAnnotations.map(
+                                ({ creator, creatorReference }) => [
+                                    creatorReference.id,
+                                    {
+                                        name: creator?.user.displayName,
+                                        profileImgSrc:
+                                            creator?.profile.avatarURL,
+                                    },
+                                ],
+                            ),
                         ),
                     },
                 })
