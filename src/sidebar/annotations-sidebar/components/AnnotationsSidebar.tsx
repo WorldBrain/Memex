@@ -175,6 +175,20 @@ class AnnotationsSidebar extends React.Component<
             return this.renderLoader()
         }
 
+        if (list.loadState === 'error') {
+            return (
+                <>
+                    <FollowedListsMsgHead>
+                        Something went wrong
+                    </FollowedListsMsgHead>
+                    <FollowedListsMsg>
+                        Reload the page and, if the problem persists, contact
+                        support.
+                    </FollowedListsMsg>
+                </>
+            )
+        }
+
         const annotationsData = list.sharedAnnotationReferences
             .map((ref) => this.props.followedAnnotations[ref.id])
             .filter((a) => !!a)
@@ -208,8 +222,26 @@ class AnnotationsSidebar extends React.Component<
             return this.renderLoader()
         }
 
+        if (this.props.followedListLoadState === 'error') {
+            return (
+                <>
+                    <FollowedListsMsgHead>
+                        Something went wrong
+                    </FollowedListsMsgHead>
+                    <FollowedListsMsg>
+                        Reload the page and, if the problem persists, contact
+                        support.
+                    </FollowedListsMsg>
+                </>
+            )
+        }
+
         if (!this.props.followedLists.allIds.length) {
-            return 'No followed lists exist for this page'
+            return (
+                <FollowedListsMsg>
+                    No followed lists exist for this page
+                </FollowedListsMsg>
+            )
         }
 
         return this.props.followedLists.allIds.map((listId) => {
@@ -396,6 +428,10 @@ const FollowedNotesContainer = styled.div`
     flex-direction: column;
 `
 
+const FollowedListsMsgHead = styled.span`
+    font-weight: bold;
+`
+const FollowedListsMsg = styled.span``
 const FollowedListsContainer = styled.div`
     display: flex;
     flex-direction: column;
