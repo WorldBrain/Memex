@@ -208,55 +208,42 @@ class AnnotationsSidebar extends React.Component<
             return this.renderLoader()
         }
 
-        return (
-            <FollowedListsContainer>
-                {this.props.followedLists.allIds.map((listId) => {
-                    const listData = this.props.followedLists.byId[listId]
-                    return (
-                        <React.Fragment key={listId}>
-                            <FollowedListNotesContainer bottom="10px">
-                                <FollowedListRow>
-                                    <FollowedListTitleContainer
-                                        onClick={() =>
-                                            this.props.expandFollowedListNotes(
-                                                listId,
-                                            )
-                                        }
-                                    >
-                                        <FollowedListTitle
-                                            title={listData.name}
-                                        >
-                                            {listData.name}
-                                        </FollowedListTitle>
-                                        <FollowedListNoteCount
-                                            left="10px"
-                                            right="5px"
-                                        >
-                                            {
-                                                listData
-                                                    .sharedAnnotationReferences
-                                                    .length
-                                            }
-                                        </FollowedListNoteCount>
-                                        <Icon icon="triangle" height="12px" />
-                                    </FollowedListTitleContainer>
-                                    <Icon
-                                        icon="goTo"
-                                        height="16px"
-                                        onClick={() =>
-                                            this.props.openCollectionPage(
-                                                listId,
-                                            )
-                                        }
-                                    />
-                                </FollowedListRow>
-                                {this.renderFollowedListNotes(listId)}
-                            </FollowedListNotesContainer>
-                        </React.Fragment>
-                    )
-                })}
-            </FollowedListsContainer>
-        )
+        if (!this.props.followedLists.allIds.length) {
+            return 'No followed lists exist for this page'
+        }
+
+        return this.props.followedLists.allIds.map((listId) => {
+            const listData = this.props.followedLists.byId[listId]
+            return (
+                <React.Fragment key={listId}>
+                    <FollowedListNotesContainer bottom="10px">
+                        <FollowedListRow>
+                            <FollowedListTitleContainer
+                                onClick={() =>
+                                    this.props.expandFollowedListNotes(listId)
+                                }
+                            >
+                                <FollowedListTitle title={listData.name}>
+                                    {listData.name}
+                                </FollowedListTitle>
+                                <FollowedListNoteCount left="10px" right="5px">
+                                    {listData.sharedAnnotationReferences.length}
+                                </FollowedListNoteCount>
+                                <Icon icon="triangle" height="12px" />
+                            </FollowedListTitleContainer>
+                            <Icon
+                                icon="goTo"
+                                height="16px"
+                                onClick={() =>
+                                    this.props.openCollectionPage(listId)
+                                }
+                            />
+                        </FollowedListRow>
+                        {this.renderFollowedListNotes(listId)}
+                    </FollowedListNotesContainer>
+                </React.Fragment>
+            )
+        })
     }
 
     private renderResultsBody() {
@@ -265,7 +252,11 @@ class AnnotationsSidebar extends React.Component<
         }
 
         if (this.props.notesType === 'shared') {
-            return this.renderSharedNotesByList()
+            return (
+                <FollowedListsContainer>
+                    {this.renderSharedNotesByList()}
+                </FollowedListsContainer>
+            )
         }
 
         return (
