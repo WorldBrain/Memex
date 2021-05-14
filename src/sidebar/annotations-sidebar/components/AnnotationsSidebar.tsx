@@ -428,6 +428,7 @@ const FollowedListNotesContainer = styled(Margin)`
 const FollowedNotesContainer = styled.div`
     display: flex;
     flex-direction: column;
+    width: 100%;
 `
 
 const FollowedListsMsgHead = styled.span`
