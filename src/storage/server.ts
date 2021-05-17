@@ -115,6 +115,7 @@ export function createLazyServerStorage(
             })
             const userManagement = new UserStorage({
                 storageManager,
+                operationExecuter: operationExecuter('users'),
             })
             const activityStreams = new ActivityStreamsStorage({
                 storageManager,
