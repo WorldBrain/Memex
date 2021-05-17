@@ -896,6 +896,15 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 )
 
+                this.options.events?.emit('renderHighlights', {
+                    highlights: sharedAnnotations
+                        .filter((annot) => annot.selector != null)
+                        .map((annot) => ({
+                            url: annot.reference.id.toString(),
+                            selector: annot.selector,
+                        })),
+                })
+
                 this.emitMutation({
                     followedAnnotations: {
                         $merge: fromPairs(

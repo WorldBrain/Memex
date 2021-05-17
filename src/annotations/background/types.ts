@@ -104,6 +104,7 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
                 reference: SharedAnnotationReference
                 creatorReference: UserReference
                 creator?: UserPublicDetails
+                selector?: Anchor
             }
         >
     >

@@ -23,6 +23,7 @@ export { ResultWithIndex }
 
 export interface HighlighterEvents {
     renderHighlight: (args: { highlight: Highlight }) => void
+    renderHighlights: (args: { highlights: Highlight[] }) => void
     highlightAndScroll: (args: { url: string }) => void
     removeTemporaryHighlights: () => void
     removeAnnotationHighlights: (args: { url: string }) => void

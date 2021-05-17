@@ -94,6 +94,18 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 })
             }),
         )
+        this.props.events.on('renderHighlights', async ({ highlights }) => {
+            await highlighter.renderHighlights(
+                highlights,
+                ({ annotationUrl }) => {
+                    inPageUI.showSidebar({
+                        annotationUrl,
+                        // anchor: highlight.selector,
+                        action: 'show_annotation',
+                    })
+                },
+            )
+        })
     }
 
     cleanupEventForwarding = () => {

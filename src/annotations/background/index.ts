@@ -551,6 +551,10 @@ export default class DirectLinkingBackground {
             ...annotationsById[ref.id],
             creatorReference: annotationsById[ref.id].creator,
             creator: creatorData?.[annotationsById[ref.id].creator.id],
+            selector:
+                annotationsById[ref.id].selector != null
+                    ? JSON.parse(annotationsById[ref.id].selector)
+                    : undefined,
         }))
     }
 
