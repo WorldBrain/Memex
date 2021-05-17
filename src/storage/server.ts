@@ -49,9 +49,11 @@ export function createLazyServerStorage(
     options: {
         autoPkType: 'string' | 'number'
         sharedSyncLog?: SharedSyncLogStorage
+        skipApplicationLayer?: boolean
     },
 ) {
     let serverStoragePromise: Promise<ServerStorage>
+    const storageManager = createStorageManager()
 
     try {
         window['setServerStorageLoggingEnabled'] = (value: boolean) =>
@@ -64,37 +66,10 @@ export function createLazyServerStorage(
         }
 
         serverStoragePromise = (async () => {
-            const storageManager = createStorageManager()
-            const firebase = getFirebase()
-
-            const applicationLayer = createClientApplicationLayer(
-                async (name, params) => {
-                    const functions = firebase.functions()
-                    const result = await functions.httpsCallable(name)(params)
-                    return result.data
-                },
-            )
-
-            const defaultOperationExecutor = _defaultOperationExecutor(
-                storageManager,
-            )
-            const operationExecuter: (
-                storageModuleName: keyof typeof ALLOWED_STORAGE_MODULE_OPERATIONS,
-            ) => StorageOperationExecuter = (storageModuleName) => async (
-                params,
-            ) => {
-                const allowModuleOperations = ALLOWED_STORAGE_MODULE_OPERATIONS[
-                    storageModuleName
-                ] as any
-                if (!allowModuleOperations?.[params.name]) {
-                    return defaultOperationExecutor(params)
-                }
-                return applicationLayer.executeStorageModuleOperation({
-                    storageModule: storageModuleName,
-                    operationName: params.name,
-                    operationArgs: params.context,
-                })
-            }
+            const operationExecuter = !options.skipApplicationLayer
+                ? getFirebaseOperationExecuter(storageManager)
+                : (stroageModuleName: string) =>
+                      _defaultOperationExecutor(storageManager)
 
             const sharedSyncLog =
                 options.sharedSyncLog ??
@@ -158,6 +133,38 @@ export function createLazyMemoryServerStorage() {
         },
         {
             autoPkType: 'number',
+            skipApplicationLayer: true,
         },
     )
+}
+
+function getFirebaseOperationExecuter(storageManager: StorageManager) {
+    const firebase = getFirebase()
+
+    const applicationLayer = createClientApplicationLayer(
+        async (name, params) => {
+            const functions = firebase.functions()
+            const result = await functions.httpsCallable(name)(params)
+            return result.data
+        },
+    )
+
+    const defaultOperationExecutor = _defaultOperationExecutor(storageManager)
+    const operationExecuter: (
+        storageModuleName: keyof typeof ALLOWED_STORAGE_MODULE_OPERATIONS,
+    ) => StorageOperationExecuter = (storageModuleName) => async (params) => {
+        const allowModuleOperations = ALLOWED_STORAGE_MODULE_OPERATIONS[
+            storageModuleName
+        ] as any
+        if (!allowModuleOperations?.[params.name]) {
+            return defaultOperationExecutor(params)
+        }
+        return applicationLayer.executeStorageModuleOperation({
+            storageModule: storageModuleName,
+            operationName: params.name,
+            operationArgs: params.context,
+        })
+    }
+
+    return operationExecuter
 }
