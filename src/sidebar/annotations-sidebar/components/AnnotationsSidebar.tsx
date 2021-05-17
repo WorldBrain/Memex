@@ -202,12 +202,23 @@ class AnnotationsSidebar extends React.Component<
                 {annotationsData.map((noteData, i) => (
                     <AnnotationEditable
                         key={i}
+                        url={noteData.id}
                         body={noteData.body}
                         comment={noteData.comment}
                         lastEdited={noteData.updatedWhen}
                         createdWhen={noteData.createdWhen}
                         creatorDependencies={
                             this.props.users[noteData.creatorId]
+                        }
+                        isActive={
+                            this.props.activeAnnotationUrl === noteData.id
+                        }
+                        onHighlightClick={this.props.setActiveAnnotationUrl(
+                            noteData.id,
+                        )}
+                        isClickable={
+                            this.props.theme.canClickAnnotations &&
+                            noteData.body?.length > 0
                         }
                     />
                 ))}

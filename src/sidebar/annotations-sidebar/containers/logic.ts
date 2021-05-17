@@ -2,7 +2,6 @@ import fromPairs from 'lodash/fromPairs'
 import debounce from 'lodash/debounce'
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { isFullUrl, normalizeUrl } from '@worldbrain/memex-url-utils'
-import { EventEmitter } from 'events'
 
 import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
@@ -56,14 +55,8 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
     SidebarContainerEvents
 > {
-    private inPageEvents: AnnotationsSidebarInPageEventEmitter
-
     constructor(private options: SidebarLogicOptions) {
         super()
-
-        this.inPageEvents =
-            options.events ??
-            (new EventEmitter() as AnnotationsSidebarInPageEventEmitter)
     }
 
     private get resultLimit(): number {
