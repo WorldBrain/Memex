@@ -216,11 +216,12 @@ class AnnotationsSidebar extends React.Component<
     }
 
     private renderSharedNotesByList() {
-        if (this.props.followedListLoadState === 'running') {
+        const { followedListLoadState, followedLists } = this.props
+        if (followedListLoadState === 'running') {
             return this.renderLoader()
         }
 
-        if (this.props.followedListLoadState === 'error') {
+        if (followedListLoadState === 'error') {
             return (
                 <>
                     <FollowedListsMsgHead>
@@ -234,7 +235,7 @@ class AnnotationsSidebar extends React.Component<
             )
         }
 
-        if (!this.props.followedLists.allIds.length) {
+        if (!followedLists.allIds.length) {
             return (
                 <FollowedListsMsg>
                     No followed lists exist for this page
@@ -242,8 +243,8 @@ class AnnotationsSidebar extends React.Component<
             )
         }
 
-        return this.props.followedLists.allIds.map((listId) => {
-            const listData = this.props.followedLists.byId[listId]
+        return followedLists.allIds.map((listId) => {
+            const listData = followedLists.byId[listId]
             return (
                 <React.Fragment key={listId}>
                     <FollowedListNotesContainer bottom="10px">

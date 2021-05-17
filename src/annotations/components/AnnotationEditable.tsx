@@ -127,6 +127,11 @@ export default class AnnotationEditable extends React.Component<Props> {
         return {
             createdWhen,
             lastEdited: lastEdited !== createdWhen ? lastEdited : undefined,
+            creator: this.props.creatorDependencies
+                ? {
+                      displayName: this.props.creatorDependencies.name,
+                  }
+                : undefined,
         }
     }
 
@@ -345,11 +350,7 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     private renderFooter() {
-        const {
-            mode,
-            annotationFooterDependencies: footerDeps,
-            creatorDependencies: creatorDeps,
-        } = this.props
+        const { mode, annotationFooterDependencies: footerDeps } = this.props
 
         let actionBtnText: string
         let actionBtnHandler: React.MouseEventHandler
@@ -366,14 +367,6 @@ export default class AnnotationEditable extends React.Component<Props> {
         } else {
             return (
                 <DefaultFooterStyled>
-                    {creatorDeps && (
-                        <CreatorContainer>
-                            {/*<CreatorProfileImg
-                                src={creatorDeps.profileImgSrc}
-                            />*/}
-                            <CreatorName>{creatorDeps.name}</CreatorName>
-                        </CreatorContainer>
-                    )}
                     <ItemBoxBottom
                         firstDivProps={{
                             onMouseEnter: this.props.onFooterHover,
@@ -646,24 +639,6 @@ const DefaultFooterStyled = styled.div`
     & div {
         border-top: none;
     }
-`
-
-const CreatorContainer = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-`
-
-const CreatorProfileImg = styled.img`
-    border-radius: 50%;
-    height: 25px;
-    margin: 0 10px;
-`
-
-const CreatorName = styled.span`
-    font-weight: bold;
-    font-size: 12px;
-    white-space: nowrap;
 `
 
 const AnnotationStyled = styled.div`
