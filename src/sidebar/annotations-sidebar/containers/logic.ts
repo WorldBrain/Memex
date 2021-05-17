@@ -330,8 +330,17 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
 
+        if (previousState.pageUrl === event.pageUrl) {
+            return
+        }
+
         const mutation: UIMutation<SidebarContainerState> = {
+            followedLists: { $set: initNormalizedState() },
+            followedListLoadState: { $set: 'pristine' },
+            followedAnnotations: { $set: {} },
             pageUrl: { $set: event.pageUrl },
+            notesType: { $set: 'private' },
+            users: { $set: {} },
         }
         this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
