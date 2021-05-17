@@ -180,13 +180,23 @@ export default class CustomListBackground {
         )
         const currentUser = await auth.getCurrentUser()!
 
-        return sharedLists.map((sharedList) => ({
-            isOwned: sharedList.creator.id === currentUser.id,
-            remoteId: sharedList.reference.id as string,
-            id: sharedList.createdWhen,
-            name: sharedList.title,
-            isFollowed: true,
-        }))
+        return sharedLists
+            .sort((a, b) => {
+                if (a.title < b.title) {
+                    return -1
+                }
+                if (a.title > b.title) {
+                    return 1
+                }
+                return 0
+            })
+            .map((sharedList) => ({
+                isOwned: sharedList.creator.id === currentUser.id,
+                remoteId: sharedList.reference.id as string,
+                id: sharedList.createdWhen,
+                name: sharedList.title,
+                isFollowed: true,
+            }))
     }
 
     fetchAllLists = async ({
