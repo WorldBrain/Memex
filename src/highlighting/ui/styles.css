@@ -4,11 +4,11 @@
     cursor: pointer;
 
     &.medium {
-        background: #89e9ff;
+        background: #ffff3c66;
     }
 
     &.dark {
-        background: #89e9ff;
+        background: #ffff3c66;
     }
 
     &.tmp {
