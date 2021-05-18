@@ -32,7 +32,6 @@ export type SearchFilterLabel = 'Date' | 'Tags' | 'Domains' | 'Collections'
 
 export interface SearchFiltersState {
     searchQuery: string
-    isSearchBarFocused: boolean
     searchFiltersOpen: boolean
     isTagFilterActive: boolean
     isDateFilterActive: boolean
@@ -54,7 +53,6 @@ export interface SearchFiltersState {
 
 export type SearchFilterEvents = UIEvent<{
     setSearchQuery: { query: string }
-    setSearchBarFocus: { isFocused: boolean }
 
     setSearchFiltersOpen: { isOpen: boolean }
     toggleShowTagPicker: { isActive: boolean }

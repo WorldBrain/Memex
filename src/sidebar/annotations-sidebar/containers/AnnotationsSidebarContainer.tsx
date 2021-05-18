@@ -261,6 +261,12 @@ export class AnnotationsSidebarContainer<
                 <HoverBox>
                     <TagPicker
                         initialSelectedEntries={() => annot.tags}
+                        queryEntries={(query) =>
+                            this.props.tags.searchForTagSuggestions({ query })
+                        }
+                        loadDefaultSuggestions={
+                            this.props.tags.fetchInitialTagSuggestions
+                        }
                         onUpdateEntrySelection={this.handleTagsUpdate(
                             currentAnnotationId,
                         )}
