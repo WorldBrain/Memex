@@ -183,7 +183,7 @@ class AnnotationsSidebar extends React.Component<
                         Something went wrong
                     </FollowedListsMsgHead>
                     <FollowedListsMsg>
-                        Reload the page and, if the problem persists, <ExternalLink label='contact
+                        Reload the page and if the problem persists <ExternalLink label='contact
                         support' href="mailto:support@worldbrain.io"/>. 
                     </FollowedListsMsg>
                 </FollowedListsMsgContainer>
@@ -240,8 +240,8 @@ class AnnotationsSidebar extends React.Component<
                         Something went wrong
                     </FollowedListsMsgHead>
                     <FollowedListsMsg>
-                        Reload the page and, if the problem persists, contact
-                        support.
+                        Reload the page and if the problem persists <ExternalLink label='contact
+                        support' href="mailto:support@worldbrain.io"/>.
                     </FollowedListsMsg>
                 </FollowedListsMsgContainer>
             )
@@ -465,7 +465,6 @@ const FollowedListsMsg = styled.span`
     color: ${(props) => props.theme.colors.darkgrey};
     text-align: center;
 `
-
 
 const FollowedListsContainer = styled.div`
     display: flex;
