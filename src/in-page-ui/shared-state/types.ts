@@ -1,6 +1,7 @@
 import TypedEventEmitter from 'typed-emitter'
 import { Anchor } from 'src/highlighting/types'
 import { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
+import { SidebarDisplayMode } from 'src/sidebar/annotations-sidebar/containers/types'
 
 export type InPageUISidebarAction =
     | 'annotate'
@@ -25,6 +26,7 @@ export interface SidebarActionOptions {
     action: InPageUISidebarAction
     anchor?: Anchor
     annotationUrl?: string
+    displayMode?: SidebarDisplayMode
     annotationData?: IncomingAnnotationData
     annotationSharingAccess?: AnnotationSharingAccess
 }

@@ -65,7 +65,7 @@ export class SidebarContainerLogic extends UILogic<
 
     getInitialState(): SidebarContainerState {
         return {
-            notesType: 'private',
+            displayMode: 'private-notes',
             loadState: 'pristine',
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',
@@ -229,18 +229,18 @@ export class SidebarContainerLogic extends UILogic<
         return false
     }
 
-    setNotesType: EventHandler<'setNotesType'> = async ({
+    setDisplayMode: EventHandler<'setDisplayMode'> = async ({
         event,
         previousState,
     }) => {
         const mutation: UIMutation<SidebarContainerState> = {
-            notesType: { $set: event.notesType },
+            displayMode: { $set: event.mode },
         }
 
         this.emitMutation(mutation)
 
         if (
-            event.notesType === 'shared' &&
+            event.mode === 'shared-notes' &&
             previousState.followedListLoadState === 'pristine'
         ) {
             await this.processUIEvent('loadFollowedLists', {
@@ -332,7 +332,7 @@ export class SidebarContainerLogic extends UILogic<
             followedListLoadState: { $set: 'pristine' },
             followedAnnotations: { $set: {} },
             pageUrl: { $set: event.pageUrl },
-            notesType: { $set: 'private' },
+            displayMode: { $set: 'private-notes' },
             users: { $set: {} },
         }
         this.emitMutation(mutation)
@@ -878,6 +878,7 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         this.options.events?.emit('renderHighlights', {
+            displayMode: 'shared-notes',
             highlights: followedAnnotIds
                 .filter(
                     (id) =>
@@ -917,6 +918,7 @@ export class SidebarContainerLogic extends UILogic<
                 )
 
                 this.options.events?.emit('renderHighlights', {
+                    displayMode: 'shared-notes',
                     highlights: sharedAnnotations
                         .filter((annot) => annot.selector != null)
                         .map((annot) => ({

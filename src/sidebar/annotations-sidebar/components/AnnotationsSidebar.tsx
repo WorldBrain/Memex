@@ -142,7 +142,7 @@ class AnnotationsSidebar extends React.Component<
     }
 
     private renderNewAnnotation() {
-        if (this.props.notesType === 'shared') {
+        if (this.props.displayMode === 'shared-notes') {
             return null
         }
 
@@ -297,7 +297,7 @@ class AnnotationsSidebar extends React.Component<
             return this.renderLoader()
         }
 
-        if (this.props.notesType === 'shared') {
+        if (this.props.displayMode === 'shared-notes') {
             return (
                 <FollowedListsContainer>
                     {this.renderSharedNotesByList()}

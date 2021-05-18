@@ -2,6 +2,7 @@ import TypedEventEmitter from 'typed-emitter'
 
 import { Highlight } from 'src/highlighting/types'
 import { ResultWithIndex } from 'src/overview/types'
+import { SidebarDisplayMode } from './containers/types'
 
 export interface Page {
     url?: string
@@ -23,7 +24,10 @@ export { ResultWithIndex }
 
 export interface HighlighterEvents {
     renderHighlight: (args: { highlight: Highlight }) => void
-    renderHighlights: (args: { highlights: Highlight[] }) => void
+    renderHighlights: (args: {
+        highlights: Highlight[]
+        displayMode?: SidebarDisplayMode
+    }) => void
     highlightAndScroll: (args: { url: string }) => void
     removeTemporaryHighlights: () => void
     removeAnnotationHighlight: (args: { url: string }) => void

@@ -17,6 +17,7 @@ import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/Shar
 import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
+import { SidebarDisplayMode } from './types'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -71,24 +72,24 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     private setupEventForwarding() {
-        const { inPageUI, highlighter } = this.props
+        const { inPageUI, highlighter, events: sidebarEvents } = this.props
 
         inPageUI.events.on('stateChanged', this.handleInPageUIStateChange)
         inPageUI.events.on('sidebarAction', this.handleExternalAction)
 
-        this.props.events.on('removeTemporaryHighlights', () =>
+        sidebarEvents.on('removeTemporaryHighlights', () =>
             highlighter.removeTempHighlights(),
         )
-        this.props.events.on('highlightAndScroll', ({ url }) =>
+        sidebarEvents.on('highlightAndScroll', ({ url }) =>
             highlighter.highlightAndScroll({ url } as any),
         )
-        this.props.events.on('removeAnnotationHighlight', ({ url }) =>
+        sidebarEvents.on('removeAnnotationHighlight', ({ url }) =>
             highlighter.removeAnnotationHighlight(url),
         )
-        this.props.events.on('removeAnnotationHighlights', ({ urls }) =>
+        sidebarEvents.on('removeAnnotationHighlights', ({ urls }) =>
             highlighter.removeAnnotationHighlights(urls),
         )
-        this.props.events.on('renderHighlight', ({ highlight }) =>
+        sidebarEvents.on('renderHighlight', ({ highlight }) =>
             highlighter.renderHighlight(highlight, () => {
                 inPageUI.showSidebar({
                     annotationUrl: highlight.url,
@@ -97,18 +98,21 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 })
             }),
         )
-        this.props.events.on('renderHighlights', async ({ highlights }) => {
-            await highlighter.renderHighlights(
-                highlights,
-                ({ annotationUrl }) => {
-                    inPageUI.showSidebar({
-                        annotationUrl,
-                        // anchor: highlight.selector,
-                        action: 'show_annotation',
-                    })
-                },
-            )
-        })
+        sidebarEvents.on(
+            'renderHighlights',
+            async ({ highlights, displayMode }) => {
+                await highlighter.renderHighlights(
+                    highlights,
+                    ({ annotationUrl }) => {
+                        inPageUI.showSidebar({
+                            displayMode,
+                            annotationUrl,
+                            action: 'show_annotation',
+                        })
+                    },
+                )
+            },
+        )
     }
 
     cleanupEventForwarding = () => {
@@ -127,12 +131,26 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         return containerNode?.getRootNode() as Document
     }
 
-    private activateAnnotation(url: string) {
-        this.processEvent('switchAnnotationMode', {
-            annotationUrl: url,
-            context: 'pageAnnotations',
-            mode: 'default',
-        })
+    private activateAnnotation(
+        url: string,
+        annotationMode: 'edit' | 'show',
+        displayMode: SidebarDisplayMode = 'private-notes',
+    ) {
+        this.processEvent('setDisplayMode', { mode: displayMode })
+
+        if (annotationMode === 'show') {
+            this.processEvent('switchAnnotationMode', {
+                annotationUrl: url,
+                context: 'pageAnnotations',
+                mode: 'default',
+            })
+        } else {
+            this.processEvent('setAnnotationEditMode', {
+                annotationUrl: url,
+                context: 'pageAnnotations',
+            })
+        }
+
         this.processEvent('setActiveAnnotationUrl', { annotationUrl: url })
         const annotationBoxNode = this.getDocument()?.getElementById(url)
 
@@ -153,12 +171,17 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 tags: event.annotationData?.tags,
             })
         } else if (event.action === 'show_annotation') {
-            this.activateAnnotation(event.annotationUrl)
+            this.activateAnnotation(
+                event.annotationUrl,
+                'show',
+                event.displayMode,
+            )
         } else if (event.action === 'edit_annotation') {
-            this.processEvent('setAnnotationEditMode', {
-                annotationUrl: event.annotationUrl,
-                context: 'pageAnnotations',
-            })
+            this.activateAnnotation(
+                event.annotationUrl,
+                'edit',
+                'private-notes',
+            )
         } else if (event.action === 'set_sharing_access') {
             this.processEvent('receiveSharingAccessChange', {
                 sharingAccess: event.annotationSharingAccess,
