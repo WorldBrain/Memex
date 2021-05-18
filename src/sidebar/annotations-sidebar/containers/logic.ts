@@ -65,7 +65,7 @@ export class SidebarContainerLogic extends UILogic<
 
     getInitialState(): SidebarContainerState {
         return {
-            notesType: 'private',
+            displayMode: 'private-notes',
             loadState: 'pristine',
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',
@@ -229,18 +229,18 @@ export class SidebarContainerLogic extends UILogic<
         return false
     }
 
-    setNotesType: EventHandler<'setNotesType'> = async ({
+    setDisplayMode: EventHandler<'setDisplayMode'> = async ({
         event,
         previousState,
     }) => {
         const mutation: UIMutation<SidebarContainerState> = {
-            notesType: { $set: event.notesType },
+            displayMode: { $set: event.mode },
         }
 
         this.emitMutation(mutation)
 
         if (
-            event.notesType === 'shared' &&
+            event.mode === 'shared-notes' &&
             previousState.followedListLoadState === 'pristine'
         ) {
             await this.processUIEvent('loadFollowedLists', {
@@ -332,7 +332,7 @@ export class SidebarContainerLogic extends UILogic<
             followedListLoadState: { $set: 'pristine' },
             followedAnnotations: { $set: {} },
             pageUrl: { $set: event.pageUrl },
-            notesType: { $set: 'private' },
+            displayMode: { $set: 'private-notes' },
             users: { $set: {} },
         }
         this.emitMutation(mutation)
@@ -840,9 +840,14 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
     }) => {
         const {
+            sharedAnnotationReferences,
             isExpanded: wasExpanded,
             loadState,
         } = previousState.followedLists.byId[event.listId]
+
+        const followedAnnotIds = sharedAnnotationReferences.map(
+            (ref) => ref.id as string,
+        )
 
         const mutation: UIMutation<SidebarContainerState> = {
             followedLists: {
@@ -855,12 +860,35 @@ export class SidebarContainerLogic extends UILogic<
         }
         this.emitMutation(mutation)
 
-        if (!wasExpanded && loadState === 'pristine') {
+        // If collapsing, signal to de-render highlights
+        if (wasExpanded) {
+            this.options.events?.emit('removeAnnotationHighlights', {
+                urls: followedAnnotIds,
+            })
+            return
+        }
+
+        // If annot data yet to be loaded, load it
+        if (loadState === 'pristine') {
             await this.processUIEvent('loadFollowedListNotes', {
                 event,
                 previousState: this.withMutation(previousState, mutation),
             })
+            return
         }
+
+        this.options.events?.emit('renderHighlights', {
+            displayMode: 'shared-notes',
+            highlights: followedAnnotIds
+                .filter(
+                    (id) =>
+                        previousState.followedAnnotations[id]?.selector != null,
+                )
+                .map((id) => ({
+                    url: id,
+                    selector: previousState.followedAnnotations[id].selector,
+                })),
+        })
     }
 
     loadFollowedListNotes: EventHandler<'loadFollowedListNotes'> = async ({
@@ -890,6 +918,7 @@ export class SidebarContainerLogic extends UILogic<
                 )
 
                 this.options.events?.emit('renderHighlights', {
+                    displayMode: 'shared-notes',
                     highlights: sharedAnnotations
                         .filter((annot) => annot.selector != null)
                         .map((annot) => ({
@@ -923,7 +952,7 @@ export class SidebarContainerLogic extends UILogic<
                                     {
                                         name: creator?.user.displayName,
                                         profileImgSrc:
-                                            creator?.profile.avatarURL,
+                                            creator?.profile?.avatarURL,
                                     },
                                 ],
                             ),

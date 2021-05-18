@@ -14,7 +14,7 @@ import type {
     SidebarContainerState,
     SidebarContainerEvents,
     AnnotationEventContext,
-    SidebarNotesType,
+    SidebarDisplayMode,
 } from './types'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
@@ -467,15 +467,15 @@ export class AnnotationsSidebarContainer<
                             ))}
                         <DropdownMenuBtn
                             onMenuItemClick={(item) =>
-                                this.processEvent('setNotesType', {
-                                    notesType: item.id as SidebarNotesType,
+                                this.processEvent('setDisplayMode', {
+                                    mode: item.id as SidebarDisplayMode,
                                 })
                             }
                             btnChildren={
                                 <NoteTypesWrapper>
                                     <NotesTypeName>
                                         {sidebarNotesTypeToString(
-                                            this.state.notesType,
+                                            this.state.displayMode,
                                         )}{' '}
                                     </NotesTypeName>
                                     <Icon icon="triangle" height="12px" />
@@ -483,20 +483,24 @@ export class AnnotationsSidebarContainer<
                             }
                             menuItems={[
                                 {
-                                    id: 'private',
-                                    name: sidebarNotesTypeToString('private'),
+                                    id: 'private-notes',
+                                    name: sidebarNotesTypeToString(
+                                        'private-notes',
+                                    ),
                                     info: 'The notes you made on this page',
                                 },
                                 {
-                                    id: 'shared',
-                                    name: sidebarNotesTypeToString('shared'),
+                                    id: 'shared-notes',
+                                    name: sidebarNotesTypeToString(
+                                        'shared-notes',
+                                    ),
                                     info:
                                         'Notes shared with you via collections',
                                 },
                             ]}
                         />
                     </TopBarActionBtns>
-                    {this.state.notesType === 'private' && (
+                    {this.state.displayMode === 'private-notes' && (
                         <TopBarActionBtns>
                             <SortingDropdownMenuBtn
                                 onMenuItemClick={({ sortingFn }) =>

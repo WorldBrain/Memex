@@ -498,11 +498,14 @@ export class HighlightRenderer implements HighlightRendererInterface {
         parent.removeChild(highlight)
     }
 
+    removeAnnotationHighlights = (urls: string[]) =>
+        urls.forEach(this.removeAnnotationHighlight)
+
     /**
-     * Removes all the highlights of a given annotation.
+     * Removes the highlights of a given annotation.
      * Called when the annotation is deleted.
      */
-    removeAnnotationHighlights = (url: string) => {
+    removeAnnotationHighlight = (url: string) => {
         const baseClass = styles['memex-highlight']
         const highlights = document.querySelectorAll(
             `.${baseClass}[data-annotation="${url}"]`,
@@ -510,5 +513,5 @@ export class HighlightRenderer implements HighlightRendererInterface {
         highlights.forEach((highlight) => this._removeHighlight(highlight))
     }
 
-    undoHighlight = this.removeAnnotationHighlights
+    undoHighlight = this.removeAnnotationHighlight
 }
