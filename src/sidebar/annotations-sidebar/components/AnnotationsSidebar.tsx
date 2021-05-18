@@ -5,8 +5,7 @@ import onClickOutside from 'react-onclickoutside'
 
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import AnnotationCreate, {
-    AnnotationCreateGeneralProps,
-    AnnotationCreateEventProps,
+    Props as AnnotationCreateProps,
 } from 'src/annotations/components/AnnotationCreate'
 import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
@@ -46,8 +45,7 @@ export interface AnnotationsSidebarProps {
     bindAnnotationEditProps: (
         annotation: Annotation,
     ) => AnnotationEditGeneralProps & AnnotationEditEventProps
-    annotationCreateProps: AnnotationCreateGeneralProps &
-        AnnotationCreateEventProps
+    annotationCreateProps: AnnotationCreateProps
 
     sharingAccess: AnnotationSharingAccess
     isSearchLoading: boolean

@@ -82,21 +82,19 @@ const StyledIcon = styled(Icon)`
 export interface SearchBarProps {
     placeholder?: string
     searchQuery: string
-    isSearchBarFocused: boolean
     searchFiltersOpen: boolean
-    onSearchBarFocus(): void
     onSearchQueryChange(queryString: string): void
     onSearchFiltersOpen(): void
     onInputClear(): void
 }
 
 export default class SearchBar extends PureComponent<SearchBarProps> {
-    inputRef = React.createRef<HTMLInputElement>()
-    componentDidMount = () => {
-        if (this.props.isSearchBarFocused) {
-            this.inputRef.current.focus()
-        }
+    private inputRef = React.createRef<HTMLInputElement>()
+
+    componentDidMount() {
+        this.inputRef.current.focus()
     }
+
     handleChange: React.KeyboardEventHandler = (evt) => {
         // need to amend getFilterStrings function to pull through search terms as well, then
         // bundle them in an object to send with the onSearchQueryChange func
@@ -113,11 +111,10 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
             searchFiltersOpen,
             searchQuery,
             onSearchFiltersOpen,
-            onSearchBarFocus,
         } = this.props
         return (
             <Margin vertical="auto">
-                <SearchBarContainer onClick={onSearchBarFocus}>
+                <SearchBarContainer>
                     <FullWidthMargin>
                         {!!searchQuery ? (
                             <IconContainer>

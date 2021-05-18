@@ -4,7 +4,6 @@ import onClickOutside from 'react-onclickoutside'
 
 import { ButtonTooltip } from 'src/common-ui/components'
 import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
-import TagInput from 'src/tags/ui/tag-input'
 import { FocusableComponent } from './types'
 import { insertTab, uninsertTab } from 'src/common-ui/utils'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
@@ -13,7 +12,10 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import SharePrivacyOption from 'src/overview/sharing/components/SharePrivacyOption'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import Margin from 'src/dashboard-refactor/components/Margin'
-
+import TagHolder from 'src/tags/ui/tag-holder'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import { ClickAway } from 'src/util/click-away-wrapper'
+import TagPicker, { TagPickerDependencies } from 'src/tags/ui/TagPicker'
 
 interface State {
     isTagPickerShown: boolean
@@ -30,14 +32,20 @@ export interface AnnotationCreateEventProps {
 
 export interface AnnotationCreateGeneralProps {
     hide?: () => void
+    autoFocus?: boolean
     comment: string
     tags: string[]
-    autoFocus?: boolean
 }
 
 export interface Props
     extends AnnotationCreateGeneralProps,
-        AnnotationCreateEventProps {}
+        AnnotationCreateEventProps,
+        Partial<
+            Pick<
+                TagPickerDependencies,
+                'queryEntries' | 'loadDefaultSuggestions'
+            >
+        > {}
 
 export class AnnotationCreate extends React.Component<Props, State>
     implements FocusableComponent {
@@ -132,22 +140,38 @@ export class AnnotationCreate extends React.Component<Props, State>
         })
 
     private renderTagPicker() {
+        const { tags, onTagsUpdate } = this.props
+        const setPickerShown = (isTagPickerShown: boolean) =>
+            this.setState({ isTagPickerShown })
+
+        const tagPicker = !this.state.isTagPickerShown ? null : (
+            <HoverBox>
+                <ClickAway onClickAway={() => setPickerShown(false)}>
+                    <TagPicker
+                        {...this.props}
+                        onUpdateEntrySelection={async ({ selected }) =>
+                            onTagsUpdate(selected)
+                        }
+                        initialSelectedEntries={() => tags}
+                        onEscapeKeyDown={() => setPickerShown(false)}
+                    />
+                </ClickAway>
+            </HoverBox>
+        )
+
         return (
-            <TagInput
-                updateTags={async ({ selected }) =>
-                    this.props.onTagsUpdate(selected)
-                }
-                isTagInputActive={this.state.isTagPickerShown}
-                setTagInputActive={(isTagPickerShown) =>
-                    this.setState({ isTagPickerShown })
-                }
-                tags={this.props.tags}
-                deleteTag={(tag) =>
-                    this.props.onTagsUpdate(
-                        this.props.tags.filter((_tag) => _tag !== tag),
-                    )
-                }
-            />
+            <div>
+                <TagHolder
+                    tags={tags}
+                    deleteTag={(tag) =>
+                        onTagsUpdate(tags.filter((t) => t !== tag))
+                    }
+                    clickHandler={() =>
+                        setPickerShown(!this.state.isTagPickerShown)
+                    }
+                />
+                {tagPicker}
+            </div>
         )
     }
 
@@ -171,9 +195,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                     />{' '}
                     Save
                 </SaveBtnText>
-                <SaveBtnArrow
-                    horizontal="1px"
-                >
+                <SaveBtnArrow horizontal="1px">
                     <DropdownMenuBtn
                         btnChildren={<Icon icon="triangle" height="10px" />}
                         isOpen={this.state.isPrivacyLevelShown}

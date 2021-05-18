@@ -46,7 +46,7 @@ const InnerContainer = styled.div<{ displayTopBorder?: boolean }>`
         `}
 `
 
-const Input = styled.input<{ isFocused: boolean }>`
+const Input = styled.input`
     ${textStyles}
     width: 100%;
     border: none;
@@ -85,10 +85,8 @@ const StyledIcon = styled(Icon)`
 `
 
 export interface ListsSidebarSearchBarProps {
-    isSearchBarFocused: boolean
     hasPerfectMatch: boolean
     searchQuery?: string
-    onFocus(): void
     onSearchQueryChange(inputString: string): void
     onInputClear(): void
     onCreateNew(newListName: string): void // should this return a promise?
@@ -99,12 +97,6 @@ export default class ListsSidebarSearchBar extends PureComponent<
     ListsSidebarSearchBarProps
 > {
     private inputRef = React.createRef<HTMLInputElement>()
-
-    componentDidMount() {
-        if (this.props.isSearchBarFocused) {
-            this.inputRef.current.focus()
-        }
-    }
 
     private handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (
         evt,
@@ -141,14 +133,11 @@ export default class ListsSidebarSearchBar extends PureComponent<
     render(): JSX.Element {
         const {
             searchQuery,
-            isSearchBarFocused,
-            onFocus,
-            onInputClear,
             sidebarLockedState: { isSidebarLocked },
         } = this.props
         return (
             <OuterContainer isSidebarLocked={isSidebarLocked}>
-                <InnerContainer onClick={onFocus} horizontal="8px">
+                <InnerContainer horizontal="8px">
                     {!!searchQuery ? (
                         <IconContainer>
                             <Margin right="5px">
@@ -171,7 +160,6 @@ export default class ListsSidebarSearchBar extends PureComponent<
                     )}
                     <Input
                         placeholder="Search collections"
-                        isFocused={isSearchBarFocused}
                         ref={this.inputRef}
                         onChange={this.handleInputChange}
                         value={searchQuery}
