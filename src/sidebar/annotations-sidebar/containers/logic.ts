@@ -952,7 +952,7 @@ export class SidebarContainerLogic extends UILogic<
                                     {
                                         name: creator?.user.displayName,
                                         profileImgSrc:
-                                            creator?.profile.avatarURL,
+                                            creator?.profile?.avatarURL,
                                     },
                                 ],
                             ),

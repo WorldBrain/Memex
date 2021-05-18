@@ -59,7 +59,7 @@ export interface AnnotationProps {
         AnnotationEditEventProps
     creatorDependencies?: {
         name: string
-        profileImgSrc: string
+        profileImgSrc?: string
     }
     onHighlightClick?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler

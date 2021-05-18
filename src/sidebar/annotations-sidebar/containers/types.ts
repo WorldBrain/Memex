@@ -101,7 +101,7 @@ interface SidebarFollowedListsState {
     users: {
         [userId: string]: {
             name: string
-            profileImgSrc: string
+            profileImgSrc?: string
         }
     }
 }
