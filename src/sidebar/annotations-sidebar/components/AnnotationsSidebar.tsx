@@ -25,6 +25,7 @@ import {
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 import { SidebarContainerState } from '../containers/types'
+import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
 import Margin from 'src/dashboard-refactor/components/Margin'
 
 export interface AnnotationsSidebarProps
@@ -177,15 +178,15 @@ class AnnotationsSidebar extends React.Component<
 
         if (list.loadState === 'error') {
             return (
-                <>
+                <FollowedListsMsgContainer>
                     <FollowedListsMsgHead>
                         Something went wrong
                     </FollowedListsMsgHead>
                     <FollowedListsMsg>
-                        Reload the page and, if the problem persists, contact
-                        support.
+                        Reload the page and, if the problem persists, <ExternalLink label='contact
+                        support' href="mailto:support@worldbrain.io"/>. 
                     </FollowedListsMsg>
-                </>
+                </FollowedListsMsgContainer>
             )
         }
 
@@ -234,7 +235,7 @@ class AnnotationsSidebar extends React.Component<
 
         if (followedListLoadState === 'error') {
             return (
-                <>
+                <FollowedListsMsgContainer>
                     <FollowedListsMsgHead>
                         Something went wrong
                     </FollowedListsMsgHead>
@@ -242,15 +243,17 @@ class AnnotationsSidebar extends React.Component<
                         Reload the page and, if the problem persists, contact
                         support.
                     </FollowedListsMsg>
-                </>
+                </FollowedListsMsgContainer>
             )
         }
 
         if (!followedLists.allIds.length) {
             return (
-                <FollowedListsMsg>
-                    No followed lists exist for this page
-                </FollowedListsMsg>
+                <FollowedListsMsgContainer>
+                    <FollowedListsMsg>
+                        No followed lists exist for this page
+                    </FollowedListsMsg>
+                </FollowedListsMsgContainer>
             )
         }
 
@@ -443,10 +446,27 @@ const FollowedNotesContainer = styled.div`
     width: 100%;
 `
 
+
+const FollowedListsMsgContainer = styled.div`
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex-direction: column;
+`
+
 const FollowedListsMsgHead = styled.span`
     font-weight: bold;
+    text-align: center;
+    color: ${(props) => props.theme.colors.primary}
 `
-const FollowedListsMsg = styled.span``
+const FollowedListsMsg = styled.span`
+    color: ${(props) => props.theme.colors.darkgrey};
+    text-align: center;
+`
+
+
 const FollowedListsContainer = styled.div`
     display: flex;
     flex-direction: column;
