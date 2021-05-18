@@ -26,7 +26,8 @@ export interface HighlighterEvents {
     renderHighlights: (args: { highlights: Highlight[] }) => void
     highlightAndScroll: (args: { url: string }) => void
     removeTemporaryHighlights: () => void
-    removeAnnotationHighlights: (args: { url: string }) => void
+    removeAnnotationHighlight: (args: { url: string }) => void
+    removeAnnotationHighlights: (args: { urls: string[] }) => void
     hideHighlights: () => void
     showHighlights: () => void
 }

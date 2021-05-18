@@ -38,20 +38,20 @@ export const SHARED_ANNOTATIONS: Array<
     }
 > = [
     {
-        reference: { type: 'shared-annotation-reference', id: 1 },
-        creatorReference: { type: 'user-reference', id: 123 },
+        reference: { type: 'shared-annotation-reference', id: '1' },
+        creatorReference: { type: 'user-reference', id: '123' },
         creator: CREATOR_1,
         normalizedPageUrl: 'test.com',
         body: 'test highlight 1',
         createdWhen: 11111,
         updatedWhen: 11111,
         uploadedWhen: 11111,
+        selector: {} as any,
     },
     {
-        reference: { type: 'shared-annotation-reference', id: 2 },
-        creatorReference: { type: 'user-reference', id: 123 },
+        reference: { type: 'shared-annotation-reference', id: '2' },
+        creatorReference: { type: 'user-reference', id: '123' },
         creator: CREATOR_1,
-
         normalizedPageUrl: 'test.com',
         body: 'test highlight 2',
         comment: 'test comment 1',
@@ -60,8 +60,8 @@ export const SHARED_ANNOTATIONS: Array<
         uploadedWhen: 11111,
     },
     {
-        reference: { type: 'shared-annotation-reference', id: 3 },
-        creatorReference: { type: 'user-reference', id: 123 },
+        reference: { type: 'shared-annotation-reference', id: '3' },
+        creatorReference: { type: 'user-reference', id: '123' },
         creator: CREATOR_1,
         normalizedPageUrl: 'test.com',
         comment: 'test comment 2',

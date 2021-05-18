@@ -840,9 +840,14 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
     }) => {
         const {
+            sharedAnnotationReferences,
             isExpanded: wasExpanded,
             loadState,
         } = previousState.followedLists.byId[event.listId]
+
+        const followedAnnotIds = sharedAnnotationReferences.map(
+            (ref) => ref.id as string,
+        )
 
         const mutation: UIMutation<SidebarContainerState> = {
             followedLists: {
@@ -855,12 +860,34 @@ export class SidebarContainerLogic extends UILogic<
         }
         this.emitMutation(mutation)
 
-        if (!wasExpanded && loadState === 'pristine') {
+        // If collapsing, signal to de-render highlights
+        if (wasExpanded) {
+            this.options.events?.emit('removeAnnotationHighlights', {
+                urls: followedAnnotIds,
+            })
+            return
+        }
+
+        // If annot data yet to be loaded, load it
+        if (loadState === 'pristine') {
             await this.processUIEvent('loadFollowedListNotes', {
                 event,
                 previousState: this.withMutation(previousState, mutation),
             })
+            return
         }
+
+        this.options.events?.emit('renderHighlights', {
+            highlights: followedAnnotIds
+                .filter(
+                    (id) =>
+                        previousState.followedAnnotations[id]?.selector != null,
+                )
+                .map((id) => ({
+                    url: id,
+                    selector: previousState.followedAnnotations[id].selector,
+                })),
+        })
     }
 
     loadFollowedListNotes: EventHandler<'loadFollowedListNotes'> = async ({

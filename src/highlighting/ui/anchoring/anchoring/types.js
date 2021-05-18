@@ -240,7 +240,6 @@ export class TextQuoteAnchor {
             ...this.context,
             hint: options.hint,
         })
-        console.log(`toPositionAnchor`, { options, text, match })
 
         if (!match) {
             throw new Error('Quote not found')

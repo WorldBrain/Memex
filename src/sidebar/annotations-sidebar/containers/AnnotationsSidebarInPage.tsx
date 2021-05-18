@@ -82,8 +82,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         this.props.events.on('highlightAndScroll', ({ url }) =>
             highlighter.highlightAndScroll({ url } as any),
         )
-        this.props.events.on('removeAnnotationHighlights', ({ url }) =>
-            highlighter.removeAnnotationHighlights(url),
+        this.props.events.on('removeAnnotationHighlight', ({ url }) =>
+            highlighter.removeAnnotationHighlight(url),
+        )
+        this.props.events.on('removeAnnotationHighlights', ({ urls }) =>
+            highlighter.removeAnnotationHighlights(urls),
         )
         this.props.events.on('renderHighlight', ({ highlight }) =>
             highlighter.renderHighlight(highlight, () => {
@@ -202,9 +205,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             ...boundProps,
             onDeleteConfirm: (e) => {
                 boundProps.onDeleteConfirm(e)
-                this.props.highlighter.removeAnnotationHighlights(
-                    annotation.url,
-                )
+                this.props.highlighter.removeAnnotationHighlight(annotation.url)
             },
         }
     }
