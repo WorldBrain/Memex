@@ -96,6 +96,7 @@ export async function main() {
             storexHub: backgroundModules.storexHub,
             contentSharing: backgroundModules.contentSharing,
             readwise: backgroundModules.readwise,
+            personalCloud: backgroundModules.personalCloud,
         },
     )
     await setupBackgroundModules(backgroundModules, storageManager)

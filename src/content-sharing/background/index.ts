@@ -138,7 +138,9 @@ export default class ContentSharingBackground {
 
     async setup() {
         try {
-            await this.executePendingActions()
+            // this method is awaited in the program setup, so don't block that
+            // by awaiting pending actions (which could take a long time)
+            this.executePendingActions()
         } catch (e) {
             // Log the error, but don't stop the entire extension setup
             // when we can't reach the sharing back-end

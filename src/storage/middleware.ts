@@ -6,6 +6,8 @@ import SyncService from '@worldbrain/memex-common/lib/sync'
 import { StorexHubBackground } from 'src/storex-hub/background'
 import ContentSharingBackground from 'src/content-sharing/background'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
+import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import { PersonalCloudBackground } from 'src/personal-cloud/background'
 
 export async function setStorageMiddleware(
     storageManager: StorageManager,
@@ -14,6 +16,7 @@ export async function setStorageMiddleware(
         storexHub?: StorexHubBackground
         contentSharing?: ContentSharingBackground
         readwise?: ReadwiseBackground
+        personalCloud?: PersonalCloudBackground
         modifyMiddleware?: (
             middleware: StorageMiddleware[],
         ) => StorageMiddleware[]
@@ -23,20 +26,32 @@ export async function setStorageMiddleware(
         options.modifyMiddleware ?? ((middleware) => middleware)
 
     const syncedCollections = new Set(SYNCED_COLLECTIONS)
+
+    const postProcessChange = async (
+        event: StorageOperationEvent<'post'>,
+        source: 'local' | 'sync',
+    ) => {
+        const promises = [
+            options.storexHub?.handlePostStorageChange(event),
+            options.contentSharing?.handlePostStorageChange(event, {
+                source,
+            }),
+            options.readwise?.handlePostStorageChange(event, {
+                source,
+            }),
+        ]
+        if (source !== 'sync') {
+            promises.push(options.personalCloud?.handlePostStorageChange(event))
+        }
+        await Promise.all(promises)
+    }
+
     const changeWatchMiddleware = new ChangeWatchMiddleware({
         storageManager,
         shouldWatchCollection: (collection) =>
             syncedCollections.has(collection),
         postprocessOperation: async (event) => {
-            await Promise.all([
-                options.storexHub?.handlePostStorageChange(event),
-                options.contentSharing?.handlePostStorageChange(event, {
-                    source: 'local',
-                }),
-                options.readwise?.handlePostStorageChange(event, {
-                    source: 'local',
-                }),
-            ])
+            await postProcessChange(event, 'local')
         },
     })
 
@@ -54,39 +69,31 @@ export async function setStorageMiddleware(
         ]),
     )
 
-    const syncChangeWatchMiddleware = new ChangeWatchMiddleware({
-        storageManager,
-        shouldWatchCollection: (collection) =>
-            syncedCollections.has(collection),
-        postprocessOperation: async (event) => {
-            await Promise.all([
-                options.storexHub?.handlePostStorageChange(event),
-                options.contentSharing?.handlePostStorageChange(event, {
-                    source: 'sync',
-                }),
-                options.readwise?.handlePostStorageChange(event, {
-                    source: 'sync',
-                }),
-            ])
-        },
-    })
-    options.syncService.executeReconciliationOperation = async (
-        operationName: string,
-        ...operationArgs: any[]
-    ) => {
-        return syncChangeWatchMiddleware.process({
-            operation: [operationName, ...operationArgs],
-            extraData: {},
-            next: {
-                process: (context) => {
-                    return storageManager.backend.operation(
-                        context.operation[0],
-                        ...context.operation.slice(1),
-                    )
-                },
-            },
-        })
-    }
+    // const syncChangeWatchMiddleware = new ChangeWatchMiddleware({
+    //     storageManager,
+    //     shouldWatchCollection: (collection) =>
+    //         syncedCollections.has(collection),
+    //     postprocessOperation: async (event) => {
+    //         await postProcessChange(event, 'sync')
+    //     },
+    // })
+    // options.syncService.executeReconciliationOperation = async (
+    //     operationName: string,
+    //     ...operationArgs: any[]
+    // ) => {
+    //     return syncChangeWatchMiddleware.process({
+    //         operation: [operationName, ...operationArgs],
+    //         extraData: {},
+    //         next: {
+    //             process: (context) => {
+    //                 return storageManager.backend.operation(
+    //                     context.operation[0],
+    //                     ...context.operation.slice(1),
+    //                 )
+    //             },
+    //         },
+    //     })
+    // }
 
     return {
         setStorageLoggingEnabled,

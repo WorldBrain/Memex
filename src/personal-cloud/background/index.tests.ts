@@ -12,6 +12,10 @@ import {
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
+import {
+    PersonalCloudChangeSourceBus,
+    StorexPersonalCloudBackend,
+} from './backend/storex'
 
 // to shut up linting
 const debug = console['log'].bind(console)
@@ -28,11 +32,11 @@ export function registerSyncBackgroundIntegrationTests(
     options?: BackgroundIntegrationTestSetupOpts,
 ) {
     describe('Sync tests', () => {
-        describe('should work when synced in various patterns across 2 devices', () => {
+        describe(test.description + ' - 2 device sync back and forth', () => {
             registerSyncBackAndForthTests(test, options)
         })
         if (!test.skipConflictTests) {
-            describe('should work when doing the same action on two devices, then syncing', () => {
+            describe(test.description + ' - 2 device sync conflicts', () => {
                 registerConflictGenerationTests(test, options)
             })
         }
@@ -286,12 +290,19 @@ async function setupSyncBackgroundTest(
     const userId = TEST_USER.id
 
     const getServerStorage = await createLazyMemoryServerStorage()
+    const cloudChangeBus = new PersonalCloudChangeSourceBus()
+
     const setups: BackgroundIntegrationTestSetup[] = []
     for (let i = 0; i < options.deviceCount; ++i) {
+        const personalCloudBackend = new StorexPersonalCloudBackend({
+            changeSource: cloudChangeBus.getView(),
+        })
+
         setups.push(
             await setupBackgroundIntegrationTest({
                 ...options,
                 getServerStorage,
+                personalCloudBackend,
             }),
         )
     }
@@ -323,15 +334,7 @@ async function setupSyncBackgroundTest(
         syncOptions: { debug: boolean },
     ) => {
         const setup = setups[deviceIndex]
-        await setup.backgroundModules.sync.continuousSync.doIncrementalSync({
-            debug: syncOptions.debug,
-            prettifier: (object) =>
-                require('util').inspect(object, {
-                    depth: null,
-                    color: true,
-                    indent: 4,
-                }),
-        })
+        await setup.backgroundModules.personalCloud.waitForSync()
     }
 
     return { userId, setups, sync }

@@ -63,6 +63,9 @@ import { Services } from 'src/services/types'
 import { PDFBackground } from 'src/pdf/background'
 import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
 import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
+import { PersonalCloudBackground } from 'src/personal-cloud/background'
+import { PersonalCloudBackend } from 'src/personal-cloud/background/backend/types'
+import { NullPersonalCloudBackend } from 'src/personal-cloud/background/backend/null'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -96,6 +99,7 @@ export interface BackgroundModules {
     readwise: ReadwiseBackground
     activityStreams: ActivityStreamsBackground
     userMessages: UserMessageService
+    personalCloud: PersonalCloudBackground
 }
 
 const globalFetch: typeof fetch =
@@ -112,6 +116,7 @@ export function createBackgroundModules(options: {
         name: string,
         ...args: any[]
     ) => Promise<Returns>
+    personalCloudBackend?: PersonalCloudBackend
     fetchPageDataProcessor?: FetchPageProcessor
     tabManager?: TabManager
     auth?: AuthBackground
@@ -482,6 +487,11 @@ export function createBackgroundModules(options: {
         activityStreams,
         contentSharing,
         userMessages,
+        personalCloud: new PersonalCloudBackground({
+            storageManager,
+            backend:
+                options.personalCloudBackend ?? new NullPersonalCloudBackend(),
+        }),
     }
 }
 
@@ -533,7 +543,8 @@ export async function setupBackgroundModules(
 
     // Ensure log-in state gotten from FB + trigger share queue processing, but don't wait for it
     await backgroundModules.auth.authService.refreshUserInfo()
-    backgroundModules.contentSharing.setup()
+    await backgroundModules.contentSharing.setup()
+    await backgroundModules.personalCloud.setup()
 }
 
 export function getBackgroundStorageModules(
