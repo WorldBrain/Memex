@@ -22,7 +22,6 @@ import { ServerStorageModules } from 'src/storage/types'
 import { Services } from 'src/services/types'
 import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
-import { SHARED_ANNOTATIONS } from 'src/sidebar/annotations-sidebar/containers/logic.test.data'
 
 const limitSuggestionsReturnLength = 10
 const limitSuggestionsStorageLength = 20
@@ -124,11 +123,47 @@ export default class CustomListBackground {
         )
     }
 
+    private fetchCollaborativeListReferences = async (): Promise<
+        SharedListReference[]
+    > => {
+        const { auth } = this.options.services
+        const { contentSharing } = await this.options.getServerStorage()
+
+        const currentUser = await auth.getCurrentUser()
+        if (!currentUser) {
+            return []
+        }
+
+        const seenLists = new Set()
+        const listRoles = await contentSharing.getUserListRoles({
+            userReference: {
+                type: 'user-reference',
+                id: currentUser.id,
+            },
+        })
+
+        for (const { sharedList } of listRoles) {
+            if (seenLists.has(sharedList.id)) {
+                continue
+            }
+            seenLists.add(sharedList.id)
+        }
+
+        return [...seenLists].map(
+            (id) =>
+                ({ id, type: 'shared-list-reference' } as SharedListReference),
+        )
+    }
+
     fetchFollowedListsWithAnnotations: RemoteCollectionsInterface['fetchFollowedListsWithAnnotations'] = async ({
         normalizedPageUrl,
     }) => {
         const { contentSharing } = await this.options.getServerStorage()
-        const listReferences = await this.fetchFollowedListReferences()
+        const listReferences = [
+            ...(await this.fetchFollowedListReferences()),
+            ...(await this.fetchCollaborativeListReferences()),
+        ]
+
         const annotListEntriesByList = new Map<
             string | number,
             GetAnnotationListEntriesElement[]
