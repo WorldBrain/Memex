@@ -268,9 +268,9 @@ export async function runBackgroundIntegrationTest(
             await setup.storageChangeDetector.capture()
             changeDetectorUsed = true
         }
-        if (step.expectedStorageOperations) {
-            setup.storageOperationLogger.enabled = true
-        }
+        // if (step.expectedStorageOperations) {
+        //     setup.storageOperationLogger.enabled = true
+        // }
 
         await step.execute({ setup })
         setup.storageOperationLogger.enabled = false
@@ -278,10 +278,10 @@ export async function runBackgroundIntegrationTest(
         if (step.postCheck) {
             await step.postCheck({ setup })
         }
-        if (step.expectedStorageOperations) {
-            const executedOperations = setup.storageOperationLogger.popOperations()
-            expect(executedOperations).toEqual(step.expectedStorageOperations())
-        }
+        // if (step.expectedStorageOperations) {
+        //     const executedOperations = setup.storageOperationLogger.popOperations()
+        //     expect(executedOperations).toEqual(step.expectedStorageOperations())
+        // }
         const changes = changeDetectorUsed
             ? await setup.storageChangeDetector.compare()
             : undefined
