@@ -26,12 +26,17 @@ import { EntrySelectedTag } from './components/EntrySelectedTag'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 import { tags } from 'src/util/remote-functions-background'
 
+export type { TagPickerDependencies }
+
 class TagPicker extends StatefulUIElement<
     TagPickerDependencies,
     TagPickerState,
     TagPickerEvent
 > {
-    static defaultProps: Partial<TagPickerDependencies> = {
+    static defaultProps: Pick<
+        TagPickerDependencies,
+        'queryEntries' | 'loadDefaultSuggestions'
+    > = {
         queryEntries: (query) => tags.searchForTagSuggestions({ query }),
         loadDefaultSuggestions: tags.fetchInitialTagSuggestions,
     }

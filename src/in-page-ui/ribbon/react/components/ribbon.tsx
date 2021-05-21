@@ -453,6 +453,7 @@ export default class Ribbon extends Component<Props, State> {
                                 {this.props.commentBox.showCommentBox && (
                                     <Tooltip position="left">
                                         <AnnotationCreate
+                                            {...this.props.tagging}
                                             ref={(ref) =>
                                                 (this.annotationCreateRef = ref)
                                             }

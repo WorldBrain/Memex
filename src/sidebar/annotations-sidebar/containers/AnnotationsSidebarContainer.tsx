@@ -209,6 +209,9 @@ export class AnnotationsSidebarContainer<
             onCancel: () => this.processEvent('cancelNewPageComment', null),
             onSave: (privacyLevel) =>
                 this.processEvent('saveNewPageComment', { privacyLevel }),
+            queryEntries: (query) =>
+                this.props.tags.searchForTagSuggestions({ query }),
+            loadDefaultSuggestions: this.props.tags.fetchInitialTagSuggestions,
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
         }
@@ -270,6 +273,12 @@ export class AnnotationsSidebarContainer<
                 <HoverBox>
                     <TagPicker
                         initialSelectedEntries={() => annot.tags}
+                        queryEntries={(query) =>
+                            this.props.tags.searchForTagSuggestions({ query })
+                        }
+                        loadDefaultSuggestions={
+                            this.props.tags.fetchInitialTagSuggestions
+                        }
                         onUpdateEntrySelection={this.handleTagsUpdate(
                             currentAnnotationId,
                         )}
@@ -292,9 +301,7 @@ export class AnnotationsSidebarContainer<
 
         return (
             <ShareMenuWrapper>
-                <HoverBox
-                    width="320px"
-                >
+                <HoverBox width="320px">
                     <SingleNoteShareMenu
                         shareImmediately={this.state.immediatelyShareNotes}
                         contentSharingBG={this.props.contentSharing}

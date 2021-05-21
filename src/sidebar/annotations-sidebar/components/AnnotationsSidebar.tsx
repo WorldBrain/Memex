@@ -6,8 +6,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import AnnotationCreate, {
-    AnnotationCreateGeneralProps,
-    AnnotationCreateEventProps,
+    Props as AnnotationCreateProps,
 } from 'src/annotations/components/AnnotationCreate'
 import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
@@ -53,8 +52,7 @@ export interface AnnotationsSidebarProps
     bindAnnotationEditProps: (
         annotation: Annotation,
     ) => AnnotationEditGeneralProps & AnnotationEditEventProps
-    annotationCreateProps: AnnotationCreateGeneralProps &
-        AnnotationCreateEventProps
+    annotationCreateProps: AnnotationCreateProps
 
     sharingAccess: AnnotationSharingAccess
     isSearchLoading: boolean
@@ -183,8 +181,13 @@ class AnnotationsSidebar extends React.Component<
                         Something went wrong
                     </FollowedListsMsgHead>
                     <FollowedListsMsg>
-                        Reload the page and if the problem persists <ExternalLink label='contact
-                        support' href="mailto:support@worldbrain.io"/>. 
+                        Reload the page and if the problem persists{' '}
+                        <ExternalLink
+                            label="contact
+                        support"
+                            href="mailto:support@worldbrain.io"
+                        />
+                        .
                     </FollowedListsMsg>
                 </FollowedListsMsgContainer>
             )
@@ -240,8 +243,13 @@ class AnnotationsSidebar extends React.Component<
                         Something went wrong
                     </FollowedListsMsgHead>
                     <FollowedListsMsg>
-                        Reload the page and if the problem persists <ExternalLink label='contact
-                        support' href="mailto:support@worldbrain.io"/>.
+                        Reload the page and if the problem persists{' '}
+                        <ExternalLink
+                            label="contact
+                        support"
+                            href="mailto:support@worldbrain.io"
+                        />
+                        .
                     </FollowedListsMsg>
                 </FollowedListsMsgContainer>
             )
@@ -446,7 +454,6 @@ const FollowedNotesContainer = styled.div`
     width: 100%;
 `
 
-
 const FollowedListsMsgContainer = styled.div`
     height: 150px;
     display: flex;
@@ -459,7 +466,7 @@ const FollowedListsMsgContainer = styled.div`
 const FollowedListsMsgHead = styled.span`
     font-weight: bold;
     text-align: center;
-    color: ${(props) => props.theme.colors.primary}
+    color: ${(props) => props.theme.colors.primary};
 `
 const FollowedListsMsg = styled.span`
     color: ${(props) => props.theme.colors.darkgrey};

@@ -109,7 +109,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
             searchFilters: {
                 searchQuery: '',
-                isSearchBarFocused: false,
                 domainsExcluded: [],
                 domainsIncluded: [],
                 isDateFilterActive: false,
@@ -1755,14 +1754,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { searchQuery: { $set: event.query } },
-        })
-    }
-
-    setSearchBarFocus: EventHandler<'setSearchBarFocus'> = async ({
-        event,
-    }) => {
-        this.emitMutation({
-            searchFilters: { isSearchBarFocused: { $set: event.isFocused } },
         })
     }
 

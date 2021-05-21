@@ -16,12 +16,14 @@ import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 
 const setupLogicHelper = async ({
     device,
+    withAuth,
     pageUrl = DATA.CURRENT_TAB_URL_1,
     focusCreateForm = () => undefined,
     copyToClipboard = () => undefined,
 }: {
     device: UILogicTestDevice
     pageUrl?: string
+    withAuth?: boolean
     focusCreateForm?: () => void
     copyToClipboard?: (text: string) => Promise<boolean>
 }) => {
@@ -44,6 +46,15 @@ const setupLogicHelper = async ({
     const emittedEvents: Array<{ event: string; args: any }> = []
     const fakeEmitter = {
         emit: (event: string, args: any) => emittedEvents.push({ event, args }),
+    }
+
+    if (withAuth) {
+        device.backgroundModules.auth.remoteFunctions.getCurrentUser = async () => ({
+            id: 'test-user',
+            displayName: 'test',
+            email: 'test@test.com',
+            emailVerified: true,
+        })
     }
 
     const analytics = new FakeAnalytics()
@@ -703,7 +714,11 @@ describe('SidebarContainerLogic', () => {
                 { skipPageIndexing: true },
             )
 
-            const { sidebar } = await setupLogicHelper({ device, pageUrl })
+            const { sidebar } = await setupLogicHelper({
+                device,
+                pageUrl,
+                withAuth: true,
+            })
             await sidebar.processEvent('receiveSharingAccessChange', {
                 sharingAccess: 'sharing-allowed',
             })
@@ -719,6 +734,10 @@ describe('SidebarContainerLogic', () => {
 
             await sidebar.processEvent('resetShareMenuNoteId', null)
             expect(sidebar.state.activeShareMenuNoteId).toEqual(undefined)
+
+            await sidebar.processEvent('receiveSharingAccessChange', {
+                sharingAccess: 'sharing-allowed',
+            })
 
             await sidebar.processEvent('shareAnnotation', {
                 context: 'pageAnnotations',

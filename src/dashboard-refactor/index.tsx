@@ -308,11 +308,6 @@ export class DashboardContainer extends StatefulUIElement<
                 searchBarProps={{
                     searchQuery: searchFilters.searchQuery,
                     searchFiltersOpen: searchFilters.searchFiltersOpen,
-                    isSearchBarFocused: searchFilters.isSearchBarFocused,
-                    onSearchBarFocus: () =>
-                        this.processEvent('setSearchBarFocus', {
-                            isFocused: true,
-                        }),
                     onSearchFiltersOpen: () =>
                         this.processEvent('setSearchFiltersOpen', {
                             isOpen: !searchFilters.searchFiltersOpen,
@@ -412,11 +407,9 @@ export class DashboardContainer extends StatefulUIElement<
                 searchBarProps={{
                     searchQuery: listsSidebar.searchQuery,
                     sidebarLockedState: lockedState,
-                    isSearchBarFocused: false,
                     hasPerfectMatch: true,
                     onCreateNew: (value) =>
                         this.processEvent('confirmListCreate', { value }),
-                    onFocus: () => null,
                     onSearchQueryChange: (query) =>
                         this.processEvent('setListQueryValue', { query }),
                     onInputClear: () =>

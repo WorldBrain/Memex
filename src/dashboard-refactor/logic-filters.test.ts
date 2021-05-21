@@ -19,26 +19,6 @@ describe('Dashboard search filters logic', () => {
         expect(searchResults.logic['searchTriggeredCount']).toBe(1)
     })
 
-    it('should be able to set the search bar focus', async ({ device }) => {
-        const { searchResults } = await setupTest(device)
-
-        expect(searchResults.state.searchFilters.isSearchBarFocused).toEqual(
-            false,
-        )
-        await searchResults.processEvent('setSearchBarFocus', {
-            isFocused: true,
-        })
-        expect(searchResults.state.searchFilters.isSearchBarFocused).toEqual(
-            true,
-        )
-        await searchResults.processEvent('setSearchBarFocus', {
-            isFocused: false,
-        })
-        expect(searchResults.state.searchFilters.isSearchBarFocused).toEqual(
-            false,
-        )
-    })
-
     it('should be able to set the search filter bar open state', async ({
         device,
     }) => {
