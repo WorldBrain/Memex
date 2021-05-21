@@ -95,6 +95,23 @@ export default class CustomListBackground {
         return Date.now()
     }
 
+    private fetchOwnListReferences = async (): Promise<
+        SharedListReference[]
+    > => {
+        const { auth } = this.options.services
+        const { contentSharing } = await this.options.getServerStorage()
+
+        const currentUser = await auth.getCurrentUser()
+        if (!currentUser) {
+            return []
+        }
+
+        return contentSharing.getListReferencesByCreator({
+            id: currentUser.id,
+            type: 'user-reference',
+        })
+    }
+
     private fetchFollowedListReferences = async (): Promise<
         SharedListReference[]
     > => {
@@ -160,6 +177,7 @@ export default class CustomListBackground {
     }) => {
         const { contentSharing } = await this.options.getServerStorage()
         const listReferences = [
+            ...(await this.fetchOwnListReferences()),
             ...(await this.fetchFollowedListReferences()),
             ...(await this.fetchCollaborativeListReferences()),
         ]
