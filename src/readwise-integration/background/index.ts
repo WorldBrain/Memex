@@ -153,22 +153,24 @@ export class ReadwiseBackground {
         await this.actionQueue.scheduleAction(
             {
                 type: 'post-highlights',
-                highlights: await Promise.all(
-                    annotations.map(async (annotation) => {
-                        try {
-                            const pageData = await options.getPageData(
-                                annotation.pageUrl,
-                            )
-                            return annotationToReadwise(annotation, {
-                                pageData,
-                            })
-                        } catch (e) {
-                            console.error(e)
-                            Raven.captureException(e)
-                            return null
-                        }
-                    }),
-                ),
+                highlights: (
+                    await Promise.all(
+                        annotations.map(async (annotation) => {
+                            try {
+                                const pageData = await options.getPageData(
+                                    annotation.pageUrl,
+                                )
+                                return annotationToReadwise(annotation, {
+                                    pageData,
+                                })
+                            } catch (e) {
+                                console.error(e)
+                                Raven.captureException(e)
+                                return null
+                            }
+                        }),
+                    )
+                ).filter((highlight) => !!highlight),
             },
             { queueInteraction: options.queueInteraction },
         )
