@@ -364,9 +364,9 @@ export default class DirectLinkingBackground {
         toCreate: CreateAnnotationParams,
         { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
-        let fullPageUrl = getUrl(tab?.url) ?? toCreate.pageUrl
+        let fullPageUrl = toCreate.pageUrl ?? getUrl(tab?.url)
         if (!isFullUrl(fullPageUrl)) {
-            fullPageUrl = toCreate.pageUrl
+            fullPageUrl = getUrl(tab?.url)
             if (!isFullUrl(fullPageUrl)) {
                 throw new Error(
                     'Could not get full URL while creating annotation',
