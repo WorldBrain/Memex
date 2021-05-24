@@ -1,8 +1,8 @@
 import createResolvable from '@josephg/resolvable'
 import {
     PersonalCloudBackend,
-    PersonalCloudObjectBatch,
-    PersonalCloudObject,
+    PersonalCloudUpdateBatch,
+    PersonalCloudUpdate,
 } from './types'
 // import StorageManager from '@worldbrain/storex';
 
@@ -14,39 +14,35 @@ export class StorexPersonalCloudBackend implements PersonalCloudBackend {
         },
     ) {}
 
-    async pushObject(
-        params: {
-            schemaVersion: Date
-        } & PersonalCloudObject,
-    ): Promise<void> {
-        this.options.changeSource.pushObject({ objects: [params] })
+    pushUpdates: PersonalCloudBackend['pushUpdates'] = async (updates) => {
+        await this.options.changeSource.pushUpdates(updates)
     }
 
-    async *streamObjects(): AsyncIterableIterator<PersonalCloudObjectBatch> {
+    async *streamUpdates(): AsyncIterableIterator<PersonalCloudUpdateBatch> {
         yield* this.options.changeSource.streamObjects()
     }
 }
 
 export class PersonalCloudChangeSourceView {
-    nextObjects = createResolvable<PersonalCloudObjectBatch>()
+    nextObjects = createResolvable<PersonalCloudUpdateBatch>()
 
     constructor(public bus: PersonalCloudChangeSourceBus, public id: number) {}
 
-    async pushObject(batch: PersonalCloudObjectBatch): Promise<void> {
-        this.bus.pushObjects(this.id, batch)
+    pushUpdates: PersonalCloudBackend['pushUpdates'] = async (updates) => {
+        this.bus.pushUpdate(this.id, updates)
     }
 
-    async *streamObjects(): AsyncIterableIterator<PersonalCloudObjectBatch> {
+    async *streamObjects(): AsyncIterableIterator<PersonalCloudUpdateBatch> {
         while (true) {
             const nextObjects = await this.nextObjects
             yield nextObjects
         }
     }
 
-    receiveObjects(batch: PersonalCloudObjectBatch) {
+    receiveUpdates(updates: PersonalCloudUpdateBatch) {
         const oldNextObjects = this.nextObjects
         this.nextObjects = createResolvable()
-        oldNextObjects.resolve(batch)
+        oldNextObjects.resolve(updates)
     }
 }
 
@@ -63,10 +59,10 @@ export class PersonalCloudChangeSourceBus {
         return source
     }
 
-    pushObjects(sourceId: number, batch: PersonalCloudObjectBatch) {
+    pushUpdate(sourceId: number, updates: PersonalCloudUpdateBatch) {
         for (const view of this._views) {
             if (view.id !== sourceId) {
-                view.receiveObjects(batch)
+                view.receiveUpdates(updates)
             }
         }
     }

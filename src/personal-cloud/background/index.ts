@@ -1,8 +1,11 @@
-import StorageManager, { IndexSourceField } from '@worldbrain/storex'
+import StorageManager, {
+    IndexSourceField,
+    StorageRegistry,
+} from '@worldbrain/storex'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
 import { AsyncMutex } from '@worldbrain/memex-common/lib/utils/async-mutex'
-import { PersonalCloudBackend } from './backend/types'
+import { PersonalCloudBackend, PersonalCloudUpdateType } from './backend/types'
 
 export class PersonalCloudBackground {
     currentSchemaVersion?: Date
@@ -26,15 +29,23 @@ export class PersonalCloudBackground {
     }
 
     async integrateContinuously() {
-        for await (const { objects } of this.options.backend.streamObjects()) {
+        for await (const updates of this.options.backend.streamUpdates()) {
             const { releaseMutex } = await this.pullMutex.lock()
-            for (const objectInfo of objects) {
-                // WARNING: Keep in mind this skips all storage middleware
-                await this.options.storageManager.backend.operation(
-                    'createObject',
-                    objectInfo.collection,
-                    objectInfo.object,
-                )
+            for (const update of updates) {
+                if (update.type === PersonalCloudUpdateType.Overwrite) {
+                    // WARNING: Keep in mind this skips all storage middleware
+                    await this.options.storageManager.backend.operation(
+                        'createObject',
+                        update.collection,
+                        update.object,
+                    )
+                } else if (update.type === PersonalCloudUpdateType.Delete) {
+                    await this.options.storageManager.backend.operation(
+                        'deleteObjects',
+                        update.collection,
+                        update.where,
+                    )
+                }
             }
             releaseMutex()
         }
@@ -55,24 +66,57 @@ export class PersonalCloudBackground {
                     change.collection,
                     change.pk,
                 )
-                await this.options.backend.pushObject({
-                    schemaVersion: this.currentSchemaVersion!,
-                    collection: change.collection,
-                    object,
-                })
-            } else if (change.type === 'modify') {
-                for (const pk of change.pks) {
-                    const object = await getObjectByPk(
-                        this.options.storageManager,
-                        change.collection,
-                        pk,
-                    )
-                    await this.options.backend.pushObject({
+                if (!object) {
+                    // Here we assume the object is already deleted again before
+                    // we got the change to look at it, so just ignore the create
+                    continue
+                }
+                await this.options.backend.pushUpdates([
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
                         schemaVersion: this.currentSchemaVersion!,
                         collection: change.collection,
                         object,
-                    })
-                }
+                    },
+                ])
+            } else if (change.type === 'modify') {
+                const objects = await Promise.all(
+                    change.pks.map((pk) =>
+                        getObjectByPk(
+                            this.options.storageManager,
+                            change.collection,
+                            pk,
+                        ),
+                    ),
+                )
+                await this.options.backend.pushUpdates(
+                    objects
+                        .filter((object) => !!object)
+                        .map((object) => ({
+                            type: PersonalCloudUpdateType.Overwrite,
+                            schemaVersion: this.currentSchemaVersion!,
+                            collection: change.collection,
+                            object,
+                        })),
+                )
+            } else if (change.type === 'delete') {
+                const wheres = await Promise.all(
+                    change.pks.map((pk) =>
+                        getObjectWhereByPk(
+                            this.options.storageManager.registry,
+                            change.collection,
+                            pk,
+                        ),
+                    ),
+                )
+                await this.options.backend.pushUpdates(
+                    wheres.map((where) => ({
+                        type: PersonalCloudUpdateType.Delete,
+                        schemaVersion: this.currentSchemaVersion!,
+                        collection: change.collection,
+                        where,
+                    })),
+                )
             }
         }
 
@@ -80,8 +124,8 @@ export class PersonalCloudBackground {
     }
 }
 
-async function getObjectByPk(
-    storageManager: StorageManager,
+function getObjectWhereByPk(
+    storageRegistry: StorageRegistry,
     collection: string,
     pk: number | string | Array<number | string>,
 ) {
@@ -92,7 +136,7 @@ async function getObjectByPk(
             : indexSourceField
     }
 
-    const collectionDefinition = storageManager.registry.collections[collection]
+    const collectionDefinition = storageRegistry.collections[collection]
     const pkIndex = collectionDefinition.pkIndex!
     const where: { [field: string]: number | string } = {}
     if (pkIndex instanceof Array) {
@@ -104,5 +148,14 @@ async function getObjectByPk(
         where[getPkField(pkIndex)] = pk as number | string
     }
 
+    return where
+}
+
+async function getObjectByPk(
+    storageManager: StorageManager,
+    collection: string,
+    pk: number | string | Array<number | string>,
+) {
+    const where = getObjectWhereByPk(storageManager.registry, collection, pk)
     return storageManager.operation('findObject', collection, where)
 }

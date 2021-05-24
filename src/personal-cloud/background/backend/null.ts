@@ -1,19 +1,15 @@
 import {
     PersonalCloudBackend,
-    PersonalCloudObjectBatch,
-    PersonalCloudObject,
+    PersonalCloudUpdateBatch,
+    PersonalCloudObjectInfo,
 } from './types'
 
 export class NullPersonalCloudBackend implements PersonalCloudBackend {
     constructor() {}
 
-    async pushObject(
-        params: {
-            schemaVersion: Date
-        } & PersonalCloudObject,
-    ): Promise<void> {}
+    pushUpdates: PersonalCloudBackend['pushUpdates'] = async (updates) => {}
 
-    async *streamObjects(): AsyncIterableIterator<PersonalCloudObjectBatch> {
+    async *streamUpdates(): AsyncIterableIterator<PersonalCloudUpdateBatch> {
         await new Promise(() => {})
     }
 }
