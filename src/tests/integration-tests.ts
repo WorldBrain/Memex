@@ -36,6 +36,7 @@ export interface IntegrationTest<StepContext> {
 }
 export interface IntegrationTestInstance<StepContext> {
     setup?: (options: StepContext) => Promise<void>
+    debug?: boolean
     steps: Array<IntegrationTestStep<StepContext>>
 }
 

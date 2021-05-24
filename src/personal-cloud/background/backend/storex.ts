@@ -19,11 +19,11 @@ export class StorexPersonalCloudBackend implements PersonalCloudBackend {
             schemaVersion: Date
         } & PersonalCloudObject,
     ): Promise<void> {
-        // this.options.changeSource.pushObject({ objects: [params] })
+        this.options.changeSource.pushObject({ objects: [params] })
     }
 
     async *streamObjects(): AsyncIterableIterator<PersonalCloudObjectBatch> {
-        return this.options.changeSource.streamObjects()
+        yield* this.options.changeSource.streamObjects()
     }
 }
 
@@ -38,13 +38,15 @@ export class PersonalCloudChangeSourceView {
 
     async *streamObjects(): AsyncIterableIterator<PersonalCloudObjectBatch> {
         while (true) {
-            yield await this.nextObjects
+            const nextObjects = await this.nextObjects
+            yield nextObjects
         }
     }
 
     receiveObjects(batch: PersonalCloudObjectBatch) {
-        this.nextObjects.resolve(batch)
+        const oldNextObjects = this.nextObjects
         this.nextObjects = createResolvable()
+        oldNextObjects.resolve(batch)
     }
 }
 
