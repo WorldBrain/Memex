@@ -153,24 +153,22 @@ export class ReadwiseBackground {
         await this.actionQueue.scheduleAction(
             {
                 type: 'post-highlights',
-                highlights: (
-                    await Promise.all(
-                        annotations.map(async (annotation) => {
-                            try {
-                                const pageData = await options.getPageData(
-                                    annotation.pageUrl,
-                                )
-                                return annotationToReadwise(annotation, {
-                                    pageData,
-                                })
-                            } catch (e) {
-                                console.error(e)
-                                Raven.captureException(e)
-                                return null
-                            }
-                        }),
-                    )
-                ).filter((highlight) => !!highlight),
+                highlights: await Promise.all(
+                    annotations.map(async (annotation) => {
+                        try {
+                            const pageData = await options.getPageData(
+                                annotation.pageUrl,
+                            )
+                            return annotationToReadwise(annotation, {
+                                pageData,
+                            })
+                        } catch (e) {
+                            console.error(e)
+                            Raven.captureException(e)
+                            return null
+                        }
+                    }),
+                ),
             },
             { queueInteraction: options.queueInteraction },
         )
@@ -355,7 +353,7 @@ function annotationToReadwise(
         return text
     }
 
-    let location = annotation.createdWhen.getTime()
+    let location: number | undefined
     if (annotation.selector) {
         const selector = getAnchorSelector(
             annotation.selector,
@@ -369,7 +367,7 @@ function annotationToReadwise(
         source_url: options.pageData.fullUrl,
         source_type: 'article',
         note: formatNote(annotation),
-        location_type: 'page',
+        location_type: 'order',
         location,
         highlighted_at: annotation.createdWhen,
         text: annotation?.body?.length

@@ -28,7 +28,7 @@ export interface ReadwiseHighlight {
     source_type: 'article'
     note: string // annotation comment
     location: number
-    location_type: 'time_offset' | 'page'
+    location_type: 'time_offset' | 'page' | 'order'
     highlighted_at: Date
     highlight_url?: string // URL the user can use to jump directly to annotation
     text: string // annotation body
