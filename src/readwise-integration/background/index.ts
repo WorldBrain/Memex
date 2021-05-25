@@ -355,7 +355,7 @@ function annotationToReadwise(
         return text
     }
 
-    let location = annotation.createdWhen.getTime()
+    let location: number | undefined
     if (annotation.selector) {
         const selector = getAnchorSelector(
             annotation.selector,
@@ -369,7 +369,7 @@ function annotationToReadwise(
         source_url: options.pageData.fullUrl,
         source_type: 'article',
         note: formatNote(annotation),
-        location_type: 'page',
+        location_type: 'order',
         location,
         highlighted_at: annotation.createdWhen,
         text: annotation?.body?.length
