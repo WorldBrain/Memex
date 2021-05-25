@@ -62,24 +62,41 @@ export const migrations: Migrations = {
      * avoid needing to support both cases, here we are migrating everyone over to the static ID.
      */
     'staticize-mobile-list-id': async ({ db }) => {
+        let someListFound = false
         let oldListId: number
         await db
             .table('customLists')
             .where('name')
             .equals(SPECIAL_LIST_NAMES.MOBILE)
             .modify((list) => {
-                oldListId = list.id
+                someListFound = true
                 if (list.id !== SPECIAL_LIST_IDS.MOBILE) {
+                    oldListId = list.id
                     list.id = SPECIAL_LIST_IDS.MOBILE
                 }
             })
-        await db
-            .table('pageListEntries')
-            .where('listId')
-            .equals(oldListId)
-            .modify((entry) => {
-                entry.listId = SPECIAL_LIST_IDS.MOBILE
+
+        // If it doesn't exist, it needs to be created
+        if (!someListFound) {
+            await db.table('customLists').add({
+                searchableName: SPECIAL_LIST_NAMES.MOBILE,
+                name: SPECIAL_LIST_NAMES.MOBILE,
+                id: SPECIAL_LIST_IDS.MOBILE,
+                createdAt: new Date(),
+                isDeletable: false,
+                isNestable: false,
             })
+        }
+
+        if (oldListId != null) {
+            await db
+                .table('pageListEntries')
+                .where('listId')
+                .equals(oldListId)
+                .modify((entry) => {
+                    entry.listId = SPECIAL_LIST_IDS.MOBILE
+                })
+        }
     },
     /*
      * There was a bug in some annotation refactoring (due to url normalisation)
