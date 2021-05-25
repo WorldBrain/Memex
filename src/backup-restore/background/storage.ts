@@ -125,7 +125,7 @@ export default class BackupStorage extends StorageModule {
         const batch = {
             changes: [],
             forget: async () => {
-                const pks = batch.changes.map(change => change['timestamp'])
+                const pks = batch.changes.map((change) => change['timestamp'])
                 await this.operation('deleteBackupChanges', { pks })
             },
         }
@@ -144,6 +144,10 @@ export default class BackupStorage extends StorageModule {
                 if (change.timestamp > until.getTime()) {
                     running = false
                     break
+                }
+
+                if (change.objectPk == null) {
+                    continue
                 }
 
                 batch.changes.push(change)
