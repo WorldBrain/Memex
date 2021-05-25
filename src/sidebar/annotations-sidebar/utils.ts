@@ -32,7 +32,7 @@ export const maxPossibleTags = (tags: string[]) => {
 export const sidebarNotesTypeToString = (mode: SidebarDisplayMode): string => {
     switch (mode) {
         case 'private-notes':
-            return 'Your notes'
+            return 'Notes by me'
         case 'shared-notes':
         default:
             return 'Shared with me'

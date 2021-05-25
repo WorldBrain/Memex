@@ -259,7 +259,13 @@ class AnnotationsSidebar extends React.Component<
             return (
                 <FollowedListsMsgContainer>
                     <FollowedListsMsg>
-                        No followed lists exist for this page
+                        ¯\_(ツ)_/¯
+                    </FollowedListsMsg>
+                    <FollowedListsMsgHead>
+                        No annotations by other people on this page
+                    </FollowedListsMsgHead>
+                    <FollowedListsMsg>
+                        Follow or share collections containing <br />annotations for this page
                     </FollowedListsMsg>
                 </FollowedListsMsgContainer>
             )
@@ -394,6 +400,15 @@ export default onClickOutside(AnnotationsSidebar)
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css
 
+const EmptyMessage = () => (
+    <FollowedListsMsgContainer>
+        <FollowedListsMsg>¯\_(ツ)_/¯</FollowedListsMsg>
+        <FollowedListsMsgHead>
+            You made no notes or highlights<br/>on this page
+        </FollowedListsMsgHead>
+    </FollowedListsMsgContainer>
+)
+
 const ButtonStyled = styled.button`
     cursor: pointer;
     z-index: 3000;
@@ -467,6 +482,8 @@ const FollowedListsMsgHead = styled.span`
     font-weight: bold;
     text-align: center;
     color: ${(props) => props.theme.colors.primary};
+    padding-top: 10px;
+    padding-bottom: 5px;
 `
 const FollowedListsMsg = styled.span`
     color: ${(props) => props.theme.colors.darkgrey};
@@ -629,15 +646,6 @@ const TopSectionStyled = styled.div`
     overflow: hidden;
     padding: 0 5px;
 `
-
-const EmptyMessage = () => (
-    <EmptyMessageStyled>
-        <EmptyMessageEmojiStyled>¯\_(ツ)_/¯</EmptyMessageEmojiStyled>
-        <EmptyMessageTextStyled>
-            No notes or highlights on this page
-        </EmptyMessageTextStyled>
-    </EmptyMessageStyled>
-)
 
 const EmptyMessageStyled = styled.div`
     width: 80%;

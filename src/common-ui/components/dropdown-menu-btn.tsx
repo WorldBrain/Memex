@@ -200,6 +200,7 @@ const MenuItemName = styled.div`
 const MenuItemInfo = styled.div`
     font-weight: 400;
     font-size: 14px;
+    padding-top: 5px;
 `
 
 const MenuBtn = styled.div`

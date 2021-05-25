@@ -504,7 +504,7 @@ export class AnnotationsSidebarContainer<
                                         'shared-notes',
                                     ),
                                     info:
-                                        'Notes shared with you via collections',
+                                        'Notes from collections you follow or shared',
                                 },
                             ]}
                         />
