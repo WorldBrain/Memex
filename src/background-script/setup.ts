@@ -344,6 +344,7 @@ export function createBackgroundModules(options: {
         customListsBackground: customLists,
         copyPasterBackground: copyPaster,
         notifsBackground: notifications,
+        readwiseBackground: readwise,
     })
 
     const connectivityChecker = new ConnectivityCheckerBackground({

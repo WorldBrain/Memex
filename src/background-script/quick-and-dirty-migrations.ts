@@ -8,6 +8,7 @@ import {
     SPECIAL_LIST_IDS,
 } from '@worldbrain/memex-storage/lib/lists/constants'
 
+import { ReadwiseBackground } from 'src/readwise-integration/background'
 import { STORAGE_KEYS as IDXING_STORAGE_KEYS } from 'src/options/settings/constants'
 
 export interface MigrationProps {
@@ -15,13 +16,45 @@ export interface MigrationProps {
     storex: Storex
     normalizeUrl: URLNormalizer
     localStorage: Storage.LocalStorageArea
+    backgroundModules: {
+        readwise: ReadwiseBackground
+    }
 }
 
 export interface Migrations {
     [storageKey: string]: (props: MigrationProps) => Promise<void>
 }
 
+// __IMPORTANT NOTE__
+//     Please make sure to use the `storex` instance rather than the Dexie `db` instance if you're updating existing records
+//     as the Dexie instance won't trigger storage hooks, like backup log appending. This may result in inconsistencies in things like the
+//     backup log - potentially breaking important features!
+// __IMPORTANT NOTE__
+
 export const migrations: Migrations = {
+    /*
+     * We recently added ordering to annotations uploaded to Readwise, however we messed it up for notes (without highlights), causing them
+     * to not upload correctly. Now we need to upload all notes.
+     */
+    'reupload-all-readwise-notes': async ({
+        backgroundModules: { readwise },
+    }) => {
+        const readwiseApiKey = await readwise.getAPIKey()
+        if (!readwiseApiKey) {
+            return
+        }
+        const validationResult = await readwise.validateAPIKey({
+            key: readwiseApiKey,
+        })
+        if (!validationResult?.success) {
+            return
+        }
+
+        await readwise.uploadAllAnnotations({
+            queueInteraction: 'queue-and-return',
+            annotationFilter: (annot) => !annot.body?.length,
+        })
+    },
     /*
      * A long time ago we made the decision to make the "Saved from Mobile" list's ID static
      * to simplify references to it. However this was after we'd already rolled the feature out.

@@ -23,6 +23,7 @@ import insertDefaultTemplates from 'src/copy-paster/background/default-templates
 import { INSTALL_TIME_KEY, OVERVIEW_URL } from 'src/constants'
 import { SEARCH_INJECTION_KEY } from 'src/search-injection/constants'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
+import { ReadwiseBackground } from 'src/readwise-integration/background'
 
 // TODO: pass these deps down via constructor
 import {
@@ -34,6 +35,7 @@ import TabManagementBackground from 'src/tab-management/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
 
+// TODO: clean this types mess up
 class BackgroundScript {
     private utils: typeof utils
     private tabManagement: TabManagementBackground
@@ -41,6 +43,7 @@ class BackgroundScript {
     private customListsBackground: CustomListBackground
     private notifsBackground: NotifsBackground
     private storageChangesMan: StorageChangesManager
+    private readwiseBackground: ReadwiseBackground
     private storageManager: Storex
     private urlNormalizer: URLNormalizer
     private storageAPI: Storage.Static
@@ -54,6 +57,7 @@ class BackgroundScript {
     constructor({
         storageManager,
         notifsBackground,
+        readwiseBackground,
         copyPasterBackground,
         customListsBackground,
         tabManagement,
@@ -72,6 +76,7 @@ class BackgroundScript {
         notifsBackground: NotifsBackground
         copyPasterBackground: CopyPasterBackground
         customListsBackground: CustomListBackground
+        readwiseBackground: ReadwiseBackground
         urlNormalizer?: URLNormalizer
         utilFns?: typeof utils
         storageChangesMan: StorageChangesManager
@@ -87,6 +92,7 @@ class BackgroundScript {
         this.notifsBackground = notifsBackground
         this.copyPasterBackground = copyPasterBackground
         this.customListsBackground = customListsBackground
+        this.readwiseBackground = readwiseBackground
         this.utils = utilFns
         this.storageChangesMan = storageChangesMan
         this.storageAPI = storageAPI
@@ -230,6 +236,9 @@ class BackgroundScript {
                 db: this.storageManager.backend['dexieInstance'],
                 localStorage: this.storageAPI.local,
                 normalizeUrl: this.urlNormalizer,
+                backgroundModules: {
+                    readwise: this.readwiseBackground,
+                },
             })
             await this.storageAPI.local.set({ [storageKey]: true })
         }
