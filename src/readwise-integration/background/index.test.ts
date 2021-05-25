@@ -1142,6 +1142,72 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }
             },
         ),
+        backgroundIntegrationTest(
+            'should be able to filter annotations before uploading to Readwise',
+            () => {
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                injectFakeTabs({
+                                    tabManagement:
+                                        setup.backgroundModules.tabManagement,
+                                    tabsAPI: setup.browserAPIs.tabs,
+                                    tabs: [DATA.TEST_TAB_1, DATA.TEST_TAB_2],
+                                    includeTitle: true,
+                                })
+                                setup.fetch.post(READWISE_API_URL, {
+                                    status: 200,
+                                })
+                                const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: DATA.TEST_TAB_1 },
+                                    DATA.ANNOT_1,
+                                )
+                                const secondAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: DATA.TEST_TAB_2 },
+                                    DATA.ANNOT_2,
+                                )
+                                const thirdAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
+                                    { tab: DATA.TEST_TAB_2 },
+                                    DATA.ANNOT_3,
+                                )
+                                await setup.backgroundModules.readwise.setAPIKey(
+                                    {
+                                        validatedKey: 'my key',
+                                    },
+                                )
+                                setup.backgroundModules.readwise.uploadBatchSize = 1
+                                await setup.backgroundModules.readwise.uploadAllAnnotations(
+                                    {
+                                        queueInteraction: 'queue-and-return',
+                                        annotationFilter: (annot) =>
+                                            !annot.body?.length,
+                                    },
+                                )
+                                await setup.backgroundModules.readwise.actionQueue.waitForSync()
+
+                                expectFetchCalls(
+                                    parseJsonFetchCalls(setup.fetch.calls()),
+                                    [
+                                        {
+                                            url: READWISE_API_URL,
+                                            ...DATA.UPLOAD_REQUEST({
+                                                token: 'my key',
+                                                highlights: [
+                                                    DATA.UPLOADED_HIGHLIGHT_3(
+                                                        thirdAnnotationUrl,
+                                                    ),
+                                                ],
+                                            }),
+                                        },
+                                    ],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
     ],
 )
 
