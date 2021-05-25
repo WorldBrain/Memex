@@ -26,12 +26,45 @@ export interface Migrations {
 }
 
 // __IMPORTANT NOTE__
-//     Please make sure to use the `storex` instance rather than the Dexie `db` instance if you're updating existing records
-//     as the Dexie instance won't trigger storage hooks, like backup log appending. This may result in inconsistencies in things like the
-//     backup log - potentially breaking important features!
+//     Please note that use of the Dexie `db` instance rather than the `storex` instance won't trigger
+//     storage hooks, like backup log appending. This may result in inconsistencies - potentially
+//     breaking important features! Only use it if you need to change data without triggering side-effects.
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    'remove-then-re-add-broken-backup-log-entries': async ({ db }) => {
+        // Remove log entries with missing objectPk refs
+        const modifiedCount = await db
+            .table('backupChanges')
+            .toCollection()
+            .modify((value, ref) => {
+                if (value.objectPk == null) {
+                    delete ref.value
+                }
+            })
+
+        if (!modifiedCount) {
+            return
+        }
+
+        // Create new log entries with the proper objectPk refs to add in
+        const baseTimestamp = Date.now()
+        const backupChanges = []
+        let offset = 0
+        await db
+            .table('annotationPrivacyLevels')
+            .toCollection()
+            .eachPrimaryKey((objectPk) =>
+                backupChanges.push({
+                    timestamp: baseTimestamp + offset++,
+                    collection: 'annotationPrivacyLevels',
+                    operation: 'create',
+                    objectPk,
+                }),
+            )
+
+        await db.table('backupChanges').bulkAdd(backupChanges)
+    },
     /*
      * We recently added ordering to annotations uploaded to Readwise, however we messed it up for notes (without highlights), causing them
      * to not upload correctly. Now we need to upload all notes.
