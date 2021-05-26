@@ -133,9 +133,9 @@ export const InnerDiv = styled.div`
         props.large &&
         `
         overflow-y: scroll;
-        width: 840px;
         height: fit-content;
         max-height: 95vh;
         max-width: 95vw;
+        width: fit-content;
     `}
 `

@@ -133,6 +133,7 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     </TimeButtonRight>
                 </TimeButtonBox>
                 <PricingGrid>
+                    <PricingGridPlanTitle> </PricingGridPlanTitle>
                     <PricingGridPlanSpacer />
                     <PricingGridPlanTitle> Explorer </PricingGridPlanTitle>
 
