@@ -63,9 +63,18 @@ import { Services } from 'src/services/types'
 import { PDFBackground } from 'src/pdf/background'
 import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
 import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
+import {
+    PersonalDeviceType,
+    PersonalDeviceOs,
+    PersonalDeviceBrowser,
+    PersonalDeviceProduct,
+} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { PersonalCloudBackground } from 'src/personal-cloud/background'
 import { PersonalCloudBackend } from 'src/personal-cloud/background/backend/types'
 import { NullPersonalCloudBackend } from 'src/personal-cloud/background/backend/null'
+import { BrowserSettingsStore } from 'src/util/settings'
+import { PersonalCloudSettings } from 'src/personal-cloud/background/types'
+import { authChanges } from 'src/authentication/background/utils'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -491,6 +500,27 @@ export function createBackgroundModules(options: {
             storageManager,
             backend:
                 options.personalCloudBackend ?? new NullPersonalCloudBackend(),
+            createDeviceId: async () => {
+                const serverStorage = await options.getServerStorage()
+                const device = await serverStorage.storageModules.personalCloud.createDeviceInfo(
+                    {
+                        type: PersonalDeviceType.DesktopBrowser,
+                        os: PersonalDeviceOs.Windows,
+                        browser: PersonalDeviceBrowser.Edge,
+                        product: PersonalDeviceProduct.Extension,
+                    },
+                )
+                return device.id
+            },
+            settingStore: new BrowserSettingsStore<PersonalCloudSettings>(
+                options.browserAPIs.storage.local,
+                {
+                    prefix: 'personalCloud.',
+                },
+            ),
+            getUserId: async () =>
+                (await auth.authService.getCurrentUser()).id ?? null,
+            userIdChanges: () => authChanges(auth.authService),
         }),
     }
 }
@@ -568,6 +598,8 @@ export function getBackgroundStorageModules(
         reader: backgroundModules.readable.storage,
         contentSharing: backgroundModules.contentSharing.storage,
         readwiseActionQueue: backgroundModules.readwise.actionQueue.storage,
+        personalCloudActionQueue:
+            backgroundModules.personalCloud.actionQueue.storage,
     }
 }
 

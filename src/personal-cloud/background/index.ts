@@ -5,27 +5,79 @@ import StorageManager, {
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
 import { AsyncMutex } from '@worldbrain/memex-common/lib/utils/async-mutex'
+import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
 import { PersonalCloudBackend, PersonalCloudUpdateType } from './backend/types'
+import {
+    PersonalCloudAction,
+    PersonalCloudActionType,
+    PersonalCloudSettings,
+    PersonalCloudDeviceID,
+} from './types'
+import { PERSONAL_CLOUD_ACTION_RETRY_INTERVAL } from './backend/constants'
+import {
+    ActionExecutor,
+    ActionPreprocessor,
+} from '@worldbrain/memex-common/lib/action-queue/types'
+import { STORAGE_VERSIONS } from 'src/storage/constants'
+import { SettingStore } from 'src/util/settings'
+
+export interface PersonalCloudBackgroundOptions {
+    storageManager: StorageManager
+    backend: PersonalCloudBackend
+    getUserId(): Promise<string | number | null>
+    userIdChanges(): AsyncIterableIterator<void>
+    settingStore: SettingStore<PersonalCloudSettings>
+    createDeviceId(): Promise<PersonalCloudDeviceID>
+}
 
 export class PersonalCloudBackground {
     currentSchemaVersion?: Date
+    actionQueue: ActionQueue<PersonalCloudAction>
     pushMutex = new AsyncMutex()
     pullMutex = new AsyncMutex()
+    deviceId?: string | number
 
-    constructor(
-        public options: {
-            storageManager: StorageManager
-            backend: PersonalCloudBackend
-        },
-    ) {}
+    constructor(public options: PersonalCloudBackgroundOptions) {
+        this.actionQueue = new ActionQueue({
+            storageManager: options.storageManager,
+            collectionName: 'personalCloudAction',
+            versions: { initial: STORAGE_VERSIONS[25].version },
+            retryIntervalInMs: PERSONAL_CLOUD_ACTION_RETRY_INTERVAL,
+            executeAction: this.executeAction,
+            preprocessAction: this.preprocessAction,
+        })
+    }
 
     async setup() {
         this.currentSchemaVersion = getCurrentSchemaVersion(
             this.options.storageManager,
         )
+        await this.actionQueue.setup({ paused: true })
 
-        // This will never return, so don't await for it
+        // These will never return, so don't await for it
+        this.observeAuthChanges()
         this.integrateContinuously()
+    }
+
+    async observeAuthChanges() {
+        for await (const _ of this.options.userIdChanges()) {
+            await this.loadDeviceId()
+        }
+    }
+
+    async loadDeviceId() {
+        const userId = await this.options.getUserId()
+        if (userId) {
+            this.deviceId = await this.options.settingStore.get('deviceId')
+            if (!this.deviceId) {
+                this.deviceId = await this.options.createDeviceId()
+                await this.options.settingStore.set('deviceId', this.deviceId!)
+            }
+            this.actionQueue.unpause()
+        } else {
+            this.actionQueue.pause()
+            delete this.deviceId
+        }
     }
 
     async integrateContinuously() {
@@ -54,6 +106,7 @@ export class PersonalCloudBackground {
     async waitForSync() {
         await this.pushMutex.wait()
         await this.pullMutex.wait()
+        await this.actionQueue.waitForSync()
     }
 
     async handlePostStorageChange(event: StorageOperationEvent<'post'>) {
@@ -71,14 +124,20 @@ export class PersonalCloudBackground {
                     // we got the change to look at it, so just ignore the create
                     continue
                 }
-                await this.options.backend.pushUpdates([
+                await this.actionQueue.scheduleAction(
                     {
-                        type: PersonalCloudUpdateType.Overwrite,
-                        schemaVersion: this.currentSchemaVersion!,
-                        collection: change.collection,
-                        object,
+                        type: PersonalCloudActionType.PushObject,
+                        updates: [
+                            {
+                                type: PersonalCloudUpdateType.Overwrite,
+                                schemaVersion: this.currentSchemaVersion!,
+                                collection: change.collection,
+                                object,
+                            },
+                        ],
                     },
-                ])
+                    { queueInteraction: 'queue-and-return' },
+                )
             } else if (change.type === 'modify') {
                 const objects = await Promise.all(
                     change.pks.map((pk) =>
@@ -89,15 +148,19 @@ export class PersonalCloudBackground {
                         ),
                     ),
                 )
-                await this.options.backend.pushUpdates(
-                    objects
-                        .filter((object) => !!object)
-                        .map((object) => ({
-                            type: PersonalCloudUpdateType.Overwrite,
-                            schemaVersion: this.currentSchemaVersion!,
-                            collection: change.collection,
-                            object,
-                        })),
+                await this.actionQueue.scheduleAction(
+                    {
+                        type: PersonalCloudActionType.PushObject,
+                        updates: objects
+                            .filter((object) => !!object)
+                            .map((object) => ({
+                                type: PersonalCloudUpdateType.Overwrite,
+                                schemaVersion: this.currentSchemaVersion!,
+                                collection: change.collection,
+                                object,
+                            })),
+                    },
+                    { queueInteraction: 'queue-and-return' },
                 )
             } else if (change.type === 'delete') {
                 const wheres = await Promise.all(
@@ -109,18 +172,36 @@ export class PersonalCloudBackground {
                         ),
                     ),
                 )
-                await this.options.backend.pushUpdates(
-                    wheres.map((where) => ({
-                        type: PersonalCloudUpdateType.Delete,
-                        schemaVersion: this.currentSchemaVersion!,
-                        collection: change.collection,
-                        where,
-                    })),
+                await this.actionQueue.scheduleAction(
+                    {
+                        type: PersonalCloudActionType.PushObject,
+                        updates: wheres.map((where) => ({
+                            type: PersonalCloudUpdateType.Delete,
+                            schemaVersion: this.currentSchemaVersion!,
+                            collection: change.collection,
+                            where,
+                        })),
+                    },
+                    { queueInteraction: 'queue-and-return' },
                 )
             }
         }
 
         releaseMutex()
+    }
+
+    executeAction: ActionExecutor<PersonalCloudAction> = async ({ action }) => {
+        if (!this.deviceId) {
+            return { pauseAndRetry: true }
+        }
+
+        if (action.type === PersonalCloudActionType.PushObject) {
+            await this.options.backend.pushUpdates(action.updates)
+        }
+    }
+
+    preprocessAction: ActionPreprocessor<PersonalCloudAction> = () => {
+        return { valid: true }
     }
 }
 

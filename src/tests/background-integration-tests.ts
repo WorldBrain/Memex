@@ -285,6 +285,10 @@ export async function runBackgroundIntegrationTest(
         const changes = changeDetectorUsed
             ? await setup.storageChangeDetector.compare()
             : undefined
+        if (changes) {
+            delete changes.personalCloudAction
+        }
+
         if (step.validateStorageChanges) {
             step.validateStorageChanges({ changes })
         }

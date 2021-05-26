@@ -313,11 +313,12 @@ async function setupSyncBackgroundTest(
         // })
         // deviceIds.push(deviceId)
 
+        await setup.backgroundModules.personalCloud.setup()
         const memoryAuth = setup.backgroundModules.auth
             .authService as MemoryAuthService
-        memoryAuth.setUser({ ...TEST_USER })
-        await setup.backgroundModules.sync.continuousSync.initDevice()
-        await setup.backgroundModules.sync.continuousSync.enableContinuousSync()
+        await memoryAuth.setUser({ ...TEST_USER })
+        // await setup.backgroundModules.sync.continuousSync.initDevice()
+        // await setup.backgroundModules.sync.continuousSync.enableContinuousSync()
     }
 
     // const changeDetectors = setups.map(setup => new StorageChangeDetector({

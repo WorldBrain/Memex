@@ -6,6 +6,8 @@ import {
 } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { SettingStore } from 'src/util/settings'
 import { AuthSettings } from './types'
+import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
+import createResolvable from '@josephg/resolvable'
 
 export function hasSubscribedBefore(claims: Claims): boolean {
     return (
@@ -109,4 +111,18 @@ export function getSubscriptionExpirationTimestamp(
 
 export function getSubscriptionStatus(claims: Claims): SubscriptionStatus {
     return claims?.subscriptionStatus
+}
+
+export async function* authChanges(authService: AuthService) {
+    let resolvable = createResolvable()
+    authService.events.on('changed', () => {
+        const oldResolvable = resolvable
+        resolvable = createResolvable()
+        oldResolvable.resolve()
+    })
+
+    while (true) {
+        await resolvable
+        yield
+    }
 }

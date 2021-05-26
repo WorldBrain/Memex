@@ -20,6 +20,7 @@ import { ServerStorage } from './types'
 import ContentConversationStorage from '@worldbrain/memex-common/lib/content-conversations/storage'
 import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
 import ActivityFollowsStorage from '@worldbrain/memex-common/lib/activity-follows/storage'
+import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/storage'
 
 let shouldLogOperations = false
 
@@ -94,6 +95,10 @@ export function createLazyServerStorage(
             const activityStreams = new ActivityStreamsStorage({
                 storageManager,
             })
+            const personalCloud = new PersonalCloudStorage({
+                storageManager,
+                autoPkType: 'string',
+            })
             const activityFollows = new ActivityFollowsStorage({
                 storageManager,
                 operationExecuter: operationExecuter('activityFollows'),
@@ -107,6 +112,7 @@ export function createLazyServerStorage(
                     activityStreams,
                     activityFollows,
                     contentConversations,
+                    personalCloud,
                 },
             }
             registerModuleMapCollections(

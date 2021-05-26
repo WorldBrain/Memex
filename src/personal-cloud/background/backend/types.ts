@@ -1,11 +1,5 @@
 export interface PersonalCloudBackend {
-    pushUpdates(
-        updates: Array<
-            {
-                schemaVersion: Date
-            } & PersonalCloudUpdate
-        >,
-    ): Promise<void>
+    pushUpdates(updates: PersonalCloudUpdateBatchPush): Promise<void>
     streamUpdates(): AsyncIterableIterator<PersonalCloudUpdateBatch>
 }
 
@@ -33,3 +27,8 @@ export interface PersonalCloudObjectInfo {
 }
 
 export type PersonalCloudUpdateBatch = Array<PersonalCloudUpdate>
+export type PersonalCloudUpdateBatchPush = Array<
+    {
+        schemaVersion: Date
+    } & PersonalCloudUpdate
+>
