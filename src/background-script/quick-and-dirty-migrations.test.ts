@@ -3,6 +3,7 @@ import {
     SPECIAL_LIST_IDS,
 } from '@worldbrain/memex-storage/lib/lists/constants'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import range from 'lodash/range'
 
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { migrations, MigrationProps } from './quick-and-dirty-migrations'
@@ -23,6 +24,163 @@ async function setupTest() {
 }
 
 describe('quick-and-dirty migration tests', () => {
+    describe('remove-then-re-add-broken-backup-log-entries', () => {
+        it('should remove then re-add any backup log entries for annotationPrivacyLevels with undefined PKs', async () => {
+            const { migrationProps } = await setupTest()
+
+            let offset = 0
+            const baseTimestamp = Date.now()
+            const annotLimitPerPage = 10
+
+            for (const testPageUrl of testPageUrls) {
+                for (const _ of range(1, annotLimitPerPage)) {
+                    const timestamp = baseTimestamp - offset++
+
+                    await migrationProps.db
+                        .table('annotationPrivacyLevels')
+                        .add({
+                            annotation: testPageUrl + '/#' + timestamp,
+                            createdWhen: timestamp,
+                            privacyLevel: 100,
+                        })
+
+                    await migrationProps.db.table('backupChanges').add({
+                        timestamp,
+                        collection: 'annotationPrivacyLevels',
+                        operation: 'create',
+                    })
+                }
+            }
+
+            offset = 0
+            const expectedPrivacyLevels = testPageUrls
+                .map((testPageUrl) =>
+                    range(1, annotLimitPerPage).map(() => {
+                        const timestamp = baseTimestamp - offset++
+                        return expect.objectContaining({
+                            annotation: testPageUrl + '/#' + timestamp,
+                            createdWhen: timestamp,
+                            privacyLevel: 100,
+                        })
+                    }),
+                )
+                .flat()
+
+            const privacyLevelsPre = await migrationProps.db
+                .table('annotationPrivacyLevels')
+                .toArray()
+            expect(privacyLevelsPre).toEqual(expectedPrivacyLevels)
+
+            expect(
+                await migrationProps.db.table('backupChanges').toArray(),
+            ).toEqual(
+                privacyLevelsPre.map(() => ({
+                    timestamp: expect.any(Number),
+                    collection: 'annotationPrivacyLevels',
+                    operation: 'create',
+                })),
+            )
+
+            await migrations['remove-then-re-add-broken-backup-log-entries'](
+                migrationProps,
+            )
+
+            const privacyLevelsPost = await migrationProps.db
+                .table('annotationPrivacyLevels')
+                .toArray()
+
+            // These should be untouched
+            expect(privacyLevelsPost).toEqual(expectedPrivacyLevels)
+
+            expect(
+                await migrationProps.db.table('backupChanges').toArray(),
+            ).toEqual(
+                privacyLevelsPost.map(({ id }) => ({
+                    timestamp: expect.any(Number),
+                    collection: 'annotationPrivacyLevels',
+                    operation: 'create',
+                    objectPk: id, // This should now exist
+                })),
+            )
+        })
+
+        it('should not touch backup log entries if PKs all exist as expected', async () => {
+            const { migrationProps } = await setupTest()
+
+            let offset = 0
+            const baseTimestamp = Date.now()
+            const annotLimitPerPage = 10
+
+            for (const testPageUrl of testPageUrls) {
+                for (const _ of range(1, annotLimitPerPage)) {
+                    const timestamp = baseTimestamp - offset++
+
+                    const objectPk = await migrationProps.db
+                        .table('annotationPrivacyLevels')
+                        .add({
+                            annotation: testPageUrl + '/#' + timestamp,
+                            createdWhen: timestamp,
+                            privacyLevel: 100,
+                        })
+
+                    await migrationProps.db.table('backupChanges').add({
+                        timestamp,
+                        collection: 'annotationPrivacyLevels',
+                        operation: 'create',
+                        objectPk,
+                    })
+                }
+            }
+
+            offset = 0
+            const expectedPrivacyLevels = testPageUrls
+                .map((testPageUrl) =>
+                    range(1, annotLimitPerPage).map(() => {
+                        const timestamp = baseTimestamp - offset++
+                        return expect.objectContaining({
+                            annotation: testPageUrl + '/#' + timestamp,
+                            createdWhen: timestamp,
+                            privacyLevel: 100,
+                        })
+                    }),
+                )
+                .flat()
+
+            const privacyLevels = await migrationProps.db
+                .table('annotationPrivacyLevels')
+                .toArray()
+            const expectedBackupLog = expect.arrayContaining(
+                privacyLevels.map(({ id }) => ({
+                    timestamp: expect.any(Number),
+                    collection: 'annotationPrivacyLevels',
+                    operation: 'create',
+                    objectPk: id,
+                })),
+            )
+
+            expect(privacyLevels).toEqual(expectedPrivacyLevels)
+            expect(
+                await migrationProps.db.table('backupChanges').toArray(),
+            ).toEqual(expectedBackupLog)
+
+            await migrations['remove-then-re-add-broken-backup-log-entries'](
+                migrationProps,
+            )
+
+            // These should be untouched
+            expect(
+                await migrationProps.db
+                    .table('annotationPrivacyLevels')
+                    .toArray(),
+            ).toEqual(expectedPrivacyLevels)
+
+            // These should also be untouched
+            expect(
+                await migrationProps.db.table('backupChanges').toArray(),
+            ).toEqual(expectedBackupLog)
+        })
+    })
+
     describe('staticize-mobile-list-id', () => {
         it('should be able to staticize existing mobile list ID + update all entries', async () => {
             const { migrationProps } = await setupTest()

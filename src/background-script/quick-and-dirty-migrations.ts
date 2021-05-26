@@ -27,8 +27,8 @@ export interface Migrations {
 
 // __IMPORTANT NOTE__
 //     Please note that use of the Dexie `db` instance rather than the `storex` instance won't trigger
-//     storage hooks, like backup log appending. This may result in inconsistencies - potentially
-//     breaking important features! Only use it if you need to change data without triggering side-effects.
+//     storage hooks. This may result in inconsistencies - potentially breaking important features!
+//     Only use it if you need to change data without triggering side-effects.
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
