@@ -11,7 +11,7 @@ import {
 import styled from 'styled-components'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-
+import { ButtonTooltip } from 'src/common-ui/components'
 
 import SubscriptionOptionsChargebee from 'src/authentication/components/Subscription/SubscriptionOptionsChargebee'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
@@ -56,6 +56,26 @@ const PioneerPlanLearnMoreButton = styled(SecondaryAction)`
 `
 
 const PioneerPlanUpgradeButton = styled(PrimaryAction)`
+`
+
+const ClosePioneerUpgradeContainer = styled.div`
+    mask-position: center;
+    mask-repeat: no-repeat;
+    height: 20px;
+    width: 20px;
+    mask-size: 13px;
+    background-color: ${(props) => props.theme.colors.primary};
+    opacity: 0.7;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/close.svg');
+
+    border: none;
+    outline: none;
+
+    &:hover {
+        cursor: pointer;
+    }
 `
 
 
@@ -179,7 +199,14 @@ class Subscribe extends React.Component<Props, State> {
                 </PioneerPlanContentBox>
                 <PioneerPlanButtonBox>
                     <PioneerPlanLearnMoreButton label="Learn More" onClick={() => window.open('https://worldbrain.io/announcements/pioneer-plan')}/>
-                    <PioneerPlanUpgradeButton label="Upgrade" onClick={this.handleSubscriptionOpened}/>
+                    <PioneerPlanUpgradeButton label="Upgrade" onClick={() => window.open('https://buy.stripe.com/4gw3fpg3i6i534IcMM')}/>
+                    {/*  TODO. differentiate in prod and staging to use this link for staging: https://buy.stripe.com/test_8wMdU4cm4frH4SY144*/}
+                    <ButtonTooltip
+                            tooltipText={'Hide Message'}
+                            position="bottom"
+                        >
+                    <ClosePioneerUpgradeContainer/>
+                    </ButtonTooltip>
                 </PioneerPlanButtonBox>
             </PioneerPlanContainer>
 
