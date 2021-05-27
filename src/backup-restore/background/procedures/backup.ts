@@ -226,6 +226,9 @@ export default class BackupProcedure {
             events.emit('info', { info })
         }
 
+        await localStorage.removeItem(
+                    'backup.onboarding.running-backup',
+                )
         console.log('finished incremental backup')
     }
 
