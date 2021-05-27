@@ -278,7 +278,7 @@ async function runSyncBackgroundTest(
     }
 }
 
-async function setupSyncBackgroundTest(
+export async function setupSyncBackgroundTest(
     options: {
         deviceCount: number
         debugStorageOperations?: boolean
@@ -287,12 +287,17 @@ async function setupSyncBackgroundTest(
     const userId = TEST_USER.id
 
     const getServerStorage = await createLazyMemoryServerStorage()
+    const serverStorage = await getServerStorage()
     const cloudChangeBus = new PersonalCloudChangeSourceBus()
 
     const setups: BackgroundIntegrationTestSetup[] = []
+    let now = 555
     for (let i = 0; i < options.deviceCount; ++i) {
         const personalCloudBackend = new StorexPersonalCloudBackend({
+            storageManager: serverStorage.storageManager,
             changeSource: cloudChangeBus.getView(),
+            getUserId: async () => userId,
+            getNow: () => now++,
         })
 
         setups.push(
@@ -335,7 +340,7 @@ async function setupSyncBackgroundTest(
         await setup.backgroundModules.personalCloud.waitForSync()
     }
 
-    return { userId, setups, sync }
+    return { userId, setups, sync, serverStorage }
 }
 
 const getReadablePattern = (pattern: number[]) =>

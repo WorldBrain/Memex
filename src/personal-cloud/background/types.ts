@@ -1,4 +1,4 @@
-import { PersonalCloudUpdateBatchPush } from './backend/types'
+import { PersonalCloudUpdatePushBatch } from './backend/types'
 
 export type PersonalCloudAction = PushObjectAction
 export enum PersonalCloudActionType {
@@ -6,7 +6,7 @@ export enum PersonalCloudActionType {
 }
 export interface PushObjectAction {
     type: PersonalCloudActionType.PushObject
-    updates: PersonalCloudUpdateBatchPush
+    updates: PersonalCloudUpdatePushBatch
 }
 
 export interface PersonalCloudSettings {

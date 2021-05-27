@@ -4,17 +4,31 @@ import {
     PersonalCloudUpdateBatch,
     PersonalCloudUpdate,
 } from './types'
-// import StorageManager from '@worldbrain/storex';
+import StorageManager from '@worldbrain/storex'
+import { processClientUpdates } from './translation-layer'
 
 export class StorexPersonalCloudBackend implements PersonalCloudBackend {
     constructor(
         public options: {
-            // storageManager: StorageManager
+            storageManager: StorageManager
             changeSource: PersonalCloudChangeSourceView
+            getUserId: () => Promise<number | string | null>
+            getNow(): number
         },
     ) {}
 
     pushUpdates: PersonalCloudBackend['pushUpdates'] = async (updates) => {
+        const userId = await this.options.getUserId()
+        if (!userId) {
+            throw new Error(`User tried to push update without being logged in`)
+        }
+
+        await processClientUpdates({
+            storageManager: this.options.storageManager,
+            getNow: this.options.getNow,
+            userId,
+            updates,
+        })
         await this.options.changeSource.pushUpdates(updates)
     }
 
