@@ -32,6 +32,49 @@ export interface Migrations {
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    /*
+     * We discovered further complications with our mobile list ID staticization attempts where,
+     * as it was not also done on the mobile app, sync entries coming in from the mobile app would
+     * still point to the old dynamically created mobile list ID. This migration exists to identify
+     * those entries pointing to the old list, that would have been as a result of sync, and point them
+     * to the new static list.
+     */
+    'point-old-mobile-list-entries-to-new': async ({ db }) => {
+        const listIdsForPageEntries = await db
+            .table('pageListEntries')
+            .orderBy('listId')
+            .uniqueKeys()
+        const matchingListIds = await db
+            .table('customLists')
+            .where('id')
+            .anyOf(listIdsForPageEntries)
+            .primaryKeys()
+
+        // Figure out if there is an entry pointing to a non-existent list - this will be the old mobile list
+        let nonExistentId: number
+        listIdsForPageEntries.forEach((id) => {
+            if (!matchingListIds.includes(id)) {
+                nonExistentId = id as number
+            }
+        })
+        if (!nonExistentId) {
+            return
+        }
+
+        await db
+            .table('pageListEntries')
+            .where('listId')
+            .equals(nonExistentId)
+            .modify({
+                listId: SPECIAL_LIST_IDS.MOBILE,
+            })
+    },
+    /*
+     * We recently messed up backup by adding our new annotations privacy level table that had an
+     * auto-generated PK. The backup log is appended to automatically using a Dexie hook, but at
+     * the time the hook runs that generated PK isn't available. But it still appended to the backup log
+     * with a missing PK. Hence we needed to update all backup log entries with missing PKs.
+     */
     'remove-then-re-add-broken-backup-log-entries': async ({ db }) => {
         // Remove log entries with missing objectPk refs
         const modifiedCount = await db

@@ -24,6 +24,201 @@ async function setupTest() {
 }
 
 describe('quick-and-dirty migration tests', () => {
+    describe('point-old-mobile-list-entries-to-new', () => {
+        it('should modify all list entries pointing to the old mobile list to point to the new one', async () => {
+            const { migrationProps } = await setupTest()
+            const oldMobileListId = 99
+
+            // Create new static ID mobile list + some others
+            await migrationProps.db.table('customLists').add({
+                id: SPECIAL_LIST_IDS.MOBILE,
+                name: SPECIAL_LIST_NAMES.MOBILE,
+                searchableName: SPECIAL_LIST_NAMES.MOBILE,
+                isDeletable: false,
+                isNestable: false,
+                createdAt: new Date(),
+            })
+            await migrationProps.db.table('customLists').add({
+                id: 1,
+                name: 'test 1',
+                searchableName: 'test 1',
+                isDeletable: false,
+                isNestable: false,
+                createdAt: new Date(),
+            })
+            await migrationProps.db.table('customLists').add({
+                id: 2,
+                name: 'test 2',
+                searchableName: 'test 2',
+                isDeletable: false,
+                isNestable: false,
+                createdAt: new Date(),
+            })
+
+            // Create some dummy page list entries
+            for (const testPageUrl of testPageUrls) {
+                await migrationProps.db.table('pageListEntries').add({
+                    pageUrl: testPageUrl,
+                    fullUrl: 'https://' + testPageUrl,
+                    listId: 1,
+                    createdAt: new Date(),
+                })
+                await migrationProps.db.table('pageListEntries').add({
+                    pageUrl: testPageUrl,
+                    fullUrl: 'https://' + testPageUrl,
+                    listId: 2,
+                    createdAt: new Date(),
+                })
+                await migrationProps.db.table('pageListEntries').add({
+                    pageUrl: testPageUrl,
+                    fullUrl: 'https://' + testPageUrl,
+                    listId: oldMobileListId,
+                    createdAt: new Date(),
+                })
+            }
+
+            expect(
+                await migrationProps.db.table('pageListEntries').toArray(),
+            ).toEqual(
+                expect.arrayContaining(
+                    testPageUrls
+                        .map((testPageUrl) => [
+                            expect.objectContaining({
+                                pageUrl: testPageUrl,
+                                fullUrl: 'https://' + testPageUrl,
+                                listId: 1,
+                            }),
+                            expect.objectContaining({
+                                pageUrl: testPageUrl,
+                                fullUrl: 'https://' + testPageUrl,
+                                listId: 2,
+                            }),
+                            expect.objectContaining({
+                                pageUrl: testPageUrl,
+                                fullUrl: 'https://' + testPageUrl,
+                                listId: oldMobileListId,
+                            }),
+                        ])
+                        .flat(),
+                ),
+            )
+
+            await migrations['point-old-mobile-list-entries-to-new'](
+                migrationProps,
+            )
+
+            expect(
+                await migrationProps.db.table('pageListEntries').toArray(),
+            ).toEqual(
+                expect.arrayContaining(
+                    testPageUrls
+                        .map((testPageUrl) => [
+                            expect.objectContaining({
+                                pageUrl: testPageUrl,
+                                fullUrl: 'https://' + testPageUrl,
+                                listId: 1,
+                            }),
+                            expect.objectContaining({
+                                pageUrl: testPageUrl,
+                                fullUrl: 'https://' + testPageUrl,
+                                listId: 2,
+                            }),
+                            expect.objectContaining({
+                                pageUrl: testPageUrl,
+                                fullUrl: 'https://' + testPageUrl,
+                                listId: SPECIAL_LIST_IDS.MOBILE, // This should have changed
+                            }),
+                        ])
+                        .flat(),
+                ),
+            )
+        })
+
+        it('should not do anything to data where no list entries point to the old mobile list', async () => {
+            const { migrationProps } = await setupTest()
+
+            // Create new static ID mobile list + some others
+            await migrationProps.db.table('customLists').add({
+                id: SPECIAL_LIST_IDS.MOBILE,
+                name: SPECIAL_LIST_NAMES.MOBILE,
+                searchableName: SPECIAL_LIST_NAMES.MOBILE,
+                isDeletable: false,
+                isNestable: false,
+                createdAt: new Date(),
+            })
+            await migrationProps.db.table('customLists').add({
+                id: 1,
+                name: 'test 1',
+                searchableName: 'test 1',
+                isDeletable: false,
+                isNestable: false,
+                createdAt: new Date(),
+            })
+            await migrationProps.db.table('customLists').add({
+                id: 2,
+                name: 'test 2',
+                searchableName: 'test 2',
+                isDeletable: false,
+                isNestable: false,
+                createdAt: new Date(),
+            })
+
+            // Create some dummy page list entries
+            for (const testPageUrl of testPageUrls) {
+                await migrationProps.db.table('pageListEntries').add({
+                    pageUrl: testPageUrl,
+                    fullUrl: 'https://' + testPageUrl,
+                    listId: 1,
+                    createdAt: new Date(),
+                })
+                await migrationProps.db.table('pageListEntries').add({
+                    pageUrl: testPageUrl,
+                    fullUrl: 'https://' + testPageUrl,
+                    listId: 2,
+                    createdAt: new Date(),
+                })
+                await migrationProps.db.table('pageListEntries').add({
+                    pageUrl: testPageUrl,
+                    fullUrl: 'https://' + testPageUrl,
+                    listId: SPECIAL_LIST_IDS.MOBILE,
+                    createdAt: new Date(),
+                })
+            }
+            const expected = expect.arrayContaining(
+                testPageUrls
+                    .map((testPageUrl) => [
+                        expect.objectContaining({
+                            pageUrl: testPageUrl,
+                            fullUrl: 'https://' + testPageUrl,
+                            listId: 1,
+                        }),
+                        expect.objectContaining({
+                            pageUrl: testPageUrl,
+                            fullUrl: 'https://' + testPageUrl,
+                            listId: 2,
+                        }),
+                        expect.objectContaining({
+                            pageUrl: testPageUrl,
+                            fullUrl: 'https://' + testPageUrl,
+                            listId: SPECIAL_LIST_IDS.MOBILE,
+                        }),
+                    ])
+                    .flat(),
+            )
+            expect(
+                await migrationProps.db.table('pageListEntries').toArray(),
+            ).toEqual(expected)
+
+            await migrations['point-old-mobile-list-entries-to-new'](
+                migrationProps,
+            )
+
+            expect(
+                await migrationProps.db.table('pageListEntries').toArray(),
+            ).toEqual(expected) // Nothing should have changed
+        })
+    })
+
     describe('remove-then-re-add-broken-backup-log-entries', () => {
         it('should remove then re-add any backup log entries for annotationPrivacyLevels with undefined PKs', async () => {
             const { migrationProps } = await setupTest()
