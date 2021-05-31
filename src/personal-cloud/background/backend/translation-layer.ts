@@ -129,15 +129,39 @@ async function processClientUpdate(
         })
         return { contentMetadata, contentLocator }
     }
-    const updateMany = async (collection: string, where: any, updates: any) => {
-        await storageManager.collection(collection).updateObjects(
-            { ...where, user: params.userId },
+    const updateById = async (
+        collection: string,
+        id: number | string,
+        updates: any,
+    ) => {
+        const now = params.getNow()
+        const batch: OperationBatch = [
             {
-                ...updates,
-                updatedWhen: params.getNow(),
-                user: params.userId,
+                placeholder: 'update',
+                operation: 'updateObjects',
+                collection,
+                where: { id, user: params.userId },
+                updates: {
+                    ...updates,
+                    updatedWhen: now,
+                    user: params.userId,
+                },
             },
-        )
+            {
+                placeholder: 'update-entry',
+                operation: 'createObject',
+                collection: 'personalDataChange',
+                args: {
+                    createdWhen: now,
+                    user: params.userId,
+                    createdByDevice: params.update.deviceId,
+                    type: DataChangeType.Modify,
+                    collection,
+                    objectId: id,
+                },
+            },
+        ]
+        await storageManager.operation('executeBatch', batch)
     }
     const deleteMany = async (collection: string, where: any) => {
         await params.storageManager.collection(collection).deleteObjects({
@@ -172,9 +196,9 @@ async function processClientUpdate(
                     primary: true,
                 })
             } else if (contentMetadata) {
-                await updateMany(
+                await updateById(
                     'personalContentMetadata',
-                    { id: contentMetadata.id },
+                    contentMetadata.id,
                     {
                         canonicalUrl: page.canonicalUrl,
                         title: page.fullTitle,

@@ -36,21 +36,38 @@ function dataChanges(
             /* id: */ string | number,
         ]
     >,
+    options?: { skip?: number },
 ) {
-    let id = 1
-    let time = 555
-    return changes.map((change) => {
-        const now = time++
-        return {
-            id: id++,
-            createdWhen: now,
-            createdByDevice: REMOTE_TEST_DATA_V24.personalDeviceInfo.first.id,
-            user: TEST_USER.id,
-            type: change[0],
-            collection: change[1],
-            objectId: change[2],
-        }
-    })
+    let id = 0
+    let now = 554
+    const advance = () => {
+        ++id
+        ++now
+    }
+    const skip = options?.skip ?? 0
+    const skipped: Array<ReturnType<jest.Expect['anything']>> = []
+    for (let i = 0; i < skip; ++i) {
+        advance()
+        skipped.push(expect.anything())
+    }
+
+    return [
+        ...skipped,
+        ...changes.map((change) => {
+            advance()
+
+            return {
+                id,
+                createdWhen: now,
+                createdByDevice:
+                    REMOTE_TEST_DATA_V24.personalDeviceInfo.first.id,
+                user: TEST_USER.id,
+                type: change[0],
+                collection: change[1],
+                objectId: change[2],
+            }
+        }),
+    ]
 }
 
 describe('Personal cloud translation layer', () => {
@@ -115,19 +132,27 @@ describe('Personal cloud translation layer', () => {
                 { fullTitle: 'Updated title' },
             )
             await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const testMetadata = REMOTE_TEST_DATA_V24.personalContentMetadata
+
+            // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
                     'personalContentMetadata',
                     'personalContentLocator',
                 ]),
             ).toEqual({
+                personalDataChange: dataChanges([
+                    [DataChangeType.Modify, 'personalContentMetadata', testMetadata.first.id],
+                ], { skip: 4 }),
                 personalContentMetadata: [
                     {
-                        ...REMOTE_TEST_DATA_V24.personalContentMetadata.first,
+                        ...testMetadata.first,
                         updatedWhen: 559,
                         title: 'Updated title',
                     },
-                    REMOTE_TEST_DATA_V24.personalContentMetadata.second,
+                    testMetadata.second,
                 ],
                 personalContentLocator: [
                     REMOTE_TEST_DATA_V24.personalContentLocator.first,
@@ -143,8 +168,10 @@ describe('Personal cloud translation layer', () => {
                 url: LOCAL_TEST_DATA_V24.pages.first.url,
             })
             await setups[0].backgroundModules.personalCloud.waitForSync()
+            // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
+                    // 'personalDataChange',
                     'personalContentMetadata',
                     'personalContentLocator',
                 ]),
@@ -165,8 +192,10 @@ describe('Personal cloud translation layer', () => {
                 .collection('visits')
                 .createObject(LOCAL_TEST_DATA_V24.visits.first)
             await setups[0].backgroundModules.personalCloud.waitForSync()
+            // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
+                    // 'personalDataChange',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalContentRead',
@@ -196,8 +225,10 @@ describe('Personal cloud translation layer', () => {
                 .collection('tags')
                 .createObject(LOCAL_TEST_DATA_V24.tags.first)
             await setups[0].backgroundModules.personalCloud.waitForSync()
+            // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
+                    // 'personalDataChange',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalTag',
