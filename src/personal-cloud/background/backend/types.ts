@@ -30,4 +30,5 @@ export type PersonalCloudUpdateBatch = Array<PersonalCloudUpdate>
 export type PersonalCloudUpdatePushBatch = Array<PersonalCloudUpdatePush>
 export type PersonalCloudUpdatePush = {
     schemaVersion: Date
+    deviceId: number | string
 } & PersonalCloudUpdate

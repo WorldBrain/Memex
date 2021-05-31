@@ -131,6 +131,7 @@ export class PersonalCloudBackground {
                             {
                                 type: PersonalCloudUpdateType.Overwrite,
                                 schemaVersion: this.currentSchemaVersion!,
+                                deviceId: this.deviceId,
                                 collection: change.collection,
                                 object,
                             },
@@ -156,6 +157,7 @@ export class PersonalCloudBackground {
                             .map((object) => ({
                                 type: PersonalCloudUpdateType.Overwrite,
                                 schemaVersion: this.currentSchemaVersion!,
+                                deviceId: this.deviceId,
                                 collection: change.collection,
                                 object,
                             })),
@@ -178,6 +180,7 @@ export class PersonalCloudBackground {
                         updates: wheres.map((where) => ({
                             type: PersonalCloudUpdateType.Delete,
                             schemaVersion: this.currentSchemaVersion!,
+                            deviceId: this.deviceId,
                             collection: change.collection,
                             where,
                         })),
@@ -196,7 +199,12 @@ export class PersonalCloudBackground {
         }
 
         if (action.type === PersonalCloudActionType.PushObject) {
-            await this.options.backend.pushUpdates(action.updates)
+            await this.options.backend.pushUpdates(
+                action.updates.map((update) => ({
+                    ...update,
+                    deviceId: update.deviceId ?? this.deviceId,
+                })),
+            )
         }
     }
 

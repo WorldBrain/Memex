@@ -119,7 +119,34 @@ describe('Personal cloud translation layer', () => {
             })
         })
 
-        it.todo('should create visits')
+        it('should create visits', async () => {
+            const { setups, serverStorage } = await setup()
+            await insertTestPages(setups)
+            await setups[0].storageManager
+                .collection('visits')
+                .createObject(LOCAL_TEST_DATA_V24.visits.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'personalContentRead',
+                ]),
+            ).toEqual({
+                personalContentMetadata: [
+                    REMOTE_TEST_DATA_V24.personalContentMetadata.first,
+                    REMOTE_TEST_DATA_V24.personalContentMetadata.second,
+                ],
+                personalContentLocator: [
+                    REMOTE_TEST_DATA_V24.personalContentLocator.first,
+                    REMOTE_TEST_DATA_V24.personalContentLocator.second,
+                ],
+                personalContentRead: [
+                    REMOTE_TEST_DATA_V24.personalContentRead.first,
+                ],
+            })
+        })
+
         it.todo('should update vists')
         it.todo('should delete vists')
 

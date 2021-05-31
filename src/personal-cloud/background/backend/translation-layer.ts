@@ -53,6 +53,7 @@ async function processClientUpdate(
             .createObject({
                 ...toCreate,
                 user: params.userId,
+                createdByDevice: params.update.deviceId,
                 createdWhen: now,
                 updatedWhen: now,
             })
@@ -83,6 +84,7 @@ async function processClientUpdate(
     }
     const findContentLocator = async (normalizedUrl: string) => {
         const contentLocator: PersonalContentLocator & {
+            id: string | number
             personalContentMetadata: string | number
         } = await findOne('personalContentLocator', {
             locationScheme: LocationSchemeType.NormalizedUrlV1,
@@ -192,6 +194,24 @@ async function processClientUpdate(
         }
     } else if (update.collection === 'visits') {
         if (update.type === PersonalCloudUpdateType.Overwrite) {
+            const visit = update.object
+            const normalizedUrl = visit.url
+            const {
+                contentMetadata,
+                contentLocator,
+            } = await findContentMetadata(normalizedUrl)
+            if (!contentMetadata) {
+                return
+            }
+            await create('personalContentRead', {
+                personalContentMetadata: contentMetadata.id,
+                personalContentLocator: contentLocator.id,
+                readWhen: visit.time,
+                readDuration: visit.duration ?? null,
+                progressPercentage: visit.scrollPerc ?? null,
+                scrollTotal: visit.scrollMaxPx ?? null,
+                scrollProgress: visit.scrollPx ?? null,
+            })
         } else if (update.type === PersonalCloudUpdateType.Delete) {
         }
     } else if (update.collection === 'tags') {
