@@ -63,7 +63,7 @@ async function processClientUpdate(
         where: any,
         defaults: any = {},
     ) => {
-        const existing = storageManager
+        const existing = await storageManager
             .collection(collection)
             .findObject({ ...where, user: params.userId })
         if (existing) {

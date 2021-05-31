@@ -5,6 +5,7 @@ import {
     LOCAL_TEST_DATA_V24,
     REMOTE_TEST_DATA_V24,
 } from './translation-layer.test.data'
+import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 
 async function getDatabaseContents(
     storageManager: StorageManager,
@@ -34,12 +35,20 @@ describe('Personal cloud translation layer', () => {
             })
             return { setups, serverStorage }
         }
-
-        it('should work for created pages', async () => {
-            const { setups, serverStorage } = await setup()
+        async function insertTestPages(
+            setups: BackgroundIntegrationTestSetup[],
+        ) {
             await setups[0].storageManager
                 .collection('pages')
                 .createObject(LOCAL_TEST_DATA_V24.pages.first)
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.second)
+        }
+
+        it('should create pages', async () => {
+            const { setups, serverStorage } = await setup()
+            await insertTestPages(setups)
             await setups[0].backgroundModules.personalCloud.waitForSync()
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
@@ -49,18 +58,18 @@ describe('Personal cloud translation layer', () => {
             ).toEqual({
                 personalContentMetadata: [
                     REMOTE_TEST_DATA_V24.personalContentMetadata.first,
+                    REMOTE_TEST_DATA_V24.personalContentMetadata.second,
                 ],
                 personalContentLocator: [
                     REMOTE_TEST_DATA_V24.personalContentLocator.first,
+                    REMOTE_TEST_DATA_V24.personalContentLocator.second,
                 ],
             })
         })
 
-        it('should work for updated pages', async () => {
+        it('should update pages', async () => {
             const { setups, serverStorage } = await setup()
-            await setups[0].storageManager
-                .collection('pages')
-                .createObject(LOCAL_TEST_DATA_V24.pages.first)
+            await insertTestPages(setups)
             await setups[0].storageManager.collection('pages').updateObjects(
                 {
                     url: LOCAL_TEST_DATA_V24.pages.first.url,
@@ -79,21 +88,18 @@ describe('Personal cloud translation layer', () => {
                         ...REMOTE_TEST_DATA_V24.personalContentMetadata.first,
                         title: 'Updated title',
                     },
+                    REMOTE_TEST_DATA_V24.personalContentMetadata.second,
                 ],
                 personalContentLocator: [
                     REMOTE_TEST_DATA_V24.personalContentLocator.first,
+                    REMOTE_TEST_DATA_V24.personalContentLocator.second,
                 ],
             })
         })
 
         it('should delete pages', async () => {
             const { setups, serverStorage } = await setup()
-            await setups[0].storageManager
-                .collection('pages')
-                .createObject(LOCAL_TEST_DATA_V24.pages.first)
-            await setups[0].storageManager
-                .collection('pages')
-                .createObject(LOCAL_TEST_DATA_V24.pages.second)
+            await insertTestPages(setups)
             await setups[0].storageManager.collection('pages').deleteObjects({
                 url: LOCAL_TEST_DATA_V24.pages.first.url,
             })
@@ -112,5 +118,45 @@ describe('Personal cloud translation layer', () => {
                 ],
             })
         })
+
+        it.todo('should create visits')
+        it.todo('should update vists')
+        it.todo('should delete vists')
+
+        it('should create page tags', async () => {
+            const { setups, serverStorage } = await setup()
+            await insertTestPages(setups)
+            await setups[0].storageManager
+                .collection('tags')
+                .createObject(LOCAL_TEST_DATA_V24.tags.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'personalTag',
+                    'personalTagConnection',
+                ]),
+            ).toEqual({
+                personalContentMetadata: [
+                    REMOTE_TEST_DATA_V24.personalContentMetadata.first,
+                    REMOTE_TEST_DATA_V24.personalContentMetadata.second,
+                ],
+                personalContentLocator: [
+                    REMOTE_TEST_DATA_V24.personalContentLocator.first,
+                    REMOTE_TEST_DATA_V24.personalContentLocator.second,
+                ],
+                personalTag: [REMOTE_TEST_DATA_V24.personalTag.first],
+                personalTagConnection: [
+                    REMOTE_TEST_DATA_V24.personalTagConnection.first,
+                ],
+            })
+        })
+
+        it.todo('should connect existing page tags')
+        it.todo('should remove page tags')
+        it.todo('should add note tags')
+        it.todo('should connect existing note tags')
+        it.todo('should remove note tags')
     })
 })

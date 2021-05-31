@@ -1,18 +1,20 @@
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
+const FIRST_PAGE_V24 = {
+    url: 'getmemexed.com/test',
+    fullUrl: 'https://www.getmemexed.com/test',
+    domain: 'getmemexed.com',
+    hostname: 'www.getmemexed.com',
+    fullTitle: 'getmemexed.com title',
+    text: 'getmemexed.com page conmtent',
+    lang: 'en-GB',
+    canonicalUrl: 'https://www.getmemexed.com/test',
+    description: 'getmemexed.com description',
+}
+
 export const LOCAL_TEST_DATA_V24 = {
     pages: {
-        first: {
-            url: 'getmemexed.com/test',
-            fullUrl: 'https://www.getmemexed.com/test',
-            domain: 'getmemexed.com',
-            hostname: 'www.getmemexed.com',
-            fullTitle: 'getmemexed.com title',
-            text: 'getmemexed.com page conmtent',
-            lang: 'en-GB',
-            canonicalUrl: 'https://www.getmemexed.com/test',
-            description: 'getmemexed.com description',
-        },
+        first: FIRST_PAGE_V24,
         second: {
             url: 'notionized.com/foo',
             fullUrl: 'https://www.notionized.com/foo',
@@ -23,6 +25,12 @@ export const LOCAL_TEST_DATA_V24 = {
             lang: 'en-US',
             canonicalUrl: 'https://www.notionized.com/foo',
             description: 'notionized.com/foo description',
+        },
+    },
+    tags: {
+        first: {
+            url: FIRST_PAGE_V24.url,
+            name: 'foo-tag',
         },
     },
 }
@@ -86,6 +94,28 @@ export const REMOTE_TEST_DATA_V24 = {
             primary: true,
             valid: true,
             version: 0,
+        },
+    },
+    personalTag: {
+        first: {
+            id: 1,
+            createdByDevice: undefined,
+            createdWhen: 559,
+            updatedWhen: 559,
+            user: TEST_USER.id,
+            name: 'foo-tag',
+        },
+    },
+    personalTagConnection: {
+        first: {
+            id: 1,
+            collection: 'personalContentMetadata',
+            createdByDevice: undefined,
+            createdWhen: 560,
+            updatedWhen: 560,
+            objectId: 1,
+            personalTag: 1,
+            user: TEST_USER.id,
         },
     },
 }
