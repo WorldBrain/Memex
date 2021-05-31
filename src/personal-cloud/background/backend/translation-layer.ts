@@ -11,6 +11,13 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { PersonalContentLocator } from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
 
+// READ BEFORE EDITING
+// `updates` comes from the client-side and can contain tampered data. As sunch,
+// any use of data coming from `updates` should be handled with care. There are
+// locally defined functions for a few common operations, like `findObjects` and
+// `deleteObjects` that scope those operations down to users' personal data. Any
+// direct usage of `storageManager` should be handled with care and security in mind.
+
 export interface TranslationLayerDependencies {
     storageManager: StorageManager
     userId: number | string
@@ -174,7 +181,7 @@ async function processClientUpdate(
                 batch.push({
                     placeholder: `locator-${locatorIndex}`,
                     operation: 'deleteObjects',
-                    collection: 'personalContentMetadata',
+                    collection: 'personalContentLocator',
                     where: {
                         user: params.userId,
                         id: contentLocator.id,

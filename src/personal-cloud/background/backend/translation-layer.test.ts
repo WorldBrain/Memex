@@ -85,5 +85,32 @@ describe('Personal cloud translation layer', () => {
                 ],
             })
         })
+
+        it('should delete pages', async () => {
+            const { setups, serverStorage } = await setup()
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.first)
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.second)
+            await setups[0].storageManager.collection('pages').deleteObjects({
+                url: LOCAL_TEST_DATA_V24.pages.first.url,
+            })
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                ]),
+            ).toEqual({
+                personalContentMetadata: [
+                    REMOTE_TEST_DATA_V24.personalContentMetadata.second,
+                ],
+                personalContentLocator: [
+                    REMOTE_TEST_DATA_V24.personalContentLocator.second,
+                ],
+            })
+        })
     })
 })
