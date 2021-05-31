@@ -44,30 +44,45 @@ export const migrations: Migrations = {
             .table('pageListEntries')
             .orderBy('listId')
             .uniqueKeys()
-        const matchingListIds = await db
-            .table('customLists')
-            .where('id')
-            .anyOf(listIdsForPageEntries)
-            .primaryKeys()
+        const matchingListIds = new Set(
+            await db
+                .table('customLists')
+                .where('id')
+                .anyOf(listIdsForPageEntries)
+                .primaryKeys(),
+        )
 
-        // Figure out if there is an entry pointing to a non-existent list - this will be the old mobile list
-        let nonExistentId: number
+        // Figure out if there are entries pointing to non-existent lists - one of these will be the old mobile list
+        let nonExistentIds: number[] = []
         listIdsForPageEntries.forEach((id) => {
-            if (!matchingListIds.includes(id)) {
-                nonExistentId = id as number
+            if (!matchingListIds.has(id)) {
+                nonExistentIds.push(id as number)
             }
         })
-        if (!nonExistentId) {
+        if (!nonExistentIds.length) {
             return
         }
 
+        let encounteredDupes = false
         await db
             .table('pageListEntries')
             .where('listId')
-            .equals(nonExistentId)
+            .anyOf(nonExistentIds)
             .modify({
                 listId: SPECIAL_LIST_IDS.MOBILE,
             })
+            .catch((err) => {
+                encounteredDupes = true
+            })
+
+        // If modify encountered dupes, do one last sweep to remove them
+        if (encounteredDupes) {
+            await db
+                .table('pageListEntries')
+                .where('listId')
+                .anyOf(nonExistentIds)
+                .delete()
+        }
     },
     /*
      * We recently messed up backup by adding our new annotations privacy level table that had an

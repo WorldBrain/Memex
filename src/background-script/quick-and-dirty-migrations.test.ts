@@ -25,9 +25,10 @@ async function setupTest() {
 
 describe('quick-and-dirty migration tests', () => {
     describe('point-old-mobile-list-entries-to-new', () => {
-        it('should modify all list entries pointing to the old mobile list to point to the new one', async () => {
+        it('should modify all list entries pointing to a non-existent list to point to the mobile list', async () => {
             const { migrationProps } = await setupTest()
-            const oldMobileListId = 99
+            const nonExistentListIdA = 99
+            const nonExistentListIdB = 98
 
             // Create new static ID mobile list + some others
             await migrationProps.db.table('customLists').add({
@@ -72,14 +73,22 @@ describe('quick-and-dirty migration tests', () => {
                 await migrationProps.db.table('pageListEntries').add({
                     pageUrl: testPageUrl,
                     fullUrl: 'https://' + testPageUrl,
-                    listId: oldMobileListId,
+                    listId: nonExistentListIdA,
+                    createdAt: new Date(),
+                })
+                await migrationProps.db.table('pageListEntries').add({
+                    pageUrl: testPageUrl,
+                    fullUrl: 'https://' + testPageUrl,
+                    listId: nonExistentListIdB,
                     createdAt: new Date(),
                 })
             }
 
-            expect(
-                await migrationProps.db.table('pageListEntries').toArray(),
-            ).toEqual(
+            const preResult = await migrationProps.db
+                .table('pageListEntries')
+                .toArray()
+            expect(preResult.length).toBe(testPageUrls.length * 4)
+            expect(preResult).toEqual(
                 expect.arrayContaining(
                     testPageUrls
                         .map((testPageUrl) => [
@@ -96,7 +105,12 @@ describe('quick-and-dirty migration tests', () => {
                             expect.objectContaining({
                                 pageUrl: testPageUrl,
                                 fullUrl: 'https://' + testPageUrl,
-                                listId: oldMobileListId,
+                                listId: nonExistentListIdA,
+                            }),
+                            expect.objectContaining({
+                                pageUrl: testPageUrl,
+                                fullUrl: 'https://' + testPageUrl,
+                                listId: nonExistentListIdB,
                             }),
                         ])
                         .flat(),
@@ -107,9 +121,11 @@ describe('quick-and-dirty migration tests', () => {
                 migrationProps,
             )
 
-            expect(
-                await migrationProps.db.table('pageListEntries').toArray(),
-            ).toEqual(
+            const postResult = await migrationProps.db
+                .table('pageListEntries')
+                .toArray()
+            expect(postResult.length).toBe(testPageUrls.length * 3)
+            expect(postResult).toEqual(
                 expect.arrayContaining(
                     testPageUrls
                         .map((testPageUrl) => [
@@ -123,10 +139,11 @@ describe('quick-and-dirty migration tests', () => {
                                 fullUrl: 'https://' + testPageUrl,
                                 listId: 2,
                             }),
+                            // This entry should exist for the both entries that pointed to different non-existent lists
                             expect.objectContaining({
                                 pageUrl: testPageUrl,
                                 fullUrl: 'https://' + testPageUrl,
-                                listId: SPECIAL_LIST_IDS.MOBILE, // This should have changed
+                                listId: SPECIAL_LIST_IDS.MOBILE,
                             }),
                         ])
                         .flat(),
