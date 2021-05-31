@@ -6,6 +6,7 @@ import {
     REMOTE_TEST_DATA_V24,
 } from './translation-layer.test.data'
 import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
+import { DataChangeType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
 async function getDatabaseContents(
     storageManager: StorageManager,
@@ -25,6 +26,31 @@ async function getDatabaseContents(
         }),
     )
     return contents
+}
+
+function dataChanges(
+    changes: Array<
+        [
+            /* type: */ DataChangeType,
+            /* collection: */ string,
+            /* id: */ string | number,
+        ]
+    >,
+) {
+    let id = 1
+    let time = 555
+    return changes.map((change) => {
+        const now = time++
+        return {
+            id: id++,
+            createdWhen: now,
+            createdByDevice: REMOTE_TEST_DATA_V24.personalDeviceInfo.first.id,
+            user: TEST_USER.id,
+            type: change[0],
+            collection: change[1],
+            objectId: change[2],
+        }
+    })
 }
 
 describe('Personal cloud translation layer', () => {
@@ -50,19 +76,31 @@ describe('Personal cloud translation layer', () => {
             const { setups, serverStorage } = await setup()
             await insertTestPages(setups)
             await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const testMetadata = REMOTE_TEST_DATA_V24.personalContentMetadata
+            const testLocators = REMOTE_TEST_DATA_V24.personalContentLocator
+
+            // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
                     'personalContentMetadata',
                     'personalContentLocator',
                 ]),
             ).toEqual({
+                personalDataChange: dataChanges([
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
+                ]),
                 personalContentMetadata: [
-                    REMOTE_TEST_DATA_V24.personalContentMetadata.first,
-                    REMOTE_TEST_DATA_V24.personalContentMetadata.second,
+                    testMetadata.first,
+                    testMetadata.second,
                 ],
                 personalContentLocator: [
-                    REMOTE_TEST_DATA_V24.personalContentLocator.first,
-                    REMOTE_TEST_DATA_V24.personalContentLocator.second,
+                    testLocators.first,
+                    testLocators.second,
                 ],
             })
         })

@@ -47,6 +47,11 @@ export const LOCAL_TEST_DATA_V24 = {
 }
 
 export const REMOTE_TEST_DATA_V24 = {
+    personalDeviceInfo: {
+        first: {
+            id: 1,
+        },
+    },
     personalContentMetadata: {
         first: {
             id: 1,

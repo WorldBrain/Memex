@@ -5,6 +5,7 @@ import {
     PersonalCloudUpdatePush,
 } from './types'
 import {
+    DataChangeType,
     LocationSchemeType,
     ContentLocatorType,
     ContentLocatorFormat,
@@ -48,15 +49,41 @@ async function processClientUpdate(
     // to prevent users from overwriting each others' data
     const create = async (collection: string, toCreate: any) => {
         const now = params.getNow()
-        const { object } = await storageManager
-            .collection(collection)
-            .createObject({
-                ...toCreate,
-                user: params.userId,
-                createdByDevice: params.update.deviceId,
-                createdWhen: now,
-                updatedWhen: now,
-            })
+
+        const batch: OperationBatch = [
+            {
+                placeholder: 'creation',
+                operation: 'createObject',
+                collection,
+                args: {
+                    ...toCreate,
+                    user: params.userId,
+                    createdByDevice: params.update.deviceId,
+                    createdWhen: now,
+                    updatedWhen: now,
+                },
+            },
+            {
+                placeholder: 'update-entry',
+                operation: 'createObject',
+                collection: 'personalDataChange',
+                args: {
+                    createdWhen: now,
+                    user: params.userId,
+                    createdByDevice: params.update.deviceId,
+                    type: DataChangeType.Create,
+                    collection,
+                },
+                replace: [
+                    {
+                        path: 'objectId',
+                        placeholder: 'creation',
+                    },
+                ],
+            },
+        ]
+        const result = await storageManager.operation('executeBatch', batch)
+        const object = result.info.creation.object
         return object
     }
     const findOrCreate = async (
@@ -103,16 +130,14 @@ async function processClientUpdate(
         return { contentMetadata, contentLocator }
     }
     const updateMany = async (collection: string, where: any, updates: any) => {
-        await storageManager
-            .collection(collection)
-            .updateObjects(
-                { ...where, user: params.userId },
-                {
-                    ...updates,
-                    updatedWhen: params.getNow(),
-                    user: params.userId,
-                },
-            )
+        await storageManager.collection(collection).updateObjects(
+            { ...where, user: params.userId },
+            {
+                ...updates,
+                updatedWhen: params.getNow(),
+                user: params.userId,
+            },
+        )
     }
     const deleteMany = async (collection: string, where: any) => {
         await params.storageManager.collection(collection).deleteObjects({
