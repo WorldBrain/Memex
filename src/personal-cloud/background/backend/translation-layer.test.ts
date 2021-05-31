@@ -86,6 +86,7 @@ describe('Personal cloud translation layer', () => {
                 personalContentMetadata: [
                     {
                         ...REMOTE_TEST_DATA_V24.personalContentMetadata.first,
+                        updatedWhen: 559,
                         title: 'Updated title',
                     },
                     REMOTE_TEST_DATA_V24.personalContentMetadata.second,

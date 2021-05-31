@@ -107,7 +107,11 @@ async function processClientUpdate(
             .collection(collection)
             .updateObjects(
                 { ...where, user: params.userId },
-                { ...updates, user: params.userId },
+                {
+                    ...updates,
+                    updatedWhen: params.getNow(),
+                    user: params.userId,
+                },
             )
     }
     const deleteMany = async (collection: string, where: any) => {

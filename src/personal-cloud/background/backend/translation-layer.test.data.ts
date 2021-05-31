@@ -1,6 +1,6 @@
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
-const FIRST_PAGE_V24 = {
+const LOCAL_FIRST_PAGE_V24 = {
     url: 'getmemexed.com/test',
     fullUrl: 'https://www.getmemexed.com/test',
     domain: 'getmemexed.com',
@@ -14,7 +14,7 @@ const FIRST_PAGE_V24 = {
 
 export const LOCAL_TEST_DATA_V24 = {
     pages: {
-        first: FIRST_PAGE_V24,
+        first: LOCAL_FIRST_PAGE_V24,
         second: {
             url: 'notionized.com/foo',
             fullUrl: 'https://www.notionized.com/foo',
@@ -29,7 +29,7 @@ export const LOCAL_TEST_DATA_V24 = {
     },
     visits: {
         first: {
-            url: FIRST_PAGE_V24.url,
+            url: LOCAL_FIRST_PAGE_V24.url,
             time: 4545,
             duration: 1122,
             scrollMaxPerc: 100,
@@ -40,7 +40,7 @@ export const LOCAL_TEST_DATA_V24 = {
     },
     tags: {
         first: {
-            url: FIRST_PAGE_V24.url,
+            url: LOCAL_FIRST_PAGE_V24.url,
             name: 'foo-tag',
         },
     },
