@@ -290,7 +290,7 @@ class AnnotationsSidebar extends React.Component<
                                 </FollowedListNoteCount>
                                 <FollowedListDropdownIcon
                                     icon="triangle"
-                                    height="12px"
+                                    height="8px"
                                     isExpanded={listData.isExpanded}
                                 />
                             </FollowedListTitleContainer>
@@ -484,10 +484,14 @@ const FollowedListsMsgHead = styled.span`
     color: ${(props) => props.theme.colors.primary};
     padding-top: 10px;
     padding-bottom: 5px;
+    font-size: 16px;
+    line-height: 25px;
 `
 const FollowedListsMsg = styled.span`
     color: ${(props) => props.theme.colors.darkgrey};
     text-align: center;
+    font-size: 14px;
+    line-height: 25px;
 `
 
 const FollowedListsContainer = styled.div`

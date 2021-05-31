@@ -3,6 +3,7 @@
 
 :host {
     all: initial;
+    font-family: sans-serif;
 }
 
 .hr {

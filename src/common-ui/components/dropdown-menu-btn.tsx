@@ -170,6 +170,7 @@ const MenuItem = styled.li`
             : '&:hover { background: #e0e0e0; cursor: pointer; }'};
     ${({ theme }) => theme.isSelected && 'background: #f0f0f0;'};
     padding: 10px 20px;
+    line-height: 20px;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -230,7 +231,7 @@ const MenuBtn = styled.div`
     }
 
     & div {
-        margin-left: 3px;
+        padding: 0 5px;
     }
 `
 
