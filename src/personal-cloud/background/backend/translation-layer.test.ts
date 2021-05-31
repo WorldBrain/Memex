@@ -56,22 +56,34 @@ describe('Personal cloud translation layer', () => {
             })
         })
 
-        // it('should work for updated pages', async () => {
-        //     const { setups, serverStorage } = await setup()
-        //     await setups[0].storageManager.collection('pages').createObject(LOCAL_TEST_DATA_V24.pages.first)
-        //     await setups[0].storageManager.collection('pages').updateObjects({
-        //         url: LOCAL_TEST_DATA_V24.pages.first.url,
-        //     }, { fullTitle: 'Updated title' })
-        //     await setups[0].backgroundModules.personalCloud.waitForSync()
-        //     expect(await getDatabaseContents(serverStorage.storageManager, [
-        //         'personalContentMetadata', 'personalContentLocator'
-        //     ])).toEqual({
-        //         personalContentMetadata: [{
-        //             ...REMOTE_TEST_DATA_V24.personalContentMetadata.first,
-        //             title: 'Updated title'
-        //         }],
-        //         personalContentLocator: [REMOTE_TEST_DATA_V24.personalContentLocator.first],
-        //     })
-        // })
+        it('should work for updated pages', async () => {
+            const { setups, serverStorage } = await setup()
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.first)
+            await setups[0].storageManager.collection('pages').updateObjects(
+                {
+                    url: LOCAL_TEST_DATA_V24.pages.first.url,
+                },
+                { fullTitle: 'Updated title' },
+            )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                ]),
+            ).toEqual({
+                personalContentMetadata: [
+                    {
+                        ...REMOTE_TEST_DATA_V24.personalContentMetadata.first,
+                        title: 'Updated title',
+                    },
+                ],
+                personalContentLocator: [
+                    REMOTE_TEST_DATA_V24.personalContentLocator.first,
+                ],
+            })
+        })
     })
 })

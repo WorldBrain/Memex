@@ -123,7 +123,7 @@ async function processClientUpdate(
                     title: page.fullTitle,
                 })
                 contentLocator = await create('personalContentLocator', {
-                    contentMetadata: contentMetadata.id,
+                    personalContentMetadata: contentMetadata.id,
                     locationType: ContentLocatorType.Remote,
                     locationScheme: LocationSchemeType.NormalizedUrlV1,
                     format: ContentLocatorFormat.HTML,
