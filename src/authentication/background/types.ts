@@ -1,10 +1,14 @@
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
-import {
+import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import type {
     UserFeature,
     UserPlan,
     Claims,
     SubscriptionStatus,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
+import type {
+    UserReference,
+    User,
+} from '@worldbrain/memex-common/lib/web-interface/types/users'
 
 export interface AuthRemoteFunctionsInterface {
     getCurrentUser(): Promise<AuthenticatedUser | null>
@@ -12,6 +16,7 @@ export interface AuthRemoteFunctionsInterface {
     refreshUserInfo(): Promise<void>
 
     getUserProfile(): Promise<{ displayName?: string } | null>
+    getUserByReference(reference: UserReference): Promise<User | null>
     updateUserProfile(updates: { displayName: string }): Promise<void>
 
     hasValidPlan(plan: UserPlan): Promise<boolean>
