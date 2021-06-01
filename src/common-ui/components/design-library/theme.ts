@@ -74,6 +74,8 @@ export const theme: Theme = {
         shared: icons.shared,
         shareEmpty: icons.shareEmpty,
         check: icons.check,
+        comment: icons.commentFull,
+        commentEmpty: icons.commentEmpty,
         people: icons.shared,
         plusIcon: icons.plus,
         webLogo: icons.webLogo,

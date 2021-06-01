@@ -50,6 +50,7 @@ import CopyPasterBackground from 'src/copy-paster/background'
 import { ReaderBackground } from 'src/reader/background'
 import { ServerStorage } from 'src/storage/types'
 import ContentSharingBackground from 'src/content-sharing/background'
+import ContentConversationsBackground from 'src/content-conversations/background'
 import { getFirebase } from 'src/util/firebase-app-initialized'
 import TabManagementBackground from 'src/tab-management/background'
 import { runInTab } from 'src/util/webextensionRPC'
@@ -92,6 +93,7 @@ export interface BackgroundModules {
     copyPaster: CopyPasterBackground
     readable: ReaderBackground
     contentSharing: ContentSharingBackground
+    contentConversations: ContentConversationsBackground
     tabManagement: TabManagementBackground
     readwise: ReadwiseBackground
     activityStreams: ActivityStreamsBackground
@@ -482,8 +484,11 @@ export function createBackgroundModules(options: {
         }),
         copyPaster,
         activityStreams,
-        contentSharing,
         userMessages,
+        contentSharing,
+        contentConversations: new ContentConversationsBackground({
+            getServerStorage,
+        }),
     }
 }
 
