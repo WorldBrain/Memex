@@ -1,10 +1,7 @@
 import StorageManager from '@worldbrain/storex'
-import { setupSyncBackgroundTest } from '../index.tests'
+import { setupSyncBackgroundTest } from '../../index.tests'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import {
-    LOCAL_TEST_DATA_V24,
-    REMOTE_TEST_DATA_V24,
-} from './translation-layer.test.data'
+import { LOCAL_TEST_DATA_V24, REMOTE_TEST_DATA_V24 } from './index.test.data'
 import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 import { DataChangeType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 

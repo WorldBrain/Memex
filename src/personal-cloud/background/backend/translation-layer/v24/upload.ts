@@ -1,12 +1,9 @@
-import StorageManager, {
-    OperationBatch,
-    BatchOperation,
-} from '@worldbrain/storex'
+import { OperationBatch } from '@worldbrain/storex'
 import {
-    PersonalCloudUpdatePushBatch,
     PersonalCloudUpdateType,
     PersonalCloudUpdatePush,
-} from './types'
+    TranslationLayerDependencies,
+} from '../../types'
 import {
     DataChangeType,
     LocationSchemeType,
@@ -22,26 +19,7 @@ import { PersonalContentLocator } from '@worldbrain/memex-common/lib/web-interfa
 // `deleteObjects` that scope those operations down to users' personal data. Any
 // direct usage of `storageManager` should be handled with care and security in mind.
 
-export interface TranslationLayerDependencies {
-    storageManager: StorageManager
-    userId: number | string
-    getNow(): number
-}
-
-export async function processClientUpdates(
-    params: TranslationLayerDependencies & {
-        updates: PersonalCloudUpdatePushBatch
-    },
-) {
-    for (const update of params.updates) {
-        await processClientUpdate({
-            ...params,
-            update,
-        })
-    }
-}
-
-async function processClientUpdate(
+export async function processClientUpdate(
     params: TranslationLayerDependencies & {
         update: PersonalCloudUpdatePush
     },

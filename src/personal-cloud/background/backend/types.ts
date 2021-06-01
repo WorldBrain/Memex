@@ -1,3 +1,5 @@
+import StorageManager from '@worldbrain/storex'
+
 export interface PersonalCloudBackend {
     pushUpdates(updates: PersonalCloudUpdatePushBatch): Promise<void>
     streamUpdates(): AsyncIterableIterator<PersonalCloudUpdateBatch>
@@ -32,3 +34,9 @@ export type PersonalCloudUpdatePush = {
     schemaVersion: Date
     deviceId: number | string
 } & PersonalCloudUpdate
+
+export interface TranslationLayerDependencies {
+    storageManager: StorageManager
+    userId: number | string
+    getNow(): number
+}
