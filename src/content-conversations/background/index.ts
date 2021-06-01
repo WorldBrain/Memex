@@ -12,7 +12,7 @@ export default class ContentConversationsBackground {
         },
     ) {
         this.remoteFunctions = {
-            getThreadsForSharedAnnotation: async ({
+            getThreadsForSharedAnnotations: async ({
                 sharedAnnotationReferences,
             }) => {
                 const {

@@ -13,7 +13,7 @@ export interface ContentConversationsInterface {
     getRepliesBySharedAnnotation(params: {
         sharedAnnotationReference: SharedAnnotationReference
     }): Promise<PreparedAnnotationReply[]>
-    getThreadsForSharedAnnotation(params: {
+    getThreadsForSharedAnnotations(params: {
         sharedAnnotationReferences: SharedAnnotationReference[]
     }): Promise<PreparedThread[]>
     getOrCreateThread(params: {
