@@ -1,9 +1,14 @@
 import StorageManager from '@worldbrain/storex'
 import { setupSyncBackgroundTest } from '../../index.tests'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { LOCAL_TEST_DATA_V24, REMOTE_TEST_DATA_V24 } from './index.test.data'
-import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
+import {
+    LOCAL_TEST_DATA_V24,
+    REMOTE_TEST_DATA_V24,
+    insertTestPages,
+} from './index.test.data'
 import { DataChangeType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import { PersonalCloudUpdateBatch, PersonalCloudUpdateType } from '../types'
+import { downloadClientUpdates } from '.'
 
 async function getDatabaseContents(
     storageManager: StorageManager,
@@ -70,25 +75,31 @@ function dataChanges(
 describe('Personal cloud translation layer', () => {
     describe(`from local schema version 24`, () => {
         async function setup() {
-            const { setups, serverStorage } = await setupSyncBackgroundTest({
+            const {
+                setups,
+                serverStorage,
+                getNow,
+            } = await setupSyncBackgroundTest({
                 deviceCount: 2,
             })
-            return { setups, serverStorage }
-        }
-        async function insertTestPages(
-            setups: BackgroundIntegrationTestSetup[],
-        ) {
-            await setups[0].storageManager
-                .collection('pages')
-                .createObject(LOCAL_TEST_DATA_V24.pages.first)
-            await setups[0].storageManager
-                .collection('pages')
-                .createObject(LOCAL_TEST_DATA_V24.pages.second)
+            return {
+                setups,
+                serverStorage,
+                testDownload: async (expected: PersonalCloudUpdateBatch) => {
+                    const { batch } = await downloadClientUpdates({
+                        getNow,
+                        startTime: 0,
+                        storageManager: serverStorage.storageManager,
+                        userId: TEST_USER.id,
+                    })
+                    expect(batch).toEqual(expected)
+                },
+            }
         }
 
         it('should create pages', async () => {
-            const { setups, serverStorage } = await setup()
-            await insertTestPages(setups)
+            const { setups, serverStorage, testDownload } = await setup()
+            await insertTestPages(setups[0].storageManager)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const testMetadata = REMOTE_TEST_DATA_V24.personalContentMetadata
@@ -111,11 +122,16 @@ describe('Personal cloud translation layer', () => {
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
             })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
+            ])
         })
 
         it('should update pages', async () => {
-            const { setups, serverStorage } = await setup()
-            await insertTestPages(setups)
+            const { setups, serverStorage, testDownload } = await setup()
+            await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager.collection('pages').updateObjects(
                 {
                     url: LOCAL_TEST_DATA_V24.pages.first.url,
@@ -151,8 +167,8 @@ describe('Personal cloud translation layer', () => {
         })
 
         it('should delete pages', async () => {
-            const { setups, serverStorage } = await setup()
-            await insertTestPages(setups)
+            const { setups, serverStorage, testDownload } = await setup()
+            await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager.collection('pages').deleteObjects({
                 url: LOCAL_TEST_DATA_V24.pages.first.url,
             })
@@ -179,8 +195,8 @@ describe('Personal cloud translation layer', () => {
         })
 
         it('should create visits', async () => {
-            const { setups, serverStorage } = await setup()
-            await insertTestPages(setups)
+            const { setups, serverStorage, testDownload } = await setup()
+            await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('visits')
                 .createObject(LOCAL_TEST_DATA_V24.visits.first)
@@ -212,8 +228,8 @@ describe('Personal cloud translation layer', () => {
         it.todo('should delete vists')
 
         it('should create page tags', async () => {
-            const { setups, serverStorage } = await setup()
-            await insertTestPages(setups)
+            const { setups, serverStorage, testDownload } = await setup()
+            await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('tags')
                 .createObject(LOCAL_TEST_DATA_V24.tags.first)

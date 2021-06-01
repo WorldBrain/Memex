@@ -1,4 +1,14 @@
+import StorageManager from '@worldbrain/storex'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+
+export async function insertTestPages(storageManager: StorageManager) {
+    await storageManager
+        .collection('pages')
+        .createObject(LOCAL_TEST_DATA_V24.pages.first)
+    await storageManager
+        .collection('pages')
+        .createObject(LOCAL_TEST_DATA_V24.pages.second)
+}
 
 const LOCAL_FIRST_PAGE_V24 = {
     url: 'getmemexed.com/test',

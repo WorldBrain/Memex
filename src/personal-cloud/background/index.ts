@@ -6,7 +6,11 @@ import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watc
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
 import { AsyncMutex } from '@worldbrain/memex-common/lib/utils/async-mutex'
 import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
-import { PersonalCloudBackend, PersonalCloudUpdateType } from './backend/types'
+import {
+    PersonalCloudBackend,
+    PersonalCloudUpdateType,
+    PersonalCloudUpdateBatch,
+} from './backend/types'
 import {
     PersonalCloudAction,
     PersonalCloudActionType,
@@ -82,25 +86,29 @@ export class PersonalCloudBackground {
 
     async integrateContinuously() {
         for await (const updates of this.options.backend.streamUpdates()) {
-            const { releaseMutex } = await this.pullMutex.lock()
-            for (const update of updates) {
-                if (update.type === PersonalCloudUpdateType.Overwrite) {
-                    // WARNING: Keep in mind this skips all storage middleware
-                    await this.options.storageManager.backend.operation(
-                        'createObject',
-                        update.collection,
-                        update.object,
-                    )
-                } else if (update.type === PersonalCloudUpdateType.Delete) {
-                    await this.options.storageManager.backend.operation(
-                        'deleteObjects',
-                        update.collection,
-                        update.where,
-                    )
-                }
-            }
-            releaseMutex()
+            await this.integrateUpdates(updates)
         }
+    }
+
+    async integrateUpdates(updates: PersonalCloudUpdateBatch) {
+        const { releaseMutex } = await this.pullMutex.lock()
+        for (const update of updates) {
+            if (update.type === PersonalCloudUpdateType.Overwrite) {
+                // WARNING: Keep in mind this skips all storage middleware
+                await this.options.storageManager.backend.operation(
+                    'createObject',
+                    update.collection,
+                    update.object,
+                )
+            } else if (update.type === PersonalCloudUpdateType.Delete) {
+                await this.options.storageManager.backend.operation(
+                    'deleteObjects',
+                    update.collection,
+                    update.where,
+                )
+            }
+        }
+        releaseMutex()
     }
 
     async waitForSync() {

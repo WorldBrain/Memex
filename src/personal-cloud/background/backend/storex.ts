@@ -5,7 +5,7 @@ import {
     PersonalCloudUpdate,
 } from './types'
 import StorageManager from '@worldbrain/storex'
-import { processClientUpdates } from './translation-layer'
+import { uploadClientUpdates } from './translation-layer'
 
 export class StorexPersonalCloudBackend implements PersonalCloudBackend {
     constructor(
@@ -23,7 +23,7 @@ export class StorexPersonalCloudBackend implements PersonalCloudBackend {
             throw new Error(`User tried to push update without being logged in`)
         }
 
-        await processClientUpdates({
+        await uploadClientUpdates({
             storageManager: this.options.storageManager,
             getNow: this.options.getNow,
             userId,

@@ -19,7 +19,7 @@ import { PersonalContentLocator } from '@worldbrain/memex-common/lib/web-interfa
 // `deleteObjects` that scope those operations down to users' personal data. Any
 // direct usage of `storageManager` should be handled with care and security in mind.
 
-export async function processClientUpdate(
+export async function uploadClientUpdate(
     params: TranslationLayerDependencies & {
         update: PersonalCloudUpdatePush
     },

@@ -290,14 +290,15 @@ export async function setupSyncBackgroundTest(
     const serverStorage = await getServerStorage()
     const cloudChangeBus = new PersonalCloudChangeSourceBus()
 
-    const setups: BackgroundIntegrationTestSetup[] = []
     let now = 555
+    const getNow = () => now++
+    const setups: BackgroundIntegrationTestSetup[] = []
     for (let i = 0; i < options.deviceCount; ++i) {
         const personalCloudBackend = new StorexPersonalCloudBackend({
             storageManager: serverStorage.storageManager,
             changeSource: cloudChangeBus.getView(),
             getUserId: async () => userId,
-            getNow: () => now++,
+            getNow,
         })
 
         setups.push(
@@ -340,7 +341,7 @@ export async function setupSyncBackgroundTest(
         await setup.backgroundModules.personalCloud.waitForSync()
     }
 
-    return { userId, setups, sync, serverStorage }
+    return { userId, setups, sync, serverStorage, getNow }
 }
 
 const getReadablePattern = (pattern: number[]) =>
