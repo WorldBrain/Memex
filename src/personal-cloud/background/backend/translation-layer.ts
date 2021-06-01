@@ -1,4 +1,7 @@
-import StorageManager, { OperationBatch } from '@worldbrain/storex'
+import StorageManager, {
+    OperationBatch,
+    BatchOperation,
+} from '@worldbrain/storex'
 import {
     PersonalCloudUpdatePushBatch,
     PersonalCloudUpdateType,
@@ -163,11 +166,41 @@ async function processClientUpdate(
         ]
         await storageManager.operation('executeBatch', batch)
     }
-    const deleteMany = async (collection: string, where: any) => {
+    const deleteById = async (collection: string, id: number | string) => {
         await params.storageManager.collection(collection).deleteObjects({
-            ...where,
             user: params.userId,
+            id,
         })
+    }
+    const deleteMany = async (
+        references: Array<{ collection: string; id: number | string }>,
+    ) => {
+        const batch: OperationBatch = []
+        for (const [index, reference] of references.entries()) {
+            batch.push({
+                placeholder: `deletion-${index}`,
+                operation: 'deleteObjects',
+                collection: reference.collection,
+                where: {
+                    user: params.userId,
+                    id: reference.id,
+                },
+            })
+            batch.push({
+                placeholder: `entry-${index}`,
+                operation: 'createObject',
+                collection: 'personalDataChange',
+                args: {
+                    createdWhen: params.getNow(),
+                    user: params.userId,
+                    createdByDevice: params.update.deviceId,
+                    type: DataChangeType.Delete,
+                    collection: reference.collection,
+                    objectId: reference.id,
+                },
+            })
+        }
+        await storageManager.operation('executeBatch', batch)
     }
 
     const { update } = params
@@ -211,39 +244,27 @@ async function processClientUpdate(
             if (!firstConttentLocator) {
                 return
             }
-            const allContentLocators = await findMany(
-                'personalContentLocator',
+            const allContentLocators: Array<{
+                id: number | string
+            }> = await findMany('personalContentLocator', {
+                personalContentMetadata:
+                    firstConttentLocator.personalContentMetadata,
+            })
+
+            const references: Array<{
+                collection: string
+                id: number | string
+            }> = allContentLocators.map((locator) => ({
+                collection: 'personalContentLocator',
+                id: locator.id,
+            }))
+            await deleteMany([
                 {
-                    personalContentMetadata:
-                        firstConttentLocator.personalContentMetadata,
-                },
-            )
-            const batch: OperationBatch = [
-                {
-                    placeholder: 'metadata',
-                    operation: 'deleteObjects',
                     collection: 'personalContentMetadata',
-                    where: {
-                        user: params.userId,
-                        id: firstConttentLocator.personalContentMetadata,
-                    },
+                    id: firstConttentLocator.personalContentMetadata,
                 },
-            ]
-            for (const [
-                locatorIndex,
-                contentLocator,
-            ] of allContentLocators.entries()) {
-                batch.push({
-                    placeholder: `locator-${locatorIndex}`,
-                    operation: 'deleteObjects',
-                    collection: 'personalContentLocator',
-                    where: {
-                        user: params.userId,
-                        id: contentLocator.id,
-                    },
-                })
-            }
-            await storageManager.operation('executeBatch', batch)
+                ...references,
+            ])
         }
     } else if (update.collection === 'visits') {
         if (update.type === PersonalCloudUpdateType.Overwrite) {
@@ -298,10 +319,11 @@ async function processClientUpdate(
                 return
             }
 
-            await deleteMany('personalTagConnection', {
+            const tagConnection = await findOne('personalTagConnection', {
                 peronalTag: tag.id,
                 personalContentMetadata: contentMetadata.id,
             })
+            await deleteById('personalTagConnection', tagConnection.id)
         }
     } else if (update.collection === 'customLists') {
         if (update.type === PersonalCloudUpdateType.Overwrite) {

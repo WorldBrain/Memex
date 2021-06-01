@@ -111,14 +111,8 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
                 ]),
-                personalContentMetadata: [
-                    testMetadata.first,
-                    testMetadata.second,
-                ],
-                personalContentLocator: [
-                    testLocators.first,
-                    testLocators.second,
-                ],
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
             })
         })
 
@@ -134,6 +128,7 @@ describe('Personal cloud translation layer', () => {
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const testMetadata = REMOTE_TEST_DATA_V24.personalContentMetadata
+            const testLocators = REMOTE_TEST_DATA_V24.personalContentLocator
 
             // prettier-ignore
             expect(
@@ -154,10 +149,7 @@ describe('Personal cloud translation layer', () => {
                     },
                     testMetadata.second,
                 ],
-                personalContentLocator: [
-                    REMOTE_TEST_DATA_V24.personalContentLocator.first,
-                    REMOTE_TEST_DATA_V24.personalContentLocator.second,
-                ],
+                personalContentLocator: [testLocators.first, testLocators.second],
             })
         })
 
@@ -168,20 +160,24 @@ describe('Personal cloud translation layer', () => {
                 url: LOCAL_TEST_DATA_V24.pages.first.url,
             })
             await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const testMetadata = REMOTE_TEST_DATA_V24.personalContentMetadata
+            const testLocators = REMOTE_TEST_DATA_V24.personalContentLocator
+
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    // 'personalDataChange',
+                    'personalDataChange',
                     'personalContentMetadata',
                     'personalContentLocator',
                 ]),
             ).toEqual({
-                personalContentMetadata: [
-                    REMOTE_TEST_DATA_V24.personalContentMetadata.second,
-                ],
-                personalContentLocator: [
-                    REMOTE_TEST_DATA_V24.personalContentLocator.second,
-                ],
+                personalDataChange: dataChanges([
+                    [DataChangeType.Delete, 'personalContentMetadata', testMetadata.first.id],
+                    [DataChangeType.Delete, 'personalContentLocator', testLocators.first.id],
+                ], { skip: 4 }),
+                personalContentMetadata: [testMetadata.second],
+                personalContentLocator: [testLocators.second],
             })
         })
 
@@ -192,26 +188,26 @@ describe('Personal cloud translation layer', () => {
                 .collection('visits')
                 .createObject(LOCAL_TEST_DATA_V24.visits.first)
             await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const testMetadata = REMOTE_TEST_DATA_V24.personalContentMetadata
+            const testLocators = REMOTE_TEST_DATA_V24.personalContentLocator
+            const testReads = REMOTE_TEST_DATA_V24.personalContentRead
+
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    // 'personalDataChange',
+                    'personalDataChange',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalContentRead',
                 ]),
             ).toEqual({
-                personalContentMetadata: [
-                    REMOTE_TEST_DATA_V24.personalContentMetadata.first,
-                    REMOTE_TEST_DATA_V24.personalContentMetadata.second,
-                ],
-                personalContentLocator: [
-                    REMOTE_TEST_DATA_V24.personalContentLocator.first,
-                    REMOTE_TEST_DATA_V24.personalContentLocator.second,
-                ],
-                personalContentRead: [
-                    REMOTE_TEST_DATA_V24.personalContentRead.first,
-                ],
+                personalDataChange: dataChanges([
+                    [DataChangeType.Create, 'personalContentRead', testReads.first.id],
+                ], { skip: 4 }),
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
+                personalContentRead: [testReads.first],
             })
         })
 
@@ -225,24 +221,28 @@ describe('Personal cloud translation layer', () => {
                 .collection('tags')
                 .createObject(LOCAL_TEST_DATA_V24.tags.first)
             await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const testMetadata = REMOTE_TEST_DATA_V24.personalContentMetadata
+            const testLocators = REMOTE_TEST_DATA_V24.personalContentLocator
+            const testTags = REMOTE_TEST_DATA_V24.personalTag
+            const testConnections = REMOTE_TEST_DATA_V24.personalTagConnection
+
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    // 'personalDataChange',
+                    'personalDataChange',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalTag',
                     'personalTagConnection',
                 ]),
             ).toEqual({
-                personalContentMetadata: [
-                    REMOTE_TEST_DATA_V24.personalContentMetadata.first,
-                    REMOTE_TEST_DATA_V24.personalContentMetadata.second,
-                ],
-                personalContentLocator: [
-                    REMOTE_TEST_DATA_V24.personalContentLocator.first,
-                    REMOTE_TEST_DATA_V24.personalContentLocator.second,
-                ],
+                personalDataChange: dataChanges([
+                    [DataChangeType.Create, 'personalTag', testTags.first.id],
+                    [DataChangeType.Create, 'personalTagConnection', testConnections.first.id],
+                ], { skip: 4 }),
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
                 personalTag: [REMOTE_TEST_DATA_V24.personalTag.first],
                 personalTagConnection: [
                     REMOTE_TEST_DATA_V24.personalTagConnection.first,
