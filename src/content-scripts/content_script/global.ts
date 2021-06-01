@@ -191,6 +191,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
                 getPageUrl,
                 copyPaster,
                 subscription,
+                contentConversationsBG: runInBackground(),
                 contentScriptBackground: runInBackground(),
             })
             components.sidebar?.resolve()

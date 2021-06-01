@@ -2,7 +2,11 @@ import fromPairs from 'lodash/fromPairs'
 import debounce from 'lodash/debounce'
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { isFullUrl, normalizeUrl } from '@worldbrain/memex-url-utils'
-
+import {
+    annotationConversationInitialState,
+    annotationConversationEventHandlers,
+    detectAnnotationConversationThreads,
+} from '@worldbrain/memex-common/lib/content-conversations/ui/logic'
 import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
 import type {
@@ -57,6 +61,62 @@ export class SidebarContainerLogic extends UILogic<
 > {
     constructor(private options: SidebarLogicOptions) {
         super()
+
+        // TODO: properly implement all these deps - when necessary
+        Object.assign(
+            this,
+            annotationConversationEventHandlers<SidebarContainerState>(
+                this as any,
+                {
+                    loadUserByReference: options.auth.getUserByReference,
+                    getCurrentUser: async () => {
+                        const user = await options.auth.getCurrentUser()
+                        if (!user) {
+                            return null
+                        }
+
+                        return {
+                            displayName: user.displayName,
+                            reference: { type: 'user-reference', id: user.id },
+                        }
+                    },
+                    isAuthorizedToConverse: async () => true,
+                    getAnnotation: () => null,
+                    services: {
+                        contentConversations: {
+                            submitReply: async () => ({ status: 'failure' }),
+                        },
+                    },
+                    storage: {
+                        contentSharing: {
+                            createAnnotations: async () => ({} as any),
+                            getSharedAnnotationLinkID: ({ id }) =>
+                                typeof id === 'string' ? id : id.toString(),
+                        },
+                        contentConversations: {
+                            getOrCreateThread: async ({
+                                annotationReference,
+                                ...params
+                            }) =>
+                                options.contentConversationsBG.getOrCreateThread(
+                                    {
+                                        ...params,
+                                        sharedAnnotationReference: annotationReference,
+                                    },
+                                ),
+                            getRepliesByAnnotation: async ({
+                                annotationReference,
+                            }) =>
+                                options.contentConversationsBG.getRepliesBySharedAnnotation(
+                                    {
+                                        sharedAnnotationReference: annotationReference,
+                                    },
+                                ),
+                        },
+                    },
+                },
+            ),
+        )
     }
 
     private get resultLimit(): number {
@@ -65,7 +125,9 @@ export class SidebarContainerLogic extends UILogic<
 
     getInitialState(): SidebarContainerState {
         return {
+            ...annotationConversationInitialState(),
             displayMode: 'private-notes',
+
             loadState: 'pristine',
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',

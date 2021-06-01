@@ -1,5 +1,9 @@
 import { UIEvent } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
+import {
+    AnnotationConversationEvent,
+    AnnotationConversationsState,
+} from '@worldbrain/memex-common/lib/content-conversations/ui/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import {
     RemoteCollectionsInterface,
@@ -22,7 +26,8 @@ import type { AnnotationsSorter } from '../sorting'
 import type { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
 import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import type { Anchor } from 'src/highlighting/types'
-import { NormalizedState } from 'src/common-ui/types'
+import type { NormalizedState } from 'src/common-ui/types'
+import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -44,6 +49,7 @@ export interface SidebarContainerDependencies {
     annotations: AnnotationInterface<'caller'>
     customLists: RemoteCollectionsInterface
     contentSharing: ContentSharingInterface
+    contentConversationsBG: ContentConversationsInterface
     auth: AuthRemoteFunctionsInterface
     subscription: SubscriptionsService
     theme?: Partial<SidebarTheme>
@@ -106,7 +112,9 @@ interface SidebarFollowedListsState {
     }
 }
 
-export interface SidebarContainerState extends SidebarFollowedListsState {
+export interface SidebarContainerState
+    extends SidebarFollowedListsState,
+        AnnotationConversationsState {
     loadState: TaskState
     primarySearchState: TaskState
     secondarySearchState: TaskState
@@ -169,104 +177,110 @@ export interface SidebarContainerState extends SidebarFollowedListsState {
     immediatelyShareNotes: boolean
 }
 
-export type SidebarContainerEvents = UIEvent<{
-    show: null
-    hide: null
-    lock: null
-    unlock: null
+export type SidebarContainerEvents = UIEvent<
+    AnnotationConversationEvent & {
+        show: null
+        hide: null
+        lock: null
+        unlock: null
 
-    sortAnnotations: { sortingFn: AnnotationsSorter }
+        sortAnnotations: { sortingFn: AnnotationsSorter }
 
-    setDisplayMode: { mode: SidebarDisplayMode }
+        setDisplayMode: { mode: SidebarDisplayMode }
 
-    // Adding a new page comment
-    addNewPageComment: { comment?: string; tags?: string[] }
-    setNewPageCommentAnchor: { anchor: Anchor }
-    changeNewPageCommentText: { comment: string }
-    cancelEdit: { annotationUrl: string }
-    changeEditCommentText: { annotationUrl: string; comment: string }
-    saveNewPageComment: { privacyLevel: AnnotationPrivacyLevels }
-    cancelNewPageComment: null
-    updateNewPageCommentTags: { tags: string[] }
+        // Adding a new page comment
+        addNewPageComment: { comment?: string; tags?: string[] }
+        setNewPageCommentAnchor: { anchor: Anchor }
+        changeNewPageCommentText: { comment: string }
+        cancelEdit: { annotationUrl: string }
+        changeEditCommentText: { annotationUrl: string; comment: string }
+        saveNewPageComment: { privacyLevel: AnnotationPrivacyLevels }
+        cancelNewPageComment: null
+        updateNewPageCommentTags: { tags: string[] }
 
-    setEditCommentTagPicker: { annotationUrl: string; active: boolean }
+        setEditCommentTagPicker: { annotationUrl: string; active: boolean }
 
-    updateTagsForEdit: {
-        added?: string
-        deleted?: string
-        annotationUrl: string
+        updateTagsForEdit: {
+            added?: string
+            deleted?: string
+            annotationUrl: string
+        }
+        updateListsForPageResult: {
+            added?: string
+            deleted?: string
+            url: string
+        }
+        deleteEditCommentTag: { tag: string; annotationUrl: string }
+
+        receiveSharingAccessChange: {
+            sharingAccess: AnnotationSharingAccess
+        }
+
+        // Annotation boxes
+        goToAnnotationInNewTab: {
+            context: AnnotationEventContext
+            annotationUrl: string
+        }
+        setActiveAnnotationUrl: { annotationUrl: string }
+        setAnnotationEditMode: {
+            context: AnnotationEventContext
+            annotationUrl: string
+        }
+        editAnnotation: {
+            context: AnnotationEventContext
+            annotationUrl: string
+        }
+        deleteAnnotation: {
+            context: AnnotationEventContext
+            annotationUrl: string
+        }
+        shareAnnotation: {
+            context: AnnotationEventContext
+            annotationUrl: string
+            mouseEvent: React.MouseEvent
+        }
+        switchAnnotationMode: {
+            context: AnnotationEventContext
+            annotationUrl: string
+            mode: AnnotationMode
+        }
+
+        copyNoteLink: { link: string }
+        copyPageLink: { link: string }
+
+        setPageUrl: { pageUrl: string }
+
+        // Search
+        paginateSearch: null
+        setAnnotationsExpanded: { value: boolean }
+        toggleAllAnnotationsFold: null
+        fetchSuggestedTags: null
+        fetchSuggestedDomains: null
+
+        // Followed lists
+        loadFollowedLists: null
+        loadFollowedListNotes: { listId: string }
+        expandFollowedListNotes: { listId: string }
+
+        updateAnnotationShareInfo: {
+            annotationUrl: string
+            info: Partial<AnnotationSharingInfo>
+        }
+        updateAllAnnotationsShareInfo: {
+            info: AnnotationSharingInfo
+        }
+
+        setLoginModalShown: { shown: boolean }
+        setAnnotationShareModalShown: { shown: boolean }
+        setBetaFeatureNotifModalShown: { shown: boolean }
+
+        setAllNotesCopyPasterShown: { shown: boolean }
+        setCopyPasterAnnotationId: { id: string }
+        setTagPickerAnnotationId: { id: string }
+        resetTagPickerAnnotationId: null
+        resetCopyPasterAnnotationId: null
+
+        setAllNotesShareMenuShown: { shown: boolean }
+        resetShareMenuNoteId: null
     }
-    updateListsForPageResult: { added?: string; deleted?: string; url: string }
-    deleteEditCommentTag: { tag: string; annotationUrl: string }
-
-    receiveSharingAccessChange: {
-        sharingAccess: AnnotationSharingAccess
-    }
-
-    // Annotation boxes
-    goToAnnotationInNewTab: {
-        context: AnnotationEventContext
-        annotationUrl: string
-    }
-    setActiveAnnotationUrl: { annotationUrl: string }
-    setAnnotationEditMode: {
-        context: AnnotationEventContext
-        annotationUrl: string
-    }
-    editAnnotation: {
-        context: AnnotationEventContext
-        annotationUrl: string
-    }
-    deleteAnnotation: {
-        context: AnnotationEventContext
-        annotationUrl: string
-    }
-    shareAnnotation: {
-        context: AnnotationEventContext
-        annotationUrl: string
-        mouseEvent: React.MouseEvent
-    }
-    switchAnnotationMode: {
-        context: AnnotationEventContext
-        annotationUrl: string
-        mode: AnnotationMode
-    }
-
-    copyNoteLink: { link: string }
-    copyPageLink: { link: string }
-
-    setPageUrl: { pageUrl: string }
-
-    // Search
-    paginateSearch: null
-    setAnnotationsExpanded: { value: boolean }
-    toggleAllAnnotationsFold: null
-    fetchSuggestedTags: null
-    fetchSuggestedDomains: null
-
-    // Followed lists
-    loadFollowedLists: null
-    loadFollowedListNotes: { listId: string }
-    expandFollowedListNotes: { listId: string }
-
-    updateAnnotationShareInfo: {
-        annotationUrl: string
-        info: Partial<AnnotationSharingInfo>
-    }
-    updateAllAnnotationsShareInfo: {
-        info: AnnotationSharingInfo
-    }
-
-    setLoginModalShown: { shown: boolean }
-    setAnnotationShareModalShown: { shown: boolean }
-    setBetaFeatureNotifModalShown: { shown: boolean }
-
-    setAllNotesCopyPasterShown: { shown: boolean }
-    setCopyPasterAnnotationId: { id: string }
-    setTagPickerAnnotationId: { id: string }
-    resetTagPickerAnnotationId: null
-    resetCopyPasterAnnotationId: null
-
-    setAllNotesShareMenuShown: { shown: boolean }
-    resetShareMenuNoteId: null
-}>
+>
