@@ -31,6 +31,7 @@ import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { NoteResultHoverState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
+import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -50,10 +51,12 @@ export interface AnnotationProps {
     sharingInfo?: AnnotationSharingInfo
     /** Required to decide how to go to an annotation when it's clicked. */
     url?: string
-    lastEdited?: Date | number
     className?: string
     isActive?: boolean
+    hasReplies?: boolean
+    repliesLoadingState?: UITaskState
     isClickable?: boolean
+    lastEdited?: Date | number
     annotationFooterDependencies?: AnnotationFooterEventProps
     annotationEditDependencies?: AnnotationEditGeneralProps &
         AnnotationEditEventProps
@@ -101,8 +104,8 @@ export default class AnnotationEditable extends React.Component<Props> {
         const sharingProps: SharingProps = {
             sharingInfo: this.props.sharingInfo,
             sharingAccess: this.props.sharingAccess,
-            onShare: this.props.annotationFooterDependencies.onShareClick,
-            onUnshare: this.props.annotationFooterDependencies.onShareClick,
+            onShare: this.props.annotationFooterDependencies?.onShareClick,
+            onUnshare: this.props.annotationFooterDependencies?.onShareClick,
         }
         return {
             state: getShareAnnotationBtnState(sharingProps),
@@ -256,10 +259,26 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     private calcFooterActions(): ItemBoxBottomAction[] {
-        const { annotationFooterDependencies: footerDeps } = this.props
+        const {
+            annotationFooterDependencies: footerDeps,
+            repliesLoadingState,
+            hasReplies,
+        } = this.props
 
         if (!footerDeps) {
-            return []
+            // TODO: Figure out loading state properly
+            return [
+                {
+                    key: 'replies-btn',
+                    isDisabled: true,
+                    image:
+                        repliesLoadingState === 'running'
+                            ? icons.reload
+                            : hasReplies
+                            ? icons.commentFull
+                            : icons.commentEmpty,
+                },
+            ]
         }
 
         if (this.props.hoverState === null) {
