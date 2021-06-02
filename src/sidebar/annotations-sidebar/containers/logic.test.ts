@@ -901,9 +901,9 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.followedLists.byId[listId].isExpanded).toEqual(
                 false,
             )
-            expect(sidebar.state.followedLists.byId[listId].loadState).toEqual(
-                'pristine',
-            )
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('pristine')
             expect(sidebar.state.followedAnnotations).toEqual({})
             expect(sidebar.state.users).toEqual({})
 
@@ -925,9 +925,9 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.followedLists.byId[listId].isExpanded).toEqual(
                 true,
             )
-            expect(sidebar.state.followedLists.byId[listId].loadState).toEqual(
-                'success',
-            )
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('success')
             expect(sidebar.state.followedAnnotations).toEqual(
                 fromPairs(
                     DATA.SHARED_ANNOTATIONS.map((note) => [

@@ -165,16 +165,23 @@ class AnnotationsSidebar extends React.Component<
     )
 
     private renderFollowedListNotes(listId: string) {
-        const list = this.props.followedLists.byId[listId]
-        if (!list.isExpanded || list.loadState === 'pristine') {
+        const {
+            followedAnnotations,
+            activeAnnotationUrl,
+            followedLists,
+            conversations,
+            users,
+        } = this.props
+        const list = followedLists.byId[listId]
+        if (!list.isExpanded || list.annotationsLoadState === 'pristine') {
             return null
         }
 
-        if (list.loadState === 'running') {
+        if (list.annotationsLoadState === 'running') {
             return this.renderLoader()
         }
 
-        if (list.loadState === 'error') {
+        if (list.annotationsLoadState === 'error') {
             return (
                 <FollowedListsMsgContainer>
                     <FollowedListsMsgHead>
@@ -194,7 +201,7 @@ class AnnotationsSidebar extends React.Component<
         }
 
         const annotationsData = list.sharedAnnotationReferences
-            .map((ref) => this.props.followedAnnotations[ref.id])
+            .map((ref) => followedAnnotations[ref.id])
             .filter((a) => !!a)
 
         if (!annotationsData.length) {
@@ -211,18 +218,19 @@ class AnnotationsSidebar extends React.Component<
                         comment={noteData.comment}
                         lastEdited={noteData.updatedWhen}
                         createdWhen={noteData.createdWhen}
-                        creatorDependencies={
-                            this.props.users[noteData.creatorId]
-                        }
-                        isActive={
-                            this.props.activeAnnotationUrl === noteData.id
-                        }
+                        creatorDependencies={users[noteData.creatorId]}
+                        isActive={activeAnnotationUrl === noteData.id}
                         onHighlightClick={this.props.setActiveAnnotationUrl(
                             noteData.id,
                         )}
                         isClickable={
                             this.props.theme.canClickAnnotations &&
                             noteData.body?.length > 0
+                        }
+                        repliesLoadingState={list.conversationsLoadState}
+                        hasReplies={
+                            conversations[noteData.id]?.thread != null ||
+                            conversations[noteData.id]?.replies.length > 0
                         }
                     />
                 ))}
@@ -258,14 +266,13 @@ class AnnotationsSidebar extends React.Component<
         if (!followedLists.allIds.length) {
             return (
                 <FollowedListsMsgContainer>
-                    <FollowedListsMsg>
-                        ¯\_(ツ)_/¯
-                    </FollowedListsMsg>
+                    <FollowedListsMsg>¯\_(ツ)_/¯</FollowedListsMsg>
                     <FollowedListsMsgHead>
                         No annotations by other people on this page
                     </FollowedListsMsgHead>
                     <FollowedListsMsg>
-                        Follow or share collections containing <br />annotations for this page
+                        Follow or share collections containing <br />
+                        annotations for this page
                     </FollowedListsMsg>
                 </FollowedListsMsgContainer>
             )
@@ -404,7 +411,9 @@ const EmptyMessage = () => (
     <FollowedListsMsgContainer>
         <FollowedListsMsg>¯\_(ツ)_/¯</FollowedListsMsg>
         <FollowedListsMsgHead>
-            You made no notes or highlights<br/>on this page
+            You made no notes or highlights
+            <br />
+            on this page
         </FollowedListsMsgHead>
     </FollowedListsMsgContainer>
 )

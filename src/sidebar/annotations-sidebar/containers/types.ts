@@ -88,7 +88,8 @@ interface SidebarFollowedListsState {
     followedLists: NormalizedState<
         SharedAnnotationList & {
             isExpanded: boolean
-            loadState: TaskState
+            annotationsLoadState: TaskState
+            conversationsLoadState: TaskState
         }
     >
 

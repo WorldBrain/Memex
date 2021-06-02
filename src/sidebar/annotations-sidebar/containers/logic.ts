@@ -887,7 +887,8 @@ export class SidebarContainerLogic extends UILogic<
                                 {
                                     ...list,
                                     isExpanded: false,
-                                    loadState: 'pristine',
+                                    annotationsLoadState: 'pristine',
+                                    conversationsLoadState: 'pristine',
                                 },
                             ]),
                         ),
@@ -904,7 +905,7 @@ export class SidebarContainerLogic extends UILogic<
         const {
             sharedAnnotationReferences,
             isExpanded: wasExpanded,
-            loadState,
+            annotationsLoadState,
         } = previousState.followedLists.byId[event.listId]
 
         const followedAnnotIds = sharedAnnotationReferences.map(
@@ -931,7 +932,7 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         // If annot data yet to be loaded, load it
-        if (loadState === 'pristine') {
+        if (annotationsLoadState === 'pristine') {
             await this.processUIEvent('loadFollowedListNotes', {
                 event,
                 previousState: this.withMutation(previousState, mutation),
@@ -957,7 +958,7 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const { annotations } = this.options
+        const { annotations, contentConversationsBG } = this.options
         const { sharedAnnotationReferences } = previousState.followedLists.byId[
             event.listId
         ]
@@ -967,7 +968,9 @@ export class SidebarContainerLogic extends UILogic<
             (taskState) => ({
                 followedLists: {
                     byId: {
-                        [event.listId]: { loadState: { $set: taskState } },
+                        [event.listId]: {
+                            annotationsLoadState: { $set: taskState },
+                        },
                     },
                 },
             }),
@@ -1022,6 +1025,36 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 })
             },
+        )
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                followedLists: {
+                    byId: {
+                        [event.listId]: {
+                            conversationsLoadState: { $set: taskState },
+                        },
+                    },
+                },
+            }),
+            () =>
+                detectAnnotationConversationThreads(this as any, {
+                    normalizedPageUrls: [previousState.pageUrl],
+                    annotationReferences: sharedAnnotationReferences,
+                    storage: {
+                        contentConversations: {
+                            getThreadsForAnnotations: ({
+                                annotationReferences,
+                            }) =>
+                                contentConversationsBG.getThreadsForSharedAnnotations(
+                                    {
+                                        sharedAnnotationReferences: annotationReferences,
+                                    },
+                                ),
+                        },
+                    },
+                }),
         )
     }
 
