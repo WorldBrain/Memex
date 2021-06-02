@@ -1,5 +1,6 @@
 import { ContentConversationsInterface } from './types'
 import { ServerStorageModules } from 'src/storage/types'
+import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 
 export default class ContentConversationsBackground {
     remoteFunctions: ContentConversationsInterface
@@ -45,5 +46,9 @@ export default class ContentConversationsBackground {
                 })
             },
         }
+    }
+
+    setupRemoteFunctions() {
+        makeRemotelyCallable(this.remoteFunctions)
     }
 }

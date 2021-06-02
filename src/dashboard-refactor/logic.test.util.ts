@@ -147,6 +147,8 @@ export async function setupTest(
             device.backgroundModules.backupModule.remoteFunctions,
         ) as any,
         contentShareBG: device.backgroundModules.contentSharing.remoteFunctions,
+        contentConversationsBG:
+            device.backgroundModules.contentConversations.remoteFunctions,
         activityIndicatorBG:
             device.backgroundModules.activityIndicator.remoteFunctions,
         copyToClipboard:

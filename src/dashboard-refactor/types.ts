@@ -28,6 +28,7 @@ import { PublicSyncInterface } from 'src/sync/background/types'
 import { BackupInterface } from 'src/backup-restore/background/types'
 import { SearchFiltersState, SearchFilterEvents } from './header/types'
 import { UIServices } from 'src/services/ui/types'
+import { ContentConversationsInterface } from 'src/content-conversations/background/types'
 
 export interface RootState {
     loadState: TaskState
@@ -57,6 +58,7 @@ export interface DashboardDependencies {
     syncBG: PublicSyncInterface
     backupBG: BackupInterface<'caller'>
     contentShareBG: ContentSharingInterface
+    contentConversationsBG: ContentConversationsInterface
     listsBG: RemoteCollectionsInterface
     searchBG: SearchInterface
     annotationsBG: AnnotationInterface<'caller'>

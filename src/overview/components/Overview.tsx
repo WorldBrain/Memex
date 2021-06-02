@@ -41,6 +41,7 @@ import { STORAGE_KEYS } from 'src/dashboard-refactor/constants'
 import { createServices } from 'src/services/ui'
 import type { UIServices } from 'src/services/ui/types'
 import { OverlayContainer } from '@worldbrain/memex-common/lib/main-ui/containers/overlay'
+import { ContentConversationsInterface } from 'src/content-conversations/background/types'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
@@ -75,6 +76,9 @@ class Overview extends PureComponent<Props, State> {
     private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     private customListsBG = runInBackground<RemoteCollectionsInterface>()
     private contentSharingBG = runInBackground<ContentSharingInterface>()
+    private contentConversationsBG = runInBackground<
+        ContentConversationsInterface
+    >()
     private tagsBG = runInBackground<RemoteTagsInterface>()
     private authBG = runInBackground<AuthRemoteFunctionsInterface>()
     private copyPasterBG = runInBackground<RemoteCopyPasterInterface>()
@@ -308,6 +312,7 @@ class Overview extends PureComponent<Props, State> {
                             annotations={this.annotationsBG}
                             customLists={this.customListsBG}
                             contentSharing={this.contentSharingBG}
+                            contentConversationsBG={this.contentConversationsBG}
                             refSidebar={this.annotationsSidebarRef}
                             annotationsCache={this.annotationsCache}
                             onClickOutside={this.handleClickOutsideSidebar}

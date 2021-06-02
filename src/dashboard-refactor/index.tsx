@@ -66,6 +66,7 @@ export class DashboardContainer extends StatefulUIElement<
         document: window.document,
         location: window.location,
         localStorage: browser.storage.local,
+        contentConversationsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
         contentShareBG: runInBackground(),
         annotationsBG: runInBackground(),
@@ -921,6 +922,7 @@ export class DashboardContainer extends StatefulUIElement<
                     annotations={this.props.annotationsBG}
                     annotationsCache={this.annotationsCache}
                     contentSharing={this.props.contentShareBG}
+                    contentConversationsBG={this.props.contentConversationsBG}
                     showLoginModal={() =>
                         this.processEvent('setShowLoginModal', {
                             isShown: true,
