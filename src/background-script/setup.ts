@@ -488,6 +488,7 @@ export function createBackgroundModules(options: {
         contentSharing,
         contentConversations: new ContentConversationsBackground({
             getServerStorage,
+            services: options.services,
         }),
     }
 }

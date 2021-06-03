@@ -1,18 +1,22 @@
 import { ContentConversationsInterface } from './types'
 import { ServerStorageModules } from 'src/storage/types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import { Services } from 'src/services/types'
 
 export default class ContentConversationsBackground {
     remoteFunctions: ContentConversationsInterface
 
     constructor(
         private options: {
+            services: Pick<Services, 'contentConversations'>
             getServerStorage: () => Promise<
                 Pick<ServerStorageModules, 'contentConversations'>
             >
         },
     ) {
         this.remoteFunctions = {
+            submitReply: async (params) =>
+                options.services.contentConversations.submitReply(params),
             getThreadsForSharedAnnotations: async ({
                 sharedAnnotationReferences,
             }) => {

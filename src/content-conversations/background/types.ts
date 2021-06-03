@@ -8,8 +8,10 @@ import {
 } from '@worldbrain/memex-common/lib/content-conversations/storage/types'
 import { ConversationThreadReference } from '@worldbrain/memex-common/lib/content-conversations/types'
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { ContentConversationsServiceInterface } from '@worldbrain/memex-common/lib/content-conversations/service/types'
 
-export interface ContentConversationsInterface {
+export interface ContentConversationsInterface
+    extends Pick<ContentConversationsServiceInterface, 'submitReply'> {
     getRepliesBySharedAnnotation(params: {
         sharedAnnotationReference: SharedAnnotationReference
     }): Promise<PreparedAnnotationReply[]>
