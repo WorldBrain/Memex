@@ -37,6 +37,7 @@ function dataChanges(
             /* type: */ DataChangeType,
             /* collection: */ string,
             /* id: */ string | number,
+            /* info: */ any?,
         ]
     >,
     options?: { skip?: number },
@@ -68,6 +69,7 @@ function dataChanges(
                 type: change[0],
                 collection: change[1],
                 objectId: change[2],
+                info: change[3] ?? null,
             }
         }),
     ]
@@ -86,7 +88,10 @@ describe('Personal cloud translation layer', () => {
             return {
                 setups,
                 serverStorage,
-                testDownload: async (expected: PersonalCloudUpdateBatch) => {
+                testDownload: async (
+                    expected: PersonalCloudUpdateBatch,
+                    options?: { skip?: number },
+                ) => {
                     const { batch } = await downloadClientUpdates({
                         getNow,
                         startTime: 0,
@@ -94,7 +99,7 @@ describe('Personal cloud translation layer', () => {
                         userId: TEST_USER.id,
                         clientSchemaVersion: STORAGE_VERSIONS[24].version,
                     })
-                    expect(batch).toEqual(expected)
+                    expect(batch.slice(options?.skip ?? 0)).toEqual(expected)
                 },
             }
         }
@@ -166,6 +171,15 @@ describe('Personal cloud translation layer', () => {
                 ],
                 personalContentLocator: [testLocators.first, testLocators.second],
             })
+            // prettier-ignore
+            await testDownload([
+                {
+                    type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: {
+                        ...LOCAL_TEST_DATA_V24.pages.first,
+                        fullTitle: 'Updated title'
+                    }
+                },
+            ], { skip: 2 })
         })
 
         it('should delete pages', async () => {
@@ -188,12 +202,18 @@ describe('Personal cloud translation layer', () => {
                 ]),
             ).toEqual({
                 personalDataChange: dataChanges([
-                    [DataChangeType.Delete, 'personalContentMetadata', testMetadata.first.id],
+                    [DataChangeType.Delete, 'personalContentMetadata', testMetadata.first.id, {
+                        normalizedUrl: testLocators.first.location
+                    }],
                     [DataChangeType.Delete, 'personalContentLocator', testLocators.first.id],
                 ], { skip: 4 }),
                 personalContentMetadata: [testMetadata.second],
                 personalContentLocator: [testLocators.second],
             })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Delete, collection: 'pages', where: { url: LOCAL_TEST_DATA_V24.pages.first.url } },
+            ], { skip: 1 })
         })
 
         it('should create visits', async () => {

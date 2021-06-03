@@ -28,7 +28,11 @@ export async function uploadClientUpdateV24(
 
     // NOTE: In any operation, userId should overwrite whatever is in the client-side provided object
     // to prevent users from overwriting each others' data
-    const create = async (collection: string, toCreate: any) => {
+    const create = async (
+        collection: string,
+        toCreate: any,
+        options?: { changeInfo?: any },
+    ) => {
         const now = params.getNow()
 
         const batch: OperationBatch = [
@@ -54,6 +58,7 @@ export async function uploadClientUpdateV24(
                     createdByDevice: params.update.deviceId,
                     type: DataChangeType.Create,
                     collection,
+                    info: options?.changeInfo,
                 },
                 replace: [
                     {
@@ -114,6 +119,7 @@ export async function uploadClientUpdateV24(
         collection: string,
         id: number | string,
         updates: any,
+        options?: { changeInfo?: any },
     ) => {
         const now = params.getNow()
         const batch: OperationBatch = [
@@ -139,19 +145,25 @@ export async function uploadClientUpdateV24(
                     type: DataChangeType.Modify,
                     collection,
                     objectId: id,
+                    info: options?.changeInfo,
                 },
             },
         ]
         await storageManager.operation('executeBatch', batch)
     }
-    const deleteById = async (collection: string, id: number | string) => {
-        await params.storageManager.collection(collection).deleteObjects({
-            user: params.userId,
-            id,
-        })
+    const deleteById = async (
+        collection: string,
+        id: number | string,
+        changeInfo?: any,
+    ) => {
+        await deleteMany([{ collection, id, changeInfo }])
     }
     const deleteMany = async (
-        references: Array<{ collection: string; id: number | string }>,
+        references: Array<{
+            collection: string
+            id: number | string
+            changeInfo?: any
+        }>,
     ) => {
         const batch: OperationBatch = []
         for (const [index, reference] of references.entries()) {
@@ -175,6 +187,7 @@ export async function uploadClientUpdateV24(
                     type: DataChangeType.Delete,
                     collection: reference.collection,
                     objectId: reference.id,
+                    info: reference.changeInfo,
                 },
             })
         }
@@ -226,12 +239,19 @@ export async function uploadClientUpdateV24(
             if (!firstConttentLocator) {
                 return
             }
-            const allContentLocators: Array<{
-                id: number | string
-            }> = await findMany('personalContentLocator', {
+            const allContentLocators: Array<
+                PersonalContentLocator & {
+                    id: number | string
+                }
+            > = await findMany('personalContentLocator', {
                 personalContentMetadata:
                     firstConttentLocator.personalContentMetadata,
             })
+            const normalizeContentLocator = allContentLocators.find(
+                (locator) =>
+                    locator.locationScheme ===
+                    LocationSchemeType.NormalizedUrlV1,
+            )
 
             const references: Array<{
                 collection: string
@@ -244,6 +264,9 @@ export async function uploadClientUpdateV24(
                 {
                     collection: 'personalContentMetadata',
                     id: firstConttentLocator.personalContentMetadata,
+                    changeInfo: normalizeContentLocator
+                        ? { normalizedUrl: normalizeContentLocator.location }
+                        : null,
                 },
                 ...references,
             ])
