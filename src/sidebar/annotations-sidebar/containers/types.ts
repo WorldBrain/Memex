@@ -82,9 +82,18 @@ export interface SearchTypeChange {
     pageType?: 'page' | 'all'
 }
 
+export interface FollowedListAnnotation {
+    id: string
+    body?: string
+    comment?: string
+    selector?: Anchor
+    createdWhen: number
+    updatedWhen?: number
+    creatorId: string
+}
+
 interface SidebarFollowedListsState {
     followedListLoadState: TaskState
-
     followedLists: NormalizedState<
         SharedAnnotationList & {
             isExpanded: boolean
@@ -93,17 +102,7 @@ interface SidebarFollowedListsState {
         }
     >
 
-    followedAnnotations: {
-        [annotationId: string]: {
-            id: string
-            body?: string
-            comment?: string
-            selector?: Anchor
-            createdWhen: number
-            updatedWhen?: number
-            creatorId: string
-        }
-    }
+    followedAnnotations: { [annotationId: string]: FollowedListAnnotation }
 
     users: {
         [userId: string]: {

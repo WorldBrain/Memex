@@ -609,6 +609,36 @@ export class AnnotationsSidebarContainer<
                                 listId,
                             })
                         }
+                        bindSharedAnnotationEventHandlers={(
+                            annotationReference,
+                        ) => ({
+                            onReplyBtnClick: () =>
+                                this.processEvent('toggleAnnotationReplies', {
+                                    annotationReference,
+                                }),
+                            onNewReplyInitiate: () =>
+                                this.processEvent(
+                                    'initiateNewReplyToAnnotation',
+                                    {
+                                        annotationReference,
+                                    },
+                                ),
+                            onNewReplyCancel: () =>
+                                this.processEvent(
+                                    'cancelNewReplyToAnnotation',
+                                    { annotationReference },
+                                ),
+                            onNewReplyConfirm: () =>
+                                this.processEvent(
+                                    'confirmNewReplyToAnnotation',
+                                    { annotationReference },
+                                ),
+                            onNewReplyEdit: ({ content }) =>
+                                this.processEvent('editNewReplyToAnnotation', {
+                                    annotationReference,
+                                    content,
+                                }),
+                        })}
                     />
                 </ContainerStyled>
                 {this.renderModals()}

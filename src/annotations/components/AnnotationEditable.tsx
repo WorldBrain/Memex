@@ -55,6 +55,7 @@ export interface AnnotationProps {
     isActive?: boolean
     hasReplies?: boolean
     repliesLoadingState?: UITaskState
+    onReplyBtnClick?: React.MouseEventHandler
     isClickable?: boolean
     lastEdited?: Date | number
     annotationFooterDependencies?: AnnotationFooterEventProps
@@ -262,6 +263,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         const {
             annotationFooterDependencies: footerDeps,
             repliesLoadingState,
+            onReplyBtnClick,
             hasReplies,
         } = this.props
 
@@ -270,7 +272,9 @@ export default class AnnotationEditable extends React.Component<Props> {
             return [
                 {
                     key: 'replies-btn',
-                    isDisabled: true,
+                    onClick: onReplyBtnClick,
+                    tooltipText: 'Toggle replies',
+                    isDisabled: repliesLoadingState === 'running',
                     image:
                         repliesLoadingState === 'running'
                             ? icons.reload
