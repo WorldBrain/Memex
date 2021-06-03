@@ -487,7 +487,7 @@ export class AnnotationsSidebarContainer<
                                             this.state.displayMode,
                                         )}{' '}
                                     </NotesTypeName>
-                                    <Icon icon="triangle" height="12px" />
+                                    <Icon icon="triangle" height="8px" />
                                 </NoteTypesWrapper>
                             }
                             menuItems={[
@@ -703,6 +703,8 @@ const ContainerStyled = styled.div`
     transition: all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1) 0s;
     box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+
+    font-family: sans-serif;
 `
 
 const TopBarContainerStyled = styled.div`
@@ -725,9 +727,8 @@ const TopBarActionBtns = styled.div`
     display: grid;
     justify-content: space-between;
     align-items: center;
-    display: grid;
-    grid-auto-flow: column;
-    grid-gap: 8px;
+    display: flex;
+    gap: 8px;
     height: 24px;
 `
 

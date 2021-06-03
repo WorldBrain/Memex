@@ -26,12 +26,103 @@ export interface Migrations {
 }
 
 // __IMPORTANT NOTE__
-//     Please make sure to use the `storex` instance rather than the Dexie `db` instance if you're updating existing records
-//     as the Dexie instance won't trigger storage hooks, like backup log appending. This may result in inconsistencies in things like the
-//     backup log - potentially breaking important features!
+//     Please note that use of the Dexie `db` instance rather than the `storex` instance won't trigger
+//     storage hooks. This may result in inconsistencies - potentially breaking important features!
+//     Only use it if you need to change data without triggering side-effects.
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    /*
+     * We discovered further complications with our mobile list ID staticization attempts where,
+     * as it was not also done on the mobile app, sync entries coming in from the mobile app would
+     * still point to the old dynamically created mobile list ID. This migration exists to identify
+     * those entries pointing to the old list, that would have been as a result of sync, and point them
+     * to the new static list.
+     */
+    'point-old-mobile-list-entries-to-new': async ({ db }) => {
+        const listIdsForPageEntries = await db
+            .table('pageListEntries')
+            .orderBy('listId')
+            .uniqueKeys()
+        const matchingListIds = new Set(
+            await db
+                .table('customLists')
+                .where('id')
+                .anyOf(listIdsForPageEntries)
+                .primaryKeys(),
+        )
+
+        // Figure out if there are entries pointing to non-existent lists - one of these will be the old mobile list
+        let nonExistentIds: number[] = []
+        listIdsForPageEntries.forEach((id) => {
+            if (!matchingListIds.has(id)) {
+                nonExistentIds.push(id as number)
+            }
+        })
+        if (!nonExistentIds.length) {
+            return
+        }
+
+        let encounteredDupes = false
+        await db
+            .table('pageListEntries')
+            .where('listId')
+            .anyOf(nonExistentIds)
+            .modify({
+                listId: SPECIAL_LIST_IDS.MOBILE,
+            })
+            .catch((err) => {
+                encounteredDupes = true
+            })
+
+        // If modify encountered dupes, do one last sweep to remove them
+        if (encounteredDupes) {
+            await db
+                .table('pageListEntries')
+                .where('listId')
+                .anyOf(nonExistentIds)
+                .delete()
+        }
+    },
+    /*
+     * We recently messed up backup by adding our new annotations privacy level table that had an
+     * auto-generated PK. The backup log is appended to automatically using a Dexie hook, but at
+     * the time the hook runs that generated PK isn't available. But it still appended to the backup log
+     * with a missing PK. Hence we needed to update all backup log entries with missing PKs.
+     */
+    'remove-then-re-add-broken-backup-log-entries': async ({ db }) => {
+        // Remove log entries with missing objectPk refs
+        const modifiedCount = await db
+            .table('backupChanges')
+            .toCollection()
+            .modify((value, ref) => {
+                if (value.objectPk == null) {
+                    delete ref.value
+                }
+            })
+
+        if (!modifiedCount) {
+            return
+        }
+
+        // Create new log entries with the proper objectPk refs to add in
+        const baseTimestamp = Date.now()
+        const backupChanges = []
+        let offset = 0
+        await db
+            .table('annotationPrivacyLevels')
+            .toCollection()
+            .eachPrimaryKey((objectPk) =>
+                backupChanges.push({
+                    timestamp: baseTimestamp + offset++,
+                    collection: 'annotationPrivacyLevels',
+                    operation: 'create',
+                    objectPk,
+                }),
+            )
+
+        await db.table('backupChanges').bulkAdd(backupChanges)
+    },
     /*
      * We recently added ordering to annotations uploaded to Readwise, however we messed it up for notes (without highlights), causing them
      * to not upload correctly. Now we need to upload all notes.
