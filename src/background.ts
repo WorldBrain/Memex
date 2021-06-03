@@ -35,6 +35,7 @@ import {
 } from './storage/server'
 
 export async function main() {
+    console.log('background function initiated!')
     const localStorageChangesManager = new StorageChangesManager({
         storage: browser.storage,
     })

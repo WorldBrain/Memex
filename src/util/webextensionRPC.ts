@@ -195,6 +195,7 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
 
         // If we could not invoke the function on the other side, throw an error.
         if (response.rpcError) {
+            console.log(`could not invoke the function on the other side`)
             throw new RpcError(response.rpcError)
         }
 
