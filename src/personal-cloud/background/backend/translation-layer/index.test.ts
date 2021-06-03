@@ -244,6 +244,10 @@ describe('Personal cloud translation layer', () => {
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalContentRead: [testReads.first],
             })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.first },
+            ], { skip: 2 })
         })
 
         it.todo('should update vists')
@@ -283,6 +287,10 @@ describe('Personal cloud translation layer', () => {
                     REMOTE_TEST_DATA_V24.personalTagConnection.first,
                 ],
             })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'tags', object: LOCAL_TEST_DATA_V24.tags.first },
+            ], { skip: 2 })
         })
 
         it.todo('should connect existing page tags')

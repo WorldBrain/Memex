@@ -3,8 +3,14 @@ import {
     PersonalDataChange,
     PersonalContentLocator,
     PersonalContentMetadata,
+    PersonalContentRead,
+    PersonalTagConnection,
+    PersonalTag,
 } from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
-import { DataChangeType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import {
+    DataChangeType,
+    LocationSchemeType,
+} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { DOWNLOAD_CHANGE_BATCH_SIZE } from '../constants'
 import {
     TranslationLayerDependencies,
@@ -83,6 +89,61 @@ export async function downloadClientUpdatesV24(
                     type: PersonalCloudUpdateType.Overwrite,
                     collection: 'pages',
                     object: getPageFromRemote(metadata, locatorArray[0]),
+                })
+            } else if (change.collection === 'personalContentRead') {
+                const read = object as PersonalContentRead & {
+                    personalContentMetadata: number | string
+                }
+                const locatorArray = (await findMany(
+                    'personalContentLocator',
+                    {
+                        personalContentMetadata: read.personalContentMetadata,
+                    },
+                    { limit: 1 },
+                )) as PersonalContentLocator[]
+                batch.push({
+                    type: PersonalCloudUpdateType.Overwrite,
+                    collection: 'visits',
+                    object: {
+                        url: locatorArray[0].location,
+                        time: read.readWhen,
+                        duration: read.readDuration,
+                        scrollMaxPerc: 100,
+                        scrollMaxPx: read.scrollTotal,
+                        scrollPerc:
+                            (read.scrollProgress / read.scrollTotal) * 100,
+                        scrollPx: read.scrollProgress,
+                    },
+                })
+            } else if (change.collection === 'personalTagConnection') {
+                const tagConnection = object as PersonalTagConnection & {
+                    personalTag: number | string
+                }
+                const [allContentLocators, tag] = await Promise.all<
+                    PersonalContentLocator[],
+                    PersonalTag
+                >([
+                    findOne('personalContentMetadata', {
+                        id: object.objectId,
+                    }).then((metadata) =>
+                        findMany('personalContentLocator', {
+                            personalContentMetadata: metadata.id,
+                        }),
+                    ) as Promise<PersonalContentLocator[]>,
+                    findOne('personalTag', { id: tagConnection.personalTag }),
+                ])
+                const normalizedContentLocator = allContentLocators.find(
+                    (locator) =>
+                        locator.locationScheme ===
+                        LocationSchemeType.NormalizedUrlV1,
+                )
+                batch.push({
+                    type: PersonalCloudUpdateType.Overwrite,
+                    collection: 'tags',
+                    object: {
+                        url: normalizedContentLocator.location,
+                        name: tag.name,
+                    },
                 })
             }
         } else if (change.type === DataChangeType.Delete) {
