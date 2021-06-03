@@ -19,7 +19,7 @@ import { PersonalContentLocator } from '@worldbrain/memex-common/lib/web-interfa
 // `deleteObjects` that scope those operations down to users' personal data. Any
 // direct usage of `storageManager` should be handled with care and security in mind.
 
-export async function uploadClientUpdate(
+export async function uploadClientUpdateV24(
     params: TranslationLayerDependencies & {
         update: PersonalCloudUpdatePush
     },
@@ -190,11 +190,18 @@ export async function uploadClientUpdate(
             let { contentLocator, contentMetadata } = await findContentMetadata(
                 normalizedUrl,
             )
+            const updates = {
+                canonicalUrl: page.canonicalUrl,
+                title: page.fullTitle,
+                lang: page.lang,
+                description: page.description,
+            }
+
             if (!contentLocator) {
-                contentMetadata = await create('personalContentMetadata', {
-                    canonicalUrl: page.canonicalUrl,
-                    title: page.fullTitle,
-                })
+                contentMetadata = await create(
+                    'personalContentMetadata',
+                    updates,
+                )
                 contentLocator = await create('personalContentLocator', {
                     personalContentMetadata: contentMetadata.id,
                     locationType: ContentLocatorType.Remote,
@@ -210,10 +217,7 @@ export async function uploadClientUpdate(
                 await updateById(
                     'personalContentMetadata',
                     contentMetadata.id,
-                    {
-                        canonicalUrl: page.canonicalUrl,
-                        title: page.fullTitle,
-                    },
+                    updates,
                 )
             }
         } else if (update.type === PersonalCloudUpdateType.Delete) {

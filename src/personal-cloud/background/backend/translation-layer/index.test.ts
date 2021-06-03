@@ -9,6 +9,7 @@ import {
 import { DataChangeType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { PersonalCloudUpdateBatch, PersonalCloudUpdateType } from '../types'
 import { downloadClientUpdates } from '.'
+import { STORAGE_VERSIONS } from 'src/storage/constants'
 
 async function getDatabaseContents(
     storageManager: StorageManager,
@@ -91,6 +92,7 @@ describe('Personal cloud translation layer', () => {
                         startTime: 0,
                         storageManager: serverStorage.storageManager,
                         userId: TEST_USER.id,
+                        clientSchemaVersion: STORAGE_VERSIONS[24].version,
                     })
                     expect(batch).toEqual(expected)
                 },
