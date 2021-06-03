@@ -1,14 +1,19 @@
 import fromPairs from 'lodash/fromPairs'
 import debounce from 'lodash/debounce'
-import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { isFullUrl, normalizeUrl } from '@worldbrain/memex-url-utils'
+import {
+    UILogic,
+    UIEventHandler,
+    UIMutation,
+    loadInitial,
+    executeUITask,
+} from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import {
     annotationConversationInitialState,
     annotationConversationEventHandlers,
     detectAnnotationConversationThreads,
 } from '@worldbrain/memex-common/lib/content-conversations/ui/logic'
 import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
-import { loadInitial, executeUITask } from 'src/util/ui-logic'
 import type {
     SidebarContainerDependencies,
     SidebarContainerState,
@@ -62,7 +67,6 @@ export class SidebarContainerLogic extends UILogic<
     constructor(private options: SidebarLogicOptions) {
         super()
 
-        // TODO: properly implement all these deps - when necessary
         Object.assign(
             this,
             annotationConversationEventHandlers<SidebarContainerState>(
@@ -81,10 +85,28 @@ export class SidebarContainerLogic extends UILogic<
                         }
                     },
                     isAuthorizedToConverse: async () => true,
-                    getAnnotation: () => null,
+                    getAnnotation: (state, reference) => {
+                        const annotation =
+                            state.followedAnnotations[reference.id]
+                        if (!annotation) {
+                            return null
+                        }
+                        return {
+                            annotation: {
+                                normalizedPageUrl: normalizeUrl(
+                                    state.pageUrl ?? options.pageUrl,
+                                ),
+                            },
+                            pageCreatorReference: {
+                                id: annotation.creatorId,
+                                type: 'user-reference',
+                            },
+                        }
+                    },
                     services: {
                         contentConversations: {
-                            submitReply: async () => ({ status: 'failure' }),
+                            submitReply:
+                                options.contentConversationsBG.submitReply,
                         },
                     },
                     storage: {
