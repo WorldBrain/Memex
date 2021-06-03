@@ -2,13 +2,13 @@ import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import styled, { css } from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
-import { TaskState } from 'ui-logic-core/lib/types'
+import type { TaskState } from 'ui-logic-core/lib/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import NewReply, {
     NewReplyEventHandlers,
 } from '@worldbrain/memex-common/lib/content-conversations/ui/components/new-reply'
 import AnnotationReply from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotation-reply'
-import { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import AnnotationCreate, {
@@ -17,19 +17,19 @@ import AnnotationCreate, {
 import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
-import { Annotation } from 'src/annotations/types'
+import type { Annotation } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
-import { AnnotationMode, SidebarTheme } from '../types'
+import type { AnnotationMode, SidebarTheme } from '../types'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import {
     AnnotationEditGeneralProps,
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
-import {
+import type {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
-import {
+import type {
     SidebarContainerState,
     FollowedListAnnotation,
 } from '../containers/types'

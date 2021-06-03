@@ -1,34 +1,34 @@
-import { Browser } from 'webextension-polyfill-ts'
-import { UIEvent } from 'ui-logic-core'
-import { TaskState } from 'ui-logic-core/lib/types'
+import type { Browser } from 'webextension-polyfill-ts'
+import type { UIEvent } from 'ui-logic-core'
+import type { TaskState } from 'ui-logic-core/lib/types'
 
-import {
+import type {
     RootState as SearchResultsState,
     Events as SearchResultEvents,
     NoteDataEventArgs,
     PageEventArgs,
 } from './search-results/types'
-import {
+import type {
     RootState as ListsSidebarState,
     Events as ListsSidebarEvents,
 } from './lists-sidebar/types'
-import {
+import type {
     RootState as SyncModalState,
     Events as SyncModalEvents,
 } from './header/sync-status-menu/types'
-import { RemoteTagsInterface } from 'src/tags/background/types'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import { SearchInterface } from 'src/search/background/types'
-import { AnnotationInterface } from 'src/annotations/background/types'
-import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
-import { Analytics } from 'src/analytics'
-import { ActivityIndicatorInterface } from 'src/activity-indicator/background'
-import { PublicSyncInterface } from 'src/sync/background/types'
-import { BackupInterface } from 'src/backup-restore/background/types'
-import { SearchFiltersState, SearchFilterEvents } from './header/types'
-import { UIServices } from 'src/services/ui/types'
-import { ContentConversationsInterface } from 'src/content-conversations/background/types'
+import type { RemoteTagsInterface } from 'src/tags/background/types'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type { SearchInterface } from 'src/search/background/types'
+import type { AnnotationInterface } from 'src/annotations/background/types'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type { Analytics } from 'src/analytics'
+import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
+import type { PublicSyncInterface } from 'src/sync/background/types'
+import type { BackupInterface } from 'src/backup-restore/background/types'
+import type { SearchFiltersState, SearchFilterEvents } from './header/types'
+import type { UIServices } from 'src/services/ui/types'
+import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
 
 export interface RootState {
     loadState: TaskState

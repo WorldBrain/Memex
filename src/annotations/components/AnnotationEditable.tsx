@@ -5,17 +5,18 @@ import ItemBoxBottom, {
     ItemBoxBottomAction,
 } from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
 import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
+import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
-import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
+import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
+import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import AnnotationEdit, {
     AnnotationEditGeneralProps,
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import { SidebarAnnotationTheme, AnnotationPrivacyLevels } from '../types'
-import {
+import type {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
@@ -29,9 +30,8 @@ import {
 import { ButtonTooltip } from 'src/common-ui/components'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { NoteResultHoverState } from './types'
+import type { NoteResultHoverState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
-import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 export interface HighlightProps extends AnnotationProps {
     body: string

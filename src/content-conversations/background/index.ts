@@ -1,7 +1,7 @@
-import { ContentConversationsInterface } from './types'
-import { ServerStorageModules } from 'src/storage/types'
+import type { ContentConversationsInterface } from './types'
+import type { ServerStorageModules } from 'src/storage/types'
+import type { Services } from 'src/services/types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { Services } from 'src/services/types'
 
 export default class ContentConversationsBackground {
     remoteFunctions: ContentConversationsInterface
