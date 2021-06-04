@@ -11,11 +11,15 @@ import {
 } from 'src/tests/background-integration-tests'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { createLazyMemoryServerStorage } from 'src/storage/server'
+import {
+    createLazyMemoryServerStorage,
+    createLazyTestServerStorage,
+} from 'src/storage/server'
 import {
     PersonalCloudChangeSourceBus,
     StorexPersonalCloudBackend,
 } from './backend/storex'
+import { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher'
 
 const debug = (...args: any[]) => console['log'](...args, '\n\n\n')
 
@@ -282,11 +286,19 @@ export async function setupSyncBackgroundTest(
     options: {
         deviceCount: number
         debugStorageOperations?: boolean
+        withTestUser?: boolean
+        superuser?: boolean
+        serverChangeWatchSettings?: Omit<
+            ChangeWatchMiddlewareSettings,
+            'storageManager'
+        >
     } & BackgroundIntegrationTestOptions,
 ) {
     const userId = TEST_USER.id
 
-    const getServerStorage = await createLazyMemoryServerStorage()
+    const getServerStorage = await createLazyTestServerStorage({
+        changeWatchSettings: options.serverChangeWatchSettings,
+    })
     const serverStorage = await getServerStorage()
     const cloudChangeBus = new PersonalCloudChangeSourceBus()
 

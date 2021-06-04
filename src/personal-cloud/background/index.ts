@@ -31,7 +31,7 @@ export interface PersonalCloudBackgroundOptions {
     getUserId(): Promise<string | number | null>
     userIdChanges(): AsyncIterableIterator<void>
     settingStore: SettingStore<PersonalCloudSettings>
-    createDeviceId(): Promise<PersonalCloudDeviceID>
+    createDeviceId(userId: number | string): Promise<PersonalCloudDeviceID>
 }
 
 export class PersonalCloudBackground {
@@ -74,7 +74,7 @@ export class PersonalCloudBackground {
         if (userId) {
             this.deviceId = await this.options.settingStore.get('deviceId')
             if (!this.deviceId) {
-                this.deviceId = await this.options.createDeviceId()
+                this.deviceId = await this.options.createDeviceId(userId)
                 await this.options.settingStore.set('deviceId', this.deviceId!)
             }
             this.actionQueue.unpause()

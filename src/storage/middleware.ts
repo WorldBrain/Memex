@@ -116,27 +116,21 @@ export function createOperationLoggingMiddleware(options: {
             if (typeof context.operation[1] === 'string') {
                 info.push(context.operation[1])
             }
-            console.groupCollapsed('operation', ...info)
-            console.time('operation execution time')
+            console.log('executing operation', ...info)
 
             try {
                 const result = await next()
 
-                console.timeEnd('operation execution time')
-                console['log']({
+                console['log']('done operation', {
                     operation: context.operation,
                     result,
                 })
-                console['trace']()
-                console.groupEnd()
                 return result
             } catch (e) {
-                console.timeEnd('operation execution time')
-                console['log']({
+                console['log']('failed operation', {
                     operation: context.operation,
                     result: 'error',
                 })
-                console.groupEnd()
                 throw e
             }
         },

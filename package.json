@@ -149,7 +149,7 @@
         "@babel/preset-env": "^7.9.0",
         "@babel/preset-react": "^7.9.4",
         "@babel/register": "^7.9.0",
-        "@firebase/testing": "^0.13.1",
+        "@firebase/testing": "^0.20.11",
         "@sentry/webpack-plugin": "^1.11.1",
         "@storybook/addon-actions": "^5.3.17",
         "@storybook/addon-knobs": "^5.3.14",

@@ -1,6 +1,10 @@
-import StorageManager from '@worldbrain/storex'
-import { setupSyncBackgroundTest } from '../../index.tests'
+import StorageManager, {
+    isChildOfRelationship,
+    getChildOfRelationshipTarget,
+} from '@worldbrain/storex'
+import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { setupSyncBackgroundTest } from '../../index.tests'
 import {
     LOCAL_TEST_DATA_V24,
     REMOTE_TEST_DATA_V24,
@@ -11,27 +15,89 @@ import { PersonalCloudUpdateBatch, PersonalCloudUpdateType } from '../types'
 import { downloadClientUpdates } from '.'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 
+class IdCapturer {
+    ids: { [collection: string]: Array<number | string> } = {}
+    storageManager?: StorageManager
+
+    setup(storageManager: StorageManager) {
+        this.storageManager = storageManager
+    }
+
+    handlePostStorageChange = async (event: StorageOperationEvent<'post'>) => {
+        for (const change of event.info.changes) {
+            if (change.type === 'create') {
+                const ids = this.ids[change.collection] ?? []
+                this.ids[change.collection] = ids
+                ids.push(change.pk as number | string)
+            }
+        }
+    }
+
+    mergeIds<TestData>(testData: TestData) {
+        const source = testData as any
+        const merged = {} as any
+        const idsPicked: { [collection: string]: number } = {}
+        for (const [collection, objects] of Object.entries(source)) {
+            const mergedObjects = (merged[collection] = {})
+            merged[collection] = mergedObjects
+
+            for (const [objectName, object] of Object.entries(objects)) {
+                const collectionIdsPicked = idsPicked[collection] ?? -1
+                const nextIdIndex = collectionIdsPicked + 1
+                idsPicked[collection] = nextIdIndex
+                const id = this.ids[collection]?.[nextIdIndex]
+
+                const mergedObject = {
+                    ...object,
+                    id: id ?? object.id,
+                }
+                const collectionDefinition = this.storageManager!.registry
+                    .collections[collection]
+                for (const relationship of collectionDefinition.relationships ??
+                    []) {
+                    if (isChildOfRelationship(relationship)) {
+                        const targetCollection = getChildOfRelationshipTarget(
+                            relationship,
+                        )
+                        const index = mergedObject[relationship.alias] - 1
+                        const id = this.ids[targetCollection]?.[index]
+                        mergedObject[relationship.alias] =
+                            id ?? mergedObject[relationship.alias]
+                    }
+                }
+                mergedObjects[objectName] = mergedObject
+            }
+        }
+        return merged as TestData
+    }
+}
+
 async function getDatabaseContents(
     storageManager: StorageManager,
     collections: string[],
+    options?: { getWhere?(collection: string): any },
 ) {
     const contents: { [collection: string]: any[] } = {}
     await Promise.all(
         collections.map(async (collection) => {
             contents[collection] = await storageManager
                 .collection(collection)
-                .findObjects(
-                    {},
-                    {
-                        order: [['createdWhen', 'asc']],
-                    },
-                )
+                .findObjects(options?.getWhere?.(collection) ?? {}, {
+                    order: [['createdWhen', 'asc']],
+                })
         }),
     )
     return contents
 }
 
+function getPersonalWhere(collection: string) {
+    if (collection.startsWith('personal')) {
+        return { user: TEST_USER.id }
+    }
+}
+
 function dataChanges(
+    remoteData: typeof REMOTE_TEST_DATA_V24,
     changes: Array<
         [
             /* type: */ DataChangeType,
@@ -42,10 +108,8 @@ function dataChanges(
     >,
     options?: { skip?: number },
 ) {
-    let id = 0
     let now = 554
     const advance = () => {
-        ++id
         ++now
     }
     const skip = options?.skip ?? 0
@@ -61,10 +125,9 @@ function dataChanges(
             advance()
 
             return {
-                id,
+                id: expect.anything(),
                 createdWhen: now,
-                createdByDevice:
-                    REMOTE_TEST_DATA_V24.personalDeviceInfo.first.id,
+                createdByDevice: remoteData.personalDeviceInfo.first.id,
                 user: TEST_USER.id,
                 type: change[0],
                 collection: change[1],
@@ -78,14 +141,24 @@ function dataChanges(
 describe('Personal cloud translation layer', () => {
     describe(`from local schema version 24`, () => {
         async function setup() {
+            const serverIdCapturer = new IdCapturer()
             const {
                 setups,
                 serverStorage,
                 getNow,
             } = await setupSyncBackgroundTest({
                 deviceCount: 2,
+                serverChangeWatchSettings: {
+                    shouldWatchCollection: (collection) => {
+                        return collection.startsWith('personal')
+                    },
+                    postprocessOperation:
+                        serverIdCapturer.handlePostStorageChange,
+                },
             })
+            serverIdCapturer.setup(serverStorage.storageManager)
             return {
+                serverIdCapturer,
                 setups,
                 serverStorage,
                 testDownload: async (
@@ -105,12 +178,18 @@ describe('Personal cloud translation layer', () => {
         }
 
         it('should create pages', async () => {
-            const { setups, serverStorage, testDownload } = await setup()
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
             await insertTestPages(setups[0].storageManager)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const testMetadata = REMOTE_TEST_DATA_V24.personalContentMetadata
-            const testLocators = REMOTE_TEST_DATA_V24.personalContentLocator
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
 
             // prettier-ignore
             expect(
@@ -118,9 +197,9 @@ describe('Personal cloud translation layer', () => {
                     'personalDataChange',
                     'personalContentMetadata',
                     'personalContentLocator',
-                ]),
+                ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                personalDataChange: dataChanges([
+                personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
@@ -137,7 +216,12 @@ describe('Personal cloud translation layer', () => {
         })
 
         it('should update pages', async () => {
-            const { setups, serverStorage, testDownload } = await setup()
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager.collection('pages').updateObjects(
                 {
@@ -147,8 +231,9 @@ describe('Personal cloud translation layer', () => {
             )
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const testMetadata = REMOTE_TEST_DATA_V24.personalContentMetadata
-            const testLocators = REMOTE_TEST_DATA_V24.personalContentLocator
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
 
             // prettier-ignore
             expect(
@@ -156,9 +241,9 @@ describe('Personal cloud translation layer', () => {
                     'personalDataChange',
                     'personalContentMetadata',
                     'personalContentLocator',
-                ]),
+                ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                personalDataChange: dataChanges([
+                personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalContentMetadata', testMetadata.first.id],
                 ], { skip: 4 }),
                 personalContentMetadata: [
@@ -183,15 +268,21 @@ describe('Personal cloud translation layer', () => {
         })
 
         it('should delete pages', async () => {
-            const { setups, serverStorage, testDownload } = await setup()
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager.collection('pages').deleteObjects({
                 url: LOCAL_TEST_DATA_V24.pages.first.url,
             })
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const testMetadata = REMOTE_TEST_DATA_V24.personalContentMetadata
-            const testLocators = REMOTE_TEST_DATA_V24.personalContentLocator
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
 
             // prettier-ignore
             expect(
@@ -199,9 +290,9 @@ describe('Personal cloud translation layer', () => {
                     'personalDataChange',
                     'personalContentMetadata',
                     'personalContentLocator',
-                ]),
+                ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                personalDataChange: dataChanges([
+                personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalContentMetadata', testMetadata.first.id, {
                         normalizedUrl: testLocators.first.location
                     }],
@@ -217,16 +308,22 @@ describe('Personal cloud translation layer', () => {
         })
 
         it('should create visits', async () => {
-            const { setups, serverStorage, testDownload } = await setup()
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('visits')
                 .createObject(LOCAL_TEST_DATA_V24.visits.first)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const testMetadata = REMOTE_TEST_DATA_V24.personalContentMetadata
-            const testLocators = REMOTE_TEST_DATA_V24.personalContentLocator
-            const testReads = REMOTE_TEST_DATA_V24.personalContentRead
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+            const testReads = remoteData.personalContentRead
 
             // prettier-ignore
             expect(
@@ -235,9 +332,9 @@ describe('Personal cloud translation layer', () => {
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalContentRead',
-                ]),
+                ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                personalDataChange: dataChanges([
+                personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Create, 'personalContentRead', testReads.first.id],
                 ], { skip: 4 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
@@ -254,17 +351,23 @@ describe('Personal cloud translation layer', () => {
         it.todo('should delete vists')
 
         it('should create page tags', async () => {
-            const { setups, serverStorage, testDownload } = await setup()
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('tags')
                 .createObject(LOCAL_TEST_DATA_V24.tags.first)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const testMetadata = REMOTE_TEST_DATA_V24.personalContentMetadata
-            const testLocators = REMOTE_TEST_DATA_V24.personalContentLocator
-            const testTags = REMOTE_TEST_DATA_V24.personalTag
-            const testConnections = REMOTE_TEST_DATA_V24.personalTagConnection
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+            const testTags = remoteData.personalTag
+            const testConnections = remoteData.personalTagConnection
 
             // prettier-ignore
             expect(
@@ -274,17 +377,17 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                     'personalTag',
                     'personalTagConnection',
-                ]),
+                ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                personalDataChange: dataChanges([
+                personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Create, 'personalTag', testTags.first.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.first.id],
                 ], { skip: 4 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
-                personalTag: [REMOTE_TEST_DATA_V24.personalTag.first],
+                personalTag: [remoteData.personalTag.first],
                 personalTagConnection: [
-                    REMOTE_TEST_DATA_V24.personalTagConnection.first,
+                    remoteData.personalTagConnection.first,
                 ],
             })
             // prettier-ignore

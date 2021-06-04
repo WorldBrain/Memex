@@ -500,14 +500,17 @@ export function createBackgroundModules(options: {
             storageManager,
             backend:
                 options.personalCloudBackend ?? new NullPersonalCloudBackend(),
-            createDeviceId: async () => {
+            createDeviceId: async (userId) => {
                 const serverStorage = await options.getServerStorage()
                 const device = await serverStorage.storageModules.personalCloud.createDeviceInfo(
                     {
-                        type: PersonalDeviceType.DesktopBrowser,
-                        os: PersonalDeviceOs.Windows,
-                        browser: PersonalDeviceBrowser.Edge,
-                        product: PersonalDeviceProduct.Extension,
+                        device: {
+                            type: PersonalDeviceType.DesktopBrowser,
+                            os: PersonalDeviceOs.Windows,
+                            browser: PersonalDeviceBrowser.Edge,
+                            product: PersonalDeviceProduct.Extension,
+                        },
+                        userId,
                     },
                 )
                 return device.id

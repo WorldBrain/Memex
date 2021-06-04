@@ -58,7 +58,7 @@ export async function uploadClientUpdateV24(
                     createdByDevice: params.update.deviceId,
                     type: DataChangeType.Create,
                     collection,
-                    info: options?.changeInfo,
+                    info: options?.changeInfo ?? null,
                 },
                 replace: [
                     {
@@ -145,7 +145,7 @@ export async function uploadClientUpdateV24(
                     type: DataChangeType.Modify,
                     collection,
                     objectId: id,
-                    info: options?.changeInfo,
+                    info: options?.changeInfo ?? null,
                 },
             },
         ]
@@ -187,7 +187,7 @@ export async function uploadClientUpdateV24(
                     type: DataChangeType.Delete,
                     collection: reference.collection,
                     objectId: reference.id,
-                    info: reference.changeInfo,
+                    info: reference.changeInfo ?? null,
                 },
             })
         }
@@ -222,9 +222,12 @@ export async function uploadClientUpdateV24(
                     format: ContentLocatorFormat.HTML,
                     location: normalizedUrl,
                     originalLocation: page.fullUrl,
-                    version: 0, // later, when visits are written, this is updated
+                    version: 0, // TODO: later, when visits are written, this is updated
                     valid: true,
                     primary: true,
+                    contentSize: null,
+                    fingerprint: null,
+                    lastVisited: null,
                 })
             } else if (contentMetadata) {
                 await updateById(
@@ -247,7 +250,7 @@ export async function uploadClientUpdateV24(
                 personalContentMetadata:
                     firstConttentLocator.personalContentMetadata,
             })
-            const normalizeContentLocator = allContentLocators.find(
+            const normalizedContentLocator = allContentLocators.find(
                 (locator) =>
                     locator.locationScheme ===
                     LocationSchemeType.NormalizedUrlV1,
@@ -264,8 +267,8 @@ export async function uploadClientUpdateV24(
                 {
                     collection: 'personalContentMetadata',
                     id: firstConttentLocator.personalContentMetadata,
-                    changeInfo: normalizeContentLocator
-                        ? { normalizedUrl: normalizeContentLocator.location }
+                    changeInfo: normalizedContentLocator
+                        ? { normalizedUrl: normalizedContentLocator.location }
                         : null,
                 },
                 ...references,
