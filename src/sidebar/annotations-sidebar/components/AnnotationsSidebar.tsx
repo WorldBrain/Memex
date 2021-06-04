@@ -2,13 +2,10 @@ import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import styled, { css } from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
-import type { TaskState } from 'ui-logic-core/lib/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import NewReply, {
-    NewReplyEventHandlers,
-} from '@worldbrain/memex-common/lib/content-conversations/ui/components/new-reply'
-import AnnotationReply from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotation-reply'
+import { ConversationReplies } from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { NewReplyEventHandlers } from '@worldbrain/memex-common/lib/content-conversations/ui/components/new-reply'
 
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import AnnotationCreate, {
@@ -29,10 +26,7 @@ import type {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
-import type {
-    SidebarContainerState,
-    FollowedListAnnotation,
-} from '../containers/types'
+import type { SidebarContainerState } from '../containers/types'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
 import Margin from 'src/dashboard-refactor/components/Margin'
 
@@ -180,67 +174,6 @@ class AnnotationsSidebar extends React.Component<
         </LoadingIndicatorContainer>
     )
 
-    private renderFollowedListNoteAndReplies(
-        data: FollowedListAnnotation,
-        conversationsLoadState: TaskState,
-    ) {
-        const conversation = this.props.conversations[data.id]
-        const eventHandlers = this.props.bindSharedAnnotationEventHandlers({
-            id: data.id,
-            type: 'shared-annotation-reference',
-        })
-
-        return (
-            <>
-                <AnnotationEditable
-                    key={data.id}
-                    url={data.id}
-                    body={data.body}
-                    comment={data.comment}
-                    lastEdited={data.updatedWhen}
-                    createdWhen={data.createdWhen}
-                    creatorDependencies={this.props.users[data.creatorId]}
-                    isActive={this.props.activeAnnotationUrl === data.id}
-                    onReplyBtnClick={eventHandlers.onReplyBtnClick}
-                    onHighlightClick={this.props.setActiveAnnotationUrl(
-                        data.id,
-                    )}
-                    isClickable={
-                        this.props.theme.canClickAnnotations &&
-                        data.body?.length > 0
-                    }
-                    repliesLoadingState={conversationsLoadState}
-                    hasReplies={
-                        conversation?.thread != null ||
-                        conversation?.replies.length > 0
-                    }
-                />
-                {conversation?.expanded && (
-                    <FollowedNoteRepliesContainer>
-                        {conversation?.loadState === 'running' ? (
-                            this.renderLoader()
-                        ) : (
-                            <>
-                                {conversation?.replies.map((replyData, i) => (
-                                    <AnnotationReply
-                                        key={data.id + i}
-                                        reply={replyData.reply}
-                                        user={replyData.user}
-                                    />
-                                ))}
-                                <NewReply
-                                    placeholder="Add a new reply"
-                                    newReply={conversation?.newReply}
-                                    {...eventHandlers}
-                                />
-                            </>
-                        )}
-                    </FollowedNoteRepliesContainer>
-                )}
-            </>
-        )
-    }
-
     private renderFollowedListNotes(listId: string) {
         const list = this.props.followedLists.byId[listId]
         if (!list.isExpanded || list.annotationsLoadState === 'pristine') {
@@ -279,12 +212,60 @@ class AnnotationsSidebar extends React.Component<
 
         return (
             <FollowedNotesContainer>
-                {annotationsData.map((noteData, i) =>
-                    this.renderFollowedListNoteAndReplies(
-                        noteData,
-                        list.conversationsLoadState,
-                    ),
-                )}
+                {annotationsData.map((data, i) => {
+                    const conversation = this.props.conversations[data.id]
+                    const sharedAnnotationRef: SharedAnnotationReference = {
+                        id: data.id,
+                        type: 'shared-annotation-reference',
+                    }
+                    const eventHandlers = this.props.bindSharedAnnotationEventHandlers(
+                        sharedAnnotationRef,
+                    )
+                    return (
+                        <>
+                            <AnnotationEditable
+                                key={data.id}
+                                url={data.id}
+                                body={data.body}
+                                comment={data.comment}
+                                lastEdited={data.updatedWhen}
+                                createdWhen={data.createdWhen}
+                                creatorDependencies={
+                                    this.props.users[data.creatorId]
+                                }
+                                isActive={
+                                    this.props.activeAnnotationUrl === data.id
+                                }
+                                onReplyBtnClick={eventHandlers.onReplyBtnClick}
+                                onHighlightClick={this.props.setActiveAnnotationUrl(
+                                    data.id,
+                                )}
+                                isClickable={
+                                    this.props.theme.canClickAnnotations &&
+                                    data.body?.length > 0
+                                }
+                                repliesLoadingState={
+                                    list.conversationsLoadState
+                                }
+                                hasReplies={
+                                    conversation?.thread != null ||
+                                    conversation?.replies.length > 0
+                                }
+                            />
+                            <ConversationReplies
+                                {...eventHandlers}
+                                conversation={conversation}
+                                annotation={{
+                                    body: data.body,
+                                    linkId: data.id,
+                                    comment: data.comment,
+                                    createdWhen: data.createdWhen,
+                                    reference: sharedAnnotationRef,
+                                }}
+                            />
+                        </>
+                    )
+                })}
             </FollowedNotesContainer>
         )
     }
