@@ -73,6 +73,8 @@ export class SidebarContainerLogic extends UILogic<
                 this as any,
                 {
                     loadUserByReference: options.auth.getUserByReference,
+                    submitNewReply: options.contentConversationsBG.submitReply,
+                    isAuthorizedToConverse: async () => true,
                     getCurrentUser: async () => {
                         const user = await options.auth.getCurrentUser()
                         if (!user) {
@@ -84,58 +86,39 @@ export class SidebarContainerLogic extends UILogic<
                             reference: { type: 'user-reference', id: user.id },
                         }
                     },
-                    isAuthorizedToConverse: async () => true,
-                    getAnnotation: (state, reference) => {
+                    selectAnnotationData: (state, reference) => {
                         const annotation =
                             state.followedAnnotations[reference.id]
                         if (!annotation) {
                             return null
                         }
                         return {
-                            annotation: {
-                                normalizedPageUrl: normalizeUrl(
-                                    state.pageUrl ?? options.pageUrl,
-                                ),
-                            },
+                            normalizedPageUrl: normalizeUrl(
+                                state.pageUrl ?? options.pageUrl,
+                            ),
+
                             pageCreatorReference: {
                                 id: annotation.creatorId,
                                 type: 'user-reference',
                             },
                         }
                     },
-                    services: {
-                        contentConversations: {
-                            submitReply:
-                                options.contentConversationsBG.submitReply,
-                        },
-                    },
-                    storage: {
-                        contentSharing: {
-                            createAnnotations: async () => ({} as any),
-                            getSharedAnnotationLinkID: ({ id }) =>
-                                typeof id === 'string' ? id : id.toString(),
-                        },
-                        contentConversations: {
-                            getOrCreateThread: async ({
-                                annotationReference,
-                                ...params
-                            }) =>
-                                options.contentConversationsBG.getOrCreateThread(
-                                    {
-                                        ...params,
-                                        sharedAnnotationReference: annotationReference,
-                                    },
-                                ),
-                            getRepliesByAnnotation: async ({
-                                annotationReference,
-                            }) =>
-                                options.contentConversationsBG.getRepliesBySharedAnnotation(
-                                    {
-                                        sharedAnnotationReference: annotationReference,
-                                    },
-                                ),
-                        },
-                    },
+                    getSharedAnnotationLinkID: ({ id }) =>
+                        typeof id === 'string' ? id : id.toString(),
+                    getOrCreateConversationThread: async ({
+                        annotationReference,
+                        ...params
+                    }) =>
+                        options.contentConversationsBG.getOrCreateThread({
+                            ...params,
+                            sharedAnnotationReference: annotationReference,
+                        }),
+                    getRepliesByAnnotation: async ({ annotationReference }) =>
+                        options.contentConversationsBG.getRepliesBySharedAnnotation(
+                            {
+                                sharedAnnotationReference: annotationReference,
+                            },
+                        ),
                 },
             ),
         )
@@ -1064,18 +1047,10 @@ export class SidebarContainerLogic extends UILogic<
                 detectAnnotationConversationThreads(this as any, {
                     normalizedPageUrls: [previousState.pageUrl],
                     annotationReferences: sharedAnnotationReferences,
-                    storage: {
-                        contentConversations: {
-                            getThreadsForAnnotations: ({
-                                annotationReferences,
-                            }) =>
-                                contentConversationsBG.getThreadsForSharedAnnotations(
-                                    {
-                                        sharedAnnotationReferences: annotationReferences,
-                                    },
-                                ),
-                        },
-                    },
+                    getThreadsForAnnotations: ({ annotationReferences }) =>
+                        contentConversationsBG.getThreadsForSharedAnnotations({
+                            sharedAnnotationReferences: annotationReferences,
+                        }),
                 }),
         )
     }
