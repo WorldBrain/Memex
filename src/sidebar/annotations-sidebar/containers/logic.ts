@@ -1045,7 +1045,6 @@ export class SidebarContainerLogic extends UILogic<
             }),
             () =>
                 detectAnnotationConversationThreads(this as any, {
-                    normalizedPageUrls: [previousState.pageUrl],
                     annotationReferences: sharedAnnotationReferences,
                     getThreadsForAnnotations: ({ annotationReferences }) =>
                         contentConversationsBG.getThreadsForSharedAnnotations({
