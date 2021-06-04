@@ -13,6 +13,7 @@ import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import * as sharingTestData from 'src/content-sharing/background/index.test.data'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
+import { getInitialAnnotationConversationState } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 
 const setupLogicHelper = async ({
     device,
@@ -871,8 +872,9 @@ describe('SidebarContainerLogic', () => {
                         list.id,
                         {
                             ...list,
-                            loadState: 'pristine',
                             isExpanded: false,
+                            annotationsLoadState: 'pristine',
+                            conversationsLoadState: 'pristine',
                         },
                     ]),
                 ),
@@ -884,6 +886,8 @@ describe('SidebarContainerLogic', () => {
         }) => {
             device.backgroundModules.customLists.remoteFunctions.fetchFollowedListsWithAnnotations = async () =>
                 DATA.FOLLOWED_LISTS
+            device.backgroundModules.contentConversations.remoteFunctions.getThreadsForSharedAnnotations = async () =>
+                DATA.ANNOTATION_THREADS
             device.backgroundModules.directLinking.remoteFunctions.getSharedAnnotations = async () =>
                 DATA.SHARED_ANNOTATIONS
             const { sidebar, emittedEvents } = await setupLogicHelper({
@@ -906,8 +910,29 @@ describe('SidebarContainerLogic', () => {
             ).toEqual('pristine')
             expect(sidebar.state.followedAnnotations).toEqual({})
             expect(sidebar.state.users).toEqual({})
+            expect(sidebar.state.conversations).toEqual({})
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('pristine')
+            expect(
+                sidebar.state.followedLists.byId[listId].conversationsLoadState,
+            ).toEqual('pristine')
 
-            await sidebar.processEvent('expandFollowedListNotes', { listId })
+            const expandPromise = sidebar.processEvent(
+                'expandFollowedListNotes',
+                { listId },
+            )
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('running')
+            await expandPromise
+
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('success')
+            expect(
+                sidebar.state.followedLists.byId[listId].conversationsLoadState,
+            ).toEqual('success')
 
             expectedEvents.push({
                 event: 'renderHighlights',
@@ -950,6 +975,17 @@ describe('SidebarContainerLogic', () => {
                     profileImgSrc: DATA.CREATOR_1.profile.avatarURL,
                 },
             })
+            expect(sidebar.state.conversations).toEqual(
+                fromPairs(
+                    DATA.ANNOTATION_THREADS.map((data) => [
+                        data.sharedAnnotation.id,
+                        {
+                            ...getInitialAnnotationConversationState(),
+                            thread: data.thread,
+                        },
+                    ]),
+                ),
+            )
 
             await sidebar.processEvent('expandFollowedListNotes', { listId })
 

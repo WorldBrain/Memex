@@ -212,7 +212,7 @@ class AnnotationsSidebar extends React.Component<
 
         return (
             <FollowedNotesContainer>
-                {annotationsData.map((data, i) => {
+                {annotationsData.map((data) => {
                     const conversation = this.props.conversations[data.id]
                     const sharedAnnotationRef: SharedAnnotationReference = {
                         id: data.id,
@@ -222,9 +222,8 @@ class AnnotationsSidebar extends React.Component<
                         sharedAnnotationRef,
                     )
                     return (
-                        <>
+                        <React.Fragment key={data.id}>
                             <AnnotationEditable
-                                key={data.id}
                                 url={data.id}
                                 body={data.body}
                                 comment={data.comment}
@@ -263,7 +262,7 @@ class AnnotationsSidebar extends React.Component<
                                     reference: sharedAnnotationRef,
                                 }}
                             />
-                        </>
+                        </React.Fragment>
                     )
                 })}
             </FollowedNotesContainer>
@@ -505,12 +504,6 @@ const FollowedListNotesContainer = styled(Margin)`
 `
 
 const FollowedNotesContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-`
-
-const FollowedNoteRepliesContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: 100%;
