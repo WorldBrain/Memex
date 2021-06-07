@@ -52,14 +52,18 @@ export async function uploadClientUpdateV24(
                 placeholder: 'update-entry',
                 operation: 'createObject',
                 collection: 'personalDataChange',
-                args: {
-                    createdWhen: now,
-                    user: params.userId,
-                    createdByDevice: params.update.deviceId,
-                    type: DataChangeType.Create,
-                    collection,
-                    info: options?.changeInfo ?? null,
-                },
+                args: maybeWith(
+                    {
+                        createdWhen: now,
+                        user: params.userId,
+                        createdByDevice: params.update.deviceId,
+                        type: DataChangeType.Create,
+                        collection,
+                    },
+                    {
+                        info: options?.changeInfo,
+                    },
+                ),
                 replace: [
                     {
                         path: 'objectId',
@@ -138,15 +142,19 @@ export async function uploadClientUpdateV24(
                 placeholder: 'update-entry',
                 operation: 'createObject',
                 collection: 'personalDataChange',
-                args: {
-                    createdWhen: now,
-                    user: params.userId,
-                    createdByDevice: params.update.deviceId,
-                    type: DataChangeType.Modify,
-                    collection,
-                    objectId: id,
-                    info: options?.changeInfo ?? null,
-                },
+                args: maybeWith(
+                    {
+                        createdWhen: now,
+                        user: params.userId,
+                        createdByDevice: params.update.deviceId,
+                        type: DataChangeType.Modify,
+                        collection,
+                        objectId: id,
+                    },
+                    {
+                        info: options?.changeInfo,
+                    },
+                ),
             },
         ]
         await storageManager.operation('executeBatch', batch)
@@ -180,15 +188,19 @@ export async function uploadClientUpdateV24(
                 placeholder: `entry-${index}`,
                 operation: 'createObject',
                 collection: 'personalDataChange',
-                args: {
-                    createdWhen: params.getNow(),
-                    user: params.userId,
-                    createdByDevice: params.update.deviceId,
-                    type: DataChangeType.Delete,
-                    collection: reference.collection,
-                    objectId: reference.id,
-                    info: reference.changeInfo ?? null,
-                },
+                args: maybeWith(
+                    {
+                        createdWhen: params.getNow(),
+                        user: params.userId,
+                        createdByDevice: params.update.deviceId,
+                        type: DataChangeType.Delete,
+                        collection: reference.collection,
+                        objectId: reference.id,
+                    },
+                    {
+                        info: reference.changeInfo,
+                    },
+                ),
             })
         }
         await storageManager.operation('executeBatch', batch)
@@ -225,9 +237,9 @@ export async function uploadClientUpdateV24(
                     version: 0, // TODO: later, when visits are written, this is updated
                     valid: true,
                     primary: true,
-                    contentSize: null,
-                    fingerprint: null,
-                    lastVisited: null,
+                    // contentSize: null,
+                    // fingerprint: null,
+                    lastVisited: 0,
                 })
             } else if (contentMetadata) {
                 await updateById(
@@ -342,4 +354,14 @@ export async function uploadClientUpdateV24(
         } else if (update.type === PersonalCloudUpdateType.Delete) {
         }
     }
+}
+
+function maybeWith(object: any, extras: any) {
+    for (const [key, value] of Object.entries(extras)) {
+        if (typeof value !== 'undefined' && value !== null) {
+            object[key] = value
+        }
+    }
+
+    return object
 }

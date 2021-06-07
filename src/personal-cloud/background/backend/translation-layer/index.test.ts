@@ -142,7 +142,7 @@ function dataChanges(
                 type: change[0],
                 collection: change[1],
                 objectId: change[2],
-                info: change[3] ?? null,
+                ...(change[3] ? { info: change[3] } : {}),
             }
         }),
     ]
