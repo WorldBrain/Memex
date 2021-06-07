@@ -19,6 +19,14 @@ class IdCapturer {
     ids: { [collection: string]: Array<number | string> } = {}
     storageManager?: StorageManager
 
+    constructor(
+        public options?: {
+            postprocesessMerge?: (params: {
+                merged: { [collection: string]: { [name: string]: any } }
+            }) => void
+        },
+    ) {}
+
     setup(storageManager: StorageManager) {
         this.storageManager = storageManager
     }
@@ -36,15 +44,14 @@ class IdCapturer {
     mergeIds<TestData>(testData: TestData) {
         const source = testData as any
         const merged = {} as any
-        const idsPicked: { [collection: string]: number } = {}
         for (const [collection, objects] of Object.entries(source)) {
             const mergedObjects = (merged[collection] = {})
             merged[collection] = mergedObjects
 
+            let idsPicked = 0
             for (const [objectName, object] of Object.entries(objects)) {
-                const collectionIdsPicked = idsPicked[collection] ?? -1
-                const nextIdIndex = collectionIdsPicked + 1
-                idsPicked[collection] = nextIdIndex
+                // pick IDs by looking at the IDs that were generated during object creation
+                const nextIdIndex = idsPicked++
                 const id = this.ids[collection]?.[nextIdIndex]
 
                 const mergedObject = {
@@ -68,6 +75,9 @@ class IdCapturer {
                 mergedObjects[objectName] = mergedObject
             }
         }
+        this.options?.postprocesessMerge?.({
+            merged,
+        })
         return merged as TestData
     }
 }
@@ -141,7 +151,21 @@ function dataChanges(
 describe('Personal cloud translation layer', () => {
     describe(`from local schema version 24`, () => {
         async function setup() {
-            const serverIdCapturer = new IdCapturer()
+            const serverIdCapturer = new IdCapturer({
+                postprocesessMerge: (params) => {
+                    // tag connections don't connect with the content they tag through a
+                    // Storex relationship, so we need some extra logic to get the right ID
+                    for (const tagConnection of Object.values(
+                        params.merged.personalTagConnection,
+                    )) {
+                        const collectionIds =
+                            serverIdCapturer.ids[tagConnection.collection]
+                        const idIndex = tagConnection.objectId - 1
+                        const id = collectionIds[idIndex]
+                        tagConnection.objectId = id
+                    }
+                },
+            })
             const {
                 setups,
                 serverStorage,
