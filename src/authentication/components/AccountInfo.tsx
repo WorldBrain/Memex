@@ -16,6 +16,7 @@ import DisplayNameSetup from 'src/overview/sharing/components/DisplayNameSetup'
 
 const styles = require('./styles.css')
 
+
 const hiddenInProduction =
     process.env.NODE_ENV === 'production' ? 'hidden' : 'text'
 const dev = process.env.NODE_ENV !== 'production'
