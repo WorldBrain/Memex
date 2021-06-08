@@ -27,7 +27,8 @@ import {
     getShareAnnotationBtnState,
     getShareAnnotationBtnAction,
 } from '../sharing-utils'
-import { ButtonTooltip, LoadingIndicator } from 'src/common-ui/components'
+import { ButtonTooltip } from 'src/common-ui/components'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
