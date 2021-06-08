@@ -67,9 +67,9 @@ class IdCapturer {
                             relationship,
                         )
                         const index = mergedObject[relationship.alias] - 1
-                        const id = this.ids[targetCollection]?.[index]
+                        const targetId = this.ids[targetCollection]?.[index]
                         mergedObject[relationship.alias] =
-                            id ?? mergedObject[relationship.alias]
+                            targetId ?? mergedObject[relationship.alias]
                     }
                 }
                 mergedObjects[objectName] = mergedObject

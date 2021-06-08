@@ -63,7 +63,6 @@ export async function downloadClientUpdatesV24(
             }
 
             const object = await findOne(change.collection, {
-                user: params.userId,
                 id: change.objectId,
             })
             if (!object) {
@@ -77,8 +76,7 @@ export async function downloadClientUpdatesV24(
                 const locatorArray = (await findMany(
                     'personalContentLocator',
                     {
-                        user: params.userId,
-                        id: metadata.id,
+                        personalContentMetadata: metadata.id,
                     },
                     { limit: 1 },
                 )) as PersonalContentLocator[]
