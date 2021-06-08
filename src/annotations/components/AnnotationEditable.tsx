@@ -27,7 +27,7 @@ import {
     getShareAnnotationBtnState,
     getShareAnnotationBtnAction,
 } from '../sharing-utils'
-import { ButtonTooltip } from 'src/common-ui/components'
+import { ButtonTooltip, LoadingIndicator } from 'src/common-ui/components'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
@@ -268,20 +268,17 @@ export default class AnnotationEditable extends React.Component<Props> {
         } = this.props
 
         if (!footerDeps) {
-            // TODO: Figure out loading state properly
             return [
-                {
-                    key: 'replies-btn',
-                    onClick: onReplyBtnClick,
-                    tooltipText: 'Toggle replies',
-                    isDisabled: repliesLoadingState === 'running',
-                    image:
-                        repliesLoadingState === 'running'
-                            ? icons.reload
-                            : hasReplies
-                            ? icons.commentFull
-                            : icons.commentEmpty,
-                },
+                repliesLoadingState === 'running'
+                    ? { node: <LoadingIndicator /> }
+                    : {
+                          key: 'replies-btn',
+                          onClick: onReplyBtnClick,
+                          tooltipText: 'Toggle replies',
+                          image: hasReplies
+                              ? icons.commentFull
+                              : icons.commentEmpty,
+                      },
             ]
         }
 
