@@ -112,7 +112,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
         getSelection: () => document.getSelection(),
         getUrlAndTitle: () => ({
             title: getPageTitle(),
-            pageUrl: getNormalizedPageUrl(),
+            pageUrl: getPageUrl(),
         }),
     }
 
