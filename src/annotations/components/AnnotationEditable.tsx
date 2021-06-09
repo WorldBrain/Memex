@@ -154,7 +154,6 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (!this.props.body) {
             return
         }
-
         const {
             annotationFooterDependencies: footerDeps,
             onGoToAnnotation,
