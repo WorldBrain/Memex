@@ -11,14 +11,11 @@ import {
 } from 'src/tests/background-integration-tests'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import {
-    createLazyMemoryServerStorage,
-    createLazyTestServerStorage,
-} from 'src/storage/server'
+import { createLazyTestServerStorage } from 'src/storage/server'
 import {
     PersonalCloudChangeSourceBus,
     StorexPersonalCloudBackend,
-} from './backend/storex'
+} from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher'
 
 const debug = (...args: any[]) => console['log'](...args, '\n\n\n')

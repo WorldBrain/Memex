@@ -1,1 +1,0 @@
-export const DOWNLOAD_CHANGE_BATCH_SIZE = 15

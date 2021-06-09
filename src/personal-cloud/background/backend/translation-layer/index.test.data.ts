@@ -59,6 +59,7 @@ export const LOCAL_TEST_DATA_V24 = {
 const REMOTE_DEVICES_V24 = {
     first: {
         id: 1,
+        user: TEST_USER.id,
     },
 }
 

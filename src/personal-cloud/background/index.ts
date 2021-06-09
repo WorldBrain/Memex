@@ -10,14 +10,14 @@ import {
     PersonalCloudBackend,
     PersonalCloudUpdateType,
     PersonalCloudUpdateBatch,
-} from './backend/types'
+} from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import {
     PersonalCloudAction,
     PersonalCloudActionType,
     PersonalCloudSettings,
     PersonalCloudDeviceID,
 } from './types'
-import { PERSONAL_CLOUD_ACTION_RETRY_INTERVAL } from './backend/constants'
+import { PERSONAL_CLOUD_ACTION_RETRY_INTERVAL } from './constants'
 import {
     ActionExecutor,
     ActionPreprocessor,

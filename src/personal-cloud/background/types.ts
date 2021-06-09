@@ -1,4 +1,4 @@
-import { PersonalCloudUpdatePushBatch } from './backend/types'
+import { PersonalCloudUpdatePushBatch } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 
 export type PersonalCloudAction = PushObjectAction
 export enum PersonalCloudActionType {

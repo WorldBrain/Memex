@@ -2,7 +2,7 @@ import * as firebaseTesting from '@firebase/testing'
 import { getFirebase } from 'src/util/firebase-app-initialized'
 import 'firebase/database'
 import 'firebase/firestore'
-import StorageManager from '@worldbrain/storex'
+import StorageManager, { StorageBackend } from '@worldbrain/storex'
 import { FirestoreStorageBackend } from '@worldbrain/storex-backend-firestore'
 import {
     registerModuleMapCollections,
@@ -26,10 +26,13 @@ import {
     ChangeWatchMiddleware,
     ChangeWatchMiddlewareSettings,
 } from '@worldbrain/storex-middleware-change-watcher'
+import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 
 let shouldLogOperations = false
 
-export function createServerStorageManager() {
+export function createServerStorageManager(options?: {
+    changeWatchSettings?: Omit<ChangeWatchMiddlewareSettings, 'storageManager'>
+}) {
     const firebase = getFirebase()
     const serverStorageBackend = new FirestoreStorageBackend({
         firebase: firebase as any,
@@ -41,21 +44,24 @@ export function createServerStorageManager() {
             ssl: false,
         })
     }
-    const storageManager = new StorageManager({ backend: serverStorageBackend })
-    storageManager.setMiddleware([
-        createOperationLoggingMiddleware({
-            shouldLog: () => shouldLogOperations,
-        }),
-    ])
-    return storageManager
+    return createStorageManager(serverStorageBackend, options)
 }
 
 export function createLazyServerStorage(
-    createStorageManager: () => StorageManager | Promise<StorageManager>,
+    create: (options?: {
+        changeWatchSettings?: Omit<
+            ChangeWatchMiddlewareSettings,
+            'storageManager'
+        >
+    }) => StorageManager | Promise<StorageManager>,
     options: {
         autoPkType: 'string' | 'number'
         sharedSyncLog?: SharedSyncLogStorage
         skipApplicationLayer?: boolean
+        changeWatchSettings?: Omit<
+            ChangeWatchMiddlewareSettings,
+            'storageManager'
+        >
     },
 ) {
     let serverStoragePromise: Promise<ServerStorage>
@@ -70,7 +76,7 @@ export function createLazyServerStorage(
             return serverStoragePromise
         }
 
-        const storageManager = await createStorageManager()
+        const storageManager = await create(options)
         serverStoragePromise = (async () => {
             const operationExecuter = !options.skipApplicationLayer
                 ? getFirebaseOperationExecuter(storageManager)
@@ -133,14 +139,17 @@ export function createLazyServerStorage(
     }
 }
 
-export function createLazyMemoryServerStorage() {
+export function createLazyMemoryServerStorage(options?: {
+    changeWatchSettings?: Omit<ChangeWatchMiddlewareSettings, 'storageManager'>
+}) {
     return createLazyServerStorage(
         () => {
             const backend = new DexieStorageBackend({
                 dbName: 'server',
                 idbImplementation: inMemory(),
+                legacyMemexCompatibility: true,
             })
-            return new StorageManager({ backend })
+            return createStorageManager(backend, options)
         },
         {
             autoPkType: 'number',
@@ -194,21 +203,7 @@ export function createLazyTestServerStorage(options?: {
                     firebaseModule: firebaseTesting as any,
                     firestore: firestore as any,
                 })
-                const storageManager = new StorageManager({ backend })
-                storageManager.setMiddleware([
-                    createOperationLoggingMiddleware({
-                        shouldLog: () => shouldLogOperations,
-                    }),
-                    ...(options.changeWatchSettings
-                        ? [
-                              new ChangeWatchMiddleware({
-                                  ...options.changeWatchSettings,
-                                  storageManager,
-                              }),
-                          ]
-                        : []),
-                ])
-                return storageManager
+                return createStorageManager(backend, options)
             },
             {
                 autoPkType: 'string',
@@ -216,8 +211,35 @@ export function createLazyTestServerStorage(options?: {
             },
         )
     } else {
-        return createLazyMemoryServerStorage()
+        return createLazyMemoryServerStorage(options)
     }
+}
+
+function createStorageManager(
+    backend: StorageBackend,
+    options?: {
+        changeWatchSettings?: Omit<
+            ChangeWatchMiddlewareSettings,
+            'storageManager'
+        >
+    },
+) {
+    const storageManager = new StorageManager({ backend })
+    const middleware: StorageMiddleware[] = [
+        createOperationLoggingMiddleware({
+            shouldLog: () => shouldLogOperations,
+        }),
+    ]
+    if (options?.changeWatchSettings) {
+        middleware.push(
+            new ChangeWatchMiddleware({
+                ...options.changeWatchSettings,
+                storageManager,
+            }),
+        )
+    }
+    storageManager.setMiddleware(middleware)
+    return storageManager
 }
 
 function getFirebaseOperationExecuter(storageManager: StorageManager) {

@@ -33,8 +33,8 @@ import { Browser } from 'webextension-polyfill-ts'
 import { TabManager } from 'src/tab-management/background/tab-manager'
 import { createServices } from 'src/services'
 import { MemoryUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/memory'
-import { PersonalCloudBackend } from 'src/personal-cloud/background/backend/types'
-import { NullPersonalCloudBackend } from 'src/personal-cloud/background/backend/null'
+import { PersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import { NullPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/null'
 
 fetchMock.restore()
 

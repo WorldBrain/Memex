@@ -11,8 +11,11 @@ import {
     insertTestPages,
 } from './index.test.data'
 import { DataChangeType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import { PersonalCloudUpdateBatch, PersonalCloudUpdateType } from '../types'
-import { downloadClientUpdates } from '.'
+import {
+    PersonalCloudUpdateBatch,
+    PersonalCloudUpdateType,
+} from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import { downloadClientUpdates } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 
 class IdCapturer {

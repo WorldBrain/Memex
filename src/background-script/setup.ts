@@ -70,8 +70,8 @@ import {
     PersonalDeviceProduct,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { PersonalCloudBackground } from 'src/personal-cloud/background'
-import { PersonalCloudBackend } from 'src/personal-cloud/background/backend/types'
-import { NullPersonalCloudBackend } from 'src/personal-cloud/background/backend/null'
+import { PersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import { NullPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/null'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { PersonalCloudSettings } from 'src/personal-cloud/background/types'
 import { authChanges } from 'src/authentication/background/utils'
