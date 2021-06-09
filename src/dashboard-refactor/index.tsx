@@ -502,6 +502,9 @@ export class DashboardContainer extends StatefulUIElement<
                 onDismissOnboardingMsg={() =>
                     this.processEvent('dismissOnboardingMsg', null)
                 }
+                onDismissSubscriptionBanner={() =>
+                    this.processEvent('dismissSubscriptionBanner', null)
+                }
                 noResultsType={searchResults.noResultsType}
                 filterSearchByTag={(tag) =>
                     this.processEvent('addIncludedTag', { tag })

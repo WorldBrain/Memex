@@ -169,6 +169,7 @@ export interface RootState {
     isListShareMenuShown: boolean
     shouldFormsAutoFocus: boolean
     isSearchCopyPasterShown: boolean
+    isSubscriptionBannerShown: boolean
 
     /** Holds page data specific to each page occurrence on a specific day. */
     results: NestedResults
@@ -219,8 +220,10 @@ export type Events = UIEvent<{
         link: string
         analyticsAction: AnalyticsEvents['ContentSharing']
     }
+
     dismissMobileAd: null
     dismissOnboardingMsg: null
+    dismissSubscriptionBanner: null
 
     // Page data state mutations (*shared with all* occurences of the page in different days)
     setPageTags: {

@@ -53,6 +53,7 @@ import ListDetails, {
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import ListShareMenu from 'src/overview/sharing/ListShareMenu'
 import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
+import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -75,6 +76,7 @@ export type Props = RootState &
         noResultsType: NoResultsType
         onDismissMobileAd: React.MouseEventHandler
         onDismissOnboardingMsg: React.MouseEventHandler
+        onDismissSubscriptionBanner: React.MouseEventHandler
         filterSearchByTag: (tag: string) => void
         openListShareModal: () => void
         newNoteInteractionProps: {
@@ -504,6 +506,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     render() {
         return (
             <ResultsContainer bottom="100px">
+                {this.props.isSubscriptionBannerShown && (
+                    <PioneerPlanBanner
+                        onHideClick={this.props.onDismissSubscriptionBanner}
+                    />
+                )}
                 {this.props.selectedListId != null && (
                     <ListDetails {...this.props.listDetailsProps} />
                 )}

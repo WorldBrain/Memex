@@ -64,6 +64,7 @@ export const TAG_CLEAN_PATTERN = /[#"]/g
 const KEY_PREFIX = '@Dashboard-'
 
 export const STORAGE_KEYS = {
+    subBannerDismissed: KEY_PREFIX + 'subscribe_banner_dismissed',
     listSidebarLocked: KEY_PREFIX + 'list_sidebar_locked',
     onboardingMsgSeen: KEY_PREFIX + 'onboarding_msg_seen',
     mobileAdSeen: KEY_PREFIX + 'mobile_ad_seen',

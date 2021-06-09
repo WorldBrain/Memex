@@ -90,6 +90,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 shouldFormsAutoFocus: false,
                 isListShareMenuShown: false,
                 isSearchCopyPasterShown: false,
+                isSubscriptionBannerShown: false,
                 pageData: {
                     allIds: [],
                     byId: {},
@@ -183,10 +184,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState: State,
     ): Promise<State> {
         const {
+            [STORAGE_KEYS.subBannerDismissed]: subBannerDismissed,
             [STORAGE_KEYS.listSidebarLocked]: listsSidebarLocked,
             [STORAGE_KEYS.onboardingMsgSeen]: onboardingMsgSeen,
             [STORAGE_KEYS.mobileAdSeen]: mobileAdSeen,
         } = await this.options.localStorage.get([
+            STORAGE_KEYS.subBannerDismissed,
             STORAGE_KEYS.listSidebarLocked,
             STORAGE_KEYS.onboardingMsgSeen,
             STORAGE_KEYS.mobileAdSeen,
@@ -196,6 +199,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             searchResults: {
                 showMobileAppAd: { $set: !mobileAdSeen },
                 showOnboardingMsg: { $set: !onboardingMsgSeen },
+                isSubscriptionBannerShown: { $set: !subBannerDismissed },
             },
             listsSidebar: {
                 isSidebarLocked: { $set: listsSidebarLocked ?? true },
@@ -1590,6 +1594,17 @@ export class DashboardLogic extends UILogic<State, Events> {
                 action: event.analyticsAction,
             }),
         ])
+    }
+
+    dismissSubscriptionBanner: EventHandler<
+        'dismissSubscriptionBanner'
+    > = async () => {
+        await this.options.localStorage.set({
+            [STORAGE_KEYS.subBannerDismissed]: true,
+        })
+        this.emitMutation({
+            searchResults: { isSubscriptionBannerShown: { $set: false } },
+        })
     }
 
     dismissMobileAd: EventHandler<'dismissMobileAd'> = async () => {
