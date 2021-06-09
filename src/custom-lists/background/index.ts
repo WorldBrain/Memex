@@ -176,11 +176,21 @@ export default class CustomListBackground {
         normalizedPageUrl,
     }) => {
         const { contentSharing } = await this.options.getServerStorage()
-        const listReferences = [
+        const seenListIds = new Set()
+        const allListReferences = [
             ...(await this.fetchOwnListReferences()),
             ...(await this.fetchFollowedListReferences()),
             ...(await this.fetchCollaborativeListReferences()),
         ]
+
+        const uniqueListReferences = allListReferences.filter((listRef) => {
+            if (seenListIds.has(listRef.id)) {
+                return false
+            }
+
+            seenListIds.add(listRef.id)
+            return true
+        })
 
         const annotListEntriesByList = new Map<
             string | number,
@@ -188,10 +198,10 @@ export default class CustomListBackground {
         >()
 
         const listEntriesByPageByList = await contentSharing.getAnnotationListEntriesForLists(
-            { listReferences },
+            { listReferences: uniqueListReferences },
         )
 
-        for (const listReference of listReferences) {
+        for (const listReference of uniqueListReferences) {
             if (
                 !listEntriesByPageByList[listReference.id]?.[normalizedPageUrl]
                     ?.length
