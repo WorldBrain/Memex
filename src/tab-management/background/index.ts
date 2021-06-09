@@ -146,7 +146,14 @@ export default class TabManagementBackground {
         }
 
         for (const file of CONTENT_SCRIPTS) {
-            await this.options.browserAPIs.tabs.executeScript(tab.id, { file })
+            await this.options.browserAPIs.tabs
+                .executeScript(tab.id, { file })
+                .catch((err) =>
+                    console.error(
+                        'Cannot inject content-scripts into page - reason:',
+                        err.message,
+                    ),
+                )
         }
     }
 
