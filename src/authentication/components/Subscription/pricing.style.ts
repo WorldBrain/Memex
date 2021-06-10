@@ -18,9 +18,9 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 
 const SubscriptionOptionsContainer = styled.div`
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
+    display: flex;
+    flex-direction: column;
+    align-items: center:
 `
 
 const PricingTable = styled.div`
@@ -314,15 +314,11 @@ const PlanName = styled.div`
 
 const PricingGrid = styled.div`
     display: grid;
-    grid-template-columns: 50% 25% 25%;
+    grid-template-columns: 40% 30% 30%;
     //grid-gap: 10px;
     background-color: #fff;
     margin-top: 20px;
     width: 100%;
-
-    @media (max-width: 1300px) {
-        grid-template-columns: 50% 25% 25%;
-    }
 `
 
 const gridPadding = css`
@@ -331,7 +327,7 @@ const gridPadding = css`
 
 const PricingGridPlanSpacer = styled.div`
     ${gridPadding}
-    color: #E0E0E0
+    color: #E0E0E0;
     grid-column: 1;
 `
 
@@ -340,6 +336,7 @@ const PricingGridPlanTitle = styled(TypographyHeadingPage)`
     justify-content: center;
     align-items: center;
     color: ${(props) => (props.active ? '${(props) => props.theme.colors.secondary}' : '${(props) => props.theme.colors.primary}')};
+    font-size: 18px;
 `
 
 const PricingGridFeatureTitle = styled(TypographyBodyBold)`
@@ -350,13 +347,10 @@ const PricingGridFeatureDescription = styled(TypographyTextNormal)`
     grid-column: 1;
     display: flex;
     align-items: flex-start;
-    padding-left: 20px;
+    padding-left: 15px;
     flex-direction: column;
     justify-content: center;
-
-    @media (max-width: 1300px) {
-        padding: 0px;
-    }
+    white-space: nowrap;
 `
 
 const PricingGridCheck = styled.div`
@@ -367,8 +361,7 @@ const PricingGridCheck = styled.div`
     mask-repeat: no-repeat;
     mask-position: center;
     mask-image: url('/img/check.svg');
-    background-color: ${(props) => (props.active ? '${(props) => props.theme.colors.secondary}' : '${(props) => props.theme.colors.primary}')};
-    color: #2f2f2f;
+    background-color: ${(props) => props.theme.colors.primary};
 
     @media (max-width: 700px) {
         padding: 10px 5px;
@@ -377,6 +370,7 @@ const PricingGridCheck = styled.div`
 `
 
 const PricingGridButton = styled(PricingButton)``
+
 const Line = styled.div`
     grid-column: span 5 / 5;
     width: 100%;
@@ -422,6 +416,7 @@ const PriceBox = styled(TypographySubHeading)`
 const PriceText = styled(TypographySubHeading)`
     display: inline-block;
     text-align: center;
+    font-size: 16px;
 `
 
 const PriceInputBox = styled.select`

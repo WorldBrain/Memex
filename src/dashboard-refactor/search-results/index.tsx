@@ -509,6 +509,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 {this.props.isSubscriptionBannerShown && (
                     <PioneerPlanBanner
                         onHideClick={this.props.onDismissSubscriptionBanner}
+                        width='fill-available'
                     />
                 )}
                 {this.props.selectedListId != null && (

@@ -13,6 +13,8 @@ import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { TaskState } from 'ui-logic-core/lib/types'
 import DisplayNameSetup from 'src/overview/sharing/components/DisplayNameSetup'
+import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
+
 
 const styles = require('./styles.css')
 
@@ -144,6 +146,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
             <FullPage>
                 {user != null && (
                     <div className={styles.AccountInfoBox}>
+                        <PioneerPlanBanner width={'fill-available'}/>
                         {this.state.isPioneer &&
                             this.state.loadState === 'success' && (
                                 <div className={styles.pioneerBox}>
