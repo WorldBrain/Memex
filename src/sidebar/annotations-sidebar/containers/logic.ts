@@ -352,14 +352,21 @@ export class SidebarContainerLogic extends UILogic<
 
     private async _doSearch(
         state: SidebarContainerState,
-        opts: { overwrite: boolean },
+        opts: { overwrite: boolean; rerenderHighlights?: boolean },
     ) {
+        const { annotationsCache, events } = this.options
         await executeUITask(
             this,
             opts.overwrite ? 'primarySearchState' : 'secondarySearchState',
             async () => {
                 if (opts.overwrite && state.pageUrl != null) {
-                    await this.options.annotationsCache.load(state.pageUrl)
+                    await annotationsCache.load(state.pageUrl)
+
+                    if (opts.rerenderHighlights) {
+                        events?.emit('renderHighlights', {
+                            highlights: annotationsCache.highlights,
+                        })
+                    }
                 }
             },
         )
@@ -405,7 +412,10 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
 
-        return this._doSearch(nextState, { overwrite: true })
+        return this._doSearch(nextState, {
+            overwrite: true,
+            rerenderHighlights: event.rerenderHighlights,
+        })
     }
 
     resetShareMenuNoteId: EventHandler<'resetShareMenuNoteId'> = ({}) => {

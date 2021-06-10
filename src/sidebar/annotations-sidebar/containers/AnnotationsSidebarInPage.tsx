@@ -63,11 +63,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         this.cleanupEventForwarding()
     }
 
-    componentDidUpdate(prevProps: Props) {
+    async componentDidUpdate(prevProps: Props) {
         const { pageUrl } = this.props
 
         if (pageUrl !== prevProps.pageUrl) {
-            this.processEvent('setPageUrl', { pageUrl })
+            await this.processEvent('setPageUrl', {
+                pageUrl,
+                rerenderHighlights: true,
+            })
         }
     }
 

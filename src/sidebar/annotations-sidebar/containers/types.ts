@@ -248,7 +248,7 @@ export type SidebarContainerEvents = UIEvent<
         copyNoteLink: { link: string }
         copyPageLink: { link: string }
 
-        setPageUrl: { pageUrl: string }
+        setPageUrl: { pageUrl: string; rerenderHighlights?: boolean }
 
         // Search
         paginateSearch: null
