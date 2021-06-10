@@ -1,4 +1,4 @@
-import * as firebase from 'firebase/app'
+import firebase from 'firebase/app'
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_MEMEX_API_KEY,

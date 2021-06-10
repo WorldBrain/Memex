@@ -62,6 +62,18 @@ export async function main() {
         getServerStorage,
     })
 
+    if (process.env.USE_FIREBASE_EMULATOR === 'true') {
+        const firebase = getFirebase()
+        firebase.firestore().settings({
+            host: 'localhost:8080',
+            ssl: false,
+        })
+        firebase.database().useEmulator('localhost', 9000)
+        firebase.firestore().useEmulator('localhost', 8080)
+        firebase.auth().useEmulator('http://localhost:9099/')
+        firebase.functions().useFunctionsEmulator('http://localhost:5001')
+    }
+
     const backgroundModules = createBackgroundModules({
         services,
         getServerStorage,
