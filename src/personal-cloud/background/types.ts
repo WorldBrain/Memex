@@ -11,5 +11,6 @@ export interface PushObjectAction {
 
 export interface PersonalCloudSettings {
     deviceId?: PersonalCloudDeviceID
+    lastSeen?: number
 }
 export type PersonalCloudDeviceID = number | string
