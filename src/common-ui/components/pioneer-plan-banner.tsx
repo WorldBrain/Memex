@@ -14,7 +14,7 @@ const PioneerPlanContainer = styled.div`
     background: #f0f0f0;
     border-radius: 3px;
     margin-bottom: 30px;
-    width: 780px;
+    width: ${(props) => props.width ?? '780px'};
 `
 const PioneerPlanContentBox = styled.div`
     display: flex;
@@ -43,19 +43,20 @@ const PioneerPlanLearnMoreButton = styled(SecondaryAction)``
 const PioneerPlanUpgradeButton = styled(PrimaryAction)``
 
 export interface Props {
+    width?: string
     upgradeUrl?: string
     moreInfoUrl?: string
     onHideClick?: React.MouseEventHandler
 }
 
 const PioneerPlanBanner = ({
-    onHideClick,
     moreInfoUrl = 'https://worldbrain.io/announcements/pioneer-plan',
     upgradeUrl = process.env.NODE_ENV === 'production'
         ? 'https://buy.stripe.com/4gw3fpg3i6i534IcMM'
         : 'https://buy.stripe.com/test_8wMdU4cm4frH4SY144',
+    ...props
 }: Props) => (
-    <PioneerPlanContainer>
+    <PioneerPlanContainer width={props.width}>
         <PioneerPlanContentBox>
             <PioneerPlanTitle>
                 Support Memex with the Pioneer Plan
@@ -74,12 +75,16 @@ const PioneerPlanBanner = ({
                 label="Upgrade"
                 onClick={() => window.open(upgradeUrl)}
             />
-            {onHideClick && (
+            {props.onHideClick && (
                 <ButtonTooltip
                     position="bottom"
                     tooltipText="Find this message again in your account settings."
                 >
-                    <Icon icon="removeX" height="12px" onClick={onHideClick} />
+                    <Icon
+                        icon="removeX"
+                        height="12px"
+                        onClick={props.onHideClick}
+                    />
                 </ButtonTooltip>
             )}
         </PioneerPlanButtonBox>
