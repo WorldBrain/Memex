@@ -151,7 +151,6 @@ export interface SidebarContainerState
 
     showCongratsMessage: boolean
     showClearFiltersBtn: boolean
-    isSocialPost: boolean
 
     // Filter sidebar props
     showFiltersSidebar: boolean
@@ -163,11 +162,9 @@ export interface SidebarContainerState
     shouldShowCount: boolean
     isInvalidSearch: boolean
     totalResultCount: number
-    allAnnotationsExpanded: boolean
     searchResultSkip: number
 
     isListFilterActive: boolean
-    isSocialSearch: boolean
     showLoginModal: boolean
     showAnnotationsShareModal: boolean
     showBetaFeatureNotifModal: boolean
@@ -190,7 +187,6 @@ export type SidebarContainerEvents = UIEvent<
 
         // Adding a new page comment
         addNewPageComment: { comment?: string; tags?: string[] }
-        setNewPageCommentAnchor: { anchor: Anchor }
         changeNewPageCommentText: { comment: string }
         cancelEdit: { annotationUrl: string }
         changeEditCommentText: { annotationUrl: string; comment: string }
@@ -253,7 +249,6 @@ export type SidebarContainerEvents = UIEvent<
         // Search
         paginateSearch: null
         setAnnotationsExpanded: { value: boolean }
-        toggleAllAnnotationsFold: null
         fetchSuggestedTags: null
         fetchSuggestedDomains: null
 

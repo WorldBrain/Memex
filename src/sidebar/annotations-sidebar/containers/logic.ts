@@ -159,8 +159,6 @@ export class SidebarContainerLogic extends UILogic<
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
 
-            allAnnotationsExpanded: false,
-            isSocialPost: false,
             annotations: [],
             activeAnnotationUrl: null,
 
@@ -177,7 +175,6 @@ export class SidebarContainerLogic extends UILogic<
             isInvalidSearch: false,
             totalResultCount: 0,
             isListFilterActive: false,
-            isSocialSearch: false,
             searchResultSkip: 0,
 
             showLoginModal: false,
@@ -190,18 +187,19 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        this.options.annotationsCache.annotationChanges.addListener(
+        const { annotationsCache, pageUrl } = this.options
+        annotationsCache.annotationChanges.addListener(
             'newState',
             this.annotationSubscription,
         )
 
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
-        this.annotationSubscription(this.options.annotationsCache.annotations)
+        this.annotationSubscription(annotationsCache.annotations)
 
         await loadInitial<SidebarContainerState>(this, async () => {
             // If `pageUrl` prop passed down, load search results on init, else just wait
-            if (this.options.pageUrl != null) {
-                await this._doSearch(previousState, { overwrite: true })
+            if (pageUrl != null) {
+                await annotationsCache.load(pageUrl)
             }
 
             await this.loadBeta()
@@ -348,30 +346,6 @@ export class SidebarContainerLogic extends UILogic<
         await this.options.copyToClipboard(link)
     }
 
-    private doSearch = debounce(this._doSearch, 300)
-
-    private async _doSearch(
-        state: SidebarContainerState,
-        opts: { overwrite: boolean; rerenderHighlights?: boolean },
-    ) {
-        const { annotationsCache, events } = this.options
-        await executeUITask(
-            this,
-            opts.overwrite ? 'primarySearchState' : 'secondarySearchState',
-            async () => {
-                if (opts.overwrite && state.pageUrl != null) {
-                    await annotationsCache.load(state.pageUrl)
-
-                    if (opts.rerenderHighlights) {
-                        events?.emit('renderHighlights', {
-                            highlights: annotationsCache.highlights,
-                        })
-                    }
-                }
-            },
-        )
-    }
-
     paginateSearch: EventHandler<'paginateSearch'> = async ({
         previousState,
     }) => {
@@ -387,10 +361,15 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
 
-        await this.doSearch(nextState, { overwrite: false })
+        // await this.doSearch(nextState, { overwrite: false })
     }
 
-    setPageUrl: EventHandler<'setPageUrl'> = ({ previousState, event }) => {
+    setPageUrl: EventHandler<'setPageUrl'> = async ({
+        previousState,
+        event,
+    }) => {
+        const { annotationsCache, events } = this.options
+
         if (!isFullUrl(event.pageUrl)) {
             throw new Error(
                 'Tried to set annotation sidebar with a normalized page URL',
@@ -401,21 +380,22 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        const mutation: UIMutation<SidebarContainerState> = {
+        this.emitMutation({
             followedLists: { $set: initNormalizedState() },
             followedListLoadState: { $set: 'pristine' },
             followedAnnotations: { $set: {} },
             pageUrl: { $set: event.pageUrl },
             displayMode: { $set: 'private-notes' },
             users: { $set: {} },
-        }
-        this.emitMutation(mutation)
-        const nextState = this.withMutation(previousState, mutation)
-
-        return this._doSearch(nextState, {
-            overwrite: true,
-            rerenderHighlights: event.rerenderHighlights,
         })
+
+        await annotationsCache.load(event.pageUrl)
+
+        if (event.rerenderHighlights) {
+            events?.emit('renderHighlights', {
+                highlights: annotationsCache.highlights,
+            })
+        }
     }
 
     resetShareMenuNoteId: EventHandler<'resetShareMenuNoteId'> = ({}) => {
@@ -529,15 +509,6 @@ export class SidebarContainerLogic extends UILogic<
 
         this.emitMutation(mutation)
         this.options.focusCreateForm()
-    }
-
-    // Unused since insta-saving new highlights
-    setNewPageCommentAnchor: EventHandler<'setNewPageCommentAnchor'> = (
-        incoming,
-    ) => {
-        this.emitMutation({
-            // commentBox: { anchor: { $set: incoming.event.anchor } },
-        })
     }
 
     cancelEdit: EventHandler<'cancelEdit'> = ({ event }) => {
@@ -1062,12 +1033,6 @@ export class SidebarContainerLogic extends UILogic<
                         }),
                 }),
         )
-    }
-
-    toggleAllAnnotationsFold: EventHandler<'toggleAllAnnotationsFold'> = (
-        incoming,
-    ) => {
-        return { allAnnotationsExpanded: { $apply: (value) => !value } }
     }
 
     setAnnotationShareModalShown: EventHandler<
