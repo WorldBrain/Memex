@@ -17,7 +17,7 @@ import {
     registerModuleMapCollections,
     StorageModule,
 } from '@worldbrain/storex-pattern-modules'
-import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
+import { firebaseService } from '@worldbrain/memex-common/lib/firebase-backend/services/client'
 import { setupBlacklistRemoteFunctions } from 'src/blacklist/background'
 import {
     setImportStateManager,
@@ -70,11 +70,16 @@ import {
     PersonalDeviceProduct,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { PersonalCloudBackground } from 'src/personal-cloud/background'
-import { PersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import {
+    PersonalCloudBackend,
+    PersonalCloudService,
+} from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { NullPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/null'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { PersonalCloudSettings } from 'src/personal-cloud/background/types'
 import { authChanges } from 'src/authentication/background/utils'
+import FirestorePersonalCloudBackend from 'src/personal-cloud/background/backend/firestore'
+import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -386,6 +391,11 @@ export function createBackgroundModules(options: {
               }).processor
             : undefined
 
+    const personalCloudSettingStore = new BrowserSettingsStore<
+        PersonalCloudSettings
+    >(options.browserAPIs.storage.local, {
+        prefix: 'personalCloud.',
+    })
     return {
         auth,
         social,
@@ -499,7 +509,29 @@ export function createBackgroundModules(options: {
         personalCloud: new PersonalCloudBackground({
             storageManager,
             backend:
-                options.personalCloudBackend ?? new NullPersonalCloudBackend(),
+                options.personalCloudBackend ??
+                new FirestorePersonalCloudBackend({
+                    personalCloudService: firebaseService<PersonalCloudService>(
+                        'personalCloud',
+                        options.callFirebaseFunction,
+                    ),
+                    getCurrentSchemaVersion: () =>
+                        getCurrentSchemaVersion(options.storageManager),
+                    userChanges: () => authChanges(auth.authService),
+                    getUserChangesReference: async () => {
+                        const currentUser = await auth.authService.getCurrentUser()
+                        if (!currentUser) {
+                            return null
+                        }
+                        const firebase = getFirebase()
+                        const firestore = firebase.firestore()
+                        return firestore
+                            .collection('personalDataChange')
+                            .doc(currentUser.id)
+                            .collection('objects')
+                    },
+                    settingStore: personalCloudSettingStore,
+                }),
             createDeviceId: async (userId) => {
                 const serverStorage = await options.getServerStorage()
                 const device = await serverStorage.storageModules.personalCloud.createDeviceInfo(
@@ -515,12 +547,7 @@ export function createBackgroundModules(options: {
                 )
                 return device.id
             },
-            settingStore: new BrowserSettingsStore<PersonalCloudSettings>(
-                options.browserAPIs.storage.local,
-                {
-                    prefix: 'personalCloud.',
-                },
-            ),
+            settingStore: personalCloudSettingStore,
             getUserId: async () =>
                 (await auth.authService.getCurrentUser()).id ?? null,
             userIdChanges: () => authChanges(auth.authService),

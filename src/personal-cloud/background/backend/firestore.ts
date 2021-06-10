@@ -17,8 +17,8 @@ export default class FirestorePersonalCloudBackend
             getCurrentSchemaVersion: () => Date
             personalCloudService: PersonalCloudService
             userChanges: () => AsyncIterableIterator<void>
-            getUserChangesReference: () => firestore.CollectionReference | null
-            settings: SettingStore<PersonalCloudSettings>
+            getUserChangesReference: () => Promise<firestore.CollectionReference | null>
+            settingStore: SettingStore<PersonalCloudSettings>
         },
     ) {}
 
@@ -46,8 +46,8 @@ export default class FirestorePersonalCloudBackend
             )
 
             addedResolvable = createResolvable()
-            lastSeen = (await this.options.settings.get('lastSeen')) ?? 0
-            const changesReference = this.options.getUserChangesReference()
+            lastSeen = (await this.options.settingStore.get('lastSeen')) ?? 0
+            const changesReference = await this.options.getUserChangesReference()
             if (!changesReference) {
                 cleanup = async () => {}
                 return
@@ -88,7 +88,7 @@ export default class FirestorePersonalCloudBackend
                     )
                     yield result.batch
                     lastSeen = result.lastSeen
-                    await this.options.settings.set('lastSeen', lastSeen)
+                    await this.options.settingStore.set('lastSeen', lastSeen)
                 }
             }
         }
