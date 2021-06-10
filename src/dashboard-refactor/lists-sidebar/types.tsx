@@ -18,7 +18,7 @@ export interface ListData {
     id: number
     name: string
     remoteId?: string
-    isJoinedList?: boolean
+    isOwnedList?: boolean
     wasPageDropped?: boolean
 }
 

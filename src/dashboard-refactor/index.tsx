@@ -120,12 +120,12 @@ export class DashboardContainer extends StatefulUIElement<
             listName: listData.name,
             localListId: listData.id,
             sharingAccess: searchResults.sharingAccess,
-            onAddContributorsClick: listData.isJoinedList
-                ? undefined
-                : () =>
+            onAddContributorsClick: listData.isOwnedList
+                ? () =>
                       this.processEvent('setShareListId', {
                           listId: listData.id,
-                      }),
+                      })
+                : undefined,
         }
     }
 
@@ -184,7 +184,7 @@ export class DashboardContainer extends StatefulUIElement<
                 },
                 onMoreActionClick:
                     source !== 'followed-lists' &&
-                    !listsSidebar.listData[listId].isJoinedList
+                    listsSidebar.listData[listId].isOwnedList
                         ? () =>
                               this.processEvent('setShowMoreMenuListId', {
                                   listId: listsSidebar.listData[listId].id,
