@@ -179,19 +179,24 @@ export class HighlightRenderer implements HighlightRendererInterface {
             pageTitle: title,
         } as Annotation
 
-        await params.annotationsCache.create({
-            ...annotation,
-            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-        })
-        this.renderHighlight(annotation, ({ openInEdit, annotationUrl }) => {
-            params.inPageUI.showSidebar({
-                annotationUrl,
-                action:
-                    params.options?.clickToEdit || openInEdit
-                        ? 'edit_annotation'
-                        : 'show_annotation',
-            })
-        })
+        await Promise.all([
+            params.annotationsCache.create({
+                ...annotation,
+                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            }),
+            this.renderHighlight(
+                annotation,
+                ({ openInEdit, annotationUrl }) => {
+                    params.inPageUI.showSidebar({
+                        annotationUrl,
+                        action:
+                            params.options?.clickToEdit || openInEdit
+                                ? 'edit_annotation'
+                                : 'show_annotation',
+                    })
+                },
+            ),
+        ])
 
         return annotation
     }
