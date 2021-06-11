@@ -18,7 +18,8 @@ const StyledPrimaryAction = styled.div`
     justify-content: center;
     align-items: center;
     vertical-align: middle;
-    background: ${(props) => props.disabled ? colorDisabled : props.theme.colors.purple};
+    background: ${(props) =>
+        props.disabled ? colorDisabled : props.theme.colors.purple};
 
     box-sizing: border-box;
     border-radius: 5px;
@@ -44,7 +45,7 @@ export const PrimaryAction = ({
     innerRef,
 }: {
     label: React.ReactNode
-    onClick: () => void
+    onClick: React.MouseEventHandler
     disabled?: boolean
     innerRef?: any
 }) => (
@@ -54,7 +55,7 @@ export const PrimaryAction = ({
         onClick={disabled === true ? undefined : onClick}
         disabled={disabled}
         ref={innerRef}
-        onKeyPress={(e) => (e.key === 'Enter' ? onClick() : false)}
+        onKeyPress={(e) => (e.key === 'Enter' ? onClick(e) : false)}
     >
         <StyledPrimaryActionLinkText>{label}</StyledPrimaryActionLinkText>
     </StyledPrimaryAction>

@@ -46,7 +46,7 @@ export const SecondaryAction = ({
 }: {
     label: React.ReactNode
     disabled?: boolean
-    onClick: () => void
+    onClick: React.MouseEventHandler
 }) => (
     <StyledSecondaryAction
         onClick={disabled === true ? undefined : onClick}
