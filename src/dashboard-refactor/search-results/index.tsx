@@ -54,6 +54,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import ListShareMenu from 'src/overview/sharing/ListShareMenu'
 import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
+import CloudUpgradeBanner from 'src/common-ui/components/cloud-upgrade-banner'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -506,10 +507,16 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     render() {
         return (
             <ResultsContainer bottom="100px">
+                {this.props.isCloudUpgradeBannerShown && (
+                    <CloudUpgradeBanner
+                        onGetStartedClick={() => console.log('get started!')}
+                        width="fill-available"
+                    />
+                )}
                 {this.props.isSubscriptionBannerShown && (
                     <PioneerPlanBanner
                         onHideClick={this.props.onDismissSubscriptionBanner}
-                        width='fill-available'
+                        width="fill-available"
                     />
                 )}
                 {this.props.selectedListId != null && (

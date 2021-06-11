@@ -18,6 +18,8 @@ import ToggleSwitch from '../../common-ui/components/ToggleSwitch'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import type { SearchEngineName, ResultItemProps } from '../types'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
+import CloudUpgradeBanner from 'src/common-ui/components/cloud-upgrade-banner'
+import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import { STORAGE_KEYS as DASHBOARD_STORAGE_KEYS } from 'src/dashboard-refactor/constants'
 
 export interface Props {
@@ -28,6 +30,7 @@ export interface Props {
 }
 
 interface State {
+    isCloudUpgradeBannerShown: boolean
     isSubscriptionBannerShown: boolean
     hideResults: boolean
     dropdown: boolean
@@ -63,6 +66,7 @@ class Container extends React.Component<Props, State> {
     }
 
     state: State = {
+        isCloudUpgradeBannerShown: false,
         isSubscriptionBannerShown: false,
         hideResults: true,
         dropdown: false,
@@ -92,6 +96,9 @@ class Container extends React.Component<Props, State> {
         const subBannerDismissed = await getLocalStorage(
             DASHBOARD_STORAGE_KEYS.subBannerDismissed,
         )
+        const isCloudEnabled = await getLocalStorage(
+            CLOUD_STORAGE_KEYS.isEnabled,
+        )
 
         let fetchNotif
         if (notification) {
@@ -103,6 +110,7 @@ class Container extends React.Component<Props, State> {
             position,
             isNotif: fetchNotif && !fetchNotif.readTime,
             notification,
+            isCloudUpgradeBannerShown: !isCloudEnabled,
             isSubscriptionBannerShown: !subBannerDismissed,
         })
     }
@@ -330,11 +338,18 @@ class Container extends React.Component<Props, State> {
 
         return (
             <>
+                {this.state.isCloudUpgradeBannerShown && (
+                    <CloudUpgradeBanner
+                        onGetStartedClick={() => console.log('hi')}
+                        direction="column"
+                        width="415px"
+                    />
+                )}
                 {this.state.isSubscriptionBannerShown && (
                     <PioneerPlanBanner
                         onHideClick={this.handleSubBannerDismiss}
+                        direction="column"
                         width="415px"
-                        direction='column'
                     />
                 )}
                 <Results

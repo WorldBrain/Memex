@@ -1,6 +1,7 @@
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest } from './logic.test.util'
 import { STORAGE_KEYS } from './constants'
+import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 
 describe('Dashboard Refactor misc logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -77,6 +78,7 @@ describe('Dashboard Refactor misc logic', () => {
         } = await setupTest(device)
 
         await logicA['options'].localStorage.set({
+            [CLOUD_STORAGE_KEYS.isEnabled]: false,
             [STORAGE_KEYS.listSidebarLocked]: false,
             [STORAGE_KEYS.subBannerDismissed]: false,
         })
@@ -85,10 +87,16 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsA.state.searchResults.isSubscriptionBannerShown,
         ).toBe(false)
+        expect(
+            searchResultsA.state.searchResults.isCloudUpgradeBannerShown,
+        ).toBe(false)
         await searchResultsA.processEvent('init', null)
         expect(searchResultsA.state.listsSidebar.isSidebarLocked).toBe(false)
         expect(
             searchResultsA.state.searchResults.isSubscriptionBannerShown,
+        ).toBe(true)
+        expect(
+            searchResultsA.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(true)
 
         const {
@@ -97,6 +105,7 @@ describe('Dashboard Refactor misc logic', () => {
         } = await setupTest(device)
 
         await logicB['options'].localStorage.set({
+            [CLOUD_STORAGE_KEYS.isEnabled]: true,
             [STORAGE_KEYS.listSidebarLocked]: true,
             [STORAGE_KEYS.subBannerDismissed]: true,
         })
@@ -105,10 +114,16 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsB.state.searchResults.isSubscriptionBannerShown,
         ).toBe(false)
+        expect(
+            searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
+        ).toBe(false)
         await searchResultsB.processEvent('init', null)
         expect(searchResultsB.state.listsSidebar.isSidebarLocked).toBe(true)
         expect(
             searchResultsB.state.searchResults.isSubscriptionBannerShown,
+        ).toBe(false)
+        expect(
+            searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(false)
     })
 

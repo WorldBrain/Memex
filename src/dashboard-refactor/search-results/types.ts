@@ -169,6 +169,7 @@ export interface RootState {
     isListShareMenuShown: boolean
     shouldFormsAutoFocus: boolean
     isSearchCopyPasterShown: boolean
+    isCloudUpgradeBannerShown: boolean
     isSubscriptionBannerShown: boolean
 
     /** Holds page data specific to each page occurrence on a specific day. */

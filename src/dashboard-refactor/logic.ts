@@ -15,6 +15,7 @@ import {
     PAGE_SEARCH_DUMMY_DAY,
     NON_UNIQ_LIST_NAME_ERR_MSG,
 } from 'src/dashboard-refactor/constants'
+import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import { ListData } from './lists-sidebar/types'
 import { updatePickerValues, stateToSearchParams } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
@@ -90,6 +91,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 shouldFormsAutoFocus: false,
                 isListShareMenuShown: false,
                 isSearchCopyPasterShown: false,
+                isCloudUpgradeBannerShown: false,
                 isSubscriptionBannerShown: false,
                 pageData: {
                     allIds: [],
@@ -187,11 +189,13 @@ export class DashboardLogic extends UILogic<State, Events> {
             [STORAGE_KEYS.subBannerDismissed]: subBannerDismissed,
             [STORAGE_KEYS.listSidebarLocked]: listsSidebarLocked,
             [STORAGE_KEYS.onboardingMsgSeen]: onboardingMsgSeen,
+            [CLOUD_STORAGE_KEYS.isEnabled]: isCloudEnabled,
             [STORAGE_KEYS.mobileAdSeen]: mobileAdSeen,
         } = await this.options.localStorage.get([
             STORAGE_KEYS.subBannerDismissed,
             STORAGE_KEYS.listSidebarLocked,
             STORAGE_KEYS.onboardingMsgSeen,
+            CLOUD_STORAGE_KEYS.isEnabled,
             STORAGE_KEYS.mobileAdSeen,
         ])
 
@@ -199,6 +203,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             searchResults: {
                 showMobileAppAd: { $set: !mobileAdSeen },
                 showOnboardingMsg: { $set: !onboardingMsgSeen },
+                isCloudUpgradeBannerShown: { $set: !isCloudEnabled },
                 isSubscriptionBannerShown: { $set: !subBannerDismissed },
             },
             listsSidebar: {
