@@ -47,6 +47,15 @@ export const LOCAL_TEST_DATA_V24 = {
             scrollPerc: 50,
             scrollPx: 250,
         },
+        second: {
+            url: LOCAL_PAGES_V24.second.url,
+            time: 5545,
+            duration: 174,
+            scrollMaxPerc: 70,
+            scrollMaxPx: 320,
+            scrollPerc: 30,
+            scrollPx: 130,
+        },
     },
     tags: {
         first: {
