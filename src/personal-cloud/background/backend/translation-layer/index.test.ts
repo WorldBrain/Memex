@@ -362,7 +362,7 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
-                    [DataChangeType.Create, 'personalContentRead', testReads.first.id], // TODO: Why is this here?
+                    [DataChangeType.Create, 'personalContentRead', testReads.first.id],
                 ], { skip: 4 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
@@ -413,8 +413,8 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
-                    [DataChangeType.Create, 'personalContentRead', testReads.first.id],
-                ], { skip: 4 }),
+                    [DataChangeType.Modify, 'personalContentRead', testReads.first.id],
+                ], { skip: 5 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalContentRead: [testReads.first],
@@ -425,7 +425,7 @@ describe('Personal cloud translation layer', () => {
                     ...LOCAL_TEST_DATA_V24.visits.first,
                     duration: updatedDuration,
                  } },
-            ], { skip: 2 })
+            ], { skip: 3 })
         })
 
         it('should delete vists', async () => {
@@ -464,16 +464,17 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
-                    [DataChangeType.Create, 'personalContentRead', testReads.first.id],
-                ], { skip: 4 }),
+                    [DataChangeType.Delete, 'personalContentRead', testReads.first.id],
+                    [DataChangeType.Delete, 'personalContentRead', testReads.second.id],
+                ], { skip: 6 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
-                personalContentRead: [testReads.first],
+                personalContentRead: [],
             })
             // prettier-ignore
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'visits', where: { } }
-            ], { skip: 2 })
+            ], { skip: 4 })
         })
 
         it('should create page tags', async () => {
