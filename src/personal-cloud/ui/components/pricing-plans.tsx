@@ -11,10 +11,13 @@ export interface Props {
     onTier1PlanClick: React.MouseEventHandler
     onTier2PlanClick: React.MouseEventHandler
     onTier3PlanClick: React.MouseEventHandler
-    setTier2PaymentPeriod: (period: PaymentPeriod) => () => void
+    setTier2PaymentPeriod: (period: PaymentPeriod) => void
 }
 
 export default class CloudPricingPlans extends React.PureComponent<Props> {
+    private bindSetTier2PaymentPeriod = (period: PaymentPeriod) => () =>
+        this.props.setTier2PaymentPeriod(period)
+
     private renderTier1Plan() {
         const { userType, onTier1PlanClick } = this.props
 
@@ -61,7 +64,7 @@ export default class CloudPricingPlans extends React.PureComponent<Props> {
     }
 
     render() {
-        const { tier2PaymentPeriod, setTier2PaymentPeriod } = this.props
+        const { tier2PaymentPeriod } = this.props
         return (
             <Container>
                 {this.renderTier1Plan()}
@@ -70,14 +73,14 @@ export default class CloudPricingPlans extends React.PureComponent<Props> {
                     <PlanDetails>Everything in 'Explorer' plus...</PlanDetails>
                     <PricingBox>
                         <PricingOption
-                            onClick={setTier2PaymentPeriod('monthly')}
+                            onClick={this.bindSetTier2PaymentPeriod('monthly')}
                             selected={tier2PaymentPeriod === 'monthly'}
                         >
                             <PricingOptionTitle>$8</PricingOptionTitle>
                             <PricingOptionSubtext>/ month</PricingOptionSubtext>
                         </PricingOption>
                         <PricingOption
-                            onClick={setTier2PaymentPeriod('yearly')}
+                            onClick={this.bindSetTier2PaymentPeriod('yearly')}
                             selected={tier2PaymentPeriod === 'yearly'}
                         >
                             <PricingOptionTitle>$88</PricingOptionTitle>
