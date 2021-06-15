@@ -7,9 +7,11 @@ import CloudOnboardingModalLogic from './logic'
 import type { Dependencies, State, Event } from './types'
 import { PlanTier } from './types'
 import CloudPricingPlans from '../components/pricing-plans'
+import DataMigrator from '../components/data-migrator'
+import DataDumper from '../components/data-dumper'
 
 export interface Props extends Dependencies {
-    onModalClose: () => void
+    supportLink: string
 }
 
 export default class CloudOnboardingModal extends UIElement<
@@ -17,6 +19,10 @@ export default class CloudOnboardingModal extends UIElement<
     State,
     Event
 > {
+    static defaultProps: Pick<Props, 'supportLink'> = {
+        supportLink: 'mailto:support@worldbrain.io',
+    }
+
     constructor(props: Props) {
         super(props, { logic: new CloudOnboardingModalLogic(props) })
     }
@@ -24,12 +30,9 @@ export default class CloudOnboardingModal extends UIElement<
     private selectPlan = (tier: PlanTier) => () =>
         this.processEvent('selectPlan', { tier })
 
-    render() {
-        return (
-            <Overlay
-                services={this.props.services}
-                onCloseRequested={this.props.onModalClose}
-            >
+    private renderModalContent() {
+        if (this.state.stage === 'pick-plan') {
+            return (
                 <CloudPricingPlans
                     userType={
                         this.state.currentUser != null ? 'existing' : 'new'
@@ -42,6 +45,59 @@ export default class CloudOnboardingModal extends UIElement<
                         this.processEvent('setTier2PaymentPeriod', { period })
                     }
                 />
+            )
+        }
+        if (this.state.stage === 'data-dump') {
+            return (
+                <DataDumper
+                    supportLink={this.props.supportLink}
+                    backupState={this.state.backupState}
+                    dataCleaningState={this.state.dataCleaningState}
+                    onBackupClick={() =>
+                        this.processEvent('startDataDump', null)
+                    }
+                    onRetryBackupClick={() =>
+                        this.processEvent('retryDataDump', null)
+                    }
+                    onCancelBackupClick={() =>
+                        this.processEvent('cancelDataDump', null)
+                    }
+                    onContinueClick={() =>
+                        this.processEvent('continueToMigration', null)
+                    }
+                    onRetryCleanClick={() =>
+                        this.processEvent('retryDataClean', null)
+                    }
+                    onCancelCleanClick={() =>
+                        this.processEvent('cancelDataClean', null)
+                    }
+                />
+            )
+        }
+        return (
+            <DataMigrator
+                supportLink={this.props.supportLink}
+                migrationState={this.state.migrationState}
+                onRetryMigrationClick={() =>
+                    this.processEvent('retryDataMigration', null)
+                }
+                onCancelMigrationClick={() =>
+                    this.processEvent('cancelDataMigration', null)
+                }
+                onFinishMigrationClick={() =>
+                    this.processEvent('finishMigration', null)
+                }
+            />
+        )
+    }
+
+    render() {
+        return (
+            <Overlay
+                services={this.props.services}
+                onCloseRequested={this.props.onModalClose}
+            >
+                {this.renderModalContent()}
             </Overlay>
         )
     }

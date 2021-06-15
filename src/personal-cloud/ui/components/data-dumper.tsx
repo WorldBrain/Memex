@@ -8,7 +8,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { Container, BtnBox, Header, Text } from './shared-components'
 
 export interface Props {
-    supportLink?: string
+    supportLink: string
     backupState: UITaskState
     dataCleaningState: UITaskState
     onBackupClick: React.MouseEventHandler
@@ -20,12 +20,31 @@ export interface Props {
 }
 
 export default class DataDumper extends React.PureComponent<Props> {
-    static defaultProps: Pick<Props, 'supportLink'> = {
-        supportLink: 'mailto:support@worldbrain.io',
-    }
-
     private renderBtns() {
         const { backupState, dataCleaningState, supportLink } = this.props
+        if (dataCleaningState === 'running') {
+            return (
+                <SecondaryAction
+                    label="Cancel"
+                    onClick={this.props.onCancelCleanClick}
+                />
+            )
+        }
+        if (dataCleaningState === 'error') {
+            return (
+                <>
+                    <SecondaryAction
+                        label="Cancel"
+                        onClick={this.props.onCancelCleanClick}
+                    />
+                    <PrimaryAction
+                        label="Retry"
+                        onClick={this.props.onRetryCleanClick}
+                    />
+                </>
+            )
+        }
+
         if (backupState === 'pristine') {
             return (
                 <>
@@ -63,6 +82,16 @@ export default class DataDumper extends React.PureComponent<Props> {
             )
         }
 
+        return (
+            <PrimaryAction
+                label="Continue Migration"
+                onClick={this.props.onContinueClick}
+            />
+        )
+    }
+
+    private renderContent() {
+        const { backupState, dataCleaningState, supportLink } = this.props
         if (dataCleaningState === 'running') {
             return (
                 <>
@@ -88,16 +117,6 @@ export default class DataDumper extends React.PureComponent<Props> {
             )
         }
 
-        return (
-            <PrimaryAction
-                label="Continue Migration"
-                onClick={this.props.onContinueClick}
-            />
-        )
-    }
-
-    private renderContent() {
-        const { backupState, dataCleaningState, supportLink } = this.props
         if (backupState === 'pristine') {
             return (
                 <>
@@ -142,29 +161,6 @@ export default class DataDumper extends React.PureComponent<Props> {
                         <a href={supportLink}>Contact support</a> if problem
                         persists.
                     </Text>
-                </>
-            )
-        }
-
-        if (dataCleaningState === 'running') {
-            return (
-                <SecondaryAction
-                    label="Cancel"
-                    onClick={this.props.onCancelCleanClick}
-                />
-            )
-        }
-        if (dataCleaningState === 'error') {
-            return (
-                <>
-                    <SecondaryAction
-                        label="Cancel"
-                        onClick={this.props.onCancelCleanClick}
-                    />
-                    <PrimaryAction
-                        label="Retry"
-                        onClick={this.props.onRetryCleanClick}
-                    />
                 </>
             )
         }

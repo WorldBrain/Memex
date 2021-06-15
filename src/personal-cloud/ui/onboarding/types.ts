@@ -14,15 +14,35 @@ export enum PlanTier {
 export interface Dependencies {
     services: Pick<UIServices, 'overlay' | 'device' | 'logicRegistry'>
     authBG: AuthRemoteFunctionsInterface
+    onModalClose: () => void
 }
 
 export interface State {
     loadState: UITaskState
+    backupState: UITaskState
+    migrationState: UITaskState
+    dataCleaningState: UITaskState
+
+    stage: 'pick-plan' | 'data-dump' | 'data-migration'
     currentUser: AuthenticatedUser | null
     tier2PaymentPeriod: PaymentPeriod
+    needsToRemovePassiveData: boolean
 }
 
 export interface Event {
     setTier2PaymentPeriod: { period: PaymentPeriod }
     selectPlan: { tier: PlanTier }
+
+    startDataDump: null
+    retryDataDump: null
+    cancelDataDump: null
+
+    retryDataClean: null
+    cancelDataClean: null
+
+    retryDataMigration: null
+    cancelDataMigration: null
+
+    finishMigration: null
+    continueToMigration: null
 }

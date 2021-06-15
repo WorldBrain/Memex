@@ -8,7 +8,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { Container, BtnBox, Header, Text } from './shared-components'
 
 export interface Props {
-    supportLink?: string
+    supportLink: string
     migrationState: UITaskState
     onRetryMigrationClick: React.MouseEventHandler
     onCancelMigrationClick: React.MouseEventHandler
@@ -16,10 +16,6 @@ export interface Props {
 }
 
 export default class DataMigrator extends React.PureComponent<Props> {
-    static defaultProps: Pick<Props, 'supportLink'> = {
-        supportLink: 'mailto:support@worldbrain.io',
-    }
-
     private renderBtns() {
         const { migrationState } = this.props
         if (migrationState === 'running') {
