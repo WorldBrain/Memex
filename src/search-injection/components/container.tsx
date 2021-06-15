@@ -18,7 +18,7 @@ import ToggleSwitch from '../../common-ui/components/ToggleSwitch'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import type { SearchEngineName, ResultItemProps } from '../types'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
-import CloudUpgradeBanner from 'src/common-ui/components/cloud-upgrade-banner'
+import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import { STORAGE_KEYS as DASHBOARD_STORAGE_KEYS } from 'src/dashboard-refactor/constants'
 

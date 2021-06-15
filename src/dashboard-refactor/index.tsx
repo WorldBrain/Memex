@@ -45,6 +45,7 @@ import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/t
 import type { Props as ListDetailsProps } from './search-results/components/list-details'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
+import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
 
 export interface Props extends DashboardDependencies {
     renderDashboardSwitcherLink: () => JSX.Element
@@ -505,6 +506,11 @@ export class DashboardContainer extends StatefulUIElement<
                 onDismissSubscriptionBanner={() =>
                     this.processEvent('dismissSubscriptionBanner', null)
                 }
+                showCloudOnboardingModal={() =>
+                    this.processEvent('setShowCloudOnboardingModal', {
+                        isShown: true,
+                    })
+                }
                 noResultsType={searchResults.noResultsType}
                 filterSearchByTag={(tag) =>
                     this.processEvent('addIncludedTag', { tag })
@@ -883,6 +889,20 @@ export class DashboardContainer extends StatefulUIElement<
                     }
                     onClose={() =>
                         this.processEvent('setShowBetaFeatureModal', {
+                            isShown: false,
+                        })
+                    }
+                />
+            )
+        }
+
+        if (modalsState.showCloudOnboarding) {
+            return (
+                <CloudOnboardingModal
+                    services={this.props.services}
+                    authBG={this.props.authBG}
+                    onModalClose={() =>
+                        this.processEvent('setShowCloudOnboardingModal', {
                             isShown: false,
                         })
                     }

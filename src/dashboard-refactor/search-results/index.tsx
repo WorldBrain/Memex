@@ -54,7 +54,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import ListShareMenu from 'src/overview/sharing/ListShareMenu'
 import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
-import CloudUpgradeBanner from 'src/common-ui/components/cloud-upgrade-banner'
+import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -77,6 +77,7 @@ export type Props = RootState &
         noResultsType: NoResultsType
         onDismissMobileAd: React.MouseEventHandler
         onDismissOnboardingMsg: React.MouseEventHandler
+        showCloudOnboardingModal: React.MouseEventHandler
         onDismissSubscriptionBanner: React.MouseEventHandler
         filterSearchByTag: (tag: string) => void
         openListShareModal: () => void
@@ -509,7 +510,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             <ResultsContainer bottom="100px">
                 {this.props.isCloudUpgradeBannerShown && (
                     <CloudUpgradeBanner
-                        onGetStartedClick={() => console.log('get started!')}
+                        onGetStartedClick={this.props.showCloudOnboardingModal}
                         width="fill-available"
                     />
                 )}
