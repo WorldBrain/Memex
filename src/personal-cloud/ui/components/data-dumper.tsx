@@ -10,8 +10,11 @@ import { Container, BtnBox, Header, Text } from './shared-components'
 export interface Props {
     supportLink?: string
     backupState: UITaskState
+    dataCleaningState: UITaskState
     onBackupClick: React.MouseEventHandler
     onContinueClick: React.MouseEventHandler
+    onRetryCleanClick: React.MouseEventHandler
+    onCancelCleanClick: React.MouseEventHandler
     onRetryBackupClick: React.MouseEventHandler
     onCancelBackupClick: React.MouseEventHandler
 }
@@ -22,7 +25,7 @@ export default class DataDumper extends React.PureComponent<Props> {
     }
 
     private renderBtns() {
-        const { backupState } = this.props
+        const { backupState, dataCleaningState, supportLink } = this.props
         if (backupState === 'pristine') {
             return (
                 <>
@@ -59,6 +62,32 @@ export default class DataDumper extends React.PureComponent<Props> {
                 </>
             )
         }
+
+        if (dataCleaningState === 'running') {
+            return (
+                <>
+                    <LoadingIndicator />
+                    <Header>Preparing Migration: Cleaning Old Data</Header>
+                    <Text>
+                        This may take a couple of minutes. You can't use Memex
+                        in the meantime.
+                    </Text>
+                </>
+            )
+        }
+        if (dataCleaningState === 'error') {
+            return (
+                <>
+                    <Icon icon="alertRound" height="20px" />
+                    <Header>There was an error with cleaning your data</Header>
+                    <Text>
+                        <a href={supportLink}>Contact support</a> if problem
+                        persists.
+                    </Text>
+                </>
+            )
+        }
+
         return (
             <PrimaryAction
                 label="Continue Migration"
@@ -68,7 +97,7 @@ export default class DataDumper extends React.PureComponent<Props> {
     }
 
     private renderContent() {
-        const { backupState, supportLink } = this.props
+        const { backupState, dataCleaningState, supportLink } = this.props
         if (backupState === 'pristine') {
             return (
                 <>
@@ -116,6 +145,30 @@ export default class DataDumper extends React.PureComponent<Props> {
                 </>
             )
         }
+
+        if (dataCleaningState === 'running') {
+            return (
+                <SecondaryAction
+                    label="Cancel"
+                    onClick={this.props.onCancelCleanClick}
+                />
+            )
+        }
+        if (dataCleaningState === 'error') {
+            return (
+                <>
+                    <SecondaryAction
+                        label="Cancel"
+                        onClick={this.props.onCancelCleanClick}
+                    />
+                    <PrimaryAction
+                        label="Retry"
+                        onClick={this.props.onRetryCleanClick}
+                    />
+                </>
+            )
+        }
+
         return (
             <>
                 <Icon icon="checkRound" height="20px" />
