@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import type { PaymentPeriod } from '../types'
@@ -53,7 +54,16 @@ export default class CloudPricingPlans extends React.PureComponent<Props> {
                         </>
                     ) : (
                         <SecondaryAction
-                            label="You're on this plan"
+                            label={
+                                <BtnLabelWrapper>
+                                    <Icon
+                                        icon="checkRound"
+                                        height="17px"
+                                        color="purple"
+                                    />{' '}
+                                    You're on this plan
+                                </BtnLabelWrapper>
+                            }
                             onClick={() => undefined}
                             disabled
                         />
@@ -75,6 +85,7 @@ export default class CloudPricingPlans extends React.PureComponent<Props> {
                         <PricingOption
                             onClick={this.bindSetTier2PaymentPeriod('monthly')}
                             selected={tier2PaymentPeriod === 'monthly'}
+                            clickable
                         >
                             <PricingOptionTitle>$8</PricingOptionTitle>
                             <PricingOptionSubtext>/ month</PricingOptionSubtext>
@@ -82,6 +93,7 @@ export default class CloudPricingPlans extends React.PureComponent<Props> {
                         <PricingOption
                             onClick={this.bindSetTier2PaymentPeriod('yearly')}
                             selected={tier2PaymentPeriod === 'yearly'}
+                            clickable
                         >
                             <PricingOptionTitle>$88</PricingOptionTitle>
                             <PricingOptionSubtext>/ year</PricingOptionSubtext>
@@ -132,6 +144,7 @@ const Container = styled.div`
 const PlanColumn = styled.div`
     display: flex;
     flex-direction: column;
+    align-items: center;
 `
 
 const PlanHeading = styled.h1``
@@ -143,7 +156,16 @@ const PricingBox = styled.div`
     justify-content: space-between;
 `
 
-const PricingOption = styled.div<{ naked?: boolean; selected?: boolean }>`
+const PricingOption = styled.div<{
+    naked?: boolean
+    selected?: boolean
+    clickable?: boolean
+}>`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: ${(props) => (props.selected ? '#F0F0F0' : 'white')};
+    cursor: ${(props) => (props.clickable ? 'pointer' : 'default')};
     padding: 10px;
 `
 
@@ -159,4 +181,13 @@ const PlanBtnBox = styled.div``
 
 const PlanBtnSubtext = styled.span`
     font-size: 0.7em;
+`
+
+const BtnLabelWrapper = styled.span`
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: relative;
+    min-width: 110%;
+    left: -5%;
 `
