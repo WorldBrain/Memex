@@ -36,6 +36,7 @@ import {
     createServerStorageManager,
 } from './storage/server'
 import { createServices } from './services'
+import { captureException } from 'src/util/raven'
 
 export async function main() {
     setupRpcConnection({ sideName: 'background', role: 'background' })
@@ -70,6 +71,7 @@ export async function main() {
         localStorageChangesManager,
         fetchPageDataProcessor,
         browserAPIs: browser,
+        captureException,
         storageManager,
         getIceServers: async () => {
             const firebase = await getFirebase()

@@ -80,6 +80,7 @@ export default class ContentSharingBackground {
             activityStreams: Pick<ActivityStreamsBackground, 'backend'>
             userMessages: UserMessageService
             services: Pick<Services, 'contentSharing'>
+            captureException?: (e: Error) => void
             getServerStorage: () => Promise<
                 Pick<ServerStorageModules, 'contentSharing'>
             >
@@ -588,6 +589,21 @@ export default class ContentSharingBackground {
         await this._processingUserMessage
     }
 
+    private cleanupScheduledActionsRetry() {
+        if (this._scheduledRetry) {
+            delete this._scheduledRetry
+            clearTimeout(this._scheduledRetryTimeout)
+            delete this._scheduledRetryTimeout
+        }
+    }
+
+    private cleanupPendingActionsRetry() {
+        if (this._pendingActionsRetry) {
+            this._pendingActionsRetry.resolve()
+            delete this._pendingActionsRetry
+        }
+    }
+
     async scheduleAction(
         action: ContentSharingAction,
         options: {
@@ -607,6 +623,10 @@ export default class ContentSharingBackground {
         this._queingAction.resolve()
         delete this._queingAction
 
+        if (options.queueInteraction === 'queue-only') {
+            return
+        }
+
         const executePendingActions = this.executePendingActions()
         if (options.queueInteraction === 'queue-and-await') {
             await executePendingActions
@@ -622,46 +642,55 @@ export default class ContentSharingBackground {
     executePendingActions = async () => {
         await this._executingPendingActions
 
-        const executingPendingActions = (this._executingPendingActions = createResolvable())
-        if (this._pendingActionsRetry) {
-            this._pendingActionsRetry.resolve()
-            delete this._pendingActionsRetry
-        }
+        this._executingPendingActions = createResolvable()
+        this.cleanupPendingActionsRetry()
+        this.cleanupScheduledActionsRetry()
 
-        try {
-            while (true) {
-                await this._queingAction
+        let erroredActions: ContentSharingAction[] = []
+        while (true) {
+            await this._queingAction
 
-                const action = await this.storage.peekAction()
-                if (!action) {
-                    break
-                }
+            const action = await this.storage.peekAction()
+            if (!action) {
+                break
+            }
 
+            try {
                 await this.executeAction(action)
+            } catch (e) {
+                erroredActions.push(action)
+                this.options.captureException?.(e)
+            } finally {
                 await this.storage.removeAction({ actionId: action.id })
             }
-            this._hasPendingActions = false
-            executingPendingActions.resolve({ result: 'success' })
-        } catch (e) {
+        }
+
+        if (erroredActions.length > 0) {
             this._pendingActionsRetry = createResolvable()
-            executingPendingActions.resolve({ result: 'error' })
             this._scheduledRetry = async () => {
-                delete this._scheduledRetry
-                delete this._scheduledRetryTimeout
+                this.cleanupScheduledActionsRetry()
                 await this.executePendingActions()
             }
             this._scheduledRetryTimeout = setTimeout(
                 this._scheduledRetry,
                 this.ACTION_RETRY_INTERVAL,
             )
-            throw e
-        } finally {
-            delete this._executingPendingActions
+            await Promise.all(
+                erroredActions.map((action) =>
+                    this.storage.queueAction({ action, id: action['id'] }),
+                ),
+            )
+            this._executingPendingActions.resolve({ result: 'error' })
+        } else {
+            this._executingPendingActions.resolve({ result: 'success' })
         }
+
+        this._hasPendingActions = false
+        delete this._executingPendingActions
     }
 
     async forcePendingActionsRetry() {
-        await this._scheduledRetry()
+        await this._scheduledRetry?.()
     }
 
     async executeAction(action: ContentSharingAction) {

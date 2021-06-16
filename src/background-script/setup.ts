@@ -61,6 +61,7 @@ import pick from 'lodash/pick'
 import ActivityIndicatorBackground from 'src/activity-indicator/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
 import { Services } from 'src/services/types'
+import { captureException } from 'src/util/raven'
 import { PDFBackground } from 'src/pdf/background'
 import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
 import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
@@ -118,6 +119,7 @@ export function createBackgroundModules(options: {
     tabManager?: TabManager
     auth?: AuthBackground
     analyticsManager: Analytics
+    captureException?: typeof captureException
     userMessageService?: UserMessageService
     disableSyncEnryption?: boolean
     getIceServers?: () => Promise<string[]>
@@ -303,6 +305,7 @@ export function createBackgroundModules(options: {
         userMessages,
         getServerStorage,
         services: options.services,
+        captureException: options.captureException,
     })
 
     const readwise = new ReadwiseBackground({
