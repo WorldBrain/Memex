@@ -1,4 +1,3 @@
-import * as firebaseTesting from '@firebase/testing'
 import { getFirebase } from 'src/util/firebase-app-initialized'
 import 'firebase/database'
 import 'firebase/firestore'
@@ -159,6 +158,8 @@ export function createLazyTestServerStorage(options?: {
     changeWatchSettings?: Omit<ChangeWatchMiddlewareSettings, 'storageManager'>
 }) {
     if (process.env.TEST_SERVER_STORAGE === 'firebase-emulator') {
+        const firebaseTesting = require('@firebase/testing')
+
         return createLazyServerStorage(
             async () => {
                 const userId = options?.withTestUser

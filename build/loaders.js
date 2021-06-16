@@ -124,6 +124,11 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
         use: [urlLoader],
     }
 
+    const ignoreLoader = {
+        test: /@firebase\/testing/,
+        use: 'null-loader',
+    }
+
     if (mode !== 'production' && !isCI) {
         main.use = [threadLoader, ...main.use]
     }
@@ -136,8 +141,16 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
     }
 
     if (isCI) {
-        return [main, imgLoader, cssModules, cssVanilla]
+        return [main, ignoreLoader, imgLoader, cssModules, cssVanilla]
     }
 
-    return [main, imgLoader, lint, cssModules, cssVanilla, stringReplaceLoader]
+    return [
+        main,
+        ignoreLoader,
+        imgLoader,
+        lint,
+        cssModules,
+        cssVanilla,
+        stringReplaceLoader,
+    ]
 }

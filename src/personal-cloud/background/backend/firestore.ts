@@ -1,6 +1,6 @@
 import debounce from 'lodash/debounce'
 import createResolvable from '@josephg/resolvable'
-import { firestore } from 'firebase'
+import firebase from 'firebase/app'
 import {
     PersonalCloudBackend,
     PersonalCloudService,
@@ -17,7 +17,7 @@ export default class FirestorePersonalCloudBackend
             getCurrentSchemaVersion: () => Date
             personalCloudService: PersonalCloudService
             userChanges: () => AsyncIterableIterator<void>
-            getUserChangesReference: () => Promise<firestore.CollectionReference | null>
+            getUserChangesReference: () => Promise<firebase.firestore.CollectionReference | null>
             settingStore: SettingStore<PersonalCloudSettings>
         },
     ) {}
