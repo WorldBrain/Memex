@@ -417,7 +417,11 @@ describe('Personal cloud translation layer', () => {
                 ], { skip: 5 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
-                personalContentRead: [testReads.first],
+                personalContentRead: [{
+                    ...testReads.first,
+                    updatedWhen: expect.any(Number),
+                    readDuration: updatedDuration,
+                }],
             })
             // prettier-ignore
             await testDownload([
