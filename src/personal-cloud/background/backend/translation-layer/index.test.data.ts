@@ -35,8 +35,33 @@ const LOCAL_PAGES_V24 = {
     },
 }
 
+const LOCAL_ANNOTATIONS_V24 = {
+    first: {
+        url: LOCAL_PAGES_V24.first.url + '#111111111',
+        pageUrl: LOCAL_PAGES_V24.first.url,
+        pageTitle: LOCAL_PAGES_V24.first.fullTitle,
+        body: 'This is a test highlight',
+        comment: 'This is a test comment',
+        createdWhen: new Date('2020-10-10'),
+        updatedWhen: new Date('2020-10-10'),
+        selector: {
+            quote: 'This is a test highlight',
+            descriptor: { strategy: 'hyp-anchoring', content: [] },
+        },
+    },
+    second: {
+        url: LOCAL_PAGES_V24.first.url + '#111111112',
+        pageUrl: LOCAL_PAGES_V24.first.url,
+        pageTitle: LOCAL_PAGES_V24.first.fullTitle,
+        comment: 'This is another test comment',
+        createdWhen: new Date('2020-10-11'),
+        updatedWhen: new Date('2020-10-20'),
+    },
+}
+
 export const LOCAL_TEST_DATA_V24 = {
     pages: LOCAL_PAGES_V24,
+    annotations: LOCAL_ANNOTATIONS_V24,
     visits: {
         first: {
             url: LOCAL_PAGES_V24.first.url,
@@ -47,11 +72,24 @@ export const LOCAL_TEST_DATA_V24 = {
             scrollPerc: 50,
             scrollPx: 250,
         },
+        second: {
+            url: LOCAL_PAGES_V24.second.url,
+            time: 5545,
+            duration: 174,
+            scrollMaxPerc: 70,
+            scrollMaxPx: 320,
+            scrollPerc: 30,
+            scrollPx: 130,
+        },
     },
     tags: {
         first: {
             url: LOCAL_PAGES_V24.first.url,
             name: 'foo-tag',
+        },
+        second: {
+            url: LOCAL_ANNOTATIONS_V24.first.url,
+            name: 'note-tag-1',
         },
     },
 }
@@ -162,6 +200,20 @@ export const REMOTE_TEST_DATA_V24 = {
             // pageProgress: null,
             // durationTotal: null,
             // durationProgress: null,
+        },
+        second: {
+            id: 2,
+            createdWhen: 560,
+            updatedWhen: 560,
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            personalContentMetadata: REMOTE_METADATA_V24.first.id,
+            personalContentLocator: REMOTE_LOCATORS_V24.first.id,
+            readWhen: LOCAL_TEST_DATA_V24.visits.second.time,
+            readDuration: LOCAL_TEST_DATA_V24.visits.second.duration,
+            progressPercentage: LOCAL_TEST_DATA_V24.visits.second.scrollPerc,
+            scrollTotal: LOCAL_TEST_DATA_V24.visits.second.scrollMaxPx,
+            scrollProgress: LOCAL_TEST_DATA_V24.visits.second.scrollPx,
         },
     },
     personalTag: REMOTE_TAGS_V24,

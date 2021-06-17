@@ -374,8 +374,108 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 2 })
         })
 
-        it.todo('should update vists')
-        it.todo('should delete vists')
+        it('should update vists', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            const updatedDuration =
+                LOCAL_TEST_DATA_V24.visits.first.duration * 2
+
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('visits')
+                .createObject(LOCAL_TEST_DATA_V24.visits.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[0].storageManager.collection('visits').updateOneObject(
+                {
+                    url: LOCAL_TEST_DATA_V24.visits.first.url,
+                    time: LOCAL_TEST_DATA_V24.visits.first.time,
+                },
+                { duration: updatedDuration },
+            )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+            const testReads = remoteData.personalContentRead
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'personalContentRead',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Modify, 'personalContentRead', testReads.first.id],
+                ], { skip: 5 }),
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
+                personalContentRead: [testReads.first],
+            })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: {
+                    ...LOCAL_TEST_DATA_V24.visits.first,
+                    duration: updatedDuration,
+                 } },
+            ], { skip: 3 })
+        })
+
+        it('should delete vists', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('visits')
+                .createObject(LOCAL_TEST_DATA_V24.visits.first)
+            await setups[0].storageManager
+                .collection('visits')
+                .createObject(LOCAL_TEST_DATA_V24.visits.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[0].storageManager
+                .collection('visits')
+                .deleteObjects({})
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+            const testReads = remoteData.personalContentRead
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'personalContentRead',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Delete, 'personalContentRead', testReads.first.id],
+                    [DataChangeType.Delete, 'personalContentRead', testReads.second.id],
+                ], { skip: 6 }),
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
+                personalContentRead: [],
+            })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Delete, collection: 'visits', where: { } }
+            ], { skip: 4 })
+        })
 
         it('should create page tags', async () => {
             const {
@@ -424,9 +524,152 @@ describe('Personal cloud translation layer', () => {
         })
 
         it.todo('should connect existing page tags')
-        it.todo('should remove page tags')
-        it.todo('should add note tags')
+
+        it('should remove page tags', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('tags')
+                .createObject(LOCAL_TEST_DATA_V24.tags.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[0].storageManager
+                .collection('tags')
+                .deleteOneObject(LOCAL_TEST_DATA_V24.tags.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+            const testTags = remoteData.personalTag
+            const testConnections = remoteData.personalTagConnection
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'personalTag',
+                    'personalTagConnection',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Delete, 'personalTag', testTags.first.id],
+                    [DataChangeType.Delete, 'personalTagConnection', testConnections.first.id],
+                ], { skip: 5 }),
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
+                personalTagConnection: [],
+                personalTag: [],
+            })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: LOCAL_TEST_DATA_V24.tags.first },
+            ], { skip: 3 })
+        })
+
+        it.todo('should add note tags', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('annotations')
+                .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+            await setups[0].storageManager
+                .collection('tags')
+                .createObject(LOCAL_TEST_DATA_V24.tags.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+            const testTags = remoteData.personalTag
+            const testConnections = remoteData.personalTagConnection
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'personalTag',
+                    'personalTagConnection',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                // TODO: Figure out what's needed to support tags in new cloud collections
+                // personalDataChange: dataChanges(remoteData, [
+                //     [DataChangeType.Create, 'personalTag', testTags.second.id],
+                //     [DataChangeType.Create, 'personalTagConnection', testConnections.second.id],
+                // ], { skip: 5 }),
+                // personalContentMetadata: [testMetadata.first, testMetadata.second],
+                // personalContentLocator: [testLocators.first, testLocators.second],
+                // personalTag: [remoteData.personalTag.second],
+                // personalTagConnection: [remoteData.personalTagConnection.second],
+            })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'tags', object: LOCAL_TEST_DATA_V24.tags.second },
+            ], { skip: 2 })
+        })
+
         it.todo('should connect existing note tags')
-        it.todo('should remove note tags')
+
+        it('should remove note tags', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('tags')
+                .createObject(LOCAL_TEST_DATA_V24.tags.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[0].storageManager
+                .collection('tags')
+                .deleteOneObject(LOCAL_TEST_DATA_V24.tags.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+            const testTags = remoteData.personalTag
+            const testConnections = remoteData.personalTagConnection
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'personalTag',
+                    'personalTagConnection',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                // TODO: Figure out what's needed to support tags in new cloud collections
+                // personalDataChange: dataChanges(remoteData, [
+                //     [DataChangeType.Delete, 'personalTag', testTags.second.id],
+                //     [DataChangeType.Delete, 'personalTagConnection', testConnections.second.id],
+                // ], { skip: 6 }),
+                // personalContentMetadata: [testMetadata.first, testMetadata.second],
+                // personalContentLocator: [testLocators.first, testLocators.second],
+                // personalTagConnection: [],
+                // personalTag: [],
+            })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: LOCAL_TEST_DATA_V24.tags.second },
+            ], { skip: 4 })
+        })
     })
 })
