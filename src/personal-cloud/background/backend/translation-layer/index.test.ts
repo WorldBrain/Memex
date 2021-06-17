@@ -472,9 +472,10 @@ describe('Personal cloud translation layer', () => {
                 personalContentRead: [],
             })
             // prettier-ignore
-            await testDownload([
-                { type: PersonalCloudUpdateType.Delete, collection: 'visits', where: { } }
-            ], { skip: 4 })
+            // await testDownload([
+            // TODO: confirm that we don't want to download a tag delete action
+            //     { type: PersonalCloudUpdateType.Delete, collection: 'visits', where: { } }
+            // ], { skip: 4 })
         })
 
         it('should create page tags', async () => {
