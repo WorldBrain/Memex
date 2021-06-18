@@ -598,7 +598,7 @@ describe('Personal cloud translation layer', () => {
             // ], { skip: 0 })
         })
 
-        it.todo('should add note tags', async () => {
+        it('should add note tags', async () => {
             const {
                 setups,
                 serverIdCapturer,
@@ -619,6 +619,7 @@ describe('Personal cloud translation layer', () => {
             const testLocators = remoteData.personalContentLocator
             const testTags = remoteData.personalTag
             const testConnections = remoteData.personalTagConnection
+            const testAnnotations = remoteData.personalAnnotation
 
             // prettier-ignore
             expect(
@@ -630,20 +631,20 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                // TODO: Figure out what's needed to support tags in new cloud collections
-                // personalDataChange: dataChanges(remoteData, [
-                //     [DataChangeType.Create, 'personalTag', testTags.second.id],
-                //     [DataChangeType.Create, 'personalTagConnection', testConnections.second.id],
-                // ], { skip: 5 }),
-                // personalContentMetadata: [testMetadata.first, testMetadata.second],
-                // personalContentLocator: [testLocators.first, testLocators.second],
-                // personalTag: [remoteData.personalTag.second],
-                // personalTagConnection: [remoteData.personalTagConnection.second],
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
+                    [DataChangeType.Create, 'personalTag', testTags.second.id],
+                    [DataChangeType.Create, 'personalTagConnection', testConnections.second.id],
+                ], { skip: 4 }),
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
+                personalTagConnection: [remoteData.personalTagConnection.second],
+                personalTag: [remoteData.personalTag.second],
             })
             // prettier-ignore
             await testDownload([
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'tags', object: LOCAL_TEST_DATA_V24.tags.second },
-            ], { skip: 2 })
+            ], { skip: 5 })
         })
 
         it.todo('should connect existing note tags')

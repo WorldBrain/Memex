@@ -1,4 +1,5 @@
-import StorageManager from '@worldbrain/storex'
+import type StorageManager from '@worldbrain/storex'
+import { extractIdFromAnnotationUrl } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
 export async function insertTestPages(storageManager: StorageManager) {
@@ -167,6 +168,39 @@ const REMOTE_LOCATORS_V24 = {
     },
 }
 
+const REMOTE_ANNOTATIONS_V24 = {
+    first: {
+        id: 1,
+        personalContentMetadata: REMOTE_METADATA_V24.first.id,
+        localId: extractIdFromAnnotationUrl(
+            LOCAL_TEST_DATA_V24.annotations.first.url,
+        ),
+        body: LOCAL_TEST_DATA_V24.annotations.first.body,
+        comment: LOCAL_TEST_DATA_V24.annotations.first.comment,
+        createdWhen: LOCAL_TEST_DATA_V24.annotations.first.createdWhen.getTime(),
+        updatedWhen: LOCAL_TEST_DATA_V24.annotations.first.createdWhen.getTime(),
+    },
+    second: {
+        id: 2,
+        personalContentMetadata: REMOTE_METADATA_V24.first.id,
+        localId: extractIdFromAnnotationUrl(
+            LOCAL_TEST_DATA_V24.annotations.second.url,
+        ),
+        comment: LOCAL_TEST_DATA_V24.annotations.second.comment,
+        createdWhen: LOCAL_TEST_DATA_V24.annotations.second.createdWhen.getTime(),
+        updatedWhen: LOCAL_TEST_DATA_V24.annotations.second.createdWhen.getTime(),
+    },
+}
+
+const REMOTE_ANNOTATION_SELECTORS_V24 = {
+    first: {
+        personalAnnotation: REMOTE_ANNOTATIONS_V24.first.id,
+        selector: {
+            ...LOCAL_TEST_DATA_V24.annotations.first.selector,
+        },
+    },
+}
+
 const REMOTE_TAGS_V24 = {
     first: {
         id: 1,
@@ -174,7 +208,15 @@ const REMOTE_TAGS_V24 = {
         createdWhen: 559,
         updatedWhen: 559,
         user: TEST_USER.id,
-        name: 'foo-tag',
+        name: LOCAL_TEST_DATA_V24.tags.first.name,
+    },
+    second: {
+        id: 2,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        createdWhen: 560,
+        updatedWhen: 560,
+        user: TEST_USER.id,
+        name: LOCAL_TEST_DATA_V24.tags.second.name,
     },
 }
 
@@ -228,5 +270,17 @@ export const REMOTE_TEST_DATA_V24 = {
             personalTag: REMOTE_TAGS_V24.first.id,
             user: TEST_USER.id,
         },
+        second: {
+            id: 2,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            createdWhen: 560,
+            updatedWhen: 560,
+            collection: 'personalAnnotation',
+            objectId: REMOTE_ANNOTATIONS_V24.first.id,
+            personalTag: REMOTE_TAGS_V24.second.id,
+            user: TEST_USER.id,
+        },
     },
+    personalAnnotation: REMOTE_ANNOTATIONS_V24,
+    personalAnnotationSelector: REMOTE_ANNOTATION_SELECTORS_V24,
 }
