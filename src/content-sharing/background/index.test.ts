@@ -11,6 +11,7 @@ import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import * as data from './index.test.data'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { SHARE_RETRY_LIMIT } from './constants'
 
 function convertRemoteId(id: string) {
     return parseInt(id, 10)
@@ -442,6 +443,131 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
+            `should forget a share action after reaching the retry limit`,
+            { skipConflictTests: true },
+            () => {
+                const testData: TestData = {}
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const {
+                                    contentSharing,
+                                    shareTestList,
+                                } = await setupTest({
+                                    setup,
+                                    testData,
+                                    createTestList: true,
+                                })
+                                const remoteListId = await shareTestList(
+                                    testData.localListId,
+                                    {
+                                        shareEntries: false,
+                                    },
+                                )
+
+                                const serverStorage = await setup.getServerStorage()
+                                const sharingStorage =
+                                    serverStorage.storageModules.contentSharing
+
+                                sinon.replace(
+                                    sharingStorage,
+                                    'createListEntries',
+                                    async () => {
+                                        throw Error(
+                                            `There's a monkey in your WiFi`,
+                                        )
+                                    },
+                                )
+                                let error: Error
+                                contentSharing['options'].captureException = (
+                                    e,
+                                ) => {
+                                    error = e
+                                }
+
+                                await contentSharing.shareListEntries({
+                                    listId: testData.localListId,
+                                    queueInteraction: 'queue-only',
+                                })
+
+                                expect(error).toBeUndefined()
+                                expect(
+                                    contentSharing._scheduledRetry,
+                                ).toBeUndefined()
+
+                                for (
+                                    let retryCount = 1;
+                                    retryCount <= SHARE_RETRY_LIMIT;
+                                    retryCount++
+                                ) {
+                                    await contentSharing.executePendingActions()
+                                    expect(error?.message).toEqual(
+                                        `There's a monkey in your WiFi`,
+                                    )
+                                    expect(
+                                        contentSharing._scheduledRetry,
+                                    ).not.toBeUndefined()
+                                    expect(
+                                        await contentSharing.storage.peekAction(),
+                                    ).toEqual({
+                                        id: expect.any(Number),
+                                        type: 'add-shared-list-entries',
+                                        localListId: testData.localListId,
+                                        remoteListId,
+                                        retryCount,
+                                        data: [
+                                            {
+                                                createdWhen: expect.any(Number),
+                                                entryTitle:
+                                                    data.PAGE_2_DATA.pageDoc
+                                                        .content.title,
+                                                normalizedUrl: normalizeUrl(
+                                                    data.PAGE_2_DATA.pageDoc
+                                                        .url,
+                                                ),
+                                                originalUrl:
+                                                    data.PAGE_2_DATA.pageDoc
+                                                        .url,
+                                            },
+                                            {
+                                                createdWhen: expect.any(Number),
+                                                entryTitle:
+                                                    data.PAGE_1_DATA.pageDoc
+                                                        .content.title,
+                                                normalizedUrl: normalizeUrl(
+                                                    data.PAGE_1_DATA.pageDoc
+                                                        .url,
+                                                ),
+                                                originalUrl:
+                                                    data.PAGE_1_DATA.pageDoc
+                                                        .url,
+                                            },
+                                        ],
+                                    })
+                                    error = undefined
+                                }
+
+                                // Perform it one last time, which should result in the action being forgotten
+                                await contentSharing.executePendingActions()
+                                expect(error).toBeUndefined()
+                                expect(
+                                    contentSharing._scheduledRetry,
+                                ).toBeUndefined()
+                                expect(
+                                    await contentSharing.storage.peekAction(),
+                                ).toBeNull()
+
+                                sinon.restore()
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
             `should allow subsequent pending share actions to occur if earlier one fails`,
             { skipConflictTests: true },
             () => {
@@ -595,6 +721,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 )
                                 await contentSharing.waitForSync()
+                                await contentSharing.executePendingActions()
 
                                 expect(contentSharing._scheduledRetry).not.toBe(
                                     undefined,
