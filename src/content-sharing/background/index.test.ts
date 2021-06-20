@@ -514,38 +514,44 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         await contentSharing.storage.peekAction(),
                                     ).toEqual({
                                         id: expect.any(Number),
-                                        type: 'add-shared-list-entries',
-                                        localListId: testData.localListId,
-                                        remoteListId,
-                                        retryCount,
-                                        data: [
-                                            {
-                                                createdWhen: expect.any(Number),
-                                                entryTitle:
-                                                    data.PAGE_2_DATA.pageDoc
-                                                        .content.title,
-                                                normalizedUrl: normalizeUrl(
-                                                    data.PAGE_2_DATA.pageDoc
-                                                        .url,
-                                                ),
-                                                originalUrl:
-                                                    data.PAGE_2_DATA.pageDoc
-                                                        .url,
-                                            },
-                                            {
-                                                createdWhen: expect.any(Number),
-                                                entryTitle:
-                                                    data.PAGE_1_DATA.pageDoc
-                                                        .content.title,
-                                                normalizedUrl: normalizeUrl(
-                                                    data.PAGE_1_DATA.pageDoc
-                                                        .url,
-                                                ),
-                                                originalUrl:
-                                                    data.PAGE_1_DATA.pageDoc
-                                                        .url,
-                                            },
-                                        ],
+                                        action: {
+                                            type: 'add-shared-list-entries',
+                                            localListId: testData.localListId,
+                                            remoteListId,
+                                            retryCount,
+                                            data: [
+                                                {
+                                                    createdWhen: expect.any(
+                                                        Number,
+                                                    ),
+                                                    entryTitle:
+                                                        data.PAGE_2_DATA.pageDoc
+                                                            .content.title,
+                                                    normalizedUrl: normalizeUrl(
+                                                        data.PAGE_2_DATA.pageDoc
+                                                            .url,
+                                                    ),
+                                                    originalUrl:
+                                                        data.PAGE_2_DATA.pageDoc
+                                                            .url,
+                                                },
+                                                {
+                                                    createdWhen: expect.any(
+                                                        Number,
+                                                    ),
+                                                    entryTitle:
+                                                        data.PAGE_1_DATA.pageDoc
+                                                            .content.title,
+                                                    normalizedUrl: normalizeUrl(
+                                                        data.PAGE_1_DATA.pageDoc
+                                                            .url,
+                                                    ),
+                                                    originalUrl:
+                                                        data.PAGE_1_DATA.pageDoc
+                                                            .url,
+                                                },
+                                            ],
+                                        },
                                     })
                                     error = undefined
                                 }

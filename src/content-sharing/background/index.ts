@@ -642,17 +642,23 @@ export default class ContentSharingBackground {
     }
 
     executePendingActions = async () => {
-        await this._executingPendingActions
+        if (this._executingPendingActions) {
+            return await this._executingPendingActions
+        }
 
         this._executingPendingActions = createResolvable()
         this.cleanupPendingActionsRetry()
         this.cleanupScheduledActionsRetry()
 
-        let erroredActions: StoredContentSharingAction[] = []
+        let erroredActions: {
+            action: StoredContentSharingAction
+            id: number
+        }[] = []
         while (true) {
             await this._queingAction
 
-            const action = await this.storage.peekAction()
+            const { action, id: actionId } =
+                (await this.storage.peekAction()) ?? {}
             if (!action) {
                 break
             }
@@ -662,10 +668,10 @@ export default class ContentSharingBackground {
                     await this.executeAction(action)
                 }
             } catch (e) {
-                erroredActions.push(action)
+                erroredActions.push({ action, id: actionId })
                 this.options.captureException?.(e)
             } finally {
-                await this.storage.removeAction({ actionId: action.id })
+                await this.storage.removeAction({ actionId })
             }
         }
 
@@ -680,9 +686,9 @@ export default class ContentSharingBackground {
                 this.ACTION_RETRY_INTERVAL,
             )
             await Promise.all(
-                erroredActions.map((action) =>
+                erroredActions.map(({ action, id }) =>
                     this.storage.queueAction({
-                        id: action['id'],
+                        id,
                         action: {
                             ...action,
                             retryCount: action.retryCount + 1,
