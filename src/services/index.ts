@@ -11,6 +11,7 @@ import { subscriptionRedirect } from 'src/authentication/background/redirect'
 import { ServerStorage } from 'src/storage/types'
 import { Services } from './types'
 import ContentSharingService from './content-sharing'
+import ContentConversationsService from './content-conversations'
 
 export async function createServices(options: {
     backend: 'firebase' | 'memory'
@@ -25,6 +26,12 @@ export async function createServices(options: {
             auth,
             contentSharing: new ContentSharingService({
                 storage: { contentSharing: storageModules.contentSharing },
+            }),
+            contentConversations: new ContentConversationsService({
+                services: { auth },
+                storage: {
+                    contentConversations: storageModules.contentConversations,
+                },
             }),
             subscriptions: new MemorySubscriptionsService(),
             activityStreams: new MemoryStreamsService({
@@ -47,6 +54,12 @@ export async function createServices(options: {
         auth: authDeps.authService,
         contentSharing: new ContentSharingService({
             storage: { contentSharing: storageModules.contentSharing },
+        }),
+        contentConversations: new ContentConversationsService({
+            services: { auth: authDeps.authService },
+            storage: {
+                contentConversations: storageModules.contentConversations,
+            },
         }),
         subscriptions: authDeps.subscriptionService,
         activityStreams: new FirebaseFunctionsActivityStreamsService({

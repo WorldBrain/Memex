@@ -48,12 +48,8 @@ function renderFailMessage(errorId: string) {
         </React.Fragment>
     ) : (
         <div className={settingsStyle.infoText}>
-            Please check whether you have enough space in your{' '}
-            <a href="https://drive.google.com">Google Drive</a>. Backup failed
-            as the size of the data to be uploaded was greater than the
-            remaining upload space available in your Google Drive. Clear some
-            space on the drive in order to successfully back up your data. If
-            you still encounter issues please{' '}
+            There has been an issue with your backup process. <br />
+            Try again, and if the problem persists, please{' '}
             <a href="mailto:support@worldbrain.io">contact support</a>.
         </div>
     )

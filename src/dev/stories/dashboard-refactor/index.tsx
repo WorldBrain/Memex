@@ -44,6 +44,8 @@ async function createDependencies(): Promise<DashboardProps> {
         ) as any,
         searchBG: backgroundModules.search.remoteFunctions.search,
         contentShareBG: backgroundModules.contentSharing.remoteFunctions,
+        contentConversationsBG:
+            backgroundModules.contentConversations.remoteFunctions,
         activityIndicatorBG:
             backgroundModules.activityIndicator.remoteFunctions,
         openFeed: () => undefined,

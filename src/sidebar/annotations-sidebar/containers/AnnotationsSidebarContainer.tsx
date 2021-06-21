@@ -7,12 +7,15 @@ import AnnotationsSidebar, {
 } from '../components/AnnotationsSidebar'
 import {
     SidebarContainerLogic,
-    SidebarContainerState,
-    SidebarContainerEvents,
     SidebarContainerOptions,
-    AnnotationEventContext,
     INIT_FORM_STATE,
 } from './logic'
+import type {
+    SidebarContainerState,
+    SidebarContainerEvents,
+    AnnotationEventContext,
+    SidebarDisplayMode,
+} from './types'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import { Annotation } from 'src/annotations/types'
@@ -31,6 +34,10 @@ import analytics from 'src/analytics'
 import { SortingDropdownMenuBtn } from '../components/SortingDropdownMenu'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
+import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { sidebarNotesTypeToString } from '../utils'
+import { getListShareUrl } from 'src/content-sharing/utils'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -106,7 +113,9 @@ export class AnnotationsSidebarContainer<
 
     protected bindAnnotationFooterEventProps(
         annotation: Annotation,
-    ): AnnotationFooterEventProps {
+    ): AnnotationFooterEventProps & {
+        onGoToAnnotation?: React.MouseEventHandler
+    } {
         return {
             onEditIconClick: () =>
                 this.processEvent('setAnnotationEditMode', {
@@ -292,7 +301,7 @@ export class AnnotationsSidebarContainer<
 
         return (
             <ShareMenuWrapper>
-                <HoverBox>
+                <HoverBox width="320px">
                     <SingleNoteShareMenu
                         shareImmediately={this.state.immediatelyShareNotes}
                         contentSharingBG={this.props.contentSharing}
@@ -465,32 +474,72 @@ export class AnnotationsSidebarContainer<
                                     </CloseBtn>
                                 </ButtonTooltip>
                             ))}
-                    </TopBarActionBtns>
-                    <TopBarActionBtns>
-                        <SortingDropdownMenuBtn
-                            onMenuItemClick={({ sortingFn }) =>
-                                this.processEvent('sortAnnotations', {
-                                    sortingFn,
+                        <DropdownMenuBtn
+                            onMenuItemClick={(item) =>
+                                this.processEvent('setDisplayMode', {
+                                    mode: item.id as SidebarDisplayMode,
                                 })
                             }
+                            btnChildren={
+                                <NoteTypesWrapper>
+                                    <NotesTypeName>
+                                        {sidebarNotesTypeToString(
+                                            this.state.displayMode,
+                                        )}{' '}
+                                    </NotesTypeName>
+                                    <Icon icon="triangle" height="8px" />
+                                </NoteTypesWrapper>
+                            }
+                            menuItems={[
+                                {
+                                    id: 'private-notes',
+                                    name: sidebarNotesTypeToString(
+                                        'private-notes',
+                                    ),
+                                    info: 'The notes you made on this page',
+                                },
+                                {
+                                    id: 'shared-notes',
+                                    name: sidebarNotesTypeToString(
+                                        'shared-notes',
+                                    ),
+                                    info:
+                                        'Notes from collections you follow or shared',
+                                },
+                            ]}
                         />
-                        <ButtonTooltip
-                            tooltipText="Copy All Notes"
-                            position="bottomSidebar"
-                        >
-                            <ActionBtn onClick={this.handleCopyAllNotesClick}>
-                                <ActionIcon src={icons.copy} />
-                            </ActionBtn>
-                        </ButtonTooltip>
-                        <ButtonTooltip
-                            tooltipText="Share All Notes"
-                            position="bottomRightEdge"
-                        >
-                            <ActionBtn onClick={this.handleShareAllNotesClick}>
-                                <ActionIcon src={icons.shareEmpty} />
-                            </ActionBtn>
-                        </ButtonTooltip>
                     </TopBarActionBtns>
+                    {this.state.displayMode === 'private-notes' && (
+                        <TopBarActionBtns>
+                            <SortingDropdownMenuBtn
+                                onMenuItemClick={({ sortingFn }) =>
+                                    this.processEvent('sortAnnotations', {
+                                        sortingFn,
+                                    })
+                                }
+                            />
+                            <ButtonTooltip
+                                tooltipText="Copy All Notes"
+                                position="bottomSidebar"
+                            >
+                                <ActionBtn
+                                    onClick={this.handleCopyAllNotesClick}
+                                >
+                                    <ActionIcon src={icons.copy} />
+                                </ActionBtn>
+                            </ButtonTooltip>
+                            <ButtonTooltip
+                                tooltipText="Share All Notes"
+                                position="bottomRightEdge"
+                            >
+                                <ActionBtn
+                                    onClick={this.handleShareAllNotesClick}
+                                >
+                                    <ActionIcon src={icons.shareEmpty} />
+                                </ActionBtn>
+                            </ButtonTooltip>
+                        </TopBarActionBtns>
+                    )}
                 </TopBarContainerStyled>
                 {this.renderAllNotesCopyPaster()}
                 {this.renderAllNotesShareMenu()}
@@ -511,6 +560,12 @@ export class AnnotationsSidebarContainer<
                     <AnnotationsSidebar
                         {...this.state}
                         ref={(ref) => (this.sidebarRef = ref)}
+                        openCollectionPage={(remoteListId) =>
+                            window.open(
+                                getListShareUrl({ remoteListId }),
+                                '_blank',
+                            )
+                        }
                         sharingAccess={this.state.annotationSharingAccess}
                         needsWaypoint={!this.state.noResults}
                         appendLoader={
@@ -525,11 +580,11 @@ export class AnnotationsSidebarContainer<
                             })}
                         isAnnotationCreateShown={this.state.showCommentBox}
                         annotationCreateProps={this.getCreateProps()}
-                        bindAnnotationFooterEventProps={(url) =>
-                            this.bindAnnotationFooterEventProps(url)
+                        bindAnnotationFooterEventProps={(annot) =>
+                            this.bindAnnotationFooterEventProps(annot)
                         }
-                        bindAnnotationEditProps={(url) =>
-                            this.bindAnnotationEditProps(url)
+                        bindAnnotationEditProps={(annot) =>
+                            this.bindAnnotationEditProps(annot)
                         }
                         handleScrollPagination={() =>
                             this.processEvent('paginateSearch', null)
@@ -549,6 +604,41 @@ export class AnnotationsSidebarContainer<
                         renderTagsPickerForAnnotation={
                             this.renderTagPickerForAnnotation
                         }
+                        expandFollowedListNotes={(listId) =>
+                            this.processEvent('expandFollowedListNotes', {
+                                listId,
+                            })
+                        }
+                        bindSharedAnnotationEventHandlers={(
+                            annotationReference,
+                        ) => ({
+                            onReplyBtnClick: () =>
+                                this.processEvent('toggleAnnotationReplies', {
+                                    annotationReference,
+                                }),
+                            onNewReplyInitiate: () =>
+                                this.processEvent(
+                                    'initiateNewReplyToAnnotation',
+                                    {
+                                        annotationReference,
+                                    },
+                                ),
+                            onNewReplyCancel: () =>
+                                this.processEvent(
+                                    'cancelNewReplyToAnnotation',
+                                    { annotationReference },
+                                ),
+                            onNewReplyConfirm: () =>
+                                this.processEvent(
+                                    'confirmNewReplyToAnnotation',
+                                    { annotationReference },
+                                ),
+                            onNewReplyEdit: ({ content }) =>
+                                this.processEvent('editNewReplyToAnnotation', {
+                                    annotationReference,
+                                    content,
+                                }),
+                        })}
                     />
                 </ContainerStyled>
                 {this.renderModals()}
@@ -556,6 +646,12 @@ export class AnnotationsSidebarContainer<
         )
     }
 }
+
+const NoteTypesWrapper = styled.div`
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+`
 
 const ShareMenuWrapper = styled.div`
     position: relative;
@@ -587,6 +683,10 @@ const TagPickerWrapper = styled.div`
     z-index: 5;
 `
 
+const NotesTypeName = styled.span`
+    font-weight: bold;
+`
+
 const ContainerStyled = styled.div`
     height: 100%;
     overflow: hidden scroll;
@@ -603,6 +703,8 @@ const ContainerStyled = styled.div`
     transition: all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1) 0s;
     box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+
+    font-family: sans-serif;
 `
 
 const TopBarContainerStyled = styled.div`
@@ -625,16 +727,9 @@ const TopBarActionBtns = styled.div`
     display: grid;
     justify-content: space-between;
     align-items: center;
-    display: grid;
-    grid-auto-flow: column;
-    grid-gap: 8px;
+    display: flex;
+    gap: 8px;
     height: 24px;
-
-    & * {
-        align-items: center;
-        display: flex;
-        justify-content: center;
-    }
 `
 
 const CloseBtn = styled.button`

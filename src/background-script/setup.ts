@@ -50,6 +50,7 @@ import CopyPasterBackground from 'src/copy-paster/background'
 import { ReaderBackground } from 'src/reader/background'
 import { ServerStorage } from 'src/storage/types'
 import ContentSharingBackground from 'src/content-sharing/background'
+import ContentConversationsBackground from 'src/content-conversations/background'
 import { getFirebase } from 'src/util/firebase-app-initialized'
 import TabManagementBackground from 'src/tab-management/background'
 import { runInTab } from 'src/util/webextensionRPC'
@@ -109,6 +110,7 @@ export interface BackgroundModules {
     copyPaster: CopyPasterBackground
     readable: ReaderBackground
     contentSharing: ContentSharingBackground
+    contentConversations: ContentConversationsBackground
     tabManagement: TabManagementBackground
     readwise: ReadwiseBackground
     activityStreams: ActivityStreamsBackground
@@ -257,6 +259,7 @@ export function createBackgroundModules(options: {
         socialBg: social,
         pages,
         analytics,
+        getServerStorage,
     })
 
     const auth =
@@ -362,6 +365,7 @@ export function createBackgroundModules(options: {
         customListsBackground: customLists,
         copyPasterBackground: copyPaster,
         notifsBackground: notifications,
+        readwiseBackground: readwise,
     })
 
     const connectivityChecker = new ConnectivityCheckerBackground({
@@ -504,7 +508,6 @@ export function createBackgroundModules(options: {
         }),
         copyPaster,
         activityStreams,
-        contentSharing,
         userMessages,
         personalCloud: new PersonalCloudBackground({
             storageManager,
@@ -552,6 +555,11 @@ export function createBackgroundModules(options: {
                 (await auth.authService.getCurrentUser()).id ?? null,
             userIdChanges: () => authChanges(auth.authService),
         }),
+        contentSharing,
+        contentConversations: new ContentConversationsBackground({
+            getServerStorage,
+            services: options.services,
+        }),
     }
 }
 
@@ -593,6 +601,7 @@ export async function setupBackgroundModules(
     backgroundModules.bookmarks.setupBookmarkListeners()
     backgroundModules.tabManagement.setupRemoteFunctions()
     backgroundModules.readwise.setupRemoteFunctions()
+    backgroundModules.contentConversations.setupRemoteFunctions()
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()

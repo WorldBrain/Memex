@@ -20,8 +20,6 @@ import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import SocialBG from 'src/social-integration/background'
 import { buildPostUrlId } from 'src/social-integration/util'
-import { SearchIndex } from 'src/search'
-import PageStorage from 'src/page-indexing/background/storage'
 import {
     Annotation,
     AnnotationSender,
@@ -39,6 +37,8 @@ import { generateUrl } from 'src/annotations/utils'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import { Analytics } from 'src/analytics/types'
 import { getUrl } from 'src/util/uri-utils'
+import { ServerStorageModules } from 'src/storage/types'
+import { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/lib/user-management/types'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -62,6 +62,9 @@ export default class DirectLinkingBackground {
             socialBg: SocialBG
             normalizeUrl?: URLNormalizer
             analytics: Analytics
+            getServerStorage: () => Promise<
+                Pick<ServerStorageModules, 'contentSharing' | 'userManagement'>
+            >
         },
     ) {
         this.socialBg = options.socialBg
@@ -116,6 +119,7 @@ export default class DirectLinkingBackground {
             goToAnnotationFromSidebar: this.goToAnnotationFromDashboardSidebar.bind(
                 this,
             ),
+            getSharedAnnotations: this.getSharedAnnotations,
         }
 
         this.localStorage = new BrowserSettingsStore<TagsSettings>(
@@ -364,9 +368,9 @@ export default class DirectLinkingBackground {
         toCreate: CreateAnnotationParams,
         { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
-        let fullPageUrl = getUrl(tab?.url) ?? toCreate.pageUrl
+        let fullPageUrl = toCreate.pageUrl ?? getUrl(tab?.url)
         if (!isFullUrl(fullPageUrl)) {
-            fullPageUrl = toCreate.pageUrl
+            fullPageUrl = getUrl(tab?.url)
             if (!isFullUrl(fullPageUrl)) {
                 throw new Error(
                     'Could not get full URL while creating annotation',
@@ -508,9 +512,52 @@ export default class DirectLinkingBackground {
     async toggleAnnotBookmark(_, { url }: { url: string }) {
         return this.annotationStorage.toggleAnnotBookmark({ url })
     }
+
     async getAnnotBookmark(_, { url }: { url: string }) {
         return this.annotationStorage.annotHasBookmark({ url })
     }
+
+    getSharedAnnotations: AnnotationInterface<
+        'provider'
+    >['getSharedAnnotations'] = async (
+        _,
+        { sharedAnnotationReferences, withCreatorData },
+    ) => {
+        const {
+            contentSharing,
+            userManagement,
+        } = await this.options.getServerStorage()
+
+        const annotationsById = await contentSharing.getAnnotations({
+            references: sharedAnnotationReferences,
+        })
+
+        let creatorData: GetUsersPublicDetailsResult
+        if (withCreatorData) {
+            const uniqueCreatorIds = new Set(
+                Object.values(annotationsById).map((annot) => annot.creator.id),
+            )
+            creatorData = await userManagement
+                .getUsersPublicDetails(
+                    [...uniqueCreatorIds].map((id) => ({
+                        type: 'user-reference',
+                        id,
+                    })),
+                )
+                .catch((err) => null) // TODO: remove this once user ops are allowed on server
+        }
+
+        return sharedAnnotationReferences.map((ref) => ({
+            ...annotationsById[ref.id],
+            creatorReference: annotationsById[ref.id].creator,
+            creator: creatorData?.[annotationsById[ref.id].creator.id],
+            selector:
+                annotationsById[ref.id].selector != null
+                    ? JSON.parse(annotationsById[ref.id].selector)
+                    : undefined,
+        }))
+    }
+
     async updateAnnotationBookmark(
         _,
         { url, isBookmarked }: { url: string; isBookmarked: boolean },

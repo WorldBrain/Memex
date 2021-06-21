@@ -1,3 +1,4 @@
+if: branch != master AND type = push
 language: node_js
 node_js:
     - '10'
@@ -8,7 +9,6 @@ script:
     - npm run test -- --detectOpenHandles
     - npm run lint
     - npm run build:ci
-    - npm run storybook:ci
 cache:
     yarn: true
     directories:

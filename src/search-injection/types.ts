@@ -8,3 +8,11 @@ export interface SearchEngineInfo {
     }
     containerType: 'id' | 'class'
 }
+
+export interface ResultItemProps {
+    url: string
+    title: string
+    displayTime: number
+    searchEngine: SearchEngineName
+    onLinkClick: React.MouseEventHandler
+}

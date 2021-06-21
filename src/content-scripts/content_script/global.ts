@@ -112,7 +112,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
         getSelection: () => document.getSelection(),
         getUrlAndTitle: () => ({
             title: getPageTitle(),
-            pageUrl: getNormalizedPageUrl(),
+            pageUrl: getPageUrl(),
         }),
     }
 
@@ -191,6 +191,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
                 getPageUrl,
                 copyPaster,
                 subscription,
+                contentConversationsBG: runInBackground(),
                 contentScriptBackground: runInBackground(),
             })
             components.sidebar?.resolve()

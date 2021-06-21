@@ -83,7 +83,7 @@ export const HIGHLIGHT_1 = (annotationUrl: string): ReadwiseHighlight => ({
     source_type: 'article',
     note: ANNOT_1.comment,
     location: getAnchorSelector(ANNOT_1.selector, 'TextPositionSelector').start,
-    location_type: 'page',
+    location_type: 'order',
     highlighted_at: ANNOT_1.createdWhen,
     // highlight_url: annotationUrl,
 })
@@ -110,7 +110,7 @@ export const UPLOADED_HIGHLIGHT_2 = (
     source_type: 'article',
     note: ANNOT_2.comment,
     location: getAnchorSelector(ANNOT_2.selector, 'TextPositionSelector').start,
-    location_type: 'page',
+    location_type: 'order',
     highlighted_at: ANNOT_2.createdWhen.toISOString(),
     // highlight_url: annotationUrl,
 })
@@ -123,8 +123,8 @@ export const UPLOADED_HIGHLIGHT_3 = (
     source_url: DATA.PAGE_2.fullUrl,
     source_type: 'article',
     note: ANNOT_3.comment,
-    location: ANNOT_3.createdWhen.getTime(),
-    location_type: 'page',
+    location: undefined,
+    location_type: 'order',
     highlighted_at: ANNOT_3.createdWhen.toISOString(),
     // highlight_url: annotationUrl,
 })

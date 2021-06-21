@@ -1,5 +1,5 @@
 // tslint:disable:forin
-import mapValues from 'lodash/mapValues'
+import fromPairs from 'lodash/fromPairs'
 
 import { FakeAnalytics } from 'src/analytics/mock'
 import { SidebarContainerLogic, createEditFormsForAnnotations } from './logic'
@@ -13,6 +13,7 @@ import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import * as sharingTestData from 'src/content-sharing/background/index.test.data'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
+import { getInitialAnnotationConversationState } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 
 const setupLogicHelper = async ({
     device,
@@ -43,6 +44,11 @@ const setupLogicHelper = async ({
         { skipPageIndexing: true },
     )
 
+    const emittedEvents: Array<{ event: string; args: any }> = []
+    const fakeEmitter = {
+        emit: (event: string, args: any) => emittedEvents.push({ event, args }),
+    }
+
     if (withAuth) {
         device.backgroundModules.auth.remoteFunctions.getCurrentUser = async () => ({
             id: 'test-user',
@@ -63,7 +69,10 @@ const setupLogicHelper = async ({
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
         contentScriptBackground: (backgroundModules.contentScripts
             .remoteFunctions as unknown) as ContentScriptsInterface<'caller'>,
+        contentConversationsBG:
+            backgroundModules.contentConversations.remoteFunctions,
         annotations: annotationsBG,
+        events: fakeEmitter as any,
         annotationsCache,
         analytics,
         initialState: 'hidden',
@@ -75,7 +84,7 @@ const setupLogicHelper = async ({
 
     const sidebar = device.createElement(sidebarLogic)
     await sidebar.init()
-    return { sidebar, sidebarLogic, analytics, annotationsCache }
+    return { sidebar, sidebarLogic, analytics, annotationsCache, emittedEvents }
 }
 
 describe('SidebarContainerLogic', () => {
@@ -832,6 +841,162 @@ describe('SidebarContainerLogic', () => {
                     taskState: 'pristine',
                 },
             })
+        })
+    })
+
+    describe('followed lists + annotations', () => {
+        it('should be able to set notes type + trigger followed list load', async ({
+            device,
+        }) => {
+            device.backgroundModules.customLists.remoteFunctions.fetchFollowedListsWithAnnotations = async () =>
+                DATA.FOLLOWED_LISTS
+            const { sidebar } = await setupLogicHelper({ device })
+
+            expect(sidebar.state.displayMode).toEqual('private-notes')
+            expect(sidebar.state.followedListLoadState).toEqual('pristine')
+            expect(sidebar.state.followedLists).toEqual({
+                allIds: [],
+                byId: {},
+            })
+
+            await sidebar.processEvent('setDisplayMode', {
+                mode: 'shared-notes',
+            })
+
+            expect(sidebar.state.displayMode).toEqual('shared-notes')
+            expect(sidebar.state.followedListLoadState).toEqual('success')
+            expect(sidebar.state.followedLists).toEqual({
+                allIds: DATA.FOLLOWED_LISTS.map((list) => list.id),
+                byId: fromPairs(
+                    DATA.FOLLOWED_LISTS.map((list) => [
+                        list.id,
+                        {
+                            ...list,
+                            isExpanded: false,
+                            annotationsLoadState: 'pristine',
+                            conversationsLoadState: 'pristine',
+                        },
+                    ]),
+                ),
+            })
+        })
+
+        it('should be able to expand notes for a followed list + trigger notes load', async ({
+            device,
+        }) => {
+            device.backgroundModules.customLists.remoteFunctions.fetchFollowedListsWithAnnotations = async () =>
+                DATA.FOLLOWED_LISTS
+            device.backgroundModules.contentConversations.remoteFunctions.getThreadsForSharedAnnotations = async () =>
+                DATA.ANNOTATION_THREADS
+            device.backgroundModules.directLinking.remoteFunctions.getSharedAnnotations = async () =>
+                DATA.SHARED_ANNOTATIONS
+            const { sidebar, emittedEvents } = await setupLogicHelper({
+                device,
+            })
+
+            await sidebar.processEvent('setDisplayMode', {
+                mode: 'shared-notes',
+            })
+
+            const { id: listId } = DATA.FOLLOWED_LISTS[0]
+            const expectedEvents = []
+
+            expect(emittedEvents).toEqual(expectedEvents)
+            expect(sidebar.state.followedLists.byId[listId].isExpanded).toEqual(
+                false,
+            )
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('pristine')
+            expect(sidebar.state.followedAnnotations).toEqual({})
+            expect(sidebar.state.users).toEqual({})
+            expect(sidebar.state.conversations).toEqual({})
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('pristine')
+            expect(
+                sidebar.state.followedLists.byId[listId].conversationsLoadState,
+            ).toEqual('pristine')
+
+            const expandPromise = sidebar.processEvent(
+                'expandFollowedListNotes',
+                { listId },
+            )
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('running')
+            await expandPromise
+
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('success')
+            expect(
+                sidebar.state.followedLists.byId[listId].conversationsLoadState,
+            ).toEqual('success')
+
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: {
+                    displayMode: 'shared-notes',
+                    highlights: [
+                        {
+                            url: DATA.SHARED_ANNOTATIONS[0].reference.id,
+                            selector: DATA.SHARED_ANNOTATIONS[0].selector,
+                        },
+                    ],
+                },
+            })
+            expect(emittedEvents).toEqual(expectedEvents)
+            expect(sidebar.state.followedLists.byId[listId].isExpanded).toEqual(
+                true,
+            )
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('success')
+            expect(sidebar.state.followedAnnotations).toEqual(
+                fromPairs(
+                    DATA.SHARED_ANNOTATIONS.map((note) => [
+                        note.reference.id,
+                        {
+                            id: note.reference.id,
+                            body: note.body,
+                            comment: note.comment,
+                            selector: note.selector,
+                            createdWhen: note.createdWhen,
+                            updatedWhen: note.updatedWhen,
+                            creatorId: note.creatorReference.id,
+                        },
+                    ]),
+                ),
+            )
+            expect(sidebar.state.users).toEqual({
+                [DATA.SHARED_ANNOTATIONS[0].creatorReference.id]: {
+                    name: DATA.CREATOR_1.user.displayName,
+                    profileImgSrc: DATA.CREATOR_1.profile.avatarURL,
+                },
+            })
+            expect(sidebar.state.conversations).toEqual(
+                fromPairs(
+                    DATA.ANNOTATION_THREADS.map((data) => [
+                        data.sharedAnnotation.id,
+                        {
+                            ...getInitialAnnotationConversationState(),
+                            thread: data.thread,
+                        },
+                    ]),
+                ),
+            )
+
+            await sidebar.processEvent('expandFollowedListNotes', { listId })
+
+            expectedEvents.push({
+                event: 'removeAnnotationHighlights',
+                args: { urls: [DATA.SHARED_ANNOTATIONS[0].reference.id] },
+            })
+            expect(emittedEvents).toEqual(expectedEvents)
+            expect(sidebar.state.followedLists.byId[listId].isExpanded).toEqual(
+                false,
+            )
         })
     })
 })

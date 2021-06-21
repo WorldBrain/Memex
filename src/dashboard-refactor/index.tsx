@@ -66,6 +66,7 @@ export class DashboardContainer extends StatefulUIElement<
         document: window.document,
         location: window.location,
         localStorage: browser.storage.local,
+        contentConversationsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
         contentShareBG: runInBackground(),
         annotationsBG: runInBackground(),
@@ -119,12 +120,12 @@ export class DashboardContainer extends StatefulUIElement<
             listName: listData.name,
             localListId: listData.id,
             sharingAccess: searchResults.sharingAccess,
-            onAddContributorsClick: listData.isJoinedList
-                ? undefined
-                : () =>
+            onAddContributorsClick: listData.isOwnedList
+                ? () =>
                       this.processEvent('setShareListId', {
                           listId: listData.id,
-                      }),
+                      })
+                : undefined,
         }
     }
 
@@ -183,7 +184,7 @@ export class DashboardContainer extends StatefulUIElement<
                 },
                 onMoreActionClick:
                     source !== 'followed-lists' &&
-                    !listsSidebar.listData[listId].isJoinedList
+                    listsSidebar.listData[listId].isOwnedList
                         ? () =>
                               this.processEvent('setShowMoreMenuListId', {
                                   listId: listsSidebar.listData[listId].id,
@@ -501,6 +502,9 @@ export class DashboardContainer extends StatefulUIElement<
                 onDismissOnboardingMsg={() =>
                     this.processEvent('dismissOnboardingMsg', null)
                 }
+                onDismissSubscriptionBanner={() =>
+                    this.processEvent('dismissSubscriptionBanner', null)
+                }
                 noResultsType={searchResults.noResultsType}
                 filterSearchByTag={(tag) =>
                     this.processEvent('addIncludedTag', { tag })
@@ -752,31 +756,6 @@ export class DashboardContainer extends StatefulUIElement<
                             noteId,
                             info,
                         }),
-                    onMainContentHover: (noteId) => () =>
-                        this.processEvent('setNoteHover', {
-                            noteId,
-                            hover: 'main-content',
-                        }),
-                    onFooterHover: (noteId) => () =>
-                        this.processEvent('setNoteHover', {
-                            noteId,
-                            hover: 'footer',
-                        }),
-                    onTagsHover: (noteId) => () =>
-                        this.processEvent('setNoteHover', {
-                            noteId,
-                            hover: 'tags',
-                        }),
-                    onNoteHover: (noteId) => () =>
-                        this.processEvent('setNoteHover', {
-                            noteId,
-                            hover: 'note',
-                        }),
-                    onUnhover: (noteId) => () =>
-                        this.processEvent('setNoteHover', {
-                            noteId,
-                            hover: null,
-                        }),
                 }}
                 searchCopyPasterProps={{
                     searchType: searchResults.searchType,
@@ -946,6 +925,7 @@ export class DashboardContainer extends StatefulUIElement<
                     annotations={this.props.annotationsBG}
                     annotationsCache={this.annotationsCache}
                     contentSharing={this.props.contentShareBG}
+                    contentConversationsBG={this.props.contentConversationsBG}
                     showLoginModal={() =>
                         this.processEvent('setShowLoginModal', {
                             isShown: true,

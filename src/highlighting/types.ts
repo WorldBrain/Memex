@@ -47,7 +47,8 @@ export interface HighlightInteractionsInterface {
     removeHighlights: (args?: { onlyRemoveDarkHighlights?: boolean }) => void
     sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
     _removeHighlight: (highlight: Element) => void
-    removeAnnotationHighlights: (url: string) => void
+    removeAnnotationHighlight: (url: string) => void
+    removeAnnotationHighlights: (urls: string[]) => void
     saveAndRenderHighlight: (
         params: SaveAndRenderHighlightDeps,
     ) => Promise<void>

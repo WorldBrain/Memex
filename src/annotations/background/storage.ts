@@ -32,6 +32,8 @@ export default class AnnotationStorage extends StorageModule {
     static LISTS_COLL = LIST_COLLECTION_NAMES.list
     static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
 
+    static generateAnnotationPrivacyLevelId = () => Date.now()
+
     constructor(private options: { storageManager: Storex }) {
         super({ storageManager: options.storageManager })
     }
@@ -210,11 +212,15 @@ export default class AnnotationStorage extends StorageModule {
     })
 
     async createAnnotationPrivacyLevel(params: {
+        id?: number
         annotation: string
         privacyLevel: AnnotationPrivacyLevels
         createdWhen?: Date
     }): Promise<void> {
         await this.operation('createAnnotationPrivacyLevel', {
+            id:
+                params.id ??
+                AnnotationStorage.generateAnnotationPrivacyLevelId(),
             annotation: params.annotation,
             privacyLevel: params.privacyLevel,
             createdWhen: params.createdWhen ?? new Date(),

@@ -170,7 +170,12 @@ const MenuItem = styled.li`
             : '&:hover { background: #e0e0e0; cursor: pointer; }'};
     ${({ theme }) => theme.isSelected && 'background: #f0f0f0;'};
     padding: 10px 20px;
+    line-height: 20px;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
 `
 
 const SoonPill = styled.span`
@@ -190,11 +195,13 @@ const MenuItemName = styled.div`
     font-size: 14px;
     display: flex;
     align-items: center;
+    font-weight: bold;
 `
 
 const MenuItemInfo = styled.div`
     font-weight: 400;
-    font-size: 12px;
+    font-size: 14px;
+    padding-top: 5px;
 `
 
 const MenuBtn = styled.div`
@@ -224,7 +231,7 @@ const MenuBtn = styled.div`
     }
 
     & div {
-        padding: 2px 4px;
+        padding: 0 5px;
     }
 `
 

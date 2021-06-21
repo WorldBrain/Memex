@@ -1,7 +1,7 @@
 import React from 'react'
 
 import AnnotationEditable, { Props } from './AnnotationEditable'
-import { NoteResultHoverState } from 'src/dashboard-refactor/search-results/types'
+import { NoteResultHoverState } from './types'
 
 export * from './AnnotationEditable'
 

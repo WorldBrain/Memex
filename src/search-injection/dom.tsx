@@ -13,10 +13,7 @@ import { injectCSS } from '../util/content-injection'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { theme } from 'src/common-ui/components/design-library/theme'
 
-export const handleRender = async (
-    { docs, totalCount, requiresMigration },
-    searchEngine,
-) => {
+export const handleRender = async ({ docs, totalCount }, searchEngine) => {
     // docs: (array of objects) returned by the search
     // totalCount: (int) number of results found
     // Injects CSS into the search page.
@@ -67,7 +64,6 @@ export const handleRender = async (
                         len={totalCount}
                         rerender={renderComponent}
                         searchEngine={searchEngine}
-                        requiresMigration={requiresMigration}
                     />
                 </ThemeProvider>
             </StyleSheetManager>,

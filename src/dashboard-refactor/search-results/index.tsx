@@ -35,7 +35,7 @@ import {
     AnnotationCreateEventProps,
 } from 'src/annotations/components/AnnotationCreate'
 import { sizeConstants } from '../constants'
-import AnnotationEditable from 'src/annotations/components/AnnotationEditable'
+import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
@@ -53,6 +53,7 @@ import ListDetails, {
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import ListShareMenu from 'src/overview/sharing/ListShareMenu'
 import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
+import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -75,6 +76,7 @@ export type Props = RootState &
         noResultsType: NoResultsType
         onDismissMobileAd: React.MouseEventHandler
         onDismissOnboardingMsg: React.MouseEventHandler
+        onDismissSubscriptionBanner: React.MouseEventHandler
         filterSearchByTag: (tag: string) => void
         openListShareModal: () => void
         newNoteInteractionProps: {
@@ -122,17 +124,13 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         return (
             <AnnotationEditable
                 key={noteId}
+                url={noteId}
                 tags={noteData.tags}
                 body={noteData.highlight}
                 comment={noteData.comment}
                 createdWhen={new Date(noteData.displayTime)}
-                onHighlightHover={interactionProps.onMainContentHover}
-                onFooterHover={interactionProps.onFooterHover}
-                onNoteHover={interactionProps.onNoteHover}
-                onTagsHover={interactionProps.onTagsHover}
-                onUnhover={interactionProps.onUnhover}
-                hoverState={noteData.hoverState}
                 onTagClick={this.props.filterSearchByTag}
+                onGoToAnnotation={interactionProps.onGoToHighlightClick}
                 lastEdited={
                     noteData.isEdited
                         ? new Date(noteData.displayTime)
@@ -227,7 +225,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     onTagIconClick: interactionProps.onTagPickerBtnClick,
                     onDeleteIconClick: interactionProps.onTrashBtnClick,
                     onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
-                    onGoToAnnotation: interactionProps.onGoToHighlightClick,
                     onEditCancel: interactionProps.onEditCancel,
                     onEditConfirm: interactionProps.onEditConfirm,
                     onEditIconClick: interactionProps.onEditBtnClick,
@@ -509,6 +506,12 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     render() {
         return (
             <ResultsContainer bottom="100px">
+                {this.props.isSubscriptionBannerShown && (
+                    <PioneerPlanBanner
+                        onHideClick={this.props.onDismissSubscriptionBanner}
+                        width="fill-available"
+                    />
+                )}
                 {this.props.selectedListId != null && (
                     <ListDetails {...this.props.listDetailsProps} />
                 )}

@@ -20,7 +20,8 @@ import { PageIndexingBackground } from 'src/page-indexing/background'
 import TabManagementBackground from 'src/tab-management/background'
 import { ServerStorageModules } from 'src/storage/types'
 import { Services } from 'src/services/types'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 
 const limitSuggestionsReturnLength = 10
 const limitSuggestionsStorageLength = 20
@@ -69,6 +70,8 @@ export default class CustomListBackground {
             fetchAllLists: this.fetchAllLists,
             fetchAllFollowedLists: this.fetchAllFollowedLists,
             fetchListById: this.fetchListById,
+            fetchFollowedListsWithAnnotations: this
+                .fetchFollowedListsWithAnnotations,
             fetchListPagesByUrl: this.fetchListPagesByUrl,
             fetchListIdsByUrl: this.fetchListIdsByUrl,
             fetchInitialListSuggestions: this.fetchInitialListSuggestions,
@@ -92,15 +95,28 @@ export default class CustomListBackground {
         return Date.now()
     }
 
-    fetchAllFollowedLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async ({
-        skip = 0,
-        limit = 20,
-    }) => {
+    private fetchOwnListReferences = async (): Promise<
+        SharedListReference[]
+    > => {
         const { auth } = this.options.services
-        const {
-            activityFollows,
-            contentSharing,
-        } = await this.options.getServerStorage()
+        const { contentSharing } = await this.options.getServerStorage()
+
+        const currentUser = await auth.getCurrentUser()
+        if (!currentUser) {
+            return []
+        }
+
+        return contentSharing.getListReferencesByCreator({
+            id: currentUser.id,
+            type: 'user-reference',
+        })
+    }
+
+    private fetchFollowedListReferences = async (): Promise<
+        SharedListReference[]
+    > => {
+        const { auth } = this.options.services
+        const { activityFollows } = await this.options.getServerStorage()
 
         const currentUser = await auth.getCurrentUser()
         if (!currentUser) {
@@ -115,20 +131,135 @@ export default class CustomListBackground {
             },
         })
 
+        return follows.map(
+            (follow) =>
+                ({
+                    id: follow.objectId,
+                    type: 'shared-list-reference',
+                } as SharedListReference),
+        )
+    }
+
+    private fetchCollaborativeListReferences = async (): Promise<
+        SharedListReference[]
+    > => {
+        const { auth } = this.options.services
+        const { contentSharing } = await this.options.getServerStorage()
+
+        const currentUser = await auth.getCurrentUser()
+        if (!currentUser) {
+            return []
+        }
+
+        const seenLists = new Set()
+        const listRoles = await contentSharing.getUserListRoles({
+            userReference: {
+                type: 'user-reference',
+                id: currentUser.id,
+            },
+        })
+
+        for (const { sharedList } of listRoles) {
+            if (seenLists.has(sharedList.id)) {
+                continue
+            }
+            seenLists.add(sharedList.id)
+        }
+
+        return [...seenLists].map(
+            (id) =>
+                ({ id, type: 'shared-list-reference' } as SharedListReference),
+        )
+    }
+
+    fetchFollowedListsWithAnnotations: RemoteCollectionsInterface['fetchFollowedListsWithAnnotations'] = async ({
+        normalizedPageUrl,
+    }) => {
+        const { contentSharing } = await this.options.getServerStorage()
+        const seenListIds = new Set()
+        const allListReferences = [
+            ...(await this.fetchOwnListReferences()),
+            ...(await this.fetchFollowedListReferences()),
+            ...(await this.fetchCollaborativeListReferences()),
+        ]
+
+        const uniqueListReferences = allListReferences.filter((listRef) => {
+            if (seenListIds.has(listRef.id)) {
+                return false
+            }
+
+            seenListIds.add(listRef.id)
+            return true
+        })
+
+        const annotListEntriesByList = new Map<
+            string | number,
+            GetAnnotationListEntriesElement[]
+        >()
+
+        const listEntriesByPageByList = await contentSharing.getAnnotationListEntriesForLists(
+            { listReferences: uniqueListReferences },
+        )
+
+        for (const listReference of uniqueListReferences) {
+            if (
+                !listEntriesByPageByList[listReference.id]?.[normalizedPageUrl]
+                    ?.length
+            ) {
+                continue
+            }
+            annotListEntriesByList.set(
+                listReference.id,
+                listEntriesByPageByList[listReference.id][normalizedPageUrl],
+            )
+        }
+
         const sharedLists = await contentSharing.getListsByReferences(
-            follows.map((follow) => ({
-                id: follow.objectId,
+            [...annotListEntriesByList.keys()].map((id) => ({
+                id,
                 type: 'shared-list-reference',
             })),
         )
 
-        return sharedLists.map((sharedList) => ({
-            isOwned: sharedList.creator.id === currentUser.id,
-            remoteId: sharedList.reference.id as string,
-            id: sharedList.createdWhen,
-            name: sharedList.title,
-            isFollowed: true,
+        return sharedLists.map((list) => ({
+            id: list.reference.id as string,
+            name: list.title,
+            sharedAnnotationReferences: annotListEntriesByList
+                .get(list.reference.id)
+                .map((entry) => entry.sharedAnnotation),
         }))
+    }
+
+    fetchAllFollowedLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async ({
+        skip = 0,
+        limit = 20,
+    }) => {
+        const { auth } = this.options.services
+        const { contentSharing } = await this.options.getServerStorage()
+
+        const sharedListReferences = await this.fetchFollowedListReferences()
+        const sharedLists = await contentSharing.getListsByReferences(
+            sharedListReferences,
+        )
+        const currentUser = await auth.getCurrentUser()!
+
+        return sharedLists
+            .sort((a, b) => {
+                if (a.title < b.title) {
+                    return -1
+                }
+                if (a.title > b.title) {
+                    return 1
+                }
+                return 0
+            })
+            .map((sharedList) => ({
+                isOwned: sharedList.creator.id === currentUser.id,
+                remoteId: sharedList.reference.id as string,
+                id: sharedList.createdWhen,
+                name: sharedList.title,
+                isFollowed: true,
+            }))
     }
 
     fetchAllLists = async ({

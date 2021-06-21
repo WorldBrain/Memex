@@ -122,6 +122,7 @@ export interface AnnotationsCacheInterface {
     getAnnotationById: (id: string) => CachedAnnotation
 
     annotations: CachedAnnotation[]
+    readonly highlights: CachedAnnotation[]
     annotationChanges: AnnotationCacheChangeEvents
     isEmpty: boolean
 }
@@ -138,6 +139,10 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
     get annotations(): CachedAnnotation[] {
         return this._annotations
+    }
+
+    get highlights(): CachedAnnotation[] {
+        return this.annotations.filter((a) => a.body?.length > 0)
     }
 
     get isEmpty(): boolean {

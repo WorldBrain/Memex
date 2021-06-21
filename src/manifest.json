@@ -61,7 +61,7 @@
         "data:*",
         "filesystem:/*"
     ],
-    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+    "content_security_policy": "script-src 'unsafe-eval' 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self';",
 
     "omnibox": {
         "keyword": "m"

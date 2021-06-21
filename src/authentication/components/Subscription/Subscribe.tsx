@@ -8,6 +8,13 @@ import {
     WhiteSpacer30,
     TrialInfo,
 } from 'src/authentication/components/Subscription/pricing.style'
+import styled from 'styled-components'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
+
+import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
+import { getLocalStorage, setLocalStorage } from 'src/search-injection/utils'
+import { STORAGE_KEYS as DASHBOARD_STORAGE_KEYS } from 'src/dashboard-refactor/constants'
 
 import SubscriptionOptionsChargebee from 'src/authentication/components/Subscription/SubscriptionOptionsChargebee'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
@@ -15,6 +22,42 @@ import { AuthContextInterface } from 'src/authentication/background/types'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 
 const styles = require('../styles.css')
+
+const PioneerPlanContainer = styled.div`
+    display: flex;
+    padding: 10px 15px;
+    justify-content: space-between;
+    align-items: center;
+    background: #f0f0f0;
+    border-radius: 3px;
+    margin-bottom: 30px;
+    width: 760px;
+`
+const PioneerPlanContentBox = styled.div`
+    display: flex;
+    flex-direction: column;
+`
+
+const PioneerPlanTitle = styled.div`
+    font-weight: bold;
+    font-size: 14px;
+`
+
+const PioneerPlanDescription = styled.div`
+    font-size: 12px;
+`
+
+const PioneerPlanButtonBox = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 5px;
+    margin-right: -5px;
+`
+
+const PioneerPlanLearnMoreButton = styled(SecondaryAction)``
+
+const PioneerPlanUpgradeButton = styled(PrimaryAction)``
 
 type Props = {
     onClose: () => void
@@ -29,6 +72,7 @@ type DisplayState =
 
 interface State {
     display: DisplayState
+    isSubscriptionBannerShown: boolean
 }
 
 const getUserPlans = (currentUser) => currentUser?.authorizedPlans?.length ?? 0
@@ -38,6 +82,7 @@ const userHasPlans = (currentUser) =>
 class Subscribe extends React.Component<Props, State> {
     state = {
         display: 'plans' as DisplayState,
+        isSubscriptionBannerShown: true,
     }
 
     handleClose = () => {
@@ -95,6 +140,11 @@ class Subscribe extends React.Component<Props, State> {
         }
     }
 
+    private handleSubBannerDismiss: React.MouseEventHandler = async (e) => {
+        this.setState({ isSubscriptionBannerShown: false })
+        await setLocalStorage(DASHBOARD_STORAGE_KEYS.subBannerDismissed, true)
+    }
+
     renderLoading = () => (
         <div className={styles.loadingBox}>
             <LoadingIndicator />
@@ -123,10 +173,11 @@ class Subscribe extends React.Component<Props, State> {
 
     renderPlans = () => (
         <div className={styles.PriceBox}>
+            <PioneerPlanBanner />
+
             <PricingPlanTitle className={''}>
                 ⭐️ Upgrade your Memex
             </PricingPlanTitle>
-
             <TrialInfo>30 days free trial</TrialInfo>
 
             {/*<PricingPlanItem className={''}>*/}

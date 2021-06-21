@@ -2,6 +2,10 @@ import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import styled, { css } from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { ConversationReplies } from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
+import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { NewReplyEventHandlers } from '@worldbrain/memex-common/lib/content-conversations/ui/components/new-reply'
 
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import AnnotationCreate, {
@@ -10,38 +14,51 @@ import AnnotationCreate, {
 import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
-import { Annotation } from 'src/annotations/types'
+import type { Annotation } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
-import { AnnotationMode, SidebarTheme } from '../types'
+import type { AnnotationMode, SidebarTheme } from '../types'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import {
     AnnotationEditGeneralProps,
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
-import {
+import type {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
+import type { SidebarContainerState } from '../containers/types'
+import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
+import Margin from 'src/dashboard-refactor/components/Margin'
 
-export interface AnnotationsSidebarProps {
+export interface AnnotationsSidebarProps
+    extends Omit<SidebarContainerState, 'annotationModes'> {
     annotationModes: { [url: string]: AnnotationMode }
     annotationSharingInfo: { [annotationUrl: string]: AnnotationSharingInfo }
 
-    showCongratsMessage?: boolean
-    activeAnnotationUrl?: string | null
     setActiveAnnotationUrl?: (url: string) => React.MouseEventHandler
+
+    bindSharedAnnotationEventHandlers: (
+        sharedAnnotationReference: SharedAnnotationReference,
+    ) => {
+        onReplyBtnClick: React.MouseEventHandler
+    } & NewReplyEventHandlers
+
+    handleScrollPagination: () => void
     needsWaypoint?: boolean
     appendLoader?: boolean
-    handleScrollPagination: () => void
 
     renderCopyPasterForAnnotation: (id: string) => JSX.Element
     renderTagsPickerForAnnotation: (id: string) => JSX.Element
     renderShareMenuForAnnotation: (id: string) => JSX.Element
 
+    expandFollowedListNotes: (listId: string) => void
+
     onClickOutside: React.MouseEventHandler
     bindAnnotationFooterEventProps: (
         annotation: Annotation,
-    ) => AnnotationFooterEventProps
+    ) => AnnotationFooterEventProps & {
+        onGoToAnnotation?: React.MouseEventHandler
+    }
     bindAnnotationEditProps: (
         annotation: Annotation,
     ) => AnnotationEditGeneralProps & AnnotationEditEventProps
@@ -50,9 +67,9 @@ export interface AnnotationsSidebarProps {
     sharingAccess: AnnotationSharingAccess
     isSearchLoading: boolean
     isAnnotationCreateShown: boolean
-    activeCopyPasterAnnotationId?: string
     annotations: Annotation[]
     theme: Partial<SidebarTheme>
+    openCollectionPage: (remoteListId: string) => void
 }
 
 interface AnnotationsSidebarState {
@@ -133,17 +150,11 @@ class AnnotationsSidebar extends React.Component<
         }
     }
 
-    render() {
-        return (
-            <>
-                {/* {this.renderSearchSection()} */}
-                {this.renderNewAnnotation()}
-                {this.renderResultsBody()}
-            </>
-        )
-    }
-
     private renderNewAnnotation() {
+        if (this.props.displayMode === 'shared-notes') {
+            return null
+        }
+
         return (
             <NewAnnotationSection>
                 <NewAnnotationBoxStyled>
@@ -157,19 +168,202 @@ class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderResultsBody() {
+    private renderLoader = (key?: string) => (
+        <LoadingIndicatorContainer key={key}>
+            <LoadingIndicatorStyled />
+        </LoadingIndicatorContainer>
+    )
+
+    private renderFollowedListNotes(listId: string) {
+        const list = this.props.followedLists.byId[listId]
+        if (!list.isExpanded || list.annotationsLoadState === 'pristine') {
+            return null
+        }
+
+        if (list.annotationsLoadState === 'running') {
+            return this.renderLoader()
+        }
+
+        if (list.annotationsLoadState === 'error') {
+            return (
+                <FollowedListsMsgContainer>
+                    <FollowedListsMsgHead>
+                        Something went wrong
+                    </FollowedListsMsgHead>
+                    <FollowedListsMsg>
+                        Reload the page and if the problem persists{' '}
+                        <ExternalLink
+                            label="contact support"
+                            href="mailto:support@worldbrain.io"
+                        />
+                        .
+                    </FollowedListsMsg>
+                </FollowedListsMsgContainer>
+            )
+        }
+
+        const annotationsData = list.sharedAnnotationReferences
+            .map((ref) => this.props.followedAnnotations[ref.id])
+            .filter((a) => !!a)
+
+        if (!annotationsData.length) {
+            return 'No notes exist in this list for this page'
+        }
+
         return (
-            <>
-                {this.props.isSearchLoading ? (
-                    <LoadingIndicatorContainer>
-                        <LoadingIndicatorStyled />
-                    </LoadingIndicatorContainer>
-                ) : (
-                    <AnnotationsSectionStyled>
-                        {this.renderAnnotationsEditable()}
-                    </AnnotationsSectionStyled>
-                )}
-            </>
+            <FollowedNotesContainer>
+                {annotationsData.map((data) => {
+                    const conversation = this.props.conversations[data.id]
+                    const sharedAnnotationRef: SharedAnnotationReference = {
+                        id: data.id,
+                        type: 'shared-annotation-reference',
+                    }
+                    const eventHandlers = this.props.bindSharedAnnotationEventHandlers(
+                        sharedAnnotationRef,
+                    )
+                    return (
+                        <React.Fragment key={data.id}>
+                            <AnnotationEditable
+                                url={data.id}
+                                body={data.body}
+                                comment={data.comment}
+                                lastEdited={data.updatedWhen}
+                                createdWhen={data.createdWhen}
+                                creatorDependencies={
+                                    this.props.users[data.creatorId]
+                                }
+                                isActive={
+                                    this.props.activeAnnotationUrl === data.id
+                                }
+                                onReplyBtnClick={eventHandlers.onReplyBtnClick}
+                                onHighlightClick={this.props.setActiveAnnotationUrl(
+                                    data.id,
+                                )}
+                                isClickable={
+                                    this.props.theme.canClickAnnotations &&
+                                    data.body?.length > 0
+                                }
+                                repliesLoadingState={
+                                    list.conversationsLoadState
+                                }
+                                hasReplies={
+                                    conversation?.thread != null ||
+                                    conversation?.replies.length > 0
+                                }
+                            />
+                            <ConversationReplies
+                                {...eventHandlers}
+                                conversation={conversation}
+                                annotation={{
+                                    body: data.body,
+                                    linkId: data.id,
+                                    comment: data.comment,
+                                    createdWhen: data.createdWhen,
+                                    reference: sharedAnnotationRef,
+                                }}
+                            />
+                        </React.Fragment>
+                    )
+                })}
+            </FollowedNotesContainer>
+        )
+    }
+
+    private renderSharedNotesByList() {
+        const { followedListLoadState, followedLists } = this.props
+        if (followedListLoadState === 'running') {
+            return this.renderLoader()
+        }
+
+        if (followedListLoadState === 'error') {
+            return (
+                <FollowedListsMsgContainer>
+                    <FollowedListsMsgHead>
+                        Something went wrong
+                    </FollowedListsMsgHead>
+                    <FollowedListsMsg>
+                        Reload the page and if the problem persists{' '}
+                        <ExternalLink
+                            label="contact
+                        support"
+                            href="mailto:support@worldbrain.io"
+                        />
+                        .
+                    </FollowedListsMsg>
+                </FollowedListsMsgContainer>
+            )
+        }
+
+        if (!followedLists.allIds.length) {
+            return (
+                <FollowedListsMsgContainer>
+                    <FollowedListsMsg>¯\_(ツ)_/¯</FollowedListsMsg>
+                    <FollowedListsMsgHead>
+                        No annotations by other people on this page
+                    </FollowedListsMsgHead>
+                    <FollowedListsMsg>
+                        Follow or share collections containing <br />
+                        annotations for this page
+                    </FollowedListsMsg>
+                </FollowedListsMsgContainer>
+            )
+        }
+
+        return followedLists.allIds.map((listId) => {
+            const listData = followedLists.byId[listId]
+            return (
+                <React.Fragment key={listId}>
+                    <FollowedListNotesContainer bottom="10px">
+                        <FollowedListRow>
+                            <FollowedListTitleContainer
+                                onClick={() =>
+                                    this.props.expandFollowedListNotes(listId)
+                                }
+                            >
+                                <FollowedListTitle title={listData.name}>
+                                    {listData.name}
+                                </FollowedListTitle>
+                                <FollowedListNoteCount left="10px" right="5px">
+                                    {listData.sharedAnnotationReferences.length}
+                                </FollowedListNoteCount>
+                                <FollowedListDropdownIcon
+                                    icon="triangle"
+                                    height="8px"
+                                    isExpanded={listData.isExpanded}
+                                />
+                            </FollowedListTitleContainer>
+                            <Icon
+                                icon="goTo"
+                                height="16px"
+                                onClick={() =>
+                                    this.props.openCollectionPage(listId)
+                                }
+                            />
+                        </FollowedListRow>
+                        {this.renderFollowedListNotes(listId)}
+                    </FollowedListNotesContainer>
+                </React.Fragment>
+            )
+        })
+    }
+
+    private renderResultsBody() {
+        if (this.props.isSearchLoading) {
+            return this.renderLoader()
+        }
+
+        if (this.props.displayMode === 'shared-notes') {
+            return (
+                <FollowedListsContainer>
+                    {this.renderSharedNotesByList()}
+                </FollowedListsContainer>
+            )
+        }
+
+        return (
+            <AnnotationsSectionStyled>
+                {this.renderAnnotationsEditable()}
+            </AnnotationsSectionStyled>
         )
     }
 
@@ -178,28 +372,35 @@ class AnnotationsSidebar extends React.Component<
             return <EmptyMessage />
         }
 
-        const annots = this.props.annotations.map((annot, i) => (
-            <AnnotationEditable
-                key={i}
-                {...annot}
-                {...this.props}
-                sharingAccess={this.props.sharingAccess}
-                mode={this.props.annotationModes[annot.url]}
-                sharingInfo={this.props.annotationSharingInfo[annot.url]}
-                isActive={this.props.activeAnnotationUrl === annot.url}
-                onHighlightClick={this.props.setActiveAnnotationUrl(annot.url)}
-                annotationEditDependencies={this.props.bindAnnotationEditProps(
-                    annot,
-                )}
-                annotationFooterDependencies={this.props.bindAnnotationFooterEventProps(
-                    annot,
-                )}
-                isClickable={
-                    this.props.theme.canClickAnnotations &&
-                    annot.body?.length > 0
-                }
-            />
-        ))
+        const annots = this.props.annotations.map((annot, i) => {
+            const footerDeps = this.props.bindAnnotationFooterEventProps(annot)
+            return (
+                <AnnotationEditable
+                    key={i}
+                    {...annot}
+                    {...this.props}
+                    body={annot.body}
+                    comment={annot.comment}
+                    createdWhen={annot.createdWhen!}
+                    sharingAccess={this.props.sharingAccess}
+                    mode={this.props.annotationModes[annot.url]}
+                    sharingInfo={this.props.annotationSharingInfo[annot.url]}
+                    isActive={this.props.activeAnnotationUrl === annot.url}
+                    onHighlightClick={this.props.setActiveAnnotationUrl(
+                        annot.url,
+                    )}
+                    onGoToAnnotation={footerDeps.onGoToAnnotation}
+                    annotationEditDependencies={this.props.bindAnnotationEditProps(
+                        annot,
+                    )}
+                    annotationFooterDependencies={footerDeps}
+                    isClickable={
+                        this.props.theme.canClickAnnotations &&
+                        annot.body?.length > 0
+                    }
+                />
+            )
+        })
 
         if (this.props.needsWaypoint) {
             annots.push(
@@ -211,11 +412,7 @@ class AnnotationsSidebar extends React.Component<
         }
 
         if (this.props.appendLoader) {
-            annots.push(
-                <LoadingIndicatorContainer key="sidebar-pagination-spinner">
-                    <LoadingIndicator />
-                </LoadingIndicatorContainer>,
-            )
+            annots.push(this.renderLoader('sidebar-pagination-spinner'))
         }
 
         if (this.props.showCongratsMessage) {
@@ -224,12 +421,33 @@ class AnnotationsSidebar extends React.Component<
 
         return annots
     }
+
+    render() {
+        return (
+            <>
+                {/* {this.renderSearchSection()} */}
+                {this.renderNewAnnotation()}
+                {this.renderResultsBody()}
+            </>
+        )
+    }
 }
 
 export default onClickOutside(AnnotationsSidebar)
 
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css
+
+const EmptyMessage = () => (
+    <FollowedListsMsgContainer>
+        <FollowedListsMsg>¯\_(ツ)_/¯</FollowedListsMsg>
+        <FollowedListsMsgHead>
+            You made no notes or highlights
+            <br />
+            on this page
+        </FollowedListsMsgHead>
+    </FollowedListsMsgContainer>
+)
 
 const ButtonStyled = styled.button`
     cursor: pointer;
@@ -276,6 +494,86 @@ const SearchInputStyled = styled(TextInputControlled)`
         box-shadow: none;
     }
     padding: 5px 0px;
+`
+
+const FollowedListNotesContainer = styled(Margin)`
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+`
+
+const FollowedNotesContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+`
+
+const FollowedListsMsgContainer = styled.div`
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex-direction: column;
+`
+
+const FollowedListsMsgHead = styled.span`
+    font-weight: bold;
+    text-align: center;
+    color: ${(props) => props.theme.colors.primary};
+    padding-top: 10px;
+    padding-bottom: 5px;
+    font-size: 16px;
+    line-height: 25px;
+`
+const FollowedListsMsg = styled.span`
+    color: ${(props) => props.theme.colors.darkgrey};
+    text-align: center;
+    font-size: 14px;
+    line-height: 25px;
+`
+
+const FollowedListsContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding: 10px 10px 100px 10px;
+`
+
+const FollowedListRow = styled(Margin)`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+`
+
+const FollowedListTitleContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+    width: 90%;
+`
+
+const FollowedListTitle = styled.span`
+    font-weight: bold;
+    font-size: 14px;
+    white-space: nowrap;
+    max-width: 85%;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+`
+
+const FollowedListNoteCount = styled(Margin)`
+    font-weight: bold;
+    border-radius: 30px;
+    background-color: ${(props) => props.theme.colors.grey};
+    width: 30px;
+    font-size: 12px;
+`
+
+const FollowedListDropdownIcon = styled(Icon)<{ isExpanded: boolean }>`
+    transform: ${(props) => (props.isExpanded ? 'none' : 'rotate(-90deg)')};
 `
 
 const CloseIconStyled = styled.div`
@@ -392,15 +690,6 @@ const TopSectionStyled = styled.div`
     overflow: hidden;
     padding: 0 5px;
 `
-
-const EmptyMessage = () => (
-    <EmptyMessageStyled>
-        <EmptyMessageEmojiStyled>¯\_(ツ)_/¯</EmptyMessageEmojiStyled>
-        <EmptyMessageTextStyled>
-            No notes or highlights on this page
-        </EmptyMessageTextStyled>
-    </EmptyMessageStyled>
-)
 
 const EmptyMessageStyled = styled.div`
     width: 80%;

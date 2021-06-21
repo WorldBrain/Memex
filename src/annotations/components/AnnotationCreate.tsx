@@ -197,7 +197,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                 </SaveBtnText>
                 <SaveBtnArrow horizontal="1px">
                     <DropdownMenuBtn
-                        btnChildren={<Icon icon="triangle" height="10px" />}
+                        btnChildren={<Icon icon="triangle" height="8px" />}
                         isOpen={this.state.isPrivacyLevelShown}
                         toggleOpen={() =>
                             this.setState((state) => ({

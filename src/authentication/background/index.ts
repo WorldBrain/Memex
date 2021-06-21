@@ -66,6 +66,7 @@ export class AuthBackground {
                 prefix: 'auth.',
             },
         )
+
         this.remoteFunctions = {
             getCurrentUser: () => this.authService.getCurrentUser(),
             signOut: () => this.authService.signOut(),
@@ -135,6 +136,10 @@ export class AuthBackground {
                     id: user.id,
                 })
                 return this._userProfile
+            },
+            getUserByReference: async (reference) => {
+                const userManagement = await this.getUserManagement()
+                return userManagement.getUser(reference)
             },
             updateUserProfile: async (updates) => {
                 const user = await this.authService.getCurrentUser()

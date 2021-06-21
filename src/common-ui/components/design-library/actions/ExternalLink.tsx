@@ -9,13 +9,16 @@ import {
 const StyledExternalLink = styled.a`
     cursor: pointer;
     display: inline-block;
-    font-size: 1em;
+    font-size: inherit;
+    color: inherit;
+    font-family: inherit;
 `
 const StyledExternalLinkText = styled(TypographyActionText)`
-    font-size: 1em;
+    font-size: inherit;
     text-decoration-line: underline;
     font-weight: normal;
-    color: ${colorText};
+    font-family: inherit;
+    color: inherit;
     margin-right: 4px;
     &::after {
         content: '↗';

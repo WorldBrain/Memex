@@ -13,6 +13,7 @@ import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { TaskState } from 'ui-logic-core/lib/types'
 import DisplayNameSetup from 'src/overview/sharing/components/DisplayNameSetup'
+import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 
 const styles = require('./styles.css')
 
@@ -22,8 +23,6 @@ const dev = process.env.NODE_ENV !== 'production'
 
 const DisplayNameBox = styled.div`
     & > div {
-
-
         & > div {
             display: flex;
             flex-direction: row;
@@ -61,7 +60,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
         loadState: 'running',
         isPioneer: false,
         updateProfileState: 'pristine',
-        newDisplayName: ''
+        newDisplayName: '',
     }
 
     openPortal = async () => {
@@ -144,6 +143,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
             <FullPage>
                 {user != null && (
                     <div className={styles.AccountInfoBox}>
+                        <PioneerPlanBanner width={'fill-available'} />
                         {this.state.isPioneer &&
                             this.state.loadState === 'success' && (
                                 <div className={styles.pioneerBox}>
@@ -158,8 +158,8 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                         {this.state.isPioneer && (
                             <>
                                 <TypographyInputTitle>
-                                        {' '}
-                                        Display Name{' '}
+                                    {' '}
+                                    Display Name{' '}
                                 </TypographyInputTitle>
                                 <DisplayNameBox>
                                     <DisplayNameSetup
@@ -222,7 +222,10 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                     />
                                     {this.state.loadingChargebee ||
                                     this.props.loadingUser ? (
-                                        <PrimaryAction label={<LoadingIndicator />} onClick={() => null}/>
+                                        <PrimaryAction
+                                            label={<LoadingIndicator />}
+                                            onClick={() => null}
+                                        />
                                     ) : (
                                         <PrimaryAction
                                             onClick={this.openPortal}
@@ -268,7 +271,8 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                         defaultValue={user.subscriptionStatus}
                                         readOnly
                                     />
-                                    <PrimaryAction onClick={this.openPortal}
+                                    <PrimaryAction
+                                        onClick={this.openPortal}
                                         label={'Add Payment Methods'}
                                     />
                                 </div>
@@ -327,9 +331,15 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                         <div className={styles.buttonBox}>
                             {this.state.loadingChargebee ||
                             this.props.loadingUser ? (
-                                <PrimaryAction label={<LoadingIndicator />} onClick={() => null}/>
+                                <PrimaryAction
+                                    label={<LoadingIndicator />}
+                                    onClick={() => null}
+                                />
                             ) : (
-                                <PrimaryAction label={'Refresh Subscription Status'} onClick={this.handleRefresh}/>
+                                <PrimaryAction
+                                    label={'Refresh Subscription Status'}
+                                    onClick={this.handleRefresh}
+                                />
                             )}
                         </div>
                         {dev === true && (

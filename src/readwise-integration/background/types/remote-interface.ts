@@ -4,6 +4,7 @@ import {
     RemoteFunctionWithoutExtraArgs,
 } from 'src/util/webextensionRPC'
 import { ReadwiseAPIKeyValidation } from './api'
+import { Annotation } from 'src/annotations/types'
 
 export interface ReadwiseInterface<Role extends RemoteFunctionRole> {
     validateAPIKey: RemoteFunctionWithoutExtraArgs<
@@ -19,7 +20,10 @@ export interface ReadwiseInterface<Role extends RemoteFunctionRole> {
     >
     uploadAllAnnotations: RemoteFunctionWithoutExtraArgs<
         Role,
-        { queueInteraction: ActionQueueInteraction },
+        {
+            queueInteraction: ActionQueueInteraction
+            annotationFilter?: (annotation: Annotation) => boolean
+        },
         void
     >
 }

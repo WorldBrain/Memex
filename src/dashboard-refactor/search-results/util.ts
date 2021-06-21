@@ -8,7 +8,6 @@ import {
 } from 'src/search/background/types'
 import {
     PageData,
-    NormalizedState,
     PageResult,
     PageResultsByDay,
     NoteData,
@@ -22,13 +21,14 @@ import {
 import { Annotation } from 'src/annotations/types'
 import { PAGE_SEARCH_DUMMY_DAY } from '../constants'
 import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
+import { initNormalizedState, mergeNormalizedStates } from 'src/common-ui/utils'
 
 export const notesTypeToString = (type: NotesType): string => {
     if (type === 'user') {
         return 'Your notes'
     }
     if (type === 'followed') {
-        return 'Shared with you'
+        return 'Shared with me'
     }
     return 'Results'
 }
@@ -37,7 +37,7 @@ export const stringToNotesType = (str: string): NotesType => {
     if (str === 'Your notes') {
         return 'user'
     }
-    if (str === 'Shared with you') {
+    if (str === 'Shared with me') {
         return 'followed'
     }
     return 'search'
@@ -50,11 +50,6 @@ export const formatDayGroupTime = (day: number) =>
         lastWeek: '[Last] dddd',
         sameElse: 'dddd, DD MMMM, YYYY',
     })
-
-export const initNormalizedState = <T>(): NormalizedState<T> => ({
-    allIds: [],
-    byId: {},
-})
 
 export const getInitialFormState = (): NoteFormState => ({
     tags: [],
@@ -120,7 +115,6 @@ export const getInitialNoteResultState = (): NoteResult => ({
     shareMenuShowStatus: 'hide',
     isCopyPasterShown: false,
     editNoteForm: getInitialFormState(),
-    hoverState: null,
 })
 
 const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
@@ -245,19 +239,6 @@ export const pageSearchResultToState: SearchResultToState = (
             },
         },
     }
-}
-
-export const mergeNormalizedStates = <T>(
-    ...toMerge: NormalizedState<T>[]
-): NormalizedState<T> => {
-    const merged: NormalizedState<T> = initNormalizedState()
-
-    for (const state of toMerge) {
-        merged.allIds = [...new Set([...merged.allIds, ...state.allIds])]
-        merged.byId = { ...merged.byId, ...state.byId }
-    }
-
-    return merged
 }
 
 export const mergeSearchResults = (

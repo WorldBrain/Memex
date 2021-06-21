@@ -66,7 +66,7 @@ async function createDependencies() {
         },
     ]
 
-    const sidebarDependencies: AnnotationsSidebarProps = {
+    const sidebarDependencies: any = {
         renderShareMenuForAnnotation: () => null,
         renderCopyPasterForAnnotation: () => null,
         renderTagsPickerForAnnotation: () => null,
@@ -117,6 +117,7 @@ async function createDependencies() {
         }),
         handleScrollPagination: () => undefined,
         onClickOutside: action('clickOutside'),
+        notesType: 'private',
         annotations,
         theme: {},
     }

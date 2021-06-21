@@ -2,7 +2,7 @@ import TypedEventEmitter from 'typed-emitter'
 
 import { Highlight } from 'src/highlighting/types'
 import { ResultWithIndex } from 'src/overview/types'
-import { SidebarContainerState } from 'src/sidebar/annotations-sidebar/containers/logic'
+import { SidebarDisplayMode } from './containers/types'
 
 export interface Page {
     url?: string
@@ -22,17 +22,16 @@ export interface ResultsByUrl {
 
 export { ResultWithIndex }
 
-export type StateSelector<ReturnType> = (
-    state: SidebarContainerState,
-) => ReturnType
-
-///
-
 export interface HighlighterEvents {
     renderHighlight: (args: { highlight: Highlight }) => void
+    renderHighlights: (args: {
+        highlights: Highlight[]
+        displayMode?: SidebarDisplayMode
+    }) => void
     highlightAndScroll: (args: { url: string }) => void
     removeTemporaryHighlights: () => void
-    removeAnnotationHighlights: (args: { url: string }) => void
+    removeAnnotationHighlight: (args: { url: string }) => void
+    removeAnnotationHighlights: (args: { urls: string[] }) => void
     hideHighlights: () => void
     showHighlights: () => void
 }

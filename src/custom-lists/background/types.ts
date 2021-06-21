@@ -1,3 +1,5 @@
+import { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+
 export interface PageList {
     id: number
     name: string
@@ -15,6 +17,12 @@ export interface PageListEntry {
     createdAt: Date
     listId: number
     fullUrl: string
+}
+
+export interface SharedAnnotationList {
+    id: string
+    name: string
+    sharedAnnotationReferences: SharedAnnotationReference[]
 }
 
 export interface Tab {
@@ -59,6 +67,9 @@ export interface RemoteCollectionsInterface {
         skip?: number
         limit?: number
     }): Promise<PageList[]>
+    fetchFollowedListsWithAnnotations(args: {
+        normalizedPageUrl: string
+    }): Promise<SharedAnnotationList[]>
     fetchAllLists(args: {
         skip?: number
         limit?: number

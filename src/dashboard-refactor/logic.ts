@@ -24,6 +24,7 @@ import { DisableableState } from './header/sync-status-menu/types'
 import { DRAG_EL_ID } from './components/DragElement'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
+import { mergeNormalizedStates } from 'src/common-ui/utils'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -89,6 +90,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 shouldFormsAutoFocus: false,
                 isListShareMenuShown: false,
                 isSearchCopyPasterShown: false,
+                isSubscriptionBannerShown: false,
                 pageData: {
                     allIds: [],
                     byId: {},
@@ -182,10 +184,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState: State,
     ): Promise<State> {
         const {
+            [STORAGE_KEYS.subBannerDismissed]: subBannerDismissed,
             [STORAGE_KEYS.listSidebarLocked]: listsSidebarLocked,
             [STORAGE_KEYS.onboardingMsgSeen]: onboardingMsgSeen,
             [STORAGE_KEYS.mobileAdSeen]: mobileAdSeen,
         } = await this.options.localStorage.get([
+            STORAGE_KEYS.subBannerDismissed,
             STORAGE_KEYS.listSidebarLocked,
             STORAGE_KEYS.onboardingMsgSeen,
             STORAGE_KEYS.mobileAdSeen,
@@ -195,6 +199,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             searchResults: {
                 showMobileAppAd: { $set: !mobileAdSeen },
                 showOnboardingMsg: { $set: !onboardingMsgSeen },
+                isSubscriptionBannerShown: { $set: !subBannerDismissed },
             },
             listsSidebar: {
                 isSidebarLocked: { $set: listsSidebarLocked ?? true },
@@ -279,7 +284,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         const { listsBG, contentShareBG } = this.options
 
         const remoteToLocalIdDict: { [remoteId: string]: number } = {}
-        const mutation: UIMutation<State['listsSidebar']> = {}
+
         await executeUITask(
             this,
             (taskState) => ({
@@ -307,35 +312,24 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
                     listIds.push(list.id)
                     listData[list.id] = {
+                        remoteId,
                         id: list.id,
                         name: list.name,
-                        remoteId,
+                        isOwnedList: true,
                     }
                 }
 
-                mutation.listData = { $merge: listData }
-                mutation.localLists = {
-                    allListIds: { $set: listIds },
-                    filteredListIds: { $set: listIds },
-                }
-
-                this.emitMutation({ listsSidebar: mutation })
+                this.emitMutation({
+                    listsSidebar: {
+                        listData: { $merge: listData },
+                        localLists: {
+                            allListIds: { $set: listIds },
+                            filteredListIds: { $set: listIds },
+                        },
+                    },
+                })
             },
         )
-
-        const nextState = this.withMutation(previousState, {
-            listsSidebar: mutation,
-        })
-
-        // Collect a set of all remote IDs for local lists that are shared/collaborative
-        const sharedLocalListRemoteIds = new Set<string>()
-        for (const list of nextState.listsSidebar.localLists.allListIds.map(
-            (listId) => nextState.listsSidebar.listData[listId],
-        )) {
-            if (list.remoteId) {
-                sharedLocalListRemoteIds.add(list.remoteId)
-            }
-        }
 
         await executeUITask(
             this,
@@ -352,14 +346,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const listData: { [id: number]: ListData } = {}
 
                 for (const list of followedLists) {
-                    const isJoinedList =
-                        !list.isOwned &&
-                        sharedLocalListRemoteIds.has(list.remoteId)
                     const localId =
                         remoteToLocalIdDict[list.remoteId] ?? list.id
 
                     // Joined lists appear in "Local lists" section, so don't include them here
-                    if (!isJoinedList) {
+                    if (!remoteToLocalIdDict[list.remoteId]) {
                         followedListIds.push(localId)
                     }
 
@@ -367,7 +358,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         id: localId,
                         name: list.name,
                         remoteId: list.remoteId,
-                        isJoinedList,
+                        isOwnedList: list.isOwned,
                     }
                 }
 
@@ -471,17 +462,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                               },
                               pageData: {
                                   $apply: (prev) =>
-                                      utils.mergeNormalizedStates(
-                                          prev,
-                                          pageData,
-                                      ),
+                                      mergeNormalizedStates(prev, pageData),
                               },
                               noteData: {
                                   $apply: (prev) =>
-                                      utils.mergeNormalizedStates(
-                                          prev,
-                                          noteData,
-                                      ),
+                                      mergeNormalizedStates(prev, noteData),
                               },
                               areResultsExhausted: { $set: resultsExhausted },
                               noResultsType: { $set: noResultsType },
@@ -1530,20 +1515,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setNoteHover: EventHandler<'setNoteHover'> = ({ event }) => {
-        this.emitMutation({
-            searchResults: {
-                noteData: {
-                    byId: {
-                        [event.noteId]: {
-                            hoverState: { $set: event.hover },
-                        },
-                    },
-                },
-            },
-        })
-    }
-
     setNoteTags: EventHandler<'setNoteTags'> = async ({ event }) => {
         this.emitMutation({
             searchResults: {
@@ -1609,6 +1580,17 @@ export class DashboardLogic extends UILogic<State, Events> {
                 action: event.analyticsAction,
             }),
         ])
+    }
+
+    dismissSubscriptionBanner: EventHandler<
+        'dismissSubscriptionBanner'
+    > = async () => {
+        await this.options.localStorage.set({
+            [STORAGE_KEYS.subBannerDismissed]: true,
+        })
+        this.emitMutation({
+            searchResults: { isSubscriptionBannerShown: { $set: false } },
+        })
     }
 
     dismissMobileAd: EventHandler<'dismissMobileAd'> = async () => {

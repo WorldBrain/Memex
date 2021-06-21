@@ -78,11 +78,18 @@ describe('Dashboard Refactor misc logic', () => {
 
         await logicA['options'].localStorage.set({
             [STORAGE_KEYS.listSidebarLocked]: false,
+            [STORAGE_KEYS.subBannerDismissed]: false,
         })
 
         expect(searchResultsA.state.listsSidebar.isSidebarLocked).toBe(false)
+        expect(
+            searchResultsA.state.searchResults.isSubscriptionBannerShown,
+        ).toBe(false)
         await searchResultsA.processEvent('init', null)
         expect(searchResultsA.state.listsSidebar.isSidebarLocked).toBe(false)
+        expect(
+            searchResultsA.state.searchResults.isSubscriptionBannerShown,
+        ).toBe(true)
 
         const {
             searchResults: searchResultsB,
@@ -91,11 +98,18 @@ describe('Dashboard Refactor misc logic', () => {
 
         await logicB['options'].localStorage.set({
             [STORAGE_KEYS.listSidebarLocked]: true,
+            [STORAGE_KEYS.subBannerDismissed]: true,
         })
 
         expect(searchResultsB.state.listsSidebar.isSidebarLocked).toBe(false)
+        expect(
+            searchResultsB.state.searchResults.isSubscriptionBannerShown,
+        ).toBe(false)
         await searchResultsB.processEvent('init', null)
         expect(searchResultsB.state.listsSidebar.isSidebarLocked).toBe(true)
+        expect(
+            searchResultsB.state.searchResults.isSubscriptionBannerShown,
+        ).toBe(false)
     })
 
     it('should get sharing access state during init logic', async ({

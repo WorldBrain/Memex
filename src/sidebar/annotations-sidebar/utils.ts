@@ -1,3 +1,5 @@
+import { SidebarDisplayMode } from './containers/types'
+
 // Compute the maximum width of a Tag pill
 const avgLetterPx = 8
 // Padding + Margin + X button
@@ -25,4 +27,14 @@ export const maxPossibleTags = (tags: string[]) => {
         tagsAllowed++
     }
     return tagsAllowed
+}
+
+export const sidebarNotesTypeToString = (mode: SidebarDisplayMode): string => {
+    switch (mode) {
+        case 'private-notes':
+            return 'Notes by me'
+        case 'shared-notes':
+        default:
+            return 'Shared with me'
+    }
 }

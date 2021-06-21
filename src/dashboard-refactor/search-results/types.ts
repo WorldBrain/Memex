@@ -15,16 +15,13 @@ import {
 import { Anchor } from 'src/highlighting/types'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import type { AnalyticsEvents } from 'src/analytics/types'
+import { NormalizedState } from 'src/common-ui/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
     onTagPickerBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
-    onMainContentHover: React.MouseEventHandler
-    onFooterHover: React.MouseEventHandler
-    onTagsHover: React.MouseEventHandler
-    onUnhover: React.MouseEventHandler
 }
 
 export type PageInteractionProps = Omit<
@@ -37,6 +34,10 @@ export type PageInteractionProps = Omit<
     onNotesBtnClick: React.MouseEventHandler
     onPageDrag: React.DragEventHandler
     onPageDrop: React.DragEventHandler
+    onMainContentHover: React.MouseEventHandler
+    onFooterHover: React.MouseEventHandler
+    onTagsHover: React.MouseEventHandler
+    onUnhover: React.MouseEventHandler
 }
 
 // NOTE: Derived type - edit the original
@@ -53,7 +54,6 @@ export type NoteInteractionProps = Omit<
 > & {
     updateShareInfo: (info: Partial<AnnotationSharingInfo>) => void
     updateTags: PickerUpdateHandler
-    onNoteHover: React.MouseEventHandler
     onEditCancel: React.MouseEventHandler
     onEditConfirm: React.MouseEventHandler
     onEditBtnClick: React.MouseEventHandler
@@ -87,11 +87,6 @@ export type SearchResultToState = (
 
 export type SearchType = 'pages' | 'notes'
 export type NotesType = 'search' | 'user' | 'followed'
-
-export interface NormalizedState<T> {
-    allIds: string[]
-    byId: { [id: string]: T }
-}
 
 export interface NoteFormState {
     isTagPickerShown: boolean
@@ -130,7 +125,6 @@ export type NoResultsType =
     | 'no-results'
     | null
 export type ResultHoverState = 'main-content' | 'footer' | 'tags' | null
-export type NoteResultHoverState = ResultHoverState | 'note'
 
 export interface NoteResult {
     isEditing: boolean
@@ -139,7 +133,6 @@ export interface NoteResult {
     shareMenuShowStatus: 'show' | 'hide' | 'show-n-share'
     isCopyPasterShown: boolean
     editNoteForm: NoteFormState
-    hoverState: NoteResultHoverState
 }
 
 export interface PageResult {
@@ -176,6 +169,7 @@ export interface RootState {
     isListShareMenuShown: boolean
     shouldFormsAutoFocus: boolean
     isSearchCopyPasterShown: boolean
+    isSubscriptionBannerShown: boolean
 
     /** Holds page data specific to each page occurrence on a specific day. */
     results: NestedResults
@@ -226,8 +220,10 @@ export type Events = UIEvent<{
         link: string
         analyticsAction: AnalyticsEvents['ContentSharing']
     }
+
     dismissMobileAd: null
     dismissOnboardingMsg: null
+    dismissSubscriptionBanner: null
 
     // Page data state mutations (*shared with all* occurences of the page in different days)
     setPageTags: {
@@ -281,7 +277,6 @@ export type Events = UIEvent<{
         mouseEvent: React.MouseEvent
     }
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
-    setNoteHover: NoteEventArgs & { hover: NoteResultHoverState }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
     updateNoteShareInfo: NoteEventArgs & {

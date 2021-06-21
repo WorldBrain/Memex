@@ -116,7 +116,7 @@ export class ReadwiseBackground {
 
     uploadAllAnnotations: ReadwiseInterfaceMethod<
         'uploadAllAnnotations'
-    > = async ({ queueInteraction }) => {
+    > = async ({ queueInteraction, annotationFilter = () => true }) => {
         const getFullPageUrl = makePageDataCache({
             getPageData: this.options.getPageData,
         })
@@ -130,6 +130,10 @@ export class ReadwiseBackground {
         }
 
         for await (const annotation of this.options.streamAnnotations()) {
+            if (!annotationFilter(annotation)) {
+                continue
+            }
+
             const tags = await this.options.getAnnotationTags(annotation.url)
 
             annotationBatch.push({ ...annotation, tags })
@@ -355,7 +359,7 @@ function annotationToReadwise(
         return text
     }
 
-    let location = annotation.createdWhen.getTime()
+    let location: number | undefined
     if (annotation.selector) {
         const selector = getAnchorSelector(
             annotation.selector,
@@ -369,7 +373,7 @@ function annotationToReadwise(
         source_url: options.pageData.fullUrl,
         source_type: 'article',
         note: formatNote(annotation),
-        location_type: 'page',
+        location_type: 'order',
         location,
         highlighted_at: annotation.createdWhen,
         text: annotation?.body?.length

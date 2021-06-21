@@ -1,14 +1,14 @@
 .memex-highlight {
-    background: #d4e8ff;
+    background: #ffff3c66;
     transition: all 0.1s;
     cursor: pointer;
 
     &.medium {
-        background: #89e9ff;
+        background: #d4e8ff;
     }
 
     &.dark {
-        background: #89e9ff;
+        background: #d4e8ff;
     }
 
     &.tmp {
