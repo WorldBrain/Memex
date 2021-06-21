@@ -11,10 +11,14 @@ import {
 } from 'src/tests/background-integration-tests'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { createLazyMemoryServerStorage } from 'src/storage/server'
+import { createLazyTestServerStorage } from 'src/storage/server'
+import {
+    PersonalCloudChangeSourceBus,
+    StorexPersonalCloudBackend,
+} from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
+import { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher'
 
-// to shut up linting
-const debug = console['log'].bind(console)
+const debug = (...args: any[]) => console['log'](...args, '\n\n\n')
 
 type SyncTestSequence = SyncTestStep[]
 interface SyncTestStep {
@@ -28,13 +32,9 @@ export function registerSyncBackgroundIntegrationTests(
     options?: BackgroundIntegrationTestSetupOpts,
 ) {
     describe('Sync tests', () => {
-        describe('should work when synced in various patterns across 2 devices', () => {
-            registerSyncBackAndForthTests(test, options)
-        })
+        registerSyncBackAndForthTests(test, options)
         if (!test.skipConflictTests) {
-            describe('should work when doing the same action on two devices, then syncing', () => {
-                registerConflictGenerationTests(test, options)
-            })
+            registerConflictGenerationTests(test, options)
         }
     })
 }
@@ -50,7 +50,9 @@ function registerSyncBackAndForthTests(
     const testOptions = test.instantiate({ isSyncTest: true })
     const syncPatterns = generateSyncPatterns([0, 1], testOptions.steps.length)
     for (const pattern of syncPatterns) {
-        const description = `should work when synced in pattern ${getReadablePattern(
+        const description = `${
+            test.description
+        } - 2 device sync back and forth - should work when synced in pattern ${getReadablePattern(
             pattern,
         )}`
         it(maybeMark(description, test.mark && '!!!'), async () => {
@@ -128,8 +130,7 @@ function registerConflictGenerationTests(
     test: BackgroundIntegrationTest,
     options?: BackgroundIntegrationTestSetupOpts,
 ) {
-    const description =
-        'should work when device A syncs an action, device B does the same action, then syncs'
+    const description = `${test.description} - should work when device A syncs an action, device B does the same action, then syncs`
     it(maybeMark(description, test.mark && '!!!'), async () => {
         const testInstance = test.instantiate({ isSyncTest: true })
         const sequence = generateConfictingActionsTestSequence({ testInstance })
@@ -219,6 +220,7 @@ async function runSyncBackgroundTest(
     const testInstance = await options.test.instantiate({ isSyncTest: true })
     for (const setup of setups) {
         await testInstance.setup?.({ setup })
+        await setup.backgroundModules.personalCloud.setup()
     }
 
     for (const sequenceStep of options.sequence) {
@@ -230,7 +232,7 @@ async function runSyncBackgroundTest(
             sequenceStep.deviceIndex,
         )
 
-        if (integrationTestStep.debug) {
+        if (testInstance.debug || integrationTestStep.debug) {
             debug(
                 `SYNC TEST, action ${sequenceStep.action}, device ${readableDeviceIndex}`,
             )
@@ -245,30 +247,30 @@ async function runSyncBackgroundTest(
                 setup,
             })
         } else if (sequenceStep.action === 'execute') {
-            if (integrationTestStep.expectedStorageOperations) {
-                setup.storageOperationLogger.enabled = true
-            }
-            const timeBeforeStepExecution = Date.now()
+            // if (integrationTestStep.expectedStorageOperations) {
+            //     setup.storageOperationLogger.enabled = true
+            // }
+            // const timeBeforeStepExecution = Date.now()
             await integrationTestStep.execute({ setup })
 
-            setup.storageOperationLogger.enabled = false
-            if (integrationTestStep.expectedStorageOperations) {
-                const executedOperations = setup.storageOperationLogger.popOperations()
-                expect(
-                    executedOperations.filter(
-                        (entry) => entry.operation[1] !== 'clientSyncLogEntry',
-                    ),
-                ).toEqual(integrationTestStep.expectedStorageOperations())
-            }
+            // setup.storageOperationLogger.enabled = false
+            // if (integrationTestStep.expectedStorageOperations) {
+            //     const executedOperations = setup.storageOperationLogger.popOperations()
+            //     expect(
+            //         executedOperations.filter(
+            //             (entry) => entry.operation[1] !== 'clientSyncLogEntry',
+            //         ),
+            //     ).toEqual(integrationTestStep.expectedStorageOperations())
+            // }
 
-            if (integrationTestStep.expectedSyncLogEntries) {
-                const addedEntries = await setup.backgroundModules.sync.clientSyncLog.getEntriesCreatedAfter(
-                    timeBeforeStepExecution,
-                )
-                expect(addedEntries).toEqual(
-                    integrationTestStep.expectedSyncLogEntries(),
-                )
-            }
+            // if (integrationTestStep.expectedSyncLogEntries) {
+            //     const addedEntries = await setup.backgroundModules.sync.clientSyncLog.getEntriesCreatedAfter(
+            //         timeBeforeStepExecution,
+            //     )
+            //     expect(addedEntries).toEqual(
+            //         integrationTestStep.expectedSyncLogEntries(),
+            //     )
+            // }
         } else if (sequenceStep.action === 'sync') {
             await sync(sequenceStep.deviceIndex, {
                 debug: integrationTestStep.debug,
@@ -277,21 +279,42 @@ async function runSyncBackgroundTest(
     }
 }
 
-async function setupSyncBackgroundTest(
+export async function setupSyncBackgroundTest(
     options: {
         deviceCount: number
         debugStorageOperations?: boolean
+        withTestUser?: boolean
+        superuser?: boolean
+        serverChangeWatchSettings?: Omit<
+            ChangeWatchMiddlewareSettings,
+            'storageManager'
+        >
     } & BackgroundIntegrationTestOptions,
 ) {
     const userId = TEST_USER.id
 
-    const getServerStorage = await createLazyMemoryServerStorage()
+    const getServerStorage = await createLazyTestServerStorage({
+        changeWatchSettings: options.serverChangeWatchSettings,
+    })
+    const serverStorage = await getServerStorage()
+    const cloudChangeBus = new PersonalCloudChangeSourceBus()
+
+    let now = 555
+    const getNow = () => now++
     const setups: BackgroundIntegrationTestSetup[] = []
     for (let i = 0; i < options.deviceCount; ++i) {
+        const personalCloudBackend = new StorexPersonalCloudBackend({
+            storageManager: serverStorage.storageManager,
+            changeSource: cloudChangeBus.getView(),
+            getUserId: async () => userId,
+            getNow,
+        })
+
         setups.push(
             await setupBackgroundIntegrationTest({
                 ...options,
                 getServerStorage,
+                personalCloudBackend,
             }),
         )
     }
@@ -305,11 +328,12 @@ async function setupSyncBackgroundTest(
         // })
         // deviceIds.push(deviceId)
 
+        await setup.backgroundModules.personalCloud.setup()
         const memoryAuth = setup.backgroundModules.auth
             .authService as MemoryAuthService
-        memoryAuth.setUser({ ...TEST_USER })
-        await setup.backgroundModules.sync.continuousSync.initDevice()
-        await setup.backgroundModules.sync.continuousSync.enableContinuousSync()
+        await memoryAuth.setUser({ ...TEST_USER })
+        // await setup.backgroundModules.sync.continuousSync.initDevice()
+        // await setup.backgroundModules.sync.continuousSync.enableContinuousSync()
     }
 
     // const changeDetectors = setups.map(setup => new StorageChangeDetector({
@@ -323,18 +347,10 @@ async function setupSyncBackgroundTest(
         syncOptions: { debug: boolean },
     ) => {
         const setup = setups[deviceIndex]
-        await setup.backgroundModules.sync.continuousSync.doIncrementalSync({
-            debug: syncOptions.debug,
-            prettifier: (object) =>
-                require('util').inspect(object, {
-                    depth: null,
-                    color: true,
-                    indent: 4,
-                }),
-        })
+        await setup.backgroundModules.personalCloud.waitForSync()
     }
 
-    return { userId, setups, sync }
+    return { userId, setups, sync, serverStorage, getNow }
 }
 
 const getReadablePattern = (pattern: number[]) =>

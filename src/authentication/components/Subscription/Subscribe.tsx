@@ -39,7 +39,7 @@ const PioneerPlanContentBox = styled.div`
 `
 
 const PioneerPlanTitle = styled.div`
-    font-weight: bold; 
+    font-weight: bold;
     font-size: 14px;
 `
 
@@ -55,12 +55,9 @@ const PioneerPlanButtonBox = styled.div`
     margin-right: -5px;
 `
 
-const PioneerPlanLearnMoreButton = styled(SecondaryAction)`
-`
+const PioneerPlanLearnMoreButton = styled(SecondaryAction)``
 
-const PioneerPlanUpgradeButton = styled(PrimaryAction)`
-`
-
+const PioneerPlanUpgradeButton = styled(PrimaryAction)``
 
 type Props = {
     onClose: () => void
@@ -176,7 +173,7 @@ class Subscribe extends React.Component<Props, State> {
 
     renderPlans = () => (
         <div className={styles.PriceBox}>
-            <PioneerPlanBanner/>
+            <PioneerPlanBanner />
 
             <PricingPlanTitle className={''}>
                 ⭐️ Upgrade your Memex

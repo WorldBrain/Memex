@@ -16,13 +16,14 @@ const PioneerPlanContainer = styled.div`
     margin-bottom: 30px;
     width: ${(props) => props.width ?? '760px'};
     flex-direction: ${(props) => props.direction ?? 'row'};
-    font-family: 'Poppins',
+    font-family: 'Poppins';
 `
 const PioneerPlanContentBox = styled.div`
     display: flex;
     flex-direction: column;
     padding-bottom: ${(props) => (props.direction === 'column' ? '15px' : '0')};
-    text-align: ${(props) => (props.direction === 'column' ? 'center' : 'unset')};
+    text-align: ${(props) =>
+        props.direction === 'column' ? 'center' : 'unset'};
 `
 
 const PioneerPlanTitle = styled.div`
@@ -68,8 +69,8 @@ const PioneerPlanBanner = ({
                 Support Memex with the Pioneer Plan
             </PioneerPlanTitle>
             <PioneerPlanDescription>
-                Memex is about to evolve significantly. <br /> Become an early supporter and get a
-                37% discount.
+                Memex is about to evolve significantly. <br /> Become an early
+                supporter and get a 37% discount.
             </PioneerPlanDescription>
         </PioneerPlanContentBox>
         <PioneerPlanButtonBox>
