@@ -553,10 +553,8 @@ describe('Personal cloud translation layer', () => {
                 ], { skip: 4 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
-                personalTag: [remoteData.personalTag.first],
-                personalTagConnection: [
-                    remoteData.personalTagConnection.pageTag,
-                ],
+                personalTag: [testTags.first],
+                personalTagConnection: [testConnections.pageTag],
             })
             // prettier-ignore
             await testDownload([
@@ -564,7 +562,70 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 2 })
         })
 
-        it.todo('should connect existing page tags')
+        it('should connect existing page tags', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('tags')
+                .createObject(LOCAL_TEST_DATA_V24.tags.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[0].storageManager.collection('tags').createObject({
+                url: LOCAL_TEST_DATA_V24.pages.second.url,
+                name: LOCAL_TEST_DATA_V24.tags.first.name,
+            })
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+            const testTags = remoteData.personalTag
+            const testConnections = remoteData.personalTagConnection
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'personalTag',
+                    'personalTagConnection',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalTagConnection', testConnections.pageTag.id + 1],
+                ], { skip: 6 }),
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
+                personalTag: [testTags.first],
+                personalTagConnection: [
+                    testConnections.pageTag,
+                    {
+                        ...testConnections.pageTag,
+                        id: testConnections.pageTag.id + 1,
+                        objectId: testMetadata.second.id,
+                    },
+                ],
+            })
+
+            await testDownload(
+                [
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'tags',
+                        object: {
+                            url: LOCAL_TEST_DATA_V24.pages.second.url,
+                            name: LOCAL_TEST_DATA_V24.tags.first.name,
+                        },
+                    },
+                ],
+                { skip: 3 },
+            )
+        })
 
         it('should remove page tags', async () => {
             const {
@@ -666,14 +727,94 @@ describe('Personal cloud translation layer', () => {
                 personalTagConnection: [testConnections.annotationTag],
                 personalTag: [testTags.first],
             })
-            // prettier-ignore
-            await testDownload([
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.first },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'tags', object: LOCAL_TEST_DATA_V24.tags.first },
-            ], { skip: 2 })
+
+            await testDownload(
+                [
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'annotations',
+                        object: LOCAL_TEST_DATA_V24.annotations.first,
+                    },
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'tags',
+                        object: {
+                            name: LOCAL_TEST_DATA_V24.tags.first.name,
+                            url: LOCAL_TEST_DATA_V24.annotations.first.url,
+                        },
+                    },
+                ],
+                { skip: 2 },
+            )
         })
 
-        it.todo('should connect existing note tags')
+        it('should connect existing note tags', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager.collection('tags').createObject({
+                name: LOCAL_TEST_DATA_V24.tags.first.name,
+                url: LOCAL_TEST_DATA_V24.pages.first.url,
+            })
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[0].storageManager
+                .collection('annotations')
+                .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+            await setups[0].storageManager.collection('tags').createObject({
+                name: LOCAL_TEST_DATA_V24.tags.first.name,
+                url: LOCAL_TEST_DATA_V24.annotations.first.url,
+            })
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+            const testTags = remoteData.personalTag
+            const testConnections = remoteData.personalTagConnection
+            const testAnnotations = remoteData.personalAnnotation
+            const testSelectors = remoteData.personalAnnotationSelector
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'personalAnnotation',
+                    'personalAnnotationSelector',
+                    'personalTag',
+                    'personalTagConnection',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalTagConnection', testConnections.annotationTag.id],
+                ], { skip: 8 }),
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
+                personalAnnotation: [testAnnotations.first],
+                personalAnnotationSelector: [testSelectors.first],
+                personalTagConnection: [testConnections.pageTag, testConnections.annotationTag],
+                personalTag: [testTags.first],
+            })
+
+            await testDownload(
+                [
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'tags',
+                        object: {
+                            name: LOCAL_TEST_DATA_V24.tags.first.name,
+                            url: LOCAL_TEST_DATA_V24.annotations.first.url,
+                        },
+                    },
+                ],
+                { skip: 4 },
+            )
+        })
 
         it('should remove note tags', async () => {
             const {
