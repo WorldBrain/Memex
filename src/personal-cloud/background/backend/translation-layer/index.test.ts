@@ -57,6 +57,12 @@ class IdCapturer {
                 const nextIdIndex = idsPicked++
                 const id = this.ids[collection]?.[nextIdIndex]
 
+                // TODO: determine whether current obj actually written to DB or not - skip if not
+                // if (!this.ids[collection]?.includes(object.id)) {
+                //     console.log('skippping this:', collection, object)
+                //     continue
+                // }
+
                 const mergedObject = {
                     ...object,
                     id: id ?? object.id,
@@ -163,6 +169,11 @@ describe('Personal cloud translation layer', () => {
                     )) {
                         const collectionIds =
                             serverIdCapturer.ids[tagConnection.collection]
+
+                        if (!collectionIds) {
+                            continue
+                        }
+
                         const idIndex = tagConnection.objectId - 1
                         const id = collectionIds[idIndex]
                         tagConnection.objectId = id
