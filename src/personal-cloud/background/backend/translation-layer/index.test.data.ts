@@ -44,7 +44,7 @@ const LOCAL_ANNOTATIONS_V24 = {
         body: 'This is a test highlight',
         comment: 'This is a test comment',
         createdWhen: new Date('2020-10-10'),
-        updatedWhen: new Date('2020-10-10'),
+        lastEdited: new Date('2020-10-10'),
         selector: {
             quote: 'This is a test highlight',
             descriptor: { strategy: 'hyp-anchoring', content: [] },
@@ -56,7 +56,7 @@ const LOCAL_ANNOTATIONS_V24 = {
         pageTitle: LOCAL_PAGES_V24.first.fullTitle,
         comment: 'This is another test comment',
         createdWhen: new Date('2020-10-11'),
-        updatedWhen: new Date('2020-10-20'),
+        lastEdited: new Date('2020-10-20'),
     },
 }
 
@@ -179,6 +179,8 @@ const REMOTE_ANNOTATIONS_V24 = {
         comment: LOCAL_TEST_DATA_V24.annotations.first.comment,
         createdWhen: LOCAL_TEST_DATA_V24.annotations.first.createdWhen.getTime(),
         updatedWhen: LOCAL_TEST_DATA_V24.annotations.first.createdWhen.getTime(),
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
     },
     second: {
         id: 2,
@@ -189,11 +191,18 @@ const REMOTE_ANNOTATIONS_V24 = {
         comment: LOCAL_TEST_DATA_V24.annotations.second.comment,
         createdWhen: LOCAL_TEST_DATA_V24.annotations.second.createdWhen.getTime(),
         updatedWhen: LOCAL_TEST_DATA_V24.annotations.second.createdWhen.getTime(),
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
     },
 }
 
 const REMOTE_ANNOTATION_SELECTORS_V24 = {
     first: {
+        id: 1,
+        createdWhen: 560,
+        updatedWhen: 560,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
         personalAnnotation: REMOTE_ANNOTATIONS_V24.first.id,
         selector: {
             ...LOCAL_TEST_DATA_V24.annotations.first.selector,
@@ -260,7 +269,7 @@ export const REMOTE_TEST_DATA_V24 = {
     },
     personalTag: REMOTE_TAGS_V24,
     personalTagConnection: {
-        first: {
+        pageTag: {
             id: 1,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             createdWhen: 560,
@@ -270,14 +279,14 @@ export const REMOTE_TEST_DATA_V24 = {
             personalTag: REMOTE_TAGS_V24.first.id,
             user: TEST_USER.id,
         },
-        second: {
-            id: 2,
+        annotationTag: {
+            id: 1,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
-            createdWhen: 560,
-            updatedWhen: 560,
+            createdWhen: 561,
+            updatedWhen: 561,
             collection: 'personalAnnotation',
             objectId: REMOTE_ANNOTATIONS_V24.first.id,
-            personalTag: REMOTE_TAGS_V24.second.id,
+            personalTag: REMOTE_TAGS_V24.first.id,
             user: TEST_USER.id,
         },
     },
