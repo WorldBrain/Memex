@@ -481,18 +481,41 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
-                    [DataChangeType.Delete, 'personalContentRead', testReads.first.id],
-                    [DataChangeType.Delete, 'personalContentRead', testReads.second.id],
+                    [DataChangeType.Delete, 'personalContentRead', testReads.first.id, {
+                        url: LOCAL_TEST_DATA_V24.visits.first.url,
+                        time: LOCAL_TEST_DATA_V24.visits.first.time,
+                    }],
+                    [DataChangeType.Delete, 'personalContentRead', testReads.second.id, {
+                        url: LOCAL_TEST_DATA_V24.visits.second.url,
+                        time: LOCAL_TEST_DATA_V24.visits.second.time,
+                    }],
                 ], { skip: 6 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalContentRead: [],
             })
-            // prettier-ignore
-            // await testDownload([
-            // TODO: confirm that we don't want to download a tag delete action
-            //     { type: PersonalCloudUpdateType.Delete, collection: 'visits', where: { } }
-            // ], { skip: 4 })
+
+            await testDownload(
+                [
+                    {
+                        type: PersonalCloudUpdateType.Delete,
+                        collection: 'visits',
+                        where: {
+                            url: LOCAL_TEST_DATA_V24.visits.first.url,
+                            time: LOCAL_TEST_DATA_V24.visits.first.time,
+                        },
+                    },
+                    {
+                        type: PersonalCloudUpdateType.Delete,
+                        collection: 'visits',
+                        where: {
+                            url: LOCAL_TEST_DATA_V24.visits.second.url,
+                            time: LOCAL_TEST_DATA_V24.visits.second.time,
+                        },
+                    },
+                ],
+                { skip: 2 },
+            )
         })
 
         it('should create page tags', async () => {
@@ -566,49 +589,31 @@ describe('Personal cloud translation layer', () => {
             const testTags = remoteData.personalTag
             const testConnections = remoteData.personalTagConnection
 
+            // prettier-ignore
             expect(
-                await getDatabaseContents(
-                    serverStorage.storageManager,
-                    [
-                        'personalDataChange',
-                        'personalContentMetadata',
-                        'personalContentLocator',
-                        'personalTag',
-                        'personalTagConnection',
-                    ],
-                    { getWhere: getPersonalWhere },
-                ),
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'personalTag',
+                    'personalTagConnection',
+                ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                personalDataChange: dataChanges(
-                    remoteData,
-                    [
-                        // TODO: Figure out if cloud should delete tag when no more connections left
-                        // [DataChangeType.Delete, 'personalTag', testTags.first.id],
-                        [
-                            DataChangeType.Delete,
-                            'personalTagConnection',
-                            testConnections.pageTag.id,
-                        ],
-                    ],
-                    { skip: 6 },
-                ),
-                personalContentMetadata: [
-                    testMetadata.first,
-                    testMetadata.second,
-                ],
-                personalContentLocator: [
-                    testLocators.first,
-                    testLocators.second,
-                ],
+                personalDataChange: dataChanges(remoteData, [
+                    // TODO: Figure out if cloud should delete tag when no more connections left
+                    // [DataChangeType.Delete, 'personalTag', testTags.first.id],
+                    [DataChangeType.Delete, 'personalTagConnection', testConnections.pageTag.id, LOCAL_TEST_DATA_V24.tags.first],
+                ], { skip: 6 }),
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
                 personalTagConnection: [],
                 personalTag: [testTags.first],
             })
 
             // prettier-ignore
-            // TODO: confirm that we don't want to download a tag delete action
-            // await testDownload([
-            //     { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: LOCAL_TEST_DATA_V24.tags.first },
-            // ], { skip: 0 })
+            await testDownload([
+                { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: LOCAL_TEST_DATA_V24.tags.first },
+            ], { skip: 2 })
         })
 
         it('should add note tags', async () => {
