@@ -516,7 +516,7 @@ export function createBackgroundModules(options: {
                 new FirestorePersonalCloudBackend({
                     personalCloudService: firebaseService<PersonalCloudService>(
                         'personalCloud',
-                        options.callFirebaseFunction,
+                        callFirebaseFunction,
                     ),
                     getCurrentSchemaVersion: () =>
                         getCurrentSchemaVersion(options.storageManager),

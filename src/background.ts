@@ -1,6 +1,5 @@
 import 'core-js'
 import { browser } from 'webextension-polyfill-ts'
-import { createSelfTests } from '@worldbrain/memex-common/lib/self-tests'
 
 import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
@@ -36,6 +35,7 @@ import {
     createServerStorageManager,
 } from './storage/server'
 import { createServices } from './services'
+import { createSelfTests } from './tests/self-tests'
 
 export async function main() {
     setupRpcConnection({ sideName: 'background', role: 'background' })
@@ -91,10 +91,11 @@ export async function main() {
             const response = await generateToken({})
             return response.data.iceServers
         },
-        callFirebaseFunction: <Returns>(name: string, ...args: any[]) => {
+        callFirebaseFunction: async <Returns>(name: string, ...args: any[]) => {
             const firebase = getFirebase()
             const callable = firebase.functions().httpsCallable(name)
-            return (callable(...args) as any) as Promise<Returns>
+            const result = await callable(...args)
+            return result.data as Promise<Returns>
         },
     })
     registerBackgroundModuleCollections(storageManager, backgroundModules)
@@ -149,48 +150,10 @@ export async function main() {
     window['dataSeeders'] = setupDataSeeders(storageManager)
     window['setStorageLoggingEnabled'] = setStorageLoggingEnabled
 
-    window['selfTests'] = await createSelfTests({
-        storage: {
-            manager: storageManager,
-        },
-        services: {
-            sync: backgroundModules.sync,
-        },
-        // auth: {
-        //     setUser: async ({ id }) => {
-        //         ;(backgroundModules.auth
-        //             .authService as MemoryAuthService).setUser({
-        //             ...TEST_USER,
-        //             id: id as string,
-        //         })
-        //     },
-        // },
-        intergrationTestData: {
-            insert: async () => {
-                console['log']('Inserting integration test data')
-                const listId = await backgroundModules.customLists.createCustomList(
-                    {
-                        name: 'My list',
-                    },
-                )
-                await backgroundModules.customLists.insertPageToList({
-                    id: listId,
-                    url:
-                        'http://highscalability.com/blog/2019/7/19/stuff-the-internet-says-on-scalability-for-july-19th-2019.html',
-                })
-                await backgroundModules.pages.addPage({
-                    pageDoc: {
-                        url:
-                            'http://highscalability.com/blog/2019/7/19/stuff-the-internet-says-on-scalability-for-july-19th-2019.html',
-                        content: {
-                            fullText: 'home page content',
-                            title: 'bla.com title',
-                        },
-                    },
-                    visits: [],
-                })
-            },
-        },
+    window['selfTests'] = createSelfTests({
+        backgroundModules,
+        storageManager,
+        getServerStorage,
     })
 }
 

@@ -27,6 +27,13 @@ export default class FirestorePersonalCloudBackend
     }
 
     async *streamUpdates(): AsyncIterableIterator<PersonalCloudUpdateBatch> {
+        const {
+            settingStore,
+            personalCloudService,
+            getCurrentSchemaVersion,
+            getUserChangesReference,
+        } = this.options
+
         let addedResolvable = createResolvable()
         let lastSeen = 0
         let cleanup = async () => {}
@@ -47,50 +54,78 @@ export default class FirestorePersonalCloudBackend
 
             addedResolvable = createResolvable()
             lastSeen = (await this.options.settingStore.get('lastSeen')) ?? 0
-            const changesReference = await this.options.getUserChangesReference()
+            const changesReference = await getUserChangesReference()
             if (!changesReference) {
                 cleanup = async () => {}
                 return
             }
 
+            // console.log('listen to changes from', lastSeen)
             const unsubscribe = changesReference
-                .where('createdWhen', '>', lastSeen ?? 0)
+                .where(
+                    'createdWhen',
+                    '>',
+                    firebase.firestore.Timestamp.fromMillis(lastSeen),
+                )
                 .onSnapshot((snapshot) => {
+                    // console.log('got snapshot')
                     for (const change of snapshot.docChanges()) {
+                        // console.log('change', change)
                         if (change.type === 'added') {
                             resolveAdded()
                         }
                     }
                 })
             cleanup = async () => {
-                unsubscribe()
                 cleanedUp = true
+                unsubscribe()
             }
         }
         await setup()
 
+        const downloadUpdates = async function* () {
+            if (!(await getUserChangesReference())) {
+                return
+            }
+
+            while (true) {
+                // console.log('download update batch from', lastSeen)
+                const result = await personalCloudService.downloadClientUpdates(
+                    {
+                        startTime: lastSeen,
+                        clientSchemaVersion: getCurrentSchemaVersion(),
+                    },
+                )
+                // console.log('result', result)
+                yield result.batch
+                lastSeen = result.lastSeen
+                await settingStore.set('lastSeen', lastSeen)
+                if (!result.maybeHasMore) {
+                    break
+                }
+            }
+        }
+        yield* downloadUpdates()
+
         const userChanges = this.options.userChanges()
         while (true) {
+            // console.log('event iter start')
+
             const event = await Promise.race([
                 addedResolvable.then(() => 'added' as 'added'),
                 userChanges.next().then(() => 'user-change' as 'user-change'),
             ])
             if (event === 'user-change') {
+                // console.log('user change')
                 await cleanup()
                 await setup()
+                yield* downloadUpdates()
             } else if (event === 'added') {
-                while (true) {
-                    const result = await this.options.personalCloudService.downloadClientUpdates(
-                        {
-                            startTime: lastSeen,
-                            clientSchemaVersion: this.options.getCurrentSchemaVersion(),
-                        },
-                    )
-                    yield result.batch
-                    lastSeen = result.lastSeen
-                    await this.options.settingStore.set('lastSeen', lastSeen)
-                }
+                // console.log('added')
+                yield* downloadUpdates()
             }
+
+            // console.log('event iter end')
         }
     }
 }
