@@ -687,8 +687,18 @@ describe('Personal cloud translation layer', () => {
         it.todo('should create page list entries for new list')
         it.todo('should create page list entries for existing list')
         it.todo('should delete page list entries')
-
         it.todo('should update list names')
+
+        it.todo('should create annotation privacy levels')
+        it.todo('should update annotation privacy levels')
+        it.todo('should delete annotation privacy levels')
+
+        it.todo('should create shared list metadata')
+        it.todo('should delete shared list metadata')
+
+        it.todo('should create shared annotation metadata')
+        it.todo('should update shared annotation metadata')
+        it.todo('should delete shared annotation metadata')
 
         it('should create page tags', async () => {
             const {
