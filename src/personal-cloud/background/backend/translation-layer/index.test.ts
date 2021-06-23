@@ -1044,8 +1044,160 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 3 })
         })
 
-        it.todo('should create text export template')
-        it.todo('should update text export template')
-        it.todo('should delete text export template')
+        it('should create text export template', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('templates')
+                .createObject(LOCAL_TEST_DATA_V24.templates.first)
+            await setups[0].storageManager
+                .collection('templates')
+                .createObject(LOCAL_TEST_DATA_V24.templates.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testTemplates = remoteData.personalTextTemplate
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalTextTemplate',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalTextTemplate', testTemplates.first.id],
+                    [DataChangeType.Create, 'personalTextTemplate', testTemplates.second.id],
+                ], { skip: 0 }),
+                personalTextTemplate: [testTemplates.first, testTemplates.second],
+            })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'templates', object: LOCAL_TEST_DATA_V24.templates.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'templates', object: LOCAL_TEST_DATA_V24.templates.second },
+            ], { skip: 2 })
+        })
+
+        it('should update text export template', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('templates')
+                .createObject(LOCAL_TEST_DATA_V24.templates.first)
+            await setups[0].storageManager
+                .collection('templates')
+                .createObject(LOCAL_TEST_DATA_V24.templates.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            const updatedCode = '#{{{PageUrl}}}'
+            const updatedTitle = 'New title'
+            await setups[0].storageManager
+                .collection('templates')
+                .updateOneObject(
+                    { id: LOCAL_TEST_DATA_V24.templates.first.id },
+                    { code: updatedCode },
+                )
+            await setups[0].storageManager
+                .collection('templates')
+                .updateOneObject(
+                    { id: LOCAL_TEST_DATA_V24.templates.second.id },
+                    { title: updatedTitle },
+                )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testTemplates = remoteData.personalTextTemplate
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalTextTemplate',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Modify, 'personalTextTemplate', testTemplates.first.id],
+                    [DataChangeType.Modify, 'personalTextTemplate', testTemplates.second.id],
+                ], { skip: 2 }),
+                personalTextTemplate: [{
+                    ...testTemplates.first,
+                    code: updatedCode,
+                }, {
+                    ...testTemplates.second,
+                    title: updatedTitle,
+                }],
+            })
+
+            await testDownload(
+                [
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'templates',
+                        object: {
+                            ...LOCAL_TEST_DATA_V24.templates.first,
+                            code: updatedCode,
+                        },
+                    },
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'templates',
+                        object: {
+                            ...LOCAL_TEST_DATA_V24.templates.second,
+                            title: updatedTitle,
+                        },
+                    },
+                ],
+                { skip: 2 },
+            )
+        })
+
+        it('should delete text export template', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('templates')
+                .createObject(LOCAL_TEST_DATA_V24.templates.first)
+            await setups[0].storageManager
+                .collection('templates')
+                .createObject(LOCAL_TEST_DATA_V24.templates.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[0].storageManager
+                .collection('templates')
+                .deleteObjects({})
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testTemplates = remoteData.personalTextTemplate
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalTextTemplate',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Delete, 'personalTextTemplate', testTemplates.first.id],
+                    [DataChangeType.Delete, 'personalTextTemplate', testTemplates.second.id],
+                ], { skip: 2 }),
+                personalTextTemplate: [],
+            })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Delete, collection: 'templates', where: { id: LOCAL_TEST_DATA_V24.templates.first.id } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'templates', where: { id: LOCAL_TEST_DATA_V24.templates.second.id } },
+            ], { skip: 2 })
+        })
     })
 })

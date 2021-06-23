@@ -93,6 +93,20 @@ export const LOCAL_TEST_DATA_V24 = {
             name: 'note-tag-1',
         },
     },
+    templates: {
+        first: {
+            id: 1,
+            isFavourite: false,
+            title: 'Roam Markdown',
+            code: '[[{{{PageTitle}}}]]',
+        },
+        second: {
+            id: 2,
+            isFavourite: true,
+            title: 'Other Markdown',
+            code: '[[{{{PageUrl}}}]]',
+        },
+    },
 }
 
 const REMOTE_DEVICES_V24 = {
@@ -292,4 +306,26 @@ export const REMOTE_TEST_DATA_V24 = {
     },
     personalAnnotation: REMOTE_ANNOTATIONS_V24,
     personalAnnotationSelector: REMOTE_ANNOTATION_SELECTORS_V24,
+    personalTextTemplate: {
+        first: {
+            id: 1,
+            isFavourite: LOCAL_TEST_DATA_V24.templates.first.isFavourite,
+            title: LOCAL_TEST_DATA_V24.templates.first.title,
+            code: LOCAL_TEST_DATA_V24.templates.first.code,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 561,
+            updatedWhen: 561,
+        },
+        second: {
+            id: 2,
+            isFavourite: LOCAL_TEST_DATA_V24.templates.second.isFavourite,
+            title: LOCAL_TEST_DATA_V24.templates.second.title,
+            code: LOCAL_TEST_DATA_V24.templates.second.code,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 562,
+            updatedWhen: 562,
+        },
+    },
 }
