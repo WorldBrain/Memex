@@ -568,7 +568,67 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 2 })
         })
 
-        it.todo('should update annotation notes')
+        it('should update annotation notes', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('annotations')
+                .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+            const updatedComment = 'This is an updated comment'
+            const lastEdited = new Date()
+            await setups[0].storageManager
+                .collection('annotations')
+                .updateOneObject(
+                    { url: LOCAL_TEST_DATA_V24.annotations.first.url },
+                    { comment: updatedComment, lastEdited },
+                )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+            const testAnnotations = remoteData.personalAnnotation
+            const testSelectors = remoteData.personalAnnotationSelector
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'personalAnnotation',
+                    'personalAnnotationSelector',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Modify, 'personalAnnotation', testAnnotations.first.id],
+                ], { skip: 6 }),
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
+                personalAnnotation: [{ ...testAnnotations.first, comment: updatedComment, updatedWhen: lastEdited.getTime() }],
+                personalAnnotationSelector: [testSelectors.first],
+            })
+
+            await testDownload(
+                [
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'annotations',
+                        object: {
+                            ...LOCAL_TEST_DATA_V24.annotations.first,
+                            comment: updatedComment,
+                            lastEdited,
+                        },
+                    },
+                ],
+                { skip: 3 },
+            )
+        })
 
         it('should delete annotations', async () => {
             const {
