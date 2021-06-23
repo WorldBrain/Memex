@@ -518,6 +518,16 @@ describe('Personal cloud translation layer', () => {
             )
         })
 
+        it.todo('should create annotations')
+        it.todo('should update annotation notes')
+        it.todo('should delete annotations')
+
+        it.todo('should create page list entries for new list')
+        it.todo('should create page list entries for existing list')
+        it.todo('should delete page list entries')
+
+        it.todo('should update list names')
+
         it('should create page tags', async () => {
             const {
                 setups,
@@ -677,7 +687,7 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 2 })
         })
 
-        it('should add note tags', async () => {
+        it('should add annotation tags', async () => {
             const {
                 setups,
                 serverIdCapturer,
@@ -728,27 +738,21 @@ describe('Personal cloud translation layer', () => {
                 personalTag: [testTags.first],
             })
 
-            await testDownload(
-                [
-                    {
-                        type: PersonalCloudUpdateType.Overwrite,
-                        collection: 'annotations',
-                        object: LOCAL_TEST_DATA_V24.annotations.first,
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.first },
+                {
+                    type: PersonalCloudUpdateType.Overwrite,
+                    collection: 'tags',
+                    object: {
+                        name: LOCAL_TEST_DATA_V24.tags.first.name,
+                        url: LOCAL_TEST_DATA_V24.annotations.first.url,
                     },
-                    {
-                        type: PersonalCloudUpdateType.Overwrite,
-                        collection: 'tags',
-                        object: {
-                            name: LOCAL_TEST_DATA_V24.tags.first.name,
-                            url: LOCAL_TEST_DATA_V24.annotations.first.url,
-                        },
-                    },
-                ],
-                { skip: 2 },
-            )
+                },
+            ], { skip: 2 })
         })
 
-        it('should connect existing note tags', async () => {
+        it('should connect existing annotation tags', async () => {
             const {
                 setups,
                 serverIdCapturer,
@@ -816,7 +820,7 @@ describe('Personal cloud translation layer', () => {
             )
         })
 
-        it('should remove note tags', async () => {
+        it('should remove annotation tags', async () => {
             const {
                 setups,
                 serverIdCapturer,
@@ -877,5 +881,9 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: annotationTag },
             ], { skip: 3 })
         })
+
+        it.todo('should create text export template')
+        it.todo('should update text export template')
+        it.todo('should delete text export template')
     })
 })
