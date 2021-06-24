@@ -1,6 +1,7 @@
 import type StorageManager from '@worldbrain/storex'
 import { extractIdFromAnnotationUrl } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
 export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
@@ -82,6 +83,22 @@ const LOCAL_LISTS_V24 = {
 export const LOCAL_TEST_DATA_V24 = {
     pages: LOCAL_PAGES_V24,
     annotations: LOCAL_ANNOTATIONS_V24,
+    annotationPrivacyLevels: {
+        first: {
+            id: 1,
+            annotation: LOCAL_ANNOTATIONS_V24.first.url,
+            privacyLevel: AnnotationPrivacyLevels.SHARED,
+            createdWhen: new Date(),
+            updatedWhen: new Date(),
+        },
+        second: {
+            id: 2,
+            annotation: LOCAL_ANNOTATIONS_V24.second.url,
+            privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            createdWhen: new Date(),
+            updatedWhen: new Date(),
+        },
+    },
     visits: {
         first: {
             url: LOCAL_PAGES_V24.first.url,
@@ -365,6 +382,28 @@ export const REMOTE_TEST_DATA_V24 = {
     },
     personalAnnotation: REMOTE_ANNOTATIONS_V24,
     personalAnnotationSelector: REMOTE_ANNOTATION_SELECTORS_V24,
+    personalAnnotationPrivacyLevel: {
+        first: {
+            id: 1,
+            privacyLevel:
+                LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.privacyLevel,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.first.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.createdWhen.getTime(),
+            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.updatedWhen.getTime(),
+        },
+        second: {
+            id: 1,
+            privacyLevel:
+                LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.privacyLevel,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.second.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
+            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.updatedWhen.getTime(),
+        },
+    },
     personalList: REMOTE_LISTS_V24,
     personalListEntry: {
         first: {
