@@ -60,6 +60,25 @@ const LOCAL_ANNOTATIONS_V24 = {
     },
 }
 
+const LOCAL_LISTS_V24 = {
+    first: {
+        id: 1619414286452,
+        name: 'Test list A',
+        searchableName: 'Test list A',
+        createdAt: new Date(1619414286452),
+        isDeletable: true,
+        isNestable: true,
+    },
+    second: {
+        id: 1619414286456,
+        name: 'Test list B',
+        searchableName: 'Test list B',
+        createdAt: new Date(1619414286456),
+        isDeletable: true,
+        isNestable: true,
+    },
+}
+
 export const LOCAL_TEST_DATA_V24 = {
     pages: LOCAL_PAGES_V24,
     annotations: LOCAL_ANNOTATIONS_V24,
@@ -91,6 +110,21 @@ export const LOCAL_TEST_DATA_V24 = {
         second: {
             url: LOCAL_ANNOTATIONS_V24.first.url,
             name: 'note-tag-1',
+        },
+    },
+    customLists: LOCAL_LISTS_V24,
+    pageListEntries: {
+        first: {
+            createdAt: new Date(),
+            fullUrl: LOCAL_PAGES_V24.first.fullUrl,
+            pageUrl: LOCAL_PAGES_V24.first.url,
+            listId: LOCAL_LISTS_V24.first.id,
+        },
+        second: {
+            createdAt: new Date(),
+            fullUrl: LOCAL_PAGES_V24.second.fullUrl,
+            pageUrl: LOCAL_PAGES_V24.second.url,
+            listId: LOCAL_LISTS_V24.first.id,
         },
     },
     templates: {
@@ -243,6 +277,31 @@ const REMOTE_TAGS_V24 = {
     },
 }
 
+const REMOTE_LISTS_V24 = {
+    first: {
+        id: 1,
+        localId: LOCAL_LISTS_V24.first.id,
+        name: LOCAL_LISTS_V24.first.name,
+        isDeletable: LOCAL_LISTS_V24.first.isDeletable,
+        isNestable: LOCAL_LISTS_V24.first.isNestable,
+        createdWhen: LOCAL_LISTS_V24.first.createdAt.getTime(),
+        updatedWhen: LOCAL_LISTS_V24.first.createdAt.getTime(),
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        user: TEST_USER.id,
+    },
+    second: {
+        id: 2,
+        localId: LOCAL_LISTS_V24.second.id,
+        name: LOCAL_LISTS_V24.second.name,
+        isDeletable: LOCAL_LISTS_V24.second.isDeletable,
+        isNestable: LOCAL_LISTS_V24.second.isNestable,
+        createdWhen: LOCAL_LISTS_V24.second.createdAt.getTime(),
+        updatedWhen: LOCAL_LISTS_V24.second.createdAt.getTime(),
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        user: TEST_USER.id,
+    },
+}
+
 export const REMOTE_TEST_DATA_V24 = {
     personalDeviceInfo: REMOTE_DEVICES_V24,
     personalContentMetadata: REMOTE_METADATA_V24,
@@ -306,11 +365,31 @@ export const REMOTE_TEST_DATA_V24 = {
     },
     personalAnnotation: REMOTE_ANNOTATIONS_V24,
     personalAnnotationSelector: REMOTE_ANNOTATION_SELECTORS_V24,
+    personalList: REMOTE_LISTS_V24,
+    personalListEntry: {
+        first: {
+            personalContentMetadata: REMOTE_METADATA_V24.first.id,
+            personalList: REMOTE_LISTS_V24.first.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 563,
+            updatedWhen: 563,
+        },
+        second: {
+            personalContentMetadata: REMOTE_METADATA_V24.second.id,
+            personalList: REMOTE_LISTS_V24.first.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 563,
+            updatedWhen: 563,
+        },
+    },
     personalTextTemplate: {
         first: {
             id: 1,
             isFavourite: LOCAL_TEST_DATA_V24.templates.first.isFavourite,
             title: LOCAL_TEST_DATA_V24.templates.first.title,
+            localId: LOCAL_TEST_DATA_V24.templates.first.id,
             code: LOCAL_TEST_DATA_V24.templates.first.code,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
@@ -321,6 +400,7 @@ export const REMOTE_TEST_DATA_V24 = {
             id: 2,
             isFavourite: LOCAL_TEST_DATA_V24.templates.second.isFavourite,
             title: LOCAL_TEST_DATA_V24.templates.second.title,
+            localId: LOCAL_TEST_DATA_V24.templates.second.id,
             code: LOCAL_TEST_DATA_V24.templates.second.code,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,

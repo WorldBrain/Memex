@@ -684,7 +684,145 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 2 })
         })
 
-        it.todo('should create page list entries for new list')
+        it('should create custom lists', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testLists = remoteData.personalList
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalList',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalList', testLists.first.id],
+                    [DataChangeType.Create, 'personalList', testLists.second.id],
+                ], { skip: 0 }),
+                personalList: [testLists.first, testLists.second],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.second },
+            ], { skip: 0 })
+        })
+
+        it('should update custom lists', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const updatedName = 'Updated list name'
+            await setups[0].storageManager
+                .collection('customLists')
+                .updateOneObject(
+                    { id: LOCAL_TEST_DATA_V24.customLists.first.id },
+                    { name: updatedName, searchableName: updatedName },
+                )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testLists = remoteData.personalList
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalList',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Modify, 'personalList', testLists.first.id],
+                ], { skip: 2 }),
+                personalList: [{ ...testLists.first, name: updatedName }, testLists.second],
+            })
+
+            await testDownload(
+                [
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'customLists',
+                        object: {
+                            ...LOCAL_TEST_DATA_V24.customLists.first,
+                            name: updatedName,
+                            searchableName: updatedName,
+                        },
+                    },
+                ],
+                { skip: 2 },
+            )
+        })
+
+        it('should delete custom lists', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            await setups[0].storageManager
+                .collection('customLists')
+                .deleteObjects({})
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testLists = remoteData.personalList
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalList',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Delete, 'personalList', testLists.first.id, { id: testLists.first.localId }],
+                    [DataChangeType.Delete, 'personalList', testLists.second.id, { id: testLists.second.localId }],
+                ], { skip: 2 }),
+                personalList: [],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Delete, collection: 'customLists', where: { id: LOCAL_TEST_DATA_V24.customLists.first.id } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'customLists', where: { id: LOCAL_TEST_DATA_V24.customLists.second.id } },
+            ], { skip: 0 })
+        })
+
         it.todo('should create page list entries for existing list')
         it.todo('should delete page list entries')
         it.todo('should update list names')
