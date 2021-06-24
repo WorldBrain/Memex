@@ -368,6 +368,7 @@ export const REMOTE_TEST_DATA_V24 = {
     personalList: REMOTE_LISTS_V24,
     personalListEntry: {
         first: {
+            id: 1,
             personalContentMetadata: REMOTE_METADATA_V24.first.id,
             personalList: REMOTE_LISTS_V24.first.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
@@ -376,6 +377,7 @@ export const REMOTE_TEST_DATA_V24 = {
             updatedWhen: 563,
         },
         second: {
+            id: 2,
             personalContentMetadata: REMOTE_METADATA_V24.second.id,
             personalList: REMOTE_LISTS_V24.first.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
