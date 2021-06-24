@@ -123,6 +123,7 @@ const globalFetch: typeof fetch =
 
 export function createBackgroundModules(options: {
     storageManager: StorageManager
+    persistentStorageManager: StorageManager
     services: Services
     browserAPIs: Browser
     getServerStorage: () => Promise<ServerStorage>
@@ -642,12 +643,23 @@ export function getBackgroundStorageModules(
     }
 }
 
-export function registerBackgroundModuleCollections(
-    storageManager: StorageManager,
+export function getPersistentBackgroundStorageModules(
     backgroundModules: BackgroundModules,
-) {
+): { [moduleName: string]: StorageModule } {
+    return {}
+}
+
+export function registerBackgroundModuleCollections(options: {
+    storageManager: StorageManager
+    persistentStorageManager: StorageManager
+    backgroundModules: BackgroundModules
+}) {
     registerModuleMapCollections(
-        storageManager.registry,
-        getBackgroundStorageModules(backgroundModules),
+        options.storageManager.registry,
+        getBackgroundStorageModules(options.backgroundModules),
+    )
+    registerModuleMapCollections(
+        options.persistentStorageManager.registry,
+        getPersistentBackgroundStorageModules(options.backgroundModules),
     )
 }

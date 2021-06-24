@@ -36,6 +36,7 @@ import {
 } from './storage/server'
 import { createServices } from './services'
 import { createSelfTests } from './tests/self-tests'
+import { createPersistentStorageManager } from './storage/persistent-storage'
 
 export async function main() {
     setupRpcConnection({ sideName: 'background', role: 'background' })
@@ -69,6 +70,7 @@ export async function main() {
     })
 
     const storageManager = initStorex()
+    const persistentStorageManager = createPersistentStorageManager()
     const services = await createServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
         getServerStorage,
@@ -83,6 +85,7 @@ export async function main() {
         fetchPageDataProcessor,
         browserAPIs: browser,
         storageManager,
+        persistentStorageManager,
         getIceServers: async () => {
             const firebase = await getFirebase()
             const generateToken = firebase
@@ -98,9 +101,14 @@ export async function main() {
             return result.data as Promise<Returns>
         },
     })
-    registerBackgroundModuleCollections(storageManager, backgroundModules)
+    registerBackgroundModuleCollections({
+        storageManager,
+        persistentStorageManager,
+        backgroundModules,
+    })
 
     await storageManager.finishInitialization()
+    await persistentStorageManager.finishInitialization()
 
     const { setStorageLoggingEnabled } = await setStorageMiddleware(
         storageManager,

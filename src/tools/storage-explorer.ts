@@ -9,6 +9,8 @@ import {
 import { MemoryLocalStorage } from 'src/util/tests/local-storage'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 import { createServices } from 'src/services'
+import { createPersistentStorageManager } from 'src/storage/persistent-storage'
+import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 
 type CommandLineArguments =
     | { command: 'list-collections' }
@@ -56,12 +58,16 @@ async function main() {
     })
 
     const storageManager = initStorex()
+    const persistentStorageManager = createPersistentStorageManager({
+        idbImplementation: inMemory(),
+    })
     const backgroundModules = createBackgroundModules({
         getServerStorage: () => Promise.reject(), // FIXME
         services,
         signalTransportFactory: null,
         analyticsManager: null,
         storageManager,
+        persistentStorageManager,
         localStorageChangesManager: null,
         browserAPIs: {
             storage: {

@@ -35,6 +35,8 @@ import { createServices } from 'src/services'
 import { MemoryUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/memory'
 import { PersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { NullPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/null'
+import { createPersistentStorageManager } from 'src/storage/persistent-storage'
+import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 
 fetchMock.restore()
 
@@ -67,6 +69,9 @@ export async function setupBackgroundIntegrationTest(
     const browserLocalStorage =
         options?.browserLocalStorage ?? new MemoryBrowserStorage()
     const storageManager = initStorex()
+    const persistentStorageManager = createPersistentStorageManager({
+        idbImplementation: inMemory(),
+    })
 
     const getServerStorage =
         options?.getServerStorage ?? createLazyMemoryServerStorage()
@@ -148,6 +153,7 @@ export async function setupBackgroundIntegrationTest(
     const backgroundModules = createBackgroundModules({
         getNow,
         storageManager,
+        persistentStorageManager,
         analyticsManager,
         localStorageChangesManager: null,
         getServerStorage,
@@ -169,9 +175,14 @@ export async function setupBackgroundIntegrationTest(
     backgroundModules.sync.initialSync.wrtc = wrtc
     backgroundModules.sync.initialSync.debug = false
 
-    registerBackgroundModuleCollections(storageManager, backgroundModules)
+    registerBackgroundModuleCollections({
+        storageManager,
+        persistentStorageManager,
+        backgroundModules,
+    })
 
     await storageManager.finishInitialization()
+    await persistentStorageManager.finishInitialization()
 
     const storageOperationLogger = new StorageOperationLogger({
         enabled: false,
