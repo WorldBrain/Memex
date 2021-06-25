@@ -4,7 +4,7 @@ import {
 } from '@worldbrain/storex-pattern-modules'
 import { Template } from '../types'
 
-const COLLECTION_NAMES = {
+export const COLLECTION_NAMES = {
     templates: 'templates',
 }
 

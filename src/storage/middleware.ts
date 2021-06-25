@@ -8,6 +8,7 @@ import ContentSharingBackground from 'src/content-sharing/background'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { PersonalCloudBackground } from 'src/personal-cloud/background'
+import { CLOUD_SYNCED_COLLECTIONS } from 'src/personal-cloud/background/constants'
 
 export async function setStorageMiddleware(
     storageManager: StorageManager,
@@ -25,7 +26,9 @@ export async function setStorageMiddleware(
     const modifyMiddleware =
         options.modifyMiddleware ?? ((middleware) => middleware)
 
-    const syncedCollections = new Set(SYNCED_COLLECTIONS)
+    const syncedCollections = new Set(
+        SYNCED_COLLECTIONS.concat(CLOUD_SYNCED_COLLECTIONS),
+    )
 
     const postProcessChange = async (
         event: StorageOperationEvent<'post'>,
