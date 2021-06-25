@@ -348,6 +348,93 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 1 })
         })
 
+        it('should create bookmarks', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('bookmarks')
+                .createObject(LOCAL_TEST_DATA_V24.bookmarks.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+            const testBookmarks = remoteData.personalBookmark
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'personalBookmark',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalBookmark', testBookmarks.first.id],
+                ], { skip : 4}),
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
+                personalBookmark: [testBookmarks.first]
+            })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'bookmarks', object: LOCAL_TEST_DATA_V24.bookmarks.first },
+            ], { skip: 2})
+        })
+
+        it('should delete bookmarks', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('bookmarks')
+                .createObject(LOCAL_TEST_DATA_V24.bookmarks.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            const changeInfo = { url: LOCAL_TEST_DATA_V24.bookmarks.first.url }
+            await setups[0].storageManager
+                .collection('bookmarks')
+                .deleteOneObject(changeInfo)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+            const testBookmarks = remoteData.personalBookmark
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'personalBookmark',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Delete, 'personalBookmark', testBookmarks.first.id, changeInfo],
+                ], { skip : 5}),
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
+                personalBookmark: []
+            })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Delete, collection: 'bookmarks', where: changeInfo },
+            ], { skip: 2})
+        })
+
+        it.todo('should ignore annotation bookmarks')
+
         it('should create visits', async () => {
             const {
                 setups,

@@ -82,6 +82,12 @@ const LOCAL_LISTS_V24 = {
 
 export const LOCAL_TEST_DATA_V24 = {
     pages: LOCAL_PAGES_V24,
+    bookmarks: {
+        first: {
+            url: LOCAL_PAGES_V24.first.url,
+            time: 1622010270273,
+        },
+    },
     annotations: LOCAL_ANNOTATIONS_V24,
     annotationPrivacyLevels: {
         first: {
@@ -377,6 +383,16 @@ export const REMOTE_TEST_DATA_V24 = {
             progressPercentage: LOCAL_TEST_DATA_V24.visits.second.scrollPerc,
             scrollTotal: LOCAL_TEST_DATA_V24.visits.second.scrollMaxPx,
             scrollProgress: LOCAL_TEST_DATA_V24.visits.second.scrollPx,
+        },
+    },
+    personalBookmark: {
+        first: {
+            id: 1,
+            personalContentMetadata: REMOTE_METADATA_V24.first.id,
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            createdWhen: LOCAL_TEST_DATA_V24.bookmarks.first.time,
+            updatedWhen: LOCAL_TEST_DATA_V24.bookmarks.first.time,
         },
     },
     personalTag: REMOTE_TAGS_V24,
