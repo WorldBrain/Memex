@@ -385,6 +385,7 @@ export const REMOTE_TEST_DATA_V24 = {
     personalAnnotationPrivacyLevel: {
         first: {
             id: 1,
+            localId: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.id,
             privacyLevel:
                 LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.privacyLevel,
             personalAnnotation: REMOTE_ANNOTATIONS_V24.first.id,
@@ -395,6 +396,7 @@ export const REMOTE_TEST_DATA_V24 = {
         },
         second: {
             id: 1,
+            localId: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.id,
             privacyLevel:
                 LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.privacyLevel,
             personalAnnotation: REMOTE_ANNOTATIONS_V24.second.id,

@@ -763,9 +763,6 @@ describe('Personal cloud translation layer', () => {
             await setups[0].backgroundModules.personalCloud.waitForSync()
             await setups[0].storageManager
                 .collection('annotationPrivacyLevels')
-                .createObject(LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first)
-            await setups[0].storageManager
-                .collection('annotationPrivacyLevels')
                 .createObject(
                     LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second,
                 )
@@ -802,18 +799,17 @@ describe('Personal cloud translation layer', () => {
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.second.id],
-                ], { skip: 9 }),
+                ], { skip: 8 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
                 personalAnnotationSelector: [testSelectors.first],
-                personalAnnotationPrivacyLevel: [testPrivacyLevels.first, { ...testPrivacyLevels.second, privacyLevel: AnnotationPrivacyLevels.PRIVATE }],
+                personalAnnotationPrivacyLevel: [{ ...testPrivacyLevels.second, privacyLevel: AnnotationPrivacyLevels.PRIVATE }],
             })
 
             // prettier-ignore
             await testDownload([
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second, privacyLevel: AnnotationPrivacyLevels.PRIVATE } },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second, privacyLevel: AnnotationPrivacyLevels.PRIVATE } },
             ], { skip: 4 })
         })
@@ -1523,7 +1519,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'templates', object: LOCAL_TEST_DATA_V24.templates.first },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'templates', object: LOCAL_TEST_DATA_V24.templates.second },
-            ], { skip: 2 })
+            ], { skip: 0 })
         })
 
         it('should update text export template', async () => {
@@ -1632,8 +1628,8 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
-                    [DataChangeType.Delete, 'personalTextTemplate', testTemplates.first.id],
-                    [DataChangeType.Delete, 'personalTextTemplate', testTemplates.second.id],
+                    [DataChangeType.Delete, 'personalTextTemplate', testTemplates.first.id, { id: LOCAL_TEST_DATA_V24.templates.first.id }],
+                    [DataChangeType.Delete, 'personalTextTemplate', testTemplates.second.id, { id: LOCAL_TEST_DATA_V24.templates.second.id }],
                 ], { skip: 2 }),
                 personalTextTemplate: [],
             })
@@ -1641,7 +1637,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'templates', where: { id: LOCAL_TEST_DATA_V24.templates.first.id } },
                 { type: PersonalCloudUpdateType.Delete, collection: 'templates', where: { id: LOCAL_TEST_DATA_V24.templates.second.id } },
-            ], { skip: 2 })
+            ], { skip: 0 })
         })
     })
 })
