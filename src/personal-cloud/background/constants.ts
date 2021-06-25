@@ -22,4 +22,5 @@ export const CLOUD_SYNCED_COLLECTIONS: string[] = [
     TEMPLATE_COLLECTION_NAMES.templates,
     'syncDeviceInfo',
     'sharedListMetadata',
+    'sharedAnnotationMetadata',
 ]

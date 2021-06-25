@@ -99,6 +99,18 @@ export const LOCAL_TEST_DATA_V24 = {
             updatedWhen: new Date(),
         },
     },
+    sharedAnnotationMetadata: {
+        first: {
+            excludeFromLists: false,
+            localId: LOCAL_ANNOTATIONS_V24.first.url,
+            remoteId: 'test-1',
+        },
+        second: {
+            excludeFromLists: true,
+            localId: LOCAL_ANNOTATIONS_V24.second.url,
+            remoteId: 'test-2',
+        },
+    },
     visits: {
         first: {
             url: LOCAL_PAGES_V24.first.url,
@@ -414,6 +426,34 @@ export const REMOTE_TEST_DATA_V24 = {
             user: TEST_USER.id,
             createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
             updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.updatedWhen.getTime(),
+        },
+    },
+    personalAnnotationShare: {
+        first: {
+            id: 1,
+            remoteId:
+                LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first.remoteId,
+            excludeFromLists:
+                LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first
+                    .excludeFromLists,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.first.id,
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            createdWhen: 565,
+            updatedWhen: 565,
+        },
+        second: {
+            id: 2,
+            remoteId:
+                LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.second.remoteId,
+            excludeFromLists:
+                LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.second
+                    .excludeFromLists,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.second.id,
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            createdWhen: 565,
+            updatedWhen: 565,
         },
     },
     personalList: REMOTE_LISTS_V24,
