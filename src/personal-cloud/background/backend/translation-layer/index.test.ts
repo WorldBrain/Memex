@@ -1123,8 +1123,92 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 4 })
         })
 
-        it.todo('should create shared list metadata')
-        it.todo('should delete shared list metadata')
+        it('should create shared list metadata', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testListShares = remoteData.personalListShare
+            const testLists = remoteData.personalList
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalListShare',
+                    'personalList',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalListShare', testListShares.first.id],
+                ], { skip: 1 }),
+                personalListShare: [testListShares.first],
+                personalList: [testLists.first],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
+            ], { skip: 1 })
+        })
+
+        it('should delete shared list metadata', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            const changeInfo = {
+                localId: LOCAL_TEST_DATA_V24.sharedListMetadata.first.localId,
+            }
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .deleteOneObject(changeInfo)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testListShares = remoteData.personalListShare
+            const testLists = remoteData.personalList
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalListShare',
+                    'personalList',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Delete, 'personalListShare', testListShares.first.id, changeInfo],
+                ], { skip: 2 }),
+                personalList: [testLists.first],
+                personalListShare: [],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Delete, collection: 'sharedListMetadata', where: changeInfo },
+            ], { skip: 1 })
+        })
 
         it.todo('should create shared annotation metadata')
         it.todo('should update shared annotation metadata')

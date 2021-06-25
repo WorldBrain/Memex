@@ -130,6 +130,16 @@ export const LOCAL_TEST_DATA_V24 = {
         },
     },
     customLists: LOCAL_LISTS_V24,
+    sharedListMetadata: {
+        first: {
+            localId: LOCAL_LISTS_V24.first.id,
+            remoteId: 'test-1',
+        },
+        second: {
+            localId: LOCAL_LISTS_V24.second.id,
+            remoteId: 'test-2',
+        },
+    },
     pageListEntries: {
         first: {
             createdAt: new Date(),
@@ -407,6 +417,26 @@ export const REMOTE_TEST_DATA_V24 = {
         },
     },
     personalList: REMOTE_LISTS_V24,
+    personalListShare: {
+        first: {
+            id: 1,
+            personalList: REMOTE_LISTS_V24.first.id,
+            remoteId: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            createdWhen: 565,
+            updatedWhen: 565,
+        },
+        second: {
+            id: 2,
+            personalList: REMOTE_LISTS_V24.second.id,
+            remoteId: LOCAL_TEST_DATA_V24.sharedListMetadata.second.remoteId,
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            createdWhen: 565,
+            updatedWhen: 565,
+        },
+    },
     personalListEntry: {
         first: {
             id: 1,
