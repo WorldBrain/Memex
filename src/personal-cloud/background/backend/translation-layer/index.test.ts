@@ -58,12 +58,6 @@ class IdCapturer {
                 const nextIdIndex = idsPicked++
                 const id = this.ids[collection]?.[nextIdIndex]
 
-                // TODO: determine whether current obj actually written to DB or not - skip if not
-                // if (!this.ids[collection]?.includes(object.id)) {
-                //     console.log('skippping this:', collection, object)
-                //     continue
-                // }
-
                 const mergedObject = {
                     ...object,
                     id: id ?? object.id,
@@ -433,8 +427,6 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 2})
         })
 
-        it.todo('should ignore annotation bookmarks')
-
         it('should create visits', async () => {
             const {
                 setups,
@@ -475,7 +467,7 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 2 })
         })
 
-        it('should update vists', async () => {
+        it('should update visits', async () => {
             const {
                 setups,
                 serverIdCapturer,
@@ -533,7 +525,7 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 3 })
         })
 
-        it('should delete vists', async () => {
+        it('should delete visits', async () => {
             const {
                 setups,
                 serverIdCapturer,
