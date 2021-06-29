@@ -1,14 +1,13 @@
 import StorageManager from '@worldbrain/storex'
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher'
-import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
 import SyncService from '@worldbrain/memex-common/lib/sync'
 import { StorexHubBackground } from 'src/storex-hub/background'
 import ContentSharingBackground from 'src/content-sharing/background'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { PersonalCloudBackground } from 'src/personal-cloud/background'
-import { CLOUD_SYNCED_COLLECTIONS } from 'src/personal-cloud/background/constants'
+import { WATCHED_COLLECTIONS } from './constants'
 
 export async function setStorageMiddleware(
     storageManager: StorageManager,
@@ -25,10 +24,7 @@ export async function setStorageMiddleware(
 ) {
     const modifyMiddleware =
         options.modifyMiddleware ?? ((middleware) => middleware)
-
-    const syncedCollections = new Set(
-        SYNCED_COLLECTIONS.concat(CLOUD_SYNCED_COLLECTIONS),
-    )
+    const watchedCollections = new Set(WATCHED_COLLECTIONS)
 
     const postProcessChange = async (
         event: StorageOperationEvent<'post'>,
@@ -52,7 +48,7 @@ export async function setStorageMiddleware(
     const changeWatchMiddleware = new ChangeWatchMiddleware({
         storageManager,
         shouldWatchCollection: (collection) =>
-            syncedCollections.has(collection),
+            watchedCollections.has(collection),
         postprocessOperation: async (event) => {
             await postProcessChange(event, 'local')
         },
