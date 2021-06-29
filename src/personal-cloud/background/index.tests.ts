@@ -17,6 +17,7 @@ import {
     StorexPersonalCloudBackend,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher'
+import { STORAGE_VERSIONS } from 'src/storage/constants'
 
 const debug = (...args: any[]) => console['log'](...args, '\n\n\n')
 
@@ -289,6 +290,7 @@ export async function setupSyncBackgroundTest(
             ChangeWatchMiddlewareSettings,
             'storageManager'
         >
+        useDownloadTranslationLayer?: boolean
     } & BackgroundIntegrationTestOptions,
 ) {
     const userId = TEST_USER.id
@@ -305,9 +307,11 @@ export async function setupSyncBackgroundTest(
     for (let i = 0; i < options.deviceCount; ++i) {
         const personalCloudBackend = new StorexPersonalCloudBackend({
             storageManager: serverStorage.storageManager,
+            clientSchemaVersion: STORAGE_VERSIONS[25].version,
             changeSource: cloudChangeBus.getView(),
             getUserId: async () => userId,
             getNow,
+            useDownloadTranslationLayer: options.useDownloadTranslationLayer,
         })
 
         setups.push(

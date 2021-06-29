@@ -174,6 +174,7 @@ export function createBackgroundModules(options: {
 
     const pages = new PageIndexingBackground({
         storageManager,
+        persistentStorageManager: options.persistentStorageManager,
         fetchPageData: options.fetchPageDataProcessor,
         createInboxEntry,
         tabManagement,
@@ -512,6 +513,7 @@ export function createBackgroundModules(options: {
         userMessages,
         personalCloud: new PersonalCloudBackground({
             storageManager,
+            persistentStorageManager: options.persistentStorageManager,
             backend:
                 options.personalCloudBackend ??
                 new FirestorePersonalCloudBackend({
@@ -646,7 +648,9 @@ export function getBackgroundStorageModules(
 export function getPersistentBackgroundStorageModules(
     backgroundModules: BackgroundModules,
 ): { [moduleName: string]: StorageModule } {
-    return {}
+    return {
+        pages: backgroundModules.pages.persistentStorage,
+    }
 }
 
 export function registerBackgroundModuleCollections(options: {

@@ -3,10 +3,12 @@ import extractPageMetadataFromRawContent, {
 } from './content-extraction'
 import { PageContent } from 'src/search'
 import TabManagementBackground from 'src/tab-management/background'
+import { RawPageContent } from '../types'
 
 export interface PageAnalysis {
     content: PageContent
     favIconURI?: string
+    htmlBody?: string
 }
 
 export type PageAnalyzer = (args: {
@@ -28,14 +30,16 @@ const analysePage: PageAnalyzer = async (options) => {
     const { tabId } = options
     options.includeFavIcon = options.includeFavIcon ?? true
 
-    const content = await extractPageContent(options)
+    const { content, rawContent } = await extractPageContent(options)
     const favIconURI = options.includeFavIcon
         ? await options.tabManagement.getFavIcon({ tabId })
         : undefined
+    const htmlBody = rawContent.type === 'html' ? rawContent.body : undefined
 
     return {
         content,
         favIconURI,
+        htmlBody,
     }
 }
 
@@ -43,7 +47,7 @@ async function extractPageContent(options: {
     tabId: number
     tabManagement: Pick<TabManagementBackground, 'extractRawPageContent'>
     includeContent?: 'metadata-only' | 'metadata-with-full-text'
-}): Promise<PageContent | undefined> {
+}): Promise<{ content: PageContent; rawContent: RawPageContent } | undefined> {
     if (!options.includeContent) {
         return
     }
@@ -59,7 +63,7 @@ async function extractPageContent(options: {
     if (options.includeContent === 'metadata-with-full-text') {
         content.fullText = await getPageFullText(rawContent, content)
     }
-    return content
+    return { content, rawContent }
 }
 
 export default analysePage

@@ -224,6 +224,7 @@ export async function setupBackgroundIntegrationTest(
 
     return {
         storageManager,
+        persistentStorageManager,
         backgroundModules,
         browserLocalStorage,
         storageOperationLogger,

@@ -6,6 +6,7 @@ import {
     PersonalCloudService,
     PersonalCloudUpdatePushBatch,
     PersonalCloudUpdateBatch,
+    UploadClientUpdatesResult,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { SettingStore } from 'src/util/settings'
 import { PersonalCloudSettings } from '../types'
@@ -22,8 +23,12 @@ export default class FirestorePersonalCloudBackend
         },
     ) {}
 
-    async pushUpdates(updates: PersonalCloudUpdatePushBatch): Promise<void> {
-        await this.options.personalCloudService.uploadClientUpdates({ updates })
+    async pushUpdates(
+        updates: PersonalCloudUpdatePushBatch,
+    ): Promise<UploadClientUpdatesResult> {
+        return this.options.personalCloudService.uploadClientUpdates({
+            updates,
+        })
     }
 
     async *streamUpdates(): AsyncIterableIterator<PersonalCloudUpdateBatch> {
@@ -128,4 +133,9 @@ export default class FirestorePersonalCloudBackend
             // console.log('event iter end')
         }
     }
+
+    async uploadToStorage(params: {
+        path: string
+        object: string | Blob
+    }): Promise<void> {}
 }

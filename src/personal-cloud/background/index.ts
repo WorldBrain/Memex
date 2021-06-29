@@ -10,6 +10,7 @@ import {
     PersonalCloudBackend,
     PersonalCloudUpdateType,
     PersonalCloudUpdateBatch,
+    PersonalCloudClientInstructionType,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import {
     PersonalCloudAction,
@@ -27,6 +28,7 @@ import { SettingStore } from 'src/util/settings'
 
 export interface PersonalCloudBackgroundOptions {
     storageManager: StorageManager
+    persistentStorageManager: StorageManager
     backend: PersonalCloudBackend
     getUserId(): Promise<string | number | null>
     userIdChanges(): AsyncIterableIterator<void>
@@ -207,11 +209,52 @@ export class PersonalCloudBackground {
         }
 
         if (action.type === PersonalCloudActionType.PushObject) {
-            await this.options.backend.pushUpdates(
+            const {
+                clientInstructions,
+            } = await this.options.backend.pushUpdates(
                 action.updates.map((update) => ({
                     ...update,
                     deviceId: update.deviceId ?? this.deviceId,
                 })),
+            )
+            await Promise.all(
+                clientInstructions.map(async (instruction) => {
+                    if (
+                        instruction.type ===
+                        PersonalCloudClientInstructionType.UploadToStorage
+                    ) {
+                        const storageManager =
+                            instruction.storage === 'persistent'
+                                ? this.options.persistentStorageManager
+                                : this.options.storageManager
+                        const dbObject = await storageManager
+                            .collection(instruction.collection)
+                            .findObject(instruction.where)
+                        if (!dbObject) {
+                            return
+                        }
+                        const storageObject = dbObject[instruction.field]
+                        if (
+                            !storageObject ||
+                            (typeof storageObject !== 'string' &&
+                                !(storageObject instanceof Blob))
+                        ) {
+                            return
+                        }
+                        try {
+                            await this.options.backend.uploadToStorage({
+                                path: instruction.path,
+                                object: storageObject,
+                            })
+                        } catch (e) {
+                            console.error(
+                                'Could not execute client instruction',
+                                instruction,
+                            )
+                            console.error(e)
+                        }
+                    }
+                }),
             )
         }
     }
