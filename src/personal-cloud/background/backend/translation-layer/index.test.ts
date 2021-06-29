@@ -61,6 +61,7 @@ class IdCapturer {
                 const mergedObject = {
                     ...object,
                     id: id ?? object.id,
+                    // TODO: set these here as I was encountering issues with test data timestamps getting out-of-sync - it would be nice to get this precision back
                     createdWhen: expect.any(Number),
                     updatedWhen: expect.any(Number),
                 }
@@ -455,10 +456,14 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Modify, 'personalContentLocator', testLocators.first.id],
                     [DataChangeType.Create, 'personalContentRead', testReads.first.id],
                 ], { skip: 4 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
-                personalContentLocator: [testLocators.first, testLocators.second],
+                personalContentLocator: [
+                    { ...testLocators.first, lastVisited: LOCAL_TEST_DATA_V24.visits.first.time },
+                    testLocators.second,
+                ],
                 personalContentRead: [testReads.first],
             })
             // prettier-ignore
@@ -507,9 +512,12 @@ describe('Personal cloud translation layer', () => {
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalContentRead', testReads.first.id],
-                ], { skip: 5 }),
+                ], { skip: 6 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
-                personalContentLocator: [testLocators.first, testLocators.second],
+                personalContentLocator: [
+                    { ...testLocators.first, lastVisited: LOCAL_TEST_DATA_V24.visits.first.time },
+                    testLocators.second,
+                ],
                 personalContentRead: [{
                     ...testReads.first,
                     updatedWhen: expect.any(Number),
@@ -561,15 +569,17 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Modify, 'personalContentLocator', testLocators.first.id],
                     [DataChangeType.Delete, 'personalContentRead', testReads.first.id, {
                         url: LOCAL_TEST_DATA_V24.visits.first.url,
                         time: LOCAL_TEST_DATA_V24.visits.first.time,
                     }],
+                    [DataChangeType.Modify, 'personalContentLocator', testLocators.second.id],
                     [DataChangeType.Delete, 'personalContentRead', testReads.second.id, {
                         url: LOCAL_TEST_DATA_V24.visits.second.url,
                         time: LOCAL_TEST_DATA_V24.visits.second.time,
                     }],
-                ], { skip: 6 }),
+                ], { skip: 8 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalContentRead: [],
