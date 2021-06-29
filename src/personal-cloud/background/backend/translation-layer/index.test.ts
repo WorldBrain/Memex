@@ -19,6 +19,19 @@ import { downloadClientUpdates } from '@worldbrain/memex-common/lib/personal-clo
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
+// This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
+//  - FB requires them to be `null` and excludes them from query results
+//  - Dexie always includes `null` fields
+// Running this function over the retrieved data ensures they are excluded in both cases
+const deleteNullFields = <T = any>(obj: T): T => {
+    for (const field in obj) {
+        if (obj[field] === null) {
+            delete obj[field]
+        }
+    }
+    return obj
+}
+
 class IdCapturer {
     ids: { [collection: string]: Array<number | string> } = {}
     storageManager?: StorageManager
@@ -59,7 +72,7 @@ class IdCapturer {
                 const id = this.ids[collection]?.[nextIdIndex]
 
                 const mergedObject = {
-                    ...object,
+                    ...deleteNullFields(object),
                     id: id ?? object.id,
                     // TODO: set these here as I was encountering issues with test data timestamps getting out-of-sync - it would be nice to get this precision back
                     createdWhen: expect.any(Number),
@@ -97,11 +110,13 @@ async function getDatabaseContents(
     const contents: { [collection: string]: any[] } = {}
     await Promise.all(
         collections.map(async (collection) => {
-            contents[collection] = await storageManager
-                .collection(collection)
-                .findObjects(options?.getWhere?.(collection) ?? {}, {
-                    order: [['createdWhen', 'asc']],
-                })
+            contents[collection] = (
+                await storageManager
+                    .collection(collection)
+                    .findObjects(options?.getWhere?.(collection) ?? {}, {
+                        order: [['createdWhen', 'asc']],
+                    })
+            ).map(deleteNullFields)
         }),
     )
     return contents
