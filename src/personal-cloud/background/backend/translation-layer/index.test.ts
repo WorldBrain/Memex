@@ -1543,7 +1543,7 @@ describe('Personal cloud translation layer', () => {
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('tags')
-                .createObject(LOCAL_TEST_DATA_V24.tags.first)
+                .createObject(LOCAL_TEST_DATA_V24.tags.firstPageTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
@@ -1563,17 +1563,17 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
-                    [DataChangeType.Create, 'personalTag', testTags.first.id],
-                    [DataChangeType.Create, 'personalTagConnection', testConnections.pageTag.id],
+                    [DataChangeType.Create, 'personalTag', testTags.firstPageTag.id],
+                    [DataChangeType.Create, 'personalTagConnection', testConnections.firstPageTag.id],
                 ], { skip: 4 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
-                personalTag: [testTags.first],
-                personalTagConnection: [testConnections.pageTag],
+                personalTag: [testTags.firstPageTag],
+                personalTagConnection: [testConnections.firstPageTag],
             })
             // prettier-ignore
             await testDownload([
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'tags', object: LOCAL_TEST_DATA_V24.tags.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'tags', object: LOCAL_TEST_DATA_V24.tags.firstPageTag },
             ], { skip: 2 })
         })
 
@@ -1587,12 +1587,11 @@ describe('Personal cloud translation layer', () => {
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('tags')
-                .createObject(LOCAL_TEST_DATA_V24.tags.first)
+                .createObject(LOCAL_TEST_DATA_V24.tags.firstPageTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
-            await setups[0].storageManager.collection('tags').createObject({
-                url: LOCAL_TEST_DATA_V24.pages.second.url,
-                name: LOCAL_TEST_DATA_V24.tags.first.name,
-            })
+            await setups[0].storageManager
+                .collection('tags')
+                .createObject(LOCAL_TEST_DATA_V24.tags.secondPageTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
@@ -1612,19 +1611,12 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
-                    [DataChangeType.Create, 'personalTagConnection', testConnections.pageTag.id + 1],
+                    [DataChangeType.Create, 'personalTagConnection', testConnections.firstPageTag.id + 1],
                 ], { skip: 6 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
-                personalTag: [testTags.first],
-                personalTagConnection: [
-                    testConnections.pageTag,
-                    {
-                        ...testConnections.pageTag,
-                        id: testConnections.pageTag.id + 1,
-                        objectId: testMetadata.second.id,
-                    },
-                ],
+                personalTag: [testTags.firstPageTag],
+                personalTagConnection: [testConnections.firstPageTag, testConnections.secondPageTag],
             })
 
             await testDownload(
@@ -1632,13 +1624,15 @@ describe('Personal cloud translation layer', () => {
                     {
                         type: PersonalCloudUpdateType.Overwrite,
                         collection: 'tags',
-                        object: {
-                            url: LOCAL_TEST_DATA_V24.pages.second.url,
-                            name: LOCAL_TEST_DATA_V24.tags.first.name,
-                        },
+                        object: LOCAL_TEST_DATA_V24.tags.firstPageTag,
+                    },
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'tags',
+                        object: LOCAL_TEST_DATA_V24.tags.secondPageTag,
                     },
                 ],
-                { skip: 3 },
+                { skip: 2 },
             )
         })
 
@@ -1652,11 +1646,14 @@ describe('Personal cloud translation layer', () => {
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('tags')
-                .createObject(LOCAL_TEST_DATA_V24.tags.first)
+                .createObject(LOCAL_TEST_DATA_V24.tags.firstPageTag)
+            await setups[0].storageManager
+                .collection('tags')
+                .createObject(LOCAL_TEST_DATA_V24.tags.secondPageTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
             await setups[0].storageManager
                 .collection('tags')
-                .deleteOneObject(LOCAL_TEST_DATA_V24.tags.first)
+                .deleteOneObject(LOCAL_TEST_DATA_V24.tags.firstPageTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
@@ -1678,18 +1675,18 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     // TODO: Figure out if cloud should delete tag when no more connections left
                     // [DataChangeType.Delete, 'personalTag', testTags.first.id],
-                    [DataChangeType.Delete, 'personalTagConnection', testConnections.pageTag.id, LOCAL_TEST_DATA_V24.tags.first],
-                ], { skip: 6 }),
+                    [DataChangeType.Delete, 'personalTagConnection', testConnections.firstPageTag.id, LOCAL_TEST_DATA_V24.tags.firstPageTag],
+                ], { skip: 7 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
-                personalTagConnection: [],
-                personalTag: [testTags.first],
+                personalTagConnection: [testConnections.secondPageTag],
+                personalTag: [testTags.firstPageTag],
             })
 
             // prettier-ignore
             await testDownload([
-                { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: LOCAL_TEST_DATA_V24.tags.first },
-            ], { skip: 2 })
+                { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: LOCAL_TEST_DATA_V24.tags.firstPageTag },
+            ], { skip: 3 })
         })
 
         it('should add annotation tags', async () => {
@@ -1703,10 +1700,9 @@ describe('Personal cloud translation layer', () => {
             await setups[0].storageManager
                 .collection('annotations')
                 .createObject(LOCAL_TEST_DATA_V24.annotations.first)
-            await setups[0].storageManager.collection('tags').createObject({
-                name: LOCAL_TEST_DATA_V24.tags.first.name,
-                url: LOCAL_TEST_DATA_V24.annotations.first.url,
-            })
+            await setups[0].storageManager
+                .collection('tags')
+                .createObject(LOCAL_TEST_DATA_V24.tags.firstAnnotationTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
@@ -1732,15 +1728,15 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
                     [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
-                    [DataChangeType.Create, 'personalTag', testTags.first.id],
-                    [DataChangeType.Create, 'personalTagConnection', testConnections.annotationTag.id],
+                    [DataChangeType.Create, 'personalTag', testTags.firstPageTag.id],
+                    [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
                 ], { skip: 4 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first],
                 personalAnnotationSelector: [testSelectors.first],
-                personalTagConnection: [testConnections.annotationTag],
-                personalTag: [testTags.first],
+                personalTagConnection: [testConnections.firstAnnotationTag],
+                personalTag: [testTags.firstAnnotationTag],
             })
 
             // prettier-ignore
@@ -1749,10 +1745,7 @@ describe('Personal cloud translation layer', () => {
                 {
                     type: PersonalCloudUpdateType.Overwrite,
                     collection: 'tags',
-                    object: {
-                        name: LOCAL_TEST_DATA_V24.tags.first.name,
-                        url: LOCAL_TEST_DATA_V24.annotations.first.url,
-                    },
+                    object:  LOCAL_TEST_DATA_V24.tags.firstAnnotationTag
                 },
             ], { skip: 2 })
         })
@@ -1765,18 +1758,19 @@ describe('Personal cloud translation layer', () => {
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
-            await setups[0].storageManager.collection('tags').createObject({
-                name: LOCAL_TEST_DATA_V24.tags.first.name,
-                url: LOCAL_TEST_DATA_V24.pages.first.url,
-            })
-            await setups[0].backgroundModules.personalCloud.waitForSync()
             await setups[0].storageManager
                 .collection('annotations')
                 .createObject(LOCAL_TEST_DATA_V24.annotations.first)
-            await setups[0].storageManager.collection('tags').createObject({
-                name: LOCAL_TEST_DATA_V24.tags.first.name,
-                url: LOCAL_TEST_DATA_V24.annotations.first.url,
-            })
+            await setups[0].storageManager
+                .collection('annotations')
+                .createObject(LOCAL_TEST_DATA_V24.annotations.second)
+            await setups[0].storageManager
+                .collection('tags')
+                .createObject(LOCAL_TEST_DATA_V24.tags.firstAnnotationTag)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[0].storageManager
+                .collection('tags')
+                .createObject(LOCAL_TEST_DATA_V24.tags.secondAnnotationTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
@@ -1800,14 +1794,16 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
-                    [DataChangeType.Create, 'personalTagConnection', testConnections.annotationTag.id],
-                ], { skip: 8 }),
+                    [DataChangeType.Create, 'personalTag', testTags.firstPageTag.id],
+                    [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
+                    [DataChangeType.Create, 'personalTagConnection', testConnections.secondAnnotationTag.id],
+                ], { skip: 7 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
-                personalAnnotation: [testAnnotations.first],
+                personalAnnotation: [testAnnotations.first, testAnnotations.second],
                 personalAnnotationSelector: [testSelectors.first],
-                personalTagConnection: [testConnections.pageTag, testConnections.annotationTag],
-                personalTag: [testTags.first],
+                personalTagConnection: [testConnections.firstAnnotationTag, testConnections.secondAnnotationTag],
+                personalTag: [testTags.firstAnnotationTag],
             })
 
             await testDownload(
@@ -1815,10 +1811,12 @@ describe('Personal cloud translation layer', () => {
                     {
                         type: PersonalCloudUpdateType.Overwrite,
                         collection: 'tags',
-                        object: {
-                            name: LOCAL_TEST_DATA_V24.tags.first.name,
-                            url: LOCAL_TEST_DATA_V24.annotations.first.url,
-                        },
+                        object: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag,
+                    },
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'tags',
+                        object: LOCAL_TEST_DATA_V24.tags.secondAnnotationTag,
                     },
                 ],
                 { skip: 4 },
@@ -1836,17 +1834,19 @@ describe('Personal cloud translation layer', () => {
             await setups[0].storageManager
                 .collection('annotations')
                 .createObject(LOCAL_TEST_DATA_V24.annotations.first)
-            const annotationTag = {
-                name: LOCAL_TEST_DATA_V24.tags.first.name,
-                url: LOCAL_TEST_DATA_V24.annotations.first.url,
-            }
+            await setups[0].storageManager
+                .collection('annotations')
+                .createObject(LOCAL_TEST_DATA_V24.annotations.second)
             await setups[0].storageManager
                 .collection('tags')
-                .createObject(annotationTag)
+                .createObject(LOCAL_TEST_DATA_V24.tags.firstAnnotationTag)
+            await setups[0].storageManager
+                .collection('tags')
+                .createObject(LOCAL_TEST_DATA_V24.tags.secondAnnotationTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
             await setups[0].storageManager
                 .collection('tags')
-                .deleteOneObject(annotationTag)
+                .deleteOneObject(LOCAL_TEST_DATA_V24.tags.firstAnnotationTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
@@ -1870,21 +1870,19 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
-                    [DataChangeType.Create, 'personalTag', testTags.first.id],
-                    [DataChangeType.Create, 'personalTagConnection', testConnections.annotationTag.id],
-                    [DataChangeType.Delete, 'personalTagConnection', testConnections.annotationTag.id, annotationTag],
-                ], { skip: 6 }),
+                    [DataChangeType.Delete, 'personalTagConnection', testConnections.firstAnnotationTag.id, LOCAL_TEST_DATA_V24.tags.firstAnnotationTag],
+                ], { skip: 10 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
-                personalAnnotation: [testAnnotations.first],
+                personalAnnotation: [testAnnotations.first, testAnnotations.second],
                 personalAnnotationSelector: [testSelectors.first],
-                personalTagConnection: [],
-                personalTag: [testTags.first],
+                personalTagConnection: [testConnections.secondAnnotationTag],
+                personalTag: [testTags.firstAnnotationTag],
             })
             // prettier-ignore
             await testDownload([
-                { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: annotationTag },
-            ], { skip: 3 })
+                { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag },
+            ], { skip: 5 })
         })
 
         it('should create text export template', async () => {

@@ -138,13 +138,21 @@ export const LOCAL_TEST_DATA_V24 = {
         },
     },
     tags: {
-        first: {
+        firstPageTag: {
             url: LOCAL_PAGES_V24.first.url,
             name: 'foo-tag',
         },
-        second: {
+        secondPageTag: {
+            url: LOCAL_PAGES_V24.second.url,
+            name: 'foo-tag',
+        },
+        firstAnnotationTag: {
             url: LOCAL_ANNOTATIONS_V24.first.url,
-            name: 'note-tag-1',
+            name: 'annot-tag',
+        },
+        secondAnnotationTag: {
+            url: LOCAL_ANNOTATIONS_V24.second.url,
+            name: 'annot-tag',
         },
     },
     customLists: LOCAL_LISTS_V24,
@@ -304,21 +312,21 @@ const REMOTE_ANNOTATION_SELECTORS_V24 = {
 }
 
 const REMOTE_TAGS_V24 = {
-    first: {
+    firstPageTag: {
         id: 1,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
         createdWhen: 559,
         updatedWhen: 559,
         user: TEST_USER.id,
-        name: LOCAL_TEST_DATA_V24.tags.first.name,
+        name: LOCAL_TEST_DATA_V24.tags.firstPageTag.name,
     },
-    second: {
-        id: 2,
+    firstAnnotationTag: {
+        id: 1,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
         createdWhen: 560,
         updatedWhen: 560,
         user: TEST_USER.id,
-        name: LOCAL_TEST_DATA_V24.tags.second.name,
+        name: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag.name,
     },
 }
 
@@ -400,24 +408,44 @@ export const REMOTE_TEST_DATA_V24 = {
     },
     personalTag: REMOTE_TAGS_V24,
     personalTagConnection: {
-        pageTag: {
+        firstPageTag: {
             id: 1,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             createdWhen: 560,
             updatedWhen: 560,
             collection: 'personalContentMetadata',
             objectId: REMOTE_METADATA_V24.first.id,
-            personalTag: REMOTE_TAGS_V24.first.id,
+            personalTag: REMOTE_TAGS_V24.firstPageTag.id,
             user: TEST_USER.id,
         },
-        annotationTag: {
+        secondPageTag: {
+            id: 2,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            createdWhen: 562,
+            updatedWhen: 562,
+            collection: 'personalContentMetadata',
+            objectId: REMOTE_METADATA_V24.second.id,
+            personalTag: REMOTE_TAGS_V24.firstPageTag.id,
+            user: TEST_USER.id,
+        },
+        firstAnnotationTag: {
             id: 1,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             createdWhen: 561,
             updatedWhen: 561,
             collection: 'personalAnnotation',
             objectId: REMOTE_ANNOTATIONS_V24.first.id,
-            personalTag: REMOTE_TAGS_V24.first.id,
+            personalTag: REMOTE_TAGS_V24.firstPageTag.id,
+            user: TEST_USER.id,
+        },
+        secondAnnotationTag: {
+            id: 2,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            createdWhen: 563,
+            updatedWhen: 563,
+            collection: 'personalAnnotation',
+            objectId: REMOTE_ANNOTATIONS_V24.second.id,
+            personalTag: REMOTE_TAGS_V24.firstPageTag.id,
             user: TEST_USER.id,
         },
     },
