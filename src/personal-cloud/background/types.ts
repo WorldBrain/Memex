@@ -1,16 +1,22 @@
-import { PersonalCloudUpdatePushBatch } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import {
+    PersonalCloudUpdatePushBatch,
+    PersonalCloudClientInstruction,
+} from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 
-export type PersonalCloudAction = PushObjectAction
+export type PersonalCloudAction =
+    | PushObjectAction
+    | ExecuteClientInstructionsAction
 export enum PersonalCloudActionType {
     PushObject = 'push-object',
-    UploadToStorage = 'upload-to-storage',
+    ExecuteClientInstructions = 'execute-client-instruction',
 }
 export interface PushObjectAction {
     type: PersonalCloudActionType.PushObject
     updates: PersonalCloudUpdatePushBatch
 }
-export interface UploadToStorageAction {
-    type: PersonalCloudActionType.UploadToStorage
+export interface ExecuteClientInstructionsAction {
+    type: PersonalCloudActionType.ExecuteClientInstructions
+    clientInstructions: PersonalCloudClientInstruction[]
 }
 
 export interface PersonalCloudSettings {

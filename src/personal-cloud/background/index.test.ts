@@ -1,6 +1,7 @@
 import { setupSyncBackgroundTest } from './index.tests'
 import { StorexPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 
 describe('Personal cloud', () => {
     it('should sync full page texts indexed from tabs', async () => {
@@ -28,22 +29,27 @@ describe('Personal cloud', () => {
             fullUrl,
             tabId: 667,
         })
-        expect(
-            await setups[0].persistentStorageManager
-                .collection('pageContent')
-                .findObjects({}),
-        ).toEqual([
-            {
-                id: expect.any(Number),
-                normalizedUrl: 'thetest.com/home',
-                htmlBody,
-            },
-        ])
 
+        const expectPageContent = async (
+            setup: BackgroundIntegrationTestSetup,
+        ) =>
+            expect(
+                await setup.persistentStorageManager
+                    .collection('pageContent')
+                    .findObjects({}),
+            ).toEqual([
+                {
+                    id: expect.any(Number),
+                    normalizedUrl: 'thetest.com/home',
+                    htmlBody,
+                },
+            ])
+
+        await expectPageContent(setups[0])
         await setups[0].backgroundModules.personalCloud.waitForSync()
         const firstCloudBackend = setups[0].backgroundModules.personalCloud
             .options.backend as StorexPersonalCloudBackend
-        expect(firstCloudBackend.storedObjects).toEqual([
+        expect(firstCloudBackend.options.view.hub.storedObjects).toEqual([
             {
                 path: expect.stringMatching(
                     new RegExp(`/u/${TEST_USER.id}/htmlBody/.+\.html`),
@@ -52,7 +58,8 @@ describe('Personal cloud', () => {
             },
         ])
 
-        // await setups[1].backgroundModules.personalCloud.waitForSync()
+        await setups[1].backgroundModules.personalCloud.waitForSync()
+        await expectPageContent(setups[1])
     })
 
     it.todo('should sync full page texts indexed from URLs')

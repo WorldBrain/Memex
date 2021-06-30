@@ -7,6 +7,9 @@ import {
     PersonalCloudUpdatePushBatch,
     PersonalCloudUpdateBatch,
     UploadClientUpdatesResult,
+    PersonalCloudObjectInfo,
+    ClientStorageType,
+    MediaChangeInfo,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { SettingStore } from 'src/util/settings'
 import { PersonalCloudSettings } from '../types'
@@ -134,8 +137,11 @@ export default class FirestorePersonalCloudBackend
         }
     }
 
-    async uploadToStorage(params: {
+    async uploadToMedia(params: {}): Promise<void> {}
+
+    async downloadFromMedia(params: {
         path: string
-        object: string | Blob
-    }): Promise<void> {}
+    }): Promise<string | Blob | null> {
+        return null
+    }
 }
