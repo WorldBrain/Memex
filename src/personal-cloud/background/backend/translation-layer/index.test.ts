@@ -58,7 +58,10 @@ class IdCapturer {
         }
     }
 
-    mergeIds<TestData>(testData: TestData) {
+    mergeIds<TestData>(
+        testData: TestData,
+        opts?: { skipTagType: 'annotation' | 'page' },
+    ) {
         const source = testData as any
         const merged = {} as any
         for (const [collection, objects] of Object.entries(source)) {
@@ -67,9 +70,21 @@ class IdCapturer {
 
             let idsPicked = 0
             for (const [objectName, object] of Object.entries(objects)) {
+                // This needs to exist as this method assumes the order of test data such that if IDs exist for later records, so do earlier ones.
+                // The tags collection test data contains both annotation + page tags, but only one of these get tested at a time.
+                if (
+                    (opts?.skipTagType === 'annotation' &&
+                        ['firstAnnotationTag', 'secondAnnotationTag'].includes(
+                            objectName,
+                        )) ||
+                    (opts?.skipTagType === 'page' &&
+                        ['firstPageTag', 'secondPageTag'].includes(objectName))
+                ) {
+                    continue
+                }
+
                 // pick IDs by looking at the IDs that were generated during object creation
-                const nextIdIndex = idsPicked++
-                const id = this.ids[collection]?.[nextIdIndex]
+                const id = this.ids[collection]?.[idsPicked++]
 
                 const mergedObject = {
                     ...deleteNullFields(object),
@@ -861,22 +876,17 @@ describe('Personal cloud translation layer', () => {
             await setups[0].storageManager
                 .collection('annotations')
                 .createObject(LOCAL_TEST_DATA_V24.annotations.first)
-            await setups[0].storageManager
-                .collection('annotations')
-                .createObject(LOCAL_TEST_DATA_V24.annotations.second)
             await setups[0].backgroundModules.personalCloud.waitForSync()
             await setups[0].storageManager
                 .collection('annotationPrivacyLevels')
-                .createObject(
-                    LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second,
-                )
+                .createObject(LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first)
             await setups[0].backgroundModules.personalCloud.waitForSync()
             await setups[0].storageManager
                 .collection('annotationPrivacyLevels')
                 .updateOneObject(
                     {
                         id:
-                            LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second
+                            LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first
                                 .id,
                     },
                     { privacyLevel: AnnotationPrivacyLevels.PRIVATE },
@@ -902,20 +912,20 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
-                    [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.second.id],
-                ], { skip: 8 }),
+                    [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
+                ], { skip: 7 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
-                personalAnnotation: [testAnnotations.first, testAnnotations.second],
+                personalAnnotation: [testAnnotations.first],
                 personalAnnotationSelector: [testSelectors.first],
-                personalAnnotationPrivacyLevel: [{ ...testPrivacyLevels.second, privacyLevel: AnnotationPrivacyLevels.PRIVATE }],
+                personalAnnotationPrivacyLevel: [{ ...testPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.PRIVATE }],
             })
 
             // prettier-ignore
             await testDownload([
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second, privacyLevel: AnnotationPrivacyLevels.PRIVATE } },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second, privacyLevel: AnnotationPrivacyLevels.PRIVATE } },
-            ], { skip: 4 })
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.PRIVATE } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.PRIVATE } },
+            ], { skip: 3 })
         })
 
         it('should delete annotation privacy levels', async () => {
@@ -1546,7 +1556,9 @@ describe('Personal cloud translation layer', () => {
                 .createObject(LOCAL_TEST_DATA_V24.tags.firstPageTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24, {
+                skipTagType: 'annotation',
+            })
             const testMetadata = remoteData.personalContentMetadata
             const testLocators = remoteData.personalContentLocator
             const testTags = remoteData.personalTag
@@ -1594,7 +1606,9 @@ describe('Personal cloud translation layer', () => {
                 .createObject(LOCAL_TEST_DATA_V24.tags.secondPageTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24, {
+                skipTagType: 'annotation',
+            })
             const testMetadata = remoteData.personalContentMetadata
             const testLocators = remoteData.personalContentLocator
             const testTags = remoteData.personalTag
@@ -1611,8 +1625,9 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
-                    [DataChangeType.Create, 'personalTagConnection', testConnections.firstPageTag.id + 1],
-                ], { skip: 6 }),
+                    [DataChangeType.Create, 'personalTagConnection', testConnections.firstPageTag.id],
+                    [DataChangeType.Create, 'personalTagConnection', testConnections.secondPageTag.id],
+                ], { skip: 5 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalTag: [testTags.firstPageTag],
@@ -1656,7 +1671,9 @@ describe('Personal cloud translation layer', () => {
                 .deleteOneObject(LOCAL_TEST_DATA_V24.tags.firstPageTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24, {
+                skipTagType: 'annotation',
+            })
             const testMetadata = remoteData.personalContentMetadata
             const testLocators = remoteData.personalContentLocator
             const testTags = remoteData.personalTag
@@ -1704,7 +1721,9 @@ describe('Personal cloud translation layer', () => {
                 .deleteOneObject(LOCAL_TEST_DATA_V24.tags.firstPageTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24, {
+                skipTagType: 'annotation',
+            })
             const testMetadata = remoteData.personalContentMetadata
             const testLocators = remoteData.personalContentLocator
             const testTags = remoteData.personalTag
@@ -1752,7 +1771,9 @@ describe('Personal cloud translation layer', () => {
                 .createObject(LOCAL_TEST_DATA_V24.tags.firstAnnotationTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24, {
+                skipTagType: 'page',
+            })
             const testMetadata = remoteData.personalContentMetadata
             const testLocators = remoteData.personalContentLocator
             const testTags = remoteData.personalTag
@@ -1775,7 +1796,7 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
                     [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
-                    [DataChangeType.Create, 'personalTag', testTags.firstPageTag.id],
+                    [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
                 ], { skip: 4 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
@@ -1820,7 +1841,9 @@ describe('Personal cloud translation layer', () => {
                 .createObject(LOCAL_TEST_DATA_V24.tags.secondAnnotationTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24, {
+                skipTagType: 'page',
+            })
             const testMetadata = remoteData.personalContentMetadata
             const testLocators = remoteData.personalContentLocator
             const testTags = remoteData.personalTag
@@ -1841,7 +1864,7 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
-                    [DataChangeType.Create, 'personalTag', testTags.firstPageTag.id],
+                    [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.secondAnnotationTag.id],
                 ], { skip: 7 }),
@@ -1896,7 +1919,9 @@ describe('Personal cloud translation layer', () => {
                 .deleteOneObject(LOCAL_TEST_DATA_V24.tags.firstAnnotationTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24, {
+                skipTagType: 'page',
+            })
             const testMetadata = remoteData.personalContentMetadata
             const testLocators = remoteData.personalContentLocator
             const testTags = remoteData.personalTag
@@ -1952,7 +1977,9 @@ describe('Personal cloud translation layer', () => {
                 .deleteOneObject(LOCAL_TEST_DATA_V24.tags.firstAnnotationTag)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24, {
+                skipTagType: 'page',
+            })
             const testMetadata = remoteData.personalContentMetadata
             const testLocators = remoteData.personalContentLocator
             const testTags = remoteData.personalTag
