@@ -17,6 +17,7 @@ import { conditionallySkipToTimeFilter } from './overview/onboarding/utils'
 import { combineSearchIndex } from './search/search-index'
 import { getDb } from './search'
 import initStorex from './search/memex-storex'
+import { createPersistentStorageManager } from 'src/storage/persistent-storage'
 import BookmarksStorage from './bookmarks/background/storage'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 import { PageIndexingBackground } from './page-indexing/background'
@@ -40,6 +41,7 @@ export async function main() {
         storageManager,
         getNow: () => Date.now(),
         createInboxEntry: () => undefined,
+        persistentStorageManager: createPersistentStorageManager(),
     })
     registerModuleMapCollections(storageManager.registry, {
         pages: pages.storage,
