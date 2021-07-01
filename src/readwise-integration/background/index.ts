@@ -7,10 +7,6 @@ import {
     ActionPreprocessor,
 } from '@worldbrain/memex-common/lib/action-queue/types'
 import { STORAGE_VERSIONS } from '@worldbrain/memex-common/lib/browser-extension/storage/versions'
-import {
-    StorageOperationEvent,
-    StorageChange,
-} from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import type {
     ReadwiseAPI,
     ReadwiseHighlight,
@@ -28,7 +24,6 @@ import {
     registerRemoteFunctions,
 } from 'src/util/webextensionRPC'
 import { Page } from 'src/search'
-import { isUrlForAnnotation } from 'src/annotations/utils'
 import { getAnchorSelector } from 'src/highlighting/utils'
 
 type ReadwiseInterfaceMethod<
@@ -198,132 +193,6 @@ export class ReadwiseBackground {
 
     preprocessAction: ActionPreprocessor<ReadwiseAction> = () => {
         return { valid: true }
-    }
-
-    private filterNullChanges = (change: StorageChange<'post'>): boolean =>
-        change.type === 'create' ? !!change.pk : !!change.pks?.length
-
-    async handlePostStorageChange(
-        event: StorageOperationEvent<'post'>,
-        options: {
-            source: 'sync' | 'local'
-        },
-    ) {
-        if (!(await this.getAPIKey())) {
-            return
-        }
-
-        const getPageData = makePageDataCache({
-            getPageData: this.options.getPageData,
-        })
-
-        for (const change of event.info.changes.filter(
-            this.filterNullChanges,
-        )) {
-            if (change.collection === 'annotations') {
-                await this.handleAnnotationPostStorageChange(
-                    change,
-                    getPageData,
-                )
-                continue
-            }
-
-            if (change.collection === 'tags') {
-                await this.handleTagPostStorageChange(change, getPageData)
-                continue
-            }
-        }
-    }
-
-    private async handleTagPostStorageChange(
-        change: StorageChange<'post'>,
-        getPageData: GetPageData,
-    ) {
-        if (['create', 'delete'].includes(change.type)) {
-            // There can only ever be one or multiple tags deleted for a single annotation, so just get the URL of one
-            const url =
-                change.type === 'create'
-                    ? (change.pk as [string, string])[1]
-                    : (change.pks as [string, string][])[0][1]
-
-            if (!isUrlForAnnotation(url)) {
-                return
-            }
-
-            const [annotation] = await this.options.getAnnotationsByPks([url])
-
-            if (!annotation) {
-                return // The annotation no longer exists in some cases (delete annot + all assoc. data)
-            }
-
-            await this.handleSingleAnnotationChange(annotation, getPageData)
-        }
-    }
-
-    private async handleAnnotationPostStorageChange(
-        change: StorageChange<'post'>,
-        getPageData: GetPageData,
-    ) {
-        if (change.type === 'create') {
-            await this.handleSingleAnnotationChange(
-                {
-                    url: change.pk as string,
-                    ...change.values,
-                } as Annotation,
-                getPageData,
-            )
-        } else if (change.type === 'modify') {
-            try {
-                const annotations = await this.options.getAnnotationsByPks(
-                    change.pks as string[],
-                )
-                const highlights: ReadwiseHighlight[] = await Promise.all(
-                    annotations.map(async (annotation) => {
-                        const pageData = await getPageData(annotation.pageUrl)
-                        const tags = await this.options.getAnnotationTags(
-                            annotation.url,
-                        )
-                        return annotationToReadwise(
-                            { ...annotation, tags },
-                            { pageData },
-                        )
-                    }),
-                )
-                await this.actionQueue.scheduleAction(
-                    { type: 'post-highlights', highlights },
-                    { queueInteraction: 'queue-and-return' },
-                )
-            } catch (e) {
-                console.error(e)
-                Raven.captureException(e)
-            }
-        }
-    }
-
-    private async handleSingleAnnotationChange(
-        annotation: Annotation,
-        getPageData: GetPageData,
-    ) {
-        try {
-            const pageData = await getPageData(annotation.pageUrl)
-            const tags = await this.options.getAnnotationTags(annotation.url)
-
-            await this.actionQueue.scheduleAction(
-                {
-                    type: 'post-highlights',
-                    highlights: [
-                        annotationToReadwise(
-                            { ...annotation, tags },
-                            { pageData },
-                        ),
-                    ],
-                },
-                { queueInteraction: 'queue-and-return' },
-            )
-        } catch (e) {
-            console.error(e)
-            Raven.captureException(e)
-        }
     }
 }
 

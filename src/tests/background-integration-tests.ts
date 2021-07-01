@@ -208,7 +208,6 @@ export async function setupBackgroundIntegrationTest(
         syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
         contentSharing: backgroundModules.contentSharing,
-        readwise: backgroundModules.readwise,
         personalCloud: backgroundModules.personalCloud,
         modifyMiddleware: (originalMiddleware) => [
             ...((options && options.customMiddleware) || []),

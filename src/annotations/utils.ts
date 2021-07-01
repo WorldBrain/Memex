@@ -10,9 +10,6 @@ export const generateUrl = (params: { pageUrl: string; now: () => number }) => {
     return `${normalizeUrl(pageUrl)}/#${now()}`
 }
 
-export const isUrlForAnnotation = (url: string): boolean =>
-    /#\d{10,}$/.test(url)
-
 export const getLastSharedAnnotationTimestamp = (): Promise<
     number | undefined
 > => getLocalStorage(LAST_SHARED_ANNOTS)

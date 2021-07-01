@@ -4,7 +4,6 @@ import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watc
 import SyncService from '@worldbrain/memex-common/lib/sync'
 import { StorexHubBackground } from 'src/storex-hub/background'
 import ContentSharingBackground from 'src/content-sharing/background'
-import { ReadwiseBackground } from 'src/readwise-integration/background'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { PersonalCloudBackground } from 'src/personal-cloud/background'
 import { WATCHED_COLLECTIONS } from './constants'
@@ -15,7 +14,6 @@ export async function setStorageMiddleware(
         syncService: SyncService
         storexHub?: StorexHubBackground
         contentSharing?: ContentSharingBackground
-        readwise?: ReadwiseBackground
         personalCloud?: PersonalCloudBackground
         modifyMiddleware?: (
             middleware: StorageMiddleware[],
@@ -33,9 +31,6 @@ export async function setStorageMiddleware(
         const promises = [
             options.storexHub?.handlePostStorageChange(event),
             options.contentSharing?.handlePostStorageChange(event, {
-                source,
-            }),
-            options.readwise?.handlePostStorageChange(event, {
                 source,
             }),
         ]
