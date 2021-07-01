@@ -1,4 +1,4 @@
-import { ReadwiseHighlight } from './api'
+import type { ReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 
 export type ReadwiseAction = ReadwisePostHighlightsAction
 export interface ReadwisePostHighlightsAction {

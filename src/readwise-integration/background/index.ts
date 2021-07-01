@@ -11,11 +11,14 @@ import {
     StorageOperationEvent,
     StorageChange,
 } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type {
+    ReadwiseAPI,
+    ReadwiseHighlight,
+} from '@worldbrain/memex-common/lib/readwise-integration/api/types'
+import { HTTPReadwiseAPI } from '@worldbrain/memex-common/lib/readwise-integration/api'
 import * as Raven from 'src/util/raven'
-import { ReadwiseAPI, ReadwiseHighlight } from './types/api'
 import { ReadwiseSettings } from './types/settings'
 import { ReadwiseAction } from './types/actions'
-import { HTTPReadwiseAPI } from './readwise-api'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { Annotation } from 'src/annotations/types'
 import { READWISE_ACTION_RETRY_INTERVAL } from './constants'
@@ -189,10 +192,7 @@ export class ReadwiseBackground {
         }
 
         if (action.type === 'post-highlights') {
-            await this.readwiseAPI.postHighlights({
-                key,
-                highlights: action.highlights,
-            })
+            await this.readwiseAPI.postHighlights(key, action.highlights)
         }
     }
 

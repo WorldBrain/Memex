@@ -1,16 +1,16 @@
-import { ActionQueueInteraction } from '@worldbrain/memex-common/lib/action-queue/types'
-import {
+import type { ActionQueueInteraction } from '@worldbrain/memex-common/lib/action-queue/types'
+import type { ReadwiseAPIResponse } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
+import type {
     RemoteFunctionRole,
     RemoteFunctionWithoutExtraArgs,
 } from 'src/util/webextensionRPC'
-import { ReadwiseAPIKeyValidation } from './api'
-import { Annotation } from 'src/annotations/types'
+import type { Annotation } from 'src/annotations/types'
 
 export interface ReadwiseInterface<Role extends RemoteFunctionRole> {
     validateAPIKey: RemoteFunctionWithoutExtraArgs<
         Role,
         { key: string },
-        ReadwiseAPIKeyValidation
+        ReadwiseAPIResponse
     >
     getAPIKey: RemoteFunctionWithoutExtraArgs<Role, void, string>
     setAPIKey: RemoteFunctionWithoutExtraArgs<
