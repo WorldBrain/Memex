@@ -12,9 +12,14 @@ import type {
     ReadwiseHighlight,
 } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 import { HTTPReadwiseAPI } from '@worldbrain/memex-common/lib/readwise-integration/api'
+import type { ReadwiseAction } from '@worldbrain/memex-common/lib/readwise-integration/types'
+import {
+    formatReadwiseHighlightNote,
+    formatReadwiseHighlightText,
+    formatReadwiseHighlightLocation,
+} from '@worldbrain/memex-common/lib/readwise-integration/utils'
 import * as Raven from 'src/util/raven'
 import { ReadwiseSettings } from './types/settings'
-import { ReadwiseAction } from './types/actions'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { Annotation } from 'src/annotations/types'
 import { READWISE_ACTION_RETRY_INTERVAL } from './constants'
@@ -24,7 +29,6 @@ import {
     registerRemoteFunctions,
 } from 'src/util/webextensionRPC'
 import { Page } from 'src/search'
-import { getAnchorSelector } from 'src/highlighting/utils'
 
 type ReadwiseInterfaceMethod<
     Method extends keyof ReadwiseInterface<'provider'>
@@ -200,54 +204,15 @@ function annotationToReadwise(
     annotation: Omit<Annotation, 'pageTitle'>,
     options: { pageData: PageData },
 ): ReadwiseHighlight {
-    const today = new Date()
-    const date =
-        today.getFullYear() +
-        '-' +
-        (today.getMonth() + 1) +
-        '-' +
-        today.getDate()
-    const time =
-        today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds()
-    const dateTime = date + ' ' + time
-
-    const formatNote = ({ comment = '', tags = [] }: Annotation) => {
-        if (!comment.length && !tags.length) {
-            return undefined
-        }
-
-        let text = ''
-        if (tags.length) {
-            text += '.' + tags.join(' .') + '\n'
-        }
-
-        if (comment.length) {
-            text += comment
-        }
-
-        return text
-    }
-
-    let location: number | undefined
-    if (annotation.selector) {
-        const selector = getAnchorSelector(
-            annotation.selector,
-            'TextPositionSelector',
-        )
-        location = selector.start
-    }
-
     return {
         title: options.pageData.fullTitle ?? options.pageData.url,
         source_url: options.pageData.fullUrl,
         source_type: 'article',
-        note: formatNote(annotation),
-        location_type: 'order',
-        location,
         highlighted_at: annotation.createdWhen,
-        text: annotation?.body?.length
-            ? annotation.body
-            : 'Memex note from: ' + dateTime,
+        location_type: 'order',
+        location: formatReadwiseHighlightLocation(annotation?.selector),
+        note: formatReadwiseHighlightNote(annotation?.comment, annotation.tags),
+        text: formatReadwiseHighlightText(annotation?.body),
     }
 }
 
