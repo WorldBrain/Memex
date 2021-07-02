@@ -94,15 +94,15 @@ export const LOCAL_TEST_DATA_V24 = {
             id: 1,
             annotation: LOCAL_ANNOTATIONS_V24.first.url,
             privacyLevel: AnnotationPrivacyLevels.SHARED,
-            createdWhen: new Date(),
-            updatedWhen: new Date(),
+            createdWhen: new Date(1625190554983),
+            updatedWhen: new Date(1625190554983),
         },
         second: {
             id: 2,
             annotation: LOCAL_ANNOTATIONS_V24.second.url,
             privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-            createdWhen: new Date(),
-            updatedWhen: new Date(),
+            createdWhen: new Date(1625190554984),
+            updatedWhen: new Date(1625190554984),
         },
     },
     sharedAnnotationMetadata: {
@@ -168,13 +168,13 @@ export const LOCAL_TEST_DATA_V24 = {
     },
     pageListEntries: {
         first: {
-            createdAt: new Date(),
+            createdAt: new Date(1625190554480),
             fullUrl: LOCAL_PAGES_V24.first.fullUrl,
             pageUrl: LOCAL_PAGES_V24.first.url,
             listId: LOCAL_LISTS_V24.first.id,
         },
         second: {
-            createdAt: new Date(),
+            createdAt: new Date(1625190554986),
             fullUrl: LOCAL_PAGES_V24.second.fullUrl,
             pageUrl: LOCAL_PAGES_V24.second.url,
             listId: LOCAL_LISTS_V24.first.id,
