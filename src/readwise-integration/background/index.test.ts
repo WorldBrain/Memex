@@ -1,5 +1,6 @@
 import expect from 'expect'
 import update from 'immutability-helper'
+import fetchMock from 'fetch-mock'
 
 import * as DATA from 'src/readwise-integration/background/index.test.data'
 import {
@@ -7,8 +8,7 @@ import {
     backgroundIntegrationTest,
 } from 'src/tests/integration-tests'
 import { injectFakeTabs } from 'src/tab-management/background/index.tests'
-import { READWISE_API_URL } from './constants'
-import fetchMock from 'fetch-mock'
+import { READWISE_API_URL } from '@worldbrain/memex-common/lib/readwise-integration/api/constants'
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     'Readwise Annotations',

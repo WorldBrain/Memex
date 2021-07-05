@@ -16,9 +16,11 @@ import { DexieUtilsPlugin } from 'src/search/plugins'
 import analysePage from 'src/page-analysis/background/analyse-page'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import TabManagementBackground from 'src/tab-management/background'
+import PersistentPageStorage from './persistent-storage'
 
 export class PageIndexingBackground {
     storage: PageStorage
+    persistentStorage: PersistentPageStorage
 
     // Remember which pages are already indexed in which tab, so we only add one visit per page + tab
     indexedTabPages: { [tabId: number]: { [fullPageUrl: string]: true } } = {}
@@ -27,6 +29,7 @@ export class PageIndexingBackground {
         private options: {
             tabManagement: TabManagementBackground
             storageManager: StorageManager
+            persistentStorageManager: StorageManager
             fetchPageData?: FetchPageProcessor
             createInboxEntry: (normalizedPageUrl: string) => Promise<void>
             getNow: () => number
@@ -34,6 +37,9 @@ export class PageIndexingBackground {
     ) {
         this.storage = new PageStorage({
             storageManager: options.storageManager,
+        })
+        this.persistentStorage = new PersistentPageStorage({
+            storageManager: options.persistentStorageManager,
         })
     }
 
@@ -212,6 +218,12 @@ export class PageIndexingBackground {
             pageDoc: { ...analysisRes, url: props.fullUrl },
             rejectNoContent: !props.stubOnly,
         })
+        if (analysisRes.htmlBody) {
+            await this.persistentStorage.createOrUpdatePage({
+                normalizedUrl: normalizeUrl(pageData.url),
+                htmlBody: analysisRes.htmlBody,
+            })
+        }
 
         if (analysisRes.favIconURI) {
             await this.storage.createFavIconIfNeeded(
@@ -232,7 +244,9 @@ export class PageIndexingBackground {
             )
         }
 
-        const pageData = await this.options.fetchPageData.process(props.fullUrl)
+        const { content: pageData } = await this.options.fetchPageData.process(
+            props.fullUrl,
+        )
 
         if (props.stubOnly && pageData.text && pageData.terms?.length) {
             delete pageData.text

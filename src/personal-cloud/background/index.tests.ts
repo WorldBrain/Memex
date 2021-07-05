@@ -13,10 +13,11 @@ import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/m
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { createLazyTestServerStorage } from 'src/storage/server'
 import {
-    PersonalCloudChangeSourceBus,
+    PersonalCloudHub,
     StorexPersonalCloudBackend,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher'
+import { STORAGE_VERSIONS } from 'src/storage/constants'
 
 const debug = (...args: any[]) => console['log'](...args, '\n\n\n')
 
@@ -289,6 +290,7 @@ export async function setupSyncBackgroundTest(
             ChangeWatchMiddlewareSettings,
             'storageManager'
         >
+        useDownloadTranslationLayer?: boolean
     } & BackgroundIntegrationTestOptions,
 ) {
     const userId = TEST_USER.id
@@ -297,7 +299,7 @@ export async function setupSyncBackgroundTest(
         changeWatchSettings: options.serverChangeWatchSettings,
     })
     const serverStorage = await getServerStorage()
-    const cloudChangeBus = new PersonalCloudChangeSourceBus()
+    const cloudHub = new PersonalCloudHub()
 
     let now = 555
     const getNow = () => now++
@@ -305,9 +307,11 @@ export async function setupSyncBackgroundTest(
     for (let i = 0; i < options.deviceCount; ++i) {
         const personalCloudBackend = new StorexPersonalCloudBackend({
             storageManager: serverStorage.storageManager,
-            changeSource: cloudChangeBus.getView(),
+            clientSchemaVersion: STORAGE_VERSIONS[25].version,
+            view: cloudHub.getView(),
             getUserId: async () => userId,
             getNow,
+            useDownloadTranslationLayer: options.useDownloadTranslationLayer,
         })
 
         setups.push(

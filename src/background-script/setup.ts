@@ -123,6 +123,7 @@ const globalFetch: typeof fetch =
 
 export function createBackgroundModules(options: {
     storageManager: StorageManager
+    persistentStorageManager: StorageManager
     services: Services
     browserAPIs: Browser
     getServerStorage: () => Promise<ServerStorage>
@@ -173,6 +174,7 @@ export function createBackgroundModules(options: {
 
     const pages = new PageIndexingBackground({
         storageManager,
+        persistentStorageManager: options.persistentStorageManager,
         fetchPageData: options.fetchPageDataProcessor,
         createInboxEntry,
         tabManagement,
@@ -511,12 +513,13 @@ export function createBackgroundModules(options: {
         userMessages,
         personalCloud: new PersonalCloudBackground({
             storageManager,
+            persistentStorageManager: options.persistentStorageManager,
             backend:
                 options.personalCloudBackend ??
                 new FirestorePersonalCloudBackend({
                     personalCloudService: firebaseService<PersonalCloudService>(
                         'personalCloud',
-                        options.callFirebaseFunction,
+                        callFirebaseFunction,
                     ),
                     getCurrentSchemaVersion: () =>
                         getCurrentSchemaVersion(options.storageManager),
@@ -642,12 +645,25 @@ export function getBackgroundStorageModules(
     }
 }
 
-export function registerBackgroundModuleCollections(
-    storageManager: StorageManager,
+export function getPersistentBackgroundStorageModules(
     backgroundModules: BackgroundModules,
-) {
+): { [moduleName: string]: StorageModule } {
+    return {
+        pages: backgroundModules.pages.persistentStorage,
+    }
+}
+
+export function registerBackgroundModuleCollections(options: {
+    storageManager: StorageManager
+    persistentStorageManager: StorageManager
+    backgroundModules: BackgroundModules
+}) {
     registerModuleMapCollections(
-        storageManager.registry,
-        getBackgroundStorageModules(backgroundModules),
+        options.storageManager.registry,
+        getBackgroundStorageModules(options.backgroundModules),
+    )
+    registerModuleMapCollections(
+        options.persistentStorageManager.registry,
+        getPersistentBackgroundStorageModules(options.backgroundModules),
     )
 }

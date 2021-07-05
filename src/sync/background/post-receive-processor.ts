@@ -45,7 +45,9 @@ export class PostReceiveProcessor {
     processor: SyncPostReceiveProcessor = async ({ entry, ...params }) => {
         if (this.shouldPostProcess(entry)) {
             try {
-                const pageData = await this.props.fetchPageData.process(
+                const {
+                    content: pageData,
+                } = await this.props.fetchPageData.process(
                     entry.data.value.fullUrl,
                 )
 

@@ -10,6 +10,7 @@ import {
     PersonalCloudBackend,
     PersonalCloudUpdateType,
     PersonalCloudUpdateBatch,
+    PersonalCloudClientInstructionType,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import {
     PersonalCloudAction,
@@ -27,6 +28,7 @@ import { SettingStore } from 'src/util/settings'
 
 export interface PersonalCloudBackgroundOptions {
     storageManager: StorageManager
+    persistentStorageManager: StorageManager
     backend: PersonalCloudBackend
     getUserId(): Promise<string | number | null>
     userIdChanges(): AsyncIterableIterator<void>
@@ -93,15 +95,35 @@ export class PersonalCloudBackground {
     async integrateUpdates(updates: PersonalCloudUpdateBatch) {
         const { releaseMutex } = await this.pullMutex.lock()
         for (const update of updates) {
+            const storageManager =
+                update.storage === 'persistent'
+                    ? this.options.persistentStorageManager
+                    : this.options.storageManager
+
             if (update.type === PersonalCloudUpdateType.Overwrite) {
+                const object = update.object
+                if (update.media) {
+                    await Promise.all(
+                        Object.entries(update.media).map(
+                            async ([key, path]) => {
+                                object[
+                                    key
+                                ] = await this.options.backend.downloadFromMedia(
+                                    { path },
+                                )
+                            },
+                        ),
+                    )
+                }
+
                 // WARNING: Keep in mind this skips all storage middleware
-                await this.options.storageManager.backend.operation(
+                await storageManager.backend.operation(
                     'createObject',
                     update.collection,
-                    update.object,
+                    object,
                 )
             } else if (update.type === PersonalCloudUpdateType.Delete) {
-                await this.options.storageManager.backend.operation(
+                await storageManager.backend.operation(
                     'deleteObjects',
                     update.collection,
                     update.where,
@@ -207,11 +229,70 @@ export class PersonalCloudBackground {
         }
 
         if (action.type === PersonalCloudActionType.PushObject) {
-            await this.options.backend.pushUpdates(
+            const {
+                clientInstructions,
+            } = await this.options.backend.pushUpdates(
                 action.updates.map((update) => ({
                     ...update,
                     deviceId: update.deviceId ?? this.deviceId,
                 })),
+            )
+            await this.actionQueue.scheduleAction(
+                {
+                    type: PersonalCloudActionType.ExecuteClientInstructions,
+                    clientInstructions,
+                },
+                { queueInteraction: 'queue-and-return' },
+            )
+        } else if (
+            action.type === PersonalCloudActionType.ExecuteClientInstructions
+        ) {
+            const { clientInstructions } = action
+            await Promise.all(
+                clientInstructions.map(async (instruction) => {
+                    if (
+                        instruction.type ===
+                        PersonalCloudClientInstructionType.UploadToStorage
+                    ) {
+                        const storageManager =
+                            instruction.storage === 'persistent'
+                                ? this.options.persistentStorageManager
+                                : this.options.storageManager
+                        const dbObject = await storageManager
+                            .collection(instruction.collection)
+                            .findObject(instruction.uploadWhere)
+                        if (!dbObject) {
+                            return
+                        }
+                        const storageObject = dbObject[instruction.uploadField]
+                        if (
+                            !storageObject ||
+                            (typeof storageObject !== 'string' &&
+                                !(storageObject instanceof Blob))
+                        ) {
+                            return
+                        }
+                        try {
+                            await this.options.backend.uploadToMedia({
+                                deviceId: this.deviceId,
+                                mediaPath: instruction.uploadPath,
+                                mediaObject: storageObject,
+                                changeInfo: {
+                                    dbStorage: instruction.storage,
+                                    dbCollection: instruction.collection,
+                                    dbObject: instruction.updateObject,
+                                    dbMedia: instruction.updateMedia,
+                                },
+                            })
+                        } catch (e) {
+                            console.error(
+                                'Could not execute client instruction',
+                                instruction,
+                            )
+                            console.error(e)
+                        }
+                    }
+                }),
             )
         }
     }

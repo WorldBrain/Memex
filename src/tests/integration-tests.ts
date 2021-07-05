@@ -61,6 +61,7 @@ export interface IntegrationTestStep<StepContext> {
 
 export interface BackgroundIntegrationTestSetup {
     storageManager: StorageManager
+    persistentStorageManager: StorageManager
     backgroundModules: BackgroundModules
     browserAPIs: Browser
     services: Services

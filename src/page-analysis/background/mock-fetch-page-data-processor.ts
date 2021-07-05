@@ -23,8 +23,8 @@ export class MockFetchPageDataProcessor implements FetchPageProcessor {
         this.pageToProcess = page
     }
 
-    async process(url: string): Promise<PageContent> {
+    async process(url: string): Promise<{ content: PageContent }> {
         this.lastProcessedUrl = url
-        return this.pageToProcess
+        return { content: this.pageToProcess }
     }
 }

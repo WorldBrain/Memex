@@ -12,7 +12,7 @@ export class FetchPageDataProcessor implements FetchPageProcessor {
         },
     ) {}
 
-    async process(url: string): Promise<PageContent> {
+    async process(url: string): Promise<{ content: PageContent }> {
         const fetch = this.props.fetchPageData({
             url,
             domParser: this.props.domParser,
@@ -42,6 +42,6 @@ export class FetchPageDataProcessor implements FetchPageProcessor {
             rejectNoContent: false,
         })
 
-        return pageData
+        return { content: pageData }
     }
 }

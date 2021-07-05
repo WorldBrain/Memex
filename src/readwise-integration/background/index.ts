@@ -7,15 +7,19 @@ import {
     ActionPreprocessor,
 } from '@worldbrain/memex-common/lib/action-queue/types'
 import { STORAGE_VERSIONS } from '@worldbrain/memex-common/lib/browser-extension/storage/versions'
+import type {
+    ReadwiseAPI,
+    ReadwiseHighlight,
+} from '@worldbrain/memex-common/lib/readwise-integration/api/types'
+import { HTTPReadwiseAPI } from '@worldbrain/memex-common/lib/readwise-integration/api'
+import type { ReadwiseAction } from '@worldbrain/memex-common/lib/readwise-integration/types'
 import {
-    StorageOperationEvent,
-    StorageChange,
-} from '@worldbrain/storex-middleware-change-watcher/lib/types'
+    formatReadwiseHighlightNote,
+    formatReadwiseHighlightText,
+    formatReadwiseHighlightLocation,
+} from '@worldbrain/memex-common/lib/readwise-integration/utils'
 import * as Raven from 'src/util/raven'
-import { ReadwiseAPI, ReadwiseHighlight } from './types/api'
 import { ReadwiseSettings } from './types/settings'
-import { ReadwiseAction } from './types/actions'
-import { HTTPReadwiseAPI } from './readwise-api'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { Annotation } from 'src/annotations/types'
 import { READWISE_ACTION_RETRY_INTERVAL } from './constants'
@@ -25,8 +29,6 @@ import {
     registerRemoteFunctions,
 } from 'src/util/webextensionRPC'
 import { Page } from 'src/search'
-import { isUrlForAnnotation } from 'src/annotations/utils'
-import { getAnchorSelector } from 'src/highlighting/utils'
 
 type ReadwiseInterfaceMethod<
     Method extends keyof ReadwiseInterface<'provider'>
@@ -189,141 +191,12 @@ export class ReadwiseBackground {
         }
 
         if (action.type === 'post-highlights') {
-            await this.readwiseAPI.postHighlights({
-                key,
-                highlights: action.highlights,
-            })
+            await this.readwiseAPI.postHighlights(key, action.highlights)
         }
     }
 
     preprocessAction: ActionPreprocessor<ReadwiseAction> = () => {
         return { valid: true }
-    }
-
-    private filterNullChanges = (change: StorageChange<'post'>): boolean =>
-        change.type === 'create' ? !!change.pk : !!change.pks?.length
-
-    async handlePostStorageChange(
-        event: StorageOperationEvent<'post'>,
-        options: {
-            source: 'sync' | 'local'
-        },
-    ) {
-        if (!(await this.getAPIKey())) {
-            return
-        }
-
-        const getPageData = makePageDataCache({
-            getPageData: this.options.getPageData,
-        })
-
-        for (const change of event.info.changes.filter(
-            this.filterNullChanges,
-        )) {
-            if (change.collection === 'annotations') {
-                await this.handleAnnotationPostStorageChange(
-                    change,
-                    getPageData,
-                )
-                continue
-            }
-
-            if (change.collection === 'tags') {
-                await this.handleTagPostStorageChange(change, getPageData)
-                continue
-            }
-        }
-    }
-
-    private async handleTagPostStorageChange(
-        change: StorageChange<'post'>,
-        getPageData: GetPageData,
-    ) {
-        if (['create', 'delete'].includes(change.type)) {
-            // There can only ever be one or multiple tags deleted for a single annotation, so just get the URL of one
-            const url =
-                change.type === 'create'
-                    ? (change.pk as [string, string])[1]
-                    : (change.pks as [string, string][])[0][1]
-
-            if (!isUrlForAnnotation(url)) {
-                return
-            }
-
-            const [annotation] = await this.options.getAnnotationsByPks([url])
-
-            if (!annotation) {
-                return // The annotation no longer exists in some cases (delete annot + all assoc. data)
-            }
-
-            await this.handleSingleAnnotationChange(annotation, getPageData)
-        }
-    }
-
-    private async handleAnnotationPostStorageChange(
-        change: StorageChange<'post'>,
-        getPageData: GetPageData,
-    ) {
-        if (change.type === 'create') {
-            await this.handleSingleAnnotationChange(
-                {
-                    url: change.pk as string,
-                    ...change.values,
-                } as Annotation,
-                getPageData,
-            )
-        } else if (change.type === 'modify') {
-            try {
-                const annotations = await this.options.getAnnotationsByPks(
-                    change.pks as string[],
-                )
-                const highlights: ReadwiseHighlight[] = await Promise.all(
-                    annotations.map(async (annotation) => {
-                        const pageData = await getPageData(annotation.pageUrl)
-                        const tags = await this.options.getAnnotationTags(
-                            annotation.url,
-                        )
-                        return annotationToReadwise(
-                            { ...annotation, tags },
-                            { pageData },
-                        )
-                    }),
-                )
-                await this.actionQueue.scheduleAction(
-                    { type: 'post-highlights', highlights },
-                    { queueInteraction: 'queue-and-return' },
-                )
-            } catch (e) {
-                console.error(e)
-                Raven.captureException(e)
-            }
-        }
-    }
-
-    private async handleSingleAnnotationChange(
-        annotation: Annotation,
-        getPageData: GetPageData,
-    ) {
-        try {
-            const pageData = await getPageData(annotation.pageUrl)
-            const tags = await this.options.getAnnotationTags(annotation.url)
-
-            await this.actionQueue.scheduleAction(
-                {
-                    type: 'post-highlights',
-                    highlights: [
-                        annotationToReadwise(
-                            { ...annotation, tags },
-                            { pageData },
-                        ),
-                    ],
-                },
-                { queueInteraction: 'queue-and-return' },
-            )
-        } catch (e) {
-            console.error(e)
-            Raven.captureException(e)
-        }
     }
 }
 
@@ -331,54 +204,15 @@ function annotationToReadwise(
     annotation: Omit<Annotation, 'pageTitle'>,
     options: { pageData: PageData },
 ): ReadwiseHighlight {
-    const today = new Date()
-    const date =
-        today.getFullYear() +
-        '-' +
-        (today.getMonth() + 1) +
-        '-' +
-        today.getDate()
-    const time =
-        today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds()
-    const dateTime = date + ' ' + time
-
-    const formatNote = ({ comment = '', tags = [] }: Annotation) => {
-        if (!comment.length && !tags.length) {
-            return undefined
-        }
-
-        let text = ''
-        if (tags.length) {
-            text += '.' + tags.join(' .') + '\n'
-        }
-
-        if (comment.length) {
-            text += comment
-        }
-
-        return text
-    }
-
-    let location: number | undefined
-    if (annotation.selector) {
-        const selector = getAnchorSelector(
-            annotation.selector,
-            'TextPositionSelector',
-        )
-        location = selector.start
-    }
-
     return {
         title: options.pageData.fullTitle ?? options.pageData.url,
         source_url: options.pageData.fullUrl,
         source_type: 'article',
-        note: formatNote(annotation),
-        location_type: 'order',
-        location,
         highlighted_at: annotation.createdWhen,
-        text: annotation?.body?.length
-            ? annotation.body
-            : 'Memex note from: ' + dateTime,
+        location_type: 'order',
+        location: formatReadwiseHighlightLocation(annotation?.selector),
+        note: formatReadwiseHighlightNote(annotation?.comment, annotation.tags),
+        text: formatReadwiseHighlightText(annotation?.body),
     }
 }
 
