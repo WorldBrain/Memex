@@ -3,6 +3,8 @@ import { BackgroundModules } from 'src/background-script/setup'
 import { ServerStorage } from 'src/storage/types'
 import { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
 import FirestorePersonalCloudBackend from 'src/personal-cloud/background/backend/firestore'
+import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
+import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
 export function createSelfTests(options: {
     backgroundModules: BackgroundModules
@@ -42,6 +44,7 @@ export function createSelfTests(options: {
             console.log('Self test user:', user.id)
 
             const serverStorage = await options.getServerStorage()
+            console.log('server storage:', serverStorage)
             await clearDb(serverStorage.storageManager, {
                 getWhere: async (collectionName) => {
                     if (!collectionName.startsWith('personal')) {
@@ -71,12 +74,70 @@ export function createSelfTests(options: {
             await personalCloud.loadDeviceId()
             console.log('Generated device ID:', personalCloud.deviceId!)
             // // const cloudBackend = personalCloud.options.backend as FirestorePersonalCloudBackend
-
+            const testPageUrl = 'https://www.getmemex.com'
+            const normalizedTestPageUrl = normalizeUrl(testPageUrl, {})
             await backgroundModules.tags.addTagToPage({
-                url: 'https://www.getmemex.com/',
+                url: testPageUrl,
                 tag: 'test-tag',
             })
             console.log(`Added tag 'test-tag' to 'https://www.getmemex.com'`)
+            await backgroundModules.bookmarks.addBookmark({
+                url: normalizedTestPageUrl,
+                fullUrl: testPageUrl,
+                skipIndexing: true,
+            })
+            console.log(`Bookmarked 'https://www.getmemex.com'`)
+            await backgroundModules.directLinking.createAnnotation(
+                {
+                    tab: {} as any,
+                },
+                {
+                    pageUrl: normalizedTestPageUrl,
+                    comment: 'Hi, this is a test comment',
+                },
+                { skipPageIndexing: true },
+            )
+            console.log(`Added private note to 'https://www.getmemex.com'`)
+            await backgroundModules.directLinking.createAnnotation(
+                {
+                    tab: {} as any,
+                },
+                {
+                    pageUrl: normalizedTestPageUrl,
+                    comment: `Yet another test comment! This one's protected`,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                },
+                { skipPageIndexing: true },
+            )
+            console.log(`Added protected note to 'https://www.getmemex.com'`)
+            const testListId1 = await backgroundModules.customLists.createCustomList(
+                {
+                    name: 'My test list #1',
+                },
+            )
+            const testListId2 = await backgroundModules.customLists.createCustomList(
+                {
+                    name: 'My test list #2',
+                },
+            )
+            await backgroundModules.customLists.insertPageToList({
+                id: testListId1,
+                url: normalizedTestPageUrl,
+                skipPageIndexing: true,
+            })
+            await backgroundModules.customLists.insertPageToList({
+                id: testListId2,
+                url: normalizedTestPageUrl,
+                skipPageIndexing: true,
+            })
+            console.log(`Added 'https://www.getmemex.com' to 2 lists`)
+            await backgroundModules.copyPaster.createTemplate({
+                title: 'Test template',
+                code: 'Soem test code {{{PageTitle}}}',
+                isFavourite: false,
+            })
+            console.log(`Added test copy-paster template`)
+
             await personalCloud.waitForSync()
             console.log('Waited for sync to cloud from this device')
 
