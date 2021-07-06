@@ -23,6 +23,7 @@ import {
     setImportStateManager,
     ImportStateManager,
 } from 'src/imports/background/state-manager'
+import transformPageHTML from 'src/util/transform-page-html'
 import { setupImportBackgroundModule } from 'src/imports/background'
 import SyncBackground from 'src/sync/background'
 import { PostReceiveProcessor } from 'src/sync/background/post-receive-processor'
@@ -561,7 +562,7 @@ export function createBackgroundModules(options: {
                 (await auth.authService.getCurrentUser()).id ?? null,
             userIdChanges: () => authChanges(auth.authService),
             writeIncomingData: async (params) => {
-                const storageManager =
+                const incomingStorageManager =
                     params.storageType === 'persistent'
                         ? options.persistentStorageManager
                         : options.storageManager
@@ -569,11 +570,33 @@ export function createBackgroundModules(options: {
                 // WARNING: Keep in mind this skips all storage middleware
                 await updateOrCreate({
                     ...params,
-                    storageManager,
+                    storageManager: incomingStorageManager,
                     executeOperation: (...args) => {
-                        return storageManager.backend.operation(...args)
+                        return incomingStorageManager.backend.operation(...args)
                     },
                 })
+
+                if (params.collection === 'pageContent') {
+                    const normalizedUrl = params.where?.normalizedUrl
+                    const htmlBody = params.updates.htmlBody
+                    if (normalizedUrl && htmlBody) {
+                        const processed = transformPageHTML({
+                            html: htmlBody,
+                        }).text
+                        await storageManager.backend.operation(
+                            'updateObjects',
+                            'pages',
+                            {
+                                url: normalizedUrl,
+                            },
+                            { text: processed },
+                        )
+                    } else {
+                        console.warn(
+                            `Got an incoming page, but it didn't include a URL and a body`,
+                        )
+                    }
+                }
             },
         }),
         contentSharing,
