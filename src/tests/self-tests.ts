@@ -74,7 +74,7 @@ export function createSelfTests(options: {
             await personalCloud.loadDeviceId()
             console.log('Generated device ID:', personalCloud.deviceId!)
             // // const cloudBackend = personalCloud.options.backend as FirestorePersonalCloudBackend
-            const testPageUrl = 'https://www.getmemex.com'
+            const testPageUrl = 'https://www.getmemex.com/'
             const normalizedTestPageUrl = normalizeUrl(testPageUrl, {})
             await backgroundModules.tags.addTagToPage({
                 url: testPageUrl,
@@ -144,6 +144,9 @@ export function createSelfTests(options: {
             console.log('End of self test')
         },
         cloudReceive: async () => {
+            await clearDb(options.storageManager)
+            console.log('Cleared local database')
+
             await ensureTestUser()
             await personalCloud.options.settingStore.set('deviceId', null)
             await personalCloud.loadDeviceId()
