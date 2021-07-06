@@ -49,7 +49,8 @@ export async function setStorageMiddleware(
         },
     })
 
-    let shouldLogStorageOperations = false
+    let shouldLogStorageOperations =
+        process.env.LOG_STORAGE_OPERATIONS === 'true'
     const setStorageLoggingEnabled = (value: boolean) =>
         (shouldLogStorageOperations = value)
 

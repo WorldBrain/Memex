@@ -570,8 +570,9 @@ export function createBackgroundModules(options: {
                 await updateOrCreate({
                     ...params,
                     storageManager,
-                    executeOperation: (...args) =>
-                        storageManager.backend.operation(...args),
+                    executeOperation: (...args) => {
+                        return storageManager.backend.operation(...args)
+                    },
                 })
             },
         }),
