@@ -13,7 +13,8 @@ describe('Personal cloud', () => {
         )
 
         const fullUrl = 'http://www.thetest.com/home'
-        const htmlBody = `<strong>the lazy fox jumped over something I can't remember!</strong>`
+        const fullText = `the lazy fox jumped over something I can't remember!`
+        const htmlBody = `<strong>${fullText}</strong>`
         setups[0].backgroundModules.tabManagement.extractRawPageContent = async () => ({
             type: 'html',
             url: fullUrl,
@@ -34,7 +35,7 @@ describe('Personal cloud', () => {
 
             const expectPageContent = async (
                 setup: BackgroundIntegrationTestSetup,
-            ) =>
+            ) => {
                 expect(
                     await setup.persistentStorageManager
                         .collection('pageContent')
@@ -46,6 +47,17 @@ describe('Personal cloud', () => {
                         htmlBody,
                     },
                 ])
+                expect(
+                    await setup.storageManager
+                        .collection('pages')
+                        .findObjects({}),
+                ).toEqual([
+                    expect.objectContaining({
+                        text: fullText,
+                        terms: ['lazy', 'fox', 'jumped', 'remember'],
+                    }),
+                ])
+            }
 
             await expectPageContent(setups[0])
             await setups[0].backgroundModules.personalCloud.waitForSync()
