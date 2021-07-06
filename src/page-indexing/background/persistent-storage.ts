@@ -25,7 +25,7 @@ export default class PersistentPageStorage extends StorageModule {
                 operation: 'findObject',
                 collection: 'pageContent',
                 args: {
-                    normalizeUrl: '$normalizedUrl:string',
+                    normalizedUrl: '$normalizedUrl:string',
                 },
             },
             updatePageContent: {
@@ -44,6 +44,7 @@ export default class PersistentPageStorage extends StorageModule {
         htmlBody: string
     }) {
         const existing = await this.operation('findPageContentByUrl', params)
+        console.log({ existing })
         if (existing) {
             await this.operation('updatePageContent', params)
         } else {

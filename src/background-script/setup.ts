@@ -81,6 +81,9 @@ import { PersonalCloudSettings } from 'src/personal-cloud/background/types'
 import { authChanges } from 'src/authentication/background/utils'
 import FirestorePersonalCloudBackend from 'src/personal-cloud/background/backend/firestore'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
+import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher'
+import { getObjectPk } from '@worldbrain/storex/lib/utils'
+import { getObjectWhereByPk, updateOrCreate } from 'src/storage/utils'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -557,6 +560,20 @@ export function createBackgroundModules(options: {
             getUserId: async () =>
                 (await auth.authService.getCurrentUser()).id ?? null,
             userIdChanges: () => authChanges(auth.authService),
+            writeIncomingData: async (params) => {
+                const storageManager =
+                    params.storageType === 'persistent'
+                        ? options.persistentStorageManager
+                        : options.storageManager
+
+                // WARNING: Keep in mind this skips all storage middleware
+                await updateOrCreate({
+                    ...params,
+                    storageManager,
+                    executeOperation: (...args) =>
+                        storageManager.backend.operation(...args),
+                })
+            },
         }),
         contentSharing,
         contentConversations: new ContentConversationsBackground({

@@ -25,41 +25,46 @@ describe('Personal cloud', () => {
         })
         setups[0].backgroundModules.tabManagement.findTabIdByFullUrl = async () =>
             667
-        await setups[0].backgroundModules.pages.indexPage({
-            fullUrl,
-            tabId: 667,
-        })
 
-        const expectPageContent = async (
-            setup: BackgroundIntegrationTestSetup,
-        ) =>
-            expect(
-                await setup.persistentStorageManager
-                    .collection('pageContent')
-                    .findObjects({}),
-            ).toEqual([
+        const test = async () => {
+            await setups[0].backgroundModules.pages.indexPage({
+                fullUrl,
+                tabId: 667,
+            })
+
+            const expectPageContent = async (
+                setup: BackgroundIntegrationTestSetup,
+            ) =>
+                expect(
+                    await setup.persistentStorageManager
+                        .collection('pageContent')
+                        .findObjects({}),
+                ).toEqual([
+                    {
+                        id: expect.any(Number),
+                        normalizedUrl: 'thetest.com/home',
+                        htmlBody,
+                    },
+                ])
+
+            await expectPageContent(setups[0])
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            const firstCloudBackend = setups[0].backgroundModules.personalCloud
+                .options.backend as StorexPersonalCloudBackend
+            expect(firstCloudBackend.options.view.hub.storedObjects).toEqual([
                 {
-                    id: expect.any(Number),
-                    normalizedUrl: 'thetest.com/home',
-                    htmlBody,
+                    path: expect.stringMatching(
+                        new RegExp(`/u/${TEST_USER.id}/htmlBody/.+\.html`),
+                    ),
+                    object: htmlBody,
                 },
             ])
 
-        await expectPageContent(setups[0])
-        await setups[0].backgroundModules.personalCloud.waitForSync()
-        const firstCloudBackend = setups[0].backgroundModules.personalCloud
-            .options.backend as StorexPersonalCloudBackend
-        expect(firstCloudBackend.options.view.hub.storedObjects).toEqual([
-            {
-                path: expect.stringMatching(
-                    new RegExp(`/u/${TEST_USER.id}/htmlBody/.+\.html`),
-                ),
-                object: htmlBody,
-            },
-        ])
-
-        await setups[1].backgroundModules.personalCloud.waitForSync()
-        await expectPageContent(setups[1])
+            await setups[1].backgroundModules.personalCloud.waitForSync()
+            await expectPageContent(setups[1])
+        }
+        await test()
+        await test()
     })
 
     it.todo('should sync full page texts indexed from URLs')

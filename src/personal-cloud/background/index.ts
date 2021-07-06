@@ -11,6 +11,7 @@ import {
     PersonalCloudUpdateType,
     PersonalCloudUpdateBatch,
     PersonalCloudClientInstructionType,
+    ClientStorageType,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import {
     PersonalCloudAction,
@@ -25,6 +26,7 @@ import {
 } from '@worldbrain/memex-common/lib/action-queue/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { SettingStore } from 'src/util/settings'
+import { getObjectByPk, getObjectWhereByPk } from 'src/storage/utils'
 
 export interface PersonalCloudBackgroundOptions {
     storageManager: StorageManager
@@ -34,6 +36,12 @@ export interface PersonalCloudBackgroundOptions {
     userIdChanges(): AsyncIterableIterator<void>
     settingStore: SettingStore<PersonalCloudSettings>
     createDeviceId(userId: number | string): Promise<PersonalCloudDeviceID>
+    writeIncomingData(params: {
+        storageType: ClientStorageType
+        collection: string
+        where?: { [key: string]: any }
+        updates: { [key: string]: any }
+    }): Promise<void>
 }
 
 export class PersonalCloudBackground {
@@ -116,12 +124,12 @@ export class PersonalCloudBackground {
                     )
                 }
 
-                // WARNING: Keep in mind this skips all storage middleware
-                await storageManager.backend.operation(
-                    'createObject',
-                    update.collection,
-                    object,
-                )
+                await this.options.writeIncomingData({
+                    storageType: update.storage ?? 'normal',
+                    collection: update.collection,
+                    updates: update.object,
+                    where: update.where,
+                })
             } else if (update.type === PersonalCloudUpdateType.Delete) {
                 await storageManager.backend.operation(
                     'deleteObjects',
@@ -277,12 +285,7 @@ export class PersonalCloudBackground {
                                 deviceId: this.deviceId,
                                 mediaPath: instruction.uploadPath,
                                 mediaObject: storageObject,
-                                changeInfo: {
-                                    dbStorage: instruction.storage,
-                                    dbCollection: instruction.collection,
-                                    dbObject: instruction.updateObject,
-                                    dbMedia: instruction.updateMedia,
-                                },
+                                changeInfo: instruction.changeInfo,
                             })
                         } catch (e) {
                             console.error(
@@ -300,40 +303,4 @@ export class PersonalCloudBackground {
     preprocessAction: ActionPreprocessor<PersonalCloudAction> = () => {
         return { valid: true }
     }
-}
-
-function getObjectWhereByPk(
-    storageRegistry: StorageRegistry,
-    collection: string,
-    pk: number | string | Array<number | string>,
-) {
-    const getPkField = (indexSourceField: IndexSourceField) => {
-        return typeof indexSourceField === 'object' &&
-            'relationship' in indexSourceField
-            ? indexSourceField.relationship
-            : indexSourceField
-    }
-
-    const collectionDefinition = storageRegistry.collections[collection]
-    const pkIndex = collectionDefinition.pkIndex!
-    const where: { [field: string]: number | string } = {}
-    if (pkIndex instanceof Array) {
-        for (const [index, indexSourceField] of pkIndex.entries()) {
-            const pkField = getPkField(indexSourceField)
-            where[pkField] = pk[index]
-        }
-    } else {
-        where[getPkField(pkIndex)] = pk as number | string
-    }
-
-    return where
-}
-
-async function getObjectByPk(
-    storageManager: StorageManager,
-    collection: string,
-    pk: number | string | Array<number | string>,
-) {
-    const where = getObjectWhereByPk(storageManager.registry, collection, pk)
-    return storageManager.operation('findObject', collection, where)
 }

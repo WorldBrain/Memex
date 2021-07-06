@@ -223,6 +223,11 @@ export class PageIndexingBackground {
                 normalizedUrl: normalizeUrl(pageData.url),
                 htmlBody: analysisRes.htmlBody,
             })
+            console.log(
+                await this.options.persistentStorageManager
+                    .collection('pageContent')
+                    .findObjects({}),
+            )
         }
 
         if (analysisRes.favIconURI) {
