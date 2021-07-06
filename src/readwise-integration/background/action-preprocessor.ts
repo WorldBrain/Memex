@@ -1,6 +1,6 @@
-import { ActionPreprocessor } from '@worldbrain/memex-common/lib/action-queue/types'
-import { ReadwiseAction } from './types/actions'
 import cloneDeep from 'lodash/cloneDeep'
+import type { ActionPreprocessor } from '@worldbrain/memex-common/lib/action-queue/types'
+import type { ReadwiseAction } from '@worldbrain/memex-common/lib/readwise-integration/types'
 
 export const readwiseActionPreprocessor: ActionPreprocessor<ReadwiseAction> = ({
     action,
