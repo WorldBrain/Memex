@@ -8,6 +8,7 @@ const firebaseConfig = {
     messagingSenderId: process.env.FIREBASE_MEMEX_MESSAGING_SENDER_ID,
     appId: process.env.FIREBASE_MEMEX_APP_ID,
     measurementId: process.env.FIREBASE_MEMEX_MEASUREMENT_ID,
+    storageBucket: process.env.FIREBASE_MEMEX_STORAGE_BUCKET,
 }
 
 export const getFirebase = () => {
