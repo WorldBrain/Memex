@@ -5,6 +5,7 @@ import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 import { PersonalCloudAction, PushObjectAction } from './types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { PersonalCloudOverwriteUpdate } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 
 describe('Personal cloud', () => {
     it('should sync full page texts indexed from tabs', async () => {
@@ -19,17 +20,19 @@ describe('Personal cloud', () => {
         const fullText = `the lazy fox jumped over something I can't remember!`
         const htmlBody = `<strong>${fullText}</strong>`
 
-        setups[0].backgroundModules.tabManagement.extractRawPageContent = async () => ({
-            type: 'html',
-            url: fullUrl,
-            body: htmlBody,
-            lang: '',
-            metadata: {
-                title: 'The Test',
-            },
+        injectFakeTabs({
+            tabManagement: setups[0].backgroundModules.tabManagement,
+            tabsAPI: setups[0].browserAPIs.tabs,
+            includeTitle: true,
+            tabs: [
+                {
+                    url: fullUrl,
+                    htmlBody,
+                    title: `The Test`,
+                    // favIcon: 'data:,fav%20icon',
+                },
+            ],
         })
-        setups[0].backgroundModules.tabManagement.findTabIdByFullUrl = async () =>
-            667
 
         const test = async () => {
             const executedActions: PersonalCloudAction[] = []
