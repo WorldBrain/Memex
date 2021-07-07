@@ -254,6 +254,9 @@ export class PersonalCloudBackground {
         if (collection === 'pages') {
             delete object.text
         }
+        if (collection === 'favIcons') {
+            delete object.favIcon
+        }
         return object
     }
 
