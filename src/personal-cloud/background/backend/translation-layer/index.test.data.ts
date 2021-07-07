@@ -568,4 +568,22 @@ export const REMOTE_TEST_DATA_V24 = {
             updatedWhen: 562,
         },
     },
+    personalReadwiseAction: {
+        first: {
+            id: 1,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.first.id,
+            createdWhen: new Date(1625634720653),
+            updatedWhen: new Date(1625634720653),
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+        },
+        second: {
+            id: 2,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.second.id,
+            createdWhen: new Date(1625634720654),
+            updatedWhen: new Date(1625634720654),
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+        },
+    },
 }
