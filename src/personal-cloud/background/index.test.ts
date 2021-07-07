@@ -6,9 +6,11 @@ import { PersonalCloudAction, PushObjectAction } from './types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { PersonalCloudOverwriteUpdate } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { injectFakeTabs } from 'src/tab-management/background/index.tests'
+import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
+import pipeline from 'src/search/pipeline'
 
 describe('Personal cloud', () => {
-    it('should sync full page texts indexed from tabs', async () => {
+    const testFullPage = async (testOptions: { source: 'tab' | 'url' }) => {
         const { setups, serverStorage, getNow } = await setupSyncBackgroundTest(
             {
                 deviceCount: 2,
@@ -17,22 +19,9 @@ describe('Personal cloud', () => {
         )
 
         const fullUrl = 'http://www.thetest.com/home'
+        const fullTitle = `The Test`
         const fullText = `the lazy fox jumped over something I can't remember!`
         const htmlBody = `<strong>${fullText}</strong>`
-
-        injectFakeTabs({
-            tabManagement: setups[0].backgroundModules.tabManagement,
-            tabsAPI: setups[0].browserAPIs.tabs,
-            includeTitle: true,
-            tabs: [
-                {
-                    url: fullUrl,
-                    htmlBody,
-                    title: `The Test`,
-                    // favIcon: 'data:,fav%20icon',
-                },
-            ],
-        })
 
         const test = async () => {
             const executedActions: PersonalCloudAction[] = []
@@ -42,6 +31,36 @@ describe('Personal cloud', () => {
                 executedActions.push(action)
             }
 
+            injectFakeTabs({
+                tabManagement: setups[0].backgroundModules.tabManagement,
+                tabsAPI: setups[0].browserAPIs.tabs,
+                includeTitle: true,
+                tabs:
+                    testOptions.source === 'tab'
+                        ? [
+                              {
+                                  url: fullUrl,
+                                  htmlBody,
+                                  title: fullTitle,
+                                  // favIcon: 'data:,fav%20icon',
+                              },
+                          ]
+                        : [],
+            })
+            if (testOptions.source === 'url') {
+                setups[0].backgroundModules.pages.options.fetchPageData = new MockFetchPageDataProcessor(
+                    await pipeline({
+                        pageDoc: {
+                            url: fullUrl,
+                            content: {
+                                fullText,
+                                title: fullTitle,
+                            },
+                        },
+                    }),
+                    { htmlBody },
+                )
+            }
             await setups[0].backgroundModules.pages.indexPage({
                 fullUrl,
                 tabId: 667,
@@ -125,7 +144,13 @@ describe('Personal cloud', () => {
         }
         await test()
         await test()
+    }
+
+    it('should sync full page texts indexed from tabs', async () => {
+        await testFullPage({ source: 'tab' })
     })
 
-    it.todo('should sync full page texts indexed from URLs')
+    it('should sync full page texts indexed from URLs', async () => {
+        await testFullPage({ source: 'url' })
+    })
 })
