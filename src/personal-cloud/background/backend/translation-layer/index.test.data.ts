@@ -2,6 +2,7 @@ import type StorageManager from '@worldbrain/storex'
 import { extractIdFromAnnotationUrl } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { EXTENSION_SETTINGS_NAME } from '@worldbrain/memex-common/lib/extension-settings/constants'
 
 export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
@@ -10,6 +11,19 @@ export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
         .collection('pages')
         .createObject(LOCAL_TEST_DATA_V24.pages.second)
+}
+
+export async function insertReadwiseAPIKey(
+    storageManager: StorageManager,
+    userId: string,
+) {
+    await storageManager
+        .collection('personalMemexExtensionSetting')
+        .createObject({
+            name: EXTENSION_SETTINGS_NAME.ReadwiseAPIKey,
+            value: 'test-key',
+            user: userId,
+        })
 }
 
 const LOCAL_PAGES_V24 = {
