@@ -277,13 +277,15 @@ export class PersonalCloudBackground {
                     deviceId: update.deviceId ?? this.deviceId,
                 })),
             )
-            await this.actionQueue.scheduleAction(
-                {
-                    type: PersonalCloudActionType.ExecuteClientInstructions,
-                    clientInstructions,
-                },
-                { queueInteraction: 'queue-and-return' },
-            )
+            if (clientInstructions.length) {
+                await this.actionQueue.scheduleAction(
+                    {
+                        type: PersonalCloudActionType.ExecuteClientInstructions,
+                        clientInstructions,
+                    },
+                    { queueInteraction: 'queue-and-return' },
+                )
+            }
         } else if (
             action.type === PersonalCloudActionType.ExecuteClientInstructions
         ) {

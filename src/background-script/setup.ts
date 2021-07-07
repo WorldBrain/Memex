@@ -521,6 +521,7 @@ export function createBackgroundModules(options: {
             backend:
                 options.personalCloudBackend ??
                 new FirestorePersonalCloudBackend({
+                    getServerStorage: options.getServerStorage,
                     personalCloudService: firebaseService<PersonalCloudService>(
                         'personalCloud',
                         callFirebaseFunction,

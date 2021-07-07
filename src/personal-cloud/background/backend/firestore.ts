@@ -7,17 +7,19 @@ import {
     PersonalCloudUpdatePushBatch,
     PersonalCloudUpdateBatch,
     UploadClientUpdatesResult,
-    PersonalCloudObjectInfo,
-    ClientStorageType,
     MediaChangeInfo,
+    UploadToMediaParams,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { SettingStore } from 'src/util/settings'
 import { PersonalCloudSettings } from '../types'
+import { ServerStorage } from 'src/storage/types'
+import { writeMediaChange } from '@worldbrain/memex-common/lib/personal-cloud/backend/utils'
 
 export default class FirestorePersonalCloudBackend
     implements PersonalCloudBackend {
     constructor(
         public options: {
+            getServerStorage: () => Promise<ServerStorage>
             getCurrentSchemaVersion: () => Date
             personalCloudService: PersonalCloudService
             userChanges: () => AsyncIterableIterator<void>
@@ -137,11 +139,53 @@ export default class FirestorePersonalCloudBackend
         }
     }
 
-    async uploadToMedia(params: {}): Promise<void> {}
+    async uploadToMedia(params: UploadToMediaParams): Promise<void> {
+        const serverStorage = await this.options.getServerStorage()
+        const userId = firebase.auth().currentUser?.uid
+        if (!userId) {
+            throw new Error(
+                `User tried to upload to storage without being logged in`,
+            )
+        }
+
+        let { mediaPath } = params
+        if (mediaPath.startsWith('/')) {
+            mediaPath = mediaPath.slice(1)
+        }
+        const ref = firebase.storage().ref(mediaPath)
+        if (typeof params.mediaObject === 'string') {
+            await ref.putString(params.mediaObject, 'raw', {
+                contentType: 'text/plain',
+            })
+        } else {
+            await ref.put(params.mediaObject)
+        }
+        await writeMediaChange({
+            ...params,
+            storageManager: serverStorage.storageManager,
+            userId,
+        })
+    }
 
     async downloadFromMedia(params: {
         path: string
     }): Promise<string | Blob | null> {
-        return null
+        let { path } = params
+        if (path.startsWith('/')) {
+            path = path.slice(1)
+        }
+        const ref = firebase.storage().ref(path)
+        const downloadUrl = await ref.getDownloadURL()
+        if (!downloadUrl) {
+            return null
+        }
+
+        const response = await fetch(downloadUrl)
+        const blob = await response.blob()
+        if (blob.type === 'text/plain') {
+            return blob.text()
+        }
+
+        return blob
     }
 }
